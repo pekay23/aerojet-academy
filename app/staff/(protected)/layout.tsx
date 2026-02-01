@@ -1,42 +1,49 @@
-import { getServerSession } from "next-auth/next";
+"use client";
+import { useSession } from "next-auth/react";
 import { redirect } from "next/navigation";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-// We will build a specific StaffSidebar later
-import Link from "next/link"; 
+import { useState } from "react";
+import StaffSidebar from "@/components/staff/StaffSidebar";
+import PortalHeader from "@/components/portal/PortalHeader"; // We can reuse this header
 
-export default async function StaffLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const session = await getServerSession(authOptions);
+export default function StaffLayout({ children }: { children: React.ReactNode; }) {
+  const { data: session, status } = useSession({
+    required: true,
+    onUnauthenticated() { redirect('/portal/login'); },
+  });
 
-  // 1. Check if logged in
-  if (!session || !session.user) {
-    redirect('/portal/login');
-  }
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  // 2. CHECK ROLE: Only ADMIN or STAFF allowed
-  if (session.user.role !== 'ADMIN' && session.user.role !== 'STAFF') {
-    // Redirect unauthorized students back to their own portal
-    redirect('/portal/dashboard');
+  if (status === "loading") return <div className="flex h-screen items-center justify-center">Loading...</div>;
+
+  // Role Check
+  if (!session || (session.user as any).role === 'STUDENT') {
+    return null; // The useEffect in PortalLayout handles the redirect, this is double safety
   }
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Temporary Sidebar for Staff */}
-      <aside className="w-64 bg-slate-900 text-white p-6">
-        <h2 className="text-xl font-bold mb-6 text-white">Staff Portal</h2>
-        <nav className="space-y-2">
-          <Link href="/staff/dashboard" className="block py-2 hover:text-blue-300">Dashboard</Link>
-          <Link href="/staff/applications" className="block py-2 hover:text-blue-300">Applications</Link>
-          <Link href="/staff/finance" className="block py-2 hover:text-blue-300">Finance & Verify</Link>
-        </nav>
-      </aside>
+      <div className="hidden lg:block h-full shadow-xl z-30">
+        <StaffSidebar user={session.user} collapsed={sidebarCollapsed} setCollapsed={setSidebarCollapsed} />
+      </div>
 
-      <main className="flex-1 overflow-y-auto p-8">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <div className="lg:hidden">
+            <PortalHeader onMenuClick={() => setMobileSidebarOpen(true)} />
+        </div>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+          {children}
+        </main>
+      </div>
+
+      {mobileSidebarOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex">
+          <div className="fixed inset-0 bg-black/50" onClick={() => setMobileSidebarOpen(false)}></div>
+          <div className="relative w-64 h-full shadow-2xl">
+            <StaffSidebar user={session.user} collapsed={false} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

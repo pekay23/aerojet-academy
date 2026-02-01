@@ -43,7 +43,8 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
-  role          String    @default("STUDENT")
+  role          String    @default("STUDENT") 
+  
   accounts      Account[]
   sessions      Session[]
   
@@ -67,12 +68,13 @@ model Student {
 
   // Personal Info
   studentId         String?   @unique
+  photoUrl          String?
   phone             String?
   dob               DateTime?
   gender            String?
   address           String?   @db.Text
   city              String?
-  region            String?   // <--- ADDED THIS BACK
+  region            String?   
   country           String?   @default("Ghana")
 
   // Emergency Contact
@@ -91,18 +93,23 @@ model Student {
   applications      Application[]
   fees              Fee[]
   examBookings      ExamBooking[]
+  attendance        AttendanceRecord[]
+  assessments       Assessment[] // <--- ADDED THIS
 }
 
 model Course {
-  id          String        @id @default(cuid())
-  code        String        @unique
-  title       String
-  description String        @db.Text
-  duration    String
-  price       Float
+  id           String        @id @default(cuid())
+  code         String        @unique
+  title        String
+  description  String        @db.Text
+  duration     String
+  price        Float
+  
+  materialLink String?
   
   applications Application[]
   examRuns     ExamRun[]
+  attendance   AttendanceRecord[]
 }
 
 model Application {
@@ -124,7 +131,6 @@ model Fee {
   dueDate     DateTime
   status      String   @default("UNPAID")
   description String?
-  
   proofUrl    String?
   
   studentId   String
@@ -155,6 +161,7 @@ model ExamRun {
   status          String   @default("SCHEDULED")
   
   bookings        ExamBooking[]
+  assessments     Assessment[] // <--- ADDED THIS
 }
 
 model ExamBooking {
@@ -168,4 +175,42 @@ model ExamBooking {
   status      String   @default("CONFIRMED")
   seatLabel   String?
   bookedAt    DateTime @default(now())
+}
+
+// --- Attendance & Results Models ---
+
+model AttendanceRecord {
+  id              String   @id @default(cuid())
+  date            DateTime @default(now())
+  
+  courseId        String
+  course          Course   @relation(fields: [courseId], references: [id])
+  
+  studentId       String
+  student         Student  @relation(fields: [studentId], references: [id])
+  
+  scheduledHours  Float
+  attendedHours   Float
+  lateMinutes     Int      @default(0)
+  
+  notes           String?
+  recordedBy      String   
+}
+
+model Assessment {
+  id            String   @id @default(cuid())
+  type          String   @default("EASA_EXAM") 
+  
+  examRunId     String?  
+  run           ExamRun? @relation(fields: [examRunId], references: [id])
+  
+  studentId     String
+  student       Student  @relation(fields: [studentId], references: [id])
+  
+  score         Float    
+  maxScore      Float    @default(100.0)
+  isPassed      Boolean  @default(false)
+  
+  comments      String?
+  recordedAt    DateTime @default(now())
 }

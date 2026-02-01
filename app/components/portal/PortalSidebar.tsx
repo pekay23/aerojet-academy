@@ -54,14 +54,14 @@ export default function PortalSidebar({
       <aside 
         className={`bg-aerojet-blue text-white flex flex-col h-full shadow-xl transition-[width] duration-300 ease-in-out relative ${
           collapsed ? 'w-20' : 'w-64'
-        }`}
-      >
+      }`}
+    >
         
         {/* Desktop Toggle Button */}
         {setCollapsed && (
           <button 
             onClick={() => setCollapsed(!collapsed)}
-            className="hidden lg:flex absolute -right-3 top-8 bg-aerojet-sky text-white p-1.5 rounded-full shadow-md z-50 items-center justify-center border-2 border-white hover:bg-aerojet-soft-blue transition-colors"
+            className="hidden lg:flex absolute -right-3 top-20 bg-aerojet-sky text-white p-1.5 rounded-full shadow-md z-50 items-center justify-center border-2 border-white hover:bg-aerojet-soft-blue transition-colors"
           >
             {collapsed ? <Icons.Expand /> : <Icons.Collapse />}
           </button>

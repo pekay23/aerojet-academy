@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function FinanceStaffPage() {
   const [payments, setPayments] = useState<any[]>([]);
@@ -57,14 +58,18 @@ export default function FinanceStaffPage() {
                         <tr key={pay.id}>
                             <td className="p-4 font-bold">{pay.student.user.name}</td>
                             <td className="p-4">{pay.description}</td>
-                            <td className="p-4 text-right">GHS {pay.amount}</td>
+                            <td className="p-4 text-right">GHS {pay.amount.toFixed(2)}</td>
                             <td className="p-4 text-center">
-                                <button 
-                                    onClick={() => setViewingProof(pay)}
-                                    className="text-blue-600 underline hover:text-blue-800 text-xs font-bold"
-                                >
-                                    View File
-                                </button>
+                                {pay.proofUrl ? (
+                                    <button 
+                                        onClick={() => setViewingProof(pay)}
+                                        className="text-blue-600 underline hover:text-blue-800 text-xs font-bold"
+                                    >
+                                        View File
+                                    </button>
+                                ) : (
+                                    <span className="text-gray-400 text-xs">No File</span>
+                                )}
                             </td>
                             <td className="p-4 text-right">
                                 <button onClick={() => handleConfirm(pay.id)} className="bg-green-600 text-white px-4 py-1 rounded text-xs font-bold hover:bg-green-700">
@@ -81,28 +86,37 @@ export default function FinanceStaffPage() {
       {/* Proof Viewer Modal */}
       {viewingProof && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setViewingProof(null)}>
-            <div className="bg-white rounded-xl overflow-hidden max-w-2xl w-full" onClick={e => e.stopPropagation()}>
-                <div className="p-4 border-b flex justify-between items-center bg-gray-50">
+            <div className="bg-white rounded-xl overflow-hidden max-w-4xl w-full h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+                <div className="p-4 border-b flex justify-between items-center bg-gray-50 shrink-0">
                     <h3 className="font-bold text-gray-800">Proof of Payment: {viewingProof.student.user.name}</h3>
-                    <button onClick={() => setViewingProof(null)} className="text-gray-500 hover:text-red-500 font-bold">✕</button>
+                    <button onClick={() => setViewingProof(null)} className="text-gray-500 hover:text-red-500 font-bold px-2">✕</button>
                 </div>
                 
-                <div className="p-8 bg-gray-100 flex flex-col items-center justify-center min-h-300px">
-                    {/* Placeholder for the actual file */}
-                    <div className="bg-white p-4 shadow-sm border rounded mb-4 text-center">
-                        <p className="text-sm text-gray-500 mb-2">Simulated Receipt File</p>
-                        <div className="w-64 h-80 bg-gray-200 flex items-center justify-center text-gray-400">
-                            [Image/PDF Preview]
+                <div className="flex-1 bg-gray-100 p-4 overflow-auto flex items-center justify-center relative">
+                    {viewingProof.proofUrl.endsWith('.pdf') ? (
+                        <iframe src={viewingProof.proofUrl} className="w-full h-full rounded border border-gray-300" />
+                    ) : (
+                        <div className="relative w-full h-full min-h-400px">
+                             {/* Use normal img tag for flexibility in modal, or configured Next Image */}
+                            <img 
+                                src={viewingProof.proofUrl} 
+                                alt="Proof" 
+                                className="object-contain max-w-full max-h-full mx-auto"
+                            />
                         </div>
-                    </div>
-                    <p className="text-xs text-gray-500">In a live environment, the user's uploaded file would appear here.</p>
+                    )}
                 </div>
 
-                <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
-                    <button onClick={() => setViewingProof(null)} className="px-4 py-2 text-gray-600 font-bold text-sm hover:bg-gray-200 rounded">Cancel</button>
-                    <button onClick={() => handleConfirm(viewingProof.id)} className="px-4 py-2 bg-green-600 text-white font-bold text-sm hover:bg-green-700 rounded">
-                        Confirm Valid Payment
-                    </button>
+                <div className="p-4 border-t bg-gray-50 flex justify-between items-center shrink-0">
+                    <Link href={viewingProof.proofUrl} target="_blank" className="text-blue-600 text-sm hover:underline font-semibold">
+                        Open in New Tab ↗
+                    </Link>
+                    <div className="flex gap-3">
+                        <button onClick={() => setViewingProof(null)} className="px-4 py-2 text-gray-600 font-bold text-sm hover:bg-gray-200 rounded">Cancel</button>
+                        <button onClick={() => handleConfirm(viewingProof.id)} className="px-4 py-2 bg-green-600 text-white font-bold text-sm hover:bg-green-700 rounded">
+                            Confirm Valid Payment
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

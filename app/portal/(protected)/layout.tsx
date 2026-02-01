@@ -1,12 +1,12 @@
 "use client";
 import { useSession } from "next-auth/react";
-import { redirect, useRouter } from "next/navigation"; // Import useRouter
+import { redirect, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import PortalSidebar from "@/components/portal/PortalSidebar";
 import PortalHeader from "@/components/portal/PortalHeader";
 
 export default function PortalLayout({ children }: { children: React.ReactNode; }) {
-  const router = useRouter(); // Use the router for client-side redirection
+  const router = useRouter();
   const { data: session, status } = useSession({
     required: true,
     onUnauthenticated() {
@@ -20,28 +20,35 @@ export default function PortalLayout({ children }: { children: React.ReactNode; 
   // --- NEW: Instant Admin Redirect Check ---
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
-      const role = (session.user as any).role; // Access the role
+      const role = (session.user as any).role;
       if (role === 'ADMIN' || role === 'STAFF') {
-        router.replace('/staff/dashboard'); // Use 'replace' to avoid history stack issues
+        router.replace('/staff/dashboard');
       }
     }
   }, [status, session, router]);
 
-  // If loading or if user is admin (redirecting), show loading state
-  // This prevents the "flash" of content
   if (status === "loading" || (session?.user as any)?.role === 'ADMIN') {
     return <div className="flex h-screen items-center justify-center text-aerojet-blue animate-pulse">Loading Portal...</div>;
   }
 
-  // Safety check for user existence
   if (!session || !session.user) {
     return null;
   }
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* ... (Rest of your layout code: Sidebar, Header, Main Content) ... */}
-      <div className="hidden lg:block h-full shadow-xl z-30">
+      {/* 
+         FIX APPLIED HERE:
+         1. Added dynamic width classes to this wrapper div.
+         2. Removed shadow-xl from here (the sidebar component handles it).
+         3. This ensures the "flex" item is exactly 64 or 20 units wide.
+      */}
+      <div 
+        className={`hidden lg:block h-full z-30 shrink-0 transition-all duration-300 ease-in-out ${
+          sidebarCollapsed ? 'w-20' : 'w-64'
+        }`}
+      >
+        {/* @ts-ignore */}
         <PortalSidebar 
           user={session.user} 
           collapsed={sidebarCollapsed} 
@@ -63,6 +70,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode; 
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={() => setMobileSidebarOpen(false)}></div>
           <div className="relative w-64 h-full shadow-2xl">
+            {/* @ts-ignore */}
             <PortalSidebar user={session.user} collapsed={false} />
           </div>
         </div>

@@ -17,7 +17,7 @@ type Application = {
   courseId: string;
   status: string;
   appliedAt: string;
-  course: Course;
+  course: Course & { materialLink?: string };
 };
 
 export default function CoursesPage() {
@@ -134,10 +134,29 @@ export default function CoursesPage() {
                   </div>
                   <div className="mt-6 pt-4 border-t border-gray-100">
                     {app.status === 'APPROVED' ? (
-                        <button className="w-full py-2 rounded-lg bg-aerojet-blue text-white font-bold text-sm hover:bg-aerojet-navy transition">Access Materials</button>
+    app.course?.materialLink ? (
+        <a 
+            href={app.course.materialLink} 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full py-2 rounded-lg bg-aerojet-blue text-white font-bold text-center text-sm hover:bg-aerojet-navy transition"
+        >
+            Access Course Materials ↗
+        </a>
+    ) : (
+        <button disabled className="w-full py-2 rounded-lg bg-gray-200 text-gray-500 font-bold text-sm cursor-not-allowed">
+            Materials Pending
+        </button>
+    )
+) : (
+    <p className="text-xs text-center text-gray-500 italic">
+        Waiting for admin approval & deposit.
+    </p>
+)}
+
                     ) : (
                         <p className="text-xs text-center text-gray-500 italic">Waiting for admin approval & deposit.</p>
-                    )}
+                    )
                   </div>
                 </div>
               ))}
