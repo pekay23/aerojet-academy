@@ -1,8 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation"; // Use router for SPA navigation
 
 export default function StaffExamsPage() {
+  const router = useRouter();
   const [runs, setRuns] = useState<any[]>([]);
   const [rooms, setRooms] = useState<any[]>([]);
   const [modules, setModules] = useState<any[]>([]);
@@ -13,12 +15,17 @@ export default function StaffExamsPage() {
   const [isCreating, setIsCreating] = useState(false);
 
   async function fetchData() {
-    const res = await fetch('/api/staff/exams');
-    const data = await res.json();
-    setRuns(data.runs || []);
-    setRooms(data.rooms || []);
-    setModules(data.modules || []);
-    setLoading(false);
+    try {
+        const res = await fetch('/api/staff/exams');
+        const data = await res.json();
+        setRuns(data.runs || []);
+        setRooms(data.rooms || []);
+        setModules(data.modules || []);
+    } catch (e) {
+        toast.error("Failed to load data");
+    } finally {
+        setLoading(false);
+    }
   }
 
   useEffect(() => { fetchData(); }, []);
@@ -99,33 +106,39 @@ export default function StaffExamsPage() {
       </div>
 
       {/* --- Exam List --- */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <table className="w-full text-left text-sm text-gray-600">
-            <thead className="bg-slate-50 text-slate-800 font-bold border-b">
-                <tr>
-                    <th className="p-4">Date</th>
-                    <th className="p-4">Module</th>
-                    <th className="p-4">Room</th>
-                    <th className="p-4">Capacity</th>
-                    <th className="p-4">Bookings</th>
-                    <th className="p-4 text-center">Status</th>
-                </tr>
-            </thead>
-            <tbody className="divide-y">
-                {runs.map(run => (
-                    <tr key={run.id} className="hover:bg-slate-50 cursor-pointer" onClick={() => window.location.href = `/staff/exams/${run.id}`}>
-                        <td className="p-4 font-mono">{new Date(run.startDatetime).toLocaleString()}</td>
-                        <td className="p-4 font-bold">{run.course.code}</td>
-                        <td className="p-4">{run.room.name}</td>
-                        <td className="p-4">{run.maxCapacity}</td>
-                        <td className="p-4 font-bold text-blue-600">{run.bookings.length} Students</td>
-                        <td className="p-4 text-center">
-                            <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">{run.status}</span>
-                        </td>
+      <div className="bg-white rounded-lg shadow overflow-hidden flex flex-col">
+        <div className="overflow-x-auto no-scrollbar">
+            <table className="w-full text-left text-sm text-gray-600 min-w-200">
+                <thead className="bg-slate-50 text-slate-800 font-bold border-b">
+                    <tr>
+                        <th className="p-4">Date</th>
+                        <th className="p-4">Module</th>
+                        <th className="p-4">Room</th>
+                        <th className="p-4">Capacity</th>
+                        <th className="p-4">Bookings</th>
+                        <th className="p-4 text-center">Status</th>
                     </tr>
-                ))}
-            </tbody>
-        </table>
+                </thead>
+                <tbody className="divide-y">
+                    {runs.map(run => (
+                        <tr 
+                            key={run.id} 
+                            className="hover:bg-slate-50 cursor-pointer transition-colors" 
+                            onClick={() => router.push(`/staff/exams/${run.id}`)} // Use router.push for faster navigation
+                        >
+                            <td className="p-4 font-mono">{new Date(run.startDatetime).toLocaleString()}</td>
+                            <td className="p-4 font-bold">{run.course.code}</td>
+                            <td className="p-4">{run.room.name}</td>
+                            <td className="p-4">{run.maxCapacity}</td>
+                            <td className="p-4 font-bold text-blue-600">{run.bookings.length} Students</td>
+                            <td className="p-4 text-center">
+                                <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold">{run.status}</span>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
       </div>
     </div>
   );

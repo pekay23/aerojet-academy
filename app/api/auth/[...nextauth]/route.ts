@@ -33,29 +33,39 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    // 1. Add role to the JWT token
+    // 1. JWT CALLBACK: Fetch latest data from DB
     async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
-        token.role = user.role; // Persist role to token
+        token.role = user.role;
+      }
+      
+      // Update role dynamically from DB on each request
+      if (token.sub) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { role: true }
+        });
+        if (dbUser) token.role = dbUser.role;
       }
       return token;
     },
-    // 2. Add role to the Session object
+
+    // 2. SESSION CALLBACK: Map token data to session object
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub!;
-        session.user.role = token.role as string; // Persist role to session
+        session.user.role = token.role as string;
       }
       return session;
     },
-    // ADD THIS REDIRECT CALLBACK
+
+    // 3. REDIRECT CALLBACK: Handle post-login navigation
     async redirect({ url, baseUrl }) {
       // Allows relative callback URLs
       if (url.startsWith("/")) return `${baseUrl}${url}`
       // Allows callback URLs on the same origin
       else if (new URL(url).origin === baseUrl) return url
-      // Default to the Traffic Cop page
       return `${baseUrl}/portal`
     }
   },

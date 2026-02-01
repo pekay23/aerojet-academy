@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react"; // Added to detect login state
 
 // --- Data for navigation links ---
 const navLinks = {
@@ -19,7 +20,6 @@ const navLinks = {
   ],
 };
 
-// --- Sub-component for mobile accordion items for cleaner code ---
 function MobileAccordion({ title, links, onLinkClick }: { title: string, links: { title: string, href: string }[], onLinkClick: () => void }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
@@ -41,11 +41,10 @@ function MobileAccordion({ title, links, onLinkClick }: { title: string, links: 
   );
 }
 
-
 export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' }) {
+  const { data: session, status } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
   const isLightPage = theme === 'light';
 
   useEffect(() => {
@@ -59,9 +58,14 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : 'unset';
   }, [mobileMenuOpen]);
 
-  // **THE FIX IS HERE:** We create separate logic for desktop vs the header itself
-  const displayAsLight = scrolled || isLightPage; // For desktop text color
-  const headerIsLight = displayAsLight || mobileMenuOpen; // For header bg, logo, and hamburger icon
+  const displayAsLight = scrolled || isLightPage; 
+  const headerIsLight = displayAsLight || mobileMenuOpen;
+
+  // Determine where the "Dashboard" link should go based on role
+  const userRole = (session?.user as any)?.role;
+  const dashboardHref = (userRole === 'ADMIN' || userRole === 'STAFF' || userRole === 'INSTRUCTOR') 
+    ? '/staff/dashboard' 
+    : '/portal/dashboard';
 
   return (
     <>
@@ -74,20 +78,40 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
             />
           </Link>
 
-          {/* Desktop Menu - uses the 'displayAsLight' variable for its text color */}
           <nav className={`hidden md:flex space-x-8 text-sm font-bold items-center transition-colors duration-300 ${displayAsLight ? "text-aerojet-blue" : "text-white"}`}>
-            <div className="group relative"><Link href="/courses" className="hover:text-aerojet-sky transition flex items-center h-full py-2">Courses <span className="ml-1 text-xs">▼</span></Link><div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto"><div className="bg-white rounded-md shadow-lg w-64 p-2 border border-gray-100">{navLinks.courses.map(link => (<Link key={link.title} href={link.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-aerojet-blue rounded-md">{link.title}</Link>))}</div></div></div>
-            <div className="group relative"><Link href="/admissions" className="hover:text-aerojet-sky transition flex items-center h-full py-2">Admissions <span className="ml-1 text-xs">▼</span></Link><div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto"><div className="bg-white rounded-md shadow-lg w-64 p-2 border border-gray-100">{navLinks.admissions.map(link => (<Link key={link.title} href={link.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-aerojet-blue rounded-md">{link.title}</Link>))}</div></div></div>
+            <div className="group relative">
+                <Link href="/courses" className="hover:text-aerojet-sky transition flex items-center h-full py-2">Courses <span className="ml-1 text-xs">▼</span></Link>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
+                    <div className="bg-white rounded-md shadow-lg w-64 p-2 border border-gray-100">
+                        {navLinks.courses.map(link => (<Link key={link.title} href={link.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-aerojet-blue rounded-md">{link.title}</Link>))}
+                    </div>
+                </div>
+            </div>
+            <div className="group relative">
+                <Link href="/admissions" className="hover:text-aerojet-sky transition flex items-center h-full py-2">Admissions <span className="ml-1 text-xs">▼</span></Link>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
+                    <div className="bg-white rounded-md shadow-lg w-64 p-2 border border-gray-100">
+                        {navLinks.admissions.map(link => (<Link key={link.title} href={link.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-aerojet-blue rounded-md">{link.title}</Link>))}
+                    </div>
+                </div>
+            </div>
             <Link href="/about" className="hover:text-aerojet-sky transition">About Us</Link>
             <Link href="/news" className="hover:text-aerojet-sky transition">News</Link>
           </nav>
           
           <div className="hidden md:flex items-center space-x-3">
-            <Link href="/portal/login" className={`text-xs font-bold transition-colors ${displayAsLight ? 'text-gray-600 hover:text-aerojet-blue' : 'text-white hover:text-gray-200'}`}>Portal Login</Link>
-            <Link href="/register" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg">REGISTER</Link>
+            {/* Logic: Change label and destination if authenticated */}
+            <Link 
+                href={status === 'authenticated' ? dashboardHref : '/portal/login'} 
+                className={`text-xs font-bold transition-colors ${displayAsLight ? 'text-gray-600 hover:text-aerojet-blue' : 'text-white hover:text-gray-200'}`}
+            >
+              {status === 'authenticated' ? 'GO TO DASHBOARD' : 'PORTAL LOGIN'}
+            </Link>
+            <Link href="/register" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
+                {status === 'authenticated' ? 'Apply Now' : 'Register'}
+            </Link>
           </div>
 
-          {/* Mobile Hamburger Button - uses 'headerIsLight' for its icon color */}
           <button className="md:hidden p-2 focus:outline-none relative z-50" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
             <div className={`w-6 h-0.5 mb-1.5 transition-all duration-300 ${mobileMenuOpen ? "rotate-45 translate-y-2 bg-aerojet-blue" : (headerIsLight ? "bg-aerojet-blue" : "bg-white")}`}></div>
             <div className={`w-6 h-0.5 mb-1.5 transition-all duration-300 ${mobileMenuOpen ? "opacity-0" : (headerIsLight ? "bg-aerojet-blue" : "bg-white")}`}></div>
@@ -104,9 +128,22 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
           <Link href="/about" onClick={() => setMobileMenuOpen(false)} className="block border-b border-gray-100 py-4 text-xl font-bold text-aerojet-blue">About Us</Link>
           <Link href="/news" onClick={() => setMobileMenuOpen(false)} className="block border-b border-gray-100 py-4 text-xl font-bold text-aerojet-blue">News</Link>
           <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block border-b border-gray-100 py-4 text-xl font-bold text-aerojet-blue">Contact</Link>
+          
           <div className="pt-8 space-y-4">
-            <Link href="/portal/login" onClick={() => setMobileMenuOpen(false)} className="block text-center text-aerojet-sky font-semibold border border-aerojet-sky py-3 rounded-md">Student Portal Login</Link>
-            <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="block bg-aerojet-gold text-aerojet-blue text-center py-4 rounded-md shadow-md font-bold uppercase tracking-wider">START REGISTRATION</Link>
+            <Link 
+                href={status === 'authenticated' ? dashboardHref : '/portal/login'} 
+                onClick={() => setMobileMenuOpen(false)} 
+                className="block text-center text-aerojet-sky font-semibold border border-aerojet-sky py-3 rounded-md"
+            >
+              {status === 'authenticated' ? 'Go to Dashboard' : 'Student Portal Login'}
+            </Link>
+            <Link 
+                href="/register" 
+                onClick={() => setMobileMenuOpen(false)} 
+                className="block bg-aerojet-sky text-white text-center py-4 rounded-md shadow-md font-bold uppercase tracking-wider"
+            >
+              Start Registration
+            </Link>
           </div>
         </div>
       </div>

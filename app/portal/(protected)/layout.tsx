@@ -21,7 +21,8 @@ export default function PortalLayout({ children }: { children: React.ReactNode; 
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
       const role = (session.user as any).role;
-      if (role === 'ADMIN' || role === 'STAFF') {
+      if (role === 'ADMIN' || role === 'STAFF' || role === 'INSTRUCTOR') {
+        console.log("Redirecting Staff Role:", role);
         router.replace('/staff/dashboard');
       }
     }

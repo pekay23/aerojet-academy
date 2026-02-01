@@ -6,7 +6,7 @@ export default function MobileStickyBar() {
   const pathname = usePathname();
 
   // List of paths where the sticky bar should be HIDDEN
-  const hiddenPaths = ["/portal", "/register", "/contact", "/studio"];
+  const hiddenPaths = ["/portal", "/staff", "/register", "/contact", "/studio"];
 
   // Check if the current path starts with any of the hidden paths
   const shouldHide = hiddenPaths.some((path) => pathname.startsWith(path));
