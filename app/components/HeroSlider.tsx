@@ -23,6 +23,7 @@ const slides = [
 
 export default function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const isPortalLive = process.env.NEXT_PUBLIC_PORTAL_LIVE === 'true';
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -60,11 +61,17 @@ export default function HeroSlider() {
           </p>
           
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/register" className="bg-aerojet-sky text-white px-8 py-4 rounded-md font-bold hover:bg-aerojet-soft-blue transition shadow-lg">
-               Start Registration
-            </Link>
+            {isPortalLive ? (
+                <Link href="/register" className="bg-aerojet-sky text-white px-8 py-4 rounded-md font-bold hover:bg-aerojet-soft-blue transition shadow-lg">
+                  Start Registration
+                </Link>
+            ) : (
+                <Link href="/contact" className="bg-aerojet-sky text-white px-8 py-4 rounded-md font-bold hover:bg-aerojet-soft-blue transition shadow-lg">
+                  Contact Admissions
+                </Link>
+            )}
             <Link href="/courses" className="border-2 border-white/80 text-white px-8 py-4 rounded-md font-bold hover:bg-white hover:text-aerojet-blue transition">
-              Request Course Info
+              Explore Courses
             </Link>
           </div>
         </div>

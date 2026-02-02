@@ -37,9 +37,10 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-base mb-3">Training</h3>
             <ul className="space-y-2 text-gray-300 text-sm">
-              <li><Link href="/courses/pilot" className="hover:text-aerojet-gold">Pilot Training</Link></li>
-              <li><Link href="/courses/engineering" className="hover:text-aerojet-gold">Engineering</Link></li>
-              <li><Link href="/courses/cabin-crew" className="hover:text-aerojet-gold">Cabin Crew</Link></li>
+              <li><Link href="/courses/easa-full-time" className="hover:text-aerojet-sky">EASA Part-66 (Full-Time)</Link></li>
+              <li><Link href="/courses/easa-modular" className="hover:text-aerojet-sky">EASA Part-66 (Modular)</Link></li>
+              <li><Link href="/courses/cabin-crew" className="hover:text-aerojet-sky text-gray-500 cursor-not-allowed">Cabin Crew (Coming Soon)</Link></li>
+              <li><Link href="/courses/pilot-training" className="hover:text-aerojet-sky text-gray-500 cursor-not-allowed">Pilot Training (Coming Soon)</Link></li>
             </ul>
           </div>
 

@@ -63,15 +63,16 @@ export default function HowToApplyPage() {
 
               {/* Sidebar: Documents and CTA */}
               <aside className="lg:col-span-1">
-                <div className="sticky top-28 bg-gray-50 p-8 rounded-xl border border-gray-200">
+                <div className="sticky top-28 bg-white p-8 rounded-xl shadow-lg border-t-4 border-aerojet-sky">
                   <h3 className="text-xl font-bold text-aerojet-blue mb-4">Required Documents</h3>
-                  <p className="text-sm text-gray-600 mb-6">Please prepare digital copies of the following documents for your online application:</p>
-                  <ul className="space-y-3 mb-8">
+                  <p className="text-sm text-gray-500 mb-6">You will need digital copies of these to complete your application:</p>
+    
+                  <ul className="space-y-4 mb-8">
                     {documents.map(doc => (
-                      <li key={doc} className="flex items-start text-gray-700 text-sm">
-                        <span className="text-aerojet-sky font-bold mr-2 mt-1">›</span>
+                      <li key={doc} className="flex items-start text-slate-700 text-sm p-3 bg-slate-50 rounded-lg">
+                        <span className="text-green-500 font-bold mr-3">✓</span>
                         {doc}
-                      </li>
+                     </li>
                     ))}
                   </ul>
 

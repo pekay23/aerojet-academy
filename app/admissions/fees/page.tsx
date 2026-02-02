@@ -119,11 +119,23 @@ export default function FeesPage() {
 
                 <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-200">
                     <h3 className="text-xl font-bold text-aerojet-blue mb-4">Refund & Cancellation Policy</h3>
-                    <ul className="space-y-3 text-sm text-gray-600">
-                        <li className="flex items-start"><span className="text-red-500 mr-2">●</span> The <strong>GHS 350 Registration Fee</strong> is strictly non-refundable.</li>
-                        <li className="flex items-start"><span className="text-red-500 mr-2">●</span> <strong>Seat Confirmation Deposits (40%)</strong> are non-refundable once the cohort has been confirmed and resources allocated.</li>
-                        <li className="flex items-start"><span className="text-red-500 mr-2">●</span> <strong>Exam Fees:</strong> If minimum numbers are not met (60 seats) by T-21, fees will be rolled over to the next window at no cost. Candidate cancellations after T-21 incur a €50 admin fee.</li>
-                        <li className="flex items-start"><span className="text-red-500 mr-2">●</span> Please refer to the <Link href="/legal/terms" className="text-blue-600 underline">Online Application Terms</Link> for the full legal policy.</li>
+                    <ul className="space-y-4 text-sm text-gray-600">
+                        <li className="flex items-start gap-3">
+                            <span className="text-red-500 font-bold">●</span> 
+                            <span>The <strong>GHS 350 Registration Fee</strong> is strictly non-refundable.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <span className="text-red-500 font-bold">●</span> 
+                            <span><strong>Seat Confirmation Deposits (40%)</strong> are non-refundable once the cohort has been confirmed and resources allocated.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <span className="text-red-500 font-bold">●</span> 
+                            <span><strong>Exam Fees:</strong> If minimum numbers are not met (60 seats) by T-21, fees will be rolled over to the next window at no cost. Candidate cancellations after T-21 incur a €50 admin fee.</span>
+                        </li>
+                        <li className="flex items-start gap-3">
+                            <span className="text-red-500 mr-0">●</span> 
+                            <span>Please refer to the <Link href="/legal/terms" className="text-blue-600 underline">Online Application Terms</Link> for the full legal policy.</span>
+                        </li>
                     </ul>
                 </div>
             </section>
@@ -131,7 +143,7 @@ export default function FeesPage() {
             {/* CTA */}
             <div className="text-center pt-8">
                 <p className="text-gray-500 mb-4">Ready to invest in your future?</p>
-                <Link href="/register" className="bg-aerojet-gold text-aerojet-blue px-10 py-4 rounded-md font-bold text-lg hover:bg-opacity-90 transition inline-block">
+                <Link href="/register" className="bg-aerojet-sky text-white px-10 py-4 rounded-md font-bold text-lg hover:bg-aerojet-soft-blue transition inline-block shadow-lg">
                     Start Registration
                 </Link>
             </div>

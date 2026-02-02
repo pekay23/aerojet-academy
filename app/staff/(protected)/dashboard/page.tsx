@@ -1,16 +1,27 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react"; // Import session
+import InstructorDashboard from "@/components/staff/InstructorDashboard"; // Import component
 
 export default function StaffDashboard() {
+  const { data: session } = useSession();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
+  // If Instructor, show specific dashboard
+  if (session && (session.user as any).role === 'INSTRUCTOR') {
+      return <InstructorDashboard session={session} />;
+  }
+
   useEffect(() => {
-    fetch('/api/staff/dashboard')
-      .then(res => res.json())
-      .then(data => { setData(data); setLoading(false); });
-  }, []);
+    // Only fetch admin stats if NOT instructor
+    if (session && (session.user as any).role !== 'INSTRUCTOR') {
+        fetch('/api/staff/dashboard')
+        .then(res => res.json())
+        .then(data => { setData(data); setLoading(false); });
+    }
+  }, [session]);
 
   if (loading) return <div className="p-8 text-slate-500 animate-pulse">Loading Command Center...</div>;
 

@@ -53,8 +53,6 @@ export default function AdmissionsProcess() {
 
         <div className="max-w-3xl mx-auto">
           <div className="relative">
-            {/* The vertical line */}
-            <div className="absolute left-4 top-0 h-full w-0.5 bg-gray-200" />
             
             <div className="space-y-12">
               {steps.map((item, index) => (

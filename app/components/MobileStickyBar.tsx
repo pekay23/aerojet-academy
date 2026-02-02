@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 
 export default function MobileStickyBar() {
   const pathname = usePathname();
+  const isPortalLive = process.env.NEXT_PUBLIC_PORTAL_LIVE === 'true';
 
   // List of paths where the sticky bar should be HIDDEN
   const hiddenPaths = ["/portal", "/staff", "/register", "/contact", "/studio"];
@@ -23,12 +24,22 @@ export default function MobileStickyBar() {
       >
         Enquire
       </Link>
-      <Link 
-        href="/register" 
-        className="flex-1 bg-aerojet-sky text-white font-bold py-3 rounded text-center text-sm uppercase tracking-wide shadow-md"
-      >
-        Apply Now
-      </Link>
+      
+      {isPortalLive ? (
+          <Link 
+            href="/register" 
+            className="flex-1 bg-aerojet-sky text-white font-bold py-3 rounded text-center text-sm uppercase tracking-wide shadow-md"
+          >
+            Apply Now
+          </Link>
+      ) : (
+          <Link 
+            href="/courses" 
+            className="flex-1 bg-aerojet-sky text-white font-bold py-3 rounded text-center text-sm uppercase tracking-wide shadow-md"
+          >
+            View Courses
+          </Link>
+      )}
     </div>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { UploadButton } from "@/app/utils/uploadthing";
+import Image from "next/image";
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -50,6 +52,20 @@ export default function UserManagementPage() {
     }
   };
 
+  const handleUserPhotoUpload = async (userId: string, url: string) => {
+    const res = await fetch('/api/staff/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, image: url })
+    });
+    if (res.ok) {
+        toast.success("Photo Updated");
+        fetchUsers();
+    } else {
+        toast.error("Failed to update photo");
+    }
+  };
+
   if (loading) return <div className="p-8">Loading Users...</div>;
 
   return (
@@ -73,7 +89,39 @@ export default function UserManagementPage() {
                 <tbody>
                     {users.map(u => (
                         <tr key={u.id} className="border-b hover:bg-slate-50">
-                            <td className="p-4 font-bold text-slate-700">{u.name}</td>
+                            <td className="p-4 flex items-center gap-3">
+                                {/* PHOTO COLUMN WITH UPLOAD */}
+                                <div className="relative group w-10 h-10 shrink-0">
+                                    <div className="w-full h-full rounded-full overflow-hidden border border-slate-200 bg-slate-100 relative">
+                                        {u.image ? (
+                                            <Image src={u.image} alt={u.name} fill className="object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center font-bold text-slate-400 text-xs">
+                                                {u.name?.[0]}
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Upload Overlay */}
+                                    <div className="absolute inset-0 bg-black/60 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer overflow-hidden">
+                                        <div className="absolute inset-0 w-full h-full">
+                                            <UploadButton
+                                                endpoint="adminStudentPhoto"
+                                                onClientUploadComplete={(res) => handleUserPhotoUpload(u.id, res[0].url)}
+                                                // FIX IS HERE: Wrapped in braces
+                                                onUploadError={(e) => { toast.error(e.message); }}
+                                                appearance={{
+                                                    button: "w-full h-full bg-transparent text-transparent absolute inset-0 cursor-pointer",
+                                                    container: "w-full h-full",
+                                                    allowedContent: "hidden"
+                                                }}
+                                            />
+                                        </div>
+                                        <span className="text-white text-[8px] font-bold pointer-events-none relative z-10">Edit</span>
+                                    </div>
+                                </div>
+                                <span className="font-bold text-slate-700">{u.name}</span>
+                            </td>
                             <td className="p-4">{u.email}</td>
                             <td className="p-4"><span className={`px-2 py-1 rounded text-xs font-bold ${u.role === 'ADMIN' ? 'bg-red-100 text-red-800' : u.role === 'STAFF' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100'}`}>{u.role}</span></td>
                             <td className="p-4">

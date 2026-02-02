@@ -22,15 +22,20 @@ export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session || (session.user as any).role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
-  const { userId, role } = await req.json(); // role: 'ADMIN', 'STAFF', 'STUDENT'
+  const { userId, role, image } = await req.json(); // Added image
+
+  const dataToUpdate: any = {};
+  if (role) dataToUpdate.role = role;
+  if (image) dataToUpdate.image = image;
 
   await prisma.user.update({
     where: { id: userId },
-    data: { role }
+    data: dataToUpdate
   });
 
   return NextResponse.json({ success: true });
 }
+
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   if (!session || (session.user as any).role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });

@@ -42,6 +42,8 @@ function MobileAccordion({ title, links, onLinkClick }: { title: string, links: 
 }
 
 export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' }) {
+  // Check the environment variable
+  const isPortalLive = process.env.NEXT_PUBLIC_PORTAL_LIVE === 'true';
   const { data: session, status } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -99,17 +101,26 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
             <Link href="/news" className="hover:text-aerojet-sky transition">News</Link>
           </nav>
           
+          {/* Desktop CTA - ONLY SHOW IF LIVE */}
           <div className="hidden md:flex items-center space-x-3">
-            {/* Logic: Change label and destination if authenticated */}
-            <Link 
-                href={status === 'authenticated' ? dashboardHref : '/portal/login'} 
-                className={`text-xs font-bold transition-colors ${displayAsLight ? 'text-gray-600 hover:text-aerojet-blue' : 'text-white hover:text-gray-200'}`}
-            >
-              {status === 'authenticated' ? 'GO TO DASHBOARD' : 'PORTAL LOGIN'}
-            </Link>
-            <Link href="/register" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
-                {status === 'authenticated' ? 'Apply Now' : 'Register'}
-            </Link>
+            {isPortalLive ? (
+              <>
+                <Link 
+                    href={status === 'authenticated' ? dashboardHref : '/portal/login'} 
+                    className={`text-xs font-bold transition-colors ${displayAsLight ? 'text-gray-600 hover:text-aerojet-blue' : 'text-white hover:text-gray-200'}`}
+                >
+                  {status === 'authenticated' ? 'GO TO DASHBOARD' : 'PORTAL LOGIN'}
+                </Link>
+                <Link href="/register" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
+                    {status === 'authenticated' ? 'Apply Now' : 'Register'}
+                </Link>
+              </>
+            ) : (
+              // Optional: Show a "Coming Soon" or "Contact Us" button instead
+              <Link href="/contact" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
+                Contact Us
+              </Link>
+            )}
           </div>
 
           <button className="md:hidden p-2 focus:outline-none relative z-50" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
@@ -130,20 +141,20 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
           <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block border-b border-gray-100 py-4 text-xl font-bold text-aerojet-blue">Contact</Link>
           
           <div className="pt-8 space-y-4">
-            <Link 
-                href={status === 'authenticated' ? dashboardHref : '/portal/login'} 
-                onClick={() => setMobileMenuOpen(false)} 
-                className="block text-center text-aerojet-sky font-semibold border border-aerojet-sky py-3 rounded-md"
-            >
-              {status === 'authenticated' ? 'Go to Dashboard' : 'Student Portal Login'}
-            </Link>
-            <Link 
-                href="/register" 
-                onClick={() => setMobileMenuOpen(false)} 
-                className="block bg-aerojet-sky text-white text-center py-4 rounded-md shadow-md font-bold uppercase tracking-wider"
-            >
-              Start Registration
-            </Link>
+            {isPortalLive ? (
+              <>
+                <Link href="/portal/login" onClick={() => setMobileMenuOpen(false)} className="block text-center text-aerojet-sky font-semibold border border-aerojet-sky py-3 rounded-md">
+                  {status === 'authenticated' ? 'Go to Dashboard' : 'Student Portal Login'}
+                </Link>
+                <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="block bg-aerojet-sky text-white text-center py-4 rounded-md shadow-md font-bold uppercase tracking-wider">
+                  Start Registration
+                </Link>
+              </>
+            ) : (
+               <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block bg-aerojet-sky text-white text-center py-4 rounded-md shadow-md font-bold uppercase tracking-wider">
+                  Contact Admissions
+               </Link>
+            )}
           </div>
         </div>
       </div>
