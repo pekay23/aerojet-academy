@@ -3,32 +3,32 @@ import Image from 'next/image';
 
 const programs = [
   {
-    title: "Full-Time EASA Part-66 B1/B2",
-    description: "A comprehensive, multi-year program for aspiring licensed aircraft maintenance engineers.",
+    title: "Full-Time Licence Programmes",
+    description: "Comprehensive 2 or 4-year pathways to B1.1/B2 licensure. Includes theory, hand-skills, and work experience.",
     image: "/4-yrFull-time.jpg",
-    link: "/courses/easa-full-time",
-    status: "Active"
+    link: "/courses",
+    badge: "Most Popular"
   },
   {
-    title: "Modular EASA Part-66",
-    description: "Flexible, self-paced learning. Book and sit for individual exam modules at your convenience.",
+    title: "12-Month Crash Course",
+    description: "Accelerated B1.1 certification for industry professionals. Theory & exams only.",
+    image: "/1-yrFull-time.jpg", // Ensure this image exists, or use another
+    link: "/courses",
+    badge: "Industry"
+  },
+  {
+    title: "Modular Training",
+    description: "Pay-as-you-go. Book tuition and exams for specific modules at your own pace.",
     image: "/hero-modular.jpg",
     link: "/courses/easa-modular",
-    status: "Active"
+    badge: "Flexible"
   },
   {
-    title: "Pilot Training",
-    description: "Express your interest in our future flight training programs, from private to commercial licenses.",
-    image: "/female-pilot.jpg",
-    link: "/contact?interest=pilot",
-    status: "Coming Soon"
-  },
-  {
-    title: "Cabin Crew Training",
-    description: "Register your interest for our upcoming safety and service excellence course for cabin crew.",
-    image: "/air-hoster.jpg",
-    link: "/contact?interest=cabin-crew",
-    status: "Coming Soon"
+    title: "Exam-Only & Revision",
+    description: "Self-study candidates can book exam seats or join 8-week revision clinics.",
+    image: "/self-study.jpg", // Ensure image exists
+    link: "/courses/exams",
+    badge: "Self-Study"
   }
 ];
 
@@ -41,7 +41,7 @@ export default function ProgramsSnapshot() {
             Find Your Path in Aviation
           </h2>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            We offer structured training for licensed engineers, with pilot and cabin crew programs on the horizon.
+            From complete beginners to experienced technicians, we have a structured pathway for you.
           </p>
         </div>
 
@@ -53,12 +53,12 @@ export default function ProgramsSnapshot() {
                   src={program.image}
                   alt={`Image for ${program.title}`}
                   layout="fill"
-                  objectFit="contain"
+                  objectFit="cover"
                   className="transition-transform duration-500 group-hover:scale-105"
                 />
-                {program.status === 'Coming Soon' && (
-                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                    <span className="text-white font-bold text-lg uppercase tracking-widest">COMING SOON</span>
+                {program.badge && (
+                  <div className="absolute top-4 right-4 bg-aerojet-sky text-white text-xs font-bold px-3 py-1 rounded shadow-sm">
+                    {program.badge}
                   </div>
                 )}
               </div>

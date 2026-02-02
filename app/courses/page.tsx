@@ -4,82 +4,112 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import PageHero from '../components/PageHero';
 
+const courseList = [
+    {
+        id: "A",
+        title: "Four-Year Full-Time (B1.1 & B2)",
+        price: "€13,500 / year",
+        desc: "Comprehensive theory, advanced hand-skills, and structured work-experience.",
+        features: ["Exam fees included", "2 free re-sits", "Logbook & PPE included"],
+        link: "/courses/easa-full-time"
+    },
+    {
+        id: "B",
+        title: "Two-Year Full-Time (B1.1)",
+        price: "€11,250 / year",
+        desc: "Theory + hand-skills training. The fastest route for school leavers.",
+        features: ["Exam fees included", "2 free re-sits", "Optional B2 top-up"],
+        link: "/courses/easa-full-time"
+    },
+    {
+        id: "C",
+        title: "12-Month Crash Course",
+        price: "€9,540 total",
+        desc: "Accelerated B1.1 certification for Industry/Military professionals.",
+        features: ["Theory & Exams only", "No hand-skills", "Evening/Weekend classes"],
+        link: "/courses/easa-full-time"
+    },
+    {
+        id: "D",
+        title: "Modular Training",
+        price: "Pay per Module",
+        desc: "Book tuition and exams module-by-module. Learn at your own pace.",
+        features: ["Flexible schedule", "Pay as you go", "Portal booking"],
+        link: "/courses/easa-modular"
+    },
+    {
+        id: "E",
+        title: "Examination-Only",
+        price: "From €520 / seat",
+        desc: "Self-study candidates can book exam seats directly.",
+        features: ["Bundles available", "Group Charter options", "Strict T-21 deadline"],
+        link: "/courses/easa-modular" // or a new exam-only page
+    },
+    {
+        id: "F",
+        title: "Revision Support",
+        price: "€120 / module series",
+        desc: "8-week targeted tuition and mock exams for exam-only candidates.",
+        features: ["2 Mock Exams", "Expert Q&A", "8-week block"],
+        link: "/courses/easa-modular"
+    }
+];
+
 export default function CoursesPage() {
   return (
     <main className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
       <div className="grow">
         <PageHero 
-          title="Our Training Courses"
-          subtitle="Explore our EASA-standard programs designed to launch your career as a licensed Aircraft Maintenance Engineer."
+          title="Our Training Programmes"
+          subtitle="From full-time licensure to flexible modular exams, choose the path that fits your career goals."
           backgroundImage="/aircraft-engine-crossection.jpg"
         />
 
-        {/* Main Content: Full-Time vs Modular */}
+        {/* Main Content */}
         <section className="py-20">
           <div className="container mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-10">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {courseList.map((course) => (
+                    <div key={course.id} className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col">
+                        <div className="bg-aerojet-blue p-4 text-white flex justify-between items-center">
+                            <span className="font-bold text-lg opacity-80">Option {course.id}</span>
+                            <span className="bg-white/20 px-2 py-1 rounded text-xs font-bold">{course.price}</span>
+                        </div>
+                        <div className="p-8 grow flex flex-col">
+                            <h3 className="text-xl font-bold text-aerojet-blue mb-3">{course.title}</h3>
+                            <p className="text-gray-600 text-sm mb-6 grow">{course.desc}</p>
+                            
+                            <ul className="space-y-2 mb-8">
+                                {course.features.map(f => (
+                                    <li key={f} className="flex items-start text-xs text-gray-500">
+                                        <span className="text-aerojet-sky mr-2">✔</span> {f}
+                                    </li>
+                                ))}
+                            </ul>
 
-              {/* Full-Time Card */}
-<Link href="/courses/easa-full-time" className="group block bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1">
-  {/* Customized container with exact 848/317 aspect ratio */}
-  <div className="relative w-full aspect-848/317 bg-gray-100">
-    <Image 
-      src="/4-yrFull-time.jpg" 
-      alt="Full-Time Program" 
-      layout="fill" 
-      objectFit="cover" // We can safely use cover now because the container matches the image ratio
-      className="transition-transform duration-500 group-hover:scale-105"
-    />
-  </div>
-  <div className="p-8">
-    <h3 className="text-2xl font-bold text-aerojet-blue mb-3">Full-Time EASA Part-66</h3>
-    <p className="text-gray-600 mb-4">A structured, immersive program designed for school leavers and career changers aiming for a B1/B2 license.</p>
-    <ul className="text-sm space-y-2 text-gray-700 mb-6">
-      <li className="flex items-center"><span className="text-aerojet-sky mr-2">✔</span>Best for a comprehensive, guided path.</li>
-      <li className="flex items-center"><span className="text-aerojet-sky mr-2">✔</span>Includes theory, practicals, and exam prep.</li>
-      <li className="flex items-center"><span className="text-aerojet-sky mr-2">✔</span>Ideal for building a career from the ground up.</li>
-    </ul>
-    <span className="font-bold text-aerojet-sky group-hover:text-aerojet-blue">Learn More →</span>
-  </div>
-</Link>
-
-{/* Modular Card */}
-<Link href="/courses/easa-modular" className="group block bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-1">
-  {/* Customized container with exact 848/317 aspect ratio */}
-  <div className="relative w-full aspect-848/317 bg-gray-100">
-    <Image 
-      src="/hero-modular.jpg" 
-      alt="Modular Program" 
-      layout="fill" 
-      objectFit="cover" // Safe to use cover here too
-      className="transition-transform duration-500 group-hover:scale-105"
-    />
-  </div>
-  <div className="p-8">
-    <h3 className="text-2xl font-bold text-aerojet-blue mb-3">Modular Part-66 (B1/B2)</h3>
-    <p className="text-gray-600 mb-4">A flexible option allowing you to book and complete individual EASA modules at your own pace.</p>
-    <ul className="text-sm space-y-2 text-gray-700 mb-6">
-      <li className="flex items-center"><span className="text-aerojet-sky mr-2">✔</span>Best for experienced technicians or self-studiers.</li>
-      <li className="flex items-center"><span className="text-aerojet-sky mr-2">✔</span>Pay-as-you-go for each module exam.</li>
-      <li className="flex items-center"><span className="text-aerojet-sky mr-2">✔</span>Book exams through the student portal.</li>
-    </ul>
-    <span className="font-bold text-aerojet-sky group-hover:text-aerojet-blue">Learn More →</span>
-  </div>
-</Link>
-
-
+                            <Link href={course.link} className="block w-full text-center bg-gray-50 hover:bg-aerojet-sky hover:text-white border border-gray-200 text-gray-700 font-bold py-3 rounded-lg transition-colors">
+                                View Details
+                            </Link>
+                        </div>
+                    </div>
+                ))}
             </div>
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-16 bg-white">
+        {/* Next Steps CTA */}
+        <section className="py-16 bg-white border-t border-gray-200">
             <div className="container mx-auto px-6 text-center">
-                <h2 className="text-3xl font-bold text-aerojet-blue mb-4">Ready to Take the Next Step?</h2>
-                <p className="text-gray-600 mb-8 max-w-2xl mx-auto">Registration is required to apply for our programs or book modular exams. Get started today to unlock the portal and begin your application.</p>
+                <h2 className="text-2xl font-bold text-aerojet-blue mb-4">Ready to Enroll?</h2>
+                <div className="max-w-2xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-8">
+                    <div className="p-4 bg-gray-50 rounded">1. Pay Registration Fee</div>
+                    <div className="p-4 bg-gray-50 rounded">2. Submit Application</div>
+                    <div className="p-4 bg-gray-50 rounded">3. Pay Deposit</div>
+                    <div className="p-4 bg-gray-50 rounded">4. Start Training</div>
+                </div>
                 <Link href="/register" className="bg-aerojet-gold text-aerojet-blue px-10 py-4 rounded-md font-bold text-lg hover:bg-opacity-90 transition">
-                    Start Registration
+                    Start Registration Now
                 </Link>
             </div>
         </section>
