@@ -1,74 +1,94 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
-// Use the @ alias to avoid relative path errors
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
+export const metadata: Metadata = {
+  title: 'Application Terms',
+};
+
 export default function TermsPage() {
   return (
-    <main className="min-h-screen flex flex-col bg-gray-50 pt-20">
+    <main className="min-h-screen flex flex-col bg-slate-50 pt-20">
       <Navbar theme="light" />
       
-      <div className="grow container mx-auto px-6 py-12 max-w-4xl"> {/* Changed flex-grow to grow per Tailwind suggestion */}
-        <div className="bg-white p-10 rounded-xl shadow-sm border border-gray-100">
+      <div className="grow container mx-auto px-6 py-12 max-w-4xl">
+        <div className="bg-white p-8 md:p-16 rounded-[2.5rem] shadow-xl border border-slate-100 relative overflow-hidden">
           
-          <h1 className="text-3xl md:text-4xl font-bold text-aerojet-blue mb-2">
-            Online Application Terms & Conditions
-          </h1>
-          <p className="text-gray-500 mb-10 text-sm">
-            Last Updated: {new Date().getFullYear()}
-          </p>
+          {/* Header */}
+          <div className="mb-12 border-b border-slate-100 pb-8">
+            <span className="bg-blue-50 text-aerojet-sky px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 inline-block">
+                Legal Policy
+            </span>
+            <h1 className="text-3xl md:text-5xl font-black text-aerojet-blue uppercase tracking-tight leading-tight">
+              Online Application <br/>Terms & Conditions
+            </h1>
+            <p className="text-slate-400 mt-4 font-medium text-sm italic">
+              Last Updated: February 2026
+            </p>
+          </div>
 
-          <div className="prose prose-blue max-w-none text-gray-700">
-            {/* ... Content remains the same ... */}
-            <p>
-              Please read these terms carefully before submitting your registration or application to Aerojet Aviation Training Academy. By proceeding, you agree to be bound by the policies outlined below.
+          <div className="prose prose-slate max-w-none 
+            prose-headings:text-aerojet-blue prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight
+            prose-p:text-slate-600 prose-p:leading-relaxed
+            prose-strong:text-slate-900 prose-strong:font-bold
+            prose-li:text-slate-600">
+            
+            <p className="text-lg font-medium text-slate-700">
+              By initiating the registration process or submitting an application to Aerojet Aviation Training Academy, you acknowledge that you have read, understood, and agree to the following terms.
             </p>
 
-            <h3 className="text-aerojet-blue font-bold text-xl mt-8 mb-4">1. Registration Fee Policy</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>The <strong>Registration Fee</strong> is a mandatory, one-time administrative payment required to initiate your application process.</li>
-              <li>This fee covers the cost of background verification, document review, and setting up your secure student portal account.</li>
-              <li><strong>The Registration Fee is strictly non-refundable</strong> under any circumstances, regardless of whether your application is subsequently approved or rejected.</li>
+            <h3>1. Registration Gating & Fees</h3>
+            <ul>
+              <li><strong>Initial Payment:</strong> A one-time Registration Fee of <strong>GHS 350.00</strong> is mandatory for all programmes.</li>
+              <li><strong>Non-Refundable:</strong> The Registration Fee is strictly non-refundable and covers administrative processing, background checks, and verification.</li>
+              <li><strong>Access:</strong> Payment of this fee is required before the secure Online Application Form link is released to the candidate.</li>
             </ul>
 
-            <h3 className="text-aerojet-blue font-bold text-xl mt-8 mb-4">2. Application & Verification Process</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Submission of an application does not guarantee admission. All applicants must meet the entry requirements and pass internal assessments.</li>
-              <li>Aerojet Academy reserves the right to request additional documentation or verify the authenticity of any document provided.</li>
-              <li>False declarations or forged documents will result in immediate disqualification and a permanent ban from future applications.</li>
+            <h3>2. Enrollment & Seat Confirmation</h3>
+            <ul>
+              <li><strong>Full-Time Programmes:</strong> Approved applicants must pay a <strong>40% Seat Confirmation Deposit</strong> of the first year's tuition to secure their place in the cohort.</li>
+              <li><strong>Modular/Exam Programmes:</strong> Enrollment is confirmed only upon 100% upfront payment of the booked module or exam seat.</li>
+              <li><strong>Deadlines:</strong> Failure to settle confirmation invoices by the specified deadline may result in the seat being offered to the next candidate on the waitlist.</li>
             </ul>
 
-            <h3 className="text-aerojet-blue font-bold text-xl mt-8 mb-4">3. Seat Confirmation Deposit & Fees</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li>Upon approval of your application, you will be issued a Seat Confirmation Invoice.</li>
-              <li><strong>Full-Time Students:</strong> A deposit of <strong>40% of the total tuition fee</strong> is required to secure your seat in the cohort.</li>
-              <li><strong>Exam-Only Students:</strong> The <strong>full fee</strong> for the selected module(s) is required to secure your seat.</li>
-              <li>Your seat is <strong>not secured</strong> until this payment is made in full and confirmed by our finance team.</li>
-              <li>If you withdraw your application after paying the deposit but before the course commences, a cancellation fee may apply as per the full Student Agreement provided upon enrollment.</li>
+            <h3>3. Examination Policies (Exam-Only)</h3>
+            <ul>
+              <li><strong>Go/No-Go Decision (T-21):</strong> Exam windows are confirmed 21 days prior to the start date. Sittings proceed only if the minimum threshold (60 paid seats or 3 Group Charters) is met.</li>
+              <li><strong>Roll-over Rule:</strong> If a window is cancelled due to low numbers, all confirmed bookings will roll to the next available window at no extra cost.</li>
+              <li><strong>Late Booking:</strong> Bookings made within 14 days (T-14) of an exam incur a <strong>€50 surcharge</strong>, subject to seat availability.</li>
+              <li><strong>No-Shows:</strong> Candidates who fail to attend a scheduled and locked exam sitting forfeit their fees.</li>
             </ul>
 
-            <h3 className="text-aerojet-blue font-bold text-xl mt-8 mb-4">4. Program Availability & Cohort Starts</h3>
-            <ul className="list-disc pl-5 space-y-2">
-              <li><strong>Minimum Cohort Size:</strong> Training for any specific intake will commence only when the minimum required number of enrolled students is met.</li>
-              <li>In the event that a cohort does not reach the minimum size, Aerojet Academy reserves the right to defer the start date to the next available intake.</li>
-              <li>Enrolled students will be notified of their official start date via the Student Portal and email.</li>
-            </ul>
-
-            <h3 className="text-aerojet-blue font-bold text-xl mt-8 mb-4">5. Communications</h3>
+            <h3>4. The 24-Month Rule (Modular)</h3>
             <p>
-              By registering, you consent to receive official communications regarding your application, invoices, and academic status via the email address provided and the Student Portal. It is your responsibility to check these channels regularly.
+              In accordance with EASA standards, candidates pursuing a full category certification via the modular route must successfully complete all required examinations within a <strong>24-month window</strong>, starting from the date of the first passed module.
             </p>
 
-            <div className="mt-12 pt-8 border-t border-gray-200">
-              <p className="font-semibold text-aerojet-blue">
-                Do you have questions about these terms?
-              </p>
-              <p className="mt-2">
-                Contact our admissions team at{' '}
-                <a href="mailto:admissions@aerojet-academy.com" className="text-aerojet-sky hover:underline">
-                  admissions@aerojet-academy.com
-                </a>
-              </p>
+            <h3>5. Cohort Minimums & Start Dates</h3>
+            <ul>
+              <li>Course start dates are indicative. Actual commencement is subject to meeting minimum cohort sizes.</li>
+              <li>Aerojet Academy reserves the right to adjust schedules or defer intakes if minimum numbers are not reached. Enrolled students will be notified via the Student Portal.</li>
+            </ul>
+
+            <h3>6. Documentation & Conduct</h3>
+            <p>
+              All documents uploaded to the portal (Passport, Certificates, Transcripts) must be authentic. Submission of forged documents will result in immediate disqualification, forfeiture of fees, and a permanent ban from the Academy.
+            </p>
+
+            <div className="mt-16 pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div>
+                    <p className="font-black text-aerojet-blue uppercase text-sm">Have Questions?</p>
+                    <p className="text-xs text-slate-500">Our admissions team is available to clarify these terms.</p>
+                </div>
+                <div className="flex gap-4">
+                    <Link href="/contact" className="text-aerojet-sky font-bold text-xs uppercase tracking-widest hover:underline">
+                        Contact Us
+                    </Link>
+                    <Link href="/register" className="bg-aerojet-sky text-white px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-aerojet-blue transition-all shadow-md">
+                        Start Registration
+                    </Link>
+                </div>
             </div>
 
           </div>

@@ -1,82 +1,61 @@
+"use client";
 import Link from 'next/link';
 
-const steps = [
-  {
-    step: "01",
-    title: "Enquiry & Course Selection",
-    description: "Submit an enquiry or select your desired course. We collect your basic contact details to start the process."
-  },
-  {
-    step: "02",
-    title: "Pay Registration Fee",
-    description: "A registration fee invoice is issued to your email. This must be paid before the application form is released."
-  },
-  {
-    step: "03",
-    title: "Submit Application",
-    description: "Once your fee is confirmed, you'll receive a link to submit your detailed online application and upload required documents."
-  },
-  {
-    step: "04",
-    title: "Application Review",
-    description: "Our admissions team carefully reviews your application. We may contact you if additional information is needed."
-  },
-  {
-    step: "05",
-    title: "Pay Seat Deposit / Exam Fee", // Updated Title
-    description: "Approved Full-Time applicants receive a Seat Confirmation Invoice for a 40% deposit. For Exam-Only options, the full fee is required to secure your seat." // Updated Description
-  },
-  {
-    step: "06",
-    title: "Enrollment & Onboarding",
-    description: "Once your deposit or fee is confirmed, your seat is secured. You will be officially onboarded into the Student Portal."
-  },
-  {
-    step: "07",
-    title: "Start Date Confirmation",
-    description: "Your official start date is confirmed via email and the portal once the course cohort meets the minimum enrollment size."
-  },
-];
-
 export default function AdmissionsProcess() {
+  const steps = [
+    {
+      step: "01",
+      title: "Registration Invoice",
+      desc: "We will first issue an invoice for the GHS 350 registration fee. Payment of the registration fee is required before you can complete the online application."
+    },
+    {
+      step: "02",
+      title: "Online Application Form",
+      desc: "Once payment is received and you send us confirmation, we will provide a link to complete the online application form for Academy review and approval."
+    },
+    {
+      step: "03",
+      title: "Confirmation Invoice",
+      desc: "Upon approval, we will issue an invoice for the Confirmation payment applicable to your selected training programme. Once paid, your seat is secured."
+    },
+    {
+      step: "04",
+      title: "Onboarding & Access",
+      desc: "After confirmation, you will be onboarded onto our student portal. You will receive your start date or receive a link to access your learning materials."
+    }
+  ];
+
   return (
-    <section className="bg-white py-20 md:py-28">
+    <section className="py-24 bg-white">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-aerojet-blue mb-4">
-            How Admissions Works
+        <div className="text-center mb-20">
+          <h2 className="text-3xl md:text-5xl font-black text-aerojet-blue uppercase tracking-tight mb-4">
+            How to Enroll
           </h2>
-          <p className="text-gray-600 max-w-3xl mx-auto">
-            Our transparent, step-by-step process ensures a fair and structured journey from applicant to enrolled student.
+          <p className="text-slate-500 max-w-2xl mx-auto font-medium">
+            Follow our structured enrollment pathway to secure your place at the academy.
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto">
-          <div className="relative">
-            
-            <div className="space-y-12">
-              {steps.map((item, index) => (
-                <div key={index} className="flex items-start"> {/* Kept the flex fix */}
-                  <div className="shrink-0 w-12 h-12 bg-aerojet-sky rounded-full flex items-center justify-center text-white font-bold mr-6">
-                    {item.step}
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-aerojet-blue mb-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-gray-600">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-              ))}
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {steps.map((item, index) => (
+            <div key={index} className="relative p-8 rounded-3xl bg-slate-50 border border-slate-100 group hover:border-aerojet-sky transition-all duration-500 shadow-sm hover:shadow-xl">
+              <div className="w-12 h-12 rounded-2xl bg-aerojet-sky text-white flex items-center justify-center font-black text-xl mb-6 shadow-lg shadow-blue-100 group-hover:scale-110 transition-transform">
+                {item.step}
+              </div>
+              <h3 className="text-lg font-black text-aerojet-blue mb-3 uppercase tracking-tight">
+                {item.title}
+              </h3>
+              <p className="text-sm text-slate-500 leading-relaxed font-medium">
+                {item.desc}
+              </p>
             </div>
-          </div>
+          ))}
         </div>
 
-        <div className="text-center mt-16">
-          <Link href="/register" className="bg-aerojet-sky text-white px-10 py-4 rounded-md font-bold text-lg hover:bg-aerojet-soft-blue transition shadow-lg">
-            Get Started
+        <div className="mt-16 text-center">
+          <Link href="/register" className="bg-aerojet-blue text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-aerojet-sky shadow-xl transition-all active:scale-95 inline-block">
+            Start Your Registration →
           </Link>
         </div>
       </div>

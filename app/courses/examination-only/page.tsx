@@ -1,8 +1,13 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import PageHero from '../../components/PageHero';
-import NextSteps from "@/components/NextSteps"; // Import
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import PageHero from '@/components/PageHero';
+import NextSteps from '@/components/NextSteps';
+
+export const metadata: Metadata = {
+  title: 'Examination-Only',
+};
 
 export default function ExamOnlyPage() {
   return (
@@ -11,75 +16,59 @@ export default function ExamOnlyPage() {
       <div className="grow">
         <PageHero 
           title="Examination-Only"
-          subtitle="Certified EASA Part-66 module examinations for self-study candidates and industry professionals."
+          subtitle="Certified EASA Part-66 module sittings for self-study candidates and industry professionals."
           backgroundImage="/exam-only.jpg"
         />
 
         <div className="container mx-auto px-6 py-20">
-          <div className="max-w-5xl mx-auto space-y-16">
+          <div className="max-w-6xl mx-auto space-y-24">
             
-            {/* Overview Section */}
-            <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="grid md:grid-cols-2 gap-16 items-center">
                 <div>
-                    <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-6">Professional Exam Environment</h2>
-                    <p className="text-gray-700 leading-relaxed mb-4">
-                        Aerojet Academy provides a certified, high-standard environment for sitting EASA Part-66 module exams. We offer a rotating schedule of exam windows throughout the year at our Accra facilities.
+                    <div className="w-16 h-1.5 bg-aerojet-sky mb-6 rounded-full" />
+                    <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-6">Professional Testing Environment</h2>
+                    <p className="text-slate-600 leading-relaxed mb-4 font-medium text-lg">
+                        Aerojet Academy provides a high-standard facility for sitting official EASA Part-66 module exams. 
                     </p>
-                    <p className="text-gray-700 leading-relaxed">
-                        Seats are limited to 28 per sitting to ensure strict invigilation and a professional atmosphere. All bookings, seat assignments, and results are managed via our secure student portal.
+                    <p className="text-slate-500 leading-relaxed">
+                        Seats are limited to a maximum of 28 per sitting to ensure strict invigilation and a focused atmosphere. All bookings, seat assignments, and results are managed via our secure student portal.
                     </p>
                 </div>
-                <div className="bg-slate-50 p-8 rounded-3xl border border-slate-200 shadow-sm">
-                    <h3 className="font-bold text-aerojet-blue text-sm uppercase tracking-widest mb-6">Exam Booking Rules</h3>
-                    <ul className="space-y-4 text-sm text-gray-600">
-                        <li className="flex items-start gap-3">
-                            <span className="text-aerojet-sky font-bold">●</span> 
-                            <span><b>T-21 Deadline:</b> Exam windows are confirmed only if minimum numbers are met 21 days prior to the start date.</span>
+                
+                <div className="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-2xl relative border-t-4 border-aerojet-sky">
+                    <h3 className="font-black uppercase tracking-widest text-xs text-aerojet-sky mb-6">Booking Conditions</h3>
+                    <ul className="space-y-5">
+                        <li className="flex gap-4">
+                            <span className="text-aerojet-sky font-bold">●</span>
+                            <p className="text-sm text-slate-300"><b>T-21 Confirmation:</b> Windows are confirmed only if minimum numbers are met 21 days prior.</p>
                         </li>
-                        <li className="flex items-start gap-3">
-                            <span className="text-aerojet-sky font-bold">●</span> 
-                            <span><b>Late Booking:</b> Bookings made within 14 days of an exam incur a late-processing surcharge.</span>
+                        <li className="flex gap-4">
+                            <span className="text-aerojet-sky font-bold">●</span>
+                            <p className="text-sm text-slate-300"><b>Late Surcharge:</b> Bookings within T-14 incur a €50 admin surcharge if space remains.</p>
                         </li>
-                        <li className="flex items-start gap-3">
-                            <span className="text-aerojet-sky font-bold">●</span> 
-                            <span><b>No-Shows:</b> Seats are forfeited once schedules are locked.</span>
+                        <li className="flex gap-4">
+                            <span className="text-red-500 font-bold">●</span>
+                            <p className="text-sm text-slate-300"><b>No-Shows:</b> Seats are forfeited once schedules are locked. Fees roll only if window is cancelled.</p>
                         </li>
                     </ul>
                 </div>
             </div>
 
-            {/* Pricing Notice Section */}
-            <section className="bg-aerojet-blue rounded-3xl p-10 text-white shadow-xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                    <svg className="w-40 h-40" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                </div>
-                <div className="relative z-10 max-w-2xl">
-                    <h2 className="text-3xl font-black uppercase tracking-tight mb-4">Transparent Pricing</h2>
-                    <p className="text-blue-100 text-lg leading-relaxed mb-6">
-                        Detailed pricing for individual module seats, resits, and exam bundles (2-seat and 4-seat options) is available exclusively within the <b>Student Portal</b>.
-                    </p>
-                    <div className="flex flex-wrap gap-4">
-                        <Link href="/register" className="bg-aerojet-sky text-white px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-aerojet-blue transition-all">
-                            Register to View Prices
-                        </Link>
-                        <Link href="/contact" className="border-2 border-white/30 text-white px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-aerojet-blue transition-all">
-                            Contact Admissions
-                        </Link>
-                    </div>
-                </div>
+            {/* Pricing CTA */}
+            <section className="bg-slate-50 rounded-[3rem] p-10 md:p-16 border border-slate-100 text-center shadow-inner">
+                <h2 className="text-2xl font-black text-aerojet-blue uppercase tracking-widest mb-4">Pricing & Seat Availability</h2>
+                <p className="text-slate-500 max-w-2xl mx-auto mb-10 font-medium">
+                    Detailed pricing for individual module seats, 2-seat and 4-seat bundles, and Group Charters is visible exclusively within the <b>Student Portal</b>.
+                </p>
+                <Link href="/register" className="bg-aerojet-sky text-white px-12 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-aerojet-blue transition-all shadow-lg active:scale-95">
+                    Register to View Pricing
+                </Link>
             </section>
 
-            {/* Pathways Hint */}
-            <div className="text-center">
-                <p className="text-gray-500 text-sm">
-                    Unsure which modules you need? Check our <Link href="/courses/modules" className="text-aerojet-sky font-bold hover:underline">Module Pathways guide</Link>.
-                </p>
-            </div>
-
+            <NextSteps />
           </div>
         </div>
       </div>
-      <NextSteps />
       <Footer />
     </main>
   );

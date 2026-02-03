@@ -1,77 +1,106 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import PageHero from '../../components/PageHero';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import PageHero from '@/components/PageHero';
 
-export default function ModularCoursePage() {
+export const metadata: Metadata = {
+  title: 'Modular Training',
+};
+
+export default function ModularProgrammePage() {
   return (
     <main className="min-h-screen flex flex-col bg-white">
       <Navbar />
-      <div className="flex-grow">
+      
+      <div className="grow">
         <PageHero 
-          title="Modular EASA Part-66 Program"
-          subtitle="A flexible, self-paced approach to achieving your B1/B2 license certification."
-          backgroundImage="/module-top.jpg"
+          title="Modular Training Programme"
+          subtitle="Self-paced, flexible certification paths for EASA Part-66 B1 and B2 licences."
+          backgroundImage="/hero-modular.jpg"
         />
 
-        <div className="py-20">
-          <div className="container mx-auto px-6">
-            <div className="grid lg:grid-cols-3 gap-12">
-              
-              <div className="lg:col-span-2">
-                <section>
-                  <h2 className="text-2xl font-bold text-aerojet-blue mb-4">Program Overview</h2>
-                  <p className="text-gray-700 leading-relaxed mb-4">
-                    The Modular EASA Part-66 Program is designed for maximum flexibility. It is the ideal solution for individuals who are already working in the industry, prefer a self-study approach, or wish to complete the required modules at their own pace.
-                  </p>
-                  <p className="text-gray-700 leading-relaxed">
-                    You can book and sit for individual module exams through our student portal. Upon successful payment and registration, you gain access to the relevant study materials to prepare for your exams.
-                  </p>
-                </section>
-
-                <section className="mt-12">
-                  <h2 className="text-2xl font-bold text-aerojet-blue mb-4">How It Works</h2>
-                   <ol className="list-decimal list-inside space-y-4 text-gray-700">
-                        <li><span className="font-bold text-gray-800">Register:</span> Pay the one-time registration fee to create your student portal account.</li>
-                        <li><span className="font-bold text-gray-800">Book:</span> Log in to the portal and select the specific exam module(s) you wish to take.</li>
-                        <li><span className="font-bold text-gray-800">Pay & Prepare:</span> Pay for your selected module(s) and upload proof. Once verified, access to study materials is granted.</li>
-                        <li><em className="font-bold text-gray-800">Sit for the Exam:</em> Attend your scheduled exam at our certified facility.</li>
-                   </ol>
-                </section>
-
-                 <div className="mt-12 bg-yellow-50 border-l-4 border-yellow-400 p-6 rounded-r-lg">
-                    <h3 className="font-bold text-yellow-800">Important: 24-Month Rule</h3>
-                    <p className="text-sm text-yellow-700">
-                        Please be aware that all required modules for a specific license category must be successfully passed within a 24-month period, starting from the date you pass your first module exam.
+        <div className="container mx-auto px-6 py-20">
+          <div className="max-w-5xl mx-auto space-y-20">
+            
+            {/* 1. Programme Overview */}
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div className="w-16 h-1.5 bg-aerojet-sky mb-6 rounded-full" />
+                    <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-6">Flexibility for Professionals</h2>
+                    <p className="text-slate-600 leading-relaxed mb-4 font-medium">
+                        The Modular Training Programme is designed for individuals who require flexibility. Whether you are already working in the industry or prefer to manage your own study schedule, this path allows you to book tuition and exams module-by-module.
+                    </p>
+                    <p className="text-slate-500 leading-relaxed text-sm">
+                        Each modular booking is inclusive of full classroom tuition and one official EASA examination sitting. This ensures you receive expert instruction before attempting your certification.
                     </p>
                 </div>
-              </div>
-
-              <aside className="lg:col-span-1">
-                <div className="sticky top-28 bg-gray-50 p-8 rounded-xl border border-gray-200">
-                  <h3 className="text-xl font-bold text-aerojet-blue mb-6">Program at a Glance</h3>
-                  <div className="mb-6">
-                    <h4 className="text-sm font-bold text-gray-500 uppercase">Category</h4>
-                    <p className="font-semibold text-gray-800">EASA Part-66 Modular</p>
-                  </div>
-                   <div className="mb-6">
-                    <h4 className="text-sm font-bold text-gray-500 uppercase">Pacing</h4>
-                    <p className="font-semibold text-gray-800">Self-Paced, Pay-per-Module</p>
-                  </div>
-                  <div className="mb-8">
-                    <h4 className="text-sm font-bold text-gray-500 uppercase">Booking</h4>
-                    <p className="font-semibold text-gray-800">Via Student Portal</p>
-                  </div>
-                  <Link href="/register" className="w-full text-center block bg-aerojet-gold text-aerojet-blue px-6 py-3 rounded-md font-bold hover:bg-opacity-90 transition">
-                    Register to Get Started
-                  </Link>
+                <div className="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden border-t-4 border-aerojet-sky">
+                    <h3 className="text-xl font-bold mb-6">Modular Rules</h3>
+                    <ul className="space-y-5">
+                        <li className="flex items-start gap-4">
+                            <span className="text-aerojet-sky font-black text-lg">✓</span>
+                            <p className="text-sm text-slate-300 font-medium leading-relaxed">Book modules at your own pace through the secure student portal.</p>
+                        </li>
+                        <li className="flex items-start gap-4">
+                            <span className="text-aerojet-sky font-black text-lg">✓</span>
+                            <p className="text-sm text-slate-300 font-medium leading-relaxed"><b>100% Upfront Payment:</b> Required per booked module to activate access.</p>
+                        </li>
+                        <li className="flex items-start gap-4">
+                            <span className="text-red-500 font-black text-lg">!</span>
+                            <p className="text-sm text-slate-300 font-medium leading-relaxed"><b>The 24-Month Rule:</b> All exams must be passed within 24 months of the first module pass.</p>
+                        </li>
+                    </ul>
                 </div>
-              </aside>
             </div>
+
+            {/* 2. Pricing & Access Information */}
+            <section className="bg-slate-50 rounded-[3rem] p-8 md:p-16 border border-slate-100 text-center shadow-inner">
+                <h2 className="text-2xl font-black text-aerojet-blue uppercase tracking-widest mb-4">Pricing & Availability</h2>
+                <p className="text-slate-500 max-w-2xl mx-auto mb-10 font-medium">
+                    To maintain strict cohort standards and up-to-date scheduling, detailed pricing and available dates for modular tuition are visible exclusively within the <b>Student Portal</b> after successful registration.
+                </p>
+                <div className="flex flex-col md:flex-row justify-center gap-4">
+                    <Link href="/register" className="bg-aerojet-sky text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-aerojet-blue transition-all shadow-lg">
+                        Register to View Pricing
+                    </Link>
+                    <Link href="/courses/modules" className="bg-white border-2 border-slate-200 text-slate-600 px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-slate-100 transition-all">
+                        View Module List (M1–M17)
+                    </Link>
+                </div>
+            </section>
+
+            {/* 3. Next Steps Verbatim from Master Pack */}
+            <section className="pt-10">
+                <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-12 text-center">How to Enroll</h2>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm group hover:border-aerojet-sky transition-all">
+                        <span className="text-slate-300 font-black text-xl mb-4 block group-hover:text-aerojet-sky">01</span>
+                        <h4 className="font-bold text-aerojet-blue text-sm mb-2">Registration Invoice</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">We will first issue an invoice for the GHS 350 registration fee. Payment is required before you can complete the online application.</p>
+                    </div>
+                    <div className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm group hover:border-aerojet-sky transition-all">
+                        <span className="text-slate-300 font-black text-xl mb-4 block group-hover:text-aerojet-sky">02</span>
+                        <h4 className="font-bold text-aerojet-blue text-sm mb-2">Online Application</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">Once payment is received and confirmed, we will provide a link to complete the online application form for review.</p>
+                    </div>
+                    <div className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm group hover:border-aerojet-sky transition-all">
+                        <span className="text-slate-300 font-black text-xl mb-4 block group-hover:text-aerojet-sky">03</span>
+                        <h4 className="font-bold text-aerojet-blue text-sm mb-2">Confirmation Invoice</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">Upon approval, we will issue an invoice for the Confirmation payment. Once paid, your seat is secured.</p>
+                    </div>
+                    <div className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm group hover:border-aerojet-sky transition-all">
+                        <span className="text-slate-300 font-black text-xl mb-4 block group-hover:text-aerojet-sky">04</span>
+                        <h4 className="font-bold text-aerojet-blue text-sm mb-2">Portal Access</h4>
+                        <p className="text-[11px] text-slate-500 leading-relaxed">After confirmation, you will be onboarded to the student portal to access your materials and book your exams.</p>
+                    </div>
+                </div>
+            </section>
+
           </div>
         </div>
       </div>
+
       <Footer />
     </main>
   );

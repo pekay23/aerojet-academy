@@ -21,8 +21,8 @@ export default function WhoWeAre() {
           {/* Image */}
           <div className="relative w-full h-80 md:h-96 rounded-lg overflow-hidden shadow-xl">
             <Image 
-              src="/studentsLecture.jpg" // Using an image of students in a classroom
-              alt="Students in a lecture at Aerojet Academy"
+              src="/excellence.jpg"
+              alt="People standing on a hill"
               layout="fill"
               objectFit="cover"
               className="object-center"

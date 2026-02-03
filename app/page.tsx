@@ -1,3 +1,4 @@
+import { Metadata } from 'next';
 import Navbar from "@/components/Navbar";
 import HeroSlider from "@/components/HeroSlider";
 import Credibility from "@/components/Credibility";
@@ -8,42 +9,49 @@ import PortalHighlights from "@/components/PortalHighlights";
 import NewsroomTeaser from "@/components/NewsroomTeaser";
 import HomeContact from "@/components/HomeContact";
 import Footer from "@/components/Footer";
-import Reveal from "@/components/Reveal"; // Import Reveal
+import Reveal from "@/components/Reveal";
+
+export const metadata: Metadata = {
+  // Title is set by default/template in layout.tsx
+};
 
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col bg-white">
       <Navbar />
-      <HeroSlider />
       
-      <Reveal>
-        <Credibility />
-      </Reveal>
-      
-      <Reveal delay={200}>
-        <WhoWeAre />
-      </Reveal>
-      
-      <Reveal>
-        <ProgramsSnapshot />
-      </Reveal>
-      
-      <Reveal>
-        <AdmissionsProcess />
-      </Reveal>
-      
-      <Reveal>
-        <PortalHighlights />
-      </Reveal>
-      
-      <Reveal>
-        <NewsroomTeaser />
-      </Reveal>
-      
-      <Reveal>
-        <HomeContact />
-      </Reveal>
-      
+      <div className="grow">
+        <HeroSlider />
+        
+        <Reveal>
+          <Credibility />
+        </Reveal>
+        
+        <Reveal delay={200}>
+          <WhoWeAre />
+        </Reveal>
+        
+        <Reveal>
+          <ProgramsSnapshot />
+        </Reveal>
+        
+        <Reveal>
+          <AdmissionsProcess />
+        </Reveal>
+        
+        <Reveal>
+          <PortalHighlights />
+        </Reveal>
+        
+        <Reveal>
+          <NewsroomTeaser />
+        </Reveal>
+        
+        <Reveal>
+          <HomeContact />
+        </Reveal>
+      </div>
+
       <Footer />
     </main>
   );

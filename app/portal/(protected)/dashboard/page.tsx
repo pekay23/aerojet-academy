@@ -28,7 +28,7 @@ export default async function DashboardPage() {
         include: { run: { include: { course: true } } },
         where: { run: { startDatetime: { gt: new Date() } } },
         orderBy: { run: { startDatetime: 'asc' } },
-        take: 3 // UPDATED: Show up to 3 upcoming exams
+        take: 3 
       },
       applications: {
         include: { course: true },
@@ -38,7 +38,6 @@ export default async function DashboardPage() {
     }
   });
 
-  // --- Logic Checks ---
   const isProfileComplete = !!(student?.phone && student?.address && student?.emergencyName);
   const studentId = student?.studentId || "PENDING";
   
@@ -49,7 +48,7 @@ export default async function DashboardPage() {
   const latestApp = student?.applications[0];
   const appStatus = latestApp?.status || "Not Started";
 
-  // Filter for approved courses that have material links
+  // Course Materials Access
   const approvedMaterials = student?.applications
     .filter(app => app.status === 'APPROVED' && app.course.materialLink)
     .map(app => app.course) || [];
@@ -58,12 +57,10 @@ export default async function DashboardPage() {
   const totalScheduled = student?.attendance.reduce((acc, rec) => acc + rec.scheduledHours, 0) || 0;
   const totalAttended = student?.attendance.reduce((acc, rec) => acc + rec.attendedHours, 0) || 0;
   const totalLateMins = student?.attendance.reduce((acc, rec) => acc + rec.lateMinutes, 0) || 0;
-  
   const hoursPerDay = 2.5; 
   const lateHours = totalLateMins / 60;
   const rawAbsentHours = totalScheduled - totalAttended;
-  const totalEffectiveAbsentHours = rawAbsentHours + lateHours;
-  const derivedAbsentDays = hoursPerDay > 0 ? (totalEffectiveAbsentHours / hoursPerDay) : 0;
+  const derivedAbsentDays = hoursPerDay > 0 ? ((rawAbsentHours + lateHours) / hoursPerDay) : 0;
   const attendancePct = totalScheduled > 0 ? ((totalAttended / totalScheduled) * 100).toFixed(1) : "100";
 
   return (
@@ -72,11 +69,11 @@ export default async function DashboardPage() {
       <div className="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-6">
             <div className="w-20 h-20 rounded-full border-2 border-aerojet-sky shadow-md overflow-hidden shrink-0">
-                  <ProtectedImage 
-                      src={student?.photoUrl}
-                      alt="ID" 
-                      fallbackInitial={session.user.name?.[0]} 
-                  />
+                <ProtectedImage 
+                    src={student?.photoUrl || ""} 
+                    alt="Official ID Photo" 
+                    fallbackInitial={session.user.name?.[0]} 
+                />
             </div>
             <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-aerojet-blue">
@@ -94,83 +91,60 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* 2. Key Metrics Grid */}
+      {/* 2. Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {/* Attendance Card */}
+        {/* Attendance */}
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-purple-500">
-            <div className="flex justify-between items-start mb-4">
-                <h3 className="font-bold text-gray-700 text-sm uppercase tracking-tight">Attendance</h3>
-                <span className="text-xl">📊</span>
-            </div>
-            <p className="text-3xl font-bold text-aerojet-blue">{attendancePct}%</p>
+            <h3 className="font-bold text-gray-700 text-[10px] uppercase tracking-widest mb-4">Current Attendance</h3>
+            <p className="text-3xl font-black text-aerojet-blue">{attendancePct}%</p>
             <div className="mt-2 text-[10px] text-gray-500 flex justify-between">
-                <span>Late: <b className="text-red-500">{lateHours.toFixed(1)}h</b></span>
+                <span>Lateness: <b className="text-red-500">{lateHours.toFixed(1)}h</b></span>
                 <span>Absence: <b className="text-red-500">{derivedAbsentDays.toFixed(1)}d</b></span>
             </div>
         </div>
 
-        {/* Finance Card */}
+        {/* Finance */}
         <div className={`bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 ${outstandingBalance > 0 ? 'border-l-red-500' : 'border-l-green-500'}`}>
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="font-bold text-gray-700 text-sm uppercase tracking-tight">Outstanding</h3>
-            <span className="text-xl">💳</span>
-          </div>
-          <p className="text-2xl font-bold text-aerojet-blue">GHS {(outstandingBalance * 17.5).toFixed(0)}*</p>
-          <Link href="/portal/finance" className="text-xs text-aerojet-sky hover:underline mt-2 inline-block">
-            View Ledger (EUR/GHS) &rarr;
-          </Link>
+          <h3 className="font-bold text-gray-700 text-[10px] uppercase tracking-widest mb-4">Outstanding Bal.</h3>
+          <p className="text-2xl font-black text-aerojet-blue">€{outstandingBalance.toFixed(2)}</p>
+          <Link href="/portal/finance" className="text-[10px] font-bold text-aerojet-sky hover:underline mt-2 inline-block uppercase">View Ledger &rarr;</Link>
         </div>
 
-        {/* Status Card (Updated Title) */}
-        <div className={`bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 ${appStatus === 'APPROVED' ? 'border-l-green-500' : 'border-l-yellow-400'}`}>
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="font-bold text-gray-700 text-sm uppercase tracking-tight">Recent Application</h3>
-            <span className="text-xl">📝</span>
-          </div>
-          <p className="text-lg font-bold text-aerojet-blue capitalize">{appStatus === 'PENDING' ? 'Under Review' : appStatus}</p>
-          <p className="text-[10px] text-gray-400 mt-1">{latestApp?.course.code || 'No recent apps'}</p>
+        {/* Status (NEW TITLE) */}
+        <div className={`bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 ${appStatus === 'APPROVED' ? 'border-l-green-500' : 'border-l-orange-400'}`}>
+          <h3 className="font-bold text-gray-700 text-[10px] uppercase tracking-widest mb-4">Recent Application Status</h3>
+          <p className="text-lg font-black text-aerojet-blue capitalize tracking-tight">{appStatus === 'PENDING' ? 'Under Review' : appStatus}</p>
+          <p className="text-[10px] text-gray-400 mt-1 truncate">{latestApp?.course.code || 'No active app'}</p>
         </div>
 
-        {/* Multi-Exam Card */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-aerojet-blue">
-          <div className="flex justify-between items-start mb-4">
-            <h3 className="font-bold text-gray-700 text-sm uppercase tracking-tight">Next Exams</h3>
-            <span className="text-xl">📅</span>
-          </div>
-          <div className="space-y-2">
-            {student?.examBookings.length === 0 ? (
-                <p className="text-xs text-gray-400 italic">No exams booked</p>
-            ) : (
-                student?.examBookings.map(b => (
-                    <div key={b.id} className="text-xs">
-                        <p className="font-bold text-aerojet-blue">{b.run.course.code}</p>
-                        <p className="text-gray-500">{new Date(b.run.startDatetime).toLocaleDateString()}</p>
-                    </div>
-                ))
-            )}
+        {/* Exams (MULTI-LIST) */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 border-l-4 border-l-aerojet-blue overflow-hidden">
+          <h3 className="font-bold text-gray-700 text-[10px] uppercase tracking-widest mb-4">Next Exams</h3>
+          <div className="space-y-2 max-h-20 overflow-y-auto no-scrollbar">
+            {student?.examBookings.length === 0 ? <p className="text-[10px] text-gray-400 italic">None booked</p> : student?.examBookings.map(b => (
+                <div key={b.id} className="flex justify-between items-center text-[10px] border-b border-slate-50 pb-1 last:border-0">
+                    <b className="text-aerojet-blue uppercase">{b.run.course.code}</b>
+                    <span className="text-slate-400 font-mono">{new Date(b.run.startDatetime).toLocaleDateString()}</span>
+                </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* 3. Course Materials Section (NEW) */}
+      {/* 3. Course Materials Section */}
       {approvedMaterials.length > 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div className="bg-slate-50 px-6 py-3 border-b border-gray-100">
-                <h3 className="font-bold text-slate-700 text-sm uppercase tracking-wider">My Learning Materials</h3>
+                <h3 className="font-black text-slate-700 text-[10px] uppercase tracking-[0.2em]">Learning Materials Access</h3>
             </div>
             <div className="p-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {approvedMaterials.map(course => (
-                    <div key={course.id} className="p-4 rounded-lg border border-blue-50 bg-blue-50/30 flex justify-between items-center group">
-                        <div>
-                            <p className="font-bold text-aerojet-blue">{course.code}</p>
-                            <p className="text-[10px] text-gray-500">{course.title}</p>
+                    <div key={course.id} className="p-4 rounded-xl border border-blue-50 bg-blue-50/20 flex justify-between items-center group hover:bg-blue-50 transition-colors">
+                        <div className="overflow-hidden">
+                            <p className="font-black text-aerojet-blue text-sm">{course.code}</p>
+                            <p className="text-[10px] text-gray-500 truncate w-full">{course.title}</p>
                         </div>
-                        <a 
-                            href={course.materialLink!} 
-                            target="_blank" 
-                            className="bg-white text-aerojet-sky p-2 rounded-md shadow-sm border border-blue-100 hover:bg-aerojet-sky hover:text-white transition-all"
-                            title="Open OneDrive"
-                        >
+                        <a href={course.materialLink!} target="_blank" className="bg-white text-aerojet-sky p-2 rounded-lg shadow-sm border border-blue-100 hover:bg-aerojet-sky hover:text-white transition-all ml-4 shrink-0">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
                         </a>
                     </div>
@@ -181,16 +155,16 @@ export default async function DashboardPage() {
 
       {/* 4. Action Required */}
       {!isProfileComplete && (
-        <div className="bg-white rounded-xl shadow-sm border border-red-100 overflow-hidden border-l-4 border-l-red-600">
+        <div className="bg-white rounded-2xl shadow-lg border border-red-100 overflow-hidden border-l-8 border-l-red-600">
           <div className="p-6 flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 font-bold shrink-0 animate-bounce">!</div>
+              <div className="w-12 h-12 rounded-2xl bg-red-100 flex items-center justify-center text-red-600 font-black text-xl shrink-0 animate-pulse">!</div>
               <div>
-                <h4 className="font-bold text-gray-800 text-lg">Incomplete Profile</h4>
-                <p className="text-gray-600 text-sm">Please update your address and emergency contact to finalize your applications.</p>
+                <h4 className="font-black text-slate-900 uppercase tracking-tight">Profile Incomplete</h4>
+                <p className="text-slate-500 text-xs leading-relaxed mt-1">We require your residential address and emergency contact details before we can finalize your enrollment. Please update your profile immediately.</p>
               </div>
             </div>
-            <Link href="/portal/profile" className="w-full md:w-auto text-center bg-red-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-red-700 transition shadow-md">
+            <Link href="/portal/profile" className="w-full md:w-auto text-center bg-red-600 text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-[10px] shadow-lg hover:bg-red-700 transition active:scale-95">
               Update Profile &rarr;
             </Link>
           </div>

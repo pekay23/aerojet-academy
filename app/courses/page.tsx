@@ -1,19 +1,18 @@
+import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import PageHero from '../components/PageHero';
-import { Metadata } from 'next';
+import Navbar from '@/components/Navbar';
+import Footer from '@/components/Footer';
+import PageHero from '@/components/PageHero';
 
 export const metadata: Metadata = {
-  title: 'Courses',
+  title: 'Programmes',
 };
 
 const courseList = [
     {
         id: "A",
         title: "Four-Year Full-Time (B1.1 & B2)",
-        // price: "€13,500 / year", // REMOVED
         desc: "Comprehensive theory, advanced hand-skills, and structured work-experience.",
         features: ["Exam fees included", "2 free re-sits", "Logbook & PPE included"],
         link: "/courses/easa-full-time"
@@ -21,7 +20,6 @@ const courseList = [
     {
         id: "B",
         title: "Two-Year Full-Time (B1.1)",
-        // price: "€11,250 / year", // REMOVED
         desc: "Theory + hand-skills training. The fastest route for school leavers.",
         features: ["Exam fees included", "2 free re-sits", "Optional B2 top-up"],
         link: "/courses/easa-full-time"
@@ -29,7 +27,6 @@ const courseList = [
     {
         id: "C",
         title: "12-Month Crash Course",
-        // price: "€9,540 total", // REMOVED
         desc: "Accelerated B1.1 certification for Industry/Military professionals.",
         features: ["Theory & Exams only", "No hand-skills", "Evening/Weekend classes"],
         link: "/courses/easa-full-time"
@@ -37,23 +34,20 @@ const courseList = [
     {
         id: "D",
         title: "Modular Training",
-        // price: "Pay per Module", // REMOVED
         desc: "Book tuition and exams module-by-module. Learn at your own pace.",
-        features: ["Flexible schedule", "Pay as you go", "Portal booking"],
+        features: ["Flexible schedule", "Includes study materials", "Portal booking"],
         link: "/courses/easa-modular"
     },
     {
         id: "E",
         title: "Examination-Only",
-        // price: "From €520 / seat", // REMOVED
-        desc: "Self-study candidates can book exam seats directly.",
+        desc: "Self-study candidates can book exam seats directly in the portal.",
         features: ["Bundles available", "Group Charter options", "Strict T-21 deadline"],
-        link: "/courses/examination-only" // Updated link
+        link: "/courses/examination-only"
     },
     {
         id: "F",
         title: "Revision Support",
-        // price: "€120 / module series", // REMOVED
         desc: "8-week targeted tuition and mock exams for exam-only candidates.",
         features: ["2 Mock Exams", "Expert Q&A", "8-week block"],
         link: "/courses/easa-modular"
@@ -62,8 +56,9 @@ const courseList = [
 
 export default function CoursesPage() {
   return (
-    <main className="min-h-screen flex flex-col bg-gray-50">
+    <main className="min-h-screen flex flex-col bg-slate-50">
       <Navbar />
+      
       <div className="grow">
         <PageHero 
           title="Our Training Programmes"
@@ -76,23 +71,24 @@ export default function CoursesPage() {
           <div className="container mx-auto px-6">
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {courseList.map((course) => (
-                    <div key={course.id} className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col">
+                    <div key={course.id} className="bg-white rounded-2xl shadow-md overflow-hidden border border-slate-100 hover:shadow-xl transition-all duration-300 flex flex-col group hover:border-aerojet-sky">
                         <div className="bg-aerojet-blue p-4 text-white flex justify-between items-center">
-                            <span className="font-bold text-lg opacity-80">Option {course.id}</span>
+                            <span className="font-black text-sm uppercase tracking-widest opacity-70">Option {course.id}</span>
+                            <span className="bg-white/10 px-2 py-1 rounded text-[10px] font-bold uppercase tracking-tighter">Pricing in Portal</span>
                         </div>
                         <div className="p-8 grow flex flex-col">
-                            <h3 className="text-xl font-bold text-aerojet-blue mb-3">{course.title}</h3>
-                            <p className="text-gray-600 text-sm mb-6 grow">{course.desc}</p>
+                            <h3 className="text-xl font-black text-aerojet-blue mb-3 leading-tight group-hover:text-aerojet-sky transition-colors">{course.title}</h3>
+                            <p className="text-slate-500 text-sm mb-6 grow leading-relaxed">{course.desc}</p>
                             
-                            <ul className="space-y-2 mb-8">
+                            <ul className="space-y-2 mb-8 border-t border-slate-50 pt-6">
                                 {course.features.map(f => (
-                                    <li key={f} className="flex items-start text-xs text-gray-500">
-                                        <span className="text-aerojet-sky mr-2">✔</span> {f}
+                                    <li key={f} className="flex items-center text-xs font-bold text-slate-400">
+                                        <span className="text-aerojet-sky mr-2 text-lg">✓</span> {f}
                                     </li>
                                 ))}
                             </ul>
 
-                            <Link href={course.link} className="block w-full text-center bg-gray-50 hover:bg-aerojet-sky hover:text-white border border-gray-200 text-gray-700 font-bold py-3 rounded-lg transition-colors">
+                            <Link href={course.link} className="block w-full text-center bg-slate-50 hover:bg-aerojet-sky hover:text-white border border-slate-100 text-slate-600 font-black uppercase text-[10px] tracking-widest py-4 rounded-xl transition-all">
                                 View Details
                             </Link>
                         </div>
@@ -102,17 +98,36 @@ export default function CoursesPage() {
           </div>
         </section>
 
-        {/* Next Steps CTA */}
-        <section className="py-16 bg-white border-t border-gray-200">
+        {/* Next Steps CTA - Updated with Verbatim Text */}
+        <section className="py-20 bg-white border-t border-slate-100">
             <div className="container mx-auto px-6 text-center">
-                <h2 className="text-2xl font-bold text-aerojet-blue mb-4">Ready to Enroll?</h2>
-                <div className="max-w-2xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-gray-600 mb-8">
-                    <div className="p-4 bg-gray-50 rounded">1. Pay Registration Fee</div>
-                    <div className="p-4 bg-gray-50 rounded">2. Submit Application</div>
-                    <div className="p-4 bg-gray-50 rounded">3. Pay Deposit</div>
-                    <div className="p-4 bg-gray-50 rounded">4. Start Training</div>
+                <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-4">Ready to Enroll?</h2>
+                <p className="text-slate-500 mb-12 max-w-2xl mx-auto">Follow our 4-step process to secure your seat at the academy.</p>
+                
+                <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 text-left mb-12">
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                        <span className="text-aerojet-sky font-black text-xl mb-2 block">01</span>
+                        <h4 className="font-bold text-aerojet-blue text-sm mb-1">Registration Invoice</h4>
+                        <p className="text-[11px] text-slate-500 leading-tight">Pay the GHS 350 fee to initiate your application.</p>
+                    </div>
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                        <span className="text-aerojet-sky font-black text-xl mb-2 block">02</span>
+                        <h4 className="font-bold text-aerojet-blue text-sm mb-1">Online Application</h4>
+                        <p className="text-[11px] text-slate-500 leading-tight">Submit your docs via the secure portal for review.</p>
+                    </div>
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                        <span className="text-aerojet-sky font-black text-xl mb-2 block">03</span>
+                        <h4 className="font-bold text-aerojet-blue text-sm mb-1">Confirmation Invoice</h4>
+                        <p className="text-[11px] text-slate-500 leading-tight">Upon approval, pay your seat deposit or exam fee.</p>
+                    </div>
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                        <span className="text-aerojet-sky font-black text-xl mb-2 block">04</span>
+                        <h4 className="font-bold text-aerojet-blue text-sm mb-1">Start Training</h4>
+                        <p className="text-[11px] text-slate-500 leading-tight">Access your materials and receive your start date.</p>
+                    </div>
                 </div>
-                <Link href="/register" className="bg-aerojet-gold text-aerojet-blue px-10 py-4 rounded-md font-bold text-lg hover:bg-opacity-90 transition">
+
+                <Link href="/register" className="bg-aerojet-sky text-white px-12 py-4 rounded-xl font-black uppercase tracking-[0.2em] text-sm hover:bg-aerojet-blue transition-all shadow-lg shadow-blue-100 active:scale-95 inline-block">
                     Start Registration Now
                 </Link>
             </div>
