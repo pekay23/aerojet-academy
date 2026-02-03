@@ -2,6 +2,11 @@ import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import PageHero from '../components/PageHero';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Admissions',
+};
 import NextSteps from "@/components/NextSteps"; // Import
 
 const processSteps = [

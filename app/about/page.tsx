@@ -3,6 +3,12 @@ import Image from 'next/image';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import PageHero from '../components/PageHero';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'About Us',
+};
+
 
 export default function AboutPage() {
   return (

@@ -4,6 +4,12 @@ import { toast } from "sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import PageHero from "@/components/PageHero";
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Contact',
+};
+
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });

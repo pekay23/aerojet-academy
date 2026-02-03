@@ -4,6 +4,11 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import PageHero from '../components/PageHero';
 import { client } from '../../sanity/lib/client'; // Import the client
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Newsroom',
+};
 import { urlFor } from '../../sanity/lib/image';  // Import the image helper
 
 // Define the type for our article data
