@@ -10,6 +10,7 @@ export default function FinanceStaffPage() {
   
   // Modal State
   const [viewingProof, setViewingProof] = useState<any | null>(null);
+  const [confirmAmount, setConfirmAmount] = useState(""); // New State
 
   async function fetchPayments() {
     const res = await fetch('/api/staff/finance');
@@ -20,16 +21,22 @@ export default function FinanceStaffPage() {
 
   useEffect(() => { fetchPayments(); }, []);
 
-  const handleConfirm = async (id: string) => {
+  const handleConfirm = async () => {
+    if (!viewingProof || !confirmAmount) return;
+    
     const res = await fetch('/api/staff/finance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ feeId: id })
+        body: JSON.stringify({ feeId: viewingProof.id, amountPaid: parseFloat(confirmAmount) })
     });
+    
     if (res.ok) {
-        toast.success("Payment Confirmed");
-        setViewingProof(null); // Close modal if open
+        toast.success(`Payment of €${confirmAmount} Confirmed`);
+        setViewingProof(null); 
+        setConfirmAmount("");
         fetchPayments();
+    } else {
+        toast.error("Failed to confirm payment");
     }
   };
 
@@ -48,7 +55,7 @@ export default function FinanceStaffPage() {
                     <tr>
                         <th className="p-4">Student</th>
                         <th className="p-4">Description</th>
-                        <th className="p-4 text-right">Amount</th>
+                        <th className="p-4 text-right">Total</th>
                         <th className="p-4 text-center">Proof</th>
                         <th className="p-4 text-right">Action</th>
                     </tr>
@@ -58,23 +65,21 @@ export default function FinanceStaffPage() {
                         <tr key={pay.id}>
                             <td className="p-4 font-bold">{pay.student.user.name}</td>
                             <td className="p-4">{pay.description}</td>
-                            <td className="p-4 text-right">GHS {pay.amount.toFixed(2)}</td>
+                            <td className="p-4 text-right">€{pay.amount.toFixed(2)}</td>
                             <td className="p-4 text-center">
                                 {pay.proofUrl ? (
                                     <button 
                                         onClick={() => setViewingProof(pay)}
                                         className="text-blue-600 underline hover:text-blue-800 text-xs font-bold"
                                     >
-                                        View File
+                                        Verify
                                     </button>
                                 ) : (
                                     <span className="text-gray-400 text-xs">No File</span>
                                 )}
                             </td>
-                            <td className="p-4 text-right">
-                                <button onClick={() => handleConfirm(pay.id)} className="bg-green-600 text-white px-4 py-1 rounded text-xs font-bold hover:bg-green-700">
-                                    Confirm
-                                </button>
+                            <td className="p-4 text-right text-gray-400 italic text-xs">
+                                Verify to Action
                             </td>
                         </tr>
                     ))}
@@ -86,9 +91,9 @@ export default function FinanceStaffPage() {
       {/* Proof Viewer Modal */}
       {viewingProof && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setViewingProof(null)}>
-            <div className="bg-white rounded-xl overflow-hidden max-w-4xl w-full h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="bg-white rounded-xl overflow-hidden max-w-4xl w-full h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
                 <div className="p-4 border-b flex justify-between items-center bg-gray-50 shrink-0">
-                    <h3 className="font-bold text-gray-800">Proof of Payment: {viewingProof.student.user.name}</h3>
+                    <h3 className="font-bold text-gray-800">Verify Payment: {viewingProof.student.user.name}</h3>
                     <button onClick={() => setViewingProof(null)} className="text-gray-500 hover:text-red-500 font-bold px-2">✕</button>
                 </div>
                 
@@ -96,25 +101,34 @@ export default function FinanceStaffPage() {
                     {viewingProof.proofUrl.endsWith('.pdf') ? (
                         <iframe src={viewingProof.proofUrl} className="w-full h-full rounded border border-gray-300" />
                     ) : (
-                        <div className="relative w-full h-full min-h-400px">
-                             {/* Use normal img tag for flexibility in modal, or configured Next Image */}
-                            <img 
-                                src={viewingProof.proofUrl} 
-                                alt="Proof" 
-                                className="object-contain max-w-full max-h-full mx-auto"
-                            />
-                        </div>
+                        <img src={viewingProof.proofUrl} alt="Proof" className="object-contain max-w-full max-h-full mx-auto" />
                     )}
                 </div>
 
-                <div className="p-4 border-t bg-gray-50 flex justify-between items-center shrink-0">
-                    <Link href={viewingProof.proofUrl} target="_blank" className="text-blue-600 text-sm hover:underline font-semibold">
-                        Open in New Tab ↗
-                    </Link>
-                    <div className="flex gap-3">
-                        <button onClick={() => setViewingProof(null)} className="px-4 py-2 text-gray-600 font-bold text-sm hover:bg-gray-200 rounded">Cancel</button>
-                        <button onClick={() => handleConfirm(viewingProof.id)} className="px-4 py-2 bg-green-600 text-white font-bold text-sm hover:bg-green-700 rounded">
-                            Confirm Valid Payment
+                <div className="p-6 border-t bg-white flex flex-col gap-4 shrink-0">
+                    <div className="flex justify-between items-center text-sm text-gray-600">
+                        <p>Total Invoice: <span className="font-bold text-slate-800">€{viewingProof.amount.toFixed(2)}</span></p>
+                        <Link href={viewingProof.proofUrl} target="_blank" className="text-blue-600 hover:underline">Open File ↗</Link>
+                    </div>
+                    
+                    <div className="flex gap-4 items-end">
+                        <div className="flex-1">
+                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Amount Received (EUR)</label>
+                            <input 
+                                type="number" 
+                                value={confirmAmount}
+                                onChange={e => setConfirmAmount(e.target.value)}
+                                className="w-full border-2 border-slate-300 rounded-lg p-2 text-lg font-mono font-bold focus:border-green-500 outline-none"
+                                placeholder="0.00"
+                                autoFocus
+                            />
+                        </div>
+                        <button 
+                            onClick={handleConfirm} 
+                            disabled={!confirmAmount}
+                            className="px-8 py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 disabled:opacity-50 shadow-md transition-all"
+                        >
+                            Confirm Payment
                         </button>
                     </div>
                 </div>

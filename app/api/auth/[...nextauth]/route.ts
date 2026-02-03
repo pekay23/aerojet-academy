@@ -32,6 +32,21 @@ export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
+
+  events: {
+    // Set user to INACTIVE on first-time signup
+    createUser: async ({ user }) => {
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { isActive: false }
+      });
+      // Also create a student profile automatically
+      await prisma.student.create({
+        data: { userId: user.id }
+      });
+    }
+  },
+
   callbacks: {
     // 1. JWT CALLBACK: Fetch latest data from DB
     async jwt({ token, user }) {

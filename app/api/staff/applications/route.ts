@@ -39,7 +39,6 @@ export async function POST(req: Request) {
   const { applicationId } = await req.json();
 
   try {
-    // 1. Get the application details
     const application = await prisma.application.findUnique({
       where: { id: applicationId },
       include: { course: true }
@@ -47,11 +46,9 @@ export async function POST(req: Request) {
 
     if (!application) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-    // 2. Calculate Deposit Amount
-    // Logic: If Exam Only -> Full Price. If Full Time -> 40%
-    const isExamOnly = application.course.duration === 'Exam Only';
-    const depositAmount = isExamOnly ? application.course.price : (application.course.price * 0.40);
-    const description = isExamOnly ? `Exam Fee: ${application.course.code}` : `Seat Deposit: ${application.course.title}`;
+    // Use Full Price for the Invoice
+    const invoiceAmount = application.course.price;
+    const description = `Tuition Fee: ${application.course.title}`;
 
     await prisma.$transaction(async (tx) => {
         // Update Application Status
@@ -60,15 +57,15 @@ export async function POST(req: Request) {
             data: { status: 'APPROVED' }
         });
 
-        // Create the Invoice
+        // Create the Invoice for the FULL AMOUNT
         await tx.fee.create({
             data: {
                 studentId: application.studentId,
-                amount: depositAmount,
+                amount: invoiceAmount,
                 paid: 0,
-                status: 'UNPAID',
+                status: 'UNPAID', // Will become PARTIAL once they pay 40%
                 description: description,
-                dueDate: new Date(new Date().setDate(new Date().getDate() + 14)) // Due in 14 days
+                dueDate: new Date(new Date().setDate(new Date().getDate() + 14))
             }
         });
     });

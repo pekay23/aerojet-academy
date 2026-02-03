@@ -45,64 +45,59 @@ export async function GET(req: Request) {
 // POST: Confirm payment and update Wallet if applicable
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  
-  if (!session || (session.user as any).role === 'STUDENT') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+
+  const { feeId, amountPaid } = await req.json(); // Admin sends the actual amount
 
   try {
-    const { feeId } = await req.json();
-    
-    const fee = await prisma.fee.findUnique({ where: { id: feeId } });
+    const fee = await prisma.fee.findUnique({ 
+        where: { id: feeId },
+        include: { student: true }
+    });
     if (!fee) return NextResponse.json({ error: 'Fee not found' }, { status: 404 });
 
-    // Transaction: Update Fee AND potentially update Wallet
-    await prisma.$transaction(async (tx) => {
-    // 1. Mark Fee as Paid
-    await tx.fee.update({
-        where: { id: feeId },
-        data: { status: 'PAID', paid: fee.amount }
-    });
+    const paidAmount = parseFloat(amountPaid);
+    const newPaidTotal = fee.paid + paidAmount;
+    
+    // Determine Status
+    let newStatus = 'UNPAID';
+    if (newPaidTotal >= fee.amount) newStatus = 'PAID';
+    else if (newPaidTotal > 0) newStatus = 'PARTIAL';
 
-    // 2. AUTO-ENROLL LOGIC
-    // Check if this payment was a Seat Deposit
-    if (fee.description && fee.description.toLowerCase().includes('seat deposit')) {
-        await tx.student.update({
-            where: { id: fee.studentId },
+    // Check 40% Threshold
+    const isDepositThresholdMet = newPaidTotal >= (fee.amount * 0.40);
+
+    await prisma.$transaction(async (tx) => {
+        // 1. Update Fee
+        await tx.fee.update({
+            where: { id: feeId },
             data: { 
-                enrollmentStatus: 'ENROLLED',
-                // You can also set the cohort here if known
+                status: newStatus, 
+                paid: newPaidTotal 
             }
         });
-    }
 
-        // 3. Check if it's a Bundle Purchase
-        if (fee.description && fee.description.startsWith('BUNDLE:')) {
-            // Extract credits (Format: "BUNDLE: Name (X Credits)")
+        // 2. Check for Auto-Enrollment (If 40% threshold met)
+        if (isDepositThresholdMet && fee.student.enrollmentStatus !== 'ENROLLED') {
+             await tx.student.update({
+                where: { id: fee.studentId },
+                data: { enrollmentStatus: 'ENROLLED' }
+            });
+        }
+        
+        // 3. Bundle Logic (Only if fully paid)
+        if (newStatus === 'PAID' && fee.description && fee.description.startsWith('BUNDLE:')) {
             const match = fee.description.match(/\((\d+) Credits\)/);
             if (match && match[1]) {
                 const credits = parseInt(match[1]);
-
-                // Find or Create Wallet
                 let wallet = await tx.wallet.findUnique({ where: { studentId: fee.studentId } });
-                if (!wallet) {
-                    wallet = await tx.wallet.create({ data: { studentId: fee.studentId, balance: 0 } });
-                }
-
-                // Add Credits
+                if (!wallet) wallet = await tx.wallet.create({ data: { studentId: fee.studentId, balance: 0 } });
                 await tx.wallet.update({
                     where: { id: wallet.id },
                     data: { balance: { increment: credits } }
                 });
-
-                // Log Transaction
                 await tx.walletTransaction.create({
-                    data: {
-                        walletId: wallet.id,
-                        amount: credits,
-                        type: 'PURCHASE',
-                        description: `Purchased ${fee.description}`
-                    }
+                    data: { walletId: wallet.id, amount: credits, type: 'PURCHASE', description: `Purchased ${fee.description}` }
                 });
             }
         }
@@ -110,7 +105,6 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Confirm Payment Error:", error);
     return NextResponse.json({ error: 'Confirmation failed' }, { status: 500 });
   }
 }

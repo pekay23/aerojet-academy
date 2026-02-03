@@ -44,6 +44,8 @@ model User {
   image         String?
   password      String?
   role          String    @default("STUDENT") 
+  isActive      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
   
   // Relations
   accounts      Account[]

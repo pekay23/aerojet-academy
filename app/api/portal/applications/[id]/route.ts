@@ -6,9 +6,14 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // GET: Fetch application details
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  req: Request, 
+  { params }: { params: Promise<{ id: string }> } // Updated to Promise for Next.js 15
+) {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   const { id } = await params;
 
@@ -17,6 +22,11 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       where: { id },
       include: { course: true }
     });
+    
+    if (!application) {
+      return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+    }
+
     return NextResponse.json({ application });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
@@ -24,9 +34,14 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 }
 
 // POST: Save/Submit detailed application
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(
+  req: Request, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (!session || !session.user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
   const { id } = await params;
   const body = await req.json();
@@ -39,8 +54,10 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     });
 
     const regFee = student?.fees.find(f => f.description?.includes("Registration Fee"));
+    
+    // Safety check: registration fee must be PAID to submit the long form
     if (regFee?.status !== 'PAID') {
-        return NextResponse.json({ error: 'Registration fee must be paid first.' }, { status: 403 });
+        return NextResponse.json({ error: 'Registration fee must be verified by admin first.' }, { status: 403 });
     }
 
     const application = await prisma.application.update({
@@ -53,12 +70,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
         certificateUrl: body.certificateUrl,
         transcriptUrl: body.transcriptUrl,
         isSubmitted: true,
-        status: 'UNDER_REVIEW' // Move status forward automatically
+        status: 'UNDER_REVIEW' 
       }
     });
 
     return NextResponse.json({ success: true, application });
   } catch (error) {
+    console.error("Application Submit Error:", error);
     return NextResponse.json({ error: 'Submission failed' }, { status: 500 });
   }
 }

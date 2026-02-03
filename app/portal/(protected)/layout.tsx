@@ -17,39 +17,47 @@ export default function PortalLayout({ children }: { children: React.ReactNode; 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
-  // --- NEW: Instant Admin Redirect Check ---
+  // --- Role & Activation Redirect Logic ---
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
-      const role = (session.user as any).role;
-      if (role === 'ADMIN' || role === 'STAFF' || role === 'INSTRUCTOR') {
-        console.log("Redirecting Staff Role:", role);
+      const user = session.user as any;
+      
+      // 1. If user is ADMIN/STAFF/INSTRUCTOR, redirect to staff portal
+      if (['ADMIN', 'STAFF', 'INSTRUCTOR'].includes(user.role)) {
         router.replace('/staff/dashboard');
+        return;
+      }
+      
+      // 2. If user is a STUDENT but not yet active, redirect to pending page
+      if (user.role === 'STUDENT' && !user.isActive) {
+        router.replace('/portal/pending');
+        return;
       }
     }
   }, [status, session, router]);
 
-  if (status === "loading" || (session?.user as any)?.role === 'ADMIN') {
+  // Loading state should check for all redirect conditions to prevent content flashes
+  const user = (session?.user as any);
+  if (
+    status === "loading" ||
+    (user && ['ADMIN', 'STAFF', 'INSTRUCTOR'].includes(user.role)) ||
+    (user && user.role === 'STUDENT' && !user.isActive)
+  ) {
     return <div className="flex h-screen items-center justify-center text-aerojet-blue animate-pulse">Loading Portal...</div>;
   }
 
+  // Final safety check
   if (!session || !session.user) {
     return null;
   }
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* 
-         FIX APPLIED HERE:
-         1. Added dynamic width classes to this wrapper div.
-         2. Removed shadow-xl from here (the sidebar component handles it).
-         3. This ensures the "flex" item is exactly 64 or 20 units wide.
-      */}
       <div 
         className={`hidden lg:block h-full z-30 shrink-0 transition-all duration-300 ease-in-out ${
           sidebarCollapsed ? 'w-20' : 'w-64'
         }`}
       >
-        {/* @ts-ignore */}
         <PortalSidebar 
           user={session.user} 
           collapsed={sidebarCollapsed} 
@@ -71,8 +79,10 @@ export default function PortalLayout({ children }: { children: React.ReactNode; 
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-black/50 transition-opacity" onClick={() => setMobileSidebarOpen(false)}></div>
           <div className="relative w-64 h-full shadow-2xl">
-            {/* @ts-ignore */}
-            <PortalSidebar user={session.user} collapsed={false} />
+            <PortalSidebar 
+                user={session.user} 
+                collapsed={false} 
+            />
           </div>
         </div>
       )}
