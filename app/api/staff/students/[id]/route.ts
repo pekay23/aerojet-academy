@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
@@ -6,9 +6,15 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // GET: Fetch single student details
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> } // Updated for Next.js 15
+) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  
+  if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
   const { id } = await params;
 
@@ -22,21 +28,32 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         examBookings: { include: { run: { include: { course: true } } } }
       }
     });
+
+    if (!student) {
+      return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+    }
+
     return NextResponse.json({ student });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
+    console.error("Fetch Student Detail Error:", error);
+    return NextResponse.json({ error: 'Failed to fetch student details' }, { status: 500 });
   }
 }
 
 // PATCH: Update Student ID OR Photo
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
+export async function PATCH(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  
+  if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
   const body = await req.json();
   const { id } = await params;
 
-  // Destructure all possible fields an admin might update
   const { studentId, photoUrl, enrollmentStatus, cohort } = body;
 
   try {
@@ -56,24 +73,37 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
     return NextResponse.json({ error: 'Update failed' }, { status: 500 });
   }
 }
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+
+// DELETE: Delete a student and their auth user record
+export async function DELETE(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role !== 'ADMIN') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  
+  // Only Admin can delete accounts
+  if (!session || (session.user as any).role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
   const { id } = await params;
 
   try {
     // 1. Find student to get the linked userId
     const student = await prisma.student.findUnique({ where: { id } });
-    if (!student) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    
+    if (!student) {
+      return NextResponse.json({ error: 'Student not found' }, { status: 404 });
+    }
 
-    // 2. Delete User (Student profile will delete automatically due to Cascade)
+    // 2. Delete the Auth User (Student profile deletes automatically due to onDelete: Cascade)
     await prisma.user.delete({
       where: { id: student.userId }
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Delete Student Error:", error);
     return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
   }
 }

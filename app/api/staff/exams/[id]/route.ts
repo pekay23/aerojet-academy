@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
@@ -6,11 +6,18 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 // GET: Fetch single exam run details + roster
-export async function GET(req: Request, { params }: { params: { id: string } }) {
+export async function GET(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> } // Updated for Next.js 15
+) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  
+  // Verify Admin/Staff Role
+  if (!session || (session.user as any).role === 'STUDENT') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
-  // Wait for params to resolve (Next.js 15+)
+  // Await params before accessing the id
   const { id } = await params;
 
   try {
@@ -23,7 +30,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
           include: {
             student: { include: { user: true } }
           },
-          orderBy: { seatLabel: 'asc' } // Sort by seat S01, S02...
+          orderBy: { seatLabel: 'asc' } 
         }
       }
     });
@@ -32,15 +39,25 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
 
     return NextResponse.json({ run });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
+    console.error("Fetch Exam Roster Error:", error);
+    return NextResponse.json({ error: 'Failed to fetch roster' }, { status: 500 });
   }
 }
 
 // DELETE: Remove a student booking
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  
+  if (!session || (session.user as any).role === 'STUDENT') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
+  // Await params even if id isn't used directly in the body, 
+  // ensuring method signature matches the route
+  const { id } = await params; 
   const { bookingId } = await req.json();
 
   try {
@@ -49,21 +66,29 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
     });
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Delete Booking Error:", error);
     return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
   }
 }
-// PATCH: Assign a seat label to a booking
-export async function PATCH(req: Request, { params }: { params: { id: string } }) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
 
+// PATCH: Assign a seat label to a booking
+export async function PATCH(
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const session = await getServerSession(authOptions);
+  
+  if (!session || (session.user as any).role === 'STUDENT') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
+
+  const { id } = await params;
   const { bookingId, seatLabel } = await req.json();
 
   try {
-    // Check if seat is already taken in this exam run
-    // (We need the run ID from the params or fetch the booking to be safe)
-    // For MVP, we trust the admin input or add a unique constraint in Prisma (which we have: @@unique([examRunId, seatLabel]))
-
+    // Note: id (examRunId) could be used here for additional verification 
+    // to ensure the booking belongs to this specific run.
+    
     await prisma.examBooking.update({
       where: { id: bookingId },
       data: { seatLabel }
@@ -71,6 +96,7 @@ export async function PATCH(req: Request, { params }: { params: { id: string } }
 
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error("Assign Seat Error:", error);
     return NextResponse.json({ error: 'Failed to assign seat. Label might be taken.' }, { status: 500 });
   }
 }

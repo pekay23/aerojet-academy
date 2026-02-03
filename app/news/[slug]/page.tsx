@@ -14,19 +14,37 @@ interface Article {
   body: any[];
 }
 
-async function getArticle(slug: string): Promise<Article> {
+// Fetch a single article by its slug from Sanity
+async function getArticle(slug: string): Promise<Article | null> {
   const query = `*[_type == "article" && slug.current == $slug][0] {
-    title, mainImage, category, publishedAt, body
+    title, 
+    mainImage, 
+    category, 
+    publishedAt, 
+    body
   }`;
-  // Ensure we don't send an 'undefined' slug
-  if (!slug) return notFound();
-  const article = await client.fetch(query, { slug });
-  return article;
+  
+  try {
+    const article = await client.fetch(query, { slug });
+    return article;
+  } catch (error) {
+    console.error("Sanity Fetch Error:", error);
+    return null;
+  }
 }
 
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
-  const awaitedParams = await params; // Fix for Next.js promise-based params
-  const article = await getArticle(awaitedParams.slug);
+// Next.js 15 requirement: params must be treated as a Promise
+export default async function ArticlePage({ 
+  params 
+}: { 
+  params: Promise<{ slug: string }> 
+}) {
+  // Await the params to extract the slug
+  const { slug } = await params;
+
+  if (!slug) return notFound();
+
+  const article = await getArticle(slug);
 
   if (!article) {
     return notFound();
@@ -35,27 +53,44 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   return (
     <main className="min-h-screen flex flex-col bg-white">
       <Navbar theme="light" />
+      
       <div className="grow pt-20">
+        {/* Article Header */}
         <header className="container mx-auto px-6 py-12 text-center">
-          <p className="text-sm font-bold text-aerojet-sky uppercase">{article.category}</p>
-          <h1 className="text-3xl md:text-5xl font-bold text-aerojet-blue mt-2 mb-4 max-w-4xl mx-auto">{article.title}</h1>
-          <p className="text-gray-500">{new Date(article.publishedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          <p className="text-sm font-bold text-aerojet-sky uppercase tracking-widest">
+            {article.category}
+          </p>
+          <h1 className="text-3xl md:text-5xl font-black text-aerojet-blue mt-4 mb-6 max-w-4xl mx-auto tracking-tight leading-tight">
+            {article.title}
+          </h1>
+          <p className="text-slate-400 font-medium">
+            {new Date(article.publishedAt).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            })}
+          </p>
         </header>
-        <div className="relative w-full h-64 md:h-96 lg:h-500px mb-12">
+
+        {/* Hero Image */}
+        <div className="relative w-full h-64 md:h-96 lg:h-125 mb-16 shadow-inner bg-slate-100">
           <Image
             src={urlFor(article.mainImage).url()}
             alt={article.title}
-            layout="fill"
-            objectFit="cover"
+            fill
+            className="object-cover"
             priority
           />
         </div>
-        <article className="container mx-auto px-6 pb-20 max-w-3xl">
-          <div className="prose lg:prose-lg max-w-none">
+
+        {/* Article Content */}
+        <article className="container mx-auto px-6 pb-24 max-w-3xl">
+          <div className="prose prose-slate lg:prose-xl max-w-none prose-headings:text-aerojet-blue prose-a:text-aerojet-sky">
             <PortableText value={article.body} />
           </div>
         </article>
       </div>
+
       <Footer />
     </main>
   );

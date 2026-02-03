@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
@@ -7,14 +7,16 @@ const prisma = new PrismaClient();
 
 // GET: Fetch application details
 export async function GET(
-  req: Request, 
-  { params }: { params: Promise<{ id: string }> } // Updated to Promise for Next.js 15
+  req: NextRequest, 
+  { params }: { params: Promise<{ id: string }> } // Correct Next.js 15 Promise type
 ) {
   const session = await getServerSession(authOptions);
+  
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Await the params promise to get the ID
   const { id } = await params;
 
   try {
@@ -29,37 +31,47 @@ export async function GET(
 
     return NextResponse.json({ application });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
+    console.error("Fetch Application Error:", error);
+    return NextResponse.json({ error: 'Failed to fetch application' }, { status: 500 });
   }
 }
 
 // POST: Save/Submit detailed application
 export async function POST(
-  req: Request, 
+  req: NextRequest, 
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
+  
   if (!session || !session.user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  // Await the params promise to get the ID
   const { id } = await params;
   const body = await req.json();
 
   try {
-    // Check if the Registration Fee is PAID before allowing submission
+    // 1. Get student profile and their fees
     const student = await prisma.student.findUnique({
         where: { userId: session.user.id },
         include: { fees: true }
     });
 
-    const regFee = student?.fees.find(f => f.description?.includes("Registration Fee"));
-    
-    // Safety check: registration fee must be PAID to submit the long form
-    if (regFee?.status !== 'PAID') {
-        return NextResponse.json({ error: 'Registration fee must be verified by admin first.' }, { status: 403 });
+    if (!student) {
+        return NextResponse.json({ error: 'Student profile not found' }, { status: 404 });
     }
 
+    // 2. Security Check: Find if the Registration Fee is PAID
+    const regFee = student.fees.find(f => f.description?.includes("Registration Fee"));
+    
+    if (regFee?.status !== 'PAID') {
+        return NextResponse.json({ 
+            error: 'Registration fee must be verified by admin before submitting the full form.' 
+        }, { status: 403 });
+    }
+
+    // 3. Update the Application with detailed info
     const application = await prisma.application.update({
       where: { id },
       data: {
