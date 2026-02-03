@@ -261,3 +261,8 @@ model WalletTransaction {
   description     String
   createdAt       DateTime @default(now())
 }
+model SystemSetting {
+  id    String @id @default(cuid())
+  key   String @unique // e.g., "CONTACT_EMAIL_RECIPIENT"
+  value String
+}

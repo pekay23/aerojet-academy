@@ -53,35 +53,43 @@ export default function ContactPage() {
             {/* --- LEFT: Contact Info & Map (2/5 columns) --- */}
             <div className="lg:col-span-2 bg-aerojet-blue p-8 md:p-12 text-white">
                 <h2 className="text-2xl font-black uppercase tracking-widest mb-8 border-b border-white/10 pb-4">Get in Touch</h2>
-                
-                <div className="space-y-8">
-                    <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">📍</div>
-                        <div>
-                            <h3 className="font-bold text-aerojet-sky text-xs uppercase tracking-widest mb-1">Campus Location</h3>
-                            <p className="text-sm text-slate-300 leading-relaxed">
-                                Accra Technical Training Centre (ATTC),<br/> 
-                                Kokomlemle – Accra, Ghana
-                            </p>
-                        </div>
-                    </div>
 
-                    <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">📞</div>
-                        <div>
-                            <h3 className="font-bold text-aerojet-sky text-xs uppercase tracking-widest mb-1">Direct Line</h3>
-                            <p className="text-sm text-slate-300">+233 551 010 108</p>
-                        </div>
-                    </div>
+<div className="space-y-8">
+    <div className="flex items-start gap-4">
+        <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">📍</div>
+        <div>
+            <h3 className="font-bold text-aerojet-sky text-xs uppercase tracking-widest mb-1">Campus Location</h3>
+            <p className="text-sm text-slate-300 leading-relaxed font-medium">
+                ATTC Small Engines Department,<br/> 
+                Kokomlemle, Accra, Ghana
+            </p>
+        </div>
+    </div>
+
+    <div className="flex items-start gap-4">
+        <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">📞</div>
+        <div>
+            <h3 className="font-bold text-aerojet-sky text-xs uppercase tracking-widest mb-1">Admissions Line</h3>
+            <p className="text-sm text-slate-300 font-medium">+233-20-984-8423</p>
+        </div>
+    </div>
+
+    <div className="flex items-start gap-4">
+        <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">✉️</div>
+        <div>
+            <h3 className="font-bold text-aerojet-sky text-xs uppercase tracking-widest mb-1">Official Email</h3>
+            <p className="text-sm text-slate-300 font-medium">trainingprograms@aerojet-academy.com</p>
+        </div>
+        </div>
+        </div>
+    </div>
+</div>
+
 
                     <div className="flex items-start gap-4">
                         <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">✉️</div>
                         <div>
-                            <h3 className="font-bold text-aerojet-sky text-xs uppercase tracking-widest mb-1">Official Email</h3>
-                            <p className="text-sm text-slate-300">trainingprograms@aerojet-academy.com</p>
-                        </div>
-                    </div>
-                </div>
+                   
 
                 {/* Interactive Map */}
                 <div className="mt-12 h-64 rounded-2xl overflow-hidden border border-white/10 grayscale opacity-80 hover:grayscale-0 hover:opacity-100 transition-all duration-500 shadow-inner">

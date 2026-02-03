@@ -1,13 +1,27 @@
 import { Resend } from 'resend';
+import { PrismaClient } from '@prisma/client';
 
+const prisma = new PrismaClient();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // --- CONFIGURATION ---
-// Verbatim text for the "From" address
-const FROM_EMAIL = 'Aerojet Academy <admissions@aerojet-academy.com>';
+const FROM_EMAIL = 'Aerojet Academy <trainingprograms@aerojet-academy.com>';
 
-// The internal email address where YOUR TEAM will receive lead notifications
-const STAFF_INBOX = 'info@aerojet-academy.com'; 
+/**
+ * Helper to fetch a dynamic email recipient from the SystemSettings table.
+ * If not set in the Admin Portal, it falls back to your default gmail.
+ */
+async function getEmailRecipient(key: string) {
+  try {
+    const setting = await prisma.systemSetting.findUnique({
+      where: { key },
+    });
+    // Fallback to the new trainingprograms email
+    return setting?.value || 'trainingprograms@aerojet-academy.com';
+  } catch (error) {
+    return 'trainingprograms@aerojet-academy.com';
+  }
+}
 
 // --- 1. STUDENT: AUTO-REPLY TO ENQUIRY ---
 export const sendEnquiryEmail = async (email: string, name: string) => {
@@ -29,9 +43,12 @@ export const sendEnquiryEmail = async (email: string, name: string) => {
 
 // --- 2. STAFF: INTERNAL NOTIFICATION OF NEW LEAD ---
 export const sendStaffNotification = async (name: string, email: string, message: string) => {
+  // Dynamically fetch who should receive "Contact Form" enquiries
+  const recipient = await getEmailRecipient('CONTACT_FORM_RECIPIENT');
+
   await resend.emails.send({
     from: 'Website System <system@aerojet-academy.com>',
-    to: STAFF_INBOX,
+    to: recipient,
     subject: `New Website Enquiry: ${name}`,
     html: `
       <div style="font-family: sans-serif; color: #333;">
@@ -43,7 +60,10 @@ export const sendStaffNotification = async (name: string, email: string, message
           <p><strong>Message:</strong></p>
           <p style="white-space: pre-wrap;">${message}</p>
         </div>
-        <p style="font-size: 12px; color: #999; mt-4;">This is an automated notification from the Aerojet Academy System.</p>
+        <p style="font-size: 12px; color: #999; margin-top: 20px;">
+            Notification sent to: ${recipient}<br/>
+            Change this recipient in the Staff Portal > Settings > Email Routing.
+        </p>
       </div>
     `,
   });
