@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import PageHero from '../components/PageHero';
+import NextSteps from "@/components/NextSteps"; // Import
 
 const processSteps = [
   { step: 1, title: "Choose Your Program", description: "Select the course that aligns with your career goals, either the Full-Time Program or individual Modular Exams." },
@@ -87,6 +88,7 @@ export default function HowToApplyPage() {
           </div>
         </div>
       </div>
+      <NextSteps />
       <Footer />
     </main>
   );

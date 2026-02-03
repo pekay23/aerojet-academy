@@ -33,14 +33,15 @@ export default function Footer() {
 
           {/* Column 3: Training */}
           <div>
-            <h3 className="font-bold text-sm uppercase tracking-widest mb-4 text-aerojet-sky">Programmes</h3>
-            <ul className="space-y-2 text-gray-300 text-sm">
-              <li><Link href="/courses/easa-full-time" className="hover:text-white transition">Full-Time B1/B2</Link></li>
-              <li><Link href="/courses/easa-modular" className="hover:text-white transition">Modular Training</Link></li>
-              <li><span className="text-gray-500 italic">Pilot Training (Soon)</span></li>
-              <li><span className="text-gray-500 italic">Cabin Crew (Soon)</span></li>
-            </ul>
-          </div>
+  <h3 className="font-bold text-sm uppercase tracking-widest mb-4 text-aerojet-sky">Programmes</h3>
+  <ul className="space-y-2 text-gray-300 text-sm">
+    <li><Link href="/courses/easa-full-time" className="hover:text-white transition">Full-Time B1/B2</Link></li>
+    <li><Link href="/courses/easa-modular" className="hover:text-white transition">Modular Training</Link></li>
+    <li><Link href="/courses/examination-only" className="hover:text-white transition">Examination-Only</Link></li> {/* Added */}
+    <li><span className="text-gray-500 italic">Pilot Training (Soon)</span></li>
+    <li><span className="text-gray-500 italic">Cabin Crew (Soon)</span></li>
+  </ul>
+</div>
 
           {/* Column 4: Admissions */}
           <div>

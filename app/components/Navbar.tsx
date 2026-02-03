@@ -9,6 +9,7 @@ const navLinks = {
   courses: [
     { title: "EASA Part-66 (Full-Time)", href: "/courses/easa-full-time" },
     { title: "EASA Part-66 (Modular)", href: "/courses/easa-modular" },
+    { title: "Examination-Only", href: "/courses/examination-only" },
     { title: "Module List (M1–M17)", href: "/courses/modules" },
     { title: "Cabin Crew (Coming Soon)", href: "/courses/cabin-crew" },
     { title: "Pilot Training (Coming Soon)", href: "/courses/pilot-training" },
@@ -19,6 +20,7 @@ const navLinks = {
     { title: "Fees & Payment Milestones", href: "/admissions/fees" },
   ],
 };
+
 
 function MobileAccordion({ title, links, onLinkClick }: { title: string, links: { title: string, href: string }[], onLinkClick: () => void }) {
   const [isOpen, setIsOpen] = useState(false);

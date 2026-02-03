@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
 import PageHero from '../../components/PageHero';
-
+import NextSteps from "@/components/NextSteps"; // Import
 const requirements = [
   "Minimum 18 years of age",
   "High school diploma (or equivalent), with strong passes in Maths & Physics",
@@ -123,6 +123,7 @@ export default function FullTimeCoursePage() {
           </div>
         </div>
       </div>
+      <NextSteps />
       <Footer />
     </main>
   );

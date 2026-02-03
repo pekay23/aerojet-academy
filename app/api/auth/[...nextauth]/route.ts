@@ -48,6 +48,23 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // 1. Check if the user already exists in our database
+      const existingUser = await prisma.user.findUnique({
+        where: { email: user.email as string },
+      });
+
+      // 2. If the user DOES NOT exist, block them from creating an account
+      if (!existingUser) {
+        // You can redirect them to a custom "Not Authorized" or "Pay First" page
+        return '/portal/login?error=AccessDenied'; 
+      }
+
+      // 3. If they exist and are inactive, we still let them in to the "Pending" page 
+      // (or you can block them here too if you prefer)
+      return true;
+    },
+    
     // 1. JWT CALLBACK: Fetch latest data from DB
     async jwt({ token, user }) {
       if (user) {
@@ -63,6 +80,7 @@ export const authOptions: NextAuthOptions = {
         });
         if (dbUser) token.role = dbUser.role;
       }
+
       return token;
     },
 

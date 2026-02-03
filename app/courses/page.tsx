@@ -8,7 +8,7 @@ const courseList = [
     {
         id: "A",
         title: "Four-Year Full-Time (B1.1 & B2)",
-        price: "€13,500 / year",
+        // price: "€13,500 / year", // REMOVED
         desc: "Comprehensive theory, advanced hand-skills, and structured work-experience.",
         features: ["Exam fees included", "2 free re-sits", "Logbook & PPE included"],
         link: "/courses/easa-full-time"
@@ -16,7 +16,7 @@ const courseList = [
     {
         id: "B",
         title: "Two-Year Full-Time (B1.1)",
-        price: "€11,250 / year",
+        // price: "€11,250 / year", // REMOVED
         desc: "Theory + hand-skills training. The fastest route for school leavers.",
         features: ["Exam fees included", "2 free re-sits", "Optional B2 top-up"],
         link: "/courses/easa-full-time"
@@ -24,7 +24,7 @@ const courseList = [
     {
         id: "C",
         title: "12-Month Crash Course",
-        price: "€9,540 total",
+        // price: "€9,540 total", // REMOVED
         desc: "Accelerated B1.1 certification for Industry/Military professionals.",
         features: ["Theory & Exams only", "No hand-skills", "Evening/Weekend classes"],
         link: "/courses/easa-full-time"
@@ -32,7 +32,7 @@ const courseList = [
     {
         id: "D",
         title: "Modular Training",
-        price: "Pay per Module",
+        // price: "Pay per Module", // REMOVED
         desc: "Book tuition and exams module-by-module. Learn at your own pace.",
         features: ["Flexible schedule", "Pay as you go", "Portal booking"],
         link: "/courses/easa-modular"
@@ -40,15 +40,15 @@ const courseList = [
     {
         id: "E",
         title: "Examination-Only",
-        price: "From €520 / seat",
+        // price: "From €520 / seat", // REMOVED
         desc: "Self-study candidates can book exam seats directly.",
         features: ["Bundles available", "Group Charter options", "Strict T-21 deadline"],
-        link: "/courses/easa-modular" // or a new exam-only page
+        link: "/courses/examination-only" // Updated link
     },
     {
         id: "F",
         title: "Revision Support",
-        price: "€120 / module series",
+        // price: "€120 / module series", // REMOVED
         desc: "8-week targeted tuition and mock exams for exam-only candidates.",
         features: ["2 Mock Exams", "Expert Q&A", "8-week block"],
         link: "/courses/easa-modular"
@@ -74,7 +74,6 @@ export default function CoursesPage() {
                     <div key={course.id} className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 hover:shadow-xl transition-all duration-300 flex flex-col">
                         <div className="bg-aerojet-blue p-4 text-white flex justify-between items-center">
                             <span className="font-bold text-lg opacity-80">Option {course.id}</span>
-                            <span className="bg-white/20 px-2 py-1 rounded text-xs font-bold">{course.price}</span>
                         </div>
                         <div className="p-8 grow flex flex-col">
                             <h3 className="text-xl font-bold text-aerojet-blue mb-3">{course.title}</h3>
