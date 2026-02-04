@@ -63,7 +63,7 @@ export default function CoursesPage() {
         <PageHero 
           title="Our Training Programmes"
           subtitle="From full-time licensure to flexible modular exams, choose the path that fits your career goals."
-          backgroundImage="/aircraft-engine-crossection.jpg"
+          backgroundImage="/coursespage.jpg"
         />
 
         {/* Main Content */}
