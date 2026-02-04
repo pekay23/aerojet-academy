@@ -9,7 +9,7 @@ type PageHeroProps = {
 export default function PageHero({ title, subtitle, backgroundImage }: PageHeroProps) {
   return (
     // 1. INCREASED HEIGHT: Changed h-[70vh] to h-[85vh] to "zoom out" the image
-    <section className="relative w-full h-[60vh] md:h-[85vh] flex items-center justify-center bg-slate-950 overflow-hidden">
+    <section className="relative w-full h-[60vh] md:h-[60vh] flex items-center justify-center bg-slate-950 overflow-hidden">
       
       <Image
         src={backgroundImage}
