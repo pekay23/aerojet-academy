@@ -27,7 +27,7 @@ export const authOptions: NextAuthOptions = {
     })
   ],
   pages: {
-    signIn: '/portal/login',
+    // signIn: '/portal/login',
   },
   session: {
     strategy: "jwt",
