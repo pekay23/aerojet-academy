@@ -142,6 +142,30 @@ useEffect(() => {
         </div>
       </div>
 
+      <div className="grid md:grid-cols-2 gap-6 mb-8">
+    <div className="bg-aerojet-blue text-white p-6 rounded-2xl shadow-lg border border-white/10 relative overflow-hidden">
+        <h3 className="text-xs font-black uppercase tracking-widest text-aerojet-sky mb-4">Official Banking Details</h3>
+        <div className="space-y-2 font-mono text-sm">
+            <p><span className="opacity-50">BANK:</span> FNB BANK</p>
+            <p><span className="opacity-50">NAME:</span> AEROJET FOUNDATION</p>
+            <p><span className="opacity-50">ACCT:</span> 1020003980687</p>
+            <p><span className="opacity-50">SWIFT:</span> FIRNGHACXXX</p>
+        </div>
+        <div className="absolute -right-4 -bottom-4 opacity-10">
+            <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.45l8.27 14.3H3.73L12 5.45zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>
+        </div>
+    </div>
+
+    <div className="bg-white p-6 rounded-2xl border border-slate-200 flex flex-col justify-center">
+        <h3 className="font-bold text-slate-800 text-sm mb-2">How to Pay</h3>
+        <p className="text-xs text-slate-500 leading-relaxed">
+            1. Transfer funds using the bank details provided.<br/>
+            2. Use your <b>Full Name</b> or <b>Student ID</b> as the reference.<br/>
+            3. Upload a clear photo or PDF of your receipt using the "Upload Proof" button in the table below.
+        </p>
+    </div>
+</div>
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden flex flex-col">
         <div className="overflow-x-auto no-scrollbar lg:no-scrollbar">
           <table className="w-full text-left text-sm text-gray-600 min-w-200">

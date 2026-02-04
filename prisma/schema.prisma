@@ -224,21 +224,30 @@ model AttendanceRecord {
 
 model Assessment {
   id            String   @id @default(cuid())
-  type          String   @default("EASA_EXAM") 
   
-  examRunId     String?  
-  run           ExamRun? @relation(fields: [examRunId], references: [id])
+  // Type of result
+  type          String   @default("INTERNAL_TEST") // INTERNAL_TEST, EASA_FINAL, PRACTICAL_LOG
   
-  studentId     String
-  student       Student  @relation(fields: [studentId], references: [id])
+  // Which module (e.g., M01, M05)
+  moduleCode    String   
+  attemptNumber Int      @default(1)
   
-  score         Float    
+  score         Float
   maxScore      Float    @default(100.0)
   isPassed      Boolean  @default(false)
   
   comments      String?
   recordedAt    DateTime @default(now())
+
+  // Relations
+  studentId     String
+  student       Student  @relation(fields: [studentId], references: [id])
+  
+  // Optional: Link to a scheduled exam session if it was an official sitting
+  examRunId     String?  
+  run           ExamRun? @relation(fields: [examRunId], references: [id])
 }
+
 
 model Wallet {
   id              String   @id @default(cuid())

@@ -79,12 +79,19 @@ export const sendRegistrationInvoiceEmail = async (email: string, name: string) 
       <div style="font-family: sans-serif; color: #333;">
         <h1>Welcome ${name},</h1>
         <p>To begin your journey at Aerojet Academy, please complete the mandatory one-time registration fee.</p>
-        <div style="background: #eef6ff; padding: 15px; border-radius: 8px; border-left: 4px solid #2880b9;">
-            <p><strong>Amount Due:</strong> GHS 350.00</p>
-            <p><strong>Bank Details:</strong> [Your Bank Name] | Account: [Your Account Number] | Ref: REG-${name.substring(0,3).toUpperCase()}</p>
+        
+        <div style="background: #eef6ff; padding: 20px; border-radius: 12px; border-left: 6px solid #2880b9;">
+            <h3 style="margin-top: 0; color: #002a5c;">OFFICIAL BANKING DETAILS</h3>
+            <p style="margin: 5px 0;"><strong>Bank:</strong> FNB Bank</p>
+            <p style="margin: 5px 0;"><strong>Account Name:</strong> AEROJET FOUNDATION</p>
+            <p style="margin: 5px 0;"><strong>Account No:</strong> 1020003980687</p>
+            <p style="margin: 5px 0;"><strong>Branch Code:</strong> 330102</p>
+            <p style="margin: 5px 0;"><strong>SWIFT CODE:</strong> FIRNGHACXXX</p>
+            <p style="margin: 10px 0 0 0; font-size: 18px; font-weight: bold;">Amount Due: GHS 350.00</p>
         </div>
-        <p>Once paid, log in to the portal and upload your receipt to unlock the Online Application Form.</p>
-        <p>Regards,<br/><b>Finance Department</b></p>
+
+        <p style="margin-top: 20px;">Once payment is made, please reply to this email with your proof of payment or upload it to your portal profile (once activated).</p>
+        <p>Regards,<br/><b>Aerojet Finance Team</b></p>
       </div>
     `,
   });
