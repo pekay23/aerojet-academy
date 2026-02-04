@@ -26,7 +26,7 @@ export default function AdmissionsPage() {
         <PageHero 
           title="Admissions & Enrollment"
           subtitle="Start your career in aviation with our clear, structured enrollment process."
-          backgroundImage="/takeoff.jpg"
+          backgroundImage="/admissions.jpg"
         />
 
         <div className="container mx-auto px-6 py-20">

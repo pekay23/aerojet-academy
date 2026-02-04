@@ -45,7 +45,7 @@ export default function ModulesPage() {
         <PageHero 
           title="Module Requirements"
           subtitle="The EASA Part-66 knowledge syllabus for B1 and B2 certification."
-          backgroundImage="/undercarage.jpg"
+          backgroundImage="/courselist.jpg"
         />
 
         <div className="container mx-auto px-6 py-20">

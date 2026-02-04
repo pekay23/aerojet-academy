@@ -17,7 +17,7 @@ export default function FeesPage() {
         <PageHero 
           title="Fees & Payment Rules"
           subtitle="Understanding the structured payment milestones for Aerojet Academy training programmes."
-          backgroundImage="/techSupport.jpg"
+          backgroundImage="/feespayment.jpg"
         />
         
         <div className="container mx-auto px-6 py-20">

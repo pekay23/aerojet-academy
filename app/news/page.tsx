@@ -34,7 +34,7 @@ export default async function NewsroomPage() {
         <PageHero 
           title="News & Updates"
           subtitle="Stay informed about our latest intakes, partnerships, and facility milestones."
-          backgroundImage="/lecturer2.jpg"
+          backgroundImage="/news.jpg"
         />
 
         <div className="container mx-auto px-6 py-20">

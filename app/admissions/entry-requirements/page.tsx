@@ -17,7 +17,7 @@ export default function EntryRequirementsPage() {
         <PageHero 
           title="Entry Requirements"
           subtitle="Ensure you meet the academic and professional criteria for our EASA programmes."
-          backgroundImage="/joystick.jpg"
+          backgroundImage="/entry1.jpg"
         />
 
         <div className="container mx-auto px-6 py-20">

@@ -5,18 +5,18 @@ const programs = [
   {
     title: "Full-Time Licence Programmes",
     description: "Comprehensive 2 or 4-year pathways to B1.1/B2 licensure. Includes theory, hand-skills, and work experience.",
-    image: "/4-yrFull-time.jpg", // Updated Hero Image
+    image: "/fulltime.jpg", // Updated Hero Image
     link: "/courses/easa-full-time",
     badge: "Most Popular",
-    ratio: "aspect-[848/317]" // Wide Ratio
+    ratio: "aspect-video" 
   },
   {
     title: "12-Month Crash Course",
     description: "Accelerated B1.1 certification for industry professionals. Theory & exams only.",
-    image: "/1-yrFull-time.jpg",
+    image: "/12month.jpg",
     link: "/courses/easa-full-time",
     badge: "Industry",
-    ratio: "aspect-[848/317]" // Wide Ratio
+    ratio: "aspect-video"
   },
   {
     title: "Modular Training",

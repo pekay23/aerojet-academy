@@ -18,7 +18,7 @@ export default function AboutPage() {
         <PageHero 
           title="About Aerojet Academy"
           subtitle="Building the future of African aviation, one certified technician at a time."
-          backgroundImage="/aircraft-full.jpg"
+          backgroundImage="/students.png"
         />
 
         <div className="container mx-auto px-6 py-20">

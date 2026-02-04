@@ -17,7 +17,7 @@ export default function PilotTrainingPage() {
         <PageHero 
           title="Pilot Training"
           subtitle="Take to the skies. Our world-class flight training programme is currently in development."
-          backgroundImage="/female-pilot.jpg"
+          backgroundImage="/pilot.jpg"
         />
 
         <div className="container mx-auto px-6 py-20 text-center">
