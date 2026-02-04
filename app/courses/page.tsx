@@ -34,23 +34,23 @@ const courseList = [
     {
         id: "D",
         title: "Modular Training",
-        desc: "Book tuition and exams module-by-module. Learn at your own pace.",
-        features: ["Flexible schedule", "Includes study materials", "Portal booking"],
+        desc: "Individual tuition + exam per module. Book your preferred modules and join a scheduled class.",
+        features: ["Includes classroom tuition", "One exam sitting included", "Flexible scheduling"],
         link: "/courses/easa-modular"
     },
     {
         id: "E",
         title: "Examination-Only",
-        desc: "Self-study candidates can book exam seats directly in the portal.",
-        features: ["Bundles available", "Group Charter options", "Strict T-21 deadline"],
+        desc: "Self-study candidates booking exam seats directly. Strict deadline policies apply.",
+        features: ["Exam seat only", "No tuition provided", "Strict T-21 deadline"],
         link: "/courses/examination-only"
     },
     {
         id: "F",
         title: "Revision Support",
-        desc: "8-week targeted tuition and mock exams for exam-only candidates.",
-        features: ["2 Mock Exams", "Expert Q&A", "8-week block"],
-        link: "/courses/easa-modular"
+        desc: "Intensive 8-week block tuition designed for groups and organizations (Min 20 students).",
+        features: ["Group bookings only", "2 Mock Exams included", "Custom scheduling"],
+        link: "/courses/revision-support"
     }
 ];
 

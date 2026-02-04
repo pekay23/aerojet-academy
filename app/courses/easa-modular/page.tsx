@@ -27,12 +27,12 @@ export default function ModularProgrammePage() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div>
                     <div className="w-16 h-1.5 bg-aerojet-sky mb-6 rounded-full" />
-                    <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-6">Flexibility for Professionals</h2>
+                    <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-6">Individual Tuition & Exam</h2>
                     <p className="text-slate-600 leading-relaxed mb-4 font-medium">
-                        The Modular Training Programme is designed for individuals who require flexibility. Whether you are already working in the industry or prefer to manage your own study schedule, this path allows you to book tuition and exams module-by-module.
+                        The Modular Training Programme is our primary route for **individuals** who want expert instruction without committing to a full-time schedule. 
                     </p>
                     <p className="text-slate-500 leading-relaxed text-sm">
-                        Each modular booking is inclusive of full classroom tuition and one official EASA examination sitting. This ensures you receive expert instruction before attempting your certification.
+                        Unlike "Exam-Only", this option includes **full classroom tuition** for your chosen module, plus the examination sitting fee. You join a scheduled class and receive structured learning support.
                     </p>
                 </div>
                 <div className="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden border-t-4 border-aerojet-sky">

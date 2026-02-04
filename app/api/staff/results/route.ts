@@ -8,39 +8,48 @@ const prisma = new PrismaClient();
 // POST: Save Results for a batch of students
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  if (!session || (session.user as any).role === 'STUDENT') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
   const { examRunId, results } = await req.json(); // results: [{ studentId, score }]
 
   try {
-    // Process each result in a transaction
+    // 1. Fetch the Exam Run to get the Module Code
+    const examRun = await prisma.examRun.findUnique({
+      where: { id: examRunId },
+      include: { course: true } // Need this for moduleCode
+    });
+
+    if (!examRun) {
+        return NextResponse.json({ error: 'Exam run not found' }, { status: 404 });
+    }
+
+    const moduleCode = examRun.course.code; // e.g. "MOD-01"
+
+    // 2. Process each result in a transaction
     await prisma.$transaction(
         results.map((res: any) => {
             const score = parseFloat(res.score);
             const isPassed = score >= 75; // EASA Standard Pass Mark
 
             // Update or Create the assessment
-            return prisma.assessment.upsert({
-                where: { 
-                    // This is tricky without a composite ID. 
-                    // For MVP, we search by unique constraint if we added one, or just create.
-                    // Let's assume we allow multiple attempts, so just create.
-                    id: "force-create" // Hack to force create if we don't have a unique ID strategy yet
-                },
-                update: {},
-                create: {
+            return prisma.assessment.create({
+                data: {
                     examRunId,
                     studentId: res.studentId,
                     score,
                     maxScore: 100,
                     isPassed,
-                    type: 'EASA_EXAM'
+                    type: 'EASA_EXAM',
+                    moduleCode: moduleCode, // <--- ADDED THIS (Required field)
+                    comments: "Exam Run Result"
                 }
             });
         })
     );
 
-    // Mark the exam run as COMPLETED so it doesn't show up in "Upcoming" lists
+    // Mark the exam run as COMPLETED
     await prisma.examRun.update({
         where: { id: examRunId },
         data: { status: 'COMPLETED' }
@@ -48,20 +57,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    // Upsert hack above will fail, so let's just use createMany or loop
-    // Better approach for MVP:
-    for (const res of results) {
-        const score = parseFloat(res.score);
-        await prisma.assessment.create({
-            data: {
-                examRunId,
-                studentId: res.studentId,
-                score,
-                isPassed: score >= 75
-            }
-        });
-    }
-    
-    return NextResponse.json({ success: true });
+    console.error("Result Save Error:", error);
+    return NextResponse.json({ error: 'Failed to save results' }, { status: 500 });
   }
 }

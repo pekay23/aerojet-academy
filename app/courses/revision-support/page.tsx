@@ -12,11 +12,10 @@ export default function RevisionSupportPage() {
   return (
     <main className="min-h-screen flex flex-col bg-white">
       <Navbar />
-      
       <div className="grow">
         <PageHero 
           title="Revision Support"
-          subtitle="Targeted tuition and mock examinations designed to ensure exam-day confidence for EASA candidates."
+          subtitle="Intensive 8-week tuition blocks designed for organizations and large cohorts."
           backgroundImage="/lecture.jpg"
         />
 
@@ -27,112 +26,75 @@ export default function RevisionSupportPage() {
             <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div>
                     <div className="w-16 h-1.5 bg-aerojet-sky mb-6 rounded-full" />
-                    <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-6">Focused Exam Preparation</h2>
+                    <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-6">Group Learning Solution</h2>
                     <p className="text-slate-600 leading-relaxed mb-4 font-medium">
-                        Need extra preparation? Our Revision Support clinics are targeted tuition add-ons for exam-only candidates who require focused review before sitting their official EASA Part-66 modules.
+                        Our Revision Support clinics are designed for **organizations, airlines, or pre-formed groups** requiring focused preparation for their candidates before EASA examinations.
                     </p>
                     <p className="text-slate-500 leading-relaxed text-sm">
-                        Each module series runs for a 8-week block, providing a deep dive into core concepts and difficult subject areas. Timings rotate based on demand and instructor availability.
+                        This 8-week intensive series provides deep-dive tuition and mock exams. It is not available for individual booking.
                     </p>
-                </div>
-                <div className="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200 shadow-sm relative overflow-hidden">
-                    <h3 className="text-xl font-black text-aerojet-blue uppercase tracking-tight mb-6">The 8-Week Format</h3>
-                    <div className="space-y-6">
-                        <div className="flex gap-4">
-                            <div className="shrink-0 w-8 h-8 rounded-lg bg-aerojet-sky text-white flex items-center justify-center font-bold text-xs">01</div>
-                            <p className="text-sm text-slate-600 font-medium leading-relaxed"><b>Weekly Clinics:</b> Specialized classroom sessions focusing on the official EASA syllabus.</p>
-                        </div>
-                        <div className="flex gap-4">
-                            <div className="shrink-0 w-8 h-8 rounded-lg bg-aerojet-sky text-white flex items-center justify-center font-bold text-xs">02</div>
-                            <p className="text-sm text-slate-600 font-medium leading-relaxed"><b>Mock Exam 1 (Week 4):</b> A mid-point assessment to identify knowledge gaps early.</p>
-                        </div>
-                        <div className="flex gap-4">
-                            <div className="shrink-0 w-8 h-8 rounded-lg bg-aerojet-sky text-white flex items-center justify-center font-bold text-xs">03</div>
-                            <p className="text-sm text-slate-600 font-medium leading-relaxed"><b>Mock Exam 2 (Week 8):</b> A final simulation to verify readiness for the official sitting.</p>
-                        </div>
+                    <div className="mt-6 p-4 bg-orange-50 border-l-4 border-orange-400 rounded-r-lg">
+                        <p className="text-xs font-bold text-orange-800 uppercase tracking-widest mb-1">Individual Student?</p>
+                        <p className="text-xs text-orange-700">Please view our <Link href="/courses/easa-modular" className="underline font-bold">Modular Training Programme</Link> which allows individuals to book tuition per module.</p>
                     </div>
+                </div>
+                <div className="bg-slate-900 text-white p-10 rounded-[2.5rem] shadow-2xl relative overflow-hidden border-t-4 border-aerojet-sky">
+                    <h3 className="text-xl font-black uppercase tracking-tight mb-6 text-aerojet-sky">Booking Requirements</h3>
+                    <ul className="space-y-6">
+                        <li className="flex gap-4">
+                            <span className="shrink-0 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-sm">20+</span>
+                            <div>
+                                <p className="font-bold text-sm">Minimum Group Size</p>
+                                <p className="text-xs text-slate-400 leading-relaxed">Bookings are only accepted for cohorts of 20 or more candidates.</p>
+                            </div>
+                        </li>
+                        <li className="flex gap-4">
+                            <span className="shrink-0 w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-sm">8W</span>
+                            <div>
+                                <p className="font-bold text-sm">Block Duration</p>
+                                <p className="text-xs text-slate-400 leading-relaxed">The curriculum is fixed to an 8-week intensive schedule per module.</p>
+                            </div>
+                        </li>
+                    </ul>
                 </div>
             </div>
 
-            {/* 2. Example Timetable & Pricing */}
-            <section className="bg-slate-900 text-white rounded-[3rem] p-8 md:p-16 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-10 opacity-5">
-                    <svg className="w-64 h-64" fill="currentColor" viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
-                </div>
-
-                <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
-                    <div>
-                        <h2 className="text-3xl font-black uppercase tracking-tight mb-6">Timetable & Pricing</h2>
-                        <p className="text-slate-400 leading-relaxed mb-8">
-                            Revision classes typically run <b>Monday to Friday, 14:00 – 17:00</b>. Candidates must book the full 8-weeks series for their chosen module.
-                        </p>
-                        <div className="p-6 bg-white/5 rounded-2xl border border-white/10 inline-block">
-                            <p className="text-[10px] font-black text-aerojet-sky uppercase tracking-widest mb-1">Tuition Fees</p>
-                            <p className="text-2xl font-black uppercase">Pricing visible in Portal</p>
-                            <p className="text-xs text-slate-500 mt-1">Price Per Module</p>
-                        </div>
+            {/* 2. Format Details */}
+            <section className="bg-slate-50 rounded-[3rem] p-10 border border-slate-200">
+                <h2 className="text-2xl font-black text-aerojet-blue uppercase tracking-tight mb-8 text-center">The 8-Week Structure</h2>
+                <div className="grid md:grid-cols-3 gap-6">
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <span className="text-aerojet-sky font-black text-4xl block mb-2">01</span>
+                        <h4 className="font-bold text-slate-800 text-sm uppercase mb-2">Tuition Clinics</h4>
+                        <p className="text-[11px] text-slate-500">Weekly classroom sessions focusing on core syllabus topics.</p>
                     </div>
-
-                    <div className="bg-white rounded-4xl p-8 text-slate-900 shadow-xl">
-                        <h3 className="font-black text-aerojet-blue uppercase text-sm tracking-widest mb-6 border-b pb-4">Indicative Schedule</h3>
-                        <div className="space-y-4 font-mono text-sm">
-                            <div className="flex justify-between border-b border-slate-50 pb-2">
-                                <span className="font-bold text-slate-400">M2 Physics</span>
-                                <span className="text-aerojet-sky">Active Block</span>
-                            </div>
-                            <div className="flex justify-between border-b border-slate-50 pb-2">
-                                <span className="font-bold text-slate-400">M4 Electronics</span>
-                                <span className="text-aerojet-sky">Active Block</span>
-                            </div>
-                            <div className="flex justify-between border-b border-slate-50 pb-2">
-                                <span className="font-bold text-slate-400">M10 Legislation</span>
-                                <span className="text-slate-300 italic">Coming Next</span>
-                            </div>
-                        </div>
-                        <p className="mt-6 text-[10px] text-slate-400 leading-tight">
-                            * Timings and module availability are subject to demand. Minimum class sizes apply.
-                        </p>
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <span className="text-aerojet-sky font-black text-4xl block mb-2">02</span>
+                        <h4 className="font-bold text-slate-800 text-sm uppercase mb-2">Mid-Point Mock</h4>
+                        <p className="text-[11px] text-slate-500">A full mock examination at Week 4 to assess progress.</p>
+                    </div>
+                    <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+                        <span className="text-aerojet-sky font-black text-4xl block mb-2">03</span>
+                        <h4 className="font-bold text-slate-800 text-sm uppercase mb-2">Final Mock</h4>
+                        <p className="text-[11px] text-slate-500">Exam-condition simulation at Week 8 before the official sitting.</p>
                     </div>
                 </div>
             </section>
 
-            {/* 3. Next Steps Verbatim */}
-            <section className="pt-10">
-                <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-12 text-center">How to Enroll</h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <span className="text-aerojet-sky font-black text-xl mb-4 block">01</span>
-                        <h4 className="font-bold text-aerojet-blue text-sm mb-2">Registration Invoice</h4>
-                        <p className="text-[11px] text-slate-500 leading-relaxed">Pay the GHS 350 fee to activate your account and unlock programme details.</p>
-                    </div>
-                    <div className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <span className="text-aerojet-sky font-black text-xl mb-4 block">02</span>
-                        <h4 className="font-bold text-aerojet-blue text-sm mb-2">Online Application</h4>
-                        <p className="text-[11px] text-slate-500 leading-relaxed">Once confirmed, submit your online form for Academy review and approval.</p>
-                    </div>
-                    <div className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <span className="text-aerojet-sky font-black text-xl mb-4 block">03</span>
-                        <h4 className="font-bold text-aerojet-blue text-sm mb-2">Confirmation Invoice</h4>
-                        <p className="text-[11px] text-slate-500 leading-relaxed">Upon approval, pay the block tuition fee to secure your seat in the revision series.</p>
-                    </div>
-                    <div className="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <span className="text-aerojet-sky font-black text-xl mb-4 block">04</span>
-                        <h4 className="font-bold text-aerojet-blue text-sm mb-2">Portal Access</h4>
-                        <p className="text-[11px] text-slate-500 leading-relaxed">Receive your link to access the learning materials and joined the scheduled clinics.</p>
-                    </div>
-                </div>
-
-                <div className="mt-16 text-center">
-                    <Link href="/register" className="bg-aerojet-sky text-white px-12 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-aerojet-blue shadow-lg transition-all active:scale-95">
-                        Register for Revision Support
-                    </Link>
-                </div>
-            </section>
+            {/* 3. CTA for Groups */}
+            <div className="text-center pt-8">
+                <h2 className="text-2xl font-black text-aerojet-blue uppercase tracking-tight mb-4">Corporate & Group Enquiry</h2>
+                <p className="text-slate-500 mb-8 max-w-lg mx-auto text-sm">
+                    Representing an organization? Contact us to discuss scheduling a dedicated revision block for your team.
+                </p>
+                <Link href="/contact" className="bg-aerojet-blue text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-aerojet-sky transition-all shadow-lg">
+                    Contact Corporate Admissions
+                </Link>
+            </div>
 
           </div>
         </div>
       </div>
-
       <Footer />
     </main>
   );
