@@ -14,6 +14,7 @@ const navLinks = {
     { title: "Module List (M1–M17)", href: "/courses/modules" },
     { title: "Cabin Crew (Soon)", href: "/courses/cabin-crew" },
     { title: "Pilot Training (Soon)", href: "/courses/pilot-training" },
+    { title: "Exam Schedule (2026/27)", href: "/courses/exam-schedule" }
   ],
   admissions: [
     { title: "How to Apply", href: "/admissions" },

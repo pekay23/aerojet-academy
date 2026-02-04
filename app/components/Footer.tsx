@@ -72,7 +72,7 @@ export default function Footer() {
             </ul>
           </div>
         </div>
-
+        
         <div className="mt-12 border-t border-white/5 pt-6 text-center text-[10px] text-gray-500 uppercase tracking-[0.2em] font-bold">
           <p>&copy; {new Date().getFullYear()} Aerojet Aviation Training Academy. All Rights Reserved.</p>
         </div>
