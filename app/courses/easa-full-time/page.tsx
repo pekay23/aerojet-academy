@@ -38,7 +38,7 @@ export default function FullTimeCoursesPage() {
         <PageHero 
           title="Full-Time Programmes"
           subtitle="Immersive, EASA-standard training pathways designed to produce elite Aircraft Maintenance Engineers."
-          backgroundImage="/4-yrFull-time.jpg"
+          backgroundImage="/full-time.jpg"
         />
 
         <div className="container mx-auto px-6 py-20">

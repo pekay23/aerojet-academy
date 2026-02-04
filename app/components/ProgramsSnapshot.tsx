@@ -5,70 +5,82 @@ const programs = [
   {
     title: "Full-Time Licence Programmes",
     description: "Comprehensive 2 or 4-year pathways to B1.1/B2 licensure. Includes theory, hand-skills, and work experience.",
-    image: "/4-yrFull-time.jpg",
-    link: "/courses",
-    badge: "Most Popular"
+    image: "/4-yrFull-time.jpg", // Updated Hero Image
+    link: "/courses/easa-full-time",
+    badge: "Most Popular",
+    ratio: "aspect-[848/317]" // Wide Ratio
   },
   {
     title: "12-Month Crash Course",
     description: "Accelerated B1.1 certification for industry professionals. Theory & exams only.",
-    image: "/1-yrFull-time.jpg", // Ensure this image exists, or use another
-    link: "/courses",
-    badge: "Industry"
+    image: "/1-yrFull-time.jpg",
+    link: "/courses/easa-full-time",
+    badge: "Industry",
+    ratio: "aspect-[848/317]" // Wide Ratio
   },
   {
     title: "Modular Training",
-    description: "Pay-as-you-go. Book tuition and exams for specific modules at your own pace.",
-    image: "/hero-modular.jpg",
+    description: "Individual tuition + exam per module. Book tuition and exams for specific modules at your own pace.",
+    image: "/modular1.jpg", // New High-Res Image
     link: "/courses/easa-modular",
-    badge: "Flexible"
+    badge: "Individual",
+    ratio: "aspect-video" // Standard Video Ratio
   },
   {
     title: "Exam-Only & Revision",
-    description: "Self-study candidates can book exam seats or join 8-week revision clinics.",
-    image: "/self-study.jpg", // Ensure image exists
-    link: "/courses/exams",
-    badge: "Self-Study"
+    description: "Self-study candidates can book exam sittings or join 8-week group revision blocks.",
+    image: "/examonly1.jpg", // New High-Res Image
+    link: "/courses/examination-only",
+    badge: "Self-Study",
+    ratio: "aspect-video" // Standard Video Ratio
   }
 ];
 
 export default function ProgramsSnapshot() {
   return (
-    <section className="py-20 md:py-28 bg-gray-50">
+    <section className="py-24 md:py-32 bg-slate-50">
       <div className="container mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-aerojet-blue mb-4">
+        <div className="text-center mb-20">
+          <h2 className="text-3xl md:text-5xl font-black text-aerojet-blue uppercase tracking-tight mb-4">
             Find Your Path in Aviation
           </h2>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            From complete beginners to experienced technicians, we have a structured pathway for you.
+          <p className="text-slate-500 max-w-2xl mx-auto font-medium">
+            From complete beginners to experienced technicians, we have a certified pathway for you.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        {/* Use a 2-column grid on small screens, 2-column on medium, and 4-column on large */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {programs.map((program) => (
-            <Link href={program.link} key={program.title} className="group block bg-white rounded-lg shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden transform hover:-translate-y-2">
-              <div className="relative h-56 w-full bg-gray-200">
+            <Link 
+                href={program.link} 
+                key={program.title} 
+                className="group block bg-white rounded-4xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden transform hover:-translate-y-2 border border-slate-100"
+            >
+              {/* Dynamic Aspect Ratio Container */}
+              <div className={`relative w-full ${program.ratio} bg-slate-200`}>
                 <Image
                   src={program.image}
-                  alt={`Image for ${program.title}`}
-                  layout="fill"
-                  objectFit="cover"
-                  className="transition-transform duration-500 group-hover:scale-105"
+                  alt={program.title}
+                  fill
+                  className="object-cover transition-transform duration-700 group-hover:scale-110"
                 />
-                {program.badge && (
-                  <div className="absolute top-4 right-4 bg-aerojet-sky text-white text-xs font-bold px-3 py-1 rounded shadow-sm">
+                <div className="absolute top-4 right-4 bg-aerojet-sky/90 backdrop-blur-sm text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full shadow-sm">
                     {program.badge}
-                  </div>
-                )}
+                </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-aerojet-blue mb-2 group-hover:text-aerojet-sky transition-colors">
+              
+              <div className="p-8">
+                <h3 className="text-lg font-black text-aerojet-blue mb-3 uppercase tracking-tight leading-tight group-hover:text-aerojet-sky transition-colors">
                   {program.title}
                 </h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className="text-sm text-slate-500 leading-relaxed font-medium mb-6">
                   {program.description}
                 </p>
+                <div className="flex items-center text-aerojet-sky font-black uppercase text-[10px] tracking-widest">
+                    Learn More
+                    <span className="ml-2 transform group-hover:translate-x-2 transition-transform">→</span>
+                </div>
               </div>
             </Link>
           ))}

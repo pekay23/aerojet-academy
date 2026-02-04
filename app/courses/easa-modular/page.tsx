@@ -17,7 +17,7 @@ export default function ModularProgrammePage() {
         <PageHero 
           title="Modular Training Programme"
           subtitle="Self-paced, flexible certification paths for EASA Part-66 B1 and B2 licences."
-          backgroundImage="/hero-modular.jpg"
+          backgroundImage="/modular.jpg"
         />
 
         <div className="container mx-auto px-6 py-20">

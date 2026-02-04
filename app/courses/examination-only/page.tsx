@@ -17,7 +17,7 @@ export default function ExamOnlyPage() {
         <PageHero 
           title="Examination-Only"
           subtitle="Certified EASA Part-66 module sittings for self-study candidates and industry professionals."
-          backgroundImage="/exam-only.jpg"
+          backgroundImage="/examonly.jpg"
         />
 
         <div className="container mx-auto px-6 py-20">
