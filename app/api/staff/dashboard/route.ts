@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     
@@ -14,12 +14,11 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // --- 2. STUDENT DEMOGRAPHICS ---
+    // --- 2. STUDENT STATS ---
     const totalStudents = await prisma.user.count({ where: { role: 'STUDENT' } });
     const activeStudents = await prisma.user.count({ where: { role: 'STUDENT', isActive: true } });
     const inactiveStudents = totalStudents - activeStudents;
 
-    // Queries the Student table for gender (assumes profile exists)
     const maleStudents = await prisma.student.count({ where: { gender: 'MALE' } });
     const femaleStudents = await prisma.student.count({ where: { gender: 'FEMALE' } });
 
@@ -56,13 +55,10 @@ export async function GET(req: NextRequest) {
       let paidSeatsCount = 0;
       nextWindow.runs.forEach(run => {
         run.bookings.forEach(booking => {
-          // Verify if student has a fee record matching the module code that is marked PAID
           const examFee = booking.student.fees.find(f => 
             f.description?.includes(run.course.code) && f.status === 'PAID'
           );
-          if (examFee) {
-            paidSeatsCount++;
-          }
+          if (examFee) paidSeatsCount++;
         });
       });
 
@@ -100,11 +96,11 @@ export async function GET(req: NextRequest) {
         pendingApps,
         verifyingPayments
       },
-      windowTracker: windowStats 
+      windowTracker: windowStats
     });
 
   } catch (error) {
     console.error("Dashboard API Error:", error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    return NextResponse.json({ error: 'Failed to fetch dashboard data' }, { status: 500 });
   }
 }

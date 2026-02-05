@@ -1,8 +1,10 @@
 "use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react"; // Added to detect login state
+import { useSession } from "next-auth/react";
+import { Wrench } from 'lucide-react'; // Import the icon for staff
 
 // --- Data for navigation links ---
 const navLinks = {
@@ -10,7 +12,7 @@ const navLinks = {
     { title: "EASA Part-66 (Full-Time)", href: "/courses/easa-full-time" },
     { title: "EASA Part-66 (Modular)", href: "/courses/easa-modular" },
     { title: "Examination-Only", href: "/courses/examination-only" },
-    { title: "Revision Support", href: "/courses/revision-support" }, // Added this
+    { title: "Revision Support", href: "/courses/revision-support" },
     { title: "Module List (M1–M17)", href: "/courses/modules" },
     { title: "Cabin Crew (Soon)", href: "/courses/cabin-crew" },
     { title: "Pilot Training (Soon)", href: "/courses/pilot-training" },
@@ -22,7 +24,6 @@ const navLinks = {
     { title: "Fees & Payment Milestones", href: "/admissions/fees" },
   ],
 };
-
 
 function MobileAccordion({ title, links, onLinkClick }: { title: string, links: { title: string, href: string }[], onLinkClick: () => void }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -51,6 +52,7 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
   const { data: session, status } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   const isLightPage = theme === 'light';
 
   useEffect(() => {
@@ -67,11 +69,15 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
   const displayAsLight = scrolled || isLightPage; 
   const headerIsLight = displayAsLight || mobileMenuOpen;
 
-  // Determine where the "Dashboard" link should go based on role
+  // --- LOGIC UPDATE: Determine User Role ---
   const userRole = (session?.user as any)?.role;
-  const dashboardHref = (userRole === 'ADMIN' || userRole === 'STAFF' || userRole === 'INSTRUCTOR') 
-    ? '/staff/dashboard' 
-    : '/portal/dashboard';
+  const isStaffOrAdmin = userRole === 'ADMIN' || userRole === 'STAFF';
+  const isInstructor = userRole === 'INSTRUCTOR';
+
+  // Determine Dashboard Link
+  let dashboardHref = '/portal/dashboard'; // Default Student
+  if (isStaffOrAdmin) dashboardHref = '/staff/applications'; // Staff goes to Applications by default
+  if (isInstructor) dashboardHref = '/staff/materials'; // Instructor goes to Materials
 
   return (
     <>
@@ -105,22 +111,36 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
             <Link href="/news" className="hover:text-aerojet-sky transition">News</Link>
           </nav>
           
-          {/* Desktop CTA - ONLY SHOW IF LIVE */}
+          {/* Desktop CTA */}
           <div className="hidden md:flex items-center space-x-3">
             {isPortalLive ? (
               <>
+                {/* LOGIC UPDATE: Show Staff Portal link if Admin/Staff */}
+                {isStaffOrAdmin && (
+                  <Link 
+                    href="/staff/applications" 
+                    className={`flex items-center gap-1 text-xs font-bold transition-colors ${displayAsLight ? 'text-aerojet-sky hover:text-aerojet-blue' : 'text-aerojet-sky hover:text-white'}`}
+                  >
+                    <Wrench className="w-3 h-3" />
+                    STAFF PORTAL
+                  </Link>
+                )}
+
                 <Link 
                     href={status === 'authenticated' ? dashboardHref : '/portal/login'} 
                     className={`text-xs font-bold transition-colors ${displayAsLight ? 'text-gray-600 hover:text-aerojet-blue' : 'text-white hover:text-gray-200'}`}
                 >
-                  {status === 'authenticated' ? 'GO TO DASHBOARD' : 'PORTAL LOGIN'}
+                  {status === 'authenticated' ? (isStaffOrAdmin ? 'DASHBOARD' : 'MY PORTAL') : 'PORTAL LOGIN'}
                 </Link>
-                <Link href="/register" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
-                    {status === 'authenticated' ? 'Apply Now' : 'Register'}
-                </Link>
+                
+                {/* Hide 'Apply Now' if user is already staff/admin to reduce clutter */}
+                {!isStaffOrAdmin && (
+                  <Link href="/register" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
+                      {status === 'authenticated' ? 'Apply Now' : 'Register'}
+                  </Link>
+                )}
               </>
             ) : (
-              // Optional: Show a "Coming Soon" or "Contact Us" button instead
               <Link href="/contact" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
                 Contact Us
               </Link>
@@ -147,12 +167,21 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
           <div className="pt-8 space-y-4">
             {isPortalLive ? (
               <>
-                <Link href="/portal/login" onClick={() => setMobileMenuOpen(false)} className="block text-center text-aerojet-sky font-semibold border border-aerojet-sky py-3 rounded-md">
+                {isStaffOrAdmin && (
+                   <Link href="/staff/applications" onClick={() => setMobileMenuOpen(false)} className=" text-center text-white bg-slate-800 font-semibold border border-slate-800 py-3 rounded-md uppercase tracking-wider flex items-center justify-center gap-2">
+                     <Wrench className="w-4 h-4" /> Staff Portal
+                   </Link>
+                )}
+
+                <Link href={dashboardHref} onClick={() => setMobileMenuOpen(false)} className="block text-center text-aerojet-sky font-semibold border border-aerojet-sky py-3 rounded-md">
                   {status === 'authenticated' ? 'Go to Dashboard' : 'Student Portal Login'}
                 </Link>
-                <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="block bg-aerojet-sky text-white text-center py-4 rounded-md shadow-md font-bold uppercase tracking-wider">
-                  Start Registration
-                </Link>
+
+                {!isStaffOrAdmin && (
+                  <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="block bg-aerojet-sky text-white text-center py-4 rounded-md shadow-md font-bold uppercase tracking-wider">
+                    Start Registration
+                  </Link>
+                )}
               </>
             ) : (
                <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block bg-aerojet-sky text-white text-center py-4 rounded-md shadow-md font-bold uppercase tracking-wider">

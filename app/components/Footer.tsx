@@ -47,9 +47,9 @@ export default function Footer() {
           <div>
             <h3 className="font-bold text-sm uppercase tracking-widest mb-4 text-aerojet-sky">Admissions</h3>
             <ul className="space-y-2 text-gray-300 text-sm">
-              <li><Link href="/admissions" className="hover:text-white transition">How to Enroll</Link></li>
+              <li><Link href="/admissions" className="hover:text-white transition">How to Apply</Link></li>
+              <li><Link href="/admissions/entry-requirements" className="hover:text-white transition">Requirements</Link></li>
               <li><Link href="/admissions/fees" className="hover:text-white transition">Fees & Rules</Link></li>
-              <li><Link href="/portal/login" className="hover:text-white transition">Student Portal</Link></li>
             </ul>
           </div>
           
