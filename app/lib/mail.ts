@@ -1,118 +1,143 @@
 import { Resend } from 'resend';
-import { PrismaClient } from '@prisma/client';
 
-const prisma = new PrismaClient();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// --- CONFIGURATION ---
-const FROM_EMAIL = 'Aerojet Academy <trainingprograms@aerojet-academy.com>';
+const DOMAIN = process.env.NEXT_PUBLIC_APP_URL || 'https://aerojet-academy.com';
 
-/**
- * Helper to fetch a dynamic email recipient from the SystemSettings table.
- * If not set in the Admin Portal, it falls back to your default gmail.
- */
-async function getEmailRecipient(key: string) {
-  try {
-    const setting = await prisma.systemSetting.findUnique({
-      where: { key },
-    });
-    // Fallback to the new trainingprograms email
-    return setting?.value || 'trainingprograms@aerojet-academy.com';
-  } catch (error) {
-    return 'trainingprograms@aerojet-academy.com';
-  }
-}
+// --- VISUAL ASSETS ---
+const LOGO_URL = `${DOMAIN}/email-logo.jpg`; // Ensure this exists in your public folder
+const FOOTER_BG_COLOR = '#002a5c'; // Aerojet Navy
+const ACCENT_COLOR = '#2880b9'; // Aerojet Sky
 
-// --- 1. STUDENT: AUTO-REPLY TO ENQUIRY ---
-export const sendEnquiryEmail = async (email: string, name: string) => {
-  await resend.emails.send({
-    from: FROM_EMAIL,
-    to: email,
-    subject: 'Aerojet Academy - Enquiry Received',
-    html: `
-      <div style="font-family: sans-serif; color: #333;">
-        <h1>Hello ${name},</h1>
-        <p>Thank you for reaching out to Aerojet Aviation Training Academy.</p>
-        <p>We have received your enquiry. Our admissions team will review your interest and contact you shortly.</p>
-        <p><strong>Next Step:</strong> We will first issue an invoice for the GHS 350 registration fee. Payment of the registration fee is required before you can complete the online application.</p>
-        <p>Regards,<br/><b>Admissions Team</b></p>
-      </div>
-    `,
-  });
-};
-
-// --- 2. STAFF: INTERNAL NOTIFICATION OF NEW LEAD ---
-export const sendStaffNotification = async (name: string, email: string, message: string) => {
-  // Dynamically fetch who should receive "Contact Form" enquiries
-  const recipient = await getEmailRecipient('CONTACT_FORM_RECIPIENT');
-
-  await resend.emails.send({
-    from: 'Website System <system@aerojet-academy.com>',
-    to: recipient,
-    subject: `New Website Enquiry: ${name}`,
-    html: `
-      <div style="font-family: sans-serif; color: #333;">
-        <h2 style="color: #002a5c;">New Lead Captured</h2>
-        <p>A new enquiry has been submitted via the website contact form.</p>
-        <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; border: 1px solid #eee;">
-          <p><strong>Name:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
-          <p><strong>Message:</strong></p>
-          <p style="white-space: pre-wrap;">${message}</p>
+// --- SHARED HTML WRAPPER ---
+// This wraps every email in the branded header and footer
+const wrapEmail = (title: string, contentHtml: string) => {
+  return `
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <meta charset="utf-8">
+        <style>
+          body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 0; }
+          .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+          .header { text-align: center; padding: 30px 20px; border-bottom: 1px solid #eaeaea; }
+          .header img { height: 50px; width: auto; }
+          .content { padding: 40px 30px; color: #333333; line-height: 1.6; }
+          .h1 { color: ${FOOTER_BG_COLOR}; font-size: 24px; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.5px; }
+          .button { display: inline-block; padding: 12px 24px; background-color: ${ACCENT_COLOR}; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }
+          .footer { background-color: ${FOOTER_BG_COLOR}; color: #ffffff; padding: 30px; text-align: center; font-size: 12px; }
+          .footer a { color: #8ecae6; text-decoration: none; margin: 0 8px; }
+          .footer-divider { height: 1px; background-color: rgba(255,255,255,0.1); margin: 20px 0; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <img src="${LOGO_URL}" alt="Aerojet Aviation Academy" />
+          </div>
+          <div class="content">
+            <div class="h1">${title}</div>
+            ${contentHtml}
+          </div>
+          <div class="footer">
+            <p style="font-weight: bold; font-size: 14px; margin-bottom: 10px;">AEROJET AVIATION TRAINING ACADEMY</p>
+            <p>Accra Technical Training Centre (ATTC)<br/>Kokomlemle, Accra - Ghana</p>
+            <p>+233 551 010 108 | info@aerojet-academy.com</p>
+            
+            <div class="footer-divider"></div>
+            
+            <p>
+              <a href="${DOMAIN}">Website</a> • 
+              <a href="${DOMAIN}/portal">Student Portal</a> • 
+              <a href="https://linkedin.com/company/aerojet">LinkedIn</a>
+            </p>
+            <p style="opacity: 0.6; margin-top: 20px;">&copy; ${new Date().getFullYear()} Aerojet Aviation. All rights reserved.</p>
+          </div>
         </div>
-        <p style="font-size: 12px; color: #999; margin-top: 20px;">
-            Notification sent to: ${recipient}<br/>
-            Change this recipient in the Staff Portal > Settings > Email Routing.
-        </p>
-      </div>
-    `,
-  });
+      </body>
+    </html>
+  `;
 };
 
-// --- 3. STUDENT: REGISTRATION INVOICE ---
+// --- 1. REGISTRATION INVOICE EMAIL ---
 export const sendRegistrationInvoiceEmail = async (email: string, name: string) => {
-  await resend.emails.send({
-    from: FROM_EMAIL,
-    to: email,
-    subject: 'Your Registration Fee Invoice - Aerojet Academy',
-    html: `
-      <div style="font-family: sans-serif; color: #333;">
-        <h1>Welcome ${name},</h1>
-        <p>To begin your journey at Aerojet Academy, please complete the mandatory one-time registration fee.</p>
-        
-        <div style="background: #eef6ff; padding: 20px; border-radius: 12px; border-left: 6px solid #2880b9;">
-            <h3 style="margin-top: 0; color: #002a5c;">OFFICIAL BANKING DETAILS</h3>
-            <p style="margin: 5px 0;"><strong>Bank:</strong> FNB Bank</p>
-            <p style="margin: 5px 0;"><strong>Account Name:</strong> AEROJET FOUNDATION</p>
-            <p style="margin: 5px 0;"><strong>Account No:</strong> 1020003980687</p>
-            <p style="margin: 5px 0;"><strong>Branch Code:</strong> 330102</p>
-            <p style="margin: 5px 0;"><strong>SWIFT CODE:</strong> FIRNGHACXXX</p>
-            <p style="margin: 10px 0 0 0; font-size: 18px; font-weight: bold;">Amount Due: GHS 350.00</p>
-        </div>
+  const subject = "Action Required: Registration Fee Invoice";
+  const html = wrapEmail(
+    "Complete Your Registration",
+    `
+    <p>Dear ${name},</p>
+    <p>Thank you for starting your enrollment process with Aerojet Aviation Training Academy.</p>
+    <p>To unlock the official application form and secure your candidate profile, a non-refundable registration fee of <strong>GHS 350.00</strong> is required.</p>
+    
+    <div style="background-color: #f8f9fa; padding: 20px; border-left: 4px solid ${ACCENT_COLOR}; margin: 20px 0;">
+      <p style="margin:0; font-weight:bold; color: #555;">PAYMENT DETAILS</p>
+      <p style="margin: 5px 0;"><strong>Bank:</strong> FNB Bank</p>
+      <p style="margin: 5px 0;"><strong>Account Name:</strong> Aerojet Foundation</p>
+      <p style="margin: 5px 0;"><strong>Account No:</strong> 1020003980687</p>
+      <p style="margin: 5px 0;"><strong>Branch Code:</strong> 330102</p>
+    </div>
 
-        <p style="margin-top: 20px;">Once payment is made, please reply to this email with your proof of payment or upload it to your portal profile (once activated).</p>
-        <p>Regards,<br/><b>Aerojet Finance Team</b></p>
-      </div>
-    `,
+    <p>Once payment is made, please upload your proof of payment via the link below or reply to this email.</p>
+    <a href="${DOMAIN}/portal/login" class="button">Log In to Upload Proof</a>
+    `
+  );
+
+  await resend.emails.send({
+    from: 'Admissions <admissions@aerojet-academy.com>',
+    to: email,
+    subject,
+    html
   });
 };
 
-// --- 4. STUDENT: PAYMENT VERIFIED / APP UNLOCKED ---
+// --- 2. PAYMENT RECEIVED / WELCOME EMAIL ---
 export const sendPaymentVerifiedEmail = async (email: string, name: string) => {
+  const subject = "Payment Verified: Application Access Granted";
+  const html = wrapEmail(
+    "Payment Confirmed",
+    `
+    <p>Dear ${name},</p>
+    <p>We have successfully verified your registration fee payment. Your candidate profile is now active.</p>
+    <p>You can now access the full <strong>Online Application Form</strong> in your student portal. Please complete this at your earliest convenience to be considered for the next intake.</p>
+    <a href="${DOMAIN}/portal/dashboard" class="button">Go to Dashboard</a>
+    `
+  );
+
   await resend.emails.send({
-    from: FROM_EMAIL,
+    from: 'Finance <finance@aerojet-academy.com>',
     to: email,
-    subject: 'Payment Verified - Application Unlocked',
-    html: `
-      <div style="font-family: sans-serif; color: #333;">
-        <h1>Good news, ${name}!</h1>
-        <p>Your payment has been verified by our finance team.</p>
-        <p>The <strong>Online Application Form</strong> is now unlocked in your student portal. Please log in to provide your academic details and upload your documents.</p>
-        <div style="margin-top: 30px;">
-            <a href="https://aerojet-academy.com/portal/login" style="background: #2880b9; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">Log in to Portal</a>
-        </div>
-        <p style="margin-top: 30px;">Regards,<br/><b>Aerojet Academy Admissions</b></p>
-      </div>
-    `,
+    subject,
+    html
+  });
+};
+
+// --- 3. ENQUIRY AUTO-REPLY ---
+export const sendEnquiryEmail = async (email: string, name: string) => {
+  const subject = "We received your enquiry";
+  const html = wrapEmail(
+    "Thank You for Contacting Us",
+    `
+    <p>Dear ${name},</p>
+    <p>This is a quick note to let you know we have received your message. A member of our admissions team will review your query and get back to you within 24 business hours.</p>
+    <p>In the meantime, feel free to browse our <a href="${DOMAIN}/courses">course catalog</a>.</p>
+    `
+  );
+
+  await resend.emails.send({
+    from: 'Support <info@aerojet-academy.com>',
+    to: email,
+    subject,
+    html
+  });
+};
+
+// --- 4. STAFF NOTIFICATION ---
+export const sendStaffNotification = async (name: string, email: string, message: string) => {
+  // Simple internal text email
+  await resend.emails.send({
+    from: 'System <admin@aerojet-academy.com>',
+    to: 'info@aerojet-academy.com', // Your staff inbox
+    subject: `New Website Enquiry: ${name}`,
+    text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
   });
 };
