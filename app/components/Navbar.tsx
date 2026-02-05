@@ -17,7 +17,7 @@ const navLinks = {
     { title: "Exam Schedule (2026/27)", href: "/courses/exam-schedule" }
   ],
   admissions: [
-    { title: "How to Apply", href: "/admissions" },
+    { title: "How to Apply", href: "/admissions/how-to-apply" },
     { title: "Entry Requirements", href: "/admissions/entry-requirements" },
     { title: "Fees & Payment Milestones", href: "/admissions/fees" },
   ],

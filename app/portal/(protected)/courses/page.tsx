@@ -1,240 +1,121 @@
-"use client";
-import { useSession } from "next-auth/react";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import Link from "next/link"; // Ensure Link is imported
+import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Lock, BookOpen } from 'lucide-react';
 
-type Course = {
-  id: string;
-  title: string;
-  code: string;
-  description: string;
-  duration: string;
-  price: number;
+// --- PRIVATE PRICING DATA (NOT FOR PUBLIC SITE) ---
+const CORE_MODULES = [
+  { code: 'M1', name: 'Mathematics', hours: 20, price: 1190 },
+  { code: 'M2', name: 'Physics', hours: 20, price: 1190 },
+  { code: 'M3', name: 'Basic Electricals', hours: 24, price: 1400 },
+  { code: 'M4', name: 'Basic Electronics', hours: 20, price: 1190 },
+  { code: 'M5', name: 'Digital Techniques', hours: 24, price: 1400 },
+  { code: 'M6', name: 'Materials & Hardware', hours: 25, price: 1400 },
+  { code: 'M7', name: 'Maintenance Practices (MCQ)', hours: 15, price: 1030 },
+  { code: 'M8', name: 'Basic Aerodynamics', hours: 15, price: 1030 },
+  { code: 'M9', name: 'Human Factors', hours: 15, price: 1030 },
+  { code: 'M10', name: 'Aviation Legislation (MCQ)', hours: 15, price: 1030 },
+  { code: 'MP-E', name: 'Maintenance Practices (Essay Only)', hours: 0, price: 340 },
+];
+
+const SPECIALIST_MODULES = [
+  { code: 'M11', name: 'Turbine Aeroplane Aerodynamics', hours: 25, price: 1400 },
+  { code: 'M15', name: 'Turbine Engines', hours: 25, price: 1400 },
+  { code: 'M17', name: 'Propellers', hours: 15, price: 1090 },
+  { code: 'M12', name: 'Helicopter Aerodynamics', hours: 25, price: 1400 },
+  { code: 'M16', name: 'Piston Engine', hours: 25, price: 1400 },
+];
+
+const AVIONICS_MODULES = [
+  { code: 'M13', name: 'Aircraft Aerodynamics (Avionics)', hours: 25, price: 1400 },
+  { code: 'M14', name: 'Propulsion', hours: 15, price: 1090 },
+];
+
+const ALL_MODULES = {
+  core: CORE_MODULES,
+  specialist: SPECIALIST_MODULES,
+  avionics: AVIONICS_MODULES
 };
 
-type Application = {
-  id: string;
-  courseId: string;
-  status: string;
-  appliedAt: string;
-  course: Course & { materialLink?: string };
-};
+export default function PortalCoursesPage() {
+  // Mock User Status - In real app, fetch from NextAuth session / DB
+  // Statuses: 'enquiry', 'fee_paid', 'applicant', 'approved', 'enrolled'
+  const userStatus = 'enrolled'; // CHANGE THIS TO TEST DIFFERENT VIEWS
 
-export default function CoursesPage() {
-  const { status } = useSession();
-  const [activeTab, setActiveTab] = useState<'my-courses' | 'browse'>('my-courses');
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [applications, setApplications] = useState<Application[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [applyingId, setApplyingId] = useState<string | null>(null);
-
-  // Fetch Data
-  async function fetchData() {
-    try {
-      const res = await fetch('/api/portal/courses');
-      const data = await res.json();
-      if (res.ok) {
-        setCourses(data.courses || []);
-        const apps = (data.applications || []).map((app: any) => ({
-            ...app,
-            course: data.courses.find((c: any) => c.id === app.courseId)
-        }));
-        setApplications(apps);
-        if (apps.length === 0) setActiveTab('browse');
-      }
-    } catch (error) {
-      toast.error("Failed to load courses.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    if (status === 'authenticated') fetchData();
-  }, [status]);
-
-  const handleApply = async (courseId: string) => {
-    setApplyingId(courseId);
-    try {
-      const res = await fetch('/api/portal/courses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ courseId }),
-      });
-      
-      if (res.ok) {
-        toast.success("Initial application sent. Now complete the full form.");
-        fetchData(); 
-      } else {
-        const err = await res.json();
-        toast.error(err.error || "Failed to apply.");
-      }
-    } catch (error) {
-      toast.error("An error occurred.");
-    } finally {
-      setApplyingId(null);
-    }
-  };
-
-  const myCourseIds = new Set(applications.map(app => app.courseId));
-  const availableCourses = courses.filter(c => !myCourseIds.has(c.id));
-  const fullTimePrograms = availableCourses.filter(c => c.code.startsWith('PROG-'));
-  const examModules = availableCourses.filter(c => c.code.startsWith('MOD-'));
-
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading Courses...</div>;
+  const canPurchase = ['approved', 'enrolled'].includes(userStatus);
 
   return (
-    <div className="max-w-6xl mx-auto pb-20">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div>
-          <h1 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight">Courses & Exams</h1>
-          <p className="text-slate-500 mt-1">Manage your active enrollments and browse available programs.</p>
-        </div>
-        
-        <div className="bg-white p-1 rounded-xl border border-slate-200 flex shadow-sm">
-          <button onClick={() => setActiveTab('my-courses')} className={`px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'my-courses' ? "bg-aerojet-sky text-white shadow-md" : "text-slate-400 hover:text-aerojet-blue"}`}>
-            My Enrollments
-          </button>
-          <button onClick={() => setActiveTab('browse')} className={`px-6 py-2 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'browse' ? "bg-aerojet-sky text-white shadow-md" : "text-slate-400 hover:text-aerojet-blue"}`}>
-            Browse Catalog
-          </button>
-        </div>
+    <div className="space-y-8 p-4 md:p-8 max-w-7xl mx-auto">
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Course Catalog</h1>
+        <p className="text-slate-600">
+          Browse and book your EASA Part-66 training modules.
+        </p>
       </div>
 
-      {/* --- TAB: MY ENROLLMENTS --- */}
-      {activeTab === 'my-courses' && (
-        <div className="space-y-6">
-          {applications.length === 0 ? (
-            <div className="text-center py-20 bg-white rounded-2xl border-2 border-dashed border-slate-200">
-              <p className="text-slate-400 font-medium mb-4">You have not applied for any courses yet.</p>
-              <button onClick={() => setActiveTab('browse')} className="bg-aerojet-sky text-white px-8 py-3 rounded-xl font-bold text-sm hover:shadow-lg transition-all">Browse Catalog &rarr;</button>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 gap-6">
-              {applications.map((app) => (
-                <div key={app.id} className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-all">
-                  <div>
-                    <div className="flex justify-between items-start mb-4">
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${
-                            app.status === 'APPROVED' ? 'bg-green-100 text-green-700' : 
-                            app.status === 'REJECTED' ? 'bg-red-100 text-red-700' : 
-                            'bg-orange-100 text-orange-700'
-                        }`}>
-                            {app.status}
+      {!canPurchase && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+          <Lock className="w-5 h-5 text-amber-600 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-amber-900">Purchase Locked</h3>
+            <p className="text-sm text-amber-800 mt-1">
+              You must complete your application and be approved before you can purchase individual modules.
+            </p>
+          </div>
+        </div>
+      )}
+
+      <Tabs defaultValue="core" className="w-full">
+        <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 mb-6">
+          <TabsTrigger value="core">Core Modules (M1-M10)</TabsTrigger>
+          <TabsTrigger value="specialist">Specialist (Mechanical)</TabsTrigger>
+          <TabsTrigger value="avionics">Avionics (B2)</TabsTrigger>
+        </TabsList>
+
+        {Object.entries(ALL_MODULES).map(([key, modules]) => (
+          <TabsContent key={key} value={key} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {modules.map((module) => (
+                <Card key={module.code} className="flex flex-col">
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <Badge variant="outline" className="font-mono text-slate-500">
+                        {module.code}
+                      </Badge>
+                      {module.hours > 0 && (
+                        <span className="text-xs font-medium text-slate-500 flex items-center gap-1">
+                          <BookOpen className="w-3 h-3" /> {module.hours} Hrs
                         </span>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase">Applied: {new Date(app.appliedAt).toLocaleDateString()}</span>
+                      )}
                     </div>
-                    <h3 className="text-xl font-black text-aerojet-blue leading-tight mb-1">{app.course?.title}</h3>
-                    <p className="text-xs font-bold text-aerojet-sky font-mono uppercase">{app.course?.code}</p>
-                  </div>
-
-                  <div className="mt-8 pt-4 border-t border-slate-50">
-                    {app.status === 'APPROVED' ? (
-                      app.course?.materialLink ? (
-                        <a 
-                          href={app.course.materialLink} 
-                          target="_blank" 
-                          rel="noopener noreferrer"  
-                          className="block w-full py-3 rounded-xl bg-aerojet-blue text-white font-black text-center text-xs uppercase tracking-widest hover:bg-aerojet-sky transition-all shadow-md"
-                        >
-                          Access Course Materials ↗
-                        </a>
-                      ) : (
-                        <button disabled className="w-full py-3 rounded-xl bg-slate-100 text-slate-400 font-bold text-xs uppercase cursor-not-allowed">Materials Not Yet Linked</button>
-                      )
-                    ) : (
-                      <div className="space-y-3">
-                        <Link 
-                          href={`/portal/applications/${app.id}`}
-                          className="block w-full py-3 rounded-xl bg-orange-500 text-white font-black text-center text-xs uppercase tracking-widest hover:bg-orange-600 transition-all shadow-md"
-                        >
-                          Complete Application Form &rarr;
-                        </Link>
-                        <p className="text-[10px] text-center text-slate-400 font-medium">
-                          Note: Enrollment is confirmed after fee verification.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                    <CardTitle className="text-lg leading-tight mt-2">{module.name}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grow">
+                    <p className="text-sm text-slate-600 mb-4">
+                      Comprehensive tuition support, learning materials, and exam preparation included.
+                    </p>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-2xl font-bold text-slate-900">€{module.price.toLocaleString()}</span>
+                      <span className="text-sm text-slate-500">/ module</span>
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full" 
+                      disabled={!canPurchase}
+                      variant={canPurchase ? "default" : "secondary"}
+                    >
+                      {canPurchase ? "Select Module" : "Locked"}
+                    </Button>
+                  </CardFooter>
+                </Card>
               ))}
             </div>
-          )}
-        </div>
-      )}
-
-      {/* --- TAB: BROWSE CATALOG --- */}
-      {activeTab === 'browse' && (
-        <div className="space-y-16">
-          
-          {/* Section: Full-Time Programs */}
-          <section>
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center">
-              <span className="w-8 h-px bg-slate-200 mr-4"></span>
-              A. Full-Time & Revision Programmes
-            </h2>
-            <div className="grid md:grid-cols-2 gap-8">
-              {fullTimePrograms.map((course) => (
-                <div key={course.id} className="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col group hover:border-aerojet-sky transition-all">
-                  <div className="grow">
-                    <h3 className="text-xl font-black text-aerojet-blue mb-2 group-hover:text-aerojet-sky transition-colors">{course.title}</h3>
-                    <p className="text-sm text-slate-500 leading-relaxed mb-6">{course.description}</p>
-                    <div className="flex justify-between items-center text-xs font-black text-slate-400 uppercase tracking-widest mb-6 bg-slate-50 p-3 rounded-xl">
-                        <span>⏱ {course.duration}</span>
-                        <span className="text-aerojet-blue text-sm">€{course.price.toLocaleString()}</span>
-                    </div>
-                  </div>
-                  <button onClick={() => handleApply(course.id)} disabled={!!applyingId} className="w-full py-4 rounded-xl border-2 border-aerojet-sky text-aerojet-sky font-black uppercase text-xs tracking-widest hover:bg-aerojet-sky hover:text-white transition-all disabled:opacity-50">
-                    {applyingId === course.id ? 'Processing...' : 'Start Application'}
-                  </button>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          {/* Section: Modular Exams */}
-          <section>
-            <h2 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6 flex items-center">
-              <span className="w-8 h-px bg-slate-200 mr-4"></span>
-              B. Modular Exam Seats (First Attempt)
-            </h2>
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                <div className="overflow-x-auto no-scrollbar">
-                    <table className="w-full text-left text-sm text-slate-600 min-w-175">
-                        <thead className="bg-slate-50 text-slate-400 font-black uppercase text-[10px] tracking-widest border-b border-slate-100">
-                            <tr>
-                                <th className="px-6 py-5 whitespace-nowrap">Code</th>
-                                <th className="px-6 py-5 whitespace-nowrap">Module Title</th>
-                                <th className="px-6 py-5 text-right whitespace-nowrap">Price</th>
-                                <th className="px-6 py-5 text-center whitespace-nowrap">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-50">
-                            {examModules.map((course) => (
-                                <tr key={course.id} className="hover:bg-slate-50/50 transition">
-                                    <td className="px-6 py-4 font-mono text-aerojet-sky whitespace-nowrap font-black">{course.code}</td>
-                                    <td className="px-6 py-4 font-bold text-slate-800 whitespace-nowrap">{course.title}</td>
-                                    <td className="px-6 py-4 text-right font-black text-slate-900 whitespace-nowrap">€{course.price}</td>
-                                    <td className="px-6 py-4 text-center whitespace-nowrap">
-                                        <button 
-                                            onClick={() => handleApply(course.id)}
-                                            disabled={!!applyingId}
-                                            className="text-aerojet-sky hover:text-aerojet-blue font-black uppercase text-[10px] tracking-tighter border border-aerojet-sky px-5 py-2 rounded-lg disabled:opacity-50 transition-all hover:bg-blue-50 active:scale-95"
-                                        >
-                                            {applyingId === course.id ? '...' : 'Select Seat'}
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-          </section>
-
-        </div>
-      )}
+          </TabsContent>
+        ))}
+      </Tabs>
     </div>
   );
 }

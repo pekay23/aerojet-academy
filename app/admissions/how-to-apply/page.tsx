@@ -26,7 +26,6 @@ export default function HowToApplyPage() {
           subtitle="Your step-by-step roadmap to joining Aerojet Academy."
           backgroundImage="/takeoff.jpg"
         />
-
         <div className="container mx-auto px-6 py-20">
           <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-16">
             
@@ -89,6 +88,7 @@ export default function HowToApplyPage() {
                 <div className="bg-white p-8 rounded-4xl border border-slate-200 shadow-sm sticky top-28">
                     <h3 className="font-black text-xs uppercase tracking-[0.2em] mb-6 text-slate-400">Document Checklist</h3>
                     <p className="text-xs text-slate-500 mb-8 font-medium">Please ensure you have these documents ready for your application submission (Step 2):</p>
+                    
                     <ul className="space-y-4 mb-10">
                         {documents.map(doc => (
                             <li key={doc} className="flex items-start text-[11px] font-bold text-slate-700 bg-slate-50 p-3 rounded-xl border border-slate-100">
@@ -97,6 +97,7 @@ export default function HowToApplyPage() {
                             </li>
                         ))}
                     </ul>
+
                     <div className="pt-6 border-t border-slate-100">
                         <Link href="/contact" className="text-aerojet-sky font-bold text-xs uppercase tracking-widest hover:underline">
                             Ask a question ↗
@@ -104,7 +105,6 @@ export default function HowToApplyPage() {
                     </div>
                 </div>
             </aside>
-
           </div>
         </div>
       </div>
