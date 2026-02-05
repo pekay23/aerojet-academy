@@ -5,7 +5,7 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const DOMAIN = process.env.NEXT_PUBLIC_APP_URL || 'https://aerojet-academy.com';
 
 // --- VISUAL ASSETS ---
-const LOGO_URL = `${DOMAIN}/email-logo.jpg`; // Ensure this exists in your public folder
+const LOGO_URL = `${DOMAIN}/email-logo.png`; // Ensure this exists in your public folder
 const FOOTER_BG_COLOR = '#002a5c'; // Aerojet Navy
 const ACCENT_COLOR = '#2880b9'; // Aerojet Sky
 
@@ -135,7 +135,7 @@ export const sendEnquiryEmail = async (email: string, name: string) => {
 export const sendStaffNotification = async (name: string, email: string, message: string) => {
   // Simple internal text email
   await resend.emails.send({
-    from: 'System <admin@aerojet-academy.com>',
+    from: 'Admin <admin@aerojet-academy.com>',
     to: 'info@aerojet-academy.com', // Your staff inbox
     subject: `New Website Enquiry: ${name}`,
     text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
