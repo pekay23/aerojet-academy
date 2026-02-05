@@ -187,6 +187,9 @@ model ExamRun {
   
   bookings        ExamBooking[]
   assessments     Assessment[] // <--- ADDED THIS
+
+  windowId        String?
+  window          ExamWindow? @relation(fields: [windowId], references: [id])
 }
 
 model ExamBooking {
@@ -200,6 +203,22 @@ model ExamBooking {
   status      String   @default("CONFIRMED")
   seatLabel   String?
   bookedAt    DateTime @default(now())
+}
+
+model ExamWindow {
+  id                String    @id @default(cuid())
+  name              String    // e.g. "June 2026"
+  startDate         DateTime
+  endDate           DateTime
+  cutoffDate        DateTime  // The T-21 Date
+  
+  minSeatsRequired  Int       @default(60)
+  minChartersRequired Int     @default(3)
+  
+  status            String    @default("PENDING") // PENDING, GO, CANCELLED
+  
+  runs              ExamRun[]
+  createdAt         DateTime  @default(now())
 }
 
 // --- Attendance & Results Models ---
