@@ -19,15 +19,19 @@ const wrapEmail = (title: string, contentHtml: string) => {
         <meta charset="utf-8">
         <style>
           body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 0; }
-          .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-          .header { text-align: center; padding: 30px 20px; border-bottom: 1px solid #eaeaea; }
-          .header img { height: 50px; width: auto; }
-          .content { padding: 40px 30px; color: #333333; line-height: 1.6; }
-          .h1 { color: ${FOOTER_BG_COLOR}; font-size: 24px; font-weight: 800; margin-bottom: 20px; letter-spacing: -0.5px; }
+          .container { max-width: 600px; margin: 20px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+          /* HEADER ADJUSTMENTS */
+          .header { text-align: center; padding: 20px; border-bottom: 1px solid #eaeaea; }
+          .header img { height: 80px; width: auto; } /* Increased Size */
+          
+          .content { padding: 30px; color: #333333; line-height: 1.6; }
+          .h1 { color: ${FOOTER_BG_COLOR}; font-size: 22px; font-weight: 800; margin-bottom: 15px; }
           .button { display: inline-block; padding: 12px 24px; background-color: ${ACCENT_COLOR}; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold; margin-top: 20px; }
-          .footer { background-color: ${FOOTER_BG_COLOR}; color: #ffffff; padding: 30px; text-align: center; font-size: 12px; }
-          .footer a { color: #8ecae6; text-decoration: none; margin: 0 8px; }
-          .footer-divider { height: 1px; background-color: rgba(255,255,255,0.1); margin: 20px 0; }
+          
+          /* FOOTER ADJUSTMENTS */
+          .footer { background-color: ${FOOTER_BG_COLOR}; color: #ffffff; padding: 20px; text-align: center; font-size: 11px; } /* Reduced padding/font */
+          .footer a { color: #8ecae6; text-decoration: none; margin: 0 5px; }
+          .footer-divider { height: 1px; background-color: rgba(255,255,255,0.1); margin: 15px 0; }
         </style>
       </head>
       <body>
@@ -77,8 +81,8 @@ export const sendRegistrationInvoiceEmail = async (email: string, name: string) 
       <p style="margin: 5px 0;"><strong>Branch Code:</strong> 330102</p>
     </div>
 
-    <p>Once payment is made, please upload your proof of payment via the link below or reply to this email.</p>
-    <a href="${DOMAIN}/portal/login" class="button">Log In to Upload Proof</a>
+     <p>Once payment is made, please upload your proof of payment instantly via the link below:</p>
+    <a href="${DOMAIN}/upload-proof?email=${encodeURIComponent(email)}" class="button">Upload Payment Proof</a>
     `
   );
 

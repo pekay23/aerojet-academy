@@ -3,8 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
-import { useSession } from "next-auth/react";
-import { Wrench } from 'lucide-react'; // Import the icon for staff
+import { useSession } from "next-auth/react"; 
+import { Wrench } from 'lucide-react'; // Added Icon
 
 // --- Data for navigation links ---
 const navLinks = {
@@ -69,15 +69,15 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
   const displayAsLight = scrolled || isLightPage; 
   const headerIsLight = displayAsLight || mobileMenuOpen;
 
-  // --- LOGIC UPDATE: Determine User Role ---
+  // --- LOGIC: Determine User Role ---
   const userRole = (session?.user as any)?.role;
   const isStaffOrAdmin = userRole === 'ADMIN' || userRole === 'STAFF';
   const isInstructor = userRole === 'INSTRUCTOR';
 
   // Determine Dashboard Link
-  let dashboardHref = '/portal/dashboard'; // Default Student
-  if (isStaffOrAdmin) dashboardHref = '/staff/applications'; // Staff goes to Applications by default
-  if (isInstructor) dashboardHref = '/staff/materials'; // Instructor goes to Materials
+  let dashboardHref = '/portal/dashboard'; // Default
+  if (isStaffOrAdmin) dashboardHref = '/staff/dashboard'; // Was '/staff/applications', but dashboard is better entry
+  if (isInstructor) dashboardHref = '/staff/materials';
 
   return (
     <>
@@ -111,14 +111,14 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
             <Link href="/news" className="hover:text-aerojet-sky transition">News</Link>
           </nav>
           
-          {/* Desktop CTA */}
+          {/* Desktop CTA - ONLY SHOW IF LIVE OR LOGGED IN */}
           <div className="hidden md:flex items-center space-x-3">
-            {isPortalLive ? (
+            {isPortalLive || status === 'authenticated' ? (
               <>
-                {/* LOGIC UPDATE: Show Staff Portal link if Admin/Staff */}
+                {/* 1. If Staff/Admin, show quick link */}
                 {isStaffOrAdmin && (
                   <Link 
-                    href="/staff/applications" 
+                    href="/staff/dashboard" 
                     className={`flex items-center gap-1 text-xs font-bold transition-colors ${displayAsLight ? 'text-aerojet-sky hover:text-aerojet-blue' : 'text-aerojet-sky hover:text-white'}`}
                   >
                     <Wrench className="w-3 h-3" />
@@ -126,14 +126,15 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
                   </Link>
                 )}
 
+                {/* 2. Main Action Button */}
                 <Link 
-                    href={status === 'authenticated' ? dashboardHref : '/portal/login'} 
+                    href={dashboardHref} 
                     className={`text-xs font-bold transition-colors ${displayAsLight ? 'text-gray-600 hover:text-aerojet-blue' : 'text-white hover:text-gray-200'}`}
                 >
                   {status === 'authenticated' ? (isStaffOrAdmin ? 'DASHBOARD' : 'MY PORTAL') : 'PORTAL LOGIN'}
                 </Link>
                 
-                {/* Hide 'Apply Now' if user is already staff/admin to reduce clutter */}
+                {/* 3. Register/Apply Button (Hide for Staff) */}
                 {!isStaffOrAdmin && (
                   <Link href="/register" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
                       {status === 'authenticated' ? 'Apply Now' : 'Register'}
@@ -141,6 +142,7 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
                 )}
               </>
             ) : (
+              // Coming Soon State
               <Link href="/contact" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
                 Contact Us
               </Link>
@@ -165,10 +167,11 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
           <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block border-b border-gray-100 py-4 text-xl font-bold text-aerojet-blue">Contact</Link>
           
           <div className="pt-8 space-y-4">
-            {isPortalLive ? (
+            {isPortalLive || status === 'authenticated' ? (
               <>
+                {/* Staff Mobile Link */}
                 {isStaffOrAdmin && (
-                   <Link href="/staff/applications" onClick={() => setMobileMenuOpen(false)} className=" text-center text-white bg-slate-800 font-semibold border border-slate-800 py-3 rounded-md uppercase tracking-wider flex items-center justify-center gap-2">
+                   <Link href="/staff/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex text-center text-white bg-slate-800 font-semibold border border-slate-800 py-3 rounded-md uppercase tracking-wider items-center justify-center gap-2">
                      <Wrench className="w-4 h-4" /> Staff Portal
                    </Link>
                 )}

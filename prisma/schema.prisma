@@ -3,12 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "postgresql" // Or your provider
   url      = env("DATABASE_URL")
 }
 
 // --- NextAuth Models ---
-
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -22,8 +21,7 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -43,18 +41,20 @@ model User {
   emailVerified DateTime?
   image         String?
   password      String?
-  role          String    @default("STUDENT") 
+  role          String    @default("STUDENT") // ADMIN, STAFF, INSTRUCTOR, STUDENT
   isActive      Boolean   @default(false)
   createdAt     DateTime  @default(now())
-  
+
   // Relations
-  accounts      Account[]
-  sessions      Session[]
+  accounts       Account[]
+  sessions       Session[]
   studentProfile Student?
-  
-  // For Instructors: Which courses do they teach?
+
+  // For Instructors
   instructedCourses Course[] @relation("CourseInstructors")
 
+  isDeleted     Boolean   @default(false)
+  deletedAt     DateTime?
 }
 
 model VerificationToken {
@@ -65,8 +65,25 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// --- Student Portal Models ---
+// --- ACADEMIC STRUCTURE (NEW) ---
+model SchoolPeriod {
+  id        String   @id @default(cuid())
+  name      String   // e.g. "2026/2027 Academic Year"
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+  intakes   Intake[]
+}
 
+model Intake {
+  id             String       @id @default(cuid())
+  name           String       // e.g. "September 2026 Cohort"
+  schoolPeriodId String
+  schoolPeriod   SchoolPeriod @relation(fields: [schoolPeriodId], references: [id])
+  students       Student[]
+}
+
+// --- STUDENT PORTAL MODELS ---
 model Student {
   id                String    @id @default(cuid())
   userId            String    @unique
@@ -80,7 +97,7 @@ model Student {
   gender            String?
   address           String?   @db.Text
   city              String?
-  region            String?   
+  region            String?
   country           String?   @default("Ghana")
 
   // Emergency Contact
@@ -90,8 +107,12 @@ model Student {
 
   // Status
   enrollmentStatus  String    @default("APPLICANT")
-  cohort            String?
   
+  // Intake Relation (NEW)
+  intakeId          String?
+  intake            Intake?   @relation(fields: [intakeId], references: [id])
+  cohort            String?   // Legacy field (can be deprecated later)
+
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 
@@ -100,54 +121,63 @@ model Student {
   fees              Fee[]
   examBookings      ExamBooking[]
   attendance        AttendanceRecord[]
-  assessments       Assessment[] // <--- ADDED THIS
+  assessments       Assessment[]
+  wallet            Wallet?
+  notes             StudentNote[] // (NEW)
+}
 
-  wallet          Wallet? // One wallet per student
+// --- STUDENT NOTES (NEW) ---
+model StudentNote {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
+  authorId  String   // Staff/Instructor ID
+  title     String
+  content   String   @db.Text
+  type      String   // DISCIPLINARY, ACADEMIC, GENERAL
+  createdAt DateTime @default(now())
 }
 
 model Course {
   id           String        @id @default(cuid())
   code         String        @unique
   title        String
-  description  String        @db.Text
-  duration     String
+  description  String?       @db.Text
+  duration     String?
   price        Float
-  
+
   materialLink String?
-  
+
   // Relations
   applications Application[]
   examRuns     ExamRun[]
   attendance   AttendanceRecord[]
-
-  // Instructors assigned to this course
   instructors  User[]        @relation("CourseInstructors")
 }
 
 model Application {
-  id        String   @id @default(cuid())
-  status    String   @default("PENDING") // PENDING, AWAITING_DOCS, UNDER_REVIEW, APPROVED, REJECTED
-  appliedAt DateTime @default(now())
-  
+  id              String   @id @default(cuid())
+  status          String   @default("PENDING")
+  appliedAt       DateTime @default(now())
+
   // Detailed Application Data
-  educationLevel    String?
-  institutionName   String?
-  graduationYear    String?
-  
-  // Document URLs (from UploadThing)
-  idDocumentUrl     String? // Passport or National ID
-  certificateUrl    String? // High School Certificate
-  transcriptUrl     String? // Academic Transcripts
-  
-  isSubmitted       Boolean @default(false) // Track if the user finished the long form
+  educationLevel  String?
+  institutionName String?
+  graduationYear  String?
 
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
+  // Documents
+  idDocumentUrl   String?
+  certificateUrl  String?
+  transcriptUrl   String?
+
+  isSubmitted     Boolean @default(false)
   
-  courseId  String
-  course    Course   @relation(fields: [courseId], references: [id])
+  studentId       String
+  student         Student @relation(fields: [studentId], references: [id])
+  
+  courseId        String
+  course          Course  @relation(fields: [courseId], references: [id])
 }
-
 
 model Fee {
   id          String   @id @default(cuid())
@@ -157,19 +187,18 @@ model Fee {
   status      String   @default("UNPAID")
   description String?
   proofUrl    String?
-  
+
   studentId   String
   student     Student  @relation(fields: [studentId], references: [id])
 }
 
-// --- Exam Models ---
-
+// --- EXAM MODELS ---
 model ExamRoom {
-  id        String    @id @default(cuid())
-  name      String
-  code      String    @unique
-  capacity  Int       @default(28)
-  runs      ExamRun[]
+  id       String    @id @default(cuid())
+  name     String
+  code     String    @unique
+  capacity Int       @default(28)
+  runs     ExamRun[]
 }
 
 model ExamRun {
@@ -186,68 +215,78 @@ model ExamRun {
   status          String   @default("SCHEDULED")
   
   bookings        ExamBooking[]
-  assessments     Assessment[] // <--- ADDED THIS
-
+  assessments     Assessment[]
+  
   windowId        String?
   window          ExamWindow? @relation(fields: [windowId], references: [id])
 }
 
 model ExamBooking {
-  id          String   @id @default(cuid())
-  examRunId   String
-  run         ExamRun  @relation(fields: [examRunId], references: [id])
+  id        String   @id @default(cuid())
+  examRunId String
+  run       ExamRun  @relation(fields: [examRunId], references: [id])
   
-  studentId   String
-  student     Student  @relation(fields: [studentId], references: [id])
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id])
   
-  status      String   @default("CONFIRMED")
-  seatLabel   String?
-  bookedAt    DateTime @default(now())
+  status    String   @default("CONFIRMED")
+  seatLabel String?
+  bookedAt  DateTime @default(now())
 }
 
 model ExamWindow {
-  id                String    @id @default(cuid())
-  name              String    // e.g. "June 2026"
-  startDate         DateTime
-  endDate           DateTime
-  cutoffDate        DateTime  // The T-21 Date
+  id                  String    @id @default(cuid())
+  name                String
+  startDate           DateTime
+  endDate             DateTime
+  cutoffDate          DateTime
   
-  minSeatsRequired  Int       @default(60)
-  minChartersRequired Int     @default(3)
+  minSeatsRequired    Int       @default(60)
+  minChartersRequired Int       @default(3)
   
-  status            String    @default("PENDING") // PENDING, GO, CANCELLED
+  status              String    @default("PENDING")
   
-  runs              ExamRun[]
-  createdAt         DateTime  @default(now())
+  runs                ExamRun[]
+  createdAt           DateTime  @default(now())
 }
 
-// --- Attendance & Results Models ---
+// --- ATTENDANCE & RESULTS ---
+
+// (UPDATED) Enhanced Attendance
+enum AttendanceStatus {
+  PRESENT
+  ABSENT_EXCUSED
+  ABSENT_UNEXCUSED
+  LATE
+  EXPELLED
+  UNSPECIFIED
+}
 
 model AttendanceRecord {
-  id              String   @id @default(cuid())
-  date            DateTime @default(now())
+  id             String           @id @default(cuid())
+  date           DateTime         @default(now())
   
-  courseId        String
-  course          Course   @relation(fields: [courseId], references: [id])
+  courseId       String
+  course         Course           @relation(fields: [courseId], references: [id])
   
-  studentId       String
-  student         Student  @relation(fields: [studentId], references: [id])
+  studentId      String
+  student        Student          @relation(fields: [studentId], references: [id])
   
-  scheduledHours  Float
-  attendedHours   Float
-  lateMinutes     Int      @default(0)
+  // Legacy fields (optional support)
+  scheduledHours Float?
+  attendedHours  Float?
+  lateMinutes    Int              @default(0)
   
-  notes           String?
-  recordedBy      String   
+  // New Status
+  status         AttendanceStatus @default(UNSPECIFIED)
+  comment        String?          // Replaces 'notes' or works alongside it
+  recordedBy     String   
 }
 
 model Assessment {
   id            String   @id @default(cuid())
+  type          String   @default("INTERNAL_TEST")
   
-  // Type of result
-  type          String   @default("INTERNAL_TEST") // INTERNAL_TEST, EASA_FINAL, PRACTICAL_LOG
-  
-  // Which module (e.g., M01, M05)
   moduleCode    String   
   attemptNumber Int      @default(1)
   
@@ -257,40 +296,35 @@ model Assessment {
   
   comments      String?
   recordedAt    DateTime @default(now())
-
-  // Relations
+  
   studentId     String
   student       Student  @relation(fields: [studentId], references: [id])
   
-  // Optional: Link to a scheduled exam session if it was an official sitting
   examRunId     String?  
   run           ExamRun? @relation(fields: [examRunId], references: [id])
 }
 
-
 model Wallet {
-  id              String   @id @default(cuid())
-  studentId       String   @unique
-  student         Student  @relation(fields: [studentId], references: [id])
-  
-  balance         Int      @default(0) // Number of exam credits available
-  updatedAt       DateTime @updatedAt
-  
-  transactions    WalletTransaction[]
+  id           String              @id @default(cuid())
+  studentId    String              @unique
+  student      Student             @relation(fields: [studentId], references: [id])
+  balance      Int                 @default(0)
+  updatedAt    DateTime            @updatedAt
+  transactions WalletTransaction[]
 }
 
 model WalletTransaction {
-  id              String   @id @default(cuid())
-  walletId        String
-  wallet          Wallet   @relation(fields: [walletId], references: [id])
-  
-  amount          Int      // +4 (Buy Bundle) or -1 (Book Exam)
-  type            String   // PURCHASE, USAGE, REFUND, ADJUSTMENT
-  description     String
-  createdAt       DateTime @default(now())
+  id          String   @id @default(cuid())
+  walletId    String
+  wallet      Wallet   @relation(fields: [walletId], references: [id])
+  amount      Int
+  type        String
+  description String
+  createdAt   DateTime @default(now())
 }
+
 model SystemSetting {
   id    String @id @default(cuid())
-  key   String @unique // e.g., "CONTACT_EMAIL_RECIPIENT"
+  key   String @unique
   value String
 }
