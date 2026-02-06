@@ -2,12 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, CreditCard, Calendar as CalendarIcon, Gift, Clock } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar'; // Ensure shadcn calendar is installed
+import { Users, FileText, CreditCard, Calendar as CalendarIcon, Clock, GraduationCap, ArrowUpRight } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function DashboardClient() {
   const [stats, setStats] = useState<any>(null);
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [selectedEvents, setSelectedEvents] = useState<any[]>([]);
 
   useEffect(() => {
     fetch('/api/staff/dashboard')
@@ -15,127 +17,195 @@ export default function DashboardClient() {
       .then(data => setStats(data));
   }, []);
 
-  if (!stats) return <div>Loading dashboard...</div>;
+  // Filter events when a date is selected
+  useEffect(() => {
+    if (stats?.calendarEvents && date) {
+      const eventsOnDate = stats.calendarEvents.filter((e: any) => 
+        new Date(e.date).toDateString() === date.toDateString()
+      );
+      setSelectedEvents(eventsOnDate);
+    }
+  }, [date, stats]);
+
+  if (!stats) return <div className="p-8 text-center text-slate-400 animate-pulse">Loading analytics...</div>;
+
+  const cardClass = "relative overflow-hidden border-none shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       
-      {/* Top Stats Row */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Students</CardTitle>
-            <Users className="h-4 w-4 text-aerojet-sky" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.studentStats?.active || 0}</div>
-            <p className="text-xs text-muted-foreground">{stats.studentStats?.total || 0} Total Enrolled</p>
+      {/* --- HERO STATS ROW --- */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        
+        {/* Active Students - Blue Gradient */}
+        <Card className={`${cardClass} bg-linear-to-br from-blue-600 to-blue-800 text-white`}>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-blue-100 text-sm font-medium mb-1">Active Students</p>
+                <h3 className="text-4xl font-black">{stats.studentStats?.active || 0}</h3>
+              </div>
+              <div className="p-2 bg-white/10 rounded-lg">
+                <GraduationCap className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="mt-4 flex items-center text-xs text-blue-200">
+              <span className="bg-white/20 px-1.5 py-0.5 rounded text-white mr-2">
+                {stats.studentStats?.total} Total
+              </span>
+              Enrolled in system
+            </div>
           </CardContent>
         </Card>
         
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Apps</CardTitle>
-            <FileText className="h-4 w-4 text-orange-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.opsStats?.pendingApps || 0}</div>
-            <p className="text-xs text-muted-foreground">Requires Review</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Instructors</CardTitle>
-            <Users className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.teamStats?.instructors || 0}</div>
-            <p className="text-xs text-muted-foreground">Teaching Staff</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-aerojet-blue text-white">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-blue-100">School Period</CardTitle>
-            <Clock className="h-4 w-4 text-white" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-lg font-bold">2026/2027 Academic Year</div>
-            <p className="text-xs text-blue-200">Sep 2026 - Jul 2027</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid gap-6 md:grid-cols-7">
-        
-        {/* Calendar Column */}
-        <Card className="md:col-span-3">
-          <CardHeader><CardTitle>Academic Calendar</CardTitle></CardHeader>
-          <CardContent>
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border"
-            />
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <span className="w-2 h-2 rounded-full bg-red-500"></span> Public Holiday
+        {/* Pending Apps - Orange Gradient */}
+        <Card className={`${cardClass} bg-linear-to-br from-orange-500 to-red-600 text-white`}>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-orange-100 text-sm font-medium mb-1">Pending Applications</p>
+                <h3 className="text-4xl font-black">{stats.opsStats?.pendingApps || 0}</h3>
               </div>
-              <div className="flex items-center gap-2 text-sm">
-                <span className="w-2 h-2 rounded-full bg-blue-500"></span> Exam Week
+              <div className="p-2 bg-white/10 rounded-lg">
+                <FileText className="h-6 w-6 text-white" />
               </div>
+            </div>
+            <div className="mt-4 text-xs text-orange-100 flex items-center gap-1 cursor-pointer hover:underline">
+              Review Queue <ArrowUpRight className="w-3 h-3" />
             </div>
           </CardContent>
         </Card>
 
-        {/* Info Column */}
-        <div className="md:col-span-4 space-y-6">
-          
-          {/* Upcoming Birthdays */}
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-               <CardTitle className="flex items-center gap-2"><Gift className="w-4 h-4 text-pink-500"/> Upcoming Birthdays</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Mock Data - Connect to API later */}
-                {[
-                  { name: "Kwame Doe", role: "Student", date: "Oct 12" },
-                  { name: "Sarah Smith", role: "Instructor", date: "Oct 14" }
-                ].map((b, i) => (
-                  <div key={i} className="flex items-center justify-between border-b pb-2 last:border-0">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600">
-                        {b.name[0]}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium">{b.name}</p>
-                        <p className="text-xs text-slate-500">{b.role}</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-bold bg-pink-50 text-pink-600 px-2 py-1 rounded">{b.date}</span>
+        {/* Pending Finance - Emerald Gradient */}
+        <Card className={`${cardClass} bg-linear-to-br from-emerald-500 to-teal-700 text-white`}>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-emerald-100 text-sm font-medium mb-1">Verify Payments</p>
+                <h3 className="text-4xl font-black">{stats.opsStats?.verifyingPayments || 0}</h3>
+              </div>
+              <div className="p-2 bg-white/10 rounded-lg">
+                <CreditCard className="h-6 w-6 text-white" />
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-emerald-100">
+              Transactions pending approval
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Staff Count - Slate/Dark */}
+        <Card className={`${cardClass} bg-white border border-slate-100 text-slate-800`}>
+          <CardContent className="p-6">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-slate-500 text-sm font-medium mb-1">Instructors</p>
+                <h3 className="text-4xl font-black text-slate-900">{stats.teamStats?.instructors || 0}</h3>
+              </div>
+              <div className="p-2 bg-slate-100 rounded-lg">
+                <Users className="h-6 w-6 text-slate-600" />
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-slate-400">
+              Active teaching staff
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* --- MAIN GRID --- */}
+      <div className="grid gap-8 md:grid-cols-7">
+        
+        {/* Calendar Widget (Left 3 Cols) */}
+        <Card className="md:col-span-3 border-none shadow-lg overflow-hidden flex flex-col">
+          <CardHeader className="bg-slate-50 border-b border-slate-100">
+            <CardTitle className="flex items-center gap-2 text-slate-800">
+              <CalendarIcon className="w-5 h-5 text-aerojet-sky"/> Academic Calendar
+            </CardTitle>
+          </CardHeader>
+          <div className="p-4 flex justify-center bg-white">
+            <Calendar
+              mode="single"
+              selected={date}
+              onSelect={setDate}
+              className="rounded-md border-none"
+              modifiers={{
+                event: (date) => stats.calendarEvents.some((e:any) => new Date(e.date).toDateString() === date.toDateString())
+              }}
+              modifiersStyles={{
+                event: { fontWeight: 'bold', color: '#2563eb', textDecoration: 'underline' }
+              }}
+            />
+          </div>
+          {/* Selected Date Events */}
+          <div className="bg-slate-50 p-4 border-t border-slate-100 flex-1 min-h-37.5">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">
+              Events for {date?.toLocaleDateString()}
+            </h4>
+            {selectedEvents.length > 0 ? (
+              <div className="space-y-2">
+                {selectedEvents.map((e: any, i: number) => (
+                  <div key={i} className="flex items-center gap-3 p-2 bg-white rounded-lg border border-slate-100 shadow-sm">
+                    <div className={`w-2 h-2 rounded-full ${e.type === 'EXAM' ? 'bg-purple-500' : 'bg-red-500'}`} />
+                    <p className="text-sm font-medium text-slate-700">{e.title}</p>
+                    <span className="ml-auto text-xs text-slate-400">
+                      {new Date(e.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    </span>
                   </div>
                 ))}
               </div>
+            ) : (
+              <p className="text-sm text-slate-400 italic">No events scheduled.</p>
+            )}
+          </div>
+        </Card>
+
+        {/* Right Column: Newest Students & School Year */}
+        <div className="md:col-span-4 space-y-6">
+          
+          {/* School Year Card */}
+          <Card className="bg-slate-900 text-white border-none shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+               <Clock className="w-32 h-32" />
+            </div>
+            <CardContent className="p-8 relative z-10">
+               <h3 className="text-2xl font-bold mb-1">2026/2027 Academic Year</h3>
+               <p className="text-blue-200 mb-6">Current Period: Semester 1</p>
+               <div className="w-full bg-white/10 rounded-full h-2 mb-2">
+                 <div className="bg-aerojet-sky h-2 rounded-full" style={{ width: '35%' }}></div>
+               </div>
+               <div className="flex justify-between text-xs text-slate-400">
+                 <span>Sep 2026</span>
+                 <span>35% Complete</span>
+                 <span>Jul 2027</span>
+               </div>
             </CardContent>
           </Card>
 
-          {/* Activity Feed */}
-          <Card>
-            <CardHeader><CardTitle>Recent Activity</CardTitle></CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                 <div className="flex gap-3 text-sm">
-                    <span className="text-slate-400 text-xs w-12 shrink-0">10:00 AM</span>
-                    <p><span className="font-bold">Admin</span> approved <span className="font-bold">John Doe</span></p>
-                 </div>
-                 <div className="flex gap-3 text-sm">
-                    <span className="text-slate-400 text-xs w-12 shrink-0">09:45 AM</span>
-                    <p><span className="font-bold">System</span> verified payment #INV-2024</p>
-                 </div>
+          {/* Recent Students List */}
+          <Card className="border-none shadow-lg">
+            <CardHeader>
+               <CardTitle>Recent Enrollments</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <div className="divide-y divide-slate-100">
+                {stats.recentStudents?.map((student: any) => (
+                  <div key={student.id} className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage src={student.user.image} />
+                        <AvatarFallback>{student.user.name?.[0]}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="text-sm font-bold text-slate-800">{student.user.name}</p>
+                        <p className="text-xs text-slate-500">{student.studentId || 'Applicant'}</p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-medium bg-green-50 text-green-700 px-2 py-1 rounded-full">
+                      {new Date(student.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

@@ -2,10 +2,14 @@ import { Metadata } from 'next';
 import UploadProofClient from './_components/UploadProofClient';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import { Suspense } from 'react'; // Import Suspense
 
 export const metadata: Metadata = {
   title: 'Upload Payment Proof',
 };
+
+// 1. FORCE DYNAMIC (Fixes the build error)
+export const dynamic = 'force-dynamic';
 
 export default function UploadProofPage() {
   return (
@@ -18,7 +22,10 @@ export default function UploadProofPage() {
             <p className="text-blue-100 text-sm mt-2">Upload your receipt to secure your spot.</p>
           </div>
           <div className="p-8">
-            <UploadProofClient />
+            {/* 2. Wrap Client Component in Suspense (Best Practice) */}
+            <Suspense fallback={<div>Loading...</div>}>
+              <UploadProofClient />
+            </Suspense>
           </div>
         </div>
       </div>

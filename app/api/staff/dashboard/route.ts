@@ -55,10 +55,13 @@ export async function GET(req: Request) {
       let paidSeatsCount = 0;
       nextWindow.runs.forEach(run => {
         run.bookings.forEach(booking => {
+          // Check if the student has a PAID fee entry that matches this module code
           const examFee = booking.student.fees.find(f => 
             f.description?.includes(run.course.code) && f.status === 'PAID'
           );
-          if (examFee) paidSeatsCount++;
+          if (examFee) {
+            paidSeatsCount++;
+          }
         });
       });
 
@@ -78,7 +81,42 @@ export async function GET(req: Request) {
       };
     }
 
-    // --- 6. FINAL RESPONSE ---
+    // --- 6. NEW: CALENDAR EVENTS (Exams & Deadlines) ---
+    const upcomingExams = await prisma.examRun.findMany({
+      where: { startDatetime: { gte: new Date() } },
+      include: { course: true },
+      take: 10,
+      orderBy: { startDatetime: 'asc' }
+    });
+
+    const upcomingDeadlines = await prisma.examWindow.findMany({
+      where: { endDate: { gte: new Date() } },
+      take: 5
+    });
+
+    const calendarEvents = [
+      ...upcomingExams.map(exam => ({
+        id: exam.id,
+        title: `Exam: ${exam.course.code}`,
+        date: exam.startDatetime,
+        type: 'EXAM'
+      })),
+      ...upcomingDeadlines.map(window => ({
+        id: window.id,
+        title: `Deadline: ${window.name}`,
+        date: window.endDate,
+        type: 'DEADLINE'
+      }))
+    ];
+
+    // --- 7. NEW: RECENT ENROLLMENTS (For Activity Feed) ---
+    const recentStudents = await prisma.student.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: { user: true }
+    });
+
+    // --- 8. FINAL CONSOLIDATED RESPONSE ---
     return NextResponse.json({
       studentStats: {
         total: totalStudents,
@@ -96,7 +134,9 @@ export async function GET(req: Request) {
         pendingApps,
         verifyingPayments
       },
-      windowTracker: windowStats
+      windowTracker: windowStats,
+      calendarEvents, // <--- New Data for Calendar
+      recentStudents  // <--- New Data for Feed
     });
 
   } catch (error) {
