@@ -3,7 +3,7 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PageHero from '@/components/PageHero';
-import ContactForm from '@/components/ContactForm'; // Import the client form
+import ContactForm from '@/components/ContactForm';
 
 export const metadata: Metadata = {
   title: 'Contact',
@@ -18,7 +18,7 @@ export default function ContactPage() {
         <PageHero 
           title="Contact Us"
           subtitle="Reach out to our admissions team for enquiries about EASA programmes."
-          backgroundImage="/airport.jpg"
+          backgroundImage="/contact-hero.jpg"
         />
 
         <div className="container mx-auto px-6 py-16 -mt-24 relative z-20">
@@ -39,7 +39,6 @@ export default function ContactPage() {
                             </p>
                         </div>
                     </div>
-
                     <div className="flex items-start gap-4">
                         <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">📞</div>
                         <div>
@@ -47,7 +46,6 @@ export default function ContactPage() {
                             <p className="text-sm text-slate-300 font-medium">+233-20-984-8423</p>
                         </div>
                     </div>
-
                     <div className="flex items-start gap-4">
                         <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">✉️</div>
                         <div>
@@ -57,10 +55,17 @@ export default function ContactPage() {
                     </div>
                 </div>
 
-                <div className="mt-12 h-60 rounded-3xl overflow-hidden border border-white/10 grayscale opacity-70">
+                {/* Optimized Map Container */}
+                <div className="mt-12 h-60 rounded-3xl overflow-hidden border border-white/10 grayscale opacity-70 relative bg-slate-800">
                     <iframe 
                         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3970.786377777076!2d-0.2085864241476562!3d5.598254333214875!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xfdf90a079636901%3A0x8772a4667556553a!2sAccra%20Technical%20Training%20Centre!5e0!3m2!1sen!2sgh!4v1709220000000!5m2!1sen!2sgh" 
-                        width="100%" height="100%" style={{border:0}} allowFullScreen={true} loading="lazy" 
+                        width="100%" 
+                        height="100%" 
+                        style={{border:0}} 
+                        allowFullScreen={true} 
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        className="absolute inset-0 w-full h-full"
                     ></iframe>
                 </div>
             </div>
@@ -71,10 +76,10 @@ export default function ContactPage() {
                  <p className="text-slate-500 mb-10">Fill out the form below and we will get back to you via email.</p>
                  <ContactForm />
             </div>
+
           </div>
         </div>
       </div>
-
       <Footer />
     </main>
   );

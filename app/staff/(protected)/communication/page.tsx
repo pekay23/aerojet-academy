@@ -1,22 +1,22 @@
 import { Metadata } from 'next';
-import UnifiedDirectoryClient from './_components/UnifiedDirectoryClient';
+import CommunicationClient from './_components/CommunicationClient';
 
 export const metadata: Metadata = {
-  title: 'Admin: Directory',
+  title: 'Staff: Communication',
 };
 
-export default function DirectoryPage() {
+export default function CommunicationPage() {
   return (
     <div className="p-4 md:p-8 space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">
-          Academy Directory
+          Communication Hub
         </h1>
         <p className="text-slate-500 mt-1">
-          Manage all students, instructors, and staff members.
+          Send announcements and emails to students, staff, or specific cohorts.
         </p>
       </div>
-      <UnifiedDirectoryClient />
+      <CommunicationClient />
     </div>
   );
 }

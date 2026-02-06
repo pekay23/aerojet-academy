@@ -131,7 +131,7 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
                     href={dashboardHref} 
                     className={`text-xs font-bold transition-colors ${displayAsLight ? 'text-gray-600 hover:text-aerojet-blue' : 'text-white hover:text-gray-200'}`}
                 >
-                  {status === 'authenticated' ? (isStaffOrAdmin ? 'DASHBOARD' : 'MY PORTAL') : 'PORTAL LOGIN'}
+                  {status === 'authenticated' ? (isStaffOrAdmin ? 'DASHBOARD' : 'PORTAL') : 'PORTAL LOGIN'}
                 </Link>
                 
                 {/* 3. Register/Apply Button (Hide for Staff) */}

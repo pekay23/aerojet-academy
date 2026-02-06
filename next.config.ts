@@ -21,6 +21,19 @@ const nextConfig: NextConfig = {
         port: '',
         pathname: '/**',
       },
+      // --- NEW: Added for UploadThing (Specific & Wildcard) ---
+      {
+        protocol: 'https',
+        hostname: 'gx1g03nvpo.ufs.sh',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.ufs.sh',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   // Optional: If you want to force the timezone to Africa/Accra for server-side dates

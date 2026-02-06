@@ -116,7 +116,7 @@ export async function PATCH(req: Request) {
   }
 }
 
-// DELETE: Soft Delete (Archive)
+// DELETE: Soft Delete (Archive) OR Hard Delete
 export async function DELETE(req: Request) {
   const session = await getServerSession(authOptions);
   
@@ -126,22 +126,34 @@ export async function DELETE(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
+  const permanent = searchParams.get('permanent') === 'true'; // Check for flag
 
   if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
   try {
-    // Perform Soft Delete
-    await prisma.user.update({
-      where: { id },
-      data: { 
-        isDeleted: true,
-        deletedAt: new Date(),
-        isActive: false // Also deactivate login access
-      }
-    });
+    if (permanent) {
+      // HARD DELETE: Removes record from DB entirely.
+      // Allows email to be reused.
+      await prisma.user.delete({
+        where: { id }
+      });
+    } else {
+      // SOFT DELETE: Marks as archived.
+      await prisma.user.update({
+        where: { id },
+        data: { 
+          isDeleted: true,
+          deletedAt: new Date(),
+          isActive: false 
+        }
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
+    console.error("Delete error:", error);
+    // If this fails, it's usually because of connected data (Fees, Applications).
+    // The Schema needs 'onDelete: Cascade' on those relations to fix strict SQL errors.
+    return NextResponse.json({ error: 'Delete failed. User may have dependent records.' }, { status: 500 });
   }
 }

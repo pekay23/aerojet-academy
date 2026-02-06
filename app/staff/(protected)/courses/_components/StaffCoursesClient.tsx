@@ -97,29 +97,40 @@ export default function StaffCoursesClient() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
-        {loading ? <div>Loading...</div> : courses.map(course => (
-          <Card key={course.id} className="group hover:border-aerojet-sky transition-colors relative">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <span className="bg-slate-100 text-slate-600 font-mono text-xs px-2 py-1 rounded">{course.code}</span>
-                <span className="font-bold text-slate-900">€{course.price}</span>
-              </div>
-              <h3 className="font-bold text-lg text-slate-800 mb-2">{course.title}</h3>
-              <p className="text-sm text-slate-500 line-clamp-2 mb-4">{course.description || "No description."}</p>
-              
-              {/* EDIT ACTIONS */}
-              <div className="flex gap-2 border-t pt-4">
-                <Button variant="outline" size="sm" className="w-full" onClick={() => openEditModal(course)}>
-                    <Pencil className="w-3 h-3 mr-2" /> Edit
-                </Button>
-                <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => handleDelete(course.id)}>
-                    <Trash2 className="w-3 h-3" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+  {loading ? <div>Loading...</div> : courses.map(course => (
+    <Card key={course.id} className="group border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-aerojet-sky dark:hover:border-aerojet-sky transition-colors relative shadow-sm hover:shadow-md">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start mb-4">
+          <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono text-xs px-2 py-1 rounded border border-slate-200 dark:border-slate-700">
+            {course.code}
+          </span>
+          <span className="font-bold text-lg text-slate-900 dark:text-white">
+            €{course.price}
+          </span>
+        </div>
+        
+        <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 mb-2 leading-tight">
+          {course.title}
+        </h3>
+        
+        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6 h-10">
+          {course.description || "No description provided."}
+        </p>
+        
+        {/* EDIT ACTIONS */}
+        <div className="flex gap-2 border-t border-slate-100 dark:border-slate-800 pt-4 mt-auto">
+          <Button variant="outline" size="sm" className="w-full text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800" onClick={() => openEditModal(course)}>
+              <Pencil className="w-3 h-3 mr-2" /> Edit
+          </Button>
+          <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => handleDelete(course.id)}>
+              <Trash2 className="w-3 h-3" />
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  ))}
+</div>
+
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>
