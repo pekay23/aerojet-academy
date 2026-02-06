@@ -4,9 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react"; 
-import { Wrench } from 'lucide-react'; // Added Icon
+import { Wrench } from 'lucide-react';
 
-// --- Data for navigation links ---
 const navLinks = {
   courses: [
     { title: "EASA Part-66 (Full-Time)", href: "/courses/easa-full-time" },
@@ -33,7 +32,7 @@ function MobileAccordion({ title, links, onLinkClick }: { title: string, links: 
         <span className="text-xl font-bold">{title}</span>
         <span className={`text-sm transform transition-transform ${isOpen ? 'rotate-180' : ''}`}>▼</span>
       </button>
-      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-500px opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-125 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
         <div className="flex flex-col space-y-3 pl-4 border-l-2 border-gray-100 ml-1">
           {links.map(link => (
             <Link key={link.title} href={link.href} onClick={onLinkClick} className="block text-sm text-gray-600 hover:text-aerojet-sky font-medium py-1">
@@ -47,8 +46,6 @@ function MobileAccordion({ title, links, onLinkClick }: { title: string, links: 
 }
 
 export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' }) {
-  // Check the environment variable
-  const isPortalLive = process.env.NEXT_PUBLIC_PORTAL_LIVE === 'true';
   const { data: session, status } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -69,14 +66,12 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
   const displayAsLight = scrolled || isLightPage; 
   const headerIsLight = displayAsLight || mobileMenuOpen;
 
-  // --- LOGIC: Determine User Role ---
   const userRole = (session?.user as any)?.role;
   const isStaffOrAdmin = userRole === 'ADMIN' || userRole === 'STAFF';
   const isInstructor = userRole === 'INSTRUCTOR';
 
-  // Determine Dashboard Link
-  let dashboardHref = '/portal/dashboard'; // Default
-  if (isStaffOrAdmin) dashboardHref = '/staff/dashboard'; // Was '/staff/applications', but dashboard is better entry
+  let dashboardHref = '/portal/dashboard';
+  if (isStaffOrAdmin) dashboardHref = '/staff/dashboard';
   if (isInstructor) dashboardHref = '/staff/materials';
 
   return (
@@ -111,11 +106,8 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
             <Link href="/news" className="hover:text-aerojet-sky transition">News</Link>
           </nav>
           
-          {/* Desktop CTA - ONLY SHOW IF LIVE OR LOGGED IN */}
           <div className="hidden md:flex items-center space-x-3">
-            {isPortalLive || status === 'authenticated' ? (
               <>
-                {/* 1. If Staff/Admin, show quick link */}
                 {isStaffOrAdmin && (
                   <Link 
                     href="/staff/dashboard" 
@@ -126,27 +118,19 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
                   </Link>
                 )}
 
-                {/* 2. Main Action Button */}
                 <Link 
-                    href={dashboardHref} 
+                    href={status === 'authenticated' ? dashboardHref : '/portal/login'} 
                     className={`text-xs font-bold transition-colors ${displayAsLight ? 'text-gray-600 hover:text-aerojet-blue' : 'text-white hover:text-gray-200'}`}
                 >
-                  {status === 'authenticated' ? (isStaffOrAdmin ? 'DASHBOARD' : 'PORTAL') : 'PORTAL LOGIN'}
+                  {status === 'authenticated' ? (isStaffOrAdmin ? 'DASHBOARD' : 'MY PORTAL') : 'PORTAL LOGIN'}
                 </Link>
                 
-                {/* 3. Register/Apply Button (Hide for Staff) */}
                 {!isStaffOrAdmin && (
                   <Link href="/register" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
                       {status === 'authenticated' ? 'Apply Now' : 'Register'}
                   </Link>
                 )}
               </>
-            ) : (
-              // Coming Soon State
-              <Link href="/contact" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
-                Contact Us
-              </Link>
-            )}
           </div>
 
           <button className="md:hidden p-2 focus:outline-none relative z-50" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
@@ -157,7 +141,6 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
         </div>
       </header>
 
-      {/* Mobile Menu Overlay */}
       <div className={`fixed inset-0 bg-white z-40 pt-24 px-6 overflow-y-auto transform transition-transform duration-300 ease-in-out md:hidden ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex flex-col space-y-2 pb-20">
           <MobileAccordion title="Courses" links={navLinks.courses} onLinkClick={() => setMobileMenuOpen(false)} />
@@ -167,9 +150,7 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
           <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block border-b border-gray-100 py-4 text-xl font-bold text-aerojet-blue">Contact</Link>
           
           <div className="pt-8 space-y-4">
-            {isPortalLive || status === 'authenticated' ? (
               <>
-                {/* Staff Mobile Link */}
                 {isStaffOrAdmin && (
                    <Link href="/staff/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex text-center text-white bg-slate-800 font-semibold border border-slate-800 py-3 rounded-md uppercase tracking-wider items-center justify-center gap-2">
                      <Wrench className="w-4 h-4" /> Staff Portal
@@ -186,11 +167,6 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
                   </Link>
                 )}
               </>
-            ) : (
-               <Link href="/contact" onClick={() => setMobileMenuOpen(false)} className="block bg-aerojet-sky text-white text-center py-4 rounded-md shadow-md font-bold uppercase tracking-wider">
-                  Contact Admissions
-               </Link>
-            )}
           </div>
         </div>
       </div>

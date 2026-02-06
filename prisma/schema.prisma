@@ -55,6 +55,8 @@ model User {
 
   isDeleted     Boolean   @default(false)
   deletedAt     DateTime?
+
+  lastPasswordChange DateTime?
 }
 
 model VerificationToken {
