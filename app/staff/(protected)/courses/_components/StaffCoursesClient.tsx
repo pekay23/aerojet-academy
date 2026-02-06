@@ -97,40 +97,45 @@ export default function StaffCoursesClient() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-6">
-  {loading ? <div>Loading...</div> : courses.map(course => (
-    <Card key={course.id} className="group border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-aerojet-sky dark:hover:border-aerojet-sky transition-colors relative shadow-sm hover:shadow-md">
+  {loading ? (
+    <div className="col-span-3 text-center py-12"><Loader2 className="w-8 h-8 animate-spin mx-auto text-primary"/></div>
+  ) : courses.map(course => (
+    /* 
+       FIX: 
+       - Light mode: bg-white with border
+       - Dark mode: bg-card (#2c3e50) with border
+    */
+    <Card key={course.id} className="bg-white dark:bg-card border-border shadow-sm hover:shadow-md transition-all group overflow-hidden">
       <CardContent className="p-6">
         <div className="flex justify-between items-start mb-4">
-          <span className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-mono text-xs px-2 py-1 rounded border border-slate-200 dark:border-slate-700">
+          <span className="bg-muted text-foreground/70 font-mono text-[10px] font-bold px-2 py-1 rounded border border-border">
             {course.code}
           </span>
-          <span className="font-bold text-lg text-slate-900 dark:text-white">
-            €{course.price}
+          <span className="font-black text-xl text-primary">
+            €{course.price.toLocaleString()}
           </span>
         </div>
         
-        <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 mb-2 leading-tight">
+        <h3 className="font-bold text-lg text-foreground mb-2 leading-tight group-hover:text-primary transition-colors">
           {course.title}
         </h3>
         
-        <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 mb-6 h-10">
-          {course.description || "No description provided."}
+        <p className="text-sm text-muted-foreground line-clamp-2 mb-6 h-10">
+          {course.description || "No description available for this module."}
         </p>
         
-        {/* EDIT ACTIONS */}
-        <div className="flex gap-2 border-t border-slate-100 dark:border-slate-800 pt-4 mt-auto">
-          <Button variant="outline" size="sm" className="w-full text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800" onClick={() => openEditModal(course)}>
-              <Pencil className="w-3 h-3 mr-2" /> Edit
+        <div className="flex gap-2 border-t border-border pt-4">
+          <Button variant="outline" size="sm" className="flex-1 font-bold text-[10px] uppercase tracking-widest" onClick={() => openEditModal(course)}>
+              <Pencil className="w-3.5 h-3.5 mr-2" /> Edit
           </Button>
-          <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20" onClick={() => handleDelete(course.id)}>
-              <Trash2 className="w-3 h-3" />
+          <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => handleDelete(course.id)}>
+              <Trash2 className="w-4 h-4" />
           </Button>
         </div>
       </CardContent>
     </Card>
   ))}
 </div>
-
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent>

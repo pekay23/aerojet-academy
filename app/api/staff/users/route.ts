@@ -1,30 +1,42 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Prisma } from '@prisma/client'; // Import Prisma type for where clause
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-// GET: List users (Supports filtering for 'deleted' vs 'active')
+// GET: List users (with filtering)
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
-  
-  // Security: Only Admins/Staff
   if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
-  // Check query params for "?view=trash"
   const { searchParams } = new URL(req.url);
-  const viewTrash = searchParams.get('view') === 'trash';
+  const view = searchParams.get('view');
+  const roleFilter = searchParams.get('role');
+
+  const where: Prisma.UserWhereInput = {
+    isDeleted: view === 'trash' ? true : false,
+  };
+
+  // --- THIS IS THE FIX ---
+  // Apply role filtering based on the query parameter
+  if (roleFilter === 'students') {
+    where.role = 'STUDENT';
+  } else if (roleFilter === 'staff') {
+    where.role = { in: ['ADMIN', 'STAFF', 'INSTRUCTOR'] };
+  }
+  // If no roleFilter, it fetches everyone (for backwards compatibility or other uses)
 
   try {
     const users = await prisma.user.findMany({
-      where: {
-        isDeleted: viewTrash ? true : false, // Show only deleted OR only active
+      where,
+      include: {
+        studentProfile: true, // Always include student profile to get the Student ID
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
     return NextResponse.json({ users });
   } catch (error) {

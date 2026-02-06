@@ -1,338 +1,265 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, FileText, CreditCard, Calendar as CalendarIcon, Clock, GraduationCap, ArrowUpRight, Activity, ChevronRight, MapPin } from 'lucide-react';
-import { Calendar } from '@/components/ui/calendar';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { 
+  Users, 
+  BookOpen, 
+  Calendar, 
+  FileCheck, 
+  TrendingUp, 
+  TrendingDown, 
+  MoreVertical, 
+  Loader2,
+  ArrowRight
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
-const chartData = [
-  { name: 'Jan', students: 40 },
-  { name: 'Feb', students: 45 },
-  { name: 'Mar', students: 60 },
-  { name: 'Apr', students: 90 },
-  { name: 'May', students: 110 },
-  { name: 'Jun', students: 125 },
-];
-
-export default function DashboardClient() {
+export default function StaffDashboard() {
+  const router = useRouter();
+  const [activeTab, setActiveTab] = useState("students");
   const [stats, setStats] = useState<any>(null);
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  
-  // Optimistic UI: Don't load events via API every click, filter locally instantly
-  const [selectedEvents, setSelectedEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/staff/dashboard')
-      .then(res => res.json())
-      .then(data => setStats(data));
+      .then(async (res) => {
+        if (res.status === 403) throw new Error("Unauthorized access.");
+        if (!res.ok) throw new Error("Failed to load dashboard data.");
+        return res.json();
+      })
+      .then(data => {
+        setStats(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
   }, []);
 
-  // Instant Filter Logic
-  useEffect(() => {
-    if (stats?.calendarEvents && date) {
-      const eventsOnDate = stats.calendarEvents.filter((e: any) => 
-        new Date(e.date).toDateString() === date.toDateString()
-      );
-      setSelectedEvents(eventsOnDate);
-    }
-  }, [date, stats]);
-
-  // SKELETON LOADING STATE (Optimistic Feel)
-  if (!stats) {
+  // 1. Loading State
+  if (loading) {
     return (
-        <div className="space-y-8 p-4">
-            <div className="grid gap-6 md:grid-cols-4">
-                {[1,2,3,4].map(i => <div key={i} className="h-32 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse shadow-sm" />)}
-            </div>
-            <div className="grid gap-8 md:grid-cols-7">
-                <div className="md:col-span-3 h-96 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse shadow-sm" />
-                <div className="md:col-span-4 h-96 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse shadow-sm" />
-            </div>
-        </div>
+      <div className="flex h-96 items-center justify-center">
+        <Loader2 className="w-10 h-10 animate-spin text-aerojet-sky" />
+      </div>
     );
   }
 
-  const cardClass = "relative overflow-hidden border-none shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group";
+  // 2. Error State (Handles the 403)
+  if (error) {
+    return (
+      <div className="p-8 text-center bg-red-50 text-red-600 rounded-xl border border-red-100">
+        <p className="font-bold">Error: {error}</p>
+        <p className="text-sm mt-2">Please ensure you are logged in as an Administrator.</p>
+        <Button onClick={() => window.location.reload()} variant="outline" className="mt-4">Retry</Button>
+      </div>
+    );
+  }
+
+  // 3. DEFENSIVE CHECK: If stats is still null for some reason
+  if (!stats) return null;
+
+  // Now we define the stats array, because we know 'stats' is loaded
+  const adminStats = [
+    {
+      title: "Total Students",
+      value: stats.studentStats?.total || 0, // Using Optional Chaining + Default
+      change: `+${stats.studentStats?.active || 0}`,
+      trend: "up",
+      subtitle: "Active enrollments",
+      icon: Users,
+      color: "text-blue-600"
+    },
+    {
+      title: "Active Instructors",
+      value: stats.teamStats?.instructors || 0,
+      change: "Stable",
+      trend: "neutral",
+      subtitle: "Teaching staff",
+      icon: BookOpen,
+      color: "text-purple-600"
+    },
+    {
+      title: "Pending Apps",
+      value: stats.opsStats?.pendingApps || 0,
+      change: "Required",
+      trend: "up",
+      subtitle: "Awaiting review",
+      icon: FileCheck,
+      color: "text-orange-600"
+    },
+    {
+      title: "Verify Payments",
+      value: stats.opsStats?.verifyingPayments || 0,
+      change: "Action",
+      trend: "down",
+      subtitle: "Finance queue",
+      icon: Calendar,
+      color: "text-emerald-600"
+    }
+  ];
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      
-      {/* --- HERO STATS ROW --- */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        
-        {/* Active Students - Blue Gradient */}
-        <Card className={`${cardClass} bg-linear-to-br from-indigo-500 to-purple-600 text-white`}>
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Users className="w-24 h-24" />
-          </div>
-          <CardContent className="p-6 relative z-10">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-indigo-100 text-sm font-medium mb-1">Active Students</p>
-                <h3 className="text-4xl font-black">{stats.studentStats?.active || 0}</h3>
-              </div>
-              <div className="p-2 bg-white/10 rounded-lg backdrop-blur-md">
-                <GraduationCap className="h-6 w-6 text-white" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-xs text-indigo-200">
-              <span className="bg-white/20 px-1.5 py-0.5 rounded text-white mr-2">
-                {stats.studentStats?.total} Total
-              </span>
-              Enrolled in system
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Pending Apps - Orange Gradient */}
-        <Card className={`${cardClass} bg-linear-to-br from-orange-500 to-red-600 text-white`}>
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <FileText className="w-24 h-24" />
-          </div>
-          <CardContent className="p-6 relative z-10">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-orange-100 text-sm font-medium mb-1">Pending Applications</p>
-                <h3 className="text-4xl font-black">{stats.opsStats?.pendingApps || 0}</h3>
-              </div>
-              <div className="p-2 bg-white/10 rounded-lg backdrop-blur-md">
-                <FileText className="h-6 w-6 text-white" />
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-orange-100 flex items-center gap-1 cursor-pointer hover:underline">
-              Review Queue <ArrowUpRight className="w-3 h-3" />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Pending Finance - Emerald Gradient */}
-        <Card className={`${cardClass} bg-linear-to-br from-emerald-500 to-teal-700 text-white`}>
-          <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-            <CreditCard className="w-24 h-24" />
-          </div>
-          <CardContent className="p-6 relative z-10">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-emerald-100 text-sm font-medium mb-1">Verify Payments</p>
-                <h3 className="text-4xl font-black">{stats.opsStats?.verifyingPayments || 0}</h3>
-              </div>
-              <div className="p-2 bg-white/10 rounded-lg backdrop-blur-md">
-                <CreditCard className="h-6 w-6 text-white" />
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-emerald-100">
-              Transactions pending approval
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Staff Count - Slate/Dark */}
-        <Card className={`${cardClass} bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 text-slate-800 dark:text-slate-200`}>
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mb-1">Instructors</p>
-                <h3 className="text-4xl font-black text-slate-900 dark:text-white">{stats.teamStats?.instructors || 0}</h3>
-              </div>
-              <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
-                <Users className="h-6 w-6 text-slate-600 dark:text-slate-400" />
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-slate-400">
-              Active teaching staff
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* --- CHART & FEED --- */}
-      <div className="grid lg:grid-cols-3 gap-8">
-        <Card className="lg:col-span-2 border-none shadow-lg dark:bg-slate-900">
-          <CardHeader>
-            <CardTitle>Enrollment Growth</CardTitle>
-          </CardHeader>
-          <CardContent className="h-75">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="colorStudents" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#2880b9" stopOpacity={0.8}/>
-                    <stop offset="95%" stopColor="#2880b9" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8'}} />
-                <Tooltip 
-                    contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px', color: '#fff' }}
-                    itemStyle={{ color: '#fff' }}
-                />
-                <Area type="monotone" dataKey="students" stroke="#2880b9" strokeWidth={3} fillOpacity={1} fill="url(#colorStudents)" />
-              </AreaChart>
-            </ResponsiveContainer>
-          </CardContent>
-        </Card>
-
-                {/* Activity Feed - Improved Contrast */}
-        <Card className="border shadow-md bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
-          <CardHeader className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800 py-4">
-            <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
-                <Activity className="w-5 h-5 text-aerojet-sky"/> Live Activity
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-0">
-            <div className="divide-y divide-slate-100 dark:divide-slate-800 max-h-75 overflow-y-auto">
-                {stats.recentStudents?.map((student: any) => (
-                    <div key={student.id} className="p-4 flex gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
-                        {/* Status Dot */}
-                        <div className="mt-1.5 relative">
-                            <div className="w-2.5 h-2.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
-                            <div className="absolute inset-0 w-2.5 h-2.5 rounded-full bg-green-500 animate-ping opacity-75" />
-                        </div>
-                        
-                        <div className="flex-1">
-                            <p className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-0.5">
-                                New Student Registered
-                            </p>
-                            <p className="text-xs font-medium text-slate-600 dark:text-slate-400 leading-snug">
-                                <span className="text-aerojet-sky">{student.user.name}</span> joined the <span className="bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded text-slate-700 dark:text-slate-300">{student.cohort || 'General'}</span> cohort.
-                            </p>
-                            <span className="text-[10px] text-slate-400 mt-2 block font-mono">
-                                {new Date(student.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                            </span>
-                        </div>
-                    </div>
-                ))}
-                {(!stats.recentStudents || stats.recentStudents.length === 0) && (
-                    <div className="p-8 text-center text-slate-400 text-sm italic">
-                        No recent activity recorded.
-                    </div>
-                )}
-            </div>
-          </CardContent>
-        </Card>
-
-      </div>
-
-      {/* --- ENHANCED CALENDAR SECTION --- */}
-      <div className="grid gap-8 md:grid-cols-7">
-        
-        {/* Calendar Widget (Left 3 Cols) */}
-        <Card className="md:col-span-3 border-none shadow-lg overflow-hidden flex flex-col dark:bg-slate-900 bg-white h-full">
-          <CardHeader className="bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div className="flex justify-between items-center">
-                <CardTitle className="flex items-center gap-2 text-slate-800 dark:text-slate-200">
-                    <CalendarIcon className="w-5 h-5 text-aerojet-sky"/> Academic Calendar
-                </CardTitle>
-                <Badge variant="outline" className="text-xs font-normal">
-                    {new Date().toLocaleString('default', { month: 'long' })}
-                </Badge>
-            </div>
-          </CardHeader>
-          
-          <div className="p-4 flex justify-center bg-white dark:bg-slate-900 min-h-80 items-start">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border-none w-full max-w-full"
-              classNames={{
-                day_selected: "bg-aerojet-sky text-white hover:bg-aerojet-blue hover:text-white focus:bg-aerojet-sky focus:text-white",
-                day_today: "bg-slate-100 text-slate-900 font-bold dark:bg-slate-800 dark:text-slate-100",
-              }}
-              modifiers={{
-                hasEvent: (date) => stats.calendarEvents.some((e:any) => new Date(e.date).toDateString() === date.toDateString())
-              }}
-              modifiersStyles={{
-                hasEvent: { 
-                    fontWeight: 'bold', 
-                    color: '#2880b9',
-                    textDecoration: 'underline decoration-2 decoration-aerojet-sky/30 underline-offset-4' 
-                }
-              }}
-            />
-          </div>
-
-          {/* Agenda List */}
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-5 border-t border-slate-100 dark:border-slate-800 flex-1 overflow-y-auto max-h-75">
-            <div className="flex justify-between items-center mb-4">
-                <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                    Agenda: {date?.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric'})}
-                </h4>
-                {selectedEvents.length > 0 && <Badge className="bg-aerojet-sky text-[10px]">{selectedEvents.length} Events</Badge>}
-            </div>
-            
-            {selectedEvents.length > 0 ? (
-              <div className="space-y-3">
-                {selectedEvents.map((e: any, i: number) => (
-                  <div key={i} className="group flex items-start gap-3 p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700 shadow-sm hover:shadow-md transition-all hover:border-aerojet-sky cursor-pointer">
-                    <div className={`mt-1 w-2.5 h-2.5 rounded-full shrink-0 ${e.type === 'EXAM' ? 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`} />
-                    <div className="flex-1">
-                        <p className="text-sm font-bold text-slate-700 dark:text-slate-200 group-hover:text-aerojet-blue transition-colors">{e.title}</p>
-                        <div className="flex items-center gap-2 mt-1">
-                            <span className="text-xs text-slate-400 flex items-center gap-1">
-                                <Clock className="w-3 h-3"/> 
-                                {new Date(e.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                            </span>
-                            {e.type === 'EXAM' && (
-                                <span className="text-xs text-slate-400 flex items-center gap-1">
-                                    <MapPin className="w-3 h-3"/> Room A
-                                </span>
-                            )}
-                        </div>
-                    </div>
-                    <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-aerojet-sky" />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-slate-400 gap-2 min-h-25">
-                 <CalendarIcon className="w-8 h-8 opacity-20" />
-                 <p className="text-sm">No events scheduled.</p>
-              </div>
-            )}
-          </div>
-        </Card>
-
-        {/* Right Column */}
-        <div className="md:col-span-4 space-y-6">
-          <Card className="bg-slate-900 text-white border-none shadow-xl relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity"><Clock className="w-32 h-32" /></div>
-            <CardContent className="p-8 relative z-10">
-               <h3 className="text-2xl font-bold mb-1">2026/2027 Academic Year</h3>
-               <p className="text-blue-200 mb-6">Current Period: Semester 1</p>
-               <div className="w-full bg-white/10 rounded-full h-2 mb-2"><div className="bg-aerojet-sky h-2 rounded-full" style={{ width: '35%' }}></div></div>
-               <div className="flex justify-between text-xs text-slate-400"><span>Sep 2026</span><span>35% Complete</span><span>Jul 2027</span></div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-none shadow-lg dark:bg-slate-900">
-            <CardHeader><CardTitle>Recent Enrollments</CardTitle></CardHeader>
-            <CardContent className="p-0">
-              <div className="divide-y divide-slate-100 dark:divide-slate-800">
-                {stats.recentStudents?.map((student: any) => (
-                  <div key={student.id} className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage src={student.user.image} />
-                        <AvatarFallback>{student.user.name?.[0]}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{student.user.name}</p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">{student.studentId || 'Applicant'}</p>
-                      </div>
-                    </div>
-                    <span className="text-xs font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-1 rounded-full">{new Date(student.createdAt).toLocaleDateString()}</span>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+    <div className="space-y-8 animate-in fade-in duration-500">
+      {/* ... rest of your JSX rendering adminStats ... */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">Admin Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Academy Management Command Center</p>
         </div>
       </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {adminStats.map((stat, idx) => {
+          const Icon = stat.icon;
+          return (
+            <Card key={idx} className="border border-border bg-card shadow-sm hover:shadow-md transition-all">
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">{stat.title}</p>
+                    <h3 className="text-3xl font-black text-foreground">{stat.value}</h3>
+                  </div>
+                  <div className="p-3 rounded-xl bg-muted/50">
+                    <Icon className={`w-5 h-5 ${stat.color}`} />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-green-500">{stat.change}</span>
+                  <span className="text-xs text-muted-foreground">{stat.subtitle}</span>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    
+      {/* Quick Access Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-linear-to-br from-blue-500/5 to-transparent border-border hover:border-aerojet-sky transition-colors cursor-pointer group" onClick={() => router.push('/staff/applications')}>
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-all">
+              <FileCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground">Review Applications</h3>
+              <p className="text-xs text-muted-foreground">{stats.opsStats.pendingApps} waiting for you</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-linear-to-br from-purple-500/5 to-transparent border-border hover:border-purple-500 transition-colors cursor-pointer group" onClick={() => router.push('/staff/exams')}>
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 group-hover:bg-purple-600 group-hover:text-white transition-all">
+              <Calendar className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground">Exam Scheduling</h3>
+              <p className="text-xs text-muted-foreground">Manage upcoming sittings</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-linear-to-br from-emerald-500/5 to-transparent border-border hover:border-emerald-500 transition-colors cursor-pointer group" onClick={() => router.push('/staff/finance')}>
+          <CardContent className="p-6 flex items-center gap-4">
+            <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-all">
+              <Users className="w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="font-bold text-foreground">Finance Verify</h3>
+              <p className="text-xs text-muted-foreground">{stats.opsStats.verifyingPayments} proof uploads to check</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Real Data Tabs Section */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="bg-muted/50 p-1 rounded-xl h-auto border border-border">
+          <TabsTrigger value="students" className="px-6 py-2.5 data-state-active:bg-background data-state-active:shadow-sm rounded-lg">
+            Recent Students
+            <Badge className="ml-2 bg-primary/10 text-primary border-none">{stats.studentStats.total}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="calendar" className="px-6 py-2.5 data-state-active:bg-background data-state-active:shadow-sm rounded-lg">
+            Today's Events
+            <Badge className="ml-2 bg-orange-500/10 text-orange-600 border-none">{stats.calendarEvents.length}</Badge>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="students" className="animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <Card className="border-border bg-card shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/30 border-b border-border">
+                  <tr>
+                    <th className="p-4 text-left font-bold text-muted-foreground uppercase tracking-widest text-[10px]">Student Name</th>
+                    <th className="p-4 text-left font-bold text-muted-foreground uppercase tracking-widest text-[10px]">Email</th>
+                    <th className="p-4 text-left font-bold text-muted-foreground uppercase tracking-widest text-[10px]">Status</th>
+                    <th className="p-4 text-left font-bold text-muted-foreground uppercase tracking-widest text-[10px]">Joined</th>
+                    <th className="p-4"></th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {stats.recentStudents?.map((student: any) => (
+                    <tr key={student.id} className="hover:bg-muted/30 transition-colors group">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-600 dark:text-slate-400">
+                            {student.user.name?.[0]}
+                          </div>
+                          <span className="font-semibold text-foreground">{student.user.name}</span>
+                        </div>
+                      </td>
+                      <td className="p-4 text-muted-foreground font-medium">{student.user.email}</td>
+                      <td className="p-4">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-blue-500/10 text-blue-600 dark:text-blue-400 uppercase border border-blue-500/20">
+                          {student.enrollmentStatus}
+                        </span>
+                      </td>
+                      <td className="p-4 text-muted-foreground">{new Date(student.createdAt).toLocaleDateString()}</td>
+                      <td className="p-4 text-right">
+                        <Button variant="ghost" size="icon" className="group-hover:text-primary transition-colors">
+                          <MoreVertical className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="calendar">
+           <Card className="border-border bg-card p-0 overflow-hidden shadow-sm">
+              <div className="divide-y divide-border">
+                {stats.calendarEvents?.length > 0 ? (
+                  stats.calendarEvents.map((e: any, i: number) => (
+                    <div key={i} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-2 h-2 rounded-full ${e.type === 'EXAM' ? 'bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]' : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'}`} />
+                        <div>
+                          <p className="font-bold text-foreground">{e.title}</p>
+                          <p className="text-xs text-muted-foreground">{new Date(e.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                        </div>
+                      </div>
+                      <Badge variant="outline" className="font-mono text-[10px]">{new Date(e.date).toLocaleDateString()}</Badge>
+                    </div>
+                  ))
+                ) : (
+                  <div className="p-12 text-center text-muted-foreground italic">No events scheduled for today.</div>
+                )}
+              </div>
+           </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

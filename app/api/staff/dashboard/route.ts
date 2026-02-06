@@ -14,61 +14,82 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // --- 2. STUDENT STATS ---
-    const totalStudents = await prisma.user.count({ where: { role: 'STUDENT' } });
-    const activeStudents = await prisma.user.count({ where: { role: 'STUDENT', isActive: true } });
-    const inactiveStudents = totalStudents - activeStudents;
+    // 🚀 PERFORMANCE OPTIMIZATION: Execute all independent queries in parallel
+    const [
+      totalStudents,
+      activeStudents,
+      maleStudents,
+      femaleStudents,
+      totalStaff,
+      totalInstructors,
+      totalAdmins,
+      pendingApps,
+      verifyingPayments,
+      nextWindow,
+      upcomingExams,
+      upcomingDeadlines,
+      recentStudents
+    ] = await Promise.all([
+      // Student Counts
+      prisma.user.count({ where: { role: 'STUDENT', isDeleted: false } }),
+      prisma.user.count({ where: { role: 'STUDENT', isActive: true, isDeleted: false } }),
+      prisma.student.count({ where: { gender: 'MALE', user: { isDeleted: false } } }),
+      prisma.student.count({ where: { gender: 'FEMALE', user: { isDeleted: false } } }),
+      
+      // Team Counts
+      prisma.user.count({ where: { role: 'STAFF', isDeleted: false } }),
+      prisma.user.count({ where: { role: 'INSTRUCTOR', isDeleted: false } }),
+      prisma.user.count({ where: { role: 'ADMIN', isDeleted: false } }),
+      
+      // Ops Counts
+      prisma.application.count({ where: { status: 'PENDING' } }),
+      prisma.fee.count({ where: { status: 'VERIFYING' } }),
 
-    const maleStudents = await prisma.student.count({ where: { gender: 'MALE' } });
-    const femaleStudents = await prisma.student.count({ where: { gender: 'FEMALE' } });
-
-    // --- 3. TEAM STATS ---
-    const totalStaff = await prisma.user.count({ where: { role: 'STAFF' } });
-    const totalInstructors = await prisma.user.count({ where: { role: 'INSTRUCTOR' } });
-    const totalAdmins = await prisma.user.count({ where: { role: 'ADMIN' } });
-
-    // --- 4. OPERATIONAL STATS ---
-    const pendingApps = await prisma.application.count({ where: { status: 'PENDING' } });
-    const verifyingPayments = await prisma.fee.count({ where: { status: 'VERIFYING' } });
-
-    // --- 5. EXAM WINDOW TRACKER LOGIC ---
-    const nextWindow = await prisma.examWindow.findFirst({
-      where: { endDate: { gt: new Date() } },
-      include: {
-        runs: {
-          include: {
-            course: true,
-            bookings: {
-              include: { 
-                student: { include: { fees: true } } 
-              }
+      // Data Fetches
+      prisma.examWindow.findFirst({
+        where: { endDate: { gt: new Date() } },
+        include: {
+          runs: {
+            include: {
+              course: true,
+              bookings: { include: { student: { include: { fees: true } } } }
             }
           }
-        }
-      },
-      orderBy: { startDate: 'asc' }
-    });
+        },
+        orderBy: { startDate: 'asc' }
+      }),
+      prisma.examRun.findMany({
+        where: { startDatetime: { gte: new Date() } },
+        include: { course: true },
+        take: 10,
+        orderBy: { startDatetime: 'asc' }
+      }),
+      prisma.examWindow.findMany({
+        where: { endDate: { gte: new Date() } },
+        take: 5
+      }),
+      prisma.student.findMany({
+        take: 5,
+        orderBy: { createdAt: 'desc' },
+        include: { user: { select: { name: true, email: true, image: true } } }
+      })
+    ]);
 
+    // --- Process Window Tracker ---
     let windowStats = null;
-
     if (nextWindow) {
       let paidSeatsCount = 0;
       nextWindow.runs.forEach(run => {
         run.bookings.forEach(booking => {
-          // Check if the student has a PAID fee entry that matches this module code
           const examFee = booking.student.fees.find(f => 
             f.description?.includes(run.course.code) && f.status === 'PAID'
           );
-          if (examFee) {
-            paidSeatsCount++;
-          }
+          if (examFee) paidSeatsCount++;
         });
       });
 
-      const today = new Date();
       const cutoff = new Date(nextWindow.cutoffDate);
-      const diffTime = cutoff.getTime() - today.getTime();
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      const diffDays = Math.ceil((cutoff.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
 
       windowStats = {
         id: nextWindow.id,
@@ -81,19 +102,7 @@ export async function GET(req: Request) {
       };
     }
 
-    // --- 6. NEW: CALENDAR EVENTS (Exams & Deadlines) ---
-    const upcomingExams = await prisma.examRun.findMany({
-      where: { startDatetime: { gte: new Date() } },
-      include: { course: true },
-      take: 10,
-      orderBy: { startDatetime: 'asc' }
-    });
-
-    const upcomingDeadlines = await prisma.examWindow.findMany({
-      where: { endDate: { gte: new Date() } },
-      take: 5
-    });
-
+    // --- Merge Calendar Events ---
     const calendarEvents = [
       ...upcomingExams.map(exam => ({
         id: exam.id,
@@ -109,38 +118,18 @@ export async function GET(req: Request) {
       }))
     ];
 
-    // --- 7. NEW: RECENT ENROLLMENTS (For Activity Feed) ---
-    const recentStudents = await prisma.student.findMany({
-      take: 5,
-      orderBy: { createdAt: 'desc' },
-      include: { user: true }
-    });
-
-    // --- 8. FINAL CONSOLIDATED RESPONSE ---
+    // --- Return Consolidated Result ---
     return NextResponse.json({
-      studentStats: {
-        total: totalStudents,
-        active: activeStudents,
-        inactive: inactiveStudents,
-        male: maleStudents,
-        female: femaleStudents
-      },
-      teamStats: {
-        staff: totalStaff,
-        instructors: totalInstructors,
-        admins: totalAdmins
-      },
-      opsStats: {
-        pendingApps,
-        verifyingPayments
-      },
+      studentStats: { total: totalStudents, active: activeStudents, male: maleStudents, female: femaleStudents },
+      teamStats: { staff: totalStaff, instructors: totalInstructors, admins: totalAdmins },
+      opsStats: { pendingApps, verifyingPayments },
       windowTracker: windowStats,
-      calendarEvents, // <--- New Data for Calendar
-      recentStudents  // <--- New Data for Feed
+      calendarEvents,
+      recentStudents
     });
 
   } catch (error) {
-    console.error("Dashboard API Error:", error);
-    return NextResponse.json({ error: 'Failed to fetch dashboard data' }, { status: 500 });
+    console.error("DASHBOARD_API_ERROR:", error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

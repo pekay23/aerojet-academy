@@ -11,17 +11,12 @@ export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     
-    if (!session || !session.user) {
-      return NextResponse.json({ error: 'Unauthenticated' }, { status: 401 });
-    }
-
-    const role = (session.user as any).role;
-    if (role === 'STUDENT') {
+    if (!session || !session.user || (session.user as any).role === 'STUDENT') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
-
+    
     const payments = await prisma.fee.findMany({
-      where: { status: 'VERIFYING' },
+      where: { status: 'VERIFYING' }, // This is correct.
       include: { 
         student: { 
           include: { user: true } 
@@ -29,7 +24,7 @@ export async function GET(req: Request) {
       },
       orderBy: { dueDate: 'desc' }
     });
-
+    
     return NextResponse.json({ payments: payments || [] });
 
   } catch (error) {
@@ -48,15 +43,10 @@ export async function POST(req: Request) {
 
   try {
     const { feeId, amountPaid } = await req.json();
-
-    // 1. Fetch fee details along with student and auth user info
+    
     const fee = await prisma.fee.findUnique({ 
         where: { id: feeId },
-        include: { 
-            student: { 
-                include: { user: true } 
-            } 
-        }
+        include: { student: { include: { user: true } } }
     });
 
     if (!fee) return NextResponse.json({ error: 'Fee not found' }, { status: 404 });
@@ -64,15 +54,13 @@ export async function POST(req: Request) {
     const paidAmount = parseFloat(amountPaid);
     const newPaidTotal = fee.paid + paidAmount;
     
-    // Determine New Status
-    let newStatus = 'UNPAID';
+    let newStatus = 'PARTIAL';
     if (newPaidTotal >= fee.amount) newStatus = 'PAID';
-    else if (newPaidTotal > 0) newStatus = 'PARTIAL';
-
-    // Check 40% Threshold for Auto-Enrollment
-    const isDepositThresholdMet = newPaidTotal >= (fee.amount * 0.40);
-
-    // 2. Execute Database Transaction
+    
+    // Check 40% Threshold for Auto-Enrollment on Tuition (not just any fee)
+    const isTuition = fee.description?.toLowerCase().includes('tuition');
+    const isDepositThresholdMet = isTuition && newPaidTotal >= (fee.amount * 0.40);
+    
     await prisma.$transaction(async (tx) => {
         // A. Update the Fee Record
         await tx.fee.update({
@@ -83,7 +71,15 @@ export async function POST(req: Request) {
             }
         });
 
-        // B. Handle Auto-Enrollment
+        // B. Activate user account if Registration Fee is paid
+        if (fee.description?.includes('Registration Fee') && newStatus === 'PAID') {
+            await tx.user.update({
+                where: { id: fee.student.userId },
+                data: { isActive: true }
+            });
+        }
+        
+        // C. Handle Auto-Enrollment for Tuition
         if (isDepositThresholdMet && fee.student.enrollmentStatus !== 'ENROLLED') {
              await tx.student.update({
                 where: { id: fee.studentId },
@@ -91,19 +87,17 @@ export async function POST(req: Request) {
             });
         }
         
-        // C. Handle Bundle/Wallet Credits (Only if fully paid)
-        if (newStatus === 'PAID' && fee.description && fee.description.startsWith('BUNDLE:')) {
+        // D. Handle Bundle/Wallet Credits
+        if (newStatus === 'PAID' && fee.description?.startsWith('BUNDLE:')) {
             const match = fee.description.match(/\((\d+) Credits\)/);
-            if (match && match[1]) {
+            if (match?.[1]) {
                 const credits = parseInt(match[1]);
-                let wallet = await tx.wallet.findUnique({ where: { studentId: fee.studentId } });
-                if (!wallet) {
-                    wallet = await tx.wallet.create({ data: { studentId: fee.studentId, balance: 0 } });
-                }
-                await tx.wallet.update({
-                    where: { id: wallet.id },
-                    data: { balance: { increment: credits } }
+                const wallet = await tx.wallet.upsert({
+                    where: { studentId: fee.studentId },
+                    update: { balance: { increment: credits } },
+                    create: { studentId: fee.studentId, balance: credits }
                 });
+
                 await tx.walletTransaction.create({
                     data: { 
                         walletId: wallet.id, 
@@ -116,20 +110,17 @@ export async function POST(req: Request) {
         }
     });
 
-    // 3. TRIGGER NOTIFICATION: Send email to student
-    // We use the email from the linked User account
+    // 3. TRIGGER NOTIFICATION
     const studentEmail = fee.student.user.email;
     const studentName = fee.student.user.name || "Student";
-
     if (studentEmail) {
         try {
             await sendPaymentVerifiedEmail(studentEmail, studentName);
         } catch (emailError) {
             console.error("Notification Email Failed:", emailError);
-            // We don't fail the whole request if just the email fails
         }
     }
-
+    
     return NextResponse.json({ success: true });
 
   } catch (error) {

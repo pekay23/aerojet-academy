@@ -29,17 +29,20 @@ const Icons = {
 // --- Menu Data ---
 const allMenuItems = [
   { title: "Dashboard", href: "/staff/dashboard", icon: Icons.Dashboard, roles: ['ADMIN', 'STAFF', 'INSTRUCTOR'] },
-  { title: "Applications", href: "/staff/applications", icon: Icons.Applications, roles: ['ADMIN', 'STAFF'] },
+  { title: "Admissions", href: "/staff/admissions", icon: Icons.Applications, roles: ['ADMIN', 'STAFF'] },
+  { title: "Directory", href: "/staff/users", icon: Icons.Users, roles: ['ADMIN', 'STAFF'] }, // Merged Students/Users
+  { title: "Finance", href: "/staff/finance", icon: Icons.Finance, roles: ['ADMIN', 'STAFF'] },
   { title: "Courses", href: "/staff/courses", icon: Icons.Courses, roles: ['ADMIN', 'STAFF'] },
-  { title: "Exam Management", href: "/staff/exams", icon: Icons.Exams, roles: ['ADMIN', 'STAFF'] },
-  { title: "Results Publishing", href: "/staff/results", icon: Icons.Results, roles: ['ADMIN', 'STAFF', 'INSTRUCTOR'] }, 
-  { title: "Teaching Materials", href: "/staff/materials", icon: Icons.Courses, roles: ['INSTRUCTOR'] }, 
-  { title: "Attendance", href: "/staff/attendance", icon: Icons.Students, roles: ['ADMIN', 'STAFF', 'INSTRUCTOR'] }, 
-  { title: "Finance & Verify", href: "/staff/finance", icon: Icons.Finance, roles: ['ADMIN', 'STAFF'] },
+  { title: "Exams", href: "/staff/exams", icon: Icons.Exams, roles: ['ADMIN', 'STAFF'] },
   { title: "Communication", href: "/staff/communication", icon: Icons.Communication, roles: ['ADMIN', 'STAFF'] },
-  { title: "Student Directory", href: "/staff/users", icon: Icons.Students, roles: ['ADMIN', 'STAFF'] },
-  { title: "Admissions Manager", href: "/staff/admissions", icon: Icons.Applications, roles: ['ADMIN'] }, 
-  { title: "System Settings", href: "/staff/settings", icon: Icons.Settings, roles: ['ADMIN', 'STAFF'] },
+  
+  // Instructor-Specific
+  { title: "My Classes", href: "/staff/materials", icon: Icons.Courses, roles: ['INSTRUCTOR'] }, 
+  { title: "Attendance", href: "/staff/attendance", icon: Icons.Students, roles: ['INSTRUCTOR'] }, 
+  { title: "Grading", href: "/staff/results", icon: Icons.Results, roles: ['INSTRUCTOR'] }, 
+
+  // Admin Only
+  { title: "System Settings", href: "/staff/settings", icon: Icons.Settings, roles: ['ADMIN'] },
 ];
 
 export default function StaffSidebar({ user, collapsed = false, setCollapsed }: { user: any, collapsed?: boolean, setCollapsed?: (v: boolean) => void }) {
