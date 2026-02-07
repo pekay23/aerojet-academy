@@ -4,9 +4,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const DOMAIN = process.env.NEXT_PUBLIC_APP_URL || 'https://aerojet-academy.com';
 
-// --- VISUAL ASSETS ---
-const LOGO_DARK_ON_WHITE = `${DOMAIN}/AATA_logo_hor_onWhite.png`; // Header
-const LOGO_WHITE_ON_DARK = `${DOMAIN}/ATA_logo_hor_onDark.png`;   // Footer
+const LOGO_DARK_ON_WHITE = `${DOMAIN}/AATA_logo_hor_onWhite.png`; 
+const LOGO_WHITE_ON_DARK = `${DOMAIN}/ATA_logo_hor_onDark.png`;   
 
 const COLORS = {
   navy: '#002a5c',
@@ -16,7 +15,6 @@ const COLORS = {
   text: '#334155'
 };
 
-// --- SHARED HTML WRAPPER ---
 const wrapEmail = (title: string, bodyContent: string) => {
   return `
     <!DOCTYPE html>
@@ -27,15 +25,17 @@ const wrapEmail = (title: string, bodyContent: string) => {
         <style>
           /* RESET */
           body { margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: ${COLORS.gray}; color: ${COLORS.text}; }
-          table { border-collapse: collapse; width: 100%; }
+          table { border-collapse: collapse; width: 100%; border-spacing: 0; }
+          img { border: 0; outline: none; text-decoration: none; }
           
           /* CONTAINER */
-          .wrapper { width: 100%; background-color: ${COLORS.gray}; padding: 40px 0; }
-          .main-table { max-width: 600px; margin: 0 auto; background-color: ${COLORS.white}; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+          /* Changed padding to 0 to make header/footer touch edges if desired, or small padding for card look */
+          .wrapper { width: 100%; background-color: ${COLORS.gray}; padding: 20px 0 0 0; } 
+          .main-table { max-width: 600px; margin: 0 auto; background-color: ${COLORS.white}; border-radius: 8px 8px 0 0; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
           
-          /* HEADER (Sleek like Navbar) */
+          /* HEADER */
           .header { background-color: ${COLORS.white}; padding: 20px 30px; border-bottom: 1px solid #f1f5f9; text-align: left; }
-          .header img { height: 32px; width: auto; display: block; }
+          .header img { height: 36px; width: auto; display: block; }
           
           /* CONTENT */
           .content { padding: 40px 30px; }
@@ -50,11 +50,16 @@ const wrapEmail = (title: string, bodyContent: string) => {
           .info-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid ${COLORS.navy}; padding: 15px; margin: 25px 0; border-radius: 4px; }
           .info-row { margin-bottom: 5px; font-size: 14px; }
           
-          /* FOOTER (Full width bottom) */
-          .footer { background-color: ${COLORS.navy}; padding: 40px 30px; text-align: center; color: #94a3b8; font-size: 12px; }
-          .footer img { height: 28px; width: auto; margin-bottom: 20px; opacity: 0.9; }
-          .footer a { color: ${COLORS.sky}; text-decoration: none; margin: 0 8px; }
-          .footer-divider { height: 1px; background-color: rgba(255,255,255,0.1); margin: 20px 0; }
+          /* FOOTER (Revised) */
+          .footer { background-color: ${COLORS.navy}; padding: 40px 30px; color: #94a3b8; font-size: 12px; }
+          /* Ensure footer touches bottom by removing bottom padding from wrapper */
+          
+          .footer-logo { width: 160px; height: auto; display: block; } /* Increased Size */
+          .footer-contact { text-align: right; color: #cbd5e1; line-height: 1.5; }
+          
+          .footer-links { text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 20px; }
+          .footer-links a { color: ${COLORS.sky}; text-decoration: none; margin: 0 10px; font-weight: bold; }
+          .copyright { text-align: center; margin-top: 15px; opacity: 0.5; font-size: 11px; }
         </style>
       </head>
       <body>
@@ -79,19 +84,36 @@ const wrapEmail = (title: string, bodyContent: string) => {
             <!-- FOOTER -->
             <tr>
               <td class="footer">
-                <img src="${LOGO_WHITE_ON_DARK}" alt="Aerojet Academy" />
-                <p>Accra Technical Training Centre (ATTC)<br/>Kokomlemle, Accra - Ghana</p>
-                <div class="footer-divider"></div>
-                <p>
+                <table width="100%">
+                  <tr>
+                    <td valign="top" width="50%">
+                      <img src="${LOGO_WHITE_ON_DARK}" class="footer-logo" alt="Aerojet Academy" />
+                    </td>
+                    <td valign="top" width="50%" class="footer-contact">
+                      <strong>AEROJET AVIATION</strong><br/>
+                      Accra Technical Training Centre<br/>
+                      Kokomlemle, Accra - Ghana<br/>
+                      +233 551 010 108
+                    </td>
+                  </tr>
+                </table>
+                
+                <div class="footer-links">
                   <a href="${DOMAIN}">Website</a>
                   <a href="${DOMAIN}/login">Portal</a>
                   <a href="${DOMAIN}/contact">Support</a>
-                </p>
-                <p style="margin-top: 20px; font-size: 11px; opacity: 0.6;">&copy; ${new Date().getFullYear()} Aerojet Aviation. All rights reserved.</p>
+                </div>
+                
+                <div class="copyright">
+                  &copy; ${new Date().getFullYear()} Aerojet Aviation. All rights reserved.
+                </div>
               </td>
             </tr>
 
           </table>
+          <!-- Space below card removed to make it feel grounded if desired, 
+               or keep .wrapper padding-bottom: 40px for floating card look. 
+               Current code: padding-bottom: 0 in wrapper, but wrapper bg is gray. -->
         </div>
       </body>
     </html>
