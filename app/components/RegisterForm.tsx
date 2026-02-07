@@ -14,7 +14,7 @@ export default function RegisterForm() {
     lastName: '', 
     email: '', 
     phone: '',
-    program: 'Full-Time' // ✅ Updated default
+    program: 'Full-Time' // Default matches the first option
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -36,7 +36,7 @@ export default function RegisterForm() {
       const responseData = await res.json();
 
       if (res.ok) {
-        toast.success("Registration successful! check your email.");
+        toast.success("Registration successful! Check your email.");
         
         // Auto-Login
         const loginRes = await signIn('credentials', {
@@ -65,40 +65,55 @@ export default function RegisterForm() {
       <div className="grid grid-cols-2 gap-4">
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-            <input required type="text" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all" 
-                value={data.firstName} onChange={e => setData({...data, firstName: e.target.value})} 
+            <input 
+                required 
+                type="text" 
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all bg-white text-slate-900" 
+                value={data.firstName} 
+                onChange={e => setData({...data, firstName: e.target.value})} 
             />
         </div>
         <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-            <input required type="text" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all" 
-                value={data.lastName} onChange={e => setData({...data, lastName: e.target.value})} 
+            <input 
+                required 
+                type="text" 
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all bg-white text-slate-900" 
+                value={data.lastName} 
+                onChange={e => setData({...data, lastName: e.target.value})} 
             />
         </div>
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
-        <input required type="email" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all" 
-            value={data.email} onChange={e => setData({...data, email: e.target.value})} 
+        <input 
+            required 
+            type="email" 
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all bg-white text-slate-900" 
+            value={data.email} 
+            onChange={e => setData({...data, email: e.target.value})} 
         />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
-        <input required type="tel" className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all" 
-            value={data.phone} onChange={e => setData({...data, phone: e.target.value})} 
+        <input 
+            required 
+            type="tel" 
+            className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all bg-white text-slate-900" 
+            value={data.phone} 
+            onChange={e => setData({...data, phone: e.target.value})} 
         />
       </div>
 
-                  {/* PROGRAM SELECTION */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Select Programme</label>
         <div className="relative">
             <select 
                 value={data.program} 
                 onChange={e => setData({...data, program: e.target.value})}
-                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all appearance-none bg-white text-gray-900"
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all appearance-none bg-white text-slate-900"
             >
                 <option value="Full-Time">EASA Part-66 Full-Time (B1.1 / B2)</option>
                 <option value="Modular">EASA Part-66 Modular</option>
