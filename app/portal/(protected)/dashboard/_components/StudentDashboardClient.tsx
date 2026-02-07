@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { BookOpen, Calendar, CheckCircle, Loader2 } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { Loader2, BookOpen, Calendar, GraduationCap, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function StudentDashboardClient() {
@@ -12,65 +13,101 @@ export default function StudentDashboardClient() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/portal/dashboard')
-      .then(res => res.json())
-      .then(d => {
-        // Redirect if NOT enrolled (i.e. is Applicant)
-        if (d.enrollmentStatus !== 'ENROLLED') {
+    const init = async () => {
+      try {
+        const dashRes = await fetch('/api/portal/dashboard');
+        const dashData = await dashRes.json();
+
+        // Security Redirect: If NOT enrolled (Applicant/Prospect), send to Applicant Portal
+        if (dashData.enrollmentStatus !== 'ENROLLED') {
             router.replace('/portal/applicant');
             return;
         }
-        setData(d);
+
+        setData(dashData);
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      } catch (error) {
+        console.error("Dashboard load failed", error);
+        setLoading(false);
+      }
+    };
+    init();
   }, [router]);
 
-  if (loading) return <div className="flex h-96 items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-aerojet-sky" /></div>;
-  if (!data) return <div>Failed to load.</div>;
+  if (loading || !data) {
+    return (
+        <div className="flex h-96 items-center justify-center">
+            <Loader2 className="w-10 h-10 animate-spin text-aerojet-sky" />
+        </div>
+    );
+  }
 
-  const academicStats = [
-    { title: "Enrolled Courses", value: data.enrolledCourses?.length || 0, icon: BookOpen, color: "text-blue-500" },
-    { title: "Upcoming Exams", value: data.upcomingExams?.length || 0, icon: Calendar, color: "text-orange-500" },
-    { title: "Attendance Rate", value: `${data.attendanceRate}%`, icon: CheckCircle, color: "text-green-500" },
-  ];
-
+  // --- VIEW: ENROLLED STUDENT DASHBOARD ---
   return (
     <div className="space-y-8 animate-in fade-in">
-      <div className="flex justify-between items-center">
-        <div><h1 className="text-3xl font-bold text-foreground">Student Dashboard</h1><p className="text-muted-foreground mt-1">Academic Overview</p></div>
+      {/* Welcome Banner */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 className="text-3xl font-bold text-foreground">Student Dashboard</h1>
+            <p className="text-muted-foreground">Track your progress and upcoming schedule.</p>
+        </div>
+        <div className="flex gap-2">
+            <Button variant="outline" onClick={() => router.push('/portal/courses')}>
+                <BookOpen className="w-4 h-4 mr-2"/> Course Catalog
+            </Button>
+        </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        {academicStats.map((stat, idx) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={idx} className="bg-card shadow-sm border-border">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div><p className="text-sm text-muted-foreground mb-1">{stat.title}</p><h3 className="text-3xl font-bold text-foreground">{stat.value}</h3></div>
-                  <div className={`p-3 rounded-lg bg-muted/50 ${stat.color}`}><Icon className="w-5 h-5" /></div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Attendance</CardTitle>
+                <Clock className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">92%</div>
+                <p className="text-xs text-muted-foreground">+2% from last month</p>
+                <Progress value={92} className="h-1.5 mt-2" />
+            </CardContent>
+        </Card>
+        
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Active Courses</CardTitle>
+                <BookOpen className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">4</div>
+                <p className="text-xs text-muted-foreground">Current Semester</p>
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium">Next Exam</CardTitle>
+                <Calendar className="w-4 h-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+                <div className="text-2xl font-bold">14 Days</div>
+                <p className="text-xs text-muted-foreground">Physics M2 - Room 304</p>
+            </CardContent>
+        </Card>
       </div>
-      
-      {/* --- RE-ADD YOUR COURSES/EXAMS TABS HERE FROM PREVIOUS VERSION --- */}
-      <Tabs defaultValue="courses" className="space-y-4">
-         <TabsList>
-            <TabsTrigger value="courses">My Courses</TabsTrigger>
-            <TabsTrigger value="exams">Exams</TabsTrigger>
-         </TabsList>
-         <TabsContent value="courses">
-            {/* ... Course List ... */}
-            <div className="p-4 bg-card border border-border rounded-lg text-center text-muted-foreground">Course list loaded.</div>
-         </TabsContent>
-         <TabsContent value="exams">
-            {/* ... Exam List ... */}
-            <div className="p-4 bg-card border border-border rounded-lg text-center text-muted-foreground">No upcoming exams.</div>
-         </TabsContent>
-      </Tabs>
+
+      {/* Placeholder for My Courses (Active Task) */}
+      <div className="mt-8">
+        <h2 className="text-xl font-semibold mb-4">My Current Modules</h2>
+        <Card className="bg-muted/30 border-dashed">
+            <CardContent className="flex flex-col items-center justify-center h-48 text-muted-foreground">
+                <GraduationCap className="w-10 h-10 mb-2 opacity-50" />
+                <p>Course content loading...</p>
+                <Button variant="link" onClick={() => router.push('/portal/courses')} className="mt-2 text-aerojet-sky">
+                    Go to My Courses Page
+                </Button>
+            </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

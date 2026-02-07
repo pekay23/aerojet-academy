@@ -1,40 +1,44 @@
 "use client";
 
-import { useSession } from "next-auth/react";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import React from 'react';
+import { Menu, Bell, UserCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useSession } from 'next-auth/react';
 
-type PortalHeaderProps = {
+// --- NEW: Define props to accept isEnrolled ---
+interface PortalHeaderProps {
   onMenuClick: () => void;
-};
+  isEnrolled: boolean;
+}
 
-export default function PortalHeader({ onMenuClick }: PortalHeaderProps) {
+export default function PortalHeader({ onMenuClick, isEnrolled }: PortalHeaderProps) {
   const { data: session } = useSession();
-  const role = (session?.user as any)?.role;
-
-  let title = "Student Portal";
-  if (role === 'ADMIN') title = "Admin Console";
-  else if (role === 'STAFF') title = "Staff Portal";
-  else if (role === 'INSTRUCTOR') title = "Instructor Portal";
+  const user = session?.user as any;
 
   return (
-    <header className="sticky top-0 z-20 bg-white/80 dark:bg-card/80 backdrop-blur-md p-4 shadow-sm border-b border-slate-200 dark:border-white/5 flex items-center justify-between transition-colors duration-300">
-      <div className="flex items-center">
-        <button 
-          onClick={onMenuClick} 
-          className="p-2 mr-2 lg:hidden text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 rounded-md transition-colors"
-        >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16"></path>
-            </svg>
-        </button>
-        <h1 className="font-bold text-lg text-slate-800 dark:text-white tracking-tight">
-          {title}
+    <header className="flex items-center justify-between h-16.25 px-4 border-b bg-card">
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon" onClick={onMenuClick} className="lg:hidden">
+          <Menu className="w-6 h-6" />
+        </Button>
+        
+        {/* --- DYNAMIC TITLE --- */}
+        <h1 className="text-lg font-bold text-foreground">
+          {isEnrolled ? 'Student Portal' : 'Applicant Portal'}
         </h1>
       </div>
-      
-      {/* Mobile Theme Toggle (Desktop is in Sidebar) */}
-      <div className="lg:hidden">
-        <ThemeToggle />
+
+      <div className="flex items-center gap-4">
+        <Button variant="ghost" size="icon">
+          <Bell className="w-5 h-5" />
+        </Button>
+        <div className="flex items-center gap-2">
+            <UserCircle className="w-7 h-7 text-muted-foreground" />
+            <div className='hidden sm:flex flex-col'>
+                <span className='text-sm font-medium'>{user?.name}</span>
+                <span className='text-xs text-muted-foreground'>{user?.email}</span>
+            </div>
+        </div>
       </div>
     </header>
   );
