@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
-import { sendPaymentVerifiedEmail } from '@/app/lib/mail';
+import { sendPaymentConfirmationEmail } from '@/app/lib/mail';
 
 const prisma = new PrismaClient();
 
@@ -132,7 +132,7 @@ export async function POST(req: Request) {
     const studentName = fee.student.user.name || "Student";
     if (studentEmail) {
         try {
-            await sendPaymentVerifiedEmail(studentEmail, studentName);
+            await sendPaymentConfirmationEmail(studentEmail, studentName);
         } catch (emailError) {
             console.error("Notification Email Failed:", emailError);
         }
