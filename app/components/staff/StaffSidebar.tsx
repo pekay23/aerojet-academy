@@ -70,26 +70,79 @@ export default function StaffSidebar({ user, collapsed = false, setCollapsed }: 
         )}
 
         <div className="h-16 flex items-center justify-center border-b border-border mx-4 shrink-0">
-          <Link href="/">
-            {collapsed ? (
-              <Image src="/apple-touch-icon.png" alt="AA" width={32} height={32} className="object-contain rounded-md" />
-            ) : (
-              <Image src="/ATA_logo_hor_onDark.png" alt="Aerojet Academy" width={140} height={35} className="object-contain dark:invert-0 invert" />
-            )}
-          </Link>
-        </div>
+  <Link href="/">
+    {collapsed ? (
+      // 1. COLLAPSED MODE: Use the Icon
+      <Image 
+        src="/apple-touch-icon.png" 
+        alt="AA" 
+        width={32} 
+        height={32} 
+        className="object-contain rounded-md" 
+      />
+    ) : (
+      // 2. EXPANDED MODE: Conditional Logo based on Theme
+      <>
+        {/* Logo for LIGHT mode */}
+        <Image 
+          src="/AATA_logo_hor_onWhite.png" 
+          alt="Aerojet Academy" 
+          width={140} 
+          height={35} 
+          className="object-contain block dark:hidden" 
+        />
+        {/* Logo for DARK mode */}
+        <Image 
+          src="/ATA_logo_hor_onDark.png" 
+          alt="Aerojet Academy" 
+          width={140} 
+          height={35} 
+          className="object-contain hidden dark:block" 
+        />
+      </>
+    )}
+  </Link>
+</div>
+
         
-        <div className={`py-6 flex flex-col items-center justify-center shrink-0 transition-all duration-300 ${collapsed ? 'px-2' : 'px-4'}`}>
-          <div className={`rounded-full bg-muted flex items-center justify-center font-bold text-foreground transition-all mx-auto overflow-hidden relative ${collapsed ? 'w-10 h-10 text-sm' : 'w-16 h-16 text-xl'}`}>
-            {user.image ? <Image src={user.image} alt="User" fill className="object-cover" /> : <span>{user.name?.[0]}</span>}
-          </div>
-          {!collapsed && (
-            <div className="mt-3 text-center w-full animate-in fade-in duration-300">
-              <p className="font-semibold text-sm truncate w-full text-foreground">{user.name}</p>
-              <span className={`text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider ${userRole === 'ADMIN' ? 'bg-destructive/10 text-destructive' : 'bg-primary/10 text-primary'}`}>{userRole}</span>
-            </div>
-          )}
-        </div>
+        {/* --- User Profile Section --- */}
+<div className={`py-6 flex flex-col items-center justify-center shrink-0 transition-all duration-300 ${collapsed ? 'px-2' : 'px-4'}`}>
+  
+  {/* Avatar Wrapper */}
+  <div className={`rounded-full bg-muted flex items-center justify-center font-bold text-foreground transition-all mx-auto overflow-hidden relative ${collapsed ? 'w-10 h-10 text-sm' : 'w-16 h-16 text-xl shadow-sm border border-border'}`}>
+    {user.image ? (
+      <Image src={user.image} alt="User" fill className="object-cover" />
+    ) : (
+      <span>{user.name?.[0]}</span>
+    )}
+  </div>
+
+  {/* Text Info - Visible only when sidebar is expanded */}
+  {!collapsed && (
+    <div className="mt-3 text-center w-full animate-in fade-in duration-300 overflow-hidden">
+      <p className="font-bold text-sm truncate w-full text-foreground">
+        {user.name}
+      </p>
+      
+      {/* --- ADDED EMAIL HERE --- */}
+      <p className="text-[10px] text-muted-foreground truncate w-full mt-0.5">
+        {user.email}
+      </p>
+
+      {/* Role Badge */}
+      <div className="mt-2">
+        <span className={`text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest ${
+          userRole === 'ADMIN' 
+            ? 'bg-destructive/10 text-destructive border border-destructive/20' 
+            : 'bg-primary/10 text-primary border border-primary/20'
+        }`}>
+          {userRole}
+        </span>
+      </div>
+    </div>
+  )}
+</div>
+
 
         {/* Navigation area */}
         <nav className="flex-1 overflow-y-auto px-3 mt-2 space-y-1 no-scrollbar min-h-0">

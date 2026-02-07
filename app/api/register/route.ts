@@ -7,28 +7,26 @@ const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
   try {
-    const { email, name, phone, programme, sourceId } = await req.json();
+    const { email, name, phone, programme } = await req.json();
 
     if (!email || !name) {
       return NextResponse.json({ error: 'Name and Email are required' }, { status: 400 });
     }
 
     // 1. Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
-
+    const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return NextResponse.json({ error: 'An account with this email already exists. Please log in.' }, { status: 409 });
+      return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 });
     }
 
     // 2. Generate a secure placeholder password
-    const tempPassword = Math.random().toString(36).slice(-8);
+    const tempPassword = Math.random().toString(36).slice(-8) + "A1!";
     const hashedPassword = await hash(tempPassword, 10);
 
-    // 3. TRANSACTION: Create User, Student Profile, and Registration Fee all at once
+    // 3. TRANSACTION: Create User, Profile, and Fee
+    // Added options to prevent the 5000ms timeout
     await prisma.$transaction(async (tx) => {
-      // A. Create the User account
+      // A. Create User account
       const user = await tx.user.create({
         data: {
           name,
@@ -39,17 +37,17 @@ export async function POST(req: Request) {
         }
       });
 
-      // B. Create the linked Student profile
+      // B. Create linked Student profile
       const student = await tx.student.create({
         data: {
           userId: user.id,
           phone: phone || null,
-          enrollmentStatus: 'APPLICANT',
+          enrollmentStatus: 'PROSPECT',
           cohort: programme || 'General Intake'
         }
       });
 
-      // C. CRITICAL STEP: Create the initial invoice for this student
+      // C. Create the Registration Fee Invoice
       await tx.fee.create({
         data: {
           studentId: student.id,
@@ -59,15 +57,18 @@ export async function POST(req: Request) {
           dueDate: new Date(),
         }
       });
+    }, {
+      maxWait: 10000, // wait up to 10s for a DB connection
+      timeout: 20000  // allow up to 20s for the whole operation
     });
 
-    // 4. Send the invoice email to the new applicant
+    // 4. Send the invoice email
     await sendRegistrationInvoiceEmail(email, name);
 
     return NextResponse.json({ success: true });
 
   } catch (error) {
-    console.error("Registration Process Error:", error);
-    return NextResponse.json({ error: 'Registration failed. Please try again.' }, { status: 500 });
+    console.error("REGISTRATION_API_ERROR:", error);
+    return NextResponse.json({ error: 'Registration failed. Please check your connection and try again.' }, { status: 500 });
   }
 }

@@ -16,10 +16,19 @@ export async function GET(req: Request) {
     }
     
     const payments = await prisma.fee.findMany({
-      where: { status: 'VERIFYING' }, // This is correct.
+      where: { status: 'VERIFYING' },
       include: { 
         student: { 
-          include: { user: true } 
+          include: { 
+            // Select only necessary user fields to reduce payload
+            user: { 
+              select: { 
+                name: true, 
+                email: true, 
+                image: true 
+              } 
+            } 
+          } 
         } 
       },
       orderBy: { dueDate: 'desc' }
@@ -57,12 +66,8 @@ export async function POST(req: Request) {
     let newStatus = 'PARTIAL';
     if (newPaidTotal >= fee.amount) newStatus = 'PAID';
     
-    // Check 40% Threshold for Auto-Enrollment on Tuition (not just any fee)
-    const isTuition = fee.description?.toLowerCase().includes('tuition');
-    const isDepositThresholdMet = isTuition && newPaidTotal >= (fee.amount * 0.40);
-    
     await prisma.$transaction(async (tx) => {
-        // A. Update the Fee Record
+        // 1. Update the Fee Record
         await tx.fee.update({
             where: { id: feeId },
             data: { 
@@ -71,23 +76,35 @@ export async function POST(req: Request) {
             }
         });
 
-        // B. Activate user account if Registration Fee is paid
+        // 2. CRITICAL: Handle "Registration Fee" Payment
+        // This promotes PROSPECT -> APPLICANT and unlocks login
         if (fee.description?.includes('Registration Fee') && newStatus === 'PAID') {
+            
+            // Activate User Login
             await tx.user.update({
                 where: { id: fee.student.userId },
                 data: { isActive: true }
             });
+
+            // Update Student Status
+            await tx.student.update({
+                where: { id: fee.student.id },
+                data: { enrollmentStatus: 'APPLICANT' }
+            });
         }
         
-        // C. Handle Auto-Enrollment for Tuition
+        // 3. Handle Tuition Deposit (40%) -> ENROLLED
+        const isTuition = fee.description?.toLowerCase().includes('tuition');
+        const isDepositThresholdMet = isTuition && newPaidTotal >= (fee.amount * 0.40);
+
         if (isDepositThresholdMet && fee.student.enrollmentStatus !== 'ENROLLED') {
              await tx.student.update({
-                where: { id: fee.studentId },
+                where: { id: fee.student.id },
                 data: { enrollmentStatus: 'ENROLLED' }
             });
         }
         
-        // D. Handle Bundle/Wallet Credits
+        // 4. Handle Bundle/Wallet Credits
         if (newStatus === 'PAID' && fee.description?.startsWith('BUNDLE:')) {
             const match = fee.description.match(/\((\d+) Credits\)/);
             if (match?.[1]) {
@@ -110,7 +127,7 @@ export async function POST(req: Request) {
         }
     });
 
-    // 3. TRIGGER NOTIFICATION
+    // 5. Send Notification Email
     const studentEmail = fee.student.user.email;
     const studentName = fee.student.user.name || "Student";
     if (studentEmail) {

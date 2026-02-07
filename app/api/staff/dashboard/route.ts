@@ -68,7 +68,14 @@ export async function GET(req: Request) {
         where: { endDate: { gte: new Date() } },
         take: 5
       }),
+      // FIX: Strictly filter recent students to exclude deleted users and non-students
       prisma.student.findMany({
+        where: {
+            user: {
+                role: 'STUDENT',
+                isDeleted: false
+            }
+        },
         take: 5,
         orderBy: { createdAt: 'desc' },
         include: { user: { select: { name: true, email: true, image: true } } }

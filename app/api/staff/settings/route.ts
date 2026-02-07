@@ -5,52 +5,36 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// GET: Fetch Rooms
-export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-
-  const rooms = await prisma.examRoom.findMany({ orderBy: { code: 'asc' } });
-  return NextResponse.json({ rooms });
+// GET: Fetch all global system settings
+export async function GET() {
+  const settings = await prisma.systemSetting.findMany();
+  return NextResponse.json({ settings });
 }
 
-// POST: Create Room
+// POST: Upsert a system setting (Save or Update)
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  
+  // Security: Only Admins can change system settings
+  if (!session || (session.user as any).role !== 'ADMIN') {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
-  const body = await req.json();
   try {
-    const room = await prisma.examRoom.create({
-        data: { name: body.name, code: body.code, capacity: parseInt(body.capacity) }
+    const { key, value } = await req.json();
+
+    if (!key || value === undefined) {
+      return NextResponse.json({ error: 'Key and Value are required' }, { status: 400 });
+    }
+
+    const setting = await prisma.systemSetting.upsert({
+      where: { key },
+      update: { value },
+      create: { key, value }
     });
-    return NextResponse.json({ success: true, room });
-  } catch (e) { return NextResponse.json({ error: 'Failed' }, { status: 500 }); }
-}
 
-// PATCH: Update Room
-export async function PATCH(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-
-  const { id, name, code, capacity } = await req.json();
-  try {
-    await prisma.examRoom.update({
-        where: { id },
-        data: { name, code, capacity: parseInt(capacity) }
-    });
-    return NextResponse.json({ success: true });
-  } catch (e) { return NextResponse.json({ error: 'Update failed' }, { status: 500 }); }
-}
-
-// DELETE: Delete Room
-export async function DELETE(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-
-  const { id } = await req.json();
-  try {
-    await prisma.examRoom.delete({ where: { id } });
-    return NextResponse.json({ success: true });
-  } catch (e) { return NextResponse.json({ error: 'Delete failed' }, { status: 500 }); }
+    return NextResponse.json({ success: true, setting });
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to update setting' }, { status: 500 });
+  }
 }

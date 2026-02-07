@@ -6,18 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  BookOpen, 
-  Calendar, 
-  FileCheck, 
-  TrendingUp, 
-  TrendingDown, 
-  MoreVertical, 
-  Loader2,
-  ArrowRight
-} from 'lucide-react';
+import { Users, BookOpen, Calendar, FileCheck, TrendingUp, TrendingDown, MoreVertical, Loader2, ArrowRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function StaffDashboard() {
   const router = useRouter();
@@ -43,7 +34,6 @@ export default function StaffDashboard() {
       });
   }, []);
 
-  // 1. Loading State
   if (loading) {
     return (
       <div className="flex h-96 items-center justify-center">
@@ -52,7 +42,6 @@ export default function StaffDashboard() {
     );
   }
 
-  // 2. Error State (Handles the 403)
   if (error) {
     return (
       <div className="p-8 text-center bg-red-50 text-red-600 rounded-xl border border-red-100">
@@ -63,14 +52,12 @@ export default function StaffDashboard() {
     );
   }
 
-  // 3. DEFENSIVE CHECK: If stats is still null for some reason
   if (!stats) return null;
 
-  // Now we define the stats array, because we know 'stats' is loaded
   const adminStats = [
     {
       title: "Total Students",
-      value: stats.studentStats?.total || 0, // Using Optional Chaining + Default
+      value: stats.studentStats?.total || 0,
       change: `+${stats.studentStats?.active || 0}`,
       trend: "up",
       subtitle: "Active enrollments",
@@ -108,7 +95,6 @@ export default function StaffDashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
-      {/* ... rest of your JSX rendering adminStats ... */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Admin Dashboard</h1>
@@ -141,7 +127,6 @@ export default function StaffDashboard() {
         })}
       </div>
     
-      {/* Quick Access Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="bg-linear-to-br from-blue-500/5 to-transparent border-border hover:border-aerojet-sky transition-colors cursor-pointer group" onClick={() => router.push('/staff/applications')}>
           <CardContent className="p-6 flex items-center gap-4">
@@ -150,7 +135,7 @@ export default function StaffDashboard() {
             </div>
             <div>
               <h3 className="font-bold text-foreground">Review Applications</h3>
-              <p className="text-xs text-muted-foreground">{stats.opsStats.pendingApps} waiting for you</p>
+              <p className="text-xs text-muted-foreground">{stats.opsStats?.pendingApps || 0} waiting for you</p>
             </div>
           </CardContent>
         </Card>
@@ -174,22 +159,21 @@ export default function StaffDashboard() {
             </div>
             <div>
               <h3 className="font-bold text-foreground">Finance Verify</h3>
-              <p className="text-xs text-muted-foreground">{stats.opsStats.verifyingPayments} proof uploads to check</p>
+              <p className="text-xs text-muted-foreground">{stats.opsStats?.verifyingPayments || 0} proof uploads to check</p>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Real Data Tabs Section */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="bg-muted/50 p-1 rounded-xl h-auto border border-border">
           <TabsTrigger value="students" className="px-6 py-2.5 data-state-active:bg-background data-state-active:shadow-sm rounded-lg">
             Recent Students
-            <Badge className="ml-2 bg-primary/10 text-primary border-none">{stats.studentStats.total}</Badge>
+            <Badge className="ml-2 bg-primary/10 text-primary border-none">{stats.studentStats?.total || 0}</Badge>
           </TabsTrigger>
           <TabsTrigger value="calendar" className="px-6 py-2.5 data-state-active:bg-background data-state-active:shadow-sm rounded-lg">
             Today's Events
-            <Badge className="ml-2 bg-orange-500/10 text-orange-600 border-none">{stats.calendarEvents.length}</Badge>
+            <Badge className="ml-2 bg-orange-500/10 text-orange-600 border-none">{stats.calendarEvents?.length || 0}</Badge>
           </TabsTrigger>
         </TabsList>
 
@@ -208,13 +192,19 @@ export default function StaffDashboard() {
                 </thead>
                 <tbody className="divide-y divide-border">
                   {stats.recentStudents?.map((student: any) => (
-                    <tr key={student.id} className="hover:bg-muted/30 transition-colors group">
+                    <tr 
+                      key={student.id} 
+                      className="hover:bg-muted/30 transition-colors group cursor-pointer"
+                      onClick={() => router.push(`/staff/students/${student.id}`)} // CLICKABLE ROW
+                    >
                       <td className="p-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-bold text-slate-600 dark:text-slate-400">
-                            {student.user.name?.[0]}
-                          </div>
-                          <span className="font-semibold text-foreground">{student.user.name}</span>
+                          <Avatar>
+                            <AvatarImage src={student.user.image} />
+                            {/* SAFE FALLBACK */}
+                            <AvatarFallback>{student.user.name ? student.user.name[0] : '?'}</AvatarFallback>
+                          </Avatar>
+                          <span className="font-semibold text-foreground">{student.user.name || 'Unknown User'}</span>
                         </div>
                       </td>
                       <td className="p-4 text-muted-foreground font-medium">{student.user.email}</td>
@@ -225,7 +215,15 @@ export default function StaffDashboard() {
                       </td>
                       <td className="p-4 text-muted-foreground">{new Date(student.createdAt).toLocaleDateString()}</td>
                       <td className="p-4 text-right">
-                        <Button variant="ghost" size="icon" className="group-hover:text-primary transition-colors">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="group-hover:text-primary transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            router.push(`/staff/students/${student.id}`);
+                          }}
+                        >
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </td>

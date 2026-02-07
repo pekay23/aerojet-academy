@@ -2,28 +2,26 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 export function middleware(req: NextRequest) {
-  const isPortalLive = process.env.NEXT_PUBLIC_PORTAL_LIVE === 'true';
-  
-  // Check if the "Magic Key" cookie exists in the user's browser
-  const hasAccessCookie = req.cookies.has('portal_access');
-  
-  const { pathname } = req.nextUrl;
-
-  // If portal is LOCKED and user doesn't have the "Magic Key"
-  if (!isPortalLive && !hasAccessCookie) {
-    if (
-      pathname.startsWith('/portal') || 
-      pathname.startsWith('/staff') || 
-      pathname.startsWith('/register')
-    ) {
-      // Redirect them away
-      return NextResponse.redirect(new URL('/contact', req.url));
-    }
-  }
+  // --- PORTAL ACCESS LOGIC REMOVED ---
+  // The portal is now open to everyone. 
+  // Access control is strictly handled by the database/role logic.
 
   return NextResponse.next();
 }
 
+/**
+ * Configure which paths the middleware runs on.
+ * We exclude API routes (except for auth), static files, and icons for performance.
+ */
 export const config = {
-  matcher: ["/((?!api/auth|_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api/auth (NextAuth API)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api/auth|_next/static|_next/image|favicon.ico).*)",
+  ],
 };

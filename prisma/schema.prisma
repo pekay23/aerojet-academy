@@ -3,11 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql" // Or your provider
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// --- NextAuth Models ---
+// --- 1. USER & AUTHENTICATION ---
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -35,28 +35,24 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          String    @default("STUDENT") // ADMIN, STAFF, INSTRUCTOR, STUDENT
-  isActive      Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-
-  // Relations
-  accounts       Account[]
-  sessions       Session[]
-  studentProfile Student?
-
-  // For Instructors
-  instructedCourses Course[] @relation("CourseInstructors")
-
-  isDeleted     Boolean   @default(false)
-  deletedAt     DateTime?
-
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String?   @unique
+  emailVerified      DateTime?
+  image              String?
+  password           String?
+  role               String    @default("STUDENT")
+  isActive           Boolean   @default(false)
+  isDeleted          Boolean   @default(false)
+  deletedAt          DateTime?
   lastPasswordChange DateTime?
+  createdAt          DateTime  @default(now())
+
+  accounts          Account[]
+  sessions          Session[]
+  studentProfile    Student?
+  instructedCourses Course[]  @relation("CourseInstructors")
+  auditLogs         AuditLog[]
 }
 
 model VerificationToken {
@@ -67,10 +63,10 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// --- ACADEMIC STRUCTURE (NEW) ---
+// --- 2. ACADEMIC HIERARCHY ---
 model SchoolPeriod {
   id        String   @id @default(cuid())
-  name      String   // e.g. "2026/2027 Academic Year"
+  name      String
   startDate DateTime
   endDate   DateTime
   isActive  Boolean  @default(false)
@@ -79,122 +75,217 @@ model SchoolPeriod {
 
 model Intake {
   id             String       @id @default(cuid())
-  name           String       // e.g. "September 2026 Cohort"
+  name           String
   schoolPeriodId String
   schoolPeriod   SchoolPeriod @relation(fields: [schoolPeriodId], references: [id])
+  cohorts        Cohort[]     // FIXED: Renamed classes to cohorts
   students       Student[]
 }
 
-// --- STUDENT PORTAL MODELS ---
+model Cohort {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  intakeId    String
+  intake      Intake   @relation(fields: [intakeId], references: [id])
+  students    Student[]
+  curriculum  CohortCourse[] 
+  createdAt   DateTime @default(now())
+}
+
+model CohortCourse {
+  id           String   @id @default(cuid())
+  cohortId     String
+  cohort       Cohort   @relation(fields: [cohortId], references: [id])
+  courseId     String
+  course       Course   @relation(fields: [courseId], references: [id])
+  semester     Int      @default(1)
+  instructorId String?
+}
+
+// --- 3. STUDENT CORE ---
 model Student {
-  id                String    @id @default(cuid())
-  userId            String    @unique
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Personal Info
-  studentId         String?   @unique
-  photoUrl          String?
-  phone             String?
-  dob               DateTime?
-  gender            String?
-  address           String?   @db.Text
-  city              String?
-  region            String?
-  country           String?   @default("Ghana")
-
-  // Emergency Contact
-  emergencyName     String?
-  emergencyPhone    String?
-  emergencyRelation String?
-
-  // Status
-  enrollmentStatus  String    @default("APPLICANT")
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  // Intake Relation (NEW)
-  intakeId          String?
-  intake            Intake?   @relation(fields: [intakeId], references: [id])
-  cohort            String?   // Legacy field (can be deprecated later)
+  studentId          String?  @unique
+  photoUrl           String?
+  phone              String?
+  dob                DateTime?
+  gender             String?
+  address            String?  @db.Text
+  city               String?
+  region             String?
+  country            String?  @default("Ghana")
+  
+  emergencyName      String?
+  emergencyPhone     String?
+  emergencyRelation  String?
 
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
+  enrollmentStatus   String   @default("PROSPECT")
+  institutionalEmail String?  @unique
+  
+  intakeId           String?
+  intake             Intake?  @relation(fields: [intakeId], references: [id])
+  cohort             String?
+  cohortId           String?
+  cohortRel          Cohort?  @relation(fields: [cohortId], references: [id])
 
-  // Relationships
-  applications      Application[]
-  fees              Fee[]
-  examBookings      ExamBooking[]
-  attendance        AttendanceRecord[]
-  assessments       Assessment[]
-  wallet            Wallet?
-  notes             StudentNote[] // (NEW)
-}
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-// --- STUDENT NOTES (NEW) ---
-model StudentNote {
-  id        String   @id @default(cuid())
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  authorId  String   // Staff/Instructor ID
-  title     String
-  content   String   @db.Text
-  type      String   // DISCIPLINARY, ACADEMIC, GENERAL
-  createdAt DateTime @default(now())
-}
-
-model Course {
-  id           String        @id @default(cuid())
-  code         String        @unique
-  title        String
-  description  String?       @db.Text
-  duration     String?
-  price        Float
-
-  materialLink String?
-
-  // Relations
-  applications Application[]
-  examRuns     ExamRun[]
-  attendance   AttendanceRecord[]
-  instructors  User[]        @relation("CourseInstructors")
+  applications       Application[]
+  fees               Fee[]
+  examBookings       ExamBooking[]
+  attendance         AttendanceRecord[]
+  assessments        Assessment[]
+  wallet             Wallet?
+  notes              StudentNote[]
+  files              StudentFile[]
+  poolParticipations PoolParticipant[]
 }
 
 model Application {
   id              String   @id @default(cuid())
   status          String   @default("PENDING")
   appliedAt       DateTime @default(now())
-
-  // Detailed Application Data
   educationLevel  String?
   institutionName String?
   graduationYear  String?
-
-  // Documents
   idDocumentUrl   String?
   certificateUrl  String?
   transcriptUrl   String?
-
-  isSubmitted     Boolean @default(false)
+  isSubmitted     Boolean  @default(false)
   
   studentId       String
-  student         Student @relation(fields: [studentId], references: [id])
-  
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   courseId        String
-  course          Course  @relation(fields: [courseId], references: [id])
+  course          Course   @relation(fields: [courseId], references: [id])
 }
 
-model Fee {
+model StudentNote {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  authorId  String
+  title     String
+  content   String   @db.Text
+  type      String
+  createdAt DateTime @default(now())
+}
+
+model StudentFile {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  name      String
+  url       String
+  type      String
+  createdAt DateTime @default(now())
+}
+
+// --- 4. CURRICULUM & ATTENDANCE ---
+model Course {
+  id           String             @id @default(cuid())
+  code         String             @unique
+  title        String
+  description  String?            @db.Text
+  duration     String?
+  price        Float
+  materialLink String?
+  
+  applications Application[]
+  examRuns     ExamRun[]
+  attendance   AttendanceRecord[]
+  instructors  User[]             @relation("CourseInstructors")
+  cohorts      CohortCourse[]     // FIXED: Renamed classes to cohorts
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT_EXCUSED
+  ABSENT_UNEXCUSED
+  LATE
+  EXPULSED
+  UNSPECIFIED
+}
+
+model AttendanceRecord {
+  id            String           @id @default(cuid())
+  date          DateTime         @default(now())
+  courseId      String
+  course         Course           @relation(fields: [courseId], references: [id])
+  studentId     String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status        AttendanceStatus @default(UNSPECIFIED)
+  type          String           @default("DAILY")
+  lessonName    String?
+  comment       String?
+  recordedBy    String
+  
+  scheduledHours Float?
+  attendedHours  Float?
+  lateMinutes    Int?             @default(0)
+}
+
+// ... EXAMS & POOLING (Same as before) ...
+model ExamPool {
+  id              String            @id @default(cuid())
+  name            String
+  examDate        DateTime
+  joinDeadline    DateTime
+  confirmDeadline DateTime
+  minCandidates   Int               @default(25)
+  maxCandidates   Int               @default(28)
+  currentCount    Int               @default(0)
+  status          String            @default("OPEN")
+  templateId      String?
+  template        PoolTemplate?     @relation(fields: [templateId], references: [id])
+  participants    PoolParticipant[]
+  modules         PoolModule[]
+  confirmedAt     DateTime?
+  confirmedBy     String?
+  createdAt       DateTime          @default(now())
+}
+
+model PoolParticipant {
+  id               String             @id @default(cuid())
+  poolId           String
+  pool             ExamPool           @relation(fields: [poolId], references: [id])
+  studentId        String
+  student          Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status           String             @default("SOFT_JOINED")
+  requestedModules String[]
+  optInVisibility  Boolean            @default(false)
+  reservationId    String?            @unique
+  reservation      WalletReservation? @relation(fields: [reservationId], references: [id])
+  createdAt        DateTime           @default(now())
+
+  @@unique([poolId, studentId])
+}
+
+model PoolModule {
   id          String   @id @default(cuid())
-  amount      Float
-  paid        Float    @default(0.0)
-  dueDate     DateTime
-  status      String   @default("UNPAID")
-  description String?
-  proofUrl    String?
+  poolId      String
+  pool        ExamPool @relation(fields: [poolId], references: [id])
+  moduleCode  String
+  moduleName  String
+  demandCount Int      @default(0)
 
-  studentId   String
-  student     Student  @relation(fields: [studentId], references: [id])
+  @@unique([poolId, moduleCode])
 }
 
-// --- EXAM MODELS ---
+model PoolTemplate {
+  id             String     @id @default(cuid())
+  name           String
+  allowedModules String[]
+  minModules     Int        @default(1)
+  maxModules     Int        @default(4)
+  pricePerModule Float      @default(490.00)
+  pools          ExamPool[]
+}
+
 model ExamRoom {
   id       String    @id @default(cuid())
   name     String
@@ -204,33 +295,28 @@ model ExamRoom {
 }
 
 model ExamRun {
-  id              String   @id @default(cuid())
+  id              String        @id @default(cuid())
   examModuleId    String
-  course          Course   @relation(fields: [examModuleId], references: [id])
-  
+  course          Course        @relation(fields: [examModuleId], references: [id])
   roomId          String
-  room            ExamRoom @relation(fields: [roomId], references: [id])
-  
+  room            ExamRoom      @relation(fields: [roomId], references: [id])
   startDatetime   DateTime
   durationMinutes Int
-  maxCapacity     Int      @default(28)
-  status          String   @default("SCHEDULED")
-  
+  maxCapacity     Int           @default(28)
+  status          String        @default("SCHEDULED")
+  poolId          String?
   bookings        ExamBooking[]
   assessments     Assessment[]
-  
   windowId        String?
-  window          ExamWindow? @relation(fields: [windowId], references: [id])
+  window          ExamWindow?   @relation(fields: [windowId], references: [id])
 }
 
 model ExamBooking {
   id        String   @id @default(cuid())
   examRunId String
   run       ExamRun  @relation(fields: [examRunId], references: [id])
-  
   studentId String
   student   Student  @relation(fields: [studentId], references: [id])
-  
   status    String   @default("CONFIRMED")
   seatLabel String?
   bookedAt  DateTime @default(now())
@@ -242,91 +328,111 @@ model ExamWindow {
   startDate           DateTime
   endDate             DateTime
   cutoffDate          DateTime
-  
   minSeatsRequired    Int       @default(60)
-  minChartersRequired Int       @default(3)
-  
   status              String    @default("PENDING")
-  
-  runs                ExamRun[]
   createdAt           DateTime  @default(now())
+  runs                ExamRun[]
 }
 
-// --- ATTENDANCE & RESULTS ---
-
-// (UPDATED) Enhanced Attendance
-enum AttendanceStatus {
-  PRESENT
-  ABSENT_EXCUSED
-  ABSENT_UNEXCUSED
-  LATE
-  EXPELLED
-  UNSPECIFIED
-}
-
-model AttendanceRecord {
-  id             String           @id @default(cuid())
-  date           DateTime         @default(now())
-  
-  courseId       String
-  course         Course           @relation(fields: [courseId], references: [id])
-  
-  studentId      String
-  student        Student          @relation(fields: [studentId], references: [id])
-  
-  // Legacy fields (optional support)
-  scheduledHours Float?
-  attendedHours  Float?
-  lateMinutes    Int              @default(0)
-  
-  // New Status
-  status         AttendanceStatus @default(UNSPECIFIED)
-  comment        String?          // Replaces 'notes' or works alongside it
-  recordedBy     String   
-}
-
-model Assessment {
-  id            String   @id @default(cuid())
-  type          String   @default("INTERNAL_TEST")
-  
-  moduleCode    String   
-  attemptNumber Int      @default(1)
-  
-  score         Float
-  maxScore      Float    @default(100.0)
-  isPassed      Boolean  @default(false)
-  
-  comments      String?
-  recordedAt    DateTime @default(now())
-  
-  studentId     String
-  student       Student  @relation(fields: [studentId], references: [id])
-  
-  examRunId     String?  
-  run           ExamRun? @relation(fields: [examRunId], references: [id])
+model Fee {
+  id          String   @id @default(cuid())
+  amount      Float
+  paid        Float    @default(0.0)
+  dueDate     DateTime
+  status      String   @default("UNPAID")
+  description String?
+  paymentMethod String?
+  proofUrl    String?
+  studentId   String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
 }
 
 model Wallet {
   id           String              @id @default(cuid())
   studentId    String              @unique
-  student      Student             @relation(fields: [studentId], references: [id])
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   balance      Int                 @default(0)
   updatedAt    DateTime            @updatedAt
   transactions WalletTransaction[]
+  reservations WalletReservation[]
+}
+
+model WalletReservation {
+  id          String   @id @default(cuid())
+  walletId    String
+  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  amount      Int
+  status      String   @default("ACTIVE")
+  purpose     String
+  participant PoolParticipant?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+  capturedAt  DateTime? 
+  releasedAt  DateTime?
 }
 
 model WalletTransaction {
-  id          String   @id @default(cuid())
-  walletId    String
-  wallet      Wallet   @relation(fields: [walletId], references: [id])
-  amount      Int
-  type        String
-  description String
-  createdAt   DateTime @default(now())
+  id            String   @id @default(cuid())
+  walletId      String
+  wallet        Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  amount        Int
+  type          String
+  description   String
+  createdAt     DateTime @default(now())
 }
 
 model SystemSetting {
   id    String @id @default(cuid())
   key   String @unique
   value String
+}
+
+model AdmissionForm {
+  id                String   @id @default(cuid())
+  name              String
+  targetAudience    String
+  selectionType     String
+  startDate         DateTime
+  endDate           DateTime
+  notificationEmail String
+  registrationFee   Float    @default(350.0)
+  monthlyFee        Float?
+  yearlyFee         Float?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+}
+
+model PoolNotification {
+  id        String   @id @default(cuid())
+  studentId String
+  type      String
+  subject   String
+  message   String   @db.Text
+  sent      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  details   String   @db.Text
+  createdAt DateTime @default(now())
+}
+
+model Assessment {
+  id            String   @id @default(cuid())
+  type          String   @default("INTERNAL_TEST")
+  moduleCode    String
+  score         Float
+  maxScore      Float    @default(100.0)
+  isPassed      Boolean  @default(false)
+  comments      String?  @db.Text
+  recordedAt    DateTime @default(now())
+  studentId     String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  examRunId     String?
+  run           ExamRun? @relation(fields: [examRunId], references: [id])
 }

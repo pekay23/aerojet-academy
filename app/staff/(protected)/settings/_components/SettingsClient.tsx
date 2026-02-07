@@ -1,122 +1,263 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { Mail, Shield, Server, Save, Loader2, Bell } from 'lucide-react';
+import { 
+  Mail, 
+  Landmark, 
+  CalendarDays, 
+  Lock, 
+  Save, 
+  Loader2, 
+  Percent, 
+  Power
+} from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 
 export default function SettingsClient() {
-  const [emailRecipient, setEmailRecipient] = useState('');
   const [loading, setLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSaving, setIsSaving] = useState<string | null>(null);
 
+  // Form States
+  const [emailRecipient, setEmailRecipient] = useState('');
+  const [regFee, setRegFee] = useState('350');
+  const [depositPercent, setDepositPercent] = useState('40');
+  const [activeYear, setActiveYear] = useState('2026-2027');
+  const [isAdmissionsOpen, setIsAdmissionsOpen] = useState(true);
+  const [isMaintenanceMode, setIsMaintenanceMode] = useState(false);
+  
+  // Bank Details
+  const [bankName, setBankName] = useState('FNB Bank');
+  const [bankAccName, setBankAccName] = useState('Aerojet Foundation');
+  const [bankAccNo, setBankAccNo] = useState('1020003980687');
+
+  // Load settings on mount
   useEffect(() => {
-    // Fetch current settings
-    fetch('/api/staff/settings')
-      .then(res => res.json())
-      .then(data => {
-        const contactEmail = data.settings?.find((s: any) => s.key === 'CONTACT_EMAIL_RECIPIENT');
-        setEmailRecipient(contactEmail?.value || '');
+    async function loadSettings() {
+      try {
+        const res = await fetch('/api/staff/settings');
+        const data = await res.json();
+        
+        const findValue = (key: string) => data.settings?.find((s: any) => s.key === key)?.value;
+        
+        if (findValue('CONTACT_EMAIL_RECIPIENT')) setEmailRecipient(findValue('CONTACT_EMAIL_RECIPIENT'));
+        if (findValue('REGISTRATION_FEE')) setRegFee(findValue('REGISTRATION_FEE'));
+        if (findValue('TUITION_DEPOSIT_PERCENT')) setDepositPercent(findValue('TUITION_DEPOSIT_PERCENT'));
+        if (findValue('ACTIVE_ACADEMIC_YEAR')) setActiveYear(findValue('ACTIVE_ACADEMIC_YEAR'));
+        if (findValue('ADMISSIONS_OPEN')) setIsAdmissionsOpen(findValue('ADMISSIONS_OPEN') === 'true');
+        if (findValue('MAINTENANCE_MODE')) setIsMaintenanceMode(findValue('MAINTENANCE_MODE') === 'true');
+        if (findValue('BANK_NAME')) setBankName(findValue('BANK_NAME'));
+        if (findValue('BANK_ACC_NAME')) setBankAccName(findValue('BANK_ACC_NAME'));
+        if (findValue('BANK_ACC_NO')) setBankAccNo(findValue('BANK_ACC_NO'));
+
+      } catch (e) {
+        toast.error("Failed to sync system settings.");
+      } finally {
         setLoading(false);
-      })
-      .catch(() => setLoading(false));
+      }
+    }
+    loadSettings();
   }, []);
 
-  const handleSaveEmail = async () => {
-    if (!emailRecipient) return;
-    setIsSaving(true);
+  const saveSetting = async (key: string, value: string, sectionName: string) => {
+    setIsSaving(key);
     try {
       const res = await fetch('/api/staff/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ key: 'CONTACT_EMAIL_RECIPIENT', value: emailRecipient })
+        body: JSON.stringify({ key, value })
       });
 
       if (res.ok) {
-        toast.success("Email configuration updated.");
+        toast.success(`${sectionName} updated successfully.`);
       } else {
         toast.error("Failed to save changes.");
       }
     } catch {
-      toast.error("An error occurred.");
+      toast.error("Network error.");
     } finally {
-      setIsSaving(false);
+      setIsSaving(null);
     }
   };
 
-  if (loading) return <div className="p-8 text-center animate-pulse text-muted-foreground">Loading system settings...</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center h-96 gap-4 text-muted-foreground">
+        <Loader2 className="w-8 h-8 animate-spin text-aerojet-sky" />
+        <p className="text-[10px] font-black uppercase tracking-widest">Accessing Control Panel...</p>
+    </div>
+  );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 max-w-4xl">
+    <div className="max-w-5xl space-y-8 animate-in fade-in duration-500 pb-20">
       
-      {/* 1. Email & Notifications Configuration */}
-      <Card className="bg-card border-border shadow-md overflow-hidden">
-        <CardHeader className="bg-muted/30 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-primary/10 rounded-lg">
-                <Mail className="w-5 h-5 text-primary" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        {/* 1. ACADEMIC LIFECYCLE */}
+        <Card className="bg-card border-border shadow-md transition-all">
+          <CardHeader className="bg-muted/30 border-b border-border">
+            <div className="flex items-center gap-3">
+              <CalendarDays className="w-5 h-5 text-primary" />
+              <CardTitle className="text-base font-bold">Academic Calendar</CardTitle>
             </div>
-            <div>
-                <CardTitle className="text-lg">Email Configuration</CardTitle>
-                <CardDescription>Define where system notifications are delivered.</CardDescription>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Active Year</label>
+              <Select value={activeYear} onValueChange={setActiveYear}>
+                <SelectTrigger className="bg-background border-border"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="2025-2026">2025/2026</SelectItem>
+                  <SelectItem value="2026-2027">2026/2027</SelectItem>
+                  <SelectItem value="2027-2028">2027/2028</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="space-y-2">
-            <label className="text-sm font-bold text-foreground">Enquiry Notifications Recipient</label>
-            <div className="flex gap-3">
-                <Input 
-                    type="email" 
-                    placeholder="admissions@aerojet-academy.com" 
-                    value={emailRecipient}
-                    onChange={(e) => setEmailRecipient(e.target.value)}
-                    className="bg-background border-border flex-1"
-                />
+            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-xl border border-border">
+              <div className="space-y-0.5">
+                <p className="text-xs font-bold text-foreground">Global Admissions</p>
+                <p className="text-[10px] text-muted-foreground">Allow new registrations</p>
+              </div>
+              <Switch checked={isAdmissionsOpen} onCheckedChange={(val) => {
+                  setIsAdmissionsOpen(val);
+                  saveSetting('ADMISSIONS_OPEN', String(val), 'Admissions Switch');
+              }} />
+            </div>
+            <Button 
+                onClick={() => saveSetting('ACTIVE_ACADEMIC_YEAR', activeYear, 'Academic Year')} 
+                disabled={isSaving === 'ACTIVE_ACADEMIC_YEAR'} 
+                className="w-full bg-primary h-10 font-bold uppercase text-[10px] tracking-widest"
+            >
+               {isSaving === 'ACTIVE_ACADEMIC_YEAR' ? <Loader2 className="animate-spin w-4 h-4"/> : "Update Academic Rules"}
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* 2. FINANCIAL DEFAULTS */}
+        <Card className="bg-card border-border shadow-md transition-all">
+          <CardHeader className="bg-muted/30 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Percent className="w-5 h-5 text-primary" />
+              <CardTitle className="text-base font-bold">Financial Defaults</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 space-y-4">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Registration Fee (GHS)</label>
+              <Input type="number" value={regFee} onChange={(e) => setRegFee(e.target.value)} className="bg-background border-border" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Deposit Percentage (%)</label>
+              <Input type="number" value={depositPercent} onChange={(e) => setDepositPercent(e.target.value)} className="bg-background border-border" />
+            </div>
+            <Button 
+                onClick={() => {
+                    saveSetting('REGISTRATION_FEE', regFee, 'Fee');
+                    saveSetting('TUITION_DEPOSIT_PERCENT', depositPercent, 'Deposit');
+                }} 
+                disabled={!!isSaving} 
+                className="w-full bg-primary h-10 font-bold uppercase text-[10px] tracking-widest"
+            >
+               Update Fees
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* 3. COMMUNICATION ROUTING */}
+        <Card className="bg-card border-border shadow-md md:col-span-2 transition-all">
+          <CardHeader className="bg-muted/30 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Mail className="w-5 h-5 text-primary" />
+              <CardTitle className="text-base font-bold">System Notifications</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid md:grid-cols-3 gap-6 items-end">
+              <div className="md:col-span-2 space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground ml-1">Main Alerts Recipient</label>
+                <Input value={emailRecipient} onChange={(e) => setEmailRecipient(e.target.value)} className="bg-background border-border h-12" />
+              </div>
+              <Button 
+                onClick={() => saveSetting('CONTACT_EMAIL_RECIPIENT', emailRecipient, 'Notification Email')} 
+                disabled={isSaving === 'CONTACT_EMAIL_RECIPIENT'} 
+                className="bg-primary h-12 font-bold uppercase text-[10px] tracking-widest shadow-lg"
+              >
+                 {isSaving === 'CONTACT_EMAIL_RECIPIENT' ? <Loader2 className="animate-spin w-4 h-4"/> : "Save Email Config"}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* 4. BANKING INFORMATION */}
+        <Card className="bg-card border-border shadow-md md:col-span-2 transition-all">
+          <CardHeader className="bg-muted/30 border-b border-border">
+            <div className="flex items-center gap-3">
+              <Landmark className="w-5 h-5 text-primary" />
+              <CardTitle className="text-base font-bold">Official Bank Details</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1">Bank Name</label>
+                <Input value={bankName} onChange={e => setBankName(e.target.value)} className="bg-background border-border" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1">Account Name</label>
+                <Input value={bankAccName} onChange={e => setBankAccName(e.target.value)} className="bg-background border-border" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-bold text-muted-foreground uppercase ml-1">Account No.</label>
+                <Input value={bankAccNo} onChange={e => setBankAccNo(e.target.value)} className="bg-background border-border" />
+              </div>
+            </div>
+            <div className="flex justify-end pt-4 border-t border-border">
                 <Button 
-                    onClick={handleSaveEmail} 
-                    disabled={isSaving}
-                    className="bg-aerojet-sky hover:bg-aerojet-blue text-white shadow-sm font-bold uppercase text-[10px] tracking-widest px-6"
+                    variant="outline" 
+                    className="font-bold uppercase text-[10px] tracking-widest px-8 border-primary text-primary hover:bg-primary/5"
+                    onClick={() => {
+                        saveSetting('BANK_NAME', bankName, 'Bank Name');
+                        saveSetting('BANK_ACC_NAME', bankAccName, 'Account Name');
+                        saveSetting('BANK_ACC_NO', bankAccNo, 'Account Number');
+                    }}
                 >
-                    {isSaving ? <Loader2 className="w-4 h-4 animate-spin"/> : <><Save className="w-4 h-4 mr-2"/> Save</>}
+                    Update Payment Instructions
                 </Button>
             </div>
-            <p className="text-[10px] text-muted-foreground italic">
-                Website enquiry forms and registration alerts will be sent to this address.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* 2. Security & Access (Placeholder for future) */}
-      <Card className="bg-card border-border shadow-md overflow-hidden opacity-60 grayscale cursor-not-allowed">
-        <CardHeader className="bg-muted/30 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
-                <Shield className="w-5 h-5 text-slate-500" />
-            </div>
-            <div>
-                <CardTitle className="text-lg">Authentication Rules</CardTitle>
-                <CardDescription>Manage password policies and MFA requirements.</CardDescription>
-            </div>
-          </div>
-        </CardHeader>
-        <CardContent className="p-6">
-            <div className="flex items-center justify-between p-4 bg-muted/50 rounded-xl border border-dashed border-border">
-                <span className="text-sm text-muted-foreground font-medium italic">Advanced security controls coming in next update.</span>
-            </div>
-        </CardContent>
-      </Card>
+      </div>
 
-      {/* 3. System Health */}
-      <div className="flex items-center justify-between p-4 bg-primary/5 rounded-2xl border border-primary/10">
-        <div className="flex items-center gap-3">
-            <Server className="w-5 h-5 text-primary" />
-            <span className="text-xs font-bold text-primary uppercase tracking-widest">System Status: All Systems Operational</span>
-        </div>
-        <div className="w-2 h-2 bg-green-500 rounded-full animate-ping" />
+      {/* DANGER ZONE */}
+      <div className="pt-8">
+        <h3 className="text-destructive font-black uppercase tracking-widest text-xs mb-4 flex items-center gap-2 ml-1">
+            <Lock className="w-4 h-4"/> Danger Zone
+        </h3>
+        <Card className="border-destructive/20 bg-destructive/5 overflow-hidden">
+            <CardContent className="p-6 flex items-center justify-between">
+                <div>
+                    <p className="font-bold text-foreground">Maintenance Mode</p>
+                    <p className="text-xs text-muted-foreground">Disable student portal access temporarily.</p>
+                </div>
+                <Button 
+                    variant={isMaintenanceMode ? "default" : "destructive"} 
+                    size="sm" 
+                    className="font-black uppercase text-[10px] px-6"
+                    onClick={() => {
+                        const nextState = !isMaintenanceMode;
+                        setIsMaintenanceMode(nextState);
+                        saveSetting('MAINTENANCE_MODE', String(nextState), 'Maintenance Mode');
+                    }}
+                >
+                    <Power className="w-3 h-3 mr-2" /> 
+                    {isMaintenanceMode ? "Deactivate" : "Activate"}
+                </Button>
+            </CardContent>
+        </Card>
       </div>
 
     </div>

@@ -22,16 +22,16 @@ export default function StudentPortalLayout({
   });
 
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false); // Correct name
 
   // --- IDLE TIMEOUT LOGIC ---
-  const onIdle = () => {
+  const handleOnIdle = () => {
     toast.warning("Session Expired", { description: "You have been logged out due to inactivity." });
     signOut({ callbackUrl: '/portal/login' });
   };
 
   useIdleTimer({
-    onIdle,
+    onIdle: handleOnIdle,
     timeout: 1000 * 60 * 30, // 30 minutes
     throttle: 500,
   });
@@ -40,32 +40,19 @@ export default function StudentPortalLayout({
   useEffect(() => {
     if (status === 'authenticated' && session?.user) {
       const user = session.user as any;
-      
       if (['ADMIN', 'STAFF', 'INSTRUCTOR'].includes(user.role)) {
         router.replace('/staff/dashboard');
-        return;
-      }
-      
-      if (user.role === 'STUDENT' && !user.isActive) {
-        router.replace('/portal/pending');
-        return;
       }
     }
   }, [status, session, router]);
 
   const user = (session?.user as any);
-  if (
-    status === "loading" ||
-    (user && ['ADMIN', 'STAFF', 'INSTRUCTOR'].includes(user.role)) ||
-    (user && user.role === 'STUDENT' && !user.isActive)
-  ) {
-    return <div className="flex h-screen items-center justify-center text-aerojet-blue animate-pulse">Loading Portal...</div>;
+  if (status === "loading" || !user) {
+    return <div className="flex h-screen items-center justify-center text-aerojet-sky animate-pulse">Loading Portal...</div>;
   }
 
-  if (!session || !session.user) return null;
-
   return (
-    <div className="flex h-screen bg-gray-100 dark:bg-slate-900/50">
+    <div className="flex h-screen bg-background transition-colors duration-300 dashboard-theme">
       <div 
         className={`hidden lg:block h-full z-30 shrink-0 transition-all duration-300 ease-in-out ${
           sidebarCollapsed ? 'w-20' : 'w-64'
@@ -80,15 +67,15 @@ export default function StudentPortalLayout({
 
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="lg:hidden">
-            <PortalHeader onMenuClick={() => setMobileSidebarOpen(true)} />
+            {/* FIX: Used mobileSidebarOpen */}
+            <PortalHeader onMenuClick={() => setMobileSidebarOpen(!mobileSidebarOpen)} />
         </div>
         
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 pt-6">
           {children}
         </main>
       </div>
 
-      {/* --- FIX IS HERE --- */}
       {mobileSidebarOpen && ( 
         <div className="lg:hidden fixed inset-0 z-50 flex" onClick={() => setMobileSidebarOpen(false)}>
           <div className="fixed inset-0 bg-black/50 transition-opacity"></div>

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient, Prisma } from '@prisma/client'; // Import Prisma type for where clause
+import { PrismaClient, Prisma } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -9,6 +9,8 @@ const prisma = new PrismaClient();
 // GET: List users (with filtering)
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
+  
+  // Security: Only Admins and Staff can view the user list
   if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
@@ -21,22 +23,23 @@ export async function GET(req: Request) {
     isDeleted: view === 'trash' ? true : false,
   };
 
-  // --- THIS IS THE FIX ---
   // Apply role filtering based on the query parameter
   if (roleFilter === 'students') {
     where.role = 'STUDENT';
   } else if (roleFilter === 'staff') {
     where.role = { in: ['ADMIN', 'STAFF', 'INSTRUCTOR'] };
   }
-  // If no roleFilter, it fetches everyone (for backwards compatibility or other uses)
 
   try {
     const users = await prisma.user.findMany({
       where,
-      include: {
-        studentProfile: true, // Always include student profile to get the Student ID
-      },
       orderBy: { createdAt: 'desc' },
+      include: {
+        // Merged the include logic here
+        studentProfile: { 
+            select: { studentId: true, cohort: true } 
+        }
+      }
     });
     return NextResponse.json({ users });
   } catch (error) {
@@ -138,19 +141,18 @@ export async function DELETE(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
-  const permanent = searchParams.get('permanent') === 'true'; // Check for flag
+  const permanent = searchParams.get('permanent') === 'true';
 
   if (!id) return NextResponse.json({ error: 'ID required' }, { status: 400 });
 
   try {
     if (permanent) {
-      // HARD DELETE: Removes record from DB entirely.
-      // Allows email to be reused.
+      // HARD DELETE
       await prisma.user.delete({
         where: { id }
       });
     } else {
-      // SOFT DELETE: Marks as archived.
+      // SOFT DELETE
       await prisma.user.update({
         where: { id },
         data: { 
@@ -164,8 +166,6 @@ export async function DELETE(req: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Delete error:", error);
-    // If this fails, it's usually because of connected data (Fees, Applications).
-    // The Schema needs 'onDelete: Cascade' on those relations to fix strict SQL errors.
     return NextResponse.json({ error: 'Delete failed. User may have dependent records.' }, { status: 500 });
   }
 }

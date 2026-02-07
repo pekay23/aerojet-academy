@@ -7,7 +7,7 @@ export default function MobileStickyBar() {
   const isPortalLive = process.env.NEXT_PUBLIC_PORTAL_LIVE === 'true';
 
   // List of paths where the sticky bar should be HIDDEN
-  const hiddenPaths = ["/portal", "/staff", "/register", "/contact", "/studio"];
+  const hiddenPaths = ["/portal", "/staff", "/register", "/contact", "/studio", "/upload-proof", "/portal/login"];
 
   // Check if the current path starts with any of the hidden paths
   const shouldHide = hiddenPaths.some((path) => pathname.startsWith(path));
