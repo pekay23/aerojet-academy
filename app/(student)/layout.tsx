@@ -13,11 +13,11 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   const router = useRouter();
   const { data: session, status } = useSession({
     required: true,
-    onUnauthenticated() { redirect('/portal/login'); },
+    onUnauthenticated() { redirect('/login'); },
   });
 
   useIdleTimer({
-    onIdle: () => { toast.warning("Session Expired"); signOut({ callbackUrl: '/portal/login' }); },
+    onIdle: () => { toast.warning("Session Expired"); signOut({ callbackUrl: '/login' }); },
     timeout: 1000 * 60 * 30,
   });
 
@@ -26,7 +26,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   const user = session?.user as any;
 
   // ⚠️ TEMPORARY DEV: Comment this out to test the UI
-  /*
+  
   if (user?.role !== 'STUDENT') {
     router.replace('/staff/dashboard');
     return null;
@@ -35,7 +35,6 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
      router.replace('/applicant/dashboard');
      return null;
   }
-  */ 
 
   return (
     <SidebarProvider defaultOpen={true}>

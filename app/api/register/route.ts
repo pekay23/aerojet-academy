@@ -20,11 +20,11 @@ export async function POST(req: Request) {
     }
 
     // 2. Generate a secure placeholder password
+    // This will be returned to the client ONE TIME for auto-login
     const tempPassword = Math.random().toString(36).slice(-8) + "A1!";
     const hashedPassword = await hash(tempPassword, 10);
 
     // 3. TRANSACTION: Create User, Profile, and Fee
-    // Added options to prevent the 5000ms timeout
     await prisma.$transaction(async (tx) => {
       // A. Create User account
       const user = await tx.user.create({
@@ -57,15 +57,25 @@ export async function POST(req: Request) {
           dueDate: new Date(),
         }
       });
+
     }, {
-      maxWait: 10000, // wait up to 10s for a DB connection
-      timeout: 20000  // allow up to 20s for the whole operation
+      maxWait: 10000, 
+      timeout: 20000 
     });
 
-    // 4. Send the invoice email
-    await sendRegistrationInvoiceEmail(email, name);
+    // 4. Send the invoice email (Async, don't block response)
+    // We catch errors here to prevent the registration from failing if email fails
+    try {
+        await sendRegistrationInvoiceEmail(email, name);
+    } catch (emailError) {
+        console.error("EMAIL_SEND_ERROR:", emailError);
+    }
 
-    return NextResponse.json({ success: true });
+    // 5. SUCCESS: Return the tempPassword for Auto-Login
+    return NextResponse.json({ 
+        success: true, 
+        tempPassword: tempPassword 
+    });
 
   } catch (error) {
     console.error("REGISTRATION_API_ERROR:", error);

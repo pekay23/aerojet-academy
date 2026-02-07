@@ -12,11 +12,11 @@ export default function ApplicantLayout({ children }: { children: React.ReactNod
   const router = useRouter();
   const { data: session, status } = useSession({
     required: true,
-    onUnauthenticated() { redirect('/portal/login'); },
+    onUnauthenticated() { redirect('/login'); },
   });
 
   useIdleTimer({
-    onIdle: () => { toast.warning("Session Expired"); signOut({ callbackUrl: '/portal/login' }); },
+    onIdle: () => { toast.warning("Session Expired"); signOut({ callbackUrl: '/login' }); },
     timeout: 1000 * 60 * 30,
   });
 

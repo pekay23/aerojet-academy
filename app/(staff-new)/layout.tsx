@@ -13,11 +13,11 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const { data: session, status } = useSession({
     required: true,
-    onUnauthenticated() { redirect('/portal/login'); },
+    onUnauthenticated() { redirect('/login'); },
   });
 
   useIdleTimer({
-    onIdle: () => { toast.warning("Session Expired"); signOut({ callbackUrl: '/portal/login' }); },
+    onIdle: () => { toast.warning("Session Expired"); signOut({ callbackUrl: '/login' }); },
     timeout: 1000 * 60 * 30,
   });
 
@@ -25,13 +25,10 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
 
   const user = session?.user as any;
 
-  // ⚠️ TEMPORARY DEV: Comment this out to test the UI
-  /*
   if (!['ADMIN', 'STAFF', 'INSTRUCTOR'].includes(user?.role)) { 
       router.replace('/student/dashboard'); 
       return null; 
   }
-  */
 
   return (
     <SidebarProvider defaultOpen={true}>

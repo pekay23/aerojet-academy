@@ -31,7 +31,7 @@ export default function StudentSidebar({ user }: { user: any }) {
 
   return (
     <>
-      <Sidebar collapsible="icon" className="border-r border-white/10 bg-aerojet-blue text-white">
+      <Sidebar collapsible="icon" className="border-r border-white/10 bg-aerojet-blue! text-white">
         <SidebarHeader className="h-20 flex items-center justify-center border-b border-white/10 mb-2">
            <Link href="/" className="flex items-center justify-center w-full h-full p-2">
             {open ? (
