@@ -26,7 +26,7 @@ export default function PageHero({ title, subtitle, backgroundImage }: PageHeroP
       <div className="absolute inset-0 bg-black/10 z-10" />
 
       {/* TEXT CONTENT */}
-      <div className="relative container mx-auto px-6 text-center text-white z-20 mt-20">
+      <div className="relative container mx-auto px-6 text-center text-white z-20 pt-24 md:pt-32">
         <div className="max-w-5xl mx-auto">
             <h1 className="text-4xl md:text-8xl font-black uppercase tracking-tighter leading-[0.85] mb-8 drop-shadow-2xl">
                 {title}

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react"; 
 import { Wrench } from 'lucide-react';
+import { usePathname } from "next/navigation";
 
 const navLinks = {
   courses: [
@@ -49,8 +50,19 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
   const { data: session, status } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  const pathname = usePathname();
 
-  const isLightPage = theme === 'light';
+  const lightThemePaths = [
+    '/admissions/fees', 
+    '/legal/terms',
+    '/register',
+  ];
+
+  const isExactLight = lightThemePaths.some(path => pathname === path);
+  const isDynamicLight = pathname.startsWith('/news/');
+  const isForcedLight = isExactLight || isDynamicLight;
+  const isLightPage = theme === 'light' || isForcedLight;
 
   useEffect(() => {
     if (isLightPage) { setScrolled(true); return; }
@@ -70,7 +82,7 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
   const isStaffOrAdmin = userRole === 'ADMIN' || userRole === 'STAFF';
   const isInstructor = userRole === 'INSTRUCTOR';
 
-  let dashboardHref = '/portal/dashboard';
+  let dashboardHref = '/student/dashboard'; 
   if (isStaffOrAdmin) dashboardHref = '/staff/dashboard';
   if (isInstructor) dashboardHref = '/staff/materials';
 
@@ -84,7 +96,6 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
               alt="Aerojet Academy Logo" width={160} height={40} priority className="object-contain"
             />
           </Link>
-
           <nav className={`hidden md:flex space-x-8 text-sm font-bold items-center transition-colors duration-300 ${displayAsLight ? "text-aerojet-blue" : "text-white"}`}>
             <div className="group relative">
                 <Link href="/courses" className="hover:text-aerojet-sky transition flex items-center h-full py-2">Courses <span className="ml-1 text-xs">▼</span></Link>
@@ -117,22 +128,20 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
                     STAFF PORTAL
                   </Link>
                 )}
-
                 <Link 
-                    href={status === 'authenticated' ? dashboardHref : '/portal/login'} 
+                    href={status === 'authenticated' ? dashboardHref : '/login'} 
                     className={`text-xs font-bold transition-colors ${displayAsLight ? 'text-gray-600 hover:text-aerojet-blue' : 'text-white hover:text-gray-200'}`}
                 >
                   {status === 'authenticated' ? (isStaffOrAdmin ? 'DASHBOARD' : 'MY PORTAL') : 'PORTAL LOGIN'}
                 </Link>
                 
                 {!isStaffOrAdmin && (
-                  <Link href="/register" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-soft-blue transition shadow-lg uppercase">
+                  <Link href="/register" className="bg-aerojet-sky text-white px-4 py-2 rounded-md font-bold text-xs hover:bg-aerojet-light transition shadow-lg uppercase">
                       {status === 'authenticated' ? 'Apply Now' : 'Register'}
                   </Link>
                 )}
               </>
           </div>
-
           <button className="md:hidden p-2 focus:outline-none relative z-50" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
             <div className={`w-6 h-0.5 mb-1.5 transition-all duration-300 ${mobileMenuOpen ? "rotate-45 translate-y-2 bg-aerojet-blue" : (headerIsLight ? "bg-aerojet-blue" : "bg-white")}`}></div>
             <div className={`w-6 h-0.5 mb-1.5 transition-all duration-300 ${mobileMenuOpen ? "opacity-0" : (headerIsLight ? "bg-aerojet-blue" : "bg-white")}`}></div>
@@ -140,7 +149,6 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
           </button>
         </div>
       </header>
-
       <div className={`fixed inset-0 bg-white z-40 pt-24 px-6 overflow-y-auto transform transition-transform duration-300 ease-in-out md:hidden ${mobileMenuOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex flex-col space-y-2 pb-20">
           <MobileAccordion title="Courses" links={navLinks.courses} onLinkClick={() => setMobileMenuOpen(false)} />
@@ -156,11 +164,9 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
                      <Wrench className="w-4 h-4" /> Staff Portal
                    </Link>
                 )}
-
                 <Link href={dashboardHref} onClick={() => setMobileMenuOpen(false)} className="block text-center text-aerojet-sky font-semibold border border-aerojet-sky py-3 rounded-md">
                   {status === 'authenticated' ? 'Go to Dashboard' : 'Student Portal Login'}
                 </Link>
-
                 {!isStaffOrAdmin && (
                   <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="block bg-aerojet-sky text-white text-center py-4 rounded-md shadow-md font-bold uppercase tracking-wider">
                     Start Registration
