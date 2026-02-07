@@ -91,6 +91,7 @@ export default function RegisterForm() {
         />
       </div>
 
+                  {/* PROGRAM SELECTION */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">Select Programme</label>
         <div className="relative">
@@ -99,9 +100,9 @@ export default function RegisterForm() {
                 onChange={e => setData({...data, program: e.target.value})}
                 className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all appearance-none bg-white text-gray-900"
             >
-                <option value="Full-Time B1.1">EASA Part-66 B1.1 (Mechanical)</option>
-                <option value="Full-Time B2">EASA Part-66 B2 (Avionics)</option>
-                <option value="Modular">Modular Fast-Track</option>
+                <option value="Full-Time">EASA Part-66 Full-Time (B1.1 / B2)</option>
+                <option value="Modular">EASA Part-66 Modular</option>
+                <option value="Examination-Only">Examination Only</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
                 <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
