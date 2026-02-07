@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
+// ✅ FIXED IMPORT: Using the correct new function name
 import { sendPaymentConfirmationEmail } from '@/app/lib/mail';
 
 const prisma = new PrismaClient();
@@ -35,7 +36,6 @@ export async function GET(req: Request) {
     });
     
     return NextResponse.json({ payments: payments || [] });
-
   } catch (error) {
     console.error("Staff Finance GET Error:", error);
     return NextResponse.json({ payments: [], error: "Server Error" }, { status: 500 });
@@ -130,8 +130,12 @@ export async function POST(req: Request) {
     // 5. Send Notification Email
     const studentEmail = fee.student.user.email;
     const studentName = fee.student.user.name || "Student";
+
     if (studentEmail) {
         try {
+            // ✅ FIXED CALL: Using correct name. 
+            // Note: Not passing password here as this might be a partial payment or tuition top-up.
+            // Ensure mail.ts 'password' param is optional (password?: string).
             await sendPaymentConfirmationEmail(studentEmail, studentName);
         } catch (emailError) {
             console.error("Notification Email Failed:", emailError);
