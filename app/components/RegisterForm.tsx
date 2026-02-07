@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react'; // Import signIn
+import { signIn } from 'next-auth/react';
 import { toast } from 'sonner';
-import { Loader2, ArrowRight } from 'lucide-react';
+import { Loader2, ArrowRight, Info } from 'lucide-react';
 
 export default function RegisterForm() {
   const router = useRouter();
@@ -13,7 +13,8 @@ export default function RegisterForm() {
     firstName: '', 
     lastName: '', 
     email: '', 
-    phone: ''
+    phone: '',
+    program: 'Full-Time B1.1'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,7 +22,6 @@ export default function RegisterForm() {
     setLoading(true);
 
     try {
-      // 1. Create the User in DB
       const res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -29,27 +29,26 @@ export default function RegisterForm() {
           name: `${data.firstName} ${data.lastName}`,
           email: data.email,
           phone: data.phone,
-          // We don't send a password; the API will generate a random one
+          programme: data.program
         })
       });
 
       const responseData = await res.json();
 
       if (res.ok) {
-        toast.success("Registration successful! Redirecting...");
+        toast.success("Registration successful! check your email.");
         
-        // 2. AUTO-LOGIN (The Magic Step)
-        // We use the credentials returned by the API (or a special token)
+        // Auto-Login
         const loginRes = await signIn('credentials', {
           redirect: false,
           email: data.email,
-          password: responseData.tempPassword, // API must return this!
+          password: responseData.tempPassword,
         });
 
         if (loginRes?.ok) {
-            router.push('/applicant/dashboard'); // Go straight to dashboard
+            router.push('/applicant/dashboard');
         } else {
-            router.push('/login'); // Fallback
+            router.push('/login');
         }
       } else {
         toast.error(responseData.error || "Registration failed");
@@ -92,12 +91,39 @@ export default function RegisterForm() {
         />
       </div>
 
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Select Programme</label>
+        <div className="relative">
+            <select 
+                value={data.program} 
+                onChange={e => setData({...data, program: e.target.value})}
+                className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-aerojet-blue outline-none transition-all appearance-none bg-white text-gray-900"
+            >
+                <option value="Full-Time B1.1">EASA Part-66 B1.1 (Mechanical)</option>
+                <option value="Full-Time B2">EASA Part-66 B2 (Avionics)</option>
+                <option value="Modular">Modular Fast-Track</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+                <svg className="h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+            </div>
+        </div>
+      </div>
+
+      {/* FEE NOTICE */}
+      <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex gap-3 items-start">
+        <Info className="w-5 h-5 text-aerojet-blue shrink-0 mt-0.5" />
+        <div className="text-xs text-slate-600 leading-relaxed">
+            <span className="font-bold text-aerojet-blue block mb-1">Registration Fee Required</span>
+            A non-refundable fee of <strong>GHS 350.00</strong> is required to process your application. You will receive payment details and a link to upload your proof of payment via email immediately after registering.
+        </div>
+      </div>
+
       <button type="submit" disabled={loading} className="w-full bg-aerojet-blue hover:bg-aerojet-sky text-white font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 mt-6">
         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <>Start Application <ArrowRight className="w-5 h-5" /></>}
       </button>
       
       <p className="text-xs text-center text-gray-500 mt-4">
-        By clicking Start, you agree to our Terms. We will email you a temporary password.
+        By clicking Start, you agree to our Terms. Your account login details will be emailed to you.
       </p>
     </form>
   );
