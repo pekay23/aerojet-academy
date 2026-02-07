@@ -14,7 +14,7 @@ export default function RegisterForm() {
     lastName: '', 
     email: '', 
     phone: '',
-    program: 'Full-Time B1.1'
+    program: 'Full-Time' // ✅ Updated default
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
