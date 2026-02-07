@@ -152,17 +152,20 @@ export const sendRegistrationInvoiceEmail = async (email: string, name: string) 
   });
 };
 
-export const sendPaymentConfirmationEmail = async (email: string, name: string) => {
+export const sendPaymentConfirmationEmail = async (email: string, name: string, password?: string) => {
   const html = wrapEmail(
     "Account Activated",
     `
     <p class="text">Dear ${name},</p>
-    <p class="text">Your registration fee has been verified. Your applicant account is now active and ready for the next step.</p>
+    <p class="text">Your registration fee has been verified. Your applicant account is now active.</p>
     
     <div class="info-box" style="border-left-color: #22c55e;">
       <div class="info-row"><strong>Status:</strong> <span style="color:#15803d; font-weight:bold;">Verified ✅</span></div>
-      <div class="info-row"><strong>Next Step:</strong> Complete Application Form</div>
+      <div class="info-row"><strong>Login Email:</strong> ${email}</div>
+      <div class="info-row"><strong>Access Code:</strong> <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #000;">${password}</span></div>
     </div>
+
+    <p class="text" style="font-size: 13px; color: #666;">Use the access code above as your password to log in.</p>
 
     <div class="btn-container">
       <a href="${DOMAIN}/login" class="btn">Login to Portal</a>
@@ -173,7 +176,7 @@ export const sendPaymentConfirmationEmail = async (email: string, name: string) 
   await resend.emails.send({
     from: 'Admissions <admissions@aerojet-academy.com>',
     to: email,
-    subject: 'Account Unlocked - Next Steps',
+    subject: 'Account Unlocked - Login Details',
     html
   });
 };

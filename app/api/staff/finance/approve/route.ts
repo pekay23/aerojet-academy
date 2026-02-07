@@ -2,8 +2,8 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-// 👇 1. IMPORT THE NEW FUNCTION
 import { sendPaymentConfirmationEmail } from '@/app/lib/mail'; 
+import { hash } from 'bcryptjs'; // Import hash
 
 const prisma = new PrismaClient();
 
@@ -17,30 +17,34 @@ export async function POST(req: Request) {
   try {
     const { feeId } = await req.json();
 
-    // Fetch Fee with Student AND User info (Need email/name)
     const fee = await prisma.fee.findUnique({
       where: { id: feeId },
-      include: { 
-        student: {
-          include: { user: true } // ✅ Need User to get email
-        } 
-      }
+      include: { student: { include: { user: true } } }
     });
 
     if (!fee) return NextResponse.json({ error: 'Fee not found' }, { status: 404 });
 
+    // 1. GENERATE NEW ACCESS CODE (Random 6 chars)
+    const accessCode = Math.random().toString(36).slice(-6).toUpperCase();
+    const hashedCode = await hash(accessCode, 10);
+
     await prisma.$transaction(async (tx) => {
-      // ... (Transaction logic stays the same: Update Fee, Unlock User, Update Student) ...
+      // 2. Mark Fee Paid
       await tx.fee.update({
         where: { id: feeId },
         data: { status: 'PAID', paid: fee.amount }
       });
 
+      // 3. Unlock User & SET NEW PASSWORD
       await tx.user.update({
         where: { id: fee.student.userId },
-        data: { isActive: true }
+        data: { 
+            isActive: true,
+            password: hashedCode // Update DB with new hash
+        }
       });
 
+      // 4. Update Status
       if (fee.student.enrollmentStatus === 'PROSPECT') {
           await tx.student.update({
             where: { id: fee.studentId },
@@ -49,15 +53,15 @@ export async function POST(req: Request) {
       }
     });
 
-    // 👇 2. SEND THE EMAIL (After transaction succeeds)
+    // 5. Send Email with RAW Access Code
     try {
         await sendPaymentConfirmationEmail(
             fee.student.user.email!, 
-            fee.student.user.name!
+            fee.student.user.name!,
+            accessCode // Pass the raw code to email
         );
     } catch (emailError) {
         console.error("EMAIL_SEND_ERROR:", emailError);
-        // Don't fail the request if email fails, just log it
     }
 
     return NextResponse.json({ success: true });
