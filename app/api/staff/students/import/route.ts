@@ -21,28 +21,43 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No data provided' }, { status: 400 });
     }
 
-    // Hash a default password for these imported accounts
-    // They can change it later via the "Security" tab we built
     const defaultPassword = await hash("Aerojet2026!", 10);
 
     const results = await prisma.$transaction(
       students.map((s: any) => 
         prisma.user.upsert({
           where: { email: s.email },
+          
+          // CASE 1: User Exists -> Update their info & link student profile
           update: {
-             // If user exists, ensure they are active
-             isActive: true 
+             isActive: true,
+             studentProfile: {
+                upsert: {
+                    create: {
+                        phone: s.phone || null,
+                        studentId: s.studentId || null,
+                        enrollmentStatus: 'ENROLLED',
+                    },
+                    update: {
+                        phone: s.phone || undefined,
+                        studentId: s.studentId || undefined,
+                        enrollmentStatus: 'ENROLLED', // Force enroll if importing
+                    }
+                }
+             }
           }, 
+          
+          // CASE 2: New User -> Create everything
           create: {
             name: s.name,
             email: s.email,
             password: defaultPassword,
             role: 'STUDENT',
-            isActive: true, // Imported students bypass the payment gate
+            isActive: true,
             studentProfile: {
               create: {
                 phone: s.phone || null,
-                studentId: s.studentId || null, // e.g. AATA0001
+                studentId: s.studentId || null,
                 enrollmentStatus: 'ENROLLED'
               }
             }

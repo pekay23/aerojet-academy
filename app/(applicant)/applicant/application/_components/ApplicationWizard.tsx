@@ -7,20 +7,31 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-// Check this import path! Ensure it matches your project structure.
 import { UploadDropzone } from '@/app/utils/uploadthing'; 
 import { CheckCircle2, ArrowRight, ArrowLeft, Loader2, UploadCloud, FileText } from 'lucide-react';
 
-export default function ApplicationWizard() {
+interface WizardProps {
+  initialData?: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  }
+}
+
+export default function ApplicationWizard({ initialData }: WizardProps) {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Form State
+  // Form State - Using initialData if available
   const [data, setData] = useState({
-    firstName: '', lastName: '', email: '', phone: '',
-    program: 'Full-Time B1.1',
+    firstName: initialData?.firstName || '', 
+    lastName: initialData?.lastName || '', 
+    email: initialData?.email || '', 
+    phone: initialData?.phone || '',
+    program: 'Full-Time',
     idDocUrl: '',
     cvDocUrl: '' 
   });
@@ -36,16 +47,16 @@ export default function ApplicationWizard() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/register', {
+      const res = await fetch('/api/portal/applications', { // Updated API endpoint for Application submission
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          name: `${data.firstName} ${data.lastName}`,
-          email: data.email,
-          phone: data.phone,
-          programme: data.program,
-          // sourceId: formId, // Removed unless you are tracking campaigns
-          documents: { id: data.idDocUrl, cv: data.cvDocUrl }
+          // Adjust payload to match your Application API expectation
+          educationLevel: "High School", // Add fields as per your schema
+          institutionName: "N/A",
+          idDocumentUrl: data.idDocUrl,
+          certificateUrl: data.cvDocUrl,
+          program: data.program
         })
       });
 
@@ -106,11 +117,23 @@ export default function ApplicationWizard() {
           <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
             <h3 className="text-lg font-bold text-slate-800">Personal Details</h3>
             <div className="grid grid-cols-2 gap-4">
-              <Input placeholder="First Name" value={data.firstName} onChange={e => setData({...data, firstName: e.target.value})} />
-              <Input placeholder="Last Name" value={data.lastName} onChange={e => setData({...data, lastName: e.target.value})} />
+              <div>
+                  <label className="text-sm font-medium mb-1 block">First Name</label>
+                  <Input placeholder="First Name" value={data.firstName} onChange={e => setData({...data, firstName: e.target.value})} />
+              </div>
+              <div>
+                  <label className="text-sm font-medium mb-1 block">Last Name</label>
+                  <Input placeholder="Last Name" value={data.lastName} onChange={e => setData({...data, lastName: e.target.value})} />
+              </div>
             </div>
-            <Input type="email" placeholder="Email Address" value={data.email} onChange={e => setData({...data, email: e.target.value})} />
-            <Input type="tel" placeholder="Phone Number" value={data.phone} onChange={e => setData({...data, phone: e.target.value})} />
+            <div>
+                <label className="text-sm font-medium mb-1 block">Email</label>
+                <Input type="email" placeholder="Email Address" value={data.email} onChange={e => setData({...data, email: e.target.value})} />
+            </div>
+            <div>
+                <label className="text-sm font-medium mb-1 block">Phone</label>
+                <Input type="tel" placeholder="Phone Number" value={data.phone} onChange={e => setData({...data, phone: e.target.value})} />
+            </div>
             
             <div className="pt-4 flex justify-end">
               <Button onClick={handleNext} className="bg-aerojet-blue hover:bg-aerojet-sky text-white">
@@ -127,9 +150,9 @@ export default function ApplicationWizard() {
             <Select value={data.program} onValueChange={v => setData({...data, program: v})}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="Full-Time B1.1">EASA Part-66 B1.1 (Mechanical)</SelectItem>
-                <SelectItem value="Full-Time B2">EASA Part-66 B2 (Avionics)</SelectItem>
-                <SelectItem value="Modular">Modular Fast-Track</SelectItem>
+                <SelectItem value="Full-Time">EASA Part-66 Full-Time (B1.1 / B2)</SelectItem>
+                <SelectItem value="Modular">EASA Part-66 Modular</SelectItem>
+                <SelectItem value="Examination-Only">Examination Only</SelectItem>
               </SelectContent>
             </Select>
 

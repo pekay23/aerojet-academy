@@ -23,40 +23,23 @@ const wrapEmail = (title: string, bodyContent: string) => {
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
-          /* RESET */
           body { margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: ${COLORS.gray}; color: ${COLORS.text}; }
           table { border-collapse: collapse; width: 100%; border-spacing: 0; }
           img { border: 0; outline: none; text-decoration: none; }
-          
-          /* CONTAINER */
-          /* Changed padding to 0 to make header/footer touch edges if desired, or small padding for card look */
           .wrapper { width: 100%; background-color: ${COLORS.gray}; padding: 20px 0 0 0; } 
           .main-table { max-width: 600px; margin: 0 auto; background-color: ${COLORS.white}; border-radius: 8px 8px 0 0; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-          
-          /* HEADER */
           .header { background-color: ${COLORS.white}; padding: 20px 30px; border-bottom: 1px solid #f1f5f9; text-align: left; }
           .header img { height: 36px; width: auto; display: block; }
-          
-          /* CONTENT */
           .content { padding: 40px 30px; }
           .h1 { color: ${COLORS.navy}; font-size: 22px; font-weight: 800; margin: 0 0 20px 0; letter-spacing: -0.5px; }
           .text { font-size: 15px; line-height: 1.6; color: ${COLORS.text}; margin-bottom: 15px; }
-          
-          /* BUTTON */
           .btn-container { margin: 30px 0; }
           .btn { background-color: ${COLORS.navy}; color: ${COLORS.white}; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block; }
-          
-          /* INFO BOX */
           .info-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid ${COLORS.navy}; padding: 15px; margin: 25px 0; border-radius: 4px; }
           .info-row { margin-bottom: 5px; font-size: 14px; }
-          
-          /* FOOTER (Revised) */
           .footer { background-color: ${COLORS.navy}; padding: 40px 30px; color: #94a3b8; font-size: 12px; }
-          /* Ensure footer touches bottom by removing bottom padding from wrapper */
-          
-          .footer-logo { width: 160px; height: auto; display: block; } /* Increased Size */
+          .footer-logo { width: 160px; height: auto; display: block; }
           .footer-contact { text-align: right; color: #cbd5e1; line-height: 1.5; }
-          
           .footer-links { text-align: center; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: 20px; }
           .footer-links a { color: ${COLORS.sky}; text-decoration: none; margin: 0 10px; font-weight: bold; }
           .copyright { text-align: center; margin-top: 15px; opacity: 0.5; font-size: 11px; }
@@ -65,55 +48,25 @@ const wrapEmail = (title: string, bodyContent: string) => {
       <body>
         <div class="wrapper">
           <table class="main-table" align="center">
-            
-            <!-- HEADER -->
-            <tr>
-              <td class="header">
-                <img src="${LOGO_DARK_ON_WHITE}" alt="Aerojet Academy" />
-              </td>
-            </tr>
-
-            <!-- BODY -->
-            <tr>
-              <td class="content">
-                <h1 class="h1">${title}</h1>
-                ${bodyContent}
-              </td>
-            </tr>
-
-            <!-- FOOTER -->
+            <tr><td class="header"><img src="${LOGO_DARK_ON_WHITE}" alt="Aerojet Academy" /></td></tr>
+            <tr><td class="content"><h1 class="h1">${title}</h1>${bodyContent}</td></tr>
             <tr>
               <td class="footer">
                 <table width="100%">
                   <tr>
-                    <td valign="top" width="50%">
-                      <img src="${LOGO_WHITE_ON_DARK}" class="footer-logo" alt="Aerojet Academy" />
-                    </td>
-                    <td valign="top" width="50%" class="footer-contact">
-                      <strong>AEROJET AVIATION</strong><br/>
-                      Accra Technical Training Centre<br/>
-                      Kokomlemle, Accra - Ghana<br/>
-                      +233 551 010 108
-                    </td>
+                    <td valign="top" width="50%"><img src="${LOGO_WHITE_ON_DARK}" class="footer-logo" alt="Aerojet Academy" /></td>
+                    <td valign="top" width="50%" class="footer-contact"><strong>AEROJET AVIATION</strong><br/>Accra Technical Training Centre<br/>Kokomlemle, Accra - Ghana<br/>+233 551 010 108</td>
                   </tr>
                 </table>
-                
                 <div class="footer-links">
                   <a href="${DOMAIN}">Website</a>
                   <a href="${DOMAIN}/login">Portal</a>
                   <a href="${DOMAIN}/contact">Support</a>
                 </div>
-                
-                <div class="copyright">
-                  &copy; ${new Date().getFullYear()} Aerojet Aviation. All rights reserved.
-                </div>
+                <div class="copyright">&copy; ${new Date().getFullYear()} Aerojet Aviation. All rights reserved.</div>
               </td>
             </tr>
-
           </table>
-          <!-- Space below card removed to make it feel grounded if desired, 
-               or keep .wrapper padding-bottom: 40px for floating card look. 
-               Current code: padding-bottom: 0 in wrapper, but wrapper bg is gray. -->
         </div>
       </body>
     </html>
@@ -152,31 +105,50 @@ export const sendRegistrationInvoiceEmail = async (email: string, name: string) 
   });
 };
 
-export const sendPaymentConfirmationEmail = async (email: string, name: string, password?: string) => {
+export const sendPaymentConfirmationEmail = async (
+    toEmail: string, 
+    name: string, 
+    password?: string,
+    newAcademyEmail?: string
+) => {
   const html = wrapEmail(
-    "Account Activated",
+    "Student Portal Unlocked",
     `
     <p class="text">Dear ${name},</p>
-    <p class="text">Your registration fee has been verified. Your applicant account is now active.</p>
+    <p class="text">Your registration is verified. We have created your official <strong>Aerojet Academy Account</strong>.</p>
     
     <div class="info-box" style="border-left-color: #22c55e;">
-      <div class="info-row"><strong>Status:</strong> <span style="color:#15803d; font-weight:bold;">Verified ✅</span></div>
-      <div class="info-row"><strong>Login Email:</strong> ${email}</div>
-      <div class="info-row"><strong>Access Code:</strong> <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #000;">${password}</span></div>
+      <div class="info-row"><strong>Status:</strong> <span style="color:#15803d; font-weight:bold;">Active ✅</span></div>
+      
+      ${newAcademyEmail ? `
+      <div class="info-row" style="margin-top:10px; border-top:1px dashed #ccc; padding-top:10px;">
+        <strong>Your New Login Email:</strong><br/>
+        <span style="font-size: 16px; color: #002a5c; font-weight:bold;">${newAcademyEmail}</span>
+      </div>
+      ` : ''}
+
+      ${password ? `
+      <div class="info-row" style="margin-top:5px;">
+        <strong>Access Code:</strong><br/>
+        <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #000;">${password}</span>
+      </div>
+      ` : ''}
     </div>
 
-    <p class="text" style="font-size: 13px; color: #666;">Use the access code above as your password to log in.</p>
+    <p class="text" style="font-size: 13px; color: #666;">
+        Please use the <strong>Academy Email</strong> above to log in from now on. Your personal email will no longer work for login.
+    </p>
 
     <div class="btn-container">
-      <a href="${DOMAIN}/login" class="btn">Login to Portal</a>
+      <a href="${DOMAIN}/login" class="btn">Login to Student Portal</a>
     </div>
     `
   );
 
   await resend.emails.send({
     from: 'Admissions <admissions@aerojet-academy.com>',
-    to: email,
-    subject: 'Account Unlocked - Login Details',
+    to: toEmail,
+    subject: 'Student Portal Access - Login Details',
     html
   });
 };

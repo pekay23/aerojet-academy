@@ -5,46 +5,50 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// GET: Fetch single exam run details + roster
+/**
+ * GET: Fetch single Exam Pool details + Roster (Members)
+ */
 export async function GET(
   req: NextRequest, 
-  { params }: { params: Promise<{ id: string }> } // Updated for Next.js 15
+  { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   
-  // Verify Admin/Staff Role
   if (!session || (session.user as any).role === 'STUDENT') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
-  // Await params before accessing the id
   const { id } = await params;
 
   try {
-    const run = await prisma.examRun.findUnique({
+    // Fetch Pool with Memberships
+    const pool = await prisma.examPool.findUnique({
       where: { id },
       include: {
-        course: true,
-        room: true,
-        bookings: {
+        event: true, // Include parent event
+        memberships: {
           include: {
-            student: { include: { user: true } }
+            student: { 
+                include: { user: { select: { name: true, email: true, image: true } } } 
+            }
           },
-          orderBy: { seatLabel: 'asc' } 
+          orderBy: { createdAt: 'asc' } // First come, first served
         }
       }
     });
 
-    if (!run) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    if (!pool) return NextResponse.json({ error: 'Pool not found' }, { status: 404 });
 
-    return NextResponse.json({ run });
+    return NextResponse.json({ run: pool }); // Keeping 'run' key for frontend compat if needed, or change to 'pool'
   } catch (error) {
-    console.error("Fetch Exam Roster Error:", error);
-    return NextResponse.json({ error: 'Failed to fetch roster' }, { status: 500 });
+    console.error("Fetch Pool Error:", error);
+    return NextResponse.json({ error: 'Failed to fetch pool' }, { status: 500 });
   }
 }
 
-// DELETE: Remove a student booking
+/**
+ * DELETE: Remove a student (Membership) from the pool
+ */
 export async function DELETE(
   req: NextRequest, 
   { params }: { params: Promise<{ id: string }> }
@@ -55,48 +59,33 @@ export async function DELETE(
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
-  // Await params even if id isn't used directly in the body, 
-  // ensuring method signature matches the route
-  const { id } = await params; 
-  const { bookingId } = await req.json();
+  const { membershipId } = await req.json(); // Changed from bookingId
 
   try {
-    await prisma.examBooking.delete({
-      where: { id: bookingId }
+    // 1. Delete the membership
+    const deleted = await prisma.poolMembership.delete({
+      where: { id: membershipId },
+      include: { pool: true }
     });
+
+    // 2. Refund logic would go here (e.g. update Wallet)
+    // For now, we just remove the record.
+
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Delete Booking Error:", error);
+    console.error("Remove Member Error:", error);
     return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
   }
 }
 
-// PATCH: Assign a seat label to a booking
+/**
+ * PATCH: Update Membership (e.g. Assign Seat Label if you added that field)
+ * Note: PoolMembership doesn't have 'seatLabel' in the current schema unless you add it.
+ * I will comment this out until you add it, or we can use it to update status.
+ */
 export async function PATCH(
   req: NextRequest, 
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  
-  if (!session || (session.user as any).role === 'STUDENT') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
-
-  const { id } = await params;
-  const { bookingId, seatLabel } = await req.json();
-
-  try {
-    // Note: id (examRunId) could be used here for additional verification 
-    // to ensure the booking belongs to this specific run.
-    
-    await prisma.examBooking.update({
-      where: { id: bookingId },
-      data: { seatLabel }
-    });
-
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Assign Seat Error:", error);
-    return NextResponse.json({ error: 'Failed to assign seat. Label might be taken.' }, { status: 500 });
-  }
+    return NextResponse.json({ message: "Seat assignment not implemented in Pool Schema yet" });
 }

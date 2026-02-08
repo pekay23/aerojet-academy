@@ -5,56 +5,61 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// GET: Fetch all exam runs (with booking counts)
+// GET: Fetch all Exam Pools (Replaces Runs)
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  if (!session || (session.user as any).role === 'STUDENT') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
   try {
-    const runs = await prisma.examRun.findMany({
+    const pools = await prisma.examPool.findMany({
       include: {
-        course: true,
-        room: true,
-        bookings: { include: { student: { include: { user: true } } } }
+        event: true,
+        // Count bookings/memberships
+        _count: { select: { memberships: true } }
       },
-      orderBy: { startDatetime: 'desc' }
+      orderBy: { examDate: 'desc' }
     });
     
-    // Also fetch available rooms and modules for the "Create" form
-    const rooms = await prisma.examRoom.findMany();
-    const modules = await prisma.course.findMany({ where: { code: { startsWith: 'MOD-' } } });
+    // Also fetch Events (Windows) for the Create form
+    const events = await prisma.examEvent.findMany({
+        where: { status: 'OPEN' }
+    });
 
-    return NextResponse.json({ runs, rooms, modules });
+    return NextResponse.json({ pools, events });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
+    console.error("GET_POOLS_ERROR:", error);
+    return NextResponse.json({ error: 'Failed to fetch pools' }, { status: 500 });
   }
 }
 
-// POST: Create a new Exam Run
+// POST: Create a new Exam Pool
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  if (!session || (session.user as any).role === 'STUDENT') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  }
 
-  const { moduleId, roomId, datetime, duration } = await req.json();
+  const { eventId, name, examDate, startTime, endTime } = await req.json();
 
   try {
-    // Basic validation: Check room capacity
-    const room = await prisma.examRoom.findUnique({ where: { id: roomId } });
-    if (!room) return NextResponse.json({ error: 'Room not found' }, { status: 404 });
-
-    const run = await prisma.examRun.create({
+    const pool = await prisma.examPool.create({
         data: {
-            examModuleId: moduleId,
-            roomId: roomId,
-            startDatetime: new Date(datetime),
-            durationMinutes: parseInt(duration),
-            maxCapacity: room.capacity,
-            status: 'SCHEDULED'
+            eventId,
+            name,
+            examDate: new Date(examDate),
+            examStartTime: startTime, // "09:00"
+            examEndTime: endTime,     // "12:00"
+            minCandidates: 25,
+            maxCandidates: 28,
+            status: 'OPEN'
         }
     });
 
-    return NextResponse.json({ success: true, run });
+    return NextResponse.json({ success: true, pool });
   } catch (error) {
-    return NextResponse.json({ error: 'Failed to create run' }, { status: 500 });
+    console.error("CREATE_POOL_ERROR:", error);
+    return NextResponse.json({ error: 'Failed to create pool' }, { status: 500 });
   }
 }

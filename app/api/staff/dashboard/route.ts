@@ -9,12 +9,12 @@ export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
     
-    // 1. Security Check: Only Admin and Staff allowed
+    // 1. Security Check
     if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // 🚀 PERFORMANCE OPTIMIZATION: Execute all independent queries in parallel
+    // 🚀 Execute all queries in parallel
     const [
       totalStudents,
       activeStudents,
@@ -25,9 +25,9 @@ export async function GET(req: Request) {
       totalAdmins,
       pendingApps,
       verifyingPayments,
-      nextWindow,
-      upcomingExams,
-      upcomingDeadlines,
+      nextEvent,      // Was nextWindow
+      upcomingPools,  // Was upcomingExams
+      upcomingEvents, // Was upcomingDeadlines
       recentStudents
     ] = await Promise.all([
       // Student Counts
@@ -43,38 +43,40 @@ export async function GET(req: Request) {
       
       // Ops Counts
       prisma.application.count({ where: { status: 'PENDING' } }),
-      prisma.fee.count({ where: { status: 'VERIFYING' } }),
+      prisma.fee.count({ where: { status: 'UNPAID' } }), // Adjusted from VERIFYING if needed
 
-      // Data Fetches
-      prisma.examWindow.findFirst({
+      // 1. Current/Next Exam Event (Replaces Window)
+      prisma.examEvent.findFirst({
         where: { endDate: { gt: new Date() } },
         include: {
-          runs: {
+          pools: {
             include: {
-              course: true,
-              bookings: { include: { student: { include: { fees: true } } } }
+              memberships: {
+                 where: { status: { in: ['RESERVED', 'CONFIRMED'] } }
+              }
             }
           }
         },
         orderBy: { startDate: 'asc' }
       }),
-      prisma.examRun.findMany({
-        where: { startDatetime: { gte: new Date() } },
-        include: { course: true },
+
+      // 2. Upcoming Pools (Replaces Runs)
+      prisma.examPool.findMany({
+        where: { examDate: { gte: new Date() } },
         take: 10,
-        orderBy: { startDatetime: 'asc' }
+        orderBy: { examDate: 'asc' }
       }),
-      prisma.examWindow.findMany({
+
+      // 3. Upcoming Event Deadlines
+      prisma.examEvent.findMany({
         where: { endDate: { gte: new Date() } },
         take: 5
       }),
-      // FIX: Strictly filter recent students to exclude deleted users and non-students
+
+      // 4. Recent Students
       prisma.student.findMany({
         where: {
-            user: {
-                role: 'STUDENT',
-                isDeleted: false
-            }
+            user: { role: 'STUDENT', isDeleted: false }
         },
         take: 5,
         orderBy: { createdAt: 'desc' },
@@ -82,45 +84,51 @@ export async function GET(req: Request) {
       })
     ]);
 
-    // --- Process Window Tracker ---
+    // --- Process Event Tracker (Go/No-Go) ---
     let windowStats = null;
-    if (nextWindow) {
-      let paidSeatsCount = 0;
-      nextWindow.runs.forEach(run => {
-        run.bookings.forEach(booking => {
-          const examFee = booking.student.fees.find(f => 
-            f.description?.includes(run.course.code) && f.status === 'PAID'
-          );
-          if (examFee) paidSeatsCount++;
-        });
+    
+    if (nextEvent) {
+      // Calculate revenue/seats from Pools
+      let totalConfirmedSeats = 0;
+      let totalRevenue = 0;
+
+      nextEvent.pools.forEach(pool => {
+         const seats = pool.memberships.length;
+         totalConfirmedSeats += seats;
+         // Estimate revenue (assuming 300 per seat for now)
+         totalRevenue += seats * 300; 
       });
 
-      const cutoff = new Date(nextWindow.cutoffDate);
+      const cutoff = new Date(nextEvent.paymentDeadline); // T-21
       const diffDays = Math.ceil((cutoff.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
 
+      // Threshold logic: €25,000 revenue target
+      const isGo = totalRevenue >= Number(nextEvent.minRevenueTarget);
+
       windowStats = {
-        id: nextWindow.id,
-        name: nextWindow.name,
-        cutoff: nextWindow.cutoffDate,
-        paidSeats: paidSeatsCount,
-        targetSeats: nextWindow.minSeatsRequired,
-        isGo: paidSeatsCount >= nextWindow.minSeatsRequired,
+        id: nextEvent.id,
+        name: nextEvent.name,
+        cutoff: nextEvent.paymentDeadline,
+        paidSeats: totalConfirmedSeats,
+        revenue: totalRevenue,
+        targetRevenue: Number(nextEvent.minRevenueTarget),
+        isGo: isGo,
         daysToCutoff: diffDays > 0 ? diffDays : 0
       };
     }
 
     // --- Merge Calendar Events ---
     const calendarEvents = [
-      ...upcomingExams.map(exam => ({
-        id: exam.id,
-        title: `Exam: ${exam.course.code}`,
-        date: exam.startDatetime,
+      ...upcomingPools.map(pool => ({
+        id: pool.id,
+        title: `Pool: ${pool.name}`,
+        date: pool.examDate, // Use examDate instead of startDatetime
         type: 'EXAM'
       })),
-      ...upcomingDeadlines.map(window => ({
-        id: window.id,
-        title: `Deadline: ${window.name}`,
-        date: window.endDate,
+      ...upcomingEvents.map(event => ({
+        id: event.id,
+        title: `Deadline: ${event.name}`,
+        date: event.paymentDeadline, // Track Payment Deadline
         type: 'DEADLINE'
       }))
     ];

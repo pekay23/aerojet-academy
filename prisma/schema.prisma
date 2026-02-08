@@ -7,7 +7,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// --- 1. USER & AUTHENTICATION ---
+// =========================================================
+// 1. USER & AUTHENTICATION (Unchanged)
+// =========================================================
+
 model Account {
   id                String  @id @default(cuid())
   userId            String
@@ -63,7 +66,10 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// --- 2. ACADEMIC HIERARCHY ---
+// =========================================================
+// 2. ACADEMIC HIERARCHY (Unchanged)
+// =========================================================
+
 model SchoolPeriod {
   id        String   @id @default(cuid())
   name      String
@@ -78,7 +84,7 @@ model Intake {
   name           String
   schoolPeriodId String
   schoolPeriod   SchoolPeriod @relation(fields: [schoolPeriodId], references: [id])
-  cohorts        Cohort[]     // FIXED: Renamed classes to cohorts
+  cohorts        Cohort[]     
   students       Student[]
 }
 
@@ -103,7 +109,10 @@ model CohortCourse {
   instructorId String?
 }
 
-// --- 3. STUDENT CORE ---
+// =========================================================
+// 3. STUDENT CORE (Updated with Ambassador Fields)
+// =========================================================
+
 model Student {
   id                 String   @id @default(cuid())
   userId             String   @unique
@@ -122,28 +131,38 @@ model Student {
   emergencyName      String?
   emergencyPhone     String?
   emergencyRelation  String?
-
   enrollmentStatus   String   @default("PROSPECT")
   institutionalEmail String?  @unique
   
+  // Academic Relations
   intakeId           String?
   intake             Intake?  @relation(fields: [intakeId], references: [id])
   cohort             String?
   cohortId           String?
   cohortRel          Cohort?  @relation(fields: [cohortId], references: [id])
+  
+  // --- NEW: Ambassador Program (Spec 3.8) ---
+  isAmbassador        Boolean  @default(false)
+  referralCode        String?  @unique
+  successfulReferrals Int      @default(0)
 
+  // Data Relations
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
-
+  
   applications       Application[]
   fees               Fee[]
-  examBookings       ExamBooking[]
   attendance         AttendanceRecord[]
   assessments        Assessment[]
-  wallet             Wallet?
   notes              StudentNote[]
   files              StudentFile[]
-  poolParticipations PoolParticipant[]
+  
+  // --- NEW: Pooling System Relations ---
+  wallet             Wallet?
+  poolMemberships    PoolMembership[]
+  bookings           Booking[]
+  referralsMade      Referral[] @relation("Referrer")
+  referralsReceived  Referral[] @relation("Referee")
 }
 
 model Application {
@@ -159,7 +178,7 @@ model Application {
   isSubmitted     Boolean  @default(false)
   
   studentId       String
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   courseId        String
   course          Course   @relation(fields: [courseId], references: [id])
 }
@@ -185,7 +204,10 @@ model StudentFile {
   createdAt DateTime @default(now())
 }
 
-// --- 4. CURRICULUM & ATTENDANCE ---
+// =========================================================
+// 4. CURRICULUM & ATTENDANCE (Unchanged)
+// =========================================================
+
 model Course {
   id           String             @id @default(cuid())
   code         String             @unique
@@ -196,10 +218,9 @@ model Course {
   materialLink String?
   
   applications Application[]
-  examRuns     ExamRun[]
   attendance   AttendanceRecord[]
   instructors  User[]             @relation("CourseInstructors")
-  cohorts      CohortCourse[]     // FIXED: Renamed classes to cohorts
+  cohorts      CohortCourse[]     
 }
 
 enum AttendanceStatus {
@@ -215,9 +236,9 @@ model AttendanceRecord {
   id            String           @id @default(cuid())
   date          DateTime         @default(now())
   courseId      String
-  course         Course           @relation(fields: [courseId], references: [id])
+  course        Course           @relation(fields: [courseId], references: [id])
   studentId     String
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student       Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
   status        AttendanceStatus @default(UNSPECIFIED)
   type          String           @default("DAILY")
   lessonName    String?
@@ -229,156 +250,196 @@ model AttendanceRecord {
   lateMinutes    Int?             @default(0)
 }
 
-// ... EXAMS & POOLING (Same as before) ...
+// =========================================================
+// 5. EXAM POOLING SYSTEM (NEW - Spec Section 3)
+// =========================================================
+
+// --- 3.1 Events Table ---
+model ExamEvent {
+  id               String   @id @default(cuid())
+  name             String   // e.g. "June 2026 Exam Event"
+  startDate        DateTime
+  endDate          DateTime
+  
+  // T-21 Go/No-Go Decision Deadline
+  paymentDeadline  DateTime 
+  joinDeadline     DateTime?
+  
+  minRevenueTarget Decimal  @default(25000.00) @db.Decimal(10, 2)
+  status           String   @default("DRAFT") // DRAFT, OPEN, CONFIRMED, POSTPONED, CANCELLED, COMPLETED
+  
+  pools            ExamPool[]
+  bookings         Booking[]
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// --- 3.2 Pools Table ---
 model ExamPool {
-  id              String            @id @default(cuid())
-  name            String
-  examDate        DateTime
-  joinDeadline    DateTime
-  confirmDeadline DateTime
-  minCandidates   Int               @default(25)
-  maxCandidates   Int               @default(28)
-  currentCount    Int               @default(0)
-  status          String            @default("OPEN")
-  templateId      String?
-  template        PoolTemplate?     @relation(fields: [templateId], references: [id])
-  participants    PoolParticipant[]
-  modules         PoolModule[]
-  confirmedAt     DateTime?
-  confirmedBy     String?
-  createdAt       DateTime          @default(now())
+  id               String   @id @default(cuid())
+  eventId          String
+  event            ExamEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  name             String   // e.g. "Pool A - Mon AM"
+  examDate         DateTime
+  examStartTime    String   // "09:00"
+  examEndTime      String   // "12:00"
+  
+  minCandidates    Int      @default(25)
+  maxCandidates    Int      @default(28)
+  moduleDiversityCap Int    @default(4)
+  
+  status           String   @default("DRAFT") // DRAFT, OPEN, NEAR_FULL, CONFIRMED, LOCKED, FAILED, COMPLETED
+  
+  preSeedModules   String[] // e.g. ["M1", "M7"]
+  
+  memberships      PoolMembership[]
+  bookings         Booking[] // Optional: if tracking physical allocation via pool
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
-model PoolParticipant {
-  id               String             @id @default(cuid())
+// --- 3.3 Pool Memberships Table (Replaces PoolParticipant) ---
+model PoolMembership {
+  id               String   @id @default(cuid())
+  
   poolId           String
-  pool             ExamPool           @relation(fields: [poolId], references: [id])
+  pool             ExamPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  
   studentId        String
-  student          Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  status           String             @default("SOFT_JOINED")
-  requestedModules String[]
-  optInVisibility  Boolean            @default(false)
-  reservationId    String?            @unique
-  reservation      WalletReservation? @relation(fields: [reservationId], references: [id])
-  createdAt        DateTime           @default(now())
+  student          Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  moduleCode       String   // ONE module per pool per candidate
+  
+  status           String   @default("RESERVED") // RESERVED, CONFIRMED, CANCELLED, FAILED, ROLLED, COMPLETED
+  
+  pricePaid        Decimal  @db.Decimal(10, 2)
+  reservedAmount   Decimal  @db.Decimal(10, 2) // Funds held in wallet
+  discountType     String?  // 'MULTI_POOL', 'AMBASSADOR'
+  
+  referralCode     String?  // If joined via referral
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  confirmationDate DateTime?
 
-  @@unique([poolId, studentId])
+  // Constraint: One membership per pool
+  @@unique([poolId, studentId]) 
 }
 
-model PoolModule {
-  id          String   @id @default(cuid())
-  poolId      String
-  pool        ExamPool @relation(fields: [poolId], references: [id])
-  moduleCode  String
-  moduleName  String
-  demandCount Int      @default(0)
-
-  @@unique([poolId, moduleCode])
+// --- 3.6 Bookings Table (Consolidated) ---
+model Booking {
+  id               String   @id @default(cuid())
+  
+  candidateId      String
+  student          Student  @relation(fields: [candidateId], references: [id])
+  
+  eventId          String
+  event            ExamEvent @relation(fields: [eventId], references: [id])
+  
+  poolId           String?
+  pool             ExamPool? @relation(fields: [poolId], references: [id])
+  
+  moduleCode       String
+  bookingType      String   @default("POOL") // POOL, INDIVIDUAL, BUNDLE, GROUP_CHARTER
+  
+  amountPaid       Decimal  @db.Decimal(10, 2)
+  status           String   @default("CONFIRMED") // CONFIRMED, CANCELLED, COMPLETED, NO_SHOW
+  
+  bookingDate      DateTime @default(now())
+  examDate         DateTime?
 }
 
-model PoolTemplate {
-  id             String     @id @default(cuid())
-  name           String
-  allowedModules String[]
-  minModules     Int        @default(1)
-  maxModules     Int        @default(4)
-  pricePerModule Float      @default(490.00)
-  pools          ExamPool[]
+// --- 3.7 Referrals Table ---
+model Referral {
+  id                  String   @id @default(cuid())
+  
+  referrerId          String
+  referrer            Student  @relation("Referrer", fields: [referrerId], references: [id])
+  
+  refereeId           String
+  referee             Student  @relation("Referee", fields: [refereeId], references: [id])
+  
+  referralCode        String
+  status              String   @default("PENDING") // PENDING, CONFIRMED, FAILED
+  
+  poolMembershipId    String? // Link to the specific membership that triggered this
+  
+  createdAt           DateTime @default(now())
+  confirmedAt         DateTime?
+  
+  @@unique([referralCode, refereeId])
 }
 
-model ExamRoom {
-  id       String    @id @default(cuid())
-  name     String
-  code     String    @unique
-  capacity Int       @default(28)
-  runs     ExamRun[]
+// --- 3.9 Modules Reference ---
+model Module {
+  code             String   @id // M1, M7
+  name             String
+  category         String?  // Foundation, Airframe
+  durationMinutes  Int      @default(180)
+  isActive         Boolean  @default(true)
 }
 
-model ExamRun {
-  id              String        @id @default(cuid())
-  examModuleId    String
-  course          Course        @relation(fields: [examModuleId], references: [id])
-  roomId          String
-  room            ExamRoom      @relation(fields: [roomId], references: [id])
-  startDatetime   DateTime
-  durationMinutes Int
-  maxCapacity     Int           @default(28)
-  status          String        @default("SCHEDULED")
-  poolId          String?
-  bookings        ExamBooking[]
-  assessments     Assessment[]
-  windowId        String?
-  window          ExamWindow?   @relation(fields: [windowId], references: [id])
-}
-
-model ExamBooking {
-  id        String   @id @default(cuid())
-  examRunId String
-  run       ExamRun  @relation(fields: [examRunId], references: [id])
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  status    String   @default("CONFIRMED")
-  seatLabel String?
-  bookedAt  DateTime @default(now())
-}
-
-model ExamWindow {
-  id                  String    @id @default(cuid())
-  name                String
-  startDate           DateTime
-  endDate             DateTime
-  cutoffDate          DateTime
-  minSeatsRequired    Int       @default(60)
-  status              String    @default("PENDING")
-  createdAt           DateTime  @default(now())
-  runs                ExamRun[]
-}
-
-model Fee {
-  id          String   @id @default(cuid())
-  amount      Float
-  paid        Float    @default(0.0)
-  dueDate     DateTime
-  status      String   @default("UNPAID")
-  description String?
-  paymentMethod String?
-  proofUrl    String?
-  studentId   String
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  createdAt   DateTime @default(now())
-}
+// =========================================================
+// 6. WALLET SYSTEM (Updated - Spec Section 3.4)
+// =========================================================
 
 model Wallet {
-  id           String              @id @default(cuid())
-  studentId    String              @unique
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  balance      Int                 @default(0)
-  updatedAt    DateTime            @updatedAt
-  transactions WalletTransaction[]
-  reservations WalletReservation[]
-}
-
-model WalletReservation {
-  id          String   @id @default(cuid())
-  walletId    String
-  wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
-  amount      Int
-  status      String   @default("ACTIVE")
-  purpose     String
-  participant PoolParticipant?
-  expiresAt   DateTime
-  createdAt   DateTime @default(now())
-  capturedAt  DateTime? 
-  releasedAt  DateTime?
+  id               String   @id @default(cuid())
+  studentId        String   @unique
+  student          Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  // Using Decimal for currency accuracy
+  availableBalance Decimal  @default(0.00) @db.Decimal(10, 2)
+  reservedBalance  Decimal  @default(0.00) @db.Decimal(10, 2)
+  currency         String   @default("EUR")
+  
+  transactions     WalletTransaction[]
+  
+  updatedAt        DateTime @updatedAt
+  createdAt        DateTime @default(now())
 }
 
 model WalletTransaction {
+  id               String   @id @default(cuid())
+  walletId         String
+  wallet           Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
+  type             String   // TOP_UP, RESERVE, CAPTURE, RELEASE, REFUND
+  amount           Decimal  @db.Decimal(10, 2)
+  
+  // Snapshots for Audit Trail
+  balanceBefore    Decimal  @default(0) @db.Decimal(10, 2)
+  balanceAfter     Decimal  @default(0) @db.Decimal(10, 2)
+  
+  referenceType    String?  // 'POOL_MEMBERSHIP', 'BOOKING', 'PAYMENT'
+  referenceId      String?
+  description      String?
+  
+  createdAt        DateTime @default(now())
+}
+
+// =========================================================
+// 7. FINANCE & SYSTEM (Legacy Support + Updates)
+// =========================================================
+
+model Fee {
   id            String   @id @default(cuid())
-  walletId      String
-  wallet        Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
-  amount        Int
-  type          String
-  description   String
+  // Updated to Decimal for consistency, but Float maintained if legacy data exists
+  amount        Decimal  @db.Decimal(10, 2) 
+  paid          Decimal  @default(0.0) @db.Decimal(10, 2)
+  
+  dueDate       DateTime
+  status        String   @default("UNPAID")
+  description   String?
+  paymentMethod String?
+  proofUrl      String?
+  
+  studentId     String
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
   createdAt     DateTime @default(now())
 }
 
@@ -432,7 +493,9 @@ model Assessment {
   comments      String?  @db.Text
   recordedAt    DateTime @default(now())
   studentId     String
-  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  examRunId     String?
-  run           ExamRun? @relation(fields: [examRunId], references: [id])
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  // Updated Relation to new logic (optional)
+  // Can link to Booking or ExamPool if needed in future
+  legacyRunId   String? 
 }

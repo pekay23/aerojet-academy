@@ -1,45 +1,41 @@
 "use client";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation'; // 1. Import this
 
 export default function MobileStickyBar() {
-  const pathname = usePathname();
-  const isPortalLive = process.env.NEXT_PUBLIC_PORTAL_LIVE === 'true';
+  const [isVisible, setIsVisible] = useState(false);
+  const pathname = usePathname(); // 2. Get current path
 
-  // List of paths where the sticky bar should be HIDDEN
-  const hiddenPaths = ["/portal", "/staff", "/register", "/contact", "/studio", "/upload-proof", "/portal/login"];
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsVisible(window.scrollY > 300);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  // Check if the current path starts with any of the hidden paths
-  const shouldHide = hiddenPaths.some((path) => pathname.startsWith(path));
+  // 3. Logic: Hide if inside any Portal or Auth page
+  const isPortal = pathname.startsWith('/student') || 
+                   pathname.startsWith('/applicant') || 
+                   pathname.startsWith('/staff') ||
+                   pathname.startsWith('/staff-new') ||
+                   pathname.startsWith('/login') ||
+                   pathname.startsWith('/register');
 
-  if (shouldHide) {
-    return null;
-  }
+  if (isPortal || !isVisible) return null; // 4. Return null to hide
 
   return (
-    <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 z-40 md:hidden flex gap-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-      <Link 
-        href="/contact" 
-        className="flex-1 border-2 border-aerojet-blue text-aerojet-blue font-bold py-3 rounded text-center text-sm uppercase tracking-wide"
-      >
-        Enquire
-      </Link>
-      
-      {isPortalLive ? (
-          <Link 
-            href="/register" 
-            className="flex-1 bg-aerojet-sky text-white font-bold py-3 rounded text-center text-sm uppercase tracking-wide shadow-md"
-          >
-            Apply Now
-          </Link>
-      ) : (
-          <Link 
-            href="/courses" 
-            className="flex-1 bg-aerojet-sky text-white font-bold py-3 rounded text-center text-sm uppercase tracking-wide shadow-md"
-          >
-            View Courses
-          </Link>
-      )}
+    <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 z-50 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] animate-in slide-in-from-bottom-full duration-300">
+      <div className="flex gap-3">
+        <Link href="/courses" className="flex-1 bg-gray-100 text-gray-800 font-bold py-3 rounded-lg text-center text-sm">
+          Courses
+        </Link>
+        <Link href="/admissions/how-to-apply" className="flex-1 bg-aerojet-blue text-white font-bold py-3 rounded-lg text-center text-sm shadow-md">
+          Apply Now
+        </Link>
+      </div>
     </div>
   );
 }

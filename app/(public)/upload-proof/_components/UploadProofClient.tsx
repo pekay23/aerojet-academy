@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { UploadDropzone } from '@/app/utils/uploadthing'; // Ensure this path is correct for your project
 import { Input } from '@/components/ui/input';
@@ -10,11 +10,18 @@ import { Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function UploadProofClient() {
   const searchParams = useSearchParams();
+  const emailParam = searchParams.get('email') || '';
   // Auto-fill email if passed in URL from the email link
-  const [email, setEmail] = useState(searchParams.get('email') || '');
+  const [email, setEmail] = useState(emailParam || '');
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
   const [isLinking, setIsLinking] = useState(false);
+
+  useEffect(() => {
+    if (emailParam) {
+        setEmail(emailParam);
+    }
+  }, [emailParam]);
 
   const handleLinkPayment = async () => {
     if (!email || !uploadedFileUrl) {
@@ -71,8 +78,9 @@ export default function UploadProofClient() {
           type="email" 
           placeholder="student@example.com" 
           value={email} 
-          onChange={(e) => setEmail(e.target.value)} 
-          className="bg-slate-50 border-slate-200"
+          onChange={(e) => setEmail(e.target.value)}
+          style={{ color: '#0f172a' }} // Force black text 
+          className="bg-slate-50 border-slate-200 text-slate-900"
         />
         <p className="text-[10px] text-slate-400 ml-1">
           Must match the email you used during registration.

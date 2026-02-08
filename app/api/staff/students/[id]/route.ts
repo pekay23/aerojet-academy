@@ -7,7 +7,6 @@ const prisma = new PrismaClient();
 
 /**
  * GET: Fetch single student details
- * OPTIMIZED: Uses 'take' and 'select' to prevent 10s load times
  */
 export async function GET(
   req: NextRequest, 
@@ -35,7 +34,6 @@ export async function GET(
             isDeleted: true,
           }
         },
-        // 🚀 PERFORMANCE FIX: Only fetch the last few items to avoid data bloat
         applications: { 
           take: 5, 
           orderBy: { appliedAt: 'desc' }, 
@@ -45,10 +43,14 @@ export async function GET(
           take: 15, 
           orderBy: { dueDate: 'desc' } 
         },
-        examBookings: { 
+        // ✅ UPDATED: Use 'bookings' relation
+        bookings: { 
           take: 10, 
-          orderBy: { bookedAt: 'desc' }, 
-          include: { run: { include: { course: true } } } 
+          orderBy: { bookingDate: 'desc' }, 
+          include: { 
+            pool: true, // Include pool details
+            event: true // Include event details
+          } 
         },
         attendance: { 
           take: 30, 
@@ -110,7 +112,6 @@ export async function PATCH(
     });
 
     return NextResponse.json({ success: true, student });
-
   } catch (error) {
     console.error("UPDATE_STUDENT_ERROR:", error);
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
@@ -119,7 +120,6 @@ export async function PATCH(
 
 /**
  * DELETE: Soft Delete (Archive)
- * Marks user as deleted so data stays in DB for Admin but is hidden from app
  */
 export async function DELETE(
   req: NextRequest, 
@@ -135,7 +135,6 @@ export async function DELETE(
     const { searchParams } = new URL(req.url);
     const permanent = searchParams.get('permanent') === 'true';
 
-    // 1. Find the student to get the linked userId
     const student = await prisma.student.findUnique({
       where: { id },
       select: { userId: true }
@@ -146,12 +145,10 @@ export async function DELETE(
     }
 
     if (permanent) {
-      // HARD DELETE: Removes from database entirely
       await prisma.user.delete({
         where: { id: student.userId }
       });
     } else {
-      // SOFT DELETE: Mark as deleted and deactivate
       await prisma.user.update({
         where: { id: student.userId },
         data: {
@@ -163,7 +160,6 @@ export async function DELETE(
     }
 
     return NextResponse.json({ success: true });
-
   } catch (error) {
     console.error("DELETE_STUDENT_ERROR:", error);
     return NextResponse.json({ error: 'Delete failed' }, { status: 500 });

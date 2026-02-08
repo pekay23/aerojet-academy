@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
-// ✅ FIXED IMPORT: Using the correct new function name
+import { PrismaClient, Prisma } from '@prisma/client';
 import { sendPaymentConfirmationEmail } from '@/app/lib/mail';
 
 const prisma = new PrismaClient();
@@ -21,7 +20,6 @@ export async function GET(req: Request) {
       include: { 
         student: { 
           include: { 
-            // Select only necessary user fields to reduce payload
             user: { 
               select: { 
                 name: true, 
@@ -42,7 +40,7 @@ export async function GET(req: Request) {
   }
 }
 
-// POST: Confirm payment amount, update Status, Wallet, and notify Student
+// POST: Confirm payment amount
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
   
@@ -60,14 +58,15 @@ export async function POST(req: Request) {
 
     if (!fee) return NextResponse.json({ error: 'Fee not found' }, { status: 404 });
 
-    const paidAmount = parseFloat(amountPaid);
-    const newPaidTotal = fee.paid + paidAmount;
+    // Handle Decimal Arithmetic using Prisma.Decimal
+    const paidAmount = new Prisma.Decimal(amountPaid);
+    const newPaidTotal = fee.paid.add(paidAmount);
     
     let newStatus = 'PARTIAL';
-    if (newPaidTotal >= fee.amount) newStatus = 'PAID';
+    if (newPaidTotal.gte(fee.amount)) newStatus = 'PAID';
     
     await prisma.$transaction(async (tx) => {
-        // 1. Update the Fee Record
+        // 1. Update Fee
         await tx.fee.update({
             where: { id: feeId },
             data: { 
@@ -76,28 +75,23 @@ export async function POST(req: Request) {
             }
         });
 
-        // 2. CRITICAL: Handle "Registration Fee" Payment
-        // This promotes PROSPECT -> APPLICANT and unlocks login
+        // 2. Handle Registration Fee (Unlock User)
         if (fee.description?.includes('Registration Fee') && newStatus === 'PAID') {
-            
-            // Activate User Login
             await tx.user.update({
                 where: { id: fee.student.userId },
                 data: { isActive: true }
             });
-
-            // Update Student Status
             await tx.student.update({
                 where: { id: fee.student.id },
                 data: { enrollmentStatus: 'APPLICANT' }
             });
         }
         
-        // 3. Handle Tuition Deposit (40%) -> ENROLLED
+        // 3. Handle Tuition Deposit (40%)
         const isTuition = fee.description?.toLowerCase().includes('tuition');
-        const isDepositThresholdMet = isTuition && newPaidTotal >= (fee.amount * 0.40);
-
-        if (isDepositThresholdMet && fee.student.enrollmentStatus !== 'ENROLLED') {
+        const depositThreshold = fee.amount.mul(0.40);
+        
+        if (isTuition && newPaidTotal.gte(depositThreshold) && fee.student.enrollmentStatus !== 'ENROLLED') {
              await tx.student.update({
                 where: { id: fee.student.id },
                 data: { enrollmentStatus: 'ENROLLED' }
@@ -109,17 +103,24 @@ export async function POST(req: Request) {
             const match = fee.description.match(/\((\d+) Credits\)/);
             if (match?.[1]) {
                 const credits = parseInt(match[1]);
-                const wallet = await tx.wallet.upsert({
-                    where: { studentId: fee.studentId },
-                    update: { balance: { increment: credits } },
-                    create: { studentId: fee.studentId, balance: credits }
-                });
+                const creditDecimal = new Prisma.Decimal(credits);
 
+                const wallet = await tx.wallet.upsert({
+                  where: { studentId: fee.studentId },
+                  update: { 
+                      availableBalance: { increment: creditDecimal } // Update availableBalance
+                  },
+                  create: { 
+                      studentId: fee.studentId, 
+                      availableBalance: creditDecimal, // Set availableBalance
+                      reservedBalance: new Prisma.Decimal(0) // Initialize reserved
+                  }
+              });
                 await tx.walletTransaction.create({
                     data: { 
                         walletId: wallet.id, 
-                        amount: credits, 
-                        type: 'PURCHASE', 
+                        amount: creditDecimal, 
+                        type: 'PURCHASE', // 'TOP_UP' might be better
                         description: `Purchased ${fee.description}` 
                     }
                 });
@@ -127,15 +128,12 @@ export async function POST(req: Request) {
         }
     });
 
-    // 5. Send Notification Email
+    // 5. Send Notification
     const studentEmail = fee.student.user.email;
     const studentName = fee.student.user.name || "Student";
 
     if (studentEmail) {
         try {
-            // ✅ FIXED CALL: Using correct name. 
-            // Note: Not passing password here as this might be a partial payment or tuition top-up.
-            // Ensure mail.ts 'password' param is optional (password?: string).
             await sendPaymentConfirmationEmail(studentEmail, studentName);
         } catch (emailError) {
             console.error("Notification Email Failed:", emailError);

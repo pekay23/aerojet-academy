@@ -34,13 +34,22 @@ export async function GET(req: Request) {
     const users = await prisma.user.findMany({
       where,
       orderBy: { createdAt: 'desc' },
-      include: {
-        // Merged the include logic here
+      // 🔒 SECURITY FIX: Select only non-sensitive fields
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        image: true,
+        createdAt: true,
+        // Include relations safely
         studentProfile: { 
-            select: { studentId: true, cohort: true } 
+            select: { id: true, studentId: true, cohort: true, enrollmentStatus: true } 
         }
       }
     });
+
     return NextResponse.json({ users });
   } catch (error) {
     return NextResponse.json({ error: 'Failed to fetch users' }, { status: 500 });
