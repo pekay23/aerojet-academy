@@ -7,7 +7,7 @@ import { signOut } from "next-auth/react";
 import { toast } from 'sonner';
 import { useState } from 'react';
 import ConfirmationModal from '@/components/modal/ConfirmationModal';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { ThemeToggle } from '@/app/components/marketing/ThemeToggle';
 import { Power } from 'lucide-react';
 
 const Icons = {
@@ -177,3 +177,4 @@ export default function StaffSidebar({ user, collapsed = false, setCollapsed }: 
     </>
   );
 }
+

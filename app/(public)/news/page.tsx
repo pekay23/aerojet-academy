@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import PageHero from '@/components/PageHero';
+import Navbar from '@/app/components/marketing/Navbar';
+import Footer from '@/app/components/marketing/Footer';
+import PageHero from '@/app/components/marketing/PageHero';
 import { client } from '@/sanity/lib/client';
 import { urlFor } from '@/sanity/lib/image';
 
@@ -75,3 +75,4 @@ export default async function NewsroomPage() {
     </main>
   );
 }
+

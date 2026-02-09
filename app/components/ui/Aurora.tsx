@@ -176,7 +176,7 @@ export default function Aurora(props: AuroraProps) {
     });
 
     const mesh = new Mesh(gl, { geometry, program });
-    ctn.appendChild(gl.canvas);
+    ctn.appendChild(gl.canvas as HTMLCanvasElement);
 
     let animateId = 0;
     const update = (t: number) => {
@@ -201,8 +201,9 @@ export default function Aurora(props: AuroraProps) {
     return () => {
       cancelAnimationFrame(animateId);
       window.removeEventListener('resize', resize);
-      if (ctn && gl.canvas.parentNode === ctn) {
-        ctn.removeChild(gl.canvas);
+      const canvas = gl.canvas as HTMLCanvasElement;
+      if (ctn && canvas.parentNode === ctn) {
+        ctn.removeChild(canvas);
       }
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };

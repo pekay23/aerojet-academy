@@ -7,7 +7,7 @@ import { usePathname } from 'next/navigation';
 import { signOut } from "next-auth/react";
 import { toast } from 'sonner';
 import { LayoutDashboard, BookOpen, GraduationCap, Users, BarChart, CreditCard, Wallet, LifeBuoy, UserCircle, LogOut } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { ThemeToggle } from '@/app/components/marketing/ThemeToggle';
 import ConfirmationModal from '@/components/modal/ConfirmationModal';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, useSidebar } from '@/components/ui/sidebar';
 
@@ -102,3 +102,4 @@ export default function StudentSidebar({ user }: { user: any }) {
     </>
   );
 }
+

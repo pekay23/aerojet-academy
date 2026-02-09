@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
-import PageHero from '@/components/PageHero';
+import Navbar from '@/app/components/marketing/Navbar';
+import Footer from '@/app/components/marketing/Footer';
+import PageHero from '@/app/components/marketing/PageHero';
 
 export const metadata: Metadata = {
   title: 'Full-Time Programmes',
@@ -161,3 +161,4 @@ export default function FullTimeCoursesPage() {
     </main>
   );
 }
+

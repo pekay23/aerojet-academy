@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./providers";
-import MobileStickyBar from "@/components/MobileStickyBar";
-import ScrollToTop from "@/components/ScrollToTop";
+import MobileStickyBar from "@/app/components/marketing/MobileStickyBar";
+import ScrollToTop from "@/app/components/marketing/ScrollToTop";
 import { Toaster } from "sonner";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { CommandMenu } from '@/components/CommandMenu';
+import { CommandMenu } from '@/app/components/marketing/CommandMenu';
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -47,3 +47,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

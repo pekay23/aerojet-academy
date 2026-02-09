@@ -15,13 +15,20 @@ import { Search, Loader2, Eye, UserPlus, MoreHorizontal, Edit, Trash, KeyRound }
 import { toast } from 'sonner';
 import EditUserDialog from './EditUserDialog';
 
-export default function UserListClient() {
+interface UserListClientProps {
+  initialFilter?: 'all' | 'students' | 'staff';
+}
+
+// ✅ 1. Accept Props
+export default function UserListClient({ initialFilter = 'all' }: UserListClientProps) {
   const router = useRouter();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [editingUser, setEditingUser] = useState<any>(null);
-  const [filter, setFilter] = useState('all'); 
+  
+  // ✅ 2. Use Initial Filter
+  const [filter, setFilter] = useState(initialFilter); 
 
   const fetchUsers = async (roleFilter: string) => {
     try {
@@ -44,9 +51,13 @@ export default function UserListClient() {
   const handleDelete = async (id: string) => {
     if(!confirm("Are you sure? This will archive the user.")) return;
     try {
-        await fetch(`/api/staff/users?id=${id}`, { method: 'DELETE' });
-        toast.success("User archived");
-        fetchUsers(filter);
+        const res = await fetch(`/api/staff/users?id=${id}`, { method: 'DELETE' });
+        if (res.ok) {
+            toast.success("User archived");
+            fetchUsers(filter);
+        } else {
+            toast.error("Failed to delete");
+        }
     } catch { toast.error("Error"); }
   };
 
@@ -57,7 +68,7 @@ export default function UserListClient() {
 
   return (
     <>
-        <Tabs value={filter} onValueChange={setFilter}>
+        <Tabs value={filter} onValueChange={(val) => setFilter(val as any)}>
             <div className="flex justify-between items-center mb-4">
                 <TabsList>
                     <TabsTrigger value="all">All Users</TabsTrigger>

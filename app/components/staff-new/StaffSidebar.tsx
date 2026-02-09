@@ -11,7 +11,7 @@ import {
   BookOpen, GraduationCap, MessageSquare, BarChart, 
   Settings, LogOut 
 } from 'lucide-react';
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { ThemeToggle } from '@/app/components/marketing/ThemeToggle';
 import ConfirmationModal from '@/components/modal/ConfirmationModal';
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarHeader,
@@ -93,3 +93,4 @@ export default function StaffSidebar({ user }: { user: any }) {
     </>
   );
 }
+
