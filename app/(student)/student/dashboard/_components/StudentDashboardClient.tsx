@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Loader2, BookOpen, Calendar, Clock, GraduationCap } from 'lucide-react';
+import { Loader2, BookOpen, Calendar, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+// ✅ 1. Import your new component
+import SpotlightCard from '@/app/components/ui/SpotlightCard'; 
 
 export default function StudentDashboardClient() {
   const router = useRouter();
@@ -13,80 +14,58 @@ export default function StudentDashboardClient() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const dashRes = await fetch('/api/portal/dashboard');
-        const dashData = await dashRes.json();
-        setData(dashData);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-      }
-    };
-    init();
+    // ... fetch logic ...
+    // For now, let's mock data to see the UI
+    setData({
+        attendance: 92,
+        activeCourses: 4,
+        nextExam: "14 Days"
+    });
+    setLoading(false);
   }, []);
 
-  if (loading || !data) return <div className="flex h-96 items-center justify-center"><Loader2 className="w-10 h-10 animate-spin text-primary" /></div>;
+  if (loading || !data) { /* ... loading state ... */ }
 
   return (
     <div className="space-y-8 animate-in fade-in">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex justify-between items-start">
         <div>
-            <h1 className="text-3xl font-bold text-foreground">Student Dashboard</h1>
-            <p className="text-muted-foreground">Track your progress and upcoming schedule.</p>
+            <h1 className="text-3xl font-bold">Student Dashboard</h1>
+            <p className="text-muted-foreground">Your academic overview and schedule.</p>
         </div>
         <Button variant="outline" onClick={() => router.push('/student/courses')}>
-            <BookOpen className="w-4 h-4 mr-2"/> Course Catalog
+            <BookOpen className="w-4 h-4 mr-2"/> My Courses
         </Button>
       </div>
 
-      {/* Stats Overview */}
+      {/* ✅ 2. Use the Spotlight Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Attendance</CardTitle>
-                <Clock className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">92%</div>
-                <Progress value={92} className="h-1.5 mt-2" />
-            </CardContent>
-        </Card>
+        <SpotlightCard className="p-6 bg-aerojet-blue! border-blue-900!">
+            <div className="flex justify-between items-center pb-2">
+                <h3 className="text-sm font-medium text-blue-200">Attendance</h3>
+                <Clock className="w-4 h-4 text-blue-300" />
+            </div>
+            <div className="text-3xl font-bold text-white mt-2">{data.attendance}%</div>
+            <Progress value={data.attendance} className="h-1.5 mt-4" />
+        </SpotlightCard>
         
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Active Courses</CardTitle>
-                <BookOpen className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">4</div>
-                <p className="text-xs text-muted-foreground">Current Semester</p>
-            </CardContent>
-        </Card>
+        <SpotlightCard className="p-6 bg-aerojet-blue! border-blue-900!">
+            <div className="flex justify-between items-center pb-2">
+                <h3 className="text-sm font-medium text-blue-200">Active Courses</h3>
+                <BookOpen className="w-4 h-4 text-blue-300" />
+            </div>
+            <div className="text-3xl font-bold text-white mt-2">{data.activeCourses}</div>
+            <p className="text-xs text-blue-300 mt-4">Current Semester</p>
+        </SpotlightCard>
 
-        <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium">Next Exam</CardTitle>
-                <Calendar className="w-4 h-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-                <div className="text-2xl font-bold">14 Days</div>
-                <p className="text-xs text-muted-foreground">Physics M2 - Room 304</p>
-            </CardContent>
-        </Card>
-      </div>
-
-      <div className="mt-8">
-        <h2 className="text-xl font-semibold mb-4">My Current Modules</h2>
-        <Card className="bg-muted/30 border-dashed">
-            <CardContent className="flex flex-col items-center justify-center h-48 text-muted-foreground">
-                <GraduationCap className="w-10 h-10 mb-2 opacity-50" />
-                <p>Course content loading...</p>
-                <Button variant="link" onClick={() => router.push('/student/courses')} className="mt-2 text-primary">
-                    Go to My Courses Page
-                </Button>
-            </CardContent>
-        </Card>
+        <SpotlightCard className="p-6 bg-aerojet-blue! border-blue-900!">
+            <div className="flex justify-between items-center pb-2">
+                <h3 className="text-sm font-medium text-blue-200">Next Exam</h3>
+                <Calendar className="w-4 h-4 text-blue-300" />
+            </div>
+            <div className="text-3xl font-bold text-white mt-2">{data.nextExam}</div>
+            <p className="text-xs text-blue-300 mt-4">Physics M2 - Room 304</p>
+        </SpotlightCard>
       </div>
     </div>
   );

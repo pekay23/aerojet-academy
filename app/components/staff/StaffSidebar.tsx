@@ -70,7 +70,7 @@ export default function StaffSidebar({ user, collapsed = false, setCollapsed }: 
         )}
 
         <div className="h-16 flex items-center justify-center border-b border-border mx-4 shrink-0">
-  <Link href="/">
+  <Link href="/staff/dashboard">
     {collapsed ? (
       // 1. COLLAPSED MODE: Use the Icon
       <Image 
