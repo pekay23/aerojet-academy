@@ -9,9 +9,9 @@ import { toast } from 'sonner';
 import { 
   LayoutDashboard, ClipboardList, Users, CreditCard, 
   BookOpen, GraduationCap, MessageSquare, BarChart, 
-  Settings, LogOut, FileBarChart
+  Settings, LogOut, FileBarChart, Sun, Moon
 } from 'lucide-react';
-import { ThemeToggle } from '@/app/components/marketing/ThemeToggle';
+import { useTheme } from "next-themes";
 import ConfirmationModal from '@/components/modal/ConfirmationModal';
 import {
   Sidebar, SidebarContent, SidebarFooter, SidebarHeader,
@@ -39,13 +39,17 @@ export default function StaffSidebar({ user }: { user: any }) {
   const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
   const pathname = usePathname();
   const { open } = useSidebar();
+  const { setTheme, theme } = useTheme(); // Use hook for dynamic text
   const userRole = (user?.role || 'STUDENT').toUpperCase();
   const visibleItems = allMenuItems.filter(item => item.roles && item.roles.includes(userRole));
 
   return (
     <>
-      <Sidebar collapsible="icon" className="border-r border-border bg-card z-30">
-        <SidebarHeader className="h-20 flex items-center justify-center border-b border-border mb-2">
+      <Sidebar 
+        collapsible="icon" 
+        className="border-r border-border bg-card static h-full w-62.5 data-[collapsed=true]:w-20 transition-all duration-300 z-30 flex flex-col"
+      >
+        <SidebarHeader className="h-20 flex items-center justify-center border-b border-border mb-2 shrink-0">
           <Link href="/staff/dashboard" className="flex items-center justify-center w-full h-full p-2">
             {open ? (
                <>
@@ -58,7 +62,7 @@ export default function StaffSidebar({ user }: { user: any }) {
           </Link>
         </SidebarHeader>
 
-        <SidebarContent>
+        <SidebarContent className="flex-1 overflow-y-auto overflow-x-hidden">
             <div className="flex flex-col items-center justify-center py-6 px-2">
                 <div className="relative h-16 w-16 rounded-full overflow-hidden border border-border shadow-sm group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 transition-all">
                     {user.image ? <Image src={user.image} alt="User" fill className="object-cover" /> : <div className="h-full w-full bg-muted flex items-center justify-center font-bold">{user.name?.[0]}</div>}
@@ -87,11 +91,27 @@ export default function StaffSidebar({ user }: { user: any }) {
             </SidebarGroup>
         </SidebarContent>
 
-        <SidebarFooter className="border-t border-border p-4">
-            <div className="flex flex-col gap-2 group-data-[collapsible=icon]:items-center">
-                <div className="group-data-[collapsible=icon]:hidden"><ThemeToggle /></div>
+        <SidebarFooter className="border-t border-border p-4 shrink-0 mt-auto">
+            <div className="flex flex-col gap-2">
+                
+                {/* Custom Theme Toggle with Text */}
+                <SidebarMenuButton 
+                    onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                    className="w-full justify-start group-data-[collapsible=icon]:justify-center"
+                    tooltip="Toggle Theme"
+                >
+                    <div className="flex items-center justify-center w-5 h-5">
+                        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                    </div>
+                    <span className="group-data-[collapsible=icon]:hidden font-medium ml-2">
+                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                    </span>
+                </SidebarMenuButton>
+
                 <SidebarMenuButton onClick={() => setIsSignOutModalOpen(true)} className="text-destructive hover:bg-destructive/10 w-full justify-start group-data-[collapsible=icon]:justify-center" tooltip="Sign Out">
-                    <LogOut className="w-5 h-5" /><span className="group-data-[collapsible=icon]:hidden font-medium">Sign Out</span>
+                    <LogOut className="w-5 h-5" />
+                    <span className="group-data-[collapsible=icon]:hidden font-medium ml-2">Sign Out</span>
                 </SidebarMenuButton>
             </div>
         </SidebarFooter>

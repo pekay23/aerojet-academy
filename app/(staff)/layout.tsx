@@ -35,31 +35,31 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
   }, [status, session, router]);
 
   if (status === 'loading' || isChecking) {
-    return <div className="flex h-screen items-center justify-center">Loading...</div>;
+    return <div className="flex h-screen items-center justify-center">Loading Staff Portal...</div>;
   }
   
   const user = session?.user as any;
 
   return (
     <SidebarProvider defaultOpen={true}>
-      {/* USE FLEX ROW to force side-by-side */}
-      <div className="flex h-screen w-full bg-muted/20 overflow-hidden">
+      {/* Change h-screen to h-full/min-h-screen to allow zoom adaptation */}
+      <div className="flex w-full min-h-screen bg-muted/20">
         
-          {/* 1. Sidebar (Fixed Width managed by Shadcn) */}
-          <div className="shrink-0 h-full">
+          {/* Sidebar Container */}
+          <div className="shrink-0 sticky top-0 h-screen overflow-hidden">
              <StaffSidebar user={user} />
           </div>
           
-          {/* 2. Content (Takes remaining space) */}
-          <div className="flex-1 flex flex-col h-full overflow-hidden min-w-0">
-            <header className="flex items-center gap-2 px-4 border-b h-16 shrink-0 bg-background sticky top-0 z-10 shadow-sm w-full">
-                <SidebarTrigger className="-ml-1" />
+          {/* Content Container */}
+          <div className="flex-1 flex flex-col min-w-0">
+            <header className="flex items-center gap-2 px-4 border-b h-16 shrink-0 bg-background sticky top-0 z-50 shadow-sm w-full">
+                <SidebarTrigger className="lg:hidden -ml-1" />
                 <div className="flex-1">
                     <PortalHeader onMenuClick={() => {}} title="Staff Portal" />
                 </div>
             </header>
             
-            <main className="flex-1 overflow-y-auto p-6 scrollbar-hide">
+            <main className="flex-1 p-4 sm:p-6 md:p-8 w-full">
                 {children}
             </main>
           </div>
