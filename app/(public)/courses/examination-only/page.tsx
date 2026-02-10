@@ -2,116 +2,162 @@ import React from 'react';
 import { Metadata } from 'next';
 import PageHero from '@/app/components/marketing/PageHero';
 import Link from 'next/link';
-import { BookOpen, MonitorPlay, CheckCircle2 } from 'lucide-react';
+import { BookOpen, Calendar, CheckCircle2, AlertTriangle, Users, ArrowRight } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Examination Only',
-  description: 'Sit for EASA Part-66 Exams with Aerojet Academy.',
+    title: 'Examination Only | Aerojet Academy',
+    description: 'Sit for EASA Part-66 Exams with Aerojet Academy. Flexible exam pools for self-study candidates.',
 };
 
 export default function ExamOnlyPage() {
-  return (
-    <main className="min-h-screen flex flex-col bg-white">
-      <div className="grow">
-        <PageHero 
-            title="Examination Only"
-            subtitle="Self-study option for candidates who are confident studying on their own."
-            backgroundImage="/examonly.jpg"
-        />
+    return (
+        <main className="min-h-screen flex flex-col bg-white">
+            <div className="grow">
+                <PageHero
+                    title="Examination Only"
+                    subtitle="Self-study option for candidates who are confident studying on their own."
+                    backgroundImage="/examonly.jpg"
+                />
 
-        <div className="container mx-auto px-6 py-20">
-             <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-12">
-                
-                {/* LEFT CONTENT */}
-                <div className="lg:col-span-2 space-y-12">
-                    <section>
-                        <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-6">Self-Study & Exams</h2>
-                        <p className="text-lg text-slate-700 leading-relaxed mb-6">
-                            The Exam Only option is ideal for our customers who are very confident studying on their own and require no tuition support. 
-                            Candidates for this will usually get learning materials for the booked module and be able to book exam slots at their convenience.
-                        </p>
-                        <p className="text-slate-700 mb-6 font-medium">
-                            Aerojet’s facility is a <strong>Certified EASA Part 147 Facility</strong> and as such all-EASA Examination rules apply.
-                        </p>
-                        
-                        <div className="bg-blue-50 p-6 rounded-xl border border-blue-100 mt-8">
-                            <h3 className="font-bold text-aerojet-blue mb-4 text-lg">What is Included?</h3>
-                            <p className="text-sm text-slate-600 mb-6">
-                                The package is comprehensive. When you book a module, the following are all included:
-                            </p>
-                            <div className="space-y-4">
-                                <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
-                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                                        <BookOpen className="w-5 h-5 text-[#4c9ded]" />
-                                    </div>
-                                    <div>
-                                        <h5 className="font-bold text-slate-900">Exam Fee & Learning Materials</h5>
-                                        <p className="text-xs text-slate-500">Full access to study guides and the examination sitting.</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4 bg-white p-4 rounded-lg shadow-sm">
-                                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                                        <MonitorPlay className="w-5 h-5 text-[#4c9ded]" />
-                                    </div>
-                                    <div>
-                                        <h5 className="font-bold text-slate-900">1 Online Prep Session</h5>
-                                        <p className="text-xs text-slate-500">One online prep session included in the package.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="mt-6 pt-6 border-t border-blue-200">
-                                <p className="text-sm text-slate-700 flex gap-2">
-                                    <CheckCircle2 className="w-5 h-5 text-[#4c9ded] shrink-0" />
-                                    <span>
-                                        <strong>Bonus:</strong> Students who book with us can benefit from some online info sessions for the modules they book as a <em>complimentary addition</em> to aid their exam preparation.
-                                    </span>
+                <div className="container mx-auto px-6 py-20">
+                    <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-12">
+
+                        {/* LEFT CONTENT (2/3 width) */}
+                        <div className="lg:col-span-2 space-y-12">
+                            {/* Intro */}
+                            <section>
+                                <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-6">Self-Study & Exams</h2>
+                                <p className="text-lg text-slate-700 leading-relaxed mb-6 font-medium">
+                                    The Exam Only option is ideal for our customers who are very confident studying on their own and require no tuition support.
+                                    Candidates for this will usually get learning materials for the booked module and be able to book exam slots at their convenience.
                                 </p>
+                                <p className="text-slate-700 mb-6">
+                                    Aerojet’s facility is a <strong>Certified EASA Part 147 Facility</strong> and as such all EASA Examination rules apply.
+                                </p>
+                            </section>
+
+                            {/* How it Works */}
+                            <section className="bg-slate-50 p-8 rounded-3xl border border-slate-200">
+                                <h3 className="text-xl font-bold text-aerojet-blue mb-6 flex items-center gap-3">
+                                    <Calendar className="w-6 h-6 text-aerojet-sky" /> How Exam Events Work
+                                </h3>
+                                <div className="space-y-6">
+                                    <div className="flex gap-4">
+                                        <div className="w-8 h-8 bg-aerojet-blue text-white rounded-full flex items-center justify-center shrink-0 font-bold text-sm">1</div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-900">Quarterly Windows</h4>
+                                            <p className="text-slate-600 text-sm mt-1">Exams are delivered in 4 windows per year (approx. every 3 months).</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <div className="w-8 h-8 bg-aerojet-blue text-white rounded-full flex items-center justify-center shrink-0 font-bold text-sm">2</div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-900">Minimum Numbers (Go/No-Go)</h4>
+                                            <p className="text-slate-600 text-sm mt-1">
+                                                Each exam window requires a minimum of <strong>60 confirmed seats</strong> to proceed.
+                                                The decision to proceed is made on the "Payment Deadline" (T-21 days before exam).
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-4">
+                                        <div className="w-8 h-8 bg-aerojet-blue text-white rounded-full flex items-center justify-center shrink-0 font-bold text-sm">3</div>
+                                        <div>
+                                            <h4 className="font-bold text-slate-900">Confirmation</h4>
+                                            <p className="text-slate-600 text-sm mt-1">
+                                                If the minimum is met, the window is confirmed. If not, the window is cancelled and all bookings
+                                                automatically roll over to the next window.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            {/* Exam Pools */}
+                            <section className="bg-white border-2 border-slate-100 p-8 rounded-3xl shadow-lg relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-aerojet-sky/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                                <h3 className="text-xl font-bold text-aerojet-blue mb-6 flex items-center gap-3">
+                                    <Users className="w-6 h-6 text-aerojet-sky" /> Understanding Exam Pools
+                                </h3>
+                                <p className="text-slate-600 mb-6 text-sm leading-relaxed">
+                                    To make exams more affordable, we offer "Exam Pools". This allows a group of students (e.g., from the same university or workplace)
+                                    to book together to reach the minimum number required for a confirmed sitting.
+                                </p>
+                                <div className="bg-blue-50 p-5 rounded-xl border border-blue-100">
+                                    <h4 className="font-bold text-aerojet-blue text-sm mb-2">Pool Benefits</h4>
+                                    <ul className="space-y-2">
+                                        <li className="flex gap-2 text-sm text-slate-700">
+                                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" /> Reduced cost per seat
+                                        </li>
+                                        <li className="flex gap-2 text-sm text-slate-700">
+                                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" /> Higher likelihood of window confirmation
+                                        </li>
+                                        <li className="flex gap-2 text-sm text-slate-700">
+                                            <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0" /> Coordinated study schedules
+                                        </li>
+                                    </ul>
+                                </div>
+                            </section>
+                        </div>
+
+                        {/* RIGHT SIDEBAR (1/3 width) */}
+                        <aside className="space-y-8">
+
+                            {/* Booking Conditions */}
+                            <div className="bg-slate-900 text-white p-8 rounded-3xl shadow-xl relative overflow-hidden">
+                                <div className="absolute top-0 right-0 p-4 opacity-10">
+                                    <AlertTriangle className="w-24 h-24" />
+                                </div>
+                                <h3 className="font-bold text-lg mb-4 text-aerojet-sky relative z-10">Booking Conditions</h3>
+                                <ul className="space-y-4 relative z-10">
+                                    <li className="flex items-start gap-3 text-sm text-slate-300">
+                                        <span className="text-aerojet-sky font-bold mt-1">•</span>
+                                        <span>All exam seats must be <strong>paid in full</strong> by the Payment Deadline (21 days prior).</span>
+                                    </li>
+                                    <li className="flex items-start gap-3 text-sm text-slate-300">
+                                        <span className="text-aerojet-sky font-bold mt-1">•</span>
+                                        <span>Unpaid seats will be cancelled.</span>
+                                    </li>
+                                    <li className="flex items-start gap-3 text-sm text-slate-300">
+                                        <span className="text-aerojet-sky font-bold mt-1">•</span>
+                                        <span>If window cancelled, fees roll over to next window.</span>
+                                    </li>
+                                    <li className="flex items-start gap-3 text-sm text-slate-300">
+                                        <span className="text-aerojet-sky font-bold mt-1">•</span>
+                                        <span>No refunds for withdrawals within 21 days.</span>
+                                    </li>
+                                </ul>
                             </div>
-                        </div>
-                    </section>
 
-                    <section>
-                        <h3 className="text-2xl font-bold text-slate-900 mb-6">How to Book with Us</h3>
-                        <div className="space-y-4">
-                             <div className="flex gap-4">
-                                <span className="font-black text-[#4c9ded] text-xl">01.</span>
-                                <p className="text-slate-700 text-sm">Pay and Register with the Training Academy.</p>
-                             </div>
-                             <div className="flex gap-4">
-                                <span className="font-black text-[#4c9ded] text-xl">02.</span>
-                                <p className="text-slate-700 text-sm">Log in with your credentials.</p>
-                             </div>
-                             <div className="flex gap-4">
-                                <span className="font-black text-[#4c9ded] text-xl">03.</span>
-                                <p className="text-slate-700 text-sm">Browse any course you want and buy your preferred course when ready.</p>
-                             </div>
-                             <div className="flex gap-4">
-                                <span className="font-black text-[#4c9ded] text-xl">04.</span>
-                                <p className="text-slate-700 text-sm">Book your exam date, course start date, or classroom tuition session slots using the scheduled slots available.</p>
-                             </div>
-                        </div>
-                    </section>
+                            {/* CTA Card */}
+                            <div className="bg-blue-50 p-8 rounded-3xl border border-blue-100">
+                                <h3 className="font-bold text-lg mb-4 text-aerojet-blue">Ready to Book?</h3>
+                                <p className="text-sm text-slate-600 mb-6">
+                                    Register now to access the portal, view upcoming exam schedules, and book your seat.
+                                </p>
+                                <Link href="/register" className="flex items-center justify-center gap-2 w-full bg-aerojet-blue text-white font-bold py-3 rounded-xl hover:bg-aerojet-sky transition-colors uppercase tracking-wider text-sm">
+                                    Register Now <ArrowRight className="w-4 h-4" />
+                                </Link>
+                                <div className="mt-4 text-center">
+                                    <Link href="/courses/exam-schedule" className="text-xs text-slate-500 underline hover:text-aerojet-blue">
+                                        View Exam Schedule
+                                    </Link>
+                                </div>
+                            </div>
+
+                            {/* Support */}
+                            <div className="p-6 rounded-2xl border border-slate-100 bg-white shadow-sm">
+                                <h4 className="font-bold text-slate-900 mb-2">Need Tuition?</h4>
+                                <p className="text-xs text-slate-500 mb-4">Check out our Modular Training options if you need classroom support.</p>
+                                <Link href="/courses/easa-modular" className="text-sm font-bold text-aerojet-blue hover:text-aerojet-sky">
+                                    View Modular Programs →
+                                </Link>
+                            </div>
+
+                        </aside>
+
+                    </div>
                 </div>
-
-                {/* RIGHT SIDEBAR */}
-                <div className="space-y-8">
-                     <div className="p-8 rounded-3xl bg-aerojet-blue text-white shadow-xl relative overflow-hidden">
-                          <div className="relative z-10">
-                            <span className="text-blue-200 text-xs font-bold uppercase tracking-widest">Student Portal</span>
-                            <div className="text-3xl font-black mt-2 mb-1">Book an Exam</div>
-                            <p className="text-sm opacity-80 mt-4 mb-8">
-                                Gaining access to our portal only requires a one-time registration. Once you are registered, you have <strong>lifetime access</strong> to buy and book as many courses as you wish.
-                            </p>
-                            <Link href="/register" className="block w-full text-center bg-[#4c9ded] text-white mt-8 py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-aerojet-blue transition-all">
-                                Book Now
-                            </Link>
-                          </div>
-                     </div>
-                </div>
-
-             </div>
-        </div>
-      </div>
-    </main>
-  );
+            </div>
+        </main>
+    );
 }

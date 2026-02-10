@@ -98,7 +98,8 @@ export default function ApplicantDashboardClient() {
         <h1 className="text-3xl font-bold mb-2">Welcome to Aerojet, {data.name}!</h1>
         <p className="text-blue-100 opacity-90">
           {isProspect && "Complete your registration payment to unlock your full application."}
-          {isApplicant && "Your registration is approved. Complete your seat confirmation deposit to secure your place."}
+          {isApplicant && !data.application && "Your registration is approved. Please complete your application form."}
+          {isApplicant && data.application && "Application received. Complete your seat confirmation deposit to secure your place."}
         </p>
       </div>
 
@@ -115,14 +116,41 @@ export default function ApplicantDashboardClient() {
               <p className="text-sm text-muted-foreground mb-6">
                 This non-refundable fee activates your application and grants access to the admissions process.
               </p>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-white font-bold" onClick={() => router.push('/applicant/payment')}>
+              {/* Find the registration fee if it exists */}
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-white font-bold" onClick={() => {
+                const regFee = data.fees?.find((f: any) => f.description?.includes('Registration'));
+                if (regFee) {
+                  router.push(`/applicant/payment?feeId=${regFee.id}`);
+                } else {
+                  // If no fee, maybe go to a page that creates it or just generic payment (fallback)
+                  router.push('/applicant/payment');
+                }
+              }}>
                 View Invoice & Pay <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {isApplicant && (
+        {isApplicant && !data.application && (
+          <Card className="border-2 border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 relative">
+            <div className="absolute -top-3 left-6 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Next Step</div>
+            <CardHeader>
+              <CardTitle>Complete Application</CardTitle>
+              <CardDescription>Submit your details and documents.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-6">
+                Please fill out the application form and upload your qualifications to proceed.
+              </p>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-white font-bold" onClick={() => router.push('/applicant/application')}>
+                Start Application <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {isApplicant && data.application && (
           <Card className="border-2 border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 relative">
             <div className="absolute -top-3 left-6 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Action Required</div>
             <CardHeader>
