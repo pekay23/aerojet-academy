@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 export async function GET(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     // 1. Security Check
     if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as any).role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
@@ -25,26 +25,27 @@ export async function GET(req: Request) {
       totalAdmins,
       pendingApps,
       verifyingPayments,
-      nextEvent,      
-      upcomingPools,  
-      upcomingEvents, 
+      nextEvent,
+      upcomingPools,
+      upcomingEvents,
       recentStudents,
-      attendanceRecords // ✅ NEW: Attendance Data
+      attendanceRecords,
+      systemEvents
     ] = await Promise.all([
       // Student Counts
       prisma.user.count({ where: { role: 'STUDENT', isDeleted: false } }),
       prisma.user.count({ where: { role: 'STUDENT', isActive: true, isDeleted: false } }),
       prisma.student.count({ where: { gender: 'MALE', user: { isDeleted: false } } }),
       prisma.student.count({ where: { gender: 'FEMALE', user: { isDeleted: false } } }),
-      
+
       // Team Counts
       prisma.user.count({ where: { role: 'STAFF', isDeleted: false } }),
       prisma.user.count({ where: { role: 'INSTRUCTOR', isDeleted: false } }),
       prisma.user.count({ where: { role: 'ADMIN', isDeleted: false } }),
-      
+
       // Ops Counts
       prisma.application.count({ where: { status: 'PENDING' } }),
-      prisma.fee.count({ where: { status: 'UNPAID' } }), 
+      prisma.fee.count({ where: { status: 'UNPAID' } }),
 
       // 1. Current/Next Exam Event 
       prisma.examEvent.findFirst({
@@ -53,7 +54,7 @@ export async function GET(req: Request) {
           pools: {
             include: {
               memberships: {
-                 where: { status: { in: ['RESERVED', 'CONFIRMED'] } }
+                where: { status: { in: ['RESERVED', 'CONFIRMED'] } }
               }
             }
           }
@@ -82,10 +83,17 @@ export async function GET(req: Request) {
         include: { user: { select: { name: true, email: true, image: true } } }
       }),
 
-      // 5. ✅ NEW: Recent Attendance (Last 30 Days)
+      // 5. Recent Attendance (Last 30 Days)
       prisma.attendanceRecord.findMany({
         where: { date: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
         select: { status: true }
+      }),
+
+      // 6. Upcoming System Events
+      (prisma as any).systemEvent.findMany({
+        where: { end: { gte: new Date() } },
+        take: 5,
+        orderBy: { start: 'asc' }
       })
     ]);
 
@@ -94,12 +102,12 @@ export async function GET(req: Request) {
     if (nextEvent) {
       let totalConfirmedSeats = 0;
       let totalRevenue = 0;
-      nextEvent.pools.forEach(pool => {
-         const seats = pool.memberships.length;
-         totalConfirmedSeats += seats;
-         totalRevenue += seats * 300; 
+      nextEvent.pools.forEach((pool: any) => {
+        const seats = pool.memberships.length;
+        totalConfirmedSeats += seats;
+        totalRevenue += seats * 300;
       });
-      const cutoff = new Date(nextEvent.paymentDeadline); 
+      const cutoff = new Date(nextEvent.paymentDeadline);
       const diffDays = Math.ceil((cutoff.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24));
       const isGo = totalRevenue >= Number(nextEvent.minRevenueTarget);
 
@@ -117,23 +125,29 @@ export async function GET(req: Request) {
 
     // --- Process Calendar Events ---
     const calendarEvents = [
-      ...upcomingPools.map(pool => ({
+      ...upcomingPools.map((pool: any) => ({
         id: pool.id,
         title: `Pool: ${pool.name}`,
         date: pool.examDate,
         type: 'EXAM'
       })),
-      ...upcomingEvents.map(event => ({
+      ...upcomingEvents.map((event: any) => ({
         id: event.id,
         title: `Deadline: ${event.name}`,
         date: event.paymentDeadline,
         type: 'DEADLINE'
+      })),
+      ...systemEvents.map((event: any) => ({
+        id: event.id,
+        title: event.title,
+        date: event.start,
+        type: event.type
       }))
-    ];
+    ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // --- ✅ Calculate Attendance Rate ---
+    // --- Calculate Attendance Rate ---
     const totalRecs = attendanceRecords.length;
-    const presentRecs = attendanceRecords.filter(r => r.status === 'PRESENT').length;
+    const presentRecs = attendanceRecords.filter((r: any) => r.status === 'PRESENT').length;
     const studentRate = totalRecs > 0 ? ((presentRecs / totalRecs) * 100).toFixed(1) : 0;
 
     // --- Return Consolidated Result ---
@@ -144,7 +158,6 @@ export async function GET(req: Request) {
       windowTracker: windowStats,
       calendarEvents,
       recentStudents,
-      // ✅ NEW: Attendance Data
       attendance: {
         studentRate: studentRate,
         instructorRate: 98.5 // Hardcoded until we track instructor logins

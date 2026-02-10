@@ -539,3 +539,18 @@ model EmailSignature {
   updatedAt   DateTime @updatedAt
   createdAt   DateTime @default(now())
 }
+
+// =========================================================
+// 9. SYSTEM EVENTS (NEW)
+// =========================================================
+
+model SystemEvent {
+  id          String   @id @default(cuid())
+  title       String
+  start       DateTime
+  end         DateTime
+  type        String   @default("GENERAL") // GENERAL, ACADEMIC, HOLIDAY
+  description String?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+}

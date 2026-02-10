@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Loader2, Users, FileText, Banknote, Calendar, ArrowUp, ArrowRight, Clock, TrendingUp, TrendingDown, Target } from 'lucide-react';
+import { Loader2, Users, FileText, Banknote, Calendar, ArrowUp, ArrowRight, Clock, TrendingUp, TrendingDown, Target, Globe } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -159,6 +159,19 @@ export default function DashboardClient() {
                             // Note: Tailwind classes for progress indicator color are handled by Shadcn, 
                             // but you can override via css variable or just accept default primary color.
                             />
+                        </div>
+                    </SpotlightCard>
+
+                    {/* CMS ACCESS CARD */}
+                    <SpotlightCard className="p-6 bg-card border-border shadow-sm cursor-pointer group" spotlightColor="rgba(236, 72, 153, 0.15)" onClick={() => window.open('/studio', '_blank')}>
+                        <div className="flex justify-between items-center">
+                            <div>
+                                <h3 className="text-lg font-semibold group-hover:text-pink-500 transition-colors">Manage Public Site</h3>
+                                <p className="text-sm text-muted-foreground">Edit content, posts, and pages in Sanity Studio.</p>
+                            </div>
+                            <div className="p-3 bg-pink-500/10 rounded-full text-pink-500">
+                                <Globe className="w-6 h-6" />
+                            </div>
                         </div>
                     </SpotlightCard>
 
