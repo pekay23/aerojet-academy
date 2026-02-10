@@ -39,12 +39,12 @@ export default function ApplicantLayout({ children }: { children: React.ReactNod
   return (
     <SidebarProvider defaultOpen={true}>
       <ApplicantSidebar user={user} />
-      <SidebarInset>
-        <div className="flex items-center gap-2 px-4 border-b h-16 shrink-0 bg-background sticky top-0 z-10 shadow-sm">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex-1"><PortalHeader onMenuClick={() => {}} title="Applicant Portal" /></div>
+      <SidebarInset className="bg-background">
+        <div className="flex items-center gap-2 px-4 border-b border-border h-16 shrink-0 bg-background sticky top-0 z-10 shadow-sm">
+          <SidebarTrigger className="-ml-1" />
+          <div className="flex-1"><PortalHeader onMenuClick={() => { }} title="Applicant Portal" /></div>
         </div>
-        <main className="flex-1 overflow-y-auto p-4">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 bg-muted/5">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

@@ -30,18 +30,19 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
     const user = session?.user as any;
 
     if (user) {
-        if (user.role !== 'STUDENT') {
-            router.replace('/staff/dashboard');
-        } else if (!user.isActive && user.enrollmentStatus !== 'ENROLLED') {
-            setIsChecking(false); 
-        } else {
-            setIsChecking(false);
-        }
+      if (user.role !== 'STUDENT') {
+        router.replace('/staff/dashboard');
+      } else if (!user.isActive && user.enrollmentStatus !== 'ENROLLED') {
+        // User is not active and not enrolled - redirect to applicant portal
+        router.replace('/applicant/dashboard');
+      } else {
+        setIsChecking(false);
+      }
     }
   }, [status, session, router]);
 
   if (status === 'loading' || isChecking) {
-      return <div className="flex h-screen items-center justify-center animate-pulse">Loading...</div>;
+    return <div className="flex h-screen items-center justify-center animate-pulse">Loading...</div>;
   }
 
   const user = session?.user as any;
@@ -49,19 +50,19 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
   return (
     <SidebarProvider defaultOpen={true}>
       <StudentSidebar user={user} />
-      
-      <SidebarInset className="bg-muted/10 flex flex-col h-full">
-        <div className="flex items-center gap-2 px-4 border-b h-16 shrink-0 bg-background sticky top-0 z-10 shadow-sm">
-            <SidebarTrigger className="-ml-1" />
-            <div className="flex-1">
-                <PortalHeader onMenuClick={() => {}} title="Student Portal" />
-            </div>
+
+      <SidebarInset className="bg-background flex flex-col h-full">
+        <div className="flex items-center gap-2 px-4 border-b border-border h-16 shrink-0 bg-background sticky top-0 z-10 shadow-sm">
+          <SidebarTrigger className="-ml-1" />
+          <div className="flex-1">
+            <PortalHeader onMenuClick={() => { }} title="Student Portal" />
+          </div>
         </div>
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
-            <div className="max-w-7xl mx-auto">
-                {children}
-            </div>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 bg-muted/5">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </SidebarInset>
     </SidebarProvider>

@@ -4,8 +4,8 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 const DOMAIN = process.env.NEXT_PUBLIC_APP_URL || 'https://aerojet-academy.com';
 
-const LOGO_DARK_ON_WHITE = `${DOMAIN}/AATA_logo_hor_onWhite.png`; 
-const LOGO_WHITE_ON_DARK = `${DOMAIN}/ATA_logo_hor_onDark.png`;   
+const LOGO_DARK_ON_WHITE = `${DOMAIN}/AATA_logo_hor_onWhite.png`;
+const LOGO_WHITE_ON_DARK = `${DOMAIN}/ATA_logo_hor_onDark.png`;
 
 const COLORS = {
   navy: '#002a5c',
@@ -75,12 +75,37 @@ const wrapEmail = (title: string, bodyContent: string) => {
 
 // --- EMAIL FUNCTIONS ---
 
-export const sendRegistrationInvoiceEmail = async (email: string, name: string) => {
+export const sendRegistrationInvoiceEmail = async (email: string, name: string, password: string) => {
   const html = wrapEmail(
-    "Complete Your Registration",
+    "Welcome to Aerojet Academy!",
     `
     <p class="text">Dear ${name},</p>
-    <p class="text">Thank you for starting your journey with Aerojet Academy. A registration fee of <strong>GHS 350.00</strong> is required to unlock your full application.</p>
+    <p class="text">Thank you for registering with Aerojet Academy. Your account has been created successfully!</p>
+    
+    <div class="info-box" style="border-left-color: #22c55e;">
+      <div class="info-row"><strong>Your Login Credentials:</strong></div>
+      <div class="info-row" style="margin-top:10px;">
+        <strong>Email:</strong><br/>
+        <span style="font-size: 15px; color: #002a5c; font-weight:bold;">${email}</span>
+      </div>
+      <div class="info-row" style="margin-top:5px;">
+        <strong>Password:</strong><br/>
+        <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #000; background: #fff3cd; padding: 4px 8px; border-radius: 4px;">${password}</span>
+      </div>
+    </div>
+
+    <p class="text" style="font-size: 13px; color: #d97706; background: #fef3c7; padding: 10px; border-radius: 4px; border-left: 3px solid #d97706;">
+      <strong>⚠️ Important:</strong> Please save these credentials securely. You will need them to access your applicant portal.
+    </p>
+
+    <div class="btn-container">
+      <a href="${DOMAIN}/login" class="btn">Login to Your Portal</a>
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 30px 0;">
+
+    <p class="text"><strong>Next Step: Complete Registration Payment</strong></p>
+    <p class="text">A registration fee of <strong>GHS 350.00</strong> is required to activate your application.</p>
     
     <div class="info-box">
       <div class="info-row"><strong>Bank:</strong> FNB Bank</div>
@@ -89,27 +114,23 @@ export const sendRegistrationInvoiceEmail = async (email: string, name: string) 
       <div class="info-row"><strong>Ref:</strong> ${email}</div>
     </div>
 
-    <p class="text">Once paid, please upload your proof of payment securely below.</p>
-    
-    <div class="btn-container">
-      <a href="${DOMAIN}/upload-proof?email=${encodeURIComponent(email)}" class="btn">Upload Payment Proof</a>
-    </div>
+    <p class="text">After making your payment, log in to your portal to upload proof of payment for verification.</p>
     `
   );
 
   await resend.emails.send({
     from: 'Admissions <admissions@aerojet-academy.com>',
     to: email,
-    subject: 'Action Required: Registration Fee',
+    subject: 'Welcome to Aerojet Academy - Login Credentials',
     html
   });
 };
 
 export const sendPaymentConfirmationEmail = async (
-    toEmail: string, 
-    name: string, 
-    password?: string,
-    newAcademyEmail?: string
+  toEmail: string,
+  name: string,
+  password?: string,
+  newAcademyEmail?: string
 ) => {
   const html = wrapEmail(
     "Student Portal Unlocked",

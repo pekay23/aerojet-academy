@@ -1,30 +1,34 @@
 "use client";
 
-import React from 'react';
-import { 
-  LayoutDashboard, 
-  CreditCard, 
-  BookOpen, 
-  UserCircle, 
-  Headphones, 
+import React, { useState } from 'react';
+import {
+  LayoutDashboard,
+  CreditCard,
+  BookOpen,
+  UserCircle,
+  Headphones,
   LogOut,
+  Sun,
+  Moon,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'next-auth/react';
+import { useTheme } from "next-themes";
+import ConfirmationModal from '@/components/modal/ConfirmationModal';
 // Ensure this path points to where Shadcn installed the component. 
 // If it fails, try '@/app/components/ui/sidebar'
-import { 
-  Sidebar, 
-  SidebarContent, 
-  SidebarFooter, 
-  SidebarHeader, 
-  SidebarMenu, 
-  SidebarMenuItem, 
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuItem,
   SidebarMenuButton,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarRail,
-} from '@/components/ui/sidebar'; 
+} from '@/components/ui/sidebar';
 
 const mainMenuItems = [
   { title: "Onboarding", url: "/portal/applicant", icon: LayoutDashboard },
@@ -40,77 +44,96 @@ const accountMenuItems = [
 // CHANGED TO DEFAULT EXPORT 👇
 export default function ApplicantSidebar({ user }: { user: any }) {
   const pathname = usePathname();
+  const { setTheme, theme } = useTheme();
+  const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-border bg-white dark:bg-[#0f172a] dark:border-transparent static h-full w-62.5 data-[collapsed=true]:w-20 transition-all duration-300 z-30 flex flex-col">
-      <SidebarHeader className="h-16.25 flex items-center justify-center border-b border-white/10">
-        <div className="flex items-center gap-3 overflow-hidden group-data-[collapsible=icon]:justify-center w-full">
-            <div className="w-8 h-8 bg-aerojet-sky rounded-lg flex items-center justify-center font-bold text-white shadow-lg shrink-0">
-                A
+    <>
+      <Sidebar collapsible="icon" className="border-r border-border bg-background static h-full w-62.5 data-[collapsed=true]:w-20 transition-all duration-300 z-30 flex flex-col">
+        <SidebarHeader className="h-16.25 flex items-center justify-center border-b border-border">
+          <div className="flex items-center gap-3 overflow-hidden group-data-[collapsible=icon]:justify-center w-full">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-bold text-primary-foreground shadow-lg shrink-0">
+              A
             </div>
-            <span className="font-bold tracking-tight group-data-[collapsible=icon]:hidden">Applicant Portal</span>
-        </div>
-      </SidebarHeader>
+            <span className="font-bold tracking-tight text-foreground group-data-[collapsible=icon]:hidden">Applicant Portal</span>
+          </div>
+        </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel className="text-blue-200/50">Menu</SidebarGroupLabel>
-          <SidebarMenu>
-            {mainMenuItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton 
-                  asChild 
-                  isActive={pathname.startsWith(item.url)}
-                  tooltip={item.title}
-                  className="hover:bg-white/10 data-[active=true]:bg-aerojet-sky data-[active=true]:text-white text-blue-100"
-                >
-                  <a href={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel className="text-muted-foreground">Menu</SidebarGroupLabel>
+            <SidebarMenu>
+              {mainMenuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith(item.url)}
+                    tooltip={item.title}
+                    className="text-foreground/80 hover:bg-accent hover:text-accent-foreground data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
+                  >
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
 
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupLabel className="text-blue-200/50">Account</SidebarGroupLabel>
-          <SidebarMenu>
-            {accountMenuItems.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton 
-                  asChild 
-                  isActive={pathname.startsWith(item.url)}
-                  tooltip={item.title}
-                  className="hover:bg-white/10 data-[active=true]:bg-aerojet-sky data-[active=true]:text-white text-blue-100"
-                >
-                  <a href={item.url}>
-                    <item.icon />
-                    <span>{item.title}</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
-          </SidebarMenu>
-        </SidebarGroup>
-      </SidebarContent>
+          <SidebarGroup className="mt-auto">
+            <SidebarGroupLabel className="text-muted-foreground">Account</SidebarGroupLabel>
+            <SidebarMenu>
+              {accountMenuItems.map((item) => (
+                <SidebarMenuItem key={item.title}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith(item.url)}
+                    tooltip={item.title}
+                    className="text-foreground/80 hover:bg-accent hover:text-accent-foreground data-[active=true]:bg-primary data-[active=true]:text-primary-foreground"
+                  >
+                    <a href={item.url}>
+                      <item.icon />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroup>
+        </SidebarContent>
 
-      <SidebarFooter className="border-t border-white/10 p-2">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton 
-              onClick={() => signOut({ callbackUrl: '/' })}
-              className="text-red-300 hover:bg-red-500/20 hover:text-red-200"
+        <SidebarFooter className="border-t border-border p-4">
+          <div className="flex flex-col gap-2 group-data-[collapsed=true]:items-center">
+            {/* Theme Toggle */}
+            <SidebarMenuButton
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="w-full justify-start group-data-[collapsed=true]:justify-center"
+              tooltip="Toggle Theme"
+            >
+              <div className="flex items-center justify-center w-5 h-5">
+                <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              </div>
+              <span className="group-data-[collapsed=true]:hidden font-medium">
+                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              </span>
+            </SidebarMenuButton>
+
+            {/* Sign Out */}
+            <SidebarMenuButton
+              onClick={() => setIsSignOutModalOpen(true)}
+              className="text-destructive hover:bg-destructive/10 hover:text-destructive w-full justify-start group-data-[collapsed=true]:justify-center"
               tooltip="Sign Out"
             >
-              <LogOut />
-              <span>Sign Out</span>
+              <LogOut className="w-5 h-5" />
+              <span className="group-data-[collapsed=true]:hidden font-medium">Sign Out</span>
             </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-      </SidebarFooter>
-      <SidebarRail />
-    </Sidebar>
+          </div>
+        </SidebarFooter>
+        <SidebarRail />
+      </Sidebar>
+      <ConfirmationModal isOpen={isSignOutModalOpen} onClose={() => setIsSignOutModalOpen(false)} onConfirm={() => signOut({ callbackUrl: '/' })} title="Sign Out" message="Exit applicant portal?" />
+    </>
   );
 }

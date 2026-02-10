@@ -59,22 +59,22 @@ export async function POST(req: Request) {
       });
 
     }, {
-      maxWait: 10000, 
-      timeout: 20000 
+      maxWait: 10000,
+      timeout: 20000
     });
 
     // 4. Send the invoice email (Async, don't block response)
     // We catch errors here to prevent the registration from failing if email fails
     try {
-        await sendRegistrationInvoiceEmail(email, name);
+      await sendRegistrationInvoiceEmail(email, name, tempPassword);
     } catch (emailError) {
-        console.error("EMAIL_SEND_ERROR:", emailError);
+      console.error("EMAIL_SEND_ERROR:", emailError);
     }
 
-    // 5. SUCCESS: Return the tempPassword for Auto-Login
-    return NextResponse.json({ 
-        success: true, 
-        tempPassword: tempPassword 
+    // 5. SUCCESS: Return success without exposing password
+    return NextResponse.json({
+      success: true,
+      message: 'Registration successful! Check your email for login credentials.'
     });
 
   } catch (error) {
