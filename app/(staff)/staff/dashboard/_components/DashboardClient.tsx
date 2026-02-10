@@ -163,7 +163,7 @@ export default function DashboardClient() {
                     </SpotlightCard>
 
                     {/* CMS ACCESS CARD */}
-                    <SpotlightCard className="p-6 bg-card border-border shadow-sm cursor-pointer group" spotlightColor="rgba(236, 72, 153, 0.15)" onClick={() => window.open('/studio', '_blank')}>
+                    <SpotlightCard className="p-6 bg-card border-border shadow-sm cursor-pointer group" spotlightColor="rgba(236, 72, 153, 0.15)" onClick={() => { window.open('/studio', '_blank'); }}>
                         <div className="flex justify-between items-center">
                             <div>
                                 <h3 className="text-lg font-semibold group-hover:text-pink-500 transition-colors">Manage Public Site</h3>
