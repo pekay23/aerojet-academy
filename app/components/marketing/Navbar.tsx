@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react"; 
 import { Wrench, Menu, X, ChevronDown } from 'lucide-react';
 import { usePathname } from "next/navigation";
+import { title } from "process";
 
 // ✅ UPDATED SITEMAP STRUCTURE WITH GROUPING
 const navLinks = {
@@ -34,6 +35,9 @@ const navLinks = {
   about: [
     { title: "About Aerojet Academy", href: "/about" },
     { title: "Accra MRO Project", href: "/about/accra-mro" },
+  ],
+  faq: [
+  {title:"Frequesntly Asked Questions", href: "/faq" }
   ]
 };
 
@@ -85,6 +89,7 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
     '/legal/privacy',
     '/faq',
     '/register',
+    '/faq',
     '/courses/modules', 
   ];
 
