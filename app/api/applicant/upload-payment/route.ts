@@ -76,8 +76,7 @@ export async function POST(req: Request) {
             where: { id: feeId },
             data: {
                 status: 'PENDING',
-                proofOfPayment: proofUrl,
-                updatedAt: new Date()
+                proofUrl: proofUrl
             }
         });
 
