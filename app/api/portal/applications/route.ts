@@ -56,13 +56,17 @@ export async function POST(req: Request) {
 
         if (program === 'Full-Time') {
             const tuition = Number(course.price) || 2500.00;
-            const depositAmount = tuition * 0.40;
+            const minDeposit = tuition * 0.40;
+
+            // Use the higher of the two: custom amount or minimum required
+            const { depositAmount } = body;
+            const finalDeposit = Math.max(Number(depositAmount) || 0, minDeposit);
 
             await prisma.fee.create({
                 data: {
                     studentId: student.id,
-                    amount: depositAmount,
-                    description: 'Seat Confirmation Deposit (40%)',
+                    amount: finalDeposit,
+                    description: `Seat Confirmation Deposit (${finalDeposit > minDeposit ? 'Custom Amount' : '40%'})`,
                     dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
                     status: 'UNPAID'
                 }
