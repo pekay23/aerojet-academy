@@ -2,10 +2,10 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
-import { Resend } from 'resend';
+import { sendAdmissionApprovalEmail } from '@/app/lib/mail';
+import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
     try {
@@ -16,6 +16,7 @@ export async function POST(req: Request) {
         }
 
         const user = session.user as any;
+        // Basic role check - in a real app, use a middleware or more robust check
         if (user.role === 'STUDENT' || user.role === 'PROSPECT') {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
@@ -42,6 +43,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Fee not found' }, { status: 404 });
         }
 
+        // Update Fee
         const updatedFee = await prisma.fee.update({
             where: { id: feeId },
             data: {
@@ -50,34 +52,43 @@ export async function POST(req: Request) {
             }
         });
 
+        // Registration Logic
         let statusUpdated = false;
         if (fee.description?.toLowerCase().includes('registration') && fee.student.enrollmentStatus === 'PROSPECT') {
+
+            // 1. Generate Credentials
+            const tempPassword = Math.random().toString(36).slice(-8) + "A1!";
+            const hashedPassword = await hash(tempPassword, 10);
+
+            // 2. Activate User & Update Password
+            await prisma.user.update({
+                where: { id: fee.student.userId },
+                data: {
+                    password: hashedPassword,
+                    isActive: true,
+                    // If we want to mark email as verified since they paid, we can:
+                    emailVerified: new Date()
+                }
+            });
+
+            // 3. Update Student Status
             await prisma.student.update({
                 where: { id: fee.studentId },
                 data: { enrollmentStatus: 'APPLICANT' }
             });
             statusUpdated = true;
-        }
 
-        if (fee.student.user.email) {
-            try {
-                await resend.emails.send({
-                    from: 'Aerojet Academy <admissions@aerojet-academy.com>',
-                    to: fee.student.user.email,
-                    subject: 'Payment Approved - Application Access Granted',
-                    html: `
-                        <h2>Payment Confirmed</h2>
-                        <p>Dear ${fee.student.user.name || 'Student'},</p>
-                        <p>We have confirmed your payment of <strong>€${fee.amount}</strong> for <strong>${fee.description}</strong>.</p>
-                        ${statusUpdated ? `<p><strong>Your status has been updated to APPLICANT.</strong> You can now log in to the portal and begin your application process.</p>` : ''}
-                        <p>
-                            <a href="${process.env.NEXT_PUBLIC_APP_URL}/portal" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Portal</a>
-                        </p>
-                        <p>Regards,<br>Aerojet Admissions Team</p>
-                    `
-                });
-            } catch (emailError) {
-                console.error('FAILED_TO_SEND_EMAIL', emailError);
+            // 4. Send Credentials Email
+            if (fee.student.user.email) {
+                try {
+                    await sendAdmissionApprovalEmail(
+                        fee.student.user.email,
+                        fee.student.user.name || 'Student',
+                        tempPassword
+                    );
+                } catch (emailError) {
+                    console.error('FAILED_TO_SEND_CREDENTIALS', emailError);
+                }
             }
         }
 

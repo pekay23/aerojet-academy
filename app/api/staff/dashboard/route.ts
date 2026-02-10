@@ -86,7 +86,7 @@ export async function GET(req: Request) {
       // 5. Recent Attendance (Last 30 Days)
       prisma.attendanceRecord.findMany({
         where: { date: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
-        select: { status: true }
+        select: { status: true, date: true, recordedBy: true }
       }),
 
       // 6. Upcoming System Events
@@ -150,6 +150,23 @@ export async function GET(req: Request) {
     const presentRecs = attendanceRecords.filter((r: any) => r.status === 'PRESENT').length;
     const studentRate = totalRecs > 0 ? ((presentRecs / totalRecs) * 100).toFixed(1) : 0;
 
+    // --- Calculate Instructor Attendance Rate ---
+    // Count distinct instructors who recorded attendance in the last 30 days
+    const instructorRecorders = new Set(
+      attendanceRecords.map((r: any) => r.recordedBy).filter(Boolean)
+    );
+    // Calculate working days in last 30 days (approx 22 weekdays)
+    const workingDays = 22;
+    const instructorCount = totalInstructors || 1;
+    const expectedRecords = workingDays * instructorCount;
+    // Distinct days instructors logged attendance
+    const instructorDays = new Set(
+      attendanceRecords.map((r: any) => `${r.recordedBy}-${new Date(r.date).toDateString()}`)
+    );
+    const instructorRate = expectedRecords > 0
+      ? Math.min(100, ((instructorDays.size / expectedRecords) * 100)).toFixed(1)
+      : 0;
+
     // --- Return Consolidated Result ---
     return NextResponse.json({
       studentStats: { total: totalStudents, active: activeStudents, male: maleStudents, female: femaleStudents },
@@ -160,7 +177,7 @@ export async function GET(req: Request) {
       recentStudents,
       attendance: {
         studentRate: studentRate,
-        instructorRate: 98.5 // Hardcoded until we track instructor logins
+        instructorRate: instructorRate
       }
     });
 
@@ -169,3 +186,4 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+

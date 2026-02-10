@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut } from "next-auth/react";
 import { toast } from 'sonner';
-import { LayoutDashboard, BookOpen, GraduationCap, Users, BarChart, CreditCard, Wallet, LifeBuoy, UserCircle, LogOut } from 'lucide-react';
+import { LayoutDashboard, BookOpen, GraduationCap, Users, BarChart, CreditCard, Wallet, LifeBuoy, UserCircle, LogOut, Compass } from 'lucide-react';
 import { ThemeToggle } from '@/app/components/marketing/ThemeToggle';
 import ConfirmationModal from '@/components/modal/ConfirmationModal';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, useSidebar } from '@/components/ui/sidebar';
@@ -14,6 +14,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 const studentMenu = [
   { title: "Dashboard", href: "/student/dashboard", icon: LayoutDashboard },
   { title: "My Courses", href: "/student/courses", icon: BookOpen },
+  { title: "Browse Courses", href: "/student/browse-courses", icon: Compass },
   { title: "Exam Bookings", href: "/student/exams", icon: GraduationCap },
   { title: "Exam Pools", href: "/student/exam-pools", icon: Users },
   { title: "Results", href: "/student/results", icon: BarChart },

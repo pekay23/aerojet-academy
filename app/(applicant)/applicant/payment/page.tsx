@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Upload, CheckCircle2, Clock, XCircle, FileText, Loader2, Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { UploadButton } from '@/app/utils/uploadthing';
 
 export default function PaymentPage() {
     const router = useRouter();
@@ -206,80 +207,84 @@ export default function PaymentPage() {
                                     </p>
                                 </div>
 
-                                <div className="flex flex-col gap-3">
-                                    <label htmlFor="file-upload" className="cursor-pointer group">
-                                        <div className="border-2 border-dashed border-slate-300 hover:border-blue-500 hover:bg-blue-50/50 transition-all rounded-xl p-8 text-center group-hover:scale-[1.01] duration-200">
-                                            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                                                <Upload className="w-8 h-8" />
-                                            </div>
-                                            <div className="text-base font-medium text-slate-700">
-                                                <span className="text-blue-600 font-bold">Click to upload proof</span>
-                                                <span className="text-slate-500"> or drag and drop</span>
-                                            </div>
-                                            <p className="text-xs text-slate-400 mt-2">
-                                                PNG, JPG or PDF (max. 5MB)
-                                            </p>
-                                        </div>
-                                        <input
-                                            id="file-upload"
-                                            type="file"
-                                            className="hidden"
-                                            accept="image/jpeg,image/png,image/jpg,application/pdf"
-                                            onChange={handleFileUpload}
-                                            disabled={uploading || isPending}
+                                <div className="flex flex-col items-center justify-center">
+                                    <div className="w-full max-w-xs">
+                                        <UploadButton
+                                            endpoint="paymentProof"
+                                            onClientUploadComplete={async (res) => {
+                                                if (res && res[0]) {
+                                                    const url = res[0].url;
+                                                    setUploading(true);
+                                                    try {
+                                                        const response = await fetch('/api/applicant/upload-payment', {
+                                                            method: 'POST',
+                                                            headers: { 'Content-Type': 'application/json' },
+                                                            body: JSON.stringify({ feeId: fee.id, proofUrl: url }),
+                                                        });
+                                                        if (response.ok) {
+                                                            toast.success('Proof of payment uploaded successfully!');
+                                                            fetchData();
+                                                        } else {
+                                                            toast.error('Failed to submit proof. Please try again.');
+                                                        }
+                                                    } catch (err) {
+                                                        toast.error('Submission error.');
+                                                    } finally {
+                                                        setUploading(false);
+                                                    }
+                                                }
+                                            }}
+                                            onUploadError={(error: Error) => {
+                                                toast.error(`ERROR! ${error.message}`);
+                                            }}
                                         />
-                                    </label>
-
-                                    {uploading && (
-                                        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-2">
-                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                            Uploading payment proof...
-                                        </div>
-                                    )}
-
-                                    {isPending && (
-                                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
-                                            <Clock className="w-5 h-5 text-yellow-600" />
-                                            <div className="text-sm text-yellow-800">
-                                                <strong>Proof submitted!</strong> Our team is currently reviewing your payment.
-                                            </div>
-                                        </div>
-                                    )}
+                                    </div>
                                 </div>
+
+
+                                {isPending && (
+                                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
+                                        <Clock className="w-5 h-5 text-yellow-600" />
+                                        <div className="text-sm text-yellow-800">
+                                            <strong>Proof submitted!</strong> Our team is currently reviewing your payment.
+                                        </div>
+                                    </div>
+                                )}
                             </div>
-                        </>
+                        </div>
+                </>
                     )}
 
-                    {/* Action Button */}
-                    {isPaid && (
-                        <Button
-                            onClick={() => router.push('/applicant/dashboard')}
-                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 text-lg shadow-lg shadow-blue-900/20"
-                            size="lg"
-                        >
-                            Continue to Dashboard <CheckCircle2 className="ml-2 w-5 h-5" />
-                        </Button>
-                    )}
-                </CardContent>
-            </Card>
+                {/* Action Button */}
+                {isPaid && (
+                    <Button
+                        onClick={() => router.push('/applicant/dashboard')}
+                        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 text-lg shadow-lg shadow-blue-900/20"
+                        size="lg"
+                    >
+                        Continue to Dashboard <CheckCircle2 className="ml-2 w-5 h-5" />
+                    </Button>
+                )}
+            </CardContent>
+        </Card>
 
-            {/* Help Card */}
-            <Card className="bg-muted/50">
-                <CardContent className="pt-6">
-                    <h4 className="font-semibold mb-2">Need Help?</h4>
-                    <p className="text-sm text-muted-foreground mb-3">
-                        If you experience any issues with payment or upload, please contact our admissions team.
-                    </p>
-                    <div className="flex gap-4 text-sm">
-                        <a href="mailto:admissions@aerojet-academy.com" className="text-primary hover:underline font-medium">
-                            admissions@aerojet-academy.com
-                        </a>
-                        <a href="tel:+233551010108" className="text-primary hover:underline font-medium">
-                            +233 551 010 108
-                        </a>
-                    </div>
-                </CardContent>
-            </Card>
-        </div>
+            {/* Help Card */ }
+    <Card className="bg-muted/50">
+        <CardContent className="pt-6">
+            <h4 className="font-semibold mb-2">Need Help?</h4>
+            <p className="text-sm text-muted-foreground mb-3">
+                If you experience any issues with payment or upload, please contact our admissions team.
+            </p>
+            <div className="flex gap-4 text-sm">
+                <a href="mailto:admissions@aerojet-academy.com" className="text-primary hover:underline font-medium">
+                    admissions@aerojet-academy.com
+                </a>
+                <a href="tel:+233551010108" className="text-primary hover:underline font-medium">
+                    +233 551 010 108
+                </a>
+            </div>
+        </CardContent>
+    </Card>
+        </div >
     );
 }

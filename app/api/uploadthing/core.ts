@@ -8,11 +8,8 @@ export const ourFileRouter = {
   // 1. Payment Proof (Students/Public)
   paymentProof: f({ image: { maxFileSize: "4MB", maxFileCount: 1 }, pdf: { maxFileSize: "4MB", maxFileCount: 1 } })
     .middleware(async () => {
-      const session = await getServerSession(authOptions);
-      // Allow if logged in OR if handling public submission (handled by client logic usually, but here we enforce session for safety if desired, or you can remove auth check for truly public)
-      // For now, keeping your existing auth check:
-      if (!session || !session.user) throw new Error("Unauthorized");
-      return { userId: session.user.id };
+      // Public endpoint for applicants
+      return { userId: "public-applicant" };
     })
     .onUploadComplete(async ({ file }) => {
       console.log("Proof uploaded:", file.url);

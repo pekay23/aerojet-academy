@@ -6,25 +6,43 @@ import { usePathname } from 'next/navigation'; // 1. Import this
 
 export default function MobileStickyBar() {
   const [isVisible, setIsVisible] = useState(false);
-  const pathname = usePathname(); // 2. Get current path
+  const [isFooterVisible, setIsFooterVisible] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
+    // 1. Scroll Visibility Logic
     const handleScroll = () => {
       setIsVisible(window.scrollY > 300);
     };
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    // 2. Footer Intersection Logic
+    const footerObserver = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        setIsFooterVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 } // Trigger when 10% of footer is visible
+    );
+
+    const footer = document.getElementById('site-footer');
+    if (footer) footerObserver.observe(footer);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (footer) footerObserver.unobserve(footer);
+    };
   }, []);
 
-  // 3. Logic: Hide if inside any Portal or Auth page
-  const isPortal = pathname.startsWith('/student') || 
-                   pathname.startsWith('/applicant') || 
-                   pathname.startsWith('/staff') ||
-                   pathname.startsWith('/staff-new') ||
-                   pathname.startsWith('/login') ||
-                   pathname.startsWith('/register');
+  // 3. Logic: Hide if inside any Portal or Auth page OR if footer is visible
+  const isPortal = pathname.startsWith('/student') ||
+    pathname.startsWith('/applicant') ||
+    pathname.startsWith('/staff') ||
+    pathname.startsWith('/staff-new') ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/register');
 
-  if (isPortal || !isVisible) return null; // 4. Return null to hide
+  if (isPortal || !isVisible || isFooterVisible) return null;
 
   return (
     <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 z-50 md:hidden shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] animate-in slide-in-from-bottom-full duration-300">

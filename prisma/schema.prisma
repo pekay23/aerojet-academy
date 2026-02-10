@@ -50,12 +50,17 @@ model User {
   deletedAt          DateTime?
   lastPasswordChange DateTime?
   createdAt          DateTime  @default(now())
+  
+  // Auth Recovery
+  resetToken         String?
+  resetTokenExpiry   DateTime?
 
   accounts          Account[]
   sessions          Session[]
   studentProfile    Student?
   instructedCourses Course[]  @relation("CourseInstructors")
   auditLogs         AuditLog[]
+  notifications     Notification[]
 }
 
 model VerificationToken {
@@ -145,6 +150,9 @@ model Student {
   isAmbassador        Boolean  @default(false)
   referralCode        String?  @unique
   successfulReferrals Int      @default(0)
+  
+  // Registration Flow
+  registrationCode    String?  @unique
 
   // Data Relations
   createdAt          DateTime @default(now())
@@ -553,4 +561,20 @@ model SystemEvent {
   description String?
   createdBy   String?
   createdAt   DateTime @default(now())
+}
+
+// =========================================================
+// 10. NOTIFICATIONS (NEW)
+// =========================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("INFO")  // INFO, SUCCESS, WARNING, ACTION
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
 }

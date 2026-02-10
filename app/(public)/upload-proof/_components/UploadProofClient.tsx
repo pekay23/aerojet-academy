@@ -1,132 +1,157 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
-import { UploadDropzone } from '@/app/utils/uploadthing'; // Ensure this path is correct for your project
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { toast } from 'sonner';
+import React, { useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import Link from "next/link";
+import { toast } from "sonner";
+import { Button } from "@/app/components/ui/button";
+import { Input } from "@/app/components/ui/input";
+import { Label } from "@/app/components/ui/label";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/app/components/ui/card";
+import { UploadButton } from "@/app/utils/uploadthing"; // Corrected path
 import { Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function UploadProofClient() {
   const searchParams = useSearchParams();
-  const emailParam = searchParams.get('email') || '';
-  // Auto-fill email if passed in URL from the email link
-  const [email, setEmail] = useState(emailParam || '');
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [uploadedFileUrl, setUploadedFileUrl] = useState<string | null>(null);
-  const [isLinking, setIsLinking] = useState(false);
+  const router = useRouter();
+  const codeFromUrl = searchParams.get("code") || "";
+  const emailFromUrl = searchParams.get("email") || "";
 
-  useEffect(() => {
-    if (emailParam) {
-        setEmail(emailParam);
-    }
-  }, [emailParam]);
+  const [registrationCode, setRegistrationCode] = useState(codeFromUrl);
+  const [email, setEmail] = useState(emailFromUrl);
+  const [proofUrl, setProofUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
 
-  const handleLinkPayment = async () => {
-    if (!email || !uploadedFileUrl) {
-      toast.error("Please provide your email and upload a file.");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if ((!registrationCode && !email) || !proofUrl) {
+      toast.error("Please provide your registration code (or email) and upload proof.");
       return;
     }
 
-    setIsLinking(true);
+    setLoading(true);
+
     try {
-      // Call a public API route to link this proof to the user's latest UNPAID invoice
-      const res = await fetch('/api/public/submit-proof', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, proofUrl: uploadedFileUrl })
+      const res = await fetch("/api/public/submit-proof", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          registrationCode,
+          email,
+          proofUrl
+        }),
       });
 
       const data = await res.json();
 
-      if (res.ok) {
-        setIsSubmitted(true);
-        toast.success("Proof submitted successfully!");
-      } else {
-        toast.error(data.error || "Failed to link payment. Please contact support.");
-      }
-    } catch {
-      toast.error("Network error. Please try again.");
+      if (!res.ok) throw new Error(data.error || "Failed to submit proof");
+
+      setSubmitted(true);
+      toast.success("Proof submitted successfully!");
+    } catch (error: any) {
+      toast.error(error.message);
     } finally {
-      setIsLinking(false);
+      setLoading(false);
     }
   };
 
-  if (isSubmitted) {
+  if (submitted) {
     return (
-      <div className="text-center py-10 space-y-4">
-        <div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto">
-          <CheckCircle2 className="w-8 h-8" />
-        </div>
-        <h3 className="text-xl font-bold text-slate-900">Submission Received</h3>
-        <p className="text-slate-500 text-sm max-w-xs mx-auto">
-          Our finance team will review your receipt shortly. You will receive a confirmation email once approved.
-        </p>
+      <div className="flex flex-col items-center justify-center p-4">
+        <Card className="w-full max-w-md shadow-none border-none">
+          <CardHeader className="text-center">
+            <div className="mx-auto w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-4">
+              <CheckCircle2 className="w-8 h-8" />
+            </div>
+            <CardTitle className="text-green-700">Submission Successful!</CardTitle>
+            <CardDescription>
+              Your proof of payment has been uploaded. Our admissions team will review it shortly.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center">
+            <p className="text-sm text-gray-600 mb-6">
+              Once approved, you will receive an email with your login credentials to access the student portal.
+            </p>
+            <Button asChild className="w-full bg-aerojet-blue hover:bg-aerojet-sky" variant="default">
+              <Link href="/">Return to Home</Link>
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <label htmlFor="email" className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
-          Registered Email Address
-        </label>
-        <Input 
-          id="email" 
-          type="email" 
-          placeholder="student@example.com" 
-          value={email} 
-          onChange={(e) => setEmail(e.target.value)}
-          style={{ color: '#0f172a' }} // Force black text 
-          className="bg-slate-50 border-slate-200 text-slate-900"
-        />
-        <p className="text-[10px] text-slate-400 ml-1">
-          Must match the email you used during registration.
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">
-          Upload Receipt (PDF/Image)
-        </label>
-        <div className="border-2 border-dashed border-slate-200 rounded-xl p-4 hover:bg-slate-50 transition-colors">
-          <UploadDropzone
-            endpoint="paymentProof" // Ensure this matches your core.ts router name
-            onClientUploadComplete={(res) => {
-              if (res && res[0]) {
-                setUploadedFileUrl(res[0].url);
-                toast.success("File uploaded!");
-              }
-            }}
-            onUploadError={(error: Error) => {
-              toast.error(`Upload failed: ${error.message}`);
-            }}
-            appearance={{
-              button: "bg-aerojet-sky text-white text-sm px-4 py-2 rounded-md",
-              allowedContent: "text-slate-400 text-xs"
-            }}
-          />
-        </div>
-        {uploadedFileUrl && (
-          <div className="flex items-center gap-2 text-xs text-green-600 font-medium bg-green-50 p-2 rounded-lg">
-            <CheckCircle2 className="w-3 h-3" /> File ready to submit
+    <Card className="w-full shadow-none border-none">
+      <CardHeader>
+        {/* Header is handled by the parent page mostly, but we can add specific instructions here if needed */}
+      </CardHeader>
+      <form onSubmit={handleSubmit}>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="code">Registration Code</Label>
+            <Input
+              id="code"
+              placeholder="ATA-XXXX"
+              value={registrationCode}
+              onChange={(e) => setRegistrationCode(e.target.value.toUpperCase())}
+              className="bg-slate-50 border-slate-200"
+            />
+            <p className="text-[10px] text-muted-foreground">
+              Use the code sent to your email.
+            </p>
           </div>
-        )}
-      </div>
 
-      <Button 
-        onClick={handleLinkPayment} 
-        disabled={!uploadedFileUrl || !email || isLinking}
-        className="w-full bg-aerojet-blue hover:bg-aerojet-sky py-6 text-sm font-bold uppercase tracking-widest shadow-lg"
-      >
-        {isLinking ? (
-          <> <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Processing... </>
-        ) : (
-          "Submit Proof for Verification"
-        )}
-      </Button>
-    </div>
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-slate-200"></div>
+            <span className="flex-shrink mx-4 text-xs text-slate-400 font-bold uppercase">OR</span>
+            <div className="flex-grow border-t border-slate-200"></div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email Address</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="applicant@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="bg-slate-50 border-slate-200"
+            />
+          </div>
+
+          <div className="space-y-2 pt-2">
+            <Label>Proof of Payment</Label>
+            <div className="border border-dashed border-slate-300 rounded-lg p-6 text-center hover:bg-slate-50 transition-colors">
+              {proofUrl ? (
+                <div className="text-sm text-green-600 font-medium flex items-center justify-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" /> File Uploaded Successfully!
+                </div>
+              ) : (
+                <UploadButton
+                  endpoint="paymentProof"
+                  onClientUploadComplete={(res) => {
+                    if (res && res[0]) {
+                      setProofUrl(res[0].url);
+                      toast.success("Upload Completed");
+                    }
+                  }}
+                  onUploadError={(error: Error) => {
+                    toast.error(`ERROR! ${error.message}`);
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <Button type="submit" className="w-full bg-aerojet-blue hover:bg-aerojet-sky h-12 text-sm font-bold uppercase tracking-widest" disabled={loading || !proofUrl || (!registrationCode && !email)}>
+            {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : "Submit Proof"}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
   );
 }

@@ -14,12 +14,14 @@ interface PortalHeaderProps {
   isEnrolled?: boolean;
 }
 
+import NotificationBell from './NotificationBell';
+
 export default function PortalHeader({ onMenuClick, title, isEnrolled }: PortalHeaderProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const { setTheme, theme } = useTheme();
   const [currentTime, setCurrentTime] = useState(new Date());
-  
+
   // Update time every second
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -32,7 +34,7 @@ export default function PortalHeader({ onMenuClick, title, isEnrolled }: PortalH
 
   return (
     <header className="flex items-center justify-between h-full w-full bg-white dark:bg-[#0f172a] px-2 transition-colors duration-300">
-      
+
       {/* LEFT: Welcome & Time */}
       <div className="flex flex-col justify-center">
         <h1 className="text-xl font-bold text-gray-800 dark:text-white leading-tight">
@@ -40,22 +42,24 @@ export default function PortalHeader({ onMenuClick, title, isEnrolled }: PortalH
         </h1>
         <div className="flex items-center gap-3 text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
           <div className="flex items-center gap-1">
-             <CalendarIcon className="w-3 h-3" />
-             {currentTime.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+            <CalendarIcon className="w-3 h-3" />
+            {currentTime.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
           </div>
           <div className="flex items-center gap-1 border-l border-gray-200 dark:border-gray-700 pl-3">
-             <Clock className="w-3 h-3" />
-             {currentTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+            <Clock className="w-3 h-3" />
+            {currentTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
           </div>
         </div>
       </div>
 
       {/* RIGHT: Actions & Profile */}
       <div className="flex items-center gap-4">
-        
+
+        <NotificationBell />
+
         {/* Theme Toggle */}
-        <button 
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")} 
+        <button
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors"
         >
           {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -67,7 +71,7 @@ export default function PortalHeader({ onMenuClick, title, isEnrolled }: PortalH
             <button className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-700 outline-none group">
               <div className="text-right hidden sm:block">
                 <div className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-aerojet-blue dark:group-hover:text-blue-400 transition-colors">
-                    {user?.name}
+                  {user?.name}
                 </div>
                 <div className="text-[10px] text-gray-500 dark:text-gray-400">{roleLabel}</div>
               </div>

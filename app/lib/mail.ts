@@ -204,3 +204,144 @@ export const sendStaffNotification = async (name: string, email: string, message
     text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
   });
 };
+
+export const sendVerificationEmail = async (email: string, name: string, token: string) => {
+  const verifyUrl = `${DOMAIN}/verify-email?token=${token}`;
+
+  const html = wrapEmail(
+    "Verify Your Email",
+    `
+    <p class="text">Dear ${name},</p>
+    <p class="text">Please verify your email address to activate your Aerojet Academy account.</p>
+    
+    <div class="btn-container">
+      <a href="${verifyUrl}" class="btn">Verify Email Address</a>
+    </div>
+    
+    <p class="text" style="font-size: 13px; color: #666;">
+      If you did not create an account, please ignore this email.
+    </p>
+    `
+  );
+
+  await resend.emails.send({
+    from: 'Aerojet Academy <onboarding@resend.dev>', // Update domain
+    to: email,
+    subject: 'Verify your email address',
+    html
+  });
+};
+
+export const sendApplicationReceivedEmail = async (email: string, name: string, code: string) => {
+  const uploadUrl = `${DOMAIN}/upload-proof?code=${code}`;
+
+  const html = wrapEmail(
+    "Application Received",
+    `
+    <p class="text">Dear ${name},</p>
+    <p class="text">Thank you for starting your application to Aerojet Academy.</p>
+    
+    <div class="info-box" style="border-left-color: #3b82f6;">
+      <div class="info-row"><strong>Your Registration Code:</strong></div>
+      <div class="info-row" style="margin-top:5px;">
+        <span style="font-family: monospace; font-size: 20px; letter-spacing: 2px; color: #002a5c; font-weight:bold; background: #e0f2fe; padding: 4px 12px; border-radius: 4px;">${code}</span>
+      </div>
+    </div>
+
+    <p class="text"><strong>Step 1: Make Payment</strong></p>
+    <p class="text">Please pay the registration fee of <strong>GHS 350.00</strong> to:</p>
+    
+    <div class="info-box">
+      <div class="info-row"><strong>Bank:</strong> FNB Bank</div>
+      <div class="info-row"><strong>Account No:</strong> 1020003980687</div>
+      <div class="info-row"><strong>Branch:</strong> 330102</div>
+      <div class="info-row"><strong>Reference:</strong> ${code}</div>
+    </div>
+
+    <p class="text"><strong>Step 2: Upload Proof</strong></p>
+    <p class="text">After payment, use the link below to upload your receipt.</p>
+    
+    <div class="btn-container">
+      <a href="${uploadUrl}" class="btn">Upload Payment Proof</a>
+    </div>
+    
+    <p class="text" style="font-size: 13px; color: #666;">
+      Note: Your account will only be created after your payment is verified.
+    </p>
+    `
+  );
+
+  await resend.emails.send({
+    from: 'Admissions <admissions@aerojet-academy.com>',
+    to: email,
+    subject: 'Aerojet Academy - Application Received',
+    html
+  });
+};
+
+export const sendAdmissionApprovalEmail = async (email: string, name: string, password: string) => {
+  const html = wrapEmail(
+    "Congratulations! Admission Approved",
+    `
+    <p class="text">Dear ${name},</p>
+    <p class="text">We are pleased to inform you that your application payment has been verified and your admission process is moving forward!</p>
+    
+    <p class="text">You can now access the student portal to view courses, schedules, and more.</p>
+    
+    <div class="info-box" style="border-left-color: #22c55e;">
+      <div class="info-row"><strong>Your Login Credentials:</strong></div>
+      <div class="info-row" style="margin-top:10px;">
+        <strong>Email:</strong><br/>
+        <span style="font-size: 15px; color: #002a5c; font-weight:bold;">${email}</span>
+      </div>
+      <div class="info-row" style="margin-top:5px;">
+        <strong>Temporary Password:</strong><br/>
+        <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #000; background: #fff3cd; padding: 4px 8px; border-radius: 4px;">${password}</span>
+      </div>
+    </div>
+
+    <div class="btn-container">
+      <a href="${DOMAIN}/portal/login" class="btn">Login to Portal</a>
+    </div>
+
+    <p class="text"><em>Please change your password after logging in for the first time.</em></p>
+    `
+  );
+
+  await resend.emails.send({
+    from: 'Admissions <admissions@aerojet-academy.com>',
+    to: email,
+    subject: 'Admission Approved - Welcome to Aerojet Academy',
+    html
+  });
+};
+
+export const sendProofReceivedEmail = async (email: string, name: string, code: string) => {
+  const html = wrapEmail(
+    "Payment Proof Received",
+    `
+    <p class="text">Dear ${name},</p>
+    <p class="text">We have received your payment proof for application <strong>${code}</strong>.</p>
+    
+    <div class="info-box">
+      <div class="info-row"><strong>Status:</strong> <span style="color:#d97706; font-weight:bold;">Under Review ⏳</span></div>
+      <div class="info-row" style="margin-top:5px;">
+        Our admissions team will verify your payment shortly.
+      </div>
+    </div>
+
+    <p class="text">Once verified, you will receive another email with your <strong>Student Portal</strong> login credentials.</p>
+    
+    <p class="text" style="font-size: 13px; color: #666;">
+      Thank you for your patience.
+    </p>
+    `
+  );
+
+  await resend.emails.send({
+    from: 'Admissions <admissions@aerojet-academy.com>',
+    to: email,
+    subject: 'Payment Proof Received - Aerojet Academy',
+    html
+  });
+};

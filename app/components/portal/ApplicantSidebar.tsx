@@ -31,14 +31,14 @@ import {
 } from '@/components/ui/sidebar';
 
 const mainMenuItems = [
-  { title: "Onboarding", url: "/portal/applicant", icon: LayoutDashboard },
-  { title: "Finance", url: "/portal/finance", icon: CreditCard },
-  { title: "Exam Bookings", url: "/portal/exam-pools", icon: BookOpen },
+  { title: "Dashboard", url: "/applicant/dashboard", icon: LayoutDashboard },
+  { title: "Application", url: "/applicant/application", icon: BookOpen },
+  { title: "Finance", url: "/applicant/payment", icon: CreditCard },
 ];
 
 const accountMenuItems = [
-  { title: "My Profile", url: "/portal/profile", icon: UserCircle },
-  { title: "Support", url: "/portal/support", icon: Headphones },
+  { title: "My Profile", url: "/applicant/profile", icon: UserCircle },
+  { title: "Support", url: "/applicant/support", icon: Headphones },
 ];
 
 // CHANGED TO DEFAULT EXPORT 👇

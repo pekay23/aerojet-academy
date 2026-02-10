@@ -5,6 +5,8 @@ import { redirect, useRouter } from 'next/navigation';
 import { useIdleTimer } from 'react-idle-timer';
 import { toast } from 'sonner';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import { Loader2 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 // ✅ UPDATED IMPORTS
 import PortalHeader from '@/app/components/portal/PortalHeader';
 import ApplicantSidebar from '@/app/components/portal/ApplicantSidebar';
@@ -35,6 +37,44 @@ export default function ApplicantLayout({ children }: { children: React.ReactNod
     router.replace('/student/dashboard');
     return null;
   }
+
+  // --- NEW: Payment Verification Gate ---
+  // We need to check if they have paid the registration fee.
+  // Since we don't have fee status in session, we might need to fetch it or rely on a specialized hook.
+  // For simplicity/performance in this layout, we'll fetch it once on mount.
+  // Note: For a robust app, we should add feeStatus to session callback.
+  const [isPaid, setIsPaid] = React.useState<boolean | null>(null);
+  const pathname = usePathname(); // Correct usage
+
+  React.useEffect(() => {
+    async function checkFee() {
+      try {
+        const res = await fetch('/api/applicant/registration-fee');
+        const data = await res.json();
+        if (data?.fee?.status === 'PAID') {
+          setIsPaid(true);
+        } else {
+          setIsPaid(false);
+        }
+      } catch (e) {
+        setIsPaid(false);
+      }
+    }
+    checkFee();
+  }, []);
+
+  // While checking, maybe show loading or just render? 
+  // If we block rendering, it might flash. 
+  // Let's render but redirect if confirmed NOT paid and NOT on payment page.
+
+  React.useEffect(() => {
+    if (isPaid === false && !pathname.includes('/applicant/payment') && !pathname.includes('/support')) {
+      router.replace('/applicant/payment');
+    }
+  }, [isPaid, pathname, router]);
+
+  if (isPaid === null) return <div className="flex h-screen items-center justify-center animate-pulse"><Loader2 className="w-10 h-10 animate-spin text-primary" /></div>;
+
 
   return (
     <SidebarProvider defaultOpen={true}>

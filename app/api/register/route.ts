@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server';
-import { sendRegistrationInvoiceEmail } from '@/app/lib/mail';
+import { sendApplicationReceivedEmail } from '@/app/lib/mail';
 import { PrismaClient } from '@prisma/client';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
+
+function generateRegistrationCode() {
+  // Format: ATA-XXXX (e.g., ATA-9281)
+  const random = Math.floor(1000 + Math.random() * 9000);
+  return `ATA-${random}`;
+}
 
 export async function POST(req: Request) {
   try {
@@ -16,38 +22,56 @@ export async function POST(req: Request) {
     // 1. Check if user already exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      return NextResponse.json({ error: 'An account with this email already exists.' }, { status: 409 });
+      if (existingUser.isActive) {
+        return NextResponse.json({ error: 'An account with this email already exists and is active. Please login.' }, { status: 409 });
+      }
+      // If inactive, we might allow re-registration or just return the existing code, 
+      // but for now let's blocking for simplicity or assume they need to upload proof.
+      return NextResponse.json({ error: 'An application with this email already exists. Please upload your proof of payment.' }, { status: 409 });
     }
 
-    // 2. Generate a secure placeholder password
-    // This will be returned to the client ONE TIME for auto-login
-    const tempPassword = Math.random().toString(36).slice(-8) + "A1!";
-    const hashedPassword = await hash(tempPassword, 10);
+    // 2. Generate Registration Code
+    let registrationCode = generateRegistrationCode();
+    // Ensure uniqueness (simple check)
+    let isUnique = false;
+    let attempts = 0;
+    while (!isUnique && attempts < 5) {
+      const check = await prisma.student.findUnique({ where: { registrationCode } });
+      if (!check) isUnique = true;
+      else {
+        registrationCode = generateRegistrationCode();
+        attempts++;
+      }
+    }
 
-    // 3. TRANSACTION: Create User, Profile, and Fee
+    // 3. Create Inactive User (No Password yet)
+    // We set a dummy password hash because schema might require it, or just null if optional. 
+    // Schema says String?, so null is fine.
+
+    // TRANSACTION
     await prisma.$transaction(async (tx) => {
-      // A. Create User account
+      // A. Create User
       const user = await tx.user.create({
         data: {
           name,
           email,
-          password: hashedPassword,
           role: 'STUDENT',
-          isActive: false, // User is locked until payment is verified
+          isActive: false, // Inactive until approved
         }
       });
 
-      // B. Create linked Student profile
+      // B. Create Student with Code
       const student = await tx.student.create({
         data: {
           userId: user.id,
           phone: phone || null,
           enrollmentStatus: 'PROSPECT',
-          cohort: programme || 'General Intake'
+          cohort: programme || 'General Intake',
+          registrationCode: registrationCode
         }
       });
 
-      // C. Create the Registration Fee Invoice
+      // C. Create Registration Fee
       await tx.fee.create({
         data: {
           studentId: student.id,
@@ -63,22 +87,22 @@ export async function POST(req: Request) {
       timeout: 20000
     });
 
-    // 4. Send the invoice email (Async, don't block response)
-    // We catch errors here to prevent the registration from failing if email fails
+    // 4. Send Email
     try {
-      await sendRegistrationInvoiceEmail(email, name, tempPassword);
+      await sendApplicationReceivedEmail(email, name, registrationCode);
     } catch (emailError) {
       console.error("EMAIL_SEND_ERROR:", emailError);
     }
 
-    // 5. SUCCESS: Return success without exposing password
+    // 5. Success - Return Code
     return NextResponse.json({
       success: true,
-      message: 'Registration successful! Check your email for login credentials.'
+      message: 'Application initiated.',
+      registrationCode: registrationCode
     });
 
   } catch (error) {
     console.error("REGISTRATION_API_ERROR:", error);
-    return NextResponse.json({ error: 'Registration failed. Please check your connection and try again.' }, { status: 500 });
+    return NextResponse.json({ error: 'Registration failed. Please try again.' }, { status: 500 });
   }
 }
