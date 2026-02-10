@@ -98,7 +98,8 @@ export default function ApplicantDashboardClient() {
         <h1 className="text-3xl font-bold mb-2">Welcome to Aerojet, {data.name}!</h1>
         <p className="text-blue-100 opacity-90">
           {isProspect && "Complete your registration payment to unlock your full application."}
-          {isApplicant && "Your registration is approved. Complete your seat confirmation deposit to secure your place."}
+          {isApplicant && !data.application && "Your registration is approved. Please complete your application form."}
+          {isApplicant && data.application && "Application received. Complete your seat confirmation deposit to secure your place."}
         </p>
       </div>
 
@@ -115,14 +116,41 @@ export default function ApplicantDashboardClient() {
               <p className="text-sm text-muted-foreground mb-6">
                 This non-refundable fee activates your application and grants access to the admissions process.
               </p>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-white font-bold" onClick={() => router.push('/applicant/payment')}>
+              {/* Find the registration fee if it exists */}
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-white font-bold" onClick={() => {
+                const regFee = data.fees?.find((f: any) => f.description?.includes('Registration'));
+                if (regFee) {
+                  router.push(`/applicant/payment?feeId=${regFee.id}`);
+                } else {
+                  // If no fee, maybe go to a page that creates it or just generic payment (fallback)
+                  router.push('/applicant/payment');
+                }
+              }}>
                 View Invoice & Pay <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {isApplicant && (
+        {isApplicant && !data.application && (
+          <Card className="border-2 border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 relative">
+            <div className="absolute -top-3 left-6 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Next Step</div>
+            <CardHeader>
+              <CardTitle>Complete Application</CardTitle>
+              <CardDescription>Submit your details and documents.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <p className="text-sm text-muted-foreground mb-6">
+                Please fill out the application form and upload your qualifications to proceed.
+              </p>
+              <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-white font-bold" onClick={() => router.push('/applicant/application')}>
+                Start Application <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        )}
+
+        {isApplicant && data.application && (
           <Card className="border-2 border-blue-500/20 bg-blue-50/50 dark:bg-blue-950/20 relative">
             <div className="absolute -top-3 left-6 bg-blue-600 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-widest">Action Required</div>
             <CardHeader>
@@ -135,9 +163,34 @@ export default function ApplicantDashboardClient() {
                 <li className="flex items-center gap-3 text-sm"><CheckCircle className="w-5 h-5 text-green-500 shrink-0" /> Guaranteed placement</li>
                 <li className="flex items-center gap-3 text-sm"><CheckCircle className="w-5 h-5 text-green-500 shrink-0" /> Access to digital library</li>
               </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-white font-bold" onClick={() => router.push('/applicant/application')}>
-                Generate Invoice <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
+
+              {/* Check if Deposit Fee exists */}
+              {(() => {
+                const depositFee = data.fees?.find((f: any) => f.description?.includes('Deposit') || f.amount > 1000);
+                if (depositFee) {
+                  if (depositFee.status === 'PAID') {
+                    return (
+                      <div className="bg-green-100 p-4 rounded-lg text-green-800 font-bold text-center">
+                        <CheckCircle className="w-6 h-6 mx-auto mb-2" />
+                        Deposit Paid - Enrollment Confirmed!
+                      </div>
+                    );
+                  }
+                  return (
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-white font-bold" onClick={() => router.push(`/applicant/payment?feeId=${depositFee.id}`)}>
+                      Pay Deposit (GHS {depositFee.amount}) <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  );
+                } else {
+                  return (
+                    <div className="text-center p-4 bg-slate-100 rounded-lg text-slate-500 text-sm">
+                      <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+                      Generating Invoice...
+                    </div>
+                  );
+                }
+              })()}
+
             </CardContent>
           </Card>
         )}
