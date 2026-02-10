@@ -516,3 +516,26 @@ model Lesson {
   
   createdAt   DateTime @default(now())
 }
+
+// =========================================================
+// 8. EMAIL SIGNATURE SYSTEM
+// =========================================================
+
+model EmailSignature {
+  id          String   @id @default(cuid())
+  logoUrl     String?
+  name        String   @default("Your Name")
+  role        String   @default("Your Role")
+  phone       String   @default("+000 000 000 000")
+  email       String   @default("email@example.com")
+  website     String   @default("example.com")
+  address     String   @default("Address Line, City, Country")
+  services    String   @default("Service 1 • Service 2 • Service 3")
+  
+  // Design customization
+  primaryColor String  @default("#0A5C7A")
+  accentColor  String  @default("#C84B4B")
+  
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+}
