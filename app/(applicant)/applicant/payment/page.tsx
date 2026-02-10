@@ -164,28 +164,33 @@ export default function PaymentPage() {
                         <span className="text-3xl font-black text-foreground">GHS 350.00</span>
                     </div>
 
-                    {/* Payment Instructions */}
-                    <div className="space-y-3">
-                        <h4 className="font-semibold text-foreground flex items-center gap-2">
-                            <Info className="w-4 h-4" />
+                    {/* Payment Instructions - High Visibility */}
+                    <div className="bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900 rounded-xl p-6 space-y-4">
+                        <h4 className="font-bold text-blue-900 dark:text-blue-100 flex items-center gap-2 text-lg">
+                            <Info className="w-5 h-5" />
                             Bank Transfer Details
                         </h4>
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                            <div>
-                                <span className="text-muted-foreground block">Bank Name</span>
-                                <span className="font-semibold">FNB Bank</span>
+                        <div className="grid gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="p-3 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800/50">
+                                    <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider block mb-1">Bank Name</span>
+                                    <span className="font-bold text-lg text-slate-800 dark:text-slate-100">FNB Bank</span>
+                                </div>
+                                <div className="p-3 bg-white dark:bg-slate-900 rounded-lg shadow-sm border border-blue-100 dark:border-blue-800/50">
+                                    <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider block mb-1">Branch Code</span>
+                                    <span className="font-bold text-lg text-slate-800 dark:text-slate-100">330102</span>
+                                </div>
                             </div>
-                            <div>
-                                <span className="text-muted-foreground block">Account Number</span>
-                                <span className="font-semibold font-mono">1020003980687</span>
+
+                            <div className="p-4 bg-white dark:bg-slate-900 rounded-lg shadow-sm border-2 border-blue-200 dark:border-blue-800 relative overflow-hidden">
+                                <div className="absolute top-0 right-0 bg-blue-200 text-blue-800 text-[10px] font-bold px-2 py-1 rounded-bl-lg">ACCOUNT NUMBER</div>
+                                <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider block mb-1">FNB Account No.</span>
+                                <span className="font-mono font-black text-2xl md:text-3xl text-slate-900 dark:text-white tracking-widest">1020003980687</span>
                             </div>
-                            <div>
-                                <span className="text-muted-foreground block">Branch Code</span>
-                                <span className="font-semibold">330102</span>
-                            </div>
-                            <div>
-                                <span className="text-muted-foreground block">Reference</span>
-                                <span className="font-semibold text-xs">{user?.email}</span>
+
+                            <div className="p-3 bg-blue-100/50 dark:bg-blue-900/20 rounded-lg border border-dashed border-blue-300 dark:border-blue-700">
+                                <span className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wider block mb-1">Payment Reference (Important)</span>
+                                <span className="font-mono font-bold text-base text-blue-900 dark:text-blue-100 break-all">{user?.email}</span>
                             </div>
                         </div>
                     </div>
@@ -193,24 +198,25 @@ export default function PaymentPage() {
                     {/* Upload Section */}
                     {!isPaid && (
                         <>
-                            <hr className="border-border" />
-                            <div className="space-y-4">
+                            <div className="mt-8 space-y-4">
                                 <div>
-                                    <h4 className="font-semibold text-foreground mb-1">Upload Proof of Payment</h4>
+                                    <h4 className="font-semibold text-foreground mb-1 text-lg">Upload Proof of Payment</h4>
                                     <p className="text-sm text-muted-foreground">
-                                        After making your payment, upload a clear image or PDF of your receipt/transaction confirmation.
+                                        Please upload a clear image or PDF of your transaction receipt.
                                     </p>
                                 </div>
 
                                 <div className="flex flex-col gap-3">
-                                    <label htmlFor="file-upload" className="cursor-pointer">
-                                        <div className="border-2 border-dashed border-border hover:border-primary transition-colors rounded-lg p-8 text-center">
-                                            <Upload className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                                            <div className="text-sm">
-                                                <span className="font-semibold text-primary">Click to upload</span>
-                                                <span className="text-muted-foreground"> or drag and drop</span>
+                                    <label htmlFor="file-upload" className="cursor-pointer group">
+                                        <div className="border-2 border-dashed border-slate-300 hover:border-blue-500 hover:bg-blue-50/50 transition-all rounded-xl p-8 text-center group-hover:scale-[1.01] duration-200">
+                                            <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                                <Upload className="w-8 h-8" />
                                             </div>
-                                            <p className="text-xs text-muted-foreground mt-1">
+                                            <div className="text-base font-medium text-slate-700">
+                                                <span className="text-blue-600 font-bold">Click to upload proof</span>
+                                                <span className="text-slate-500"> or drag and drop</span>
+                                            </div>
+                                            <p className="text-xs text-slate-400 mt-2">
                                                 PNG, JPG or PDF (max. 5MB)
                                             </p>
                                         </div>
@@ -225,17 +231,19 @@ export default function PaymentPage() {
                                     </label>
 
                                     {uploading && (
-                                        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+                                        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground py-2">
                                             <Loader2 className="w-4 h-4 animate-spin" />
-                                            Uploading...
+                                            Uploading payment proof...
                                         </div>
                                     )}
 
                                     {isPending && (
-                                        <p className="text-sm text-center text-muted-foreground">
-                                            <FileText className="w-4 h-4 inline mr-1" />
-                                            Proof of payment submitted and awaiting review
-                                        </p>
+                                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 flex items-center gap-3">
+                                            <Clock className="w-5 h-5 text-yellow-600" />
+                                            <div className="text-sm text-yellow-800">
+                                                <strong>Proof submitted!</strong> Our team is currently reviewing your payment.
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -244,8 +252,12 @@ export default function PaymentPage() {
 
                     {/* Action Button */}
                     {isPaid && (
-                        <Button onClick={() => router.push('/applicant/dashboard')} className="w-full" size="lg">
-                            Continue to Dashboard
+                        <Button
+                            onClick={() => router.push('/applicant/dashboard')}
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold h-12 text-lg shadow-lg shadow-blue-900/20"
+                            size="lg"
+                        >
+                            Continue to Dashboard <CheckCircle2 className="ml-2 w-5 h-5" />
                         </Button>
                     )}
                 </CardContent>
