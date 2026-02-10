@@ -5,7 +5,8 @@ import { redirect, useRouter } from 'next/navigation';
 import { useIdleTimer } from 'react-idle-timer';
 import { toast } from 'sonner';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import PortalHeader from '@/app/components/portal-new/PortalHeader';
+// ✅ UPDATED IMPORT
+import PortalHeader from '@/app/components/portal/PortalHeader';
 import StaffSidebar from '@/app/components/staff/StaffSidebar'; 
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
@@ -42,16 +43,10 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
 
   return (
     <SidebarProvider defaultOpen={true}>
-      {/* Change h-screen to h-full/min-h-screen to allow zoom adaptation */}
       <div className="flex w-full min-h-screen bg-muted/20">
-        
-          {/* Sidebar Container */}
-          <div className="shrink-0 sticky top-0 h-screen overflow-hidden">
-             <StaffSidebar user={user} />
-          </div>
+          <StaffSidebar user={user} />
           
-          {/* Content Container */}
-          <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 flex flex-col min-w-0 transition-all duration-300 ease-in-out">
             <header className="flex items-center gap-2 px-4 border-b h-16 shrink-0 bg-background sticky top-0 z-50 shadow-sm w-full">
                 <SidebarTrigger className="lg:hidden -ml-1" />
                 <div className="flex-1">

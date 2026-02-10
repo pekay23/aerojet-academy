@@ -26,7 +26,8 @@ export default function AdmissionsProcess() {
   ];
 
   return (
-    <section className="py-24 bg-white">
+    <section className="py-24 bg-blue-50/30 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-linear-to-l from-blue-50 to-transparent opacity-50 pointer-events-none" />
       <div className="container mx-auto px-6">
         <div className="text-center mb-20">
           <h2 className="text-3xl md:text-5xl font-black text-aerojet-blue uppercase tracking-tight mb-4">

@@ -77,16 +77,16 @@ export default function TermsPage() {
             <div className="mt-16 pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
                 <div>
                     <p className="font-black text-aerojet-blue uppercase text-sm">Have Questions?</p>
-                    <p className="text-xs text-slate-500">Our admissions team is available to clarify these terms.</p>
+                    <p className="text-xs text-slate-500">Send us an enquiry.</p>
                 </div>
-                <div className="flex gap-4">
-                    <Link href="/contact" className="text-aerojet-sky font-bold text-xs uppercase tracking-widest hover:underline">
-                        Contact Us
-                    </Link>
-                    <Link href="/register" className="bg-aerojet-sky text-white px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-aerojet-blue transition-all shadow-md">
+                <div className="flex items-center gap-6"> 
+                <Link href="/contact" className="text-[#4c9ded] font-bold text-xs uppercase tracking-widest hover:underline">
+                    Contact Us
+                </Link>
+                <Link href="/register" className="bg-aerojet-sky text-white px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-aerojet-blue transition-all shadow-md">
                         Start Registration
-                    </Link>
-                </div>
+                </Link>
+            </div>
             </div>
 
           </div>

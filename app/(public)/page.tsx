@@ -1,15 +1,16 @@
 import { Metadata } from 'next';
-import Navbar from "@/app/components/marketing/Navbar";
+import Link from 'next/link';
+
+// Components
 import HeroSlider from "@/app/components/marketing/HeroSlider";
 import Credibility from "@/app/components/marketing/Credibility";
 import WhoWeAre from "@/app/components/marketing/WhoWeAre";
-import ProgramsSnapshot from "@/app/components/marketing/ProgramsSnapshot";
-import AdmissionsProcess from "@/app/components/marketing/AdmissionsProcess";
+import ProgrammeTabs from "@/app/components/marketing/ProgrammeTabs"; 
 import PortalHighlights from "@/app/components/marketing/PortalHighlights";
 import NewsroomTeaser from "@/app/components/marketing/NewsroomTeaser";
 import HomeContact from "@/app/components/marketing/HomeContact";
-import Footer from "@/app/components/marketing/Footer";
 import Reveal from "@/app/components/marketing/Reveal";
+import AdmissionsProcess from "@/app/components/marketing/AdmissionsProcess"; // ✅ RESTORED IMPORT
 
 export const metadata: Metadata = {
   // Title is set by default/template in layout.tsx
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main className="min-h-screen flex flex-col bg-white">
-         
+      
       <div className="grow">
         <HeroSlider />
         
@@ -31,9 +32,10 @@ export default function Home() {
         </Reveal>
         
         <Reveal>
-          <ProgramsSnapshot />
+          <ProgrammeTabs />
         </Reveal>
         
+        {/* ✅ RESTORED AdmissionsProcess */}
         <Reveal>
           <AdmissionsProcess />
         </Reveal>
@@ -50,8 +52,6 @@ export default function Home() {
           <HomeContact />
         </Reveal>
       </div>
-
     </main>
   );
 }
-

@@ -5,8 +5,9 @@ import { redirect, useRouter } from 'next/navigation';
 import { useIdleTimer } from 'react-idle-timer';
 import { toast } from 'sonner';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
-import PortalHeader from '@/app/components/portal-new/PortalHeader';
-import ApplicantSidebar from '@/app/components/portal-new/ApplicantSidebar';
+// ✅ UPDATED IMPORTS
+import PortalHeader from '@/app/components/portal/PortalHeader';
+import ApplicantSidebar from '@/app/components/portal/ApplicantSidebar';
 
 export default function ApplicantLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -24,15 +25,12 @@ export default function ApplicantLayout({ children }: { children: React.ReactNod
 
   const user = session?.user as any;
 
-  // 🔒 SECURITY: Route Protection
-  
-  // 1. If Staff/Admin, go to Staff Portal
+  // Security Checks
   if (['ADMIN', 'STAFF', 'INSTRUCTOR'].includes(user?.role)) {
     router.replace('/staff/dashboard');
     return null;
   }
 
-  // 2. If Active Student (Enrolled), go to Student Portal
   if (user?.role === 'STUDENT' && (user?.isActive || user?.enrollmentStatus === 'ENROLLED')) {
     router.replace('/student/dashboard');
     return null;
@@ -42,7 +40,7 @@ export default function ApplicantLayout({ children }: { children: React.ReactNod
     <SidebarProvider defaultOpen={true}>
       <ApplicantSidebar user={user} />
       <SidebarInset>
-        <div className="flex items-center gap-2 px-4 border-b h-16 shrink-0 bg-card">
+        <div className="flex items-center gap-2 px-4 border-b h-16 shrink-0 bg-background sticky top-0 z-10 shadow-sm">
             <SidebarTrigger className="-ml-1" />
             <div className="flex-1"><PortalHeader onMenuClick={() => {}} title="Applicant Portal" /></div>
         </div>

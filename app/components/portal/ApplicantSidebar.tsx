@@ -38,11 +38,11 @@ const accountMenuItems = [
 ];
 
 // CHANGED TO DEFAULT EXPORT 👇
-export default function ApplicantSidebar() {
+export default function ApplicantSidebar({ user }: { user: any }) {
   const pathname = usePathname();
 
   return (
-    <Sidebar collapsible="icon" className="border-r border-white/10 bg-aerojet-navy text-white" variant="sidebar">
+    <Sidebar collapsible="icon" className="border-r border-border bg-white dark:bg-[#0f172a] dark:border-transparent static h-full w-62.5 data-[collapsed=true]:w-20 transition-all duration-300 z-30 flex flex-col">
       <SidebarHeader className="h-16.25 flex items-center justify-center border-b border-white/10">
         <div className="flex items-center gap-3 overflow-hidden group-data-[collapsible=icon]:justify-center w-full">
             <div className="w-8 h-8 bg-aerojet-sky rounded-lg flex items-center justify-center font-bold text-white shadow-lg shrink-0">

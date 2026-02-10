@@ -39,7 +39,7 @@ export default function StaffSidebar({ user }: { user: any }) {
   const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
   const pathname = usePathname();
   const { open } = useSidebar();
-  const { setTheme, theme } = useTheme(); // Use hook for dynamic text
+  const { setTheme, theme } = useTheme(); 
   const userRole = (user?.role || 'STUDENT').toUpperCase();
   const visibleItems = allMenuItems.filter(item => item.roles && item.roles.includes(userRole));
 
@@ -47,7 +47,7 @@ export default function StaffSidebar({ user }: { user: any }) {
     <>
       <Sidebar 
         collapsible="icon" 
-        className="border-r border-border bg-card static h-full w-62.5 data-[collapsed=true]:w-20 transition-all duration-300 z-30 flex flex-col"
+        className="border-r border-border bg-white dark:bg-[#0f172a] dark:border-transparent static h-full w-62.5 data-[collapsed=true]:w-20 transition-all duration-300 z-30 flex flex-col"
       >
         <SidebarHeader className="h-20 flex items-center justify-center border-b border-border mb-2 shrink-0">
           <Link href="/staff/dashboard" className="flex items-center justify-center w-full h-full p-2">
@@ -64,10 +64,10 @@ export default function StaffSidebar({ user }: { user: any }) {
 
         <SidebarContent className="flex-1 overflow-y-auto overflow-x-hidden">
             <div className="flex flex-col items-center justify-center py-6 px-2">
-                <div className="relative h-16 w-16 rounded-full overflow-hidden border border-border shadow-sm group-data-[collapsible=icon]:h-8 group-data-[collapsible=icon]:w-8 transition-all">
+                <div className="relative h-16 w-16 rounded-full overflow-hidden border border-border shadow-sm group-data-[collapsed=true]:h-8 group-data-[collapsed=true]:w-8 transition-all">
                     {user.image ? <Image src={user.image} alt="User" fill className="object-cover" /> : <div className="h-full w-full bg-muted flex items-center justify-center font-bold">{user.name?.[0]}</div>}
                 </div>
-                <div className="mt-3 text-center w-full group-data-[collapsible=icon]:hidden animate-in fade-in">
+                <div className="mt-3 text-center w-full group-data-[collapsed=true]:hidden animate-in fade-in">
                     <p className="font-bold text-sm truncate">{user.name}</p>
                     <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
                     <span className="text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-widest bg-primary/10 text-primary border border-primary/20 mt-2 inline-block">{userRole}</span>
@@ -92,27 +92,29 @@ export default function StaffSidebar({ user }: { user: any }) {
         </SidebarContent>
 
         <SidebarFooter className="border-t border-border p-4 shrink-0 mt-auto">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 group-data-[collapsed=true]:items-center">
                 
-                {/* Custom Theme Toggle with Text */}
+                {/* Theme Toggle */}
                 <SidebarMenuButton 
                     onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                    className="w-full justify-start group-data-[collapsible=icon]:justify-center"
+                    className="w-full justify-start group-data-[collapsed=true]:justify-center"
                     tooltip="Toggle Theme"
                 >
                     <div className="flex items-center justify-center w-5 h-5">
                         <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                         <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                     </div>
-                    <span className="group-data-[collapsible=icon]:hidden font-medium ml-2">
+                    <span className="group-data-[collapsed=true]:hidden font-medium ml-2">
                         {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                     </span>
                 </SidebarMenuButton>
 
-                <SidebarMenuButton onClick={() => setIsSignOutModalOpen(true)} className="text-destructive hover:bg-destructive/10 w-full justify-start group-data-[collapsible=icon]:justify-center" tooltip="Sign Out">
+                {/* Sign Out */}
+                <SidebarMenuButton onClick={() => setIsSignOutModalOpen(true)} className="text-destructive hover:bg-destructive/10 w-full justify-start group-data-[collapsed=true]:justify-center" tooltip="Sign Out">
                     <LogOut className="w-5 h-5" />
-                    <span className="group-data-[collapsible=icon]:hidden font-medium ml-2">Sign Out</span>
+                    <span className="group-data-[collapsed=true]:hidden font-medium ml-2">Sign Out</span>
                 </SidebarMenuButton>
+
             </div>
         </SidebarFooter>
       </Sidebar>

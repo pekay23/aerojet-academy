@@ -4,29 +4,45 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react"; 
-import { Wrench } from 'lucide-react';
+import { Wrench, Menu, X, ChevronDown } from 'lucide-react';
 import { usePathname } from "next/navigation";
 
+// ✅ UPDATED SITEMAP STRUCTURE WITH GROUPING
 const navLinks = {
-  courses: [
-    { title: "EASA Part-66 (Full-Time)", href: "/courses/easa-full-time" },
-    { title: "EASA Part-66 (Modular)", href: "/courses/easa-modular" },
-    { title: "Examination-Only", href: "/courses/examination-only" },
-    { title: "Revision Support", href: "/courses/revision-support" },
-    { title: "Module List (M1–M17)", href: "/courses/modules" },
-    { title: "Cabin Crew (Soon)", href: "/courses/cabin-crew" },
-    { title: "Pilot Training (Soon)", href: "/courses/pilot-training" },
-    { title: "Exam Schedule (2026/27)", href: "/courses/exam-schedule" }
-  ],
+  // Courses are now structured with a nested group
+  courses: {
+    engineering: [
+        { title: "EASA Part-66 B1 (Overview)", href: "/courses/easa-full-time" },
+        { title: "B2 Add-On (Top-Up)", href: "/courses/cabin-crew" }, 
+        { title: "Modular Programme", href: "/courses/easa-modular" },
+        { title: "Examination-Only", href: "/courses/examination-only" },
+        { title: "Revision Support", href: "/courses/revision-support" },
+        { title: "Module Requirements", href: "/courses/modules" },
+    ],
+    other: [
+        { title: "Cabin Crew Training (Coming Soon)", href: "#" },
+        { title: "Pilot Training (Coming Soon)", href: "#" }
+    ]
+  },
   admissions: [
-    { title: "How to Apply", href: "/admissions/how-to-apply" },
+    { title: "How to Enrol", href: "/admissions/how-to-apply" },
     { title: "Entry Requirements", href: "/admissions/entry-requirements" },
-    { title: "Fees & Payment Milestones", href: "/admissions/fees" },
+    { title: "Fees & Payment Rules", href: "/admissions/fees" },
+    { title: "FAQ", href: "/faq" }, 
+    { title: "Application Terms", href: "/legal/terms" },
   ],
+  about: [
+    { title: "About Aerojet Academy", href: "/about" },
+    { title: "Accra MRO Project", href: "/about/accra-mro" },
+  ]
 };
 
-function MobileAccordion({ title, links, onLinkClick }: { title: string, links: { title: string, href: string }[], onLinkClick: () => void }) {
+// ... (MobileAccordion updated to handle nested structure below) ...
+
+function MobileAccordion({ title, links, onLinkClick }: { title: string, links: any, onLinkClick: () => void }) {
   const [isOpen, setIsOpen] = useState(false);
+  const isGrouped = !Array.isArray(links); // Check if it's the complex courses object
+
   return (
     <div className="border-b border-gray-100 py-2">
       <button onClick={() => setIsOpen(!isOpen)} className="flex justify-between items-center w-full text-left py-2 text-aerojet-blue">
@@ -35,11 +51,22 @@ function MobileAccordion({ title, links, onLinkClick }: { title: string, links: 
       </button>
       <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-125 opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
         <div className="flex flex-col space-y-3 pl-4 border-l-2 border-gray-100 ml-1">
-          {links.map(link => (
-            <Link key={link.title} href={link.href} onClick={onLinkClick} className="block text-sm text-gray-600 hover:text-aerojet-sky font-medium py-1">
-              {link.title}
-            </Link>
-          ))}
+          {isGrouped ? (
+            <>
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-2">Aircraft Engineering</div>
+                {links.engineering.map((link: any) => (
+                    <Link key={link.title} href={link.href} onClick={onLinkClick} className="block text-sm text-gray-600 hover:text-aerojet-sky font-medium py-1">{link.title}</Link>
+                ))}
+                <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-4">Other Programs</div>
+                {links.other.map((link: any) => (
+                    <Link key={link.title} href={link.href} onClick={onLinkClick} className="block text-sm text-gray-400 font-medium py-1 cursor-default">{link.title}</Link>
+                ))}
+            </>
+          ) : (
+            links.map((link: any) => (
+                <Link key={link.title} href={link.href} onClick={onLinkClick} className="block text-sm text-gray-600 hover:text-aerojet-sky font-medium py-1">{link.title}</Link>
+            ))
+          )}
         </div>
       </div>
     </div>
@@ -50,13 +77,15 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
   const { data: session, status } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  
   const pathname = usePathname();
 
   const lightThemePaths = [
     '/admissions/fees', 
     '/legal/terms',
+    '/legal/privacy',
+    '/faq',
     '/register',
+    '/courses/modules', 
   ];
 
   const isExactLight = lightThemePaths.some(path => pathname === path);
@@ -77,14 +106,11 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
 
   const displayAsLight = scrolled || isLightPage; 
   const headerIsLight = displayAsLight || mobileMenuOpen;
-
+  
   const userRole = (session?.user as any)?.role;
-  const isStaffOrAdmin = userRole === 'ADMIN' || userRole === 'STAFF';
-  const isInstructor = userRole === 'INSTRUCTOR';
-
+  const isStaffOrAdmin = ['ADMIN', 'STAFF', 'INSTRUCTOR'].includes(userRole);
   let dashboardHref = '/student/dashboard'; 
   if (isStaffOrAdmin) dashboardHref = '/staff/dashboard';
-  if (isInstructor) dashboardHref = '/staff/materials';
 
   return (
     <>
@@ -97,15 +123,29 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
             />
           </Link>
           <nav className={`hidden md:flex space-x-8 text-sm font-bold items-center transition-colors duration-300 ${displayAsLight ? "text-aerojet-blue" : "text-white"}`}>
-            <div className="group relative">
+            
+            {/* COURSES DROPDOWN (Grouped) */}
+            <div className="group relative h-full flex items-center">
                 <Link href="/courses" className="hover:text-aerojet-sky transition flex items-center h-full py-2">Courses <span className="ml-1 text-xs">▼</span></Link>
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
-                    <div className="bg-white rounded-md shadow-lg w-64 p-2 border border-gray-100">
-                        {navLinks.courses.map(link => (<Link key={link.title} href={link.href} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-aerojet-blue rounded-md">{link.title}</Link>))}
+                    <div className="bg-white rounded-md shadow-lg w-72 p-4 border border-gray-100 text-left">
+                        
+                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 border-b pb-1">Aircraft Engineering</div>
+                        {navLinks.courses.engineering.map(link => (
+                            <Link key={link.title} href={link.href} className="block px-2 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-aerojet-blue rounded-md">{link.title}</Link>
+                        ))}
+                        
+                        <div className="text-xs font-bold text-gray-400 uppercase tracking-wider mt-4 mb-2 border-b pb-1">Other Programs</div>
+                        {navLinks.courses.other.map(link => (
+                            <span key={link.title} className="block px-2 py-2 text-sm text-gray-400 cursor-not-allowed">{link.title}</span>
+                        ))}
+
                     </div>
                 </div>
             </div>
-            <div className="group relative">
+
+            {/* ADMISSIONS DROPDOWN */}
+            <div className="group relative h-full flex items-center">
                 <Link href="/admissions" className="hover:text-aerojet-sky transition flex items-center h-full py-2">Admissions <span className="ml-1 text-xs">▼</span></Link>
                 <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:pointer-events-auto">
                     <div className="bg-white rounded-md shadow-lg w-64 p-2 border border-gray-100">
@@ -113,6 +153,7 @@ export default function Navbar({ theme = 'dark' }: { theme?: 'light' | 'dark' })
                     </div>
                 </div>
             </div>
+
             <Link href="/about" className="hover:text-aerojet-sky transition">About Us</Link>
             <Link href="/news" className="hover:text-aerojet-sky transition">News</Link>
           </nav>

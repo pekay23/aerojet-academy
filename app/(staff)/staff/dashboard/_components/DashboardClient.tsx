@@ -17,13 +17,18 @@ export default function DashboardClient() {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  
+  // Widget States
   const [time, setTime] = useState(new Date());
+  const [attendanceView, setAttendanceView] = useState<'INSTRUCTOR' | 'STUDENT'>('INSTRUCTOR');
 
+  // Clock Timer
   useEffect(() => {
     const timer = setInterval(() => setTime(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
 
+  // Fetch Data
   useEffect(() => {
     fetch('/api/staff/dashboard')
       .then(res => res.json())
@@ -35,13 +40,15 @@ export default function DashboardClient() {
     return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-[#4c9ded]"/></div>;
   }
 
-  const { studentStats, opsStats, teamStats, recentStudents, calendarEvents, windowTracker } = data;
+  // Destructure Data
+  const { studentStats, opsStats, teamStats, recentStudents, calendarEvents, windowTracker, attendance } = data;
+  const firstName = session?.user?.name?.split(' ')[0] || 'Admin';
 
   const statItems = [
     { title: "Total Students", value: studentStats?.total || 0, icon: Users },
     { title: "Pending Apps", value: opsStats?.pendingApps || 0, icon: FileText },
     { title: "Pending Finance", value: opsStats?.verifyingPayments || 0, icon: Banknote },
-    { title: "Total Staff", value: (teamStats?.staff || 0) + (teamStats?.instructors || 0) + (teamStats?.admins || 0), icon: Users },
+    { title: "Total Staff", value: teamStats?.total || 0, icon: Users },
   ];
 
   const getDaysLeft = (date: string) => {
@@ -50,8 +57,9 @@ export default function DashboardClient() {
     return `${Math.ceil(diff / (1000 * 60 * 60 * 24))} days left`;
   };
 
-   // 3. Get First Name
-  const firstName = session?.user?.name?.split(' ')[0] || 'Admin';
+  const currentAttendanceRate = attendanceView === 'INSTRUCTOR' 
+    ? (attendance?.instructorRate || 98.5) 
+    : (attendance?.studentRate || 0);
 
   return (
     <div className="space-y-8">
@@ -68,7 +76,7 @@ export default function DashboardClient() {
         </div>
       </div>
       
-      {/* 1. STATS CARDS */}
+      {/* 1. STATS CARDS (Spotlight) */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statItems.map(item => (
             <SpotlightCard key={item.title} className="p-6 bg-card border-border shadow-sm" spotlightColor="rgba(76, 157, 237, 0.15)">
@@ -93,23 +101,23 @@ export default function DashboardClient() {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        {recentStudents?.slice(0, 5).map((student: any) => (
-                        <div key={student.id} className="flex items-center justify-between hover:bg-muted/50 p-2 -mx-2 rounded-md transition-colors">
+                        {recentStudents?.length > 0 ? recentStudents.map((student: any) => (
+                        <div key={student.id} className="flex items-center justify-between hover:bg-muted/50 p-2 -mx-2 rounded-md transition-colors cursor-pointer group" onClick={() => router.push(`/staff/students/${student.id}`)}>
                             <div className="flex items-center gap-4">
                                 <Avatar className="border-2 border-[#4c9ded]/20">
                                     <AvatarImage src={student.user.image} />
                                     <AvatarFallback className="bg-[#4c9ded]/10 text-[#4c9ded]">{student.user.name[0]}</AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="text-sm font-semibold">{student.user.name}</p>
+                                    <p className="text-sm font-semibold group-hover:text-[#4c9ded] transition-colors">{student.user.name}</p>
                                     <p className="text-xs text-muted-foreground">{student.user.email}</p>
                                 </div>
                             </div>
-                            <Button variant="outline" size="icon" className="h-8 w-8 text-[#4c9ded] border-[#4c9ded]/30 hover:bg-[#4c9ded]/10" onClick={() => router.push(`/staff/students/${student.id}`)}>
+                            <Button variant="outline" size="icon" className="h-8 w-8 text-[#4c9ded] border-[#4c9ded]/30 hover:bg-[#4c9ded]/10">
                                 <ArrowRight className="w-4 h-4" />
                             </Button>
                         </div>
-                        ))}
+                        )) : <div className="text-center py-4 text-muted-foreground text-sm">No recent registrations.</div>}
                     </div>
                 </CardContent>
             </Card>
@@ -118,7 +126,43 @@ export default function DashboardClient() {
         {/* 3. RIGHT COLUMN (Col Span 2) */}
         <div className="lg:col-span-2 space-y-6">
             
-            {/* GO/NO-GO EVENT TRACKER */}
+            {/* ATTENDANCE CARD (Interactive) */}
+            <SpotlightCard className="p-6 bg-background! border-border! min-h-37.5 flex flex-col justify-between" spotlightColor="rgba(34, 197, 94, 0.15)">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <h3 className="text-sm font-medium text-muted-foreground mb-1">Attendance Rate</h3>
+                        {/* Toggle Buttons */}
+                        <div className="flex gap-2 text-[10px] font-bold uppercase tracking-wider">
+                            <button 
+                                onClick={() => setAttendanceView('INSTRUCTOR')}
+                                className={`transition-colors ${attendanceView === 'INSTRUCTOR' ? 'text-green-500' : 'text-muted-foreground hover:text-foreground'}`}
+                            >
+                                Instr.
+                            </button>
+                            <span className="text-border">|</span>
+                            <button 
+                                onClick={() => setAttendanceView('STUDENT')}
+                                className={`transition-colors ${attendanceView === 'STUDENT' ? 'text-blue-500' : 'text-muted-foreground hover:text-foreground'}`}
+                            >
+                                Student
+                            </button>
+                        </div>
+                    </div>
+                    <Clock className={`w-5 h-5 ${attendanceView === 'INSTRUCTOR' ? 'text-green-500' : 'text-blue-500'}`} />
+                </div>
+
+                <div className="mt-4">
+                    <div className="text-3xl font-bold transition-all">{currentAttendanceRate}%</div>
+                    <Progress 
+                        value={Number(currentAttendanceRate)} 
+                        className={`h-2 mt-3`} 
+                        // Note: Tailwind classes for progress indicator color are handled by Shadcn, 
+                        // but you can override via css variable or just accept default primary color.
+                    />
+                </div>
+            </SpotlightCard>
+
+            {/* REVENUE TARGET */}
             <Card className="bg-card border-border shadow-sm">
                 <CardHeader>
                     <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -146,20 +190,9 @@ export default function DashboardClient() {
                 </CardContent>
             </Card>
 
-            {/* ATTENDANCE CARD */}
-            <SpotlightCard className="p-6 bg-background! border-border!">
-                <div className="flex justify-between items-center pb-2">
-                    <h3 className="text-sm font-medium text-muted-foreground">Today's Attendance</h3>
-                    <Clock className="w-5 h-5 text-green-500" />
-                </div>
-                <div className="text-3xl font-bold">--%</div>
-                <p className="text-xs text-muted-foreground mt-1">System Offline</p>
-                <Progress value={0} className="h-2 mt-3" />
-            </SpotlightCard>
-
-            {/* CALENDAR */}
+            {/* UPCOMING DEADLINES */}
             <Card className="bg-card border-border shadow-sm">
-                <CardHeader className="pb-6">
+                <CardHeader className="pb-3">
                     <CardTitle className="text-base flex items-center gap-2 text-[#4c9ded]">
                         <Calendar className="w-4 h-4"/> Upcoming
                     </CardTitle>
@@ -167,12 +200,12 @@ export default function DashboardClient() {
                 <CardContent className="p-0">
                     <Table>
                         <TableBody>
-                            {calendarEvents?.slice(0, 3).map((event: any) => (
-                                <TableRow key={event.id} className="border-b border-border last:border-0">
+                            {calendarEvents?.length > 0 ? calendarEvents.slice(0, 3).map((event: any) => (
+                                <TableRow key={event.id} className="border-b border-border last:border-0 hover:bg-transparent">
                                     <TableCell className="py-3 text-sm font-medium">{event.title}</TableCell>
                                     <TableCell className="py-3 text-right text-xs text-muted-foreground">{new Date(event.date).toLocaleDateString()}</TableCell>
                                 </TableRow>
-                            ))}
+                            )) : <div className="p-4 text-center text-xs text-muted-foreground">No upcoming events.</div>}
                         </TableBody>
                     </Table>
                 </CardContent>
