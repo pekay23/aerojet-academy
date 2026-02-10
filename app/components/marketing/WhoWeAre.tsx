@@ -38,7 +38,7 @@ export default function WhoWeAre() {
           </div>
           <div className="relative h-[500px] bg-slate-100 rounded-3xl overflow-hidden shadow-2xl skew-x-1 hover:skew-x-0 transition-transform duration-700">
             <Image
-              src="/al16.jpeg"
+              src="/al4.jpeg"
               alt="Aviation Students"
               fill
               className="object-cover"
