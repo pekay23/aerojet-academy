@@ -135,9 +135,34 @@ export default function ApplicantDashboardClient() {
                 <li className="flex items-center gap-3 text-sm"><CheckCircle className="w-5 h-5 text-green-500 shrink-0" /> Guaranteed placement</li>
                 <li className="flex items-center gap-3 text-sm"><CheckCircle className="w-5 h-5 text-green-500 shrink-0" /> Access to digital library</li>
               </ul>
-              <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-white font-bold" onClick={() => router.push('/applicant/application')}>
-                Generate Invoice <ArrowRight className="ml-2 w-4 h-4" />
-              </Button>
+
+              {/* Check if Deposit Fee exists */}
+              {(() => {
+                const depositFee = data.fees?.find((f: any) => f.description?.includes('Deposit') || f.amount > 1000);
+                if (depositFee) {
+                  if (depositFee.status === 'PAID') {
+                    return (
+                      <div className="bg-green-100 p-4 rounded-lg text-green-800 font-bold text-center">
+                        <CheckCircle className="w-6 h-6 mx-auto mb-2" />
+                        Deposit Paid - Enrollment Confirmed!
+                      </div>
+                    );
+                  }
+                  return (
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 h-12 text-white font-bold" onClick={() => router.push(`/applicant/payment?feeId=${depositFee.id}`)}>
+                      Pay Deposit (GHS {depositFee.amount}) <ArrowRight className="ml-2 w-4 h-4" />
+                    </Button>
+                  );
+                } else {
+                  return (
+                    <div className="text-center p-4 bg-slate-100 rounded-lg text-slate-500 text-sm">
+                      <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
+                      Generating Invoice...
+                    </div>
+                  );
+                }
+              })()}
+
             </CardContent>
           </Card>
         )}
