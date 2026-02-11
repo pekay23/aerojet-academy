@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut } from "next-auth/react";
-import { toast } from 'sonner';
 import { LayoutDashboard, BookOpen, GraduationCap, Users, BarChart, CreditCard, Wallet, LifeBuoy, UserCircle, LogOut, Compass } from 'lucide-react';
 import { ThemeToggle } from '@/app/components/marketing/ThemeToggle';
 import ConfirmationModal from '@/components/modal/ConfirmationModal';
@@ -24,7 +23,14 @@ const studentMenu = [
   { title: "My Profile", href: "/student/profile", icon: UserCircle },
 ];
 
-export default function StudentSidebar({ user }: { user: any }) {
+interface SidebarUser {
+  name: string;
+  email: string;
+  image?: string;
+  enrollmentStatus?: string;
+}
+
+export default function StudentSidebar({ user }: { user: SidebarUser }) {
   const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);
   const pathname = usePathname();
   const { open } = useSidebar();

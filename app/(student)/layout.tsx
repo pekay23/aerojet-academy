@@ -1,14 +1,21 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { useSession, signOut } from 'next-auth/react';
+import React, { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { redirect, useRouter } from 'next/navigation';
-import { useIdleTimer } from 'react-idle-timer';
-import { toast } from 'sonner';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 // ✅ UPDATED IMPORTS: Point to 'portal', not 'portal-new'
 import PortalHeader from '@/app/components/portal/PortalHeader';
 import StudentSidebar from '@/app/components/portal/StudentSidebar';
+
+interface StudentUser {
+  name?: string | null;
+  email?: string | null;
+  image?: string | null;
+  role: string;
+  isActive: boolean;
+  enrollmentStatus?: string;
+}
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -17,45 +24,46 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
     onUnauthenticated() { redirect('/login'); },
   });
 
-  const [isChecking, setIsChecking] = useState(true);
+  const user = session?.user as unknown as StudentUser | undefined;
+  // Derived authorization state - no useState needed
+  // Check if user exists and meets criteria
+  const isAuthorized = user && 
+    user.role === 'STUDENT' && 
+    (user.isActive || user.enrollmentStatus === 'ENROLLED');
 
-  useIdleTimer({
-    onIdle: () => { toast.warning("Session Expired"); signOut({ callbackUrl: '/login' }); },
-    timeout: 1000 * 60 * 30,
-  });
+  const isLoading = status === 'loading';
 
   useEffect(() => {
-    if (status === 'loading') return;
+    if (isLoading || !user) return;
 
-    const user = session?.user as any;
-
-    if (user) {
-      if (user.role !== 'STUDENT') {
-        router.replace('/staff/dashboard');
-      } else if (!user.isActive && user.enrollmentStatus !== 'ENROLLED') {
-        // User is not active and not enrolled - redirect to applicant portal
-        router.replace('/applicant/dashboard');
-      } else {
-        setIsChecking(false);
-      }
+    if (!isAuthorized) {
+       // Handle unauthorized redirects
+       if (user.role !== 'STUDENT') {
+         router.replace('/staff/dashboard');
+       } else {
+         // Not active/enrolled -> Applicant
+         router.replace('/applicant/dashboard');
+       }
     }
-  }, [status, session, router]);
+  }, [isLoading, user, isAuthorized, router]);
 
-  if (status === 'loading' || isChecking) {
+  if (isLoading || !isAuthorized) {
     return <div className="flex h-screen items-center justify-center animate-pulse">Loading...</div>;
   }
 
-  const user = session?.user as any;
-
   return (
     <SidebarProvider defaultOpen={true}>
-      <StudentSidebar user={user} />
+      <StudentSidebar user={{
+          name: user?.name || 'Student',
+          email: user?.email || '',
+          image: user?.image || undefined
+      }} />
 
       <SidebarInset className="bg-background flex flex-col h-full">
         <div className="flex items-center gap-2 px-4 border-b border-border h-16 shrink-0 bg-background sticky top-0 z-10 shadow-sm">
           <SidebarTrigger className="-ml-1" />
           <div className="flex-1">
-            <PortalHeader onMenuClick={() => { }} title="Student Portal" />
+            <PortalHeader />
           </div>
         </div>
 

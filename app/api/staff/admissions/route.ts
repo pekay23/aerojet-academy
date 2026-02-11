@@ -5,9 +5,9 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
   const session = await getServerSession(authOptions);
-  if (!['ADMIN', 'STAFF'].includes((session?.user as any)?.role)) {
+  if (!['ADMIN', 'STAFF'].includes((session?.user as { role: string })?.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
@@ -51,7 +51,7 @@ export async function GET(req: Request) {
 // POST: Update Application Status
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!['ADMIN', 'STAFF'].includes((session?.user as any)?.role)) {
+  if (!['ADMIN', 'STAFF'].includes((session?.user as { role: string })?.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 

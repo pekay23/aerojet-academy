@@ -77,7 +77,7 @@ export default function CommunicationClient() {
             setSent(true);
             setSentCount(data.count);
             toast.success(`Sent to ${data.count} recipient(s)!`);
-        } catch (err: any) { toast.error(err.message || "Send failed"); }
+        } catch (err) { toast.error(err instanceof Error ? err.message : "Send failed"); }
         finally { setSending(false); }
     };
 

@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { sendPaymentConfirmationEmail } from '@/app/lib/mail';
+import { sendPaymentConfirmationEmail, sendPaymentReceiptEmail } from '@/app/lib/mail';
 import { hash } from 'bcryptjs';
 import { generateInstitutionalEmail } from '@/app/lib/utils'; // Import the helper
 
@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 export async function POST(req: Request) {
   const session = await getServerSession(authOptions);
 
-  if (!['ADMIN', 'STAFF'].includes((session?.user as any)?.role)) {
+  if (!['ADMIN', 'STAFF'].includes((session?.user as { role: string })?.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
 
     // 2. GENERATE INSTITUTIONAL EMAIL
     const personalEmail = fee.student.user.email!; // Save old email to send notification
-    let institutionalEmail = generateInstitutionalEmail(fee.student.user.name!);
+    const institutionalEmail = generateInstitutionalEmail(fee.student.user.name!);
 
     // Check uniqueness (if s.hughes exists, maybe append number? Skipping for now based on spec)
 
@@ -49,7 +49,20 @@ export async function POST(req: Request) {
         }
       });
 
-      // 5. Update Student Profile
+      // 5. SEND RECEIPT EMAIL
+      // We send to the *original* personal email because they might not have access to institutional yet, 
+      // OR we send to both/institutional if active. 
+      // The `sendPaymentConfirmationEmail` below sends credentials to personal email.
+      // Let's send receipt to personal email as well for records.
+      await sendPaymentReceiptEmail(
+         personalEmail, 
+         fee.student.user.name!, 
+         fee.amount.toNumber(), 
+         fee.description || 'Course Fee', 
+         fee.id
+      );
+
+      // 6. Update Student Profile
       await tx.student.update({
         where: { id: fee.studentId },
         data: {
@@ -57,7 +70,8 @@ export async function POST(req: Request) {
           institutionalEmail: institutionalEmail // Save copy here too
         }
       });
-    });
+      
+    }, { maxWait: 20000, timeout: 30000 });
 
     // 6. Send Email to PERSONAL address
     // "Your new Academy Email is X and password is Y"

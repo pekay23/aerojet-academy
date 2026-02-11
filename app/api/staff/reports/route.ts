@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 
 export async function GET(req: Request) {
     const session = await getServerSession(authOptions);
-    if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as any).role)) {
+    if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as { role: string }).role)) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
@@ -44,12 +44,11 @@ export async function GET(req: Request) {
         }
 
         if (type === 'students') {
-            const [total, active, byGender, byStatus, byProgramme, recent] = await Promise.all([
+            const [total, active, byGender, byStatus, recent] = await Promise.all([
                 prisma.user.count({ where: { role: 'STUDENT', isDeleted: false } }),
                 prisma.user.count({ where: { role: 'STUDENT', isActive: true, isDeleted: false } }),
                 prisma.student.groupBy({ by: ['gender'], _count: true }),
                 prisma.student.groupBy({ by: ['enrollmentStatus'], _count: true }),
-                prisma.student.groupBy({ by: ['programme'], _count: true }),
                 prisma.student.findMany({
                     take: 10,
                     orderBy: { createdAt: 'desc' },
@@ -60,9 +59,9 @@ export async function GET(req: Request) {
             return NextResponse.json({
                 type: 'students',
                 total, active,
-                byGender: byGender.map(g => ({ gender: g.gender, count: g._count })),
+                byGender: byGender.map(g => ({ gender: g.gender || 'Unspecified', count: g._count })),
                 byStatus: byStatus.map(g => ({ status: g.enrollmentStatus, count: g._count })),
-                byProgramme: byProgramme.map(g => ({ programme: g.programme, count: g._count })),
+                byProgramme: [], // 'programme' field logic removed as it does not correspond to schema
                 recent: recent.map(s => ({
                     name: s.user.name,
                     email: s.user.email,
@@ -74,12 +73,12 @@ export async function GET(req: Request) {
 
         if (type === 'exams') {
             const [totalResults, passResults, pools] = await Promise.all([
-                prisma.examResult.count(),
-                prisma.examResult.count({ where: { grade: { gte: 75 } } }),
+                prisma.assessment.count(),
+                prisma.assessment.count({ where: { isPassed: true } }),
                 prisma.examPool.findMany({
                     include: {
                         _count: { select: { memberships: true } },
-                        course: { select: { title: true, code: true } }
+                        event: { select: { name: true } }
                     },
                     orderBy: { examDate: 'desc' },
                     take: 10
@@ -93,10 +92,10 @@ export async function GET(req: Request) {
                 passRate: totalResults > 0 ? ((passResults / totalResults) * 100).toFixed(1) : 0,
                 recentPools: pools.map(p => ({
                     name: p.name,
-                    course: p.course?.title || p.course?.code,
+                    course: p.event.name, // Use event name as proxy for context
                     date: p.examDate,
                     seats: p._count.memberships,
-                    capacity: p.capacity
+                    capacity: p.maxCandidates
                 }))
             });
         }
@@ -116,7 +115,7 @@ export async function GET(req: Request) {
             ]);
 
             const present = records.filter(r => r.status === 'PRESENT').length;
-            const absent = records.filter(r => r.status === 'ABSENT').length;
+            const absent = records.filter(r => ['ABSENT_EXCUSED', 'ABSENT_UNEXCUSED'].includes(r.status)).length;
             const late = records.filter(r => r.status === 'LATE').length;
 
             return NextResponse.json({

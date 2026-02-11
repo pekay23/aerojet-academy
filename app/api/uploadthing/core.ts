@@ -20,7 +20,7 @@ export const ourFileRouter = {
     .middleware(async () => {
       const session = await getServerSession(authOptions);
       // STRICT CHECK: Only Admin/Staff can upload to this endpoint
-      if (!session || (session.user as any).role === 'STUDENT') throw new Error("Unauthorized");
+      if (!session || (session.user as { role: string }).role === 'STUDENT') throw new Error("Unauthorized");
       return { userId: session.user.id };
     })
     .onUploadComplete(async ({ file }) => {

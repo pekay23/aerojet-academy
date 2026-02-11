@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
-import { sendApplicationReceivedEmail } from '@/app/lib/mail';
+import { sendApplicationReceivedEmail, sendVerificationEmail } from '@/app/lib/mail';
 import { PrismaClient } from '@prisma/client';
-import { hash } from 'bcryptjs';
+import crypto from 'crypto';
 
 const prisma = new PrismaClient();
 
@@ -87,17 +87,32 @@ export async function POST(req: Request) {
       timeout: 20000
     });
 
-    // 4. Send Email
+    // 4. Generate Verification Token
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(new Date().getTime() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await prisma.verificationToken.create({
+      data: {
+        identifier: email,
+        token,
+        expires
+      }
+    });
+
+    // 5. Send Emails
     try {
+      // Send classic application received email (with code)
       await sendApplicationReceivedEmail(email, name, registrationCode);
+      // Send verification link
+      await sendVerificationEmail(email, name, token);
     } catch (emailError) {
       console.error("EMAIL_SEND_ERROR:", emailError);
     }
 
-    // 5. Success - Return Code
+    // 6. Success - Return Code
     return NextResponse.json({
       success: true,
-      message: 'Application initiated.',
+      message: 'Application initiated. Please check your email to verify.',
       registrationCode: registrationCode
     });
 

@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/app/lib/prisma';
 
-const prisma = new PrismaClient();
-
-export async function GET(req: Request) {
+export async function GET(_req: Request) {
     try {
         const session = await getServerSession(authOptions);
 
@@ -13,7 +11,7 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const userId = (session.user as any).id;
+        const userId = (session.user as { id: string }).id;
 
         const student = await prisma.student.findUnique({
             where: { userId },
@@ -33,7 +31,7 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'Student profile not found' }, { status: 404 });
         }
 
-        let cohort = student.cohort || 'Full-Time';
+        const cohort = student.cohort || 'Full-Time';
 
         return NextResponse.json({
             name: student.user.name,

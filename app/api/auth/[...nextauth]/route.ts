@@ -2,10 +2,8 @@ import NextAuth, { type NextAuthOptions, getServerSession } from "next-auth"; //
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import prisma from "@/app/lib/prisma";
 import { compare } from 'bcryptjs';
-
-const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
@@ -72,7 +70,7 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.sub = user.id;
-        token.role = (user as any).role;
+        token.role = (user as { role: string }).role;
         const dbUser = await prisma.user.findUnique({ where: { id: user.id }});
         token.lastPasswordChange = dbUser?.lastPasswordChange?.getTime() || null;
       }
@@ -110,7 +108,7 @@ export const authOptions: NextAuthOptions = {
       
       // Since getServerSession can't be used here reliably, check token passed in
       const session = await getServerSession(authOptions); // This should be okay here but can be tricky
-      if((session?.user as any)?.role === 'STUDENT'){
+      if((session?.user as { role: string })?.role === 'STUDENT'){
         return `${baseUrl}/portal/dashboard`;
       } else {
         return `${baseUrl}/staff/dashboard`;

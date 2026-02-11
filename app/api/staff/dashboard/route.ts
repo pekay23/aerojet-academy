@@ -5,12 +5,12 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
 
     // 1. Security Check
-    if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as any).role)) {
+    if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as { role: string }).role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
@@ -90,6 +90,7 @@ export async function GET(req: Request) {
       }),
 
       // 6. Upcoming System Events
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (prisma as any).systemEvent.findMany({
         where: { end: { gte: new Date() } },
         take: 5,
@@ -102,7 +103,7 @@ export async function GET(req: Request) {
     if (nextEvent) {
       let totalConfirmedSeats = 0;
       let totalRevenue = 0;
-      nextEvent.pools.forEach((pool: any) => {
+      nextEvent.pools.forEach((pool) => {
         const seats = pool.memberships.length;
         totalConfirmedSeats += seats;
         totalRevenue += seats * 300;
@@ -125,19 +126,19 @@ export async function GET(req: Request) {
 
     // --- Process Calendar Events ---
     const calendarEvents = [
-      ...upcomingPools.map((pool: any) => ({
+      ...upcomingPools.map((pool) => ({
         id: pool.id,
         title: `Pool: ${pool.name}`,
         date: pool.examDate,
         type: 'EXAM'
       })),
-      ...upcomingEvents.map((event: any) => ({
+      ...upcomingEvents.map((event) => ({
         id: event.id,
         title: `Deadline: ${event.name}`,
         date: event.paymentDeadline,
         type: 'DEADLINE'
       })),
-      ...systemEvents.map((event: any) => ({
+      ...systemEvents.map((event: { id: string; title: string; start: Date; type: string }) => ({
         id: event.id,
         title: event.title,
         date: event.start,
@@ -147,21 +148,18 @@ export async function GET(req: Request) {
 
     // --- Calculate Attendance Rate ---
     const totalRecs = attendanceRecords.length;
-    const presentRecs = attendanceRecords.filter((r: any) => r.status === 'PRESENT').length;
+    const presentRecs = attendanceRecords.filter((r) => r.status === 'PRESENT').length;
     const studentRate = totalRecs > 0 ? ((presentRecs / totalRecs) * 100).toFixed(1) : 0;
 
     // --- Calculate Instructor Attendance Rate ---
     // Count distinct instructors who recorded attendance in the last 30 days
-    const instructorRecorders = new Set(
-      attendanceRecords.map((r: any) => r.recordedBy).filter(Boolean)
-    );
     // Calculate working days in last 30 days (approx 22 weekdays)
     const workingDays = 22;
     const instructorCount = totalInstructors || 1;
     const expectedRecords = workingDays * instructorCount;
     // Distinct days instructors logged attendance
     const instructorDays = new Set(
-      attendanceRecords.map((r: any) => `${r.recordedBy}-${new Date(r.date).toDateString()}`)
+      attendanceRecords.map((r) => `${r.recordedBy}-${new Date(r.date).toDateString()}`)
     );
     const instructorRate = expectedRecords > 0
       ? Math.min(100, ((instructorDays.size / expectedRecords) * 100)).toFixed(1)

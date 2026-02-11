@@ -44,7 +44,7 @@ export default function TermsPage() {
             <section>
               <h3 className="text-xl font-black text-aerojet-blue uppercase tracking-tight mb-4">2. Enrollment & Seat Confirmation</h3>
               <ul className="list-disc pl-5 space-y-2 text-slate-700 leading-relaxed">
-                <li><strong className="text-slate-900">Full-Time Programmes:</strong> Approved applicants must pay a <strong className="text-slate-900">40% Seat Confirmation Deposit</strong> of the first year's tuition to secure their place in the cohort.</li>
+                <li><strong className="text-slate-900">Full-Time Programmes:</strong> Approved applicants must pay a <strong className="text-slate-900">40% Seat Confirmation Deposit</strong> of the first year&apos;s tuition to secure their place in the cohort.</li>
                 <li><strong className="text-slate-900">Modular/Exam Programmes:</strong> Enrollment is confirmed only upon 100% upfront payment of the booked module or exam seat.</li>
                 <li><strong className="text-slate-900">Deadlines:</strong> Failure to settle confirmation invoices by the specified deadline may result in the seat being offered to the next candidate on the waitlist.</li>
               </ul>

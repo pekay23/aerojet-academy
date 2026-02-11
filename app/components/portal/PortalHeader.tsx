@@ -1,94 +1,95 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Sun, Moon, Calendar as CalendarIcon, Clock, ChevronDown } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+
+import React from 'react';
+import { Sun, Moon, ChevronRight, LogOut, User } from 'lucide-react';
 import { useSession, signOut } from 'next-auth/react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { useTheme } from "next-themes";
-import { useRouter } from 'next/navigation';
-
-interface PortalHeaderProps {
-  onMenuClick?: () => void;
-  title?: string;
-  isEnrolled?: boolean;
-}
-
+import { useRouter, usePathname } from 'next/navigation';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import NotificationBell from './NotificationBell';
 
-export default function PortalHeader({ onMenuClick, title, isEnrolled }: PortalHeaderProps) {
+export default function PortalHeader() {
   const { data: session } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
   const { setTheme, theme } = useTheme();
-  const [currentTime, setCurrentTime] = useState(new Date());
 
-  // Update time every second
-  useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const user = session?.user as any;
+  const user = session?.user as { name?: string | null; email?: string | null; image?: string | null } | undefined;
   const firstName = user?.name?.split(' ')[0] || 'User';
-  const roleLabel = user?.role === 'ADMIN' ? 'Administrator' : (user?.role === 'STAFF' ? 'Staff Member' : `Student ID: ${user?.studentProfile?.studentId || 'PENDING'}`);
+
+  // Generate breadcrumbs from pathname
+  const pathSegments = pathname?.split('/').filter(Boolean) || [];
+  // e.g. ['applicant', 'payment'] -> Applicant > Payment
 
   return (
-    <header className="flex items-center justify-between h-full w-full bg-white dark:bg-[#0f172a] px-2 transition-colors duration-300">
-
-      {/* LEFT: Welcome & Time */}
+    <header className="flex items-center justify-between h-16 w-full bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 px-6 border-b border-border/40 sticky top-0 z-50 transition-all">
+      
+      {/* LEFT: Breadcrumbs / Title */}
       <div className="flex flex-col justify-center">
-        <h1 className="text-xl font-bold text-gray-800 dark:text-white leading-tight">
-          Welcome, {firstName}
-        </h1>
-        <div className="flex items-center gap-3 text-[10px] text-gray-500 dark:text-gray-400 mt-0.5">
-          <div className="flex items-center gap-1">
-            <CalendarIcon className="w-3 h-3" />
-            {currentTime.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-          </div>
-          <div className="flex items-center gap-1 border-l border-gray-200 dark:border-gray-700 pl-3">
-            <Clock className="w-3 h-3" />
-            {currentTime.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
-          </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground font-medium">
+             <span className="opacity-50 hover:opacity-100 transition-opacity cursor-pointer" onClick={() => router.push('/applicant/dashboard')}>Portal</span>
+             {pathSegments.map((segment, index) => (
+                 <React.Fragment key={segment}>
+                     <ChevronRight className="w-3.5 h-3.5 opacity-40" />
+                     <span className={`capitalize ${index === pathSegments.length - 1 ? 'text-foreground font-semibold' : 'opacity-50 hover:opacity-100 transition-opacity cursor-pointer'}`}>
+                         {segment.replace(/-/g, ' ')}
+                     </span>
+                 </React.Fragment>
+             ))}
         </div>
       </div>
 
-      {/* RIGHT: Actions & Profile */}
-      <div className="flex items-center gap-4">
+      {/* RIGHT: Actions */}
+      <div className="flex items-center gap-1 sm:gap-2">
 
-        <NotificationBell />
+        <div className="flex items-center gap-1 mr-2">
+            <NotificationBell />
+            
+            <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            className="p-2 rounded-full hover:bg-accent text-muted-foreground transition-colors"
+            >
+            {theme === 'dark' ? <Sun className="w-4.5 h-4.5" /> : <Moon className="w-4.5 h-4.5" />}
+            </button>
+        </div>
 
-        {/* Theme Toggle */}
-        <button
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-colors"
-        >
-          {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
+        <div className="h-6 w-px bg-border mx-2 hidden sm:block"></div>
 
-        {/* User Profile Dropdown */}
+        {/* User Profile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-3 pl-4 border-l border-gray-200 dark:border-gray-700 outline-none group">
-              <div className="text-right hidden sm:block">
-                <div className="text-sm font-medium text-gray-900 dark:text-white group-hover:text-aerojet-blue dark:group-hover:text-blue-400 transition-colors">
-                  {user?.name}
+            <button className="flex items-center gap-3 pl-1 outline-none group">
+              <div className="text-right hidden md:block">
+                <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
+                  {firstName}
                 </div>
-                <div className="text-[10px] text-gray-500 dark:text-gray-400">{roleLabel}</div>
               </div>
-              <div className="w-9 h-9 bg-aerojet-blue text-white rounded-full flex items-center justify-center font-bold text-sm shadow-md ring-2 ring-white dark:ring-gray-800">
-                {user?.name?.[0] || 'U'}
-              </div>
-              <ChevronDown className="w-4 h-4 text-gray-400" />
+              <Avatar className="h-8 w-8 ring-2 ring-transparent group-hover:ring-primary/20 transition-all">
+                  <AvatarImage src={user?.image || undefined} />
+                  <AvatarFallback className="bg-primary/10 text-primary font-bold text-xs">
+                      {user?.name?.[0] || 'U'}
+                  </AvatarFallback>
+              </Avatar>
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-56 mt-2">
+            <DropdownMenuLabel className="font-normal">
+                <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user?.name}</p>
+                    <p className="text-xs leading-none text-muted-foreground">{user?.email}</p>
+                </div>
+            </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => router.push(user?.role === 'STUDENT' ? '/student/profile' : '/staff/settings')}>
-              Settings
+            <DropdownMenuItem onClick={() => router.push('/applicant/profile')} className="cursor-pointer">
+              <User className="mr-2 h-4 w-4" />
+              <span>Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' })} className="text-red-600 focus:text-red-600">
-              Log out
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/login' })} className="text-destructive focus:text-destructive cursor-pointer">
+              <LogOut className="mr-2 h-4 w-4" />
+              <span>Log out</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

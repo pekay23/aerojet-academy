@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Loader2, ArrowRight, ArrowLeft, XCircle, CheckCircle, Eye, FileImage, Users, UserCheck } from 'lucide-react';
+import { Loader2, ArrowRight, ArrowLeft, XCircle, CheckCircle, FileImage, Users, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,7 +18,7 @@ export default function AdmissionsBoardClient() {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('prospects');
 
-    const fetchData = async () => {
+    const fetchData = useCallback(async () => {
         try {
             const res = await fetch('/api/staff/admissions');
             const data = await res.json();
@@ -26,9 +26,9 @@ export default function AdmissionsBoardClient() {
             setProspects(data.prospects || []);
             setLoading(false);
         } catch { toast.error("Failed to load"); }
-    };
+    }, []);
 
-    useEffect(() => { fetchData(); }, []);
+    useEffect(() => { fetchData(); }, [fetchData]);
 
     const updateStatus = async (id: string, newStatus: string) => {
         setApps(prev => prev.map(a => a.id === id ? { ...a, status: newStatus } : a));
@@ -69,7 +69,6 @@ export default function AdmissionsBoardClient() {
     if (loading) return <div className="flex h-96 items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
 
     const prospectsWithProof = prospects.filter(p => p.fees?.[0]?.status === 'VERIFYING');
-    const prospectsAwaiting = prospects.filter(p => p.fees?.[0]?.status === 'UNPAID');
 
     return (
         <div className="space-y-6">

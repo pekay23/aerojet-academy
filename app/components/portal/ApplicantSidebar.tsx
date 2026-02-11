@@ -4,7 +4,6 @@ import React, { useState } from 'react';
 import {
   LayoutDashboard,
   CreditCard,
-  BookOpen,
   UserCircle,
   Headphones,
   LogOut,
@@ -32,7 +31,6 @@ import {
 
 const mainMenuItems = [
   { title: "Dashboard", url: "/applicant/dashboard", icon: LayoutDashboard },
-  { title: "Application", url: "/applicant/application", icon: BookOpen },
   { title: "Finance", url: "/applicant/payment", icon: CreditCard },
 ];
 
@@ -41,8 +39,10 @@ const accountMenuItems = [
   { title: "Support", url: "/applicant/support", icon: Headphones },
 ];
 
+
+
 // CHANGED TO DEFAULT EXPORT 👇
-export default function ApplicantSidebar({ user }: { user: any }) {
+export default function ApplicantSidebar() {
   const pathname = usePathname();
   const { setTheme, theme } = useTheme();
   const [isSignOutModalOpen, setIsSignOutModalOpen] = useState(false);

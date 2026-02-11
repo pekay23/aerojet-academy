@@ -1,14 +1,36 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Save, Lock, Settings, DollarSign, Building, CheckCircle } from 'lucide-react';
+import { Save, Loader2, Settings, Lock, DollarSign, Building } from 'lucide-react';
+
+// ... (existing code)
+
+  // Safe sync with props
+
 import { toast } from 'sonner';
 
 type Setting = { key: string; value: string };
+
+const FINANCE_ITEMS = [
+  { key: 'EXAM_PRICE', label: 'Default Exam Price (EUR)', placeholder: '300', type: 'number' as const },
+  { key: 'REGISTRATION_FEE', label: 'Registration Fee (GHS)', placeholder: '350', type: 'number' as const },
+];
+
+const BANK_ITEMS = [
+  { key: 'BANK_NAME', label: 'Bank Name', placeholder: 'FNB Bank', type: 'text' as const },
+  { key: 'BANK_ACCOUNT', label: 'Account Number', placeholder: '1020003980687', type: 'text' as const },
+  { key: 'BANK_BRANCH', label: 'Branch Code', placeholder: '330102', type: 'text' as const },
+];
+
+const ACADEMY_ITEMS = [
+  { key: 'ACADEMY_NAME', label: 'Academy Name', placeholder: 'Aerojet Academy', type: 'text' as const },
+  { key: 'CONTACT_EMAIL', label: 'Contact Email', placeholder: 'info@aerojet-academy.com', type: 'email' as const },
+  { key: 'CONTACT_PHONE', label: 'Contact Phone', placeholder: '+233 XX XXX XXXX', type: 'tel' as const },
+];
 
 export default function SettingsClient() {
   const [settings, setSettings] = useState<Setting[]>([]);
@@ -19,18 +41,18 @@ export default function SettingsClient() {
   const [passwordForm, setPasswordForm] = useState({ current: '', newPassword: '', confirm: '' });
   const [changingPassword, setChangingPassword] = useState(false);
 
-  const fetchSettings = async () => {
+  const fetchSettings = useCallback(async () => {
     try {
       const res = await fetch('/api/staff/settings');
       const data = await res.json();
       setSettings(data.settings || []);
     } catch { toast.error("Failed to load settings"); }
     finally { setLoading(false); }
-  };
+  }, []);
 
-  useEffect(() => { fetchSettings(); }, []);
+  useEffect(() => { fetchSettings(); }, [fetchSettings]);
 
-  const getValue = (key: string) => settings.find(s => s.key === key)?.value || '';
+  const getValue = useCallback((key: string) => settings.find(s => s.key === key)?.value || '', [settings]);
 
   const saveSetting = async (key: string, value: string) => {
     setSaving(key);
@@ -41,7 +63,12 @@ export default function SettingsClient() {
         body: JSON.stringify({ key, value })
       });
       toast.success(`${key} updated!`);
-      fetchSettings();
+      // Update local state directly to avoid re-fetch if possible, or just re-fetch
+      setSettings(prev => {
+        const existing = prev.find(p => p.key === key);
+        if (existing) return prev.map(p => p.key === key ? { ...p, value } : p);
+        return [...prev, { key, value }];
+      });
     } catch { toast.error("Save failed"); }
     finally { setSaving(null); }
   };
@@ -132,10 +159,7 @@ export default function SettingsClient() {
         <SettingCard
           icon={DollarSign}
           title="Financial Settings"
-          items={[
-            { key: 'EXAM_PRICE', label: 'Default Exam Price (EUR)', placeholder: '300', type: 'number' as const },
-            { key: 'REGISTRATION_FEE', label: 'Registration Fee (GHS)', placeholder: '350', type: 'number' as const },
-          ]}
+          items={FINANCE_ITEMS}
           getValue={getValue}
           onSave={saveSetting}
           saving={saving}
@@ -145,11 +169,7 @@ export default function SettingsClient() {
         <SettingCard
           icon={Building}
           title="Bank Details"
-          items={[
-            { key: 'BANK_NAME', label: 'Bank Name', placeholder: 'FNB Bank', type: 'text' as const },
-            { key: 'BANK_ACCOUNT', label: 'Account Number', placeholder: '1020003980687', type: 'text' as const },
-            { key: 'BANK_BRANCH', label: 'Branch Code', placeholder: '330102', type: 'text' as const },
-          ]}
+          items={BANK_ITEMS}
           getValue={getValue}
           onSave={saveSetting}
           saving={saving}
@@ -159,11 +179,7 @@ export default function SettingsClient() {
         <SettingCard
           icon={Settings}
           title="Academy Information"
-          items={[
-            { key: 'ACADEMY_NAME', label: 'Academy Name', placeholder: 'Aerojet Academy', type: 'text' as const },
-            { key: 'CONTACT_EMAIL', label: 'Contact Email', placeholder: 'info@aerojet-academy.com', type: 'email' as const },
-            { key: 'CONTACT_PHONE', label: 'Contact Phone', placeholder: '+233 XX XXX XXXX', type: 'tel' as const },
-          ]}
+          items={ACADEMY_ITEMS}
           getValue={getValue}
           onSave={saveSetting}
           saving={saving}
@@ -177,7 +193,7 @@ export default function SettingsClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <EmailSignatureSetting value={getValue('EMAIL_SIGNATURE')} onSave={(v) => saveSetting('EMAIL_SIGNATURE', v)} saving={saving === 'EMAIL_SIGNATURE'} />
+            <EmailSignatureSetting value={getValue('EMAIL_SIGNATURE')} onSave={(v: string) => saveSetting('EMAIL_SIGNATURE', v)} saving={saving === 'EMAIL_SIGNATURE'} />
           </CardContent>
         </Card>
       </div>
@@ -186,19 +202,39 @@ export default function SettingsClient() {
 }
 
 function SettingCard({ icon: Icon, title, items, getValue, onSave, saving }: {
-  icon: any; title: string;
+  icon: React.ElementType; title: string;
   items: { key: string; label: string; placeholder: string; type: 'text' | 'number' | 'email' | 'tel' }[];
-  getValue: (k: string) => string;
+  getValue: (key: string) => string;
   onSave: (k: string, v: string) => void;
   saving: string | null;
 }) {
-  const [values, setValues] = useState<Record<string, string>>({});
-
-  useEffect(() => {
+  // Initialize state lazily
+  const [values, setValues] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {};
     items.forEach(item => { initial[item.key] = getValue(item.key); });
-    setValues(initial);
-  }, [getValue]);
+    return initial;
+  });
+
+  // Safe sync with props
+  useEffect(() => {
+     // eslint-disable-next-line
+     setValues(prev => {
+        const next: Record<string, string> = { ...prev };
+        let hasChanges = false;
+        items.forEach(item => {
+            const currentProp = getValue(item.key);
+             // Only update if we don't have a local override? Or always sync?
+             // If we always sync, typing might be overwritten by slow prop updates.
+             // But prop updates only happen on Save.
+             // So here we just want to ensure if parent updates from elsewhere, we reflect it.
+             if (currentProp !== undefined && currentProp !== prev[item.key] && saving !== item.key) {
+                 next[item.key] = currentProp;
+                 hasChanges = true;
+             }
+        });
+        return hasChanges ? next : prev;
+     });
+  }, [getValue, items, saving]);
 
   return (
     <Card>
@@ -209,25 +245,26 @@ function SettingCard({ icon: Icon, title, items, getValue, onSave, saving }: {
       </CardHeader>
       <CardContent className="space-y-4">
         {items.map(item => (
-          <div key={item.key} className="flex gap-2 items-end">
-            <div className="flex-1">
-              <label className="text-sm font-medium">{item.label}</label>
+          <div key={item.key} className="grid gap-2">
+            <label htmlFor={item.key} className="text-sm font-medium">{item.label}</label>
+            <div className="flex gap-2">
               <Input
+                id={item.key}
                 type={item.type}
                 placeholder={item.placeholder}
                 value={values[item.key] || ''}
-                onChange={e => setValues({ ...values, [item.key]: e.target.value })}
+                onChange={(e) => setValues(prev => ({ ...prev, [item.key]: e.target.value }))}
               />
+              <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => onSave(item.key, values[item.key] || '')}
+                  disabled={saving === item.key || values[item.key] === getValue(item.key)}
+                  className="shrink-0"
+                >
+                  {saving === item.key ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
+                </Button>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onSave(item.key, values[item.key] || '')}
-              disabled={saving === item.key}
-              className="shrink-0"
-            >
-              {saving === item.key ? <Loader2 className="w-3 h-3 animate-spin" /> : <Save className="w-3 h-3" />}
-            </Button>
           </div>
         ))}
       </CardContent>

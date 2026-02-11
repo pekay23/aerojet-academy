@@ -50,7 +50,7 @@ export default function RegisterForm() {
       } else {
         toast.error(responseData.error || "Registration failed");
       }
-    } catch (error) {
+    } catch {
       toast.error("Something went wrong");
     } finally {
       setLoading(false);
@@ -98,7 +98,7 @@ export default function RegisterForm() {
         </div>
 
         {/* Registration Code */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-5 text-center">
+        <div className="bg-linear-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-2xl p-5 text-center">
           <p className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2">Your Registration Code</p>
           <div className="flex items-center justify-center gap-3">
             <span className="font-mono text-3xl font-black text-aerojet-blue tracking-[0.15em]">

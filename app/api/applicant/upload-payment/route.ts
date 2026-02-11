@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient } from '@prisma/client';
-import { sendProofReceivedEmail } from '@/app/lib/mail';
+import { sendProofReceivedEmail, sendStaffNotification } from '@/app/lib/mail';
 
 const prisma = new PrismaClient();
 
@@ -14,7 +14,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const user = session.user as any;
+        const user = session.user as { id: string; email?: string; name?: string };
         const body = await req.json();
         const { feeId, proofUrl } = body;
 
@@ -44,7 +44,41 @@ export async function POST(req: Request) {
             }
         });
 
-        // Notify Staff (Optional - can reuse existing logic or just rely on dashboard)
+        // Archive in Document History
+        await prisma.studentFile.create({
+            data: {
+                studentId: fee.studentId,
+                name: `Payment Proof - ${fee.description}`,
+                url: proofUrl,
+                type: 'FINANCE'
+            }
+        });
+
+        // Notify Staff via Email
+        try {
+             await sendStaffNotification(
+                user.name || 'Applicant', 
+                user.email || 'No Email', 
+                `New payment proof uploaded by ${user.name} for fee ${fee.description}. Link: ${proofUrl}`, 
+                `Action Required: Payment Proof Uploaded`
+             );
+        } catch (e) { console.error("Staff email failed", e); }
+
+        // Notify Staff via DB Notification
+        try {
+            // Find admins/staff
+            const staff = await prisma.user.findMany({ where: { role: { in: ['ADMIN', 'STAFF'] } } });
+            await prisma.notification.createMany({
+                data: staff.map(s => ({
+                    userId: s.id,
+                    title: 'New Payment Proof',
+                    message: `${user.name} uploaded proof for ${fee.description}`,
+                    type: 'INFO',
+                    link: '/staff/finance'
+                }))
+            });
+        } catch (e) { console.error("DB notification failed", e); }
+
         // Send Confirmation Email to Applicant
         try {
             if (user.email && fee.student && fee.student.registrationCode) {

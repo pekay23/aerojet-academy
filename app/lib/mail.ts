@@ -196,12 +196,41 @@ export const sendEnquiryEmail = async (email: string, name: string) => {
   });
 };
 
-export const sendStaffNotification = async (name: string, email: string, message: string) => {
+export const sendStaffNotification = async (name: string, email: string, message: string, subject?: string) => {
   await resend.emails.send({
     from: 'System <admin@aerojet-academy.com>',
     to: 'info@aerojet-academy.com',
-    subject: `New Enquiry from ${name}`,
+    subject: subject || `New Enquiry from ${name}`,
     text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`
+  });
+};
+
+export const sendPaymentReceiptEmail = async (email: string, name: string, amount: number, feeDescription: string, transactionId: string) => {
+  const html = wrapEmail(
+    "Payment Receipt",
+    `
+    <p class="text">Dear ${name},</p>
+    <p class="text">We acknowledge receipt of your payment. Thank you for settling your fees.</p>
+    
+    <div class="info-box" style="border-left-color: #22c55e;">
+      <div class="info-row"><strong>Receipt No:</strong> <span style="font-family:monospace;">${transactionId}</span></div>
+      <div class="info-row"><strong>Amount Paid:</strong> GHS ${amount.toFixed(2)}</div>
+      <div class="info-row"><strong>Description:</strong> ${feeDescription}</div>
+      <div class="info-row"><strong>Date:</strong> ${new Date().toLocaleDateString()}</div>
+      <div class="info-row"><strong>Status:</strong> <span style="color:#15803d; font-weight:bold;">PAID ✅</span></div>
+    </div>
+
+    <p class="text" style="font-size: 13px; color: #666;">
+        This email serves as your official receipt.
+    </p>
+    `
+  );
+
+  await resend.emails.send({
+    from: 'Finance <finance@aerojet-academy.com>',
+    to: email,
+    subject: `Payment Receipt - ${feeDescription}`,
+    html
   });
 };
 

@@ -54,6 +54,18 @@ export async function POST(req: Request) {
             }
         });
 
+        // --- HISTORY: Archive Documents ---
+        if (idDocumentUrl) {
+            await prisma.studentFile.create({
+                data: { studentId: student.id, name: `ID Document - ${new Date().toISOString().split('T')[0]}`, url: idDocumentUrl, type: 'IDENTITY' }
+            });
+        }
+        if (certificateUrl) {
+            await prisma.studentFile.create({
+                data: { studentId: student.id, name: `Certificate - ${new Date().toISOString().split('T')[0]}`, url: certificateUrl, type: 'ACADEMIC' }
+            });
+        }
+
         if (program === 'Full-Time') {
             const tuition = Number(course.price) || 2500.00;
             const minDeposit = tuition * 0.40;

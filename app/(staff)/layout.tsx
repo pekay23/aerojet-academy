@@ -39,7 +39,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
     return <div className="flex h-screen items-center justify-center">Loading Staff Portal...</div>;
   }
 
-  const user = session?.user as any;
+  const user = (session?.user as any) || {};
 
   return (
     <SidebarProvider defaultOpen={true}>
@@ -50,7 +50,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
           <header className="flex items-center gap-2 px-4 border-b border-border h-16 shrink-0 bg-background sticky top-0 z-50 shadow-sm w-full">
             <SidebarTrigger className="lg:hidden -ml-1" />
             <div className="flex-1">
-              <PortalHeader onMenuClick={() => { }} title="Staff Portal" />
+              <PortalHeader />
             </div>
           </header>
 

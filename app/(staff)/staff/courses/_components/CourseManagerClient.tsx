@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -9,9 +9,25 @@ import { Badge } from '@/components/ui/badge';
 import { Loader2, Plus, Pencil, Trash2, X, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
+interface Instructor {
+    id: string;
+    name: string;
+}
+
+interface Course {
+    id: string;
+    code: string;
+    title: string;
+    price: number;
+    duration?: string;
+    description?: string;
+    materialLink?: string;
+    instructors?: Instructor[];
+}
+
 export default function CourseManagerClient() {
-    const [courses, setCourses] = useState<any[]>([]);
-    const [instructors, setInstructors] = useState<any[]>([]);
+    const [courses, setCourses] = useState<Course[]>([]);
+    const [instructors, setInstructors] = useState<Instructor[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAdd, setShowAdd] = useState(false);
     const [editId, setEditId] = useState<string | null>(null);
@@ -19,7 +35,7 @@ export default function CourseManagerClient() {
     const [editForm, setEditForm] = useState({ title: '', price: '', materialLink: '' });
     const [saving, setSaving] = useState(false);
 
-    const fetchCourses = async () => {
+    const fetchCourses = useCallback(async () => {
         try {
             const res = await fetch('/api/staff/courses');
             const data = await res.json();
@@ -27,9 +43,9 @@ export default function CourseManagerClient() {
             setInstructors(data.instructors || []);
         } catch { toast.error("Failed to load courses"); }
         finally { setLoading(false); }
-    };
+    }, []);
 
-    useEffect(() => { fetchCourses(); }, []);
+    useEffect(() => { fetchCourses(); }, [fetchCourses]);
 
     const handleCreate = async () => {
         if (!form.code || !form.title || !form.price) {
@@ -49,7 +65,7 @@ export default function CourseManagerClient() {
             setShowAdd(false);
             setForm({ code: '', title: '', price: '', duration: '', description: '' });
             fetchCourses();
-        } catch (err: any) { toast.error(err.message || "Creation failed"); }
+        } catch (err) { toast.error(err instanceof Error ? err.message : "Creation failed"); }
         finally { setSaving(false); }
     };
 
@@ -81,7 +97,7 @@ export default function CourseManagerClient() {
         } catch { toast.error("Delete failed — may have dependent data"); }
     };
 
-    const startEdit = (course: any) => {
+    const startEdit = (course: Course) => {
         setEditId(course.id);
         setEditForm({
             title: course.title,
@@ -186,9 +202,9 @@ export default function CourseManagerClient() {
                                         </TableCell>
                                         <TableCell className="text-sm text-muted-foreground">{course.duration || '—'}</TableCell>
                                         <TableCell>
-                                            {course.instructors?.length > 0 ? (
+                                            {course.instructors && course.instructors.length > 0 ? (
                                                 <div className="flex gap-1 flex-wrap">
-                                                    {course.instructors.map((i: any) => (
+                                                    {course.instructors.map((i) => (
                                                         <Badge key={i.id} variant="secondary" className="text-xs">{i.name}</Badge>
                                                     ))}
                                                 </div>

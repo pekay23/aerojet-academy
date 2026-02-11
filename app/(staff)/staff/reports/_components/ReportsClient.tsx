@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -8,16 +8,49 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Progress } from '@/components/ui/progress';
 import {
   Loader2, DollarSign, Users, GraduationCap, ClipboardCheck,
-  Download, TrendingUp, TrendingDown, BarChart3
+  Download, TrendingUp, TrendingDown, BarChart3,
+  LucideIcon
 } from 'lucide-react';
 import { toast } from 'sonner';
 
+interface FinanceStats {
+  totalRevenue: number;
+  outstandingAmount: number;
+  counts: { paid: number; unpaid: number; verifying: number };
+  byDescription: { description: string; total: number; count: number }[];
+}
+
+interface StudentStats {
+  total: number;
+  active: number;
+  byGender: { gender: string; count: number }[];
+  byStatus: { status: string; count: number }[];
+  recent: { name: string; email: string; status: string; enrolled: string }[];
+}
+
+interface ExamStats {
+  totalResults: number;
+  passCount: number;
+  passRate: number | string;
+  recentPools: { name: string; course: string; date: string; seats: number; capacity: number }[];
+}
+
+interface AttendanceStats {
+  rate: number | string;
+  present: number;
+  absent: number;
+  late: number;
+  total: number;
+}
+
+type ReportData = FinanceStats & StudentStats & ExamStats & AttendanceStats;
+
 export default function ReportsClient() {
   const [activeTab, setActiveTab] = useState('finance');
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<Partial<ReportData> | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchReport = async (type: string) => {
+  const fetchReport = useCallback(async (type: string) => {
     setLoading(true);
     try {
       const res = await fetch(`/api/staff/reports?type=${type}`);
@@ -25,9 +58,9 @@ export default function ReportsClient() {
       setData(result);
     } catch { toast.error("Failed to load report"); }
     finally { setLoading(false); }
-  };
+  }, []);
 
-  useEffect(() => { fetchReport(activeTab); }, [activeTab]);
+  useEffect(() => { fetchReport(activeTab); }, [activeTab, fetchReport]);
 
   const handleExport = () => {
     // Create a printable version of the current report
@@ -59,7 +92,7 @@ export default function ReportsClient() {
     printWindow.print();
   };
 
-  const StatCard = ({ label, value, icon: Icon, color = 'text-primary' }: any) => (
+  const StatCard = ({ label, value, icon: Icon, color = 'text-primary' }: { label: string; value: string | number; icon: LucideIcon; color?: string }) => (
     <Card>
       <CardContent className="pt-6">
         <div className="flex justify-between items-start">
@@ -108,9 +141,9 @@ export default function ReportsClient() {
                   <CardContent>
                     <div className="space-y-3">
                       {[
-                        { label: 'Paid', count: data?.counts?.paid, color: 'bg-green-500' },
-                        { label: 'Verifying', count: data?.counts?.verifying, color: 'bg-amber-500' },
-                        { label: 'Unpaid', count: data?.counts?.unpaid, color: 'bg-red-500' },
+                        { label: 'Paid', count: data?.counts?.paid || 0, color: 'bg-green-500' },
+                        { label: 'Verifying', count: data?.counts?.verifying || 0, color: 'bg-amber-500' },
+                        { label: 'Unpaid', count: data?.counts?.unpaid || 0, color: 'bg-red-500' },
                       ].map(item => {
                         const total = (data?.counts?.paid || 0) + (data?.counts?.verifying || 0) + (data?.counts?.unpaid || 0);
                         const pct = total > 0 ? ((item.count / total) * 100) : 0;
@@ -126,7 +159,7 @@ export default function ReportsClient() {
                   </CardContent>
                 </Card>
 
-                {data?.byDescription?.length > 0 && (
+                {(data?.byDescription?.length || 0) > 0 && (
                   <Card>
                     <CardHeader><CardTitle className="text-lg">Revenue by Category</CardTitle></CardHeader>
                     <CardContent className="p-0">
@@ -139,7 +172,7 @@ export default function ReportsClient() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {data.byDescription.map((item: any, i: number) => (
+                          {data?.byDescription?.map((item, i) => (
                             <TableRow key={i}>
                               <TableCell className="font-medium">{item.description}</TableCell>
                               <TableCell><Badge variant="secondary">{item.count}</Badge></TableCell>
@@ -166,7 +199,7 @@ export default function ReportsClient() {
                     <CardHeader><CardTitle className="text-lg">By Gender</CardTitle></CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        {(data?.byGender || []).map((g: any) => (
+                        {(data?.byGender || []).map((g) => (
                           <div key={g.gender} className="flex justify-between items-center">
                             <span className="text-sm">{g.gender || 'Unknown'}</span>
                             <Badge variant="outline">{g.count}</Badge>
@@ -180,7 +213,7 @@ export default function ReportsClient() {
                     <CardHeader><CardTitle className="text-lg">By Status</CardTitle></CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        {(data?.byStatus || []).map((s: any) => (
+                        {(data?.byStatus || []).map((s) => (
                           <div key={s.status} className="flex justify-between items-center">
                             <span className="text-sm">{s.status || 'Unknown'}</span>
                             <Badge variant="secondary">{s.count}</Badge>
@@ -190,22 +223,6 @@ export default function ReportsClient() {
                     </CardContent>
                   </Card>
                 </div>
-
-                {data?.byProgramme?.length > 0 && (
-                  <Card>
-                    <CardHeader><CardTitle className="text-lg">By Programme</CardTitle></CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {data.byProgramme.map((p: any) => (
-                          <div key={p.programme} className="flex justify-between items-center">
-                            <span className="text-sm font-medium">{p.programme || 'Unassigned'}</span>
-                            <Badge>{p.count}</Badge>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                )}
               </TabsContent>
 
               {/* EXAMS TAB */}
@@ -216,7 +233,7 @@ export default function ReportsClient() {
                   <StatCard label="Pass Rate" value={`${data?.passRate || 0}%`} icon={BarChart3} />
                 </div>
 
-                {data?.recentPools?.length > 0 && (
+                {(data?.recentPools?.length || 0) > 0 && (
                   <Card>
                     <CardHeader><CardTitle className="text-lg">Recent Exam Pools</CardTitle></CardHeader>
                     <CardContent className="p-0">
@@ -231,7 +248,7 @@ export default function ReportsClient() {
                           </TableRow>
                         </TableHeader>
                         <TableBody>
-                          {data.recentPools.map((pool: any, i: number) => (
+                          {data?.recentPools?.map((pool, i) => (
                             <TableRow key={i}>
                               <TableCell className="font-medium">{pool.name}</TableCell>
                               <TableCell>{pool.course || '—'}</TableCell>

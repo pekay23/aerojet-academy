@@ -14,7 +14,7 @@ type Recipient = {
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
-  if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as any).role)) {
+  if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as { role: string }).role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
 
@@ -31,7 +31,7 @@ export async function GET(req: Request) {
       });
     } else if (target === 'APPLICANTS') {
       users = await prisma.user.findMany({
-        where: { role: 'STUDENT', isDeleted: false, student: { enrollmentStatus: { in: ['PROSPECT', 'APPLICANT'] } } },
+        where: { role: 'STUDENT', isDeleted: false, studentProfile: { enrollmentStatus: { in: ['PROSPECT', 'APPLICANT'] } } },
         select: { id: true, email: true, name: true, role: true }
       });
     } else if (target === 'STAFF') {
@@ -49,7 +49,7 @@ export async function GET(req: Request) {
     }
 
     return NextResponse.json({ recipients: users });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed to fetch recipients' }, { status: 500 });
   }
 }

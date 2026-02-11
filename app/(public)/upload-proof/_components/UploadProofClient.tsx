@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from "next/link";
 import { toast } from "sonner";
 import { Button } from "@/app/components/ui/button";
@@ -13,7 +13,6 @@ import { Loader2, CheckCircle2 } from 'lucide-react';
 
 export default function UploadProofClient() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const codeFromUrl = searchParams.get("code") || "";
   const emailFromUrl = searchParams.get("email") || "";
 
@@ -50,8 +49,8 @@ export default function UploadProofClient() {
 
       setSubmitted(true);
       toast.success("Proof submitted successfully!");
-    } catch (error: any) {
-      toast.error(error.message);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Submission failed");
     } finally {
       setLoading(false);
     }
@@ -105,9 +104,9 @@ export default function UploadProofClient() {
           </div>
 
           <div className="relative flex py-1 items-center">
-            <div className="flex-grow border-t border-slate-200"></div>
-            <span className="flex-shrink mx-4 text-xs text-slate-400 font-bold uppercase">OR</span>
-            <div className="flex-grow border-t border-slate-200"></div>
+            <div className="grow border-t border-slate-200"></div>
+            <span className="shrink mx-4 text-xs text-slate-400 font-bold uppercase">OR</span>
+            <div className="grow border-t border-slate-200"></div>
           </div>
 
           <div className="space-y-2">

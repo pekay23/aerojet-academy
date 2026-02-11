@@ -1,10 +1,10 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CheckCircle, Eye, Loader2, XCircle, FileImage, ExternalLink, X } from 'lucide-react';
+import { CheckCircle, Loader2, XCircle, FileImage, ExternalLink, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function FinanceClient() {
@@ -12,16 +12,16 @@ export default function FinanceClient() {
   const [loading, setLoading] = useState(true);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
-  const fetchFees = async () => {
+  const fetchFees = useCallback(async () => {
     try {
       const res = await fetch('/api/staff/finance/pending');
       const data = await res.json();
       setFees(data.fees || []);
       setLoading(false);
     } catch { toast.error("Error loading fees"); }
-  };
+  }, []);
 
-  useEffect(() => { fetchFees(); }, []);
+  useEffect(() => { fetchFees(); }, [fetchFees]);
 
   const handleApprove = async (id: string) => {
     await fetch('/api/staff/finance/approve', { method: 'POST', body: JSON.stringify({ feeId: id }) });

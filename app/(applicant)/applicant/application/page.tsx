@@ -3,9 +3,7 @@ import { Metadata } from 'next';
 import ApplicationWizard from './_components/ApplicationWizard';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import prisma from '@/app/lib/prisma';
 
 export const metadata: Metadata = { title: 'New Application' };
 
@@ -14,7 +12,7 @@ export default async function ApplicationPage() {
   
   // Fetch user details from DB to get phone (which might be in Student profile)
   const user = await prisma.user.findUnique({
-    where: { id: (session?.user as any)?.id },
+    where: { id: (session?.user as { id: string })?.id },
     include: { studentProfile: true }
   });
 
