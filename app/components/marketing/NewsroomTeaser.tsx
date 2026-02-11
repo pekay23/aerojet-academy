@@ -7,7 +7,12 @@ interface ArticleTeaser {
   _id: string;
   title: string;
   slug: { current: string };
-  mainImage: any;
+  mainImage: {
+    asset: {
+      _ref: string;
+      _type: 'reference';
+    };
+  };
   category: string;
 }
 
@@ -62,7 +67,7 @@ export default async function NewsroomTeaser() {
         </div>
 
         <div className="text-center mt-16">
-          <Link href="/news" className="border-2 border-aerojet-blue text-aerojet-blue px-10 py-3 rounded-md font-bold hover:bg-aerojet-blue hover:text-white transition">
+          <Link href="/news" className="border-2 border-aerojet-blue text-aerojet-blue px-10 py-3 rounded-md font-bold hover:bg-aerojet-blue hover:text-white! transition">
             View All News
           </Link>
         </div>
