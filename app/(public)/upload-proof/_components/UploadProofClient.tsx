@@ -96,7 +96,8 @@ export default function UploadProofClient() {
               placeholder="AATA-XXXX"
               value={registrationCode}
               onChange={(e) => setRegistrationCode(e.target.value.toUpperCase())}
-              className="bg-slate-50 border-slate-200 text-slate-900"
+              className="bg-white border-slate-200 text-slate-900"
+              style={{ color: '#0f172a', backgroundColor: '#ffffff' }}
             />
             <p className="text-[10px] text-muted-foreground">
               Use the code sent to your email.
@@ -117,7 +118,8 @@ export default function UploadProofClient() {
               placeholder="applicant@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-slate-50 border-slate-200 text-slate-900"
+              className="bg-white border-slate-200 text-slate-900"
+              style={{ color: '#0f172a', backgroundColor: '#ffffff' }}
             />
           </div>
 
