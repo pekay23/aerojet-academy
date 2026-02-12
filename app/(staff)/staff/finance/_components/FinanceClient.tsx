@@ -11,6 +11,7 @@ export default function FinanceClient() {
   const [fees, setFees] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
 
   const fetchFees = useCallback(async () => {
     try {
@@ -24,19 +25,56 @@ export default function FinanceClient() {
   useEffect(() => { fetchFees(); }, [fetchFees]);
 
   const handleApprove = async (id: string) => {
-    await fetch('/api/staff/finance/approve', { method: 'POST', body: JSON.stringify({ feeId: id }) });
-    toast.success("Approved");
-    fetchFees();
+    if (processingIds.has(id)) return;
+
+    const originalFees = [...fees];
+    setProcessingIds(prev => new Set(prev).add(id));
+    setFees(prev => prev.filter(f => f.id !== id));
+
+    try {
+      const res = await fetch('/api/staff/finance/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feeId: id })
+      });
+      if (!res.ok) throw new Error("Failed to approve");
+      toast.success("Approved successfully");
+    } catch (err) {
+      toast.error("Error approving fee");
+      setFees(originalFees);
+    } finally {
+      setProcessingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
   };
 
   const handleReject = async (id: string) => {
+    if (processingIds.has(id)) return;
+
+    const originalFees = [...fees];
+    setProcessingIds(prev => new Set(prev).add(id));
+    setFees(prev => prev.filter(f => f.id !== id));
+
     try {
-      const res = await fetch('/api/staff/finance/reject', { method: 'POST', body: JSON.stringify({ feeId: id }) });
+      const res = await fetch('/api/staff/finance/reject', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ feeId: id })
+      });
       if (!res.ok) throw new Error("Failed to reject");
-      toast.success("Rejected");
-      fetchFees();
-    } catch {
+      toast.success("Rejected successfully");
+    } catch (err) {
       toast.error("Error rejecting fee");
+      setFees(originalFees);
+    } finally {
+      setProcessingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
     }
   };
 
@@ -132,6 +170,7 @@ export default function FinanceClient() {
                             variant="ghost"
                             className="text-red-500 hover:text-red-600 hover:bg-red-50"
                             onClick={() => handleReject(f.id)}
+                            disabled={processingIds.has(f.id)}
                           >
                             <XCircle className="w-4 h-4 mr-1" /> Reject
                           </Button>
@@ -140,8 +179,14 @@ export default function FinanceClient() {
                           size="sm"
                           onClick={() => handleApprove(f.id)}
                           className="bg-green-600 hover:bg-green-700"
+                          disabled={processingIds.has(f.id)}
                         >
-                          <CheckCircle className="w-4 h-4 mr-1" /> Approve
+                          {processingIds.has(f.id) ? (
+                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                          ) : (
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                          )}
+                          Approve
                         </Button>
                       </div>
                     </TableCell>

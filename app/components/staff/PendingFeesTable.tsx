@@ -29,8 +29,14 @@ export default function PendingFeesTable() {
     }, []);
 
     const handleApprove = async (feeId: string) => {
+        if (processingId === feeId) return;
         if (!confirm('Are you sure you want to approve this payment?')) return;
+
+        const originalFees = [...fees];
         setProcessingId(feeId);
+        // Optimistic update
+        setFees(prev => prev.filter(f => f.id !== feeId));
+
         try {
             const res = await fetch('/api/staff/finance/approve', {
                 method: 'POST',
@@ -40,21 +46,29 @@ export default function PendingFeesTable() {
             const data = await res.json();
             if (data.success) {
                 toast.success('Payment approved successfully!');
-                fetchFees();
+                // No need to fetchFees as we already updated UI optimistically
             } else {
                 toast.error(data.error || 'Failed to approve');
+                setFees(originalFees);
             }
         } catch (error) {
             console.error(error);
             toast.error('Error approving payment');
+            setFees(originalFees);
         } finally {
             setProcessingId(null);
         }
     };
 
     const handleReject = async (feeId: string) => {
+        if (processingId === feeId) return;
         const reason = prompt('Reason for rejection (optional):');
+
+        const originalFees = [...fees];
         setProcessingId(feeId);
+        // Optimistic update
+        setFees(prev => prev.filter(f => f.id !== feeId));
+
         try {
             const res = await fetch('/api/staff/finance/reject', {
                 method: 'POST',
@@ -64,13 +78,14 @@ export default function PendingFeesTable() {
             const data = await res.json();
             if (data.success) {
                 toast.success('Payment rejected');
-                fetchFees();
             } else {
                 toast.error(data.error || 'Failed to reject');
+                setFees(originalFees);
             }
         } catch (error) {
             console.error(error);
             toast.error('Error rejecting payment');
+            setFees(originalFees);
         } finally {
             setProcessingId(null);
         }
