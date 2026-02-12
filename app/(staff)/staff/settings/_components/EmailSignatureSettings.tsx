@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/app/components/ui/card';
-import { Input } from '@/app/components/ui/input';
-import { Button } from '@/app/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import EmailSignature from '@/app/components/ui/EmailSignature';
+import EmailSignature from '@/components/ui/EmailSignature';
 
 interface SignatureData {
     logoUrl?: string;
@@ -58,7 +58,6 @@ export default function EmailSignatureSettings() {
     const handleSave = async () => {
         setLoading(true);
         try {
-            console.log('Sending signature data:', formData);
             const response = await fetch('/api/staff/email-signature', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

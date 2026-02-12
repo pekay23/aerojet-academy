@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Loader2, BookOpen, Calendar, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import SpotlightCard from '@/app/components/ui/SpotlightCard';
+import SpotlightCard from '@/components/ui/SpotlightCard';
 
 export default function StudentDashboardClient() {
   const router = useRouter();

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import UploadProofClient from './_components/UploadProofClient';
-import Navbar from '@/app/components/marketing/Navbar';
-import Footer from '@/app/components/marketing/Footer';
+import Navbar from '@/components/marketing/Navbar';
+import Footer from '@/components/marketing/Footer';
 import { Suspense } from 'react'; // Import Suspense
 
 export const metadata: Metadata = {

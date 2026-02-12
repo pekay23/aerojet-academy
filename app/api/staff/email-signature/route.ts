@@ -57,11 +57,9 @@ export async function POST(req: Request) {
 
         // Get the first signature or create it
         const existingSignature = await prisma.emailSignature.findFirst();
-        console.log('Existing signature ID:', existingSignature?.id);
 
         let signature;
         if (existingSignature) {
-            console.log('Updating existing signature...');
             // Update existing signature
             signature = await prisma.emailSignature.update({
                 where: { id: existingSignature.id },
@@ -79,7 +77,6 @@ export async function POST(req: Request) {
                 }
             });
         } else {
-            console.log('Creating new signature...');
             // Create new signature
             signature = await prisma.emailSignature.create({
                 data: {
@@ -97,7 +94,6 @@ export async function POST(req: Request) {
             });
         }
 
-        console.log('Signature saved successfully:', signature.id);
         return NextResponse.json({ success: true, signature });
     } catch (error) {
         console.error('Error updating email signature:', error);

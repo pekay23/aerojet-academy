@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { signOut } from "next-auth/react";
 import { LayoutDashboard, BookOpen, GraduationCap, Users, BarChart, CreditCard, Wallet, LifeBuoy, UserCircle, LogOut, Compass } from 'lucide-react';
-import { ThemeToggle } from '@/app/components/marketing/ThemeToggle';
+import { ThemeToggle } from '@/components/marketing/ThemeToggle';
 import ConfirmationModal from '@/components/modal/ConfirmationModal';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, useSidebar } from '@/components/ui/sidebar';
 

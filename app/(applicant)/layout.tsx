@@ -8,8 +8,8 @@ import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/s
 import { Loader2 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 // ✅ UPDATED IMPORTS
-import PortalHeader from '@/app/components/portal/PortalHeader';
-import ApplicantSidebar from '@/app/components/portal/ApplicantSidebar';
+import PortalHeader from '@/components/portal/PortalHeader';
+import ApplicantSidebar from '@/components/portal/ApplicantSidebar';
 
 export default function ApplicantLayout({ children }: { children: React.ReactNode }) {
   const { data: session, status } = useSession({

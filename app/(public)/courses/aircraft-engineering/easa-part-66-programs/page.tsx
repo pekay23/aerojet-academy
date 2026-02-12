@@ -1,6 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
-import PageHero from '@/app/components/marketing/PageHero';
+import PageHero from '@/components/marketing/PageHero';
 import Link from 'next/link';
 import { CheckCircle2, Clock, Users, BookOpen, Award, AlertCircle, Calendar, MonitorPlay } from 'lucide-react';
 

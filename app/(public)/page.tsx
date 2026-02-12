@@ -2,15 +2,15 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 
 // Components
-import HeroSlider from "@/app/components/marketing/HeroSlider";
-import Credibility from "@/app/components/marketing/Credibility";
-import WhoWeAre from "@/app/components/marketing/WhoWeAre";
-import ProgrammeTabs from "@/app/components/marketing/ProgrammeTabs"; 
-import PortalHighlights from "@/app/components/marketing/PortalHighlights";
-import NewsroomTeaser from "@/app/components/marketing/NewsroomTeaser";
-import HomeContact from "@/app/components/marketing/HomeContact";
-import Reveal from "@/app/components/marketing/Reveal";
-import AdmissionsProcess from "@/app/components/marketing/AdmissionsProcess"; // ✅ RESTORED IMPORT
+import HeroSlider from "@/components/marketing/HeroSlider";
+import Credibility from "@/components/marketing/Credibility";
+import WhoWeAre from "@/components/marketing/WhoWeAre";
+import ProgrammeTabs from "@/components/marketing/ProgrammeTabs"; 
+import PortalHighlights from "@/components/marketing/PortalHighlights";
+import NewsroomTeaser from "@/components/marketing/NewsroomTeaser";
+import HomeContact from "@/components/marketing/HomeContact";
+import Reveal from "@/components/marketing/Reveal";
+import AdmissionsProcess from "@/components/marketing/AdmissionsProcess"; // ✅ RESTORED IMPORT
 
 export const metadata: Metadata = {
   // Title is set by default/template in layout.tsx

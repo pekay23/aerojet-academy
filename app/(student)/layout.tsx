@@ -5,8 +5,8 @@ import { useSession } from 'next-auth/react';
 import { redirect, useRouter } from 'next/navigation';
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
 // ✅ UPDATED IMPORTS: Point to 'portal', not 'portal-new'
-import PortalHeader from '@/app/components/portal/PortalHeader';
-import StudentSidebar from '@/app/components/portal/StudentSidebar';
+import PortalHeader from '@/components/portal/PortalHeader';
+import StudentSidebar from '@/components/portal/StudentSidebar';
 
 interface StudentUser {
   name?: string | null;

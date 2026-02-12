@@ -6,8 +6,8 @@ import { useIdleTimer } from 'react-idle-timer';
 import { toast } from 'sonner';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 // ✅ UPDATED IMPORT
-import PortalHeader from '@/app/components/portal/PortalHeader';
-import StaffSidebar from '@/app/components/staff/StaffSidebar';
+import PortalHeader from '@/components/portal/PortalHeader';
+import StaffSidebar from '@/components/staff/StaffSidebar';
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();

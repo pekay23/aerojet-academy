@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Navbar from '@/app/components/marketing/Navbar';
-import Footer from '@/app/components/marketing/Footer';
+import Navbar from '@/components/marketing/Navbar';
+import Footer from '@/components/marketing/Footer';
 
 export const metadata: Metadata = {
   title: 'Application Terms',

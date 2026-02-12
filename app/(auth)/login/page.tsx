@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import LoginForm from '@/app/components/portal/LoginForm';
+import LoginForm from '@/components/portal/LoginForm';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {

@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 // Navbar and Footer REMOVED (Handled by Layout)
-import PageHero from '@/app/components/marketing/PageHero';
+import PageHero from '@/components/marketing/PageHero';
 import { ArrowRight, CheckCircle2, BookOpen, GraduationCap } from 'lucide-react';
 
 export const metadata: Metadata = {
