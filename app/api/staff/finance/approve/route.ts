@@ -88,11 +88,15 @@ export async function POST(req: Request) {
 
     // 6. Send Email to PERSONAL address
     try {
+      const emailUsedForLogin = (fee.description?.toLowerCase().includes('tuition') || fee.amount.toNumber() > 100)
+        ? institutionalEmail
+        : undefined;
+
       await sendPaymentConfirmationEmail(
         personalEmail,
         fee.student.user.name!,
         accessCode,
-        institutionalEmail
+        emailUsedForLogin
       );
     } catch (emailError) {
       console.error("EMAIL_SEND_ERROR:", emailError);

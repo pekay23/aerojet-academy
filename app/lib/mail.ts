@@ -157,7 +157,10 @@ export const sendPaymentConfirmationEmail = async (
     </div>
 
     <p class="text" style="font-size: 13px; color: #666;">
-        Please use the <strong>Academy Email</strong> above to log in from now on. Your personal email will no longer work for login.
+        ${newAcademyEmail
+      ? `Please use the <strong>Academy Email</strong> above to log in from now on. Your personal email will no longer work for login.`
+      : `Please continue to use your <strong>Personal Email</strong> to log in. Your account is now active.`
+    }
     </p>
 
     <div class="btn-container">
