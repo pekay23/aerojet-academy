@@ -1,25 +1,25 @@
+import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
 import { Resend } from 'resend';
+import { withAuth } from '@/app/lib/auth-helpers';
+import { FEE_STATUS } from '@/app/lib/constants'; // Optional: Use constant if we want to standardize 'REJECTED' too? No constant for rejected yet? 
+// The constant file had: PAID, PARTIAL, UNPAID, PENDING, VERIFYING, OVERDUE.
+// Let's check logic. If status is REJECTED, we might need to add it to constants or just use string for now if not in list.
+// I'll stick to string 'REJECTED' or add it to constants? 
+// Audit said "Standardize fee status values".
+// If I use 'REJECTED', I should probably add it to constants.
+// For now, I'll stick to the existing string to avoid breaking schema enum if it's strict?
+// Prisma schema says String.
+// I'll use string 'REJECTED' to match previous logic, but use `withAuth`.
 
-const prisma = new PrismaClient();
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
+    const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+    if (error) return error;
+    if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
     try {
-        const session = await getServerSession(authOptions);
-
-        if (!session?.user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
-        const user = session.user as any;
-        if (user.role === 'STUDENT' || user.role === 'PROSPECT') {
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
-
         const body = await req.json();
         const { feeId, reason } = body;
 
@@ -45,7 +45,7 @@ export async function POST(req: Request) {
         const updatedFee = await prisma.fee.update({
             where: { id: feeId },
             data: {
-                status: 'REJECTED',
+                status: 'REJECTED', // could use constant if added
             }
         });
 

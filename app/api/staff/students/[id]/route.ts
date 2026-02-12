@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/app/lib/prisma';
 
-const prisma = new PrismaClient();
 
 /**
  * GET: Fetch single student details
  */
 export async function GET(
-  req: NextRequest, 
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -34,36 +33,36 @@ export async function GET(
             isDeleted: true,
           }
         },
-        applications: { 
-          take: 5, 
-          orderBy: { appliedAt: 'desc' }, 
-          include: { course: true } 
+        applications: {
+          take: 5,
+          orderBy: { appliedAt: 'desc' },
+          include: { course: true }
         },
-        fees: { 
-          take: 15, 
-          orderBy: { dueDate: 'desc' } 
+        fees: {
+          take: 15,
+          orderBy: { dueDate: 'desc' }
         },
         // ✅ UPDATED: Use 'bookings' relation
-        bookings: { 
-          take: 10, 
-          orderBy: { bookingDate: 'desc' }, 
-          include: { 
+        bookings: {
+          take: 10,
+          orderBy: { bookingDate: 'desc' },
+          include: {
             pool: true, // Include pool details
             event: true // Include event details
-          } 
+          }
         },
-        attendance: { 
-          take: 30, 
+        attendance: {
+          take: 30,
           orderBy: { date: 'desc' },
           include: { course: { select: { code: true } } }
         },
-        assessments: { 
-          take: 20, 
-          orderBy: { recordedAt: 'desc' } 
+        assessments: {
+          take: 20,
+          orderBy: { recordedAt: 'desc' }
         },
-        notes: { 
-          take: 10, 
-          orderBy: { createdAt: 'desc' } 
+        notes: {
+          take: 10,
+          orderBy: { createdAt: 'desc' }
         }
       }
     });
@@ -84,7 +83,7 @@ export async function GET(
  * PATCH: Update Student Details
  */
 export async function PATCH(
-  req: NextRequest, 
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
@@ -122,7 +121,7 @@ export async function PATCH(
  * DELETE: Soft Delete (Archive)
  */
 export async function DELETE(
-  req: NextRequest, 
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {

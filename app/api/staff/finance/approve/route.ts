@@ -1,19 +1,17 @@
+import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { sendPaymentConfirmationEmail, sendPaymentReceiptEmail } from '@/app/lib/mail';
 import { hash } from 'bcryptjs';
-import { generateInstitutionalEmail } from '@/app/lib/utils'; // Import the helper
+import { generateInstitutionalEmail } from '@/app/lib/utils';
+import { FEE_STATUS } from '@/app/lib/constants';
+import { withAuth } from '@/app/lib/auth-helpers';
 
-const prisma = new PrismaClient();
+// Define transaction type since we can't import Prisma.TransactionClient easily in this setup
+type TxClient = Omit<typeof prisma, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'>;
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-
-  if (!['ADMIN', 'STAFF'].includes((session?.user as { role: string })?.role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const { error } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   try {
     const { feeId } = await req.json();
@@ -33,52 +31,66 @@ export async function POST(req: Request) {
     const personalEmail = fee.student.user.email!; // Save old email to send notification
     const institutionalEmail = generateInstitutionalEmail(fee.student.user.name!);
 
-    // Check uniqueness (if s.hughes exists, maybe append number? Skipping for now based on spec)
-
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TxClient) => {
       // 3. Mark Fee Paid
-      await tx.fee.update({ where: { id: feeId }, data: { status: 'PAID', paid: fee.amount } });
+      await tx.fee.update({ where: { id: feeId }, data: { status: FEE_STATUS.PAID, paid: fee.amount } });
 
-      // 4. UPDATE USER: Set New Email & Password
-      await tx.user.update({
-        where: { id: fee.student.userId },
-        data: {
-          isActive: true,
-          password: hashedCode,
-          email: institutionalEmail, // 🚀 SWITCH TO ACADEMY EMAIL
-        }
-      });
+      // LOGIC MERGE: Handle Registration Fee (Prospect -> Applicant)
+      if (fee.description?.toLowerCase().includes('registration') && fee.student.enrollmentStatus === 'PROSPECT') {
+        // 4a. Update User: Set Password & Activate
+        await tx.user.update({
+          where: { id: fee.student.userId },
+          data: {
+            isActive: true,
+            password: hashedCode,
+            emailVerified: new Date()
+          }
+        });
 
-      // 5. SEND RECEIPT EMAIL
-      // We send to the *original* personal email because they might not have access to institutional yet, 
-      // OR we send to both/institutional if active. 
-      // The `sendPaymentConfirmationEmail` below sends credentials to personal email.
-      // Let's send receipt to personal email as well for records.
+        // 4b. Update Student Status
+        await tx.student.update({
+          where: { id: fee.studentId },
+          data: { enrollmentStatus: 'APPLICANT' }
+        });
+      }
+      // LOGIC MERGE: Handle Course Fee (Applicant -> Student)
+      else if (fee.description?.toLowerCase().includes('tuition') || fee.amount.toNumber() > 100) {
+        // 4. UPDATE USER: Set New Email & Password & Institutional Email
+        await tx.user.update({
+          where: { id: fee.student.userId },
+          data: {
+            isActive: true,
+            password: hashedCode,
+            email: institutionalEmail,
+          }
+        });
+
+        // 6. Update Student Profile
+        await tx.student.update({
+          where: { id: fee.studentId },
+          data: {
+            enrollmentStatus: 'STUDENT',
+            institutionalEmail: institutionalEmail
+          }
+        });
+      }
+
+      // 5. SEND RECEIPT EMAIL (Always)
       await sendPaymentReceiptEmail(
-         personalEmail, 
-         fee.student.user.name!, 
-         fee.amount.toNumber(), 
-         fee.description || 'Course Fee', 
-         fee.id
+        personalEmail,
+        fee.student.user.name!,
+        fee.amount.toNumber(),
+        fee.description || 'Course Fee',
+        fee.id
       );
 
-      // 6. Update Student Profile
-      await tx.student.update({
-        where: { id: fee.studentId },
-        data: {
-          enrollmentStatus: 'STUDENT',
-          institutionalEmail: institutionalEmail // Save copy here too
-        }
-      });
-      
     }, { maxWait: 20000, timeout: 30000 });
 
     // 6. Send Email to PERSONAL address
-    // "Your new Academy Email is X and password is Y"
     try {
       await sendPaymentConfirmationEmail(
         personalEmail,
-        fee.student.user.name!, // <--- FIX: Use this directly, or define const studentName = ...
+        fee.student.user.name!,
         accessCode,
         institutionalEmail
       );

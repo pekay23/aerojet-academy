@@ -1,9 +1,7 @@
+import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-
-const prisma = new PrismaClient();
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
@@ -13,11 +11,13 @@ export async function GET(req: Request) {
   }
 
   try {
-    // Fetch pending registration fees
+    // Fetch all fees that need admin attention:
+    // VERIFYING = proof uploaded via public submit-proof route
+    // PENDING = proof uploaded via authenticated upload-payment route
+    // UNPAID/PARTIAL = still awaiting payment
     const fees = await prisma.fee.findMany({
       where: {
-        status: { in: ['UNPAID', 'PENDING_VERIFICATION'] }, // Adjust based on your schema
-        description: { contains: 'Registration' }
+        status: { in: ['VERIFYING', 'PENDING', 'UNPAID', 'PARTIAL'] }
       },
       include: {
         student: {
@@ -26,7 +26,10 @@ export async function GET(req: Request) {
           }
         }
       },
-      orderBy: { dueDate: 'desc' }
+      orderBy: [
+        // Show newest fees first
+        { createdAt: 'desc' }
+      ]
     });
 
     return NextResponse.json({ fees });

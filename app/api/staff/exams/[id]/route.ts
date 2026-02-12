@@ -1,19 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/app/lib/prisma';
 
-const prisma = new PrismaClient();
 
 /**
  * GET: Fetch single Exam Pool details + Roster (Members)
  */
 export async function GET(
-  req: NextRequest, 
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session || (session.user as any).role === 'STUDENT') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
@@ -28,8 +27,8 @@ export async function GET(
         event: true, // Include parent event
         memberships: {
           include: {
-            student: { 
-                include: { user: { select: { name: true, email: true, image: true } } } 
+            student: {
+              include: { user: { select: { name: true, email: true, image: true } } }
             }
           },
           orderBy: { createdAt: 'asc' } // First come, first served
@@ -50,11 +49,11 @@ export async function GET(
  * DELETE: Remove a student (Membership) from the pool
  */
 export async function DELETE(
-  req: NextRequest, 
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
-  
+
   if (!session || (session.user as any).role === 'STUDENT') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
@@ -84,8 +83,8 @@ export async function DELETE(
  * I will comment this out until you add it, or we can use it to update status.
  */
 export async function PATCH(
-  req: NextRequest, 
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-    return NextResponse.json({ message: "Seat assignment not implemented in Pool Schema yet" });
+  return NextResponse.json({ message: "Seat assignment not implemented in Pool Schema yet" });
 }

@@ -262,7 +262,7 @@ export const sendVerificationEmail = async (email: string, name: string, token: 
 };
 
 export const sendApplicationReceivedEmail = async (email: string, name: string, code: string) => {
-  const uploadUrl = `${DOMAIN}/upload-proof?code=${code}`;
+  const uploadUrl = `${DOMAIN}/upload-proof?code=${code}&email=${encodeURIComponent(email)}`;
 
   const html = wrapEmail(
     "Application Received",

@@ -1,10 +1,9 @@
+import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient, Prisma } from '@prisma/client';
 import { sendPaymentConfirmationEmail } from '@/app/lib/mail';
-
-const prisma = new PrismaClient();
 
 // GET: Fetch pending payments (Status: VERIFYING)
 export async function GET(req: Request) {

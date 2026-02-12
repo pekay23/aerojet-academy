@@ -18,7 +18,7 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email) return null;
 
-        if (process.env.NODE_ENV !== 'production' && credentials.password === process.env.NEXT_PUBLIC_DEV_LOGIN_SECRET) {
+        if (process.env.NODE_ENV === 'development' && credentials.password === process.env.DEV_LOGIN_SECRET) {
           const devUser = await prisma.user.findUnique({ where: { email: credentials.email } });
           if (devUser) return devUser;
         }
@@ -46,7 +46,7 @@ export const authOptions: NextAuthOptions = {
   },
   events: {
     createUser: async ({ user }) => {
-      const existingStudent = await prisma.student.findFirst({ where: { userId: user.id }});
+      const existingStudent = await prisma.student.findFirst({ where: { userId: user.id } });
       if (!existingStudent) {
         await prisma.student.create({
           data: { userId: user.id! }
@@ -61,17 +61,17 @@ export const authOptions: NextAuthOptions = {
           where: { email: user.email! },
         });
 
-        if (!existingUser) return '/portal/login?error=AccessDenied'; 
+        if (!existingUser) return '/portal/login?error=AccessDenied';
         if (!existingUser.isActive) return true;
       }
       return true;
     },
-    
+
     async jwt({ token, user, trigger, session }) {
       if (user) {
         token.sub = user.id;
         token.role = (user as { role: string }).role;
-        const dbUser = await prisma.user.findUnique({ where: { id: user.id }});
+        const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
         token.lastPasswordChange = dbUser?.lastPasswordChange?.getTime() || null;
       }
 
@@ -80,14 +80,19 @@ export const authOptions: NextAuthOptions = {
         if (session.image) token.picture = session.image;
       }
 
-      // Session Validation
+      // Session Validation — throttled to every 5 minutes
+      const REVALIDATE_MS = 5 * 60 * 1000;
       if (token.sub) {
-        const dbUser = await prisma.user.findUnique({ where: { id: token.sub } });
-        if (!dbUser || !dbUser.isActive || dbUser.isDeleted) {
-          return {}; // Return empty object to invalidate session
-        }
-        if (dbUser.lastPasswordChange && token.lastPasswordChange !== dbUser.lastPasswordChange.getTime()) {
-          return {}; // Password changed, invalidate session
+        const lastChecked = (token.lastCheckedAt as number) || 0;
+        if (Date.now() - lastChecked > REVALIDATE_MS) {
+          const dbUser = await prisma.user.findUnique({ where: { id: token.sub } });
+          if (!dbUser || !dbUser.isActive || dbUser.isDeleted) {
+            return {}; // Return empty object to invalidate session
+          }
+          if (dbUser.lastPasswordChange && token.lastPasswordChange !== dbUser.lastPasswordChange.getTime()) {
+            return {}; // Password changed, invalidate session
+          }
+          token.lastCheckedAt = Date.now();
         }
       }
 
@@ -105,10 +110,10 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       if (new URL(url).origin === baseUrl) return url;
-      
+
       // Since getServerSession can't be used here reliably, check token passed in
       const session = await getServerSession(authOptions); // This should be okay here but can be tricky
-      if((session?.user as { role: string })?.role === 'STUDENT'){
+      if ((session?.user as { role: string })?.role === 'STUDENT') {
         return `${baseUrl}/portal/dashboard`;
       } else {
         return `${baseUrl}/staff/dashboard`;

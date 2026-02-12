@@ -93,10 +93,10 @@ export default function UploadProofClient() {
             <Label htmlFor="code">Registration Code</Label>
             <Input
               id="code"
-              placeholder="ATA-XXXX"
+              placeholder="AATA-XXXX"
               value={registrationCode}
               onChange={(e) => setRegistrationCode(e.target.value.toUpperCase())}
-              className="bg-slate-50 border-slate-200"
+              className="bg-slate-50 border-slate-200 text-slate-900"
             />
             <p className="text-[10px] text-muted-foreground">
               Use the code sent to your email.
@@ -117,7 +117,7 @@ export default function UploadProofClient() {
               placeholder="applicant@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="bg-slate-50 border-slate-200"
+              className="bg-slate-50 border-slate-200 text-slate-900"
             />
           </div>
 

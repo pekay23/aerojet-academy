@@ -1,10 +1,9 @@
+import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient, Prisma } from '@prisma/client';
 import { hash } from 'bcryptjs';
-
-const prisma = new PrismaClient();
 
 // GET: List users (with filtering)
 export async function GET(req: Request) {

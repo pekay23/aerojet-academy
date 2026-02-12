@@ -1,8 +1,7 @@
+import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
 import { sendStaffNotification, sendProofReceivedEmail } from '@/app/lib/mail';
-
-const prisma = new PrismaClient();
+import { FEE_STATUS } from '@/app/lib/constants';
 
 export async function POST(req: Request) {
     try {
@@ -80,7 +79,7 @@ export async function POST(req: Request) {
                 where: { id: fee.id },
                 data: {
                     proofUrl: proofUrl,
-                    status: 'VERIFYING'
+                    status: FEE_STATUS.VERIFYING
                 }
             });
 

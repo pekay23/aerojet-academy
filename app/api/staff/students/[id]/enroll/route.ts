@@ -1,13 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/app/lib/prisma';
 
-const prisma = new PrismaClient();
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
-  
+
   if (!['ADMIN', 'STAFF'].includes((session?.user as any)?.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
   }
@@ -22,12 +21,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     // Update Student
     const updatedStudent = await prisma.student.update({
-        where: { id },
-        data: {
-            cohortId,
-            enrollmentStatus: status || 'ENROLLED',
-            cohort: cohort.name // Update legacy string field if needed
-        }
+      where: { id },
+      data: {
+        cohortId,
+        enrollmentStatus: status || 'ENROLLED',
+        cohort: cohort.name // Update legacy string field if needed
+      }
     });
 
     return NextResponse.json({ success: true, student: updatedStudent });

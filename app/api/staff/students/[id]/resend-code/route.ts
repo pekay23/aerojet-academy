@@ -1,15 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/app/lib/prisma';
 import { hash } from 'bcryptjs';
 import { sendPaymentConfirmationEmail } from '@/app/lib/mail';
 
-const prisma = new PrismaClient();
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
-  
+
   // Security: Only Admins can reset passwords/resend codes
   if (!session || (session.user as any).role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
@@ -35,7 +34,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // 3. Update Password in DB
     await prisma.user.update({
       where: { id: student.userId },
-      data: { 
+      data: {
         password: hashedPassword,
         isActive: true // Ensure they are unlocked
       }
@@ -43,14 +42,14 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     // 4. Resend Email
     try {
-        await sendPaymentConfirmationEmail(
-            student.user.email!, 
-            student.user.name!,
-            accessCode
-        );
+      await sendPaymentConfirmationEmail(
+        student.user.email!,
+        student.user.name!,
+        accessCode
+      );
     } catch (emailError) {
-        console.error("EMAIL_RESEND_ERROR:", emailError);
-        return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
+      console.error("EMAIL_RESEND_ERROR:", emailError);
+      return NextResponse.json({ error: 'Failed to send email' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, message: 'Access code reset and sent.' });

@@ -1,10 +1,9 @@
+import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
 import { sendProofReceivedEmail, sendStaffNotification } from '@/app/lib/mail';
-
-const prisma = new PrismaClient();
+import { FEE_STATUS } from '@/app/lib/constants';
 
 export async function POST(req: Request) {
     try {
@@ -39,7 +38,7 @@ export async function POST(req: Request) {
         await prisma.fee.update({
             where: { id: feeId },
             data: {
-                status: 'PENDING',
+                status: FEE_STATUS.VERIFYING,
                 proofUrl: proofUrl
             }
         });
@@ -56,12 +55,12 @@ export async function POST(req: Request) {
 
         // Notify Staff via Email
         try {
-             await sendStaffNotification(
-                user.name || 'Applicant', 
-                user.email || 'No Email', 
-                `New payment proof uploaded by ${user.name} for fee ${fee.description}. Link: ${proofUrl}`, 
+            await sendStaffNotification(
+                user.name || 'Applicant',
+                user.email || 'No Email',
+                `New payment proof uploaded by ${user.name} for fee ${fee.description}. Link: ${proofUrl}`,
                 `Action Required: Payment Proof Uploaded`
-             );
+            );
         } catch (e) { console.error("Staff email failed", e); }
 
         // Notify Staff via DB Notification

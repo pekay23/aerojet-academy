@@ -1,27 +1,29 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-export function middleware(req: NextRequest) {
-  // --- PORTAL ACCESS LOGIC REMOVED ---
-  // The portal is now open to everyone. 
-  // Access control is strictly handled by the database/role logic.
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  const { pathname } = req.nextUrl;
+
+  // Protected route groups — require authentication
+  const protectedPaths = ['/staff', '/portal/dashboard', '/applicant'];
+  const isProtected = protectedPaths.some(p => pathname.startsWith(p));
+
+  if (isProtected && !token) {
+    return NextResponse.redirect(new URL('/portal/login', req.url));
+  }
+
+  // Role-based guards — students can't access staff pages
+  if (pathname.startsWith('/staff') && token?.role === 'STUDENT') {
+    return NextResponse.redirect(new URL('/portal/dashboard', req.url));
+  }
 
   return NextResponse.next();
 }
 
-/**
- * Configure which paths the middleware runs on.
- * We exclude API routes (except for auth), static files, and icons for performance.
- */
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api/auth (NextAuth API)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
     "/((?!api/auth|_next/static|_next/image|favicon.ico).*)",
   ],
 };

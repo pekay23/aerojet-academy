@@ -97,14 +97,6 @@
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
 
 /* Force specific Aerojet utilities */
 .bg-aerojet-blue { background-color: #002a5c; }

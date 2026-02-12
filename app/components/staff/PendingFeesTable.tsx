@@ -13,7 +13,7 @@ export default function PendingFeesTable() {
     const fetchFees = async () => {
         try {
             setLoading(true);
-            const res = await fetch('/api/finance/pending-fees');
+            const res = await fetch('/api/staff/finance/pending');
             const data = await res.json();
             setFees(data.fees || []);
         } catch (error) {
@@ -32,7 +32,7 @@ export default function PendingFeesTable() {
         if (!confirm('Are you sure you want to approve this payment?')) return;
         setProcessingId(feeId);
         try {
-            const res = await fetch('/api/finance/approve-fee', {
+            const res = await fetch('/api/staff/finance/approve', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ feeId })
@@ -56,7 +56,7 @@ export default function PendingFeesTable() {
         const reason = prompt('Reason for rejection (optional):');
         setProcessingId(feeId);
         try {
-            const res = await fetch('/api/finance/reject-fee', {
+            const res = await fetch('/api/staff/finance/reject', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ feeId, reason })

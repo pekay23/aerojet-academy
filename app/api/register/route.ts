@@ -1,14 +1,12 @@
+import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
 import { sendApplicationReceivedEmail, sendVerificationEmail } from '@/app/lib/mail';
-import { PrismaClient } from '@prisma/client';
 import crypto from 'crypto';
 
-const prisma = new PrismaClient();
-
 function generateRegistrationCode() {
-  // Format: ATA-XXXX (e.g., ATA-9281)
+  // Format: AATA-XXXX (e.g., AATA-9281)
   const random = Math.floor(1000 + Math.random() * 9000);
-  return `ATA-${random}`;
+  return `AATA-${random}`;
 }
 
 export async function POST(req: Request) {
