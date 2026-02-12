@@ -11,13 +11,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Loader2, Eye, UserPlus, MoreHorizontal, Edit, Trash, KeyRound } from 'lucide-react';
+import { Search, Loader2, Eye, UserPlus, MoreHorizontal, Edit, Trash, KeyRound, RotateCcw, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import EditUserDialog from './EditUserDialog';
 import AddUserDialog from './AddUserDialog';
 
 interface UserListClientProps {
-    initialFilter?: 'all' | 'students' | 'staff';
+    initialFilter?: 'all' | 'students' | 'staff' | 'trash';
 }
 
 export default function UserListClient({ initialFilter = 'all' }: UserListClientProps) {
@@ -33,7 +33,12 @@ export default function UserListClient({ initialFilter = 'all' }: UserListClient
     const fetchUsers = async (roleFilter: string) => {
         try {
             setLoading(true);
-            const url = roleFilter === 'all' ? '/api/staff/users' : `/api/staff/users?role=${roleFilter}`;
+            let url = '/api/staff/users';
+            if (roleFilter === 'trash') {
+                url += '?view=trash';
+            } else if (roleFilter !== 'all') {
+                url += `?role=${roleFilter}`;
+            }
             const res = await fetch(url);
             const data = await res.json();
             setUsers(data.users || []);
@@ -61,6 +66,35 @@ export default function UserListClient({ initialFilter = 'all' }: UserListClient
         } catch { toast.error("Error"); }
     };
 
+    const handleRestore = async (id: string) => {
+        try {
+            const res = await fetch('/api/staff/users', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId: id, isDeleted: false })
+            });
+            if (res.ok) {
+                toast.success("User restored");
+                fetchUsers(filter);
+            } else {
+                toast.error("Failed to restore");
+            }
+        } catch { toast.error("Error"); }
+    };
+
+    const handlePermanentDelete = async (id: string) => {
+        if (!confirm("This action cannot be undone. Delete permanently?")) return;
+        try {
+            const res = await fetch(`/api/staff/users?id=${id}&permanent=true`, { method: 'DELETE' });
+            if (res.ok) {
+                toast.success("User deleted permanently");
+                fetchUsers(filter);
+            } else {
+                toast.error("Failed to delete");
+            }
+        } catch { toast.error("Error"); }
+    };
+
     const filteredUsers = users.filter(user =>
         user.name?.toLowerCase().includes(search.toLowerCase()) ||
         user.email?.toLowerCase().includes(search.toLowerCase())
@@ -71,9 +105,9 @@ export default function UserListClient({ initialFilter = 'all' }: UserListClient
             <Tabs value={filter} onValueChange={(val) => setFilter(val as any)}>
                 <div className="flex justify-between items-center mb-4">
                     <TabsList>
-                        <TabsTrigger value="all">All Users</TabsTrigger>
-                        <TabsTrigger value="students">Students</TabsTrigger>
+                        <TabsTrigger value="all">Directory</TabsTrigger>
                         <TabsTrigger value="staff">Staff & Instructors</TabsTrigger>
+                        <TabsTrigger value="trash" className="text-red-600 data-[state=active]:text-red-700">Archived</TabsTrigger>
                     </TabsList>
                     <Button variant="outline" onClick={() => setIsAddUserOpen(true)}><UserPlus className="w-4 h-4 mr-2" /> Add New</Button>
                 </div>
@@ -111,7 +145,18 @@ export default function UserListClient({ initialFilter = 'all' }: UserListClient
                                     <TableRow><TableCell colSpan={5} className="text-center h-24 text-muted-foreground">No users found.</TableCell></TableRow>
                                 ) : (
                                     filteredUsers.map((user) => (
-                                        <TableRow key={user.id}>
+                                        <TableRow
+                                            key={user.id}
+                                            className="cursor-pointer hover:bg-slate-50 transition-colors"
+                                            title="Click to view details"
+                                            onClick={() => {
+                                                if (filter !== 'trash' && user.role === 'STUDENT' && user.studentProfile?.id) {
+                                                    router.push(`/staff/students/${user.studentProfile.id}`);
+                                                } else if (filter !== 'trash') {
+                                                    setEditingUser(user);
+                                                }
+                                            }}
+                                        >
                                             <TableCell>
                                                 <div className="flex items-center gap-3">
                                                     <Avatar className="h-9 w-9"><AvatarImage src={user.image} /><AvatarFallback>{user.name?.[0]}</AvatarFallback></Avatar>
@@ -126,11 +171,20 @@ export default function UserListClient({ initialFilter = 'all' }: UserListClient
                                                     <DropdownMenuTrigger asChild><Button variant="ghost" className="h-8 w-8 p-0"><MoreHorizontal className="h-4 w-4" /></Button></DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                        <DropdownMenuItem onClick={() => setEditingUser(user)}><Edit className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
-                                                        {user.role === 'STUDENT' && user.studentProfile?.id && (
-                                                            <DropdownMenuItem onClick={() => router.push(`/staff/students/${user.studentProfile.id}`)}><Eye className="mr-2 h-4 w-4" /> View Profile</DropdownMenuItem>
+                                                        {filter === 'trash' ? (
+                                                            <>
+                                                                <DropdownMenuItem onClick={() => handleRestore(user.id)}><RotateCcw className="mr-2 h-4 w-4" /> Restore</DropdownMenuItem>
+                                                                <DropdownMenuItem onClick={() => handlePermanentDelete(user.id)} className="text-red-600"><Trash2 className="mr-2 h-4 w-4" /> Delete Forever</DropdownMenuItem>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <DropdownMenuItem onClick={() => setEditingUser(user)}><Edit className="mr-2 h-4 w-4" /> Edit</DropdownMenuItem>
+                                                                {user.role === 'STUDENT' && user.studentProfile?.id && (
+                                                                    <DropdownMenuItem onClick={() => router.push(`/staff/students/${user.studentProfile.id}`)}><Eye className="mr-2 h-4 w-4" /> View Profile</DropdownMenuItem>
+                                                                )}
+                                                                <DropdownMenuItem onClick={() => handleDelete(user.id)} className="text-red-600"><Trash className="mr-2 h-4 w-4" /> Archive</DropdownMenuItem>
+                                                            </>
                                                         )}
-                                                        <DropdownMenuItem onClick={() => handleDelete(user.id)} className="text-red-600"><Trash className="mr-2 h-4 w-4" /> Archive</DropdownMenuItem>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </TableCell>

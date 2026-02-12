@@ -11,6 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import SpotlightCard from '@/app/components/ui/SpotlightCard';
 import { useSession } from 'next-auth/react';
+import InstructorDashboardClient from './InstructorDashboardClient';
 
 export default function DashboardClient() {
     const { data: session } = useSession();
@@ -40,7 +41,13 @@ export default function DashboardClient() {
         return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-[#4c9ded]" /></div>;
     }
 
-    // Destructure Data
+    // Branch by role: Instructor gets their own dashboard
+    const userRole = (session?.user as any)?.role;
+    if (userRole === 'INSTRUCTOR' || data.role === 'INSTRUCTOR') {
+        return <InstructorDashboardClient />;
+    }
+
+    // Destructure Data (Admin/Staff only from here)
     const { studentStats, opsStats, teamStats, recentStudents, calendarEvents, windowTracker, attendance } = data;
     const firstName = session?.user?.name?.split(' ')[0] || 'Admin';
 

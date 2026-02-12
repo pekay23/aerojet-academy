@@ -505,6 +505,10 @@ model Assessment {
   studentId     String
   student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   
+  // Instructor grading fields
+  gradedBy      String?  // ID of the instructor who recorded the grade
+  isLocked      Boolean  @default(false) // Prevents re-grading once submitted
+
   // Updated Relation to new logic (optional)
   // Can link to Booking or ExamPool if needed in future
   legacyRunId   String? 

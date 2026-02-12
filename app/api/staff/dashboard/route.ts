@@ -10,8 +10,93 @@ export async function GET() {
     const session = await getServerSession(authOptions);
 
     // 1. Security Check
-    if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as { role: string }).role)) {
+    const user = session?.user as { role: string; id: string } | undefined;
+    if (!user || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes(user.role)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+    }
+
+    // 🚀 INSTRUCTOR DASHBOARD
+    if (user.role === 'INSTRUCTOR') {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const [myClasses, todayAttendance, recentGrades, upcomingEvents] = await Promise.all([
+        // Classes assigned to this instructor via CohortCourse
+        prisma.cohortCourse.findMany({
+          where: { instructorId: user.id },
+          include: {
+            course: { select: { id: true, code: true, title: true } },
+            cohort: {
+              select: {
+                id: true, name: true, code: true,
+                _count: { select: { students: true } }
+              }
+            }
+          }
+        }),
+
+        // Today's attendance records by this instructor
+        prisma.attendanceRecord.findMany({
+          where: {
+            recordedBy: user.id,
+            date: { gte: today, lt: tomorrow }
+          },
+          select: { status: true }
+        }),
+
+        // Recent grades recorded by this instructor
+        prisma.assessment.findMany({
+          where: { gradedBy: user.id },
+          take: 5,
+          orderBy: { recordedAt: 'desc' },
+          include: {
+            student: {
+              include: { user: { select: { name: true } } }
+            }
+          }
+        }),
+
+        // Upcoming system events
+        prisma.systemEvent.findMany({
+          where: { start: { gte: new Date() } },
+          take: 5,
+          orderBy: { start: 'asc' }
+        })
+      ]);
+
+      const totalStudents = myClasses.reduce((sum: number, cc: any) => sum + (cc.cohort?._count?.students || 0), 0);
+      const todayPresent = todayAttendance.filter((a: any) => a.status === 'PRESENT').length;
+      const todayTotal = todayAttendance.length;
+
+      return NextResponse.json({
+        role: 'INSTRUCTOR',
+        stats: {
+          classes: myClasses.length,
+          students: totalStudents,
+          todayAttendance: { present: todayPresent, total: todayTotal },
+          gradesRecorded: recentGrades.length
+        },
+        myClasses: myClasses.map((cc: any) => ({
+          id: cc.id,
+          courseId: cc.course.id,
+          courseCode: cc.course.code,
+          courseTitle: cc.course.title,
+          cohortName: cc.cohort.name,
+          cohortCode: cc.cohort.code,
+          studentCount: cc.cohort._count.students
+        })),
+        recentGrades: recentGrades.map((g: any) => ({
+          id: g.id,
+          studentName: g.student?.user?.name || 'Unknown',
+          moduleCode: g.moduleCode,
+          score: g.score,
+          isPassed: g.isPassed,
+          recordedAt: g.recordedAt
+        })),
+        calendarEvents: upcomingEvents.map((e: any) => ({ id: e.id, title: e.title, date: e.start, type: e.type }))
+      });
     }
 
     // 🚀 Execute all queries in parallel
@@ -103,7 +188,7 @@ export async function GET() {
     if (nextEvent) {
       let totalConfirmedSeats = 0;
       let totalRevenue = 0;
-      nextEvent.pools.forEach((pool) => {
+      nextEvent.pools.forEach((pool: any) => {
         const seats = pool.memberships.length;
         totalConfirmedSeats += seats;
         totalRevenue += seats * 300;
@@ -126,13 +211,13 @@ export async function GET() {
 
     // --- Process Calendar Events ---
     const calendarEvents = [
-      ...upcomingPools.map((pool) => ({
+      ...upcomingPools.map((pool: any) => ({
         id: pool.id,
         title: `Pool: ${pool.name}`,
         date: pool.examDate,
         type: 'EXAM'
       })),
-      ...upcomingEvents.map((event) => ({
+      ...upcomingEvents.map((event: any) => ({
         id: event.id,
         title: `Deadline: ${event.name}`,
         date: event.paymentDeadline,
@@ -148,7 +233,7 @@ export async function GET() {
 
     // --- Calculate Attendance Rate ---
     const totalRecs = attendanceRecords.length;
-    const presentRecs = attendanceRecords.filter((r) => r.status === 'PRESENT').length;
+    const presentRecs = attendanceRecords.filter((r: any) => r.status === 'PRESENT').length;
     const studentRate = totalRecs > 0 ? ((presentRecs / totalRecs) * 100).toFixed(1) : 0;
 
     // --- Calculate Instructor Attendance Rate ---
@@ -159,7 +244,7 @@ export async function GET() {
     const expectedRecords = workingDays * instructorCount;
     // Distinct days instructors logged attendance
     const instructorDays = new Set(
-      attendanceRecords.map((r) => `${r.recordedBy}-${new Date(r.date).toDateString()}`)
+      attendanceRecords.map((r: any) => `${r.recordedBy}-${new Date(r.date).toDateString()}`)
     );
     const instructorRate = expectedRecords > 0
       ? Math.min(100, ((instructorDays.size / expectedRecords) * 100)).toFixed(1)
@@ -184,4 +269,3 @@ export async function GET() {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
-

@@ -72,7 +72,7 @@ export default function LoginForm() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aerojet-blue text-gray-900" // Added text color
+            className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aerojet-blue bg-white text-gray-900" // Added bg-white
           />
         </div>
         <div>
@@ -83,7 +83,7 @@ export default function LoginForm() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aerojet-blue text-gray-900" // Added text color
+            className="mt-1 block w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-aerojet-blue bg-white text-gray-900" // Added bg-white
           />
         </div>
 
