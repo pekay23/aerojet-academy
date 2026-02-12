@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
         // Verify instructor owns this course
         if (user.role === 'INSTRUCTOR') {
             const assignment = await prisma.cohortCourse.findFirst({
-                where: { courseId, instructorId: user.id }
+                where: { courseId, instructors: { some: { id: user.id } } }
             });
             if (!assignment) {
                 return NextResponse.json({ error: 'You are not assigned to this course' }, { status: 403 });
@@ -35,7 +35,7 @@ export async function GET(req: NextRequest) {
         const cohortCourse = await prisma.cohortCourse.findFirst({
             where: {
                 courseId,
-                ...(user.role === 'INSTRUCTOR' ? { instructorId: user.id } : {})
+                ...(user.role === 'INSTRUCTOR' ? { instructors: { some: { id: user.id } } } : {})
             },
             include: {
                 cohort: {
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
         // Verify instructor owns this course
         if (user.role === 'INSTRUCTOR') {
             const assignment = await prisma.cohortCourse.findFirst({
-                where: { courseId, instructorId: user.id }
+                where: { courseId, instructors: { some: { id: user.id } } }
             });
             if (!assignment) {
                 return NextResponse.json({ error: 'You are not assigned to this course' }, { status: 403 });
@@ -170,7 +170,7 @@ export async function PUT(req: NextRequest) {
         // Verify instructor owns this course
         if (user.role === 'INSTRUCTOR') {
             const assignment = await prisma.cohortCourse.findFirst({
-                where: { courseId: record.courseId, instructorId: user.id }
+                where: { courseId: record.courseId, instructors: { some: { id: user.id } } }
             });
             if (!assignment) {
                 return NextResponse.json({ error: 'You are not assigned to this course' }, { status: 403 });

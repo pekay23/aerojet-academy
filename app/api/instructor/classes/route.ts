@@ -14,10 +14,10 @@ export async function GET() {
 
     try {
         // For instructors, fetch only their assigned classes via CohortCourse
-        const instructorId = user.role === 'INSTRUCTOR' ? user.id : undefined;
+        const instructorFilter = user.role === 'INSTRUCTOR' ? { instructors: { some: { id: user.id } } } : {};
 
         const classes = await prisma.cohortCourse.findMany({
-            where: instructorId ? { instructorId } : {},
+            where: instructorFilter,
             include: {
                 course: {
                     select: { id: true, code: true, title: true, description: true, duration: true }
@@ -47,7 +47,7 @@ export async function GET() {
                     where: {
                         courseId: cls.courseId,
                         date: { gte: thirtyDaysAgo },
-                        ...(instructorId ? { recordedBy: instructorId } : {})
+                        ...(user.role === 'INSTRUCTOR' ? { recordedBy: user.id } : {})
                     }
                 });
                 const presentRecords = await prisma.attendanceRecord.count({
@@ -55,7 +55,7 @@ export async function GET() {
                         courseId: cls.courseId,
                         date: { gte: thirtyDaysAgo },
                         status: 'PRESENT',
-                        ...(instructorId ? { recordedBy: instructorId } : {})
+                        ...(user.role === 'INSTRUCTOR' ? { recordedBy: user.id } : {})
                     }
                 });
 

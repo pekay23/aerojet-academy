@@ -30,9 +30,14 @@ export default function FinanceClient() {
   };
 
   const handleReject = async (id: string) => {
-    await fetch('/api/finance/reject-fee', { method: 'POST', body: JSON.stringify({ feeId: id }) });
-    toast.success("Rejected");
-    fetchFees();
+    try {
+      const res = await fetch('/api/staff/finance/reject', { method: 'POST', body: JSON.stringify({ feeId: id }) });
+      if (!res.ok) throw new Error("Failed to reject");
+      toast.success("Rejected");
+      fetchFees();
+    } catch {
+      toast.error("Error rejecting fee");
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -88,7 +93,9 @@ export default function FinanceClient() {
                       <span className="text-sm">{f.description}</span>
                     </TableCell>
                     <TableCell>
-                      <span className="font-bold">GHS {Number(f.amount).toFixed(2)}</span>
+                      <span className="font-bold">
+                        {f.description?.toLowerCase().includes('registration') ? 'GHS' : '€'} {Number(f.amount).toFixed(2)}
+                      </span>
                     </TableCell>
                     <TableCell>{getStatusBadge(f.status)}</TableCell>
                     <TableCell>

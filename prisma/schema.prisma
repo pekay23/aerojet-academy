@@ -59,6 +59,7 @@ model User {
   sessions          Session[]
   studentProfile    Student?
   instructedCourses Course[]  @relation("CourseInstructors")
+  cohortInstructions CohortCourse[] @relation("CohortInstructors")
   auditLogs         AuditLog[]
   notifications     Notification[]
 }
@@ -111,7 +112,7 @@ model CohortCourse {
   courseId     String
   course       Course   @relation(fields: [courseId], references: [id])
   semester     Int      @default(1)
-  instructorId String?
+  instructors  User[]   @relation("CohortInstructors")
 }
 
 // =========================================================
@@ -451,7 +452,7 @@ model Fee {
   student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   
   createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  updatedAt     DateTime? @updatedAt
 }
 
 model SystemSetting {

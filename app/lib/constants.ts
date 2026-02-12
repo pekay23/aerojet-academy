@@ -5,6 +5,7 @@ export const FEE_STATUS = {
     PARTIAL: 'PARTIAL',
     OVERDUE: 'OVERDUE',
     WAIVED: 'WAIVED',
+    REJECTED: 'REJECTED',
 } as const;
 
 export const USER_ROLES = {

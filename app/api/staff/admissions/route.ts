@@ -31,7 +31,7 @@ export async function GET(_req: Request) {
         include: {
           user: { select: { name: true, email: true, image: true, createdAt: true } },
           fees: {
-            where: { description: { contains: 'Registration' } },
+            where: { description: { contains: 'registration', mode: 'insensitive' } },
             take: 1,
             orderBy: { createdAt: 'desc' }
           }

@@ -23,7 +23,7 @@ export async function GET() {
       const [myClasses, todayAttendance, recentGrades, upcomingEvents] = await Promise.all([
         // Classes assigned to this instructor via CohortCourse
         prisma.cohortCourse.findMany({
-          where: { instructorId: user.id },
+          where: { instructors: { some: { id: user.id } } },
           include: {
             course: { select: { id: true, code: true, title: true } },
             cohort: {

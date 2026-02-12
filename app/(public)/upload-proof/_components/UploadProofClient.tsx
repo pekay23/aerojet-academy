@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { UploadButton } from "@/app/utils/uploadthing"; // Corrected path
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2, X, UploadCloud, ArrowRight } from 'lucide-react';
 
 export default function UploadProofClient() {
   const searchParams = useSearchParams();
@@ -123,33 +123,98 @@ export default function UploadProofClient() {
             />
           </div>
 
-          <div className="space-y-2 pt-2">
-            <Label>Proof of Payment</Label>
-            <div className="border border-dashed border-slate-300 rounded-lg p-6 text-center hover:bg-slate-50 transition-colors">
+          <div className="space-y-4 pt-4">
+            <Label className="text-slate-700 font-semibold flex items-center gap-2">
+              <UploadCloud className="w-4 h-4 text-aerojet-blue" />
+              Proof of Payment
+            </Label>
+
+            <div className={`relative border-2 border-dashed rounded-2xl transition-all duration-300 ${proofUrl
+              ? "border-green-500 bg-green-50/30"
+              : "border-slate-300 bg-slate-50 hover:border-aerojet-blue hover:bg-slate-100/50"
+              }`}>
               {proofUrl ? (
-                <div className="text-sm text-green-600 font-medium flex items-center justify-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" /> File Uploaded Successfully!
+                <div className="p-4">
+                  <div className="relative aspect-video w-full rounded-xl overflow-hidden border border-green-200 bg-white shadow-sm group">
+                    <img
+                      src={proofUrl}
+                      alt="Payment Proof"
+                      className="w-full h-full object-contain"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => setProofUrl("")}
+                        className="rounded-full h-10 w-10 p-0"
+                      >
+                        <X className="w-5 h-5" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="mt-3 flex items-center justify-center gap-2 text-green-700 font-medium text-sm">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Ready to submit
+                  </div>
                 </div>
               ) : (
-                <UploadButton
-                  endpoint="paymentProof"
-                  onClientUploadComplete={(res) => {
-                    if (res && res[0]) {
-                      setProofUrl(res[0].url);
-                      toast.success("Upload Completed");
-                    }
-                  }}
-                  onUploadError={(error: Error) => {
-                    toast.error(`ERROR! ${error.message}`);
-                  }}
-                />
+                <div className="p-8 flex flex-col items-center justify-center min-h-[180px]">
+                  <UploadButton
+                    endpoint="paymentProof"
+                    appearance={{
+                      button: "bg-aerojet-blue hover:bg-aerojet-sky transition-all duration-300 font-bold uppercase tracking-widest text-xs px-6 py-2 shadow-lg shadow-blue-500/20",
+                      container: "w-full",
+                      allowedContent: "text-slate-400 text-[10px] mt-2"
+                    }}
+                    onClientUploadComplete={(res) => {
+                      if (res && res[0]) {
+                        setProofUrl(res[0].url);
+                        toast.success("File uploaded successfully!");
+                      }
+                    }}
+                    onUploadError={(error: Error) => {
+                      toast.error(`Upload error: ${error.message}`);
+                    }}
+                  />
+                  {!proofUrl && (
+                    <div className="mt-4 pointer-events-none">
+                      <p className="text-sm font-medium text-slate-500">
+                        Drag and drop your receipt or click the button
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">
+                        SVG, PNG, JPG or PDF (MAX. 4MB)
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
         </CardContent>
-        <CardFooter>
-          <Button type="submit" className="w-full bg-aerojet-blue hover:bg-aerojet-sky h-12 text-sm font-bold uppercase tracking-widest" disabled={loading || !proofUrl || (!registrationCode && !email)}>
-            {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting...</> : "Submit Proof"}
+        <CardFooter className="pt-2">
+          <Button
+            type="submit"
+            className={`w-full h-14 text-sm font-black uppercase tracking-[0.15em] transition-all duration-500 relative overflow-hidden group shadow-xl ${!proofUrl || (!registrationCode && !email)
+              ? "bg-slate-200 text-slate-400"
+              : "bg-aerojet-blue hover:bg-blue-600 text-white shadow-blue-500/25 active:scale-[0.98]"
+              }`}
+            disabled={loading || !proofUrl || (!registrationCode && !email)}
+          >
+            {loading ? (
+              <div className="flex items-center gap-3">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Processing...</span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center gap-2">
+                <span>Submit Verification</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </div>
+            )}
+
+            {/* Glossy overlay effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
           </Button>
         </CardFooter>
       </form>
