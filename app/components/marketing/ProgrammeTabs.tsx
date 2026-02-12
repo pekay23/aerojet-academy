@@ -24,7 +24,7 @@ export default function ProgrammeTabs() {
             <p className="text-slate-500 max-w-2xl mx-auto">Select a category to explore our world-class aviation training options.</p>
         </div>
 
-        <Tabs defaultValue="easa" className="w-full max-w-6xl mx-auto">
+        <Tabs defaultValue="easa" className="w-full max-w-6xl mx-auto" id="program-tabs">
             <div className="flex justify-center mb-12 overflow-x-auto pb-4">
                 <TabsList className="bg-slate-100 p-1 rounded-full inline-flex">
                     <TabsTrigger value="easa" className="rounded-full px-6 py-3 text-sm font-bold data-[state=active]:bg-aerojet-blue data-[state=active]:text-white">EASA Part-66 License</TabsTrigger>
