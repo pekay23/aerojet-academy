@@ -11,8 +11,8 @@ export const ourFileRouter = {
       // Public endpoint for applicants
       return { userId: "public-applicant" };
     })
-    .onUploadComplete(async ({ file }) => {
-      console.log("Proof uploaded:", file.url);
+    .onUploadComplete(async ({ metadata, file }) => {
+      return { uploadedBy: metadata.userId, url: file.url };
     }),
 
   // 2. Admin Only Photo Upload (For uploading OTHER people's photos)

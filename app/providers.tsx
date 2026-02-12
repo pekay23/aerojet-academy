@@ -2,7 +2,7 @@
 
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "next-themes"; // Import this
-import { CommandMenu } from "@/app/components/marketing/CommandMenu";
+import { CommandMenu } from "@/components/marketing/CommandMenu";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (

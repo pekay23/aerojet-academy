@@ -3,8 +3,8 @@ import { PortableText } from '@portabletext/react';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import Link from 'next/link'; // <--- ADD THIS LINE
-import Navbar from '@/app/components/marketing/Navbar';
-import Footer from '@/app/components/marketing/Footer';
+import Navbar from '@/components/marketing/Navbar';
+import Footer from '@/components/marketing/Footer';
 import { client } from '@/sanity/lib/client';
 import { urlFor } from '@/sanity/lib/image';
 

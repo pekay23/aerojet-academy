@@ -1,6 +1,6 @@
 import React from 'react';
-import Navbar from '@/app/components/marketing/Navbar'; // FIXED
-import Footer from '@/app/components/marketing/Footer'; // FIXED
+import Navbar from '@/components/marketing/Navbar'; // FIXED
+import Footer from '@/components/marketing/Footer'; // FIXED
 
 export default function PublicLayout({
   children,

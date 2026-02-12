@@ -1,6 +1,6 @@
 import React from 'react';
 import { Metadata } from 'next';
-import PageHero from '@/app/components/marketing/PageHero';
+import PageHero from '@/components/marketing/PageHero';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 export const metadata: Metadata = {

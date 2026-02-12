@@ -9,7 +9,7 @@ import { Loader2, Users, FileText, Banknote, Calendar, ArrowUp, ArrowRight, Cloc
 import { useRouter } from 'next/navigation';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import SpotlightCard from '@/app/components/ui/SpotlightCard';
+import SpotlightCard from '@/components/ui/SpotlightCard';
 import { useSession } from 'next-auth/react';
 
 export default function DashboardClient() {

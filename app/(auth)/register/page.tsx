@@ -1,9 +1,9 @@
 import React from 'react';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Navbar from '@/app/components/marketing/Navbar';
-import Footer from '@/app/components/marketing/Footer';
-import RegisterForm from '@/app/components/marketing/RegisterForm'; 
+import Navbar from '@/components/marketing/Navbar';
+import Footer from '@/components/marketing/Footer';
+import RegisterForm from '@/components/marketing/RegisterForm'; 
 
 export const metadata: Metadata = {
   title: 'Register',

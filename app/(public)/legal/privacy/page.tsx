@@ -9,14 +9,14 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <main className="min-h-screen flex flex-col bg-slate-50 pt-20">      
+    <main className="min-h-screen flex flex-col bg-slate-50 pt-20">
       <div className="grow container mx-auto px-6 py-12 max-w-4xl">
         <div className="bg-white p-8 md:p-16 rounded-[2.5rem] shadow-xl border border-slate-100 relative overflow-hidden">
-          
+
           {/* Header */}
           <div className="mb-12 border-b border-slate-100 pb-8 text-center md:text-left">
             <span className="bg-blue-50 text-[#4c9ded] px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 inline-block">
-                Legal Policy
+              Legal Policy
             </span>
             <h1 className="text-3xl md:text-5xl font-black text-aerojet-blue uppercase tracking-tight leading-tight">
               Website Privacy Policy
@@ -33,11 +33,11 @@ export default function PrivacyPolicyPage() {
             prose-strong:text-slate-900 prose-strong:font-bold
             prose-li:text-slate-600 prose-li:my-1
             prose-a:text-[#4c9ded] prose-a:no-underline prose-a:font-bold hover:prose-a:underline hover:prose-a:text-[#002a5c] transition-colors">
-            
+
             <p className="text-lg font-medium text-slate-700">
-              This privacy policy ("policy") will help you understand how <strong className="text-aerojet-blue">Aerojet Aviation</strong> ("us", "we", "our") uses and protects the data you provide to us when you visit and use <Link href="https://www.aerojet-academy.com">www.aerojet-academy.com</Link>.
+              This privacy policy ("policy") will help you understand how <strong className="text-aerojet-blue">Aerojet Aviation</strong> ("us", "we", "our") uses and protects the data you provide to us when you visit and use <Link href="/" className="text-aerojet-blue hover:underline">www.aerojet-academy.com</Link>.
             </p><br></br>
-            
+
             <p className="text-lg font-medium text-slate-700">
               We reserve the right to change this policy at any given time, of which you will be promptly updated. If you want to make sure that you are up to date with the latest changes, we advise you to frequently visit this page.
             </p><br></br>
@@ -78,16 +78,16 @@ export default function PrivacyPolicyPage() {
 
             <h2><strong>Disclosure of Your Personal Data</strong></h2>
             <br></br>
-            
-            <p className="text-lg font-medium text-slate-700"><strong>Business Transactions</strong><br/>
-            If the Company is involved in a merger, acquisition or asset sale, Your Personal Data may be transferred. We will provide notice before Your Personal Data is transferred and becomes subject to a different Privacy Policy.</p>
+
+            <p className="text-lg font-medium text-slate-700"><strong>Business Transactions</strong><br />
+              If the Company is involved in a merger, acquisition or asset sale, Your Personal Data may be transferred. We will provide notice before Your Personal Data is transferred and becomes subject to a different Privacy Policy.</p>
             <br></br>
 
-            <p className="text-lg font-medium text-slate-700"><strong>Law Enforcement</strong><br/>
-            Under certain circumstances, the Company may be required to disclose Your Personal Data if required to do so by law or in response to valid requests by public authorities (e.g. a court or a government agency).</p>
+            <p className="text-lg font-medium text-slate-700"><strong>Law Enforcement</strong><br />
+              Under certain circumstances, the Company may be required to disclose Your Personal Data if required to do so by law or in response to valid requests by public authorities (e.g. a court or a government agency).</p>
             <br></br>
-            <p className="text-lg font-medium text-slate-700"><strong>Other Legal Requirements</strong><br/>
-            The Company may disclose Your Personal Data in the good faith belief that such action is necessary to:</p>
+            <p className="text-lg font-medium text-slate-700"><strong>Other Legal Requirements</strong><br />
+              The Company may disclose Your Personal Data in the good faith belief that such action is necessary to:</p>
             <ul className="list-disc pl-6 space-y-2 marker:text-[#4c9ded]">
               <li className="text-lg font-medium text-slate-700">Comply with a legal obligation.</li>
               <li className="text-lg font-medium text-slate-700">Protect and defend the rights or property of the Company.</li>
@@ -135,34 +135,34 @@ export default function PrivacyPolicyPage() {
 
             {/* Contact Section */}
             <div className="bg-slate-50 p-8 rounded-2xl border border-slate-100 mt-12 not-prose">
-                <h3 className="text-xl font-black text-aerojet-blue uppercase tracking-tight mb-4">Contact Us</h3>
-                <p className="text-slate-600 text-sm mb-4">If you have any questions about this Privacy Policy, You can contact us:</p>
-                <ul className="space-y-3 text-sm">
-                    <li className="flex items-start gap-3">
-                        <span className="text-[#4c9ded] font-bold">•</span>
-                        <span>By visiting this page on our website: <Link href="https://www.aerojet-academy.com" className="text-[#4c9ded] font-bold hover:underline">www.aerojet-academy.com</Link></span>
-                    </li>
-                    <li className="flex items-start gap-3">
-                        <span className="text-[#4c9ded] font-bold">•</span>
-                        <span>By sending us an email: <a href="mailto:info@aerojet-academy.com" className="text-[#4c9ded] font-bold hover:underline">info@aerojet-academy.com</a></span>
-                    </li>
-                </ul>
+              <h3 className="text-xl font-black text-aerojet-blue uppercase tracking-tight mb-4">Contact Us</h3>
+              <p className="text-slate-600 text-sm mb-4">If you have any questions about this Privacy Policy, You can contact us:</p>
+              <ul className="space-y-3 text-sm">
+                <li className="flex items-start gap-3">
+                  <span className="text-[#4c9ded] font-bold">•</span>
+                  <span>By visiting this page on our website: <Link href="/" className="text-[#4c9ded] font-bold hover:underline">www.aerojet-academy.com</Link></span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-[#4c9ded] font-bold">•</span>
+                  <span>By sending us an email: <a href="mailto:info@aerojet-academy.com" className="text-[#4c9ded] font-bold hover:underline">info@aerojet-academy.com</a></span>
+                </li>
+              </ul>
             </div>
 
             {/* Footer Section inside Card */}
             <div className="mt-16 pt-10 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6 not-prose">
-                <div>
-                    <p className="font-black text-aerojet-blue uppercase text-sm">Have Questions?</p>
-                    <p className="text-xs text-slate-500">Contact our Data Protection Officer.</p>
-                </div>
-                <div className="flex items-center gap-6">
-                    <Link href="/contact" className="text-[#4c9ded] font-bold text-xs uppercase tracking-widest hover:underline">
-                        Contact Us
-                    </Link>
-                    <Link href="/register" className="bg-aerojet-sky text-white px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-aerojet-blue transition-all shadow-md">
-                        Start Registration
+              <div>
+                <p className="font-black text-aerojet-blue uppercase text-sm">Have Questions?</p>
+                <p className="text-xs text-slate-500">Contact our Data Protection Officer.</p>
+              </div>
+              <div className="flex items-center gap-6">
+                <Link href="/contact" className="text-[#4c9ded] font-bold text-xs uppercase tracking-widest hover:underline">
+                  Contact Us
                 </Link>
-                </div>
+                <Link href="/register" className="bg-aerojet-sky text-white px-6 py-3 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-aerojet-blue transition-all shadow-md">
+                  Start Registration
+                </Link>
+              </div>
             </div>
 
           </div>

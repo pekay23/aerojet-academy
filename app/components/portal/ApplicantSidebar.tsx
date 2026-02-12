@@ -15,7 +15,7 @@ import { signOut } from 'next-auth/react';
 import { useTheme } from "next-themes";
 import ConfirmationModal from '@/components/modal/ConfirmationModal';
 // Ensure this path points to where Shadcn installed the component. 
-// If it fails, try '@/app/components/ui/sidebar'
+// If it fails, try '@/components/ui/sidebar'
 import {
   Sidebar,
   SidebarContent,

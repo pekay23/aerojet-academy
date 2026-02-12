@@ -10,6 +10,7 @@ export default defineConfig({
         setupFiles: ['./vitest.setup.ts'],
         alias: {
             '@/components': resolve(__dirname, './app/components'),
+            '@/app': resolve(__dirname, './app'),
             '@': resolve(__dirname, './')
         }
     },
