@@ -23,7 +23,7 @@ import {
 const allMenuItems = [
   { title: "Dashboard", href: "/staff/dashboard", icon: LayoutDashboard, roles: ['ADMIN', 'STAFF', 'INSTRUCTOR'] },
   { title: "Admissions", href: "/staff/admissions", icon: ClipboardList, roles: ['ADMIN', 'STAFF'] },
-  { title: "Directory", href: "/staff/users", icon: Users, roles: ['ADMIN', 'STAFF'] },
+  { title: "Directory", href: "/staff/students", icon: Users, roles: ['ADMIN', 'STAFF'] },
   { title: "Finance", href: "/staff/finance", icon: CreditCard, roles: ['ADMIN', 'STAFF'] },
   { title: "Courses", href: "/staff/courses", icon: BookOpen, roles: ['ADMIN', 'STAFF'] },
   { title: "Exams", href: "/staff/exams", icon: GraduationCap, roles: ['ADMIN', 'STAFF'] },

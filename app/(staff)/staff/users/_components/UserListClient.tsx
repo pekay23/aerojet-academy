@@ -105,8 +105,9 @@ export default function UserListClient({ initialFilter = 'all' }: UserListClient
             <Tabs value={filter} onValueChange={(val) => setFilter(val as any)}>
                 <div className="flex justify-between items-center mb-4">
                     <TabsList>
-                        <TabsTrigger value="all">Directory</TabsTrigger>
+                        <TabsTrigger value="students">Students</TabsTrigger>
                         <TabsTrigger value="staff">Staff & Instructors</TabsTrigger>
+                        <TabsTrigger value="all">All Directory</TabsTrigger>
                         <TabsTrigger value="trash" className="text-red-600 data-[state=active]:text-red-700">Archived</TabsTrigger>
                     </TabsList>
                     <Button variant="outline" onClick={() => setIsAddUserOpen(true)}><UserPlus className="w-4 h-4 mr-2" /> Add New</Button>
