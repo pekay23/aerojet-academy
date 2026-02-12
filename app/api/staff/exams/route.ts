@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 // GET: Fetch all Exam Pools (Replaces Runs)
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   try {
     const pools = await prisma.examPool.findMany({
@@ -34,10 +31,8 @@ export async function GET(req: Request) {
 
 // POST: Create a new Exam Pool
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   const { eventId, name, examDate, startTime, endTime } = await req.json();
 

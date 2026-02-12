@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 
 /**
@@ -12,10 +11,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
     const { id } = await params;
 
@@ -87,10 +84,8 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
     const body = await req.json();
     const { id } = await params;
@@ -125,10 +120,8 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session || (session.user as any).role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
     const { id } = await params;
     const { searchParams } = new URL(req.url);

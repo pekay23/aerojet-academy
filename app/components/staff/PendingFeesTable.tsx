@@ -143,7 +143,7 @@ export default function PendingFeesTable() {
                                 </td>
                                 <td className="px-6 py-4 text-sm text-slate-600">{fee.description}</td>
                                 <td className="px-6 py-4 text-sm font-bold text-slate-900">
-                                    {fee.description?.toLowerCase().includes('registration') ? 'GHS' : '€'} {Number(fee.amount).toFixed(2)}
+                                    {fee.currency === 'GHS' ? 'GHS' : '€'} {Number(fee.amount).toFixed(2)}
                                 </td>
                                 <td className="px-6 py-4">
                                     {fee.proofUrl ? (

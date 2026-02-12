@@ -1,29 +1,25 @@
 import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { withAuth } from '@/app/lib/auth-helpers';
 import { hash } from 'bcryptjs';
 
 // GET: List all students
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  
-  if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   const students = await prisma.student.findMany({
-    include: { 
-        // 🔒 SECURITY FIX: Only select safe fields
-        user: {
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                image: true,
-                isActive: true
-            }
+    include: {
+      // 🔒 SECURITY FIX: Only select safe fields
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          isActive: true
         }
+      }
     },
     orderBy: { createdAt: 'desc' }
   });
@@ -33,11 +29,8 @@ export async function GET(req: Request) {
 
 // POST: Create student manually
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  
-  if (!session || (session.user as any).role !== 'ADMIN') {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error } = await withAuth(['ADMIN']);
+  if (error) return error;
 
   const { name, email, password } = await req.json();
 

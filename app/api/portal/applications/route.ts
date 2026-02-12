@@ -1,15 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 export async function POST(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
-
-        if (!session?.user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        const { error, session } = await withAuth(['STUDENT']);
+        if (error) return error;
 
         const userId = (session.user as any).id;
 
@@ -77,6 +73,8 @@ export async function POST(req: Request) {
                     studentId: student.id,
                     amount: finalDeposit,
                     description: `Seat Confirmation Deposit (${finalDeposit > minDeposit ? 'Custom Amount' : '40%'})`,
+                    feeType: 'TUITION',
+                    currency: 'EUR',
                     dueDate: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
                     status: 'UNPAID'
                 }

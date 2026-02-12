@@ -1,21 +1,29 @@
 import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
 import { sendApplicationReceivedEmail, sendVerificationEmail } from '@/app/lib/mail';
+import { isValidEmail, sanitizeString } from '@/app/lib/validation';
 import crypto from 'crypto';
 
 function generateRegistrationCode() {
-  // Format: AATA-XXXX (e.g., AATA-9281)
-  const random = Math.floor(1000 + Math.random() * 9000);
-  return `AATA-${random}`;
+  // Format: AATA-XXXXXX (6 alphanumeric chars) ~2.1 billion combinations
+  const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const bytes = crypto.randomBytes(6);
+  let result = '';
+  for (let i = 0; i < 6; i++) {
+    result += chars[bytes[i] % chars.length];
+  }
+  return `AATA-${result}`;
 }
 
 export async function POST(req: Request) {
   try {
     const { email, name, phone, programme } = await req.json();
 
-    if (!email || !name) {
-      return NextResponse.json({ error: 'Name and Email are required' }, { status: 400 });
+    if (!isValidEmail(email) || !name) {
+      return NextResponse.json({ error: 'Valid email and name are required' }, { status: 400 });
     }
+
+    const sanitizedName = sanitizeString(name);
 
     // 1. Check if user already exists
     const existingUser = await prisma.user.findUnique({ where: { email } });
@@ -51,7 +59,7 @@ export async function POST(req: Request) {
       // A. Create User
       const user = await tx.user.create({
         data: {
-          name,
+          name: sanitizedName,
           email,
           role: 'STUDENT',
           isActive: false, // Inactive until approved
@@ -76,6 +84,8 @@ export async function POST(req: Request) {
           amount: 350.00,
           status: 'UNPAID',
           description: `Registration Fee (${programme || 'General'})`,
+          feeType: 'REGISTRATION',
+          currency: 'GHS',
           dueDate: new Date(),
         }
       });

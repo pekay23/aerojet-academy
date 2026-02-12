@@ -237,6 +237,38 @@ export const sendPaymentReceiptEmail = async (email: string, name: string, amoun
   });
 };
 
+export const sendPaymentRejectedEmail = async (email: string, name: string, feeDescription: string, reason: string) => {
+  const html = wrapEmail(
+    "Payment Proof Rejected",
+    `
+    <p class="text">Dear ${name},</p>
+    <p class="text">We have reviewed your payment proof for <strong>${feeDescription}</strong>.</p>
+    
+    <div class="info-box" style="border-left-color: #ef4444;">
+      <div class="info-row"><strong>Status:</strong> <span style="color:#dc2626; font-weight:bold;">REJECTED ❌</span></div>
+      <div class="info-row" style="margin-top:5px;"><strong>Reason:</strong> ${reason || 'Document unclear or invalid amount.'}</div>
+    </div>
+
+    <p class="text">Please log in to your portal and upload a valid proof of payment.</p>
+
+    <div class="btn-container">
+      <a href="${DOMAIN}/login" class="btn">Login to Upload Proof</a>
+    </div>
+
+    <p class="text" style="font-size: 13px; color: #666;">
+        If you have questions, please reply to this email.
+    </p>
+    `
+  );
+
+  await resend.emails.send({
+    from: 'Finance <finance@aerojet-academy.com>',
+    to: email,
+    subject: `Action Required: Payment Rejected - ${feeDescription}`,
+    html
+  });
+};
+
 export const sendVerificationEmail = async (email: string, name: string, token: string) => {
   const verifyUrl = `${DOMAIN}/verify-email?token=${token}`;
 

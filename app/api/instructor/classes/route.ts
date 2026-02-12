@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 // GET: Fetch classes assigned to the current instructor
 export async function GET() {
-    const session = await getServerSession(authOptions);
-    const user = session?.user as { role: string; id: string } | undefined;
+    const { error, session } = await withAuth(['INSTRUCTOR', 'ADMIN', 'STAFF']);
+    if (error) return error;
 
-    if (!user || !['INSTRUCTOR', 'ADMIN', 'STAFF'].includes(user.role)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    const user = session!.user as { role: string; id: string };
 
     try {
         // For instructors, fetch only their assigned classes via CohortCourse

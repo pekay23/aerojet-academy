@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 type Recipient = {
   id: string;
@@ -11,10 +10,8 @@ type Recipient = {
 };
 
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as { role: string }).role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   const { searchParams } = new URL(req.url);
   const target = searchParams.get('target');

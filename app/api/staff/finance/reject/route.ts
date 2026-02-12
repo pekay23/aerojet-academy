@@ -1,6 +1,6 @@
 import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
+import { sendPaymentRejectedEmail } from '@/app/lib/mail';
 import { withAuth } from '@/app/lib/auth-helpers';
 import { FEE_STATUS } from '@/app/lib/constants'; // Optional: Use constant if we want to standardize 'REJECTED' too? No constant for rejected yet? 
 // The constant file had: PAID, PARTIAL, UNPAID, PENDING, VERIFYING, OVERDUE.
@@ -12,7 +12,6 @@ import { FEE_STATUS } from '@/app/lib/constants'; // Optional: Use constant if w
 // Prisma schema says String.
 // I'll use string 'REJECTED' to match previous logic, but use `withAuth`.
 
-const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
     const { error, session } = await withAuth(['ADMIN', 'STAFF']);
@@ -51,24 +50,14 @@ export async function POST(req: Request) {
 
         if (fee.student.user.email) {
             try {
-                await resend.emails.send({
-                    from: 'Aerojet Academy <admissions@aerojet-academy.com>',
-                    to: fee.student.user.email,
-                    subject: 'Payment Proof Rejected',
-                    html: `
-                        <h2>Proof of Payment Rejected</h2>
-                        <p>Dear ${fee.student.user.name || 'Student'},</p>
-                        <p>We reviewed your proof of payment for <strong>${fee.description}</strong> and unfortunately it was rejected.</p>
-                        <p><strong>Reason:</strong> ${reason || 'Document unclear or invalid amount.'}</p>
-                        <p>Please log in and upload a valid proof of payment.</p>
-                        <p>
-                            <a href="${process.env.NEXT_PUBLIC_APP_URL}/applicant/payment" style="background-color: #dc3545; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Go to Payment Page</a>
-                        </p>
-                        <p>Regards,<br>Aerojet Finance Team</p>
-                    `
-                });
+                await sendPaymentRejectedEmail(
+                    fee.student.user.email,
+                    fee.student.user.name || 'Student',
+                    fee.description || 'Fee',
+                    reason
+                );
             } catch (emailError) {
-                console.error('FAILED_TO_SEND_EMAIL', emailError);
+                console.error('FAILED_TO_SEND_REJECT_EMAIL', emailError);
             }
         }
 

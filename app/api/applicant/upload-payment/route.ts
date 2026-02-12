@@ -1,17 +1,13 @@
 import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { sendProofReceivedEmail, sendStaffNotification } from '@/app/lib/mail';
 import { FEE_STATUS } from '@/app/lib/constants';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 export async function POST(req: Request) {
     try {
-        const session = await getServerSession(authOptions);
-
-        if (!session?.user) {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-        }
+        const { error, session } = await withAuth(['STUDENT']);
+  if (error) return error;
 
         const user = session.user as { id: string; email?: string; name?: string };
         const body = await req.json();

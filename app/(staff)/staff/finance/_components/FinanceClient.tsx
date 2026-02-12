@@ -132,7 +132,7 @@ export default function FinanceClient() {
                     </TableCell>
                     <TableCell>
                       <span className="font-bold">
-                        {f.description?.toLowerCase().includes('registration') ? 'GHS' : '€'} {Number(f.amount).toFixed(2)}
+                        {f.currency === 'GHS' ? 'GHS' : '€'} {Number(f.amount).toFixed(2)}
                       </span>
                     </TableCell>
                     <TableCell>{getStatusBadge(f.status)}</TableCell>

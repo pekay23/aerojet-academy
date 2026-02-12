@@ -1,14 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 // GET: Fetch Pools available for grading
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session?.user as any)?.role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   const { searchParams } = new URL(req.url);
   const poolId = searchParams.get('poolId');
@@ -55,10 +52,8 @@ export async function GET(req: Request) {
 
 // POST: Save Grades
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session?.user as any)?.role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   try {
     const { poolId, grades } = await req.json(); // grades = [{ studentId, score, isPassed, comments }]

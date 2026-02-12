@@ -1,23 +1,20 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 // GET: Fetch courses assigned to the current instructor
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  
-  // Allow Instructors (and Admins/Staff for testing)
-  if (!session || !['INSTRUCTOR', 'ADMIN', 'STAFF'].includes((session.user as any).role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error, session } = await withAuth(['INSTRUCTOR', 'ADMIN', 'STAFF']);
+  if (error) return error;
+
+  const user = session!.user as { role: string; id: string };
 
   try {
     const courses = await prisma.course.findMany({
       where: {
         instructors: {
           some: {
-            id: session.user.id
+            id: user.id
           }
         }
       },

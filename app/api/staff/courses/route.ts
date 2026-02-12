@@ -1,25 +1,24 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 // GET: Fetch courses with instructors
 export async function GET(req: Request) {
   // ... auth check ...
-  const courses = await prisma.course.findMany({ 
-      orderBy: { code: 'asc' },
-      include: { instructors: true } // Include instructor details
+  const courses = await prisma.course.findMany({
+    orderBy: { code: 'asc' },
+    include: { instructors: true } // Include instructor details
   });
   // Also fetch list of all potential instructors for the dropdown
   const instructors = await prisma.user.findMany({ where: { role: 'INSTRUCTOR' } });
-  
+
   return NextResponse.json({ courses, instructors });
 }
 
 // POST: Create a new course/module
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  const { error } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   const { code, title, price, duration, description } = await req.json();
 
@@ -46,16 +45,16 @@ export async function PATCH(req: Request) {
 
   try {
     await prisma.course.update({
-        where: { id },
-        data: { 
-            materialLink,
-            price: price ? parseFloat(price) : undefined,
-            title,
-            // Update instructors relationship
-            instructors: instructorIds ? {
-                set: instructorIds.map((uid: string) => ({ id: uid }))
-            } : undefined
-        }
+      where: { id },
+      data: {
+        materialLink,
+        price: price ? parseFloat(price) : undefined,
+        title,
+        // Update instructors relationship
+        instructors: instructorIds ? {
+          set: instructorIds.map((uid: string) => ({ id: uid }))
+        } : undefined
+      }
     });
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -65,8 +64,8 @@ export async function PATCH(req: Request) {
 
 // DELETE: Remove a course
 export async function DELETE(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+  const { error } = await withAuth(['ADMIN']);
+  if (error) return error;
 
   const { id } = await req.json();
 

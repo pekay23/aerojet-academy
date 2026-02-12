@@ -1,13 +1,12 @@
 import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { hash } from 'bcryptjs';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 // GET: Fetch Profile
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { error, session } = await withAuth(['STUDENT']);
+  if (error) return error;
   const userId = (session.user as any).id;
 
   const student = await prisma.student.findUnique({
@@ -20,8 +19,8 @@ export async function GET(req: Request) {
 
 // PATCH: Update Profile (Phone, Password)
 export async function PATCH(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { error, session } = await withAuth(['STUDENT']);
+  if (error) return error;
   const userId = (session.user as any).id;
 
   const { phone, password } = await req.json();

@@ -1,11 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  const { error, session } = await withAuth(['STUDENT']);
+  if (error) return error;
 
   const userId = (session.user as any).id;
   const { amount } = await req.json();
@@ -16,13 +15,15 @@ export async function POST(req: Request) {
 
     // Create a Fee Invoice
     const fee = await prisma.fee.create({
-        data: {
-            studentId: student.id,
-            amount: amount,
-            status: 'UNPAID', // or VERIFYING if they upload proof immediately
-            description: `Wallet Top-Up: ${amount} Credits`,
-            dueDate: new Date()
-        }
+      data: {
+        studentId: student.id,
+        amount: amount,
+        status: 'UNPAID', // or VERIFYING if they upload proof immediately
+        description: `Wallet Top-Up: ${amount} Credits`,
+        feeType: 'OTHER',
+        currency: 'EUR',
+        dueDate: new Date()
+      }
     });
 
     return NextResponse.json({ success: true, invoiceId: fee.id });

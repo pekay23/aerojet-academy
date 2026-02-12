@@ -1,17 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 export async function GET() {
-  try {
-    const session = await getServerSession(authOptions);
+  const { error, session } = await withAuth(['ADMIN', 'STAFF', 'INSTRUCTOR']);
+  if (error) return error;
 
-    // 1. Security Check
-    const user = session?.user as { role: string; id: string } | undefined;
-    if (!user || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes(user.role)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+  try {
+    const user = session!.user as { role: string; id: string };
 
     // 🚀 INSTRUCTOR DASHBOARD
     if (user.role === 'INSTRUCTOR') {

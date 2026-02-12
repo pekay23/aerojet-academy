@@ -1,18 +1,13 @@
 import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { PrismaClient, Prisma } from '@prisma/client';
 import { hash } from 'bcryptjs';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 // GET: List users (with filtering)
 export async function GET(req: Request) {
-  const session = await getServerSession(authOptions);
-  
-  // Security: Only Admins and Staff can view the user list
-  if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   const { searchParams } = new URL(req.url);
   const view = searchParams.get('view');
@@ -33,7 +28,6 @@ export async function GET(req: Request) {
     const users = await prisma.user.findMany({
       where,
       orderBy: { createdAt: 'desc' },
-      // 🔒 SECURITY FIX: Select only non-sensitive fields
       select: {
         id: true,
         name: true,
@@ -42,9 +36,8 @@ export async function GET(req: Request) {
         isActive: true,
         image: true,
         createdAt: true,
-        // Include relations safely
-        studentProfile: { 
-            select: { id: true, studentId: true, cohort: true, enrollmentStatus: true } 
+        studentProfile: {
+          select: { id: true, studentId: true, cohort: true, enrollmentStatus: true }
         }
       }
     });
@@ -57,17 +50,14 @@ export async function GET(req: Request) {
 
 // POST: Create a new user
 export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  
-  if (!session || (session.user as any).role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   const { name, email, password, role, image } = await req.json();
 
   try {
     const hashedPassword = await hash(password, 10);
-    
+
     const user = await prisma.$transaction(async (tx) => {
       const newUser = await tx.user.create({
         data: {
@@ -103,11 +93,8 @@ export async function POST(req: Request) {
 
 // PATCH: Update user (Edit Name, Role, Image, Active Status)
 export async function PATCH(req: Request) {
-  const session = await getServerSession(authOptions);
-  
-  if (!session || (session.user as any).role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   const { userId, name, role, isActive, image, isDeleted } = await req.json();
 
@@ -117,11 +104,10 @@ export async function PATCH(req: Request) {
     if (role) dataToUpdate.role = role;
     if (typeof isActive === 'boolean') dataToUpdate.isActive = isActive;
     if (image) dataToUpdate.image = image;
-    
-    // Allow restoring a deleted user via PATCH
+
     if (typeof isDeleted === 'boolean') {
-        dataToUpdate.isDeleted = isDeleted;
-        dataToUpdate.deletedAt = isDeleted ? new Date() : null;
+      dataToUpdate.isDeleted = isDeleted;
+      dataToUpdate.deletedAt = isDeleted ? new Date() : null;
     }
 
     if (Object.keys(dataToUpdate).length === 0) {
@@ -141,11 +127,8 @@ export async function PATCH(req: Request) {
 
 // DELETE: Soft Delete (Archive) OR Hard Delete
 export async function DELETE(req: Request) {
-  const session = await getServerSession(authOptions);
-  
-  if (!session || (session.user as any).role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
@@ -155,18 +138,16 @@ export async function DELETE(req: Request) {
 
   try {
     if (permanent) {
-      // HARD DELETE
       await prisma.user.delete({
         where: { id }
       });
     } else {
-      // SOFT DELETE
       await prisma.user.update({
         where: { id },
-        data: { 
+        data: {
           isDeleted: true,
           deletedAt: new Date(),
-          isActive: false 
+          isActive: false
         }
       });
     }

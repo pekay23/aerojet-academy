@@ -189,8 +189,8 @@ export default function UploadProofClient() {
                 )}
               </div>
             </div>
-          </CardContent>
-          <CardFooter className="pt-2">
+          </div>
+          <div className="pt-2">
             <Button
               type="submit"
               className={`w-full h-14 text-sm font-black uppercase tracking-[0.15em] transition-all duration-500 relative overflow-hidden group shadow-xl ${!proofUrl || (!registrationCode && !email)
@@ -214,7 +214,7 @@ export default function UploadProofClient() {
               {/* Glossy overlay effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             </Button>
-          </CardFooter>
+          </div>
         </form>
       </div>
     </div>

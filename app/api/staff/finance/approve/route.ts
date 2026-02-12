@@ -4,6 +4,8 @@ import { sendPaymentConfirmationEmail, sendPaymentReceiptEmail } from '@/app/lib
 import { hash } from 'bcryptjs';
 import { generateInstitutionalEmail } from '@/app/lib/utils';
 import { FEE_STATUS } from '@/app/lib/constants';
+import { isValidCuid } from '@/app/lib/validation';
+import crypto from 'crypto';
 import { withAuth } from '@/app/lib/auth-helpers';
 
 // Define transaction type since we can't import Prisma.TransactionClient easily in this setup
@@ -16,6 +18,10 @@ export async function POST(req: Request) {
   try {
     const { feeId } = await req.json();
 
+    if (!feeId || !isValidCuid(feeId)) {
+      return NextResponse.json({ error: 'Valid Fee ID is required' }, { status: 400 });
+    }
+
     const fee = await prisma.fee.findUnique({
       where: { id: feeId },
       include: { student: { include: { user: true } } }
@@ -24,7 +30,7 @@ export async function POST(req: Request) {
     if (!fee) return NextResponse.json({ error: 'Fee not found' }, { status: 404 });
 
     // 1. GENERATE NEW CREDENTIALS
-    const accessCode = Math.random().toString(36).slice(-6).toUpperCase();
+    const accessCode = crypto.randomBytes(4).toString('hex').toUpperCase();
     const hashedCode = await hash(accessCode, 10);
 
     // 2. GENERATE INSTITUTIONAL EMAIL
@@ -36,7 +42,7 @@ export async function POST(req: Request) {
       await tx.fee.update({ where: { id: feeId }, data: { status: FEE_STATUS.PAID, paid: fee.amount } });
 
       // LOGIC MERGE: Handle Registration Fee (Prospect -> Applicant)
-      if (fee.description?.toLowerCase().includes('registration') && fee.student.enrollmentStatus === 'PROSPECT') {
+      if (fee.feeType === 'REGISTRATION' && fee.student.enrollmentStatus === 'PROSPECT') {
         // 4a. Update User: Set Password & Activate
         await tx.user.update({
           where: { id: fee.student.userId },
@@ -54,7 +60,7 @@ export async function POST(req: Request) {
         });
       }
       // LOGIC MERGE: Handle Course Fee (Applicant -> Student)
-      else if (fee.description?.toLowerCase().includes('tuition') || fee.amount.toNumber() > 100) {
+      else if (fee.feeType === 'TUITION' || fee.amount.toNumber() > 500) {
         // 4. UPDATE USER: Set New Email & Password & Institutional Email
         await tx.user.update({
           where: { id: fee.student.userId },
@@ -75,7 +81,10 @@ export async function POST(req: Request) {
         });
       }
 
-      // 5. SEND RECEIPT EMAIL (Always)
+    }, { maxWait: 20000, timeout: 30000 });
+
+    // 5. SEND RECEIPT EMAIL (Always — outside transaction for safety)
+    try {
       await sendPaymentReceiptEmail(
         personalEmail,
         fee.student.user.name!,
@@ -83,12 +92,13 @@ export async function POST(req: Request) {
         fee.description || 'Course Fee',
         fee.id
       );
-
-    }, { maxWait: 20000, timeout: 30000 });
+    } catch (emailError) {
+      console.error("RECEIPT_EMAIL_ERROR:", emailError);
+    }
 
     // 6. Send Email to PERSONAL address
     try {
-      const emailUsedForLogin = (fee.description?.toLowerCase().includes('tuition') || fee.amount.toNumber() > 100)
+      const emailUsedForLogin = (fee.feeType === 'TUITION' || fee.amount.toNumber() > 500)
         ? institutionalEmail
         : undefined;
 

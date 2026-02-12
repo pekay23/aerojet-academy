@@ -1,4 +1,4 @@
-import NextAuth, { type NextAuthOptions, getServerSession } from "next-auth"; // Added getServerSession
+import NextAuth, { type NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
@@ -17,11 +17,6 @@ export const authOptions: NextAuthOptions = {
       credentials: { email: {}, password: {} },
       async authorize(credentials) {
         if (!credentials?.email) return null;
-
-        if (process.env.NODE_ENV === 'development' && credentials.password === process.env.DEV_LOGIN_SECRET) {
-          const devUser = await prisma.user.findUnique({ where: { email: credentials.email } });
-          if (devUser) return devUser;
-        }
 
         if (!credentials.password) return null;
         const user = await prisma.user.findUnique({ where: { email: credentials.email } });
@@ -110,14 +105,8 @@ export const authOptions: NextAuthOptions = {
     async redirect({ url, baseUrl }) {
       if (url.startsWith("/")) return `${baseUrl}${url}`;
       if (new URL(url).origin === baseUrl) return url;
-
-      // Since getServerSession can't be used here reliably, check token passed in
-      const session = await getServerSession(authOptions); // This should be okay here but can be tricky
-      if ((session?.user as { role: string })?.role === 'STUDENT') {
-        return `${baseUrl}/portal/dashboard`;
-      } else {
-        return `${baseUrl}/staff/dashboard`;
-      }
+      // Default redirect — role-based routing is handled by middleware
+      return baseUrl;
     }
   },
 };

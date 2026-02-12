@@ -1,16 +1,13 @@
 import prisma from '@/app/lib/prisma';
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { Resend } from 'resend';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
-    const session = await getServerSession(authOptions);
-    if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as { role: string }).role)) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+    const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+    if (error) return error;
 
     const { subject, message, target, selectedIds } = await req.json();
 

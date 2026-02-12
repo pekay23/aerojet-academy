@@ -1,21 +1,17 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import crypto from 'crypto';
 import { hash } from 'bcryptjs';
 import { sendPaymentConfirmationEmail } from '@/app/lib/mail';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const session = await getServerSession(authOptions);
-
-  // Security: Only Admins can reset passwords/resend codes
-  if (!session || (session.user as any).role !== 'ADMIN') {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error } = await withAuth(['ADMIN']);
+  if (error) return error;
 
   try {
-    const { id } = await params; // Student ID (e.g., from URL)
+    const { id } = await params;
 
     // 1. Find Student & User
     const student = await prisma.student.findUnique({
@@ -27,8 +23,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
     }
 
-    // 2. Generate NEW Access Code
-    const accessCode = Math.random().toString(36).slice(-6).toUpperCase();
+    // 2. Generate NEW Access Code (cryptographically secure)
+    const accessCode = crypto.randomBytes(4).toString('hex').toUpperCase();
     const hashedPassword = await hash(accessCode, 10);
 
     // 3. Update Password in DB
@@ -36,7 +32,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       where: { id: student.userId },
       data: {
         password: hashedPassword,
-        isActive: true // Ensure they are unlocked
+        isActive: true
       }
     });
 

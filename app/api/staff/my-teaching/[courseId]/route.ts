@@ -1,30 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ courseId: string }> } // Updated to Promise
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
-  const session = await getServerSession(authOptions);
+  const { error, session } = await withAuth(['INSTRUCTOR', 'ADMIN', 'STAFF']);
+  if (error) return error;
 
-  // Verify Instructor/Admin/Staff Role
-  if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as any).role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
-
-  // Mandatory for Next.js 15: Await the params to get courseId
+  const user = session!.user as { role: string; id: string };
   const { courseId } = await params;
 
   try {
-    // 1. If the user is an Instructor, verify they are actually teaching this course
-    if ((session.user as any).role === 'INSTRUCTOR') {
+    // If the user is an Instructor, verify they are actually teaching this course
+    if (user.role === 'INSTRUCTOR') {
       const assignment = await prisma.course.findFirst({
         where: {
           id: courseId,
-          instructors: { some: { id: session.user.id } }
+          instructors: { some: { id: user.id } }
         }
       });
       if (!assignment) {
@@ -32,7 +27,7 @@ export async function GET(
       }
     }
 
-    // 2. Fetch Enrolled Students (Applications with APPROVED status)
+    // Fetch Enrolled Students (Applications with APPROVED status)
     const applications = await prisma.application.findMany({
       where: {
         courseId: courseId,
@@ -55,7 +50,6 @@ export async function GET(
       orderBy: { student: { user: { name: 'asc' } } }
     });
 
-    // Extract the student profile data
     const students = applications.map(app => app.student);
 
     return NextResponse.json({ students });

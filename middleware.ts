@@ -7,7 +7,7 @@ export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Protected route groups — require authentication
-  const protectedPaths = ['/staff', '/portal/dashboard', '/applicant'];
+  const protectedPaths = ['/staff', '/portal/dashboard', '/applicant', '/api/staff', '/api/admin', '/api/instructor', '/api/student'];
   const isProtected = protectedPaths.some(p => pathname.startsWith(p));
 
   if (isProtected && !token) {

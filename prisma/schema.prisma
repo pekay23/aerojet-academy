@@ -62,6 +62,8 @@ model User {
   cohortInstructions CohortCourse[] @relation("CohortInstructors")
   auditLogs         AuditLog[]
   notifications     Notification[]
+
+  @@index([role, isDeleted])
 }
 
 model VerificationToken {
@@ -172,6 +174,8 @@ model Student {
   bookings           Booking[]
   referralsMade      Referral[] @relation("Referrer")
   referralsReceived  Referral[] @relation("Referee")
+
+  @@index([enrollmentStatus])
 }
 
 model Application {
@@ -231,7 +235,7 @@ model Course {
   instructors  User[]             @relation("CourseInstructors")
   cohorts      CohortCourse[]
   
-  lessons      Lesson[] // ✅ ADD THIS LINE
+  lessons      Lesson[]
 }
 
 enum AttendanceStatus {
@@ -259,6 +263,9 @@ model AttendanceRecord {
   scheduledHours Float?
   attendedHours  Float?
   lateMinutes    Int?             @default(0)
+
+  @@index([date, courseId])
+  @@index([studentId])
 }
 
 // =========================================================
@@ -445,6 +452,8 @@ model Fee {
   dueDate       DateTime
   status        String   @default("UNPAID")
   description   String?
+  feeType       String   @default("OTHER")  // REGISTRATION, TUITION, EXAM, BUNDLE, OTHER
+  currency      String   @default("EUR")    // EUR or GHS
   paymentMethod String?
   proofUrl      String?
   
@@ -453,6 +462,9 @@ model Fee {
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime? @updatedAt
+
+  @@index([status])
+  @@index([studentId, status])
 }
 
 model SystemSetting {
@@ -469,7 +481,7 @@ model AdmissionForm {
   startDate         DateTime
   endDate           DateTime
   notificationEmail String
-  registrationFee   Float    @default(350.0)
+  registrationFee   Decimal  @default(350.00) @db.Decimal(10, 2)
   monthlyFee        Float?
   yearlyFee         Float?
   isActive          Boolean  @default(true)
@@ -514,6 +526,9 @@ model Assessment {
   // Updated Relation to new logic (optional)
   // Can link to Booking or ExamPool if needed in future
   legacyRunId   String? 
+
+  @@index([studentId])
+  @@index([gradedBy])
 }
 model Lesson {
   id          String   @id @default(cuid())
@@ -583,4 +598,6 @@ model Notification {
   isRead    Boolean  @default(false)
   link      String?
   createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
 }

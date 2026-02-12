@@ -41,3 +41,10 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# Custom logs
+build.log
+tsc_output.txt
+test_output.txt
+all codes.txt
+ngrok_url.txt
