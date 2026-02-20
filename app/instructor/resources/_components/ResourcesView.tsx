@@ -11,7 +11,7 @@ interface Resource {
   type: string
   category: string
   url: string
-  updatedAt: string
+  updatedAt: Date | string
   courseCode?: string
 }
 
