@@ -1,0 +1,33 @@
+import { NextRequest } from 'next/server'
+import { requireStudent } from '@/lib/auth/helpers'
+import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
+import { joinPoolSchema, validateBody } from '@/lib/validation/schemas'
+import { joinPool } from '@/lib/pools/operations'
+import { createAuditLog } from '@/lib/audit/logger'
+
+export const POST = withErrorHandler(
+  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+    const user = await requireStudent()
+    const poolId = ctx?.params?.id
+    if (!poolId) return apiError('Pool ID required')
+
+    const body = await req.json()
+    const validation = validateBody(joinPoolSchema, body)
+    if (!validation.success) return apiError((validation as any).error)
+
+    const membership = await joinPool(user.id, poolId, validation.data.selectedModule, user.id)
+
+    await createAuditLog({
+      action: 'POOL_JOIN',
+      entity: 'PoolMembership',
+      entityId: membership.id,
+      userId: user.id,
+      details: { poolId, module: validation.data.selectedModule },
+    })
+
+    return apiCreated({
+      message: 'Successfully joined pool! €300 has been held in your wallet.',
+      membershipId: membership.id,
+    })
+  }
+)

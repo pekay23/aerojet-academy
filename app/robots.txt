@@ -1,0 +1,12 @@
+import { MetadataRoute } from 'next'
+ 
+export default function robots(): MetadataRoute.Robots {
+  return {
+    rules: {
+      userAgent: '*',
+      allow: '/',
+      disallow: ['/portal/', '/staff/', '/api/'], // Block portal and API from Google
+    },
+    sitemap: 'https://aerojet-academy.com/sitemap.xml',
+  }
+}

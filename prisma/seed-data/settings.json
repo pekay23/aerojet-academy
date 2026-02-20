@@ -1,0 +1,16 @@
+[
+  { "key": "academy_name", "value": "Aerojet Aviation Training Academy", "group": "general" },
+  { "key": "academy_email", "value": "info@aerojet-academy.com", "group": "general" },
+  { "key": "academy_phone", "value": "+233 30 123 4567", "group": "general" },
+  { "key": "academy_address", "value": "Kotoka International Airport Area, Accra, Ghana", "group": "general" },
+  { "key": "bank_name", "value": "Ecobank Ghana", "group": "bank" },
+  { "key": "bank_account_name", "value": "Aerojet Aviation Training Academy Ltd", "group": "bank" },
+  { "key": "bank_account_number", "value": "0011223344556677", "group": "bank" },
+  { "key": "bank_swift", "value": "EABORGHAC", "group": "bank" },
+  { "key": "bank_branch", "value": "Airport City Branch", "group": "bank" },
+  { "key": "registration_open", "value": "true", "group": "registration" },
+  { "key": "exam_pool_fee", "value": "300", "group": "exams" },
+  { "key": "pool_min_candidates", "value": "25", "group": "exams" },
+  { "key": "pool_max_candidates", "value": "28", "group": "exams" },
+  { "key": "pool_deadline_days", "value": "21", "group": "exams" }
+]

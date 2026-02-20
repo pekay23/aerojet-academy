@@ -1,0 +1,8 @@
+[
+  { "code": "B1B2-4Y", "name": "4-Year B1/B2 Licensed Aircraft Engineer", "type": "FOUR_YEAR", "price": 24000, "hours": 4800 },
+  { "code": "B1-2Y", "name": "2-Year B1 Mechanical Programme", "type": "TWO_YEAR", "price": 14000, "hours": 2400 },
+  { "code": "MIL-12M", "name": "Military/Industry Certification", "type": "MILITARY", "price": 8500, "hours": 1200 },
+  { "code": "MOD-FLEX", "name": "Modular Training Programme", "type": "MODULAR", "price": 450, "hours": null },
+  { "code": "EXAM-ONLY", "name": "Exam Only (Per Sitting)", "type": "EXAM_ONLY", "price": 300, "hours": null },
+  { "code": "REV-MOD", "name": "Revision Support Classes", "type": "REVISION", "price": 200, "hours": null }
+]

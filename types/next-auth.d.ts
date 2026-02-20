@@ -1,0 +1,35 @@
+import { DefaultSession, DefaultUser } from 'next-auth'
+import { DefaultJWT } from 'next-auth/jwt'
+
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id: string
+      role: string
+      status: string
+      mustChangePassword: boolean
+      academyEmail?: string | null
+      studentId?: string | null
+    } & DefaultSession['user']
+  }
+
+  interface User extends DefaultUser {
+    id: string
+    role: string
+    status: string
+    mustChangePassword: boolean
+    academyEmail?: string | null
+    studentId?: string | null
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT extends DefaultJWT {
+    id: string
+    role: string
+    status: string
+    mustChangePassword: boolean
+    academyEmail?: string | null
+    studentId?: string | null
+  }
+}

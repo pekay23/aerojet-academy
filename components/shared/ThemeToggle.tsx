@@ -1,0 +1,47 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useTheme } from 'next-themes'
+import { Monitor, Moon, Sun } from 'lucide-react'
+
+export default function ThemeToggle({ isCollapsed = false }: { isCollapsed?: boolean }) {
+  const [mounted, setMounted] = useState(false)
+  const { theme, setTheme } = useTheme()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const toggleTheme = () => {
+    if (theme === 'light') setTheme('dark')
+    else if (theme === 'dark') setTheme('system')
+    else setTheme('light')
+  }
+
+  const renderIcon = () => {
+    if (!mounted) return <div className="h-4 w-4 shrink-0" />
+    if (theme === 'light') return <Sun className="h-4 w-4 shrink-0" />
+    if (theme === 'dark') return <Moon className="h-4 w-4 shrink-0" />
+    return <Monitor className="h-4 w-4 shrink-0" />
+  }
+
+  const renderLabel = () => {
+    if (!mounted) return 'System Mode'
+    if (theme === 'light') return 'Light Mode'
+    if (theme === 'dark') return 'Dark Mode'
+    return 'System Mode'
+  }
+
+  return (
+    <button
+      onClick={toggleTheme}
+      className={`flex items-center gap-3 rounded-lg p-2 text-sm font-medium text-slate-400 transition-all hover:bg-white/5 hover:text-white ${
+        isCollapsed ? 'justify-center' : ''
+      }`}
+      title={isCollapsed ? renderLabel() : undefined}
+    >
+      {renderIcon()}
+      {!isCollapsed && <span className="flex-1 text-left">{renderLabel()}</span>}
+    </button>
+  )
+}

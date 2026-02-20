@@ -1,0 +1,161 @@
+import { getServerSession } from 'next-auth'
+import type { NextAuthOptions } from 'next-auth'
+import CredentialsProvider from 'next-auth/providers/credentials'
+import prisma from '@/lib/prisma/client'
+import { verifyPassword } from '@/lib/auth/helpers'
+import { createAuditLog } from '@/lib/audit/logger'
+import { UserStatus } from '@prisma/client'
+
+export const authOptions: NextAuthOptions = {
+  providers: [
+    CredentialsProvider({
+      name: 'credentials',
+      credentials: {
+        email: { label: 'Email', type: 'email' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Email and password are required')
+        }
+
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [{ email: credentials.email }, { academyEmail: credentials.email }],
+          },
+          include: {
+            profile: { select: { firstName: true, lastName: true } },
+          },
+        })
+
+        if (!user || !user.password) {
+          throw new Error('Invalid email or password')
+        }
+
+        // Check if account is locked
+        if (user.lockedUntil && user.lockedUntil > new Date()) {
+          throw new Error('Account is temporarily locked. Please try again later.')
+        }
+
+        // Check account status
+        if (user.status === UserStatus.SUSPENDED) {
+          throw new Error('Account has been suspended. Contact administration.')
+        }
+        if (user.status === UserStatus.ARCHIVED || user.status === UserStatus.DELETED) {
+          throw new Error('Account is no longer active. Contact administration.')
+        }
+        if (user.status === UserStatus.PENDING && user.role !== 'APPLICANT') {
+          throw new Error('Account is pending activation. Please complete registration.')
+        }
+
+        // Check email verification
+        if (!user.emailVerified) {
+          throw new Error('Please verify your email before logging in.')
+        }
+
+        // Verify password
+        const isValid = await verifyPassword(credentials.password, user.password)
+
+        if (!isValid) {
+          const attempts = user.loginAttempts + 1
+          const updateData: Record<string, unknown> = { loginAttempts: attempts }
+
+          if (attempts >= 5) {
+            updateData.lockedUntil = new Date(Date.now() + 30 * 60 * 1000)
+          }
+
+          await prisma.user.update({
+            where: { id: user.id },
+            data: updateData,
+          })
+
+          throw new Error('Invalid email or password')
+        }
+
+        // Reset login attempts on successful login
+        await prisma.user.update({
+          where: { id: user.id },
+          data: {
+            loginAttempts: 0,
+            lockedUntil: null,
+            lastLoginAt: new Date(),
+          },
+        })
+
+        // Audit log
+        await createAuditLog({
+          action: 'LOGIN',
+          entity: 'users',
+          entityId: user.id,
+          userId: user.id,
+          description: `User logged in: ${user.email}`,
+        })
+
+        const name = user.profile
+          ? `${user.profile.firstName} ${user.profile.lastName}`
+          : user.email
+
+        return {
+          id: user.id,
+          email: user.academyEmail || user.email,
+          name,
+          role: user.role,
+          status: user.status,
+          mustChangePassword: user.mustChangePassword && !user.passwordChanged,
+        }
+      },
+    }),
+  ],
+
+  session: {
+    strategy: 'jwt',
+    maxAge: 8 * 60 * 60,
+  },
+
+  jwt: {
+    maxAge: 8 * 60 * 60,
+  },
+
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
+
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id
+        token.role = (user as any).role
+        token.status = (user as any).status
+        token.mustChangePassword = (user as any).mustChangePassword
+      }
+      return token
+    },
+
+    async session({ session, token }) {
+      if (session.user) {
+        ;(session.user as any).id = token.id
+        ;(session.user as any).role = token.role
+        ;(session.user as any).status = token.status
+        ;(session.user as any).mustChangePassword = token.mustChangePassword
+      }
+      return session
+    },
+  },
+
+  events: {
+    async signOut({ token }) {
+      if (token?.id) {
+        await createAuditLog({
+          action: 'LOGOUT',
+          entity: 'users',
+          entityId: token.id as string,
+          userId: token.id as string,
+          description: `User logged out`,
+        })
+      }
+    },
+  },
+}
+
+export const getAuthSession = () => getServerSession(authOptions)
