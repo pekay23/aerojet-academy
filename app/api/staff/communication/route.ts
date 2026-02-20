@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { Resend } from 'resend';
 import { withAuth } from '@/app/lib/auth-helpers';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 're_123');
 
 export async function POST(req: Request) {
     const { error, session } = await withAuth(['ADMIN', 'STAFF']);
