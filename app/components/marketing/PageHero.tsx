@@ -16,6 +16,7 @@ export default function PageHero({ title, subtitle, backgroundImage }: PageHeroP
         alt={title}
         fill
         priority
+        sizes="100vw"
         // 2. POSITION ADJUSTMENT: Added 'object-top' to prioritize the top of the photo (heads/faces)
         className="object-cover object-center opacity-50"
         quality={100} 

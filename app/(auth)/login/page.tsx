@@ -1,5 +1,4 @@
-export const dynamic = "force-dynamic";
-import React from 'react';
+import React, { Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import LoginForm from '@/components/portal/LoginForm';
@@ -8,6 +7,14 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Login',
 };
+
+function LoginFormLoader() {
+  return (
+    <div className="w-full h-64 flex items-center justify-center">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-aerojet-blue"></div>
+    </div>
+  );
+}
 
 export default function LoginPage() {
   return (
@@ -22,6 +29,7 @@ export default function LoginPage() {
             width={180} 
             height={45}
             className="object-contain"
+            priority
           />
         </Link>
       </div>
@@ -41,7 +49,9 @@ export default function LoginPage() {
                If LoginForm has its own Border/Shadow, we might need to remove it from THAT component.
                But usually, LoginForm is just inputs + button. 
            */}
-           <LoginForm />
+           <Suspense fallback={<LoginFormLoader />}>
+             <LoginForm />
+           </Suspense>
 
            {/* The 'Apply Now' text is here. If it was duplicated 'behind', 
                it means previous code had an overlapping div. This clean structure prevents that. 

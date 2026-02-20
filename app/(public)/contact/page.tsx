@@ -1,7 +1,5 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import Navbar from '@/components/marketing/Navbar';
-import Footer from '@/components/marketing/Footer';
 import PageHero from '@/components/marketing/PageHero';
 import ContactForm from '@/components/marketing/ContactForm';
 

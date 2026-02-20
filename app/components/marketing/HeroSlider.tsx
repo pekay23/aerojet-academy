@@ -40,10 +40,10 @@ export default function HeroSlider() {
           key={index}
           src={slide.src}
           alt="Aerojet Academy background"
-          layout="fill"
-          objectFit="cover"
-          className={`transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
+          fill
+          className={`object-cover transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
           priority={index === 0}
+          sizes="100vw"
         />
       ))}
       
