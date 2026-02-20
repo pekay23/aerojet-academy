@@ -538,3 +538,68 @@ export async function getStudentDetails(userId: string) {
 
   return serializePrisma(student)
 }
+
+export async function getInstructorProfile() {
+  const session = await getAuthSession()
+  if (!session || session.user.role !== 'INSTRUCTOR') {
+    throw new Error('Unauthorized')
+  }
+
+  const profile = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      email: true,
+      academyEmail: true,
+      profile: true,
+      instructorProfile: {
+        include: {
+          classesInstructed: {
+            include: {
+              course: true,
+            },
+          },
+        },
+      },
+    },
+  })
+
+  if (!profile) throw new Error('Instructor not found')
+
+  return serializePrisma(profile)
+}
+
+export async function updateInstructorProfile(data: any) {
+  const session = await getAuthSession()
+  if (!session || session.user.role !== 'INSTRUCTOR') {
+    throw new Error('Unauthorized')
+  }
+
+  const { personal, emergency } = data
+
+  // Update Profile table
+  await prisma.profile.update({
+    where: { userId: session.user.id },
+    data: {
+      firstName: personal.firstName,
+      middleName: personal.middleName,
+      lastName: personal.lastName,
+      phone: personal.phone,
+      alternatePhone: personal.alternatePhone,
+      address: personal.address,
+      city: personal.city,
+      state: personal.state,
+      country: personal.country,
+      postalCode: personal.postalCode,
+      gender: personal.gender,
+      dateOfBirth: personal.dateOfBirth ? new Date(personal.dateOfBirth) : null,
+      nationality: personal.nationality,
+      emergencyContactName: emergency.name,
+      emergencyContactPhone: emergency.phone,
+      emergencyContactRelation: emergency.relation,
+    },
+  })
+
+  revalidatePath('/instructor/profile')
+  return { success: true }
+}

@@ -35,9 +35,9 @@ const resourceSchema = z.object({
   url: z.string().min(1, 'URL or path is required'),
   type: z.string(),
   category: z.string(),
-  showToInstructors: z.boolean().default(true),
-  showToStaff: z.boolean().default(true),
-  showToStudents: z.boolean().default(false),
+  showToInstructors: z.boolean(),
+  showToStaff: z.boolean(),
+  showToStudents: z.boolean(),
 })
 
 type ResourceFormValues = z.infer<typeof resourceSchema>
