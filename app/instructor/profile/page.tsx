@@ -1,22 +1,26 @@
-import { Metadata } from "next";
-import Link from "next/link";
+import { Metadata } from 'next'
+import { getInstructorProfile } from '@/lib/actions/instructor'
+import InstructorProfileView from '../_components/InstructorProfileView'
 
-export const metadata: Metadata = { title: "My Profile" };
+export const metadata: Metadata = {
+  title: 'My Profile | Instructor Portal',
+}
 
-export default function Page() {
+export default async function InstructorProfilePage() {
+  const profile = await getInstructorProfile()
+
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-6xl space-y-8 pb-10">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">My Profile</h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Your instructor profile.</p>
+        <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+          Manage Profile
+        </h1>
+        <p className="mt-2 text-lg font-medium text-slate-500 dark:text-slate-400">
+          Viewing and updating your instructor account details.
+        </p>
       </div>
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-8 sm:p-12 text-center">
-        <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🚧</span>
-        </div>
-        <h2 className="text-lg font-bold text-slate-700 mb-2">Coming Soon</h2>
-        <p className="text-sm text-slate-400 max-w-md mx-auto">This feature is under development and will be available soon.</p>
-      </div>
+
+      <InstructorProfileView initialData={profile} />
     </div>
-  );
+  )
 }
