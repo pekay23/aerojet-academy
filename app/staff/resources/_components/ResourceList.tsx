@@ -1,0 +1,181 @@
+'use client'
+
+import React, { useState } from 'react'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { FileText, ExternalLink, Trash2, Edit3, MoreVertical, Globe, Lock } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Button } from '@/components/ui/button'
+import { deleteResource } from '@/lib/actions/resources'
+import { toast } from '@/hooks/use-toast'
+import { Badge } from '@/components/ui/badge'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import ResourceForm from './ResourceForm'
+
+interface ResourceListProps {
+  resources: any[]
+}
+
+export default function ResourceList({ resources: initialResources }: ResourceListProps) {
+  const [resources, setResources] = useState(initialResources)
+  const [editingResource, setEditingResource] = useState<any>(null)
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this resource?')) return
+
+    try {
+      await deleteResource(id)
+      setResources(resources.filter((r) => r.id !== id))
+      toast.success('Resource deleted')
+    } catch (error) {
+      toast.error('Failed to delete resource')
+    }
+  }
+
+  return (
+    <>
+      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900">
+        <Table>
+          <TableHeader>
+            <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
+              <TableHead className="text-[10px] font-bold tracking-wider uppercase">
+                Resource
+              </TableHead>
+              <TableHead className="text-[10px] font-bold tracking-wider uppercase">
+                Category
+              </TableHead>
+              <TableHead className="text-[10px] font-bold tracking-wider uppercase">Type</TableHead>
+              <TableHead className="text-[10px] font-bold tracking-wider uppercase">
+                Visibility
+              </TableHead>
+              <TableHead className="text-right text-[10px] font-bold tracking-wider uppercase">
+                Actions
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {resources.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={5} className="py-12 text-center text-slate-500">
+                  No general resources found.
+                </TableCell>
+              </TableRow>
+            ) : (
+              resources.map((resource) => (
+                <TableRow
+                  key={resource.id}
+                  className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                        {resource.type === 'LINK' ? (
+                          <ExternalLink className="h-4 w-4" />
+                        ) : (
+                          <FileText className="h-4 w-4" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="font-bold text-slate-900 dark:text-slate-100">
+                          {resource.name}
+                        </div>
+                        <div className="max-w-[200px] truncate font-mono text-[10px] text-slate-400">
+                          {resource.url}
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      variant="outline"
+                      className="border-slate-200 px-2 py-0 text-[10px] font-bold tracking-widest uppercase dark:border-slate-700"
+                    >
+                      {resource.category}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-xs font-medium text-slate-500">{resource.type}</span>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex gap-1.5">
+                      {resource.showToInstructors && (
+                        <Badge className="h-5 border-blue-100 bg-blue-50 px-1.5 text-[9px] tracking-tighter text-blue-600 hover:bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400">
+                          INS
+                        </Badge>
+                      )}
+                      {resource.showToStaff && (
+                        <Badge className="h-5 border-purple-100 bg-purple-50 px-1.5 text-[9px] tracking-tighter text-purple-600 hover:bg-purple-50 dark:bg-purple-900/20 dark:text-purple-400">
+                          STAFF
+                        </Badge>
+                      )}
+                      {resource.showToStudents && (
+                        <Badge className="h-5 border-emerald-100 bg-emerald-50 px-1.5 text-[9px] tracking-tighter text-emerald-600 hover:bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400">
+                          STU
+                        </Badge>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 rounded-lg outline-none"
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-40 rounded-xl">
+                        <DropdownMenuItem
+                          onClick={() => setEditingResource(resource)}
+                          className="cursor-pointer gap-2 rounded-lg"
+                        >
+                          <Edit3 className="h-4 w-4" /> Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(resource.id)}
+                          className="cursor-pointer gap-2 rounded-lg text-rose-600 focus:text-rose-600"
+                        >
+                          <Trash2 className="h-4 w-4" /> Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <Dialog open={!!editingResource} onOpenChange={() => setEditingResource(null)}>
+        <DialogContent className="rounded-3xl sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-black text-slate-900 dark:text-slate-100">
+              Edit Resource
+            </DialogTitle>
+          </DialogHeader>
+          <ResourceForm
+            initialData={editingResource}
+            onSuccess={() => {
+              setEditingResource(null)
+              window.location.reload()
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+    </>
+  )
+}
