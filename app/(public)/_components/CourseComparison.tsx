@@ -1,0 +1,117 @@
+'use client'
+
+import { motion } from 'framer-motion'
+import Link from 'next/link'
+import { CheckCircle2, X } from 'lucide-react'
+
+const pathways = [
+  {
+    name: 'Full-Time',
+    duration: '2-4 Years',
+    href: '/courses/aircraft-engineering/easa-part-66/four-year-b1-b2',
+    highlight: true,
+    features: {
+      'Classroom Tuition': true,
+      'Study Materials': true,
+      'Exam Fees Included': true,
+      'Practical Training': true,
+      'Work Experience': true,
+      'Job Guarantee': true,
+    },
+  },
+  {
+    name: 'Modular',
+    duration: 'Self-Paced',
+    href: '/courses/aircraft-engineering/easa-part-66/modular-training',
+    highlight: false,
+    features: {
+      'Classroom Tuition': true,
+      'Study Materials': true,
+      'Exam Fees Included': false,
+      'Practical Training': false,
+      'Work Experience': false,
+      'Job Guarantee': false,
+    },
+  },
+  {
+    name: 'Exam Only',
+    duration: 'Flexible',
+    href: '/courses/aircraft-engineering/easa-part-66/exam-only',
+    highlight: false,
+    features: {
+      'Classroom Tuition': false,
+      'Study Materials': true,
+      'Exam Fees Included': true,
+      'Practical Training': false,
+      'Work Experience': false,
+      'Job Guarantee': false,
+    },
+  },
+]
+
+const featureNames = Object.keys(pathways[0].features)
+
+export default function CourseComparison() {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.6 }}
+      className="overflow-x-auto"
+    >
+      <table className="w-full min-w-[600px] text-left text-sm">
+        <thead>
+          <tr>
+            <th className="p-4 text-xs font-bold uppercase tracking-widest text-slate-400">
+              Feature
+            </th>
+            {pathways.map((p) => (
+              <th key={p.name} className="p-4 text-center">
+                <div
+                  className={`inline-block rounded-xl px-4 py-2 text-sm font-black uppercase tracking-wide ${p.highlight ? 'bg-[#002a5c] text-white' : 'bg-slate-100 text-slate-700'}`}
+                >
+                  {p.name}
+                </div>
+                <div className="mt-1 text-xs font-medium text-slate-400">{p.duration}</div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {featureNames.map((feat) => (
+            <tr key={feat} className="transition-colors hover:bg-slate-50/50">
+              <td className="p-4 font-medium text-slate-700">{feat}</td>
+              {pathways.map((p) => (
+                <td key={p.name} className="p-4 text-center">
+                  {p.features[feat as keyof typeof p.features] ? (
+                    <CheckCircle2 className="mx-auto h-5 w-5 text-green-500" />
+                  ) : (
+                    <X className="mx-auto h-5 w-5 text-slate-300" />
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+          <tr>
+            <td className="p-4" />
+            {pathways.map((p) => (
+              <td key={p.name} className="p-4 text-center">
+                <Link
+                  href={p.href}
+                  className={`inline-block rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-widest transition-all ${
+                    p.highlight
+                      ? 'bg-[#4c9ded] text-white hover:bg-[#002a5c]'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  View Details
+                </Link>
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </motion.div>
+  )
+}

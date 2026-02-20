@@ -1,0 +1,50 @@
+export enum UserRole {
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMIN',
+  STAFF = 'STAFF',
+  INSTRUCTOR = 'INSTRUCTOR',
+  APPLICANT = 'APPLICANT',
+  STUDENT = 'STUDENT',
+}
+
+export enum UserStatus {
+  PENDING = 'PENDING',
+  PAYMENT_PENDING = 'PAYMENT_PENDING',
+  PAYMENT_REJECTED = 'PAYMENT_REJECTED',
+  ACTIVE = 'ACTIVE',
+  SUSPENDED = 'SUSPENDED',
+  DEACTIVATED = 'DEACTIVATED',
+}
+
+export enum PaymentType {
+  REGISTRATION_FEE = 'REGISTRATION_FEE',
+  COURSE_FEE = 'COURSE_FEE',
+  EXAM_FEE = 'EXAM_FEE',
+  WALLET_TOP_UP = 'WALLET_TOP_UP',
+}
+
+export enum PaymentStatus {
+  PENDING = 'PENDING',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
+export enum NotificationType {
+  REGISTRATION = 'REGISTRATION',
+  PAYMENT = 'PAYMENT',
+  ENROLLMENT = 'ENROLLMENT',
+  POOL_JOIN = 'POOL_JOIN',
+  POOL_CONFIRMED = 'POOL_CONFIRMED',
+  POOL_FAILED = 'POOL_FAILED',
+  EXAM_REMINDER = 'EXAM_REMINDER',
+  GRADE = 'GRADE',
+  SYSTEM = 'SYSTEM',
+}
+
+export const MODULE_LIST = [
+  'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M7A', 'M7B',
+  'M8', 'M9', 'M9A', 'M10', 'M11', 'M11A', 'M11B', 'M11C',
+  'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M17A',
+] as const
+
+export type ModuleName = typeof MODULE_LIST[number]

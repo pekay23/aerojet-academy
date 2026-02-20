@@ -1,0 +1,60 @@
+import { NextRequest } from 'next/server'
+import prisma from '@/lib/prisma/client'
+import { requireStaff } from '@/lib/auth/helpers'
+import { apiCreated, apiError, apiPaginated, withErrorHandler } from '@/lib/api/response'
+import { parsePagination } from '@/lib/api/response'
+import { createClassSchema, validateBody } from '@/lib/validation/schemas'
+import { AuditAction, createAuditLog } from '@/lib/audit/logger'
+
+export const GET = withErrorHandler(async (req: NextRequest) => {
+  await requireStaff()
+  const { searchParams } = new URL(req.url)
+  const { page, limit, skip } = parsePagination(searchParams)
+
+  const [classes, total] = await Promise.all([
+    prisma.class.findMany({
+      include: {
+        course: { select: { code: true, name: true } },
+        instructor: {
+          include: {
+            user: { include: { profile: { select: { firstName: true, lastName: true } } } },
+          },
+        },
+        _count: { select: { attendanceRecords: true } },
+      },
+      orderBy: { startDate: 'desc' },
+      skip,
+      take: limit,
+    }),
+    prisma.class.count(),
+  ])
+  return apiPaginated(classes, total, page, limit)
+})
+
+export const POST = withErrorHandler(async (req: NextRequest) => {
+  const staff = await requireStaff()
+  const body = await req.json()
+  const validation = validateBody(createClassSchema, body)
+  if (!validation.success) return apiError((validation as any).error)
+
+  // Check for duplicate class name in course
+  const existingClass = await prisma.class.findFirst({
+    where: {
+      courseId: validation.data.courseId,
+      name: validation.data.name,
+    },
+  })
+
+  if (existingClass) {
+    return apiError('Class with this name already exists for this course', 409)
+  }
+
+  const cls = await prisma.class.create({ data: validation.data as any })
+  await createAuditLog({
+    action: AuditAction.CREATE,
+    entity: 'Class',
+    entityId: cls.id,
+    userId: staff.id,
+  })
+  return apiCreated(cls)
+})

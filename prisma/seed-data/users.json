@@ -1,0 +1,28 @@
+[
+  {
+    "email": "admin@aerojet-academy.com",
+    "role": "SUPER_ADMIN",
+    "profile": { "firstName": "Super", "lastName": "Admin" }
+  },
+  {
+    "email": "staff@aerojet-academy.com",
+    "role": "STAFF",
+    "profile": { "firstName": "Jane", "lastName": "Staff" }
+  },
+  {
+    "email": "instructor@aerojet-academy.com",
+    "role": "INSTRUCTOR",
+    "profile": { "firstName": "Captain", "lastName": "Mensah" }
+  },
+  {
+    "email": "student@aerojet-academy.com",
+    "role": "STUDENT",
+    "studentId": "AJA-2026-0001",
+    "profile": { "firstName": "Kwame", "lastName": "Owusu" }
+  },
+  {
+    "email": "applicant@example.com",
+    "role": "APPLICANT",
+    "profile": { "firstName": "Ama", "lastName": "Adjei" }
+  }
+]

@@ -1,0 +1,66 @@
+import { NextRequest } from 'next/server'
+import prisma from '@/lib/prisma/client'
+import { requireStaff } from '@/lib/auth/helpers'
+import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { getPoolWithDetails } from '@/lib/pools/operations'
+import { updateExamPoolSchema, validateBody } from '@/lib/validation/schemas'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+
+export const GET = withErrorHandler(
+  async (req: NextRequest, { params }: { params: { id: string } }) => {
+    await requireStaff()
+    const { id } = params
+    const pool = await getPoolWithDetails(id)
+    if (!pool) return apiNotFound('Pool not found')
+    return apiSuccess(pool)
+  }
+)
+
+export const PATCH = withErrorHandler(
+  async (req: NextRequest, { params }: { params: { id: string } }) => {
+    const staff = await requireStaff()
+    const { id } = params
+    const body = await req.json()
+    const validation = validateBody(updateExamPoolSchema, body)
+
+    if (!validation.success) return apiError((validation as any).error)
+
+    const existingPool = await prisma.examPool.findUnique({
+      where: { id },
+    })
+
+    if (!existingPool) {
+      return apiNotFound('Exam pool not found')
+    }
+
+    // Check for unique name within the same event (excluding current pool)
+    if (validation.data.name && validation.data.name !== existingPool.name) {
+      const duplicatePool = await prisma.examPool.findFirst({
+        where: {
+          eventId: existingPool.eventId,
+          name: validation.data.name,
+          id: { not: id },
+        },
+      })
+
+      if (duplicatePool) {
+        return apiError('A pool with this name already exists in this event')
+      }
+    }
+
+    const updatedPool = await prisma.examPool.update({
+      where: { id },
+      data: validation.data as any,
+    })
+
+    await createAuditLog({
+      action: AuditAction.UPDATE,
+      entity: 'ExamPool',
+      entityId: updatedPool.id,
+      userId: staff.id,
+      details: { changes: validation.data },
+    })
+
+    return apiSuccess(updatedPool)
+  }
+)

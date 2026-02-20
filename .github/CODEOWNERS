@@ -1,0 +1,10 @@
+# Default owners
+* @aerojet-admin
+
+# Critical paths
+prisma/ @aerojet-admin
+lib/wallet/ @aerojet-admin
+lib/pools/ @aerojet-admin
+middleware.ts @aerojet-admin
+app/api/staff/ @aerojet-admin
+app/api/cron/ @aerojet-admin
