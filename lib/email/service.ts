@@ -82,8 +82,8 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
 
 const DOMAIN = process.env.NEXT_PUBLIC_APP_URL || 'https://aerojet-academy.com'
 
-const LOGO_DARK_ON_WHITE = `${DOMAIN}/images/logos/AATA_logo_hor_onWhite.png`
-const LOGO_WHITE_ON_DARK = `${DOMAIN}/images/logos/ATA_logo_hor_onDark.png`
+const LOGO_DARK_ON_WHITE = `https://lightpink-guanaco-745322.hostingersite.com/wp-content/uploads/2024/03/ATA_logo_hor_onWhite-1-e1711591369108.png`
+const LOGO_WHITE_ON_DARK = `https://lightpink-guanaco-745322.hostingersite.com/wp-content/uploads/2024/03/ATA_logo_hor_onDark-1-e1711591332243.png`
 
 const COLORS = {
   navy: '#002a5c',
@@ -192,33 +192,57 @@ export async function sendRegistrationEmail(
         </div>
       </div>
 
-      <!-- Payment Details -->
-      <div style="margin-bottom: 12px;">
-        <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0;">Payment Details</h3>
-      </div>
-      
-      <div style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
-        <!-- Bank Name Header -->
-        <div style="background-color: #f8fafc; padding: 16px; border-bottom: 1px solid #e2e8f0; display: table; width: 100%; box-sizing: border-box;">
-          <div style="display: table-cell; font-size: 14px; font-weight: 500; color: #64748b;">Bank Name</div>
-          <div style="display: table-cell; font-size: 16px; font-weight: 700; color: #0f172a; text-align: right;">${finance.bankName || 'FNB Ghana'}</div>
-        </div>
+      <!-- Payment Details Section -->
+      <div style="margin-bottom: 32px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0;">Bank Transfer Details</h3>
         
-        <!-- Account Rows -->
-        <div style="padding: 16px; border-bottom: 1px solid #f1f5f9;">
-          <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account Name</div>
-          <div style="font-size: 15px; font-weight: 600; color: #0f172a;">${finance.bankAccountName || 'Aerojet Aviation Foundation'}</div>
-        </div>
-        
-        <div style="padding: 16px;">
-          <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account No.</div>
-          <div style="font-family: monospace; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px;">${finance.bankAccountNumber || 'N/A'}</div>
+        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+          <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+            <tr>
+              <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Bank Name</div>
+                <div style="font-size: 15px; font-weight: 700; color: #0f172a;">${finance.bankName || 'FNB Ghana'}</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account Name</div>
+                <div style="font-size: 15px; font-weight: 600; color: #0f172a;">${finance.bankAccountName || 'Aerojet Aviation Foundation'}</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account Number</div>
+                <div style="font-family: monospace; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px;">${finance.bankAccountNumber || 'N/A'}</div>
+              </td>
+            </tr>
+            ${
+              finance.bankSwift
+                ? `
+            <tr>
+              <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
+                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">SWIFT / BIC Code</div>
+                <div style="font-family: monospace; font-size: 16px; font-weight: 700; color: #0f172a;">${finance.bankSwift}</div>
+              </td>
+            </tr>
+            `
+                : ''
+            }
+            <tr>
+              <td style="padding: 16px; background-color: #f1f5f9;">
+                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Payment Reference</div>
+                <div style="font-family: monospace; font-size: 18px; font-weight: 800; color: #137fec;">${registrationCode}</div>
+              </td>
+            </tr>
+          </table>
         </div>
       </div>
 
-      <p class="text" style="font-size: 14px; color: #64748b; text-align: center; margin-top: 24px;">
-        Use your reference code <strong style="color: #334155;">${registrationCode}</strong> as the payment reference.
-      </p>
+      <div style="background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+        <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.5;">
+          <strong>Important:</strong> Please ensure the payment reference <strong style="color: #b45309;">${registrationCode}</strong> is included in your bank transfer to avoid delays in processing your application.
+        </p>
+      </div>
     `
     ),
   })
