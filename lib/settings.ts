@@ -39,6 +39,7 @@ export async function getFinanceConfig() {
     'bank_account_name',
     'bank_account_number',
     'bank_name',
+    'bank_swift',
     'payment_methods',
   ])
 
@@ -47,6 +48,7 @@ export async function getFinanceConfig() {
     bankAccountName: settings.get('bank_account_name') || '',
     bankAccountNumber: settings.get('bank_account_number') || '',
     bankName: settings.get('bank_name') || 'Fidelity Bank',
+    bankSwift: settings.get('bank_swift') || '',
     paymentMethods: (settings.get('payment_methods') || 'BANK_TRANSFER').split(','),
   }
 }

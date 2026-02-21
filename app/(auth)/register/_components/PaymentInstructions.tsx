@@ -17,6 +17,7 @@ export default function PaymentInstructions({
     bankName: string
     bankAccountName: string
     bankAccountNumber: string
+    bankSwift?: string
   }
 }) {
   const searchParams = useSearchParams()
@@ -132,6 +133,14 @@ export default function PaymentInstructions({
                 {finance.bankAccountNumber}
               </span>
             </div>
+            {finance.bankSwift && (
+              <div className="flex justify-between">
+                <span className="text-gray-500">SWIFT/BIC</span>
+                <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                  {finance.bankSwift}
+                </span>
+              </div>
+            )}
             <div className="flex justify-between border-t pt-2">
               <span className="text-gray-500">Reference</span>
               <span className="text-aerojet-blue font-mono font-bold">{registrationCode}</span>
