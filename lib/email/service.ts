@@ -132,8 +132,11 @@ export const wrapEmail = (title: string, bodyContent: string) => {
               <td class="footer" bgcolor="${COLORS.navy}" style="background-color: ${COLORS.navy} !important;">
                 <table width="100%">
                   <tr>
-                    <td valign="top" width="50%"><img src="${LOGO_WHITE_ON_DARK}" class="footer-logo" alt="Aerojet Academy" /></td>
-                    <td valign="top" width="50%" class="footer-contact" style="color: #cbd5e1 !important;"><strong>Aerojet Aviation Training Academy</strong><br/>Small Engines Dept., ATTC<br/>Kokomlemle, Accra - Ghana<br/>+233 209 848 423</td>
+                    <td valign="top"><img src="${LOGO_WHITE_ON_DARK}" class="footer-logo" alt="Aerojet Academy" /></td>
+                    <td valign="top" class="footer-contact" style="color: #cbd5e1 !important; text-align: right;">
+                      <strong style="white-space: nowrap;">Aerojet Aviation Training Academy</strong><br/>
+                      <span style="font-size: 11px; opacity: 0.8;">Small Engines Dept., ATTC<br/>Kokomlemle, Accra - Ghana<br/>+233 209 848 423</span>
+                    </td>
                   </tr>
                 </table>
                 <div class="footer-links" style="border-top: 1px solid rgba(255,255,255,0.1) !important;">
@@ -242,6 +245,10 @@ export async function sendRegistrationEmail(
         <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.5;">
           <strong>Important:</strong> Please ensure the payment reference <strong style="color: #b45309;">${registrationCode}</strong> is included in your bank transfer to avoid delays in processing your application.
         </p>
+      </div>
+
+      <div class="btn-container" style="text-align: center; margin-top: 30px;">
+        <a href="${BASE_URL}/upload-proof?code=${registrationCode}" class="btn">Upload Payment Proof</a>
       </div>
     `
     ),
