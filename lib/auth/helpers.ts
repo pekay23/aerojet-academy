@@ -62,14 +62,25 @@ export function generateAcademyEmail(
   middleName: string | null | undefined,
   lastName: string
 ): string {
-  const cleanFirst = firstName.toLowerCase().replace(/[^a-z0-9]/g, '')
-  const cleanLast = lastName.toLowerCase().replace(/[^a-z0-9]/g, '')
-  const cleanMiddle = middleName ? middleName.toLowerCase().replace(/[^a-z0-9]/g, '') : ''
+  const getInitial = (name: string) =>
+    name
+      .charAt(0)
+      .toLowerCase()
+      .replace(/[^a-z]/g, '')
 
-  if (cleanMiddle) {
-    return `${cleanFirst}.${cleanMiddle}.${cleanLast}@aerojet-academy.com`
+  const firstInitials = firstName.trim().split(/\s+/).map(getInitial).filter(Boolean)
+  const middleInitials = (middleName || '').trim().split(/\s+/).map(getInitial).filter(Boolean)
+  const cleanSurname = lastName
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+
+  const allInitials = [...firstInitials, ...middleInitials]
+
+  if (allInitials.length > 0) {
+    return `${allInitials.join('.')}.${cleanSurname}@aerojet-academy.com`
   }
-  return `${cleanFirst}.${cleanLast}@aerojet-academy.com`
+  return `${cleanSurname}@aerojet-academy.com`
 }
 
 export function generateStudentId(): string {

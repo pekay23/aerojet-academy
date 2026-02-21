@@ -46,7 +46,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       await prisma.$transaction(async (tx) => {
         const user = await tx.user.create({
           data: {
-            email: s.email,
+            email: academyEmail,
+            personalEmail: s.email,
             academyEmail,
             password: hashedPassword,
             role: UserRole.STUDENT,
@@ -95,4 +96,3 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   return apiSuccess(results)
 })
-
