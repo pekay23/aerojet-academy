@@ -1,0 +1,49 @@
+import { Resend } from 'resend'
+
+const resend = new Resend(process.env.RESEND_API_KEY)
+
+/**
+ * Create a new Resend webhook
+ * @param endpoint The URL where Resend will send events
+ * @param events List of events to subscribe to (e.g. ['email.sent', 'email.delivered'])
+ */
+export async function createResendWebhook(
+  endpoint: string,
+  events: string[] = ['email.sent', 'email.delivered', 'email.bounced']
+) {
+  return await resend.webhooks.create({
+    endpoint,
+    events: events as any,
+  })
+}
+
+/**
+ * Retrieve a webhook by ID
+ */
+export async function getResendWebhook(webhookId: string) {
+  return await resend.webhooks.get(webhookId)
+}
+
+/**
+ * Update an existing webhook
+ */
+export async function updateResendWebhook(
+  webhookId: string,
+  options: { endpoint?: string; events?: string[]; status?: 'enabled' | 'disabled' }
+) {
+  return await resend.webhooks.update(webhookId, options as any)
+}
+
+/**
+ * List all webhooks
+ */
+export async function listResendWebhooks() {
+  return await resend.webhooks.list()
+}
+
+/**
+ * Delete a webhook
+ */
+export async function deleteResendWebhook(webhookId: string) {
+  return await resend.webhooks.remove(webhookId)
+}
