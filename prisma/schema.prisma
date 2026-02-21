@@ -7,7 +7,9 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// --- NextAuth Models ---
+// =========================================================
+// 1. USER & AUTHENTICATION (Unchanged)
+// =========================================================
 
 model Account {
   id                String  @id @default(cuid())
@@ -22,8 +24,7 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
 }
@@ -37,24 +38,32 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String?
-  role          String    @default("STUDENT") 
-  isActive      Boolean   @default(false)
-  createdAt     DateTime  @default(now())
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String?   @unique
+  emailVerified      DateTime?
+  image              String?
+  password           String?
+  role               String    @default("STUDENT")
+  isActive           Boolean   @default(false)
+  isDeleted          Boolean   @default(false)
+  deletedAt          DateTime?
+  lastPasswordChange DateTime?
+  createdAt          DateTime  @default(now())
   
-  // Relations
-  accounts      Account[]
-  sessions      Session[]
-  studentProfile Student?
-  
-  // For Instructors: Which courses do they teach?
-  instructedCourses Course[] @relation("CourseInstructors")
+  // Auth Recovery
+  resetToken         String?
+  resetTokenExpiry   DateTime?
 
+  accounts          Account[]
+  sessions          Session[]
+  studentProfile    Student?
+  instructedCourses Course[]  @relation("CourseInstructors")
+  cohortInstructions CohortCourse[] @relation("CohortInstructors")
+  auditLogs         AuditLog[]
+  notifications     Notification[]
+
+  @@index([role, isDeleted])
 }
 
 model VerificationToken {
@@ -65,199 +74,530 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// --- Student Portal Models ---
+// =========================================================
+// 2. ACADEMIC HIERARCHY (Unchanged)
+// =========================================================
 
-model Student {
-  id                String    @id @default(cuid())
-  userId            String    @unique
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  // Personal Info
-  studentId         String?   @unique
-  photoUrl          String?
-  phone             String?
-  dob               DateTime?
-  gender            String?
-  address           String?   @db.Text
-  city              String?
-  region            String?   
-  country           String?   @default("Ghana")
-
-  // Emergency Contact
-  emergencyName     String?
-  emergencyPhone    String?
-  emergencyRelation String?
-
-  // Status
-  enrollmentStatus  String    @default("APPLICANT")
-  cohort            String?
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-
-  // Relationships
-  applications      Application[]
-  fees              Fee[]
-  examBookings      ExamBooking[]
-  attendance        AttendanceRecord[]
-  assessments       Assessment[] // <--- ADDED THIS
-
-  wallet          Wallet? // One wallet per student
+model SchoolPeriod {
+  id        String   @id @default(cuid())
+  name      String
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+  intakes   Intake[]
 }
 
-model Course {
-  id           String        @id @default(cuid())
-  code         String        @unique
-  title        String
-  description  String        @db.Text
-  duration     String
-  price        Float
-  
-  materialLink String?
-  
-  // Relations
-  applications Application[]
-  examRuns     ExamRun[]
-  attendance   AttendanceRecord[]
+model Intake {
+  id             String       @id @default(cuid())
+  name           String
+  schoolPeriodId String
+  schoolPeriod   SchoolPeriod @relation(fields: [schoolPeriodId], references: [id])
+  cohorts        Cohort[]     
+  students       Student[]
+}
 
-  // Instructors assigned to this course
-  instructors  User[]        @relation("CourseInstructors")
+model Cohort {
+  id          String   @id @default(cuid())
+  name        String
+  code        String   @unique
+  intakeId    String
+  intake      Intake   @relation(fields: [intakeId], references: [id])
+  students    Student[]
+  curriculum  CohortCourse[] 
+  createdAt   DateTime @default(now())
+}
+
+model CohortCourse {
+  id           String   @id @default(cuid())
+  cohortId     String
+  cohort       Cohort   @relation(fields: [cohortId], references: [id])
+  courseId     String
+  course       Course   @relation(fields: [courseId], references: [id])
+  semester     Int      @default(1)
+  instructors  User[]   @relation("CohortInstructors")
+}
+
+// =========================================================
+// 3. STUDENT CORE (Updated with Ambassador Fields)
+// =========================================================
+
+model Student {
+  id                 String   @id @default(cuid())
+  userId             String   @unique
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  studentId          String?  @unique
+  photoUrl           String?
+  phone              String?
+  dob                DateTime?
+  gender             String?
+  address            String?  @db.Text
+  city               String?
+  region             String?
+  country            String?  @default("Ghana")
+  
+  emergencyName      String?
+  emergencyPhone     String?
+  emergencyRelation  String?
+  enrollmentStatus   String   @default("PROSPECT")
+  institutionalEmail String?  @unique
+  
+  // Academic Relations
+  intakeId           String?
+  intake             Intake?  @relation(fields: [intakeId], references: [id])
+  cohort             String?
+  cohortId           String?
+  cohortRel          Cohort?  @relation(fields: [cohortId], references: [id])
+  
+  // --- NEW: Ambassador Program (Spec 3.8) ---
+  isAmbassador        Boolean  @default(false)
+  referralCode        String?  @unique
+  successfulReferrals Int      @default(0)
+  
+  // Registration Flow
+  registrationCode    String?  @unique
+
+  // Data Relations
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  
+  applications       Application[]
+  fees               Fee[]
+  attendance         AttendanceRecord[]
+  assessments        Assessment[]
+  notes              StudentNote[]
+  files              StudentFile[]
+  
+  // --- NEW: Pooling System Relations ---
+  wallet             Wallet?
+  poolMemberships    PoolMembership[]
+  bookings           Booking[]
+  referralsMade      Referral[] @relation("Referrer")
+  referralsReceived  Referral[] @relation("Referee")
+
+  @@index([enrollmentStatus])
 }
 
 model Application {
-  id        String   @id @default(cuid())
-  status    String   @default("PENDING") // PENDING, AWAITING_DOCS, UNDER_REVIEW, APPROVED, REJECTED
-  appliedAt DateTime @default(now())
-  
-  // Detailed Application Data
-  educationLevel    String?
-  institutionName   String?
-  graduationYear    String?
-  
-  // Document URLs (from UploadThing)
-  idDocumentUrl     String? // Passport or National ID
-  certificateUrl    String? // High School Certificate
-  transcriptUrl     String? // Academic Transcripts
-  
-  isSubmitted       Boolean @default(false) // Track if the user finished the long form
-
-  studentId String
-  student   Student  @relation(fields: [studentId], references: [id])
-  
-  courseId  String
-  course    Course   @relation(fields: [courseId], references: [id])
-}
-
-
-model Fee {
-  id          String   @id @default(cuid())
-  amount      Float
-  paid        Float    @default(0.0)
-  dueDate     DateTime
-  status      String   @default("UNPAID")
-  description String?
-  proofUrl    String?
-  
-  studentId   String
-  student     Student  @relation(fields: [studentId], references: [id])
-}
-
-// --- Exam Models ---
-
-model ExamRoom {
-  id        String    @id @default(cuid())
-  name      String
-  code      String    @unique
-  capacity  Int       @default(28)
-  runs      ExamRun[]
-}
-
-model ExamRun {
   id              String   @id @default(cuid())
-  examModuleId    String
-  course          Course   @relation(fields: [examModuleId], references: [id])
-  
-  roomId          String
-  room            ExamRoom @relation(fields: [roomId], references: [id])
-  
-  startDatetime   DateTime
-  durationMinutes Int
-  maxCapacity     Int      @default(28)
-  status          String   @default("SCHEDULED")
-  
-  bookings        ExamBooking[]
-  assessments     Assessment[] // <--- ADDED THIS
-}
-
-model ExamBooking {
-  id          String   @id @default(cuid())
-  examRunId   String
-  run         ExamRun  @relation(fields: [examRunId], references: [id])
-  
-  studentId   String
-  student     Student  @relation(fields: [studentId], references: [id])
-  
-  status      String   @default("CONFIRMED")
-  seatLabel   String?
-  bookedAt    DateTime @default(now())
-}
-
-// --- Attendance & Results Models ---
-
-model AttendanceRecord {
-  id              String   @id @default(cuid())
-  date            DateTime @default(now())
-  
-  courseId        String
-  course          Course   @relation(fields: [courseId], references: [id])
+  status          String   @default("PENDING")
+  appliedAt       DateTime @default(now())
+  educationLevel  String?
+  institutionName String?
+  graduationYear  String?
+  idDocumentUrl   String?
+  certificateUrl  String?
+  transcriptUrl   String?
+  isSubmitted     Boolean  @default(false)
   
   studentId       String
-  student         Student  @relation(fields: [studentId], references: [id])
+  student         Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  courseId        String
+  course          Course   @relation(fields: [courseId], references: [id])
+}
+
+model StudentNote {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  authorId  String
+  title     String
+  content   String   @db.Text
+  type      String
+  createdAt DateTime @default(now())
+}
+
+model StudentFile {
+  id        String   @id @default(cuid())
+  studentId String
+  student   Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  name      String
+  url       String
+  type      String
+  createdAt DateTime @default(now())
+}
+
+// =========================================================
+// 4. CURRICULUM & ATTENDANCE (Unchanged)
+// =========================================================
+
+model Course {
+  id           String             @id @default(cuid())
+  code         String             @unique
+  title        String
+  description  String?            @db.Text
+  duration     String?
+  price        Float
+  materialLink String?
   
-  scheduledHours  Float
-  attendedHours   Float
-  lateMinutes     Int      @default(0)
+  applications Application[]
+  attendance   AttendanceRecord[]
+  instructors  User[]             @relation("CourseInstructors")
+  cohorts      CohortCourse[]
   
-  notes           String?
-  recordedBy      String   
+  lessons      Lesson[]
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT_EXCUSED
+  ABSENT_UNEXCUSED
+  LATE
+  EXPULSED
+  UNSPECIFIED
+}
+
+model AttendanceRecord {
+  id            String           @id @default(cuid())
+  date          DateTime         @default(now())
+  courseId      String
+  course        Course           @relation(fields: [courseId], references: [id])
+  studentId     String
+  student       Student          @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  status        AttendanceStatus @default(UNSPECIFIED)
+  type          String           @default("DAILY")
+  lessonName    String?
+  comment       String?
+  recordedBy    String
+  
+  scheduledHours Float?
+  attendedHours  Float?
+  lateMinutes    Int?             @default(0)
+
+  @@index([date, courseId])
+  @@index([studentId])
+}
+
+// =========================================================
+// 5. EXAM POOLING SYSTEM (NEW - Spec Section 3)
+// =========================================================
+
+// --- 3.1 Events Table ---
+model ExamEvent {
+  id               String   @id @default(cuid())
+  name             String   // e.g. "June 2026 Exam Event"
+  startDate        DateTime
+  endDate          DateTime
+  
+  // T-21 Go/No-Go Decision Deadline
+  paymentDeadline  DateTime 
+  joinDeadline     DateTime?
+  
+  minRevenueTarget Decimal  @default(25000.00) @db.Decimal(10, 2)
+  status           String   @default("DRAFT") // DRAFT, OPEN, CONFIRMED, POSTPONED, CANCELLED, COMPLETED
+  
+  pools            ExamPool[]
+  bookings         Booking[]
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// --- 3.2 Pools Table ---
+model ExamPool {
+  id               String   @id @default(cuid())
+  eventId          String
+  event            ExamEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  
+  name             String   // e.g. "Pool A - Mon AM"
+  examDate         DateTime
+  examStartTime    String   // "09:00"
+  examEndTime      String   // "12:00"
+  
+  minCandidates    Int      @default(25)
+  maxCandidates    Int      @default(28)
+  moduleDiversityCap Int    @default(4)
+  
+  status           String   @default("DRAFT") // DRAFT, OPEN, NEAR_FULL, CONFIRMED, LOCKED, FAILED, COMPLETED
+  
+  preSeedModules   String[] // e.g. ["M1", "M7"]
+  
+  memberships      PoolMembership[]
+  bookings         Booking[] // Optional: if tracking physical allocation via pool
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
+
+// --- 3.3 Pool Memberships Table (Replaces PoolParticipant) ---
+model PoolMembership {
+  id               String   @id @default(cuid())
+  
+  poolId           String
+  pool             ExamPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  
+  studentId        String
+  student          Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  moduleCode       String   // ONE module per pool per candidate
+  
+  status           String   @default("RESERVED") // RESERVED, CONFIRMED, CANCELLED, FAILED, ROLLED, COMPLETED
+  
+  pricePaid        Decimal  @db.Decimal(10, 2)
+  reservedAmount   Decimal  @db.Decimal(10, 2) // Funds held in wallet
+  discountType     String?  // 'MULTI_POOL', 'AMBASSADOR'
+  
+  referralCode     String?  // If joined via referral
+  
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  confirmationDate DateTime?
+
+  // Constraint: One membership per pool
+  @@unique([poolId, studentId]) 
+}
+
+// --- 3.6 Bookings Table (Consolidated) ---
+model Booking {
+  id               String   @id @default(cuid())
+  
+  candidateId      String
+  student          Student  @relation(fields: [candidateId], references: [id])
+  
+  eventId          String
+  event            ExamEvent @relation(fields: [eventId], references: [id])
+  
+  poolId           String?
+  pool             ExamPool? @relation(fields: [poolId], references: [id])
+  
+  moduleCode       String
+  bookingType      String   @default("POOL") // POOL, INDIVIDUAL, BUNDLE, GROUP_CHARTER
+  
+  amountPaid       Decimal  @db.Decimal(10, 2)
+  status           String   @default("CONFIRMED") // CONFIRMED, CANCELLED, COMPLETED, NO_SHOW
+  
+  bookingDate      DateTime @default(now())
+  examDate         DateTime?
+}
+
+// --- 3.7 Referrals Table ---
+model Referral {
+  id                  String   @id @default(cuid())
+  
+  referrerId          String
+  referrer            Student  @relation("Referrer", fields: [referrerId], references: [id])
+  
+  refereeId           String
+  referee             Student  @relation("Referee", fields: [refereeId], references: [id])
+  
+  referralCode        String
+  status              String   @default("PENDING") // PENDING, CONFIRMED, FAILED
+  
+  poolMembershipId    String? // Link to the specific membership that triggered this
+  
+  createdAt           DateTime @default(now())
+  confirmedAt         DateTime?
+  
+  @@unique([referralCode, refereeId])
+}
+
+// --- 3.9 Modules Reference ---
+model Module {
+  code             String   @id // M1, M7
+  name             String
+  category         String?  // Foundation, Airframe
+  durationMinutes  Int      @default(180)
+  isActive         Boolean  @default(true)
+}
+
+// =========================================================
+// 6. WALLET SYSTEM (Updated - Spec Section 3.4)
+// =========================================================
+
+model Wallet {
+  id               String   @id @default(cuid())
+  studentId        String   @unique
+  student          Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  // Using Decimal for currency accuracy
+  availableBalance Decimal  @default(0.00) @db.Decimal(10, 2)
+  reservedBalance  Decimal  @default(0.00) @db.Decimal(10, 2)
+  currency         String   @default("EUR")
+  
+  transactions     WalletTransaction[]
+  
+  updatedAt        DateTime @updatedAt
+  createdAt        DateTime @default(now())
+}
+
+model WalletTransaction {
+  id               String   @id @default(cuid())
+  walletId         String
+  wallet           Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  
+  type             String   // TOP_UP, RESERVE, CAPTURE, RELEASE, REFUND
+  amount           Decimal  @db.Decimal(10, 2)
+  
+  // Snapshots for Audit Trail
+  balanceBefore    Decimal  @default(0) @db.Decimal(10, 2)
+  balanceAfter     Decimal  @default(0) @db.Decimal(10, 2)
+  
+  referenceType    String?  // 'POOL_MEMBERSHIP', 'BOOKING', 'PAYMENT'
+  referenceId      String?
+  description      String?
+  
+  createdAt        DateTime @default(now())
+}
+
+// =========================================================
+// 7. FINANCE & SYSTEM (Legacy Support + Updates)
+// =========================================================
+
+model Fee {
+  id            String   @id @default(cuid())
+  // Updated to Decimal for consistency, but Float maintained if legacy data exists
+  amount        Decimal  @db.Decimal(10, 2) 
+  paid          Decimal  @default(0.0) @db.Decimal(10, 2)
+  
+  dueDate       DateTime
+  status        String   @default("UNPAID")
+  description   String?
+  feeType       String   @default("OTHER")  // REGISTRATION, TUITION, EXAM, BUNDLE, OTHER
+  currency      String   @default("EUR")    // EUR or GHS
+  paymentMethod String?
+  proofUrl      String?
+  
+  studentId     String
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime? @updatedAt
+
+  @@index([status])
+  @@index([studentId, status])
+}
+
+model SystemSetting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+model AdmissionForm {
+  id                String   @id @default(cuid())
+  name              String
+  targetAudience    String
+  selectionType     String
+  startDate         DateTime
+  endDate           DateTime
+  notificationEmail String
+  registrationFee   Decimal  @default(350.00) @db.Decimal(10, 2)
+  monthlyFee        Float?
+  yearlyFee         Float?
+  isActive          Boolean  @default(true)
+  createdAt         DateTime @default(now())
+}
+
+model PoolNotification {
+  id        String   @id @default(cuid())
+  studentId String
+  type      String
+  subject   String
+  message   String   @db.Text
+  sent      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String
+  details   String   @db.Text
+  createdAt DateTime @default(now())
 }
 
 model Assessment {
   id            String   @id @default(cuid())
-  type          String   @default("EASA_EXAM") 
-  
-  examRunId     String?  
-  run           ExamRun? @relation(fields: [examRunId], references: [id])
-  
-  studentId     String
-  student       Student  @relation(fields: [studentId], references: [id])
-  
-  score         Float    
+  type          String   @default("INTERNAL_TEST")
+  moduleCode    String
+  score         Float
   maxScore      Float    @default(100.0)
   isPassed      Boolean  @default(false)
-  
-  comments      String?
+  comments      String?  @db.Text
   recordedAt    DateTime @default(now())
+  studentId     String
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  
+  // Instructor grading fields
+  gradedBy      String?  // ID of the instructor who recorded the grade
+  isLocked      Boolean  @default(false) // Prevents re-grading once submitted
+
+  // Updated Relation to new logic (optional)
+  // Can link to Booking or ExamPool if needed in future
+  legacyRunId   String? 
+
+  @@index([studentId])
+  @@index([gradedBy])
+}
+model Lesson {
+  id          String   @id @default(cuid())
+  title       String
+  order       Int      // e.g. 1, 2, 3...
+  
+  // Content
+  videoUrl    String?
+  pdfUrl      String?
+  contentText String?  @db.Text
+  
+  courseId    String
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  
+  createdAt   DateTime @default(now())
 }
 
-model Wallet {
-  id              String   @id @default(cuid())
-  studentId       String   @unique
-  student         Student  @relation(fields: [studentId], references: [id])
+// =========================================================
+// 8. EMAIL SIGNATURE SYSTEM
+// =========================================================
+
+model EmailSignature {
+  id          String   @id @default(cuid())
+  logoUrl     String?
+  name        String   @default("Your Name")
+  role        String   @default("Your Role")
+  phone       String   @default("+000 000 000 000")
+  email       String   @default("email@example.com")
+  website     String   @default("example.com")
+  address     String   @default("Address Line, City, Country")
+  services    String   @default("Service 1 • Service 2 • Service 3")
   
-  balance         Int      @default(0) // Number of exam credits available
-  updatedAt       DateTime @updatedAt
+  // Design customization
+  primaryColor String  @default("#0A5C7A")
+  accentColor  String  @default("#C84B4B")
   
-  transactions    WalletTransaction[]
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
 }
 
-model WalletTransaction {
-  id              String   @id @default(cuid())
-  walletId        String
-  wallet          Wallet   @relation(fields: [walletId], references: [id])
-  
-  amount          Int      // +4 (Buy Bundle) or -1 (Book Exam)
-  type            String   // PURCHASE, USAGE, REFUND, ADJUSTMENT
-  description     String
-  createdAt       DateTime @default(now())
+// =========================================================
+// 9. SYSTEM EVENTS (NEW)
+// =========================================================
+
+model SystemEvent {
+  id          String   @id @default(cuid())
+  title       String
+  start       DateTime
+  end         DateTime
+  type        String   @default("GENERAL") // GENERAL, ACADEMIC, HOLIDAY
+  description String?
+  createdBy   String?
+  createdAt   DateTime @default(now())
+}
+
+// =========================================================
+// 10. NOTIFICATIONS (NEW)
+// =========================================================
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String
+  message   String
+  type      String   @default("INFO")  // INFO, SUCCESS, WARNING, ACTION
+  isRead    Boolean  @default(false)
+  link      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
 }

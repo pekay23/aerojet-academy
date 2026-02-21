@@ -1,67 +1,92 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
-const prisma = new PrismaClient();
+// GET: Fetch Pools available for grading
+export async function GET(req: Request) {
+  const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
 
-// POST: Save Results for a batch of students
-export async function POST(req: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session || (session.user as any).role === 'STUDENT') return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-
-  const { examRunId, results } = await req.json(); // results: [{ studentId, score }]
+  const { searchParams } = new URL(req.url);
+  const poolId = searchParams.get('poolId');
 
   try {
-    // Process each result in a transaction
-    await prisma.$transaction(
-        results.map((res: any) => {
-            const score = parseFloat(res.score);
-            const isPassed = score >= 75; // EASA Standard Pass Mark
-
-            // Update or Create the assessment
-            return prisma.assessment.upsert({
-                where: { 
-                    // This is tricky without a composite ID. 
-                    // For MVP, we search by unique constraint if we added one, or just create.
-                    // Let's assume we allow multiple attempts, so just create.
-                    id: "force-create" // Hack to force create if we don't have a unique ID strategy yet
-                },
-                update: {},
-                create: {
-                    examRunId,
-                    studentId: res.studentId,
-                    score,
-                    maxScore: 100,
-                    isPassed,
-                    type: 'EASA_EXAM'
+    if (poolId) {
+        // Fetch specific pool roster
+        const pool = await prisma.examPool.findUnique({
+            where: { id: poolId },
+            include: {
+                memberships: {
+                    include: { student: { include: { user: true } } },
+                    orderBy: { student: { user: { name: 'asc' } } }
                 }
-            });
-        })
+            }
+        });
+        
+        // Also fetch existing assessments to pre-fill
+        const assessments = await prisma.assessment.findMany({
+            where: { 
+                // We need to link Assessment to Pool or use Module + Student + Date approximation
+                // For V1 schema, let's assume we link via 'legacyRunId' or just filter by Student + Module
+                // Better: Update Schema to link Assessment -> ExamPool.
+                // Workaround: We will create new Assessments.
+            }
+        });
+
+        return NextResponse.json({ pool });
+    } else {
+        // Fetch list of pools
+        const pools = await prisma.examPool.findMany({
+            where: { 
+                status: { in: ['CONFIRMED', 'LOCKED', 'COMPLETED'] },
+                examDate: { lte: new Date() } // Only past exams
+            },
+            orderBy: { examDate: 'desc' }
+        });
+        return NextResponse.json({ pools });
+    }
+  } catch (error) {
+    return NextResponse.json({ error: 'Failed to fetch' }, { status: 500 });
+  }
+}
+
+// POST: Save Grades
+export async function POST(req: Request) {
+  const { error, session } = await withAuth(['ADMIN', 'STAFF']);
+  if (error) return error;
+
+  try {
+    const { poolId, grades } = await req.json(); // grades = [{ studentId, score, isPassed, comments }]
+    
+    // Fetch pool to get Module Code
+    const pool = await prisma.examPool.findUnique({ where: { id: poolId } });
+    if (!pool) return NextResponse.json({ error: 'Pool not found' }, { status: 404 });
+
+    await prisma.$transaction(
+        grades.map((g: any) => 
+            prisma.assessment.create({
+                data: {
+                    studentId: g.studentId,
+                    moduleCode: g.moduleCode, // Taken from membership
+                    score: parseFloat(g.score),
+                    isPassed: g.isPassed,
+                    type: 'EXAM_POOL',
+                    comments: `Pool: ${pool.name}`,
+                    legacyRunId: pool.id // Linking to pool ID using the legacy field for now
+                }
+            })
+        )
     );
 
-    // Mark the exam run as COMPLETED so it doesn't show up in "Upcoming" lists
-    await prisma.examRun.update({
-        where: { id: examRunId },
+    // Close the pool
+    await prisma.examPool.update({
+        where: { id: poolId },
         data: { status: 'COMPLETED' }
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    // Upsert hack above will fail, so let's just use createMany or loop
-    // Better approach for MVP:
-    for (const res of results) {
-        const score = parseFloat(res.score);
-        await prisma.assessment.create({
-            data: {
-                examRunId,
-                studentId: res.studentId,
-                score,
-                isPassed: score >= 75
-            }
-        });
-    }
-    
-    return NextResponse.json({ success: true });
+    console.error("RESULTS_ERROR:", error);
+    return NextResponse.json({ error: 'Failed to save results' }, { status: 500 });
   }
 }

@@ -1,11 +1,9 @@
-import NextAuth, { type NextAuthOptions } from "next-auth"
-import GoogleProvider from "next-auth/providers/google"
-import CredentialsProvider from "next-auth/providers/credentials"
-import { PrismaAdapter } from "@auth/prisma-adapter"
-import { PrismaClient } from "@prisma/client"
+import NextAuth, { type NextAuthOptions } from "next-auth";
+import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import prisma from "@/app/lib/prisma";
 import { compare } from 'bcryptjs';
-
-const prisma = new PrismaClient()
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
@@ -18,55 +16,84 @@ export const authOptions: NextAuthOptions = {
       name: 'Credentials',
       credentials: { email: {}, password: {} },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials.password) return null;
+        if (!credentials?.email) return null;
+
+        if (!credentials.password) return null;
         const user = await prisma.user.findUnique({ where: { email: credentials.email } });
+
         if (!user || !user.password) return null;
+        if (!user.isActive) throw new Error("Account is inactive or pending verification.");
+
         const isValid = await compare(credentials.password, user.password);
-        return isValid ? user : null;
+        if (!isValid) return null;
+
+        return user;
       }
     })
   ],
   pages: {
-    signIn: '/portal/login',
+    signIn: '/login',
+    error: '/login',
   },
   session: {
     strategy: "jwt",
+    maxAge: 24 * 60 * 60,
   },
-
   events: {
-    // Set user to INACTIVE on first-time signup
     createUser: async ({ user }) => {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { isActive: false }
-      });
-      // Also create a student profile automatically
-      await prisma.student.create({
-        data: { userId: user.id }
-      });
+      const existingStudent = await prisma.student.findFirst({ where: { userId: user.id } });
+      if (!existingStudent) {
+        await prisma.student.create({
+          data: { userId: user.id! }
+        });
+      }
     }
   },
-
   callbacks: {
-    // 1. JWT CALLBACK: Fetch latest data from DB
-    async jwt({ token, user }) {
+    async signIn({ user, account }) {
+      if (account?.provider !== 'credentials') {
+        const existingUser = await prisma.user.findUnique({
+          where: { email: user.email! },
+        });
+
+        if (!existingUser) return '/portal/login?error=AccessDenied';
+        if (!existingUser.isActive) return true;
+      }
+      return true;
+    },
+
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.sub = user.id;
-        token.role = user.role;
+        token.role = (user as { role: string }).role;
+        const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
+        token.lastPasswordChange = dbUser?.lastPasswordChange?.getTime() || null;
       }
-      
-      // Update role dynamically from DB on each request
+
+      if (trigger === "update" && session) {
+        if (session.name) token.name = session.name;
+        if (session.image) token.picture = session.image;
+      }
+
+      // Session Validation — throttled to every 5 minutes
+      const REVALIDATE_MS = 5 * 60 * 1000;
       if (token.sub) {
-        const dbUser = await prisma.user.findUnique({
-          where: { id: token.sub },
-          select: { role: true }
-        });
-        if (dbUser) token.role = dbUser.role;
+        const lastChecked = (token.lastCheckedAt as number) || 0;
+        if (Date.now() - lastChecked > REVALIDATE_MS) {
+          const dbUser = await prisma.user.findUnique({ where: { id: token.sub } });
+          if (!dbUser || !dbUser.isActive || dbUser.isDeleted) {
+            return {}; // Return empty object to invalidate session
+          }
+          if (dbUser.lastPasswordChange && token.lastPasswordChange !== dbUser.lastPasswordChange.getTime()) {
+            return {}; // Password changed, invalidate session
+          }
+          token.lastCheckedAt = Date.now();
+        }
       }
+
       return token;
     },
 
-    // 2. SESSION CALLBACK: Map token data to session object
     async session({ session, token }) {
       if (session.user) {
         session.user.id = token.sub!;
@@ -75,13 +102,11 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
 
-    // 3. REDIRECT CALLBACK: Handle post-login navigation
     async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
-      return `${baseUrl}/portal`
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
+      // Default redirect — role-based routing is handled by middleware
+      return baseUrl;
     }
   },
 };

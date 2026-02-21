@@ -1,62 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import { PrismaClient } from '@prisma/client';
+import prisma from '@/app/lib/prisma';
+import { withAuth } from '@/app/lib/auth-helpers';
 
-const prisma = new PrismaClient();
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ courseId: string }> } // Updated to Promise
+  { params }: { params: Promise<{ courseId: string }> }
 ) {
-  const session = await getServerSession(authOptions);
-  
-  // Verify Instructor/Admin/Staff Role
-  if (!session || !['ADMIN', 'STAFF', 'INSTRUCTOR'].includes((session.user as any).role)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-  }
+  const { error, session } = await withAuth(['INSTRUCTOR', 'ADMIN', 'STAFF']);
+  if (error) return error;
 
-  // Mandatory for Next.js 15: Await the params to get courseId
+  const user = session!.user as { role: string; id: string };
   const { courseId } = await params;
 
   try {
-    // 1. If the user is an Instructor, verify they are actually teaching this course
-    if ((session.user as any).role === 'INSTRUCTOR') {
-        const assignment = await prisma.course.findFirst({
-            where: {
-                id: courseId,
-                instructors: { some: { id: session.user.id } }
-            }
-        });
-        if (!assignment) {
-          return NextResponse.json({ error: 'Access denied: You are not assigned to this course.' }, { status: 403 });
+    // If the user is an Instructor, verify they are actually teaching this course
+    if (user.role === 'INSTRUCTOR') {
+      const assignment = await prisma.course.findFirst({
+        where: {
+          id: courseId,
+          instructors: { some: { id: user.id } }
         }
+      });
+      if (!assignment) {
+        return NextResponse.json({ error: 'Access denied: You are not assigned to this course.' }, { status: 403 });
+      }
     }
 
-    // 2. Fetch Enrolled Students (Applications with APPROVED status)
+    // Fetch Enrolled Students (Applications with APPROVED status)
     const applications = await prisma.application.findMany({
-        where: {
-            courseId: courseId,
-            status: 'APPROVED'
-        },
-        include: {
-            student: { 
-              include: { 
-                user: {
-                  select: {
-                    name: true,
-                    email: true,
-                    image: true,
-                    createdAt: true
-                  }
-                } 
-              } 
+      where: {
+        courseId: courseId,
+        status: 'APPROVED'
+      },
+      include: {
+        student: {
+          include: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+                image: true,
+                createdAt: true
+              }
             }
-        },
-        orderBy: { student: { user: { name: 'asc' } } }
+          }
+        }
+      },
+      orderBy: { student: { user: { name: 'asc' } } }
     });
 
-    // Extract the student profile data
     const students = applications.map(app => app.student);
 
     return NextResponse.json({ students });
