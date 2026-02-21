@@ -7,16 +7,6 @@ export default withAuth(
     const { pathname } = req.nextUrl
     const token = req.nextauth.token
 
-    // Force password change redirect
-    if (
-      token?.mustChangePassword &&
-      !pathname.startsWith('/change-password') &&
-      !pathname.startsWith('/api/') &&
-      !pathname.startsWith('/_next/')
-    ) {
-      return NextResponse.redirect(new URL('/change-password', req.url))
-    }
-
     // Role-based route protection
     const roleRoutes: Record<string, string[]> = {
       '/staff': ['SUPER_ADMIN', 'ADMIN', 'STAFF'],

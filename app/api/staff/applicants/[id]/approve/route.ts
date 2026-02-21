@@ -45,6 +45,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     where: { id },
     data: {
       status: 'ACTIVE',
+      personalEmail: user.email, // Preserve personal email
+      email: academyEmail, // Replace with academy email
       academyEmail,
       password: hashedTempPassword,
       verifyToken,

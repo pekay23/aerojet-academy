@@ -11,19 +11,23 @@ export const ourFileRouter = {
     // Set permissions and file types for this FileRoute
     .middleware(async ({ req }) => {
       // This code runs on your server before upload
-      console.log('Uploadthing middleware started')
+      console.log('Uploadthing middleware started for paymentProof')
       try {
         const session = await getAuthSession()
         console.log('Session in middleware:', session ? 'Found' : 'Null')
 
-        // If you throw, the user will not be able to upload
-        if (!session) {
-          console.error('Uploadthing unauthorized: No session')
-          throw new UploadThingError('Unauthorized')
+        if (session) {
+          console.log('Session ID:', session.user?.id)
+          console.log('Session Role:', (session.user as any)?.role)
         }
 
-        // Whatever is returned here is accessible in onUploadComplete as `metadata`
-        return { userId: session.user.id }
+        // For payment proof, we allow anonymous uploads if the user is not logged in.
+        // The security check is handled in the subsequent record creation step.
+        const userId = (session?.user as any)?.id || 'anonymous_applicant'
+        const metadata = { userId }
+
+        console.log('Returning metadata for paymentProof:', metadata)
+        return metadata
       } catch (error) {
         console.error('Error in Uploadthing middleware:', error)
         throw error
