@@ -455,3 +455,29 @@ export async function sendPaymentRejectedEmail(
     ),
   })
 }
+
+// ---------------------------------------------------------------------------
+// CONTACT ENQUIRY
+// ---------------------------------------------------------------------------
+
+export async function sendContactEnquiryConfirmation(email: string, name: string, subject: string) {
+  return sendEmail({
+    to: email,
+    subject: `Aerojet Academy - Enquiry Received: ${subject}`,
+    html: wrapEmail(
+      `We received your enquiry`,
+      `
+      <p class="text">Hi ${name.split(' ')[0]},</p>
+      <p class="text">
+        Thank you for reaching out to Aerojet Aviation Training Academy. We have received your enquiry regarding <strong>${subject}</strong> and our admissions team will review it and get back to you as soon as possible.
+      </p>
+      <div class="info-box">
+        <div class="info-row"><strong>Admissions Team</strong></div>
+        <div class="info-row" style="margin-top:5px;">📞 +233 209 848 423</div>
+        <div class="info-row">✉️ trainingprograms@aerojet-academy.com</div>
+      </div>
+      <p class="text">In the meantime, feel free to explore our website for more information about our programmes.</p>
+    `
+    ),
+  })
+}

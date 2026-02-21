@@ -111,6 +111,7 @@ enum NotificationType {
 model User {
   id                String      @id @default(cuid())
   email             String      @unique
+  personalEmail     String?     // Original personal email preserved after activation
   academyEmail      String?     @unique  // Generated: f.m.lastname@aerojet-academy.com
   password          String?     // Bcrypt hashed
   role              UserRole    @default(APPLICANT)

@@ -23,7 +23,14 @@ export async function approveApplicant(
 
     await prisma.user.update({
       where: { id: userId },
-      data: { status: 'ACTIVE', academyEmail, password: hashed, mustChangePassword: true },
+      data: {
+        status: 'ACTIVE',
+        personalEmail: user.email, // Preserve personal email
+        email: academyEmail, // Replace with academy email
+        academyEmail,
+        password: hashed,
+        mustChangePassword: true,
+      },
     })
 
     sendEmail({
