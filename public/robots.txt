@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /staff/
+Disallow: /student/
+Disallow: /applicant/
+
+Sitemap: https://aerojet-academy.com/sitemap.xml

@@ -44,7 +44,8 @@ export default function HeroSlider() {
           src={slide.src}
           alt="Aerojet Academy background"
           fill // Use `fill` to cover the container
-          // quality={80}
+          quality={90}
+          sizes="100vw"
           className={`object-cover transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
           priority={index === 0}
         />
