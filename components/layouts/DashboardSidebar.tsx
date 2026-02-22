@@ -121,8 +121,9 @@ export default function DashboardSidebar({
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 className="hidden items-center justify-center rounded-lg p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-white lg:flex"
                 title="Collapse sidebar"
+                aria-label="Collapse sidebar"
               >
-                <ChevronsLeft className="h-4 w-4" />
+                <ChevronsLeft className="h-4 w-4" aria-hidden="true" />
               </button>
             )}
           </div>
@@ -132,8 +133,9 @@ export default function DashboardSidebar({
               onClick={() => setIsCollapsed(!isCollapsed)}
               className="mt-4 hidden items-center justify-center rounded-lg p-1.5 text-slate-400 transition-all hover:bg-white/5 hover:text-white lg:flex"
               title="Expand sidebar"
+              aria-label="Expand sidebar"
             >
-              <ChevronsRight className="h-4 w-4" />
+              <ChevronsRight className="h-4 w-4" aria-hidden="true" />
             </button>
           )}
 
@@ -314,8 +316,9 @@ export default function DashboardSidebar({
         <button
           onClick={() => setMobileOpen(true)}
           className="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#0f1629] text-white shadow-xl transition-transform hover:scale-105 active:scale-95 dark:bg-slate-800"
+          aria-label="Open navigation menu"
         >
-          <Menu className="h-5 w-5" />
+          <Menu className="h-5 w-5" aria-hidden="true" />
         </button>
       </div>
 
@@ -341,8 +344,9 @@ export default function DashboardSidebar({
                 onClick={() => setMobileOpen(false)}
                 className="absolute top-5 right-5 z-80 flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-400 transition-all hover:bg-white/10 hover:text-white"
                 title="Close sidebar"
+                aria-label="Close sidebar"
               >
-                <X className="h-5 w-5" />
+                <X className="h-5 w-5" aria-hidden="true" />
               </button>
               <div className="flex-1 overflow-y-auto">
                 <SidebarContent forceFull={true} />
