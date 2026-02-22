@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight, Info } from 'lucide-react'
+import { NATIONALITIES } from '@/lib/data/nationalities'
 
 export default function RegistrationForm() {
   const [loading, setLoading] = useState(false)
@@ -11,11 +12,20 @@ export default function RegistrationForm() {
     middleName: '',
     lastName: '',
     email: '',
-    nationality: 'Ghanian',
-    phoneCountryCode: '+233',
+    nationality: NATIONALITIES[0].name,
+    phoneCountryCode: NATIONALITIES[0].dialCode,
     phone: '',
     program: 'FULL_TIME_2YEAR',
   })
+
+  const handleNationalityChange = (val: string) => {
+    const nation = NATIONALITIES.find((n) => n.name === val)
+    setData({
+      ...data,
+      nationality: val,
+      phoneCountryCode: nation ? nation.dialCode : data.phoneCountryCode,
+    })
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -104,14 +114,14 @@ export default function RegistrationForm() {
           <div className="relative">
             <select
               value={data.nationality}
-              onChange={(e) => setData({ ...data, nationality: e.target.value })}
+              onChange={(e) => handleNationalityChange(e.target.value)}
               className="focus:ring-aerojet-blue w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3 text-slate-900 transition-all outline-none focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
             >
-              <option value="Ghanian">Ghanian</option>
-              <option value="Nigerian">Nigerian</option>
-              <option value="South African">South African</option>
-              <option value="British">British</option>
-              <option value="American">American</option>
+              {NATIONALITIES.map((n) => (
+                <option key={n.name} value={n.name}>
+                  {n.name}
+                </option>
+              ))}
               <option value="Other">Other</option>
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
@@ -130,18 +140,17 @@ export default function RegistrationForm() {
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-700">Phone Number</label>
         <div className="flex gap-2">
-          <div className="relative w-32 shrink-0">
+          <div className="relative w-36 shrink-0">
             <select
               value={data.phoneCountryCode}
               onChange={(e) => setData({ ...data, phoneCountryCode: e.target.value })}
               className="focus:ring-aerojet-blue w-full appearance-none rounded-lg border border-gray-300 bg-white px-3 py-3 text-slate-900 transition-all outline-none focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
             >
-              <option value="+233">🇬🇭 +233</option>
-              <option value="+234">🇳🇬 +234</option>
-              <option value="+44">🇬🇧 +44</option>
-              <option value="+1">🇺🇸 +1</option>
-              <option value="+254">🇰🇪 +254</option>
-              <option value="+27">🇿🇦 +27</option>
+              {NATIONALITIES.map((n) => (
+                <option key={n.name + n.dialCode} value={n.dialCode}>
+                  {n.flag} {n.dialCode} ({n.name.substring(0, 3)})
+                </option>
+              ))}
             </select>
             <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
               <svg

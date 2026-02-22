@@ -259,7 +259,9 @@ export default function DashboardSidebar({
 
             {!isCollapsed && userName && (
               <div className="min-w-0 flex-1">
-                <p className="truncate text-xs font-bold text-white">{userName}</p>
+                <p className="truncate text-xs font-bold text-white dark:text-slate-100">
+                  {userName}
+                </p>
                 {userRole && (
                   <p
                     className={`mt-0.5 truncate text-[10px] font-bold tracking-widest uppercase ${portalColor}`}
@@ -303,12 +305,14 @@ export default function DashboardSidebar({
       </aside>
 
       {/* Mobile Toggle */}
-      <button
-        onClick={() => setMobileOpen(true)}
-        className="fixed top-4 left-4 z-40 flex h-10 w-10 items-center justify-center rounded-xl bg-[#0f1629] text-white shadow-lg lg:hidden dark:bg-slate-900"
-      >
-        <Menu className="h-5 w-5" />
-      </button>
+      {!mobileOpen && (
+        <button
+          onClick={() => setMobileOpen(true)}
+          className="fixed top-4 left-4 z-40 flex h-10 w-10 items-center justify-center rounded-xl bg-[#0f1629] text-white shadow-lg lg:hidden dark:bg-slate-800"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+      )}
 
       {/* Mobile Sidebar */}
       {mobileOpen && (
@@ -317,14 +321,17 @@ export default function DashboardSidebar({
             className="fixed inset-0 z-40 bg-black/60 lg:hidden"
             onClick={() => setMobileOpen(false)}
           />
-          <aside className="fixed top-0 bottom-0 left-0 z-50 flex w-72 flex-col bg-[#0f1629] lg:hidden dark:border-r dark:border-slate-800 dark:bg-slate-900">
+          <aside className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-[#0f1629] lg:hidden dark:border-r dark:border-slate-800 dark:bg-slate-900">
             <button
               onClick={() => setMobileOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 z-50 rounded-lg p-2 text-slate-400 transition-colors hover:bg-white/10 hover:text-white"
+              title="Close sidebar"
             >
               <X className="h-5 w-5" />
             </button>
-            <SidebarContent />
+            <div className="flex-1 overflow-y-auto">
+              <SidebarContent />
+            </div>
           </aside>
         </>
       )}
