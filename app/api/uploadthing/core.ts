@@ -97,7 +97,7 @@ export const ourFileRouter = {
       return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl }
     }),
 
-  newsAudio: f({ blob: { maxFileSize: '20MB', maxFileCount: 1 } })
+  newsAudio: f({ blob: { maxFileSize: '32MB', maxFileCount: 1 } })
     .middleware(async ({ req }) => {
       const session = await getAuthSession()
       if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes((session.user as any).role)) {
