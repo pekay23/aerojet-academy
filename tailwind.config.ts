@@ -1,5 +1,6 @@
 import type { Config } from 'tailwindcss'
 import tailwindAnimate from 'tailwindcss-animate'
+import tailwindTypography from '@tailwindcss/typography'
 
 const config: Config = {
   darkMode: 'class',
@@ -76,6 +77,10 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
+        lexend: ['var(--font-lexend)', 'system-ui', 'sans-serif'],
+        montserrat: ['var(--font-montserrat)', 'sans-serif'],
+        outfit: ['var(--font-outfit)', 'sans-serif'],
+        playfair: ['var(--font-playfair)', 'serif'],
         heading: ['var(--font-cal)', 'var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       keyframes: {
@@ -102,7 +107,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [tailwindAnimate],
+  plugins: [tailwindAnimate, tailwindTypography],
 }
 
 export default config

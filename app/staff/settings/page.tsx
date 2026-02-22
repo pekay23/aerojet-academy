@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import { Settings, Save, School, Globe, Clock, DollarSign, Mail, Shield } from 'lucide-react'
 import WelcomeMessagesManager from './_components/WelcomeMessagesManager'
-import { getWelcomeMessages } from '@/lib/welcome-messages'
+import { getWelcomeMessagesGrouped } from '@/lib/welcome-messages'
 
 export const metadata: Metadata = { title: 'Settings | Staff Portal' }
 
@@ -201,13 +201,13 @@ export default async function SettingsPage() {
   const existingSettings = await prisma.systemSetting.findMany()
   const settingMap = new Map(existingSettings.map((s) => [s.key, s.value]))
 
-  const welcomeMessages = await getWelcomeMessages(prisma)
+  const welcomeMessages = await getWelcomeMessagesGrouped(prisma)
 
   return (
     <div className="mx-auto max-w-4xl">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white dark:text-blue-400">
+        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
           Settings
         </h1>
         <p className="text-slate-500 dark:text-slate-400">
@@ -258,7 +258,7 @@ export default async function SettingsPage() {
                               defaultChecked={currentValue === 'true'}
                               className="peer sr-only"
                             />
-                            <div className="peer h-6 w-11 rounded-full bg-slate-200 peer-checked:bg-[#002a5c] peer-focus:ring-2 peer-focus:ring-[#002a5c]/30 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white dark:bg-slate-900 after:transition-all peer-checked:after:translate-x-full"></div>
+                            <div className="peer h-6 w-11 rounded-full bg-slate-200 peer-checked:bg-[#002a5c] peer-focus:ring-2 peer-focus:ring-[#002a5c]/30 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full dark:bg-slate-900"></div>
                           </label>
                           <span className="text-sm text-slate-600 dark:text-slate-400">
                             {currentValue === 'true' ? 'Enabled' : 'Disabled'}

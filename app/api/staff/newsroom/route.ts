@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma/client'
 import { apiSuccess, apiError } from '@/lib/api/response'
 import { getAuthSession } from '@/lib/auth/auth-options'
@@ -44,7 +45,18 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await req.json()
-    const { title, slug, excerpt, content, coverImage, status } = data
+    const {
+      title,
+      slug,
+      excerpt,
+      content,
+      coverImage,
+      status,
+      customAuthorName,
+      publishedAt,
+      customPublishedAt,
+      tags,
+    } = data
 
     if (!title || !slug || !content) {
       return apiError('Title, slug, and content are required', 400)
@@ -63,10 +75,21 @@ export async function POST(req: NextRequest) {
         content,
         coverImage,
         status: status || 'DRAFT',
+        customAuthorName,
+        tags: tags || [],
         authorId: (session.user as any)?.id,
-        publishedAt: status === 'PUBLISHED' ? new Date() : undefined,
+        publishedAt: publishedAt
+          ? new Date(publishedAt)
+          : status === 'PUBLISHED'
+            ? new Date()
+            : undefined,
+        customPublishedAt: customPublishedAt ? new Date(customPublishedAt) : undefined,
       },
     })
+
+    // Revalidate public pages
+    revalidatePath('/newsroom')
+    revalidatePath('/')
 
     return apiSuccess(article, 201)
   } catch (error) {

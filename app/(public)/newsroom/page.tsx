@@ -25,21 +25,35 @@ export default async function NewsroomPage() {
 
       <div className="mx-auto max-w-6xl px-6 py-20">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article, i) => (
-            <NewsCard
-              key={article.id}
-              title={article.title}
-              slug={article.slug}
-              image={article.coverImage || '/placeholder-news.jpg'}
-              category="Announcement"
-              date={new Date(article.publishedAt || article.createdAt).toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
-              })}
-              index={i}
-            />
-          ))}
+          {articles.map((article, i) => {
+            const wordsPerMinute = 200
+            const words = (article.content || '').trim().split(/\s+/).length
+            const readTime = Math.ceil(words / wordsPerMinute)
+
+            return (
+              <NewsCard
+                key={article.id}
+                title={article.title}
+                slug={article.slug}
+                image={
+                  article.coverImage ||
+                  'https://gx1g03nvpo.ufs.sh/f/d9OGsE12ZLmuYHcsu6EdTXKJmiU25PHpnqh9N1zWk0QucfeF'
+                }
+                date={new Date(
+                  article.customPublishedAt || article.publishedAt || article.createdAt
+                ).toLocaleDateString('en-GB', {
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}
+                readTime={readTime}
+                viewCount={article.viewCount}
+                tags={article.tags}
+                excerpt={article.excerpt}
+                index={i}
+              />
+            )
+          })}
         </div>
       </div>
     </div>

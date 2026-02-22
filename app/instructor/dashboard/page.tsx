@@ -224,6 +224,8 @@ export default async function Page() {
 }
 
 async function AsyncWelcomeBanner({ userName }: { userName?: string }) {
-  const [welcomeMessages] = await Promise.all([getWelcomeMessages(prisma)])
+  const session = await getAuthSession()
+  const role = session?.user?.role || 'STUDENT'
+  const [welcomeMessages] = await Promise.all([getWelcomeMessages(prisma, role)])
   return <WelcomeBanner messages={welcomeMessages} userName={userName} />
 }

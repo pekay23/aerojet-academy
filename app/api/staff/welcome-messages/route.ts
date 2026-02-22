@@ -9,26 +9,36 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json()
-  const messages: string[] = body.messages
+  const messages = body.messages // This can be an object: { STUDENT: [], STAFF: [] ... }
 
-  if (!Array.isArray(messages)) {
+  if (!messages || typeof messages !== 'object') {
     return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
   }
 
-  // Sanitise: strip blanks, trim, deduplicate
-  const clean = [...new Set(messages.map((m) => m.trim()).filter(Boolean))]
+  // Sanitise each role's messages
+  const cleanMessages: Record<string, string[]> = {}
+
+  for (const [role, roleMsgs] of Object.entries(messages)) {
+    if (Array.isArray(roleMsgs)) {
+      cleanMessages[role] = [...new Set(roleMsgs.map((m: any) => String(m).trim()).filter(Boolean))]
+    }
+  }
+
+  if (Object.keys(cleanMessages).length === 0) {
+    return NextResponse.json({ error: 'At least one message is required' }, { status: 400 })
+  }
 
   await prisma.systemSetting.upsert({
     where: { key: 'welcome_messages' },
-    update: { value: JSON.stringify(clean), updatedBy: (session.user as any).id },
+    update: { value: JSON.stringify(cleanMessages), updatedBy: (session.user as any).id },
     create: {
       key: 'welcome_messages',
-      value: JSON.stringify(clean),
+      value: JSON.stringify(cleanMessages),
       type: 'JSON',
-      description: 'Rotating welcome messages shown on all portal dashboards',
+      description: 'Rotating welcome messages shown on portal dashboards (categorised by role)',
       updatedBy: (session.user as any).id,
     },
   })
 
-  return NextResponse.json({ success: true, count: clean.length })
+  return NextResponse.json({ success: true, count: Object.values(cleanMessages).flat().length })
 }
