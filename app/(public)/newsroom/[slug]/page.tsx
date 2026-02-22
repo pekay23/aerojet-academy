@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma/client'
 import { Eye, Clock, Calendar, User as UserIcon, ArrowLeft } from 'lucide-react'
 import ShareButtons from '../_components/ShareButtons'
+import { getBaseUrl } from '@/lib/utils/url'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -179,7 +180,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
                   Share this article
                 </h4>
                 <ShareButtons
-                  url={`${process.env.NEXT_PUBLIC_APP_URL || ''}/newsroom/${article.slug}`}
+                  url={`${getBaseUrl()}/newsroom/${article.slug}`}
                   title={article.title}
                 />
               </div>

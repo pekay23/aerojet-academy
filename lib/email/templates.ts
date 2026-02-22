@@ -1,4 +1,6 @@
-const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://aerojet-academy.com'
+import { getBaseUrl } from '@/lib/utils/url'
+
+const appUrl = getBaseUrl()
 const currentYear = new Date().getFullYear()
 
 const baseLayout = (content: string, title?: string) => `
