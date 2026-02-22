@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import { useRef } from 'react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 
@@ -28,9 +29,13 @@ export default function PageHero({ title, subtitle, backgroundImage }: PageHeroP
     >
       {/* Background with Parallax */}
       <motion.div style={{ y: backgroundY }} className="absolute inset-0">
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${backgroundImage})` }}
+        <Image
+          src={backgroundImage}
+          alt={title}
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover"
         />
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-black/60" />

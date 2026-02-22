@@ -50,7 +50,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       if (existing) return apiError('Slug already in use', 400)
     }
 
-    let finalPublishedAt = publishedAt ? new Date(publishedAt) : currentArticle.publishedAt
+    let finalPublishedAt = customPublishedAt
+      ? new Date(customPublishedAt)
+      : publishedAt
+        ? new Date(publishedAt)
+        : currentArticle.publishedAt
+
     if (status === 'PUBLISHED' && !finalPublishedAt) {
       finalPublishedAt = new Date()
     }
