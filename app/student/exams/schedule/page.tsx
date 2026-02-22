@@ -30,7 +30,7 @@ export default async function ExamSchedulePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+        <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
           Exam Schedule
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -39,11 +39,13 @@ export default async function ExamSchedulePage() {
       </div>
 
       {bookings.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-12 text-center">
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
           <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
             <Calendar className="h-8 w-8 text-slate-400" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No Exams Scheduled</h3>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            No Exams Scheduled
+          </h3>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
             You don&apos;t have any upcoming exams scheduled at the moment.
           </p>
@@ -53,11 +55,22 @@ export default async function ExamSchedulePage() {
           {bookings.map((booking) => (
             <div
               key={booking.id}
-              className="flex flex-col justify-between rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm transition-all hover:shadow-md"
+              className="flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
             >
               <div>
                 <div className="mb-4 flex items-start justify-between">
-                  <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-blue-600">
+                  {booking.exam?.course?.code && (
+                    <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold tracking-wide text-blue-600 uppercase">
+                      {booking.exam.course.code}
+                    </div>
+                  )}
+                  {booking.status === 'PENDING' && (
+                    <div className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-600 uppercase">
+                      <AlertCircle className="h-3 w-3" />
+                      Pending Approval
+                    </div>
+                  )}
+                </div>
                 <h3 className="mb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
                   {booking.exam?.course?.name || 'Unknown Course'}
                 </h3>
@@ -66,7 +79,7 @@ export default async function ExamSchedulePage() {
                 </p>
               </div>
 
-              <div className="mt-6 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
+              <div className="mt-6 space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800">
                 <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
                   <Calendar className="h-4 w-4 text-slate-400" />
                   <span>
