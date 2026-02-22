@@ -78,11 +78,13 @@ export async function POST(req: NextRequest) {
         customAuthorName,
         tags: tags || [],
         authorId: (session.user as any)?.id,
-        publishedAt: publishedAt
-          ? new Date(publishedAt)
-          : status === 'PUBLISHED'
-            ? new Date()
-            : undefined,
+        publishedAt: customPublishedAt
+          ? new Date(customPublishedAt)
+          : publishedAt
+            ? new Date(publishedAt)
+            : status === 'PUBLISHED'
+              ? new Date()
+              : undefined,
         customPublishedAt: customPublishedAt ? new Date(customPublishedAt) : undefined,
       },
     })
