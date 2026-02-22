@@ -20,22 +20,22 @@ export default function WelcomeBanner({ messages, userName }: WelcomeBannerProps
   if (!message) return null
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#002a5c] via-[#003875] to-[#0059a8] px-6 py-5 text-white shadow-lg">
+    <div className="relative overflow-hidden rounded-2xl bg-linear-to-r from-[#002a5c] via-[#003875] to-[#0059a8] px-6 py-5 text-white shadow-lg">
       {/* Decorative circles */}
-      <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/5" />
-      <div className="pointer-events-none absolute -bottom-6 right-16 h-20 w-20 rounded-full bg-white/5" />
+      <div className="pointer-events-none absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/5" />
+      <div className="pointer-events-none absolute right-16 -bottom-6 h-20 w-20 rounded-full bg-white/5" />
 
       <div className="relative flex items-start gap-4">
-        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-white/15">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/15">
           <Sparkles className="h-5 w-5 text-white" />
         </div>
         <div>
           {userName && (
-            <p className="mb-0.5 text-xs font-semibold uppercase tracking-widest text-white/60">
+            <p className="mb-0.5 text-xs font-semibold tracking-widest text-white/80 uppercase">
               Good to see you, {userName}
             </p>
           )}
-          <p className="text-base font-semibold leading-snug text-white">{message}</p>
+          <p className="text-base leading-snug font-semibold text-white">{message}</p>
         </div>
       </div>
     </div>

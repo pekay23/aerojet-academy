@@ -14,7 +14,7 @@
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 215.4 16.3% 35%; /* Darker for better contrast (was 46.9%) */
     --accent: 210 40% 96.1%;
     --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
@@ -35,11 +35,11 @@
     --public-secondary: 212 82% 61%;
     --public-dark: 216 34% 25%;
 
-    /* Branding Colors */
+    /* Branding Colors - Increased contrast for standard UI text */
     --aero-blue: 213 100% 18%; /* #002a5c */
-    --aero-sky: 210 82% 61%; /* #4c9ded */
-    --aero-light: 204 65% 44%; /* #2880b9 */
-    --aero-soft-blue: 210 100% 45%; /* #0073e6 */
+    --aero-sky: 210 82% 45%; /* Darkened for accessibility (was 61%) */
+    --aero-light: 204 65% 40%; /* Darkened for accessibility (was 44%) */
+    --aero-soft-blue: 210 100% 40%; /* Darkened for accessibility (was 45%) */
     --aero-slate: 210 29% 24%; /* #2c3e50 */
     --aero-offwhite: 0 0% 98%; /* #f9f9f9 */
   }
@@ -56,7 +56,7 @@
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
     --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted-foreground: 215 20.2% 75%; /* Lighter for better contrast in dark mode (was 65.1%) */
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
     --destructive: 0 62.8% 30.6%;
@@ -77,11 +77,11 @@
     --public-dark: 216 34% 25%;
 
     /* Branding Colors (Dark Mode Adjustments) */
-    --aero-blue: 213 100% 25%;
-    --aero-sky: 210 82% 70%;
-    --aero-light: 204 65% 55%;
-    --aero-soft-blue: 210 100% 55%;
-    --aero-slate: 210 29% 40%;
+    --aero-blue: 213 100% 30%;
+    --aero-sky: 210 82% 75%; /* Lighter for visibility */
+    --aero-light: 204 65% 60%;
+    --aero-soft-blue: 210 100% 60%;
+    --aero-slate: 210 29% 45%;
     --aero-offwhite: 222 47% 11%;
   }
 
