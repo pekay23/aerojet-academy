@@ -68,17 +68,21 @@ export function generateAcademyEmail(
       .toLowerCase()
       .replace(/[^a-z]/g, '')
 
-  const firstInitials = firstName.trim().split(/\s+/).map(getInitial).filter(Boolean)
+  // Get initial of first name
+  const firstInitial = getInitial(firstName.trim())
+
+  // Get initials of all middle names
   const middleInitials = (middleName || '').trim().split(/\s+/).map(getInitial).filter(Boolean)
+
   const cleanSurname = lastName
     .trim()
     .toLowerCase()
     .replace(/[^a-z0-9]/g, '')
 
-  const allInitials = [...firstInitials, ...middleInitials]
+  const initials = [firstInitial, ...middleInitials].filter(Boolean)
 
-  if (allInitials.length > 0) {
-    return `${allInitials.join('.')}.${cleanSurname}@aerojet-academy.com`
+  if (initials.length > 0) {
+    return `${initials.join('.')}.${cleanSurname}@aerojet-academy.com`
   }
   return `${cleanSurname}@aerojet-academy.com`
 }

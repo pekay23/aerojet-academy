@@ -11,6 +11,8 @@ export default function RegistrationForm() {
     middleName: '',
     lastName: '',
     email: '',
+    nationality: 'Ghanian',
+    phoneCountryCode: '+233',
     phone: '',
     program: 'FULL_TIME_2YEAR',
   })
@@ -28,6 +30,8 @@ export default function RegistrationForm() {
           middleName: data.middleName || undefined,
           lastName: data.lastName,
           email: data.email,
+          nationality: data.nationality,
+          phoneCountryCode: data.phoneCountryCode,
           phone: data.phone,
           selectedProgramme: data.program,
         }),
@@ -84,26 +88,80 @@ export default function RegistrationForm() {
         </div>
       </div>
 
-      <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">Email Address</label>
-        <input
-          required
-          type="email"
-          className="focus:ring-aerojet-blue w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-slate-900 transition-all outline-none focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
-          value={data.email}
-          onChange={(e) => setData({ ...data, email: e.target.value })}
-        />
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Email Address</label>
+          <input
+            required
+            type="email"
+            className="focus:ring-aerojet-blue w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-slate-900 transition-all outline-none focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
+            value={data.email}
+            onChange={(e) => setData({ ...data, email: e.target.value })}
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm font-medium text-gray-700">Nationality</label>
+          <div className="relative">
+            <select
+              value={data.nationality}
+              onChange={(e) => setData({ ...data, nationality: e.target.value })}
+              className="focus:ring-aerojet-blue w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-3 text-slate-900 transition-all outline-none focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
+            >
+              <option value="Ghanian">Ghanian</option>
+              <option value="Nigerian">Nigerian</option>
+              <option value="South African">South African</option>
+              <option value="British">British</option>
+              <option value="American">American</option>
+              <option value="Other">Other</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500">
+              <svg
+                className="h-4 w-4 fill-current"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+              </svg>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div>
         <label className="mb-1 block text-sm font-medium text-gray-700">Phone Number</label>
-        <input
-          required
-          type="tel"
-          className="focus:ring-aerojet-blue w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-slate-900 transition-all outline-none focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
-          value={data.phone}
-          onChange={(e) => setData({ ...data, phone: e.target.value })}
-        />
+        <div className="flex gap-2">
+          <div className="relative w-32 shrink-0">
+            <select
+              value={data.phoneCountryCode}
+              onChange={(e) => setData({ ...data, phoneCountryCode: e.target.value })}
+              className="focus:ring-aerojet-blue w-full appearance-none rounded-lg border border-gray-300 bg-white px-3 py-3 text-slate-900 transition-all outline-none focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
+            >
+              <option value="+233">🇬🇭 +233</option>
+              <option value="+234">🇳🇬 +234</option>
+              <option value="+44">🇬🇧 +44</option>
+              <option value="+1">🇺🇸 +1</option>
+              <option value="+254">🇰🇪 +254</option>
+              <option value="+27">🇿🇦 +27</option>
+            </select>
+            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+              <svg
+                className="h-4 w-4 fill-current"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+              >
+                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+              </svg>
+            </div>
+          </div>
+          <input
+            required
+            type="tel"
+            placeholder="0XX XXX XXXX"
+            className="focus:ring-aerojet-blue w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-slate-900 transition-all outline-none focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
+            value={data.phone}
+            onChange={(e) => setData({ ...data, phone: e.target.value })}
+          />
+        </div>
       </div>
 
       <div>

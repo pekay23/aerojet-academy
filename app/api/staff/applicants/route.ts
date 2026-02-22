@@ -34,23 +34,41 @@ export async function GET(req: NextRequest) {
     where.status = 'PENDING'
   }
 
-  const [applicants, total] = await Promise.all([
-    prisma.user.findMany({
-      where,
-      include: {
-        profile: true,
-        payments: {
-          where: { referenceType: 'REGISTRATION' },
-          orderBy: { createdAt: 'desc' },
-          take: 1,
+  const [applicants, total, allCount, pendingPaymentCount, pendingApprovalCount] =
+    await Promise.all([
+      prisma.user.findMany({
+        where,
+        include: {
+          profile: true,
+          payments: {
+            where: { referenceType: 'REGISTRATION' },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-      skip: (page - 1) * limit,
-      take: limit,
-    }),
-    prisma.user.count({ where }),
-  ])
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.user.count({ where }),
+      prisma.user.count({ where: { role: 'APPLICANT', status: 'PENDING' } }),
+      prisma.user.count({
+        where: { role: 'APPLICANT', status: 'PENDING', registrationPaid: false },
+      }),
+      prisma.user.count({
+        where: { role: 'APPLICANT', status: 'PENDING', registrationPaid: true },
+      }),
+    ])
 
-  return NextResponse.json({ applicants, total, page, limit })
+  return NextResponse.json({
+    applicants,
+    total,
+    page,
+    limit,
+    counts: {
+      all: allCount,
+      pending_payment: pendingPaymentCount,
+      pending_approval: pendingApprovalCount,
+    },
+  })
 }

@@ -56,6 +56,66 @@ export const POST = withErrorHandler(
         )
       }
 
+      // Handle Course Enrollment
+      if (payment.referenceType === 'COURSE' && payment.referenceId) {
+        await prisma.$transaction(async (tx) => {
+          // 1. Approve the enrollment
+          await tx.enrollment.update({
+            where: {
+              userId_courseId: {
+                userId: payment.userId,
+                courseId: payment.referenceId!,
+              },
+            },
+            data: {
+              status: 'ENROLLED', // Using string literal as EnrollmentStatus enum might not be imported correctly or varies
+              enrolledAt: new Date(),
+              amountPaid: payment.amount,
+            },
+          })
+
+          // 2. Promote to STUDENT if APPLICANT
+          if (payment.user.role === 'APPLICANT') {
+            const { generateStudentId } = await import('@/lib/auth/helpers')
+            const studentId = generateStudentId()
+
+            await tx.user.update({
+              where: { id: payment.userId },
+              data: { role: 'STUDENT' },
+            })
+
+            // Create StudentProfile if not exists
+            const existingProfile = await tx.studentProfile.findUnique({
+              where: { userId: payment.userId },
+            })
+            if (!existingProfile) {
+              await tx.studentProfile.create({
+                data: {
+                  userId: payment.userId,
+                  studentId,
+                  enrollmentType: 'MODULAR', // Default
+                },
+              })
+            }
+
+            // Create Wallet if not exists
+            const existingWallet = await tx.wallet.findUnique({
+              where: { userId: payment.userId },
+            })
+            if (!existingWallet) {
+              await tx.wallet.create({
+                data: {
+                  userId: payment.userId,
+                  balance: 0,
+                  reservedBalance: 0,
+                  availableBalance: 0,
+                },
+              })
+            }
+          }
+        })
+      }
+
       if (payment.user.profile) {
         sendPaymentApprovedEmail(
           payment.user.email,

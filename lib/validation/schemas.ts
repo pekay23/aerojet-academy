@@ -9,7 +9,9 @@ export const registerSchema = z.object({
   lastName: z.string().min(2, 'Last name must be at least 2 characters').max(50),
   middleName: z.string().max(50).optional(),
   email: z.string().email('Invalid email address'),
-  phone: z.string().min(8, 'Phone number too short').max(20).optional(),
+  nationality: z.string().min(2, 'Nationality is required'),
+  phoneCountryCode: z.string().min(1, 'Country code is required'),
+  phone: z.string().min(7, 'Phone number is too short').max(15),
   selectedProgramme: z.enum([
     'FULL_TIME_4YEAR',
     'FULL_TIME_2YEAR',
