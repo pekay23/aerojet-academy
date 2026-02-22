@@ -120,6 +120,11 @@ export default async function ApplicantDashboard() {
 
   if (!applicant) redirect('/login')
 
+  // If user has been promoted to STUDENT, redirect to student portal
+  if (applicant.role === 'STUDENT') {
+    redirect('/student')
+  }
+
   const firstName = applicant.profile?.firstName ?? 'Applicant'
   const appStatus = deriveStatus(applicant)
   const statusInfo = statusConfig[appStatus]
