@@ -1,44 +1,125 @@
 /**
- * Default welcome messages seeded if none exist in the database.
- * Stored in SystemSetting under key `welcome_messages` as a JSON array.
+ * Default welcome messages categorized by role.
+ * Stored in SystemSetting under key `welcome_messages` as a JSON object.
  */
-export const DEFAULT_WELCOME_MESSAGES = [
-  'Welcome back! Ready to reach new heights today?',
-  "The sky is not the limit — it's just the beginning. Let's go!",
-  'Every great aviator started exactly where you are now.',
-  'Today is a great day to learn something that changes your trajectory.',
-  'Excellence in aviation starts with discipline in the classroom.',
-  "Your dedication today is the altitude you'll fly at tomorrow.",
-  "Clear skies ahead. Let's make the most of your session.",
-  'Precision, focus, and passion — the traits of every great pilot.',
-  'Another day, another chance to sharpen your skills. Welcome!',
-  'The ground is where dreams start. The sky is where they soar.',
-  'Welcome aboard! Your next great achievement starts right here.',
-  "Knowledge is your co-pilot. Let's fly together.",
-  "Stay curious, stay committed — you're building a career that matters.",
-  'Every lesson learned brings you one step closer to the flight deck.',
-  'Dream it. Study it. Fly it. Welcome back to Aerojet Academy.',
-]
+export const DEFAULT_ROLE_WELCOME_MESSAGES: Record<string, string[]> = {
+  STUDENT: [
+    'Welcome back! Ready to reach new heights today?',
+    "The sky is not the limit — it's just the beginning. Let's go!",
+    'Every great aviator started exactly where you are now.',
+    'Today is a great day to learn something that changes your trajectory.',
+    'Excellence in aviation starts with discipline in the classroom.',
+    "Your dedication today is the altitude you'll fly at tomorrow.",
+    "Clear skies ahead. Let's make the most of your session.",
+    'Precision, focus, and passion — the traits of every great pilot.',
+    'Another day, another chance to sharpen your skills. Welcome!',
+    'The ground is where dreams start. The sky is where they soar.',
+  ],
+  STAFF: [
+    'System operational. Ready for today’s administrative challenges?',
+    'Efficiency is the engine of Aerojet Academy. Welcome back.',
+    'Thank you for keeping the gears turning behind the scenes.',
+    'Great to see you! Let’s make today productive and orderly.',
+    'Success starts with strong support. You make it happen.',
+    'Another day of excellence in operations. Glad to have you.',
+    'The foundation of every flight starts right here in the office.',
+    'Welcome back! Your hard work is the wind beneath our wings.',
+    'Ensuring a smooth journey for every student, one task at a time.',
+    'Aerojet Academy runs on your dedication. Let’s soar today.',
+  ],
+  INSTRUCTOR: [
+    'Welcome back, Captain. Ready to shape the next generation?',
+    'Teaching is the highest form of aviation expertise.',
+    'Your mentorship is the compass for our future pilots.',
+    'Clear skies for your classes today. Lead the way!',
+    'Knowledge is the fuel for every successful flight.',
+    'Great to see you! Let’s inspire some excellence today.',
+    'Precision and passion — thank you for passing it on.',
+    'The future of aviation is in your hands today. Good luck!',
+    'Another day to mentor, guide, and excel. Welcome back.',
+    'Your expertise is our greatest asset. Let’s fly high.',
+  ],
+  ADMIN: [
+    'Welcome, Administrator. The system is at your command.',
+    'Strategic oversight is key to our mission. Glad you’re here.',
+    'Ensuring the academy reaches new heights, one decision at a time.',
+    'Great to see you! Ready to oversee our operations today?',
+    'Leadership is the rudder of our institution. Welcome back.',
+    'The academy’s success starts with your vision. Let’s excel.',
+    'Full system access granted. Ready for excellence?',
+    'Thank you for guiding Aerojet Academy’s trajectory.',
+    'Your leadership ensures we always fly in the right direction.',
+    'System integrity: 100%. Ready for your administrative oversight.',
+  ],
+}
 
 /**
  * Fetches the active welcome messages from the DB (or returns defaults).
  * Call this server-side in dashboard pages.
  */
-export async function getWelcomeMessages(prismaClient: {
-  systemSetting: {
-    findUnique: (args: any) => Promise<{ value: string } | null>
-  }
-}): Promise<string[]> {
+export async function getWelcomeMessages(
+  prismaClient: {
+    systemSetting: {
+      findUnique: (args: any) => Promise<{ value: string } | null>
+    }
+  },
+  role: string = 'STUDENT'
+): Promise<string[]> {
   const setting = await prismaClient.systemSetting.findUnique({
     where: { key: 'welcome_messages' },
   })
 
-  if (!setting) return DEFAULT_WELCOME_MESSAGES
+  const defaults = DEFAULT_ROLE_WELCOME_MESSAGES[role] || DEFAULT_ROLE_WELCOME_MESSAGES.STUDENT
+
+  if (!setting) return defaults
 
   try {
     const parsed = JSON.parse(setting.value)
-    if (Array.isArray(parsed) && parsed.length > 0) return parsed
+    // Support legacy array format or new object format
+    if (Array.isArray(parsed)) {
+      return parsed.length > 0 ? parsed : defaults
+    }
+
+    if (typeof parsed === 'object' && parsed !== null) {
+      const roleMessages = parsed[role]
+      if (Array.isArray(roleMessages) && roleMessages.length > 0) return roleMessages
+      return defaults
+    }
   } catch {}
 
-  return DEFAULT_WELCOME_MESSAGES
+  return defaults
+}
+
+/**
+ * Fetches all welcome messages grouped by role.
+ * Primarily for admin settings page.
+ */
+export async function getWelcomeMessagesGrouped(prismaClient: {
+  systemSetting: {
+    findUnique: (args: any) => Promise<{ value: string } | null>
+  }
+}): Promise<Record<string, string[]>> {
+  const setting = await prismaClient.systemSetting.findUnique({
+    where: { key: 'welcome_messages' },
+  })
+
+  if (!setting) return DEFAULT_ROLE_WELCOME_MESSAGES
+
+  try {
+    const parsed = JSON.parse(setting.value)
+    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
+      return parsed
+    }
+    // Handle legacy array format
+    if (Array.isArray(parsed)) {
+      return {
+        STUDENT: parsed,
+        STAFF: DEFAULT_ROLE_WELCOME_MESSAGES.STAFF,
+        INSTRUCTOR: DEFAULT_ROLE_WELCOME_MESSAGES.INSTRUCTOR,
+        ADMIN: DEFAULT_ROLE_WELCOME_MESSAGES.ADMIN,
+      }
+    }
+  } catch {}
+
+  return DEFAULT_ROLE_WELCOME_MESSAGES
 }

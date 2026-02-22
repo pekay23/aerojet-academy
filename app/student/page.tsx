@@ -55,7 +55,7 @@ export default async function StudentDashboard() {
       where: { userId },
       select: { status: true },
     }),
-    getWelcomeMessages(prisma),
+    getWelcomeMessages(prisma, session.user.role),
   ])
 
   // Calculate Attendance Rate
@@ -84,13 +84,13 @@ export default async function StudentDashboard() {
 
       {/* Stats Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
               <Wallet className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">Balance</p>
+              <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Balance</p>
               <p className="text-xl font-black text-slate-900 dark:text-slate-100">
                 {wallet?.currency || 'GH₵'} {Number(wallet?.availableBalance || 0).toFixed(2)}
               </p>
@@ -98,44 +98,50 @@ export default async function StudentDashboard() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
               <BookOpen className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+              <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
                 Active Courses
               </p>
-              <p className="text-xl font-black text-slate-900 dark:text-slate-100">{enrollments.length}</p>
+              <p className="text-xl font-black text-slate-900 dark:text-slate-100">
+                {enrollments.length}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
               <Calendar className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+              <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
                 Upcoming Exams
               </p>
-              <p className="text-xl font-black text-slate-900 dark:text-slate-100">{upcomingExams.length}</p>
+              <p className="text-xl font-black text-slate-900 dark:text-slate-100">
+                {upcomingExams.length}
+              </p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
               <TrendingUp className="h-6 w-6" />
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+              <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
                 Attendance
               </p>
-              <p className="text-xl font-black text-slate-900 dark:text-slate-100">{attendanceRate}%</p>
+              <p className="text-xl font-black text-slate-900 dark:text-slate-100">
+                {attendanceRate}%
+              </p>
             </div>
           </div>
         </div>
@@ -145,8 +151,8 @@ export default async function StudentDashboard() {
         {/* Main Column */}
         <div className="space-y-8 lg:col-span-2">
           {/* Active Courses */}
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-6 py-4">
+          <div className="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
               <h2 className="font-bold text-slate-900 dark:text-slate-100">Active Courses</h2>
               <Link
                 href="/student/courses"
@@ -161,20 +167,24 @@ export default async function StudentDashboard() {
                   {enrollments.map((enrollment) => (
                     <div
                       key={enrollment.id}
-                      className="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 p-4 transition-colors hover:bg-slate-50 dark:bg-slate-800/50"
+                      className="flex items-center justify-between rounded-xl border border-slate-100 p-4 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50"
                     >
                       <div className="flex items-center gap-4">
                         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
                           <BookOpen className="h-5 w-5" />
                         </div>
                         <div>
-                          <h3 className="font-bold text-slate-900 dark:text-slate-100">{enrollment.course.name}</h3>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{enrollment.course.code}</p>
+                          <h3 className="font-bold text-slate-900 dark:text-slate-100">
+                            {enrollment.course.name}
+                          </h3>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {enrollment.course.code}
+                          </p>
                         </div>
                       </div>
                       <Link
                         href={`/student/courses/${enrollment.id}`}
-                        className="rounded-lg bg-slate-100 p-2 text-slate-400 transition-colors hover:bg-white dark:bg-slate-900 hover:text-blue-600 hover:shadow-sm"
+                        className="rounded-lg bg-slate-100 p-2 text-slate-400 transition-colors hover:bg-white hover:text-blue-600 hover:shadow-sm dark:bg-slate-900"
                       >
                         <ArrowRight className="h-4 w-4" />
                       </Link>
@@ -198,8 +208,8 @@ export default async function StudentDashboard() {
           </div>
 
           {/* Upcoming Exams */}
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-6 py-4">
+          <div className="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
               <h2 className="font-bold text-slate-900 dark:text-slate-100">Upcoming Exams</h2>
               <Link
                 href="/student/exams"
@@ -214,7 +224,7 @@ export default async function StudentDashboard() {
                   {upcomingExams.map((exam) => (
                     <div
                       key={exam.id}
-                      className="flex items-center gap-4 rounded-xl border border-slate-100 dark:border-slate-800 p-4"
+                      className="flex items-center gap-4 rounded-xl border border-slate-100 p-4 dark:border-slate-800"
                     >
                       <div className="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:text-slate-400">
                         <span className="text-[10px] font-bold uppercase">
@@ -223,12 +233,14 @@ export default async function StudentDashboard() {
                         <span className="text-lg font-black">{exam.examDate?.getDate()}</span>
                       </div>
                       <div className="flex-1">
-                        <h3 className="font-bold text-slate-900 dark:text-slate-100">{exam.exam.course.name}</h3>
+                        <h3 className="font-bold text-slate-900 dark:text-slate-100">
+                          {exam.exam.course.name}
+                        </h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                           {exam.exam.duration} minutes • {exam.event?.location || 'Main Hall'}
                         </p>
                       </div>
-                      <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-slate-600 dark:text-slate-400">
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-[10px] font-bold tracking-wide text-slate-600 uppercase dark:text-slate-400">
                         {exam.examDate?.toLocaleTimeString([], {
                           hour: '2-digit',
                           minute: '2-digit',
@@ -249,7 +261,7 @@ export default async function StudentDashboard() {
         {/* Right Column */}
         <div className="space-y-8">
           {/* Notifications */}
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-900 text-white shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-slate-900 text-white shadow-sm dark:border-slate-800">
             <div className="border-b border-white/10 px-6 py-4">
               <h2 className="flex items-center gap-2 font-bold">
                 <Bell className="h-4 w-4 text-blue-400" />
@@ -269,8 +281,8 @@ export default async function StudentDashboard() {
           </div>
 
           {/* Quick Actions */}
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-            <div className="border-b border-slate-100 dark:border-slate-800 px-6 py-4">
+          <div className="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="border-b border-slate-100 px-6 py-4 dark:border-slate-800">
               <h2 className="font-bold text-slate-900 dark:text-slate-100">Quick Actions</h2>
             </div>
             <div className="space-y-2 p-4">

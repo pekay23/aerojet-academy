@@ -1,19 +1,32 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import Image from "next/image";
-import { motion } from "framer-motion";
+import Link from 'next/link'
+import Image from 'next/image'
+import { motion } from 'framer-motion'
 
 interface NewsCardProps {
-  title: string;
-  slug: string;
-  image: string;
-  category: string;
-  date: string;
-  index?: number;
+  title: string
+  slug: string
+  image: string
+  date: string
+  readTime?: number
+  viewCount?: number
+  index?: number
+  tags?: string[]
+  excerpt?: string | null
 }
 
-export default function NewsCard({ title, slug, image, category, date, index = 0 }: NewsCardProps) {
+export default function NewsCard({
+  title,
+  slug,
+  image,
+  date,
+  readTime,
+  viewCount,
+  index = 0,
+  tags = [],
+  excerpt,
+}: NewsCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 24 }}
@@ -23,31 +36,55 @@ export default function NewsCard({ title, slug, image, category, date, index = 0
     >
       <Link
         href={`/newsroom/${slug}`}
-        className="group bg-white rounded-2xl sm:rounded-3xl shadow-sm hover:shadow-2xl transition-all duration-500 overflow-hidden border border-slate-100 flex flex-col h-full"
+        className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-500 hover:shadow-2xl sm:rounded-3xl"
       >
-        <div className="relative h-52 sm:h-60 w-full bg-slate-100 overflow-hidden">
+        <div className="relative h-52 w-full overflow-hidden bg-slate-100 sm:h-60">
           <Image
             src={image}
             alt={title}
             fill
             className="object-cover transition-transform duration-700 group-hover:scale-110"
           />
-          <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm">
-            <p className="text-[10px] font-black text-[#4c9ded] uppercase tracking-widest">{category}</p>
-          </div>
         </div>
 
-        <div className="p-6 sm:p-8 grow flex flex-col">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3">{date}</p>
-          <h3 className="text-lg sm:text-xl font-black text-[#002a5c] leading-tight mb-4 group-hover:text-[#4c9ded] transition-colors line-clamp-2">
+        <div className="flex grow flex-col p-6 sm:p-8">
+          <div className="mb-3 flex items-center gap-3 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+            <span>{date}</span>
+            {readTime && (
+              <>
+                <span className="h-1 w-1 rounded-full bg-slate-200" />
+                <span>{readTime} Min Read</span>
+              </>
+            )}
+          </div>
+          <h3 className="mb-4 line-clamp-2 text-lg leading-tight font-black text-[#002a5c] transition-colors group-hover:text-[#4c9ded] sm:text-xl">
             {title}
           </h3>
-          <div className="mt-auto pt-4 flex items-center text-[#4c9ded] font-black uppercase text-[10px] tracking-[0.2em]">
+
+          {excerpt && (
+            <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+              {excerpt}
+            </p>
+          )}
+
+          {tags.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full bg-slate-50 px-2 py-0.5 text-[9px] font-bold tracking-wider text-slate-500 uppercase dark:bg-slate-900/50"
+                >
+                  #{tag}
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="mt-auto flex items-center pt-4 text-[10px] font-black tracking-[0.2em] text-[#4c9ded] uppercase">
             Read Full Story
-            <span className="ml-2 transform group-hover:translate-x-2 transition-transform">→</span>
+            <span className="ml-2 transform transition-transform group-hover:translate-x-2">→</span>
           </div>
         </div>
       </Link>
     </motion.div>
-  );
+  )
 }
