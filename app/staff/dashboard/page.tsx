@@ -21,49 +21,55 @@ async function getDashboardData() {
   const now = new Date()
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
-  const [
-    totalUsers,
-    pendingApplicants,
-    activeStudents,
-    pendingPayments,
-    recentPendingPayments,
-    activePool,
-    approvedPayments,
-  ] = await Promise.all([
-    prisma.user.count({ where: { status: 'ACTIVE' } }),
-    prisma.user.count({ where: { role: 'APPLICANT', status: 'PENDING' } }),
-    prisma.user.count({ where: { role: 'STUDENT', status: 'ACTIVE' } }),
-    prisma.payment.count({ where: { status: 'PENDING' } }),
-    prisma.payment.findMany({
-      where: { status: 'PENDING' },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            academyEmail: true,
-            role: true,
-            profile: { select: { firstName: true, lastName: true } },
+  const [userStatusCounts, pendingPayments, recentPendingPayments, activePool, approvedPayments] =
+    await Promise.all([
+      // Grouped user counts for efficiency
+      prisma.user.groupBy({
+        by: ['role', 'status'],
+        _count: { _all: true },
+      }),
+      prisma.payment.count({ where: { status: 'PENDING' } }),
+      prisma.payment.findMany({
+        where: { status: 'PENDING' },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              academyEmail: true,
+              role: true,
+              profile: { select: { firstName: true, lastName: true } },
+            },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 4,
-    }),
-    prisma.examPool.findFirst({
-      where: { status: { in: ['OPEN', 'NEAR_FULL'] } },
-      include: { event: true },
-      orderBy: { examDate: 'asc' },
-    }),
-    // Fetch all approved payments in the last 6 months for chart aggregation
-    prisma.payment.findMany({
-      where: {
-        status: 'APPROVED',
-        approvedAt: { gte: sixMonthsAgo },
-      },
-      select: { amount: true, approvedAt: true },
-    }),
-  ])
+        orderBy: { createdAt: 'desc' },
+        take: 4,
+      }),
+      prisma.examPool.findFirst({
+        where: { status: { in: ['OPEN', 'NEAR_FULL'] } },
+        include: { event: true },
+        orderBy: { examDate: 'asc' },
+      }),
+      prisma.payment.findMany({
+        where: {
+          status: 'APPROVED',
+          approvedAt: { gte: sixMonthsAgo },
+        },
+        select: { amount: true, approvedAt: true },
+      }),
+    ])
+
+  // Map user counts
+  const totalActiveUsers = userStatusCounts
+    .filter((cg) => cg.status === 'ACTIVE')
+    .reduce((acc, cg) => acc + cg._count._all, 0)
+
+  const pendingApplicants =
+    userStatusCounts.find((cg) => cg.role === 'APPLICANT' && cg.status === 'PENDING')?._count
+      ._all ?? 0
+
+  const activeStudents =
+    userStatusCounts.find((cg) => cg.role === 'STUDENT' && cg.status === 'ACTIVE')?._count._all ?? 0
 
   // Aggregate revenue by month
   const monthNames = [
@@ -104,7 +110,7 @@ async function getDashboardData() {
   }))
 
   return {
-    totalUsers,
+    totalUsers: totalActiveUsers,
     pendingApplicants,
     activeStudents,
     pendingPayments,

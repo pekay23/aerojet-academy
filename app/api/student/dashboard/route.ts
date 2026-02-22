@@ -14,7 +14,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       }),
       prisma.wallet.findUnique({ where: { userId: user.id } }),
       prisma.enrollment.findMany({
-        where: { userId: user.id, status: 'ACTIVE' },
+        where: { userId: user.id, status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
         include: { course: { select: { name: true, code: true, duration: true } } },
       }),
       prisma.examBooking.findMany({
@@ -48,4 +48,3 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     attendanceRate,
   })
 })
-
