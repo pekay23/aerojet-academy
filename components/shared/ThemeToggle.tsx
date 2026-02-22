@@ -39,8 +39,19 @@ export default function ThemeToggle({ isCollapsed = false }: { isCollapsed?: boo
         isCollapsed ? 'justify-center' : ''
       }`}
       title={isCollapsed ? renderLabel() : undefined}
+      aria-label={`Switch to ${theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'} mode`}
     >
-      {renderIcon()}
+      {mounted ? (
+        theme === 'light' ? (
+          <Sun className="h-4 w-4 shrink-0" aria-hidden="true" />
+        ) : theme === 'dark' ? (
+          <Moon className="h-4 w-4 shrink-0" aria-hidden="true" />
+        ) : (
+          <Monitor className="h-4 w-4 shrink-0" aria-hidden="true" />
+        )
+      ) : (
+        <div className="h-4 w-4 shrink-0" />
+      )}
       {!isCollapsed && <span className="flex-1 text-left">{renderLabel()}</span>}
     </button>
   )
