@@ -48,21 +48,21 @@ export default function NewsCard({
         </div>
 
         <div className="flex grow flex-col p-6 sm:p-8">
-          <div className="mb-3 flex items-center gap-3 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+          <div className="mb-3 flex items-center gap-3 text-[10px] font-bold tracking-widest text-slate-500 uppercase">
             <span>{date}</span>
             {readTime && (
               <>
-                <span className="h-1 w-1 rounded-full bg-slate-200" />
+                <span className="h-1 w-1 rounded-full bg-slate-300" />
                 <span>{readTime} Min Read</span>
               </>
             )}
           </div>
-          <h3 className="mb-4 line-clamp-2 text-lg leading-tight font-black text-[#002a5c] transition-colors group-hover:text-[#4c9ded] sm:text-xl">
+          <h3 className="text-public-primary group-hover:text-public-secondary mb-4 line-clamp-2 text-lg leading-tight font-black transition-colors sm:text-xl">
             {title}
           </h3>
 
           {excerpt && (
-            <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+            <p className="mb-4 line-clamp-2 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
               {excerpt}
             </p>
           )}
@@ -79,9 +79,14 @@ export default function NewsCard({
               ))}
             </div>
           )}
-          <div className="mt-auto flex items-center pt-4 text-[10px] font-black tracking-[0.2em] text-[#4c9ded] uppercase">
+          <div className="text-public-secondary mt-auto flex items-center pt-4 text-[10px] font-black tracking-[0.2em] uppercase">
             Read Full Story
-            <span className="ml-2 transform transition-transform group-hover:translate-x-2">→</span>
+            <span
+              className="ml-2 transform transition-transform group-hover:translate-x-2"
+              aria-hidden="true"
+            >
+              →
+            </span>
           </div>
         </div>
       </Link>
