@@ -52,6 +52,63 @@ export const ourFileRouter = {
       console.log('Profile Image Upload complete for userId:', metadata.userId)
       return { uploadedBy: metadata.userId }
     }),
+
+  newsCoverImage: f({ image: { maxFileSize: '4MB', maxFileCount: 1 } })
+    .middleware(async ({ req }) => {
+      const session = await getAuthSession()
+      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes((session.user as any).role)) {
+        throw new UploadThingError('Unauthorized')
+      }
+      return { userId: session.user.id }
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log('News Cover Image Upload complete for userId:', metadata.userId)
+      return { uploadedBy: metadata.userId }
+    }),
+
+  newsAttachment: f({
+    image: { maxFileSize: '4MB', maxFileCount: 1 },
+    video: { maxFileSize: '16MB', maxFileCount: 1 },
+    audio: { maxFileSize: '8MB', maxFileCount: 1 },
+    blob: { maxFileSize: '4MB', maxFileCount: 1 },
+  })
+    .middleware(async ({ req }) => {
+      const session = await getAuthSession()
+      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes((session.user as any).role)) {
+        throw new UploadThingError('Unauthorized')
+      }
+      return { userId: session.user.id }
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log('News Attachment Upload complete for userId:', metadata.userId)
+      return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl }
+    }),
+
+  newsImage: f({ blob: { maxFileSize: '4MB', maxFileCount: 1 } })
+    .middleware(async ({ req }) => {
+      const session = await getAuthSession()
+      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes((session.user as any).role)) {
+        throw new UploadThingError('Unauthorized')
+      }
+      return { userId: session.user.id }
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log('News Image Upload complete for userId:', metadata.userId)
+      return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl }
+    }),
+
+  newsAudio: f({ blob: { maxFileSize: '20MB', maxFileCount: 1 } })
+    .middleware(async ({ req }) => {
+      const session = await getAuthSession()
+      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes((session.user as any).role)) {
+        throw new UploadThingError('Unauthorized')
+      }
+      return { userId: session.user.id }
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log('News Audio Upload complete for userId:', metadata.userId)
+      return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl }
+    }),
 } satisfies FileRouter
 
 export type OurFileRouter = typeof ourFileRouter

@@ -1,9 +1,10 @@
 import { Metadata } from 'next'
-import ReactMarkdown from 'react-markdown'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { prisma } from '@/lib/prisma/client'
+import { Eye, Clock, Calendar, User as UserIcon, ArrowLeft } from 'lucide-react'
+import ShareButtons from '../_components/ShareButtons'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -14,43 +15,59 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: article.title, description: article.excerpt || '' }
 }
 
-async function getArticle(slug: string) {
-  return await prisma.newsArticle.findUnique({
+async function getArticleAndIncrementViews(slug: string) {
+  // Update view count and get article
+  const article = await prisma.newsArticle.findUnique({
     where: { slug },
+    include: {
+      author: {
+        select: {
+          profile: {
+            select: { firstName: true, lastName: true },
+          },
+        },
+      },
+    },
   })
+
+  if (!article || article.status !== 'PUBLISHED') return null
+
+  // Increment views in background
+  await prisma.newsArticle.update({
+    where: { id: article.id },
+    data: { viewCount: { increment: 1 } },
+  })
+
+  return article
 }
 
-export default async function ArticlePage({ params }: Props) {
-  const { slug } = await params
-  const article = await getArticle(slug)
+function calculateReadTime(content: string) {
+  const wordsPerMinute = 200
+  const words = content.trim().split(/\s+/).length
+  return Math.ceil(words / wordsPerMinute)
+}
 
-  if (!article || article.status !== 'PUBLISHED') return notFound()
+export default async function NewsroomArticlePage({ params }: Props) {
+  const { slug } = await params
+  const article = await getArticleAndIncrementViews(slug)
+
+  if (!article) {
+    notFound()
+  }
+
+  const readTime = calculateReadTime(article.content)
+  const authorName =
+    article.customAuthorName ||
+    (article.author.profile
+      ? `${article.author.profile.firstName} ${article.author.profile.lastName}`
+      : 'Aerojet Academy')
 
   return (
-    <div className="bg-white pt-24 text-slate-900">
-      <header className="mx-auto mb-12 max-w-4xl border-b border-slate-50 px-6 py-12 text-center">
-        <div className="mb-6 inline-block rounded-full bg-blue-50 px-4 py-1.5 text-[10px] font-black tracking-[0.2em] text-[#4c9ded] uppercase">
-          Announcement
-        </div>
-        <h1 className="mx-auto max-w-4xl text-3xl leading-[1.1] font-black tracking-tighter text-[#002a5c] dark:text-white sm:text-5xl">
-          {article.title}
-        </h1>
-        <div className="mt-6 flex items-center justify-center gap-4 text-xs font-bold tracking-widest text-slate-400 uppercase">
-          <span>By Aerojet Admissions</span>
-          <span className="h-1 w-1 rounded-full bg-slate-300" />
-          <span>
-            {new Date(article.publishedAt || article.createdAt).toLocaleDateString('en-GB', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
-          </span>
-        </div>
-      </header>
-
-      {article.coverImage && (
-        <div className="mx-auto mb-14 max-w-5xl px-6">
-          <div className="relative aspect-video overflow-hidden rounded-2xl border-4 border-slate-100 shadow-2xl sm:rounded-3xl">
+    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950">
+      {/* Immersive Hero Section */}
+      <div className="relative h-[60vh] min-h-[400px] w-full overflow-hidden sm:h-[70vh]">
+        {article.coverImage ? (
+          <>
             <Image
               src={article.coverImage}
               alt={article.title}
@@ -58,26 +75,118 @@ export default async function ArticlePage({ params }: Props) {
               className="object-cover"
               priority
             />
+            {/* Sophisticated Overlay Gradient */}
+            <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-transparent" />
+          </>
+        ) : (
+          <div className="absolute inset-0 bg-[#002a5c]" />
+        )}
+
+        {/* Hero Content Overlay */}
+        <div className="absolute inset-0 flex items-end pb-16 sm:pb-24">
+          <div className="mx-auto w-full max-w-7xl px-6">
+            <div className="max-w-4xl">
+              <div className="mb-6 inline-block rounded-full bg-[#4c9ded] px-4 py-1.5 text-[10px] font-black tracking-[0.2em] text-white uppercase shadow-lg shadow-blue-500/20">
+                Academy News
+              </div>
+
+              <h1 className="mb-8 text-4xl leading-[1.05] font-black tracking-tighter text-white sm:text-6xl md:text-7xl">
+                {article.title}
+              </h1>
+
+              <div className="flex flex-wrap items-center gap-6 text-[11px] font-bold tracking-widest text-slate-200 uppercase">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
+                    <UserIcon className="h-3.5 w-3.5 text-[#4c9ded]" />
+                  </div>
+                  <span>{authorName}</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
+                    <Calendar className="h-3.5 w-3.5 text-[#4c9ded]" />
+                  </div>
+                  <span>
+                    {new Date(
+                      article.customPublishedAt || article.publishedAt || article.createdAt
+                    ).toLocaleDateString('en-GB', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric',
+                    })}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
+                    <Clock className="h-3.5 w-3.5 text-[#4c9ded]" />
+                  </div>
+                  <span>{readTime} Min Read</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
+                    <Eye className="h-3.5 w-3.5 text-[#4c9ded]" />
+                  </div>
+                  <span>{article.viewCount} Views</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      )}
+      </div>
 
-      <article className="mx-auto max-w-3xl px-6 pb-28">
-        <div className="prose prose-slate prose-lg prose-headings:text-[#002a5c] prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-[#002a5c] prose-a:text-[#4c9ded] prose-a:font-bold prose-a:no-underline hover:prose-a:underline max-w-none">
-          <ReactMarkdown>{article.content}</ReactMarkdown>
+      {/* Article Content Area */}
+      <div className="mx-auto max-w-7xl px-6 py-20">
+        <div className="flex flex-col gap-16 lg:flex-row">
+          {/* Main Content */}
+          <article className="flex-1">
+            <div
+              className="prose prose-slate prose-lg prose-headings:text-[#002a5c] prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-[#002a5c] prose-a:text-[#4c9ded] prose-a:font-bold prose-a:no-underline hover:prose-a:underline dark:prose-invert max-w-none"
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            />
+
+            {/* Article Tags */}
+            {article.tags && article.tags.length > 0 && (
+              <div className="mt-12 flex flex-wrap gap-3">
+                {article.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase transition-all hover:border-[#4c9ded] hover:bg-white hover:text-[#002a5c] dark:border-slate-800 dark:bg-slate-900"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Back to Newsroom - Bottom */}
+            <div className="mt-16 flex justify-center">
+              <Link
+                href="/newsroom"
+                className="group flex items-center gap-3 text-sm font-black tracking-widest text-slate-400 uppercase transition-all hover:text-[#002a5c] dark:hover:text-white"
+              >
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-100 bg-slate-50 transition-all group-hover:border-[#4c9ded] group-hover:bg-[#4c9ded] group-hover:text-white dark:border-slate-800 dark:bg-slate-900">
+                  <ArrowLeft className="h-4 w-4" />
+                </div>
+                <span>Back to Newsroom</span>
+              </Link>
+            </div>
+          </article>
+
+          {/* Sticky Sidebar for desktop - Optional for premium feel */}
+          <aside className="hidden w-80 lg:block">
+            <div className="sticky top-28 space-y-8">
+              <div className="rounded-3xl border border-slate-100 bg-slate-50/50 p-6 dark:border-slate-800 dark:bg-slate-900/50">
+                <h4 className="mb-4 text-sm font-black tracking-widest text-[#002a5c] uppercase dark:text-white">
+                  Share this article
+                </h4>
+                <ShareButtons
+                  url={`${process.env.NEXT_PUBLIC_APP_URL || ''}/newsroom/${article.slug}`}
+                  title={article.title}
+                />
+              </div>
+            </div>
+          </aside>
         </div>
-        <div className="mt-16 border-t border-slate-100 pt-8 text-center">
-          <p className="mb-5 text-xs font-bold tracking-widest text-slate-400 uppercase">
-            Interested in our programmes?
-          </p>
-          <Link
-            href="/register"
-            className="inline-block rounded-xl bg-[#4c9ded] px-10 py-4 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-[#002a5c]"
-          >
-            Begin Your Application
-          </Link>
-        </div>
-      </article>
+      </div>
     </div>
   )
 }

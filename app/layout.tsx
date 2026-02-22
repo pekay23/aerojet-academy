@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Lexend } from 'next/font/google'
+import { Inter, Lexend, Montserrat, Outfit, Playfair_Display } from 'next/font/google'
 import './globals.css'
 // import '@uploadthing/react/styles.css'
 import { Providers } from './providers'
@@ -12,6 +12,21 @@ const inter = Inter({
 const lexend = Lexend({
   subsets: ['latin'],
   variable: '--font-lexend',
+})
+
+const montserrat = Montserrat({
+  subsets: ['latin'],
+  variable: '--font-montserrat',
+})
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-outfit',
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-playfair',
 })
 
 export const metadata: Metadata = {
@@ -42,7 +57,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className={`${inter.variable} ${lexend.variable} font-sans antialiased`}>
+      <body
+        className={`${inter.variable} ${lexend.variable} ${montserrat.variable} ${outfit.variable} ${playfair.variable} font-sans antialiased`}
+      >
         <Providers>{children}</Providers>
       </body>
     </html>

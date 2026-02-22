@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma/client'
 import { apiSuccess, apiError } from '@/lib/api/response'
 import { getAuthSession } from '@/lib/auth/auth-options'
@@ -28,7 +29,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const { id } = await params
     const data = await req.json()
-    const { title, slug, excerpt, content, coverImage, status } = data
+    const {
+      title,
+      slug,
+      excerpt,
+      content,
+      coverImage,
+      status,
+      customAuthorName,
+      publishedAt,
+      customPublishedAt,
+      tags,
+    } = data
 
     const currentArticle = await prisma.newsArticle.findUnique({ where: { id } })
     if (!currentArticle) return apiError('Not found', 404)
@@ -38,9 +50,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       if (existing) return apiError('Slug already in use', 400)
     }
 
-    let publishedAt = currentArticle.publishedAt
-    if (status === 'PUBLISHED' && currentArticle.status !== 'PUBLISHED') {
-      publishedAt = new Date()
+    let finalPublishedAt = publishedAt ? new Date(publishedAt) : currentArticle.publishedAt
+    if (status === 'PUBLISHED' && !finalPublishedAt) {
+      finalPublishedAt = new Date()
     }
 
     const updated = await prisma.newsArticle.update({
@@ -52,9 +64,17 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         content,
         coverImage,
         status,
-        publishedAt,
+        customAuthorName,
+        tags: tags || [],
+        publishedAt: finalPublishedAt,
+        customPublishedAt: customPublishedAt ? new Date(customPublishedAt) : undefined,
       },
     })
+
+    // Revalidate public pages
+    revalidatePath('/newsroom')
+    revalidatePath(`/newsroom/${updated.slug}`)
+    revalidatePath('/')
 
     return apiSuccess(updated)
   } catch (error) {
@@ -77,6 +97,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     await prisma.newsArticle.delete({
       where: { id },
     })
+
+    // Revalidate public pages
+    revalidatePath('/newsroom')
+    revalidatePath('/')
 
     return apiSuccess({ success: true })
   } catch (error) {
