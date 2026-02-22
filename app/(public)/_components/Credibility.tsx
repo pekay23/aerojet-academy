@@ -36,6 +36,7 @@ export default function Credibility() {
                   alt={partner.name}
                   width={partner.width}
                   height={partner.height}
+                  sizes="(max-width: 768px) 120px, 150px"
                   className="object-contain"
                 />
               </div>

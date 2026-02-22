@@ -73,6 +73,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
               src={article.coverImage}
               alt={article.title}
               fill
+              sizes="100vw"
               className="object-cover"
               priority
             />
