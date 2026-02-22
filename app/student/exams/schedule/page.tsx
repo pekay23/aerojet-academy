@@ -58,47 +58,46 @@ export default async function ExamSchedulePage() {
               <div>
                 <div className="mb-4 flex items-start justify-between">
                   <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-blue-600">
-                    {booking.exam.course.code}
-                  </div>
-                  {booking.status === 'PENDING' && (
-                    <div className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-600">
-                      <AlertCircle className="h-3 w-3" />
-                      Pending Approval
-                    </div>
-                  )}
-                </div>
                 <h3 className="mb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
-                  {booking.exam.course.name}
+                  {booking.exam?.course?.name || 'Unknown Course'}
                 </h3>
-                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{booking.exam.name}</p>
+                <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
+                  {booking.exam?.name || 'Individual Exam'}
+                </p>
               </div>
 
               <div className="mt-6 space-y-3 border-t border-slate-100 dark:border-slate-800 pt-4">
                 <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
                   <Calendar className="h-4 w-4 text-slate-400" />
                   <span>
-                    {booking.examDate.toLocaleDateString(undefined, {
+                    {booking.examDate?.toLocaleDateString(undefined, {
                       weekday: 'long',
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric',
-                    })}
+                    }) || 'Date Not Set'}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
                   <Clock className="h-4 w-4 text-slate-400" />
                   <span>
-                    {booking.examDate.toLocaleTimeString(undefined, {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                    {' - '}
-                    {new Date(
-                      booking.examDate.getTime() + booking.exam.duration * 60000
-                    ).toLocaleTimeString(undefined, {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
+                    {booking.examDate
+                      ? booking.examDate.toLocaleTimeString(undefined, {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })
+                      : 'N/A'}
+                    {booking.examDate && booking.exam && (
+                      <>
+                        {' - '}
+                        {new Date(
+                          booking.examDate.getTime() + booking.exam.duration * 60000
+                        ).toLocaleTimeString(undefined, {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </>
+                    )}
                   </span>
                 </div>
                 {booking.event?.location && (
