@@ -129,7 +129,7 @@ export default function PublicNav() {
   const headerClasses = `fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled || mobileOpen || forceSolid ? 'bg-white/95 backdrop-blur-xl shadow-sm border-slate-100' : 'bg-transparent border-transparent'}`
   const linkColorClasses = scrolled || mobileOpen || forceSolid ? 'text-slate-700' : 'text-white'
   const activeLinkColorClasses =
-    scrolled || mobileOpen || forceSolid ? 'text-[#4c9ded]' : 'text-white'
+    scrolled || mobileOpen || forceSolid ? 'text-public-secondary' : 'text-white'
 
   return (
     <>
@@ -218,16 +218,20 @@ export default function PublicNav() {
             </Link>
             <Link
               href="/register"
-              className="hidden items-center rounded-xl bg-[#4c9ded] px-5 py-2.5 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-[#002a5c] sm:inline-flex"
+              className="bg-public-secondary hover:bg-public-primary hidden h-11 items-center rounded-xl px-5 py-2.5 text-[10px] font-black tracking-widest text-white uppercase transition-all sm:inline-flex"
             >
               Register
             </Link>
             <button
               onClick={() => setMobileOpen(!mobileOpen)}
-              className={`flex h-10 w-10 items-center justify-center rounded-lg transition-all lg:hidden ${linkColorClasses}`}
-              aria-label="Toggle menu"
+              className={`flex h-11 w-11 items-center justify-center rounded-lg transition-all lg:hidden ${linkColorClasses}`}
+              aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}
             >
-              {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {mobileOpen ? (
+                <X className="h-6 w-6" aria-hidden="true" />
+              ) : (
+                <Menu className="h-6 w-6" aria-hidden="true" />
+              )}
             </button>
           </div>
         </div>
@@ -251,8 +255,12 @@ export default function PublicNav() {
             >
               <div className="flex items-center justify-between border-b p-6">
                 <span className="text-public-primary text-lg font-black uppercase">Menu</span>
-                <button onClick={() => setMobileOpen(false)} className="p-2">
-                  <X className="h-5 w-5" />
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="flex h-11 w-11 items-center justify-center p-2"
+                  aria-label="Close menu"
+                >
+                  <X className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
               <div className="p-4">
