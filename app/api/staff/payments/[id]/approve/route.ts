@@ -9,9 +9,9 @@ import { topUpWallet } from '@/lib/wallet/operations'
 
 // POST /api/staff/payments/[id]/approve — Approve or reject a payment
 export const POST = withErrorHandler(
-  async (req: NextRequest, context?: { params: Record<string, string> }) => {
+  async (req: NextRequest, context: { params: Promise<{ id: string }> }) => {
     const staff = await requireStaff()
-    const id = context?.params?.id
+    const { id } = await context.params
     if (!id) return apiError('Payment ID required')
 
     let body
@@ -68,20 +68,23 @@ export const POST = withErrorHandler(
               },
             },
             data: {
-              status: 'ENROLLED', // Using string literal as EnrollmentStatus enum might not be imported correctly or varies
-              enrolledAt: new Date(),
+              status: 'ENROLLED',
+              approvedAt: new Date(),
               amountPaid: payment.amount,
             },
           })
 
-          // 2. Promote to STUDENT if APPLICANT
+          // 2. Promote to STUDENT and set user status to ACTIVE if APPLICANT
           if (payment.user.role === 'APPLICANT') {
             const { generateStudentId } = await import('@/lib/auth/helpers')
             const studentId = generateStudentId()
 
             await tx.user.update({
               where: { id: payment.userId },
-              data: { role: 'STUDENT' },
+              data: {
+                role: 'STUDENT',
+                status: 'ACTIVE', // Ensure they are active after first purchase
+              },
             })
 
             // Create StudentProfile if not exists
