@@ -30,20 +30,65 @@ const playfair = Playfair_Display({
 })
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://aerojet-academy.com'),
   title: {
-    default: 'Aerojet Aviation Training Academy',
+    default: 'Aerojet Aviation Training Academy | EASA Part-66 Training',
     template: '%s | Aerojet Academy',
   },
   description:
-    'EASA Part-66 Aviation Maintenance Training — B1 & B2 Licensed Aircraft Engineer programmes in Accra, Ghana.',
-  keywords: ['EASA Part-66', 'aviation training', 'aircraft maintenance', 'Ghana', 'B1', 'B2'],
+    "Africa's leading institution for EASA Part-66 Aviation Maintenance Training. Become a B1 or B2 Licensed Aircraft Engineer in Accra, Ghana.",
+  keywords: [
+    'EASA Part-66',
+    'aviation training',
+    'aircraft maintenance',
+    'Ghana',
+    'B1',
+    'B2',
+    'Aviation Academy Africa',
+    'Aircraft Engineering',
+  ],
   authors: [{ name: 'Aerojet Aviation Training Academy' }],
+  creator: 'Aerojet Aviation',
+  publisher: 'Aerojet Aviation',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
   openGraph: {
     title: 'Aerojet Aviation Training Academy',
     description: 'EASA Part-66 Aviation Maintenance Training in Accra, Ghana',
-    type: 'website',
-    locale: 'en_GB',
+    url: 'https://aerojet-academy.com',
     siteName: 'Aerojet Academy',
+    images: [
+      {
+        url: '/og-image.jpg', // We should ensure this exists or generate one
+        width: 1200,
+        height: 630,
+        alt: 'Aerojet Aviation Training Academy',
+      },
+    ],
+    locale: 'en_GB',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Aerojet Aviation Training Academy',
+    description: 'EASA Part-66 Aviation Maintenance Training in Accra, Ghana',
+    site: '@aerojet_academy',
+    creator: '@aerojet_academy',
+    images: ['/og-image.jpg'],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
   },
 }
 
@@ -51,6 +96,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://gx1g03nvpo.ufs.sh" />
+        <link rel="preconnect" href="https://utfs.io" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
         <link
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
