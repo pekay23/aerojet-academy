@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 async function getArticles() {
   return await prisma.newsArticle.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: { publishedAt: 'desc' },
     include: {
       author: {
         select: { profile: { select: { firstName: true, lastName: true } } },

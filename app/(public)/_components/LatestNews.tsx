@@ -12,7 +12,25 @@ async function getRecentArticles() {
 }
 
 export default async function LatestNews() {
-  const articles = await getRecentArticles()
+  let articles = []
+  let errorMsg = null
+
+  try {
+    articles = await getRecentArticles()
+  } catch (e: any) {
+    console.error('LatestNews fetch error:', e)
+    errorMsg = e.message
+  }
+
+  if (errorMsg) {
+    return (
+      <section className="bg-slate-50 py-10 dark:bg-slate-900/10">
+        <div className="container mx-auto px-6 text-center">
+          <p className="text-red-500">ERROR: Failed to load news. {errorMsg}</p>
+        </div>
+      </section>
+    )
+  }
 
   if (!articles || articles.length === 0) {
     return null
