@@ -28,7 +28,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError((validation as any).error)
   }
 
-  const { firstName, lastName, middleName, email, phone } = validation.data as any
+  const { firstName, lastName, middleName, email, phone, phoneCountryCode, nationality } =
+    validation.data as any
 
   // Check if email already exists
   const existing = await prisma.user.findUnique({ where: { email } })
@@ -50,13 +51,16 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       },
     })
 
+    const fullPhone = `${phoneCountryCode}${phone.replace(/\s+/g, '')}`
+
     await tx.profile.create({
       data: {
         userId: newUser.id,
         firstName,
         lastName,
         middleName: middleName || null,
-        phone: phone || null,
+        phone: fullPhone,
+        nationality: nationality || null,
       },
     })
 

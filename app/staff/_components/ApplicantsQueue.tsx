@@ -36,11 +36,14 @@ const TABS = [
   { key: 'pending_approval', label: 'Pending Approval' },
 ]
 
-export default function ApplicantsQueue({
-  initialCounts,
-}: {
-  initialCounts: Record<string, number>
-}) {
+interface Counts {
+  all: number
+  pending_payment: number
+  pending_approval: number
+  [key: string]: number
+}
+
+export default function ApplicantsQueue({ initialCounts }: { initialCounts: Counts }) {
   const [applicants, setApplicants] = useState<Applicant[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
@@ -52,11 +55,18 @@ export default function ApplicantsQueue({
   const fetchApplicants = useCallback(async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({ status: tab, ...(search && { search }) })
+      const params = new URLSearchParams({
+        status: tab,
+        ...(search && { search }),
+        limit: '50', // Increase limit for queue
+      })
       const res = await fetch(`/api/staff/applicants?${params}`)
       const data = await res.json()
       setApplicants(data.applicants ?? [])
       setTotal(data.total ?? 0)
+      if (data.counts) {
+        setCounts(data.counts)
+      }
     } finally {
       setLoading(false)
     }
@@ -69,12 +79,25 @@ export default function ApplicantsQueue({
 
   const handleApproved = (id: string) => {
     setApplicants((prev) => prev.filter((a) => a.id !== id))
-    setCounts((c) => ({ ...c, all: c.all - 1, pending_approval: c.pending_approval - 1 }))
+    setCounts((prev) => ({
+      ...prev,
+      all: Math.max(0, prev.all - 1),
+      pending_approval: Math.max(0, prev.pending_approval - 1),
+    }))
   }
 
   const handleRejected = (id: string) => {
+    const applicant = applicants.find((a) => a.id === id)
     setApplicants((prev) => prev.filter((a) => a.id !== id))
-    setCounts((c) => ({ ...c, all: c.all - 1 }))
+    setCounts((prev) => {
+      const newCounts = { ...prev, all: Math.max(0, prev.all - 1) }
+      if (applicant?.registrationPaid) {
+        newCounts.pending_approval = Math.max(0, prev.pending_approval - 1)
+      } else {
+        newCounts.pending_payment = Math.max(0, prev.pending_payment - 1)
+      }
+      return newCounts
+    })
   }
 
   const statCards = [

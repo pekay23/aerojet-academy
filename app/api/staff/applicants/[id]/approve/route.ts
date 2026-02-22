@@ -36,8 +36,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const verifyToken = generateToken()
   const academyEmail = await generateAcademyEmail(
     profile.firstName,
-    profile.lastName,
-    profile.middleName || undefined
+    profile.middleName || undefined,
+    profile.lastName
   )
 
   // Activate the applicant
