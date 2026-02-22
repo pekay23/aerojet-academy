@@ -92,6 +92,10 @@ export const config = {
     '/applicant/:path*',
     '/student/:path*',
     '/instructor/:path*',
+    '/api/staff/:path*',
+    '/api/applicant/:path*',
+    '/api/student/:path*',
+    '/api/instructor/:path*',
     '/change-password',
   ],
 }
