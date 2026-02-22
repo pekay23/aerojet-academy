@@ -1,5 +1,6 @@
 import { NotificationType } from '@prisma/client'
 import { getFinanceConfig, getRegistrationConfig } from '@/lib/settings'
+import { getBaseUrl } from '@/lib/utils/url'
 
 type TxClient = any // Prisma transaction client
 
@@ -34,7 +35,7 @@ export async function createNotification(
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@aerojet-academy.com'
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+const BASE_URL = getBaseUrl()
 
 interface EmailPayload {
   to: string
@@ -80,7 +81,7 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
 // EMAIL TEMPLATES
 // ---------------------------------------------------------------------------
 
-const DOMAIN = process.env.NEXT_PUBLIC_APP_URL || 'https://aerojet-academy.com'
+const DOMAIN = getBaseUrl()
 
 const LOGO_DARK_ON_WHITE = `https://lightpink-guanaco-745322.hostingersite.com/wp-content/uploads/2024/03/ATA_logo_hor_onWhite-1-e1711591369108.png`
 const LOGO_WHITE_ON_DARK = `https://lightpink-guanaco-745322.hostingersite.com/wp-content/uploads/2024/03/ATA_logo_hor_onDark-1-e1711591332243.png`
