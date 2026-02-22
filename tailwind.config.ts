@@ -101,6 +101,11 @@ const config: Config = {
           },
         },
       },
+      zIndex: {
+        '60': '60',
+        '70': '70',
+        '80': '80',
+      },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',

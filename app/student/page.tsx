@@ -36,7 +36,10 @@ export default async function StudentDashboard() {
   ] = await Promise.all([
     prisma.wallet.findUnique({ where: { userId } }),
     prisma.enrollment.findMany({
-      where: { userId, status: 'ACTIVE' },
+      where: {
+        userId,
+        status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] },
+      },
       include: { course: true },
       take: 3,
     }),

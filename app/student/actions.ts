@@ -14,7 +14,7 @@ export async function enrollInCourse(courseId: string) {
     where: {
       userId: user.id,
       courseId: courseId,
-      status: { in: ['ACTIVE', 'PENDING', 'SUSPENDED'] },
+      status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED', 'PENDING', 'SUSPENDED'] },
     },
   })
 
@@ -237,7 +237,7 @@ export async function getAvailableRecipients() {
   const enrollments = await prisma.enrollment.findMany({
     where: {
       userId: session.user.id,
-      status: { in: ['ACTIVE', 'COMPLETED'] },
+      status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED', 'COMPLETED'] },
     },
     include: {
       course: {
