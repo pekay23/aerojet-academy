@@ -78,7 +78,11 @@ export default function PaymentsQueue({
   const handleApprove = async (id: string) => {
     setActionLoading(id)
     try {
-      const res = await fetch(`/api/staff/payments/${id}/approve`, { method: 'POST' })
+      const res = await fetch(`/api/staff/payments/${id}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'approve' }),
+      })
       if (!res.ok) throw new Error()
       toast.success('Payment approved')
       setPayments((prev) => prev.filter((p) => p.id !== id))
@@ -96,10 +100,10 @@ export default function PaymentsQueue({
     }
     setActionLoading(rejectTarget)
     try {
-      const res = await fetch(`/api/staff/payments/${rejectTarget}/reject`, {
+      const res = await fetch(`/api/staff/payments/${rejectTarget}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason: rejectReason }),
+        body: JSON.stringify({ action: 'reject', reason: rejectReason }),
       })
       if (!res.ok) throw new Error()
       toast.success('Payment rejected')
