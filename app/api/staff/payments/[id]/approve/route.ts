@@ -9,9 +9,9 @@ import { topUpWallet } from '@/lib/wallet/operations'
 
 // POST /api/staff/payments/[id]/approve — Approve or reject a payment
 export const POST = withErrorHandler(
-  async (req: NextRequest, context: { params: Promise<{ id: string }> }) => {
+  async (req: NextRequest, context: { params: Record<string, string> }) => {
     const staff = await requireStaff()
-    const { id } = await context.params
+    const id = context?.params?.id
     if (!id) return apiError('Payment ID required')
 
     let body
