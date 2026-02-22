@@ -12,16 +12,17 @@ export const POST = withErrorHandler(
   async (req: NextRequest, context: { params: Record<string, string> }) => {
     const staff = await requireStaff()
     const id = context?.params?.id
+
     if (!id) return apiError('Payment ID required')
 
-    let body
+    let body: any
     try {
       body = await req.json()
     } catch (e) {
       return apiError('Invalid request body', 400)
     }
-    const { action, notes, reason } = body // action: 'approve' | 'reject'
 
+    const { action, notes, reason } = body
     if (!['approve', 'reject'].includes(action)) {
       return apiError('Action must be "approve" or "reject"')
     }
