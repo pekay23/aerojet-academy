@@ -39,45 +39,45 @@ const statusConfig: Record<
 > = {
   registered: {
     label: 'Registered',
-    color: 'text-blue-600',
-    bg: 'bg-blue-50 border-blue-200',
+    color: 'text-blue-600 dark:text-blue-400',
+    bg: 'bg-blue-50 border-blue-200 dark:bg-blue-900/10 dark:border-blue-800',
     icon: ClipboardList,
     description: 'Your account has been created. Upload your registration payment to continue.',
   },
   payment_pending: {
     label: 'Payment Pending',
-    color: 'text-orange-600',
-    bg: 'bg-orange-50 border-orange-200',
+    color: 'text-orange-600 dark:text-orange-400',
+    bg: 'bg-orange-50 border-orange-200 dark:bg-orange-900/10 dark:border-orange-800',
     icon: Clock,
     description: 'Please upload your registration payment proof to proceed.',
   },
   payment_submitted: {
     label: 'Payment Submitted',
-    color: 'text-purple-600',
-    bg: 'bg-purple-50 border-purple-200',
+    color: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-purple-50 border-purple-200 dark:bg-purple-900/10 dark:border-purple-800',
     icon: AlertCircle,
     description: 'Your payment proof has been submitted. Our team is reviewing it.',
   },
   under_review: {
     label: 'Under Review',
-    color: 'text-purple-600',
-    bg: 'bg-purple-50 border-purple-200',
+    color: 'text-purple-600 dark:text-purple-400',
+    bg: 'bg-purple-50 border-purple-200 dark:bg-purple-900/10 dark:border-purple-800',
     icon: AlertCircle,
     description:
       'Your application and payment are being reviewed by our admissions team. We will notify you soon.',
   },
   approved: {
     label: 'Approved',
-    color: 'text-green-600',
-    bg: 'bg-green-50 border-green-200',
+    color: 'text-green-600 dark:text-green-400',
+    bg: 'bg-green-50 border-green-200 dark:bg-green-900/10 dark:border-green-800',
     icon: ShieldCheck,
     description:
       'Congratulations! Your registration has been approved. You may now enroll in a course.',
   },
   rejected: {
     label: 'Not Accepted',
-    color: 'text-red-600',
-    bg: 'bg-red-50 border-red-200',
+    color: 'text-red-600 dark:text-red-400',
+    bg: 'bg-red-50 border-red-200 dark:bg-red-900/10 dark:border-red-800',
     icon: AlertCircle,
     description:
       'Unfortunately, your application was not accepted. Please contact admissions for more information.',
@@ -142,7 +142,7 @@ export default async function ApplicantDashboard() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+        <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
           Welcome, {firstName}
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -154,15 +154,17 @@ export default async function ApplicantDashboard() {
       <div className={`${statusInfo.bg} rounded-2xl border p-6 sm:p-8`}>
         <div className="flex items-start gap-4">
           <div
-            className={`h-12 w-12 rounded-xl ${statusInfo.color} flex shrink-0 items-center justify-center bg-white dark:bg-slate-900 shadow-sm`}
+            className={`h-12 w-12 rounded-xl ${statusInfo.color} flex shrink-0 items-center justify-center bg-white shadow-sm dark:bg-slate-900`}
           >
             <StatusIcon className="h-6 w-6" />
           </div>
           <div className="flex-1">
             <div className="mb-2 flex flex-wrap items-center gap-3">
-              <h2 className="text-lg font-black text-slate-900 dark:text-slate-100">Application Status</h2>
+              <h2 className="text-lg font-black text-slate-900 dark:text-slate-100">
+                Application Status
+              </h2>
               <span
-                className={`rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-widest ${statusInfo.color} border bg-white dark:bg-slate-900`}
+                className={`rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase ${statusInfo.color} border bg-white dark:bg-slate-900`}
               >
                 {statusInfo.label}
               </span>
@@ -181,7 +183,7 @@ export default async function ApplicantDashboard() {
             {(appStatus === 'payment_pending' || appStatus === 'registered') && (
               <Link
                 href="/applicant/application/payment"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white dark:bg-slate-900 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-[#002a5c] shadow-sm transition-all hover:bg-[#002a5c] hover:text-white"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-bold tracking-widest text-[#002a5c] uppercase shadow-sm transition-all hover:bg-[#002a5c] hover:text-white dark:bg-slate-900"
               >
                 <CreditCard className="h-4 w-4" />
                 Upload Payment Proof
@@ -191,7 +193,7 @@ export default async function ApplicantDashboard() {
             {appStatus === 'approved' && (
               <Link
                 href="/applicant/courses"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white shadow-sm transition-all hover:bg-green-700"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-xs font-bold tracking-widest text-white uppercase shadow-sm transition-all hover:bg-green-700"
               >
                 <BookOpen className="h-4 w-4" />
                 Browse Courses
@@ -202,7 +204,7 @@ export default async function ApplicantDashboard() {
       </div>
 
       {/* Journey Timeline */}
-      <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8">
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
         <h3 className="mb-6 font-bold text-slate-900 dark:text-slate-100">Your Journey</h3>
         <div className="space-y-4">
           {timelineSteps.map((item, i) => (
@@ -242,13 +244,13 @@ export default async function ApplicantDashboard() {
           <Link
             key={label}
             href={href}
-            className="group flex items-center gap-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 transition-all hover:border-[#4c9ded] hover:shadow-lg"
+            className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-[#4c9ded] hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800/50 transition-colors group-hover:bg-[#002a5c]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 transition-colors group-hover:bg-[#002a5c] dark:bg-slate-800/50">
               <Icon className="h-5 w-5 text-slate-400 transition-colors group-hover:text-white" />
             </div>
             <div className="flex-1">
-              <span className="text-sm font-bold text-slate-700">{label}</span>
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{label}</span>
             </div>
             <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-[#4c9ded]" />
           </Link>
