@@ -769,6 +769,7 @@ model Payment {
   
   @@index([userId])
   @@index([status])
+  @@index([approvedAt])
   @@index([referenceCode])
   @@index([referenceType, referenceId])
   @@map("payments")

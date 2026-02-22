@@ -291,7 +291,7 @@ export async function getClassAttendance(classId: string, date?: Date) {
       course: {
         include: {
           enrollments: {
-            where: { status: 'ACTIVE' },
+            where: { status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
             include: { user: { include: { profile: true } } },
           },
         },
@@ -465,7 +465,7 @@ export async function getInstructorStudents() {
           some: { instructorId },
         },
       },
-      status: 'ACTIVE',
+      status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] },
     },
     include: {
       user: {
