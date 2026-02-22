@@ -10,10 +10,10 @@ if (!connectionString) {
 }
 
 // PostgreSQL SSL settings for Neon
-// Using ssl: true or an object with rejectUnauthorized: false depending on env
-const sslConfig = connectionString.includes('sslmode=verify-full')
-  ? { rejectUnauthorized: true }
-  : { rejectUnauthorized: false }
+// Using ssl: { rejectUnauthorized: false } is usually safer for serverless/Vercel
+const sslConfig = {
+  rejectUnauthorized: connectionString.includes('sslmode=verify-full'),
+}
 
 const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
 
@@ -21,12 +21,15 @@ const createPrismaClient = () => {
   const pool = new Pool({
     connectionString,
     ssl: sslConfig,
-    max: 10, // Limit connections
+    max: 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 2000,
+    connectionTimeoutMillis: 10000, // Increased to 10s for Vercel cold starts/Neon wake-ups
   })
   const adapter = new PrismaPg(pool)
-  return new PrismaClient({ adapter })
+  return new PrismaClient({
+    adapter,
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  })
 }
 
 export const prisma = globalForPrisma.prisma ?? createPrismaClient()
