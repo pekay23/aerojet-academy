@@ -6,8 +6,8 @@ import { CheckCircle2, X } from 'lucide-react'
 
 const pathways = [
   {
-    name: 'Full-Time',
-    duration: '2-4 Years',
+    name: '4-Year Full-Time',
+    duration: '4 Years',
     href: '/courses/aircraft-engineering/easa-part-66/four-year-b1-b2',
     highlight: true,
     features: {
@@ -15,6 +15,20 @@ const pathways = [
       'Study Materials': true,
       'Exam Fees Included': true,
       'Practical Training': true,
+      'Work Experience': true,
+      'Job Guarantee': true,
+    },
+  },
+  {
+    name: '2-Year Full-Time',
+    duration: '2 Years',
+    href: '/courses/aircraft-engineering/easa-part-66/two-year-b1',
+    highlight: false,
+    features: {
+      'Classroom Tuition': true,
+      'Study Materials': true,
+      'Exam Fees Included': true,
+      'Practical Training': false,
       'Work Experience': true,
       'Job Guarantee': true,
     },
@@ -63,13 +77,13 @@ export default function CourseComparison() {
       <table className="w-full min-w-[600px] text-left text-sm">
         <thead>
           <tr>
-            <th className="p-4 text-xs font-bold uppercase tracking-widest text-slate-400">
+            <th className="p-4 text-xs font-bold tracking-widest text-slate-400 uppercase">
               Feature
             </th>
             {pathways.map((p) => (
               <th key={p.name} className="p-4 text-center">
                 <div
-                  className={`inline-block rounded-xl px-4 py-2 text-sm font-black uppercase tracking-wide ${p.highlight ? 'bg-[#002a5c] text-white' : 'bg-slate-100 text-slate-700'}`}
+                  className={`inline-block rounded-xl px-4 py-2 text-sm font-black tracking-wide uppercase ${p.highlight ? 'bg-[#002a5c] text-white' : 'bg-slate-100 text-slate-700'}`}
                 >
                   {p.name}
                 </div>
@@ -99,7 +113,7 @@ export default function CourseComparison() {
               <td key={p.name} className="p-4 text-center">
                 <Link
                   href={p.href}
-                  className={`inline-block rounded-xl px-5 py-2.5 text-xs font-black uppercase tracking-widest transition-all ${
+                  className={`inline-block rounded-xl px-5 py-2.5 text-xs font-black tracking-widest uppercase transition-all ${
                     p.highlight
                       ? 'bg-[#4c9ded] text-white hover:bg-[#002a5c]'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
