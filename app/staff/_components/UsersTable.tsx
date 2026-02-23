@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Search, Users, RefreshCw, UserPlus } from 'lucide-react'
+import { Search, Users, RefreshCw, UserPlus, ShieldCheck } from 'lucide-react'
 import UserActionsMenu from './UserActionsMenu'
+import CreateUserDialog from './CreateUserDialog'
 
 interface User {
   id: string
@@ -88,6 +89,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           <p className="mt-1 text-sm text-slate-400">{total.toLocaleString()} total users</p>
         </div>
         <div className="flex gap-2">
+          <CreateUserDialog />
           <button
             onClick={fetchUsers}
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
@@ -241,6 +243,8 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                           userId={user.id}
                           userStatus={user.status}
                           userEmail={user.email}
+                          userRole={user.role}
+                          userName={fullName}
                           onActionComplete={fetchUsers}
                         />
                       </td>

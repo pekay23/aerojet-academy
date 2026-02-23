@@ -91,7 +91,7 @@ export default async function UserProfilePage({ params }: Props) {
               />
             </div>
             <div>
-              <h1 className="mb-2 text-3xl font-black tracking-tight text-[#002a5c] dark:text-white dark:text-white">
+              <h1 className="mb-2 text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
                 {fullName}
               </h1>
               <div className="flex items-center gap-3">
@@ -121,7 +121,13 @@ export default async function UserProfilePage({ params }: Props) {
               </div>
             </div>
           </div>
-          <UserActionsMenu userId={user.id} userStatus={user.status} userEmail={user.email} />
+          <UserActionsMenu
+            userId={user.id}
+            userStatus={user.status}
+            userEmail={user.email}
+            userRole={user.role}
+            userName={fullName}
+          />
         </div>
       </div>
 
