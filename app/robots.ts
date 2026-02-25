@@ -1,12 +1,15 @@
 import { MetadataRoute } from 'next'
- 
-export default function robots(): MetadataRoute.Robots {
+import { getBaseUrl } from '../lib/utils/url'
+
+export default async function robots(): Promise<MetadataRoute.Robots> {
+  const baseUrl = await getBaseUrl()
+
   return {
     rules: {
       userAgent: '*',
       allow: '/',
       disallow: ['/portal/', '/staff/', '/api/'], // Block portal and API from Google
     },
-    sitemap: 'https://aerojet-academy.com/sitemap.xml',
+    sitemap: `${baseUrl}/sitemap.xml`,
   }
 }

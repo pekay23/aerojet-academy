@@ -4,7 +4,7 @@ import { headers } from 'next/headers'
  * Utility to get the base URL of the application.
  * Handles local development, Vercel preview environments, and production.
  */
-export async function getBaseUrl() {
+export async function getBaseUrl(): Promise<string> {
   // 1. Try to get from request headers (server-side only)
   try {
     const headersList = await headers()
