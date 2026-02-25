@@ -93,7 +93,7 @@ export default function ModularTrainingPage() {
       <Hero
         title="Modular Training"
         subtitle="Study at your own pace — book individual EASA B1 or B2 modules to fit your schedule."
-        backgroundImage="/images/hero/modular.jpg"
+        backgroundImage="/images/hero/modular.webp"
       />
       <div className="mx-auto max-w-6xl space-y-24 px-6 py-20">
         {/* Intro + Who Is It For */}

@@ -38,7 +38,7 @@ export default function EasaPart66Page() {
       <Hero
         title="EASA Part-66 Certification"
         subtitle="The globally recognized standard for aircraft maintenance professionals. Your license to a worldwide career."
-        backgroundImage="/images/hero/easa-part-66.png" 
+        backgroundImage="/images/hero/easa-part-66.webp" 
       />
       <div className="container mx-auto px-6 py-20 sm:py-28">
         <div className="mx-auto max-w-4xl space-y-20">

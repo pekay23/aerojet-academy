@@ -113,6 +113,7 @@ export default async function ApplicantDashboard() {
       registrationCode: true,
       registrationFee: true,
       registrationCurrency: true,
+      programmeChoice: true,
       createdAt: true,
       profile: { select: { firstName: true, lastName: true } },
     },
@@ -129,6 +130,31 @@ export default async function ApplicantDashboard() {
   const appStatus = deriveStatus(applicant)
   const statusInfo = statusConfig[appStatus]
   const StatusIcon = statusInfo.icon
+
+  const formatProgramme = (choice: string | null) => {
+    if (!choice) return 'Not Selected'
+    const match = choice.match(/(.+)_(.YEAR)/)
+    if (match) return `${match[1].replace('_', ' ')} (${match[2].replace('YEAR', ' YEARS')})`
+    return choice.replace('_', ' ')
+  }
+
+  const getActionLink = (choice: string | null) => {
+    switch (choice) {
+      case 'EXAM_ONLY':
+        return { href: '/applicant/exam-pools', label: 'Browse Exams', icon: FileCheck }
+      case 'MODULAR':
+        return {
+          href: '/applicant/courses?category=MODULAR',
+          label: 'Browse Modules',
+          icon: BookOpen,
+        }
+      default:
+        // Full time / Military
+        return { href: '/applicant/pathway', label: 'Complete Enrollment', icon: ArrowRight }
+    }
+  }
+
+  const actionInfo = getActionLink(applicant.programmeChoice)
 
   const timelineSteps = [
     { step: 'Create Account', done: true },
@@ -177,12 +203,22 @@ export default async function ApplicantDashboard() {
             <p className="text-sm text-slate-600 dark:text-slate-400">{statusInfo.description}</p>
 
             {applicant.registrationCode && (
-              <p className="mt-2 text-xs text-slate-400">
-                Registration Code:{' '}
-                <span className="font-mono font-bold text-slate-600 dark:text-slate-400">
-                  {applicant.registrationCode}
-                </span>
-              </p>
+              <div className="mt-2 space-y-1">
+                <p className="text-xs text-slate-400">
+                  Registration Code:{' '}
+                  <span className="font-mono font-bold text-slate-600 dark:text-slate-400">
+                    {applicant.registrationCode}
+                  </span>
+                </p>
+                {applicant.programmeChoice && (
+                  <p className="text-xs text-slate-400">
+                    Selected Pathway:{' '}
+                    <span className="font-bold text-slate-600 dark:text-slate-400">
+                      {formatProgramme(applicant.programmeChoice)}
+                    </span>
+                  </p>
+                )}
+              </div>
             )}
 
             {(appStatus === 'payment_pending' || appStatus === 'registered') && (
@@ -197,11 +233,11 @@ export default async function ApplicantDashboard() {
 
             {appStatus === 'approved' && (
               <Link
-                href="/applicant/courses"
+                href={actionInfo.href}
                 className="mt-4 inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-xs font-bold tracking-widest text-white uppercase shadow-sm transition-all hover:bg-green-700"
               >
-                <BookOpen className="h-4 w-4" />
-                Browse Courses
+                <actionInfo.icon className="h-4 w-4" />
+                {actionInfo.label}
               </Link>
             )}
           </div>
@@ -226,7 +262,11 @@ export default async function ApplicantDashboard() {
                 )}
               </div>
               <span
-                className={`text-sm ${item.done ? 'font-semibold text-slate-700 line-through decoration-green-300' : 'text-slate-500'}`}
+                className={`text-sm ${
+                  item.done
+                    ? 'font-semibold text-slate-700 line-through decoration-green-300 dark:text-slate-200'
+                    : 'text-slate-500 dark:text-slate-400'
+                }`}
               >
                 {item.step}
               </span>

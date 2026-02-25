@@ -30,12 +30,16 @@ export const POST = withErrorHandler(
         data: { status: PaymentStatus.APPROVED, approvedBy: staff.id, approvedAt: new Date() },
       })
 
-      await topUpWallet(
-        payment.userId,
-        Number(payment.amount),
-        `Wallet top-up approved (Payment: ${payment.referenceCode})`,
-        payment.referenceCode || undefined
-      )
+      await prisma.$transaction(async (tx) => {
+        await topUpWallet(
+          tx,
+          payment.userId,
+          Number(payment.amount),
+          `Wallet top-up approved (Payment: ${payment.referenceCode})`,
+          payment.id,
+          'PAYMENT_ID'
+        )
+      })
 
       await createAuditLog({
         action: AuditAction.WALLET_TOP_UP,

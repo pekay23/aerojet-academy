@@ -7,18 +7,18 @@ import { Button } from '@/components/ui/button' // Using ShadCN button for consi
 
 const slides = [
   {
-    src: '/images/hero/hero-slide1.jpg',
+    src: '/images/hero/hero-slide1.webp',
     headline: 'Your Journey to Becoming a Certified Aircraft Technician Starts Here.',
     subhead:
       'World-class aviation technical training in Accra — structured pathways to EASA Part-66 B1/B2 standards.',
   },
   {
-    src: '/images/hero/hero-slide2.jpg',
+    src: '/images/hero/hero-slide2.webp',
     headline: 'Discipline, Structure, and Excellence in Aviation.',
     subhead: 'Join a cohort of dedicated professionals training for a global career.',
   },
   {
-    src: '/images/hero/hero-slide3.jpg',
+    src: '/images/hero/hero-slide3.webp',
     headline: 'State-of-the-Art Training for a High-Tech Industry.',
     subhead: 'Learn with modern tools and a curriculum designed for real-world MRO environments.',
   },
@@ -35,8 +35,7 @@ export default function HeroSlider() {
   }, [])
 
   return (
-    // ===== FIX: Changed h-screen to h-[70vh] =====
-    <section className="relative flex h-[70vh] w-full items-center justify-center overflow-hidden bg-black">
+    <section className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-black md:min-h-[80vh]">
       {/* Background Images */}
       {slides.map((slide, index) => (
         <Image
@@ -55,8 +54,8 @@ export default function HeroSlider() {
       <div className="absolute inset-0 z-10 bg-linear-to-b from-black/20 via-black/60 to-black/80" />
 
       {/* Content Area - Centered */}
-      <div className="relative z-20 container mx-auto px-6 text-center">
-        <div className="mx-auto max-w-4xl">
+      <div className="relative z-20 w-full px-6 py-20 text-center md:container md:mx-auto">
+        <div className="mx-auto max-w-4xl pt-16">
           <h1 className="mb-6 text-4xl leading-tight font-black text-white md:text-5xl lg:text-6xl">
             {slides[currentSlide].headline}
           </h1>

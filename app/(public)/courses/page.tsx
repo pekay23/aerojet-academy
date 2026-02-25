@@ -17,7 +17,7 @@ export default function CoursesPage() {
       <Hero
         title="Training Programs"
         subtitle="EASA Part-66 certified pathways to a global career in Aircraft Maintenance Engineering."
-        backgroundImage="/images/hero/coursespage.jpg" // Ensure this path is correct
+        backgroundImage="/images/hero/coursespage.webp" // Ensure this path is correct
       />
 
       {/* Intro Section (As you liked) */}

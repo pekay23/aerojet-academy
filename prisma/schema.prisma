@@ -1,7 +1,6 @@
 // This is your Prisma schema file
 // Learn more: https://pris.ly/d/prisma-schema
 
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -15,26 +14,40 @@ datasource db {
 // ============================================================================
 
 enum UserRole {
-  APPLICANT   // Registered, payment approved, before course purchase
-  STUDENT     // After course purchase and approval
-  INSTRUCTOR  // Teaching staff
-  STAFF       // Admin staff with role-based permissions
-  ADMIN       // Full system access
+  APPLICANT // Registered, payment approved, before course purchase
+  STUDENT // After course purchase and approval
+  INSTRUCTOR // Teaching staff
+  STAFF // Admin staff with role-based permissions
+  ADMIN // Full system access
 }
 
 enum UserStatus {
-  PENDING     // Registration submitted, awaiting approval
-  ACTIVE      // Approved and active
-  SUSPENDED   // Temporarily suspended
-  ARCHIVED    // Soft deleted (can be restored)
-  DELETED     // Marked for permanent deletion
+  PENDING // Registration submitted, awaiting approval
+  ACTIVE // Approved and active
+  SUSPENDED // Temporarily suspended
+  ARCHIVED // Soft deleted (can be restored)
+  DELETED // Marked for permanent deletion
 }
 
 enum EnrollmentType {
-  FULL_TIME   // Full-time program
-  MODULAR     // Modular/part-time
-  EXAM_ONLY   // Exam-only candidates
+  FULL_TIME // Full-time program
+  MODULAR // Modular/part-time
+  EXAM_ONLY // Exam-only candidates
   SHORT_COURSE // Short courses
+}
+
+enum StudyPathway {
+  FULL_TIME
+  EXAM_ONLY
+  MODULAR
+}
+
+enum ProgrammeChoice {
+  FULL_TIME_4YEAR
+  FULL_TIME_2YEAR
+  MILITARY_1YEAR
+  MODULAR
+  EXAM_ONLY
 }
 
 enum EnrollmentStatus {
@@ -66,32 +79,34 @@ enum EventStatus {
 enum PoolStatus {
   DRAFT
   OPEN
-  NEAR_FULL    // 23-24 members
-  CONFIRMED    // 25+ members
-  LOCKED       // Exam in progress
-  FAILED       // Didn't reach minimum
-  MERGED       // Merged with another pool
-  COMPLETED    // Exam finished
+  NEAR_FULL // 23-24 members
+  CONFIRMED // 25+ members
+  LOCKED // Exam in progress
+  FAILED // Didn't reach minimum
+  MERGED // Merged with another pool
+  COMPLETED // Exam finished
 }
 
 enum MembershipStatus {
-  RESERVED     // Funds held in wallet
-  CONFIRMED    // Pool confirmed, payment captured
-  CANCELLED    // User cancelled
-  FAILED       // Pool failed
-  ROLLED       // Rolled to next event
-  COMPLETED    // Exam taken
-  NO_SHOW      // Didn't attend
+  RESERVED // Funds held in wallet
+  CONFIRMED // Pool confirmed, payment captured
+  CANCELLED // User cancelled
+  FAILED // Pool failed
+  ROLLED // Rolled to next event
+  COMPLETED // Exam taken
+  NO_SHOW // Didn't attend
 }
 
 enum TransactionType {
-  TOP_UP       // Wallet top-up
-  RESERVE      // Hold funds for pool
-  CAPTURE      // Deduct funds (pool confirmed)
-  RELEASE      // Release held funds (pool failed)
-  REFUND       // Refund to wallet
-  PAYMENT      // General payment
-  ADJUSTMENT   // Manual adjustment
+  TOP_UP // Wallet top-up
+  RESERVE // Hold funds for pool
+  CAPTURE // Deduct funds (pool confirmed)
+  RELEASE // Release held funds (pool failed)
+  CREDIT // Wallet credit
+  DEBIT // Wallet debit
+  REFUND // Refund to wallet
+  PAYMENT // General payment
+  ADJUSTMENT // Manual adjustment
 }
 
 enum NotificationType {
@@ -109,59 +124,67 @@ enum NotificationType {
 // ============================================================================
 
 model User {
-  id                String      @id @default(cuid())
-  email             String      @unique
-  personalEmail     String?     // Original personal email preserved after activation
-  academyEmail      String?     @unique  // Generated: f.m.lastname@aerojet-academy.com
-  password          String?     // Bcrypt hashed
-  role              UserRole    @default(APPLICANT)
-  status            UserStatus  @default(PENDING)
-  
+  id            String     @id @default(cuid())
+  email         String     @unique
+  personalEmail String? // Original personal email preserved after activation
+  academyEmail  String?    @unique // Generated: f.m.lastname@aerojet-academy.com
+  password      String? // Bcrypt hashed
+  role          UserRole   @default(APPLICANT)
+  status        UserStatus @default(PENDING)
+
   // Registration Phase
-  registrationCode  String?     @unique  // AERO-2026-ABC123
-  registrationFee   Decimal     @default(350.00) @db.Decimal(10, 2)  // GHS
+  registrationCode     String?   @unique // AERO-2026-ABC123
+  registrationFee      Decimal   @default(350.00) @db.Decimal(10, 2) // GHS
   registrationCurrency String    @default("EUR")
-  registrationPaid  Boolean     @default(false)
-  paymentProofUrl   String?
-  paymentApprovedAt DateTime?
-  paymentApprovedBy String?
-  
+  registrationPaid     Boolean   @default(false)
+  paymentProofUrl      String?
+  paymentApprovedAt    DateTime?
+  paymentApprovedBy    String?
+  programmeChoice      ProgrammeChoice?
+
   // Security
-  mustChangePassword Boolean    @default(false)
-  passwordChanged   Boolean     @default(false)
-  emailVerified     DateTime?
-  verifyToken       String?     @unique
-  loginAttempts     Int         @default(0)
-  lockedUntil       DateTime?
-  lastLoginAt       DateTime?
-  
+  mustChangePassword Boolean   @default(false)
+  passwordChanged    Boolean   @default(false)
+  emailVerified      DateTime?
+  verifyToken          String?   @unique
+  verifyTokenExpires   DateTime?
+  loginAttempts        Int       @default(0)
+  lockedUntil        DateTime?
+  lastLoginAt        DateTime?
+
   // Timestamps
-  createdAt         DateTime    @default(now())
-  updatedAt         DateTime    @updatedAt
-  deletedAt         DateTime?   // Soft delete
-  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Soft delete
+
   // Relationships
-  profile           Profile?
-  studentProfile    StudentProfile?
-  instructorProfile InstructorProfile?
-  staffProfile      StaffProfile?
-  wallet            Wallet?
-  enrollments       Enrollment[]
-  poolMemberships   PoolMembership[]
-  examBookings      ExamBooking[]
-  grades            Grade[]
-  examResults       ExamResult[]
-  attendanceRecords AttendanceRecord[]
-  payments          Payment[]
-  invoices          Invoice[]
-  notificationsSent Notification[] @relation("SentNotifications")
-  notificationsReceived Notification[] @relation("ReceivedNotifications")
-  messagesSent      Message[] @relation("SentMessages")
-  messagesReceived  Message[] @relation("ReceivedMessages")
-  auditLogs         AuditLog[]
-  fileUploads       FileUpload[]
-  newsArticles      NewsArticle[]
-  
+  profile               Profile?
+  studentProfile        StudentProfile?
+  instructorProfile     InstructorProfile?
+  staffProfile          StaffProfile?
+  wallet                Wallet?
+  enrollments           Enrollment[]
+  poolMemberships       PoolMembership[]
+  examBookings          ExamBooking[]
+  grades                Grade[]
+  examResults           ExamResult[]
+  attendanceRecords     AttendanceRecord[]
+  payments              Payment[]
+  invoices              Invoice[]
+  notificationsSent     Notification[]     @relation("SentNotifications")
+  notificationsReceived Notification[]     @relation("ReceivedNotifications")
+  messagesSent          Message[]          @relation("SentMessages")
+  messagesReceived      Message[]          @relation("ReceivedMessages")
+  auditLogs             AuditLog[]
+  fileUploads           FileUpload[]
+  newsArticles          NewsArticle[]
+
+  // Pathway Relations
+  fullTimeEnrollments FullTimeEnrollment[]
+  modularEnrollments  ModularEnrollment[]
+  tuitionBookings     TuitionBooking[]
+  createdTuitionRuns  TuitionRun[]         @relation("CreatedTuitionRuns")
+
   @@index([email])
   @@index([academyEmail])
   @@index([registrationCode])
@@ -171,65 +194,72 @@ model User {
 }
 
 model Profile {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Personal Info
-  firstName       String
-  middleName      String?
-  lastName        String
-  dateOfBirth     DateTime?
-  gender          String?
-  nationality     String?
-  
+  firstName   String
+  middleName  String?
+  lastName    String
+  dateOfBirth DateTime?
+  gender      String?
+  nationality String?
+
   // Contact
-  phone           String?
-  alternatePhone  String?
-  address         String?
-  city            String?
-  state           String?
-  country         String?
-  postalCode      String?
-  
+  phone          String?
+  alternatePhone String?
+  address        String?
+  city           String?
+  state          String?
+  country        String?
+  postalCode     String?
+
   // Emergency Contact
-  emergencyContactName  String?
-  emergencyContactPhone String?
+  emergencyContactName     String?
+  emergencyContactPhone    String?
   emergencyContactRelation String?
-  
+
   // Documents
   profilePhotoUrl String?
   idDocumentUrl   String?
-  
+
   // Metadata
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@map("profiles")
 }
 
 model StudentProfile {
-  id              String             @id @default(cuid())
-  userId          String             @unique
-  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  studentId       String             @unique  // AJA-2026-0001
-  enrollmentType  EnrollmentType
-  enrollmentStatus EnrollmentStatus  @default(ENROLLED)
-  enrollmentDate  DateTime           @default(now())
-  graduationDate  DateTime?
-  
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  studentId        String           @unique // AJA-2026-0001
+  enrollmentType   EnrollmentType?
+  enrollmentStatus EnrollmentStatus @default(ENROLLED)
+  enrollmentDate   DateTime         @default(now())
+  graduationDate   DateTime?
+
+  // Pathway
+  studyPathway              StudyPathway?
+  studyPathwayLockedAt      DateTime?
+  studyPathwayLocked        Boolean       @default(false)
+  studyPathwayLastChangedBy String?
+  studyPathwayChangeReason  String?       @db.Text
+
   // Academic
-  CGPA            Decimal?           @db.Decimal(3, 2)
-  
+  CGPA Decimal? @db.Decimal(3, 2)
+
   // Preferences
-  preferredModules String[]          // Array of module codes
-  
+  preferredModules String[] // Array of module codes
+
   // Metadata
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([studentId])
   @@index([enrollmentType])
   @@index([enrollmentStatus])
@@ -237,47 +267,47 @@ model StudentProfile {
 }
 
 model InstructorProfile {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  employeeId      String    @unique
-  department      String?
-  specialization  String?
-  qualifications  String?
-  hireDate        DateTime?
-  
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  employeeId     String    @unique
+  department     String?
+  specialization String?
+  qualifications String?
+  hireDate       DateTime?
+
   // Teaching
-  modulesQualified String[]  // Array of module codes
-  
+  modulesQualified String[] // Array of module codes
+
   // Relationships
   classesInstructed Class[]
-  
+
   // Metadata
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([employeeId])
   @@map("instructor_profiles")
 }
 
 model StaffProfile {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  employeeId      String    @unique
-  department      String?
-  position        String?
-  hireDate        DateTime?
-  
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  employeeId String    @unique
+  department String?
+  position   String?
+  hireDate   DateTime?
+
   // Permissions (JSON for flexibility)
-  permissions     Json?     // {canApprovePayments: true, canManageUsers: true, ...}
-  
+  permissions Json? // {canApprovePayments: true, canManageUsers: true, ...}
+
   // Metadata
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([employeeId])
   @@map("staff_profiles")
 }
@@ -287,35 +317,35 @@ model StaffProfile {
 // ============================================================================
 
 model Course {
-  id              String        @id @default(cuid())
-  code            String        @unique  // M1, M2, etc.
-  name            String
-  description     String?       @db.Text
-  category        String?       // CORE, SPECIALIST, AVIONICS
-  
+  id          String  @id @default(cuid())
+  code        String  @unique // M1, M2, etc.
+  name        String
+  description String? @db.Text
+  category    String? // CORE, SPECIALIST, AVIONICS
+
   // Details
-  duration        Int?          // Hours
-  price           Decimal       @db.Decimal(10, 2)
-  currency        String        @default("EUR")
-  
+  duration Int? // Hours
+  price    Decimal @db.Decimal(10, 2)
+  currency String  @default("EUR")
+
   // Flags
-  isActive        Boolean       @default(true)
+  isActive             Boolean  @default(true)
   requiresPrerequisite Boolean  @default(false)
-  prerequisites   String[]      // Array of course codes
-  
+  prerequisites        String[] // Array of course codes
+
   // Content
-  syllabusUrl     String?
-  materialsUrl    String?
-  
+  syllabusUrl  String?
+  materialsUrl String?
+
   // Relationships
-  enrollments     Enrollment[]
-  classes         Class[]
-  exams           Exam[]
-  
+  enrollments Enrollment[]
+  classes     Class[]
+  exams       Exam[]
+
   // Metadata
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([code])
   @@index([category])
   @@index([isActive])
@@ -323,31 +353,31 @@ model Course {
 }
 
 model Enrollment {
-  id              String        @id @default(cuid())
-  userId          String
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  courseId        String
-  course          Course        @relation(fields: [courseId], references: [id])
-  
+  id       String @id @default(cuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+
   // Status
-  status          String        @default("PENDING")  // PENDING, APPROVED, ACTIVE, COMPLETED, WITHDRAWN
-  
+  status String @default("PENDING") // PENDING, APPROVED, ACTIVE, COMPLETED, WITHDRAWN
+
   // Dates
-  enrolledAt      DateTime      @default(now())
-  approvedAt      DateTime?
-  completedAt     DateTime?
-  
+  enrolledAt  DateTime  @default(now())
+  approvedAt  DateTime?
+  completedAt DateTime?
+
   // Payment
-  amountPaid      Decimal?      @db.Decimal(10, 2)
+  amountPaid      Decimal? @db.Decimal(10, 2)
   paymentProofUrl String?
-  
+
   // Relationships
-  grades          Grade[]
-  
+  grades Grade[]
+
   // Metadata
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
@@ -356,34 +386,37 @@ model Enrollment {
 }
 
 model Class {
-  id              String        @id @default(cuid())
-  courseId        String
-  course          Course        @relation(fields: [courseId], references: [id])
-  instructorId    String?
-  instructor      InstructorProfile? @relation(fields: [instructorId], references: [id])
-  
+  id           String             @id @default(cuid())
+  courseId     String
+  course       Course             @relation(fields: [courseId], references: [id])
+  instructorId String?
+  instructor   InstructorProfile? @relation(fields: [instructorId], references: [id])
+
   // Details
-  name            String
-  description     String?       @db.Text
-  semester        String?
-  academicYear    String?
-  
+  name        String
+  description String? @db.Text
+
+  academicYearId String?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id])
+  semesterId     String?
+  semester       Semester?     @relation(fields: [semesterId], references: [id])
+
   // Schedule
-  startDate       DateTime
-  endDate         DateTime
-  schedule        Json?         // {days: ["MON", "WED"], time: "14:00-17:00"}
-  
+  startDate DateTime
+  endDate   DateTime
+  schedule  Json? // {days: ["MON", "WED"], time: "14:00-17:00"}
+
   // Capacity
-  maxStudents     Int           @default(28)
-  currentStudents Int           @default(0)
-  
+  maxStudents     Int @default(28)
+  currentStudents Int @default(0)
+
   // Relationships
   attendanceRecords AttendanceRecord[]
-  
+
   // Metadata
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([courseId])
   @@index([instructorId])
   @@index([startDate, endDate])
@@ -391,23 +424,23 @@ model Class {
 }
 
 model AttendanceRecord {
-  id              String    @id @default(cuid())
-  classId         String
-  class           Class     @relation(fields: [classId], references: [id], onDelete: Cascade)
-  userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id      String @id @default(cuid())
+  classId String
+  class   Class  @relation(fields: [classId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Attendance
-  date            DateTime
-  status          String    // PRESENT, ABSENT, LATE, EXCUSED
-  minutesLate     Int?      // If status = LATE
-  notes           String?
-  
+  date        DateTime
+  status      String // PRESENT, ABSENT, LATE, EXCUSED
+  minutesLate Int? // If status = LATE
+  notes       String?
+
   // Metadata
-  recordedBy      String?   // Staff/Instructor ID
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  recordedBy String? // Staff/Instructor ID
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   @@unique([classId, userId, date])
   @@index([classId])
   @@index([userId])
@@ -416,29 +449,29 @@ model AttendanceRecord {
 }
 
 model Grade {
-  id              String        @id @default(cuid())
-  userId          String
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  enrollmentId    String
-  enrollment      Enrollment    @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-  
+  id           String     @id @default(cuid())
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  enrollmentId String
+  enrollment   Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
   // Assessment
-  assessmentType  String        // EXAM, ASSIGNMENT, QUIZ, PROJECT
-  assessmentName  String
-  score           Decimal       @db.Decimal(5, 2)
-  maxScore        Decimal       @db.Decimal(5, 2)
-  percentage      Decimal       @db.Decimal(5, 2)
-  grade           String?       // A, B, C, F
-  
+  assessmentType String // EXAM, ASSIGNMENT, QUIZ, PROJECT
+  assessmentName String
+  score          Decimal @db.Decimal(5, 2)
+  maxScore       Decimal @db.Decimal(5, 2)
+  percentage     Decimal @db.Decimal(5, 2)
+  grade          String? // A, B, C, F
+
   // Dates
-  assessmentDate  DateTime
-  
+  assessmentDate DateTime
+
   // Metadata
-  gradedBy        String?       // Instructor ID
-  comments        String?       @db.Text
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
+  gradedBy  String? // Instructor ID
+  comments  String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([enrollmentId])
   @@index([assessmentDate])
@@ -450,34 +483,34 @@ model Grade {
 // ============================================================================
 
 model ExamEvent {
-  id              String        @id @default(cuid())
-  
-  // Basic Info
-  name            String        // "Jun 2026 Exam Event"
+  id String @id @default(cuid())
 
-  startDate       DateTime
-  endDate         DateTime
-  location        String?       // "Main Hall", "Room 404"
-  
+  // Basic Info
+  name String // "Jun 2026 Exam Event"
+
+  startDate DateTime
+  endDate   DateTime
+  location  String? // "Main Hall", "Room 404"
+
   // Deadlines
-  joinDeadline    DateTime?     // Typically T-45
-  paymentDeadline DateTime      // T-21 (Go/No-Go decision)
-  
+  joinDeadline    DateTime? // Typically T-45
+  paymentDeadline DateTime // T-21 (Go/No-Go decision)
+
   // Business Rules
-  minRevenueTarget Decimal      @default(25000.00) @db.Decimal(10, 2)
-  
+  minRevenueTarget Decimal @default(25000.00) @db.Decimal(10, 2)
+
   // Status
-  status          EventStatus   @default(DRAFT)
-  
+  status EventStatus @default(DRAFT)
+
   // Relationships
-  pools           ExamPool[]
-  examBookings    ExamBooking[]
-  
+  pools        ExamPool[]
+  examBookings ExamBooking[]
+
   // Audit
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  createdBy       String?       // Admin user ID
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String? // Admin user ID
+
   @@index([status])
   @@index([startDate, endDate])
   @@index([paymentDeadline])
@@ -485,46 +518,46 @@ model ExamEvent {
 }
 
 model ExamPool {
-  id                  String      @id @default(cuid())
-  eventId             String
-  event               ExamEvent   @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  
+  id      String    @id @default(cuid())
+  eventId String
+  event   ExamEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
   // Basic Info
-  name                String      // "Pool A", "Monday Morning"
-  
+  name String // "Pool A", "Monday Morning"
+
   // Schedule
-  examDate            DateTime
-  examStartTime       DateTime
-  examEndTime         DateTime
-  
+  examDate      DateTime
+  examStartTime DateTime
+  examEndTime   DateTime
+
   // Capacity Rules
-  minCandidates       Int         @default(25)
-  maxCandidates       Int         @default(28)
-  moduleDiversityCap  Int         @default(4)  // Max 4 different modules
-  currentMemberCount  Int         @default(0)
-  
+  minCandidates      Int @default(25)
+  maxCandidates      Int @default(28)
+  moduleDiversityCap Int @default(4) // Max 4 different modules
+  currentMemberCount Int @default(0)
+
   // Status
-  status              PoolStatus  @default(DRAFT)
-  
+  status PoolStatus @default(DRAFT)
+
   // Pre-seeding (optional)
-  preSeedModules      String[]    // ["M1", "M7", "M8", "M15"]
-  allowedModules      String[]    // Modules allowed in this pool
-  
+  preSeedModules String[] // ["M1", "M7", "M8", "M15"]
+  allowedModules String[] // Modules allowed in this pool
+
   // Pricing
-  seatPrice           Decimal     @default(300.00) @db.Decimal(10, 2)
-  
+  seatPrice Decimal @default(300.00) @db.Decimal(10, 2)
+
   // Metadata
-  notes               String?     @db.Text
-  
+  notes String? @db.Text
+
   // Relationships
-  memberships         PoolMembership[]
-  
+  memberships PoolMembership[]
+
   // Audit
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
-  confirmedAt         DateTime?
-  createdBy           String?     // Admin user ID
-  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime?
+  createdBy   String? // Admin user ID
+
   @@index([eventId])
   @@index([status])
   @@index([examDate, examStartTime])
@@ -533,35 +566,35 @@ model ExamPool {
 }
 
 model PoolMembership {
-  id                String           @id @default(cuid())
-  poolId            String
-  pool              ExamPool         @relation(fields: [poolId], references: [id], onDelete: Cascade)
-  userId            String
-  user              User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id     String   @id @default(cuid())
+  poolId String
+  pool   ExamPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Module Selection
-  selectedModule    String           // ONE module per membership: "M1", "M7", etc.
-  
+  selectedModule String // ONE module per membership: "M1", "M7", etc.
+
   // Status
-  status            MembershipStatus @default(RESERVED)
-  
+  status MembershipStatus @default(RESERVED)
+
   // Pricing
-  amountReserved    Decimal          @db.Decimal(10, 2)  // Held in wallet
-  amountPaid        Decimal?         @db.Decimal(10, 2)  // Captured amount
-  discountType      String?          // MULTI_POOL, AMBASSADOR, or null
-  
+  amountReserved Decimal  @db.Decimal(10, 2) // Held in wallet
+  amountPaid     Decimal? @db.Decimal(10, 2) // Captured amount
+  discountType   String? // MULTI_POOL, AMBASSADOR, or null
+
   // Referral
-  referralCode      String?          // If joined via Ambassador link
-  
+  referralCode String? // If joined via Ambassador link
+
   // Timestamps
-  createdAt         DateTime         @default(now())
-  updatedAt         DateTime         @updatedAt
-  confirmedAt       DateTime?        // When pool confirmed
-  paidAt            DateTime?
-  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  confirmedAt DateTime? // When pool confirmed
+  paidAt      DateTime?
+
   // Payment Reference
-  paymentReference  String?
-  
+  paymentReference String?
+
   @@unique([poolId, userId])
   @@index([poolId])
   @@index([userId])
@@ -576,61 +609,67 @@ model PoolMembership {
 // ============================================================================
 
 model Wallet {
-  id               String              @id @default(cuid())
-  userId           String              @unique
-  user             User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Balance Components
-  balance          Decimal             @default(0) @db.Decimal(10, 2)  // Total balance
-  reservedBalance  Decimal             @default(0) @db.Decimal(10, 2)  // Held for pools
-  availableBalance Decimal             @default(0) @db.Decimal(10, 2)  // Computed: balance - reserved
-  
+  balance          Decimal @default(0) @db.Decimal(10, 2) // Total balance
+  reservedBalance  Decimal @default(0) @db.Decimal(10, 2) // Held for pools
+  availableBalance Decimal @default(0) @db.Decimal(10, 2) // Computed: balance - reserved
+
   // Currency
-  currency         String              @default("EUR")
-  
+  currency String @default("EUR")
+
   // Relationships
-  transactions     WalletTransaction[]
-  
+  transactions WalletTransaction[]
+
   // Timestamps
-  createdAt        DateTime            @default(now())
-  updatedAt        DateTime            @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([availableBalance])
   @@map("wallets")
 }
 
 model WalletTransaction {
-  id              String          @id @default(cuid())
-  walletId        String
-  wallet          Wallet          @relation(fields: [walletId], references: [id], onDelete: Cascade)
-  
+  id       String @id @default(cuid())
+  walletId String
+  wallet   Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
   // Transaction Type
-  type            TransactionType
-  
+  type TransactionType
+
   // Amount
-  amount          Decimal         @db.Decimal(10, 2)
-  
+  amount Decimal @db.Decimal(10, 2)
+
   // Balance Snapshots (audit trail)
-  balanceBefore   Decimal?        @db.Decimal(10, 2)
-  balanceAfter    Decimal?        @db.Decimal(10, 2)
-  reservedBefore  Decimal?        @db.Decimal(10, 2)
-  reservedAfter   Decimal?        @db.Decimal(10, 2)
-  availableBefore Decimal?        @db.Decimal(10, 2)
-  availableAfter  Decimal?        @db.Decimal(10, 2)
-  
+  balanceBefore   Decimal? @db.Decimal(10, 2)
+  balanceAfter    Decimal? @db.Decimal(10, 2)
+  reservedBefore  Decimal? @db.Decimal(10, 2)
+  reservedAfter   Decimal? @db.Decimal(10, 2)
+  availableBefore Decimal? @db.Decimal(10, 2)
+  availableAfter  Decimal? @db.Decimal(10, 2)
+
   // Reference (what this relates to)
-  referenceType   String?         // pool_membership, booking, payment, manual
-  referenceId     String?
-  
+  referenceType String? // pool_membership, booking, payment, manual
+  referenceId   String?
+
+  // Back relations for direct lookups
+  paymentMilestones  PaymentMilestone[]
+  examBookings       ExamBooking[]
+  modularEnrollments ModularEnrollment[]
+  tuitionBookings    TuitionBooking[]
+
   // Description
-  description     String?         @db.Text
-  metadata        Json?           // Additional data
-  
+  description String? @db.Text
+  metadata    Json? // Additional data
+
   // Audit
-  createdAt       DateTime        @default(now())
-  createdBy       String?         // system, admin:user_id, payment_gateway
-  
+  createdAt DateTime @default(now())
+  createdBy String? // system, admin:user_id, payment_gateway
+
   @@index([walletId])
   @@index([type])
   @@index([createdAt(sort: Desc)])
@@ -644,57 +683,59 @@ model WalletTransaction {
 // ============================================================================
 
 model Exam {
-  id              String        @id @default(cuid())
-  courseId        String
-  course          Course        @relation(fields: [courseId], references: [id])
-  
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
+
   // Details
-  name            String
-  description     String?       @db.Text
-  examDate        DateTime
-  duration        Int           // Minutes
-  passingScore    Decimal       @db.Decimal(5, 2)
-  
+  name         String
+  description  String?  @db.Text
+  examDate     DateTime
+  duration     Int // Minutes
+  passingScore Decimal  @db.Decimal(5, 2)
+
   // Relationships
-  bookings        ExamBooking[]
-  results         ExamResult[]
-  
+  bookings ExamBooking[]
+  results  ExamResult[]
+
   // Metadata
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([courseId])
   @@index([examDate])
   @@map("exams")
 }
 
 model ExamBooking {
-  id              String        @id @default(cuid())
-  userId          String
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  examId          String?
-  exam            Exam?         @relation(fields: [examId], references: [id])
-  eventId         String?
-  event           ExamEvent?    @relation(fields: [eventId], references: [id])
-  
+  id      String     @id @default(cuid())
+  userId  String
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  examId  String?
+  exam    Exam?      @relation(fields: [examId], references: [id])
+  eventId String?
+  event   ExamEvent? @relation(fields: [eventId], references: [id])
+
   // Booking Type
-  bookingType     String        // INDIVIDUAL, BUNDLE_2, BUNDLE_4, GROUP_CHARTER, RESIT
-  
+  bookingType String // INDIVIDUAL, BUNDLE_2, BUNDLE_4, GROUP_CHARTER, RESIT
+
   // Module
-  moduleCode      String
-  
+  moduleCode String
+
   // Payment
-  amountPaid      Decimal       @db.Decimal(10, 2)
-  status          PaymentStatus @default(PENDING)
-  
+  amountPaid        Decimal            @db.Decimal(10, 2)
+  status            PaymentStatus      @default(PENDING)
+  walletTxnId       String?
+  walletTransaction WalletTransaction? @relation(fields: [walletTxnId], references: [id])
+
   // Dates
-  bookedAt        DateTime      @default(now())
-  examDate        DateTime?
-  
+  bookedAt DateTime  @default(now())
+  examDate DateTime?
+
   // Metadata
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([examId])
   @@index([eventId])
@@ -703,27 +744,27 @@ model ExamBooking {
 }
 
 model ExamResult {
-  id              String    @id @default(cuid())
-  examId          String
-  exam            Exam      @relation(fields: [examId], references: [id], onDelete: Cascade)
-  userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  examId String
+  exam   Exam   @relation(fields: [examId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Results
-  score           Decimal   @db.Decimal(5, 2)
-  maxScore        Decimal   @db.Decimal(5, 2)
-  percentage      Decimal   @db.Decimal(5, 2)
-  passed          Boolean
-  grade           String?   // A, B, C, F
-  
+  score      Decimal @db.Decimal(5, 2)
+  maxScore   Decimal @db.Decimal(5, 2)
+  percentage Decimal @db.Decimal(5, 2)
+  passed     Boolean
+  grade      String? // A, B, C, F
+
   // Certificate
-  certificateUrl  String?
+  certificateUrl    String?
   certificateIssued DateTime?
-  
+
   // Metadata
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([examId])
   @@index([userId])
   @@map("exam_results")
@@ -734,39 +775,39 @@ model ExamResult {
 // ============================================================================
 
 model Payment {
-  id              String        @id @default(cuid())
-  userId          String
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Payment Details
-  amount          Decimal       @db.Decimal(10, 2)
-  currency        String        @default("EUR")
-  paymentMethod   String        // BANK_TRANSFER, MOBILE_MONEY, CARD
-  
+  amount        Decimal @db.Decimal(10, 2)
+  currency      String  @default("EUR")
+  paymentMethod String // BANK_TRANSFER, MOBILE_MONEY, CARD
+
   // Status
-  status          PaymentStatus @default(PENDING)
-  
+  status PaymentStatus @default(PENDING)
+
   // Proof
   proofUrl        String?
   proofUploadedAt DateTime?
-  
+
   // Reference
-  referenceCode   String?       @unique
-  referenceType   String?       // REGISTRATION, COURSE, WALLET_TOPUP, EXAM
-  referenceId     String?
-  
+  referenceCode String? @unique
+  referenceType String? // REGISTRATION, COURSE, WALLET_TOPUP, EXAM
+  referenceId   String?
+
   // Approval
   approvedAt      DateTime?
-  approvedBy      String?       // Staff ID
+  approvedBy      String? // Staff ID
   rejectedAt      DateTime?
-  rejectedBy      String?       // Staff ID
-  rejectionReason String?       @db.Text
-  
+  rejectedBy      String? // Staff ID
+  rejectionReason String?   @db.Text
+
   // Metadata
-  notes           String?       @db.Text
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([status])
   @@index([approvedAt])
@@ -776,33 +817,33 @@ model Payment {
 }
 
 model Invoice {
-  id              String    @id @default(cuid())
-  userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // Invoice Details
-  invoiceNumber   String    @unique
-  amount          Decimal   @db.Decimal(10, 2)
-  currency        String    @default("EUR")
-  
+  invoiceNumber String  @unique
+  amount        Decimal @db.Decimal(10, 2)
+  currency      String  @default("EUR")
+
   // Items
-  items           Json      // [{name, quantity, price}, ...]
-  
+  items Json // [{name, quantity, price}, ...]
+
   // Status
-  status          String    @default("UNPAID")  // UNPAID, PAID, CANCELLED
-  
+  status String @default("UNPAID") // UNPAID, PAID, CANCELLED
+
   // Dates
-  issuedAt        DateTime  @default(now())
-  dueDate         DateTime?
-  paidAt          DateTime?
-  
+  issuedAt DateTime  @default(now())
+  dueDate  DateTime?
+  paidAt   DateTime?
+
   // PDF
-  pdfUrl          String?
-  
+  pdfUrl String?
+
   // Metadata
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([invoiceNumber])
   @@index([status])
@@ -814,32 +855,32 @@ model Invoice {
 // ============================================================================
 
 model Notification {
-  id              String            @id @default(cuid())
-  userId          String
-  user            User              @relation("ReceivedNotifications", fields: [userId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation("ReceivedNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
   // Content
-  title           String
-  message         String            @db.Text
-  type            NotificationType  @default(INFO)
-  
+  title   String
+  message String           @db.Text
+  type    NotificationType @default(INFO)
+
   // Status
-  isRead          Boolean           @default(false)
-  readAt          DateTime?
-  
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
   // Link
-  linkUrl         String?
-  linkText        String?
-  
+  linkUrl  String?
+  linkText String?
+
   // Sender
-  sentBy          String?
-  sender          User?             @relation("SentNotifications", fields: [sentBy], references: [id])
-  
+  sentBy String?
+  sender User?   @relation("SentNotifications", fields: [sentBy], references: [id])
+
   // Metadata
-  metadata        Json?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([userId])
   @@index([isRead])
   @@index([type])
@@ -848,31 +889,31 @@ model Notification {
 }
 
 model Message {
-  id              String    @id @default(cuid())
-  senderId        String
-  sender          User      @relation("SentMessages", fields: [senderId], references: [id])
-  recipientId     String
-  recipient       User      @relation("ReceivedMessages", fields: [recipientId], references: [id])
-  
+  id          String @id @default(cuid())
+  senderId    String
+  sender      User   @relation("SentMessages", fields: [senderId], references: [id])
+  recipientId String
+  recipient   User   @relation("ReceivedMessages", fields: [recipientId], references: [id])
+
   // Content
-  subject         String?
-  body            String    @db.Text
-  
+  subject String?
+  body    String  @db.Text
+
   // Status
-  isRead          Boolean   @default(false)
-  readAt          DateTime?
-  
+  isRead Boolean   @default(false)
+  readAt DateTime?
+
   // Thread
-  threadId        String?
-  replyToId       String?
-  
+  threadId  String?
+  replyToId String?
+
   // Attachments
-  attachments     Json?     // [{name, url}, ...]
-  
+  attachments Json? // [{name, url}, ...]
+
   // Metadata
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([senderId])
   @@index([recipientId])
   @@index([isRead])
@@ -886,26 +927,26 @@ model Message {
 // ============================================================================
 
 model AuditLog {
-  id              String    @id @default(cuid())
-  userId          String?
-  user            User?     @relation(fields: [userId], references: [id])
-  
+  id     String  @id @default(cuid())
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id])
+
   // Action
-  action          String    // USER_CREATED, PAYMENT_APPROVED, POOL_CONFIRMED, etc.
-  entity          String?   // users, payments, pools, etc.
-  entityId        String?
-  
+  action   String // USER_CREATED, PAYMENT_APPROVED, POOL_CONFIRMED, etc.
+  entity   String? // users, payments, pools, etc.
+  entityId String?
+
   // Details
-  description     String?   @db.Text
-  changes         Json?     // {before: {...}, after: {...}}
-  
+  description String? @db.Text
+  changes     Json? // {before: {...}, after: {...}}
+
   // Context
-  ipAddress       String?
-  userAgent       String?
-  
+  ipAddress String?
+  userAgent String?
+
   // Metadata
-  createdAt       DateTime  @default(now())
-  
+  createdAt DateTime @default(now())
+
   @@index([userId])
   @@index([action])
   @@index([entity, entityId])
@@ -914,43 +955,43 @@ model AuditLog {
 }
 
 model SystemSetting {
-  id              String    @id @default(cuid())
-  key             String    @unique
-  value           String    @db.Text
-  type            String    // STRING, NUMBER, BOOLEAN, JSON
-  description     String?   @db.Text
-  
+  id          String  @id @default(cuid())
+  key         String  @unique
+  value       String  @db.Text
+  type        String // STRING, NUMBER, BOOLEAN, JSON
+  description String? @db.Text
+
   // Metadata
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  updatedBy       String?   // Admin user ID
-  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String? // Admin user ID
+
   @@index([key])
   @@map("system_settings")
 }
 
 model FileUpload {
-  id              String    @id @default(cuid())
-  userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   // File Details
-  filename        String
-  originalName    String
-  mimeType        String
-  size            Int       // Bytes
-  url             String
-  
+  filename     String
+  originalName String
+  mimeType     String
+  size         Int // Bytes
+  url          String
+
   // Type
-  fileType        String    // PAYMENT_PROOF, PROFILE_PHOTO, ID_DOCUMENT, etc.
-  
+  fileType String // PAYMENT_PROOF, PROFILE_PHOTO, ID_DOCUMENT, etc.
+
   // Reference
-  referenceType   String?
-  referenceId     String?
-  
+  referenceType String?
+  referenceId   String?
+
   // Metadata
-  createdAt       DateTime  @default(now())
-  
+  createdAt DateTime @default(now())
+
   @@index([userId])
   @@index([fileType])
   @@index([referenceType, referenceId])
@@ -968,27 +1009,27 @@ enum NewsArticleStatus {
 }
 
 model NewsArticle {
-  id          String            @id @default(cuid())
-  title       String
-  slug        String            @unique
-  excerpt     String?           @db.Text
-  content     String            @db.Text
-  coverImage  String?
-  status      NewsArticleStatus @default(DRAFT)
-  
-  authorId    String
-  author      User              @relation(fields: [authorId], references: [id])
-  
+  id         String            @id @default(cuid())
+  title      String
+  slug       String            @unique
+  excerpt    String?           @db.Text
+  content    String            @db.Text
+  coverImage String?
+  status     NewsArticleStatus @default(DRAFT)
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
   // Custom Metadata
   customAuthorName String?
-  viewCount        Int               @default(0)
-  
-  tags        String[]          @default([])
-  
-  publishedAt DateTime?
+  viewCount        Int     @default(0)
+
+  tags String[] @default([])
+
+  publishedAt       DateTime?
   customPublishedAt DateTime?
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   @@index([slug])
   @@index([status])
@@ -997,24 +1038,225 @@ model NewsArticle {
 }
 
 model GeneralResource {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   name        String
-  description String?  @db.Text
+  description String? @db.Text
   url         String
-  type        String   // PDF, DOCX, ZIP, LINK, etc.
-  category    String   // ACADEMIC, ADMINISTRATIVE, EXAMINATION, INSTITUTIONAL
-  
+  type        String // PDF, DOCX, ZIP, LINK, etc.
+  category    String // ACADEMIC, ADMINISTRATIVE, EXAMINATION, INSTITUTIONAL
+
   // Visibility
   showToInstructors Boolean @default(true)
   showToStaff       Boolean @default(true)
   showToStudents    Boolean @default(false)
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([category])
   @@index([showToInstructors])
   @@index([showToStaff])
   @@index([showToStudents])
   @@map("general_resources")
+}
+
+// ============================================================================
+// ACADEMIC CALENDAR & STUDY PATHWAYS
+// ============================================================================
+
+model AcademicYear {
+  id        String   @id @default(cuid())
+  name      String   @unique // e.g., "2026/2027"
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+
+  semesters Semester[]
+  classes   Class[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("academic_years")
+}
+
+model Semester {
+  id             String       @id @default(cuid())
+  name           String // e.g., "Semester 1", "Semester 2"
+  academicYearId String
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  startDate      DateTime
+  endDate        DateTime
+  isActive       Boolean      @default(true)
+
+  classes Class[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([academicYearId])
+  @@map("semesters")
+}
+
+model FullTimeProgramme {
+  id            String  @id @default(cuid())
+  name          String
+  durationYears Int
+  yearFeeAmount Decimal @db.Decimal(10, 2)
+  description   String? @db.Text
+  isActive      Boolean @default(true)
+
+  programmeYears ProgrammeYear[]
+  enrollments    FullTimeEnrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("full_time_programmes")
+}
+
+model ProgrammeYear {
+  id            String            @id @default(cuid())
+  programmeId   String
+  programme     FullTimeProgramme @relation(fields: [programmeId], references: [id], onDelete: Cascade)
+  yearNumber    Int // 1, 2, 3, 4
+  yearFeeAmount Decimal?          @db.Decimal(10, 2)
+
+  semester1StartDate DateTime
+  semester2StartDate DateTime
+
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  @@unique([programmeId, yearNumber])
+  @@map("programme_years")
+}
+
+model FullTimeEnrollment {
+  id          String            @id @default(cuid())
+  studentId   String
+  student     User              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  programmeId String
+  programme   FullTimeProgramme @relation(fields: [programmeId], references: [id])
+
+  status            String @default("PENDING_CONFIRMATION")
+  currentYearNumber Int    @default(1)
+
+  milestones PaymentMilestone[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([studentId, programmeId])
+  @@map("full_time_enrollments")
+}
+
+model PaymentMilestone {
+  id           String             @id @default(cuid())
+  enrollmentId String
+  enrollment   FullTimeEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+  yearNumber   Int
+
+  milestoneType    String // SEAT_CONFIRMATION, SEM1_DUE, SEM2_DUE, FULL_YEAR, FULL_COURSE
+  dueDate          DateTime
+  percentOfYearFee Decimal  @db.Decimal(5, 2)
+  amountDue        Decimal  @db.Decimal(10, 2)
+
+  status String    @default("DUE") // DUE, PAID, OVERDUE, WAIVED
+  paidAt DateTime?
+
+  walletTxnId       String?
+  walletTransaction WalletTransaction? @relation(fields: [walletTxnId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([enrollmentId])
+  @@map("payment_milestones")
+}
+
+model ModularPackage {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?  @db.Text
+  price           Decimal  @db.Decimal(10, 2)
+  modulesIncluded String[] // Array of module codes
+  durationMonths  Int?
+  isActive        Boolean  @default(true)
+
+  enrollments ModularEnrollment[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("modular_packages")
+}
+
+model ModularEnrollment {
+  id        String         @id @default(cuid())
+  studentId String
+  student   User           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  packageId String
+  package   ModularPackage @relation(fields: [packageId], references: [id])
+
+  status     String  @default("DRAFT") // DRAFT, CONFIRMED, ACTIVE, COMPLETED, CANCELLED
+  amountPaid Decimal @db.Decimal(10, 2)
+
+  walletTxnId       String?
+  walletTransaction WalletTransaction? @relation(fields: [walletTxnId], references: [id])
+
+  validFrom  DateTime?
+  validUntil DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([studentId])
+  @@map("modular_enrollments")
+}
+
+model TuitionRun {
+  id          String  @id @default(cuid())
+  title       String
+  moduleTag   String?
+  description String? @db.Text
+
+  startDatetime DateTime
+  endDatetime   DateTime
+
+  capacity           Int
+  minClassSize       Int @default(5)
+  currentEnrollments Int @default(0)
+
+  price  Decimal @db.Decimal(10, 2)
+  status String  @default("SCHEDULED") // SCHEDULED, OPEN, FULL, CANCELLED, COMPLETED
+
+  createdById String?
+  creator     User?   @relation("CreatedTuitionRuns", fields: [createdById], references: [id])
+
+  bookings TuitionBooking[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("tuition_runs")
+}
+
+model TuitionBooking {
+  id           String     @id @default(cuid())
+  tuitionRunId String
+  tuitionRun   TuitionRun @relation(fields: [tuitionRunId], references: [id])
+  studentId    String
+  student      User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  status     String  @default("DRAFT") // DRAFT, CONFIRMED, CANCELLED, ATTENDED, NO_SHOW
+  amountPaid Decimal @db.Decimal(10, 2)
+
+  walletTxnId       String?
+  walletTransaction WalletTransaction? @relation(fields: [walletTxnId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tuitionRunId, studentId])
+  @@map("tuition_bookings")
 }

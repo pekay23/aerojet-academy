@@ -1,71 +1,72 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
 import prisma from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { createAuditLog } from '@/lib/audit/logger'
 
-export const POST = withErrorHandler(async (req: NextRequest) => {
-  const session = await getAuthSession()
-  if (!session || session.user.role !== 'STUDENT') {
-    return apiError('Unauthorized', 401)
-  }
+export async function POST(req: NextRequest) {
+  try {
+    const session = await getAuthSession()
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
 
-  const body = await req.json()
-  const { amount: amountStr, studentId, proofUrl, filename, fileType, fileSize } = body
+    const userId = session.user.id
+    const { amount, studentId, proofUrl, filename, fileType, fileSize } = await req.json()
 
-  if (!amountStr || !studentId || !proofUrl) {
-    return apiError('Missing required fields')
-  }
+    if (!amount || !proofUrl) {
+      return NextResponse.json({ error: 'Amount and payment proof are required.' }, { status: 400 })
+    }
 
-  const amount = Number(amountStr)
+    const parsedAmount = parseFloat(amount)
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      return NextResponse.json({ error: 'Invalid amount provided.' }, { status: 400 })
+    }
 
-  // Get student's wallet
-  const wallet = await prisma.wallet.findUnique({
-    where: { userId: session.user.id },
-  })
+    // Generate a unique reference code
+    const referenceCode = `W-TOPUP-${Date.now()}-${Math.floor(Math.random() * 1000)}`
 
-  if (!wallet) {
-    return apiError('Wallet not found')
-  }
-
-  // Generate unique reference code
-  const timestamp = Date.now().toString().slice(-6)
-  const random = Math.floor(Math.random() * 1000)
-    .toString()
-    .padStart(3, '0')
-  const referenceCode = `PAY-${studentId}-${timestamp}-${random}`
-
-  await prisma.$transaction(async (tx) => {
-    // 1. Create Payment record
-    const payment = await tx.payment.create({
+    const payment = await prisma.payment.create({
       data: {
-        userId: session.user.id,
-        amount,
-        currency: 'GHS', // Hardcoded as per top-up page info
-        status: 'PENDING',
+        userId,
+        amount: parsedAmount,
+        currency: 'GHS',
         paymentMethod: 'BANK_TRANSFER',
-        referenceCode,
+        status: 'PENDING',
         proofUrl,
+        proofUploadedAt: new Date(),
+        referenceCode,
         referenceType: 'WALLET_TOPUP',
+        referenceId: studentId,
+        notes: `Student uploaded proof for Wallet Top-up. File: ${filename || 'Unknown'}`,
       },
     })
 
-    // 2. Create FileUpload record for tracking
-    await tx.fileUpload.create({
-      data: {
-        userId: session.user.id,
-        filename: filename || `proof-${referenceCode}`,
-        originalName: filename || 'Payment Proof',
-        mimeType: fileType || 'application/octet-stream',
-        size: fileSize || 0,
-        url: proofUrl,
-        fileType: 'PAYMENT_PROOF',
-        referenceType: 'PAYMENT',
-        referenceId: payment.id,
-      },
-    })
-  })
+    // Optionally record FileUpload if needed for the system
+    if (filename && proofUrl) {
+      await prisma.fileUpload.create({
+        data: {
+          userId,
+          url: proofUrl,
+          filename: filename || 'unknown',
+          originalName: filename || 'unknown',
+          size: fileSize ? parseInt(fileSize) : 0,
+          mimeType: fileType || 'application/octet-stream',
+          fileType: 'PAYMENT_PROOF',
+        },
+      })
+    }
 
-  return apiSuccess({ message: 'Upload successful' })
-})
+    await createAuditLog({
+      action: 'SYSTEM_UPDATE' as any,
+      entity: 'payments',
+      entityId: payment.id,
+      userId,
+      description: `Student submitted a wallet top-up request for GHS ${parsedAmount}`,
+    })
+
+    return NextResponse.json({ success: true, paymentId: payment.id }, { status: 201 })
+  } catch (error: any) {
+    console.error('Wallet proof upload error:', error)
+    return NextResponse.json({ error: 'Failed to submit payment proof.' }, { status: 500 })
+  }
+}

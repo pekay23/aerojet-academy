@@ -15,7 +15,7 @@ export default function TwoYearPage() {
       <Hero
         title="2-Year Full-Time Program"
         subtitle="B1.1 Mechanical License — An accelerated pathway for focused candidates."
-        backgroundImage="/images/hero/fulltime-2year-b1.png"
+        backgroundImage="/images/hero/fulltime-2year-b1.webp"
       />
 
       <div className="mx-auto max-w-5xl space-y-20 px-6 py-20">

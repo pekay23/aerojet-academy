@@ -7,7 +7,7 @@ export default function GlobalLoading() {
         <div className="bg-public-secondary/20 absolute inset-0 animate-ping rounded-full" />
         <div className="relative flex h-20 w-20 items-center justify-center rounded-full border border-slate-100 bg-white shadow-lg">
           <Image
-            src="/images/logos/AATA_logo_hor_onWhite.png"
+            src="/images/logos/AATA_logo_hor_onWhite.webp"
             alt="Aerojet"
             width={40}
             height={40}

@@ -19,7 +19,7 @@ const baseLayout = (content: string, title?: string) => `
           <!-- Header -->
           <tr>
             <td align="center" style="padding:32px 24px;background-color:#ffffff;border-bottom:1px solid #e2e8f0;">
-              <img src="${appUrl}/images/logos/AATA_logo_hor_onWhite.png" alt="Aerojet Aviation" width="220" style="display:block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
+              <img src="${appUrl}/images/logos/AATA_logo_hor_onWhite.webp" alt="Aerojet Aviation" width="220" style="display:block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
             </td>
           </tr>
           <!-- Content -->
@@ -32,7 +32,7 @@ const baseLayout = (content: string, title?: string) => `
           <tr>
             <td style="background-color:#002a5c;padding:32px 24px;border-top:1px solid #002a5c;">
               <div style="text-align:center;margin-bottom:16px;">
-                <img src="${appUrl}/images/logos/aerojet-logo-dark.png" alt="Aerojet Aviation" width="160" style="display:inline-block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
+                <img src="${appUrl}/images/logos/aerojet-logo-dark.webp" alt="Aerojet Aviation" width="160" style="display:inline-block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
               </div>
               <p style="margin:0 0 4px 0;font-size:14px;color:#ffffff;text-align:center;font-weight:600;">
                 Aerojet Aviation Training Academy
@@ -107,7 +107,9 @@ export function passwordResetEmail(name: string, resetLink: string) {
     <p>Dear ${name},</p>
     <p>We received a request to reset your password. Click the button below:</p>
     <div style="text-align:center;margin:24px 0;">
-      <a href="${resetLink}" style="background:#0f172a;color:#ffffff;padding:12px 32px;border-radius:6px;text-decoration:none;display:inline-block;">Reset Password</a>
+      <a href="${resetLink}" style="background-color: #0f172a; color: #ffffff !important; padding: 12px 32px; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: bold;">
+        <span style="color: #ffffff !important;">Reset Password</span>
+      </a>
     </div>
     <p style="font-size:12px;color:#64748b;">This link expires in 1 hour. If you didn't request this, ignore this email.</p>
   `

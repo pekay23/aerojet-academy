@@ -34,6 +34,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const tempPassword = generateTempPassword()
   const hashedTempPassword = await hashPassword(tempPassword)
   const verifyToken = generateToken()
+  const verifyTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours (resilient to connection issues)
   const academyEmail = await generateAcademyEmail(
     profile.firstName,
     profile.middleName || undefined,
@@ -50,6 +51,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       academyEmail,
       password: hashedTempPassword,
       verifyToken,
+      verifyTokenExpires,
       mustChangePassword: true,
       paymentApprovedAt: new Date(),
       paymentApprovedBy: actorId,

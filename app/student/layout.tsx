@@ -9,6 +9,20 @@ export default async function StudentLayout({ children }: { children: React.Reac
   if (!session) redirect('/login')
 
   const user = session.user
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { status: true, role: true },
+  })
+
+  if (
+    !dbUser ||
+    ['SUSPENDED', 'DELETED', 'ARCHIVED'].includes(dbUser.status) ||
+    dbUser.role !== 'STUDENT'
+  ) {
+    redirect('/login')
+  }
+
   const userName = user.name || user.email
   const userRole = user.role
 

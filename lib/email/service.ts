@@ -83,8 +83,8 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
 
 const DOMAIN = getBaseUrl()
 
-const LOGO_DARK_ON_WHITE = `https://lightpink-guanaco-745322.hostingersite.com/wp-content/uploads/2024/03/ATA_logo_hor_onWhite-1-e1711591369108.png`
-const LOGO_WHITE_ON_DARK = `https://lightpink-guanaco-745322.hostingersite.com/wp-content/uploads/2024/03/ATA_logo_hor_onDark-1-e1711591332243.png`
+const LOGO_DARK_ON_WHITE = `${DOMAIN}/images/logos/AATA_logo_hor_onWhite.webp`
+const LOGO_WHITE_ON_DARK = `${DOMAIN}/images/logos/ATA_logo_hor_onDark.webp`
 
 const COLORS = {
   navy: '#002a5c',
@@ -113,7 +113,7 @@ export const wrapEmail = (title: string, bodyContent: string) => {
           .h1 { color: ${COLORS.navy}; font-size: 22px; font-weight: 800; margin: 0 0 20px 0; letter-spacing: -0.5px; }
           .text { font-size: 15px; line-height: 1.6; color: ${COLORS.text}; margin-bottom: 15px; }
           .btn-container { margin: 30px 0; }
-          .btn { background-color: ${COLORS.navy}; color: ${COLORS.white}; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block; }
+          .btn { background-color: ${COLORS.navy}; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block; }
           .info-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid ${COLORS.navy}; padding: 15px; margin: 25px 0; border-radius: 4px; }
           .info-row { margin-bottom: 5px; font-size: 14px; }
           .footer { background-color: ${COLORS.navy}; padding: 40px 30px; color: #94a3b8; font-size: 12px; }
@@ -158,107 +158,153 @@ export const wrapEmail = (title: string, bodyContent: string) => {
 // REGISTRATION
 // ---------------------------------------------------------------------------
 
+export async function renderRegistrationEmail(firstName: string, registrationCode: string) {
+  const finance = await getFinanceConfig()
+  const config = await getRegistrationConfig()
+
+  return wrapEmail(
+    `Welcome, ${firstName}!`,
+    `
+    <div style="margin-bottom: 24px;">
+      <div style="color: #16a34a; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
+        ✓ Registration Received
+      </div>
+      <p class="text" style="font-size: 16px; color: #475569;">
+        Thank you for registering. We have received your details. To proceed with your enrollment, please complete the registration fee payment using the details below.
+      </p>
+    </div>
+    
+    <!-- Reference Code Card -->
+    <div style="background-color: #137fec; border-radius: 12px; padding: 24px; color: #ffffff; margin-bottom: 32px; box-shadow: 0 4px 6px -1px rgba(19, 127, 236, 0.2);">
+      <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 8px;">
+        Your Reference Code
+      </div>
+      <div style="font-family: monospace; font-size: 28px; font-weight: 800; letter-spacing: 2px; margin-bottom: 20px;">
+        ${registrationCode}
+      </div>
+      
+      <div style="border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 16px;">
+        <div style="font-size: 12px; font-weight: 500; opacity: 0.8;">Fee Amount</div>
+        <div style="font-size: 20px; font-weight: 700;">${config.currency} ${config.fee}</div>
+      </div>
+    </div>
+
+    <!-- Payment Details Section -->
+    <div style="margin-bottom: 32px;">
+      <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0;">Bank Transfer Details</h3>
+      
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+          <tr>
+            <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Bank Name</div>
+              <div style="font-size: 15px; font-weight: 700; color: #0f172a;">${finance.bankName || 'FNB Ghana'}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account Name</div>
+              <div style="font-size: 15px; font-weight: 600; color: #0f172a;">${finance.bankAccountName || 'Aerojet Aviation Foundation'}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account Number</div>
+              <div style="font-family: monospace; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px;">${finance.bankAccountNumber || 'N/A'}</div>
+            </td>
+          </tr>
+          ${
+            finance.bankSwift
+              ? `
+          <tr>
+            <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">SWIFT / BIC Code</div>
+              <div style="font-family: monospace; font-size: 16px; font-weight: 700; color: #0f172a;">${finance.bankSwift}</div>
+            </td>
+          </tr>
+          `
+              : ''
+          }
+          <tr>
+            <td style="padding: 16px; background-color: #f1f5f9;">
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Payment Reference</div>
+              <div style="font-family: monospace; font-size: 18px; font-weight: 800; color: #137fec;">${registrationCode}</div>
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div style="background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+      <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.5;">
+        <strong>Important:</strong> Please ensure the payment reference <strong style="color: #b45309;">${registrationCode}</strong> is included in your bank transfer to avoid delays in processing your application.
+      </p>
+    </div>
+
+    <div class="btn-container" style="text-align: center; margin-top: 30px;">
+      <a href="${BASE_URL}/upload-proof?code=${registrationCode}" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block;">
+        <span style="color: #ffffff !important;">Upload Payment Proof</span>
+      </a>
+    </div>
+  `
+  )
+}
+
 export async function sendRegistrationEmail(
   email: string,
   firstName: string,
   registrationCode: string
 ) {
-  const finance = await getFinanceConfig()
-  const config = await getRegistrationConfig()
+  const html = await renderRegistrationEmail(firstName, registrationCode)
 
   return sendEmail({
     to: email,
     subject: 'Welcome to Aerojet Aviation - Registration Received',
-    html: wrapEmail(
-      `Welcome, ${firstName}!`,
-      `
-      <div style="margin-bottom: 24px;">
-        <div style="color: #16a34a; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
-          ✓ Registration Received
-        </div>
-        <p class="text" style="font-size: 16px; color: #475569;">
-          Thank you for registering. We have received your details. To proceed with your enrollment, please complete the registration fee payment using the details below.
-        </p>
-      </div>
-      
-      <!-- Reference Code Card -->
-      <div style="background-color: #137fec; border-radius: 12px; padding: 24px; color: #ffffff; margin-bottom: 32px; box-shadow: 0 4px 6px -1px rgba(19, 127, 236, 0.2);">
-        <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 8px;">
-          Your Reference Code
-        </div>
-        <div style="font-family: monospace; font-size: 28px; font-weight: 800; letter-spacing: 2px; margin-bottom: 20px;">
-          ${registrationCode}
-        </div>
-        
-        <div style="border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 16px;">
-          <div style="font-size: 12px; font-weight: 500; opacity: 0.8;">Fee Amount</div>
-          <div style="font-size: 20px; font-weight: 700;">${config.currency} ${config.fee}</div>
-        </div>
-      </div>
-
-      <!-- Payment Details Section -->
-      <div style="margin-bottom: 32px;">
-        <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0;">Bank Transfer Details</h3>
-        
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
-          <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
-            <tr>
-              <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
-                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Bank Name</div>
-                <div style="font-size: 15px; font-weight: 700; color: #0f172a;">${finance.bankName || 'FNB Ghana'}</div>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
-                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account Name</div>
-                <div style="font-size: 15px; font-weight: 600; color: #0f172a;">${finance.bankAccountName || 'Aerojet Aviation Foundation'}</div>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
-                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account Number</div>
-                <div style="font-family: monospace; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px;">${finance.bankAccountNumber || 'N/A'}</div>
-              </td>
-            </tr>
-            ${
-              finance.bankSwift
-                ? `
-            <tr>
-              <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
-                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">SWIFT / BIC Code</div>
-                <div style="font-family: monospace; font-size: 16px; font-weight: 700; color: #0f172a;">${finance.bankSwift}</div>
-              </td>
-            </tr>
-            `
-                : ''
-            }
-            <tr>
-              <td style="padding: 16px; background-color: #f1f5f9;">
-                <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Payment Reference</div>
-                <div style="font-family: monospace; font-size: 18px; font-weight: 800; color: #137fec;">${registrationCode}</div>
-              </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <div style="background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-        <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.5;">
-          <strong>Important:</strong> Please ensure the payment reference <strong style="color: #b45309;">${registrationCode}</strong> is included in your bank transfer to avoid delays in processing your application.
-        </p>
-      </div>
-
-      <div class="btn-container" style="text-align: center; margin-top: 30px;">
-        <a href="${BASE_URL}/upload-proof?code=${registrationCode}" class="btn">Upload Payment Proof</a>
-      </div>
-    `
-    ),
+    html,
   })
 }
 
 // ---------------------------------------------------------------------------
 // ACCOUNT ACTIVATION
 // ---------------------------------------------------------------------------
+
+export function renderActivationEmail(
+  firstName: string,
+  academyEmail: string,
+  tempPassword: string,
+  verifyToken: string
+) {
+  const verifyUrl = `${BASE_URL}/verify-email?token=${verifyToken}`
+
+  return wrapEmail(
+    `Account Activated, ${firstName}!`,
+    `
+    <p class="text">Your registration payment has been approved. You can now access the Applicant Portal.</p>
+    
+    <div class="info-box" style="border-left-color: #22c55e;">
+      <div class="info-row"><strong>Login Credentials:</strong></div>
+      <div class="info-row" style="margin-top:10px;">
+        <strong>Academy Email:</strong><br/>
+        <span style="font-size: 15px; color: #002a5c; font-weight:bold;">${academyEmail}</span>
+      </div>
+      <div class="info-row" style="margin-top:5px;">
+        <strong>Temporary Password:</strong><br/>
+        <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #000; background: #fff3cd; padding: 4px 8px; border-radius: 4px;">${tempPassword}</span>
+      </div>
+    </div>
+
+    <p class="text" style="font-size: 13px; color: #d97706; background: #fef3c7; padding: 10px; border-radius: 4px; border-left: 3px solid #d97706;">
+      <strong>⚠️ Important:</strong> Click the button below to verify your email. You will be automatically logged in to set your permanent password.
+    </p>
+
+    <div class="btn-container">
+      <a href="${verifyUrl}" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block;">
+        <span style="color: #ffffff !important;">Verify & Auto-Login</span>
+      </a>
+    </div>
+  `
+  )
+}
 
 export async function sendActivationEmail(
   email: string,
@@ -267,37 +313,12 @@ export async function sendActivationEmail(
   tempPassword: string,
   verifyToken: string
 ) {
-  const verifyUrl = `${BASE_URL}/verify-email?token=${verifyToken}`
+  const html = renderActivationEmail(firstName, academyEmail, tempPassword, verifyToken)
 
   return sendEmail({
     to: email,
     subject: 'Aerojet Aviation - Account Activated',
-    html: wrapEmail(
-      `Account Activated, ${firstName}!`,
-      `
-      <p class="text">Your registration payment has been approved. You can now access the Applicant Portal.</p>
-      
-      <div class="info-box" style="border-left-color: #22c55e;">
-        <div class="info-row"><strong>Login Credentials:</strong></div>
-        <div class="info-row" style="margin-top:10px;">
-          <strong>Academy Email:</strong><br/>
-          <span style="font-size: 15px; color: #002a5c; font-weight:bold;">${academyEmail}</span>
-        </div>
-        <div class="info-row" style="margin-top:5px;">
-          <strong>Temporary Password:</strong><br/>
-          <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #000; background: #fff3cd; padding: 4px 8px; border-radius: 4px;">${tempPassword}</span>
-        </div>
-      </div>
-
-      <p class="text" style="font-size: 13px; color: #d97706; background: #fef3c7; padding: 10px; border-radius: 4px; border-left: 3px solid #d97706;">
-        <strong>⚠️ Important:</strong> You must verify your email and change your password on your first login.
-      </p>
-
-      <div class="btn-container">
-        <a href="${verifyUrl}" class="btn">Verify & Access Portal</a>
-      </div>
-    `
-    ),
+    html,
   })
 }
 
@@ -305,45 +326,76 @@ export async function sendActivationEmail(
 // STUDENT PROMOTION
 // ---------------------------------------------------------------------------
 
+export function renderStudentPromotionEmail(firstName: string, studentId: string) {
+  return wrapEmail(
+    `Congratulations, ${firstName}!`,
+    `
+    <p class="text">Your course enrollment has been approved. You are now a Student at Aerojet Aviation Training Academy.</p>
+    
+    <div class="info-box" style="border-left-color: #22c55e;">
+      <div class="info-row"><strong>Your Student ID:</strong></div>
+      <div class="info-row" style="margin-top:5px;">
+        <span style="font-family: monospace; font-size: 20px; letter-spacing: 2px; color: #2e7d32; font-weight:bold; background: #e8f5e9; padding: 4px 12px; border-radius: 4px;">${studentId}</span>
+      </div>
+    </div>
+
+    <p class="text" style="margin-top: 16px;">A wallet has been created for your account. You can now:</p>
+    <ul style="color: #334155; line-height: 1.6; margin-bottom: 20px;">
+      <li>Access course materials</li>
+      <li>Book exam pool seats</li>
+      <li>Track attendance and grades</li>
+      <li>Manage your wallet</li>
+    </ul>
+
+    <div class="btn-container">
+      <a href="${BASE_URL}/login" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block;">
+        <span style="color: #ffffff !important;">Go to Student Portal</span>
+      </a>
+    </div>
+  `
+  )
+}
+
 export async function sendStudentPromotionEmail(
   email: string,
   firstName: string,
   studentId: string
 ) {
+  const html = renderStudentPromotionEmail(firstName, studentId)
+
   return sendEmail({
     to: email,
     subject: 'Aerojet Aviation - Welcome, Student!',
-    html: wrapEmail(
-      `Congratulations, ${firstName}!`,
-      `
-      <p class="text">Your course enrollment has been approved. You are now a Student at Aerojet Aviation Training Academy.</p>
-      
-      <div class="info-box" style="border-left-color: #22c55e;">
-        <div class="info-row"><strong>Your Student ID:</strong></div>
-        <div class="info-row" style="margin-top:5px;">
-          <span style="font-family: monospace; font-size: 20px; letter-spacing: 2px; color: #2e7d32; font-weight:bold; background: #e8f5e9; padding: 4px 12px; border-radius: 4px;">${studentId}</span>
-        </div>
-      </div>
-
-      <p class="text" style="margin-top: 16px;">A wallet has been created for your account. You can now:</p>
-      <ul style="color: #334155; line-height: 1.6; margin-bottom: 20px;">
-        <li>Access course materials</li>
-        <li>Book exam pool seats</li>
-        <li>Track attendance and grades</li>
-        <li>Manage your wallet</li>
-      </ul>
-
-      <div class="btn-container">
-        <a href="${BASE_URL}/login" class="btn">Go to Student Portal</a>
-      </div>
-    `
-    ),
+    html,
   })
 }
 
 // ---------------------------------------------------------------------------
 // POOL CONFIRMED
 // ---------------------------------------------------------------------------
+
+export function renderPoolConfirmedEmail(
+  firstName: string,
+  poolName: string,
+  module: string,
+  examDate: string,
+  amount: number
+) {
+  return wrapEmail(
+    `Exam Pool Confirmed!`,
+    `
+    <p class="text">Hi ${firstName}, great news! <strong>${poolName}</strong> has reached the minimum candidates and is confirmed.</p>
+    
+    <div class="info-box" style="border-left-color: #22c55e;">
+      <div class="info-row"><strong>Module:</strong> ${module}</div>
+      <div class="info-row"><strong>Exam Date:</strong> ${examDate}</div>
+      <div class="info-row font-bold"><strong>Amount Paid:</strong> €${amount}</div>
+    </div>
+
+    <p class="text">€${amount} has been deducted from your wallet. Please prepare for your exam.</p>
+  `
+  )
+}
 
 export async function sendPoolConfirmedEmail(
   email: string,
@@ -353,23 +405,12 @@ export async function sendPoolConfirmedEmail(
   examDate: string,
   amount: number
 ) {
+  const html = renderPoolConfirmedEmail(firstName, poolName, module, examDate, amount)
+
   return sendEmail({
     to: email,
     subject: `Aerojet Aviation - Exam Pool Confirmed: ${poolName}`,
-    html: wrapEmail(
-      `Exam Pool Confirmed!`,
-      `
-      <p class="text">Hi ${firstName}, great news! <strong>${poolName}</strong> has reached the minimum candidates and is confirmed.</p>
-      
-      <div class="info-box" style="border-left-color: #22c55e;">
-        <div class="info-row"><strong>Module:</strong> ${module}</div>
-        <div class="info-row"><strong>Exam Date:</strong> ${examDate}</div>
-        <div class="info-row font-bold"><strong>Amount Paid:</strong> €${amount}</div>
-      </div>
-
-      <p class="text">€${amount} has been deducted from your wallet. Please prepare for your exam.</p>
-    `
-    ),
+    html,
   })
 }
 
@@ -377,26 +418,34 @@ export async function sendPoolConfirmedEmail(
 // PASSWORD RESET
 // ---------------------------------------------------------------------------
 
-export async function sendPasswordResetEmail(email: string, firstName: string, resetToken: string) {
+export function renderPasswordResetEmail(firstName: string, resetToken: string) {
   const resetUrl = `${BASE_URL}/reset-password?token=${resetToken}`
+
+  return wrapEmail(
+    `Password Reset Request`,
+    `
+    <p class="text">Hi ${firstName}, we received a request to reset your password.</p>
+    
+    <div class="btn-container">
+      <a href="${resetUrl}" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block;">
+        <span style="color: #ffffff !important;">Reset Password</span>
+      </a>
+    </div>
+
+    <p class="text" style="font-size: 13px; color: #666;">
+      This link expires in 1 hour. If you didn't request this, you can safely ignore this email.
+    </p>
+  `
+  )
+}
+
+export async function sendPasswordResetEmail(email: string, firstName: string, resetToken: string) {
+  const html = renderPasswordResetEmail(firstName, resetToken)
 
   return sendEmail({
     to: email,
     subject: 'Aerojet Aviation - Password Reset',
-    html: wrapEmail(
-      `Password Reset Request`,
-      `
-      <p class="text">Hi ${firstName}, we received a request to reset your password.</p>
-      
-      <div class="btn-container">
-        <a href="${resetUrl}" class="btn">Reset Password</a>
-      </div>
-
-      <p class="text" style="font-size: 13px; color: #666;">
-        This link expires in 1 hour. If you didn't request this, you can safely ignore this email.
-      </p>
-    `
-    ),
+    html,
   })
 }
 
@@ -404,28 +453,56 @@ export async function sendPasswordResetEmail(email: string, firstName: string, r
 // PAYMENT APPROVED/REJECTED
 // ---------------------------------------------------------------------------
 
+export function renderPaymentApprovedEmail(firstName: string, paymentType: string, amount: number) {
+  return wrapEmail(
+    `Payment Approved`,
+    `
+    <p class="text">Hi ${firstName}, your ${paymentType} payment of <strong>€${amount}</strong> has been approved.</p>
+    
+    <div class="info-box" style="border-left-color: #22c55e;">
+      <div class="info-row"><strong>Status:</strong> <span style="color:#15803d; font-weight:bold;">PAID ✅</span></div>
+      <div class="info-row font-bold" style="margin-top:5px;"><strong>Amount:</strong> €${amount}</div>
+      <div class="info-row"><strong>Description:</strong> ${paymentType}</div>
+    </div>
+  `
+  )
+}
+
 export async function sendPaymentApprovedEmail(
   email: string,
   firstName: string,
   paymentType: string,
   amount: number
 ) {
+  const html = renderPaymentApprovedEmail(firstName, paymentType, amount)
+
   return sendEmail({
     to: email,
     subject: 'Aerojet Aviation - Payment Approved',
-    html: wrapEmail(
-      `Payment Approved`,
-      `
-      <p class="text">Hi ${firstName}, your ${paymentType} payment of <strong>€${amount}</strong> has been approved.</p>
-      
-      <div class="info-box" style="border-left-color: #22c55e;">
-        <div class="info-row"><strong>Status:</strong> <span style="color:#15803d; font-weight:bold;">PAID ✅</span></div>
-        <div class="info-row font-bold" style="margin-top:5px;"><strong>Amount:</strong> €${amount}</div>
-        <div class="info-row"><strong>Description:</strong> ${paymentType}</div>
-      </div>
-    `
-    ),
+    html,
   })
+}
+
+export function renderPaymentRejectedEmail(firstName: string, paymentType: string, reason: string) {
+  return wrapEmail(
+    `Payment Not Approved`,
+    `
+    <p class="text">Hi ${firstName}, your ${paymentType} payment was not approved.</p>
+    
+    <div class="info-box" style="border-left-color: #ef4444;">
+      <div class="info-row"><strong>Status:</strong> <span style="color:#dc2626; font-weight:bold;">REJECTED ❌</span></div>
+      <div class="info-row" style="margin-top:5px;"><strong>Reason:</strong> ${reason}</div>
+    </div>
+
+    <p class="text">Please log in to your portal and re-upload a valid payment proof or contact the admissions office.</p>
+
+    <div class="btn-container">
+      <a href="${DOMAIN}/login" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block;">
+        <span style="color: #ffffff !important;">Login to Upload Proof</span>
+      </a>
+    </div>
+  `
+  )
 }
 
 export async function sendPaymentRejectedEmail(
@@ -434,26 +511,12 @@ export async function sendPaymentRejectedEmail(
   paymentType: string,
   reason: string
 ) {
+  const html = renderPaymentRejectedEmail(firstName, paymentType, reason)
+
   return sendEmail({
     to: email,
     subject: 'Aerojet Aviation - Payment Rejected',
-    html: wrapEmail(
-      `Payment Not Approved`,
-      `
-      <p class="text">Hi ${firstName}, your ${paymentType} payment was not approved.</p>
-      
-      <div class="info-box" style="border-left-color: #ef4444;">
-        <div class="info-row"><strong>Status:</strong> <span style="color:#dc2626; font-weight:bold;">REJECTED ❌</span></div>
-        <div class="info-row" style="margin-top:5px;"><strong>Reason:</strong> ${reason}</div>
-      </div>
-
-      <p class="text">Please log in to your portal and re-upload a valid payment proof or contact the admissions office.</p>
-
-      <div class="btn-container">
-        <a href="${DOMAIN}/login" class="btn">Login to Upload Proof</a>
-      </div>
-    `
-    ),
+    html,
   })
 }
 
@@ -461,24 +524,30 @@ export async function sendPaymentRejectedEmail(
 // CONTACT ENQUIRY
 // ---------------------------------------------------------------------------
 
+export function renderContactEnquiryConfirmation(name: string, subject: string) {
+  return wrapEmail(
+    `We received your enquiry`,
+    `
+    <p class="text">Hi ${name.split(' ')[0]},</p>
+    <p class="text">
+      Thank you for reaching out to Aerojet Aviation Training Academy. We have received your enquiry regarding <strong>${subject}</strong> and our admissions team will review it and get back to you as soon as possible.
+    </p>
+    <div class="info-box">
+      <div class="info-row"><strong>Admissions Team</strong></div>
+      <div class="info-row" style="margin-top:5px;">📞 +233 209 848 423</div>
+      <div class="info-row">✉️ trainingprograms@aerojet-academy.com</div>
+    </div>
+    <p class="text">In the meantime, feel free to explore our website for more information about our programmes.</p>
+  `
+  )
+}
+
 export async function sendContactEnquiryConfirmation(email: string, name: string, subject: string) {
+  const html = renderContactEnquiryConfirmation(name, subject)
+
   return sendEmail({
     to: email,
     subject: `Aerojet Academy - Enquiry Received: ${subject}`,
-    html: wrapEmail(
-      `We received your enquiry`,
-      `
-      <p class="text">Hi ${name.split(' ')[0]},</p>
-      <p class="text">
-        Thank you for reaching out to Aerojet Aviation Training Academy. We have received your enquiry regarding <strong>${subject}</strong> and our admissions team will review it and get back to you as soon as possible.
-      </p>
-      <div class="info-box">
-        <div class="info-row"><strong>Admissions Team</strong></div>
-        <div class="info-row" style="margin-top:5px;">📞 +233 209 848 423</div>
-        <div class="info-row">✉️ trainingprograms@aerojet-academy.com</div>
-      </div>
-      <p class="text">In the meantime, feel free to explore our website for more information about our programmes.</p>
-    `
-    ),
+    html,
   })
 }

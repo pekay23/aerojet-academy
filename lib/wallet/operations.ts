@@ -51,40 +51,46 @@ export async function getOrCreateWallet(userId: string) {
 // ---------------------------------------------------------------------------
 
 export async function topUpWallet(
+  tx: TxClient,
   userId: string,
   amount: number,
   description?: string,
-  reference?: string
+  referenceId?: string,
+  referenceType?: string
 ) {
-  return prisma.$transaction(async (tx) => {
-    const wallet = await tx.wallet.findUnique({ where: { userId } })
-    if (!wallet) throw new Error('Wallet not found')
+  const wallet = await tx.wallet.findUnique({ where: { userId } })
+  if (!wallet) throw new Error('Wallet not found')
 
-    const balanceBefore = wallet.balance.toNumber()
-    const newBalance = balanceBefore + amount
+  const balanceBefore = wallet.balance.toNumber()
+  const availableBefore = wallet.availableBalance.toNumber()
+  const reservedBefore = wallet.reservedBalance.toNumber()
 
-    const updated = await tx.wallet.update({
-      where: { userId },
-      data: {
-        balance: newBalance,
-        availableBalance: newBalance - wallet.reservedBalance.toNumber(),
-      },
-    })
-
-    await tx.walletTransaction.create({
-      data: {
-        walletId: wallet.id,
-        type: TransactionType.TOP_UP,
-        amount,
-        balanceBefore,
-        balanceAfter: newBalance,
-        description: description || `Wallet top-up of €${amount}`,
-        referenceId: reference,
-      },
-    })
-
-    return updated
+  const updated = await tx.wallet.update({
+    where: { userId },
+    data: {
+      balance: { increment: amount },
+      availableBalance: { increment: amount },
+    },
   })
+
+  await tx.walletTransaction.create({
+    data: {
+      walletId: wallet.id,
+      type: TransactionType.TOP_UP,
+      amount,
+      balanceBefore,
+      balanceAfter: balanceBefore + amount,
+      reservedBefore,
+      reservedAfter: reservedBefore,
+      availableBefore,
+      availableAfter: availableBefore + amount,
+      description: description || `Wallet top-up of €${amount}`,
+      referenceId,
+      referenceType,
+    },
+  })
+
+  return updated
 }
 
 // ---------------------------------------------------------------------------
@@ -96,12 +102,13 @@ export async function reserveFunds(
   userId: string,
   amount: number,
   description?: string,
-  reference?: string
+  referenceId?: string,
+  referenceType?: string
 ) {
   const wallet = await tx.wallet.findUnique({ where: { userId } })
   if (!wallet) throw new Error('Wallet not found')
 
-  const available = wallet.balance.toNumber() - wallet.reservedBalance.toNumber()
+  const available = wallet.availableBalance.toNumber()
   if (available < amount) {
     throw new Error(
       `Insufficient funds. Available: €${available.toFixed(2)}, Required: €${amount.toFixed(2)}`
@@ -109,13 +116,14 @@ export async function reserveFunds(
   }
 
   const balanceBefore = wallet.balance.toNumber()
-  const newReserved = wallet.reservedBalance.toNumber() + amount
+  const availableBefore = wallet.availableBalance.toNumber()
+  const reservedBefore = wallet.reservedBalance.toNumber()
 
   const updated = await tx.wallet.update({
     where: { userId },
     data: {
-      reservedBalance: newReserved,
-      availableBalance: wallet.balance.toNumber() - newReserved,
+      reservedBalance: { increment: amount },
+      availableBalance: { decrement: amount },
     },
   })
 
@@ -125,9 +133,14 @@ export async function reserveFunds(
       type: TransactionType.RESERVE,
       amount,
       balanceBefore,
-      referenceId: reference,
       balanceAfter: balanceBefore,
+      reservedBefore,
+      reservedAfter: reservedBefore + amount,
+      availableBefore,
+      availableAfter: availableBefore - amount,
       description: description || `Funds reserved: €${amount}`,
+      referenceId,
+      referenceType,
     },
   })
 
@@ -143,37 +156,42 @@ export async function captureFunds(
   userId: string,
   amount: number,
   description?: string,
-  reference?: string
+  referenceId?: string,
+  referenceType?: string
 ) {
   const wallet = await tx.wallet.findUnique({ where: { userId } })
   if (!wallet) throw new Error('Wallet not found')
 
   const balanceBefore = wallet.balance.toNumber()
-  const newBalance = balanceBefore - amount
-  const newReserved = wallet.reservedBalance.toNumber() - amount
+  const availableBefore = wallet.availableBalance.toNumber()
+  const reservedBefore = wallet.reservedBalance.toNumber()
 
-  if (newBalance < 0 || newReserved < 0) {
-    throw new Error('Invalid capture: would result in negative balance')
+  if (reservedBefore < amount) {
+    throw new Error('Invalid capture: reserved balance is less than capture amount')
   }
 
   const updated = await tx.wallet.update({
     where: { userId },
     data: {
-      balance: newBalance,
-      reservedBalance: newReserved,
-      availableBalance: newBalance - newReserved,
+      balance: { decrement: amount },
+      reservedBalance: { decrement: amount },
     },
   })
 
   await tx.walletTransaction.create({
     data: {
       walletId: wallet.id,
-      type: TransactionType.PAYMENT,
+      type: TransactionType.CAPTURE,
       amount,
       balanceBefore,
-      referenceId: reference,
-      balanceAfter: newBalance,
+      balanceAfter: balanceBefore - amount,
+      reservedBefore,
+      reservedAfter: reservedBefore - amount,
+      availableBefore,
+      availableAfter: availableBefore,
       description: description || `Payment captured: €${amount}`,
+      referenceId,
+      referenceType,
     },
   })
 
@@ -189,19 +207,25 @@ export async function releaseFunds(
   userId: string,
   amount: number,
   description?: string,
-  reference?: string
+  referenceId?: string,
+  referenceType?: string
 ) {
   const wallet = await tx.wallet.findUnique({ where: { userId } })
   if (!wallet) throw new Error('Wallet not found')
 
   const balanceBefore = wallet.balance.toNumber()
-  const newReserved = Math.max(0, wallet.reservedBalance.toNumber() - amount)
+  const availableBefore = wallet.availableBalance.toNumber()
+  const reservedBefore = wallet.reservedBalance.toNumber()
+
+  if (reservedBefore < amount) {
+    throw new Error('Invalid release: requested amount exceeds reserved funds')
+  }
 
   const updated = await tx.wallet.update({
     where: { userId },
     data: {
-      reservedBalance: newReserved,
-      availableBalance: wallet.balance.toNumber() - newReserved,
+      reservedBalance: { decrement: amount },
+      availableBalance: { increment: amount },
     },
   })
 
@@ -211,9 +235,14 @@ export async function releaseFunds(
       type: TransactionType.RELEASE,
       amount,
       balanceBefore,
-      referenceId: reference,
       balanceAfter: balanceBefore,
+      reservedBefore,
+      reservedAfter: reservedBefore - amount,
+      availableBefore,
+      availableAfter: availableBefore + amount,
       description: description || `Funds released: €${amount}`,
+      referenceId,
+      referenceType,
     },
   })
 
@@ -221,44 +250,101 @@ export async function releaseFunds(
 }
 
 // ---------------------------------------------------------------------------
-// REFUND TO WALLET
+// CREDIT TO WALLET (DIRECT CREDIT/REFUND)
 // ---------------------------------------------------------------------------
 
-export async function refundToWallet(
+export async function creditToWallet(
+  tx: TxClient,
   userId: string,
   amount: number,
   description?: string,
-  reference?: string
+  referenceId?: string,
+  referenceType?: string
 ) {
-  return prisma.$transaction(async (tx) => {
-    const wallet = await tx.wallet.findUnique({ where: { userId } })
-    if (!wallet) throw new Error('Wallet not found')
+  const wallet = await tx.wallet.findUnique({ where: { userId } })
+  if (!wallet) throw new Error('Wallet not found')
 
-    const balanceBefore = wallet.balance.toNumber()
-    const newBalance = balanceBefore + amount
+  const balanceBefore = wallet.balance.toNumber()
+  const availableBefore = wallet.availableBalance.toNumber()
+  const reservedBefore = wallet.reservedBalance.toNumber()
 
-    const updated = await tx.wallet.update({
-      where: { userId },
-      data: {
-        balance: newBalance,
-        availableBalance: newBalance - wallet.reservedBalance.toNumber(),
-      },
-    })
-
-    await tx.walletTransaction.create({
-      data: {
-        walletId: wallet.id,
-        type: TransactionType.REFUND,
-        amount,
-        balanceBefore,
-        referenceId: reference,
-        balanceAfter: newBalance,
-        description: description || `Refund: €${amount}`,
-      },
-    })
-
-    return updated
+  const updated = await tx.wallet.update({
+    where: { userId },
+    data: {
+      balance: { increment: amount },
+      availableBalance: { increment: amount },
+    },
   })
+
+  await tx.walletTransaction.create({
+    data: {
+      walletId: wallet.id,
+      type: TransactionType.CREDIT,
+      amount,
+      balanceBefore,
+      balanceAfter: balanceBefore + amount,
+      reservedBefore,
+      reservedAfter: reservedBefore,
+      availableBefore,
+      availableAfter: availableBefore + amount,
+      description: description || `Wallet credited: €${amount}`,
+      referenceId,
+      referenceType,
+    },
+  })
+
+  return updated
+}
+
+// ---------------------------------------------------------------------------
+// DIRECT CHARGE (deduct available balance instantly without reserve)
+// ---------------------------------------------------------------------------
+
+export async function chargeWallet(
+  tx: TxClient,
+  userId: string,
+  amount: number,
+  description?: string,
+  referenceId?: string,
+  referenceType?: string
+) {
+  const wallet = await tx.wallet.findUnique({ where: { userId } })
+  if (!wallet) throw new Error('Wallet not found')
+
+  const balanceBefore = wallet.balance.toNumber()
+  const availableBefore = wallet.availableBalance.toNumber()
+  const reservedBefore = wallet.reservedBalance.toNumber()
+
+  if (availableBefore < amount) {
+    throw new Error('Insufficient available balance for this charge.')
+  }
+
+  const updated = await tx.wallet.update({
+    where: { userId },
+    data: {
+      balance: { decrement: amount },
+      availableBalance: { decrement: amount },
+    },
+  })
+
+  await tx.walletTransaction.create({
+    data: {
+      walletId: wallet.id,
+      type: TransactionType.PAYMENT,
+      amount,
+      balanceBefore,
+      balanceAfter: balanceBefore - amount,
+      reservedBefore,
+      reservedAfter: reservedBefore,
+      availableBefore,
+      availableAfter: availableBefore - amount,
+      description: description || `Direct payment: €${amount}`,
+      referenceId,
+      referenceType,
+    },
+  })
+
+  return updated
 }
 
 // ---------------------------------------------------------------------------

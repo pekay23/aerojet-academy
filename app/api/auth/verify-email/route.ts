@@ -14,7 +14,11 @@ export async function GET(req: NextRequest) {
   })
 
   if (!user) {
-    return NextResponse.json({ error: 'Invalid or expired token' }, { status: 400 })
+    return NextResponse.json({ error: 'Invalid token' }, { status: 400 })
+  }
+
+  if (user.verifyTokenExpires && user.verifyTokenExpires < new Date()) {
+    return NextResponse.json({ error: 'Verification link has expired' }, { status: 400 })
   }
 
   await prisma.user.update({

@@ -15,7 +15,7 @@ export default function MilitaryCertPage() {
       <Hero
         title="Military & Industry Certification"
         subtitle="1-Year fast-track for experienced personnel — theory & exams only."
-        backgroundImage="/images/hero/military-certification.png"
+        backgroundImage="/images/hero/military-certification.webp"
       />
       <div className="max-w-6xl mx-auto px-6 py-20 space-y-20">
 
