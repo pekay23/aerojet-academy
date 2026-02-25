@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react'
 import { Plus, Trash2, Save, Loader2, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
 import { DEFAULT_ROLE_WELCOME_MESSAGES } from '@/lib/welcome-messages'
+import MotionTabs from '@/components/ui/MotionTabs'
 
 interface WelcomeMessagesManagerProps {
   initialMessages: Record<string, string[]> | string[]
@@ -105,20 +106,15 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
         </div>
 
         {/* Role Tabs */}
-        <div className="flex overflow-x-auto border-t border-slate-100 px-2 pt-2 lg:border-t-0 dark:border-slate-800">
-          {ROLES.map((role) => (
-            <button
-              key={role}
-              onClick={() => setActiveRole(role)}
-              className={`rounded-t-lg px-4 py-3 text-xs font-black tracking-widest whitespace-nowrap uppercase transition-all ${
-                activeRole === role
-                  ? 'bg-slate-50 text-[#002a5c] dark:bg-slate-800 dark:text-blue-400'
-                  : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300'
-              }`}
-            >
-              {role}
-            </button>
-          ))}
+        <div className="flex border-t border-slate-100 p-2 lg:border-t-0 dark:border-slate-800">
+          <MotionTabs
+            tabs={ROLES}
+            activeTab={activeRole}
+            onChange={setActiveRole}
+            layoutId="role-tabs"
+            containerClassName="bg-transparent dark:bg-transparent"
+            tabClassName="py-2.5"
+          />
         </div>
       </div>
 

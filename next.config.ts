@@ -30,12 +30,12 @@ const nextConfig: NextConfig = {
         source: '/(.*)',
         headers: [
           {
-            key: 'X-Forwarded-Proto',
-            value: 'https',
+            key: 'X-Frame-Options',
+            value: 'SAMEORIGIN',
           },
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self';",
           },
           {
             key: 'X-Content-Type-Options',

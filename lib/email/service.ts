@@ -1,4 +1,5 @@
 import { NotificationType } from '@prisma/client'
+import prisma from '@/lib/prisma/client'
 import { getFinanceConfig, getRegistrationConfig } from '@/lib/settings'
 import { getBaseUrl } from '@/lib/utils/url'
 
@@ -35,7 +36,30 @@ export async function createNotification(
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@aerojet-academy.com'
-const BASE_URL = getBaseUrl()
+
+/**
+ * Replaces {{handlebars}} style placeholders in a string.
+ */
+function replacePlaceholders(template: string, data: Record<string, any>) {
+  return template.replace(/\{\{(.*?)\}\}/g, (match, key) => {
+    const value = data[key.trim()]
+    return value !== undefined ? String(value) : match
+  })
+}
+
+async function getTemplate(name: string, defaults: { subject: string; body: string }) {
+  try {
+    const t = await prisma.emailTemplate.findUnique({
+      where: { name },
+    })
+    if (t && t.isActive) {
+      return { subject: t.subject, body: t.body }
+    }
+  } catch (error) {
+    console.warn(`[Email] Failed to fetch template "${name}", using default:`, error)
+  }
+  return defaults
+}
 
 interface EmailPayload {
   to: string
@@ -81,11 +105,6 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
 // EMAIL TEMPLATES
 // ---------------------------------------------------------------------------
 
-const DOMAIN = getBaseUrl()
-
-const LOGO_DARK_ON_WHITE = `${DOMAIN}/images/logos/AATA_logo_hor_onWhite.webp`
-const LOGO_WHITE_ON_DARK = `${DOMAIN}/images/logos/ATA_logo_hor_onDark.webp`
-
 const COLORS = {
   navy: '#002a5c',
   sky: '#4c9ded',
@@ -94,7 +113,11 @@ const COLORS = {
   text: '#334155',
 }
 
-export const wrapEmail = (title: string, bodyContent: string) => {
+export const wrapEmail = async (title: string, bodyContent: string) => {
+  const baseUrl = await getBaseUrl()
+  const logoDarkOnWhite = `${baseUrl}/images/logos/AATA_logo_hor_onWhite.webp`
+  const logoWhiteOnDark = `${baseUrl}/images/logos/ATA_logo_hor_onDark.webp`
+
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -127,13 +150,13 @@ export const wrapEmail = (title: string, bodyContent: string) => {
       <body>
         <div class="wrapper">
           <table class="main-table" align="center">
-            <tr><td class="header"><img src="${LOGO_DARK_ON_WHITE}" alt="Aerojet Academy" /></td></tr>
+            <tr><td class="header"><img src="${logoDarkOnWhite}" alt="Aerojet Academy" /></td></tr>
             <tr><td class="content"><h1 class="h1">${title}</h1>${bodyContent}</td></tr>
             <tr>
               <td class="footer" bgcolor="${COLORS.navy}" style="background-color: ${COLORS.navy} !important;">
                 <table width="100%">
                   <tr>
-                    <td valign="top"><img src="${LOGO_WHITE_ON_DARK}" class="footer-logo" alt="Aerojet Academy" /></td>
+                    <td valign="top"><img src="${logoWhiteOnDark}" class="footer-logo" alt="Aerojet Academy" /></td>
                     <td valign="top" class="footer-contact" style="color: #cbd5e1 !important; text-align: right;">
                       <strong style="white-space: nowrap;">Aerojet Aviation Training Academy</strong><br/>
                       <span style="font-size: 11px; opacity: 0.8;">Small Engines Dept., ATTC<br/>Kokomlemle, Accra - Ghana<br/>+233 209 848 423</span>
@@ -141,8 +164,8 @@ export const wrapEmail = (title: string, bodyContent: string) => {
                   </tr>
                 </table>
                 <div class="footer-links" style="border-top: 1px solid rgba(255,255,255,0.1) !important;">
-                  <a href="${DOMAIN}" style="color: ${COLORS.sky} !important;">Website</a>
-                  <a href="${DOMAIN}/login" style="color: ${COLORS.sky} !important;">Portal</a>
+                  <a href="${baseUrl}" style="color: ${COLORS.sky} !important;">Website</a>
+                  <a href="${baseUrl}/login" style="color: ${COLORS.sky} !important;">Portal</a>
                 </div>
                 <div class="copyright" style="color: #94a3b8 !important; opacity: 1 !important;">&copy; ${new Date().getFullYear()} Aerojet Aviation. All rights reserved.</div>
               </td>
@@ -162,9 +185,8 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
   const finance = await getFinanceConfig()
   const config = await getRegistrationConfig()
 
-  return wrapEmail(
-    `Welcome, ${firstName}!`,
-    `
+  const defaultSubject = 'Welcome to Aerojet Aviation - Registration Received'
+  const defaultBody = `
     <div style="margin-bottom: 24px;">
       <div style="color: #16a34a; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
         ✓ Registration Received
@@ -180,12 +202,12 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
         Your Reference Code
       </div>
       <div style="font-family: monospace; font-size: 28px; font-weight: 800; letter-spacing: 2px; margin-bottom: 20px;">
-        ${registrationCode}
+        {{registrationCode}}
       </div>
       
       <div style="border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 16px;">
         <div style="font-size: 12px; font-weight: 500; opacity: 0.8;">Fee Amount</div>
-        <div style="font-size: 20px; font-weight: 700;">${config.currency} ${config.fee}</div>
+        <div style="font-size: 20px; font-weight: 700;">{{currency}} {{fee}}</div>
       </div>
     </div>
 
@@ -198,56 +220,53 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
           <tr>
             <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
               <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Bank Name</div>
-              <div style="font-size: 15px; font-weight: 700; color: #0f172a;">${finance.bankName || 'FNB Ghana'}</div>
+              <div style="font-size: 15px; font-weight: 700; color: #0f172a;">{{bankName}}</div>
             </td>
           </tr>
           <tr>
             <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
               <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account Name</div>
-              <div style="font-size: 15px; font-weight: 600; color: #0f172a;">${finance.bankAccountName || 'Aerojet Aviation Foundation'}</div>
+              <div style="font-size: 15px; font-weight: 600; color: #0f172a;">{{bankAccountName}}</div>
             </td>
           </tr>
           <tr>
             <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
               <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account Number</div>
-              <div style="font-family: monospace; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px;">${finance.bankAccountNumber || 'N/A'}</div>
+              <div style="font-family: monospace; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px;">{{bankAccountNumber}}</div>
             </td>
           </tr>
-          ${
-            finance.bankSwift
-              ? `
-          <tr>
-            <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
-              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">SWIFT / BIC Code</div>
-              <div style="font-family: monospace; font-size: 16px; font-weight: 700; color: #0f172a;">${finance.bankSwift}</div>
-            </td>
-          </tr>
-          `
-              : ''
-          }
           <tr>
             <td style="padding: 16px; background-color: #f1f5f9;">
               <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Payment Reference</div>
-              <div style="font-family: monospace; font-size: 18px; font-weight: 800; color: #137fec;">${registrationCode}</div>
+              <div style="font-family: monospace; font-size: 18px; font-weight: 800; color: #137fec;">{{registrationCode}}</div>
             </td>
           </tr>
         </table>
       </div>
     </div>
 
-    <div style="background-color: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
-      <p style="margin: 0; font-size: 13px; color: #92400e; line-height: 1.5;">
-        <strong>Important:</strong> Please ensure the payment reference <strong style="color: #b45309;">${registrationCode}</strong> is included in your bank transfer to avoid delays in processing your application.
-      </p>
-    </div>
-
     <div class="btn-container" style="text-align: center; margin-top: 30px;">
-      <a href="${BASE_URL}/upload-proof?code=${registrationCode}" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block;">
-        <span style="color: #ffffff !important;">Upload Payment Proof</span>
+      <a href="{{uploadUrl}}" class="btn">
+        <span>Upload Payment Proof</span>
       </a>
     </div>
   `
-  )
+
+  const template = await getTemplate('registration', { subject: defaultSubject, body: defaultBody })
+
+  const baseUrl = await getBaseUrl()
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    registrationCode,
+    currency: config.currency,
+    fee: config.fee,
+    bankName: finance.bankName || 'FNB Ghana',
+    bankAccountName: finance.bankAccountName || 'Aerojet Aviation Foundation',
+    bankAccountNumber: finance.bankAccountNumber || 'N/A',
+    uploadUrl: `${baseUrl}/upload-proof?code=${registrationCode}`,
+  })
+
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
 }
 
 export async function sendRegistrationEmail(
@@ -255,11 +274,12 @@ export async function sendRegistrationEmail(
   firstName: string,
   registrationCode: string
 ) {
+  // Subject placeholder replacement is handled inside renderRegistrationEmail
   const html = await renderRegistrationEmail(firstName, registrationCode)
 
   return sendEmail({
     to: email,
-    subject: 'Welcome to Aerojet Aviation - Registration Received',
+    subject: 'Welcome to Aerojet Aviation - Registration Received', // This is still used by Resend but the rendered HTML has its own title
     html,
   })
 }
@@ -268,28 +288,25 @@ export async function sendRegistrationEmail(
 // ACCOUNT ACTIVATION
 // ---------------------------------------------------------------------------
 
-export function renderActivationEmail(
+export async function renderActivationEmail(
   firstName: string,
   academyEmail: string,
   tempPassword: string,
   verifyToken: string
 ) {
-  const verifyUrl = `${BASE_URL}/verify-email?token=${verifyToken}`
-
-  return wrapEmail(
-    `Account Activated, ${firstName}!`,
-    `
+  const defaultSubject = 'Account Activated, {{firstName}}!'
+  const defaultBody = `
     <p class="text">Your registration payment has been approved. You can now access the Applicant Portal.</p>
     
     <div class="info-box" style="border-left-color: #22c55e;">
       <div class="info-row"><strong>Login Credentials:</strong></div>
       <div class="info-row" style="margin-top:10px;">
         <strong>Academy Email:</strong><br/>
-        <span style="font-size: 15px; color: #002a5c; font-weight:bold;">${academyEmail}</span>
+        <span style="font-size: 15px; color: #002a5c; font-weight:bold;">{{academyEmail}}</span>
       </div>
       <div class="info-row" style="margin-top:5px;">
         <strong>Temporary Password:</strong><br/>
-        <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #000; background: #fff3cd; padding: 4px 8px; border-radius: 4px;">${tempPassword}</span>
+        <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #000; background: #fff3cd; padding: 4px 8px; border-radius: 4px;">{{tempPassword}}</span>
       </div>
     </div>
 
@@ -298,12 +315,23 @@ export function renderActivationEmail(
     </p>
 
     <div class="btn-container">
-      <a href="${verifyUrl}" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block;">
-        <span style="color: #ffffff !important;">Verify & Auto-Login</span>
+      <a href="{{verifyUrl}}" class="btn">
+        <span>Verify & Auto-Login</span>
       </a>
     </div>
   `
-  )
+
+  const template = await getTemplate('activation', { subject: defaultSubject, body: defaultBody })
+
+  const baseUrl = await getBaseUrl()
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    academyEmail,
+    tempPassword,
+    verifyUrl: `${baseUrl}/verify-email?token=${verifyToken}`,
+  })
+
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
 }
 
 export async function sendActivationEmail(
@@ -313,7 +341,7 @@ export async function sendActivationEmail(
   tempPassword: string,
   verifyToken: string
 ) {
-  const html = renderActivationEmail(firstName, academyEmail, tempPassword, verifyToken)
+  const html = await renderActivationEmail(firstName, academyEmail, tempPassword, verifyToken)
 
   return sendEmail({
     to: email,
@@ -326,16 +354,15 @@ export async function sendActivationEmail(
 // STUDENT PROMOTION
 // ---------------------------------------------------------------------------
 
-export function renderStudentPromotionEmail(firstName: string, studentId: string) {
-  return wrapEmail(
-    `Congratulations, ${firstName}!`,
-    `
+export async function renderStudentPromotionEmail(firstName: string, studentId: string) {
+  const defaultSubject = 'Congratulations, {{firstName}}!'
+  const defaultBody = `
     <p class="text">Your course enrollment has been approved. You are now a Student at Aerojet Aviation Training Academy.</p>
     
     <div class="info-box" style="border-left-color: #22c55e;">
       <div class="info-row"><strong>Your Student ID:</strong></div>
       <div class="info-row" style="margin-top:5px;">
-        <span style="font-family: monospace; font-size: 20px; letter-spacing: 2px; color: #2e7d32; font-weight:bold; background: #e8f5e9; padding: 4px 12px; border-radius: 4px;">${studentId}</span>
+        <span style="font-family: monospace; font-size: 20px; letter-spacing: 2px; color: #2e7d32; font-weight:bold; background: #e8f5e9; padding: 4px 12px; border-radius: 4px;">{{studentId}}</span>
       </div>
     </div>
 
@@ -348,12 +375,22 @@ export function renderStudentPromotionEmail(firstName: string, studentId: string
     </ul>
 
     <div class="btn-container">
-      <a href="${BASE_URL}/login" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block;">
-        <span style="color: #ffffff !important;">Go to Student Portal</span>
+      <a href="{{loginUrl}}" class="btn">
+        <span>Go to Student Portal</span>
       </a>
     </div>
   `
-  )
+
+  const template = await getTemplate('promotion', { subject: defaultSubject, body: defaultBody })
+
+  const baseUrl = await getBaseUrl()
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    studentId,
+    loginUrl: `${baseUrl}/login`,
+  })
+
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
 }
 
 export async function sendStudentPromotionEmail(
@@ -361,7 +398,7 @@ export async function sendStudentPromotionEmail(
   firstName: string,
   studentId: string
 ) {
-  const html = renderStudentPromotionEmail(firstName, studentId)
+  const html = await renderStudentPromotionEmail(firstName, studentId)
 
   return sendEmail({
     to: email,
@@ -374,27 +411,40 @@ export async function sendStudentPromotionEmail(
 // POOL CONFIRMED
 // ---------------------------------------------------------------------------
 
-export function renderPoolConfirmedEmail(
+export async function renderPoolConfirmedEmail(
   firstName: string,
   poolName: string,
   module: string,
   examDate: string,
   amount: number
 ) {
-  return wrapEmail(
-    `Exam Pool Confirmed!`,
-    `
-    <p class="text">Hi ${firstName}, great news! <strong>${poolName}</strong> has reached the minimum candidates and is confirmed.</p>
+  const defaultSubject = 'Exam Pool Confirmed!'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, great news! <strong>{{poolName}}</strong> has reached the minimum candidates and is confirmed.</p>
     
     <div class="info-box" style="border-left-color: #22c55e;">
-      <div class="info-row"><strong>Module:</strong> ${module}</div>
-      <div class="info-row"><strong>Exam Date:</strong> ${examDate}</div>
-      <div class="info-row font-bold"><strong>Amount Paid:</strong> €${amount}</div>
+      <div class="info-row"><strong>Module:</strong> {{module}}</div>
+      <div class="info-row"><strong>Exam Date:</strong> {{examDate}}</div>
+      <div class="info-row font-bold"><strong>Amount Paid:</strong> {{amount}}</div>
     </div>
 
-    <p class="text">€${amount} has been deducted from your wallet. Please prepare for your exam.</p>
+    <p class="text">{{amount}} has been deducted from your wallet. Please prepare for your exam.</p>
   `
-  )
+
+  const template = await getTemplate('pool-confirmed', {
+    subject: defaultSubject,
+    body: defaultBody,
+  })
+
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    poolName,
+    module,
+    examDate,
+    amount,
+  })
+
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
 }
 
 export async function sendPoolConfirmedEmail(
@@ -405,7 +455,7 @@ export async function sendPoolConfirmedEmail(
   examDate: string,
   amount: number
 ) {
-  const html = renderPoolConfirmedEmail(firstName, poolName, module, examDate, amount)
+  const html = await renderPoolConfirmedEmail(firstName, poolName, module, examDate, amount)
 
   return sendEmail({
     to: email,
@@ -418,17 +468,14 @@ export async function sendPoolConfirmedEmail(
 // PASSWORD RESET
 // ---------------------------------------------------------------------------
 
-export function renderPasswordResetEmail(firstName: string, resetToken: string) {
-  const resetUrl = `${BASE_URL}/reset-password?token=${resetToken}`
-
-  return wrapEmail(
-    `Password Reset Request`,
-    `
-    <p class="text">Hi ${firstName}, we received a request to reset your password.</p>
+export async function renderPasswordResetEmail(firstName: string, resetToken: string) {
+  const defaultSubject = 'Password Reset Request'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, we received a request to reset your password.</p>
     
     <div class="btn-container">
-      <a href="${resetUrl}" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block;">
-        <span style="color: #ffffff !important;">Reset Password</span>
+      <a href="{{resetUrl}}" class="btn">
+        <span>Reset Password</span>
       </a>
     </div>
 
@@ -436,11 +483,23 @@ export function renderPasswordResetEmail(firstName: string, resetToken: string) 
       This link expires in 1 hour. If you didn't request this, you can safely ignore this email.
     </p>
   `
-  )
+
+  const template = await getTemplate('reset-password', {
+    subject: defaultSubject,
+    body: defaultBody,
+  })
+
+  const baseUrl = await getBaseUrl()
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    resetUrl: `${baseUrl}/reset-password?token=${resetToken}`,
+  })
+
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
 }
 
 export async function sendPasswordResetEmail(email: string, firstName: string, resetToken: string) {
-  const html = renderPasswordResetEmail(firstName, resetToken)
+  const html = await renderPasswordResetEmail(firstName, resetToken)
 
   return sendEmail({
     to: email,
@@ -453,19 +512,34 @@ export async function sendPasswordResetEmail(email: string, firstName: string, r
 // PAYMENT APPROVED/REJECTED
 // ---------------------------------------------------------------------------
 
-export function renderPaymentApprovedEmail(firstName: string, paymentType: string, amount: number) {
-  return wrapEmail(
-    `Payment Approved`,
-    `
-    <p class="text">Hi ${firstName}, your ${paymentType} payment of <strong>€${amount}</strong> has been approved.</p>
+export async function renderPaymentApprovedEmail(
+  firstName: string,
+  paymentType: string,
+  amount: number
+) {
+  const defaultSubject = 'Payment Approved'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, your {{paymentType}} payment of <strong>{{amount}}</strong> has been approved.</p>
     
     <div class="info-box" style="border-left-color: #22c55e;">
       <div class="info-row"><strong>Status:</strong> <span style="color:#15803d; font-weight:bold;">PAID ✅</span></div>
-      <div class="info-row font-bold" style="margin-top:5px;"><strong>Amount:</strong> €${amount}</div>
-      <div class="info-row"><strong>Description:</strong> ${paymentType}</div>
+      <div class="info-row font-bold" style="margin-top:5px;"><strong>Amount:</strong> {{amount}}</div>
+      <div class="info-row"><strong>Description:</strong> {{paymentType}}</div>
     </div>
   `
-  )
+
+  const template = await getTemplate('payment-approved', {
+    subject: defaultSubject,
+    body: defaultBody,
+  })
+
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    paymentType,
+    amount,
+  })
+
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
 }
 
 export async function sendPaymentApprovedEmail(
@@ -474,7 +548,7 @@ export async function sendPaymentApprovedEmail(
   paymentType: string,
   amount: number
 ) {
-  const html = renderPaymentApprovedEmail(firstName, paymentType, amount)
+  const html = await renderPaymentApprovedEmail(firstName, paymentType, amount)
 
   return sendEmail({
     to: email,
@@ -483,26 +557,43 @@ export async function sendPaymentApprovedEmail(
   })
 }
 
-export function renderPaymentRejectedEmail(firstName: string, paymentType: string, reason: string) {
-  return wrapEmail(
-    `Payment Not Approved`,
-    `
-    <p class="text">Hi ${firstName}, your ${paymentType} payment was not approved.</p>
+export async function renderPaymentRejectedEmail(
+  firstName: string,
+  paymentType: string,
+  reason: string
+) {
+  const defaultSubject = 'Payment Not Approved'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, your {{paymentType}} payment was not approved.</p>
     
     <div class="info-box" style="border-left-color: #ef4444;">
       <div class="info-row"><strong>Status:</strong> <span style="color:#dc2626; font-weight:bold;">REJECTED ❌</span></div>
-      <div class="info-row" style="margin-top:5px;"><strong>Reason:</strong> ${reason}</div>
+      <div class="info-row" style="margin-top:5px;"><strong>Reason:</strong> {{reason}}</div>
     </div>
 
     <p class="text">Please log in to your portal and re-upload a valid payment proof or contact the admissions office.</p>
 
     <div class="btn-container">
-      <a href="${DOMAIN}/login" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block;">
-        <span style="color: #ffffff !important;">Login to Upload Proof</span>
+      <a href="{{loginUrl}}" class="btn">
+        <span>Login to Upload Proof</span>
       </a>
     </div>
   `
-  )
+
+  const template = await getTemplate('payment-rejected', {
+    subject: defaultSubject,
+    body: defaultBody,
+  })
+
+  const baseUrl = await getBaseUrl()
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    paymentType,
+    reason,
+    loginUrl: `${baseUrl}/login`,
+  })
+
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
 }
 
 export async function sendPaymentRejectedEmail(
@@ -511,7 +602,7 @@ export async function sendPaymentRejectedEmail(
   paymentType: string,
   reason: string
 ) {
-  const html = renderPaymentRejectedEmail(firstName, paymentType, reason)
+  const html = await renderPaymentRejectedEmail(firstName, paymentType, reason)
 
   return sendEmail({
     to: email,
@@ -524,26 +615,36 @@ export async function sendPaymentRejectedEmail(
 // CONTACT ENQUIRY
 // ---------------------------------------------------------------------------
 
-export function renderContactEnquiryConfirmation(name: string, subject: string) {
-  return wrapEmail(
-    `We received your enquiry`,
-    `
-    <p class="text">Hi ${name.split(' ')[0]},</p>
+export async function renderContactEnquiryConfirmation(name: string, subject: string) {
+  const defaultSubject = 'We received your enquiry'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}},</p>
     <p class="text">
-      Thank you for reaching out to Aerojet Aviation Training Academy. We have received your enquiry regarding <strong>${subject}</strong> and our admissions team will review it and get back to you as soon as possible.
+      Thank you for reaching out to Aerojet Aviation Training Academy. We have received your enquiry regarding <strong>{{subject}}</strong> and our admissions team will review it and get back to you as soon as possible.
     </p>
     <div class="info-box">
       <div class="info-row"><strong>Admissions Team</strong></div>
       <div class="info-row" style="margin-top:5px;">📞 +233 209 848 423</div>
       <div class="info-row">✉️ trainingprograms@aerojet-academy.com</div>
     </div>
-    <p class="text">In the meantime, feel free to explore our website for more information about our programmes.</p>
+    <p class="text" style="margin-top: 16px;">In the meantime, feel free to explore our website for more information about our programmes.</p>
   `
+
+  const template = await getTemplate('contact', { subject: defaultSubject, body: defaultBody })
+
+  const body = replacePlaceholders(template.body, {
+    firstName: name.split(' ')[0],
+    subject,
+  })
+
+  return await wrapEmail(
+    replacePlaceholders(template.subject, { firstName: name.split(' ')[0] }),
+    body
   )
 }
 
 export async function sendContactEnquiryConfirmation(email: string, name: string, subject: string) {
-  const html = renderContactEnquiryConfirmation(name, subject)
+  const html = await renderContactEnquiryConfirmation(name, subject)
 
   return sendEmail({
     to: email,

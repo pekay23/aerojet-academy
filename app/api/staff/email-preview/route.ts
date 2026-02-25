@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
       html = await emailService.renderRegistrationEmail('John', 'REG-123456')
       break
     case 'activation':
-      html = emailService.renderActivationEmail(
+      html = await emailService.renderActivationEmail(
         'Jane',
         'jane.doe@aerojet-academy.com',
         'temp-pass-123',
@@ -33,23 +33,23 @@ export async function GET(req: NextRequest) {
       )
       break
     case 'promotion':
-      html = emailService.renderStudentPromotionEmail('Alex', 'STU-789-012')
+      html = await emailService.renderStudentPromotionEmail('Alex', 'STU-789-012')
       break
     case 'reset-password':
-      html = emailService.renderPasswordResetEmail('Sam', 'mock-reset-token')
+      html = await emailService.renderPasswordResetEmail('Sam', 'mock-reset-token')
       break
     case 'payment-approved':
-      html = emailService.renderPaymentApprovedEmail('Chris', 'Registration Fee', 250)
+      html = await emailService.renderPaymentApprovedEmail('Chris', 'Registration Fee', 250)
       break
     case 'payment-rejected':
-      html = emailService.renderPaymentRejectedEmail(
+      html = await emailService.renderPaymentRejectedEmail(
         'Pat',
         'Tuition Fee',
         'Invalid transaction reference'
       )
       break
     case 'pool-confirmed':
-      html = emailService.renderPoolConfirmedEmail(
+      html = await emailService.renderPoolConfirmedEmail(
         'Jordan',
         'Pool A',
         'Module 1',
@@ -58,7 +58,10 @@ export async function GET(req: NextRequest) {
       )
       break
     case 'contact':
-      html = emailService.renderContactEnquiryConfirmation('Taylor Swift', 'Course Availability')
+      html = await emailService.renderContactEnquiryConfirmation(
+        'Taylor Swift',
+        'Course Availability'
+      )
       break
     default:
       return new NextResponse('Invalid template name', { status: 400 })
