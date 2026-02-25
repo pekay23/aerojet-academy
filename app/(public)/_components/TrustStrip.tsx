@@ -19,7 +19,7 @@ export default function TrustStrip() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: '-50px' }}
           transition={{ duration: 0.6 }}
-          className="grid grid-cols-2 divide-x divide-slate-100 rounded-2xl border border-slate-100 bg-white shadow-xl sm:rounded-3xl md:grid-cols-4"
+          className="grid grid-cols-2 divide-x divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl sm:rounded-3xl md:grid-cols-4"
         >
           {stats.map((stat, i) => (
             <div key={i} className="group p-5 text-center sm:p-8">

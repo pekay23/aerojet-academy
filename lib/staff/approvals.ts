@@ -69,11 +69,16 @@ export async function approvePayment(
 
     // If wallet top-up, credit the wallet
     if (payment.referenceType === 'WALLET_TOP_UP') {
-      await topUpWallet(
-        payment.userId,
-        Number(payment.amount),
-        `Top-up approved: ${payment.referenceCode}`
-      )
+      await prisma.$transaction(async (tx) => {
+        await topUpWallet(
+          tx,
+          payment.userId,
+          Number(payment.amount),
+          `Top-up approved: ${payment.referenceCode}`,
+          payment.id,
+          'PAYMENT_ID'
+        )
+      })
     }
 
     const name = payment.user.profile?.firstName || 'User'

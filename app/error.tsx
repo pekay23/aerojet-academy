@@ -20,7 +20,7 @@ export default function GlobalError({
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6">
       <Link href="/" className="mb-12">
         <Image
-          src="/images/logos/AATA_logo_hor_onWhite.png"
+          src="/images/logos/AATA_logo_hor_onWhite.webp"
           alt="Aerojet Academy"
           width={180}
           height={40}

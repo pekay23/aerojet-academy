@@ -139,8 +139,8 @@ export default function PublicNav() {
             <Image
               src={
                 scrolled || mobileOpen || forceSolid
-                  ? '/images/logos/AATA_logo_hor_onWhite.png'
-                  : '/images/logos/ATA_logo_hor_onDark.png'
+                  ? '/images/logos/AATA_logo_hor_onWhite.webp'
+                  : '/images/logos/ATA_logo_hor_onDark.webp'
               }
               alt="Aerojet Logo"
               width={150}

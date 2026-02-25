@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { joinExamPool } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight } from 'lucide-react'
+import { WalletConfirmModal } from '@/components/shared/WalletConfirmModal'
 
 export default function JoinPoolButton({
   poolId,
@@ -43,7 +44,7 @@ export default function JoinPoolButton({
     return (
       <button
         disabled
-        className="cursor-not-allowed rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold uppercase tracking-wide text-slate-400"
+        className="cursor-not-allowed rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold tracking-wide text-slate-400 uppercase"
       >
         Insufficient Funds
       </button>
@@ -51,19 +52,27 @@ export default function JoinPoolButton({
   }
 
   return (
-    <button
-      onClick={handleJoin}
-      disabled={loading}
-      className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold uppercase tracking-wide text-white transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+    <WalletConfirmModal
+      title="Reserve Exam Seat"
+      description="You are about to reserve a seat in this exam pool. The seat price will be reserved from your wallet balance."
+      amount={price}
+      currency={currency}
+      onConfirm={handleJoin}
+      processing={loading}
     >
-      {loading ? (
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-      ) : (
-        <>
-          Reserve Seat
-          <ArrowRight className="h-3.5 w-3.5" />
-        </>
-      )}
-    </button>
+      <button
+        disabled={loading}
+        className="inline-flex items-center gap-1.5 rounded-xl bg-blue-600 px-4 py-2 text-xs font-bold tracking-wide text-white uppercase transition-all hover:bg-blue-700 active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        {loading ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <>
+            Reserve Seat
+            <ArrowRight className="h-3.5 w-3.5" />
+          </>
+        )}
+      </button>
+    </WalletConfirmModal>
   )
 }

@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function RevisionSupportPage() {
   return (
     <div className="bg-white">
-      <Hero title="Revision Support" subtitle="Intensive 8-week tuition blocks with mock examinations." backgroundImage="/images/hero/lecture.jpg"/>
+      <Hero title="Revision Support" subtitle="Intensive 8-week tuition blocks with mock examinations." backgroundImage="/images/hero/lecture.webp"/>
 
       <div className="max-w-5xl mx-auto px-6 py-20 space-y-20">
 

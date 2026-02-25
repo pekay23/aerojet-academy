@@ -59,7 +59,7 @@ export default async function CourseDetailsPage({ params }: Props) {
             <span className="font-mono text-xs font-black tracking-widest text-[#4c9ded]">
               {course.code}
             </span>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+            <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
               {course.name}
             </h1>
           </div>
@@ -87,12 +87,12 @@ export default async function CourseDetailsPage({ params }: Props) {
         {/* Main Content */}
         <div className="space-y-8 lg:col-span-2">
           {/* Description Card */}
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-            <h2 className="mb-4 text-[10px] font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
               About this course
             </h2>
             <div className="prose prose-slate max-w-none">
-              <p className="whitespace-pre-wrap leading-relaxed text-slate-600 dark:text-slate-400">
+              <p className="leading-relaxed whitespace-pre-wrap text-slate-600 dark:text-slate-400">
                 {course.description || 'No detailed description available for this course.'}
               </p>
             </div>
@@ -100,12 +100,14 @@ export default async function CourseDetailsPage({ params }: Props) {
 
           {/* Resources & Content */}
           <div className="grid gap-6 sm:grid-cols-2">
-            <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#4c9ded]">
                 <FileText className="h-5 w-5" />
               </div>
               <h3 className="font-bold text-slate-900 dark:text-slate-100">Syllabus</h3>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Download the detailed curriculum.</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Download the detailed curriculum.
+              </p>
               {course.syllabusUrl ? (
                 <a
                   href={course.syllabusUrl}
@@ -117,30 +119,38 @@ export default async function CourseDetailsPage({ params }: Props) {
                   <ChevronRight className="h-4 w-4" />
                 </a>
               ) : (
-                <span className="mt-4 inline-block text-xs italic text-slate-400">
+                <span className="mt-4 inline-block text-xs text-slate-400 italic">
                   Not available yet
                 </span>
               )}
             </div>
 
-            <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-500">
                 <Package className="h-5 w-5" />
               </div>
               <h3 className="font-bold text-slate-900 dark:text-slate-100">Materials</h3>
-              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Access reading lists and study guides.</p>
+              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                Access reading lists and study guides.
+              </p>
               {course.materialsUrl ? (
-                <a
-                  href={course.materialsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center text-sm font-bold text-[#002a5c] hover:underline"
-                >
-                  View Materials
-                  <ChevronRight className="h-4 w-4" />
-                </a>
+                enrollment?.status === 'APPROVED' || enrollment?.status === 'ACTIVE' ? (
+                  <a
+                    href={course.materialsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-4 inline-flex items-center text-sm font-bold text-[#002a5c] hover:underline dark:text-[#4c9ded]"
+                  >
+                    View Materials
+                    <ChevronRight className="h-4 w-4" />
+                  </a>
+                ) : (
+                  <span className="mt-4 inline-block text-xs font-bold text-slate-400 italic">
+                    Available after paying for a course
+                  </span>
+                )
               ) : (
-                <span className="mt-4 inline-block text-xs italic text-slate-400">
+                <span className="mt-4 inline-block text-xs text-slate-400 italic">
                   Not available yet
                 </span>
               )}
@@ -162,13 +172,13 @@ export default async function CourseDetailsPage({ params }: Props) {
                   course.prerequisites.map((code) => (
                     <span
                       key={code}
-                      className="rounded-lg border border-blue-100 bg-white dark:bg-slate-900 px-3 py-1.5 text-xs font-black text-[#002a5c] shadow-sm"
+                      className="rounded-lg border border-blue-100 bg-white px-3 py-1.5 text-xs font-black text-[#002a5c] shadow-sm dark:bg-slate-900"
                     >
                       {code}
                     </span>
                   ))
                 ) : (
-                  <span className="text-xs italic text-slate-400">Check office for details</span>
+                  <span className="text-xs text-slate-400 italic">Check office for details</span>
                 )}
               </div>
             </div>
@@ -177,17 +187,17 @@ export default async function CourseDetailsPage({ params }: Props) {
 
         {/* Sidebar Info */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-            <h2 className="mb-6 text-[10px] font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-6 text-[10px] font-black tracking-widest text-slate-400 uppercase">
               Course Summary
             </h2>
             <div className="space-y-5">
               <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
                   <GraduationCap className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">
                     Category
                   </p>
                   <p className="text-sm font-bold text-slate-700">{course.category || 'CORE'}</p>
@@ -195,11 +205,11 @@ export default async function CourseDetailsPage({ params }: Props) {
               </div>
 
               <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-500 dark:text-slate-400">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
                   <Clock className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                  <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">
                     Duration
                   </p>
                   <p className="text-sm font-bold text-slate-700">
@@ -209,15 +219,15 @@ export default async function CourseDetailsPage({ params }: Props) {
               </div>
 
               <div className="border-t border-slate-50 pt-5">
-                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">
                   Investment
                 </p>
                 <div className="mt-1 flex items-baseline gap-1">
-                  <span className="text-xl font-black text-[#002a5c]">
+                  <span className="text-xl font-black text-[#002a5c] dark:text-blue-400">
                     {course.currency} {Number(course.price).toLocaleString()}
                   </span>
                 </div>
-                <p className="mt-2 text-[10px] italic text-slate-400">
+                <p className="mt-2 text-[10px] text-slate-400 italic">
                   Price inclusive of training materials and exam fees.
                 </p>
               </div>
@@ -233,10 +243,12 @@ export default async function CourseDetailsPage({ params }: Props) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="flex items-center gap-3">
               <BookOpen className="h-5 w-5 text-slate-400" />
-              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Training Quality</h3>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                Training Quality
+              </h3>
             </div>
             <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
               All our courses follow strictly EASA Part-147 standards with certified instructors and

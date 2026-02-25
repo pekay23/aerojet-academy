@@ -25,7 +25,7 @@ export default function FourYearPage() {
       <Hero
         title="4-Year Full-Time Program"
         subtitle="B1.1 & B2 License — The complete pathway to becoming a Licensed Aircraft Engineer."
-        backgroundImage="/images/hero/fulltime-b1-b2.png"
+        backgroundImage="/images/hero/fulltime-b1-b2.webp"
       />
 
       <div className="mx-auto max-w-6xl space-y-24 px-6 py-20">

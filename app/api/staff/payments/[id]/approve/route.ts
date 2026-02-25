@@ -49,73 +49,110 @@ export const POST = withErrorHandler(
       // Handle Wallet Top-up
       if (payment.referenceType === 'WALLET_TOPUP') {
         const topUpReference = payment.referenceCode || `PAY-${payment.id.slice(-6)}`
-        await topUpWallet(
-          payment.userId,
-          Number(payment.amount),
-          `Wallet top-up approved (Ref: ${topUpReference})`,
-          topUpReference
-        )
+        await prisma.$transaction(async (tx) => {
+          // If Wallet doesn't exist yet (APPLICANT topping up for the first time), create it
+          let wallet = await tx.wallet.findUnique({ where: { userId: payment.userId } })
+          if (!wallet) {
+            wallet = await tx.wallet.create({
+              data: {
+                userId: payment.userId,
+                balance: 0,
+                reservedBalance: 0,
+                availableBalance: 0,
+              },
+            })
+          }
+
+          await topUpWallet(
+            tx,
+            payment.userId,
+            Number(payment.amount),
+            `Wallet top-up approved (Ref: ${topUpReference})`,
+            payment.id,
+            'PAYMENT_ID'
+          )
+        })
       }
 
-      // Handle Course Enrollment
+      // Handle Course Enrollment (Modular)
       if (payment.referenceType === 'COURSE' && payment.referenceId) {
-        await prisma.$transaction(async (tx) => {
-          // 1. Approve the enrollment
-          await tx.enrollment.update({
-            where: {
-              userId_courseId: {
-                userId: payment.userId,
-                courseId: payment.referenceId!,
-              },
+        await prisma.enrollment.update({
+          where: {
+            userId_courseId: {
+              userId: payment.userId,
+              courseId: payment.referenceId,
             },
+          },
+          data: {
+            status: 'ENROLLED',
+            approvedAt: new Date(),
+            amountPaid: payment.amount,
+          },
+        })
+      }
+
+      // Promote APPLICANT to STUDENT logic
+      const promotionTriggers = ['COURSE', 'YEAR_1_FULL', 'FULL_PROGRAMME', 'WALLET_TOPUP']
+      if (
+        payment.user.role === 'APPLICANT' &&
+        payment.referenceType &&
+        promotionTriggers.includes(payment.referenceType)
+      ) {
+        await prisma.$transaction(async (tx) => {
+          const { generateStudentId } = await import('@/lib/auth/helpers')
+          const studentId = generateStudentId()
+
+          await tx.user.update({
+            where: { id: payment.userId },
             data: {
-              status: 'ENROLLED',
-              approvedAt: new Date(),
-              amountPaid: payment.amount,
+              role: 'STUDENT',
+              status: 'ACTIVE',
             },
           })
 
-          // 2. Promote to STUDENT and set user status to ACTIVE if APPLICANT
-          if (payment.user.role === 'APPLICANT') {
-            const { generateStudentId } = await import('@/lib/auth/helpers')
-            const studentId = generateStudentId()
+          // Create StudentProfile if not exists
+          const existingProfile = await tx.studentProfile.findUnique({
+            where: { userId: payment.userId },
+          })
+          if (!existingProfile) {
+            // Determine enrollment type based on programme Choice if available
+            let enrollmentType = 'MODULAR'
+            if (
+              payment.user.programmeChoice?.includes('FULL_TIME') ||
+              payment.user.programmeChoice === 'MILITARY_1YEAR'
+            ) {
+              enrollmentType = 'FULL_TIME'
+            } else if (payment.user.programmeChoice === 'EXAM_ONLY') {
+              enrollmentType = 'EXAM_ONLY'
+            }
 
-            await tx.user.update({
-              where: { id: payment.userId },
+            await tx.studentProfile.create({
               data: {
-                role: 'STUDENT',
-                status: 'ACTIVE', // Ensure they are active after first purchase
+                userId: payment.userId,
+                studentId,
+                enrollmentType: enrollmentType as any,
+                studyPathway: (payment.user.programmeChoice?.startsWith('FULL_TIME')
+                  ? 'FULL_TIME'
+                  : payment.user.programmeChoice === 'EXAM_ONLY'
+                    ? 'EXAM_ONLY'
+                    : 'MODULAR') as any,
               },
             })
+          }
 
-            // Create StudentProfile if not exists
-            const existingProfile = await tx.studentProfile.findUnique({
-              where: { userId: payment.userId },
+          // Create Wallet if not exists
+          const existingWallet = await tx.wallet.findUnique({
+            where: { userId: payment.userId },
+          })
+          if (!existingWallet) {
+            await tx.wallet.create({
+              data: {
+                userId: payment.userId,
+                balance: 0,
+                reservedBalance: 0,
+                availableBalance: 0,
+              },
             })
-            if (!existingProfile) {
-              await tx.studentProfile.create({
-                data: {
-                  userId: payment.userId,
-                  studentId,
-                  enrollmentType: 'MODULAR', // Default
-                },
-              })
-            }
-
-            // Create Wallet if not exists
-            const existingWallet = await tx.wallet.findUnique({
-              where: { userId: payment.userId },
-            })
-            if (!existingWallet) {
-              await tx.wallet.create({
-                data: {
-                  userId: payment.userId,
-                  balance: 0,
-                  reservedBalance: 0,
-                  availableBalance: 0,
-                },
-              })
-            }
           }
         })
       }

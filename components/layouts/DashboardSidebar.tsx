@@ -99,7 +99,7 @@ export default function DashboardSidebar({
             >
               {collapsed ? (
                 <Image
-                  src="/apple-touch-icon.png"
+                  src="/apple-touch-icon.webp"
                   alt="Aerojet Academy"
                   width={32}
                   height={32}
@@ -107,7 +107,7 @@ export default function DashboardSidebar({
                 />
               ) : (
                 <Image
-                  src="/images/logos/ATA_logo_hor_onDark.png"
+                  src="/images/logos/ATA_logo_hor_onDark.webp"
                   alt="Aerojet Academy"
                   width={130}
                   height={32}

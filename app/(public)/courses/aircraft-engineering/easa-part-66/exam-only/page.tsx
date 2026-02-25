@@ -27,7 +27,7 @@ export default function ExamOnlyPage() {
       <Hero
         title="Examination Only"
         subtitle="Self-study option with flexible exam booking — pool seats, individual slots, and bundle packages."
-        backgroundImage="/images/hero/examonly.jpg"
+        backgroundImage="/images/hero/examonly.webp"
       />
 
       <div className="mx-auto max-w-6xl space-y-20 px-6 py-20">

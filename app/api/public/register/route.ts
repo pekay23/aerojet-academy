@@ -28,8 +28,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError((validation as any).error)
   }
 
-  const { firstName, lastName, middleName, email, phone, phoneCountryCode, nationality } =
-    validation.data as any
+  const {
+    firstName,
+    lastName,
+    middleName,
+    email,
+    phone,
+    phoneCountryCode,
+    nationality,
+    dateOfBirth,
+    selectedProgramme,
+  } = validation.data as any
 
   // Check if email already exists
   const existing = await prisma.user.findUnique({ where: { email } })
@@ -48,6 +57,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         registrationCode,
         registrationFee: config.fee,
         registrationCurrency: config.currency,
+        programmeChoice: selectedProgramme,
       },
     })
 
@@ -61,6 +71,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         middleName: middleName || null,
         phone: fullPhone,
         nationality: nationality || null,
+        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
       },
     })
 

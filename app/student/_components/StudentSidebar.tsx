@@ -17,6 +17,7 @@ import {
 
 const links = [
   { label: 'Dashboard', href: '/student', icon: LayoutDashboard },
+  { label: 'Academic Calendar', href: '/student/academic-calendar', icon: CalendarCheck },
   {
     label: 'Wallet',
     href: '/student/wallet',

@@ -9,6 +9,23 @@ import { hash, compare } from 'bcryptjs'
 export async function enrollInCourse(courseId: string) {
   const user = await requireStudent()
 
+  // Find course details
+  const course = await prisma.course.findUnique({ where: { id: courseId } })
+  if (!course) return { error: 'Course not found' }
+
+  // Restrict by pathway
+  const profile = await prisma.studentProfile.findUnique({
+    where: { userId: user.id },
+  })
+  if (!profile) return { error: 'Student profile not found.' }
+
+  if (profile.studyPathway === 'EXAM_ONLY') {
+    return {
+      error:
+        'Exam-Only students cannot enroll in training modules. Please contact support to change your pathway.',
+    }
+  }
+
   // Check if already enrolled
   const existing = await prisma.enrollment.findFirst({
     where: {
@@ -23,20 +40,75 @@ export async function enrollInCourse(courseId: string) {
   }
 
   try {
-    await prisma.enrollment.create({
-      data: {
-        userId: user.id,
-        courseId: courseId,
-        status: 'PENDING', // Default to PENDING until approved or paid
-        enrolledAt: new Date(),
-      },
-    })
+    const coursePrice = Number(course.price)
+
+    if (profile.studyPathway === 'MODULAR') {
+      const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
+
+      if (!wallet || Number(wallet.availableBalance) < coursePrice) {
+        return {
+          error: `Insufficient funds. Course costs ${course.currency} ${coursePrice.toFixed(2)}. Please top up your wallet.`,
+        }
+      }
+
+      // We need to capture the funds directly and auto-enroll
+      const { chargeWallet } = await import('@/lib/wallet/operations')
+
+      await prisma.$transaction(async (tx) => {
+        // Direct charge
+        await chargeWallet(
+          tx,
+          user.id,
+          coursePrice,
+          `Enrollment in ${course.code}: ${course.name}`,
+          course.id,
+          'COURSE_ID'
+        )
+
+        // Create Active Enrollment
+        await tx.enrollment.create({
+          data: {
+            userId: user.id,
+            courseId: courseId,
+            status: 'ACTIVE', // Auto-approved because paid in full
+            enrolledAt: new Date(),
+            approvedAt: new Date(),
+            amountPaid: coursePrice,
+          },
+        })
+
+        // Upgrade APPLICANT to STUDENT if needed
+        if (user.role === 'APPLICANT') {
+          await tx.user.update({
+            where: { id: user.id },
+            data: { role: 'STUDENT' },
+          })
+          await tx.studentProfile.update({
+            where: { userId: user.id },
+            data: { enrollmentStatus: 'ENROLLED' },
+          })
+        }
+      })
+    } else {
+      // FULL_TIME logic (or pending)
+      await prisma.enrollment.create({
+        data: {
+          userId: user.id,
+          courseId: courseId,
+          status: 'PENDING', // Default to PENDING until approved or paid
+          enrolledAt: new Date(),
+        },
+      })
+    }
+
     revalidatePath('/student/courses')
     revalidatePath('/student/courses/enroll')
+    revalidatePath('/student/wallet')
+
     return { success: true }
-  } catch (error) {
+  } catch (error: any) {
     console.error('Enrollment error:', error)
-    return { error: 'Failed to enroll in course.' }
+    return { error: error.message || 'Failed to enroll in course.' }
   }
 }
 
@@ -84,25 +156,17 @@ export async function joinExamPool(poolId: string) {
   try {
     // 4. Perform Transaction (Deduct/Reserve funds + Add Membership + Update Pool Count)
     await prisma.$transaction(async (tx) => {
-      // Create Reservation Transaction
-      await tx.walletTransaction.create({
-        data: {
-          walletId: wallet.id,
-          type: 'RESERVE',
-          amount: seatPrice,
-          description: `Seat reservation for ${pool.name}`,
-          metadata: { poolId: pool.id, eventId: pool.eventId },
-        },
-      })
+      const { reserveFunds } = await import('@/lib/wallet/operations')
 
-      // Update Wallet Balances
-      await tx.wallet.update({
-        where: { id: wallet.id },
-        data: {
-          availableBalance: { decrement: seatPrice },
-          reservedBalance: { increment: seatPrice },
-        },
-      })
+      // Update Wallet Balances & Create Reservation Transaction
+      await reserveFunds(
+        tx,
+        user.id,
+        seatPrice,
+        `Seat reservation for ${pool.name}`,
+        pool.id,
+        'POOL_ID'
+      )
 
       // Create Membership
       await tx.poolMembership.create({
@@ -129,6 +193,21 @@ export async function joinExamPool(poolId: string) {
               : 'OPEN',
         },
       })
+
+      // Role Upgrade mapping:
+      if (user.role === 'APPLICANT') {
+        await tx.user.update({
+          where: { id: user.id },
+          data: { role: 'STUDENT' },
+        })
+        const sp = await tx.studentProfile.findUnique({ where: { userId: user.id } })
+        if (sp) {
+          await tx.studentProfile.update({
+            where: { userId: user.id },
+            data: { enrollmentStatus: 'ENROLLED' },
+          })
+        }
+      }
     })
 
     revalidatePath('/student/exam-pools')

@@ -14,6 +14,20 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   }
 
   const user = session.user
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { status: true, role: true },
+  })
+
+  if (
+    !dbUser ||
+    ['SUSPENDED', 'DELETED', 'ARCHIVED'].includes(dbUser.status) ||
+    !allowedRoles.includes(dbUser.role)
+  ) {
+    redirect('/login')
+  }
+
   const userName = user.name ?? user.email
   const userRole = user.role
 
@@ -44,7 +58,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
       />
 
       {/* Main content — now flexes normally beside the sticky sidebar */}
-      <div className="flex min-h-screen flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-hidden">
         <main className="flex-1 p-6 lg:p-8">{children}</main>
       </div>
     </div>

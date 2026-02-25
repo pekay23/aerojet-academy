@@ -11,7 +11,7 @@ export default function EntryRequirementsPage() {
       <Hero
         title="Entry Requirements"
         subtitle="Academic and professional criteria for our EASA programmes."
-        backgroundImage="/images/hero/entry1.jpg"
+        backgroundImage="/images/hero/entry1.webp"
       />
 
       <div className="mx-auto max-w-5xl space-y-16 px-6 py-20">

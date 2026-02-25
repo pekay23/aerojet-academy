@@ -20,7 +20,7 @@ export default async function NewsroomPage() {
       <Hero
         title="News & Updates"
         subtitle="Stay informed about our latest intakes, partnerships, and facility milestones."
-        backgroundImage="/images/hero/news.jpg"
+        backgroundImage="/images/hero/news.webp"
       />
 
       <div className="mx-auto max-w-6xl px-6 py-20">

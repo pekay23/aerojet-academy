@@ -8,7 +8,7 @@ export const metadata: Metadata = { title: "Contact | Aerojet Academy" };
 export default function ContactPage() {
   return (
     <div className="bg-slate-50">
-      <Hero title="Contact Us" subtitle="Reach out to our admissions team for enquiries about EASA programmes." backgroundImage="/images/hero/contact-hero.jpg"/>
+      <Hero title="Contact Us" subtitle="Reach out to our admissions team for enquiries about EASA programmes." backgroundImage="/images/hero/contact-hero.webp"/>
 
       <div className="max-w-5xl mx-auto px-6 py-16 -mt-20 relative z-20">
         <SectionReveal>

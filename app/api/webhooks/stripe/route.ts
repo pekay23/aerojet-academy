@@ -46,12 +46,16 @@ export async function POST(req: NextRequest) {
 
         // If wallet top-up, credit the wallet
         if (paymentType === 'WALLET_TOP_UP') {
-          await topUpWallet(
-            userId,
-            paymentIntent.amount / 100, // Stripe amounts in cents
-            `Stripe payment ${paymentIntent.id}`,
-            'STRIPE'
-          )
+          await prisma.$transaction(async (tx) => {
+            await topUpWallet(
+              tx,
+              userId,
+              paymentIntent.amount / 100, // Stripe amounts in cents
+              `Stripe payment ${paymentIntent.id}`,
+              paymentId,
+              'PAYMENT_ID'
+            )
+          })
         }
 
         await createAuditLog({
@@ -99,4 +103,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
-

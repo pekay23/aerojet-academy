@@ -8,6 +8,7 @@ import UserActionsMenu from '../../_components/UserActionsMenu'
 import EditIdDialog from './_components/EditIdDialog'
 import EditProfileDialog from './_components/EditProfileDialog'
 import EditProfilePhotoDialog from './_components/EditProfilePhotoDialog'
+import EditPathwayDialog from './_components/EditPathwayDialog'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'User Details | Staff Portal' }
@@ -196,7 +197,7 @@ export default async function UserProfilePage({ params }: Props) {
           </div>
 
           {/* Role Specific Details */}
-          {user.role === 'STUDENT' && user.studentProfile && (
+          {['STUDENT', 'APPLICANT'].includes(user.role) && (
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
               <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
                 <UserIcon className="h-4 w-4" /> Student Profile
@@ -208,14 +209,16 @@ export default async function UserProfilePage({ params }: Props) {
                   </p>
                   <div className="flex items-center">
                     <p className="font-mono font-bold text-slate-700 dark:text-slate-300">
-                      {user.studentProfile.studentId}
+                      {user.studentProfile?.studentId || 'Not Assigned'}
                     </p>
-                    <EditIdDialog
-                      userId={user.id}
-                      currentId={user.studentProfile.studentId}
-                      type="studentId"
-                      label="Student ID"
-                    />
+                    {user.studentProfile && (
+                      <EditIdDialog
+                        userId={user.id}
+                        currentId={user.studentProfile.studentId}
+                        type="studentId"
+                        label="Student ID"
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
@@ -223,8 +226,23 @@ export default async function UserProfilePage({ params }: Props) {
                     Enrollment Status
                   </p>
                   <p className="font-bold text-slate-700 dark:text-slate-300">
-                    {user.studentProfile.enrollmentStatus}
+                    {user.studentProfile?.enrollmentStatus || 'PENDING'}
                   </p>
+                </div>
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                  <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">
+                    Study Pathway
+                  </p>
+                  <div className="flex items-center">
+                    <p className="font-bold text-slate-700 dark:text-slate-300">
+                      {user.studentProfile?.studyPathway || 'Not Selected'}
+                    </p>
+                    <EditPathwayDialog
+                      userId={user.id}
+                      currentPathway={(user.studentProfile?.studyPathway as any) || null}
+                      isLocked={user.studentProfile?.studyPathwayLocked || false}
+                    />
+                  </div>
                 </div>
               </div>
             </div>

@@ -12,26 +12,60 @@ export async function GET(req: NextRequest) {
   const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0)
 
   const [
-    totalApproved,
-    monthRevenue,
-    lastMonthRevenue,
+    totalRegistration,
+    totalCourse,
+    monthRegistration,
+    monthCourse,
+    lastMonthRegistration,
+    lastMonthCourse,
     pendingCount,
     pendingTotal,
     recentTransactions,
   ] = await Promise.all([
-    // All-time approved total
+    // All-time approved total - Registration (GHS)
     prisma.payment.aggregate({
-      where: { status: 'APPROVED' },
+      where: { status: 'APPROVED', referenceType: 'REGISTRATION' },
       _sum: { amount: true },
     }),
-    // This month
+    // All-time approved total - Course/Exams (EUR)
     prisma.payment.aggregate({
-      where: { status: 'APPROVED', approvedAt: { gte: startOfMonth } },
+      where: { status: 'APPROVED', referenceType: { in: ['COURSE', 'EXAM'] } },
       _sum: { amount: true },
     }),
-    // Last month
+    // This month - Registration
     prisma.payment.aggregate({
-      where: { status: 'APPROVED', approvedAt: { gte: startOfLastMonth, lte: endOfLastMonth } },
+      where: {
+        status: 'APPROVED',
+        referenceType: 'REGISTRATION',
+        approvedAt: { gte: startOfMonth },
+      },
+      _sum: { amount: true },
+    }),
+    // This month - Course
+    prisma.payment.aggregate({
+      where: {
+        status: 'APPROVED',
+        referenceType: { in: ['COURSE', 'EXAM'] },
+        approvedAt: { gte: startOfMonth },
+      },
+      _sum: { amount: true },
+    }),
+    // Last month - Registration
+    prisma.payment.aggregate({
+      where: {
+        status: 'APPROVED',
+        referenceType: 'REGISTRATION',
+        approvedAt: { gte: startOfLastMonth, lte: endOfLastMonth },
+      },
+      _sum: { amount: true },
+    }),
+    // Last month - Course
+    prisma.payment.aggregate({
+      where: {
+        status: 'APPROVED',
+        referenceType: { in: ['COURSE', 'EXAM'] },
+        approvedAt: { gte: startOfLastMonth, lte: endOfLastMonth },
+      },
       _sum: { amount: true },
     }),
     prisma.payment.count({ where: { status: 'PENDING' } }),
@@ -53,9 +87,12 @@ export async function GET(req: NextRequest) {
   ])
 
   return NextResponse.json({
-    totalApproved: Number(totalApproved._sum.amount ?? 0),
-    monthRevenue:  Number(monthRevenue._sum.amount ?? 0),
-    lastMonthRevenue: Number(lastMonthRevenue._sum.amount ?? 0),
+    totalRegistration: Number(totalRegistration._sum.amount ?? 0),
+    totalCourse: Number(totalCourse._sum.amount ?? 0),
+    monthRegistration: Number(monthRegistration._sum.amount ?? 0),
+    monthCourse: Number(monthCourse._sum.amount ?? 0),
+    lastMonthRegistration: Number(lastMonthRegistration._sum.amount ?? 0),
+    lastMonthCourse: Number(lastMonthCourse._sum.amount ?? 0),
     pendingCount,
     pendingTotal: Number(pendingTotal._sum.amount ?? 0),
     recentTransactions,

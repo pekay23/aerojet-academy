@@ -39,7 +39,7 @@ export default function ThemeToggle({ isCollapsed = false }: { isCollapsed?: boo
         isCollapsed ? 'justify-center' : ''
       }`}
       title={isCollapsed ? renderLabel() : undefined}
-      aria-label={`Switch to ${theme === 'light' ? 'dark' : theme === 'dark' ? 'system' : 'light'} mode`}
+      aria-label="Toggle theme"
     >
       {mounted ? (
         theme === 'light' ? (

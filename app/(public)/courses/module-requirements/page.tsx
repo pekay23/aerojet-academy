@@ -39,7 +39,7 @@ const pathways = [
 export default function ModuleRequirementsPage() {
   return (
     <div className="bg-slate-50">
-      <Hero title="Module Requirements" subtitle="The EASA Part-66 knowledge syllabus for B1 and B2 certification." backgroundImage="/images/hero/module-requirements.png" />
+      <Hero title="Module Requirements" subtitle="The EASA Part-66 knowledge syllabus for B1 and B2 certification." backgroundImage="/images/hero/module-requirements.webp" />
 
       <div className="max-w-6xl mx-auto px-6 py-20 space-y-24">
 
