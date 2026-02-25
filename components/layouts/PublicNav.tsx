@@ -198,9 +198,22 @@ export default function PublicNav() {
                     <NavigationMenuItem key={item.label}>
                       <Link
                         href={item.href || '#'}
-                        className={`px-4 py-2 text-sm font-bold uppercase transition-colors ${pathname === item.href ? activeLinkColorClasses : linkColorClasses} hover:${activeLinkColorClasses}`}
+                        className={`relative px-4 py-2 text-sm font-bold uppercase transition-colors ${
+                          pathname === item.href ? activeLinkColorClasses : linkColorClasses
+                        } hover:${activeLinkColorClasses}`}
                       >
-                        {item.label}
+                        {pathname === item.href && (
+                          <motion.div
+                            layoutId="nav-pill"
+                            className={`absolute inset-0 rounded-lg ${
+                              scrolled || mobileOpen || forceSolid
+                                ? 'bg-slate-100 dark:bg-white/10'
+                                : 'bg-white/10'
+                            }`}
+                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                          />
+                        )}
+                        <span className="relative z-10">{item.label}</span>
                       </Link>
                     </NavigationMenuItem>
                   )

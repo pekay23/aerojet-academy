@@ -10,6 +10,7 @@ import {
   CreditCard,
   ShieldCheck,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 import ApplicantDetailDrawer from './ApplicantDetailDrawer'
 
 interface Applicant {
@@ -185,13 +186,21 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                  className={`relative rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                     tab === t.key
-                      ? 'bg-white text-[#002a5c] shadow-sm dark:bg-slate-700 dark:text-white'
+                      ? 'text-[#002a5c] dark:text-white'
                       : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                 >
-                  {t.label}
+                  {tab === t.key && (
+                    <motion.div
+                      layoutId="applicants-tab"
+                      className="absolute inset-0 bg-white shadow-sm dark:bg-slate-700"
+                      style={{ borderRadius: 8, zIndex: 0 }}
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <span className="relative z-10">{t.label}</span>
                 </button>
               ))}
             </div>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   X,
   User,
@@ -68,7 +69,7 @@ export default function StudentDetailPanel({ student, onClose, onActionComplete 
 
   if (!student) {
     return (
-      <div className="hidden flex-1 flex-col items-center justify-center bg-slate-50 dark:bg-slate-800/50 text-center lg:flex">
+      <div className="hidden flex-1 flex-col items-center justify-center bg-slate-50 text-center lg:flex dark:bg-slate-800/50">
         <GraduationCap className="mb-3 h-12 w-12 text-slate-200" />
         <p className="text-sm font-bold text-slate-400">Select a student to view details</p>
       </div>
@@ -86,11 +87,11 @@ export default function StudentDetailPanel({ student, onClose, onActionComplete 
 
   return (
     <div
-      className="hidden flex-1 flex-col overflow-y-auto bg-slate-50 dark:bg-slate-800/50 lg:flex"
+      className="hidden flex-1 flex-col overflow-y-auto bg-slate-50 lg:flex dark:bg-slate-800/50"
       style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,0,0,0.08) transparent' }}
     >
       {/* Profile Header */}
-      <div className="border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-8 pt-8 pb-0">
+      <div className="border-b border-slate-100 bg-white px-8 pt-8 pb-0 dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-6 flex items-start justify-between">
           <div className="flex items-center gap-5">
             <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#002a5c] text-xl font-black text-white">
@@ -151,12 +152,17 @@ export default function StudentDetailPanel({ student, onClose, onActionComplete 
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`border-b-2 pb-3 text-sm font-bold transition-all ${
-                tab === t
-                  ? 'border-[#002a5c] text-[#002a5c]'
-                  : 'border-transparent text-slate-400 hover:text-slate-600'
+              className={`relative pb-3 text-sm font-bold transition-all ${
+                tab === t ? 'text-[#002a5c]' : 'text-slate-400 hover:text-slate-600'
               }`}
             >
+              {tab === t && (
+                <motion.div
+                  layoutId="student-detail-underline"
+                  className="absolute bottom-0 left-0 h-0.5 w-full bg-[#002a5c]"
+                  transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                />
+              )}
               {t}
             </button>
           ))}
@@ -238,7 +244,7 @@ export default function StudentDetailPanel({ student, onClose, onActionComplete 
                   GHS {walletBal.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                 </p>
               </div>
-              <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4">
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Total Balance
                 </p>
@@ -265,10 +271,12 @@ export default function StudentDetailPanel({ student, onClose, onActionComplete 
                 {student.enrollments.map((e) => (
                   <div
                     key={e.id}
-                    className="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3"
+                    className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
                   >
                     <div>
-                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">{e.course.name}</p>
+                      <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
+                        {e.course.name}
+                      </p>
                       <p className="font-mono text-xs text-slate-400">{e.course.code}</p>
                     </div>
                     <span
@@ -316,7 +324,7 @@ function Grid2({ children }: { children: React.ReactNode }) {
 
 function Field({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 py-3">
+    <div className="rounded-xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
       <p className="mb-1 flex items-center gap-1.5 text-[10px] font-black tracking-widest text-slate-400 uppercase">
         <Icon className="h-3 w-3" /> {label}
       </p>
