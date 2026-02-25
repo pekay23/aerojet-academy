@@ -11,10 +11,30 @@ export default async function ApplicantLayout({ children }: { children: React.Re
   const user = session.user
   if (!['APPLICANT'].includes(user.role)) redirect('/login')
 
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { status: true, role: true },
+  })
+
+  if (
+    !dbUser ||
+    ['SUSPENDED', 'DELETED', 'ARCHIVED'].includes(dbUser.status) ||
+    dbUser.role !== 'APPLICANT'
+  ) {
+    redirect('/login')
+  }
+
   const profile = await prisma.profile.findUnique({
     where: { userId: user.id },
     select: { firstName: true, lastName: true },
   })
+
+  const studentProfile = await prisma.studentProfile.findUnique({
+    where: { userId: user.id },
+    select: { studyPathway: true },
+  })
+
+  const hasPathway = !!studentProfile?.studyPathway
 
   const userName = profile ? `${profile.firstName} ${profile.lastName}` : user.email
   const userRole = 'Applicant'
@@ -25,6 +45,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         userName={userName}
         userRole={userRole}
         userImage={user.image || undefined}
+        hasPathway={hasPathway}
       />
       <main className="min-h-screen flex-1">
         <div className="p-6 sm:p-8 lg:p-10">

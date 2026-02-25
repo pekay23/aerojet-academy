@@ -9,12 +9,12 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="absolute inset-0 bg-linear-to-br from-[#002a5c] via-[#003a7c] to-[#001a3c]" />
         <div
           className="absolute inset-0 bg-cover bg-center opacity-20"
-          style={{ backgroundImage: 'url(/images/hero/registration.png)' }}
+          style={{ backgroundImage: 'url(/images/hero/registration.webp)' }}
         />
         <div className="relative z-10">
           <Link href="/" className="mb-20 flex items-center gap-3">
             <Image
-              src="/images/logos/ATA_logo_hor_onDark.png"
+              src="/images/logos/ATA_logo_hor_onDark.webp"
               alt="Aerojet Academy"
               width={160}
               height={40}
@@ -56,7 +56,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="flex items-center justify-between border-b border-slate-100 bg-white p-4 lg:hidden dark:border-slate-800 dark:bg-slate-900">
           <Link href="/">
             <Image
-              src="/images/logos/AATA_logo_hor_onWhite.png"
+              src="/images/logos/AATA_logo_hor_onWhite.webp"
               alt="Aerojet Academy"
               width={120}
               height={30}

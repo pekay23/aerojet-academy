@@ -23,7 +23,6 @@ async function getDashboardData() {
 
   const [userStatusCounts, pendingPayments, recentPendingPayments, activePool, approvedPayments] =
     await Promise.all([
-      // Grouped user counts for efficiency
       prisma.user.groupBy({
         by: ['role', 'status'],
         _count: { _all: true },
@@ -55,23 +54,10 @@ async function getDashboardData() {
           status: 'APPROVED',
           approvedAt: { gte: sixMonthsAgo },
         },
-        select: { amount: true, approvedAt: true },
+        select: { amount: true, approvedAt: true, referenceType: true },
       }),
     ])
 
-  // Map user counts
-  const totalActiveUsers = userStatusCounts
-    .filter((cg) => cg.status === 'ACTIVE')
-    .reduce((acc, cg) => acc + cg._count._all, 0)
-
-  const pendingApplicants =
-    userStatusCounts.find((cg) => cg.role === 'APPLICANT' && cg.status === 'PENDING')?._count
-      ._all ?? 0
-
-  const activeStudents =
-    userStatusCounts.find((cg) => cg.role === 'STUDENT' && cg.status === 'ACTIVE')?._count._all ?? 0
-
-  // Aggregate revenue by month
   const monthNames = [
     'Jan',
     'Feb',
@@ -86,13 +72,12 @@ async function getDashboardData() {
     'Nov',
     'Dec',
   ]
-  const revenueByMonth: Record<string, number> = {}
+  const revenueByMonth: Record<string, { reg: number; course: number }> = {}
 
-  // Initialise all 6 months with 0
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
-    revenueByMonth[key] = 0
+    revenueByMonth[key] = { reg: 0, course: 0 }
   }
 
   for (const payment of approvedPayments) {
@@ -100,14 +85,29 @@ async function getDashboardData() {
     const d = new Date(payment.approvedAt)
     const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
     if (key in revenueByMonth) {
-      revenueByMonth[key] += Number(payment.amount)
+      if (payment.referenceType === 'REGISTRATION') {
+        revenueByMonth[key].reg += Number(payment.amount)
+      } else {
+        revenueByMonth[key].course += Number(payment.amount)
+      }
     }
   }
 
-  const revenueData = Object.entries(revenueByMonth).map(([fullKey, revenue]) => ({
-    month: fullKey.split(' ')[0], // just "Jan", "Feb" etc for chart label
-    revenue,
+  const revenueData = Object.entries(revenueByMonth).map(([fullKey, val]) => ({
+    month: fullKey.split(' ')[0],
+    revenue: val.course, // Main revenue line showing Course (EUR)
+    regRevenue: val.reg, // Secondary data
   }))
+
+  const totalActiveUsers = userStatusCounts
+    .filter((u) => u.status === 'ACTIVE')
+    .reduce((acc, curr) => acc + curr._count._all, 0)
+  const pendingApplicants = userStatusCounts
+    .filter((u) => u.role === 'APPLICANT' && u.status === 'PENDING')
+    .reduce((acc, curr) => acc + curr._count._all, 0)
+  const activeStudents = userStatusCounts
+    .filter((u) => u.role === 'STUDENT' && u.status === 'ACTIVE')
+    .reduce((acc, curr) => acc + curr._count._all, 0)
 
   return {
     totalUsers: totalActiveUsers,
@@ -217,16 +217,16 @@ export default async function StaffDashboardPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-black tracking-tight text-slate-800 uppercase dark:text-white">
-                Revenue Overview
+                Course Revenue Overview
               </h2>
               <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
-                Approved payments — last 6 months
+                Approved training payments (EUR) — last 6 months
               </p>
             </div>
             <TrendingUp className="h-5 w-5 text-[#4c9ded]" />
           </div>
           {hasRevenue ? (
-            <RevenueChart data={data.revenueData} currency="GHS " />
+            <RevenueChart data={data.revenueData} currency="€" />
           ) : (
             <div className="flex h-64 flex-col items-center justify-center text-center">
               <TrendingUp className="mb-3 h-10 w-10 text-slate-200" />

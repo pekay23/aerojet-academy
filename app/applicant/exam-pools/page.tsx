@@ -5,6 +5,7 @@ import { Suspense } from 'react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Exam Pools | Applicant Portal' }
 export const dynamic = 'force-dynamic'
@@ -38,7 +39,7 @@ export default async function ExamPoolsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+        <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
           Exam Pools
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -47,16 +48,26 @@ export default async function ExamPoolsPage() {
         </p>
       </div>
 
-      {/* Info Banner */}
-      <div className="flex items-start gap-3 rounded-2xl border border-blue-200 bg-blue-50 p-5">
-        <Info className="mt-0.5 h-5 w-5 shrink-0 text-blue-500" />
-        <div>
-          <p className="text-sm font-bold text-blue-800">For Your Information</p>
-          <p className="mt-0.5 text-xs text-blue-600">
-            Exam pools are open to enrolled students. Once your registration is approved and you've
-            enrolled in a course, you'll be able to book exam pool slots through the student portal.
-          </p>
+      {/* Info Banner & CTA */}
+      <div className="flex flex-col items-start gap-4 rounded-2xl border border-blue-200 bg-blue-50 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-start gap-3">
+          <div className="rounded-xl bg-blue-100 p-2.5">
+            <Info className="h-6 w-6 text-blue-600" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-blue-900">Credit Your Exam Wallet</p>
+            <p className="mt-1 text-sm text-blue-700">
+              To join these exam pools, you must first convert your Applicant account to an active
+              Student account by crediting your Exam Wallet.
+            </p>
+          </div>
         </div>
+        <Link
+          href="/applicant/wallet-top-up"
+          className="flex shrink-0 items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700"
+        >
+          Top Up Wallet
+        </Link>
       </div>
 
       <Suspense fallback={<PoolsSkeleton />}>
@@ -99,8 +110,8 @@ async function PoolList() {
 
   if (pools.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-12 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white dark:bg-slate-900 text-slate-300 shadow-sm">
+      <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-12 text-center dark:border-slate-700 dark:bg-slate-800/50">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white text-slate-300 shadow-sm dark:bg-slate-900">
           <BookOpen className="h-8 w-8" />
         </div>
         <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No open exam pools</h3>
@@ -122,18 +133,18 @@ async function PoolList() {
         return (
           <div
             key={pool.id}
-            className="flex flex-col gap-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm"
+            className="flex flex-col gap-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
           >
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="mb-1 font-mono text-xs font-bold text-slate-400">Exam Pool</p>
-                <h2 className="text-base font-bold leading-snug text-slate-900 dark:text-slate-100">
+                <h2 className="text-base leading-snug font-bold text-slate-900 dark:text-slate-100">
                   {pool.event?.name ?? pool.name ?? 'Exam Pool'}
                 </h2>
               </div>
               <span
-                className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-bold uppercase tracking-widest ${poolStatusColor[pool.status] ?? 'bg-slate-100 text-slate-500'}`}
+                className={`shrink-0 rounded-full px-2 py-1 text-[10px] font-bold tracking-widest uppercase ${poolStatusColor[pool.status] ?? 'bg-slate-100 text-slate-500'}`}
               >
                 {poolStatusLabel[pool.status] ?? pool.status}
               </span>
@@ -183,11 +194,11 @@ async function PoolList() {
             <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-3">
               <div>
                 <p className="text-[10px] text-slate-400">Exam Fee</p>
-                <p className="text-base font-black text-[#002a5c]">
+                <p className="text-base font-black text-[#002a5c] dark:text-blue-400">
                   EUR {Number(pool.seatPrice).toLocaleString()}
                 </p>
               </div>
-              <span className="text-xs italic text-slate-400">Enrolled students only</span>
+              <span className="text-xs text-slate-400 italic">Enrolled students only</span>
             </div>
           </div>
         )
@@ -195,4 +206,3 @@ async function PoolList() {
     </div>
   )
 }
-

@@ -19,7 +19,7 @@ export default function Careers() {
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
           <SectionReveal>
             <Image
-              src="/images/careers/aircraftcareers.jpg"
+              src="/images/careers/aircraftcareers.webp"
               alt="Aircraft Engineer working on an engine"
               width={600}
               height={700}

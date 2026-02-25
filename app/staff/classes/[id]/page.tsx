@@ -31,6 +31,7 @@ export default async function ClassDetailsPage({ params }: Props) {
     where: { id },
     include: {
       course: true,
+      semester: true,
       instructor: {
         include: {
           user: {
@@ -69,11 +70,13 @@ export default async function ClassDetailsPage({ params }: Props) {
                 <span className="font-mono text-sm font-bold text-slate-400">
                   {cls.course.code}
                 </span>
-                <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-black uppercase text-blue-700">
-                  {cls.semester || 'Current Semester'}
+                <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-black text-blue-700 uppercase">
+                  {cls.semester?.name || 'Current Semester'}
                 </span>
               </div>
-              <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">{cls.name}</h1>
+              <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+                {cls.name}
+              </h1>
             </div>
           </div>
           <ClassActionsMenu classId={cls.id} className={cls.name || ''} />
@@ -84,27 +87,27 @@ export default async function ClassDetailsPage({ params }: Props) {
         {/* Main Info */}
         <div className="space-y-6 lg:col-span-2">
           {/* Class Details */}
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-            <h2 className="mb-4 text-xs font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-4 text-xs font-black tracking-widest text-slate-400 uppercase">
               Class Information
             </h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">Course</p>
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Course</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
                   <BookOpen className="h-4 w-4 text-[#4c9ded]" />
                   {cls.course.name}
                 </div>
               </div>
-              <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">Instructor</p>
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Instructor</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
                   <UserIcon className="h-4 w-4 text-[#4c9ded]" />
                   {instructorName}
                 </div>
               </div>
-              <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">
                   Current Occupancy
                 </p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
@@ -116,8 +119,8 @@ export default async function ClassDetailsPage({ params }: Props) {
           </div>
 
           {/* About Section */}
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-            <h2 className="mb-4 text-xs font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-4 text-xs font-black tracking-widest text-slate-400 uppercase">
               Description
             </h2>
             <p className="leading-relaxed text-slate-600 dark:text-slate-400">
@@ -128,19 +131,19 @@ export default async function ClassDetailsPage({ params }: Props) {
 
         {/* Sidebar Info */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-            <h2 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
               <Calendar className="h-4 w-4" /> Schedule
             </h2>
             <div className="space-y-4">
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">Start Date</p>
+              <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
+                <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Start Date</p>
                 <p className="font-black text-slate-700">
                   {new Date(cls.startDate).toLocaleDateString(undefined, { dateStyle: 'long' })}
                 </p>
               </div>
-              <div className="rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">End Date</p>
+              <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
+                <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">End Date</p>
                 <p className="font-black text-slate-700">
                   {new Date(cls.endDate).toLocaleDateString(undefined, { dateStyle: 'long' })}
                 </p>
@@ -148,17 +151,17 @@ export default async function ClassDetailsPage({ params }: Props) {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-            <h2 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
               <Clock className="h-4 w-4" /> Weekly Timeline
             </h2>
             <div className="space-y-2">
               {cls.schedule ? (
-                <pre className="whitespace-pre-wrap text-xs font-bold text-slate-700">
+                <pre className="text-xs font-bold whitespace-pre-wrap text-slate-700">
                   {JSON.stringify(cls.schedule, null, 2)}
                 </pre>
               ) : (
-                <p className="text-xs italic text-slate-400">No specific weekly schedule set.</p>
+                <p className="text-xs text-slate-400 italic">No specific weekly schedule set.</p>
               )}
             </div>
           </div>

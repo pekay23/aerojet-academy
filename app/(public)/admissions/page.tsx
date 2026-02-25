@@ -14,7 +14,7 @@ export default function AdmissionsPage() {
       <Hero 
         title="Admissions" 
         subtitle="Your journey to a global aviation career starts with a simple first step." 
-        backgroundImage="/images/hero/admissions.jpg" 
+        backgroundImage="/images/hero/admissions.webp" 
       />
 
       {/* --- START: GRADIENT WRAPPER --- */}

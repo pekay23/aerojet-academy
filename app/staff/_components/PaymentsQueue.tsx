@@ -11,6 +11,14 @@ import {
   Loader2,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import * as Dialog from '@radix-ui/react-dialog'
+
+interface FileUpload {
+  id: string
+  url: string
+  filename: string
+  createdAt: string
+}
 
 interface Payment {
   id: string
@@ -56,6 +64,10 @@ export default function PaymentsQueue({
   const [actionLoading, setActionLoading] = useState<string | null>(null)
   const [rejectTarget, setRejectTarget] = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
+
+  const [historyTargetId, setHistoryTargetId] = useState<string | null>(null)
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [uploadHistory, setUploadHistory] = useState<FileUpload[]>([])
 
   const fetchPayments = useCallback(async () => {
     setLoading(true)
@@ -114,6 +126,22 @@ export default function PaymentsQueue({
       setActionLoading(null)
       setRejectTarget(null)
       setRejectReason('')
+    }
+  }
+
+  const handleOpenHistory = async (id: string) => {
+    setHistoryTargetId(id)
+    setHistoryLoading(true)
+    try {
+      const res = await fetch(`/api/staff/payments/uploads/${id}`)
+      if (!res.ok) throw new Error()
+      const data = await res.json()
+      setUploadHistory(data.uploads || [])
+    } catch {
+      toast.error('Failed to load history')
+      setUploadHistory([])
+    } finally {
+      setHistoryLoading(false)
     }
   }
 
@@ -250,14 +278,22 @@ export default function PaymentsQueue({
                         </td>
                         <td className="px-5 py-3.5">
                           {p.proofUrl ? (
-                            <a
-                              href={p.proofUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1 text-xs font-bold text-[#4c9ded] hover:underline"
-                            >
-                              <ExternalLink className="h-3.5 w-3.5" /> View
-                            </a>
+                            <div className="flex flex-col items-start gap-1">
+                              <a
+                                href={p.proofUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs font-bold text-[#4c9ded] hover:underline"
+                              >
+                                <ExternalLink className="h-3.5 w-3.5" /> Latest
+                              </a>
+                              <button
+                                onClick={() => handleOpenHistory(p.id)}
+                                className="text-[10px] font-medium text-slate-400 hover:text-slate-600 hover:underline dark:hover:text-slate-200"
+                              >
+                                View History
+                              </button>
+                            </div>
                           ) : (
                             <span className="text-xs text-slate-300">—</span>
                           )}
@@ -346,6 +382,67 @@ export default function PaymentsQueue({
           </div>
         )}
       </div>
+
+      <Dialog.Root
+        open={!!historyTargetId}
+        onOpenChange={(open) => !open && setHistoryTargetId(null)}
+      >
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
+          <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-4 flex items-center justify-between">
+              <Dialog.Title className="text-lg font-black text-[#002a5c] dark:text-white">
+                Upload History
+              </Dialog.Title>
+              <Dialog.Close className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300">
+                <XCircle className="h-5 w-5" />
+              </Dialog.Close>
+            </div>
+
+            <div className="space-y-3">
+              {historyLoading ? (
+                <div className="flex justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-[#4c9ded]" />
+                </div>
+              ) : uploadHistory.length === 0 ? (
+                <div className="py-6 text-center text-sm text-slate-500">
+                  No previous uploads found in history.
+                </div>
+              ) : (
+                <div className="max-h-[60vh] space-y-3 overflow-y-auto pr-2">
+                  {uploadHistory.map((file, i) => (
+                    <div
+                      key={file.id}
+                      className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/40"
+                    >
+                      <div>
+                        <p className="mb-0.5 max-w-[200px] truncate text-xs font-bold text-slate-700 dark:text-slate-300">
+                          {file.filename}
+                        </p>
+                        <p className="text-[10px] text-slate-400">
+                          {new Date(file.createdAt).toLocaleString(undefined, {
+                            dateStyle: 'medium',
+                            timeStyle: 'short',
+                          })}
+                          {i === 0 && <span className="ml-2 font-bold text-[#4c9ded]">Latest</span>}
+                        </p>
+                      </div>
+                      <a
+                        href={file.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 hover:text-[#002a5c] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" /> Open
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   )
 }

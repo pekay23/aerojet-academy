@@ -92,7 +92,7 @@ export default async function PurchasePage({ params }: Props) {
                     {label}
                   </dt>
                   <dd
-                    className={`font-mono text-sm font-bold ${highlight ? 'text-lg text-[#002a5c]' : 'text-slate-700 dark:text-slate-200'}`}
+                    className={`font-mono text-sm font-bold ${highlight ? 'text-lg text-[#002a5c] dark:text-blue-400' : 'text-slate-700 dark:text-slate-200'}`}
                   >
                     {value || '—'}
                   </dd>

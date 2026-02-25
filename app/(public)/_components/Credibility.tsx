@@ -4,14 +4,14 @@ import Image from 'next/image'
 import SectionReveal from './SectionReveal' // We'll wrap this in a reveal for a nice effect
 
 const partners = [
-  { name: 'EASA', src: '/images/partners/easa-logo.png', width: 120, height: 40 },
-  { name: 'USTDA', src: '/images/partners/ustda.jpg', width: 120, height: 40 },
-  { name: 'Ghana Air Force', src: '/images/partners/Airforce-logo.png', width: 120, height: 40 },
-  { name: 'Joramco', src: '/images/partners/Joramco-Logo-AI.png', width: 120, height: 35 },
-  { name: 'Gaptek', src: '/images/partners/Logotip-GAPTEK.jpg', width: 120, height: 40 },
+  { name: 'EASA', src: '/images/partners/easa-logo.webp', width: 120, height: 40 },
+  { name: 'USTDA', src: '/images/partners/ustda.webp', width: 120, height: 40 },
+  { name: 'Ghana Air Force', src: '/images/partners/Airforce-logo.webp', width: 120, height: 40 },
+  { name: 'Joramco', src: '/images/partners/Joramco-Logo-AI.webp', width: 120, height: 35 },
+  { name: 'Gaptek', src: '/images/partners/Logotip-GAPTEK.webp', width: 120, height: 40 },
   {
     name: 'Aerojet Foundation',
-    src: '/images/partners/foundation-logo.png',
+    src: '/images/partners/foundation-logo.webp',
     width: 130,
     height: 40,
   },

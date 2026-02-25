@@ -11,7 +11,7 @@ export default function MROPage() {
       <Hero
         title="Accra MRO Project"
         subtitle="Establishing West Africa's premier Maintenance, Repair, and Overhaul hub."
-        backgroundImage="/images/hero/hanger.jpg"
+        backgroundImage="/images/hero/hanger.webp"
       />
 
       <div className="mx-auto max-w-4xl space-y-12 px-6 py-20">

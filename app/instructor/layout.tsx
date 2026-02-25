@@ -1,5 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
+import prisma from '@/lib/prisma/client'
 import InstructorSidebar from './_components/InstructorSidebar'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import { getPendingGradingCount } from '@/lib/actions/instructor'
@@ -9,7 +10,21 @@ export default async function InstructorLayout({ children }: { children: React.R
   if (!session) redirect('/login')
 
   const user = session.user
-  if (!['INSTRUCTOR', 'ADMIN', 'SUPER_ADMIN'].includes(user.role)) redirect('/login')
+  const allowedRoles = ['INSTRUCTOR', 'ADMIN', 'SUPER_ADMIN']
+  if (!allowedRoles.includes(user.role)) redirect('/login')
+
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { status: true, role: true },
+  })
+
+  if (
+    !dbUser ||
+    ['SUSPENDED', 'DELETED', 'ARCHIVED'].includes(dbUser.status) ||
+    !allowedRoles.includes(dbUser.role)
+  ) {
+    redirect('/login')
+  }
 
   const userName = user.name || user.email
   const userRole = user.role

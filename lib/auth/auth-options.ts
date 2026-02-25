@@ -13,8 +13,48 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
+        token: { label: 'Token', type: 'text' }, // Added for auto-login
       },
       async authorize(credentials) {
+        // Handling Auto-Login via Verification Token
+        if (credentials?.token) {
+          const user = await prisma.user.findUnique({
+            where: { verifyToken: credentials.token },
+            include: { profile: { select: { firstName: true, lastName: true } } },
+          })
+
+          if (!user) {
+            throw new Error('Invalid verification token')
+          }
+
+          if (user.verifyTokenExpires && user.verifyTokenExpires < new Date()) {
+            throw new Error('Verification link has expired')
+          }
+
+          // Mark as verified and clear token
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              emailVerified: new Date(),
+              verifyToken: null,
+            },
+          })
+
+          const name = user.profile
+            ? `${user.profile.firstName} ${user.profile.lastName}`
+            : user.email
+
+          return {
+            id: user.id,
+            email: user.academyEmail || user.email,
+            name,
+            role: user.role,
+            status: user.status,
+            mustChangePassword: user.mustChangePassword && !user.passwordChanged,
+          }
+        }
+
+        // Normal Email/Password Login
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Email and password are required')
         }

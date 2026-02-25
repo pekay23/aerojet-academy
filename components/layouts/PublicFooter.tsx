@@ -33,7 +33,7 @@ export default function PublicFooter() {
           <div className="col-span-1 lg:col-span-1">
             <Link href="/">
               <Image
-                src="/images/logos/logo-footer.png"
+                src="/images/logos/logo-footer.webp"
                 alt="Aerojet Footer Logo"
                 width={160}
                 height={40}

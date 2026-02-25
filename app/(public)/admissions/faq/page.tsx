@@ -54,7 +54,7 @@ const FAQS = [
 export default function FAQPage() {
   return (
     <div className="bg-slate-50">
-      <Hero title="Frequently Asked Questions" subtitle="Answers to common questions about admissions, training, and careers." backgroundImage="/images/hero/faq.png"/>
+      <Hero title="Frequently Asked Questions" subtitle="Answers to common questions about admissions, training, and careers." backgroundImage="/images/hero/faq.webp"/>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-20 space-y-10">
         {FAQS.map((category, idx) => (

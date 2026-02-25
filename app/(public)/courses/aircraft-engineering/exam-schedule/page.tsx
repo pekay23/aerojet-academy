@@ -28,7 +28,7 @@ export default function ExamSchedulePage() {
       <PageHero 
         title="Exam Schedule 2026–2027"
         subtitle="Official examination windows for EASA Part-66 modular candidates."
-        backgroundImage="/images/hero/examsschedule.jpg" // Make sure this image path is correct
+        backgroundImage="/images/hero/examsschedule.webp" // Make sure this image path is correct
       />
       <div className="container mx-auto px-6 py-20 sm:py-28">
         <div className="max-w-4xl mx-auto space-y-16">

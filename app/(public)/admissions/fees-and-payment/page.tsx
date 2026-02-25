@@ -17,7 +17,7 @@ const milestones = [
 export default function FeesPage() {
   return (
     <div className="bg-slate-50">
-      <Hero title="Fees & Payment Rules" subtitle="Structured payment milestones for Aerojet Academy training programmes." backgroundImage="/images/hero/feespayment.jpg" />      <div className="max-w-5xl mx-auto px-6 py-20 space-y-16">
+      <Hero title="Fees & Payment Rules" subtitle="Structured payment milestones for Aerojet Academy training programmes." backgroundImage="/images/hero/feespayment.webp" />      <div className="max-w-5xl mx-auto px-6 py-20 space-y-16">
         {/* Registration Fee */}
         <SectionReveal>
           <section className="bg-white p-6 sm:p-10 rounded-2xl sm:rounded-3xl shadow-xl border border-slate-100 flex flex-col md:flex-row items-center gap-8">

@@ -1,8 +1,19 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import prisma from '@/lib/prisma/client'
 import { Metadata } from 'next'
-import { Settings, Save, School, Globe, Clock, DollarSign, Mail, Shield } from 'lucide-react'
+import {
+  Settings,
+  Save,
+  School,
+  Globe,
+  Clock,
+  DollarSign,
+  Mail,
+  Shield,
+  Sparkles,
+} from 'lucide-react'
 import WelcomeMessagesManager from './_components/WelcomeMessagesManager'
 import { getWelcomeMessagesGrouped } from '@/lib/welcome-messages'
 
@@ -206,49 +217,80 @@ export default async function SettingsPage() {
   return (
     <div className="mx-auto max-w-4xl">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
-          Settings
-        </h1>
-        <p className="text-slate-500 dark:text-slate-400">
-          Configure your academy platform settings
-        </p>
+      <div className="mb-10 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+            Settings
+          </h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Configure your academy platform settings and preferences
+          </p>
+        </div>
+        <Link
+          href="/staff/settings/email-previews"
+          className="group flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-700 dark:hover:bg-slate-800"
+        >
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:group-hover:bg-blue-900/50">
+            <Mail className="h-4 w-4" />
+          </div>
+          <span className="flex items-center gap-2">
+            Email Previews
+            <span className="rounded-full bg-blue-100 px-1.5 py-0.5 text-[10px] font-black text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
+              NEW
+            </span>
+          </span>
+        </Link>
       </div>
 
       <form action="/api/staff/settings" method="POST" className="space-y-6">
         {DEFAULT_SETTINGS.map(({ group, icon: Icon, color, keys }) => (
           <div
             key={group}
-            className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/50"
+            className="overflow-hidden rounded-3xl border border-slate-200/60 bg-white/70 shadow-sm transition-all hover:shadow-xl hover:shadow-blue-500/5 dark:border-white/5 dark:bg-[#111827]/60 dark:backdrop-blur-xl"
           >
             {/* Group header */}
-            <div className="flex items-center gap-3 border-b border-slate-100 px-6 py-4 dark:border-slate-800">
-              <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${color}`}>
-                <Icon className="h-5 w-5" />
+            <div className="flex items-center gap-4 border-b border-slate-100/60 bg-slate-50/40 px-8 py-6 dark:border-white/5 dark:bg-white/2">
+              <div
+                className={`flex h-12 w-12 items-center justify-center rounded-2xl shadow-inner ${color} dark:bg-opacity-20`}
+              >
+                <Icon className="h-6 w-6" />
               </div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-white">{group}</h2>
+              <div>
+                <h2 className="text-lg font-black tracking-tight text-[#002a5c] uppercase dark:text-white">
+                  {group}
+                </h2>
+                <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                  Configuration Group
+                </p>
+              </div>
             </div>
 
             {/* Settings rows */}
-            <div className="divide-y divide-slate-50">
+            <div className="divide-y divide-slate-100/60 dark:divide-white/5">
               {keys.map(({ key, label, description, type, default: defaultVal }) => {
                 const currentValue = settingMap.get(key) ?? defaultVal
                 return (
-                  <div key={key} className="flex items-center gap-6 px-6 py-5">
-                    <div className="flex-1">
+                  <div
+                    key={key}
+                    className="group flex flex-col justify-between gap-6 px-8 py-7 transition-colors hover:bg-slate-50/50 md:flex-row md:items-center dark:hover:bg-white/1"
+                  >
+                    <div className="max-w-xl flex-1">
                       <label
                         htmlFor={key}
-                        className="block text-sm font-bold text-slate-900 dark:text-slate-200"
+                        className="block text-sm font-bold text-slate-900 dark:text-slate-100"
                       >
                         {label}
                       </label>
-                      <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
+                      <p className="mt-1.5 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                         {description}
                       </p>
                     </div>
-                    <div className="w-72 shrink-0">
+                    <div className="w-full shrink-0 md:w-72">
                       {type === 'BOOLEAN' ? (
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center justify-end gap-3">
+                          <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                            {currentValue === 'true' ? 'Active' : 'Disabled'}
+                          </span>
                           <input type="hidden" name={`${key}__type`} value="BOOLEAN" />
                           <label className="relative inline-flex cursor-pointer items-center">
                             <input
@@ -258,23 +300,20 @@ export default async function SettingsPage() {
                               defaultChecked={currentValue === 'true'}
                               className="peer sr-only"
                             />
-                            <div className="peer h-6 w-11 rounded-full bg-slate-200 peer-checked:bg-[#002a5c] peer-focus:ring-2 peer-focus:ring-[#002a5c]/30 after:absolute after:top-[2px] after:left-[2px] after:h-5 after:w-5 after:rounded-full after:bg-white after:transition-all peer-checked:after:translate-x-full dark:bg-slate-900"></div>
+                            <div className="peer h-7 w-12 rounded-full bg-slate-200 shadow-inner transition-colors peer-checked:bg-[#002a5c] peer-focus:ring-4 peer-focus:ring-[#002a5c]/20 peer-focus:outline-none after:absolute after:top-[4px] after:left-[4px] after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600 dark:peer-focus:ring-blue-600/30"></div>
                           </label>
-                          <span className="text-sm text-slate-600 dark:text-slate-400">
-                            {currentValue === 'true' ? 'Enabled' : 'Disabled'}
-                          </span>
                         </div>
                       ) : (
-                        <>
+                        <div className="group/input relative">
                           <input type="hidden" name={`${key}__type`} value={type} />
                           <input
                             id={key}
                             name={key}
                             type={type === 'NUMBER' ? 'number' : 'text'}
                             defaultValue={currentValue}
-                            className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                            className="w-full rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:border-[#002a5c] focus:ring-4 focus:ring-[#002a5c]/5 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white dark:focus:border-blue-500/50 dark:focus:ring-blue-500/10"
                           />
-                        </>
+                        </div>
                       )}
                     </div>
                   </div>

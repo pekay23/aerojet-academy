@@ -10,15 +10,15 @@ export const registerSchema = z.object({
   middleName: z.string().max(50).optional(),
   email: z.string().email('Invalid email address'),
   nationality: z.string().min(2, 'Nationality is required'),
+  dateOfBirth: z.string().refine((val) => !isNaN(Date.parse(val)), 'Invalid date of birth'),
   phoneCountryCode: z.string().min(1, 'Country code is required'),
   phone: z.string().min(7, 'Phone number is too short').max(15),
-  selectedProgramme: z.enum([
-    'FULL_TIME_4YEAR',
-    'FULL_TIME_2YEAR',
-    'MILITARY_1YEAR',
-    'MODULAR',
-    'EXAM_ONLY',
-  ]),
+  selectedProgramme: z.enum(
+    ['FULL_TIME_4YEAR', 'FULL_TIME_2YEAR', 'MILITARY_1YEAR', 'MODULAR', 'EXAM_ONLY'],
+    {
+      message: 'Please select a study pathway',
+    }
+  ),
 })
 
 export const loginSchema = z.object({

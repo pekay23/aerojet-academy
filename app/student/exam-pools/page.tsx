@@ -16,8 +16,8 @@ export default async function ExamPoolsPage() {
   // 1. Fetch available pools (OPEN or NEAR_FULL)
   const pools = await prisma.examPool.findMany({
     where: {
-      status: { in: ['OPEN', 'NEAR_FULL'] },
-      event: { status: { in: ['OPEN', 'CONFIRMED'] } },
+      status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] },
+      event: { status: { in: ['OPEN', 'CONFIRMED', 'DRAFT'] } },
     },
     include: { event: true },
     orderBy: { examDate: 'asc' },
@@ -40,7 +40,7 @@ export default async function ExamPoolsPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
             Exam Pools
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -49,7 +49,7 @@ export default async function ExamPoolsPage() {
         </div>
         <Link
           href="/student/exam-pools/my-bookings"
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-2.5 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 hover:text-slate-900 dark:text-slate-100"
+          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
         >
           <FileCheck className="h-4 w-4" />
           My Bookings
@@ -67,7 +67,7 @@ export default async function ExamPoolsPage() {
               <Wallet className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+              <p className="text-xs font-bold tracking-widest text-slate-500 uppercase dark:text-slate-400">
                 Available Funds
               </p>
               <p className="text-xl font-black text-slate-900 dark:text-slate-100">
@@ -96,20 +96,30 @@ export default async function ExamPoolsPage() {
             return (
               <div
                 key={pool.id}
-                className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:border-blue-200 hover:shadow-md"
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
               >
                 {/* Status Banner */}
                 <div
-                  className={`px-6 py-2 text-[10px] font-black uppercase tracking-widest text-white ${
-                    pool.status === 'NEAR_FULL' ? 'bg-amber-500' : 'bg-[#002a5c]'
+                  className={`px-6 py-2 text-[10px] font-black tracking-widest text-white uppercase ${
+                    pool.status === 'NEAR_FULL'
+                      ? 'bg-amber-500'
+                      : pool.status === 'DRAFT'
+                        ? 'bg-slate-500'
+                        : pool.status === 'CONFIRMED'
+                          ? 'bg-blue-600'
+                          : 'bg-[#002a5c]'
                   }`}
                 >
-                  {pool.status.replace('_', ' ')}
+                  {pool.status === 'DRAFT' ? 'Upcoming' : pool.status.replace('_', ' ')}
                 </div>
 
                 <div className="flex flex-1 flex-col p-6">
-                  <h3 className="mb-1 text-lg font-black text-slate-900 dark:text-slate-100">{pool.name}</h3>
-                  <p className="mb-4 text-xs font-bold text-slate-500 dark:text-slate-400">{pool.event?.name}</p>
+                  <h3 className="mb-1 text-lg font-black text-slate-900 dark:text-slate-100">
+                    {pool.name}
+                  </h3>
+                  <p className="mb-4 text-xs font-bold text-slate-500 dark:text-slate-400">
+                    {pool.event?.name}
+                  </p>
 
                   <div className="mb-6 space-y-3">
                     <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
@@ -137,16 +147,18 @@ export default async function ExamPoolsPage() {
 
                   <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-4">
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+                      <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
                         Seat Price
                       </p>
-                      <p className="text-lg font-black text-[#002a5c]">{seatPrice.toFixed(2)}</p>
+                      <p className="text-lg font-black text-[#002a5c] dark:text-blue-400">
+                        {seatPrice.toFixed(2)}
+                      </p>
                     </div>
 
                     {isJoined ? (
                       <button
                         disabled
-                        className="rounded-xl bg-emerald-100 px-4 py-2 text-xs font-bold uppercase tracking-wide text-emerald-700"
+                        className="rounded-xl bg-emerald-100 px-4 py-2 text-xs font-bold tracking-wide text-emerald-700 uppercase"
                       >
                         Joined
                       </button>
@@ -165,11 +177,13 @@ export default async function ExamPoolsPage() {
           })}
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-12 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white dark:bg-slate-900 text-slate-300 shadow-sm">
+        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-12 text-center dark:border-slate-700 dark:bg-slate-800/50">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white text-slate-300 shadow-sm dark:bg-slate-900">
             <FileCheck className="h-8 w-8" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No pools available</h3>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+            No pools available
+          </h3>
           <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
             Check back later for new exam pool openings.
           </p>
@@ -178,4 +192,3 @@ export default async function ExamPoolsPage() {
     </div>
   )
 }
-

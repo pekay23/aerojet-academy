@@ -37,7 +37,9 @@ export const POST = withErrorHandler(
     // Ensure wallet exists
     await getOrCreateWallet(id)
 
-    const wallet = await topUpWallet(id, amount, description, reference)
+    const wallet = await prisma.$transaction(async (tx) => {
+      return topUpWallet(tx, id, amount, description, reference)
+    })
 
     await createAuditLog({
       action: AuditAction.WALLET_TOP_UP,

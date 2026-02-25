@@ -3,7 +3,7 @@
 import DashboardSidebar from '@/components/layouts/DashboardSidebar'
 import { LayoutDashboard, ClipboardList, BookOpen, FileCheck, User } from 'lucide-react'
 
-const links = [
+const allLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'My Application', href: '/application/status', icon: ClipboardList },
   { label: 'Browse Courses', href: '/courses', icon: BookOpen },
@@ -15,11 +15,20 @@ export default function ApplicantSidebar({
   userName,
   userRole,
   userImage,
+  hasPathway,
 }: {
   userName?: string
   userRole?: string
   userImage?: string
+  hasPathway?: boolean
 }) {
+  const restrictedLinks = [
+    { label: 'Choose Study Path', href: '/pathway', icon: LayoutDashboard },
+    { label: 'Profile', href: '/profile', icon: User },
+  ]
+
+  const links = hasPathway ? allLinks : restrictedLinks
+
   return (
     <DashboardSidebar
       links={links}
