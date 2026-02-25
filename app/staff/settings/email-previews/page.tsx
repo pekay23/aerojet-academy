@@ -264,7 +264,11 @@ export default function EmailPreviewsPage() {
             </p>
           </div>
           <div className="w-full md:w-80">
+            <Label htmlFor="test-recipient-email" className="sr-only">
+              Test Recipient Email
+            </Label>
             <Input
+              id="test-recipient-email"
               type="email"
               placeholder="e.g. test@example.com"
               value={testEmail}
@@ -458,6 +462,8 @@ export default function EmailPreviewsPage() {
                             {currentTemplate?.placeholders.map((p) => (
                               <button
                                 key={p}
+                                type="button"
+                                aria-label={`Copy placeholder ${p} to clipboard`}
                                 onClick={() => {
                                   // Simple way to copy to clipboard or just show
                                   navigator.clipboard.writeText(`{{${p}}}`)
@@ -465,7 +471,10 @@ export default function EmailPreviewsPage() {
                                 }}
                                 className="group flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 font-mono text-[11px] transition-all hover:border-[#002a5c]"
                               >
-                                <PlusCircle className="h-3 w-3 text-slate-300 group-hover:text-[#002a5c]" />
+                                <PlusCircle
+                                  className="h-3 w-3 text-slate-300 group-hover:text-[#002a5c]"
+                                  role="presentation"
+                                />
                                 <span>
                                   {'{' + '{'}
                                   {p}
