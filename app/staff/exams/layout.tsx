@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { Calendar, ClipboardList, Trophy } from 'lucide-react'
 
 const tabs = [
@@ -30,7 +31,7 @@ export default function ExamsLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="space-y-6">
-      <div className="border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 pt-4">
+      <div className="border-b border-slate-200 bg-white px-6 pt-4 dark:border-slate-700 dark:bg-slate-900">
         <div className="mx-auto max-w-7xl">
           <div className="flex space-x-8">
             {tabs.map((tab) => {
@@ -40,12 +41,19 @@ export default function ExamsLayout({ children }: { children: React.ReactNode })
                 <Link
                   key={tab.name}
                   href={tab.href}
-                  className={`flex items-center gap-2 border-b-2 px-1 pb-4 text-sm font-medium transition-colors ${
+                  className={`relative flex items-center gap-2 px-1 pb-4 text-sm font-medium transition-colors ${
                     isActive
-                      ? 'border-[#002a5c] text-[#002a5c]'
-                      : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700'
+                      ? 'text-[#002a5c] dark:text-blue-400'
+                      : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
                   }`}
                 >
+                  {isActive && (
+                    <motion.div
+                      layoutId="exams-nav-underline"
+                      className="absolute bottom-0 left-0 h-0.5 w-full bg-[#002a5c] dark:bg-blue-400"
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
                   <Icon className="h-4 w-4" />
                   {tab.name}
                 </Link>

@@ -1260,3 +1260,23 @@ model TuitionBooking {
   @@unique([tuitionRunId, studentId])
   @@map("tuition_bookings")
 }
+
+// ============================================================================
+// EMAIL TEMPLATES
+// ============================================================================
+
+model EmailTemplate {
+  id          String  @id @default(cuid())
+  name        String  @unique // e.g., 'registration', 'activation'
+  subject     String
+  body        String  @db.Text // HTML with {{placeholders}}
+  description String? @db.Text
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  updatedBy String? // Admin user ID
+
+  @@map("email_templates")
+}
+
