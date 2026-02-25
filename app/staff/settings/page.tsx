@@ -288,11 +288,14 @@ export default async function SettingsPage() {
                     <div className="w-full shrink-0 md:w-72">
                       {type === 'BOOLEAN' ? (
                         <div className="flex items-center justify-end gap-3">
-                          <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                          <label
+                            htmlFor={key}
+                            className="cursor-pointer text-[10px] font-black tracking-widest text-slate-400 uppercase"
+                          >
                             {currentValue === 'true' ? 'Active' : 'Disabled'}
-                          </span>
+                          </label>
                           <input type="hidden" name={`${key}__type`} value="BOOLEAN" />
-                          <label className="relative inline-flex cursor-pointer items-center">
+                          <div className="relative inline-flex items-center">
                             <input
                               id={key}
                               name={key}
@@ -300,8 +303,11 @@ export default async function SettingsPage() {
                               defaultChecked={currentValue === 'true'}
                               className="peer sr-only"
                             />
-                            <div className="peer h-7 w-12 rounded-full bg-slate-200 shadow-inner transition-colors peer-checked:bg-[#002a5c] peer-focus:ring-4 peer-focus:ring-[#002a5c]/20 peer-focus:outline-none after:absolute after:top-[4px] after:left-[4px] after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600 dark:peer-focus:ring-blue-600/30"></div>
-                          </label>
+                            <label
+                              htmlFor={key}
+                              className="peer h-7 w-12 cursor-pointer rounded-full bg-slate-200 shadow-inner transition-colors peer-checked:bg-[#002a5c] peer-focus:ring-4 peer-focus:ring-[#002a5c]/20 peer-focus:outline-none after:absolute after:top-[4px] after:left-[4px] after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600 dark:peer-focus:ring-blue-600/30"
+                            ></label>
+                          </div>
                         </div>
                       ) : (
                         <div className="group/input relative">

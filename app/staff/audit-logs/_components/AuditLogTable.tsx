@@ -28,7 +28,139 @@ type AuditLog = {
     email: string
     profile: { firstName: string; lastName: string } | null
   } | null
-}
+} | null
+
+import { memo } from 'react'
+
+const LogRow = memo(
+  ({
+    log,
+    idx,
+    entityLabels,
+    onSelect,
+    actionStyle,
+    getEntityIcon,
+    getUserName,
+    getUserInitials,
+  }: {
+    log: AuditLog
+    idx: number
+    entityLabels: Record<string, string>
+    onSelect: (log: AuditLog) => void
+    actionStyle: (act: string) => string
+    getEntityIcon: (entity: string | null) => React.ReactNode
+    getUserName: (log: AuditLog) => string
+    getUserInitials: (name: string) => string
+  }) => {
+    const userName = getUserName(log)
+    const initials = getUserInitials(userName)
+
+    return (
+      <motion.tr
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        // Only stagger the first 25 items to save main thread on large lists
+        transition={{ delay: idx < 25 ? idx * 0.02 : 0, duration: 0.2 }}
+        onClick={() => onSelect(log)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault()
+            onSelect(log)
+          }
+        }}
+        tabIndex={0}
+        role="button"
+        aria-label={`View details for ${log.action} on ${log.entity || 'system'}`}
+        className="group relative cursor-pointer transition-all hover:bg-slate-50/50 dark:hover:bg-white/2"
+      >
+        {/* Timestamp */}
+        <td className="px-6 py-5">
+          <div className="flex flex-col items-start justify-center">
+            <span className="font-mono text-[10px] font-bold tracking-tighter text-slate-500 dark:text-slate-400">
+              {format(new Date(log.createdAt), 'MMM dd, yyyy').toUpperCase()}
+            </span>
+            <span className="font-mono text-[11px] font-medium text-slate-400 dark:text-slate-500">
+              {format(new Date(log.createdAt), 'HH:mm:ss.SSS')}
+            </span>
+          </div>
+        </td>
+
+        {/* Action */}
+        <td className="px-6 py-5">
+          <span
+            className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-[10px] font-black tracking-widest uppercase shadow-sm ${actionStyle(log.action)}`}
+          >
+            {log.action}
+          </span>
+        </td>
+
+        {/* Entity & Description */}
+        <td className="px-6 py-5">
+          <div className="flex flex-col justify-center overflow-hidden">
+            <div className="mb-1 flex items-center gap-2">
+              <div
+                className="flex items-center text-slate-400 dark:text-slate-500"
+                aria-hidden="true"
+              >
+                {getEntityIcon(log.entity)}
+              </div>
+              <span className="truncate font-mono text-xs font-bold text-slate-700 dark:text-slate-200">
+                {log.entity || 'system_event'}
+              </span>
+              {log.entityId && (
+                <>
+                  <span className="text-slate-300 dark:text-white/10">/</span>
+                  <span className="truncate font-mono text-[10px] text-slate-500 dark:text-slate-400">
+                    {entityLabels[log.entityId] ?? log.entityId.substring(0, 8)}
+                  </span>
+                </>
+              )}
+            </div>
+            <p className="truncate text-xs leading-relaxed text-slate-500 dark:text-slate-400">
+              {log.description ?? 'System recorded action without explicit description.'}
+            </p>
+          </div>
+        </td>
+
+        {/* User */}
+        <td className="px-6 py-5">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white font-bold text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-800 dark:text-slate-300"
+              aria-hidden="true"
+            >
+              <span className="text-[10px]">{initials}</span>
+            </div>
+            <div className="flex flex-col truncate">
+              <span className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
+                {userName}
+              </span>
+              {log.user?.email && userName !== log.user.email && (
+                <span className="truncate text-[10px] font-medium tracking-tight text-slate-500 dark:text-slate-500">
+                  {log.user.email}
+                </span>
+              )}
+            </div>
+          </div>
+        </td>
+
+        {/* IP Address */}
+        <td className="px-6 py-5 text-right">
+          <div className="flex items-center justify-end gap-3">
+            <div className="rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1 font-mono text-[10px] font-bold text-slate-500 dark:border-white/5 dark:bg-white/3 dark:text-slate-400">
+              {log.ipAddress ?? 'INTERNAL'}
+            </div>
+            <ExternalLink
+              className="h-3.5 w-3.5 text-slate-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-white/20"
+              aria-hidden="true"
+            />
+          </div>
+        </td>
+      </motion.tr>
+    )
+  }
+)
+LogRow.displayName = 'LogRow'
 
 interface AuditLogTableProps {
   logs: AuditLog[]
@@ -91,120 +223,66 @@ export default function AuditLogTable({ logs, entityLabels, query }: AuditLogTab
   return (
     <>
       <div className="overflow-x-auto rounded-2xl border border-slate-200/60 bg-white shadow-sm dark:border-slate-800/80 dark:bg-[#0A0F1C]">
-        <div className="min-w-[1000px]">
+        <table className="w-full min-w-[1000px] border-collapse">
           {/* Header Row */}
-          <div className="hidden grid-cols-12 gap-4 border-b border-slate-100 bg-slate-50/50 px-6 py-4 text-xs font-bold tracking-wider text-slate-500 uppercase lg:grid dark:border-slate-800/80 dark:bg-slate-900/50 dark:text-slate-400">
-            <div className="col-span-2">Timestamp</div>
-            <div className="col-span-2">Action</div>
-            <div className="col-span-3">Entity & Context</div>
-            <div className="col-span-3">User</div>
-            <div className="col-span-2 text-right">IP Address</div>
-          </div>
+          <thead>
+            <tr className="hidden border-b border-slate-100 bg-slate-50/50 text-xs font-bold tracking-wider text-slate-500 uppercase lg:table-row dark:border-slate-800/80 dark:bg-slate-900/50 dark:text-slate-400">
+              <th className="px-6 py-4 text-left font-bold" scope="col">
+                Timestamp
+              </th>
+              <th className="px-6 py-4 text-left font-bold" scope="col">
+                Action
+              </th>
+              <th className="px-6 py-4 text-left font-bold" scope="col">
+                Entity & Context
+              </th>
+              <th className="px-6 py-4 text-left font-bold" scope="col">
+                User
+              </th>
+              <th className="px-6 py-4 text-right font-bold" scope="col">
+                IP Address
+              </th>
+            </tr>
+          </thead>
 
           {/* List Body */}
-          <div className="divide-y divide-slate-100 dark:divide-white/5">
-            <AnimatePresence>
-              {logs.length === 0 ? (
-                <div className="flex flex-col items-center justify-center p-16 text-center">
-                  <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800/50">
-                    <ShieldAlert className="h-8 w-8 text-slate-300 dark:text-slate-600" />
+          <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+            {logs.length === 0 ? (
+              <tr>
+                <td colSpan={5}>
+                  <div className="flex flex-col items-center justify-center p-16 text-center">
+                    <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800/50">
+                      <ShieldAlert
+                        className="h-8 w-8 text-slate-300 dark:text-slate-600"
+                        aria-hidden="true"
+                      />
+                    </div>
+                    <p className="font-bold text-slate-500 dark:text-slate-400">
+                      No events recorded
+                    </p>
+                    {query && (
+                      <p className="mt-1 text-sm text-slate-400">Try adjusting your filters</p>
+                    )}
                   </div>
-                  <p className="font-bold text-slate-500 dark:text-slate-400">No events recorded</p>
-                  {query && (
-                    <p className="mt-1 text-sm text-slate-400">Try adjusting your filters</p>
-                  )}
-                </div>
-              ) : (
-                logs.map((log, idx) => {
-                  const userName = getUserName(log)
-                  const initials = getUserInitials(userName)
-
-                  return (
-                    <motion.div
-                      key={log.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: idx * 0.03 }}
-                      onClick={() => setSelectedLog(log)}
-                      className="group relative flex cursor-pointer flex-col gap-4 p-5 transition-all hover:bg-slate-50/50 lg:grid lg:grid-cols-12 lg:items-center lg:gap-4 lg:px-6 dark:hover:bg-white/2"
-                    >
-                      {/* Left Accent indicator on hover */}
-                      <div className="absolute top-0 left-0 h-full w-1 origin-left scale-y-0 bg-[#002a5c] opacity-0 transition-transform duration-200 group-hover:scale-y-100 group-hover:opacity-100 dark:bg-blue-500" />
-
-                      {/* 1. Timestamp */}
-                      <div className="col-span-2 flex flex-col items-start justify-center">
-                        <span className="font-mono text-[10px] font-bold tracking-tighter text-slate-500 dark:text-slate-400">
-                          {format(new Date(log.createdAt), 'MMM dd, yyyy').toUpperCase()}
-                        </span>
-                        <span className="font-mono text-[11px] font-medium text-slate-400 dark:text-slate-500">
-                          {format(new Date(log.createdAt), 'HH:mm:ss.SSS')}
-                        </span>
-                      </div>
-
-                      {/* 2. Action */}
-                      <div className="col-span-2 flex items-center">
-                        <span
-                          className={`inline-flex items-center rounded-lg border px-3 py-1.5 text-[10px] font-black tracking-widest uppercase shadow-sm ${actionStyle(log.action)}`}
-                        >
-                          {log.action}
-                        </span>
-                      </div>
-
-                      {/* 3. Entity & Description */}
-                      <div className="col-span-3 flex flex-col justify-center overflow-hidden">
-                        <div className="mb-1 flex items-center gap-2">
-                          <div className="flex items-center text-slate-400 dark:text-slate-500">
-                            {getEntityIcon(log.entity)}
-                          </div>
-                          <span className="truncate font-mono text-xs font-bold text-slate-700 dark:text-slate-200">
-                            {log.entity || 'system_event'}
-                          </span>
-                          {log.entityId && (
-                            <>
-                              <span className="text-slate-300 dark:text-white/10">/</span>
-                              <span className="truncate font-mono text-[10px] text-slate-500 dark:text-slate-400">
-                                {entityLabels[log.entityId] ?? log.entityId.substring(0, 8)}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        <p className="truncate text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                          {log.description ??
-                            'System recorded action without explicit description.'}
-                        </p>
-                      </div>
-
-                      {/* 4. User */}
-                      <div className="col-span-3 flex items-center gap-3 overflow-hidden">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white font-bold text-slate-600 shadow-sm dark:border-white/10 dark:bg-slate-800 dark:text-slate-300">
-                          <span className="text-[10px]">{initials}</span>
-                        </div>
-                        <div className="flex flex-col truncate">
-                          <span className="truncate text-sm font-bold text-slate-800 dark:text-slate-100">
-                            {userName}
-                          </span>
-                          {log.user?.email && userName !== log.user.email && (
-                            <span className="truncate text-[10px] font-medium tracking-tight text-slate-500 dark:text-slate-500">
-                              {log.user.email}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* 5. IP Address */}
-                      <div className="col-span-2 flex items-center justify-end gap-3">
-                        <div className="rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-1 font-mono text-[10px] font-bold text-slate-500 dark:border-white/5 dark:bg-white/3 dark:text-slate-400">
-                          {log.ipAddress ?? 'INTERNAL'}
-                        </div>
-                        <ExternalLink className="h-3.5 w-3.5 text-slate-300 opacity-0 transition-opacity group-hover:opacity-100 dark:text-white/20" />
-                      </div>
-                    </motion.div>
-                  )
-                })
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
+                </td>
+              </tr>
+            ) : (
+              logs.map((log, idx) => (
+                <LogRow
+                  key={log.id}
+                  log={log}
+                  idx={idx}
+                  entityLabels={entityLabels}
+                  onSelect={setSelectedLog}
+                  actionStyle={actionStyle}
+                  getEntityIcon={getEntityIcon}
+                  getUserName={getUserName}
+                  getUserInitials={getUserInitials}
+                />
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
 
       {/* Glassmorphic Detail Modal */}
@@ -233,6 +311,7 @@ export default function AuditLogTable({ logs, entityLabels, query }: AuditLogTab
               </div>
               <button
                 onClick={() => setSelectedLog(null)}
+                aria-label="Close details"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-500 transition-colors hover:bg-slate-200 hover:text-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700 dark:hover:text-slate-200"
               >
                 <X className="h-5 w-5" />

@@ -137,6 +137,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
               <button
                 type="button"
                 title="Remove"
+                aria-label={`Remove welcome message: ${msg.substring(0, 20)}...`}
                 onClick={() => removeMessage(idx)}
                 className="shrink-0 rounded-lg p-1 text-slate-300 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-50 hover:text-red-500 dark:text-slate-600"
               >
@@ -149,11 +150,15 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
 
       {/* Add new */}
       <div className="border-t border-slate-100 px-6 py-4 dark:border-slate-800">
-        <label className="mb-2 block text-[10px] font-black tracking-widest text-slate-400 uppercase">
+        <label
+          htmlFor="new-welcome-message"
+          className="mb-2 block text-[10px] font-black tracking-widest text-slate-400 uppercase"
+        >
           New {activeRole} Message
         </label>
         <div className="flex gap-2">
           <input
+            id="new-welcome-message"
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
