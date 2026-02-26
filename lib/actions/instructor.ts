@@ -603,3 +603,49 @@ export async function updateInstructorProfile(data: any) {
   revalidatePath('/instructor/profile')
   return { success: true }
 }
+
+export async function createInternalGrade(data: {
+  userId: string
+  enrollmentId: string
+  assessmentName: string
+  assessmentType: string
+  assessmentDate: Date
+  score: number
+  maxScore: number
+  comments?: string
+  mcqScore?: number
+  essay1Score?: number
+  essay2Score?: number
+}) {
+  const session = await getAuthSession()
+  if (!session || session.user.role !== 'INSTRUCTOR') {
+    throw new Error('Unauthorized')
+  }
+
+  const instructorId = await getInstructorId(session.user.id)
+
+  const percentage = (data.score / data.maxScore) * 100
+
+  const grade = await prisma.grade.create({
+    data: {
+      userId: data.userId,
+      enrollmentId: data.enrollmentId,
+      assessmentName: data.assessmentName,
+      assessmentType: data.assessmentType,
+      assessmentDate: data.assessmentDate,
+      score: data.score,
+      maxScore: data.maxScore,
+      percentage,
+      comments: data.comments,
+      mcqScore: data.mcqScore,
+      essay1Score: data.essay1Score,
+      essay2Score: data.essay2Score,
+      gradedBy: instructorId,
+    },
+  })
+
+  revalidatePath(`/instructor/students/${data.userId}`)
+  revalidatePath('/instructor/dashboard')
+
+  return serializePrisma(grade)
+}
