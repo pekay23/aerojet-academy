@@ -71,7 +71,7 @@ export default function Home() {
           </SectionReveal>
           <SectionReveal delay={0.1}>
             <Image
-              src="/images/home/al4.webp"
+              src="/images/home/al4.jpeg"
               alt="Aerojet student"
               width={600}
               height={700} // Making the image slightly taller for better composition
