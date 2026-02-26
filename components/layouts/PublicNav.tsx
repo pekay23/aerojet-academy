@@ -55,21 +55,32 @@ const navLinks: {
         title: 'Aircraft Engineering',
         links: [
           {
-            href: '/courses/aircraft-engineering/easa-part-66',
-            label: 'EASA Part-66 Certification Programs',
+            href: '/courses/aircraft-engineering/easa-part-66/four-year-b1-b2',
+            label: '4-Year Full-Time (B1.1 & B2)',
           },
           {
-            href: '/courses/aircraft-engineering/skilled-training',
-            label: 'Skilled Training Programs',
+            href: '/courses/aircraft-engineering/easa-part-66/two-year-b1',
+            label: '2-Year Full-Time (B1.1)',
           },
           {
-            href: '/courses/aircraft-engineering/short-courses',
-            label: 'Certified Short Knowledge Courses',
+            href: '/courses/aircraft-engineering/easa-part-66/military-certification',
+            label: 'Military / Industry (1 Year)',
           },
           {
-            href: '/courses/aircraft-engineering/work-experience',
-            label: 'Aircraft Work Experience Program (coming soon)',
-            disabled: true,
+            href: '/courses/aircraft-engineering/easa-part-66/modular-training',
+            label: 'Modular Training',
+          },
+          {
+            href: '/courses/aircraft-engineering/easa-part-66/exam-only',
+            label: 'Exam Only',
+          },
+          {
+            href: '/courses/aircraft-engineering/easa-part-66/revision-support',
+            label: 'Revision Support',
+          },
+          {
+            href: '/courses/aircraft-engineering/exam-schedule',
+            label: 'Exam Schedule 2026/2027',
           },
         ],
       },
@@ -198,16 +209,16 @@ export default function PublicNav() {
                     <NavigationMenuItem key={item.label}>
                       <Link
                         href={item.href || '#'}
-                        className={`relative px-4 py-2 text-sm font-bold uppercase transition-colors ${
+                        className={`relative px-4 py-2 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${
                           pathname === item.href ? activeLinkColorClasses : linkColorClasses
                         } hover:${activeLinkColorClasses}`}
                       >
                         {pathname === item.href && (
                           <motion.div
                             layoutId="nav-pill"
-                            className={`absolute inset-0 rounded-lg ${
+                            className={`absolute inset-0 rounded-full ${
                               scrolled || mobileOpen || forceSolid
-                                ? 'bg-slate-100 dark:bg-white/10'
+                                ? 'bg-[#002a5c]/5'
                                 : 'bg-white/10'
                             }`}
                             transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}

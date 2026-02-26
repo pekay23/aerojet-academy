@@ -36,7 +36,7 @@ const courseData = [
         name: 'Revision Support',
         href: '/courses/aircraft-engineering/easa-part-66/revision-support',
       },
-      { name: 'Exam Schedule 2026/2027', href: '/courses/exam-schedule' },
+      { name: 'Exam Schedule 2026/2027', href: '/courses/aircraft-engineering/exam-schedule' },
     ],
     otherSections: [
       { name: 'Skilled Training Programs', details: 'Details coming soon.' },
@@ -59,7 +59,7 @@ export default function CourseListings() {
       {courseData.map((category) => (
         <AccordionItem value={category.value} key={category.value}>
           {/* FIX: Increased trigger font size */}
-          <AccordionTrigger className="py-6 text-left text-3xl font-black text-public-primary hover:no-underline sm:text-4xl">
+          <AccordionTrigger className="text-public-primary py-6 text-left text-3xl font-black hover:no-underline sm:text-4xl">
             {category.title}
             {category.comingSoon && (
               <span className="ml-4 text-lg font-normal text-slate-400">(Coming Soon)</span>
@@ -69,7 +69,7 @@ export default function CourseListings() {
             {!category.comingSoon ? (
               <div className="border-l-2 border-slate-200 pl-6">
                 {/* FIX: Increased sub-title font size */}
-                <h4 className="mb-6 text-xl font-bold text-public-secondary">
+                <h4 className="text-public-secondary mb-6 text-xl font-bold">
                   {category.subTitle}
                 </h4>
                 <div className="mb-8 grid gap-x-8 gap-y-4 sm:grid-cols-2">
@@ -81,7 +81,7 @@ export default function CourseListings() {
                     >
                       {/* FIX: Increased link font size */}
                       <span className="text-base font-medium text-slate-800">{prog.name}</span>
-                      <ArrowRight className="h-5 w-5 text-slate-400 transition-transform group-hover:translate-x-1 group-hover:text-public-secondary" />
+                      <ArrowRight className="group-hover:text-public-secondary h-5 w-5 text-slate-400 transition-transform group-hover:translate-x-1" />
                     </Link>
                   ))}
                 </div>
@@ -96,7 +96,7 @@ export default function CourseListings() {
                   ))}
               </div>
             ) : (
-              <div className="pl-6 text-base italic text-slate-500">
+              <div className="pl-6 text-base text-slate-500 italic">
                 Details for this program will be announced soon. Please check back later.
               </div>
             )}

@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
+import NextImage from 'next/image'
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button' // Using ShadCN button for consistency
 
 const slides = [
@@ -38,7 +39,7 @@ export default function HeroSlider() {
     <section className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-black md:min-h-[80vh]">
       {/* Background Images */}
       {slides.map((slide, index) => (
-        <Image
+        <NextImage
           key={index}
           src={slide.src}
           alt="Aerojet Academy background"
@@ -55,31 +56,45 @@ export default function HeroSlider() {
 
       {/* Content Area - Centered */}
       <div className="relative z-20 w-full px-6 py-20 text-center md:container md:mx-auto">
-        <div className="mx-auto max-w-4xl pt-16">
-          <h1 className="mb-6 text-4xl leading-tight font-black text-white md:text-5xl lg:text-6xl">
-            {slides[currentSlide].headline}
-          </h1>
-          <p className="mx-auto mb-10 max-w-2xl text-lg text-gray-200">
-            {slides[currentSlide].subhead}
-          </p>
+        <div className="mx-auto max-w-5xl pt-16">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <h1 className="mb-6 text-4xl leading-[1.1] font-black text-white md:text-6xl lg:text-7xl">
+                {slides[currentSlide].headline.split(' ').map((word, i) => (
+                  <span key={i} className="mr-[0.25em] inline-block last:mr-0">
+                    {word}
+                  </span>
+                ))}
+              </h1>
+              <p className="mx-auto mb-10 max-w-2xl text-lg font-medium text-gray-200/90 md:text-xl">
+                {slides[currentSlide].subhead}
+              </p>
 
-          <div className="flex flex-wrap justify-center gap-4">
-            <Button
-              asChild
-              size="lg"
-              className="bg-public-secondary hover:bg-opacity-90 text-white"
-            >
-              <Link href="/register">Start Registration</Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="hover:text-public-primary border-2 border-white/80 bg-transparent text-white transition-colors duration-300 hover:bg-white"
-            >
-              <Link href="/courses">Explore Courses</Link>
-            </Button>
-          </div>
+              <div className="flex flex-wrap justify-center gap-5">
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-public-secondary hover:bg-public-secondary/90 h-14 rounded-full px-10 text-xs font-black tracking-widest text-white uppercase shadow-xl transition-all hover:scale-105"
+                >
+                  <Link href="/register">Start Registration</Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="h-14 rounded-full border-2 border-white/30 bg-white/10 px-10 text-xs font-black tracking-widest text-white backdrop-blur-sm transition-all hover:bg-white hover:text-[#002a5c]"
+                >
+                  <Link href="/courses">Explore Courses</Link>
+                </Button>
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </section>

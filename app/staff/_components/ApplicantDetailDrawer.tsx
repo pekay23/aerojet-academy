@@ -14,7 +14,10 @@ import {
   ExternalLink,
   Loader2,
   Copy,
+  CreditCard,
+  ShieldCheck,
 } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 interface Applicant {
   id: string
@@ -116,9 +119,9 @@ export default function ApplicantDetailDrawer({
       <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
       {/* Drawer */}
-      <div className="fixed top-0 right-0 bottom-0 z-50 flex w-full max-w-lg flex-col border-l border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
+      <div className="fixed top-0 right-0 bottom-0 z-50 flex w-full max-w-lg flex-col border-l border-slate-100 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-6 py-4">
+        <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
           <div>
             <h2 className="text-base font-black tracking-tight text-[#002a5c] uppercase">
               Applicant Review
@@ -148,68 +151,123 @@ export default function ApplicantDetailDrawer({
 
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto">
+          {/* Progress Stepper */}
+          <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-6 dark:border-slate-800 dark:bg-slate-900/50">
+            <div className="relative flex justify-between">
+              {/* Connector line */}
+              <div className="absolute top-4 right-0 left-0 h-0.5 bg-slate-200 dark:bg-slate-800" />
+              <div
+                className="absolute top-4 left-0 h-0.5 bg-[#4c9ded] transition-all duration-500"
+                style={{
+                  width: applicant.registrationPaid ? '100%' : '50%',
+                }}
+              />
+
+              {[
+                {
+                  label: 'Registered',
+                  done: true,
+                  icon: User,
+                },
+                {
+                  label: 'Payment',
+                  done: applicant.registrationPaid,
+                  icon: CreditCard,
+                },
+                {
+                  label: 'Approval',
+                  done: false,
+                  icon: ShieldCheck,
+                },
+              ].map((step, idx) => (
+                <div key={step.label} className="relative z-10 flex flex-col items-center">
+                  <div
+                    className={`flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-300 ${
+                      step.done
+                        ? 'border-[#4c9ded] bg-[#002a5c] text-white'
+                        : 'border-slate-200 bg-white text-slate-400 dark:border-slate-800 dark:bg-slate-950'
+                    }`}
+                  >
+                    <step.icon className="h-3.5 w-3.5" />
+                  </div>
+                  <span
+                    className={`mt-2 text-[10px] font-black tracking-widest uppercase ${
+                      step.done ? 'text-[#002a5c] dark:text-[#4c9ded]' : 'text-slate-400'
+                    }`}
+                  >
+                    {step.label}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* Profile Header */}
-          <div className="flex items-center gap-4 border-b border-slate-100 dark:border-slate-800 px-6 py-5">
-            <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#002a5c] text-lg font-black text-white">
+          <div className="flex items-center gap-4 border-b border-slate-100 px-6 py-6 dark:border-slate-800">
+            <div className="group relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl bg-[#002a5c] shadow-lg">
               {applicant.profile?.profilePhotoUrl ? (
                 <img
                   src={applicant.profile.profilePhotoUrl}
                   alt={fullName}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
               ) : (
-                initials
+                <div className="flex h-full w-full items-center justify-center text-xl font-black text-white">
+                  {initials}
+                </div>
               )}
             </div>
             <div>
-              <h3 className="text-lg font-black text-slate-800 dark:text-slate-200">{fullName}</h3>
-              <p className="text-sm text-slate-500 dark:text-slate-400">{applicant.email}</p>
-              <div className="mt-1 flex items-center gap-2">
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${
-                    applicant.registrationPaid
-                      ? 'bg-emerald-100 text-emerald-700'
-                      : 'bg-amber-100 text-amber-700'
-                  }`}
-                >
-                  {applicant.registrationPaid ? 'Fee Paid' : 'Fee Pending'}
-                </span>
-                {!applicant.registrationPaid && applicant.paymentProofUrl && (
-                  <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-black tracking-widest text-blue-700 uppercase">
-                    Proof Uploaded
-                  </span>
-                )}
-              </div>
+              <h3 className="text-xl font-black tracking-tight text-slate-800 dark:text-slate-100">
+                {fullName}
+              </h3>
+              <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
+                <Mail className="h-3 w-3" /> {applicant.email}
+              </p>
             </div>
           </div>
 
           {/* Details */}
-          <div className="space-y-5 px-6 py-5">
-            {/* Direct Proof Fallback */}
-            {!latestPayment && applicant.paymentProofUrl && (
-              <div>
-                <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Quick Proof View (Legacy/Manual)
-                </h4>
-                <a
-                  href={applicant.paymentProofUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-xs font-bold text-[#4c9ded] hover:underline"
-                >
-                  <ExternalLink className="h-3.5 w-3.5" />
-                  View Uploaded Proof
-                </a>
-              </div>
-            )}
-            {/* Personal Info */}
-            <div>
-              <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+          <div className="space-y-8 px-6 py-8">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              {/* Direct Proof Fallback */}
+              {!latestPayment && applicant.paymentProofUrl && (
+                <div className="mb-6">
+                  <h4 className="mb-3 text-[10px] font-black tracking-widest text-[#002a5c]/40 uppercase dark:text-slate-500">
+                    Registration Proof (Manual)
+                  </h4>
+                  <a
+                    href={applicant.paymentProofUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4 transition-all hover:bg-white hover:shadow-md dark:border-slate-800 dark:bg-slate-800/50"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm dark:bg-slate-900">
+                        <CreditCard className="h-5 w-5 text-[#4c9ded]" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                          Payment Document
+                        </p>
+                        <p className="text-[10px] text-slate-400">View proof of registration fee</p>
+                      </div>
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-slate-300 transition-colors group-hover:text-[#4c9ded]" />
+                  </a>
+                </div>
+              )}
+
+              {/* Personal Info */}
+              <h4 className="mb-4 text-[10px] font-black tracking-widest text-[#002a5c]/40 uppercase dark:text-slate-500">
                 Personal Information
               </h4>
-              <div className="space-y-3">
+              <div className="grid gap-4 sm:grid-cols-2">
                 {[
-                  { icon: Mail, label: 'Email', value: applicant.email },
                   { icon: Phone, label: 'Phone', value: applicant.profile?.phone || '—' },
                   {
                     icon: User,
@@ -227,102 +285,127 @@ export default function ApplicantDetailDrawer({
                         })
                       : '—',
                   },
-                  {
-                    icon: Calendar,
-                    label: 'Registered',
-                    value: new Date(applicant.createdAt).toLocaleDateString('en-GB', {
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric',
-                    }),
-                  },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-                      <Icon className="h-3.5 w-3.5 text-slate-400" />
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800/50">
+                      <Icon className="h-4 w-4 text-slate-400" />
                     </div>
                     <div>
                       <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
                         {label}
                       </p>
-                      <p className="text-sm font-medium text-slate-700">{value}</p>
+                      <p className="line-clamp-1 text-sm font-bold text-slate-700 dark:text-slate-300">
+                        {value}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </motion.div>
 
             {/* Payment Info */}
             {latestPayment && (
-              <div>
-                <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h4 className="mb-4 text-[10px] font-black tracking-widest text-[#002a5c]/40 uppercase dark:text-slate-500">
                   Registration Payment
                 </h4>
-                <div className="space-y-2 rounded-xl bg-slate-50 dark:bg-slate-800/50 p-4">
-                  <div className="flex justify-between">
-                    <span className="text-xs text-slate-500 dark:text-slate-400">Amount</span>
-                    <span className="text-xs font-black text-[#002a5c]">
-                      {latestPayment.currency} {Number(latestPayment.amount).toFixed(2)}
-                    </span>
+                <div className="overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
+                  <div className="flex flex-col gap-3 p-5">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-[#4c9ded]" />
+                        <span className="text-xs font-bold text-slate-500">Registration Fee</span>
+                      </div>
+                      <span className="text-sm font-black text-[#002a5c] dark:text-[#4c9ded]">
+                        {latestPayment.currency} {Number(latestPayment.amount).toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                        Method
+                      </span>
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        {latestPayment.paymentMethod.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                        Status
+                      </span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase shadow-sm ${
+                          latestPayment.status === 'APPROVED'
+                            ? 'bg-emerald-500 text-white'
+                            : latestPayment.status === 'REJECTED'
+                              ? 'bg-red-500 text-white'
+                              : 'bg-amber-500 text-white'
+                        }`}
+                      >
+                        {latestPayment.status}
+                      </span>
+                    </div>
+
+                    {latestPayment.proofUrl && (
+                      <a
+                        href={latestPayment.proofUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-xs font-black tracking-widest text-[#002a5c] uppercase shadow-sm transition-all hover:bg-slate-50 dark:bg-slate-900/50 dark:text-[#4c9ded] dark:hover:bg-slate-900"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        Verify Payment Proof
+                      </a>
+                    )}
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-slate-500 dark:text-slate-400">Method</span>
-                    <span className="text-xs font-bold text-slate-700">
-                      {latestPayment.paymentMethod.replace(/_/g, ' ')}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-xs text-slate-500 dark:text-slate-400">Status</span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
-                        latestPayment.status === 'APPROVED'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : latestPayment.status === 'REJECTED'
-                            ? 'bg-red-100 text-red-600'
-                            : 'bg-amber-100 text-amber-700'
-                      }`}
-                    >
-                      {latestPayment.status}
-                    </span>
-                  </div>
-                  {latestPayment.proofUrl && (
-                    <a
-                      href={latestPayment.proofUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 pt-1 text-xs font-bold text-[#4c9ded] hover:underline"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      View Payment Proof
-                    </a>
-                  )}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* ID Document */}
             {applicant.profile?.idDocumentUrl && (
-              <div>
-                <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  ID Document
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <h4 className="mb-4 text-[10px] font-black tracking-widest text-[#002a5c]/40 uppercase dark:text-slate-500">
+                  Identification
                 </h4>
                 <a
                   href={applicant.profile.idDocumentUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm font-bold text-[#4c9ded] hover:underline"
+                  className="group flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4 transition-all hover:bg-white hover:shadow-md dark:border-slate-800 dark:bg-slate-800/50"
                 >
-                  <FileText className="h-4 w-4" />
-                  View Document
-                  <ExternalLink className="h-3.5 w-3.5" />
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white shadow-sm dark:bg-slate-950">
+                      <FileText className="h-5 w-5 text-slate-400 group-hover:text-[#4c9ded]" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                        Identity Document
+                      </p>
+                      <p className="text-[10px] text-slate-400">Passport / National ID Card</p>
+                    </div>
+                  </div>
+                  <ExternalLink className="h-4 w-4 text-slate-300 transition-colors group-hover:text-[#4c9ded]" />
                 </a>
-              </div>
+              </motion.div>
             )}
 
             {/* Reject Form */}
             {showRejectForm && (
-              <div>
-                <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+              >
+                <h4 className="mb-3 text-[10px] font-black tracking-widest text-red-500 uppercase">
                   Rejection Reason
                 </h4>
                 <textarea
@@ -330,15 +413,15 @@ export default function ApplicantDetailDrawer({
                   onChange={(e) => setRejectionReason(e.target.value)}
                   placeholder="Provide a reason for rejection..."
                   rows={3}
-                  className="w-full resize-none rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-red-300"
+                  className="w-full resize-none rounded-2xl border-2 border-red-50 bg-red-50/10 px-4 py-3 text-sm outline-none focus:border-red-500 focus:ring-0 dark:border-red-900/20 dark:bg-red-900/5"
                 />
-              </div>
+              </motion.div>
             )}
           </div>
         </div>
 
         {/* Footer Actions */}
-        <div className="space-y-2 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-6 py-4">
+        <div className="space-y-2 border-t border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
           {showRejectForm ? (
             <div className="flex gap-2">
               <button
@@ -358,7 +441,7 @@ export default function ApplicantDetailDrawer({
                   setShowRejectForm(false)
                   setRejectionReason('')
                 }}
-                className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-5 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-slate-700"
+                className="rounded-xl border border-slate-200 bg-white px-5 text-xs font-bold text-slate-500 hover:text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
               >
                 Cancel
               </button>

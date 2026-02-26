@@ -2,7 +2,15 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Hero from '../../../../_components/Hero'
 import SectionReveal from '../../../../_components/SectionReveal'
-import { CheckCircle2, Calendar, MonitorPlay, Users, AlertCircle, BookOpen, Euro } from 'lucide-react'
+import {
+  CheckCircle2,
+  Calendar,
+  MonitorPlay,
+  Users,
+  AlertCircle,
+  BookOpen,
+  Euro,
+} from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Modular Training Program | Aerojet Academy',
@@ -62,13 +70,13 @@ function ModuleTable({
       <table className="w-full min-w-[500px]">
         <thead>
           <tr className={headerColor}>
-            <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-white">
+            <th className="px-5 py-3.5 text-left text-xs font-bold tracking-wider text-white uppercase">
               Code
             </th>
-            <th className="px-5 py-3.5 text-left text-xs font-bold uppercase tracking-wider text-white">
+            <th className="px-5 py-3.5 text-left text-xs font-bold tracking-wider text-white uppercase">
               Module
             </th>
-            <th className="px-5 py-3.5 text-right text-xs font-bold uppercase tracking-wider text-white">
+            <th className="px-5 py-3.5 text-right text-xs font-bold tracking-wider text-white uppercase">
               Tuition Hours
             </th>
           </tr>
@@ -76,7 +84,7 @@ function ModuleTable({
         <tbody className="divide-y divide-slate-100">
           {modules.map((m, i) => (
             <tr key={m.code} className={i % 2 === 0 ? 'bg-slate-50/50' : ''}>
-              <td className="px-5 py-3.5 text-sm font-bold text-public-secondary">{m.code}</td>
+              <td className="text-public-secondary px-5 py-3.5 text-sm font-bold">{m.code}</td>
               <td className="px-5 py-3.5 text-sm text-slate-700">{m.name}</td>
               <td className="px-5 py-3.5 text-right text-sm text-slate-500">{m.hours}</td>
             </tr>
@@ -101,7 +109,7 @@ export default function ModularTrainingPage() {
           <div className="space-y-10 lg:col-span-2">
             <SectionReveal>
               <section>
-                <h2 className="mb-6 text-3xl font-black uppercase tracking-tight text-public-primary">
+                <h2 className="text-public-primary mb-6 text-3xl font-black tracking-tight uppercase">
                   Flexibility & Focus
                 </h2>
                 <p className="mb-4 text-lg leading-relaxed text-slate-700">
@@ -111,30 +119,30 @@ export default function ModularTrainingPage() {
                   Modules.
                 </p>
                 <p className="leading-relaxed text-slate-600">
-                  Once you choose a selected course in the student portal, you will receive the corresponding
-                  learning materials and be able to book the most convenient tuition and exam dates
-                  using the scheduled slots available.
+                  Once you choose a selected course in the student portal, you will receive the
+                  corresponding learning materials and be able to book the most convenient tuition
+                  and exam dates using the scheduled slots available.
                 </p>
               </section>
             </SectionReveal>
             <SectionReveal delay={0.1}>
               <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6">
-                <h4 className="mb-4 flex items-center gap-2 font-bold text-public-primary">
-                  <Users className="h-5 w-5 text-public-secondary" /> Who is this for?
+                <h4 className="text-public-primary mb-4 flex items-center gap-2 font-bold">
+                  <Users className="text-public-secondary h-5 w-5" /> Who is this for?
                 </h4>
                 <ul className="space-y-3 text-sm text-slate-600">
                   <li className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-public-secondary" />
+                    <CheckCircle2 className="text-public-secondary mt-0.5 h-5 w-5 shrink-0" />
                     <span>
-                      Candidates working full-time who want to pursue
-                      aircraft maintenance while still working.
+                      Candidates working full-time who want to pursue aircraft maintenance while
+                      still working.
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-public-secondary" />
+                    <CheckCircle2 className="text-public-secondary mt-0.5 h-5 w-5 shrink-0" />
                     <span>
-                      Non-licensed mechanics working with an airline looking to obtain
-                      their EASA license.
+                      Non-licensed mechanics working with an airline looking to obtain their EASA
+                      license.
                     </span>
                   </li>
                 </ul>
@@ -154,8 +162,11 @@ export default function ModularTrainingPage() {
                     desc: '2–3 hour pre-exam brush-up sessions right before each exam for every module.',
                   },
                 ].map(({ icon: Icon, title, desc }) => (
-                  <div key={title} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <Icon className="mb-3 h-6 w-6 text-public-primary" />
+                  <div
+                    key={title}
+                    className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
+                  >
+                    <Icon className="text-public-primary mb-3 h-6 w-6" />
                     <h5 className="mb-2 font-bold text-slate-900">{title}</h5>
                     <p className="text-sm text-slate-600">{desc}</p>
                   </div>
@@ -179,22 +190,25 @@ export default function ModularTrainingPage() {
           {/* Sidebar */}
           <SectionReveal delay={0.2}>
             <div className="space-y-6">
-              <div className="rounded-2xl bg-public-primary p-6 text-white shadow-xl sm:rounded-3xl sm:p-8">
-                <span className="text-[10px] font-black uppercase tracking-widest text-blue-200">
+              <div className="bg-public-primary rounded-2xl p-6 text-white shadow-xl sm:rounded-3xl sm:p-8">
+                <span className="text-[10px] font-black tracking-widest text-blue-200 uppercase">
                   Portal Access
                 </span>
                 <div className="mt-2 text-3xl font-black">Lifetime</div>
-                <p className="mb-6 mt-4 text-sm text-blue-100/80">
+                <p className="mt-4 mb-6 text-sm text-blue-100/80">
                   One-time registration gives you lifetime access to buy and book as many training
                   modules as you wish.
                 </p>
-                <Link href="/register" className="block w-full rounded-xl bg-public-secondary py-3.5 text-center text-xs font-bold uppercase tracking-widest text-white transition-all hover:bg-white hover:text-public-primary">
+                <Link
+                  href="/register"
+                  className="bg-public-secondary hover:text-public-primary block w-full rounded-xl py-3.5 text-center text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-white"
+                >
                   Register Now
                 </Link>
               </div>
               <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6">
                 <h4 className="mb-3 flex items-center gap-2 font-bold text-slate-900">
-                  <BookOpen className="h-5 w-5 text-public-primary" /> Each Module Includes
+                  <BookOpen className="text-public-primary h-5 w-5" /> Each Module Includes
                 </h4>
                 <ul className="space-y-2 text-xs text-slate-600">
                   {[
@@ -205,7 +219,7 @@ export default function ModularTrainingPage() {
                     'Flexible scheduling',
                   ].map((item) => (
                     <li key={item} className="flex gap-2">
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-public-secondary" />
+                      <CheckCircle2 className="text-public-secondary h-4 w-4 shrink-0" />
                       {item}
                     </li>
                   ))}
@@ -219,19 +233,22 @@ export default function ModularTrainingPage() {
         <SectionReveal>
           <section className="space-y-12">
             <div>
-              <h3 className="mb-6 text-2xl font-bold text-public-primary">Core Modules</h3>
+              <h3 className="text-public-primary mb-6 text-2xl font-bold">Core Modules</h3>
               <ModuleTable modules={coreModules} headerColor="bg-public-primary" />
             </div>
             <div>
-              <h3 className="mb-6 text-2xl font-bold text-public-primary">Specialist Modules</h3>
+              <h3 className="text-public-primary mb-6 text-2xl font-bold">Specialist Modules</h3>
               <ModuleTable modules={specialistModules} headerColor="bg-green-700" />
             </div>
             <div>
-              <h3 className="mb-6 text-2xl font-bold text-public-primary">Avionics Modules</h3>
+              <h3 className="text-public-primary mb-6 text-2xl font-bold">Avionics Modules</h3>
               <ModuleTable modules={avionicsModules} headerColor="bg-purple-700" />
             </div>
             <div className="mt-4 text-center text-sm text-slate-500">
-                <p>All module pricing is available exclusively in the student portal after registration.</p>
+              <p>
+                All module pricing is available exclusively in the student portal after
+                registration.
+              </p>
             </div>
           </section>
         </SectionReveal>
@@ -242,11 +259,17 @@ export default function ModularTrainingPage() {
             <h3 className="mb-5 text-xl font-bold">Payment Terms</h3>
             <div className="space-y-3 text-sm">
               {[
-                { bold: '100% upfront payment', text: 'required before starting your selected module(s).' },
-                { bold: 'Package deals available', text: '— contact us for savings on multiple module bookings.' },
+                {
+                  bold: '100% upfront payment',
+                  text: 'required before starting your selected module(s).',
+                },
+                {
+                  bold: 'Package deals available',
+                  text: '— contact us for savings on multiple module bookings.',
+                },
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-public-secondary" />
+                  <CheckCircle2 className="text-public-secondary mt-0.5 h-5 w-5 shrink-0" />
                   <p className="text-blue-100">
                     <strong className="text-white">{item.bold}</strong> {item.text}
                   </p>
@@ -264,8 +287,8 @@ export default function ModularTrainingPage() {
 
         {/* CTA */}
         <SectionReveal>
-          <div className="rounded-2xl bg-gradient-to-r from-public-primary to-public-secondary p-8 text-center text-white sm:rounded-3xl sm:p-12">
-            <h2 className="mb-4 text-2xl font-black uppercase tracking-tight">
+          <div className="from-public-primary to-public-secondary rounded-2xl bg-linear-to-r p-8 text-center text-white sm:rounded-3xl sm:p-12">
+            <h2 className="mb-4 text-2xl font-black tracking-tight uppercase">
               Ready to Book Your Modules?
             </h2>
             <p className="mx-auto mb-8 max-w-xl text-blue-100/80">
@@ -273,7 +296,7 @@ export default function ModularTrainingPage() {
             </p>
             <Link
               href="/register"
-              className="inline-block rounded-xl bg-white px-10 py-4 text-xs font-black uppercase tracking-widest text-public-primary transition-all hover:bg-blue-50"
+              className="text-public-primary inline-block rounded-xl bg-white px-10 py-4 text-xs font-black tracking-widest uppercase transition-all hover:bg-blue-50"
             >
               Register Now
             </Link>

@@ -1,6 +1,7 @@
 'use client'
 
-import Image from 'next/image'
+import NextImage from 'next/image'
+import { motion } from 'framer-motion'
 import { CheckCircle2 } from 'lucide-react'
 import SectionReveal from './SectionReveal'
 
@@ -14,40 +15,55 @@ const careerPoints = [
 
 export default function Careers() {
   return (
-    <section className="bg-white py-20 sm:py-28">
-      <div className="container mx-auto max-w-6xl px-6">
-        <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
-          <SectionReveal>
-            <Image
-              src="/images/careers/aircraftcareers.webp"
-              alt="Aircraft Engineer working on an engine"
-              width={600}
-              height={700}
-              sizes="(max-width: 1024px) 100vw, 50vw"
-              className="rounded-2xl object-cover"
-            />
+    <section className="bg-slate-50 px-6 py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl">
+        <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-24">
+          <SectionReveal className="order-2 lg:order-1">
+            <div className="relative">
+              <div className="absolute -top-6 -left-6 z-0 h-24 w-24 rounded-full border-4 border-white bg-[#4c9ded]/10 blur-xl" />
+              <div className="relative z-10 overflow-hidden rounded-3xl shadow-2xl">
+                <NextImage
+                  src="/images/careers/aircraftcareers.webp"
+                  alt="Aircraft Engineer working on an engine"
+                  width={800}
+                  height={1000}
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                />
+              </div>
+            </div>
           </SectionReveal>
-          <SectionReveal delay={0.1}>
+          <SectionReveal delay={0.2} className="order-1 lg:order-2">
             <div>
-              <span className="text-public-secondary mb-3 block text-xs font-bold tracking-[0.2em] uppercase">
+              <span className="mb-4 block text-sm font-black tracking-[0.3em] text-[#4c9ded] uppercase">
                 Career Opportunities
               </span>
-              <h2 className="text-public-primary mb-6 text-3xl font-black tracking-tight uppercase sm:text-4xl">
-                A Career That Takes You Anywhere
+              <h2 className="mb-8 text-4xl leading-tight font-black tracking-tight text-[#002a5c] uppercase sm:text-5xl">
+                A Career That Takes <br />
+                <span className="text-[#4c9ded]">You Anywhere</span>
               </h2>
-              <p className="mb-8 leading-relaxed text-slate-600">
+              <p className="mb-10 text-lg leading-relaxed text-slate-600">
                 An EASA Part-66 license is a globally recognized qualification that opens doors to a
                 rewarding and high-demand career. Our graduates work in a variety of roles across
                 the aviation industry worldwide, including:
               </p>
-              <ul className="space-y-4">
-                {careerPoints.map((point) => (
-                  <li key={point} className="flex items-center gap-3">
-                    <CheckCircle2 className="text-public-secondary h-5 w-5 shrink-0" />
-                    <span className="font-medium text-slate-700">{point}</span>
-                  </li>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+                {careerPoints.map((point, i) => (
+                  <motion.div
+                    key={point}
+                    initial={{ opacity: 0, x: 20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.3 + i * 0.1 }}
+                    className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-[#4c9ded] hover:shadow-md"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
+                      <CheckCircle2 className="h-5 w-5" />
+                    </div>
+                    <span className="font-bold text-slate-800">{point}</span>
+                  </motion.div>
                 ))}
-              </ul>
+              </div>
             </div>
           </SectionReveal>
         </div>

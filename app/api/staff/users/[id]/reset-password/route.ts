@@ -4,7 +4,7 @@ import { getAuthSession, hashPassword } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog } from '@/lib/audit/logger'
 import { randomBytes } from 'crypto'
-import { UserRole } from '@prisma/client'
+import { wrapEmail, sendEmail } from '@/lib/email/service'
 
 export const POST = withErrorHandler(
   async (req: NextRequest, context?: { params: Record<string, string> }) => {
@@ -28,8 +28,30 @@ export const POST = withErrorHandler(
       data: { password: hashedPassword },
     })
 
-    // TODO: Send email with tempPassword
-    console.log(`[Mock Email] Password reset for ${user.email}. New password: ${tempPassword}`)
+    // Send email with tempPassword
+    const emailBody = await wrapEmail(
+      'Password Reset',
+      `
+      <div class="h1">Password Reset Successful</div>
+      <div class="text">
+        Your account password has been reset by an administrator. Please use the temporary password below to log in. 
+        <b>We strongly recommend changing your password immediately after logging in.</b>
+      </div>
+      <div class="info-box">
+        <div class="info-row"><strong>Email:</strong> ${user.email}</div>
+        <div class="info-row"><strong>Temporary Password:</strong> <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: #002a5c;">${tempPassword}</code></div>
+      </div>
+      <div class="btn-container">
+        <a href="${process.env.NEXTAUTH_URL}/login" class="btn">Log In Now</a>
+      </div>
+    `
+    )
+
+    await sendEmail({
+      to: user.email,
+      subject: 'Temporary Password - Aerojet Academy',
+      html: emailBody,
+    })
 
     await createAuditLog({
       action: 'RESET_PASSWORD',
@@ -39,6 +61,6 @@ export const POST = withErrorHandler(
       description: `Password reset for user ${user.email} by staff`,
     })
 
-    return apiSuccess({ message: 'Password reset successfully', tempPassword }) // Returning tempPassword for dev/debug convenience
+    return apiSuccess({ message: 'Password reset successfully', tempPassword })
   }
 )
