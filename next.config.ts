@@ -57,6 +57,35 @@ const nextConfig: NextConfig = {
       },
     ]
   },
+  async redirects() {
+    return [
+      {
+        source: '/courses/four-year-b1-b2',
+        destination: '/courses/aircraft-engineering/easa-part-66/four-year-b1-b2',
+        permanent: true,
+      },
+      {
+        source: '/courses/two-year-b1',
+        destination: '/courses/aircraft-engineering/easa-part-66/two-year-b1',
+        permanent: true,
+      },
+      {
+        source: '/courses/modular-training',
+        destination: '/courses/aircraft-engineering/easa-part-66/modular-training',
+        permanent: true,
+      },
+      {
+        source: '/courses/exam-only',
+        destination: '/courses/aircraft-engineering/easa-part-66/exam-only',
+        permanent: true,
+      },
+      {
+        source: '/courses/military-certification',
+        destination: '/courses/aircraft-engineering/easa-part-66/military-certification',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 export default nextConfig

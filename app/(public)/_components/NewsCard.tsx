@@ -1,8 +1,9 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
+import NextImage from 'next/image'
 import { motion } from 'framer-motion'
+import { ArrowRight } from 'lucide-react'
 
 interface NewsCardProps {
   title: string
@@ -39,7 +40,7 @@ export default function NewsCard({
         className="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-500 hover:shadow-2xl sm:rounded-3xl"
       >
         <div className="relative h-52 w-full overflow-hidden bg-slate-100 sm:h-60">
-          <Image
+          <NextImage
             src={image}
             alt={title}
             fill
@@ -48,17 +49,17 @@ export default function NewsCard({
           />
         </div>
 
-        <div className="flex grow flex-col p-6 sm:p-8">
-          <div className="mb-3 flex items-center gap-3 text-[10px] font-bold tracking-widest text-slate-500 uppercase">
+        <div className="flex grow flex-col p-6 sm:p-9">
+          <div className="mb-4 flex items-center gap-3 text-[10px] font-black tracking-[0.25em] text-[#4c9ded] uppercase">
             <span>{date}</span>
             {readTime && (
               <>
-                <span className="h-1 w-1 rounded-full bg-slate-300" />
+                <span className="h-1.5 w-1.5 rounded-full bg-slate-200" />
                 <span>{readTime} Min Read</span>
               </>
             )}
           </div>
-          <h3 className="text-public-primary group-hover:text-public-secondary mb-4 line-clamp-2 text-lg leading-tight font-black transition-colors sm:text-xl">
+          <h3 className="mb-4 line-clamp-2 text-xl leading-tight font-black text-[#002a5c] transition-colors group-hover:text-[#4c9ded] sm:text-2xl">
             {title}
           </h3>
 
@@ -82,12 +83,7 @@ export default function NewsCard({
           )}
           <div className="text-public-secondary mt-auto flex items-center pt-4 text-[10px] font-black tracking-[0.2em] uppercase">
             Read Full Story
-            <span
-              className="ml-2 transform transition-transform group-hover:translate-x-2"
-              aria-hidden="true"
-            >
-              →
-            </span>
+            <ArrowRight className="ml-2 h-3.5 w-3.5 transform transition-transform group-hover:translate-x-2" />
           </div>
         </div>
       </Link>
