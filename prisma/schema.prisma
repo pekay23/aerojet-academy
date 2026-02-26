@@ -463,6 +463,11 @@ model Grade {
   percentage     Decimal @db.Decimal(5, 2)
   grade          String? // A, B, C, F
 
+  // Granular Scores (EASA specific)
+  mcqScore    Decimal? @db.Decimal(5, 2)
+  essay1Score Decimal? @db.Decimal(5, 2)
+  essay2Score Decimal? @db.Decimal(5, 2)
+
   // Dates
   assessmentDate DateTime
 
