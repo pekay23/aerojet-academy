@@ -33,10 +33,10 @@ export default function FourYearPage() {
         <SectionReveal>
           <section className="max-w-4xl">
             <div className="mb-6 flex flex-wrap gap-3">
-              <span className="rounded-full bg-[#002a5c] px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white">
+              <span className="rounded-full bg-[#002a5c] px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase">
                 Full-Time Training
               </span>
-              <span className="rounded-full bg-blue-100 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#002a5c]">
+              <span className="rounded-full bg-blue-100 px-4 py-2 text-[10px] font-black tracking-widest text-[#002a5c] uppercase">
                 B1.1 & B2 License
               </span>
             </div>
@@ -81,7 +81,7 @@ export default function FourYearPage() {
                 )
               )}
             </div>
-            <p className="border-l-4 border-[#4c9ded] pl-4 italic text-slate-600">
+            <p className="border-l-4 border-[#4c9ded] pl-4 text-slate-600 italic">
               "You may work on flight systems on one day and wing or fuselage materials on another."
             </p>
           </section>
@@ -231,8 +231,8 @@ export default function FourYearPage() {
 
         {/* CTA */}
         <SectionReveal>
-          <div className="rounded-2xl bg-gradient-to-r from-[#002a5c] to-[#4c9ded] p-8 text-center text-white sm:rounded-3xl sm:p-12">
-            <h2 className="mb-4 text-2xl font-black uppercase tracking-tight sm:text-3xl">
+          <div className="rounded-2xl bg-linear-to-r from-[#002a5c] to-[#4c9ded] p-8 text-center text-white sm:rounded-3xl sm:p-12">
+            <h2 className="mb-4 text-2xl font-black tracking-tight uppercase sm:text-3xl">
               Ready to Apply?
             </h2>
             <p className="mx-auto mb-8 max-w-xl text-blue-100/80">
@@ -240,7 +240,7 @@ export default function FourYearPage() {
             </p>
             <Link
               href="/register"
-              className="inline-block rounded-xl bg-white px-10 py-4 text-xs font-black uppercase tracking-widest text-[#002a5c] transition-all hover:bg-blue-50 active:scale-[0.98]"
+              className="inline-block rounded-xl bg-white px-10 py-4 text-xs font-black tracking-widest text-[#002a5c] transition-all hover:bg-blue-50 active:scale-[0.98]"
             >
               Start Registration
             </Link>

@@ -66,6 +66,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950">
       {/* Immersive Hero Section */}
+      {/* Immersive Hero Section */}
       <div className="relative h-[60vh] min-h-[400px] w-full overflow-hidden sm:h-[70vh]">
         {article.coverImage ? (
           <>
@@ -85,13 +86,9 @@ export default async function NewsroomArticlePage({ params }: Props) {
         )}
 
         {/* Hero Content Overlay */}
-        <div className="absolute inset-0 flex items-end pb-16 sm:pb-24">
+        <div className="absolute inset-0 flex items-end pb-12 sm:pb-20">
           <div className="mx-auto w-full max-w-7xl px-6">
-            <div className="max-w-4xl">
-              <div className="mb-6 inline-block rounded-full bg-[#4c9ded] px-4 py-1.5 text-[10px] font-black tracking-[0.2em] text-white uppercase shadow-lg shadow-blue-500/20">
-                Academy News
-              </div>
-
+            <div className="max-w-4xl pt-32 sm:pt-48">
               <h1 className="mb-8 text-4xl leading-[1.05] font-black tracking-tighter text-white sm:text-6xl md:text-7xl">
                 {article.title}
               </h1>
@@ -136,19 +133,20 @@ export default async function NewsroomArticlePage({ params }: Props) {
       </div>
 
       {/* Article Content Area */}
-      <div className="mx-auto max-w-7xl px-6 py-20">
-        <div className="flex flex-col gap-16 lg:flex-row">
-          {/* Main Content */}
-          <article className="flex-1">
-            <div
-              className="prose prose-slate prose-lg prose-headings:text-[#002a5c] prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-[#002a5c] prose-a:text-[#4c9ded] prose-a:font-bold prose-a:no-underline hover:prose-a:underline dark:prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: article.content }}
-            />
+      <div className="mx-auto max-w-4xl px-6 py-20">
+        <article>
+          <div
+            className="prose prose-slate prose-lg prose-headings:text-[#002a5c] prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-[#002a5c] prose-a:text-[#4c9ded] prose-a:font-bold prose-a:no-underline hover:prose-a:underline dark:prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: article.content }}
+          />
 
+          {/* Social Share & Tags Section */}
+          <div className="mt-16 flex flex-col items-center justify-between gap-8 border-t border-slate-100 pt-12 sm:flex-row">
             {/* Article Tags */}
-            {article.tags && article.tags.length > 0 && (
-              <div className="mt-12 flex flex-wrap gap-3">
-                {article.tags.map((tag) => (
+            <div className="flex flex-wrap gap-2">
+              {article.tags &&
+                article.tags.length > 0 &&
+                article.tags.map((tag) => (
                   <span
                     key={tag}
                     className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase transition-all hover:border-[#4c9ded] hover:bg-white hover:text-[#002a5c] dark:border-slate-800 dark:bg-slate-900"
@@ -156,38 +154,33 @@ export default async function NewsroomArticlePage({ params }: Props) {
                     #{tag}
                   </span>
                 ))}
-              </div>
-            )}
-
-            {/* Back to Newsroom - Bottom */}
-            <div className="mt-16 flex justify-center">
-              <Link
-                href="/newsroom"
-                className="group flex items-center gap-3 text-sm font-black tracking-widest text-slate-400 uppercase transition-all hover:text-[#002a5c] dark:hover:text-white"
-              >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-100 bg-slate-50 transition-all group-hover:border-[#4c9ded] group-hover:bg-[#4c9ded] group-hover:text-white dark:border-slate-800 dark:bg-slate-900">
-                  <ArrowLeft className="h-4 w-4" />
-                </div>
-                <span>Back to Newsroom</span>
-              </Link>
             </div>
-          </article>
 
-          {/* Sticky Sidebar for desktop - Optional for premium feel */}
-          <aside className="hidden w-80 lg:block">
-            <div className="sticky top-28 space-y-8">
-              <div className="rounded-3xl border border-slate-100 bg-slate-50/50 p-6 dark:border-slate-800 dark:bg-slate-900/50">
-                <h4 className="mb-4 text-sm font-black tracking-widest text-[#002a5c] uppercase dark:text-white">
-                  Share this article
-                </h4>
-                <ShareButtons
-                  url={`${getBaseUrl()}/newsroom/${article.slug}`}
-                  title={article.title}
-                />
-              </div>
+            {/* Share Buttons */}
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Share Article
+              </span>
+              <ShareButtons
+                url={`${getBaseUrl()}/newsroom/${article.slug}`}
+                title={article.title}
+              />
             </div>
-          </aside>
-        </div>
+          </div>
+
+          {/* Back to Newsroom - Bottom */}
+          <div className="mt-20 flex justify-center">
+            <Link
+              href="/newsroom"
+              className="group flex items-center gap-3 text-sm font-black tracking-widest text-slate-400 uppercase transition-all hover:text-[#002a5c] dark:hover:text-white"
+            >
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-100 bg-slate-50 transition-all group-hover:border-[#4c9ded] group-hover:bg-[#4c9ded] group-hover:text-white dark:border-slate-800 dark:bg-slate-900">
+                <ArrowLeft className="h-4 w-4" />
+              </div>
+              <span>Back to Newsroom</span>
+            </Link>
+          </div>
+        </article>
       </div>
     </div>
   )

@@ -1,13 +1,14 @@
-import { Metadata } from "next";
-import Link from "next/link";
+import { Metadata } from 'next'
+import Link from 'next/link'
 import Hero from '../../../../_components/Hero'
 import SectionReveal from '../../../../_components/SectionReveal'
-import { CheckCircle2, Clock, AlertCircle, Shield } from "lucide-react";
+import { CheckCircle2, Clock, AlertCircle, Shield } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: "Military / Industry Certification (1 Year) | Aerojet Academy",
-  description: "Fast-track EASA Part-66 certification for military personnel and experienced technicians.",
-};
+  title: 'Military / Industry Certification (1 Year) | Aerojet Academy',
+  description:
+    'Fast-track EASA Part-66 certification for military personnel and experienced technicians.',
+}
 
 export default function MilitaryCertPage() {
   return (
@@ -17,41 +18,57 @@ export default function MilitaryCertPage() {
         subtitle="1-Year fast-track for experienced personnel — theory & exams only."
         backgroundImage="/images/hero/military-certification.webp"
       />
-      <div className="max-w-6xl mx-auto px-6 py-20 space-y-20">
-
+      <div className="mx-auto max-w-6xl space-y-20 px-6 py-20">
         <SectionReveal>
-          <section className="grid lg:grid-cols-2 gap-10 items-start">
+          <section className="grid items-start gap-10 lg:grid-cols-2">
             <div>
-              <div className="flex flex-wrap gap-3 mb-6">
-                <span className="bg-[#4c9ded] text-white px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Fast-Track</span>
-                <span className="bg-orange-100 text-orange-700 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest">Theory Only</span>
+              <div className="mb-6 flex flex-wrap gap-3">
+                <span className="rounded-full bg-[#4c9ded] px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase">
+                  Fast-Track
+                </span>
+                <span className="rounded-full bg-orange-100 px-4 py-2 text-[10px] font-black tracking-widest text-orange-700 uppercase">
+                  Theory Only
+                </span>
               </div>
-              <h2 className="text-3xl font-black text-[#002a5c] uppercase tracking-tight mb-6">Certify Your Experience</h2>
-              <p className="text-lg text-slate-700 leading-relaxed mb-4">
-                Designed specifically for military personnel or technicians with <strong>5+ years of verifiable aircraft maintenance experience</strong> who lack EASA certification.
+              <h2 className="mb-6 text-3xl font-black tracking-tight text-[#002a5c] uppercase">
+                Certify Your Experience
+              </h2>
+              <p className="mb-4 text-lg leading-relaxed text-slate-700">
+                Designed specifically for military personnel or technicians with{' '}
+                <strong>5+ years of verifiable aircraft maintenance experience</strong> who lack
+                EASA certification.
               </p>
-              <p className="text-slate-600 leading-relaxed">
-                This fast-track course is a strictly theoretical intensive program aimed at preparing students to pass all their EASA exams. It allows experienced technicians to certify their skills without repeating practical training they have already mastered in the field.
+              <p className="leading-relaxed text-slate-600">
+                This fast-track course is a strictly theoretical intensive program aimed at
+                preparing students to pass all their EASA exams. It allows experienced technicians
+                to certify their skills without repeating practical training they have already
+                mastered in the field.
               </p>
             </div>
 
-            <div className="bg-[#002a5c] p-6 sm:p-8 rounded-2xl sm:rounded-3xl text-white">
-              <Shield className="w-10 h-10 text-[#4c9ded] mb-4" />
-              <h3 className="font-bold text-lg mb-4">Program Details</h3>
+            <div className="rounded-2xl bg-[#002a5c] p-6 text-white sm:rounded-3xl sm:p-8">
+              <Shield className="mb-4 h-10 w-10 text-[#4c9ded]" />
+              <h3 className="mb-4 text-lg font-bold">Program Details</h3>
               <ul className="space-y-4">
                 {[
-                  { label: "Duration", value: "12 Months" },
-                  { label: "Schedule", value: "16:00 – 19:00 Mon–Fri" },
-                  { label: "Type", value: "Theory & Exams Only" },
-                  { label: "Pricing", value: "Subsidized for military" },
+                  { label: 'Duration', value: '12 Months' },
+                  { label: 'Schedule', value: '16:00 – 19:00 Mon–Fri' },
+                  { label: 'Type', value: 'Theory & Exams Only' },
+                  { label: 'Pricing', value: 'Subsidized for military' },
                 ].map((item) => (
-                  <li key={item.label} className="flex justify-between border-b border-white/10 pb-3 text-sm">
+                  <li
+                    key={item.label}
+                    className="flex justify-between border-b border-white/10 pb-3 text-sm"
+                  >
                     <span className="text-blue-100">{item.label}</span>
                     <span className="font-bold text-white">{item.value}</span>
                   </li>
                 ))}
               </ul>
-              <Link href="/register" className="block w-full text-center bg-[#4c9ded] text-white mt-8 py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-white hover:text-[#002a5c] transition-all">
+              <Link
+                href="/register"
+                className="mt-8 block w-full rounded-xl bg-[#4c9ded] py-4 text-center text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-white hover:text-[#002a5c]"
+              >
                 Apply for Fast-Track
               </Link>
             </div>
@@ -59,19 +76,19 @@ export default function MilitaryCertPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <section className="bg-slate-50 p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-slate-100">
-            <h3 className="text-xl font-bold text-[#002a5c] mb-6">What's Included</h3>
-            <div className="grid sm:grid-cols-2 gap-4">
+          <section className="rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:rounded-3xl sm:p-10">
+            <h3 className="mb-6 text-xl font-bold text-[#002a5c]">What's Included</h3>
+            <div className="grid gap-4 sm:grid-cols-2">
               {[
-                "All B1.1 theory modules & EASA examinations",
-                "Guidance on EASA Part 66 License application process",
-                "Eligibility for work experience at Aerojet Part 145 Facility",
-                "All technical training notes & study materials",
-                "Tuition and examination fees included",
-                "Special subsidized pricing for military personnel",
+                'All B1.1 theory modules & EASA examinations',
+                'Guidance on EASA Part 66 License application process',
+                'Eligibility for work experience at Aerojet Part 145 Facility',
+                'All technical training notes & study materials',
+                'Tuition and examination fees included',
+                'Special subsidized pricing for military personnel',
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="w-5 h-5 text-[#4c9ded] shrink-0 mt-0.5" />
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#4c9ded]" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -80,26 +97,39 @@ export default function MilitaryCertPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <div className="bg-orange-50 p-5 rounded-xl border border-orange-200 flex gap-4 items-start">
-            <AlertCircle className="w-6 h-6 text-orange-600 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-4 rounded-xl border border-orange-200 bg-orange-50 p-5">
+            <AlertCircle className="mt-0.5 h-6 w-6 shrink-0 text-orange-600" />
             <div>
-              <strong className="text-orange-900 block mb-1">Important Note</strong>
-              <p className="text-sm text-orange-800 leading-relaxed">
-                This program is <strong>strictly theoretical</strong> — it does not include hand-skills training or practical maintenance experience. Candidates must have existing verifiable experience to qualify.
+              <strong className="mb-1 block text-orange-900">Important Note</strong>
+              <p className="text-sm leading-relaxed text-orange-800">
+                This program is <strong>strictly theoretical</strong> — it does not include
+                hand-skills training or practical maintenance experience. Candidates must have
+                existing verifiable experience to qualify.
               </p>
             </div>
           </div>
         </SectionReveal>
 
         <SectionReveal>
-          <div className="bg-gradient-to-r from-[#002a5c] to-[#4c9ded] p-8 sm:p-12 rounded-2xl sm:rounded-3xl text-center text-white">
-            <h2 className="text-2xl font-black uppercase tracking-tight mb-4">Questions About Eligibility?</h2>
-            <p className="text-blue-100/80 mb-8 max-w-xl mx-auto">Contact our admissions team to verify your experience qualifies for the fast-track program.</p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/register" className="inline-block bg-white text-[#002a5c] px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-blue-50 transition-all">
+          <div className="rounded-2xl bg-linear-to-r from-[#002a5c] to-[#4c9ded] p-8 text-center text-white sm:rounded-3xl sm:p-12">
+            <h2 className="mb-4 text-2xl font-black tracking-tight uppercase">
+              Questions About Eligibility?
+            </h2>
+            <p className="mx-auto mb-8 max-w-xl text-blue-100/80">
+              Contact our admissions team to verify your experience qualifies for the fast-track
+              program.
+            </p>
+            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+              <Link
+                href="/register"
+                className="inline-block rounded-xl bg-white px-8 py-4 text-xs font-black tracking-widest text-[#002a5c] uppercase transition-all hover:bg-blue-50"
+              >
                 Register Now
               </Link>
-              <Link href="/contact" className="inline-block bg-white/10 border border-white/20 text-white px-8 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white/20 transition-all">
+              <Link
+                href="/contact"
+                className="inline-block rounded-xl border border-white/20 bg-white/10 px-8 py-4 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-white/20"
+              >
                 Contact Admissions
               </Link>
             </div>
@@ -107,5 +137,5 @@ export default function MilitaryCertPage() {
         </SectionReveal>
       </div>
     </div>
-  );
+  )
 }

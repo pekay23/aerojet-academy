@@ -29,8 +29,8 @@ const pathways = [
       'Study Materials': true,
       'Exam Fees Included': true,
       'Practical Training': false,
-      'Work Experience': true,
-      'Job Guarantee': true,
+      'Work Experience': false,
+      'Job Guarantee': false,
     },
   },
   {

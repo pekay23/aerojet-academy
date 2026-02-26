@@ -22,10 +22,10 @@ export default function TwoYearPage() {
         <SectionReveal>
           <section>
             <div className="mb-6 flex flex-wrap gap-3">
-              <span className="rounded-full bg-green-600 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white">
+              <span className="rounded-full bg-green-600 px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase">
                 Accelerated
               </span>
-              <span className="rounded-full bg-blue-100 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-[#002a5c]">
+              <span className="rounded-full bg-blue-100 px-4 py-2 text-[10px] font-black tracking-widest text-[#002a5c] uppercase">
                 B1.1 License
               </span>
             </div>
@@ -69,7 +69,7 @@ export default function TwoYearPage() {
 
         <SectionReveal>
           <section className="rounded-2xl bg-[#002a5c] p-6 text-white sm:rounded-3xl sm:p-10">
-            <h3 className="mb-6 text-xl font-black uppercase tracking-tight text-[#4c9ded]">
+            <h3 className="mb-6 text-xl font-black tracking-tight text-[#4c9ded] uppercase">
               Program Details
             </h3>
             <div className="grid gap-6 sm:grid-cols-2">
@@ -133,8 +133,8 @@ export default function TwoYearPage() {
 
         {/* CTA */}
         <SectionReveal>
-          <div className="rounded-2xl bg-gradient-to-r from-[#002a5c] to-[#4c9ded] p-8 text-center text-white sm:rounded-3xl sm:p-12">
-            <h2 className="mb-4 text-2xl font-black uppercase tracking-tight">
+          <div className="rounded-2xl bg-linear-to-r from-[#002a5c] to-[#4c9ded] p-8 text-center text-white sm:rounded-3xl sm:p-12">
+            <h2 className="mb-4 text-2xl font-black tracking-tight uppercase">
               Interested in the 2-Year Program?
             </h2>
             <p className="mx-auto mb-8 max-w-xl text-blue-100/80">
@@ -143,13 +143,13 @@ export default function TwoYearPage() {
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Link
                 href="/register"
-                className="inline-block rounded-xl bg-white px-8 py-4 text-xs font-black uppercase tracking-widest text-[#002a5c] transition-all hover:bg-blue-50"
+                className="inline-block rounded-xl bg-white px-8 py-4 text-xs font-black tracking-widest text-[#002a5c] uppercase transition-all hover:bg-blue-50"
               >
                 Register Now
               </Link>
               <Link
                 href="/courses/aircraft-engineering/easa-part-66/four-year-b1-b2"
-                className="inline-block rounded-xl border border-white/20 bg-white/10 px-8 py-4 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-white/20"
+                className="inline-block rounded-xl border border-white/20 bg-white/10 px-8 py-4 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-white/20"
               >
                 Compare with 4-Year
               </Link>

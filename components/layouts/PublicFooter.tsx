@@ -3,11 +3,25 @@ import Image from 'next/image'
 import { MapPin, Phone, Mail, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react'
 
 const quickLinks = [
-  { label: '4-Year Full-Time', href: '/courses/four-year-b1-b2' },
-  { label: '2-Year Full-Time', href: '/courses/two-year-b1' },
-  { label: 'Modular Training', href: '/courses/modular-training' },
-  { label: 'Exam Only', href: '/courses/exam-only' },
-  { label: 'Module Requirements', href: '/courses/module-requirements' },
+  { label: '4-Year Full-Time', href: '/courses/aircraft-engineering/easa-part-66/four-year-b1-b2' },
+  { label: '2-Year Full-Time', href: '/courses/aircraft-engineering/easa-part-66/two-year-b1' },
+  {
+    label: 'Military Certification',
+    href: '/courses/aircraft-engineering/easa-part-66/military-certification',
+  },
+  {
+    label: 'Modular Training',
+    href: '/courses/aircraft-engineering/easa-part-66/modular-training',
+  },
+  { label: 'Exam Only', href: '/courses/aircraft-engineering/easa-part-66/exam-only' },
+  {
+    label: 'Revision Support',
+    href: '/courses/aircraft-engineering/easa-part-66/revision-support',
+  },
+  {
+    label: 'Module Requirements',
+    href: '/courses/module-requirements',
+  },
 ]
 
 const admissionsLinks = [
