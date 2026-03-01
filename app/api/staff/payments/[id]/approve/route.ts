@@ -4,9 +4,17 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { sendPaymentApprovedEmail, sendPaymentRejectedEmail } from '@/lib/email/service'
-import { PaymentStatus } from '@prisma/client'
+import { PaymentStatus, ProgrammeChoice } from '@prisma/client'
 import { topUpWallet } from '@/lib/wallet/operations'
 import { shouldPromoteOnPayment, promoteApplicantToStudent } from '@/lib/enrollment/pathway'
+import { generateMilestonesForYear } from '@/lib/enrollment/full-time'
+
+/** Maps ProgrammeChoice enum to FullTimeProgramme.code */
+const PROGRAMME_CODE_MAP: Record<string, string> = {
+  FULL_TIME_4YEAR: 'FT_4Y_B1B2',
+  FULL_TIME_2YEAR: 'FT_2Y_B1',
+  MILITARY_1YEAR: 'MIL_1Y_B1',
+}
 
 // POST /api/staff/payments/[id]/approve — Approve or reject a payment
 export const POST = withErrorHandler(
@@ -92,7 +100,129 @@ export const POST = withErrorHandler(
         })
       }
 
+      // Handle Full-Time enrollment creation + milestone tracking on seat-related payments
+      const isFTPayment = ['SEAT_CONFIRMATION', 'CUSTOM_PART_PAYMENT', 'YEAR_1_FULL', 'FULL_PROGRAMME'].includes(
+        payment.referenceType || ''
+      )
+      const isFTApplicant =
+        payment.user.role === 'APPLICANT' &&
+        payment.user.status === 'ACTIVE' &&
+        payment.user.programmeChoice &&
+        PROGRAMME_CODE_MAP[payment.user.programmeChoice]
+
+      if (isFTPayment && isFTApplicant) {
+        const programmeCode = PROGRAMME_CODE_MAP[payment.user.programmeChoice!]
+        const programme = await prisma.fullTimeProgramme.findUnique({
+          where: { code: programmeCode },
+          include: { programmeYears: { where: { yearNumber: 1 } } },
+        })
+
+        if (programme && programme.programmeYears.length > 0) {
+          const year1 = programme.programmeYears[0]
+
+          // Create FullTimeEnrollment if it doesn't exist yet
+          let enrollment = await prisma.fullTimeEnrollment.findFirst({
+            where: { studentId: payment.userId, programmeId: programme.id },
+          })
+
+          if (!enrollment) {
+            enrollment = await prisma.fullTimeEnrollment.create({
+              data: {
+                studentId: payment.userId,
+                programmeId: programme.id,
+                programmeYearId: year1.id,
+                status: 'PENDING_CONFIRMATION',
+                currentYearNumber: 1,
+                academicYear: '2026/2027',
+              },
+            })
+
+            // Generate Year 1 milestones (40/30/30)
+            await generateMilestonesForYear(enrollment.id, year1.id)
+          }
+
+          // Mark milestones based on payment type
+          const milestones = await prisma.paymentMilestone.findMany({
+            where: { enrollmentId: enrollment.id, yearNumber: 1 },
+            orderBy: { createdAt: 'asc' },
+          })
+
+          if (payment.referenceType === 'SEAT_CONFIRMATION' || payment.referenceType === 'CUSTOM_PART_PAYMENT') {
+            // Mark SEAT_CONFIRMATION milestone as PAID
+            const seatMs = milestones.find((m) => m.milestoneType === 'SEAT_CONFIRMATION')
+            if (seatMs && seatMs.status !== 'PAID') {
+              await prisma.paymentMilestone.update({
+                where: { id: seatMs.id },
+                data: { status: 'PAID', paidAt: new Date() },
+              })
+            }
+
+            // For CUSTOM_PART_PAYMENT: if amount > seat fee, apply excess to SEM1_DUE via wallet
+            if (payment.referenceType === 'CUSTOM_PART_PAYMENT' && seatMs) {
+              const seatAmount = Number(seatMs.amountDue)
+              const paidAmount = Number(payment.amount)
+              const excess = paidAmount - seatAmount
+
+              if (excess > 0) {
+                // Credit excess to wallet for future milestone payments
+                await prisma.$transaction(async (tx) => {
+                  let wallet = await tx.wallet.findUnique({ where: { userId: payment.userId } })
+                  if (!wallet) {
+                    wallet = await tx.wallet.create({
+                      data: { userId: payment.userId, balance: 0, reservedBalance: 0, availableBalance: 0 },
+                    })
+                  }
+                  await topUpWallet(
+                    tx,
+                    payment.userId,
+                    excess,
+                    `Excess from custom part payment credited to wallet`,
+                    payment.id,
+                    'PAYMENT_ID'
+                  )
+                })
+              }
+            }
+
+            // Update enrollment status
+            await prisma.fullTimeEnrollment.update({
+              where: { id: enrollment.id },
+              data: { status: 'PENDING_CONFIRMATION' },
+            })
+          } else if (payment.referenceType === 'YEAR_1_FULL') {
+            // Mark ALL Year 1 milestones as PAID
+            for (const ms of milestones) {
+              if (ms.status !== 'PAID') {
+                await prisma.paymentMilestone.update({
+                  where: { id: ms.id },
+                  data: { status: 'PAID', paidAt: new Date() },
+                })
+              }
+            }
+            await prisma.fullTimeEnrollment.update({
+              where: { id: enrollment.id },
+              data: { status: 'ACTIVE' },
+            })
+          } else if (payment.referenceType === 'FULL_PROGRAMME') {
+            // Mark ALL milestones as PAID (Year 1 for now; future years generated later)
+            for (const ms of milestones) {
+              if (ms.status !== 'PAID') {
+                await prisma.paymentMilestone.update({
+                  where: { id: ms.id },
+                  data: { status: 'PAID', paidAt: new Date() },
+                })
+              }
+            }
+            await prisma.fullTimeEnrollment.update({
+              where: { id: enrollment.id },
+              data: { status: 'ACTIVE' },
+            })
+          }
+        }
+      }
+
       // Promote APPLICANT → STUDENT if payment type satisfies pathway conditions
+      // (YEAR_1_FULL and FULL_PROGRAMME promote immediately; SEAT_CONFIRMATION does NOT)
       if (
         payment.user.role === 'APPLICANT' &&
         payment.user.status === 'ACTIVE' &&

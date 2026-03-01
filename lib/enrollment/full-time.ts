@@ -143,9 +143,20 @@ export async function processMilestonePayment(milestoneId: string, userId: strin
       },
     })
 
-    // 3. Auto upgrade role on first paid milestone
+    // 3. Check if promotion conditions are met:
+    //    Both SEAT_CONFIRMATION and SEM1_DUE must be PAID for applicant → student
+    const allMilestones = await tx.paymentMilestone.findMany({
+      where: { enrollmentId: milestone.enrollmentId, yearNumber: 1 },
+    })
+    const seatPaid = allMilestones.some(
+      (m) => m.milestoneType === 'SEAT_CONFIRMATION' && m.status === 'PAID'
+    )
+    const sem1Paid = allMilestones.some(
+      (m) => m.milestoneType === 'SEM1_DUE' && (m.id === milestone.id ? true : m.status === 'PAID')
+    )
+
     const user = await tx.user.findUnique({ where: { id: userId } })
-    if (user?.role === 'APPLICANT') {
+    if (user?.role === 'APPLICANT' && seatPaid && sem1Paid) {
       await tx.user.update({
         where: { id: userId },
         data: { role: 'STUDENT' },
@@ -159,8 +170,11 @@ export async function processMilestonePayment(milestoneId: string, userId: strin
     return updated
   })
 
-  // 4. Post-transaction: trigger auto-enrollment for FT/Military pathways
-  await triggerAutoEnrollmentByUserId(userId)
+  // 4. Post-transaction: trigger auto-enrollment for FT/Military pathways (if promoted)
+  const postUser = await prisma.user.findUnique({ where: { id: userId } })
+  if (postUser?.role === 'STUDENT') {
+    await triggerAutoEnrollmentByUserId(userId)
+  }
 
   return updatedMilestone
 }
