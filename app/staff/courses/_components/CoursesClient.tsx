@@ -22,7 +22,7 @@ type Course = {
   id: string
   code: string
   name: string
-  price: string
+  price: string | number
   currency: string
   isActive: boolean
   moduleType: string | null
@@ -119,17 +119,25 @@ export default function CoursesClient({ categories }: Props) {
 
         // Sort the filtered courses
         const sorted = [...filtered].sort((a, b) => {
-          let valA: any = a[sortKey]
-          let valB: any = b[sortKey]
-
           if (sortKey === 'price') {
-            valA = Number(a.price)
-            valB = Number(b.price)
+            const valA = Number(a.price)
+            const valB = Number(b.price)
+            return sortDirection === 'asc' ? valA - valB : valB - valA
           }
 
-          if (valA < valB) return sortDirection === 'asc' ? -1 : 1
-          if (valA > valB) return sortDirection === 'asc' ? 1 : -1
-          return 0
+          if (sortKey === 'isActive') {
+            const valA = a.isActive ? 1 : 0
+            const valB = b.isActive ? 1 : 0
+            return sortDirection === 'asc' ? valA - valB : valB - valA
+          }
+
+          // Natural sort for strings (code, name)
+          const valA = String(a[sortKey] || '')
+          const valB = String(b[sortKey] || '')
+
+          return sortDirection === 'asc'
+            ? valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' })
+            : valB.localeCompare(valA, undefined, { numeric: true, sensitivity: 'base' })
         })
 
         return { ...cat, courses: sorted }

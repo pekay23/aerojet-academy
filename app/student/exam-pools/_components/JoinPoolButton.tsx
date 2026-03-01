@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { joinExamPool } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight, BookOpen, Wallet, AlertCircle, CheckCircle2, X } from 'lucide-react'
+import { getCurrencySymbol } from '@/lib/currency'
 
 // All EASA Part-66 module options
 const EASA_MODULES = [
@@ -53,7 +54,7 @@ export default function JoinPoolButton({
   const [selectedModule, setSelectedModule] = useState('')
   const [isPending, startTransition] = useTransition()
 
-  const currencySymbol = currency === 'GHS' ? 'GH₵' : '€'
+  const currencySymbol = getCurrencySymbol(currency)
   const moduleCount = currentModules.length
   const atModuleCap = moduleCount >= 4
 

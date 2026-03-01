@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { bookStandaloneExamAction } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight, BookOpen, Wallet, CheckCircle2, X } from 'lucide-react'
+import { getCurrencySymbol } from '@/lib/currency'
 
 const EASA_MODULES = [
   { code: 'M1', name: 'Mathematics' },
@@ -42,7 +43,7 @@ export default function StandaloneBooking({
   const [selectedModuleId, setSelectedModuleId] = useState('')
   const [isPending, startTransition] = useTransition()
 
-  const currencySymbol = currency === 'GHS' ? 'GH₵' : '€'
+  const currencySymbol = getCurrencySymbol(currency)
   const canAfford = availableBalance >= price
 
   const handleConfirm = () => {
@@ -79,7 +80,7 @@ export default function StandaloneBooking({
         onClick={() => setOpen(true)}
         className="w-full rounded-xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 transition-all hover:border-blue-300 hover:bg-blue-50/50 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
       >
-        Book Standalone Individual Seat (€{price.toFixed(2)})
+        Book Standalone Individual Seat ({currencySymbol}{price.toFixed(2)})
       </button>
 
       {open && (

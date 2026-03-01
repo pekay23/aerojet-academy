@@ -16,6 +16,7 @@ import CourseActionsMenu from '../../_components/CourseActionsMenu'
 import ExamComponentsSection from './_components/ExamComponentsSection'
 import CourseInfoEditDialog from './_components/CourseInfoEditDialog'
 import { Metadata } from 'next'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 export const metadata: Metadata = { title: 'Course Details | Staff Portal' }
 
@@ -67,6 +68,10 @@ export default async function CourseDetailsPage({ params }: Props) {
     orderBy: { name: 'asc' },
   })
 
+  // Serialize Prisma data for Client Components
+  const serializedCourse = serializePrisma(course) as any
+  const serializedCategories = serializePrisma(categories) as any
+
   return (
     <div className="mx-auto max-w-5xl">
       {/* Header */}
@@ -84,8 +89,10 @@ export default async function CourseDetailsPage({ params }: Props) {
             </div>
             <div>
               <div className="flex items-center gap-3">
-                <span className="font-mono text-sm font-bold text-slate-400">{course.code}</span>
-                {course.isActive ? (
+                <span className="font-mono text-sm font-bold text-slate-400">
+                  {serializedCourse.code}
+                </span>
+                {serializedCourse.isActive ? (
                   <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black text-emerald-700 uppercase">
                     Active
                   </span>
@@ -96,11 +103,11 @@ export default async function CourseDetailsPage({ params }: Props) {
                 )}
               </div>
               <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
-                {course.name}
+                {serializedCourse.name}
               </h1>
             </div>
           </div>
-          <CourseActionsMenu courseId={course.id} courseName={course.name} />
+          <CourseActionsMenu courseId={serializedCourse.id} courseName={serializedCourse.name} />
         </div>
       </div>
 
@@ -113,10 +120,10 @@ export default async function CourseDetailsPage({ params }: Props) {
               <h2 className="text-xs font-black tracking-widest text-slate-400 uppercase">
                 About Course
               </h2>
-              <CourseInfoEditDialog course={course} categories={categories} />
+              <CourseInfoEditDialog course={serializedCourse} categories={serializedCategories} />
             </div>
             <p className="leading-relaxed text-slate-600 dark:text-slate-400">
-              {course.description || 'No description provided for this course.'}
+              {serializedCourse.description || 'No description provided for this course.'}
             </p>
 
             <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -124,28 +131,30 @@ export default async function CourseDetailsPage({ params }: Props) {
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Price</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
                   <DollarSign className="h-4 w-4 text-[#4c9ded]" />
-                  {course.currency} {course.price.toString()}
+                  {serializedCourse.currency} {serializedCourse.price}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Duration</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
                   <Clock className="h-4 w-4 text-[#4c9ded]" />
-                  {course.duration ? `${course.duration} Hours` : 'N/A'}
+                  {serializedCourse.duration ? `${serializedCourse.duration} Hours` : 'N/A'}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Category</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
                   <GraduationCap className="h-4 w-4 text-[#4c9ded]" />
-                  {course.categoryId || 'Standard'}
+                  {serializedCourse.category?.name || 'Standard'}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Prerequisites</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
                   <CheckCircle2 className="h-4 w-4 text-[#4c9ded]" />
-                  {course.requiresPrerequisite ? course.prerequisites.join(', ') : 'None'}
+                  {serializedCourse.requiresPrerequisite
+                    ? serializedCourse.prerequisites.join(', ')
+                    : 'None'}
                 </div>
               </div>
             </div>
@@ -153,13 +162,9 @@ export default async function CourseDetailsPage({ params }: Props) {
 
           {/* Exam Components */}
           <ExamComponentsSection
-            courseId={course.id}
-            currency={course.currency}
-            components={course.examComponents.map((ec) => ({
-              ...ec,
-              individualPrice: ec.individualPrice?.toString() ?? null,
-              poolPrice: ec.poolPrice?.toString() ?? null,
-            }))}
+            courseId={serializedCourse.id}
+            currency={serializedCourse.currency}
+            components={serializedCourse.examComponents}
           />
 
           {/* Scheduled Classes */}
@@ -177,10 +182,10 @@ export default async function CourseDetailsPage({ params }: Props) {
             </div>
 
             <div className="space-y-4">
-              {course.classes.length === 0 ? (
+              {serializedCourse.classes.length === 0 ? (
                 <p className="text-sm text-slate-400 italic">No classes currently scheduled.</p>
               ) : (
-                course.classes.map((cls) => (
+                serializedCourse.classes.map((cls) => (
                   <Link
                     key={cls.id}
                     href={`/staff/classes/${cls.id}`}
@@ -219,7 +224,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   Total Enrolled
                 </span>
                 <span className="text-sm font-black text-slate-800 dark:text-slate-200">
-                  {course._count.enrollments}
+                  {serializedCourse._count.enrollments}
                 </span>
               </div>
               <div className="flex items-center justify-between">
@@ -227,7 +232,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   Active Classes
                 </span>
                 <span className="text-sm font-black text-slate-800 dark:text-slate-200">
-                  {course._count.classes}
+                  {serializedCourse._count.classes}
                 </span>
               </div>
             </div>
@@ -241,13 +246,13 @@ export default async function CourseDetailsPage({ params }: Props) {
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-slate-500 dark:text-slate-400">Created</span>
                 <span className="font-bold text-slate-700">
-                  {new Date(course.createdAt).toLocaleDateString()}
+                  {new Date(serializedCourse.createdAt).toLocaleDateString()}
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs">
                 <span className="font-bold text-slate-500 dark:text-slate-400">Last Updated</span>
                 <span className="font-bold text-slate-700">
-                  {new Date(course.updatedAt).toLocaleDateString()}
+                  {new Date(serializedCourse.updatedAt).toLocaleDateString()}
                 </span>
               </div>
             </div>

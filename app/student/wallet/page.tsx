@@ -39,7 +39,8 @@ export default async function WalletPage() {
     currency: wallet?.currency || 'EUR',
   }
 
-  const currencySymbol = walletBalance.currency === 'GHS' ? 'GH₵' : '€'
+  const { getCurrencySymbol } = await import('@/lib/currency')
+  const currencySymbol = getCurrencySymbol(walletBalance.currency)
   const hasPendingTopups = pendingTopups.length > 0
 
   return (

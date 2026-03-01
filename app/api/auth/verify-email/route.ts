@@ -29,5 +29,11 @@ export async function GET(req: NextRequest) {
     },
   })
 
-  return NextResponse.json({ success: true, message: 'Email verified successfully' })
+  return NextResponse.json({
+    success: true,
+    message: 'Email verified successfully',
+    hasPassword: !!user.password,
+    role: user.role,
+    status: user.status,
+  })
 }

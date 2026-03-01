@@ -30,8 +30,9 @@ export default async function MyBookingsPage() {
     where: { userId: session.user.id },
     select: { currency: true },
   })
+  const { getCurrencySymbol } = await import('@/lib/currency')
   const currency = wallet?.currency || 'EUR'
-  const currencySymbol = currency === 'GHS' ? 'GH₵' : '€'
+  const currencySymbol = getCurrencySymbol(currency)
 
   const activeCount = memberships.filter((m) => ['RESERVED', 'CONFIRMED'].includes(m.status)).length
   const totalReserved = memberships
