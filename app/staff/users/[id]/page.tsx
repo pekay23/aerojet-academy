@@ -9,6 +9,8 @@ import EditIdDialog from './_components/EditIdDialog'
 import EditProfileDialog from './_components/EditProfileDialog'
 import EditProfilePhotoDialog from './_components/EditProfilePhotoDialog'
 import EditPathwayDialog from './_components/EditPathwayDialog'
+import EditAcademicPeriodDialog from './_components/EditAcademicPeriodDialog'
+import OjtSection from './_components/OjtSection'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'User Details | Staff Portal' }
@@ -27,13 +29,42 @@ export default async function UserProfilePage({ params }: Props) {
     where: { id },
     include: {
       profile: true,
-      studentProfile: true,
+      studentProfile: {
+        include: {
+          academicYear: { select: { id: true, name: true } },
+          semester: { select: { id: true, name: true } },
+          pathwayRel: { select: { code: true, name: true } },
+        },
+      },
       instructorProfile: true,
       staffProfile: true,
     },
   })
 
   if (!user) notFound()
+
+  // Fetch OJT data for students with full-time enrollments
+  const ftEnrollments = user.role === 'STUDENT'
+    ? await prisma.fullTimeEnrollment.findMany({
+        where: { studentId: user.id },
+        include: {
+          programme: { select: { code: true, name: true } },
+          ojtPeriods: { orderBy: { startDate: 'desc' } },
+        },
+      })
+    : []
+
+  const ojtData = ftEnrollments.map((e) => ({
+    id: e.id,
+    programme: e.programme,
+    ojtPeriods: e.ojtPeriods.map((o) => ({
+      ...o,
+      startDate: o.startDate.toISOString(),
+      endDate: o.endDate?.toISOString() ?? null,
+      createdAt: o.createdAt.toISOString(),
+      updatedAt: o.updatedAt.toISOString(),
+    })),
+  }))
 
   const profile = user.profile
   const fullName = profile
@@ -235,17 +266,41 @@ export default async function UserProfilePage({ params }: Props) {
                   </p>
                   <div className="flex items-center">
                     <p className="font-bold text-slate-700 dark:text-slate-300">
-                      {user.studentProfile?.studyPathway || 'Not Selected'}
+                      {user.studentProfile?.pathwayRel?.name || 'Not Selected'}
                     </p>
                     <EditPathwayDialog
                       userId={user.id}
-                      currentPathway={(user.studentProfile?.studyPathway as any) || null}
+                      currentPathway={(user.studentProfile?.pathwayRel?.code as any) || null}
                       isLocked={user.studentProfile?.studyPathwayLocked || false}
+                    />
+                  </div>
+                </div>
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                  <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">
+                    Academic Period
+                  </p>
+                  <div className="flex items-center">
+                    <p className="font-bold text-slate-700 dark:text-slate-300">
+                      {user.studentProfile?.academicYear?.name || 'Not Assigned'}
+                      {user.studentProfile?.semester?.name &&
+                        ` — ${user.studentProfile.semester.name}`}
+                    </p>
+                    <EditAcademicPeriodDialog
+                      userId={user.id}
+                      currentAcademicYearId={user.studentProfile?.academicYearId}
+                      currentAcademicYearName={user.studentProfile?.academicYear?.name}
+                      currentSemesterId={user.studentProfile?.semesterId}
+                      currentSemesterName={user.studentProfile?.semester?.name}
                     />
                   </div>
                 </div>
               </div>
             </div>
+          )}
+
+          {/* OJT Section for Full-Time Students */}
+          {user.role === 'STUDENT' && ojtData.length > 0 && (
+            <OjtSection userId={user.id} enrollments={ojtData} />
           )}
 
           {user.role === 'INSTRUCTOR' && user.instructorProfile && (

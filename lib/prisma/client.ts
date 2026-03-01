@@ -15,7 +15,7 @@ const sslConfig = {
   rejectUnauthorized: connectionString.includes('sslmode=verify-full'),
 }
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient }
+const globalForPrisma = globalThis as unknown as { prisma_aja: PrismaClient }
 
 const createPrismaClient = () => {
   const pool = new Pool({
@@ -32,8 +32,8 @@ const createPrismaClient = () => {
   })
 }
 
-export const prisma = globalForPrisma.prisma ?? createPrismaClient()
+export const prisma = globalForPrisma.prisma_aja ?? createPrismaClient()
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma_aja = prisma
 
 export default prisma

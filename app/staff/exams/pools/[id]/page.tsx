@@ -133,7 +133,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <BookOpen className="h-4 w-4 text-[#002a5c]" />
-                        <span className="font-medium text-slate-700">{member.selectedModule}</span>
+                        <span className="font-medium text-slate-700">{member.examComponent?.course?.code || 'N/A'}</span>
                       </div>
                     </td>
 

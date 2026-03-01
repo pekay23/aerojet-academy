@@ -1,4 +1,4 @@
-import prisma from '@/lib/database/prisma'
+import prisma from '@/lib/prisma/client'
 import { POOL_EXAM_FEE } from './types'
 import { sendEmail, poolConfirmedEmail, poolFailedEmail } from '@/lib/email'
 import { format } from 'date-fns'
@@ -53,7 +53,7 @@ export async function confirmPoolInternal(poolId: string, tx: any) {
         name,
         pool?.name || '',
         format(pool?.examDate || new Date(), 'dd MMM yyyy'),
-        m.selectedModule
+        m.examComponentId || 'N/A'
       ),
     }).catch(() => {})
   }

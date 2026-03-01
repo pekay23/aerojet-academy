@@ -2,6 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import StaffSidebar from './_components/StaffSidebar'
+import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 
 export default async function StaffLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
@@ -59,7 +60,10 @@ export default async function StaffLayout({ children }: { children: React.ReactN
 
       {/* Main content — now flexes normally beside the sticky sidebar */}
       <div className="flex min-h-screen min-w-0 flex-1 flex-col overflow-x-hidden">
-        <main className="flex-1 p-6 lg:p-8">{children}</main>
+        <main className="flex-1 p-4 pt-16 sm:p-6 lg:p-8 lg:pt-8">
+          <BreadcrumbNav />
+          {children}
+        </main>
       </div>
     </div>
   )

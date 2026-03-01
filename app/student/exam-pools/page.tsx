@@ -1,11 +1,13 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { FileCheck, Users, Calendar, MapPin, Wallet } from 'lucide-react'
+import { FileCheck, Users, Calendar, MapPin, Wallet, Info } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import JoinPoolButton from './_components/JoinPoolButton'
+import StandaloneBooking from './_components/StandaloneBooking'
+import { getSystemSetting } from '@/lib/settings'
 
 export const metadata: Metadata = { title: 'Exam Pools | Student Portal' }
 
@@ -13,28 +15,44 @@ export default async function ExamPoolsPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  // 1. Fetch available pools (OPEN or NEAR_FULL)
-  const pools = await prisma.examPool.findMany({
-    where: {
-      status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] },
-      event: { status: { in: ['OPEN', 'CONFIRMED', 'DRAFT'] } },
-    },
-    include: { event: true },
-    orderBy: { examDate: 'asc' },
-  })
+  // 1. Fetch available pools with membership data for module breakdown
+  const [pools, wallet, studentProfile, individualFeeStr] = await Promise.all([
+    prisma.examPool.findMany({
+      where: {
+        status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] },
+        event: { status: { in: ['OPEN', 'CONFIRMED', 'DRAFT'] } },
+      },
+      include: {
+        event: true,
+        memberships: {
+          where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
+          select: { examComponentId: true, examComponent: { select: { course: { select: { code: true } } } } },
+        },
+      },
+      orderBy: { examDate: 'asc' },
+    }),
+    prisma.wallet.findUnique({
+      where: { userId: session.user.id },
+    }),
+    prisma.studentProfile.findUnique({
+      where: { userId: session.user.id },
+    }),
+    getSystemSetting('individual_exam_fee', '520'),
+  ])
 
-  // 2. Fetch user's wallet for balance check
-  const wallet = await prisma.wallet.findUnique({
-    where: { userId: session.user.id },
-  })
   const balance = Number(wallet?.availableBalance || 0)
+  const currency = wallet?.currency || 'EUR'
+  const currencySymbol = currency === 'GHS' ? 'GH₵' : '€'
+  const individualFee = Number(individualFeeStr)
 
   // 3. Fetch existing memberships to disable join button
   const myMemberships = await prisma.poolMembership.findMany({
-    where: { userId: session.user.id },
-    select: { poolId: true },
+    where: { userId: session.user.id, status: { in: ['RESERVED', 'CONFIRMED'] } },
+    select: { poolId: true, examComponentId: true },
   })
   const joinedPoolIds = new Set(myMemberships.map((m) => m.poolId))
+
+  const isExamOnly = studentProfile?.enrollmentType === 'EXAM_ONLY'
 
   return (
     <div className="space-y-8">
@@ -47,22 +65,40 @@ export default async function ExamPoolsPage() {
             Join a pool to secure your seat for upcoming exams.
           </p>
         </div>
-        <Link
-          href="/student/exam-pools/my-bookings"
-          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-        >
-          <FileCheck className="h-4 w-4" />
-          My Bookings
-        </Link>
+        <div className="flex items-center gap-3">
+          {isExamOnly && (
+            <StandaloneBooking
+              price={individualFee}
+              currency={currency}
+              availableBalance={balance}
+            />
+          )}
+          <Link
+            href="/student/exam-pools/my-bookings"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition-all hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+          >
+            <FileCheck className="h-4 w-4" />
+            My Bookings
+          </Link>
+        </div>
       </div>
 
+      {/* Wallet Banner */}
       {wallet && (
         <div
-          className={`rounded-xl border border-l-4 p-4 ${balance > 0 ? 'border-slate-100 border-l-blue-500 bg-blue-50/20' : 'border-amber-100 border-l-amber-500 bg-amber-50'}`}
+          className={`rounded-xl border border-l-4 p-4 ${
+            balance > 0
+              ? 'border-slate-100 border-l-blue-500 bg-blue-50/20 dark:border-slate-800 dark:bg-blue-900/10'
+              : 'border-amber-100 border-l-amber-500 bg-amber-50 dark:border-amber-900 dark:bg-amber-900/20'
+          }`}
         >
           <div className="flex items-center gap-3">
             <div
-              className={`rounded-lg p-2 ${balance > 0 ? 'bg-blue-100 text-blue-600' : 'bg-amber-100 text-amber-600'}`}
+              className={`rounded-lg p-2 ${
+                balance > 0
+                  ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                  : 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
+              }`}
             >
               <Wallet className="h-5 w-5" />
             </div>
@@ -71,13 +107,14 @@ export default async function ExamPoolsPage() {
                 Available Funds
               </p>
               <p className="text-xl font-black text-slate-900 dark:text-slate-100">
-                {wallet.currency} {balance.toFixed(2)}
+                {currencySymbol}
+                {balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
               </p>
             </div>
             {balance === 0 && (
               <Link
                 href="/student/wallet/top-up"
-                className="ml-auto text-xs font-bold text-amber-600 hover:underline"
+                className="ml-auto text-xs font-bold text-amber-600 hover:underline dark:text-amber-400"
               >
                 Top up to join →
               </Link>
@@ -86,12 +123,33 @@ export default async function ExamPoolsPage() {
         </div>
       )}
 
+      {/* How It Works info banner */}
+      <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/40 px-5 py-4 text-sm text-blue-800 dark:border-blue-900/50 dark:bg-blue-900/10 dark:text-blue-300">
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
+        <span>
+          Each pool accepts <strong>25–28 candidates</strong>, up to{' '}
+          <strong>4 different EASA modules</strong> per pool. You select one module per seat. Seat
+          fee is reserved from your wallet and released if the pool is cancelled.
+        </span>
+      </div>
+
+      {/* Pool Cards */}
       {pools.length > 0 ? (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {pools.map((pool) => {
             const isJoined = joinedPoolIds.has(pool.id)
             const seatPrice = Number(pool.seatPrice)
             const canAfford = balance >= seatPrice
+            const isFull = pool.currentMemberCount >= pool.maxCandidates
+
+            // Compute unique modules in this pool
+            const existingModules = [
+              ...new Set(
+                pool.memberships
+                  .map((m) => m.examComponent?.course?.code)
+                  .filter((m): m is string => !!m)
+              ),
+            ]
 
             return (
               <div
@@ -107,7 +165,7 @@ export default async function ExamPoolsPage() {
                         ? 'bg-slate-500'
                         : pool.status === 'CONFIRMED'
                           ? 'bg-blue-600'
-                          : 'bg-[#002a5c]'
+                          : 'bg-aerojet-blue'
                   }`}
                 >
                   {pool.status === 'DRAFT' ? 'Upcoming' : pool.status.replace('_', ' ')}
@@ -121,7 +179,7 @@ export default async function ExamPoolsPage() {
                     {pool.event?.name}
                   </p>
 
-                  <div className="mb-6 space-y-3">
+                  <div className="mb-4 space-y-3">
                     <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                       <Calendar className="h-4 w-4 text-slate-400" />
                       <span>
@@ -145,12 +203,32 @@ export default async function ExamPoolsPage() {
                     </div>
                   </div>
 
-                  <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-4">
+                  {/* Module breakdown */}
+                  {existingModules.length > 0 && (
+                    <div className="mb-4 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50">
+                      <p className="mb-1.5 text-[9px] font-bold tracking-widest text-slate-400 uppercase">
+                        Modules in pool ({existingModules.length}/4)
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {existingModules.map((m) => (
+                          <span
+                            key={m}
+                            className="bg-aerojet-blue/10 text-aerojet-blue inline-flex rounded-md px-2 py-0.5 text-[10px] font-bold dark:bg-blue-900/30 dark:text-blue-300"
+                          >
+                            {m}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-4 dark:border-slate-800">
                     <div>
                       <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
                         Seat Price
                       </p>
-                      <p className="text-lg font-black text-[#002a5c] dark:text-blue-400">
+                      <p className="text-aerojet-blue text-lg font-black dark:text-blue-400">
+                        {currencySymbol}
                         {seatPrice.toFixed(2)}
                       </p>
                     </div>
@@ -158,16 +236,20 @@ export default async function ExamPoolsPage() {
                     {isJoined ? (
                       <button
                         disabled
-                        className="rounded-xl bg-emerald-100 px-4 py-2 text-xs font-bold tracking-wide text-emerald-700 uppercase"
+                        className="rounded-xl bg-emerald-100 px-4 py-2 text-xs font-bold tracking-wide text-emerald-700 uppercase dark:bg-emerald-900/30 dark:text-emerald-400"
                       >
-                        Joined
+                        Joined ✓
                       </button>
                     ) : (
                       <JoinPoolButton
                         poolId={pool.id}
+                        poolName={pool.name}
                         price={seatPrice}
-                        currency={wallet?.currency || 'EUR'}
+                        currency={currency}
                         canAfford={canAfford}
+                        availableBalance={balance}
+                        currentModules={existingModules}
+                        isFull={isFull}
                       />
                     )}
                   </div>

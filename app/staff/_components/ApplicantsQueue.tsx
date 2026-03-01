@@ -106,8 +106,8 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
       label: 'Total Pending',
       value: counts.all ?? 0,
       icon: Clock,
-      color: 'text-[#4c9ded]',
-      bg: 'bg-blue-50',
+      color: 'text-aerojet-sky',
+      bg: 'bg-blue-50 dark:bg-blue-900/20',
     },
     {
       label: 'Fee Unpaid',
@@ -131,7 +131,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-[#002a5c] uppercase dark:text-white">
+            <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
               Applicant Queue
             </h1>
             <p className="mt-1 text-sm text-slate-400">
@@ -188,7 +188,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                   onClick={() => setTab(t.key)}
                   className={`relative rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                     tab === t.key
-                      ? 'text-[#002a5c] dark:text-white'
+                      ? 'text-aerojet-blue dark:text-white'
                       : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                 >
@@ -213,7 +213,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search applicant..."
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-700 dark:bg-slate-800/50"
+                className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
               />
             </div>
           </div>
@@ -275,7 +275,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                       >
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#002a5c]/10 text-xs font-black text-[#002a5c]">
+                            <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
                               {applicant.profile?.profilePhotoUrl ? (
                                 <img
                                   src={applicant.profile.profilePhotoUrl}
@@ -319,7 +319,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                               e.stopPropagation()
                               setSelected(applicant)
                             }}
-                            className="text-xs font-bold text-[#4c9ded] hover:underline"
+                            className="text-aerojet-sky text-xs font-bold hover:underline"
                           >
                             Review →
                           </button>

@@ -30,7 +30,10 @@ export async function GET(req: NextRequest) {
       include: {
         memberships: {
           where: { status: 'CONFIRMED' },
-          include: { user: { include: { profile: true } } },
+          include: {
+            user: { include: { profile: true } },
+            examComponent: { include: { course: { select: { code: true } } } },
+          },
         },
         event: { select: { name: true } },
       },
@@ -41,6 +44,7 @@ export async function GET(req: NextRequest) {
         try {
           const email = membership.user.academyEmail || membership.user.email
           const name = membership.user.profile?.firstName || 'Student'
+          const moduleLabel = membership.examComponent?.course?.code ?? 'Module'
 
           await sendEmail({
             to: email,
@@ -49,7 +53,7 @@ export async function GET(req: NextRequest) {
               <p>This is a reminder that your exam is in <strong>7 days</strong>.</p>
               <p><strong>Pool:</strong> ${pool.name}<br/>
               <strong>Date:</strong> ${pool.examDate.toLocaleDateString()}<br/>
-              <strong>Module:</strong> ${membership.selectedModule}<br/>
+              <strong>Module:</strong> ${moduleLabel}<br/>
               <strong>Venue:</strong> TBA</p>
               <p>Please ensure you are prepared. Good luck!</p>`,
           })
@@ -59,7 +63,7 @@ export async function GET(req: NextRequest) {
               userId: membership.userId,
               type: 'EXAM_REMINDER',
               title: 'Exam in 7 Days',
-              message: `Your ${membership.selectedModule} exam is in 7 days on ${pool.examDate.toLocaleDateString()}.`,
+              message: `Your ${moduleLabel} exam is in 7 days on ${pool.examDate.toLocaleDateString()}.`,
             },
           })
 
@@ -85,7 +89,10 @@ export async function GET(req: NextRequest) {
       include: {
         memberships: {
           where: { status: 'CONFIRMED' },
-          include: { user: { include: { profile: true } } },
+          include: {
+            user: { include: { profile: true } },
+            examComponent: { include: { course: { select: { code: true } } } },
+          },
         },
         event: { select: { name: true } },
       },
@@ -96,6 +103,7 @@ export async function GET(req: NextRequest) {
         try {
           const email = membership.user.academyEmail || membership.user.email
           const name = membership.user.profile?.firstName || 'Student'
+          const moduleLabel = membership.examComponent?.course?.code ?? 'Module'
 
           await sendEmail({
             to: email,
@@ -104,7 +112,7 @@ export async function GET(req: NextRequest) {
               <p>Your exam is <strong>TOMORROW</strong>!</p>
               <p><strong>Pool:</strong> ${pool.name}<br/>
               <strong>Date:</strong> ${pool.examDate.toLocaleDateString()}<br/>
-              <strong>Module:</strong> ${membership.selectedModule}<br/>
+              <strong>Module:</strong> ${moduleLabel}<br/>
               <strong>Venue:</strong> TBA</p>
               <p>Please bring valid ID. Arrive 30 minutes early. Good luck!</p>`,
           })
@@ -114,7 +122,7 @@ export async function GET(req: NextRequest) {
               userId: membership.userId,
               type: 'EXAM_REMINDER',
               title: 'Exam Tomorrow!',
-              message: `Your ${membership.selectedModule} exam is TOMORROW.`,
+              message: `Your ${moduleLabel} exam is TOMORROW.`,
             },
           })
 

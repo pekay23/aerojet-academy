@@ -14,17 +14,29 @@ export default async function ClassesPage() {
   if (!session) redirect('/login')
 
   const classes = await prisma.class.findMany({
-    include: {
-      course: true,
+    select: {
+      id: true,
+      name: true,
+      startDate: true,
+      endDate: true,
+      maxStudents: true,
+      currentStudents: true,
+      course: {
+        select: {
+          id: true,
+          code: true,
+          name: true,
+        },
+      },
       instructor: {
-        include: {
+        select: {
+          id: true,
           user: {
-            include: {
+            select: {
               profile: {
                 select: {
                   firstName: true,
                   lastName: true,
-                  profilePhotoUrl: true,
                 },
               },
             },
@@ -39,7 +51,9 @@ export default async function ClassesPage() {
     <div className="mx-auto max-w-7xl">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">Classes</h1>
+          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+            Classes
+          </h1>
           <p className="text-slate-500 dark:text-slate-400">Manage class schedules and rosters</p>
         </div>
         <Link
@@ -51,10 +65,10 @@ export default async function ClassesPage() {
         </Link>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800/50 text-xs font-bold uppercase text-slate-500 dark:text-slate-400">
+            <thead className="bg-slate-50 text-xs font-bold text-slate-500 uppercase dark:bg-slate-800/50 dark:text-slate-400">
               <tr>
                 <th className="px-6 py-4">Class / Course</th>
                 <th className="px-6 py-4">Schedule</th>
@@ -70,7 +84,9 @@ export default async function ClassesPage() {
                     <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
                       <Calendar className="h-6 w-6 text-slate-300" />
                     </div>
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">No classes scheduled</h3>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                      No classes scheduled
+                    </h3>
                     <p className="text-xs text-slate-500 dark:text-slate-400">
                       Click "Schedule Class" to create your first class.
                     </p>
@@ -97,7 +113,7 @@ export default async function ClassesPage() {
                     <td className="px-6 py-4">
                       {cls.instructor ? (
                         <div className="flex items-center gap-2">
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold uppercase text-blue-700">
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-[10px] font-bold text-blue-700 uppercase">
                             {cls.instructor.user.profile?.firstName?.charAt(0) || 'I'}
                           </div>
                           <span className="font-medium text-slate-700">
@@ -106,7 +122,7 @@ export default async function ClassesPage() {
                           </span>
                         </div>
                       ) : (
-                        <span className="italic text-slate-400">Unassigned</span>
+                        <span className="text-slate-400 italic">Unassigned</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -137,4 +153,3 @@ export default async function ClassesPage() {
     </div>
   )
 }
-

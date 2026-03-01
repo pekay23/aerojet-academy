@@ -12,7 +12,7 @@ import { createNotification } from '@/lib/email/service'
 export async function joinPool(
   userId: string,
   poolId: string,
-  selectedModule: string,
+  examComponentId: string,
   actorId?: string
 ) {
   return prisma.$transaction(
@@ -44,17 +44,17 @@ export async function joinPool(
 
       // 5. Validate module is allowed
       const allowedModules = pool.allowedModules as string[]
-      if (allowedModules.length > 0 && !allowedModules.includes(selectedModule)) {
-        throw new Error(`Module ${selectedModule} is not available in this pool`)
+      if (allowedModules.length > 0 && !allowedModules.includes(examComponentId)) {
+        throw new Error(`Module ${examComponentId} is not available in this pool`)
       }
 
       // 6. Check module diversity cap
       const moduleDistribution = await tx.poolMembership.groupBy({
-        by: ['selectedModule'],
+        by: ['examComponentId'],
         where: { poolId, status: { not: 'CANCELLED' } },
       })
-      const uniqueModules = new Set(moduleDistribution.map((m) => m.selectedModule))
-      if (!uniqueModules.has(selectedModule) && uniqueModules.size >= pool.moduleDiversityCap) {
+      const uniqueModules = new Set(moduleDistribution.map((m) => m.examComponentId))
+      if (!uniqueModules.has(examComponentId) && uniqueModules.size >= pool.moduleDiversityCap) {
         throw new Error(
           `Pool has reached maximum module diversity (${pool.moduleDiversityCap}). ` +
             `Choose from: ${Array.from(uniqueModules).join(', ')}`
@@ -76,7 +76,7 @@ export async function joinPool(
         data: {
           poolId,
           userId,
-          selectedModule,
+          examComponentId,
           status: MembershipStatus.RESERVED,
           amountReserved: seatPrice,
         },
@@ -110,7 +110,7 @@ export async function joinPool(
       await createNotification(tx, userId, {
         type: NotificationType.SUCCESS,
         title: 'Pool Booking Confirmed',
-        message: `You've reserved a seat in ${pool.name} for module ${selectedModule}. €${seatPrice} has been held in your wallet.`,
+        message: `You've reserved a seat in ${pool.name} for module ${examComponentId}. €${seatPrice} has been held in your wallet.`,
         link: `/student/exam-pools/my-bookings`,
       })
 
@@ -151,7 +151,7 @@ async function confirmPoolInternal(tx: any, poolId: string) {
       tx,
       member.userId,
       amount,
-      `Pool confirmed: ${member.pool.name} - Module ${member.selectedModule}`,
+      `Pool confirmed: ${member.pool.name} - Module ${member.examComponentId}`,
       `POOL-CONFIRM-${poolId}`
     )
 
@@ -170,7 +170,7 @@ async function confirmPoolInternal(tx: any, poolId: string) {
     await createNotification(tx, member.userId, {
       type: NotificationType.SUCCESS,
       title: 'Exam Pool Confirmed!',
-      message: `${member.pool.name} has been confirmed. €${amount} has been captured from your wallet. Your exam for ${member.selectedModule} is scheduled.`,
+      message: `${member.pool.name} has been confirmed. €${amount} has been captured from your wallet. Your exam for ${member.examComponentId} is scheduled.`,
       link: `/student/exam-pools/my-bookings`,
     })
   }
@@ -282,6 +282,9 @@ export async function getPoolWithDetails(poolId: string) {
               profile: { select: { firstName: true, lastName: true } },
               studentProfile: { select: { studentId: true } },
             },
+          },
+          examComponent: {
+            include: { course: { select: { code: true } } },
           },
         },
         orderBy: { createdAt: 'asc' },

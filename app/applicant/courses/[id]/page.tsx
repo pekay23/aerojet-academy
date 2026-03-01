@@ -200,7 +200,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">
                     Category
                   </p>
-                  <p className="text-sm font-bold text-slate-700">{course.category || 'CORE'}</p>
+                  <p className="text-sm font-bold text-slate-700">{course.categoryId || 'CORE'}</p>
                 </div>
               </div>
 

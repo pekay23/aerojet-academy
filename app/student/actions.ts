@@ -1,32 +1,58 @@
 'use server'
 
-import { getAuthSession, requireStudent, requireAuth } from '@/lib/auth/helpers'
+import { getAuthSession } from '@/lib/auth/helpers'
+import {
+  joinPool,
+  confirmPool,
+  failPool,
+  getPoolWithDetails,
+  getAvailablePools,
+} from '@/lib/pools/operations'
+import { bookStandaloneExam, bookResitExam } from '@/lib/enrollment/exams'
 import prisma from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { requireAuth, requireStudent } from '@/lib/auth/helpers'
 import { hash, compare } from 'bcryptjs'
 
 export async function enrollInCourse(courseId: string) {
   const user = await requireStudent()
 
-  // Find course details
+  // 1. Basic user status check
+  const dbUser = await prisma.user.findUnique({
+    where: { id: user.id },
+    select: { registrationPaid: true, status: true },
+  })
+
+  if (!dbUser || dbUser.status !== 'ACTIVE') {
+    return { error: 'Your account is not active. Please contact support.' }
+  }
+
+  if (!dbUser.registrationPaid) {
+    return {
+      error:
+        'Registration fee not paid. Please complete your registration payment before enrolling.',
+    }
+  }
+
+  // 2. Find course details
   const course = await prisma.course.findUnique({ where: { id: courseId } })
   if (!course) return { error: 'Course not found' }
 
-  // Restrict by pathway
+  // 3. Profile & Pathway check
   const profile = await prisma.studentProfile.findUnique({
     where: { userId: user.id },
   })
   if (!profile) return { error: 'Student profile not found.' }
 
-  if (profile.studyPathway === 'EXAM_ONLY') {
+  if (profile.enrollmentType === 'EXAM_ONLY') {
     return {
       error:
         'Exam-Only students cannot enroll in training modules. Please contact support to change your pathway.',
     }
   }
 
-  // Check if already enrolled
+  // 4. Check if already enrolled
   const existing = await prisma.enrollment.findFirst({
     where: {
       userId: user.id,
@@ -41,8 +67,35 @@ export async function enrollInCourse(courseId: string) {
 
   try {
     const coursePrice = Number(course.price)
+    const isFullTime = profile.enrollmentType === 'FULL_TIME'
 
-    if (profile.studyPathway === 'MODULAR') {
+    // Determine if this is a "Mandatory" course for FT students
+    let isMandatoryFT = false
+    if (isFullTime) {
+      const ftEnrollment = await prisma.fullTimeEnrollment.findFirst({
+        where: { studentId: user.id, status: 'ACTIVE' },
+        include: {
+          programmeYear: {
+            include: { courses: { select: { id: true } } },
+          },
+        },
+      })
+
+      if (ftEnrollment) {
+        isMandatoryFT = ftEnrollment.programmeYear.courses.some((c) => c.id === courseId)
+      } else {
+        // Full-time student but no active programme enrollment?
+        return {
+          error:
+            'No active Full-Time programme enrollment found. Please complete your programme activation first.',
+        }
+      }
+    }
+
+    // Logic for charging: Modular OR Additional Courses for FT
+    const shouldCharge = profile.enrollmentType === 'MODULAR' || (isFullTime && !isMandatoryFT)
+
+    if (shouldCharge) {
       const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
 
       if (!wallet || Number(wallet.availableBalance) < coursePrice) {
@@ -60,7 +113,7 @@ export async function enrollInCourse(courseId: string) {
           tx,
           user.id,
           coursePrice,
-          `Enrollment in ${course.code}: ${course.name}`,
+          `Enrollment in ${course.code}: ${course.name}${isFullTime ? ' (Additional)' : ''}`,
           course.id,
           'COURSE_ID'
         )
@@ -78,7 +131,8 @@ export async function enrollInCourse(courseId: string) {
         })
 
         // Upgrade APPLICANT to STUDENT if needed
-        if (user.role === 'APPLICANT') {
+        const authUser = await tx.user.findUnique({ where: { id: user.id } })
+        if (authUser?.role === 'APPLICANT') {
           await tx.user.update({
             where: { id: user.id },
             data: { role: 'STUDENT' },
@@ -90,13 +144,14 @@ export async function enrollInCourse(courseId: string) {
         }
       })
     } else {
-      // FULL_TIME logic (or pending)
+      // Mandatory FULL_TIME course
       await prisma.enrollment.create({
         data: {
           userId: user.id,
           courseId: courseId,
-          status: 'PENDING', // Default to PENDING until approved or paid
+          status: 'ACTIVE', // Mandatory courses are auto-active
           enrolledAt: new Date(),
+          approvedAt: new Date(),
         },
       })
     }
@@ -112,13 +167,32 @@ export async function enrollInCourse(courseId: string) {
   }
 }
 
-export async function joinExamPool(poolId: string) {
+export async function joinExamPool(poolId: string, moduleCode: string) {
   const user = await requireStudent()
+
+  if (!moduleCode || moduleCode.trim() === '') {
+    return { error: 'You must select a module before joining a pool.' }
+  }
+
+  // 0. Pathway Restrictions
+  const profile = await prisma.studentProfile.findUnique({ where: { userId: user.id } })
+  if (profile?.enrollmentType === 'FULL_TIME') {
+    return {
+      error:
+        'Full-Time students cannot join exam pools individually. They follow a strictly milestone-based path.',
+    }
+  }
 
   // 1. Get Pool Details & Check availability
   const pool = await prisma.examPool.findUnique({
     where: { id: poolId },
-    include: { event: true },
+    include: {
+      event: true,
+      memberships: {
+        where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
+        select: { examComponentId: true, examComponent: { select: { course: { select: { code: true } } } } },
+      },
+    },
   })
 
   if (!pool) return { error: 'Exam pool not found.' }
@@ -129,7 +203,17 @@ export async function joinExamPool(poolId: string) {
     return { error: 'This exam pool is full.' }
   }
 
-  // 2. Check if already a member
+  // 2. Module Diversity Cap — max 4 unique modules per pool
+  const existingModules = pool.memberships.map((m) => m.examComponent?.course?.code).filter(Boolean)
+  const uniqueModules = new Set(existingModules)
+  const isNewModule = !uniqueModules.has(moduleCode)
+  if (isNewModule && uniqueModules.size >= 4) {
+    return {
+      error: `This pool already has 4 different modules (${Array.from(uniqueModules).join(', ')}). You can only join for one of these existing modules.`,
+    }
+  }
+
+  // 3. Check if already a member
   const existingMembership = await prisma.poolMembership.findUnique({
     where: {
       poolId_userId: {
@@ -143,58 +227,83 @@ export async function joinExamPool(poolId: string) {
     return { error: 'You have already joined this exam pool.' }
   }
 
-  // 3. Check Wallet Balance
+  // 4. Time Conflict Check — no two pools on the same exam date for this user
+  const examDate = new Date(pool.examDate)
+  const dayStart = new Date(examDate)
+  dayStart.setHours(0, 0, 0, 0)
+  const dayEnd = new Date(examDate)
+  dayEnd.setHours(23, 59, 59, 999)
+
+  const conflictingMembership = await prisma.poolMembership.findFirst({
+    where: {
+      userId: user.id,
+      status: { in: ['RESERVED', 'CONFIRMED'] },
+      pool: {
+        examDate: { gte: dayStart, lte: dayEnd },
+        id: { not: poolId },
+      },
+    },
+  })
+
+  if (conflictingMembership) {
+    return {
+      error:
+        'You already have a booking in another pool on this exam date. Each candidate can only sit one pool per day.',
+    }
+  }
+
+  // 5. Check Wallet Balance
   const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
   const seatPrice = Number(pool.seatPrice)
 
   if (!wallet || Number(wallet.availableBalance) < seatPrice) {
+    const available = Number(wallet?.availableBalance || 0)
     return {
-      error: `Insufficient funds. You need ${wallet?.currency || 'EUR'} ${seatPrice} to join this pool.`,
+      error: `Insufficient funds. You need €${seatPrice.toFixed(2)} but have €${available.toFixed(2)} available. Please top up your wallet.`,
     }
   }
 
   try {
-    // 4. Perform Transaction (Deduct/Reserve funds + Add Membership + Update Pool Count)
+    // 6. Perform atomic transaction
     await prisma.$transaction(async (tx) => {
       const { reserveFunds } = await import('@/lib/wallet/operations')
 
-      // Update Wallet Balances & Create Reservation Transaction
+      // Reserve funds in wallet
       await reserveFunds(
         tx,
         user.id,
         seatPrice,
-        `Seat reservation for ${pool.name}`,
+        `Seat reservation for ${pool.name} — Module ${moduleCode}`,
         pool.id,
         'POOL_ID'
       )
 
-      // Create Membership
+      const examComponent = await tx.examComponent.findFirst({
+        where: { course: { code: moduleCode } },
+      })
+
       await tx.poolMembership.create({
         data: {
           userId: user.id,
           poolId: pool.id,
           status: 'RESERVED',
-          // createdAt is automatically handled by @default(now())
-          selectedModule: 'PENDING', // Uses pending as default/placeholder
+          examComponentId: examComponent?.id,
           amountReserved: seatPrice,
         },
       })
 
-      // Update Pool Count
+      // Update Pool Count and Status
+      const newCount = pool.currentMemberCount + 1
       await tx.examPool.update({
         where: { id: pool.id },
         data: {
           currentMemberCount: { increment: 1 },
           status:
-            pool.currentMemberCount + 1 >= 23
-              ? pool.currentMemberCount + 1 >= pool.maxCandidates
-                ? 'CONFIRMED'
-                : 'NEAR_FULL'
-              : 'OPEN',
+            newCount >= pool.maxCandidates ? 'CONFIRMED' : newCount >= 23 ? 'NEAR_FULL' : 'OPEN',
         },
       })
 
-      // Role Upgrade mapping:
+      // Role Upgrade: APPLICANT → STUDENT
       if (user.role === 'APPLICANT') {
         await tx.user.update({
           where: { id: user.id },
@@ -216,7 +325,73 @@ export async function joinExamPool(poolId: string) {
     return { success: true }
   } catch (error) {
     console.error('Join Pool Error:', error)
-    return { error: 'Failed to join exam pool. Please try again.' }
+    return { error: (error as Error).message || 'Failed to join exam pool. Please try again.' }
+  }
+}
+
+export async function leaveExamPool(poolId: string) {
+  const user = await requireStudent()
+
+  // 1. Fetch membership
+  const membership = await prisma.poolMembership.findUnique({
+    where: { poolId_userId: { userId: user.id, poolId } },
+    include: { pool: { include: { event: true } } },
+  })
+
+  if (!membership) {
+    return { error: 'You are not a member of this pool.' }
+  }
+  if (membership.status !== 'RESERVED') {
+    return { error: 'You can only leave a pool while your seat is in RESERVED status.' }
+  }
+  if (membership.pool.status === 'CONFIRMED') {
+    return {
+      error: 'This pool has been confirmed and seats are locked. Please contact support.',
+    }
+  }
+
+  const refundAmount = Number(membership.amountReserved || 0)
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      const { releaseFunds } = await import('@/lib/wallet/operations')
+
+      // Release reserved funds back to available
+      if (refundAmount > 0) {
+        await releaseFunds(
+          tx,
+          user.id,
+          refundAmount,
+          `Refund: Left pool ${membership.pool.name}`,
+          poolId,
+          'POOL_ID'
+        )
+      }
+
+      // Cancel membership
+      await tx.poolMembership.update({
+        where: { poolId_userId: { userId: user.id, poolId } },
+        data: { status: 'CANCELLED' },
+      })
+
+      // Decrement pool count
+      const newCount = Math.max(0, membership.pool.currentMemberCount - 1)
+      await tx.examPool.update({
+        where: { id: poolId },
+        data: {
+          currentMemberCount: { decrement: 1 },
+          status: newCount < 23 ? 'OPEN' : 'NEAR_FULL',
+        },
+      })
+    })
+
+    revalidatePath('/student/exam-pools')
+    revalidatePath('/student/exam-pools/my-bookings')
+    revalidatePath('/student/wallet')
+    return { success: true }
+  } catch (error) {
+    console.error('Leave Pool Error:', error)
+    return { error: (error as Error).message || 'Failed to leave pool. Please try again.' }
   }
 }
 
@@ -432,5 +607,33 @@ export async function markMessageAsRead(messageId: string) {
   } catch (error) {
     console.error('markMessageAsRead error:', error)
     return { error: 'Failed to mark message as read' }
+  }
+}
+
+export async function bookStandaloneExamAction(examId: string) {
+  try {
+    const user = await requireStudent()
+    await bookStandaloneExam(examId, user.id)
+
+    revalidatePath('/student/exams')
+    revalidatePath('/student/wallet')
+    return { success: true }
+  } catch (error: any) {
+    console.error('bookStandaloneExamAction error:', error)
+    return { error: error.message || 'Failed to book exam.' }
+  }
+}
+
+export async function bookResitExamAction(examId: string) {
+  try {
+    const user = await requireStudent()
+    await bookResitExam(examId, user.id)
+
+    revalidatePath('/student/exams')
+    revalidatePath('/student/wallet')
+    return { success: true }
+  } catch (error: any) {
+    console.error('bookResitExamAction error:', error)
+    return { error: error.message || 'Failed to book resit exam.' }
   }
 }

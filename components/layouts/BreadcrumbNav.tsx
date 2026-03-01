@@ -7,7 +7,7 @@ import { ChevronRight, Home } from 'lucide-react'
 
 function segmentToLabel(segment: string): string {
   // Check if it's a UUID-like or MongoDB-like ID (very long string)
-  if (segment.length > 20) return 'Loading...'
+  if (segment.length > 20) return '...'
 
   return segment
     .replace(/\[.*?\]/g, '')
@@ -15,6 +15,10 @@ function segmentToLabel(segment: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
+/**
+ * Desktop-only breadcrumb. On mobile, the MobileTopBar in DashboardSidebar
+ * handles breadcrumb display — so this only renders on md+ screens.
+ */
 export default function BreadcrumbNav() {
   const pathname = usePathname()
   const [resolvedNames, setResolvedNames] = useState<Record<string, string>>({})
@@ -46,7 +50,10 @@ export default function BreadcrumbNav() {
   if (cleanSegments.length <= 1) return null
 
   return (
-    <nav className="mb-6 flex items-center gap-1.5 overflow-x-auto text-xs text-slate-400 dark:text-slate-500">
+    <nav
+      className="mb-6 hidden items-center gap-1.5 overflow-x-auto text-xs text-slate-400 lg:flex dark:text-slate-500"
+      aria-label="Breadcrumb"
+    >
       <Link
         href="/"
         className="shrink-0 transition-colors hover:text-slate-600 dark:hover:text-slate-300"

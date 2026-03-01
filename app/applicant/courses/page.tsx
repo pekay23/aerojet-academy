@@ -30,6 +30,7 @@ const categoryColor: Record<string, string> = {
 import { CourseCategoryFilter } from '@/components/CourseCategoryFilter'
 import TrackedCourseLink from '@/components/shared/TrackedCourseLink'
 import TrackedImpression from '@/components/shared/TrackedImpression'
+import { getCatalogVisibility } from '@/lib/enrollment/pathway'
 
 export default async function CoursesPage({
   searchParams,
@@ -40,16 +41,22 @@ export default async function CoursesPage({
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
+  const studentProfile = await prisma.studentProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { enrollmentType: true },
+  })
+
   const canEnroll = session.user.status === 'ACTIVE'
+  const visibility = getCatalogVisibility(studentProfile?.enrollmentType || null)
 
   // Fetch unique categories for filter
   const categoriesRaw = await prisma.course.findMany({
     where: { isActive: true },
-    select: { category: true },
-    distinct: ['category'],
+    select: { categoryId: true },
+    distinct: ['categoryId'],
   })
   const categories = categoriesRaw
-    .map((c) => c.category)
+    .map((c) => c.categoryId)
     .filter((c): c is string => !!c)
     .sort()
 
@@ -98,7 +105,12 @@ export default async function CoursesPage({
       <div className="h-px w-full bg-slate-100 dark:bg-slate-800" />
 
       <Suspense fallback={<CoursesSkeleton />}>
-        <CourseList canEnroll={canEnroll} category={category} />
+        <CourseList
+          canEnroll={canEnroll}
+          category={category}
+          visibility={visibility}
+          enrollmentType={studentProfile?.enrollmentType || null}
+        />
       </Suspense>
     </div>
   )
@@ -114,10 +126,25 @@ function CoursesSkeleton() {
   )
 }
 
-async function CourseList({ canEnroll, category }: { canEnroll: boolean; category?: string }) {
+async function CourseList({
+  canEnroll,
+  category,
+  visibility,
+  enrollmentType,
+}: {
+  canEnroll: boolean
+  category?: string
+  visibility: ReturnType<typeof getCatalogVisibility>
+  enrollmentType: string | null
+}) {
   const courses = await prisma.course.findMany({
-    where: { isActive: true, ...(category ? { category } : {}) },
-    orderBy: [{ category: 'asc' }, { code: 'asc' }],
+    where: {
+      isActive: true,
+      ...(category ? { categoryId: category } : {}),
+      // Apply visibility filters
+      ...(visibility.showEasaModules ? {} : { NOT: { categoryId: 'EASA_MODULE' } }),
+    },
+    orderBy: [{ code: 'asc' }],
   })
 
   if (courses.length === 0) {
@@ -137,7 +164,7 @@ async function CourseList({ canEnroll, category }: { canEnroll: boolean; categor
   // Group by category for visual hierarchy
   const grouped = courses.reduce(
     (acc, c) => {
-      const cat = c.category || 'GENERAL'
+      const cat = c.categoryId || 'GENERAL'
       if (!acc[cat]) acc[cat] = []
       acc[cat].push(c)
       return acc
@@ -166,7 +193,7 @@ async function CourseList({ canEnroll, category }: { canEnroll: boolean; categor
                 {/* Accent line */}
                 <div
                   className={`absolute top-0 left-0 h-1 w-full transition-all group-hover:h-1.5 ${
-                    categoryColor[course.category || '']
+                    categoryColor[course.categoryId || '']
                       ?.split(' ')[2]
                       ?.replace('border-', 'bg-') || 'bg-slate-200 dark:bg-slate-800'
                   }`}
@@ -219,7 +246,7 @@ async function CourseList({ canEnroll, category }: { canEnroll: boolean; categor
                         href={`/applicant/courses/${course.id}`}
                         className="inline-flex h-11 items-center justify-center rounded-xl bg-[#002a5c] px-6 text-xs font-black tracking-widest text-white uppercase ring-offset-white transition-all hover:bg-[#003875] hover:shadow-lg active:scale-95 sm:px-8 dark:bg-blue-600 dark:hover:bg-blue-500"
                       >
-                        Enroll
+                        {enrollmentType === 'EXAM_ONLY' ? 'Book Exam' : 'Enroll'}
                       </TrackedCourseLink>
                     ) : (
                       <span className="inline-flex h-11 cursor-not-allowed items-center justify-center rounded-xl bg-slate-50 px-6 text-xs font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/50">

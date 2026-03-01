@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireAdmin, getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler, apiError } from '@/lib/api/response'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireAdmin()
@@ -18,6 +19,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 export async function POST(req: NextRequest) {
   const session = await getAuthSession()
   if (!session) return apiError('Unauthorized', 401)
+  const staff = session.user
 
   try {
     const formData = await req.formData()
@@ -46,6 +48,13 @@ export async function POST(req: NextRequest) {
         })
       )
     )
+
+    await createAuditLog({
+      action: AuditAction.SYSTEM_UPDATE,
+      entity: 'SystemSetting',
+      userId: (staff as any).id,
+      details: { updates },
+    })
 
     // Redirect back with success message or just return success
     return new Response(null, {

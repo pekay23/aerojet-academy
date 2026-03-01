@@ -1,42 +1,42 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { signIn, getSession } from "next-auth/react";
-import Link from "next/link";
-import { Eye, EyeOff, Loader2, Mail, Lock } from "lucide-react";
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { signIn, getSession } from 'next-auth/react'
+import Link from 'next/link'
+import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react'
 
 export default function LoginForm() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+    e.preventDefault()
+    setError('')
+    setLoading(true)
 
     try {
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         redirect: false,
         email,
         password,
-      });
+      })
 
       if (!result) {
-        throw new Error("Something went wrong. Please try again.");
+        throw new Error('Something went wrong. Please try again.')
       }
 
       if (result.error) {
-        throw new Error("Invalid email or password.");
+        throw new Error('Invalid email or password.')
       }
 
       // Get session to read role and redirect accordingly
-      const session = await getSession();
-      const role = (session?.user as any)?.role;
+      const session = await getSession()
+      const role = (session?.user as any)?.role
 
       const redirectMap: Record<string, string> = {
         SUPER_ADMIN: '/staff',
@@ -45,32 +45,36 @@ export default function LoginForm() {
         INSTRUCTOR: '/instructor',
         STUDENT: '/student',
         APPLICANT: '/applicant',
-      };
+      }
 
-      router.push(redirectMap[role] ?? '/login');
-      router.refresh();
+      // Use window.location for full page navigation after auth
+      // router.push + router.refresh causes a race condition on mobile
+      window.location.href = redirectMap[role] ?? '/login'
     } catch (err: any) {
-      setError(err.message || "Something went wrong. Please try again.");
+      setError(err.message || 'Something went wrong. Please try again.')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
           {error}
         </div>
       )}
 
       {/* Email */}
       <div>
-        <label htmlFor="email" className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">
+        <label
+          htmlFor="email"
+          className="mb-2 block text-xs font-bold tracking-widest text-slate-500 uppercase dark:text-slate-400"
+        >
           Email Address
         </label>
         <div className="relative">
-          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Mail className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             id="email"
             type="email"
@@ -79,39 +83,45 @@ export default function LoginForm() {
             placeholder="you@example.com"
             required
             autoComplete="email"
-            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl pl-11 pr-4 py-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#4c9ded] focus:border-transparent transition-all"
+            className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-[#4c9ded] focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
         </div>
       </div>
 
       {/* Password */}
       <div>
-        <div className="flex items-center justify-between mb-2">
-          <label htmlFor="password" className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+        <div className="mb-2 flex items-center justify-between">
+          <label
+            htmlFor="password"
+            className="text-xs font-bold tracking-widest text-slate-500 uppercase dark:text-slate-400"
+          >
             Password
           </label>
-          <Link href="/forgot-password" className="text-xs font-bold text-[#4c9ded] hover:underline">
+          <Link
+            href="/forgot-password"
+            className="text-xs font-bold text-[#4c9ded] hover:underline"
+          >
             Forgot?
           </Link>
         </div>
         <div className="relative">
-          <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Lock className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             id="password"
-            type={showPassword ? "text" : "password"}
+            type={showPassword ? 'text' : 'password'}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
             required
             autoComplete="current-password"
-            className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl pl-11 pr-12 py-3.5 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-[#4c9ded] focus:border-transparent transition-all"
+            className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-12 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-[#4c9ded] focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-400 transition-colors"
+            className="absolute top-1/2 right-4 -translate-y-1/2 text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-400"
           >
-            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
       </div>
@@ -120,16 +130,16 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-[#002a5c] text-white py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#4c9ded] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#002a5c] py-4 text-xs font-black tracking-widest text-white uppercase shadow-lg transition-all hover:bg-[#4c9ded] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" /> Signing In...
+            <Loader2 className="h-4 w-4 animate-spin" /> Signing In...
           </>
         ) : (
-          "Sign In"
+          'Sign In'
         )}
       </button>
     </form>
-  );
+  )
 }

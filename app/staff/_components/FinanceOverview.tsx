@@ -85,7 +85,7 @@ export default function FinanceOverview({
       value: `GH₵ ${Number(data?.totalRegistration ?? 0).toLocaleString('en-GH', { minimumFractionDigits: 0 })}`,
       icon: Wallet,
       bg: 'bg-blue-50',
-      color: 'text-[#4c9ded]',
+      color: 'text-aerojet-sky',
       sub: data ? `${regGrowth >= 0 ? '+' : ''}${regGrowth.toFixed(1)}% vs last month` : undefined,
     },
     {
@@ -112,9 +112,9 @@ export default function FinanceOverview({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-[#002a5c] uppercase dark:text-white">
+          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
             Finance
           </h1>
           <p className="mt-1 text-sm text-slate-400">
@@ -172,7 +172,7 @@ export default function FinanceOverview({
             </h2>
             <p className="mt-0.5 text-xs text-slate-400">Approved payments only</p>
           </div>
-          <TrendingUp className="h-5 w-5 text-[#4c9ded]" />
+          <TrendingUp className="text-aerojet-sky h-5 w-5" />
         </div>
         {chartData.some((d) => d.revenue > 0) ? (
           <RevenueChart data={chartData} currency="GHS " />
@@ -190,7 +190,7 @@ export default function FinanceOverview({
             Recent Transactions
           </h2>
         </div>
-        <div className="overflow-x-auto">
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
@@ -244,7 +244,7 @@ export default function FinanceOverview({
                       <td className="px-5 py-3.5 text-xs font-bold text-slate-600 dark:text-slate-400">
                         {tx.referenceType?.replace(/_/g, ' ') ?? '—'}
                       </td>
-                      <td className="px-5 py-3.5 text-sm font-black text-[#002a5c]">
+                      <td className="text-aerojet-blue dark:text-aerojet-sky px-5 py-3.5 text-sm font-black">
                         {tx.currency}{' '}
                         {Number(tx.amount).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                       </td>
@@ -272,10 +272,86 @@ export default function FinanceOverview({
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Card View */}
+        <div className="block divide-y divide-slate-100 md:hidden dark:divide-slate-800">
+          {loading ? (
+            Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-3 p-4">
+                <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100" />
+                <div className="h-4 w-1/2 animate-pulse rounded bg-slate-100" />
+              </div>
+            ))
+          ) : !data?.recentTransactions?.length ? (
+            <div className="py-12 text-center">
+              <p className="text-sm font-bold text-slate-400">No transactions yet</p>
+            </div>
+          ) : (
+            data.recentTransactions.map((tx) => {
+              const fullName = tx.user.profile
+                ? `${tx.user.profile.firstName} ${tx.user.profile.lastName}`
+                : tx.user.email
+              const cfg = STATUS_CONFIG[tx.status] ?? {
+                label: tx.status,
+                icon: Clock,
+                style: 'text-slate-500 bg-slate-50',
+              }
+              const StatusIcon = cfg.icon
+              return (
+                <div key={tx.id} className="space-y-2 p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                        {fullName}
+                      </p>
+                      <p className="text-xs text-slate-400">{tx.user.email}</p>
+                    </div>
+                    <span
+                      className={`inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${cfg.style}`}
+                    >
+                      <StatusIcon className="h-3 w-3" /> {cfg.label}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div>
+                      <p className="font-bold tracking-wider text-slate-400 uppercase">Amount</p>
+                      <p className="text-aerojet-blue font-black dark:text-blue-400">
+                        {tx.currency}{' '}
+                        {Number(tx.amount).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-bold tracking-wider text-slate-400 uppercase">Method</p>
+                      <p className="font-bold text-slate-600 dark:text-slate-400">
+                        {tx.paymentMethod.replace(/_/g, ' ')}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-bold tracking-wider text-slate-400 uppercase">Type</p>
+                      <p className="font-bold text-slate-600 dark:text-slate-400">
+                        {tx.referenceType?.replace(/_/g, ' ') ?? '—'}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-bold tracking-wider text-slate-400 uppercase">Date</p>
+                      <p className="font-bold text-slate-600 dark:text-slate-400">
+                        {new Date(tx.createdAt).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
         <div className="border-t border-slate-100 px-6 py-3 dark:border-slate-800">
           <a
             href="/staff/finance/transactions"
-            className="text-xs font-bold text-[#4c9ded] hover:underline"
+            className="text-aerojet-sky text-xs font-bold hover:underline"
           >
             View all transactions →
           </a>

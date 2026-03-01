@@ -41,7 +41,7 @@ const pathways = [
     features: {
       'Classroom Tuition': true,
       'Study Materials': true,
-      'Exam Fees Included': false,
+      'Exam Fees Included': true,
       'Practical Training': false,
       'Work Experience': false,
       'Job Guarantee': false,

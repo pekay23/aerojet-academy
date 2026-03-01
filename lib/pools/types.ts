@@ -1,7 +1,7 @@
 export interface PoolJoinInput {
   poolId: string
   userId: string
-  selectedModule: string
+  examComponentId: string
 }
 
 export interface PoolJoinResult {
