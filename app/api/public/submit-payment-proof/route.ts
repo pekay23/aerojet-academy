@@ -20,6 +20,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiNotFound('No account found with this registration code')
   }
 
+  if (!user.emailVerified) {
+    return apiError(
+      'Please verify your email before uploading payment proof. Check your inbox for the verification link.',
+      403
+    )
+  }
+
   if (user.registrationPaid) {
     return apiError('Registration fee has already been paid')
   }

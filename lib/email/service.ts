@@ -303,7 +303,16 @@ export async function renderEmailVerificationEmail(firstName: string, verifyToke
       </a>
     </div>
 
-    <p class="text" style="font-size: 13px; color: #666;">
+    <div class="info-box" style="border-left-color: #137fec; margin-top: 24px;">
+      <p style="margin: 0;"><strong>What happens next?</strong></p>
+      <ul style="margin: 8px 0 0 0; padding-left: 20px;">
+        <li>Once verified, you will receive an email with payment details</li>
+        <li>Use the payment details to transfer your registration fee</li>
+        <li>Upload your payment proof to complete registration</li>
+      </ul>
+    </div>
+
+    <p class="text" style="font-size: 13px; color: #666; margin-top: 24px;">
       This link expires in 24 hours. If you didn't create an account, you can safely ignore this email.
     </p>
   `

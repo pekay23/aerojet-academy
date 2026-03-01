@@ -10,7 +10,23 @@ export const registerSchema = z.object({
   middleName: z.string().max(50).optional(),
   email: z.string().email('Invalid email address'),
   nationality: z.string().min(2, 'Nationality is required'),
-  dateOfBirth: z.string().refine((val) => !isNaN(Date.parse(val)), 'Invalid date of birth'),
+  dateOfBirth: z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), 'Invalid date of birth')
+    .refine((val) => {
+      const dob = new Date(val)
+      const today = new Date()
+      return dob < today
+    }, 'Date of birth cannot be in the future')
+    .refine((val) => {
+      const dob = new Date(val)
+      const today = new Date()
+      const age = today.getFullYear() - dob.getFullYear()
+      const monthDiff = today.getMonth() - dob.getMonth()
+      const dayDiff = today.getDate() - dob.getDate()
+      const fullAge = monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0) ? age : age - 1
+      return fullAge >= 16
+    }, 'You must be at least 16 years old to register'),
   phoneCountryCode: z.string().min(1, 'Country code is required'),
   phone: z.string().min(7, 'Phone number is too short').max(15),
   selectedProgramme: z.enum(
