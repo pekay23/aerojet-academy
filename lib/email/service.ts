@@ -249,6 +249,9 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
       <a href="{{uploadUrl}}" class="btn">
         <span>Upload Payment Proof</span>
       </a>
+      <p style="font-size: 12px; color: #64748b; margin-top: 20px; font-style: italic;">
+        If you have already submitted your payment proof, please ignore this email.
+      </p>
     </div>
   `
 
@@ -371,13 +374,13 @@ export async function renderActivationEmail(
       </div>
     </div>
 
-    <p class="text" style="font-size: 13px; color: #d97706; background: #fef3c7; padding: 10px; border-radius: 4px; border-left: 3px solid #d97706;">
-      <strong>⚠️ Important:</strong> Click the button below to verify your email. You will be automatically logged in to set your permanent password.
+    <p class="text" style="font-size: 13px; color: #1e40af; background: #eff6ff; padding: 10px; border-radius: 4px; border-left: 3px solid #1e40af;">
+      <strong>🚀 Get Started:</strong> Click the button below to auto-login to your portal and set your permanent password.
     </p>
 
     <div class="btn-container">
-      <a href="{{verifyUrl}}" class="btn">
-        <span>Verify & Auto-Login</span>
+      <a href="{{loginUrl}}" class="btn">
+        <span>Login & Get Started</span>
       </a>
     </div>
   `
@@ -389,7 +392,7 @@ export async function renderActivationEmail(
     firstName,
     academyEmail,
     tempPassword,
-    verifyUrl: `${baseUrl}/verify-email?token=${verifyToken}`,
+    loginUrl: `${baseUrl}/verify-email?token=${verifyToken}`,
   })
 
   return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
