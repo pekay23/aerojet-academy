@@ -160,7 +160,7 @@ export default async function StaffDashboardPage() {
       color: 'text-amber-600 dark:text-amber-400',
       bg: 'bg-amber-50 dark:bg-amber-900/20',
       alert: data.pendingApplicants > 0,
-      href: '/staff/applicants',
+      href: '/staff/users?tab=applicants',
     },
     {
       label: 'Active Students',
@@ -176,7 +176,7 @@ export default async function StaffDashboardPage() {
       color: 'text-red-600 dark:text-red-400',
       bg: 'bg-red-50 dark:bg-red-900/20',
       alert: data.pendingPayments > 0,
-      href: '/staff/payments/pending',
+      href: '/staff/payments?tab=PENDING',
     },
   ]
 
@@ -278,7 +278,7 @@ export default async function StaffDashboardPage() {
               Pending Payment Approvals
             </h2>
             <a
-              href="/staff/payments/pending"
+              href="/staff/payments?tab=PENDING"
               className="text-aerojet-sky text-xs font-bold hover:underline"
             >
               View all ({data.pendingPayments})

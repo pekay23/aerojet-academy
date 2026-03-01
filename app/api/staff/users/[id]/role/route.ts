@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { UserRole, EnrollmentType } from '@prisma/client'
+import { sendStudentPromotionEmail } from '@/lib/email/service'
 
 const updateRoleSchema = z.object({
   role: z.enum(['APPLICANT', 'STUDENT', 'INSTRUCTOR', 'STAFF', 'ADMIN']),
@@ -34,6 +35,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         studentProfile: true,
         instructorProfile: true,
         staffProfile: true,
+        profile: true,
       },
     })
 
@@ -50,6 +52,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       const random = Math.floor(1000 + Math.random() * 9000).toString()
       return `${prefix}-${random}`
     }
+
+    let generatedStudentId: string | null = null
 
     const updatedUser = await prisma.$transaction(async (tx) => {
       // 1. Update the base role
@@ -74,10 +78,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
           },
         })
       } else if (newRole === 'STUDENT' && !user.studentProfile) {
+        const studentId = generateId('AATA')
+        generatedStudentId = studentId
         await tx.studentProfile.create({
           data: {
             userId,
-            studentId: generateId('AATA'),
+            studentId,
             enrollmentType: EnrollmentType.FULL_TIME,
           },
         })
@@ -85,6 +91,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
       return updated
     })
+
+    // 3. Send promotion email if promoting to STUDENT
+    if (newRole === 'STUDENT' && generatedStudentId) {
+      const firstName = user.profile?.firstName || 'Student'
+      await sendStudentPromotionEmail(user.email, firstName, generatedStudentId)
+    }
 
     return NextResponse.json(updatedUser)
   } catch (error) {

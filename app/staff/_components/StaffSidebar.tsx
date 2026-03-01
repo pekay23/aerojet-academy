@@ -38,19 +38,16 @@ interface StaffSidebarProps {
 export default function StaffSidebar({ userName, userRole, userImage, counts }: StaffSidebarProps) {
   const staffLinks: SidebarLink[] = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'Users', href: '/users', icon: Users },
     {
-      label: 'Applicants',
-      href: '/applicants',
-      icon: UserCheck,
+      label: 'People',
+      href: '/users',
+      icon: Users,
       badge: counts?.applicants || undefined,
-    },
-    {
-      label: 'Students',
-      href: '/students',
-      icon: GraduationCap,
       children: [
-        { label: 'All Students', href: '/students' },
+        { label: 'All Users', href: '/users' },
+        { label: 'Applicants', href: '/users?tab=applicants' },
+        { label: 'Students', href: '/users?tab=students' },
+        { label: 'Instructors', href: '/users?tab=instructors' },
         { label: 'Import (CSV)', href: '/students/import' },
       ],
     },
@@ -74,13 +71,6 @@ export default function StaffSidebar({ userName, userRole, userImage, counts }: 
       label: 'Finance',
       href: '/finance',
       icon: Wallet,
-      children: [
-        { label: 'Overview', href: '/finance' },
-        { label: 'Wallet Top-ups', href: '/finance/wallet-topups' },
-        { label: 'Reconcile Payments', href: '/finance/reconciliation' },
-        { label: 'Transactions', href: '/finance/transactions' },
-        { label: 'Reports', href: '/finance/reports' },
-      ],
     },
     { label: 'Courses', href: '/courses', icon: BookOpen },
     { label: 'Programmes', href: '/programmes', icon: Briefcase },

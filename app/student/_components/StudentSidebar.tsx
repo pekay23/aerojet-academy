@@ -21,16 +21,7 @@ function buildLinks(studyPathway?: string | null) {
   const links = [
     { label: 'Dashboard', href: '/student', icon: LayoutDashboard },
     { label: 'Academic Calendar', href: '/student/academic-calendar', icon: CalendarCheck },
-    {
-      label: 'Wallet',
-      href: '/student/wallet',
-      icon: Wallet,
-      children: [
-        { label: 'Overview', href: '/student/wallet' },
-        { label: 'Top Up', href: '/student/wallet/top-up' },
-        { label: 'Transactions', href: '/student/wallet/transactions' },
-      ],
-    },
+    { label: 'Wallet', href: '/student/wallet', icon: Wallet },
     { label: 'Resources', href: '/student/resources', icon: ScrollText },
     {
       label: 'My Courses',
@@ -51,24 +42,11 @@ function buildLinks(studyPathway?: string | null) {
       label: 'Exam Pools',
       href: '/student/exam-pools',
       icon: FileCheck,
-      children: [
-        { label: 'Available Pools', href: '/student/exam-pools' },
-        { label: 'My Bookings', href: '/student/exam-pools/my-bookings' },
-      ],
     })
   }
 
   links.push(
-    {
-      label: 'Exams',
-      href: '/student/exams',
-      icon: ClipboardCheck,
-      children: [
-        { label: 'My Exams', href: '/student/exams' },
-        { label: 'Schedule', href: '/student/exams/schedule' },
-        { label: 'Results', href: '/student/exams/results' },
-      ],
-    },
+    { label: 'Exams', href: '/student/exams', icon: ClipboardCheck },
     { label: 'Grades', href: '/student/grades', icon: CalendarCheck },
     { label: 'Attendance', href: '/student/attendance', icon: CalendarCheck },
     { label: 'Certificates', href: '/student/certificates', icon: Award },

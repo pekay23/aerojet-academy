@@ -31,6 +31,9 @@ export async function GET(req: NextRequest) {
         profile: {
           select: { firstName: true, lastName: true, phone: true, profilePhotoUrl: true },
         },
+        ...(role === 'INSTRUCTOR' && {
+          instructorProfile: { select: { employeeId: true, specialization: true } },
+        }),
       },
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
