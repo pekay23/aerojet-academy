@@ -18,8 +18,8 @@ const baseLayout = (content: string, title?: string) => `
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;margin:0 auto;background-color:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);">
           <!-- Header -->
           <tr>
-            <td align="center" style="padding:32px 24px;background-color:#ffffff;border-bottom:1px solid #e2e8f0;">
-              <img src="${appUrl}/images/logos/AATA_logo_hor_onWhite.webp" alt="Aerojet Aviation" width="220" style="display:block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
+            <td align="center" style="padding:32px 24px;background-color:#ffffff;">
+              <img src="${appUrl}/images/logos/AATA_logo_hor_onWhite.png" alt="Aerojet Aviation" width="220" style="display:block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
             </td>
           </tr>
           <!-- Content -->
@@ -32,7 +32,7 @@ const baseLayout = (content: string, title?: string) => `
           <tr>
             <td style="background-color:#002a5c;padding:32px 24px;border-top:1px solid #002a5c;">
               <div style="text-align:center;margin-bottom:16px;">
-                <img src="${appUrl}/images/logos/aerojet-logo-dark.webp" alt="Aerojet Aviation" width="160" style="display:inline-block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
+                <img src="${appUrl}/images/logos/ATA_logo_hor_onDark.png" alt="Aerojet Aviation" width="160" style="display:inline-block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
               </div>
               <p style="margin:0 0 4px 0;font-size:14px;color:#ffffff;text-align:center;font-weight:600;">
                 Aerojet Aviation Training Academy

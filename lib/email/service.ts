@@ -115,8 +115,8 @@ const COLORS = {
 
 export const wrapEmail = async (title: string, bodyContent: string) => {
   const baseUrl = await getBaseUrl()
-  const logoDarkOnWhite = `${baseUrl}/images/logos/AATA_logo_hor_onWhite.webp`
-  const logoWhiteOnDark = `${baseUrl}/images/logos/ATA_logo_hor_onDark.webp`
+  const logoDarkOnWhite = `${baseUrl}/images/logos/AATA_logo_hor_onWhite.png`
+  const logoWhiteOnDark = `${baseUrl}/images/logos/ATA_logo_hor_onDark.png`
 
   return `
     <!DOCTYPE html>

@@ -105,7 +105,7 @@ export default function FinanceOverview({
       bg: 'bg-amber-50',
       color: 'text-amber-600',
       sub: data ? `Approvals queued` : undefined,
-      href: '/staff/payments/pending',
+      href: '/staff/payments?tab=PENDING',
     },
   ]
 
@@ -350,7 +350,7 @@ export default function FinanceOverview({
         </div>
         <div className="border-t border-slate-100 px-6 py-3 dark:border-slate-800">
           <a
-            href="/staff/finance/transactions"
+            href="/staff/finance?tab=transactions"
             className="text-aerojet-sky text-xs font-bold hover:underline"
           >
             View all transactions →
