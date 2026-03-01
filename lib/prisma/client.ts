@@ -23,7 +23,7 @@ const createPrismaClient = () => {
     ssl: sslConfig,
     max: 10,
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 15000, // Increased to 15s for Vercel cold starts/Neon wake-ups
+    connectionTimeoutMillis: 30000, // Increased to 30s for slow Neon wake-ups and local latency
   })
   const adapter = new PrismaPg(pool)
   return new PrismaClient({
