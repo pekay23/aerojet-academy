@@ -9,7 +9,7 @@ import {
 } from '@/lib/auth/helpers'
 import { registerSchema, validateBody } from '@/lib/validation/schemas'
 import { apiCreated, apiError, apiTooManyRequests, withErrorHandler } from '@/lib/api/response'
-import { sendRegistrationEmail } from '@/lib/email/service'
+import { sendRegistrationEmail, sendEmailVerificationEmail } from '@/lib/email/service'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { getRegistrationConfig } from '@/lib/settings'
 
@@ -49,6 +49,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // Generate credentials
   const registrationCode = generateRegistrationCode()
 
+  // Generate email verification token
+  const verifyToken = generateToken()
+  const verifyTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+
   // Create user + profile in transaction
   const user = await prisma.$transaction(async (tx) => {
     const newUser = await tx.user.create({
@@ -58,6 +62,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         registrationFee: config.fee,
         registrationCurrency: config.currency,
         programmeChoice: selectedProgramme,
+        verifyToken,
+        verifyTokenExpires,
       },
     })
 
@@ -78,7 +84,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return newUser
   })
 
-  // Send registration email (non-blocking)
+  // Send emails (non-blocking)
+  sendEmailVerificationEmail(email, firstName, verifyToken).catch(console.error)
   sendRegistrationEmail(email, firstName, registrationCode).catch(console.error)
 
   // Audit log

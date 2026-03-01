@@ -9,10 +9,21 @@ import {
 } from '@/lib/auth/helpers'
 import { sendActivationEmail } from '@/lib/email/service'
 import { createAuditLog } from '@/lib/audit/logger'
-import { triggerAutoEnrollmentIfRequired } from '@/lib/enrollment/engine'
-import { resolveEnrollmentType, mapProgrammeChoiceToPathwayCode } from '@/lib/enrollment/pathway'
-import { ProgrammeChoice } from '@prisma/client'
 
+/**
+ * POST /api/staff/applicants/[id]/approve
+ *
+ * Approves the registration fee for an applicant.
+ * This does NOT promote to STUDENT — that happens when tuition payment is approved.
+ *
+ * What this does:
+ *  - Sets status PENDING → ACTIVE (keeps role as APPLICANT)
+ *  - Marks registrationPaid = true
+ *  - Generates academy email + temporary password
+ *  - Creates a wallet (needed for modular/exam-only paths)
+ *  - Approves the REGISTRATION payment record
+ *  - Sends activation email with credentials
+ */
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAuthSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -26,6 +37,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   })
 
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
+  if (user.role !== 'APPLICANT') {
+    return NextResponse.json({ error: 'User is not an applicant' }, { status: 400 })
+  }
   if (user.status !== 'PENDING') {
     return NextResponse.json({ error: 'User is not in PENDING status' }, { status: 400 })
   }
@@ -37,25 +51,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const tempPassword = generateTempPassword()
   const hashedTempPassword = await hashPassword(tempPassword)
   const verifyToken = generateToken()
-  const verifyTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours (resilient to connection issues)
+  const verifyTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000)
   const academyEmail = await generateAcademyEmail(
     profile.firstName,
     profile.middleName || undefined,
     profile.lastName
   )
-  const { generateStudentId } = await import('@/lib/auth/helpers')
-  const studentId = generateStudentId()
-
-  // Activate and promote the applicant
-  let createdStudentProfileId: string | null = null
 
   await prisma.$transaction(async (tx) => {
-    // 1. Update User to STUDENT role and ACTIVE status
+    // 1. Update User: ACTIVE status, keep APPLICANT role
     await tx.user.update({
       where: { id },
       data: {
-        role: 'STUDENT',
         status: 'ACTIVE',
+        // Role stays APPLICANT — promotion happens on tuition payment
         personalEmail: user.email,
         email: academyEmail,
         academyEmail,
@@ -69,28 +78,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       },
     })
 
-    // 2. Map ProgrammeChoice to relational Pathway Code
-    const pathwayCode = mapProgrammeChoiceToPathwayCode(user.programmeChoice)
-    const enrollmentType = user.programmeChoice
-      ? resolveEnrollmentType(user.programmeChoice as ProgrammeChoice)
-      : 'MODULAR'
-
-    // Fetch the relational pathway
-    const pathway = await tx.studyPathwayModel.findUnique({ where: { code: pathwayCode } })
-
-    const studentProfile = await tx.studentProfile.create({
-      data: {
-        userId: id,
-        studentId,
-        enrollmentType,
-        pathwayId: pathway?.id ?? null,
-        enrollmentStatus: 'ENROLLED',
-      },
-    })
-
-    createdStudentProfileId = studentProfile.id
-
-    // 3. Approve the associated registration payment
+    // 2. Approve the associated registration payment
     const regPayment = await tx.payment.findFirst({
       where: { userId: id, referenceType: 'REGISTRATION', status: 'PENDING' },
       orderBy: { createdAt: 'desc' },
@@ -102,14 +90,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         data: { status: 'APPROVED', approvedAt: new Date(), approvedBy: actorId },
       })
     }
+
+    // 3. Create Wallet early (needed for modular/exam-only paths)
+    const existingWallet = await tx.wallet.findUnique({ where: { userId: id } })
+    if (!existingWallet) {
+      await tx.wallet.create({
+        data: {
+          userId: id,
+          balance: 0,
+          reservedBalance: 0,
+          availableBalance: 0,
+        },
+      })
+    }
+
+    // NO StudentProfile creation
+    // NO role change to STUDENT
+    // NO auto-enrollment trigger
   })
 
-  // 4. Post-transaction: trigger auto-enrollment for FT/Military pathways
-  if (createdStudentProfileId) {
-    await triggerAutoEnrollmentIfRequired(createdStudentProfileId)
-  }
-
-  // Send activation email
+  // Send activation email with credentials
   await sendActivationEmail(
     user.email,
     profile.firstName,
@@ -119,11 +119,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   ).catch(console.error)
 
   await createAuditLog({
-    action: 'APPLICANT_APPROVED',
+    action: 'REGISTRATION_FEE_APPROVED',
     entity: 'users',
     entityId: id,
     userId: actorId,
-    description: `Applicant approved: ${user.email}. Credentials sent.`,
+    description: `Registration fee approved for ${user.email}. Credentials sent. Role remains APPLICANT until tuition payment.`,
   })
 
   return NextResponse.json({ success: true })

@@ -4,13 +4,14 @@ import { useEffect, useState, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react'
+import { CheckCircle2, XCircle, Loader2, Mail } from 'lucide-react'
 
 export default function VerifyEmailPage() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const token = searchParams.get('token')
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
+  const type = searchParams.get('type') // 'registration' or null (activation)
+  const [status, setStatus] = useState<'loading' | 'verified' | 'success' | 'error'>('loading')
   const [message, setMessage] = useState('')
   const hasAttempted = useRef(false)
 
@@ -24,31 +25,47 @@ export default function VerifyEmailPage() {
     if (hasAttempted.current) return
     hasAttempted.current = true
 
-    const verifyAndLogin = async () => {
+    const verify = async () => {
       try {
-        const result = await signIn('credentials', {
-          token,
-          redirect: false,
-        })
+        if (type === 'registration') {
+          // Pre-approval: Just verify email, don't try to login (no password yet)
+          const res = await fetch(`/api/auth/verify-email?token=${token}`)
+          const data = await res.json()
 
-        if (result?.error) {
-          throw new Error(result.error)
+          if (!res.ok) {
+            throw new Error(data.error || 'Verification failed')
+          }
+
+          setStatus('verified')
+          setMessage(
+            'Your email has been verified successfully! You can now proceed with uploading your registration payment proof.'
+          )
+        } else {
+          // Post-approval: Verify and auto-login with credentials
+          const result = await signIn('credentials', {
+            token,
+            redirect: false,
+          })
+
+          if (result?.error) {
+            throw new Error(result.error)
+          }
+
+          setStatus('success')
+          setMessage('Your email has been verified. Redirecting to your portal...')
+
+          setTimeout(() => {
+            router.push('/student')
+          }, 1500)
         }
-
-        setStatus('success')
-        setMessage('Your email has been verified. Redirecting to your portal...')
-
-        setTimeout(() => {
-          router.push('/student')
-        }, 1500)
       } catch (err: any) {
         setStatus('error')
         setMessage(err.message || 'Verification failed. The link may have expired.')
       }
     }
 
-    verifyAndLogin()
-  }, [token, router])
+    verify()
+  }, [token, type, router])
 
   return (
     <div className="mx-auto max-w-md overflow-hidden rounded-3xl bg-white p-8 shadow-2xl dark:bg-white">
@@ -57,12 +74,47 @@ export default function VerifyEmailPage() {
           <>
             <Loader2 className="mx-auto mb-6 h-12 w-12 animate-spin text-[#4c9ded]" />
             <h2 className="mb-3 text-2xl font-black tracking-tight text-slate-800 uppercase">
-              Verifying & Logging In
+              Verifying Email
             </h2>
-            <p className="text-sm text-slate-500">Please wait while we secure your session...</p>
+            <p className="text-sm text-slate-500">Please wait...</p>
           </>
         )}
 
+        {/* Registration verification — no auto-login */}
+        {status === 'verified' && (
+          <>
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
+              <CheckCircle2 className="h-8 w-8 text-green-500" />
+            </div>
+            <h2 className="mb-3 text-2xl font-black tracking-tight text-slate-800 uppercase">
+              Email Verified
+            </h2>
+            <p className="mb-6 text-sm text-slate-500">{message}</p>
+
+            <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-left">
+              <div className="mb-2 flex items-center gap-2">
+                <Mail className="h-4 w-4 text-blue-600" />
+                <span className="text-xs font-bold text-blue-700 uppercase">Next Steps</span>
+              </div>
+              <ol className="ml-5 list-decimal space-y-1 text-sm text-blue-800">
+                <li>Upload your registration fee payment proof</li>
+                <li>Wait for staff to verify your payment</li>
+                <li>Receive your login credentials via email</li>
+              </ol>
+            </div>
+
+            <div className="mt-6">
+              <Link
+                href="/login"
+                className="inline-flex items-center gap-2 rounded-xl bg-[#002a5c] px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#4c9ded]"
+              >
+                Go to Login
+              </Link>
+            </div>
+          </>
+        )}
+
+        {/* Activation verification — auto-login */}
         {status === 'success' && (
           <>
             <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
@@ -88,7 +140,8 @@ export default function VerifyEmailPage() {
 
             <div className="mx-auto max-w-sm space-y-4">
               <p className="mb-4 text-xs text-slate-400 italic">
-                If your link expired or didn't work, enter your email below to receive a new one.
+                If your link expired or didn&apos;t work, enter your email below to receive a new
+                one.
               </p>
               <form
                 className="flex flex-col gap-3"

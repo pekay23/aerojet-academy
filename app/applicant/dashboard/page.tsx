@@ -11,6 +11,8 @@ import {
   Clock,
   AlertCircle,
   ShieldCheck,
+  Mail,
+  GraduationCap,
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -20,10 +22,12 @@ export const metadata: Metadata = { title: 'Dashboard | Applicant Portal' }
 export const dynamic = 'force-dynamic'
 
 type AppStatus =
+  | 'email_unverified'
   | 'registered'
   | 'payment_pending'
   | 'payment_submitted'
   | 'under_review'
+  | 'registration_approved'
   | 'approved'
   | 'rejected'
 
@@ -37,6 +41,14 @@ const statusConfig: Record<
     description: string
   }
 > = {
+  email_unverified: {
+    label: 'Email Unverified',
+    color: 'text-amber-600 dark:text-amber-400',
+    bg: 'bg-amber-50 border-amber-200 dark:bg-amber-900/10 dark:border-amber-800',
+    icon: Mail,
+    description:
+      'Please check your inbox and verify your email address. A verification link was sent when you registered.',
+  },
   registered: {
     label: 'Registered',
     color: 'text-blue-600 dark:text-blue-400',
@@ -66,13 +78,21 @@ const statusConfig: Record<
     description:
       'Your application and payment are being reviewed by our admissions team. We will notify you soon.',
   },
-  approved: {
-    label: 'Approved',
-    color: 'text-green-600 dark:text-green-400',
-    bg: 'bg-green-50 border-green-200 dark:bg-green-900/10 dark:border-green-800',
+  registration_approved: {
+    label: 'Registration Approved',
+    color: 'text-teal-600 dark:text-teal-400',
+    bg: 'bg-teal-50 border-teal-200 dark:bg-teal-900/10 dark:border-teal-800',
     icon: ShieldCheck,
     description:
-      'Congratulations! Your registration has been approved. You may now enroll in a course.',
+      'Your registration fee has been verified. Complete your pathway payment below to become a full student.',
+  },
+  approved: {
+    label: 'Student',
+    color: 'text-green-600 dark:text-green-400',
+    bg: 'bg-green-50 border-green-200 dark:bg-green-900/10 dark:border-green-800',
+    icon: GraduationCap,
+    description:
+      'Congratulations! You are now a student. You will be redirected to your student portal.',
   },
   rejected: {
     label: 'Not Accepted',
@@ -85,13 +105,17 @@ const statusConfig: Record<
 }
 
 function deriveStatus(user: {
+  emailVerified: Date | null
   registrationPaid: boolean
   paymentProofUrl: string | null
   status: string
   role: string
 }): AppStatus {
-  if (user.status === 'ACTIVE') return 'approved'
+  if (user.role === 'STUDENT') return 'approved'
   if (user.status === 'SUSPENDED') return 'rejected'
+  // ACTIVE applicant = registration fee approved, needs pathway payment
+  if (user.status === 'ACTIVE' && user.role === 'APPLICANT') return 'registration_approved'
+  if (!user.emailVerified) return 'email_unverified'
   if (user.registrationPaid) return 'under_review'
   if (user.paymentProofUrl) return 'payment_submitted'
   return 'payment_pending'
@@ -106,6 +130,7 @@ export default async function ApplicantDashboard() {
   const applicant = await prisma.user.findUnique({
     where: { id: userId },
     select: {
+      emailVerified: true,
       registrationPaid: true,
       paymentProofUrl: true,
       status: true,
@@ -156,18 +181,28 @@ export default async function ApplicantDashboard() {
 
   const actionInfo = getActionLink(applicant.programmeChoice)
 
+  const isEmailVerified = !!applicant.emailVerified
+  const isRegApproved = appStatus === 'registration_approved' || appStatus === 'approved'
+  const isStudent = (applicant.role as string) === 'STUDENT'
+
   const timelineSteps = [
     { step: 'Create Account', done: true },
+    { step: 'Verify Email', done: isEmailVerified },
     {
       step: `Upload Registration Payment (${applicant.registrationFee} ${applicant.registrationCurrency})`,
-      done: appStatus !== 'payment_pending',
+      done:
+        appStatus !== 'payment_pending' &&
+        appStatus !== 'email_unverified',
     },
     {
-      step: 'Payment Verified by Admissions',
-      done: applicant.registrationPaid || appStatus === 'approved',
+      step: 'Registration Fee Verified',
+      done: isRegApproved,
     },
-    { step: 'Application Approved', done: appStatus === 'approved' },
-    { step: 'Course Enrollment', done: false },
+    {
+      step: 'Pathway Payment',
+      done: isStudent,
+    },
+    { step: 'Student Enrollment', done: isStudent },
   ]
 
   return (
@@ -221,6 +256,12 @@ export default async function ApplicantDashboard() {
               </div>
             )}
 
+            {appStatus === 'email_unverified' && (
+              <p className="mt-3 text-xs text-amber-700 dark:text-amber-400">
+                Didn&apos;t receive the email? Check your spam folder or contact support.
+              </p>
+            )}
+
             {(appStatus === 'payment_pending' || appStatus === 'registered') && (
               <Link
                 href="/applicant/application/payment"
@@ -231,10 +272,10 @@ export default async function ApplicantDashboard() {
               </Link>
             )}
 
-            {appStatus === 'approved' && (
+            {appStatus === 'registration_approved' && (
               <Link
                 href={actionInfo.href}
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-green-600 px-5 py-2.5 text-xs font-bold tracking-widest text-white uppercase shadow-sm transition-all hover:bg-green-700"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-teal-600 px-5 py-2.5 text-xs font-bold tracking-widest text-white uppercase shadow-sm transition-all hover:bg-teal-700"
               >
                 <actionInfo.icon className="h-4 w-4" />
                 {actionInfo.label}

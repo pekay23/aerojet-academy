@@ -1,10 +1,9 @@
-export function formatCurrency(amount: number | string, currency: string = 'EUR'): string {
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency, minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num)
-}
+// Re-export from centralized currency utility
+export { getCurrencySymbol, formatCurrency } from '@/lib/currency'
 
 export function formatEuro(amount: number | string): string {
-  return formatCurrency(amount, 'EUR')
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num)
 }
 
 export function parseCurrency(value: string): number {

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { GraduationCap, FileSignature, Layers, AlertCircle, ArrowRight, X } from 'lucide-react'
+import { getCurrencySymbol } from '@/lib/currency'
 
 type PathwayType = 'FULL_TIME' | 'EXAM_ONLY' | 'MODULAR'
 
@@ -13,19 +14,7 @@ export default function PathwaySelector({ currency = 'EUR' }: { currency?: strin
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const getSymbol = () => {
-    switch (currency) {
-      case 'EUR':
-        return '€'
-      case 'GHS':
-        return 'GH₵'
-      case 'USD':
-        return '$'
-      default:
-        return '€'
-    }
-  }
-  const symbol = getSymbol()
+  const symbol = getCurrencySymbol(currency)
 
   const pathways = [
     {
