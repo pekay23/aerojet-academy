@@ -10,7 +10,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { Plus, Loader2, Trash2, FileText, CheckSquare } from 'lucide-react'
+import { Plus, Loader2, Trash2, FileText, CheckSquare, Pencil } from 'lucide-react'
 
 interface ExamComponentData {
   id: string
@@ -25,16 +25,32 @@ interface ExamComponentData {
 
 export default function ExamComponentsSection({
   courseId,
+  currency = 'EUR',
   components,
 }: {
   courseId: string
+  currency?: string
   components: ExamComponentData[]
 }) {
+  const getSymbol = () => {
+    switch (currency) {
+      case 'EUR':
+        return '€'
+      case 'GHS':
+        return 'GH₵'
+      case 'USD':
+        return '$'
+      default:
+        return '€'
+    }
+  }
+  const symbol = getSymbol()
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [deleting, setDeleting] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
 
   // Form state
   const [code, setCode] = useState('')
@@ -52,9 +68,21 @@ export default function ExamComponentsSection({
     setIndividualPrice('520')
     setPoolPrice('300')
     setError('')
+    setEditingId(null)
   }
 
-  const handleCreate = async () => {
+  const openEdit = (comp: ExamComponentData) => {
+    setEditingId(comp.id)
+    setCode(comp.code)
+    setName(comp.name)
+    setType(comp.type as 'MCQ' | 'ESSAY')
+    setDuration(String(comp.duration))
+    setIndividualPrice(String(comp.individualPrice))
+    setPoolPrice(String(comp.poolPrice))
+    setOpen(true)
+  }
+
+  const handleSave = async () => {
     if (!code || !name) {
       setError('Code and name are required')
       return
@@ -62,13 +90,19 @@ export default function ExamComponentsSection({
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/staff/courses/${courseId}/exam-components`, {
-        method: 'POST',
+      const isEditing = !!editingId
+      const url = isEditing
+        ? `/api/staff/courses/${courseId}/exam-components/${editingId}`
+        : `/api/staff/courses/${courseId}/exam-components`
+      const method = isEditing ? 'PUT' : 'POST'
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, name, type, duration, individualPrice, poolPrice }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to create')
+      if (!res.ok) throw new Error(data.error || 'Failed to save')
       setOpen(false)
       resetForm()
       router.refresh()
@@ -102,7 +136,13 @@ export default function ExamComponentsSection({
         <h2 className="text-xs font-black tracking-widest text-slate-400 uppercase">
           Exam Components
         </h2>
-        <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm() }}>
+        <Dialog
+          open={open}
+          onOpenChange={(o) => {
+            setOpen(o)
+            if (!o) resetForm()
+          }}
+        >
           <DialogTrigger asChild>
             <Button size="sm" variant="outline" className="gap-1 text-xs">
               <Plus className="h-3 w-3" /> Add Component
@@ -146,7 +186,9 @@ export default function ExamComponentsSection({
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-600">Duration (min)</label>
+                  <label className="mb-1 block text-xs font-bold text-slate-600">
+                    Duration (min)
+                  </label>
                   <input
                     type="number"
                     value={duration}
@@ -176,11 +218,24 @@ export default function ExamComponentsSection({
               {error && <p className="text-sm text-red-600">{error}</p>}
             </div>
             <div className="mt-4 flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setOpen(false)
+                  resetForm()
+                }}
+                disabled={loading}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleCreate} disabled={loading}>
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create'}
+              <Button onClick={handleSave} disabled={loading}>
+                {loading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : editingId ? (
+                  'Save Changes'
+                ) : (
+                  'Create'
+                )}
               </Button>
             </div>
           </DialogContent>
@@ -210,23 +265,42 @@ export default function ExamComponentsSection({
                     {comp.name}
                   </p>
                   <p className="text-xs text-slate-500">
-                    {comp.type} &middot; {comp.duration}min &middot;{' '}
-                    {comp._count.exams} exam{comp._count.exams !== 1 ? 's' : ''} &middot;{' '}
-                    {comp._count.bookings} booking{comp._count.bookings !== 1 ? 's' : ''}
+                    {comp.type} &middot; {comp.duration}min &middot; {comp._count.exams} exam
+                    {comp._count.exams !== 1 ? 's' : ''} &middot; {comp._count.bookings} booking
+                    {comp._count.bookings !== 1 ? 's' : ''}
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={() => openEdit(comp)}
+                  className="rounded p-1 text-slate-400 transition-colors hover:text-blue-500"
+                  title="Edit"
+                >
+                  <Pencil className="h-4 w-4" />
+                </button>
                 <span className="text-xs text-slate-500">
-                  &euro;{Number(comp.individualPrice || 0).toFixed(0)} / &euro;{Number(comp.poolPrice || 0).toFixed(0)}
+                  {symbol}
+                  {Number(comp.individualPrice || 0).toFixed(0)} / {symbol}
+                  {Number(comp.poolPrice || 0).toFixed(0)}
                 </span>
                 <button
                   onClick={() => handleDelete(comp.id)}
-                  disabled={deleting === comp.id || comp._count.exams > 0 || comp._count.bookings > 0}
+                  disabled={
+                    deleting === comp.id || comp._count.exams > 0 || comp._count.bookings > 0
+                  }
                   className="rounded p-1 text-slate-400 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-30"
-                  title={comp._count.exams > 0 || comp._count.bookings > 0 ? 'Cannot delete: has exams or bookings' : 'Delete'}
+                  title={
+                    comp._count.exams > 0 || comp._count.bookings > 0
+                      ? 'Cannot delete: has exams or bookings'
+                      : 'Delete'
+                  }
                 >
-                  {deleting === comp.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                  {deleting === comp.id ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-4 w-4" />
+                  )}
                 </button>
               </div>
             </div>

@@ -12,10 +12,10 @@ export const POST = withErrorHandler(
     if (!programmeId) return apiError('Programme ID required')
 
     const body = await req.json()
-    const { yearNumber, yearFeeAmount, seatConfirmationFee, firstPaymentAmount, semester1StartDate, semester2StartDate } = body
+    const { yearNumber, yearFeeAmount, seatConfirmationFee, firstPaymentAmount, semesters } = body
 
-    if (!yearNumber || !semester1StartDate || !semester2StartDate) {
-      return apiError('Year number and semester start dates are required')
+    if (!yearNumber || !semesters || !Array.isArray(semesters)) {
+      return apiError('Year number and semesters array are required')
     }
 
     const programme = await prisma.fullTimeProgramme.findUnique({ where: { id: programmeId } })
@@ -33,8 +33,7 @@ export const POST = withErrorHandler(
         yearFeeAmount: yearFeeAmount ? parseFloat(yearFeeAmount) : null,
         seatConfirmationFee: seatConfirmationFee ? parseFloat(seatConfirmationFee) : 1500,
         firstPaymentAmount: firstPaymentAmount ? parseFloat(firstPaymentAmount) : 3500,
-        semester1StartDate: new Date(semester1StartDate),
-        semester2StartDate: new Date(semester2StartDate),
+        semesters: semesters,
       },
     })
 
@@ -55,7 +54,8 @@ export const PATCH = withErrorHandler(
   async (req: NextRequest, context?: { params: Record<string, string> }) => {
     const staff = await requireStaff()
     const body = await req.json()
-    const { yearId, yearFeeAmount, seatConfirmationFee, firstPaymentAmount, semester1StartDate, semester2StartDate, isActive } = body
+    const { yearId, yearFeeAmount, seatConfirmationFee, firstPaymentAmount, semesters, isActive } =
+      body
 
     if (!yearId) return apiError('Year ID required')
 
@@ -65,11 +65,18 @@ export const PATCH = withErrorHandler(
     const updated = await prisma.programmeYear.update({
       where: { id: yearId },
       data: {
-        ...(yearFeeAmount !== undefined && { yearFeeAmount: yearFeeAmount ? parseFloat(yearFeeAmount) : null }),
-        ...(seatConfirmationFee !== undefined && { seatConfirmationFee: parseFloat(seatConfirmationFee) }),
-        ...(firstPaymentAmount !== undefined && { firstPaymentAmount: parseFloat(firstPaymentAmount) }),
-        ...(semester1StartDate !== undefined && { semester1StartDate: new Date(semester1StartDate) }),
-        ...(semester2StartDate !== undefined && { semester2StartDate: new Date(semester2StartDate) }),
+        ...(yearFeeAmount !== undefined && {
+          yearFeeAmount: yearFeeAmount ? parseFloat(yearFeeAmount) : null,
+        }),
+        ...(seatConfirmationFee !== undefined && {
+          seatConfirmationFee: parseFloat(seatConfirmationFee),
+        }),
+        ...(firstPaymentAmount !== undefined && {
+          firstPaymentAmount: parseFloat(firstPaymentAmount),
+        }),
+        ...(semesters !== undefined && {
+          semesters: semesters,
+        }),
         ...(isActive !== undefined && { isActive }),
       },
     })

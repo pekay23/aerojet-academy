@@ -1,5 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
+import prisma from '@/lib/prisma/client'
 import { DollarSign } from 'lucide-react'
 import { Metadata } from 'next'
 import { format } from 'date-fns'
@@ -15,6 +16,11 @@ export default async function RevenueReportPage() {
 
   const { recentPayments, totalRevenue, chartData } = await getRevenueReport()
 
+  const settings = await prisma.systemSetting.findMany({
+    where: { key: 'course_currency' },
+  })
+  const currency = settings[0]?.value || 'EUR'
+
   return (
     <div className="mx-auto max-w-7xl">
       <div className="mb-8 flex items-center justify-between">
@@ -23,13 +29,19 @@ export default async function RevenueReportPage() {
             <DollarSign className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">Revenue Report</h1>
-            <p className="text-slate-500 dark:text-slate-400">Financial overview and recent transactions</p>
+            <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+              Revenue Report
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400">
+              Financial overview and recent transactions
+            </p>
           </div>
         </div>
         <div className="text-right">
-          <p className="text-xs font-bold uppercase text-slate-400">Total Revenue</p>
-          <h2 className="text-2xl font-black text-[#002a5c]">{formatCurrency(totalRevenue)}</h2>
+          <p className="text-xs font-bold text-slate-400 uppercase">Total Revenue</p>
+          <h2 className="text-2xl font-black text-[#002a5c]">
+            {formatCurrency(totalRevenue, currency)}
+          </h2>
         </div>
       </div>
 
@@ -37,13 +49,13 @@ export default async function RevenueReportPage() {
         <RevenueChart data={chartData} />
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-        <div className="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-6 py-4">
+      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="border-b border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
           <h3 className="font-bold text-slate-900 dark:text-slate-100">Recent Approved Payments</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 dark:bg-slate-800/50 text-xs font-bold uppercase text-slate-500 dark:text-slate-400">
+            <thead className="bg-slate-50 text-xs font-bold text-slate-500 uppercase dark:bg-slate-800/50 dark:text-slate-400">
               <tr>
                 <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4">User</th>
@@ -55,7 +67,10 @@ export default async function RevenueReportPage() {
             <tbody className="divide-y divide-slate-100">
               {recentPayments.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500 dark:text-slate-400">
+                  <td
+                    colSpan={5}
+                    className="px-6 py-12 text-center text-slate-500 dark:text-slate-400"
+                  >
                     No recent payment data available.
                   </td>
                 </tr>
@@ -79,12 +94,12 @@ export default async function RevenueReportPage() {
                       {payment.id.slice(-8)}
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-medium uppercase text-slate-600 dark:text-slate-400">
+                      <span className="inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-600 uppercase dark:text-slate-400">
                         {payment.paymentMethod || 'N/A'}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right font-medium text-emerald-600">
-                      €{Number(payment.amount).toLocaleString()}
+                      {formatCurrency(payment.amount, currency)}
                     </td>
                   </tr>
                 ))
@@ -96,4 +111,3 @@ export default async function RevenueReportPage() {
     </div>
   )
 }
-

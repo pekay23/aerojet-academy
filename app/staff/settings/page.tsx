@@ -85,14 +85,16 @@ const DEFAULT_SETTINGS = [
         key: 'registration_currency',
         label: 'Registration Currency',
         description: 'Currency used for registration fees',
-        type: 'STRING',
+        type: 'SELECT',
+        options: ['EUR', 'GHS', 'USD'],
         default: 'EUR',
       },
       {
         key: 'course_currency',
         label: 'Course Currency',
         description: 'Currency used for course-related fees',
-        type: 'STRING',
+        type: 'SELECT',
+        options: ['EUR', 'GHS', 'USD'],
         default: 'EUR',
       },
       {
@@ -127,7 +129,8 @@ const DEFAULT_SETTINGS = [
         key: 'bank_currency',
         label: 'Bank Currency',
         description: 'Currency for the bank account (e.g., GHS, EUR)',
-        type: 'STRING',
+        type: 'SELECT',
+        options: ['EUR', 'GHS', 'USD'],
         default: 'GHS',
       },
       {
@@ -308,6 +311,31 @@ export default async function SettingsPage() {
                               className="peer h-7 w-12 cursor-pointer rounded-full bg-slate-200 shadow-inner transition-colors peer-checked:bg-[#002a5c] peer-focus:ring-4 peer-focus:ring-[#002a5c]/20 peer-focus:outline-none after:absolute after:top-[4px] after:left-[4px] after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600 dark:peer-focus:ring-blue-600/30"
                             ></label>
                           </div>
+                        </div>
+                      ) : type === 'SELECT' ? (
+                        <div className="group/input relative">
+                          <input type="hidden" name={`${key}__type`} value="STRING" />
+                          <select
+                            id={key}
+                            name={key}
+                            defaultValue={currentValue}
+                            className="w-full rounded-xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-bold text-slate-900 shadow-sm transition-all focus:border-[#002a5c] focus:ring-4 focus:ring-[#002a5c]/5 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
+                          >
+                            {(key === 'registration_currency' || key === 'course_currency') && (
+                              <>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="GHS">GHS - Ghana Cedis</option>
+                                <option value="USD">USD - US Dollar</option>
+                              </>
+                            )}
+                            {key === 'bank_currency' && (
+                              <>
+                                <option value="GHS">GHS - Ghana Cedis</option>
+                                <option value="EUR">EUR - Euro</option>
+                                <option value="USD">USD - US Dollar</option>
+                              </>
+                            )}
+                          </select>
                         </div>
                       ) : (
                         <div className="group/input relative">

@@ -13,8 +13,20 @@ import LatestNews from './_components/LatestNews'
 import Credibility from './_components/Credibility'
 import HomeContact from './_components/HomeContact'
 import { CheckCircle2 } from 'lucide-react'
+import prisma from '@/lib/prisma/client'
 
-export default function Home() {
+async function getRegistrationFee() {
+  const settings = await prisma.systemSetting.findMany({
+    where: { key: { in: ['registration_fee', 'registration_currency'] } },
+  })
+  const fee = settings.find((s) => s.key === 'registration_fee')?.value || '350'
+  const currency = settings.find((s) => s.key === 'registration_currency')?.value || 'GHS'
+  return { fee, currency }
+}
+
+export default async function Home() {
+  const { fee, currency } = await getRegistrationFee()
+
   return (
     <div className="bg-white">
       <HeroSlider />
@@ -167,7 +179,7 @@ export default function Home() {
 
       <Careers />
       <UnderstandingLicensing />
-      <EnrollmentSteps />
+      <EnrollmentSteps fee={fee} currency={currency} />
       <LatestNews />
       <Credibility />
       <HomeContact />

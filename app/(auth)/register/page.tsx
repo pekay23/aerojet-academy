@@ -42,7 +42,7 @@ export default async function RegisterPage({
               </p>
             </div>
 
-            <RegistrationForm />
+            <RegistrationForm currency={config.currency} fee={config.fee} />
 
             <div className="mt-6 border-t border-gray-100 pt-4 text-center text-sm text-gray-500">
               Already have an account?{' '}

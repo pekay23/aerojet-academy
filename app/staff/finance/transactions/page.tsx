@@ -17,6 +17,19 @@ import SearchInput from '@/components/SearchInput'
 
 export const metadata: Metadata = { title: 'Transaction History | Staff Portal' }
 
+function getCurrencySymbol(currency: string): string {
+  switch (currency) {
+    case 'EUR':
+      return '€'
+    case 'GHS':
+      return 'GH₵'
+    case 'USD':
+      return '$'
+    default:
+      return '€'
+  }
+}
+
 interface PageProps {
   searchParams: Promise<{ query?: string }>
 }
@@ -26,6 +39,12 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
   if (!session) redirect('/login')
 
   const { query } = await searchParams
+
+  const settings = await prisma.systemSetting.findMany({
+    where: { key: 'course_currency' },
+  })
+  const currency = settings[0]?.value || 'EUR'
+  const symbol = getCurrencySymbol(currency)
 
   const transactions = await prisma.walletTransaction.findMany({
     where: query
@@ -199,7 +218,8 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
                             : 'text-slate-900 dark:text-slate-100'
                         }`}
                       >
-                        {['TOP_UP', 'REFUND', 'RELEASE'].includes(tx.type) ? '+' : '-'}€
+                        {['TOP_UP', 'REFUND', 'RELEASE'].includes(tx.type) ? '+' : '-'}
+                        {symbol}
                         {tx.amount.toFixed(2)}
                       </span>
                     </TableCell>

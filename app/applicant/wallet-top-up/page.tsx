@@ -40,30 +40,47 @@ export default async function ApplicantWalletTopUpPage() {
     },
   })
 
-  const currency = 'EUR'
+  const settings = await prisma.systemSetting.findMany({
+    where: { key: 'course_currency' },
+  })
+  const currency = settings[0]?.value || 'EUR'
+
+  const getSymbol = () => {
+    switch (currency) {
+      case 'EUR':
+        return '€'
+      case 'GHS':
+        return 'GH₵'
+      case 'USD':
+        return '$'
+      default:
+        return '€'
+    }
+  }
+  const symbol = getSymbol()
 
   const paymentOptions = [
     {
       id: 'WALLET_TOPUP',
-      label: 'Single Exam Pool — €300',
+      label: `Single Exam Pool — ${symbol}300`,
       amount: 300,
       description: 'Sufficient funds to reserve a seat in one examination pool.',
     },
     {
       id: 'WALLET_TOPUP',
-      label: 'Two Exam Pools — €600',
+      label: `Two Exam Pools — ${symbol}600`,
       amount: 600,
       description: 'Funds for reserving seats in two examination pools.',
     },
     {
       id: 'WALLET_TOPUP',
-      label: 'Five Exam Pools — €1,500',
+      label: `Five Exam Pools — ${symbol}1,500`,
       amount: 1500,
       description: 'Best for candidates planning multiple immediate assessments.',
     },
   ]
 
-  const settings = await prisma.systemSetting.findMany({
+  const bankSettings = await prisma.systemSetting.findMany({
     where: {
       key: {
         in: ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_swift', 'bank_branch'],
@@ -72,7 +89,7 @@ export default async function ApplicantWalletTopUpPage() {
   })
 
   const globalSettings: Record<string, string> = {}
-  for (const s of settings) {
+  for (const s of bankSettings) {
     globalSettings[s.key] = s.value
   }
 

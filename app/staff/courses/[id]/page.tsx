@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import CourseActionsMenu from '../../_components/CourseActionsMenu'
 import ExamComponentsSection from './_components/ExamComponentsSection'
+import CourseInfoEditDialog from './_components/CourseInfoEditDialog'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Course Details | Staff Portal' }
@@ -31,6 +32,7 @@ export default async function CourseDetailsPage({ params }: Props) {
   const course = await prisma.course.findUnique({
     where: { id },
     include: {
+      category: true,
       examComponents: {
         include: { _count: { select: { exams: true, bookings: true } } },
         orderBy: { code: 'asc' },
@@ -60,6 +62,10 @@ export default async function CourseDetailsPage({ params }: Props) {
   })
 
   if (!course) notFound()
+
+  const categories = await prisma.courseCategory.findMany({
+    orderBy: { name: 'asc' },
+  })
 
   return (
     <div className="mx-auto max-w-5xl">
@@ -103,9 +109,12 @@ export default async function CourseDetailsPage({ params }: Props) {
         <div className="space-y-6 lg:col-span-2">
           {/* About Course */}
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="mb-4 text-xs font-black tracking-widest text-slate-400 uppercase">
-              About Course
-            </h2>
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-xs font-black tracking-widest text-slate-400 uppercase">
+                About Course
+              </h2>
+              <CourseInfoEditDialog course={course} categories={categories} />
+            </div>
             <p className="leading-relaxed text-slate-600 dark:text-slate-400">
               {course.description || 'No description provided for this course.'}
             </p>
@@ -145,6 +154,7 @@ export default async function CourseDetailsPage({ params }: Props) {
           {/* Exam Components */}
           <ExamComponentsSection
             courseId={course.id}
+            currency={course.currency}
             components={course.examComponents.map((ec) => ({
               ...ec,
               individualPrice: ec.individualPrice?.toString() ?? null,
