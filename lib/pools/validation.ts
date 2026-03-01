@@ -1,9 +1,9 @@
-import prisma from '@/lib/database/prisma'
+import prisma from '@/lib/prisma/client'
 import { POOL_MAX_CANDIDATES, MODULE_DIVERSITY_CAP, POOL_EXAM_FEE } from './types'
 import { getWalletBalance } from '@/lib/wallet/balance'
 import type { PoolValidationResult } from './types'
 
-export async function validatePoolJoin(poolId: string, userId: string, module: string): Promise<PoolValidationResult> {
+export async function validatePoolJoin(poolId: string, userId: string, examComponentId: string): Promise<PoolValidationResult> {
   // Check pool exists and is open
   const pool = await prisma.examPool.findUnique({ where: { id: poolId } })
   if (!pool) return { valid: false, error: 'Pool not found' }
@@ -18,9 +18,9 @@ export async function validatePoolJoin(poolId: string, userId: string, module: s
 
   // Check module diversity cap
   const moduleCount = await prisma.poolMembership.count({
-    where: { poolId, selectedModule: module, status: { in: ['RESERVED', 'CONFIRMED'] } },
+    where: { poolId, examComponentId, status: { in: ['RESERVED', 'CONFIRMED'] } },
   })
-  if (moduleCount >= MODULE_DIVERSITY_CAP) return { valid: false, error: `Module ${module} has reached the diversity cap (${MODULE_DIVERSITY_CAP})` }
+  if (moduleCount >= MODULE_DIVERSITY_CAP) return { valid: false, error: `Module has reached the diversity cap (${MODULE_DIVERSITY_CAP})` }
 
   // Check wallet balance
   const walletInfo = await getWalletBalance(userId)

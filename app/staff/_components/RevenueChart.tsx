@@ -24,7 +24,7 @@ interface RevenueChartProps {
 const CustomTooltip = ({ active, payload, label, currency }: any) => {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-xl border border-slate-700 bg-[#0f1629] px-4 py-3 shadow-xl">
+    <div className="rounded-xl border border-slate-700 bg-slate-900 px-4 py-3 shadow-xl dark:border-slate-800">
       <p className="mb-1 text-xs font-bold text-slate-400">{label}</p>
       {payload.map((entry: any) => (
         <p key={entry.name} className="text-sm font-black" style={{ color: entry.color }}>
@@ -47,8 +47,8 @@ export default function RevenueChart({ data, currency = '€' }: RevenueChartPro
               <stop offset="95%" stopColor="#4c9ded" stopOpacity={0} />
             </linearGradient>
             <linearGradient id="targetGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#002a5c" stopOpacity={0.15} />
-              <stop offset="95%" stopColor="#002a5c" stopOpacity={0} />
+              <stop offset="5%" stopColor="var(--aerojet-blue)" stopOpacity={0.15} />
+              <stop offset="95%" stopColor="var(--aerojet-blue)" stopOpacity={0} />
             </linearGradient>
           </defs>
           <CartesianGrid
@@ -77,7 +77,7 @@ export default function RevenueChart({ data, currency = '€' }: RevenueChartPro
             <Area
               type="monotone"
               dataKey="target"
-              stroke="#002a5c"
+              stroke="var(--aerojet-blue)"
               strokeWidth={1.5}
               strokeDasharray="4 4"
               fill="url(#targetGradient)"

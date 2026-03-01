@@ -10,10 +10,12 @@ import {
   Package,
   Activity,
   HelpCircle,
+  Lock as LockIcon,
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { canAccessClasses } from '@/lib/enrollment/pathway'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -28,8 +30,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return { title: enrollment ? `${enrollment.course.name} | Student Portal` : 'Course Details' }
 }
 
-export default async function CourseDetailsPage({ params }: PageProps) {
+export default async function CourseDetailsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ error?: string }>
+}) {
   const { id } = await params
+  const { error } = await searchParams
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
@@ -38,12 +47,21 @@ export default async function CourseDetailsPage({ params }: PageProps) {
     include: {
       course: {
         include: {
+          category: true,
           classes: {
             where: {
               attendanceRecords: {
                 some: { userId: session.user.id },
               },
             },
+          },
+        },
+      },
+      user: {
+        select: {
+          wallet: true,
+          studentProfile: {
+            select: { enrollmentType: true },
           },
         },
       },
@@ -55,9 +73,22 @@ export default async function CourseDetailsPage({ params }: PageProps) {
   }
 
   const { course } = enrollment
+  const isPaid = ['ACTIVE', 'APPROVED'].includes(enrollment.status)
+  const enrollmentType = enrollment.user.studentProfile?.enrollmentType || 'MODULAR'
+  const allowClasses = canAccessClasses(enrollmentType)
 
   return (
     <div className="space-y-8">
+      {/* Error Message if redirected from gated route */}
+      {error === 'payment_required' && (
+        <div className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-400">
+          <LockIcon className="h-5 w-5" />
+          <p className="text-xs font-bold tracking-wide uppercase">
+            Access Restricted: Please complete your course payment to access materials.
+          </p>
+        </div>
+      )}
+
       {/* Back Button */}
       <Link
         href="/student/courses"
@@ -73,7 +104,7 @@ export default async function CourseDetailsPage({ params }: PageProps) {
           <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-6">
               <span className="rounded-lg bg-blue-50 px-2 py-1 text-[10px] font-black tracking-widest text-blue-600 uppercase">
-                {course.category || 'CORE'}
+                {course.category?.name || 'CORE'}
               </span>
               <h1 className="mt-3 text-3xl leading-tight font-black tracking-tight text-slate-900 dark:text-slate-100">
                 {course.name}
@@ -154,16 +185,14 @@ export default async function CourseDetailsPage({ params }: PageProps) {
                   Learning guides and assets.
                 </p>
                 {course.materialsUrl ? (
-                  enrollment?.status === 'APPROVED' || enrollment?.status === 'ACTIVE' ? (
-                    <a
-                      href={course.materialsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-4 inline-flex items-center text-xs font-bold text-[#002a5c] hover:underline dark:text-[#4c9ded]"
+                  isPaid ? (
+                    <Link
+                      href={`/student/courses/${enrollment.id}/materials`}
+                      className="mt-4 inline-flex items-center text-xs font-black tracking-widest text-[#002a5c] uppercase hover:underline dark:text-[#4c9ded]"
                     >
-                      View Materials
+                      View Materials Dashboard
                       <ChevronRight className="ml-1 h-3 w-3" />
-                    </a>
+                    </Link>
                   ) : (
                     <span className="mt-4 inline-block text-[10px] font-bold text-slate-400 italic">
                       Available after paying for a course
@@ -189,21 +218,29 @@ export default async function CourseDetailsPage({ params }: PageProps) {
               <div>
                 <div className="mb-2 flex items-center justify-between text-xs font-bold tracking-widest text-slate-400 uppercase">
                   <span>Attendance</span>
-                  <span>—</span>
+                  <span>{allowClasses ? '—' : 'N/A'}</span>
                 </div>
                 <div className="h-2 w-full rounded-full bg-slate-100">
-                  <div className="h-full w-0 rounded-full bg-blue-600 transition-all" />
+                  <div
+                    className={`h-full rounded-full bg-blue-600 transition-all ${allowClasses ? 'w-0' : 'w-full opacity-20'}`}
+                  />
                 </div>
               </div>
 
               <div className="space-y-3 border-t border-slate-50 pt-4">
-                <Link
-                  href="/student/attendance"
-                  className="flex items-center justify-between text-sm font-bold text-slate-600 hover:text-blue-600 dark:text-slate-400"
-                >
-                  View Full Attendance
-                  <ChevronRight className="h-4 w-4" />
-                </Link>
+                {allowClasses ? (
+                  <Link
+                    href="/student/attendance"
+                    className="flex items-center justify-between text-sm font-bold text-slate-600 hover:text-blue-600 dark:text-slate-400"
+                  >
+                    View Full Attendance
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                ) : (
+                  <div className="flex items-center justify-between text-xs font-medium text-slate-400">
+                    <span>Classes not included in pathway</span>
+                  </div>
+                )}
                 <Link
                   href="/student/grades"
                   className="flex items-center justify-between text-sm font-bold text-slate-600 hover:text-blue-600 dark:text-slate-400"

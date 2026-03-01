@@ -213,6 +213,7 @@ export default function ModularTrainingPage() {
                 <ul className="space-y-2 text-xs text-slate-600">
                   {[
                     'Comprehensive classroom tuition',
+                    'Official EASA examination fee sitting',
                     'Expert instruction',
                     'All study materials',
                     'Exam preparation guidance',

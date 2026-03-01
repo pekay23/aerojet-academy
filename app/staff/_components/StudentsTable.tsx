@@ -83,7 +83,7 @@ export default function StudentsTable({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-[#002a5c] dark:text-white uppercase dark:text-white">
+          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
             Students
           </h1>
           <p className="mt-1 text-sm text-slate-400">
@@ -100,7 +100,7 @@ export default function StudentsTable({
           </button>
           <a
             href="/staff/students/import"
-            className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2 text-xs font-black text-white transition-all hover:bg-[#4c9ded]"
+            className="bg-aerojet-blue hover:bg-aerojet-sky flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black text-white transition-all"
           >
             <GraduationCap className="h-3.5 w-3.5" />
             Import CSV
@@ -124,7 +124,7 @@ export default function StudentsTable({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search name, ID, email..."
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-700 dark:bg-slate-800/50"
+                className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
               />
             </div>
             <div className="flex gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
@@ -134,7 +134,7 @@ export default function StudentsTable({
                   onClick={() => setFilter(f.key)}
                   className={`rounded-full border px-3 py-1 text-xs font-bold whitespace-nowrap transition-all ${
                     filter === f.key
-                      ? 'border-[#002a5c] bg-[#002a5c] text-white'
+                      ? 'border-aerojet-blue bg-aerojet-blue text-white'
                       : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
                   }`}
                 >
@@ -184,13 +184,13 @@ export default function StudentsTable({
                     onClick={() => setSelected(student)}
                     className={`relative cursor-pointer p-4 transition-all ${
                       isSelected
-                        ? 'border-l-2 border-[#002a5c] bg-[#002a5c]/5'
+                        ? 'border-aerojet-blue bg-aerojet-blue/5 border-l-2'
                         : 'border-l-2 border-transparent hover:bg-slate-50'
                     }`}
                   >
                     <div className="mb-2 flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#002a5c]/10 text-xs font-black text-[#002a5c]">
+                        <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
                           {student.profile?.profilePhotoUrl ? (
                             <img
                               src={student.profile.profilePhotoUrl}

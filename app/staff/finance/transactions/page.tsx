@@ -75,19 +75,31 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
     availableAfter: tx.availableAfter ? Number(tx.availableAfter) : null,
   }))
 
+  // Fetch payments to cross-reference reconciliation status
+  const paymentIds = serializedTransactions
+    .filter((tx) => tx.referenceType === 'PAYMENT_ID' && tx.referenceId)
+    .map((tx) => tx.referenceId!)
+
+  const relatedPayments = await prisma.payment.findMany({
+    where: { id: { in: paymentIds } },
+    select: { id: true, reconciled: true },
+  })
+
+  const reconciliationMap = new Map(relatedPayments.map((p) => [p.id, p.reconciled]))
+
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'TOP_UP':
       case 'REFUND':
       case 'RELEASE':
-        return 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100'
+        return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
       case 'CAPTURE':
       case 'PAYMENT':
-        return 'bg-blue-100 text-blue-700 hover:bg-blue-100'
+        return 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
       case 'RESERVE':
-        return 'bg-amber-100 text-amber-700 hover:bg-amber-100'
+        return 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
       default:
-        return 'bg-slate-100 text-slate-700 hover:bg-slate-100'
+        return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
     }
   }
 
@@ -95,29 +107,54 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">Transactions</h1>
-          <p className="text-slate-500 dark:text-slate-400">View recent wallet movements</p>
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight uppercase dark:text-white">
+            Transactions
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400">
+            View recent wallet movements and settlement status
+          </p>
         </div>
-        <div className="w-72">
-          <SearchInput placeholder="Search user or reference..." />
+        <div className="flex items-center gap-4">
+          <Link
+            href="/staff/finance/reconciliation"
+            className="text-aerojet-blue rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-xs font-black tracking-widest uppercase transition-all hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-white"
+          >
+            Go to Reconciliation
+          </Link>
+          <div className="w-72">
+            <SearchInput placeholder="Search user or reference..." />
+          </div>
         </div>
       </div>
 
-      <div className="rounded-md border bg-white dark:bg-slate-900 shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <Table>
-          <TableHeader>
+          <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Reference</TableHead>
-              <TableHead>Date</TableHead>
+              <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                User
+              </TableHead>
+              <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Type
+              </TableHead>
+              <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Amount
+              </TableHead>
+              <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Reference & Status
+              </TableHead>
+              <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Date
+              </TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="divide-y divide-slate-100 dark:divide-slate-800">
             {serializedTransactions.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center text-slate-500 dark:text-slate-400">
+                <TableCell
+                  colSpan={5}
+                  className="h-24 text-center font-bold text-slate-500 dark:text-slate-400"
+                >
                   No transactions found.
                 </TableCell>
               </TableRow>
@@ -128,40 +165,70 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
                   ? `${user.profile.firstName} ${user.profile.lastName}`
                   : user.email
 
+                const isReconciled =
+                  tx.referenceType === 'PAYMENT_ID' && reconciliationMap.get(tx.referenceId!)
+
                 return (
-                  <TableRow key={tx.id}>
-                    <TableCell>
+                  <TableRow
+                    key={tx.id}
+                    className="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                  >
+                    <TableCell className="px-6 py-5">
                       <div className="flex flex-col">
-                        <span className="font-medium">{userName}</span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">{user.email}</span>
+                        <span className="font-bold text-slate-900 dark:text-slate-100">
+                          {userName}
+                        </span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                          {user.email}
+                        </span>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge className={getTypeColor(tx.type)} variant="secondary">
+                    <TableCell className="px-6 py-5">
+                      <Badge
+                        className={`${getTypeColor(tx.type)} rounded-lg border-none px-2 py-0.5 text-[10px] font-black tracking-widest uppercase transition-all`}
+                        variant="secondary"
+                      >
                         {tx.type.replace('_', ' ')}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="px-6 py-5">
                       <span
-                        className={
+                        className={`text-sm font-black ${
                           ['TOP_UP', 'REFUND', 'RELEASE'].includes(tx.type)
-                            ? 'font-medium text-emerald-600'
-                            : 'font-medium text-slate-900'
-                        }
+                            ? 'text-emerald-600 dark:text-emerald-400'
+                            : 'text-slate-900 dark:text-slate-100'
+                        }`}
                       >
-                        {['TOP_UP', 'REFUND', 'RELEASE'].includes(tx.type) ? '+' : ''}€
+                        {['TOP_UP', 'REFUND', 'RELEASE'].includes(tx.type) ? '+' : '-'}€
                         {tx.amount.toFixed(2)}
                       </span>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">{tx.referenceType || '—'}</span>
+                    <TableCell className="px-6 py-5">
+                      <div className="flex flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                            {tx.referenceType || '—'}
+                          </span>
+                          {isReconciled ? (
+                            <span className="flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
+                              Reconciled
+                            </span>
+                          ) : tx.referenceType === 'PAYMENT_ID' ? (
+                            <span className="flex items-center gap-0.5 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-400 dark:bg-slate-800">
+                              Pending Settlement
+                            </span>
+                          ) : null}
+                        </div>
                         {tx.referenceId && (
-                          <span className="font-mono text-xs text-slate-500 dark:text-slate-400">{tx.referenceId}</span>
+                          <span className="font-mono text-[10px] text-slate-400">
+                            {tx.referenceId}
+                          </span>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell>{format(new Date(tx.createdAt), 'MMM d, yyyy HH:mm')}</TableCell>
+                    <TableCell className="px-6 py-5 text-xs text-slate-500">
+                      {format(new Date(tx.createdAt), 'MMM d, yyyy HH:mm')}
+                    </TableCell>
                   </TableRow>
                 )
               })

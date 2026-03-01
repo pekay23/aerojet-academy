@@ -13,6 +13,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import CourseActionsMenu from '../../_components/CourseActionsMenu'
+import ExamComponentsSection from './_components/ExamComponentsSection'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Course Details | Staff Portal' }
@@ -30,10 +31,15 @@ export default async function CourseDetailsPage({ params }: Props) {
   const course = await prisma.course.findUnique({
     where: { id },
     include: {
+      examComponents: {
+        include: { _count: { select: { exams: true, bookings: true } } },
+        orderBy: { code: 'asc' },
+      },
       _count: {
         select: {
           enrollments: true,
           classes: true,
+          examComponents: true,
         },
       },
       classes: {
@@ -74,16 +80,18 @@ export default async function CourseDetailsPage({ params }: Props) {
               <div className="flex items-center gap-3">
                 <span className="font-mono text-sm font-bold text-slate-400">{course.code}</span>
                 {course.isActive ? (
-                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black uppercase text-emerald-700">
+                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-black text-emerald-700 uppercase">
                     Active
                   </span>
                 ) : (
-                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black uppercase text-slate-500 dark:text-slate-400">
+                  <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-black text-slate-500 uppercase dark:text-slate-400">
                     Inactive
                   </span>
                 )}
               </div>
-              <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">{course.name}</h1>
+              <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+                {course.name}
+              </h1>
             </div>
           </div>
           <CourseActionsMenu courseId={course.id} courseName={course.name} />
@@ -94,8 +102,8 @@ export default async function CourseDetailsPage({ params }: Props) {
         {/* Main Info */}
         <div className="space-y-6 lg:col-span-2">
           {/* About Course */}
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-            <h2 className="mb-4 text-xs font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-4 text-xs font-black tracking-widest text-slate-400 uppercase">
               About Course
             </h2>
             <p className="leading-relaxed text-slate-600 dark:text-slate-400">
@@ -103,29 +111,29 @@ export default async function CourseDetailsPage({ params }: Props) {
             </p>
 
             <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
-              <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">Price</p>
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Price</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
                   <DollarSign className="h-4 w-4 text-[#4c9ded]" />
                   {course.currency} {course.price.toString()}
                 </div>
               </div>
-              <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">Duration</p>
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Duration</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
                   <Clock className="h-4 w-4 text-[#4c9ded]" />
                   {course.duration ? `${course.duration} Hours` : 'N/A'}
                 </div>
               </div>
-              <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">Category</p>
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Category</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
                   <GraduationCap className="h-4 w-4 text-[#4c9ded]" />
-                  {course.category || 'Standard'}
+                  {course.categoryId || 'Standard'}
                 </div>
               </div>
-              <div className="rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4">
-                <p className="mb-1 text-[10px] font-bold uppercase text-slate-400">Prerequisites</p>
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Prerequisites</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
                   <CheckCircle2 className="h-4 w-4 text-[#4c9ded]" />
                   {course.requiresPrerequisite ? course.prerequisites.join(', ') : 'None'}
@@ -134,10 +142,20 @@ export default async function CourseDetailsPage({ params }: Props) {
             </div>
           </div>
 
+          {/* Exam Components */}
+          <ExamComponentsSection
+            courseId={course.id}
+            components={course.examComponents.map((ec) => ({
+              ...ec,
+              individualPrice: ec.individualPrice?.toString() ?? null,
+              poolPrice: ec.poolPrice?.toString() ?? null,
+            }))}
+          />
+
           {/* Scheduled Classes */}
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xs font-black uppercase tracking-widest text-slate-400">
+              <h2 className="text-xs font-black tracking-widest text-slate-400 uppercase">
                 Scheduled Classes
               </h2>
               <Link
@@ -150,13 +168,13 @@ export default async function CourseDetailsPage({ params }: Props) {
 
             <div className="space-y-4">
               {course.classes.length === 0 ? (
-                <p className="text-sm italic text-slate-400">No classes currently scheduled.</p>
+                <p className="text-sm text-slate-400 italic">No classes currently scheduled.</p>
               ) : (
                 course.classes.map((cls) => (
                   <Link
                     key={cls.id}
                     href={`/staff/classes/${cls.id}`}
-                    className="flex items-center justify-between rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 p-4 transition-colors hover:bg-slate-100"
+                    className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/50"
                   >
                     <div>
                       <p className="font-bold text-slate-700">{cls.name}</p>
@@ -170,7 +188,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                       <p className="text-xs font-bold text-slate-600 dark:text-slate-400">
                         {new Date(cls.startDate).toLocaleDateString()}
                       </p>
-                      <p className="text-[10px] font-black uppercase text-slate-400">Starts</p>
+                      <p className="text-[10px] font-black text-slate-400 uppercase">Starts</p>
                     </div>
                   </Link>
                 ))
@@ -181,26 +199,32 @@ export default async function CourseDetailsPage({ params }: Props) {
 
         {/* Sidebar Info */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-            <h2 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
               <Users className="h-4 w-4" /> Enrollment Stats
             </h2>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Total Enrolled</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                  Total Enrolled
+                </span>
                 <span className="text-sm font-black text-slate-800 dark:text-slate-200">
                   {course._count.enrollments}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">Active Classes</span>
-                <span className="text-sm font-black text-slate-800 dark:text-slate-200">{course._count.classes}</span>
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                  Active Classes
+                </span>
+                <span className="text-sm font-black text-slate-800 dark:text-slate-200">
+                  {course._count.classes}
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-            <h2 className="mb-4 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-slate-400">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
               <Calendar className="h-4 w-4" /> Course Lifecycle
             </h2>
             <div className="space-y-4">

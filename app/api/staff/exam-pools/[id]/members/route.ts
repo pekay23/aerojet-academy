@@ -9,7 +9,7 @@ import { MembershipStatus } from '@prisma/client'
 
 const addMemberSchema = z.object({
   userId: z.string().cuid(),
-  selectedModule: z.string().min(1),
+  examComponentId: z.string().cuid(),
 })
 
 interface RouteParams {
@@ -23,34 +23,34 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: RouteP
 
   if (validation.success === false) return apiError((validation as any).error)
 
-  const { userId, selectedModule } = validation.data
+  const { userId, examComponentId } = validation.data
   const poolId = params.id
 
-  // 1. Check if pool exists and retrieve details
+  // 1. Check pool exists
   const pool = await prisma.examPool.findUnique({
     where: { id: poolId },
-    include: { memberships: true },
   })
 
   if (!pool) return apiError('Pool not found', 404)
 
-  // 2. valiate constraints
+  // 2. Validate constraints
   if (pool.currentMemberCount >= pool.maxCandidates) {
     return apiError('Pool is full', 400)
   }
 
-  if (!pool.allowedModules.includes(selectedModule)) {
-    return apiError(`Module ${selectedModule} is not allowed in this pool`, 400)
+  // Verify the exam component belongs to an allowed module
+  const examComponent = await prisma.examComponent.findUnique({
+    where: { id: examComponentId },
+    include: { course: { select: { code: true } } },
+  })
+  if (!examComponent) return apiError('Exam component not found', 404)
+  if (pool.allowedModules.length > 0 && !pool.allowedModules.includes(examComponent.course.code)) {
+    return apiError(`Module ${examComponent.course.code} is not allowed in this pool`, 400)
   }
 
   // 3. Check if user is already in the pool
   const existingMembership = await prisma.poolMembership.findUnique({
-    where: {
-      poolId_userId: {
-        poolId,
-        userId,
-      },
-    },
+    where: { poolId_userId: { poolId, userId } },
   })
 
   if (existingMembership) {
@@ -58,19 +58,13 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: RouteP
   }
 
   // 4. Create membership
-  // Note: We are not handling payment here, passing amountReserved as 0 or handled elsewhere?
-  // Schema says amountReserved is Decimal.
-  // We should ideally fetch the seatPrice from the pool.
-
   const membership = await prisma.poolMembership.create({
     data: {
       poolId,
       userId,
-      selectedModule,
-      status: MembershipStatus.RESERVED, // Or CONFIRMED if manual? Let's say RESERVED.
+      examComponentId,
+      status: MembershipStatus.RESERVED,
       amountReserved: pool.seatPrice,
-      // We might want to check if they have balance, but for manual add by staff, maybe we override or just set it.
-      // For now, simple add.
     },
   })
 
@@ -85,7 +79,7 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: RouteP
     entity: 'PoolMembership',
     entityId: membership.id,
     userId: staff.id,
-    details: { poolId, userId, selectedModule },
+    details: { poolId, userId, examComponentId, moduleCode: examComponent.course.code },
   })
 
   return apiCreated(membership)

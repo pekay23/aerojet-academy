@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
+import { triggerAutoEnrollmentIfRequired } from '@/lib/enrollment/engine'
+import { generateStudentId } from '@/lib/auth/helpers'
 
 export async function POST(req: NextRequest) {
   const session = await getAuthSession()
@@ -10,24 +12,31 @@ export async function POST(req: NextRequest) {
   const userId = (session.user as any).id
 
   try {
-    const { studyPathway } = await req.json()
+    const { studyPathway, licenseCodes } = await req.json()
 
-    if (!['FULL_TIME', 'EXAM_ONLY', 'MODULAR'].includes(studyPathway)) {
+    // Validate using relational pathway codes
+    const pathway = await prisma.studyPathwayModel.findUnique({
+      where: { code: studyPathway },
+    })
+
+    if (!pathway) {
       return NextResponse.json({ error: 'Invalid study pathway selected' }, { status: 400 })
     }
 
     // Check if a pathway is already locked
     const existingProfile = await prisma.studentProfile.findUnique({
       where: { userId },
-      select: { studyPathway: true },
+      select: { id: true, pathwayId: true },
     })
 
-    if (existingProfile?.studyPathway) {
+    if (existingProfile?.pathwayId) {
       return NextResponse.json(
         { error: 'Study pathway is already locked and cannot be changed' },
         { status: 400 }
       )
     }
+
+    let profileId = ''
 
     await prisma.$transaction(async (tx) => {
       // 1. Create or update StudentProfile
@@ -35,26 +44,49 @@ export async function POST(req: NextRequest) {
         await tx.studentProfile.update({
           where: { userId },
           data: {
-            studyPathway,
+            pathwayId: pathway.id,
             studyPathwayLockedAt: new Date(),
             studyPathwayLocked: true,
           },
         })
+        profileId = existingProfile.id
       } else {
-        // If they are an APPLICANT, they might not have a profile yet until this point
-        const { generateStudentId } = await import('@/lib/auth/helpers')
-        await tx.studentProfile.create({
+        const created = await tx.studentProfile.create({
           data: {
             userId,
             studentId: generateStudentId(),
-            studyPathway,
+            pathwayId: pathway.id,
             studyPathwayLockedAt: new Date(),
             studyPathwayLocked: true,
           },
         })
+        profileId = created.id
       }
 
-      // 2. Ensure they have a Wallet
+      // 2. Link License Targets
+      if (licenseCodes && Array.isArray(licenseCodes)) {
+        const licenseCats = await tx.licenseCategory.findMany({
+          where: { code: { in: licenseCodes } },
+        })
+
+        for (const lc of licenseCats) {
+          await tx.studentLicenseTarget.upsert({
+            where: {
+              studentProfileId_licenseCategoryId: {
+                studentProfileId: profileId,
+                licenseCategoryId: lc.id,
+              },
+            },
+            update: {},
+            create: {
+              studentProfileId: profileId,
+              licenseCategoryId: lc.id,
+            },
+          })
+        }
+      }
+
+      // 3. Ensure they have a Wallet
       const existingWallet = await tx.wallet.findUnique({ where: { userId } })
       if (!existingWallet) {
         await tx.wallet.create({
@@ -69,19 +101,21 @@ export async function POST(req: NextRequest) {
       }
     })
 
+    // 4. Trigger Auto-Enrollment (after transaction)
+    await triggerAutoEnrollmentIfRequired(profileId)
+
     await createAuditLog({
       action: 'PATHWAY_SETUP',
       entity: 'student_profiles',
       entityId: userId,
       userId,
-      description: `Student chose ${studyPathway} pathway. Locked.`,
+      description: `Student chose ${studyPathway} pathway and licenses: ${licenseCodes?.join(', ') || 'none'}. Locked.`,
     })
 
     return NextResponse.json({
       success: true,
       studyPathway,
-      lockedAt: new Date(),
-      message: 'Pathway locked. You cannot change this.',
+      message: 'Pathway locked and auto-enrollment triggered.',
     })
   } catch (error: any) {
     console.error('Pathway selection error:', error)

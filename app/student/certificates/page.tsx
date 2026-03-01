@@ -18,7 +18,7 @@ export default async function CertificatesPage() {
     },
     include: {
       exam: {
-        include: { course: true },
+        include: { examComponent: { include: { course: true } } },
       },
     },
     orderBy: { certificateIssued: 'desc' },
@@ -47,9 +47,9 @@ export default async function CertificatesPage() {
               </div>
 
               <div className="space-y-1">
-                <h3 className="line-clamp-1 font-black text-slate-900 dark:text-slate-100">{cert.exam.course.name}</h3>
+                <h3 className="line-clamp-1 font-black text-slate-900 dark:text-slate-100">{cert.exam.examComponent.course.name}</h3>
                 <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
-                  {cert.exam.course.code} • Result: {cert.percentage.toString()}%
+                  {cert.exam.examComponent.course.code} • Result: {cert.percentage.toString()}%
                 </p>
               </div>
 

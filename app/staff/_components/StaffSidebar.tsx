@@ -18,6 +18,9 @@ import {
   Settings,
   UserCog,
   Mail,
+  Calendar,
+  Shield,
+  Briefcase,
 } from 'lucide-react'
 
 interface StaffSidebarProps {
@@ -56,6 +59,10 @@ export default function StaffSidebar({ userName, userRole, userImage, counts }: 
       href: '/enrollments',
       icon: ClipboardList,
       badge: counts?.enrollments || undefined,
+      children: [
+        { label: 'All Enrollments', href: '/enrollments' },
+        { label: 'Batch Activate', href: '/enrollments/batch' },
+      ],
     },
     {
       label: 'Payments',
@@ -70,12 +77,16 @@ export default function StaffSidebar({ userName, userRole, userImage, counts }: 
       children: [
         { label: 'Overview', href: '/finance' },
         { label: 'Wallet Top-ups', href: '/finance/wallet-topups' },
+        { label: 'Reconcile Payments', href: '/finance/reconciliation' },
         { label: 'Transactions', href: '/finance/transactions' },
         { label: 'Reports', href: '/finance/reports' },
       ],
     },
     { label: 'Courses', href: '/courses', icon: BookOpen },
+    { label: 'Programmes', href: '/programmes', icon: Briefcase },
+    { label: 'License Requirements', href: '/license-requirements', icon: Shield },
     { label: 'Classes', href: '/classes', icon: School },
+    { label: 'Scheduling', href: '/scheduling', icon: Calendar },
     { label: 'Resources', href: '/resources', icon: ScrollText },
     {
       label: 'Exams',

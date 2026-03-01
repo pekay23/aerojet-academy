@@ -32,7 +32,7 @@ export default async function ExamBookingsPage({ searchParams }: PageProps) {
             },
             { moduleCode: { contains: query } },
             { event: { name: { contains: query } } },
-            { exam: { name: { contains: query } } },
+            { exam: { examComponent: { course: { code: { contains: query } } } } },
           ],
         }
       : undefined,
@@ -57,9 +57,9 @@ export default async function ExamBookingsPage({ searchParams }: PageProps) {
         select: {
           name: true,
           examDate: true,
-          course: {
+          examComponent: {
             select: {
-              code: true,
+              course: { select: { code: true } },
             },
           },
         },
@@ -145,7 +145,7 @@ export default async function ExamBookingsPage({ searchParams }: PageProps) {
                       ) : booking.exam ? (
                         <div>
                           <div className="font-medium text-slate-700">
-                            {booking.exam.course.code} Exam
+                            {booking.exam.examComponent?.course?.code || booking.moduleCode} Exam
                           </div>
                           <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                             <Calendar className="h-3 w-3" />

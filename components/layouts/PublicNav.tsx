@@ -99,6 +99,7 @@ export default function PublicNav() {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [accordionValue, setAccordionValue] = useState<string | undefined>('item-1')
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20)
@@ -161,25 +162,31 @@ export default function PublicNav() {
           </Link>
 
           <div className="hidden flex-1 items-center justify-center lg:flex">
-            <NavigationMenu>
+            <NavigationMenu delayDuration={300}>
               <NavigationMenuList>
                 {navLinks.map((item) =>
                   item.isDropdown ? (
                     <NavigationMenuItem key={item.label}>
-                      <Link href={item.href || '#'}>
-                        {/* @next-codemod-error This Link previously used the now removed `legacyBehavior` prop, and has a child that might not be an anchor. The codemod bailed out of lifting the child props to the Link. Check that the child component does not render an anchor, and potentially move the props manually to Link. */}
-                        <NavigationMenuTrigger
-                          className={`text-sm font-bold uppercase ${linkColorClasses} hover:${activeLinkColorClasses} bg-transparent`}
-                        >
-                          {item.label}
-                        </NavigationMenuTrigger>
-                      </Link>
+                      <NavigationMenuTrigger
+                        onClick={() => setAccordionValue(undefined)}
+                        className={`relative px-4 py-2 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${linkColorClasses} hover:${activeLinkColorClasses} bg-transparent transition-none!`}
+                      >
+                        {item.label}
+                      </NavigationMenuTrigger>
                       <NavigationMenuContent>
                         <div className="w-[400px] p-4 md:w-[500px]">
-                          <Accordion type="single" collapsible defaultValue="item-1">
+                          <Accordion
+                            type="single"
+                            collapsible
+                            value={accordionValue}
+                            onValueChange={setAccordionValue}
+                          >
                             {item.groups?.map((group) => (
                               <AccordionItem value={group.value} key={group.value}>
-                                <AccordionTrigger className="text-public-primary px-3 text-sm font-bold hover:no-underline">
+                                <AccordionTrigger
+                                  onPointerDown={(e) => e.stopPropagation()}
+                                  className="text-public-primary px-3 text-sm font-bold hover:no-underline"
+                                >
                                   {group.title}
                                 </AccordionTrigger>
                                 <AccordionContent className="pt-2">

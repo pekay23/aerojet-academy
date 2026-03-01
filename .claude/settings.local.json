@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx prisma generate)",
+      "Bash(npx prisma migrate dev --name \"phase1_booking_type_module_type_ojt\")",
+      "Bash(npx prisma db push)",
+      "Bash(npx dotenv -e .env -- npx tsx prisma/seed.ts)"
+    ]
+  }
+}

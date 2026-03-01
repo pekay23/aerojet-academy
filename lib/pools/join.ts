@@ -1,4 +1,4 @@
-import prisma from '@/lib/database/prisma'
+import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { POOL_EXAM_FEE, POOL_MIN_CANDIDATES, POOL_NEAR_FULL_THRESHOLD } from './types'
 import { confirmPoolInternal } from './confirm'
@@ -7,7 +7,7 @@ import type { PoolJoinInput, PoolJoinResult } from './types'
 export async function joinPool({
   poolId,
   userId,
-  selectedModule,
+  examComponentId,
 }: PoolJoinInput): Promise<PoolJoinResult> {
   try {
     return await prisma.$transaction(
@@ -22,38 +22,76 @@ export async function joinPool({
           return { success: false, error: 'Pool is not open' }
         if (pool.currentMemberCount >= 28) return { success: false, error: 'Pool is full' }
 
-        // Reserve funds
+        // 0. Pathway/Enrollment Check
+        const profile = await tx.studentProfile.findUnique({
+          where: { userId },
+          include: { user: true },
+        })
+
+        if (!profile) return { success: false, error: 'Student profile not found' }
+
+        // Full-time students follow milestones (except resits, which might be standalone)
+        if (profile.enrollmentType === 'FULL_TIME') {
+          // check if this is a resit. If not, block.
+          // For now, let's assume pools are NOT for FT students as per user feedback.
+          return {
+            success: false,
+            error:
+              'Full-Time students follow a strictly milestone-based path and do not join exam pools individually.',
+          }
+        }
+
+        // Check if Modular student has already paid for this module
+        let feeToReserve = POOL_EXAM_FEE
+        if (profile.enrollmentType === 'MODULAR') {
+          const modularEnrollment = await tx.modularEnrollment.findFirst({
+            where: {
+              studentId: userId,
+              status: 'ACTIVE',
+              package: { modulesIncluded: { has: examComponentId } },
+            },
+          })
+
+          if (modularEnrollment) {
+            feeToReserve = 0 // Included in package
+          }
+        }
+
+        // Reserve funds (if fee > 0)
         const wallet = await tx.wallet.findUnique({ where: { userId } })
         if (!wallet) return { success: false, error: 'No wallet' }
-        const available = Number(wallet.balance) - Number(wallet.reservedBalance)
-        if (available < POOL_EXAM_FEE) return { success: false, error: 'Insufficient balance' }
 
-        await tx.wallet.update({
-          where: { id: wallet.id },
-          data: { reservedBalance: { increment: POOL_EXAM_FEE } },
-        })
+        if (feeToReserve > 0) {
+          const available = Number(wallet.balance) - Number(wallet.reservedBalance)
+          if (available < feeToReserve) return { success: false, error: 'Insufficient balance' }
 
-        await tx.walletTransaction.create({
-          data: {
-            walletId: wallet.id,
-            type: 'RESERVE',
-            amount: POOL_EXAM_FEE,
-            description: `Reserved for pool: ${pool.name}`,
-            referenceId: `POOL-${poolId.substring(0, 8)}`,
-            referenceType: 'POOL_RESERVATION',
-            balanceBefore: Number(wallet.balance),
-            balanceAfter: Number(wallet.balance),
-          },
-        })
+          await tx.wallet.update({
+            where: { id: wallet.id },
+            data: { reservedBalance: { increment: feeToReserve } },
+          })
+
+          await tx.walletTransaction.create({
+            data: {
+              walletId: wallet.id,
+              type: 'RESERVE',
+              amount: feeToReserve,
+              description: `Reserved for pool: ${pool.name}`,
+              referenceId: `POOL-${poolId.substring(0, 8)}`,
+              referenceType: 'POOL_RESERVATION',
+              balanceBefore: Number(wallet.balance) - Number(wallet.reservedBalance),
+              balanceAfter: Number(wallet.balance) - Number(wallet.reservedBalance) - feeToReserve,
+            },
+          })
+        }
 
         // Create membership
         const membership = await tx.poolMembership.create({
           data: {
             poolId,
             userId,
-            selectedModule,
-            status: 'RESERVED',
-            amountReserved: POOL_EXAM_FEE,
+            examComponentId,
+            status: feeToReserve > 0 ? 'RESERVED' : 'CONFIRMED',
+            amountReserved: feeToReserve,
             amountPaid: 0,
           },
         })

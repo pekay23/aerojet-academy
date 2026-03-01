@@ -31,10 +31,10 @@ export default async function ApplicantLayout({ children }: { children: React.Re
 
   const studentProfile = await prisma.studentProfile.findUnique({
     where: { userId: user.id },
-    select: { studyPathway: true },
+    select: { pathwayId: true },
   })
 
-  const hasPathway = !!studentProfile?.studyPathway
+  const hasPathway = !!studentProfile?.pathwayId
 
   const userName = profile ? `${profile.firstName} ${profile.lastName}` : user.email
   const userRole = 'Applicant'

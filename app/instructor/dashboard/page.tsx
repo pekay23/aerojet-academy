@@ -33,7 +33,7 @@ export default async function Page() {
       </Suspense>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
         {[
           {
             label: 'Active Classes',
@@ -64,7 +64,7 @@ export default async function Page() {
           return (
             <div
               key={stat.label}
-              className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800 dark:bg-slate-900"
+              className="rounded-2xl border border-slate-100 bg-white p-4 sm:p-5 dark:border-slate-800 dark:bg-slate-900"
             >
               <div
                 className={`h-10 w-10 ${stat.color} mb-3 flex items-center justify-center rounded-xl`}
@@ -83,7 +83,7 @@ export default async function Page() {
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Today's Classes */}
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between border-b border-slate-50 px-6 py-5">
+          <div className="flex flex-col gap-2 border-b border-slate-50 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 sm:py-5">
             <h2 className="flex items-center gap-2 font-bold text-slate-900 dark:text-slate-100">
               <Calendar className="h-4 w-4 text-slate-400" /> Today's Classes
             </h2>
@@ -100,7 +100,7 @@ export default async function Page() {
                 <Link
                   key={cls.id}
                   href={`/instructor/classes/${cls.id}`}
-                  className="group flex items-center justify-between px-6 py-4 transition-all hover:bg-slate-50 dark:bg-slate-800/50"
+                  className="group flex items-center justify-between px-4 py-3 transition-all hover:bg-slate-50 sm:px-6 sm:py-4 dark:bg-slate-800/50"
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">

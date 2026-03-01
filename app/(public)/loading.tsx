@@ -1,10 +1,19 @@
+'use client'
+
+import { useEffect } from 'react'
+
 export default function PublicLoading() {
+  useEffect(() => {
+    document.body.classList.add('force-navbar-solid')
+    return () => document.body.classList.remove('force-navbar-solid')
+  }, [])
+
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center bg-white">
       <div className="flex flex-col items-center gap-4">
-        <div className="w-10 h-10 border-4 border-slate-200 border-t-[#4c9ded] rounded-full animate-spin" />
-        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Loading...</p>
+        <div className="border-t-public-secondary h-10 w-10 animate-spin rounded-full border-4 border-slate-200" />
+        <p className="text-sm font-bold tracking-widest text-slate-400 uppercase">Loading...</p>
       </div>
     </div>
-  );
+  )
 }

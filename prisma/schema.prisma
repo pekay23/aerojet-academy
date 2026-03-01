@@ -36,11 +36,6 @@ enum EnrollmentType {
   SHORT_COURSE // Short courses
 }
 
-enum StudyPathway {
-  FULL_TIME
-  EXAM_ONLY
-  MODULAR
-}
 
 enum ProgrammeChoice {
   FULL_TIME_4YEAR
@@ -52,6 +47,8 @@ enum ProgrammeChoice {
 
 enum EnrollmentStatus {
   ENROLLED
+  ACTIVE
+  APPROVED
   GRADUATED
   SUSPENDED
   WITHDRAWN
@@ -117,6 +114,20 @@ enum NotificationType {
   POOL_UPDATE
   PAYMENT_UPDATE
   EXAM_REMINDER
+}
+
+enum BookingType {
+  INDIVIDUAL   // Standard paid booking (€520)
+  POOL         // Joined via exam pool (€300)
+  MODULAR      // Included in modular package (no extra charge)
+  FULL_TIME    // Included in full-time enrollment (no extra charge)
+  COMPLIMENTARY // Admin-granted
+}
+
+enum CourseModuleType {
+  CORE        // M1-M10: mandatory for all licenses
+  SPECIALIST  // M11, M12, M15, M16, M17: category-specific mechanical
+  AVIONICS    // M13, M14: avionics/systems
 }
 
 // ============================================================================
@@ -239,19 +250,29 @@ model StudentProfile {
 
   studentId        String           @unique // AJA-2026-0001
   enrollmentType   EnrollmentType?
+  programmeChoice  ProgrammeChoice?
   enrollmentStatus EnrollmentStatus @default(ENROLLED)
   enrollmentDate   DateTime         @default(now())
   graduationDate   DateTime?
 
   // Pathway
-  studyPathway              StudyPathway?
   studyPathwayLockedAt      DateTime?
   studyPathwayLocked        Boolean       @default(false)
   studyPathwayLastChangedBy String?
   studyPathwayChangeReason  String?       @db.Text
 
+  // Academic position
+  currentYearNumber     Int @default(1)
+  currentSemesterNumber Int @default(1)
+
   // Academic
   CGPA Decimal? @db.Decimal(3, 2)
+
+  // Academic Period
+  academicYearId String?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id])
+  semesterId     String?
+  semester       Semester?     @relation(fields: [semesterId], references: [id])
 
   // Preferences
   preferredModules String[] // Array of module codes
@@ -260,9 +281,16 @@ model StudentProfile {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  // New Relational Links
+  pathwayId      String?
+  pathwayRel     StudyPathwayModel?     @relation(fields: [pathwayId], references: [id])
+  licenseTargets StudentLicenseTarget[]
+
   @@index([studentId])
   @@index([enrollmentType])
   @@index([enrollmentStatus])
+  @@index([academicYearId])
+  @@index([semesterId])
   @@map("student_profiles")
 }
 
@@ -313,6 +341,112 @@ model StaffProfile {
 }
 
 // ============================================================================
+// ACADEMIC INFRASTRUCTURE
+// ============================================================================
+
+model LicenseCategory {
+  id          String   @id @default(cuid())
+  code        String   @unique // B1.1, B2
+  name        String
+  description String?  @db.Text
+
+  // Requirements
+  requirements LicenseModuleRequirement[]
+
+  // Students targeting this license
+  studentTargets StudentLicenseTarget[]
+
+  @@map("license_categories")
+}
+
+model LicenseModuleRequirement {
+  id                String          @id @default(cuid())
+  licenseCategoryId String
+  licenseCategory   LicenseCategory @relation(fields: [licenseCategoryId], references: [id])
+  courseId          String
+  course            Course          @relation(fields: [courseId], references: [id])
+
+  @@unique([licenseCategoryId, courseId])
+  @@map("license_module_requirements")
+}
+
+model StudyPathwayModel {
+  id          String   @id @default(cuid())
+  code        String   @unique // FULL_TIME_4Y, MODULAR
+  name        String
+  description String?  @db.Text
+
+  // Rules
+  requiresAutoEnrollment Boolean @default(false)
+  grantsTuitionAccess    Boolean @default(true)
+  includesOjt            Boolean @default(false)
+
+  // Academic Terms associated with this pathway
+  academicTerms AcademicTerm[]
+
+  // Profiles using this pathway
+  profiles StudentProfile[]
+
+  @@map("study_pathways_relational")
+}
+
+model AcademicTerm {
+  id             String            @id @default(cuid())
+  pathwayId      String
+  pathway        StudyPathwayModel @relation(fields: [pathwayId], references: [id])
+  yearNumber     Int
+  semesterNumber Int
+  startDate      DateTime?
+  endDate        DateTime?
+
+  // Modules assigned to this term
+  courseAssignments TermCourseAssignment[]
+
+  @@map("academic_terms")
+}
+
+model TermCourseAssignment {
+  id       String       @id @default(cuid())
+  termId   String
+  term     AcademicTerm @relation(fields: [termId], references: [id])
+  courseId String
+  course   Course       @relation(fields: [courseId], references: [id])
+
+  @@unique([termId, courseId])
+  @@map("term_course_assignments")
+}
+
+model StudentLicenseTarget {
+  id                String          @id @default(cuid())
+  studentProfileId  String
+  studentProfile    StudentProfile  @relation(fields: [studentProfileId], references: [id])
+  licenseCategoryId String
+  licenseCategory   LicenseCategory @relation(fields: [licenseCategoryId], references: [id])
+
+  @@unique([studentProfileId, licenseCategoryId])
+  @@map("student_license_targets")
+}
+
+model ExamComponent {
+  id            String   @id @default(cuid())
+  courseId      String
+  course        Course   @relation(fields: [courseId], references: [id])
+  code          String   @unique // e.g., 'M7_MCQ', 'M7_ESSAY'
+  name          String
+  type          String // 'MCQ' or 'ESSAY'
+  duration      Int // Minutes
+  individualPrice Decimal? @default(520.00) @db.Decimal(10, 2)
+  poolPrice       Decimal? @default(300.00) @db.Decimal(10, 2)
+
+  // Relationships
+  exams           Exam[]
+  bookings        ExamBooking[]
+  poolMemberships PoolMembership[]
+
+  @@map("exam_components")
+}
+
+// ============================================================================
 // COURSES & ACADEMIC
 // ============================================================================
 
@@ -321,7 +455,11 @@ model Course {
   code        String  @unique // M1, M2, etc.
   name        String
   description String? @db.Text
-  category    String? // CORE, SPECIALIST, AVIONICS
+  categoryId   String?
+  category     CourseCategory? @relation(fields: [categoryId], references: [id])
+
+  // Classification
+  moduleType CourseModuleType? // CORE, SPECIALIST, AVIONICS
 
   // Details
   duration Int? // Hours
@@ -338,16 +476,21 @@ model Course {
   materialsUrl String?
 
   // Relationships
-  enrollments Enrollment[]
-  classes     Class[]
-  exams       Exam[]
+  programmeYears ProgrammeYear[]
+  enrollments    Enrollment[]
+  classes        Class[]
+  
+  // Relational Academic Updates
+  licenseRequirements   LicenseModuleRequirement[]
+  termAssignments       TermCourseAssignment[]
+  examComponents        ExamComponent[]
 
   // Metadata
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([code])
-  @@index([category])
+  @@index([categoryId])
   @@index([isActive])
   @@map("courses")
 }
@@ -361,6 +504,12 @@ model Enrollment {
 
   // Status
   status String @default("PENDING") // PENDING, APPROVED, ACTIVE, COMPLETED, WITHDRAWN
+
+  // Academic Period (links enrollment to a specific semester)
+  academicYearId String?
+  academicYear   AcademicYear? @relation(fields: [academicYearId], references: [id])
+  semesterId     String?
+  semester       Semester?     @relation(fields: [semesterId], references: [id])
 
   // Dates
   enrolledAt  DateTime  @default(now())
@@ -382,6 +531,8 @@ model Enrollment {
   @@index([userId])
   @@index([courseId])
   @@index([status])
+  @@index([academicYearId])
+  @@index([semesterId])
   @@map("enrollments")
 }
 
@@ -578,7 +729,8 @@ model PoolMembership {
   user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Module Selection
-  selectedModule String // ONE module per membership: "M1", "M7", etc.
+  examComponentId String?
+  examComponent   ExamComponent? @relation(fields: [examComponentId], references: [id])
 
   // Status
   status MembershipStatus @default(RESERVED)
@@ -604,7 +756,7 @@ model PoolMembership {
   @@index([poolId])
   @@index([userId])
   @@index([status])
-  @@index([selectedModule])
+  @@index([examComponentId])
   @@index([poolId, status])
   @@map("pool_memberships")
 }
@@ -688,9 +840,9 @@ model WalletTransaction {
 // ============================================================================
 
 model Exam {
-  id       String @id @default(cuid())
-  courseId String
-  course   Course @relation(fields: [courseId], references: [id])
+  id              String         @id @default(cuid())
+  examComponentId String
+  examComponent   ExamComponent  @relation(fields: [examComponentId], references: [id])
 
   // Details
   name         String
@@ -707,7 +859,7 @@ model Exam {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([courseId])
+  @@index([examComponentId])
   @@index([examDate])
   @@map("exams")
 }
@@ -721,11 +873,13 @@ model ExamBooking {
   eventId String?
   event   ExamEvent? @relation(fields: [eventId], references: [id])
 
-  // Booking Type
-  bookingType String // INDIVIDUAL, BUNDLE_2, BUNDLE_4, GROUP_CHARTER, RESIT
-
   // Module
-  moduleCode String
+  examComponentId String?
+  examComponent   ExamComponent? @relation(fields: [examComponentId], references: [id])
+
+  // Booking context
+  bookingType BookingType @default(INDIVIDUAL)
+  moduleCode  String?     // e.g. "M7" — denormalised for quick lookup
 
   // Payment
   amountPaid        Decimal            @db.Decimal(10, 2)
@@ -807,6 +961,12 @@ model Payment {
   rejectedAt      DateTime?
   rejectedBy      String? // Staff ID
   rejectionReason String?   @db.Text
+
+  // Reconciliation
+  reconciled          Boolean   @default(false)
+  reconciledAt        DateTime?
+  reconciledBy        String? // Staff ID
+  reconciliationNotes String?   @db.Text
 
   // Metadata
   notes     String?  @db.Text
@@ -1076,8 +1236,10 @@ model AcademicYear {
   endDate   DateTime
   isActive  Boolean  @default(true)
 
-  semesters Semester[]
-  classes   Class[]
+  semesters       Semester[]
+  classes         Class[]
+  studentProfiles StudentProfile[]
+  enrollments     Enrollment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1094,7 +1256,9 @@ model Semester {
   endDate        DateTime
   isActive       Boolean      @default(true)
 
-  classes Class[]
+  classes         Class[]
+  studentProfiles StudentProfile[]
+  enrollments     Enrollment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1105,9 +1269,11 @@ model Semester {
 
 model FullTimeProgramme {
   id            String  @id @default(cuid())
+  code          String  @unique
   name          String
   durationYears Int
-  yearFeeAmount Decimal @db.Decimal(10, 2)
+  totalFee      Decimal @db.Decimal(10, 2)
+  currency      String  @default("EUR")
   description   String? @db.Text
   isActive      Boolean @default(true)
 
@@ -1125,13 +1291,18 @@ model ProgrammeYear {
   programmeId   String
   programme     FullTimeProgramme @relation(fields: [programmeId], references: [id], onDelete: Cascade)
   yearNumber    Int // 1, 2, 3, 4
-  yearFeeAmount Decimal?          @db.Decimal(10, 2)
+  yearFeeAmount       Decimal?          @db.Decimal(10, 2)
+  seatConfirmationFee Decimal           @default(1500) @db.Decimal(10, 2)
+  firstPaymentAmount  Decimal           @default(3500) @db.Decimal(10, 2)
 
   semester1StartDate DateTime
   semester2StartDate DateTime
 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
+
+  courses   Course[]
+  enrollments FullTimeEnrollment[]
 
   @@unique([programmeId, yearNumber])
   @@map("programme_years")
@@ -1143,17 +1314,57 @@ model FullTimeEnrollment {
   student     User              @relation(fields: [studentId], references: [id], onDelete: Cascade)
   programmeId String
   programme   FullTimeProgramme @relation(fields: [programmeId], references: [id])
+  programmeYearId String
+  programmeYear   ProgrammeYear    @relation(fields: [programmeYearId], references: [id])
 
   status            String @default("PENDING_CONFIRMATION")
   currentYearNumber Int    @default(1)
+  startDate         DateTime @default(now())
+  academicYear      String?  @default("2026/2027")
 
   milestones PaymentMilestone[]
+  ojtPeriods OjtPeriod[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([studentId, programmeId])
   @@map("full_time_enrollments")
+}
+
+model OjtPeriod {
+  id           String             @id @default(cuid())
+  enrollmentId String
+  enrollment   FullTimeEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
+
+  // Placement Details
+  companyName    String
+  companyAddress String?
+  supervisorName String?
+  supervisorEmail String?
+
+  // Dates
+  startDate DateTime
+  endDate   DateTime?
+
+  // Progress
+  status         String @default("PENDING") // PENDING, ACTIVE, COMPLETED, FAILED
+  hoursCompleted Int    @default(0)
+  hoursRequired  Int    @default(2000) // EASA Part-66 Part-147 typical requirement
+
+  // Documentation
+  reportUrl  String?
+  verifiedBy String?   // Staff/Admin ID
+  verifiedAt DateTime?
+
+  // Metadata
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enrollmentId])
+  @@index([status])
+  @@map("ojt_periods")
 }
 
 model PaymentMilestone {
@@ -1283,5 +1494,16 @@ model EmailTemplate {
   updatedBy String? // Admin user ID
 
   @@map("email_templates")
+}
+
+model CourseCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?  @db.Text
+  courses     Course[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("course_categories")
 }
 

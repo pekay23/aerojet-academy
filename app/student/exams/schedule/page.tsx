@@ -20,7 +20,7 @@ export default async function ExamSchedulePage() {
     },
     include: {
       exam: {
-        include: { course: true },
+        include: { examComponent: { include: { course: true } } },
       },
       event: true,
     },
@@ -59,9 +59,9 @@ export default async function ExamSchedulePage() {
             >
               <div>
                 <div className="mb-4 flex items-start justify-between">
-                  {booking.exam?.course?.code && (
+                  {booking.exam?.examComponent?.course?.code && (
                     <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold tracking-wide text-blue-600 uppercase">
-                      {booking.exam.course.code}
+                      {booking.exam.examComponent.course.code}
                     </div>
                   )}
                   {booking.status === 'PENDING' && (
@@ -72,7 +72,7 @@ export default async function ExamSchedulePage() {
                   )}
                 </div>
                 <h3 className="mb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
-                  {booking.exam?.course?.name || 'Unknown Course'}
+                  {booking.exam?.examComponent?.course?.name || 'Unknown Course'}
                 </h3>
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
                   {booking.exam?.name || 'Individual Exam'}
@@ -100,7 +100,7 @@ export default async function ExamSchedulePage() {
                           minute: '2-digit',
                         })
                       : 'N/A'}
-                    {booking.examDate && booking.exam && (
+                    {booking.examDate && booking.exam?.duration && (
                       <>
                         {' - '}
                         {new Date(

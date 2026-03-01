@@ -18,7 +18,7 @@ export default async function ExamResultsPage() {
     },
     include: {
       exam: {
-        include: { course: true },
+        include: { examComponent: { include: { course: true } } },
       },
     },
     orderBy: { createdAt: 'desc' },
@@ -53,7 +53,7 @@ export default async function ExamResultsPage() {
               <div>
                 <div className="mb-4 flex items-start justify-between">
                   <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold uppercase tracking-wide text-blue-600">
-                    {result.exam.course.code}
+                    {result.exam.examComponent?.course?.code || '—'}
                   </div>
                   {result.passed ? (
                     <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold uppercase text-emerald-600">
@@ -67,7 +67,7 @@ export default async function ExamResultsPage() {
                     </div>
                   )}
                 </div>
-                <h3 className="mb-1 text-lg font-bold text-slate-900 dark:text-slate-100">{result.exam.course.name}</h3>
+                <h3 className="mb-1 text-lg font-bold text-slate-900 dark:text-slate-100">{result.exam.examComponent?.course?.name || 'Unknown'}</h3>
                 <p className="text-sm font-medium text-slate-600 dark:text-slate-400">{result.exam.name}</p>
               </div>
 
