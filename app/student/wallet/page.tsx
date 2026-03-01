@@ -23,13 +23,14 @@ export const metadata: Metadata = { title: 'Wallet | Student Portal' }
 export default async function WalletPage({
   searchParams,
 }: {
-  searchParams: { tab?: string }
+  searchParams: Promise<{ tab?: string }>
 }) {
+  const { tab: tabParam } = await searchParams
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
   const user = session.user
-  const tab = searchParams.tab || 'overview'
+  const tab = tabParam || 'overview'
 
   const [wallet, studentProfile, pendingTopups] = await Promise.all([
     prisma.wallet.findUnique({ where: { userId: user.id } }),
@@ -57,7 +58,14 @@ export default async function WalletPage({
     const bankSettings = await prisma.systemSetting.findMany({
       where: {
         key: {
-          in: ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_swift', 'bank_branch', 'bank_currency'],
+          in: [
+            'bank_name',
+            'bank_account_name',
+            'bank_account_number',
+            'bank_swift',
+            'bank_branch',
+            'bank_currency',
+          ],
         },
       },
     })
@@ -115,9 +123,12 @@ export default async function WalletPage({
             <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
               <Clock className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 dark:text-amber-400" />
               <div>
-                <p className="text-sm font-bold text-amber-800 dark:text-amber-300">Top-up Awaiting Approval</p>
+                <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                  Top-up Awaiting Approval
+                </p>
                 <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-400">
-                  {pendingTopups.length} payment{pendingTopups.length > 1 ? 's' : ''} pending staff verification.
+                  {pendingTopups.length} payment{pendingTopups.length > 1 ? 's' : ''} pending staff
+                  verification.
                 </p>
               </div>
             </div>
@@ -131,43 +142,67 @@ export default async function WalletPage({
                     <Wallet className="h-5 w-5 text-blue-200 sm:h-6 sm:w-6" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold tracking-widest text-blue-200 uppercase sm:text-xs">Available Balance</p>
+                    <p className="text-[10px] font-bold tracking-widest text-blue-200 uppercase sm:text-xs">
+                      Available Balance
+                    </p>
                     <div className="flex items-baseline gap-1.5 sm:gap-2">
                       <span className="text-2xl font-black sm:text-4xl">
-                        {currencySymbol}{walletBalance.available.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        {currencySymbol}
+                        {walletBalance.available.toLocaleString(undefined, {
+                          minimumFractionDigits: 2,
+                        })}
                       </span>
-                      <span className="text-xs font-bold text-blue-200/60 sm:text-sm">{walletBalance.currency}</span>
+                      <span className="text-xs font-bold text-blue-200/60 sm:text-sm">
+                        {walletBalance.currency}
+                      </span>
                     </div>
-                    <p className="mt-0.5 text-[9px] font-bold tracking-widest text-blue-200/60 uppercase sm:text-[10px]">Ref: {studentId}</p>
+                    <p className="mt-0.5 text-[9px] font-bold tracking-widest text-blue-200/60 uppercase sm:text-[10px]">
+                      Ref: {studentId}
+                    </p>
                   </div>
                 </div>
               </div>
               <div className="border-t border-white/10 pt-5 sm:pt-8">
-                <p className="text-[9px] font-bold tracking-widest text-blue-200/60 uppercase sm:text-[10px]">Reserved (In Pools)</p>
-                <p className="text-lg font-black sm:text-xl">
-                  {currencySymbol}{walletBalance.held.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                <p className="text-[9px] font-bold tracking-widest text-blue-200/60 uppercase sm:text-[10px]">
+                  Reserved (In Pools)
                 </p>
-                <p className="mt-1 text-[9px] text-blue-200/40 sm:text-[10px]">Held pending pool confirmation. Released if pool is cancelled.</p>
+                <p className="text-lg font-black sm:text-xl">
+                  {currencySymbol}
+                  {walletBalance.held.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                </p>
+                <p className="mt-1 text-[9px] text-blue-200/40 sm:text-[10px]">
+                  Held pending pool confirmation. Released if pool is cancelled.
+                </p>
               </div>
             </div>
 
             <div className="flex flex-col gap-3 sm:gap-4">
-              <a href="/student/wallet?tab=top-up" className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-[#4c9ded]/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+              <a
+                href="/student/wallet?tab=top-up"
+                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-[#4c9ded]/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+              >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600 transition-colors group-hover:bg-green-100 sm:h-12 sm:w-12">
                   <ArrowUpRight className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Add Funds</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Top up via bank transfer</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    Top up via bank transfer
+                  </p>
                 </div>
               </a>
-              <a href="/student/wallet?tab=transactions" className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-[#4c9ded]/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+              <a
+                href="/student/wallet?tab=transactions"
+                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-[#4c9ded]/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+              >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-100 sm:h-12 sm:w-12">
                   <CreditCard className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900 dark:text-slate-100">History</p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">View past transactions</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    View past transactions
+                  </p>
                 </div>
               </a>
             </div>
@@ -179,11 +214,13 @@ export default async function WalletPage({
                 <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-blue-900 sm:text-base dark:text-blue-300">About Training Funds</h3>
+                <h3 className="text-sm font-bold text-blue-900 sm:text-base dark:text-blue-300">
+                  About Training Funds
+                </h3>
                 <p className="mt-1 text-xs leading-relaxed text-blue-700/80 sm:text-sm dark:text-slate-400">
                   Your wallet holds verified credits for exam pool bookings and course enrollments.{' '}
-                  <strong>All credits are staff-verified</strong> — funds only appear after your bank
-                  transfer is reviewed and approved by the finance team.
+                  <strong>All credits are staff-verified</strong> — funds only appear after your
+                  bank transfer is reviewed and approved by the finance team.
                 </p>
               </div>
             </div>
@@ -199,14 +236,18 @@ export default async function WalletPage({
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#002a5c] text-white">
                 <span className="font-bold">1</span>
               </div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Transfer Funds</h2>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                Transfer Funds
+              </h2>
             </div>
             <div className="space-y-4">
               <div className="rounded-xl border border-blue-50 bg-blue-50/30 p-6">
                 <div className="flex gap-4">
                   <Building2 className="h-6 w-6 text-blue-600" />
                   <div className="flex-1">
-                    <p className="text-xs font-bold uppercase tracking-widest text-blue-600">Bank Transfer Details</p>
+                    <p className="text-xs font-bold tracking-widest text-blue-600 uppercase">
+                      Bank Transfer Details
+                    </p>
                     <div className="mt-4 grid gap-y-3">
                       {[
                         ['Bank Name', bankDetails.bank_name],
@@ -216,13 +257,22 @@ export default async function WalletPage({
                         ['SWIFT Code', bankDetails.bank_swift],
                         ['Currency', bankDetails.bank_currency || 'GHS'],
                       ].map(([label, value]) => (
-                        <div key={label} className="flex justify-between border-b border-blue-100 pb-2">
-                          <span className="text-sm text-slate-500 dark:text-slate-400">{label}</span>
-                          <span className="text-sm font-bold text-slate-900 dark:text-slate-100">{value || '—'}</span>
+                        <div
+                          key={label}
+                          className="flex justify-between border-b border-blue-100 pb-2"
+                        >
+                          <span className="text-sm text-slate-500 dark:text-slate-400">
+                            {label}
+                          </span>
+                          <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                            {value || '—'}
+                          </span>
                         </div>
                       ))}
                       <div className="flex justify-between pt-1">
-                        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">Reference (Student ID)</span>
+                        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">
+                          Reference (Student ID)
+                        </span>
                         <span className="text-sm font-black text-[#002a5c]">{studentId}</span>
                       </div>
                     </div>
@@ -232,8 +282,9 @@ export default async function WalletPage({
               <div className="rounded-xl border border-slate-100 p-4 transition-colors hover:border-slate-200 dark:border-slate-800">
                 <div className="flex gap-3 text-slate-500 dark:text-slate-400">
                   <Info className="h-5 w-5 shrink-0" />
-                  <p className="text-xs font-medium leading-relaxed">
-                    Please use your <strong>Student ID</strong> as the payment reference to ensure your funds are credited correctly.
+                  <p className="text-xs leading-relaxed font-medium">
+                    Please use your <strong>Student ID</strong> as the payment reference to ensure
+                    your funds are credited correctly.
                   </p>
                 </div>
               </div>
@@ -245,7 +296,9 @@ export default async function WalletPage({
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#4c9ded] text-white">
                 <span className="font-bold">2</span>
               </div>
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Upload Receipt</h2>
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                Upload Receipt
+              </h2>
             </div>
             <UploadProofForm studentId={studentId} />
           </div>
@@ -259,41 +312,70 @@ export default async function WalletPage({
             <table className="w-full border-collapse text-left">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-800/50">
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Date</th>
-                  <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Description</th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
-                  <th className="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">Amount</th>
+                  <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                    Date
+                  </th>
+                  <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                    Description
+                  </th>
+                  <th className="px-6 py-4 text-left text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-right text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                    Amount
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                 {allTransactions.length > 0 ? (
                   allTransactions.map((tx) => (
-                    <tr key={tx.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
+                    <tr
+                      key={tx.id}
+                      className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                    >
+                      <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-600 dark:text-slate-400">
                         {tx.createdAt.toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4">
-                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{tx.description}</p>
-                        <p className="text-[10px] font-medium uppercase tracking-tight text-slate-400">{tx.type.replace('_', ' ')}</p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                          {tx.description}
+                        </p>
+                        <p className="text-[10px] font-medium tracking-tight text-slate-400 uppercase">
+                          {tx.type.replace('_', ' ')}
+                        </p>
                       </td>
                       <td className="px-6 py-4">
                         {tx.isPending ? (
-                          <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-amber-700">Pending</span>
+                          <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold tracking-wide text-amber-700 uppercase">
+                            Pending
+                          </span>
                         ) : (
-                          <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">Completed</span>
+                          <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold tracking-wide text-emerald-700 uppercase">
+                            Completed
+                          </span>
                         )}
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <div className={`flex items-center justify-end gap-1 font-black ${tx.isPending ? 'text-slate-400' : isCredit(tx.type) ? 'text-green-600' : 'text-slate-900 dark:text-slate-100'}`}>
+                        <div
+                          className={`flex items-center justify-end gap-1 font-black ${tx.isPending ? 'text-slate-400' : isCredit(tx.type) ? 'text-green-600' : 'text-slate-900 dark:text-slate-100'}`}
+                        >
                           {!tx.isPending && (isCredit(tx.type) ? '+' : '-')}
-                          {tx.currency} {Number(tx.amount).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                          {tx.currency}{' '}
+                          {Number(tx.amount).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                          })}
                         </div>
                       </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={4} className="px-6 py-12 text-center text-sm font-medium text-slate-400">No transactions found.</td>
+                    <td
+                      colSpan={4}
+                      className="px-6 py-12 text-center text-sm font-medium text-slate-400"
+                    >
+                      No transactions found.
+                    </td>
                   </tr>
                 )}
               </tbody>
