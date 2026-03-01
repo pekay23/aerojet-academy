@@ -45,19 +45,8 @@ export default async function ApplicantWalletTopUpPage() {
   })
   const currency = settings[0]?.value || 'EUR'
 
-  const getSymbol = () => {
-    switch (currency) {
-      case 'EUR':
-        return '€'
-      case 'GHS':
-        return 'GH₵'
-      case 'USD':
-        return '$'
-      default:
-        return '€'
-    }
-  }
-  const symbol = getSymbol()
+  const { getCurrencySymbol } = await import('@/lib/currency')
+  const symbol = getCurrencySymbol(currency)
 
   const paymentOptions = [
     {

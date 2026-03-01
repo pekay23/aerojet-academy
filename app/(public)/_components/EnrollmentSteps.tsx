@@ -1,27 +1,15 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { getCurrencySymbol } from '@/lib/currency'
 
 interface EnrollmentStepsProps {
   fee?: string
   currency?: string
 }
 
-function getSymbol(currency?: string): string {
-  switch (currency) {
-    case 'EUR':
-      return '€'
-    case 'GHS':
-      return 'GH₵'
-    case 'USD':
-      return '$'
-    default:
-      return 'GH₵'
-  }
-}
-
 export default function EnrollmentSteps({ fee = '350', currency = 'GHS' }: EnrollmentStepsProps) {
-  const symbol = getSymbol(currency)
+  const symbol = getCurrencySymbol(currency || 'GHS')
 
   const steps = [
     {

@@ -41,8 +41,9 @@ export default async function ExamPoolsPage() {
   ])
 
   const balance = Number(wallet?.availableBalance || 0)
+  const { getCurrencySymbol } = await import('@/lib/currency')
   const currency = wallet?.currency || 'EUR'
-  const currencySymbol = currency === 'GHS' ? 'GH₵' : '€'
+  const currencySymbol = getCurrencySymbol(currency)
   const individualFee = Number(individualFeeStr)
 
   // 3. Fetch existing memberships to disable join button

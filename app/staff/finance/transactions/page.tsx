@@ -14,21 +14,9 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 import { Metadata } from 'next'
 import SearchInput from '@/components/SearchInput'
+import { getCurrencySymbol } from '@/lib/currency'
 
 export const metadata: Metadata = { title: 'Transaction History | Staff Portal' }
-
-function getCurrencySymbol(currency: string): string {
-  switch (currency) {
-    case 'EUR':
-      return '€'
-    case 'GHS':
-      return 'GH₵'
-    case 'USD':
-      return '$'
-    default:
-      return '€'
-  }
-}
 
 interface PageProps {
   searchParams: Promise<{ query?: string }>

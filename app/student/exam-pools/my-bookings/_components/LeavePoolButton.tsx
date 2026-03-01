@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { leaveExamPool } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { LogOut, Loader2, AlertTriangle, X } from 'lucide-react'
+import { getCurrencySymbol } from '@/lib/currency'
 
 interface LeavePoolButtonProps {
   poolId: string
@@ -20,7 +21,7 @@ export default function LeavePoolButton({
 }: LeavePoolButtonProps) {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
-  const currencySymbol = currency === 'GHS' ? 'GH₵' : '€'
+  const currencySymbol = getCurrencySymbol(currency)
 
   const handleLeave = () => {
     startTransition(async () => {

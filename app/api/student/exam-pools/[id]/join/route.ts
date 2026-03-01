@@ -26,11 +26,12 @@ export const POST = withErrorHandler(
       details: { poolId, module: validation.data.selectedModule },
     })
 
+    const { getCurrencySymbol } = await import('@/lib/currency')
     const settings = await prisma.systemSetting.findMany({
       where: { key: 'course_currency' },
     })
     const currency = settings[0]?.value || 'EUR'
-    const symbol = currency === 'EUR' ? '€' : currency === 'GHS' ? 'GH₵' : '$'
+    const symbol = getCurrencySymbol(currency)
 
     return apiCreated({
       message: `Successfully joined pool! ${symbol}300 has been held in your wallet.`,

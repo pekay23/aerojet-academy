@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
+import { getCurrencySymbol } from '@/lib/currency'
 
 export const calculateFillRate = (current: number, max: number): number => {
   if (max === 0) return 0
@@ -12,7 +13,7 @@ export const formatCurrency = (
 ): string => {
   const value = Number(amount || 0)
   const curr = currency || 'EUR'
-  const symbol = curr === 'EUR' ? '€' : curr === 'GHS' ? 'GH₵' : '$'
+  const symbol = getCurrencySymbol(curr)
   return `${symbol}${value.toLocaleString()}`
 }
 

@@ -1,21 +1,9 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
 import prisma from '@/lib/prisma/client'
+import { getCurrencySymbol } from '@/lib/currency'
 
 export const metadata: Metadata = { title: 'Application Terms | Aerojet Academy' }
-
-function getCurrencySymbol(currency: string): string {
-  switch (currency) {
-    case 'EUR':
-      return '€'
-    case 'GHS':
-      return 'GH₵'
-    case 'USD':
-      return '$'
-    default:
-      return 'GH₵'
-  }
-}
 
 async function getRegistrationFee() {
   const settings = await prisma.systemSetting.findMany({

@@ -3,21 +3,9 @@ import Link from 'next/link'
 import Hero from '../../_components/Hero'
 import SectionReveal from '../../_components/SectionReveal'
 import prisma from '@/lib/prisma/client'
+import { getCurrencySymbol } from '@/lib/currency'
 
 export const metadata: Metadata = { title: 'Fees & Payment | Aerojet Academy' }
-
-function getCurrencySymbol(currency: string): string {
-  switch (currency) {
-    case 'EUR':
-      return '€'
-    case 'GHS':
-      return 'GH₵'
-    case 'USD':
-      return '$'
-    default:
-      return 'GH₵'
-  }
-}
 
 async function getRegistrationFee() {
   const settings = await prisma.systemSetting.findMany({

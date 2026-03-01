@@ -26,11 +26,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     },
   })
 
+  const { getCurrencySymbol } = await import('@/lib/currency')
   const settings = await prisma.systemSetting.findMany({
     where: { key: 'course_currency' },
   })
   const currency = settings[0]?.value || 'EUR'
-  const symbol = currency === 'EUR' ? '€' : currency === 'GHS' ? 'GH₵' : '$'
+  const symbol = getCurrencySymbol(currency)
 
   return apiCreated({
     message: `Top-up request of ${symbol}${amount} submitted. Awaiting staff approval.`,

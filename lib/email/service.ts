@@ -285,6 +285,58 @@ export async function sendRegistrationEmail(
 }
 
 // ---------------------------------------------------------------------------
+// EMAIL VERIFICATION (on registration, before approval)
+// ---------------------------------------------------------------------------
+
+export async function renderEmailVerificationEmail(firstName: string, verifyToken: string) {
+  const defaultSubject = 'Verify Your Email — Aerojet Aviation'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}},</p>
+    <p class="text">
+      Thank you for registering with Aerojet Aviation Training Academy.
+      Please verify your email address to continue with your application.
+    </p>
+
+    <div class="btn-container">
+      <a href="{{verifyUrl}}" class="btn">
+        <span>Verify Email Address</span>
+      </a>
+    </div>
+
+    <p class="text" style="font-size: 13px; color: #666;">
+      This link expires in 24 hours. If you didn't create an account, you can safely ignore this email.
+    </p>
+  `
+
+  const template = await getTemplate('email-verification', {
+    subject: defaultSubject,
+    body: defaultBody,
+  })
+
+  const baseUrl = await getBaseUrl()
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    verifyUrl: `${baseUrl}/verify-email?token=${verifyToken}&type=registration`,
+  })
+
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+}
+
+export async function sendEmailVerificationEmail(
+  email: string,
+  firstName: string,
+  verifyToken: string
+) {
+  const html = await renderEmailVerificationEmail(firstName, verifyToken)
+
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation - Verify Your Email',
+    html,
+  })
+}
+
+// ---------------------------------------------------------------------------
 // ACCOUNT ACTIVATION
 // ---------------------------------------------------------------------------
 

@@ -25,7 +25,8 @@ async function getDashboardData() {
     where: { key: 'course_currency' },
   })
   const currency = settings[0]?.value || 'EUR'
-  const currSymbol = currency === 'EUR' ? '€' : currency === 'GHS' ? 'GH₵' : '$'
+  const { getCurrencySymbol } = await import('@/lib/currency')
+  const currSymbol = getCurrencySymbol(currency)
 
   const [userStatusCounts, pendingPayments, recentPendingPayments, activePool, approvedPayments] =
     await Promise.all([
