@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma/client'
+import { sendRegistrationEmail } from '@/lib/email/service'
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
@@ -11,6 +12,7 @@ export async function GET(req: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { verifyToken: token },
+    include: { profile: true },
   })
 
   if (!user) {
@@ -21,6 +23,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Verification link has expired' }, { status: 400 })
   }
 
+  const wasNotVerified = !user.emailVerified
+
   await prisma.user.update({
     where: { id: user.id },
     data: {
@@ -29,11 +33,17 @@ export async function GET(req: NextRequest) {
     },
   })
 
+  if (wasNotVerified) {
+    const firstName = user.profile?.firstName || 'Student'
+    sendRegistrationEmail(user.email, firstName, user.registrationCode).catch(console.error)
+  }
+
   return NextResponse.json({
     success: true,
     message: 'Email verified successfully',
     hasPassword: !!user.password,
     role: user.role,
     status: user.status,
+    registrationCode: user.registrationCode,
   })
 }
