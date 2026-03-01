@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Edit2, Loader2, AlertTriangle } from 'lucide-react'
 
-type StudyPathway = 'FULL_TIME' | 'EXAM_ONLY' | 'MODULAR' | null
+type PathwayCode = 'FULL_TIME_4Y' | 'FULL_TIME_2Y' | 'MILITARY_1Y' | 'MODULAR' | 'EXAM_ONLY' | null
 
 export default function EditPathwayDialog({
   userId,
@@ -20,31 +20,29 @@ export default function EditPathwayDialog({
   isLocked,
 }: {
   userId: string
-  currentPathway: StudyPathway
+  currentPathway: PathwayCode
   isLocked: boolean
 }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [pathway, setPathway] = useState<StudyPathway>(currentPathway)
+  const [pathway, setPathway] = useState<PathwayCode>(currentPathway)
   const [reason, setReason] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const handleSave = async () => {
     if (!reason) {
-      setError('You must provide a reason for overriding the locked pathway.')
+      setError('You must provide a reason for this change.')
       return
     }
 
     setIsSubmitting(true)
     setError(null)
     try {
-      const res = await fetch(`/api/admin/students/${userId}/study-pathway`, {
+      const res = await fetch(`/api/staff/students/${userId}/study-pathway`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ studyPathway: pathway, reason }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pathwayCode: pathway, reason }),
       })
 
       if (!res.ok) {
@@ -70,7 +68,7 @@ export default function EditPathwayDialog({
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Override Study Pathway</DialogTitle>
+          <DialogTitle>{isLocked ? 'Override Study Pathway' : 'Assign Study Pathway'}</DialogTitle>
         </DialogHeader>
 
         <div className="mt-4 space-y-4">
@@ -81,7 +79,7 @@ export default function EditPathwayDialog({
             <p className="mt-2 text-xs text-orange-700 dark:text-orange-300">
               {isLocked
                 ? "This student's pathway is locked. Changing it may disrupt their existing enrollments or wallet reservations."
-                : 'This student has not selected a pathway yet. You can force assign one here.'}
+                : 'This student has not selected a pathway yet. You can assign one here.'}
             </p>
           </div>
 
@@ -91,21 +89,23 @@ export default function EditPathwayDialog({
             </label>
             <select
               value={pathway || ''}
-              onChange={(e) => setPathway(e.target.value as StudyPathway)}
+              onChange={(e) => setPathway(e.target.value as PathwayCode)}
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
             >
               <option value="" disabled>
                 Select Pathway
               </option>
-              <option value="FULL_TIME">Full-Time Programme</option>
+              <option value="FULL_TIME_4Y">Full-Time 4 Year (B1+B2)</option>
+              <option value="FULL_TIME_2Y">Full-Time 2 Year (B1)</option>
+              <option value="MILITARY_1Y">Military 1 Year (B1)</option>
+              <option value="MODULAR">Modular</option>
               <option value="EXAM_ONLY">Exam-Only</option>
-              <option value="MODULAR">Modular Packages</option>
             </select>
           </div>
 
           <div className="space-y-2">
             <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
-              Reason for Override
+              Reason for Change
             </label>
             <textarea
               value={reason}
@@ -128,7 +128,7 @@ export default function EditPathwayDialog({
             onClick={handleSave}
             disabled={isSubmitting || !pathway || pathway === currentPathway || !reason}
           >
-            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Force Save Pathway'}
+            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Pathway'}
           </Button>
         </div>
       </DialogContent>

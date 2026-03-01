@@ -13,22 +13,33 @@ export default async function CoursesPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
+  const studentProfile = await prisma.studentProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { enrollmentType: true },
+  })
+
+  const isFullTime = studentProfile?.enrollmentType === 'FULL_TIME'
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
             My Courses
           </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Manage your active and upcoming courses.</p>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Manage your active and upcoming courses.
+          </p>
         </div>
-        <Link
-          href="/student/courses/enroll"
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-blue-700 hover:shadow-lg active:scale-95"
-        >
-          <BookOpen className="h-4 w-4" />
-          Enroll in New Course
-        </Link>
+        {!isFullTime && (
+          <Link
+            href="/student/courses/enroll"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-blue-700 hover:shadow-lg active:scale-95"
+          >
+            <BookOpen className="h-4 w-4" />
+            Enroll in New Course
+          </Link>
+        )}
       </div>
 
       <Suspense fallback={<CoursesSkeleton />}>
@@ -59,11 +70,13 @@ async function CourseList({ userId }: { userId: string }) {
 
   if (enrollments.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-12 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white dark:bg-slate-900 text-slate-300 shadow-sm">
+      <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-12 text-center dark:border-slate-700 dark:bg-slate-800/50">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white text-slate-300 shadow-sm dark:bg-slate-900">
           <BookOpen className="h-8 w-8" />
         </div>
-        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Not enrolled in any courses</h3>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+          Not enrolled in any courses
+        </h3>
         <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
           You haven&apos;t enrolled in any courses yet. Browse our available courses to get started
           with your training.
@@ -86,13 +99,13 @@ async function CourseList({ userId }: { userId: string }) {
         <Link
           key={enrollment.id}
           href={`/student/courses/${enrollment.id}`}
-          className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:border-blue-200 hover:shadow-md"
+          className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
         >
           {/* Header */}
-          <div className="bg-slate-50 dark:bg-slate-800/50 p-6 transition-colors group-hover:bg-blue-50/50">
+          <div className="bg-slate-50 p-6 transition-colors group-hover:bg-blue-50/50 dark:bg-slate-800/50">
             <div className="mb-4 flex items-center justify-between">
               <span
-                className={`rounded-lg px-2 py-1 text-[10px] font-black uppercase tracking-widest ${
+                className={`rounded-lg px-2 py-1 text-[10px] font-black tracking-widest uppercase ${
                   enrollment.status === 'ACTIVE'
                     ? 'bg-green-100 text-green-700'
                     : enrollment.status === 'PENDING'
@@ -104,8 +117,12 @@ async function CourseList({ userId }: { userId: string }) {
               </span>
               <BookOpen className="h-5 w-5 text-slate-400 group-hover:text-blue-500" />
             </div>
-            <h3 className="line-clamp-2 font-black text-slate-900 dark:text-slate-100">{enrollment.course.name}</h3>
-            <p className="mt-1 text-xs font-bold text-slate-500 dark:text-slate-400">{enrollment.course.code}</p>
+            <h3 className="line-clamp-2 font-black text-slate-900 dark:text-slate-100">
+              {enrollment.course.name}
+            </h3>
+            <p className="mt-1 text-xs font-bold text-slate-500 dark:text-slate-400">
+              {enrollment.course.code}
+            </p>
           </div>
 
           {/* Content */}
@@ -117,7 +134,7 @@ async function CourseList({ userId }: { userId: string }) {
               </div>
               <div className="flex items-center gap-1.5">
                 <GraduationCap className="h-3.5 w-3.5" />
-                <span>{enrollment.course.category}</span>
+                <span>{enrollment.course.categoryId}</span>
               </div>
             </div>
 
@@ -133,4 +150,3 @@ async function CourseList({ userId }: { userId: string }) {
     </div>
   )
 }
-

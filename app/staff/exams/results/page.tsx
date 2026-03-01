@@ -30,8 +30,7 @@ export default async function ExamResultsPage({ searchParams }: PageProps) {
                 ],
               },
             },
-            { exam: { name: { contains: query } } },
-            { exam: { course: { code: { contains: query } } } },
+            { exam: { examComponent: { course: { code: { contains: query } } } } },
           ],
         }
       : undefined,
@@ -48,10 +47,9 @@ export default async function ExamResultsPage({ searchParams }: PageProps) {
       },
       exam: {
         include: {
-          course: {
-            select: {
-              name: true,
-              code: true,
+          examComponent: {
+            include: {
+              course: { select: { name: true, code: true } },
             },
           },
         },
@@ -129,7 +127,7 @@ export default async function ExamResultsPage({ searchParams }: PageProps) {
                       <div className="flex items-center gap-2">
                         <BookOpen className="h-4 w-4 text-[#002a5c]" />
                         <span className="font-medium text-slate-700">
-                          {result.exam.course.code} - {result.exam.name}
+                          {result.exam.examComponent?.course?.code || '—'} - {result.exam.name}
                         </span>
                       </div>
                     </td>

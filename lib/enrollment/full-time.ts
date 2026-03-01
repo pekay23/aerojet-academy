@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma/client'
-import { addMonths } from 'date-fns'
+import { triggerAutoEnrollmentByUserId } from './engine'
 
 /**
  * Generates payment milestones for a Full-Time Enrollment.
@@ -23,8 +23,10 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
 
   if (!progYear) throw new Error('Programme Year not found')
 
-  // Use year-specific fee amount, otherwise fallback to base programme year fee
-  const feeBase = progYear.yearFeeAmount ?? enrollment.programme.yearFeeAmount
+  // Use year-specific fee amount, otherwise derive from programme totalFee / duration
+  const feeBase =
+    progYear.yearFeeAmount ??
+    Number(enrollment.programme.totalFee) / enrollment.programme.durationYears
   const totalAmount = Number(feeBase)
 
   const milestoneData = []
@@ -115,9 +117,9 @@ export async function processMilestonePayment(milestoneId: string, userId: strin
 
   const { chargeWallet } = await import('@/lib/wallet/operations')
 
-  return prisma.$transaction(async (tx) => {
+  const updatedMilestone = await prisma.$transaction(async (tx) => {
     // 1. Charge wallet
-    const chargeResult = await chargeWallet(
+    await chargeWallet(
       tx,
       userId,
       amountToCharge,
@@ -127,16 +129,15 @@ export async function processMilestonePayment(milestoneId: string, userId: strin
     )
 
     // 2. Mark milestone as PAID
-    const updatedMilestone = await tx.paymentMilestone.update({
+    const updated = await tx.paymentMilestone.update({
       where: { id: milestone.id },
       data: {
         status: 'PAID',
         paidAt: new Date(),
-        // We'll just fetch the latest transaction created by chargeWallet
       },
     })
 
-    // Auto upgrade role on first paid milestone
+    // 3. Auto upgrade role on first paid milestone
     const user = await tx.user.findUnique({ where: { id: userId } })
     if (user?.role === 'APPLICANT') {
       await tx.user.update({
@@ -149,8 +150,13 @@ export async function processMilestonePayment(milestoneId: string, userId: strin
       })
     }
 
-    return updatedMilestone
+    return updated
   })
+
+  // 4. Post-transaction: trigger auto-enrollment for FT/Military pathways
+  await triggerAutoEnrollmentByUserId(userId)
+
+  return updatedMilestone
 }
 
 export async function payFullYear(enrollmentId: string, yearNumber: number, userId: string) {
@@ -175,7 +181,7 @@ export async function payFullYear(enrollmentId: string, yearNumber: number, user
 
   const { chargeWallet } = await import('@/lib/wallet/operations')
 
-  return prisma.$transaction(async (tx) => {
+  await prisma.$transaction(async (tx) => {
     await chargeWallet(
       tx,
       userId,
@@ -206,4 +212,7 @@ export async function payFullYear(enrollmentId: string, yearNumber: number, user
       })
     }
   })
+
+  // Post-transaction: trigger auto-enrollment for FT/Military pathways
+  await triggerAutoEnrollmentByUserId(userId)
 }

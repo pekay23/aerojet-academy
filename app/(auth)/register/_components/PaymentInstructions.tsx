@@ -115,35 +115,37 @@ export default function PaymentInstructions({
             to:
           </p>
           <div className="space-y-2 rounded-lg bg-gray-50 p-4 text-sm">
-            <div className="flex justify-between">
-              <span className="text-gray-500">Bank</span>
-              <span className="font-bold text-slate-800 dark:text-slate-200">
+            <div className="flex items-start justify-between">
+              <span className="shrink-0 text-gray-500">Bank</span>
+              <span className="text-right font-bold text-slate-800 dark:text-slate-200">
                 {finance.bankName}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Account Name</span>
-              <span className="font-bold text-slate-800 dark:text-slate-200">
+            <div className="flex items-start justify-between">
+              <span className="shrink-0 text-gray-500">Account Name</span>
+              <span className="text-right font-bold text-slate-800 dark:text-slate-200">
                 {finance.bankAccountName || '—'}
               </span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-500">Account No.</span>
-              <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+            <div className="flex items-start justify-between">
+              <span className="shrink-0 text-gray-500">Account No.</span>
+              <span className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
                 {finance.bankAccountNumber}
               </span>
             </div>
             {finance.bankSwift && (
-              <div className="flex justify-between">
-                <span className="text-gray-500">SWIFT/BIC</span>
-                <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+              <div className="flex items-start justify-between">
+                <span className="shrink-0 text-gray-500">SWIFT/BIC</span>
+                <span className="text-right font-mono font-bold text-slate-800 dark:text-slate-200">
                   {finance.bankSwift}
                 </span>
               </div>
             )}
-            <div className="flex justify-between border-t pt-2">
-              <span className="text-gray-500">Reference</span>
-              <span className="text-aerojet-blue font-mono font-bold">{registrationCode}</span>
+            <div className="flex items-start justify-between border-t pt-2">
+              <span className="shrink-0 text-gray-500">Reference</span>
+              <span className="text-aerojet-blue text-right font-mono font-bold">
+                {registrationCode}
+              </span>
             </div>
           </div>
         </div>

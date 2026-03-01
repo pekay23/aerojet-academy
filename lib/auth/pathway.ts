@@ -8,10 +8,10 @@ export async function requirePathway() {
 
   const profile = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
-    select: { studyPathway: true },
+    select: { pathwayId: true, pathwayRel: { select: { code: true, name: true } } },
   })
 
-  if (!profile?.studyPathway) {
+  if (!profile?.pathwayId) {
     redirect('/applicant/pathway')
   }
 

@@ -31,34 +31,51 @@ export default async function EnrollPage({
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  // 1. Fetch user's existing enrollments
-  const userEnrollments = await prisma.enrollment.findMany({
-    where: { userId: session.user.id },
-    select: { courseId: true, status: true },
-  })
+  // 1. Fetch user profile and existing enrollments
+  const [studentProfile, userEnrollments] = await Promise.all([
+    prisma.studentProfile.findUnique({
+      where: { userId: session.user.id },
+      select: { pathwayId: true, pathwayRel: { select: { code: true } } },
+    }),
+    prisma.enrollment.findMany({
+      where: { userId: session.user.id },
+      select: { courseId: true, status: true },
+    }),
+  ])
+
   const enrolledCourseIds = new Set(userEnrollments.map((e) => e.courseId))
 
-  // 2. Fetch unique categories for filter
-  const categoriesRaw = await prisma.course.findMany({
-    where: { isActive: true },
-    select: { category: true },
-    distinct: ['category'],
+  // 2. Fetch all unique course categories
+  const allCategories = await prisma.courseCategory.findMany({
+    orderBy: { name: 'asc' },
   })
-  const categories = categoriesRaw
-    .map((c) => c.category)
-    .filter((c): c is string => !!c)
-    .sort()
+  const categories = allCategories.map((c) => c.name)
 
-  // 3. Fetch courses with filter
-  const allCourses = await prisma.course.findMany({
-    where: { isActive: true, ...(category ? { category } : {}) },
-    orderBy: [{ category: 'asc' }, { code: 'asc' }],
+  // 3. Fetch courses with filter (including category relation)
+  let allCourses = await prisma.course.findMany({
+    where: {
+      isActive: true,
+      ...(category ? { category: { name: category } } : {}),
+    },
+    include: { category: true },
+    orderBy: [{ category: { name: 'asc' } }, { code: 'asc' }],
   })
 
-  // Group by category
+  // 4. Client-side Visibility Filtering (Pathway-based)
+  // If student has a specific pathway, only show relevant courses + B1/B2 Dual courses
+  const pathwayCode = studentProfile?.pathwayRel?.code
+  if (pathwayCode && pathwayCode !== 'B1_B2_DUAL') {
+    allCourses = allCourses.filter((course) => {
+      const mt = course.moduleType
+      if (!mt) return true
+      return true
+    })
+  }
+
+  // Group by category name
   const grouped = allCourses.reduce(
     (acc, c) => {
-      const cat = c.category || 'GENERAL'
+      const cat = c.category?.name || 'GENERAL'
       if (!acc[cat]) acc[cat] = []
       acc[cat].push(c)
       return acc

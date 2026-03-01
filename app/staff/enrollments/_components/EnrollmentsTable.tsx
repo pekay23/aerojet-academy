@@ -33,12 +33,15 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
       case 'APPROVED':
       case 'ACTIVE':
       case 'COMPLETED':
+      case 'ENROLLED':
         return 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100'
       case 'PENDING':
         return 'bg-amber-100 text-amber-700 hover:bg-amber-100'
       case 'REJECTED':
       case 'WITHDRAWN':
       case 'CANCELLED':
+      case 'SUSPENDED':
+      case 'EXPELLED':
         return 'bg-red-100 text-red-700 hover:bg-red-100'
       default:
         return 'bg-slate-100 text-slate-700 hover:bg-slate-100'
@@ -46,7 +49,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
   }
 
   return (
-    <div className="rounded-md border bg-white dark:bg-slate-900 shadow-sm">
+    <div className="rounded-md border bg-white shadow-sm dark:bg-slate-900">
       <Table>
         <TableHeader>
           <TableRow>
@@ -60,7 +63,10 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
         <TableBody>
           {enrollments.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={5} className="h-24 text-center text-slate-500 dark:text-slate-400">
+              <TableCell
+                colSpan={5}
+                className="h-24 text-center text-slate-500 dark:text-slate-400"
+              >
                 No enrollments found.
               </TableCell>
             </TableRow>
@@ -74,7 +80,9 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                         ? `${enrollment.user.profile.firstName} ${enrollment.user.profile.lastName}`
                         : 'Unknown'}
                     </span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">{enrollment.user.email}</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                      {enrollment.user.email}
+                    </span>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -92,7 +100,9 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                 </TableCell>
                 <TableCell>{format(new Date(enrollment.enrolledAt), 'MMM d, yyyy')}</TableCell>
                 <TableCell>
-                  {enrollment.amountPaid ? `€${Number(enrollment.amountPaid).toFixed(2)}` : '-'}
+                  {enrollment.amountPaid !== null && enrollment.amountPaid !== undefined
+                    ? `€${Number(enrollment.amountPaid).toFixed(2)}`
+                    : '€0.00'}
                 </TableCell>
               </TableRow>
             ))

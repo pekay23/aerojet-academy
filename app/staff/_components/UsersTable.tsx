@@ -83,7 +83,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-[#002a5c] uppercase dark:text-white">
+          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
             Users
           </h1>
           <p className="mt-1 text-sm text-slate-400">{total.toLocaleString()} total users</p>
@@ -111,7 +111,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
               onClick={() => setRole(r)}
               className={`rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all ${
                 role === r
-                  ? 'bg-white text-[#002a5c] shadow-sm dark:bg-slate-700 dark:text-white'
+                  ? 'text-aerojet-blue bg-white shadow-sm dark:bg-slate-700 dark:text-white'
                   : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
             >
@@ -125,7 +125,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+            className="focus:ring-aerojet-sky rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
           >
             {STATUS_FILTERS.map((s) => (
               <option key={s} value={s}>
@@ -142,7 +142,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search user..."
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-700 dark:bg-slate-800/50"
+              className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
             />
           </div>
         </div>
@@ -198,7 +198,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                     >
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
-                          <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#002a5c]/10 text-xs font-black text-[#002a5c]">
+                          <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
                             {user.profile?.profilePhotoUrl ? (
                               <img
                                 src={user.profile.profilePhotoUrl}

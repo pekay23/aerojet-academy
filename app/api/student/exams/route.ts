@@ -7,8 +7,15 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const user = await requireStudent()
   const bookings = await prisma.examBooking.findMany({
     where: { userId: user.id },
-    include: { exam: { include: { course: { select: { code: true, name: true } } } } },
-    orderBy: { exam: { examDate: 'desc' } },
+    include: {
+      exam: {
+        include: {
+          examComponent: { include: { course: { select: { code: true, name: true } } } },
+        },
+      },
+      examComponent: { include: { course: { select: { code: true, name: true } } } },
+    },
+    orderBy: { bookedAt: 'desc' },
   })
   return apiSuccess(bookings)
 })

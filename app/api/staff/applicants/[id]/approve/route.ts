@@ -9,6 +9,9 @@ import {
 } from '@/lib/auth/helpers'
 import { sendActivationEmail } from '@/lib/email/service'
 import { createAuditLog } from '@/lib/audit/logger'
+import { triggerAutoEnrollmentIfRequired } from '@/lib/enrollment/engine'
+import { resolveEnrollmentType, mapProgrammeChoiceToPathwayCode } from '@/lib/enrollment/pathway'
+import { ProgrammeChoice } from '@prisma/client'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAuthSession()
@@ -40,24 +43,71 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     profile.middleName || undefined,
     profile.lastName
   )
+  const { generateStudentId } = await import('@/lib/auth/helpers')
+  const studentId = generateStudentId()
 
-  // Activate the applicant
-  await prisma.user.update({
-    where: { id },
-    data: {
-      status: 'ACTIVE',
-      personalEmail: user.email, // Preserve personal email
-      email: academyEmail, // Replace with academy email
-      academyEmail,
-      password: hashedTempPassword,
-      verifyToken,
-      verifyTokenExpires,
-      mustChangePassword: true,
-      paymentApprovedAt: new Date(),
-      paymentApprovedBy: actorId,
-      registrationPaid: true,
-    },
+  // Activate and promote the applicant
+  let createdStudentProfileId: string | null = null
+
+  await prisma.$transaction(async (tx) => {
+    // 1. Update User to STUDENT role and ACTIVE status
+    await tx.user.update({
+      where: { id },
+      data: {
+        role: 'STUDENT',
+        status: 'ACTIVE',
+        personalEmail: user.email,
+        email: academyEmail,
+        academyEmail,
+        password: hashedTempPassword,
+        verifyToken,
+        verifyTokenExpires,
+        mustChangePassword: true,
+        paymentApprovedAt: new Date(),
+        paymentApprovedBy: actorId,
+        registrationPaid: true,
+      },
+    })
+
+    // 2. Map ProgrammeChoice to relational Pathway Code
+    const pathwayCode = mapProgrammeChoiceToPathwayCode(user.programmeChoice)
+    const enrollmentType = user.programmeChoice
+      ? resolveEnrollmentType(user.programmeChoice as ProgrammeChoice)
+      : 'MODULAR'
+
+    // Fetch the relational pathway
+    const pathway = await tx.studyPathwayModel.findUnique({ where: { code: pathwayCode } })
+
+    const studentProfile = await tx.studentProfile.create({
+      data: {
+        userId: id,
+        studentId,
+        enrollmentType,
+        pathwayId: pathway?.id ?? null,
+        enrollmentStatus: 'ENROLLED',
+      },
+    })
+
+    createdStudentProfileId = studentProfile.id
+
+    // 3. Approve the associated registration payment
+    const regPayment = await tx.payment.findFirst({
+      where: { userId: id, referenceType: 'REGISTRATION', status: 'PENDING' },
+      orderBy: { createdAt: 'desc' },
+    })
+
+    if (regPayment) {
+      await tx.payment.update({
+        where: { id: regPayment.id },
+        data: { status: 'APPROVED', approvedAt: new Date(), approvedBy: actorId },
+      })
+    }
   })
+
+  // 4. Post-transaction: trigger auto-enrollment for FT/Military pathways
+  if (createdStudentProfileId) {
+    await triggerAutoEnrollmentIfRequired(createdStudentProfileId)
+  }
 
   // Send activation email
   await sendActivationEmail(

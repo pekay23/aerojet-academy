@@ -4,7 +4,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm, type Resolver } from 'react-hook-form'
 import * as z from 'zod'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -28,7 +35,9 @@ const courseFormSchema = z.object({
     message: 'Name must be at least 3 characters.',
   }),
   description: z.string().optional().nullable(),
-  category: z.string().optional().nullable(),
+  categoryId: z.string().min(1, 'Category is required'),
+  licenseCategory: z.string().nullable().optional(),
+  pathway: z.enum(['B1_MECHANICAL', 'B2_AVIONICS', 'B1_B2_DUAL']).default('B1_B2_DUAL'),
   duration: z.coerce.number().int().positive().optional().nullable(),
   price: z.coerce.number().positive(),
   isActive: z.boolean().default(true),
@@ -47,6 +56,22 @@ interface EditCourseFormProps {
 export default function EditCourseForm({ initialData }: EditCourseFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
+
+  useEffect(() => {
+    async function fetchCategories() {
+      try {
+        const response = await fetch('/api/staff/course-categories')
+        const data = await response.json()
+        if (data.success) {
+          setCategories(data.data)
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error)
+      }
+    }
+    fetchCategories()
+  }, [])
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema) as unknown as Resolver<CourseFormValues>,
@@ -54,7 +79,9 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
       code: initialData.code || '',
       name: initialData.name || '',
       description: initialData.description || '',
-      category: initialData.category || '',
+      categoryId: initialData.categoryId || '',
+      licenseCategory: initialData.licenseCategory || 'none',
+      pathway: initialData.pathway || 'B1_B2_DUAL',
       duration: initialData.duration || undefined,
       price: Number(initialData.price) || 0,
       isActive: initialData.isActive ?? true,
@@ -69,9 +96,9 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
   async function onSubmit(values: CourseFormValues) {
     setIsLoading(true)
     try {
-      // Process prerequisites into array
       const data = {
         ...values,
+        licenseCategory: values.licenseCategory === 'none' ? null : values.licenseCategory,
         prerequisites: values.prerequisites
           ? values.prerequisites
               .split(',')
@@ -89,14 +116,15 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update course')
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to update course')
       }
 
       toast.success('Course updated successfully')
-      router.push(`/staff/courses/${initialData.id}`)
+      router.push(`/staff/courses`)
       router.refresh()
-    } catch (error) {
-      toast.error('Failed to update course')
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update course')
     } finally {
       setIsLoading(false)
     }
@@ -208,17 +236,81 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
           <FormField
             control={form.control}
-            name="category"
+            name="categoryId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Category</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g., CORE" {...field} value={field.value || ''} />
-                </FormControl>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categories.map((cat) => (
+                      <SelectItem key={cat.id} value={cat.id}>
+                        {cat.name.replace('_', ' ')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="licenseCategory"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>EASA License Category (Optional)</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || 'none'}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="None" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="B1_1_AEROPLANES_TURBINE">B1.1 Aeroplanes Turbine</SelectItem>
+                    <SelectItem value="B1_2_AEROPLANES_PISTON">B1.2 Aeroplanes Piston</SelectItem>
+                    <SelectItem value="B1_3_HELICOPTERS_TURBINE">
+                      B1.3 Helicopters Turbine
+                    </SelectItem>
+                    <SelectItem value="B1_4_HELICOPTERS_PISTON">B1.4 Helicopters Piston</SelectItem>
+                    <SelectItem value="B2_AVIONICS">B2 Avionics</SelectItem>
+                    <SelectItem value="B3_PISTON_AEROPLANES">B3 Piston Aeroplanes</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="pathway"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Study Pathway</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select pathway" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="B1_MECHANICAL">B1 Mechanical</SelectItem>
+                    <SelectItem value="B2_AVIONICS">B2 Avionics</SelectItem>
+                    <SelectItem value="B1_B2_DUAL">B1/B2 Dual</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <FormField
             control={form.control}
             name="duration"

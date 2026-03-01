@@ -141,7 +141,7 @@ export default async function StaffDashboardPage() {
       label: 'Active Users',
       value: data.totalUsers,
       icon: Users,
-      color: 'text-[#4c9ded]',
+      color: 'text-aerojet-sky',
       bg: 'bg-blue-50 dark:bg-blue-900/20',
     },
     {
@@ -179,11 +179,11 @@ export default async function StaffDashboardPage() {
       <WelcomeBanner messages={welcomeMessages} userName={firstName} />
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
         {stats.map((stat) => {
           const Icon = stat.icon
           const card = (
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md dark:border-slate-800 dark:bg-slate-900/50">
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5 dark:border-slate-800 dark:bg-slate-900/50">
               <div
                 className={`h-11 w-11 rounded-xl ${stat.bg} flex shrink-0 items-center justify-center`}
               >
@@ -223,7 +223,7 @@ export default async function StaffDashboardPage() {
                 Approved training payments (EUR) — last 6 months
               </p>
             </div>
-            <TrendingUp className="h-5 w-5 text-[#4c9ded]" />
+            <TrendingUp className="text-aerojet-sky h-5 w-5" />
           </div>
           {hasRevenue ? (
             <RevenueChart data={data.revenueData} currency="€" />
@@ -270,12 +270,12 @@ export default async function StaffDashboardPage() {
             </h2>
             <a
               href="/staff/payments/pending"
-              className="text-xs font-bold text-[#4c9ded] hover:underline"
+              className="text-aerojet-sky text-xs font-bold hover:underline"
             >
               View all ({data.pendingPayments})
             </a>
           </div>
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {data.recentPendingPayments.map((payment) => (
               <PaymentApprovalCard
                 key={payment.id}

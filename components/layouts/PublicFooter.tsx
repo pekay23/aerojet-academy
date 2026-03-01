@@ -18,10 +18,6 @@ const quickLinks = [
     label: 'Revision Support',
     href: '/courses/aircraft-engineering/easa-part-66/revision-support',
   },
-  {
-    label: 'Module Requirements',
-    href: '/courses/module-requirements',
-  },
 ]
 
 const admissionsLinks = [
@@ -35,7 +31,6 @@ const companyLinks = [
   { label: 'About Us', href: '/about' },
   { label: 'Accra MRO Project', href: '/about/accra-mro-project' },
   { label: 'Newsroom', href: '/newsroom' },
-  { label: 'Contact', href: '/contact' },
 ]
 
 export default function PublicFooter() {

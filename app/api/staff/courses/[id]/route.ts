@@ -28,7 +28,7 @@ export const GET = withErrorHandler(
             },
           },
         },
-        _count: { select: { enrollments: true, classes: true, exams: true } },
+        _count: { select: { enrollments: true, classes: true, examComponents: true } },
       },
     })
 

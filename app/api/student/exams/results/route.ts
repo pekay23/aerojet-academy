@@ -7,7 +7,11 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const user = await requireStudent()
   const results = await prisma.examResult.findMany({
     where: { userId: user.id },
-    include: { exam: { include: { course: { select: { code: true, name: true } } } } },
+    include: {
+      exam: {
+        include: { examComponent: { include: { course: { select: { code: true, name: true } } } } },
+      },
+    },
     orderBy: { createdAt: 'desc' },
   })
   return apiSuccess(results)

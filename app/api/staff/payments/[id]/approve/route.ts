@@ -4,8 +4,10 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { sendPaymentApprovedEmail, sendPaymentRejectedEmail } from '@/lib/email/service'
-import { PaymentStatus } from '@prisma/client'
+import { PaymentStatus, ProgrammeChoice } from '@prisma/client'
 import { topUpWallet } from '@/lib/wallet/operations'
+import { resolveEnrollmentType, mapProgrammeChoiceToPathwayCode } from '@/lib/enrollment/pathway'
+import { triggerAutoEnrollmentByUserId } from '@/lib/enrollment/engine'
 
 // POST /api/staff/payments/[id]/approve — Approve or reject a payment
 export const POST = withErrorHandler(
@@ -115,27 +117,19 @@ export const POST = withErrorHandler(
             where: { userId: payment.userId },
           })
           if (!existingProfile) {
-            // Determine enrollment type based on programme Choice if available
-            let enrollmentType = 'MODULAR'
-            if (
-              payment.user.programmeChoice?.includes('FULL_TIME') ||
-              payment.user.programmeChoice === 'MILITARY_1YEAR'
-            ) {
-              enrollmentType = 'FULL_TIME'
-            } else if (payment.user.programmeChoice === 'EXAM_ONLY') {
-              enrollmentType = 'EXAM_ONLY'
-            }
+            // Determine enrollment type and pathway code
+            const enrollmentType = payment.user.programmeChoice
+              ? resolveEnrollmentType(payment.user.programmeChoice as ProgrammeChoice)
+              : 'MODULAR'
+            const pathwayCode = mapProgrammeChoiceToPathwayCode(payment.user.programmeChoice)
+            const pathway = await tx.studyPathwayModel.findUnique({ where: { code: pathwayCode } })
 
             await tx.studentProfile.create({
               data: {
                 userId: payment.userId,
                 studentId,
                 enrollmentType: enrollmentType as any,
-                studyPathway: (payment.user.programmeChoice?.startsWith('FULL_TIME')
-                  ? 'FULL_TIME'
-                  : payment.user.programmeChoice === 'EXAM_ONLY'
-                    ? 'EXAM_ONLY'
-                    : 'MODULAR') as any,
+                pathwayId: pathway?.id ?? null,
               },
             })
           }
@@ -155,6 +149,9 @@ export const POST = withErrorHandler(
             })
           }
         })
+
+        // Post-transaction: trigger auto-enrollment for FT/Military pathways
+        await triggerAutoEnrollmentByUserId(payment.userId)
       }
 
       if (payment.user.profile) {
