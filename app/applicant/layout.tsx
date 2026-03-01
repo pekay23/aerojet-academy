@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import ApplicantSidebar from './_components/ApplicantSidebar'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import prisma from '@/lib/prisma/client'
+import ForcePasswordChange from './_components/ForcePasswordChange'
 
 export default async function ApplicantLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
@@ -13,7 +14,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { status: true, role: true },
+    select: { status: true, role: true, mustChangePassword: true },
   })
 
   if (
@@ -22,6 +23,11 @@ export default async function ApplicantLayout({ children }: { children: React.Re
     dbUser.role !== 'APPLICANT'
   ) {
     redirect('/login')
+  }
+
+  // Force password change if required
+  if (dbUser.mustChangePassword) {
+    return <ForcePasswordChange />
   }
 
   const profile = await prisma.profile.findUnique({

@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma/client'
 import StudentSidebar from './_components/StudentSidebar'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import WelcomeBanner from '@/components/WelcomeBanner'
+import ForcePasswordChange from '../applicant/_components/ForcePasswordChange'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
@@ -26,11 +27,13 @@ export default async function StudentLayout({ children }: { children: React.Reac
   }
 
   // Mandatory password change check
-  // Note: Replace with actual change password path if different
   if (dbUser.mustChangePassword) {
-    // We check the URL in a server component? No, use middleware or just redirect if not on the page.
-    // However, in a layout, it applies to all children.
-    // Usually, the change password page should NOT be under this layout or the layout should handle it.
+    return (
+      <ForcePasswordChange
+        apiEndpoint="/api/student/profile/change-password"
+        portalName="Student Portal"
+      />
+    )
   }
 
   const userName = user.name || user.email
@@ -45,7 +48,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
     }),
     prisma.studentProfile.findUnique({
       where: { userId: user.id },
-      select: { pathwayId: true, pathwayRel: { select: { code: true, name: true } }, enrollmentType: true },
+      select: {
+        pathwayId: true,
+        pathwayRel: { select: { code: true, name: true } },
+        enrollmentType: true,
+      },
     }),
   ])
 
