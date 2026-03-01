@@ -123,7 +123,7 @@ export default function ImportStudentsPage() {
     <div className="mx-auto max-w-5xl">
       <div className="mb-6">
         <Link
-          href="/staff/students"
+          href="/staff/users?tab=students"
           className="mb-4 inline-flex items-center text-sm font-bold text-slate-400 transition-colors hover:text-[#002a5c]"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Back to Students
