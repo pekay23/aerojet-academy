@@ -19,16 +19,23 @@ export default async function LicenseRequirementsPage() {
     orderBy: { code: 'asc' },
   })
 
+  // Fetch courses with proper sorting
   const courses = await prisma.course.findMany({
     where: { isActive: true },
     select: { id: true, code: true, name: true },
     orderBy: { code: 'asc' },
   })
 
+  // Default sorting configuration
+  const defaultSortBy = 'code' // Options: 'code', 'name', or licenseCategory ID
+  const defaultSortOrder = 'asc' // Options: 'asc', 'desc'
+
   return (
     <LicenseRequirementsClient
       licenseCategories={licenseCategories}
       courses={courses}
+      defaultSortBy={defaultSortBy}
+      defaultSortOrder={defaultSortOrder}
     />
   )
 }

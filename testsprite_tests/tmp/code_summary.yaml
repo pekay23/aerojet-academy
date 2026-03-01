@@ -1,0 +1,74 @@
+version: '2'
+type: frontend
+tech_stack:
+  - TypeScript
+  - Next.js 16 (App Router)
+  - Tailwind CSS 4
+  - Radix UI
+  - Framer Motion
+  - Prisma
+  - NextAuth.js
+routes:
+  - path: /login
+    file: app/(auth)/login/page.tsx
+    auth_required: false
+    description: User login page
+  - path: /register
+    file: app/(auth)/register/page.tsx
+    auth_required: false
+    description: User registration page
+  - path: /student
+    file: app/student/page.tsx
+    auth_required: true
+    description: Student dashboard
+  - path: /instructor
+    file: app/instructor/page.tsx
+    auth_required: true
+    description: Instructor dashboard
+  - path: /staff
+    file: app/staff/page.tsx
+    auth_required: true
+    description: Staff/Admin dashboard
+  - path: /courses
+    file: app/(public)/courses/page.tsx
+    auth_required: false
+    description: Public courses listing
+features:
+  - name: User Authentication
+    description: Login, registration, and password reset flows
+    files:
+      - app/(auth)/login/page.tsx
+      - app/(auth)/register/page.tsx
+    entry_route: /login
+    user_interactions:
+      - Fill login/registration forms
+      - Submit credentials
+      - Receive session cookie
+    api_calls:
+      - method: POST
+        endpoint: /api/auth/*
+    auth_required: false
+  - name: Student Portal
+    description: Access to courses, grades, attendance, and wallet
+    files:
+      - app/student/page.tsx
+      - app/student/courses/page.tsx
+      - app/student/grades/page.tsx
+    entry_route: /student
+    user_interactions:
+      - View dashboard stats
+      - Navigate to course list
+      - Check upcoming exams
+    auth_required: true
+  - name: Staff Management
+    description: Management of users, courses, exams, and reports
+    files:
+      - app/staff/page.tsx
+      - app/staff/users/page.tsx
+    entry_route: /staff
+    user_interactions:
+      - View administrative overview
+      - Manage student enrollments
+      - Configure exam pools
+    auth_required: true
+known_limitations: []

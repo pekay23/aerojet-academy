@@ -1,8 +1,8 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
-import { Loader2, Shield } from 'lucide-react'
+import { Loader2, Shield, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
 
 interface Course {
   id: string
@@ -17,22 +17,97 @@ interface LicenseCategory {
   requirements: { id: string; courseId: string; course: Course }[]
 }
 
+type SortOrder = 'asc' | 'desc'
+
 export default function LicenseRequirementsClient({
   licenseCategories,
   courses,
+  defaultSortBy = 'code',
+  defaultSortOrder = 'asc',
 }: {
   licenseCategories: LicenseCategory[]
   courses: Course[]
+  defaultSortBy?: string
+  defaultSortOrder?: SortOrder
 }) {
   const router = useRouter()
   const [toggling, setToggling] = useState<string | null>(null)
 
+  // Sorting state
+  const [sortBy, setSortBy] = useState<string>(defaultSortBy)
+  const [sortOrder, setSortOrder] = useState<SortOrder>(defaultSortOrder)
+
   // Build a set of "licenseCategoryId:courseId" for quick lookup
-  const requiredSet = new Set<string>()
-  for (const lc of licenseCategories) {
-    for (const req of lc.requirements) {
-      requiredSet.add(`${lc.id}:${req.courseId}`)
+  const requiredSet = useMemo(() => {
+    const set = new Set<string>()
+    for (const lc of licenseCategories) {
+      for (const req of lc.requirements) {
+        set.add(`${lc.id}:${req.courseId}`)
+      }
     }
+    return set
+  }, [licenseCategories])
+
+  // Sort courses
+  const sortedCourses = useMemo(() => {
+    return [...courses].sort((a, b) => {
+      let comparison = 0
+
+      if (sortBy === 'code') {
+        // Natural sort for codes like M1, M2... M10, M11
+        const aMatch = a.code.match(/M(\d+)/)
+        const bMatch = b.code.match(/M(\d+)/)
+
+        if (aMatch && bMatch) {
+          comparison = parseInt(aMatch[1], 10) - parseInt(bMatch[1], 10)
+        } else {
+          comparison = a.code.localeCompare(b.code)
+        }
+      } else {
+        // Sort by license category requirement (true/false)
+        const aRequired = requiredSet.has(`${sortBy}:${a.id}`) ? 1 : 0
+        const bRequired = requiredSet.has(`${sortBy}:${b.id}`) ? 1 : 0
+
+        comparison = aRequired - bRequired
+
+        // Secondary sort by code if requirements are equal
+        if (comparison === 0) {
+          const aMatch = a.code.match(/M(\d+)/)
+          const bMatch = b.code.match(/M(\d+)/)
+          if (aMatch && bMatch) {
+            comparison = parseInt(aMatch[1], 10) - parseInt(bMatch[1], 10)
+          } else {
+            comparison = a.code.localeCompare(b.code)
+          }
+        }
+      }
+
+      return sortOrder === 'asc' ? comparison : -comparison
+    })
+  }, [courses, sortBy, sortOrder, requiredSet])
+
+  const handleSort = (column: string) => {
+    if (sortBy === column) {
+      // Toggle order if clicking the same column
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      // Set new column and default to ascending (except for requirements which default to desc)
+      setSortBy(column)
+      setSortOrder(column === 'code' ? 'asc' : 'desc')
+    }
+  }
+
+  const SortIndicator = ({ column }: { column: string }) => {
+    if (sortBy !== column) {
+      return (
+        <ArrowUpDown className="ml-1 inline-block h-3 w-3 opacity-30 transition-opacity group-hover:opacity-100" />
+      )
+    }
+    return sortOrder === 'asc' ? (
+      <ArrowUp className="ml-1 inline-block h-3 w-3 text-blue-600 dark:text-blue-400" />
+    ) : (
+      <ArrowDown className="ml-1 inline-block h-3 w-3 text-blue-600 dark:text-blue-400" />
+    )
   }
 
   const handleToggle = useCallback(
@@ -71,7 +146,8 @@ export default function LicenseRequirementsClient({
           License Module Requirements
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Configure which EASA modules are required for each license category. Click cells to toggle.
+          Configure which EASA modules are required for each license category. Click cells to
+          toggle.
         </p>
       </div>
 
@@ -79,21 +155,25 @@ export default function LicenseRequirementsClient({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 dark:border-slate-800">
-              <th className="sticky left-0 z-10 bg-white px-4 py-3 text-left text-xs font-black tracking-widest text-slate-400 uppercase dark:bg-slate-900">
-                Module
+              <th
+                className="group sticky left-0 z-10 cursor-pointer bg-white px-4 py-3 text-left text-xs font-black tracking-widest text-slate-400 uppercase transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800"
+                onClick={() => handleSort('code')}
+              >
+                Module <SortIndicator column="code" />
               </th>
               {licenseCategories.map((lc) => (
                 <th
                   key={lc.id}
-                  className="px-3 py-3 text-center text-xs font-black tracking-wider text-slate-500"
+                  className="group cursor-pointer px-3 py-3 text-center text-xs font-black tracking-wider text-slate-500 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+                  onClick={() => handleSort(lc.id)}
                 >
-                  {lc.code}
+                  {lc.code} <SortIndicator column={lc.id} />
                 </th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {courses.map((course) => (
+            {sortedCourses.map((course) => (
               <tr
                 key={course.id}
                 className="border-b border-slate-50 transition-colors hover:bg-slate-50 dark:border-slate-800/50 dark:hover:bg-slate-800/30"

@@ -25,6 +25,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { formatCurrency } from '@/lib/currency'
 
 const getIsoCode = (emoji: string) => {
   if (!emoji) return 'un'
@@ -38,25 +39,31 @@ const getIsoCode = (emoji: string) => {
 
 const getPhonePlaceholder = (dialCode: string) => {
   const formats: Record<string, string> = {
-    '+1': '(XXX) XXX-XXXX', // US/Canada
-    '+44': 'XXXX XXXXXX', // UK
-    '+233': 'XX XXX XXXX', // Ghana
-    '+234': 'XXX XXX XXXX', // Nigeria
-    '+61': 'XXX XXX XXX', // Australia
-    '+91': 'XXXXX XXXXX', // India
-    '+49': 'XXXX XXXXXXX', // Germany
-    '+33': 'X XX XX XX XX', // France
-    '+27': 'XX XXX XXXX', // South Africa
-    '+254': 'XXX XXX XXX', // Kenya
-    '+971': 'XX XXX XXXX', // UAE
-    '+86': 'XXX XXXX XXXX', // China
+    '+1': '(XXX) XXX-XXXX',
+    '+44': 'XXXX XXXXXX',
+    '+233': 'XX XXX XXXX',
+    '+234': 'XXX XXX XXXX',
+    '+61': 'XXX XXX XXX',
+    '+91': 'XXXXX XXXXX',
+    '+49': 'XXXX XXXXXXX',
+    '+33': 'X XX XX XX XX',
+    '+27': 'XX XXX XXXX',
+    '+254': 'XXX XXX XXXX',
+    '+971': 'XX XXX XXXX',
+    '+86': 'XXX XXXX XXXX',
   }
   return formats[dialCode] || 'XXXXXXXXXX'
 }
 
 type RegistrationFormValues = z.infer<typeof registerSchema>
 
-export default function RegistrationForm() {
+export default function RegistrationForm({
+  currency = 'EUR',
+  fee = '350',
+}: {
+  currency?: string
+  fee?: string
+}) {
   const [loading, setLoading] = useState(false)
 
   const form = useForm<RegistrationFormValues>({
@@ -380,9 +387,9 @@ export default function RegistrationForm() {
             <span className="text-aerojet-blue mb-1 block font-bold">
               Registration Fee Required
             </span>
-            A non-refundable fee of <strong>GHS 350.00</strong> is required to process your
-            application. You will receive payment details and a link to upload your proof of payment
-            immediately after registering.
+            A non-refundable fee of <strong>{formatCurrency(fee, currency)}</strong> is required to
+            process your application. You will receive payment details and a link to upload your
+            proof of payment immediately after registering.
           </div>
         </div>
 

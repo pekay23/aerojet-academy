@@ -444,8 +444,7 @@ async function main() {
           yearFeeAmount: y.yearFeeAmount,
           seatConfirmationFee: y.seatConfirmationFee,
           firstPaymentAmount: y.firstPaymentAmount,
-          semester1StartDate: new Date(y.sem1),
-          semester2StartDate: new Date(y.sem2),
+          semesters: [{name: 'Semester 1', startDate: new Date(y.sem1).toISOString(), endDate: new Date(y.sem1).toISOString()}, {name: 'Semester 2', startDate: new Date(y.sem2).toISOString(), endDate: new Date(y.sem2).toISOString()}],
           isActive: true,
         },
       })
@@ -467,8 +466,7 @@ async function main() {
           yearFeeAmount: y.yearFeeAmount,
           seatConfirmationFee: y.seatConfirmationFee,
           firstPaymentAmount: y.firstPaymentAmount,
-          semester1StartDate: new Date(y.sem1),
-          semester2StartDate: new Date(y.sem2),
+          semesters: [{name: 'Semester 1', startDate: new Date(y.sem1).toISOString(), endDate: new Date(y.sem1).toISOString()}, {name: 'Semester 2', startDate: new Date(y.sem2).toISOString(), endDate: new Date(y.sem2).toISOString()}],
           isActive: true,
         },
       })
@@ -485,8 +483,7 @@ async function main() {
         yearFeeAmount: 9540,
         seatConfirmationFee: 3816,
         firstPaymentAmount: 2862,
-        semester1StartDate: new Date('2026-09-01'),
-        semester2StartDate: new Date('2027-02-01'),
+        semesters: [{name: 'Semester 1', startDate: new Date('2026-09-01').toISOString(), endDate: new Date('2026-09-01').toISOString()}, {name: 'Semester 2', startDate: new Date('2027-02-01').toISOString(), endDate: new Date('2027-02-01').toISOString()}],
         isActive: true,
       },
     })

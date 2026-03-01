@@ -12,7 +12,7 @@ export const PATCH = withErrorHandler(
     if (!componentId) return apiError('Component ID required')
 
     const body = await req.json()
-    const { name, duration, individualPrice, poolPrice } = body
+    const { code, name, type, duration, individualPrice, poolPrice } = body
 
     const component = await prisma.examComponent.findUnique({ where: { id: componentId } })
     if (!component) return apiNotFound('Exam component not found')
@@ -20,10 +20,14 @@ export const PATCH = withErrorHandler(
     const updated = await prisma.examComponent.update({
       where: { id: componentId },
       data: {
+        ...(code !== undefined && { code }),
         ...(name !== undefined && { name }),
+        ...(type !== undefined && { type }),
         ...(duration !== undefined && { duration: parseInt(duration) }),
-        ...(individualPrice !== undefined && { individualPrice }),
-        ...(poolPrice !== undefined && { poolPrice }),
+        ...(individualPrice !== undefined && {
+          individualPrice: individualPrice ? parseFloat(individualPrice) : null,
+        }),
+        ...(poolPrice !== undefined && { poolPrice: poolPrice ? parseFloat(poolPrice) : null }),
       },
     })
 

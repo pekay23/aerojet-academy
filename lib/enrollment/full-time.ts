@@ -29,6 +29,12 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
     Number(enrollment.programme.totalFee) / enrollment.programme.durationYears
   const totalAmount = Number(feeBase)
 
+  const semesters = (progYear.semesters as any[]) || []
+  const sem1Date =
+    semesters.length > 0 && semesters[0].startDate ? new Date(semesters[0].startDate) : new Date()
+  const sem2Date =
+    semesters.length > 1 && semesters[1].startDate ? new Date(semesters[1].startDate) : new Date()
+
   const milestoneData = []
 
   if (progYear.yearNumber === 1) {
@@ -47,7 +53,7 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
         enrollmentId,
         yearNumber: 1,
         milestoneType: 'SEM1_DUE',
-        dueDate: progYear.semester1StartDate,
+        dueDate: sem1Date,
         percentOfYearFee: 30,
         amountDue: totalAmount * 0.3,
         status: 'DUE',
@@ -56,7 +62,7 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
         enrollmentId,
         yearNumber: 1,
         milestoneType: 'SEM2_DUE',
-        dueDate: progYear.semester2StartDate,
+        dueDate: sem2Date,
         percentOfYearFee: 30,
         amountDue: totalAmount * 0.3,
         status: 'DUE',
@@ -69,7 +75,7 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
         enrollmentId,
         yearNumber: progYear.yearNumber,
         milestoneType: 'SEM1_DUE',
-        dueDate: progYear.semester1StartDate,
+        dueDate: sem1Date,
         percentOfYearFee: 50,
         amountDue: totalAmount * 0.5,
         status: 'DUE',
@@ -78,7 +84,7 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
         enrollmentId,
         yearNumber: progYear.yearNumber,
         milestoneType: 'SEM2_DUE',
-        dueDate: progYear.semester2StartDate,
+        dueDate: sem2Date,
         percentOfYearFee: 50,
         amountDue: totalAmount * 0.5,
         status: 'DUE',

@@ -4,6 +4,7 @@ import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 import { joinPoolSchema, validateBody } from '@/lib/validation/schemas'
 import { joinPool } from '@/lib/pools/operations'
 import { createAuditLog } from '@/lib/audit/logger'
+import prisma from '@/lib/prisma/client'
 
 export const POST = withErrorHandler(
   async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
@@ -25,8 +26,14 @@ export const POST = withErrorHandler(
       details: { poolId, module: validation.data.selectedModule },
     })
 
+    const settings = await prisma.systemSetting.findMany({
+      where: { key: 'course_currency' },
+    })
+    const currency = settings[0]?.value || 'EUR'
+    const symbol = currency === 'EUR' ? '€' : currency === 'GHS' ? 'GH₵' : '$'
+
     return apiCreated({
-      message: 'Successfully joined pool! €300 has been held in your wallet.',
+      message: `Successfully joined pool! ${symbol}300 has been held in your wallet.`,
       membershipId: membership.id,
     })
   }
