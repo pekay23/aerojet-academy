@@ -93,7 +93,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     })
 
     // 3. Send promotion email if promoting to STUDENT
-    if (newRole === 'STUDENT' && generatedStudentId) {
+    if (newRole === 'STUDENT' && generatedStudentId && user.email) {
       const firstName = user.profile?.firstName || 'Student'
       await sendStudentPromotionEmail(user.email, firstName, generatedStudentId)
     }
