@@ -37,8 +37,15 @@ export default function VerifyEmailPage() {
           }
 
           setStatus('verified')
+
+          if (data.registrationCode) {
+            setTimeout(() => {
+              router.push(`/register?success=true&code=${data.registrationCode}`)
+            }, 2000)
+          }
+
           setMessage(
-            'Your email has been verified successfully! You can now proceed with uploading your registration payment proof.'
+            'Your email has been verified successfully! Redirecting you to complete your registration payment...'
           )
         } else {
           // Post-approval: Verify and auto-login with credentials
@@ -105,10 +112,10 @@ export default function VerifyEmailPage() {
 
             <div className="mt-6">
               <Link
-                href="/login"
+                href="/register?success=true"
                 className="inline-flex items-center gap-2 rounded-xl bg-[#002a5c] px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#4c9ded]"
               >
-                Go to Login
+                Go to Payment Details
               </Link>
             </div>
           </>

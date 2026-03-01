@@ -108,7 +108,7 @@ export default function RegistrationForm({
 
       if (res.ok) {
         toast.success('Application submitted successfully!')
-        window.location.href = `/register?success=true&code=${responseData.data?.registrationCode}`
+        window.location.href = '/register?success=true'
       } else {
         toast.error(responseData.error || 'Registration failed')
       }
@@ -220,6 +220,7 @@ export default function RegistrationForm({
                 <FormControl>
                   <Input
                     type="date"
+                    max={new Date().toISOString().split('T')[0]}
                     {...field}
                     className="focus:ring-aerojet-blue block w-full rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
                   />

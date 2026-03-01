@@ -9,7 +9,7 @@ import {
 } from '@/lib/auth/helpers'
 import { registerSchema, validateBody } from '@/lib/validation/schemas'
 import { apiCreated, apiError, apiTooManyRequests, withErrorHandler } from '@/lib/api/response'
-import { sendRegistrationEmail, sendEmailVerificationEmail } from '@/lib/email/service'
+import { sendEmailVerificationEmail } from '@/lib/email/service'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { getRegistrationConfig } from '@/lib/settings'
 
@@ -84,9 +84,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return newUser
   })
 
-  // Send emails (non-blocking)
+  // Send verification email (non-blocking)
   sendEmailVerificationEmail(email, firstName, verifyToken).catch(console.error)
-  sendRegistrationEmail(email, firstName, registrationCode).catch(console.error)
 
   // Audit log
   await createAuditLog({
