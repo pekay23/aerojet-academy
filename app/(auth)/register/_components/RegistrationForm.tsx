@@ -142,7 +142,7 @@ export default function RegistrationForm({
                 <FormControl>
                   <Input
                     {...field}
-                    className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
+                    className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2"
                   />
                 </FormControl>
                 <FormMessage />
@@ -160,7 +160,7 @@ export default function RegistrationForm({
                   <Input
                     {...field}
                     placeholder="Optional"
-                    className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 placeholder:text-slate-400 focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
+                    className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 placeholder:text-slate-400 focus:ring-2"
                   />
                 </FormControl>
                 <FormMessage />
@@ -179,7 +179,7 @@ export default function RegistrationForm({
                 <FormControl>
                   <Input
                     {...field}
-                    className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
+                    className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2"
                   />
                 </FormControl>
                 <FormMessage />
@@ -201,7 +201,7 @@ export default function RegistrationForm({
                   <Input
                     type="email"
                     {...field}
-                    className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
+                    className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2"
                   />
                 </FormControl>
                 <FormMessage />
@@ -222,7 +222,7 @@ export default function RegistrationForm({
                     type="date"
                     max={new Date().toISOString().split('T')[0]}
                     {...field}
-                    className="focus:ring-aerojet-blue block w-full rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
+                    className="focus:ring-aerojet-blue block w-full rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2"
                   />
                 </FormControl>
                 <FormMessage />
@@ -241,7 +241,7 @@ export default function RegistrationForm({
                   </FormLabel>
                   <Select onValueChange={handleNationalityChange} value={field.value}>
                     <FormControl>
-                      <SelectTrigger className="focus:ring-aerojet-blue h-auto w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-slate-900 transition-all outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100">
+                      <SelectTrigger className="focus:ring-aerojet-blue h-auto w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-slate-900 transition-all outline-none focus:ring-2">
                         <SelectValue placeholder="Select Nationality" />
                       </SelectTrigger>
                     </FormControl>
@@ -295,7 +295,7 @@ export default function RegistrationForm({
                       }}
                     >
                       <FormControl>
-                        <SelectTrigger className="focus:ring-aerojet-blue h-[50px] w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-slate-900 transition-all outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 [&>span]:flex [&>span]:items-center [&>span]:gap-2">
+                        <SelectTrigger className="focus:ring-aerojet-blue h-[50px] w-full rounded-lg border border-gray-300 bg-white px-3 py-3 text-slate-900 transition-all outline-none focus:ring-2 [&>span]:flex [&>span]:items-center [&>span]:gap-2">
                           <SelectValue placeholder="Code" />
                         </SelectTrigger>
                       </FormControl>
@@ -338,7 +338,7 @@ export default function RegistrationForm({
                       type="tel"
                       placeholder={getPhonePlaceholder(form.watch('phoneCountryCode'))}
                       {...field}
-                      className="focus:ring-aerojet-blue h-[50px] w-full rounded-lg border-gray-300 bg-white px-4 text-slate-900 focus:ring-2 dark:bg-slate-900 dark:text-slate-100"
+                      className="focus:ring-aerojet-blue h-[50px] w-full rounded-lg border-gray-300 bg-white px-4 text-slate-900 focus:ring-2"
                     />
                   </FormControl>
                   <FormMessage />
@@ -384,7 +384,7 @@ export default function RegistrationForm({
         {/* Fee Notice */}
         <div className="flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4">
           <Info className="text-aerojet-blue mt-0.5 h-5 w-5 shrink-0" />
-          <div className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+          <div className="text-xs leading-relaxed text-slate-600">
             <span className="text-aerojet-blue mb-1 block font-bold">
               Registration Fee Required
             </span>
