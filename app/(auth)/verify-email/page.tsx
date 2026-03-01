@@ -59,7 +59,7 @@ export default function VerifyEmailPage() {
           }
 
           setStatus('success')
-          setMessage('Your email has been verified. Redirecting to your portal...')
+          setMessage('Login successful! Redirecting to your portal...')
 
           setTimeout(() => {
             router.push('/student')
@@ -81,7 +81,7 @@ export default function VerifyEmailPage() {
           <>
             <Loader2 className="mx-auto mb-6 h-12 w-12 animate-spin text-[#4c9ded]" />
             <h2 className="mb-3 text-2xl font-black tracking-tight text-slate-800 uppercase">
-              Verifying Email
+              {type === 'registration' ? 'Verifying Email' : 'Logging You In'}
             </h2>
             <p className="text-sm text-slate-500">Please wait...</p>
           </>
@@ -128,7 +128,7 @@ export default function VerifyEmailPage() {
               <CheckCircle2 className="h-8 w-8 text-green-500" />
             </div>
             <h2 className="mb-3 text-2xl font-black tracking-tight text-slate-800 uppercase">
-              Email Verified
+              Success
             </h2>
             <p className="mb-8 text-sm text-slate-500">{message}</p>
             <Loader2 className="mx-auto h-6 w-6 animate-spin text-slate-400" />
