@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import ChangePasswordForm from '@/components/shared/ChangePasswordForm'
 
 export const metadata: Metadata = { title: 'Change Password' }

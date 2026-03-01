@@ -80,13 +80,8 @@ export default function StaffSidebar({ userName, userRole, userImage, counts }: 
     { label: 'Resources', href: '/resources', icon: ScrollText },
     {
       label: 'Exams',
-      href: '/exams/events',
+      href: '/exams',
       icon: FileCheck,
-      children: [
-        { label: 'Exam Events', href: '/exams/events' },
-        { label: 'Bookings', href: '/exams/bookings' },
-        { label: 'Results', href: '/exams/results' },
-      ],
     },
 
     {

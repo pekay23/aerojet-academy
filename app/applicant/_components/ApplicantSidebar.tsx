@@ -1,11 +1,12 @@
 'use client'
 
 import DashboardSidebar from '@/components/layouts/DashboardSidebar'
-import { LayoutDashboard, ClipboardList, BookOpen, FileCheck, User } from 'lucide-react'
+import { LayoutDashboard, ClipboardList, BookOpen, FileCheck, User, Wallet } from 'lucide-react'
 
 const allLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { label: 'My Application', href: '/application/status', icon: ClipboardList },
+  { label: 'Wallet', href: '/wallet-top-up', icon: Wallet },
   { label: 'Browse Courses', href: '/courses', icon: BookOpen },
   { label: 'Exam Pools', href: '/exam-pools', icon: FileCheck },
   { label: 'Profile', href: '/profile', icon: User },
