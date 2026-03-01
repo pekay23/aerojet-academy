@@ -11,6 +11,9 @@ import {
   Info,
   Search,
   Filter,
+  CheckCircle2,
+  AlertTriangle,
+  Target,
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -32,12 +35,19 @@ export default async function WalletPage({
   const user = session.user
   const tab = tabParam || 'overview'
 
-  const [wallet, studentProfile, pendingTopups] = await Promise.all([
+  const [wallet, studentProfile, pendingTopups, ftEnrollment] = await Promise.all([
     prisma.wallet.findUnique({ where: { userId: user.id } }),
     prisma.studentProfile.findUnique({ where: { userId: user.id } }),
     prisma.payment.findMany({
       where: { userId: user.id, referenceType: 'WALLET_TOPUP', status: 'PENDING' },
       orderBy: { createdAt: 'desc' },
+    }),
+    prisma.fullTimeEnrollment.findFirst({
+      where: { studentId: user.id },
+      include: {
+        programme: true,
+        milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
+      },
     }),
   ])
 
@@ -225,6 +235,102 @@ export default async function WalletPage({
               </div>
             </div>
           </div>
+
+          {/* Payment Milestones for Full-Time Students */}
+          {ftEnrollment && ftEnrollment.milestones.length > 0 && (
+            <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+              <div className="mb-4 flex items-center gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 sm:h-10 sm:w-10 dark:bg-indigo-900/30 dark:text-indigo-400">
+                  <Target className="h-4 w-4 sm:h-5 sm:w-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 sm:text-base dark:text-slate-100">
+                    Payment Milestones
+                  </h3>
+                  <p className="text-xs text-slate-400">
+                    {ftEnrollment.programme.name} — Year {ftEnrollment.currentYearNumber}
+                  </p>
+                </div>
+              </div>
+
+              {/* Progress */}
+              {(() => {
+                const total = ftEnrollment.milestones.reduce((a, m) => a + Number(m.amountDue), 0)
+                const paid = ftEnrollment.milestones
+                  .filter((m) => m.status === 'PAID')
+                  .reduce((a, m) => a + Number(m.amountDue), 0)
+                const pct = total > 0 ? Math.round((paid / total) * 100) : 0
+                return (
+                  <div className="mb-4 space-y-1">
+                    <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                      <div
+                        className="h-full rounded-full bg-emerald-500 transition-all"
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between text-xs text-slate-400">
+                      <span>{pct}% paid</span>
+                      <span>
+                        {currencySymbol} {total.toLocaleString()} total
+                      </span>
+                    </div>
+                  </div>
+                )
+              })()}
+
+              <div className="space-y-2">
+                {ftEnrollment.milestones.map((m) => {
+                  const LABELS: Record<string, string> = {
+                    SEAT_CONFIRMATION: 'Seat Confirmation',
+                    SEM1_DUE: 'Before Semester 1',
+                    SEM2_DUE: 'Before Semester 2',
+                    FULL_YEAR: 'Full Year',
+                    FULL_COURSE: 'Full Programme',
+                  }
+                  return (
+                    <div
+                      key={m.id}
+                      className="flex items-center justify-between rounded-lg border border-slate-50 p-3 dark:border-slate-800"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        {m.status === 'PAID' ? (
+                          <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+                        ) : m.status === 'OVERDUE' ? (
+                          <AlertTriangle className="h-4 w-4 text-red-500" />
+                        ) : (
+                          <Clock className="h-4 w-4 text-amber-500" />
+                        )}
+                        <div>
+                          <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                            {LABELS[m.milestoneType] || m.milestoneType}
+                          </span>
+                          <span className="ml-2 text-xs text-slate-400">
+                            Year {m.yearNumber} — {Number(m.percentOfYearFee)}%
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                            m.status === 'PAID'
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                              : m.status === 'OVERDUE'
+                                ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                : 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+                          }`}
+                        >
+                          {m.status}
+                        </span>
+                        <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                          {currencySymbol} {Number(m.amountDue).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

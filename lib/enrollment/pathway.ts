@@ -105,7 +105,9 @@ export function canAccessClasses(enrollmentType: EnrollmentType) {
  * Payment reference types that trigger APPLICANT → STUDENT promotion per pathway.
  */
 const PROMOTION_TRIGGERS: Record<string, string[]> = {
-  FULL_TIME: ['SEAT_CONFIRMATION', 'YEAR_1_FULL', 'FULL_PROGRAMME'],
+  // SEAT_CONFIRMATION alone does NOT promote — applicant must also pay SEM1_DUE (30%).
+  // YEAR_1_FULL and FULL_PROGRAMME cover enough to promote immediately.
+  FULL_TIME: ['YEAR_1_FULL', 'FULL_PROGRAMME'],
   MODULAR: ['COURSE'],
   EXAM_ONLY: ['EXAM', 'WALLET_TOPUP'],
   SHORT_COURSE: ['COURSE'],
