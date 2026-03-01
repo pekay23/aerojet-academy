@@ -49,7 +49,7 @@ export default function PaymentInstructions({
             {/* Active/Done Line Segment */}
             {i > 0 && steps[i - 1].done && (
               <div
-                className={`absolute top-5 right-1/2 h-0.5 w-full translate-x-[-100%] ${step.active || step.done ? 'bg-green-400' : 'bg-gray-100'}`}
+                className={`absolute top-5 right-1/2 h-0.5 w-full -translate-x-full ${step.active || step.done ? 'bg-green-400' : 'bg-gray-100'}`}
                 style={{ width: '100.5%' }}
               />
             )}
