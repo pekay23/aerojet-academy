@@ -29,17 +29,23 @@ export default function BreadcrumbNav() {
 
   useEffect(() => {
     const fetchNames = async () => {
-      const idSegments = cleanSegments.filter((s) => s.length > 20 && !resolvedNames[s])
+      for (let i = 0; i < cleanSegments.length; i++) {
+        const segment = cleanSegments[i]
+        // Only attempt to resolved long IDs if they are preceded by 'courses'
+        // This prevents 404s when viewing users, staff, etc.
+        const prevSegment = i > 0 ? cleanSegments[i - 1] : null
+        const isCourseId = segment.length > 20 && prevSegment === 'courses'
 
-      for (const id of idSegments) {
-        try {
-          const res = await fetch(`/api/public/courses/${id}/name`)
-          if (res.ok) {
-            const data = await res.json()
-            setResolvedNames((prev) => ({ ...prev, [id]: data.name }))
+        if (isCourseId && !resolvedNames[segment]) {
+          try {
+            const res = await fetch(`/api/public/courses/${segment}/name`)
+            if (res.ok) {
+              const data = await res.json()
+              setResolvedNames((prev) => ({ ...prev, [segment]: data.name }))
+            }
+          } catch (e) {
+            console.error('Failed to fetch breadcrumb name:', e)
           }
-        } catch (e) {
-          console.error('Failed to fetch breadcrumb name:', e)
         }
       }
     }

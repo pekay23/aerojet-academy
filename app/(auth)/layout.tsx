@@ -40,7 +40,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
               ].map((stat) => (
                 <div
                   key={stat.label}
-                  className="flex-1 rounded-xl border border-white/10 bg-white/10 p-3 text-center backdrop-blur-md dark:bg-slate-900/20"
+                  className="flex-1 rounded-xl border border-white/10 bg-white/10 p-3 text-center backdrop-blur-md"
                 >
                   <span className="block text-lg font-black text-white">{stat.value}</span>
                   <span className="text-[9px] font-bold tracking-widest text-blue-200/50 uppercase">
@@ -53,9 +53,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* Right form panel */}
-        <div className="flex min-h-screen flex-1 flex-col bg-slate-50 dark:bg-slate-800/50">
+        <div className="flex min-h-screen flex-1 flex-col bg-slate-50">
           {/* Mobile header */}
-          <div className="flex items-center justify-between border-b border-slate-100 bg-white p-4 lg:hidden dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex items-center justify-between border-b border-slate-100 bg-white p-4 lg:hidden">
             <Link href="/">
               <Image
                 src="/images/logos/AATA_logo_hor_onWhite.webp"
@@ -67,7 +67,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </Link>
             <Link
               href="/"
-              className="text-xs font-bold text-slate-400 transition-colors hover:text-slate-600 dark:text-slate-400"
+              className="text-xs font-bold text-slate-400 transition-colors hover:text-slate-600"
             >
               ← Back to site
             </Link>
@@ -79,7 +79,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           </div>
 
           {/* Footer */}
-          <div className="border-t border-slate-100 p-6 text-center dark:border-slate-800">
+          <div className="border-t border-slate-100 p-6 text-center">
             <p className="text-[10px] tracking-widest text-slate-400 uppercase">
               &copy; {new Date().getFullYear()} Aerojet Aviation. All rights reserved.
             </p>
