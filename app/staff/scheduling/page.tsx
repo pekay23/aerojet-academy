@@ -29,11 +29,19 @@ export default async function SchedulingPage() {
   })
 
   // Fetch all available EASA Modules
-  const courses = await prisma.course.findMany({
-    where: { isActive: true },
-    include: { category: true },
-    orderBy: { code: 'asc' },
-  })
+  const courses = await prisma.course
+    .findMany({
+      where: { isActive: true },
+      include: { category: true },
+      orderBy: { code: 'asc' },
+    })
+    .then((data) =>
+      data.map((course) => ({
+        ...course,
+        price: Number(course.price),
+        duration: course.duration ?? 0,
+      }))
+    )
 
   return (
     <div className="container mx-auto py-8">

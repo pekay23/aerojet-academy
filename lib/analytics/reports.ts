@@ -107,3 +107,256 @@ export async function getAttendanceReport() {
 
   return { records, chartData }
 }
+
+// ============================================================================
+// FINANCE REPORTS
+// ============================================================================
+
+export async function getFinanceReportSummary() {
+  const now = new Date()
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const startOfYear = new Date(now.getFullYear(), 0, 1)
+
+  // Total revenue (all approved payments)
+  const totalRevenueResult = await prisma.payment.aggregate({
+    where: { status: 'APPROVED' },
+    _sum: { amount: true },
+    _count: { id: true },
+  })
+
+  // Revenue this month
+  const monthRevenueResult = await prisma.payment.aggregate({
+    where: {
+      status: 'APPROVED',
+      approvedAt: { gte: startOfMonth },
+    },
+    _sum: { amount: true },
+    _count: { id: true },
+  })
+
+  // Revenue this year
+  const yearRevenueResult = await prisma.payment.aggregate({
+    where: {
+      status: 'APPROVED',
+      approvedAt: { gte: startOfYear },
+    },
+    _sum: { amount: true },
+    _count: { id: true },
+  })
+
+  // Pending payments total
+  const pendingResult = await prisma.payment.aggregate({
+    where: { status: 'PENDING' },
+    _sum: { amount: true },
+    _count: { id: true },
+  })
+
+  // Rejected/Failed payments
+  const rejectedResult = await prisma.payment.aggregate({
+    where: { status: { in: ['REJECTED', 'FAILED'] } },
+    _sum: { amount: true },
+    _count: { id: true },
+  })
+
+  const totalRevenue = Number(totalRevenueResult._sum.amount || 0)
+  const totalCount = totalRevenueResult._count.id || 0
+  const avgTransactionValue = totalCount > 0 ? totalRevenue / totalCount : 0
+
+  return {
+    totalRevenue,
+    totalCount,
+    avgTransactionValue,
+    revenueThisMonth: Number(monthRevenueResult._sum.amount || 0),
+    monthCount: monthRevenueResult._count.id || 0,
+    revenueThisYear: Number(yearRevenueResult._sum.amount || 0),
+    yearCount: yearRevenueResult._count.id || 0,
+    pendingAmount: Number(pendingResult._sum.amount || 0),
+    pendingCount: pendingResult._count.id || 0,
+    rejectedAmount: Number(rejectedResult._sum.amount || 0),
+    rejectedCount: rejectedResult._count.id || 0,
+  }
+}
+
+export async function getRevenueByProgrammeType() {
+  // Full-time programme payments (via payment milestones)
+  const fullTimePayments = await prisma.paymentMilestone.findMany({
+    where: { status: 'PAID' },
+    include: {
+      enrollment: {
+        include: { programme: true },
+      },
+    },
+  })
+
+  const fullTimeRevenue = fullTimePayments.reduce((sum, pm) => sum + Number(pm.amountDue || 0), 0)
+
+  // Modular enrollments
+  const modularEnrollments = await prisma.modularEnrollment.findMany({
+    where: { status: { in: ['CONFIRMED', 'ACTIVE', 'COMPLETED'] } },
+  })
+  const modularRevenue = modularEnrollments.reduce((sum, e) => sum + Number(e.amountPaid || 0), 0)
+
+  // Pool/Exam payments (captured from memberships)
+  const poolPayments = await prisma.poolMembership.findMany({
+    where: { status: { in: ['CONFIRMED', 'COMPLETED'] } },
+  })
+  const poolRevenue = poolPayments.reduce((sum, pm) => sum + Number(pm.amountPaid || 0), 0)
+
+  // Individual exam bookings
+  const examBookings = await prisma.examBooking.findMany({
+    where: { status: 'COMPLETED' },
+  })
+  const examRevenue = examBookings.reduce((sum, eb) => sum + Number(eb.amountPaid || 0), 0)
+
+  // Registration fees
+  const registrationPayments = await prisma.payment.findMany({
+    where: {
+      status: 'APPROVED',
+      referenceType: 'REGISTRATION',
+    },
+  })
+  const registrationRevenue = registrationPayments.reduce(
+    (sum, p) => sum + Number(p.amount || 0),
+    0
+  )
+
+  // Wallet top-ups (via wallet transactions)
+  const walletTopups = await prisma.walletTransaction.findMany({
+    where: { type: 'TOP_UP' },
+  })
+  const topupRevenue = walletTopups.reduce((sum, t) => sum + Number(t.amount || 0), 0)
+
+  const total =
+    fullTimeRevenue +
+    modularRevenue +
+    poolRevenue +
+    examRevenue +
+    registrationRevenue +
+    topupRevenue
+
+  return [
+    {
+      name: 'Full-Time Programmes',
+      value: fullTimeRevenue,
+      percentage: total > 0 ? Math.round((fullTimeRevenue / total) * 100) : 0,
+    },
+    {
+      name: 'Modular Courses',
+      value: modularRevenue,
+      percentage: total > 0 ? Math.round((modularRevenue / total) * 100) : 0,
+    },
+    {
+      name: 'Exam Pools',
+      value: poolRevenue,
+      percentage: total > 0 ? Math.round((poolRevenue / total) * 100) : 0,
+    },
+    {
+      name: 'Individual Exams',
+      value: examRevenue,
+      percentage: total > 0 ? Math.round((examRevenue / total) * 100) : 0,
+    },
+    {
+      name: 'Registration Fees',
+      value: registrationRevenue,
+      percentage: total > 0 ? Math.round((registrationRevenue / total) * 100) : 0,
+    },
+    {
+      name: 'Wallet Top-ups',
+      value: topupRevenue,
+      percentage: total > 0 ? Math.round((topupRevenue / total) * 100) : 0,
+    },
+  ]
+}
+
+export async function getPaymentMethodBreakdown() {
+  const payments = await prisma.payment.findMany({
+    where: { status: 'APPROVED' },
+    select: { paymentMethod: true, amount: true },
+  })
+
+  const breakdown: Record<string, { count: number; amount: number }> = {}
+
+  for (const payment of payments) {
+    const method = payment.paymentMethod || 'UNKNOWN'
+    if (!breakdown[method]) {
+      breakdown[method] = { count: 0, amount: 0 }
+    }
+    breakdown[method].count++
+    breakdown[method].amount += Number(payment.amount)
+  }
+
+  const total = Object.values(breakdown).reduce((sum, b) => sum + b.amount, 0)
+
+  return Object.entries(breakdown).map(([method, data]) => ({
+    method,
+    count: data.count,
+    amount: data.amount,
+    percentage: total > 0 ? Math.round((data.amount / total) * 100) : 0,
+  }))
+}
+
+export async function getMonthlyRevenueData() {
+  const now = new Date()
+  const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1)
+  const monthNames = [
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
+  ]
+
+  // Initialize all 12 months with zero
+  const monthlyData: Record<string, { month: string; revenue: number; count: number }> = {}
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
+    monthlyData[key] = { month: key, revenue: 0, count: 0 }
+  }
+
+  // Get payments from last 12 months
+  const payments = await prisma.payment.findMany({
+    where: {
+      status: 'APPROVED',
+      approvedAt: { gte: twelveMonthsAgo },
+    },
+    select: { amount: true, approvedAt: true },
+  })
+
+  // Aggregate by month
+  for (const payment of payments) {
+    if (!payment.approvedAt) continue
+    const d = new Date(payment.approvedAt)
+    const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
+    if (monthlyData[key]) {
+      monthlyData[key].revenue += Number(payment.amount)
+      monthlyData[key].count++
+    }
+  }
+
+  return Object.values(monthlyData)
+}
+
+export async function getPaymentStatusBreakdown() {
+  const statusCounts = await prisma.payment.groupBy({
+    by: ['status'],
+    _count: { id: true },
+    _sum: { amount: true },
+  })
+
+  const total = statusCounts.reduce((sum: number, s) => sum + Number(s._sum.amount || 0), 0)
+
+  return statusCounts.map((s) => ({
+    status: s.status,
+    count: s._count.id,
+    amount: Number(s._sum.amount || 0),
+    percentage: total > 0 ? Math.round((Number(s._sum.amount || 0) / total) * 100) : 0,
+  }))
+}

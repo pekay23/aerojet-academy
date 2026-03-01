@@ -89,6 +89,25 @@ function PoolsSkeleton() {
 
 async function PoolList() {
   // Get open/upcoming exam pools
+  const settings = await prisma.systemSetting.findMany({
+    where: { key: 'course_currency' },
+  })
+  const currency = settings[0]?.value || 'EUR'
+
+  const getSymbol = () => {
+    switch (currency) {
+      case 'EUR':
+        return '€'
+      case 'GHS':
+        return 'GH₵'
+      case 'USD':
+        return '$'
+      default:
+        return '€'
+    }
+  }
+  const symbol = getSymbol()
+
   const pools = await prisma.examPool.findMany({
     where: {
       status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] },
@@ -195,7 +214,7 @@ async function PoolList() {
               <div>
                 <p className="text-[10px] text-slate-400">Exam Fee</p>
                 <p className="text-base font-black text-[#002a5c] dark:text-blue-400">
-                  EUR {Number(pool.seatPrice).toLocaleString()}
+                  {currency} {Number(pool.seatPrice).toLocaleString()}
                 </p>
               </div>
               <span className="text-xs text-slate-400 italic">Enrolled students only</span>

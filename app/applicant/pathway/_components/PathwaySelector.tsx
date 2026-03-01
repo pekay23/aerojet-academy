@@ -6,12 +6,26 @@ import { GraduationCap, FileSignature, Layers, AlertCircle, ArrowRight, X } from
 
 type PathwayType = 'FULL_TIME' | 'EXAM_ONLY' | 'MODULAR'
 
-export default function PathwaySelector() {
+export default function PathwaySelector({ currency = 'EUR' }: { currency?: string }) {
   const router = useRouter()
   const [selected, setSelected] = useState<PathwayType | null>(null)
   const [isConfirming, setIsConfirming] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  const getSymbol = () => {
+    switch (currency) {
+      case 'EUR':
+        return '€'
+      case 'GHS':
+        return 'GH₵'
+      case 'USD':
+        return '$'
+      default:
+        return '€'
+    }
+  }
+  const symbol = getSymbol()
 
   const pathways = [
     {
@@ -35,8 +49,8 @@ export default function PathwaySelector() {
       description: 'Book individual EASA module exams with 100% upfront payment.',
       features: [
         'Flexible schedule',
-        'Group Pooling discounts (€300 per seat)',
-        'Individual bookings (€520 per seat)',
+        `Group Pooling discounts (${symbol}300 per seat)`,
+        `Individual bookings (${symbol}520 per seat)`,
       ],
       color:
         'bg-purple-50 text-purple-700 border-purple-200 dark:bg-purple-900/10 dark:text-purple-400 dark:border-purple-800',
@@ -54,7 +68,7 @@ export default function PathwaySelector() {
       ],
       color:
         'bg-orange-50 text-orange-700 border-orange-200 dark:bg-orange-900/10 dark:text-orange-400 dark:border-orange-800',
-      activeColor: 'border-orange-600 ring-2 ring-orange-600 dark:border-orange-500',
+      activeColor: 'border-orange-600 ring-2 ring-orange-600 dark:border-orange-600',
     },
   ]
 

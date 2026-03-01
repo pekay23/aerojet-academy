@@ -1,0 +1,2912 @@
+[
+  {
+    "id": "TC001",
+    "title": "Register a new student account and see post-registration payment-proof instructions",
+    "description": "Verifies a user can complete registration and sees the confirmation message instructing payment proof upload.",
+    "category": "User Authentication (Login & Registration)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /register"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Register\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Fill \"First name\" with \"Test\""
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Last name\" with \"Student\""
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Email\" with \"testsprite.newuser+reg1@example.com\""
+      },
+      {
+        "type": "action",
+        "description": "Fill \"Password\" with \"ValidPass!234\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Create account\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"upload payment proof\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC002",
+    "title": "Registration validation: required fields block submission and show inline errors",
+    "description": "Verifies registration cannot be submitted with missing required fields and user sees validation messaging.",
+    "category": "User Authentication (Login & Registration)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /register"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Register\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click \"Create account\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"required\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/register\""
+      }
+    ]
+  },
+  {
+    "id": "TC003",
+    "title": "First-login wizard: select EXAM_ONLY and reach Student dashboard",
+    "description": "Verifies a first-time student must pick a pathway, confirms the irreversible warning, then is redirected to the Student dashboard with success feedback.",
+    "category": "Pathway Selection Wizard (First-login)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Choose your study pathway\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"EXAM_ONLY\" pathway option"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Confirm selection\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"This cannot be changed\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC004",
+    "title": "First-login wizard: confirm selection shows success and redirects to /student",
+    "description": "Verifies confirming a pathway produces a visible success notification and redirects the user to the Student dashboard.",
+    "category": "Pathway Selection Wizard (First-login)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"EXAM_ONLY\" pathway option"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Confirm selection\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Confirm\" button in the confirmation modal"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      }
+    ]
+  },
+  {
+    "id": "TC005",
+    "title": "First-login wizard: cannot proceed without selecting a pathway",
+    "description": "Verifies the wizard enforces selecting exactly one pathway before confirmation can proceed.",
+    "category": "Pathway Selection Wizard (First-login)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Choose your study pathway\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Confirm selection\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Select a pathway\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Choose your study pathway\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC006",
+    "title": "First-login wizard: attempt to visit public courses is blocked until pathway is chosen",
+    "description": "Verifies navigation to the public Courses page is blocked while the pathway is still required and shows the PATHWAY_REQUIRED message.",
+    "category": "Pathway Selection Wizard (First-login)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Choose your study pathway\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /courses"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Please choose your study pathway first\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"403\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC007",
+    "title": "First-login wizard: attempting to go to /student keeps user in wizard until selection is confirmed",
+    "description": "Verifies that even when trying to access the Student dashboard route, the user is kept in the pathway wizard until a pathway is selected and confirmed.",
+    "category": "Pathway Selection Wizard (First-login)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Choose your study pathway\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Navigate to /student"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Please choose your study pathway first\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Choose your study pathway\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC008",
+    "title": "Locked pathway: change attempt is blocked and shows admin override instructions",
+    "description": "Verifies that once a pathway is locked, the student cannot change it and is shown instructions indicating only admins can override.",
+    "category": "Pathway Selection Wizard (First-login)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the section showing the current study pathway"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Change\" button next to the study pathway"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Only an admin can change your pathway\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC009",
+    "title": "Locked pathway: change UI does not allow selecting a different pathway",
+    "description": "Verifies the UI prevents selecting a different pathway after lock (no selection controls or they are disabled) and the pathway remains unchanged.",
+    "category": "Pathway Selection Wizard (First-login)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the section showing the current study pathway"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Change\" button next to the study pathway"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Study pathway selection options\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC010",
+    "title": "Wizard: selecting a pathway can be canceled from irreversible confirmation modal",
+    "description": "Verifies the user can back out at the irreversible confirmation modal and remains on the wizard without completing selection.",
+    "category": "Pathway Selection Wizard (First-login)",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"EXAM_ONLY\" pathway option"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Confirm selection\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"This cannot be changed\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Cancel\" button in the confirmation modal"
+      }
+    ]
+  },
+  {
+    "id": "TC011",
+    "title": "Modular student sees individual EASA Modules in the public course catalog",
+    "description": "Verifies that a Modular-pathway student can view the full list of individual EASA Modules on the /courses catalog.",
+    "category": "Course Catalog Filtering (Pathway-aware UI)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the primary navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/courses\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Module 1\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC012",
+    "title": "Modular student can open a module detail and see tuition and exam options",
+    "description": "Verifies that a Modular-pathway student can select an individual module and see both tuition and exam purchase/booking options.",
+    "category": "Course Catalog Filtering (Pathway-aware UI)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the primary navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on the course card or list item labeled \"Module 1\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Tuition\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC013",
+    "title": "Full-Time student does not see individual EASA modules in the course catalog",
+    "description": "Verifies that a Full-Time-pathway student sees programme-level info and short courses, and that individual module entries are hidden.",
+    "category": "Course Catalog Filtering (Pathway-aware UI)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the primary navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/courses\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Skilled Short Courses\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC014",
+    "title": "Full-Time student is blocked when attempting to access an individual module purchase",
+    "description": "Verifies that when a Full-Time-pathway student attempts to select an individual module purchase, the UI shows a pathway-ineligible message (403 PATHWAY_NOT_ELIGIBLE).",
+    "category": "Course Catalog Filtering (Pathway-aware UI)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the primary navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on a course entry labeled \"Module 1\" (if visible via search or direct listing)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Not available for your pathway\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"PATHWAY_NOT_ELIGIBLE\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC015",
+    "title": "Exam-Only student sees Exam-Only versions of modules in the catalog",
+    "description": "Verifies that an Exam-Only-pathway student sees exam-only versions of EASA Modules 1–17 in the /courses catalog.",
+    "category": "Course Catalog Filtering (Pathway-aware UI)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the primary navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/courses\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Exam-Only\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC016",
+    "title": "Exam-Only student can open a module but is restricted to exam booking only",
+    "description": "Verifies that an Exam-Only-pathway student opening a module sees exam booking options and does not see tuition access options.",
+    "category": "Course Catalog Filtering (Pathway-aware UI)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the primary navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on a course entry that includes \"Exam-Only\" in its title"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Book Exam\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Tuition\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC017",
+    "title": "Exam-Only student is denied access when attempting to open study materials",
+    "description": "Verifies that an Exam-Only-pathway student attempting to access study materials receives an access denied message.",
+    "category": "Course Catalog Filtering (Pathway-aware UI)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the primary navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on a course entry that includes \"Exam-Only\" in its title"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Study Materials\" or \"Materials\" (if present on the module detail page)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Access denied\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC018",
+    "title": "Student submits a wallet top-up request and sees it marked as Pending",
+    "description": "Verifies a logged-in student can submit a top-up request and sees a visible Pending status/notification afterwards.",
+    "category": "Universal Wallet - Top-up, Reserve, Capture, Release",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the username/email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Wallet\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Top Up Wallet\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Top Up Wallet\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC019",
+    "title": "Student top-up form validates missing amount",
+    "description": "Verifies the top-up request cannot be submitted without entering an amount and shows a visible validation message.",
+    "category": "Universal Wallet - Top-up, Reserve, Capture, Release",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the username/email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Wallet\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Top Up Wallet\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Submit\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC020",
+    "title": "Student sees Pending top-up after submitting valid amount (without relying on file upload)",
+    "description": "Verifies that after entering a valid amount and submitting, the UI shows a visible Pending state/notification for the top-up request.",
+    "category": "Universal Wallet - Top-up, Reserve, Capture, Release",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the username/email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Wallet\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Top Up Wallet\""
+      },
+      {
+        "type": "action",
+        "description": "Type \"50\" into the amount field"
+      }
+    ]
+  },
+  {
+    "id": "TC021",
+    "title": "Student attempts to join a pool with insufficient wallet balance and sees error with top-up CTA",
+    "description": "Verifies that joining a pool triggers an insufficient balance error and shows a top-up call-to-action when available balance is too low.",
+    "category": "Universal Wallet - Top-up, Reserve, Capture, Release",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the username/email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Join Pool\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Insufficient wallet balance\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Top up\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC022",
+    "title": "Insufficient balance error top-up CTA takes student to wallet top-up entry point",
+    "description": "Verifies that from the insufficient balance error, clicking the top-up CTA brings the student to the wallet/top-up screen.",
+    "category": "Universal Wallet - Top-up, Reserve, Capture, Release",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the username/email field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Join Pool\""
+      },
+      {
+        "type": "action",
+        "description": "Click \"Top up\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Top Up Wallet\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC023",
+    "title": "EXAM_ONLY student joins a pool and sees Reserved confirmation",
+    "description": "Verifies an EXAM_ONLY student can join Pool A, funds are reserved, and the UI confirms Reserved membership.",
+    "category": "Exam Pool Join (Reserve → Capture)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/courses\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Pool A\" to open its details page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Join Pool\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Join Pool\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Select module\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Select an available module option from the module dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Confirm\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Reserved\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC024",
+    "title": "EXAM_ONLY student cannot join a pool without selecting a module",
+    "description": "Verifies module selection is required before confirming the pool join.",
+    "category": "Exam Pool Join (Reserve → Capture)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/courses\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Pool A\" to open its details page"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Join Pool\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Confirm\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Select module\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC025",
+    "title": "EXAM_ONLY student sees wallet reservation reflected after joining pool",
+    "description": "Verifies that after joining Pool A the UI shows a reserved/held amount and a reduced available balance indicator.",
+    "category": "Exam Pool Join (Reserve → Capture)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Pool A\" to open its details page"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Join Pool\" button"
+      },
+      {
+        "type": "action",
+        "description": "Select an available module option from the module dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Confirm\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Reserved\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Reserved\" is visible in the wallet or payment summary section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Available\" is visible in the wallet or payment summary section"
+      }
+    ]
+  },
+  {
+    "id": "TC026",
+    "title": "EXAM_ONLY student is prevented from joining the same pool twice",
+    "description": "Verifies the UI blocks or errors if a student tries to join Pool A again when already reserved/confirmed.",
+    "category": "Exam Pool Join (Reserve → Capture)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/courses\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Pool A\" to open its details page"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Join Pool\" button"
+      },
+      {
+        "type": "action",
+        "description": "Select an available module option from the module dropdown"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Confirm\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Reserved\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Join Pool\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"already\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC027",
+    "title": "FULL_TIME pathway student is blocked from pooling with eligibility error",
+    "description": "Verifies a non-EXAM_ONLY student attempting to join pooling sees the explicit eligibility error message.",
+    "category": "Exam Pool Join (Reserve → Capture)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"fulltime_student@example.invalid\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"WrongPassword123!\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Invalid\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Pool A\" to open its details page"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Join Pool\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Pooling is only available to EXAM_ONLY students\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC028",
+    "title": "Pool confirmation appears after pool reaches minimum and member becomes Confirmed",
+    "description": "Verifies that once Pool A becomes confirmed, the member sees a POOL CONFIRMED notification and membership status Confirmed.",
+    "category": "Exam Pool Join (Reserve → Capture)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Pool A\" to open its details page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Reserved\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Wait for text \"POOL CONFIRMED\" to appear"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"POOL CONFIRMED\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Confirmed\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC029",
+    "title": "EXAM_ONLY student sees Join Pool disabled when pool is already confirmed",
+    "description": "Verifies the UI reflects confirmed pool state by removing or disabling joining actions.",
+    "category": "Exam Pool Join (Reserve → Capture)",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Pool A\" to open its details page"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Confirmed\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Join Pool\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC030",
+    "title": "EXAM_ONLY student books an individual exam seat and sees confirmed booking",
+    "description": "Verifies an eligible EXAM_ONLY student can book an Individual Exam Seat and sees a confirmed booking after wallet capture.",
+    "category": "Individual Exam Booking (Capture)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on module \"M1\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Individual Exam Seat\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC031",
+    "title": "Complete booking flow from Individual Exam Seat option to visible CONFIRMED status",
+    "description": "Verifies the booking action completes and the UI reflects a confirmed booking state after purchase.",
+    "category": "Individual Exam Booking (Capture)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on module \"M1\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Individual Exam Seat\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Book\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"CONFIRMED\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC032",
+    "title": "Booking shows captured amount (e.g., €520) in the confirmation or receipt area",
+    "description": "Verifies the UI shows the expected captured amount for an individual exam booking.",
+    "category": "Individual Exam Booking (Capture)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on module \"M1\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Book\" button for \"Individual Exam Seat\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"€520\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC033",
+    "title": "Insufficient wallet balance prevents booking and shows top-up link/message",
+    "description": "Verifies that when wallet funds are insufficient, the user sees an 'Insufficient wallet balance' message and booking is not confirmed.",
+    "category": "Individual Exam Booking (Capture)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on module \"M1\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Book\" button for \"Individual Exam Seat\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Insufficient wallet balance\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC034",
+    "title": "Insufficient balance flow provides a visible top-up call-to-action",
+    "description": "Verifies that the insufficient balance state includes a visible top-up link or button for the user to add funds.",
+    "category": "Individual Exam Booking (Capture)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on module \"M1\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Book\" button for \"Individual Exam Seat\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Top up\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC035",
+    "title": "FULL_TIME student blocked by pathway rules sees a 403/not permitted message",
+    "description": "Verifies a pathway-restricted user is prevented from booking and sees a clear 'not permitted' style message.",
+    "category": "Individual Exam Booking (Capture)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on module \"M1\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Book\" button for \"Individual Exam Seat\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"not permitted\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC036",
+    "title": "Blocked pathway booking does not show CONFIRMED status after attempting to book",
+    "description": "Verifies that a pathway-blocked attempt does not result in a confirmed booking state on the UI.",
+    "category": "Individual Exam Booking (Capture)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on module \"M1\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Book\" button for \"Individual Exam Seat\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"CONFIRMED\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC037",
+    "title": "Booking action displays a visible completion state (success message or booking confirmation section)",
+    "description": "Verifies the user receives a visible success indicator after a successful booking submission.",
+    "category": "Individual Exam Booking (Capture)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Log in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Courses\" in the main navigation"
+      },
+      {
+        "type": "action",
+        "description": "Click on module \"M1\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Book\" button for \"Individual Exam Seat\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Booking confirmed\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC038",
+    "title": "MODULAR student purchases Foundation 4-Pack successfully",
+    "description": "Verifies a MODULAR student can purchase the Foundation 4-Pack and sees confirmed access granted after wallet capture.",
+    "category": "Modular Package Purchase (Capture & Grant Access)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/courses"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Foundation 4-Pack\" in the courses list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Foundation 4-Pack\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Purchase\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Enrollment confirmed\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Access granted\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC039",
+    "title": "EXAM_ONLY student blocked from purchasing a modular package",
+    "description": "Verifies an EXAM_ONLY student cannot purchase a modular package and sees the pathway eligibility message.",
+    "category": "Modular Package Purchase (Capture & Grant Access)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/courses"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Foundation 4-Pack\" in the courses list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Foundation 4-Pack\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Purchase\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Modular packages require MODULAR pathway\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC040",
+    "title": "MODULAR student sees insufficient wallet balance error on purchase",
+    "description": "Verifies a MODULAR student with insufficient wallet balance is prevented from purchasing and sees top-up guidance.",
+    "category": "Modular Package Purchase (Capture & Grant Access)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/courses"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Foundation 4-Pack\" in the courses list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Foundation 4-Pack\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Purchase\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Insufficient wallet balance\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"top up\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC041",
+    "title": "Purchase button disabled or blocked while purchase is processing",
+    "description": "Verifies the UI prevents duplicate submission by showing an in-progress state after clicking Purchase.",
+    "category": "Modular Package Purchase (Capture & Grant Access)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/courses"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Foundation 4-Pack\" in the courses list"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Purchase\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Processing\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Purchase\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC042",
+    "title": "MODULAR student can access materials after confirmed purchase",
+    "description": "Verifies that after a successful modular package purchase, the student can see learning materials as available/unlocked from the student dashboard area.",
+    "category": "Modular Package Purchase (Capture & Grant Access)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Scroll to the \"My Enrollments\" section"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Foundation 4-Pack\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Foundation 4-Pack\" in the enrollments list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Materials\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Locked\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC043",
+    "title": "Courses page shows clear call-to-action for modular package purchase",
+    "description": "Verifies the Foundation 4-Pack listing exposes a visible Purchase call-to-action from the courses catalog.",
+    "category": "Modular Package Purchase (Capture & Grant Access)",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Courses\" link in the main navigation"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/courses"
+      },
+      {
+        "type": "action",
+        "description": "Scroll to \"Foundation 4-Pack\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Purchase\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC044",
+    "title": "Activate full-time enrollment by paying Seat Confirmation milestone from wallet",
+    "description": "Verifies that paying the Seat Confirmation milestone from sufficient wallet balance marks it PAID and activates the enrollment.",
+    "category": "Full-Time Enrollment & Milestone Payments (Generate → Pay → Activate)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Seat Confirmation\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Pay Seat Confirmation\" button/link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"ACTIVE\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC045",
+    "title": "Milestones are visible on student dashboard after full-time enrollment is generated",
+    "description": "Verifies the student dashboard displays milestone list including Seat Confirmation after an enrollment exists.",
+    "category": "Full-Time Enrollment & Milestone Payments (Generate → Pay → Activate)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Milestones\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Seat Confirmation\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"DUE\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC046",
+    "title": "Insufficient wallet balance prevents milestone payment and shows top-up option",
+    "description": "Verifies that attempting to pay a milestone with insufficient wallet balance shows an error and does not mark the milestone paid.",
+    "category": "Full-Time Enrollment & Milestone Payments (Generate → Pay → Activate)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Pay\" button for a due milestone"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Insufficient wallet balance\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Top up\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC047",
+    "title": "Milestone remains DUE after insufficient balance attempt",
+    "description": "Verifies that after an insufficient balance error, the milestone status remains DUE (not PAID).",
+    "category": "Full-Time Enrollment & Milestone Payments (Generate → Pay → Activate)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Pay\" button for the \"Seat Confirmation\" milestone"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Insufficient wallet balance\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"DUE\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC048",
+    "title": "Pathway not eligible: full-time enrollment actions are blocked for non-full-time students",
+    "description": "Verifies that a student without the FULL_TIME pathway is prevented from starting/creating a full-time enrollment and sees an eligibility error.",
+    "category": "Full-Time Enrollment & Milestone Payments (Generate → Pay → Activate)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Full-Time Enrollment\" or \"Enroll Full-Time\" call-to-action (if visible)"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"PATHWAY_NOT_ELIGIBLE\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"403\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC049",
+    "title": "Pay Seat Confirmation marks milestone as PAID on success",
+    "description": "Verifies that after a successful Seat Confirmation payment, the milestone shows PAID status in the UI.",
+    "category": "Full-Time Enrollment & Milestone Payments (Generate → Pay → Activate)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Pay Seat Confirmation\" button/link"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Payment successful\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"PAID\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC050",
+    "title": "Enrollment stays pending until Seat Confirmation is paid",
+    "description": "Verifies that when Seat Confirmation is still due, enrollment status remains pending (not active).",
+    "category": "Full-Time Enrollment & Milestone Payments (Generate → Pay → Activate)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"PENDING_CONFIRMATION\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Seat Confirmation\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"DUE\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC051",
+    "title": "Book an eligible tuition run and see confirmation",
+    "description": "Verifies a student can book an eligible tuition run and sees a confirmed booking state.",
+    "category": "Tuition Session Booking & Minimum Class Size",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Tuition\" or \"Tuition sessions\" section from the student dashboard"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"M1 Revision\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"M1 Revision\" run"
+      }
+    ]
+  },
+  {
+    "id": "TC052",
+    "title": "Confirm booking details are shown as CONFIRMED after booking",
+    "description": "Verifies the UI reflects a successful booking by showing a confirmed status on the booking details view.",
+    "category": "Tuition Session Booking & Minimum Class Size",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Tuition\" or \"Tuition sessions\" section from the student dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"M1 Revision\" run"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Book\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC053",
+    "title": "Booking success message is displayed after booking a tuition run",
+    "description": "Verifies that a visible success confirmation message appears after booking is completed.",
+    "category": "Tuition Session Booking & Minimum Class Size",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Tuition\" or \"Tuition sessions\" section from the student dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"M1 Revision\" run"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify element \"Book\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC054",
+    "title": "Attempt to book a FULL tuition run shows 'Tuition session is full'",
+    "description": "Verifies the UI blocks booking when a run is full and shows the expected error message.",
+    "category": "Tuition Session Booking & Minimum Class Size",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Tuition\" or \"Tuition sessions\" section from the student dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Click a tuition run that is labeled \"Full\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Book\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC055",
+    "title": "Attempt to book a CLOSED/NOT OPEN tuition run shows 'Not open'",
+    "description": "Verifies the UI blocks booking when a run is not open and shows the expected message.",
+    "category": "Tuition Session Booking & Minimum Class Size",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Tuition\" or \"Tuition sessions\" section from the student dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Click a tuition run that is labeled \"Closed\" or \"Not open\""
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Book\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC056",
+    "title": "Full run booking attempt does not create a confirmed booking state",
+    "description": "Verifies that after attempting to book a full run, the UI does not show a confirmed booking status for that run.",
+    "category": "Tuition Session Booking & Minimum Class Size",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Tuition\" or \"Tuition sessions\" section from the student dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Click a tuition run that is labeled \"Full\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"CONFIRMED\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC057",
+    "title": "Not open run booking attempt does not create a confirmed booking state",
+    "description": "Verifies that after attempting to book a closed/not open run, the UI does not show a confirmed booking status for that run.",
+    "category": "Tuition Session Booking & Minimum Class Size",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Tuition\" or \"Tuition sessions\" section from the student dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Click a tuition run that is labeled \"Closed\" or \"Not open\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"CONFIRMED\" is not visible"
+      }
+    ]
+  },
+  {
+    "id": "TC058",
+    "title": "Wallet/payment requirement messaging is visible on the booking screen",
+    "description": "Verifies the booking screen indicates upfront payment (100% upfront) so the user understands funds are captured immediately.",
+    "category": "Tuition Session Booking & Minimum Class Size",
+    "priority": "Low",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/student\""
+      },
+      {
+        "type": "action",
+        "description": "Click on the \"Tuition\" or \"Tuition sessions\" section from the student dashboard"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"M1 Revision\" run"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"100% upfront\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC059",
+    "title": "Staff login and view administrative overview",
+    "description": "Verifies a staff user can log in and see the staff dashboard overview with administrative sections visible.",
+    "category": "Staff / Admin Management (Approvals, Overrides & Audit)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify URL contains \"/staff\""
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Staff\" is visible"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Pending\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC060",
+    "title": "Approve a pending top-up and post top-up successfully",
+    "description": "Verifies a staff user can open a pending top-up, review proof details, and post the top-up to credit the wallet.",
+    "category": "Staff / Admin Management (Approvals, Overrides & Audit)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Pending top-ups\" (or the pending payments section)"
+      },
+      {
+        "type": "action",
+        "description": "Click on the first pending top-up item in the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Payment proof\" is visible"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Post Top-up\" button"
+      }
+    ]
+  },
+  {
+    "id": "TC061",
+    "title": "Posting a top-up shows a success confirmation",
+    "description": "Verifies that after posting a top-up, the UI shows a visible success state indicating the top-up was processed.",
+    "category": "Staff / Admin Management (Approvals, Overrides & Audit)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Pending top-ups\" (or the pending payments section)"
+      },
+      {
+        "type": "action",
+        "description": "Click on the first pending top-up item in the list"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Post Top-up\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Top-up posted\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC062",
+    "title": "Open a student record from staff dashboard",
+    "description": "Verifies staff can locate and open a student record from the staff area to access administrative actions like pathway changes.",
+    "category": "Staff / Admin Management (Approvals, Overrides & Audit)",
+    "priority": "Medium",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Students\" (or \"Student Records\")"
+      },
+      {
+        "type": "action",
+        "description": "Type \"Test\" into the student search field"
+      },
+      {
+        "type": "action",
+        "description": "Click the first student result in the list"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Student\" is visible"
+      }
+    ]
+  },
+  {
+    "id": "TC063",
+    "title": "Change student pathway using MIGRATE_CANCEL_AND_CREDIT mode (happy path UI submission)",
+    "description": "Verifies staff can submit a pathway change using migration mode and see a visible confirmation of the update.",
+    "category": "Staff / Admin Management (Approvals, Overrides & Audit)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Students\" (or \"Student Records\")"
+      },
+      {
+        "type": "action",
+        "description": "Click the first student result in the list"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Change Pathway\" button"
+      },
+      {
+        "type": "action",
+        "description": "Select \"MIGRATE_CANCEL_AND_CREDIT\" from the mode dropdown"
+      }
+    ]
+  },
+  {
+    "id": "TC064",
+    "title": "Complete pathway change submission with new pathway value",
+    "description": "Verifies staff can enter a new pathway value, submit the change, and see a success message.",
+    "category": "Staff / Admin Management (Approvals, Overrides & Audit)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Students\" (or \"Student Records\")"
+      },
+      {
+        "type": "action",
+        "description": "Click the first student result in the list"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Change Pathway\" button"
+      },
+      {
+        "type": "action",
+        "description": "Type \"New Pathway\" into the new pathway field"
+      }
+    ]
+  },
+  {
+    "id": "TC065",
+    "title": "BLOCK_IF_BOOKINGS mode shows error when student has active bookings",
+    "description": "Verifies that attempting a pathway override with BLOCK_IF_BOOKINGS shows the expected visible error message when active bookings exist.",
+    "category": "Staff / Admin Management (Approvals, Overrides & Audit)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Students\" (or \"Student Records\")"
+      },
+      {
+        "type": "action",
+        "description": "Click the first student result in the list"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Change Pathway\" button"
+      },
+      {
+        "type": "action",
+        "description": "Select \"BLOCK_IF_BOOKINGS\" from the mode dropdown"
+      }
+    ]
+  },
+  {
+    "id": "TC066",
+    "title": "Submit BLOCK_IF_BOOKINGS override and verify required-steps error message",
+    "description": "Verifies that submitting a BLOCK_IF_BOOKINGS override displays the specific guidance error about active bookings and migration mode.",
+    "category": "Staff / Admin Management (Approvals, Overrides & Audit)",
+    "priority": "High",
+    "steps": [
+      {
+        "type": "action",
+        "description": "Navigate to /login"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_USER}}\" into the email/username field"
+      },
+      {
+        "type": "action",
+        "description": "Type \"{{LOGIN_PASSWORD}}\" into the password field"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Sign in\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click on \"Students\" (or \"Student Records\")"
+      },
+      {
+        "type": "action",
+        "description": "Click the first student result in the list"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Change Pathway\" button"
+      },
+      {
+        "type": "action",
+        "description": "Click the \"Submit\" button"
+      },
+      {
+        "type": "assertion",
+        "description": "Verify text \"Student has active bookings. Use migration mode.\" is visible"
+      }
+    ]
+  }
+]

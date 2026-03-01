@@ -21,6 +21,12 @@ async function getDashboardData() {
   const now = new Date()
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
+  const settings = await prisma.systemSetting.findMany({
+    where: { key: 'course_currency' },
+  })
+  const currency = settings[0]?.value || 'EUR'
+  const currSymbol = currency === 'EUR' ? '€' : currency === 'GHS' ? 'GH₵' : '$'
+
   const [userStatusCounts, pendingPayments, recentPendingPayments, activePool, approvedPayments] =
     await Promise.all([
       prisma.user.groupBy({
@@ -117,6 +123,8 @@ async function getDashboardData() {
     recentPendingPayments,
     activePool,
     revenueData,
+    currency,
+    currSymbol,
   }
 }
 
@@ -220,13 +228,13 @@ export default async function StaffDashboardPage() {
                 Course Revenue Overview
               </h2>
               <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
-                Approved training payments (EUR) — last 6 months
+                Approved training payments ({data.currency}) — last 6 months
               </p>
             </div>
             <TrendingUp className="text-aerojet-sky h-5 w-5" />
           </div>
           {hasRevenue ? (
-            <RevenueChart data={data.revenueData} currency="€" />
+            <RevenueChart data={data.revenueData} currency={data.currSymbol} />
           ) : (
             <div className="flex h-64 flex-col items-center justify-center text-center">
               <TrendingUp className="mb-3 h-10 w-10 text-slate-200" />

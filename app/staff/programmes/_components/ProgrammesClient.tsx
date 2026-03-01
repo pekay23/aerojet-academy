@@ -20,14 +20,19 @@ import {
   Calendar,
 } from 'lucide-react'
 
+interface ProgrammeSemester {
+  name: string
+  startDate: string
+  endDate: string
+}
+
 interface ProgrammeYear {
   id: string
   yearNumber: number
   yearFeeAmount: string | null
   seatConfirmationFee: string
   firstPaymentAmount: string
-  semester1StartDate: string
-  semester2StartDate: string
+  semesters: ProgrammeSemester[]
   isActive: boolean
 }
 
@@ -59,14 +64,17 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
   const [totalFee, setTotalFee] = useState('')
   const [description, setDescription] = useState('')
 
-  // Add year form
+  // Add/Edit year form
   const [yearProgrammeId, setYearProgrammeId] = useState('')
+  const [editingYearId, setEditingYearId] = useState<string | null>(null)
   const [yearNumber, setYearNumber] = useState('')
   const [yearFee, setYearFee] = useState('')
   const [seatFee, setSeatFee] = useState('1500')
   const [firstPayment, setFirstPayment] = useState('3500')
-  const [sem1Start, setSem1Start] = useState('')
-  const [sem2Start, setSem2Start] = useState('')
+  const [semesters, setSemesters] = useState<ProgrammeSemester[]>([
+    { name: 'Semester 1', startDate: '', endDate: '' },
+    { name: 'Semester 2', startDate: '', endDate: '' },
+  ])
 
   const handleCreateProgramme = async () => {
     if (!code || !name || !totalFee) {
@@ -97,6 +105,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
   }
 
   const openAddYear = (programmeId: string) => {
+    setEditingYearId(null)
     setYearProgrammeId(programmeId)
     const prog = programmes.find((p) => p.id === programmeId)
     const nextYear = (prog?.programmeYears.length || 0) + 1
@@ -104,34 +113,63 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
     setYearFee('')
     setSeatFee('1500')
     setFirstPayment('3500')
-    setSem1Start('')
-    setSem2Start('')
+    setSemesters([
+      { name: 'Semester 1', startDate: '', endDate: '' },
+      { name: 'Semester 2', startDate: '', endDate: '' },
+    ])
     setError('')
     setYearOpen(true)
   }
 
-  const handleAddYear = async () => {
-    if (!sem1Start || !sem2Start) {
-      setError('Semester start dates are required')
+  const openEditYear = (programmeId: string, year: ProgrammeYear) => {
+    setEditingYearId(year.id)
+    setYearProgrammeId(programmeId)
+    setYearNumber(String(year.yearNumber))
+    setYearFee(year.yearFeeAmount || '')
+    setSeatFee(year.seatConfirmationFee)
+    setFirstPayment(year.firstPaymentAmount)
+    setSemesters(
+      year.semesters && year.semesters.length > 0
+        ? [...year.semesters]
+        : [
+            { name: 'Semester 1', startDate: '', endDate: '' },
+            { name: 'Semester 2', startDate: '', endDate: '' },
+          ]
+    )
+    setError('')
+    setYearOpen(true)
+  }
+
+  const handleSaveYear = async () => {
+    if (semesters.some((s) => !s.startDate || !s.endDate)) {
+      setError('All semesters must have start and end dates')
       return
     }
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/staff/programmes/${yearProgrammeId}/years`, {
-        method: 'POST',
+      const isEditing = !!editingYearId
+      const url = isEditing
+        ? `/api/staff/programmes/${yearProgrammeId}/years`
+        : `/api/staff/programmes/${yearProgrammeId}/years`
+
+      const method = isEditing ? 'PATCH' : 'POST'
+
+      const body = {
+        ...(isEditing ? { yearId: editingYearId } : { yearNumber }),
+        yearFeeAmount: yearFee || null,
+        seatConfirmationFee: seatFee,
+        firstPaymentAmount: firstPayment,
+        semesters: semesters,
+      }
+
+      const res = await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          yearNumber,
-          yearFeeAmount: yearFee || null,
-          seatConfirmationFee: seatFee,
-          firstPaymentAmount: firstPayment,
-          semester1StartDate: sem1Start,
-          semester2StartDate: sem2Start,
-        }),
+        body: JSON.stringify(body),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Failed to add year')
+      if (!res.ok) throw new Error(data.error || 'Failed to save year')
       setYearOpen(false)
       router.refresh()
     } catch (err: any) {
@@ -139,6 +177,23 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleAddSemester = () => {
+    setSemesters([
+      ...semesters,
+      { name: `Semester ${semesters.length + 1}`, startDate: '', endDate: '' },
+    ])
+  }
+
+  const handleRemoveSemester = (index: number) => {
+    setSemesters(semesters.filter((_, i) => i !== index))
+  }
+
+  const handleSemesterChange = (index: number, field: keyof ProgrammeSemester, value: string) => {
+    const newSemesters = [...semesters]
+    newSemesters[index] = { ...newSemesters[index], [field]: value }
+    setSemesters(newSemesters)
   }
 
   return (
@@ -174,7 +229,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-600">Duration (years)</label>
+                  <label className="mb-1 block text-xs font-bold text-slate-600">
+                    Duration (years)
+                  </label>
                   <input
                     type="number"
                     value={durationYears}
@@ -193,7 +250,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Total Fee (EUR)</label>
+                <label className="mb-1 block text-xs font-bold text-slate-600">Total Fee</label>
                 <input
                   type="number"
                   value={totalFee}
@@ -250,14 +307,18 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-slate-400">{prog.code}</span>
+                        <span className="font-mono text-xs font-bold text-slate-400">
+                          {prog.code}
+                        </span>
                         {!prog.isActive && (
                           <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
                             Inactive
                           </span>
                         )}
                       </div>
-                      <p className="text-lg font-black text-slate-800 dark:text-white">{prog.name}</p>
+                      <p className="text-lg font-black text-slate-800 dark:text-white">
+                        {prog.name}
+                      </p>
                       <p className="text-xs text-slate-500">
                         {prog.durationYears} year{prog.durationYears !== 1 ? 's' : ''} &middot;{' '}
                         {prog.currency} {Number(prog.totalFee).toLocaleString()} &middot;{' '}
@@ -273,7 +334,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                 </button>
 
                 {isExpanded && (
-                  <div className="border-t border-slate-100 px-6 pb-6 pt-4 dark:border-slate-800">
+                  <div className="border-t border-slate-100 px-6 pt-4 pb-6 dark:border-slate-800">
                     {prog.description && (
                       <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
                         {prog.description}
@@ -312,19 +373,47 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                                   Year {y.yearNumber}
                                 </p>
                                 <p className="text-xs text-slate-500">
-                                  Sem 1: {new Date(y.semester1StartDate).toLocaleDateString()} &middot;
-                                  Sem 2: {new Date(y.semester2StartDate).toLocaleDateString()}
+                                  {y.semesters && y.semesters.length > 0
+                                    ? y.semesters.map((sem, i) => (
+                                        <span key={i}>
+                                          {sem.name}:{' '}
+                                          {sem.startDate
+                                            ? new Date(sem.startDate).toLocaleDateString()
+                                            : ''}
+                                          {i < y.semesters.length - 1 ? ' · ' : ''}
+                                        </span>
+                                      ))
+                                    : 'No semesters defined'}
                                 </p>
                               </div>
                             </div>
-                            <div className="text-right text-xs text-slate-500">
-                              <p>
-                                Fee: &euro;{y.yearFeeAmount ? Number(y.yearFeeAmount).toLocaleString() : 'Auto'}
-                              </p>
-                              <p>
-                                Seat: &euro;{Number(y.seatConfirmationFee).toLocaleString()} &middot;
-                                1st: &euro;{Number(y.firstPaymentAmount).toLocaleString()}
-                              </p>
+                            <div className="flex flex-col items-end gap-2 text-right text-xs text-slate-500">
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-6 px-2 text-[10px]"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    openEditYear(prog.id, y)
+                                  }}
+                                >
+                                  Edit Year
+                                </Button>
+                              </div>
+                              <div>
+                                <p>
+                                  Fee: {prog.currency}{' '}
+                                  {y.yearFeeAmount
+                                    ? Number(y.yearFeeAmount).toLocaleString()
+                                    : 'Auto'}
+                                </p>
+                                <p>
+                                  Seat: {prog.currency}{' '}
+                                  {Number(y.seatConfirmationFee).toLocaleString()} &middot; 1st:{' '}
+                                  {prog.currency} {Number(y.firstPaymentAmount).toLocaleString()}
+                                </p>
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -338,11 +427,13 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
         )}
       </div>
 
-      {/* Add Year Dialog */}
+      {/* Add/Edit Year Dialog */}
       <Dialog open={yearOpen} onOpenChange={setYearOpen}>
         <DialogContent className="sm:max-w-[480px]">
           <DialogHeader>
-            <DialogTitle>Add Programme Year</DialogTitle>
+            <DialogTitle>
+              {editingYearId ? 'Edit Programme Year' : 'Add Programme Year'}
+            </DialogTitle>
           </DialogHeader>
           <div className="mt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
@@ -352,11 +443,14 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                   type="number"
                   value={yearNumber}
                   onChange={(e) => setYearNumber(e.target.value)}
-                  className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                  disabled={!!editingYearId}
+                  className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Year Fee (optional)</label>
+                <label className="mb-1 block text-xs font-bold text-slate-600">
+                  Year Fee (optional)
+                </label>
                 <input
                   type="number"
                   value={yearFee}
@@ -368,7 +462,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Seat Confirmation Fee</label>
+                <label className="mb-1 block text-xs font-bold text-slate-600">
+                  Seat Confirmation Fee
+                </label>
                 <input
                   type="number"
                   value={seatFee}
@@ -386,24 +482,60 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Semester 1 Start</label>
-                <input
-                  type="date"
-                  value={sem1Start}
-                  onChange={(e) => setSem1Start(e.target.value)}
-                  className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
-                />
+
+            <div className="pt-2">
+              <div className="mb-2 flex items-center justify-between">
+                <label className="block text-xs font-bold text-slate-600">Semesters</label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleAddSemester}
+                  className="h-6 px-2 text-[10px]"
+                >
+                  + Add Semester
+                </Button>
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Semester 2 Start</label>
-                <input
-                  type="date"
-                  value={sem2Start}
-                  onChange={(e) => setSem2Start(e.target.value)}
-                  className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
-                />
+              <div className="max-h-48 space-y-3 overflow-y-auto pr-1">
+                {semesters.map((sem, idx) => (
+                  <div
+                    key={idx}
+                    className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:bg-slate-800/50"
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <input
+                        className="w-32 border-b border-dashed border-slate-300 bg-transparent text-xs font-bold outline-none"
+                        value={sem.name}
+                        onChange={(e) => handleSemesterChange(idx, 'name', e.target.value)}
+                      />
+                      <button
+                        onClick={() => handleRemoveSemester(idx)}
+                        className="text-[10px] text-red-500 hover:text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="text-[10px] text-slate-500">Start</label>
+                        <input
+                          type="date"
+                          value={sem.startDate ? sem.startDate.split('T')[0] : ''}
+                          onChange={(e) => handleSemesterChange(idx, 'startDate', e.target.value)}
+                          className="w-full rounded-md border px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-800"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] text-slate-500">End</label>
+                        <input
+                          type="date"
+                          value={sem.endDate ? sem.endDate.split('T')[0] : ''}
+                          onChange={(e) => handleSemesterChange(idx, 'endDate', e.target.value)}
+                          className="w-full rounded-md border px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-800"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
             {error && <p className="text-sm text-red-600">{error}</p>}
@@ -412,8 +544,14 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
             <Button variant="outline" onClick={() => setYearOpen(false)} disabled={loading}>
               Cancel
             </Button>
-            <Button onClick={handleAddYear} disabled={loading}>
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Add Year'}
+            <Button onClick={handleSaveYear} disabled={loading}>
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : editingYearId ? (
+                'Save Changes'
+              ) : (
+                'Add Year'
+              )}
             </Button>
           </div>
         </DialogContent>

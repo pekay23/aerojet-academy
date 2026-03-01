@@ -57,7 +57,10 @@ export default async function PathwayPage() {
   }
 
   const pricing = PRICING[choice]
-  const currency = 'EUR'
+  const currencySettings = await prisma.systemSetting.findMany({
+    where: { key: 'course_currency' },
+  })
+  const currency = currencySettings[0]?.value || 'EUR'
 
   // Look for any pending payment for tuition
   const pendingTuitionPayment = await prisma.payment.findFirst({
@@ -94,7 +97,7 @@ export default async function PathwayPage() {
   ]
 
   // Optional: Fetch bank details like the registration upload page
-  const settings = await prisma.systemSetting.findMany({
+  const bankSettings = await prisma.systemSetting.findMany({
     where: {
       key: {
         in: ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_swift', 'bank_branch'],
@@ -103,7 +106,7 @@ export default async function PathwayPage() {
   })
 
   const globalSettings: Record<string, string> = {}
-  for (const s of settings) {
+  for (const s of bankSettings) {
     globalSettings[s.key] = s.value
   }
 

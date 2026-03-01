@@ -6,12 +6,14 @@ export const calculateFillRate = (current: number, max: number): number => {
   return Math.round((current / max) * 100)
 }
 
-export const formatCurrency = (amount: number | Prisma.Decimal | null): string => {
+export const formatCurrency = (
+  amount: number | Prisma.Decimal | null,
+  currency?: string
+): string => {
   const value = Number(amount || 0)
-  return new Intl.NumberFormat('en-IE', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(value)
+  const curr = currency || 'EUR'
+  const symbol = curr === 'EUR' ? '€' : curr === 'GHS' ? 'GH₵' : '$'
+  return `${symbol}${value.toLocaleString()}`
 }
 
 export const calculateGrowth = (current: number, previous: number): number => {

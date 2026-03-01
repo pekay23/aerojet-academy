@@ -1295,8 +1295,7 @@ model ProgrammeYear {
   seatConfirmationFee Decimal           @default(1500) @db.Decimal(10, 2)
   firstPaymentAmount  Decimal           @default(3500) @db.Decimal(10, 2)
 
-  semester1StartDate DateTime
-  semester2StartDate DateTime
+  semesters Json @default("[]") // [{name: "Semester 1", startDate: "...", endDate: "..."}]
 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())

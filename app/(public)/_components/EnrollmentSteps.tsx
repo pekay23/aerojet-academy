@@ -2,30 +2,50 @@
 
 import { motion } from 'framer-motion'
 
-const steps = [
-  {
-    num: '01',
-    title: 'Register Online',
-    desc: 'Pay the GHS 350 registration fee and create your portal account.',
-  },
-  {
-    num: '02',
-    title: 'Complete Application',
-    desc: 'Submit your documents and complete the online application form.',
-  },
-  {
-    num: '03',
-    title: 'Get Approved',
-    desc: 'Our team reviews your application and issues a confirmation invoice.',
-  },
-  {
-    num: '04',
-    title: 'Begin Training',
-    desc: 'Pay your confirmation fee, get onboarded, and start your journey.',
-  },
-]
+interface EnrollmentStepsProps {
+  fee?: string
+  currency?: string
+}
 
-export default function EnrollmentSteps() {
+function getSymbol(currency?: string): string {
+  switch (currency) {
+    case 'EUR':
+      return '€'
+    case 'GHS':
+      return 'GH₵'
+    case 'USD':
+      return '$'
+    default:
+      return 'GH₵'
+  }
+}
+
+export default function EnrollmentSteps({ fee = '350', currency = 'GHS' }: EnrollmentStepsProps) {
+  const symbol = getSymbol(currency)
+
+  const steps = [
+    {
+      num: '01',
+      title: 'Register Online',
+      desc: `Pay the ${symbol}${fee} registration fee and create your portal account.`,
+    },
+    {
+      num: '02',
+      title: 'Complete Application',
+      desc: 'Submit your documents and complete the online application form.',
+    },
+    {
+      num: '03',
+      title: 'Get Approved',
+      desc: 'Our team reviews your application and issues a confirmation invoice.',
+    },
+    {
+      num: '04',
+      title: 'Begin Training',
+      desc: 'Pay your confirmation fee, get onboarded, and start your journey.',
+    },
+  ]
+
   return (
     <section className="px-6 py-20 sm:py-28">
       <div className="mx-auto max-w-5xl">

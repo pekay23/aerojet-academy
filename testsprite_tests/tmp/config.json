@@ -1,0 +1,18 @@
+{
+  "status": "commited",
+  "type": "frontend",
+  "scope": "codebase",
+  "localEndpoint": "http://localhost:3000",
+  "executionArgs": {
+    "projectName": "aerojet-academy",
+    "projectPath": "c:\\Projects\\aerojet-academy",
+    "testIds": [],
+    "additionalInstruction": "Test the main user flows including login, registration, and dashboard navigation.",
+    "serverMode": "development",
+    "envs": {
+      "API_KEY": "sk-user-yJTN_bO_RwAk9U4fQHMOA-FLyR5ehnfiA8dS4sswmPoKM6wSndY5q7cKmq-DopCOFCgmv4thDrQqFxvFEVPmnbcFagZ4NXLJ7G7S2KW1yUG_0zWGpXL9fY1LoEdj6jOuNdo"
+    }
+  },
+  "serverPort": 62972,
+  "proxy": "http://f4fbd683-f2e2-4b48-9807-1ee950d51afb:1LIAmPQkSI6Gf9sVa3Yl3FRQeCkHBWF0@tun.testsprite.com:8080"
+}
