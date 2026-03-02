@@ -31,11 +31,19 @@ export default function UploadProofForm() {
           receive your portal login credentials via email.
         </p>
         <button
-          onClick={() => router.push('/login')}
+          onClick={() => router.push('/')}
           className="mt-4 w-full rounded-xl bg-green-600 px-4 py-3 text-sm font-bold text-white transition hover:bg-green-700"
         >
-          Return to Login
+          Go to Home Page
         </button>
+        <div className="mt-4 text-center">
+          <p className="text-sm text-green-600">
+            Already verified?{' '}
+            <button onClick={() => router.push('/login')} className="font-bold text-green-700 hover:underline">
+              Login here
+            </button>
+          </p>
+        </div>
       </div>
     )
   }

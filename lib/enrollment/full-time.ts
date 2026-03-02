@@ -143,20 +143,25 @@ export async function processMilestonePayment(milestoneId: string, userId: strin
       },
     })
 
+    // 2.5 Special case: Seat confirmation activates enrollment
+    if (milestone.milestoneType === 'SEAT_CONFIRMATION') {
+      await tx.fullTimeEnrollment.update({
+        where: { id: milestone.enrollmentId },
+        data: { status: 'ACTIVE' },
+      })
+    }
+
     // 3. Check if promotion conditions are met:
-    //    Both SEAT_CONFIRMATION and SEM1_DUE must be PAID for applicant → student
+    //    SEAT_CONFIRMATION must be PAID for applicant → student
     const allMilestones = await tx.paymentMilestone.findMany({
       where: { enrollmentId: milestone.enrollmentId, yearNumber: 1 },
     })
     const seatPaid = allMilestones.some(
-      (m) => m.milestoneType === 'SEAT_CONFIRMATION' && m.status === 'PAID'
-    )
-    const sem1Paid = allMilestones.some(
-      (m) => m.milestoneType === 'SEM1_DUE' && (m.id === milestone.id ? true : m.status === 'PAID')
+      (m) => m.milestoneType === 'SEAT_CONFIRMATION' && (m.id === milestone.id ? true : m.status === 'PAID')
     )
 
     const user = await tx.user.findUnique({ where: { id: userId } })
-    if (user?.role === 'APPLICANT' && seatPaid && sem1Paid) {
+    if (user?.role === 'APPLICANT' && seatPaid) {
       await tx.user.update({
         where: { id: userId },
         data: { role: 'STUDENT' },

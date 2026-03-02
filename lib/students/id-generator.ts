@@ -1,4 +1,4 @@
-import prisma from '@/lib/database/prisma'
+import prisma from '@/lib/prisma/client'
 
 export async function generateNextStudentId(): Promise<string> {
   const year = new Date().getFullYear()

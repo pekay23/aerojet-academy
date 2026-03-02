@@ -320,21 +320,21 @@ export default function AuditLogTable({ logs, entityLabels, query }: AuditLogTab
 
             <div className="p-8">
               {/* Context Grid */}
-              <div className="mb-8 grid grid-cols-2 gap-x-8 gap-y-6 md:grid-cols-4">
+              <div className="mb-8 grid grid-cols-1 gap-x-8 gap-y-6 md:grid-cols-2">
                 {/* Action Block */}
-                <div className="col-span-2 md:col-span-1">
+                <div className="col-span-1">
                   <h3 className="mb-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:text-slate-500">
                     Event Action
                   </h3>
                   <span
-                    className={`inline-flex items-center rounded-md border px-2.5 py-1 text-xs font-black tracking-wider uppercase ${actionStyle(selectedLog.action)}`}
+                    className={`inline-flex items-center rounded-md border px-3 py-1.5 text-xs font-black tracking-wider uppercase ${actionStyle(selectedLog.action)}`}
                   >
                     {selectedLog.action}
                   </span>
                 </div>
 
                 {/* Timestamp Block */}
-                <div className="col-span-2 md:col-span-1">
+                <div className="col-span-1">
                   <h3 className="mb-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:text-slate-500">
                     Timestamp
                   </h3>
@@ -347,7 +347,7 @@ export default function AuditLogTable({ logs, entityLabels, query }: AuditLogTab
                 </div>
 
                 {/* Actor Block */}
-                <div className="col-span-2 md:col-span-2">
+                <div className="col-span-full">
                   <h3 className="mb-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:text-slate-500">
                     Actor
                   </h3>

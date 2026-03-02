@@ -1,4 +1,4 @@
-import prisma from '@/lib/database/prisma'
+import prisma from '@/lib/prisma/client'
 
 export async function getWalletBalance(userId: string) {
   const wallet = await prisma.wallet.findUnique({ where: { userId } })

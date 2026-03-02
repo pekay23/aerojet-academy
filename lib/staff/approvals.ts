@@ -1,4 +1,4 @@
-import prisma from '@/lib/database/prisma'
+import prisma from '@/lib/prisma/client'
 import bcrypt from 'bcryptjs'
 import { sendEmail, activationEmail, paymentApprovedEmail } from '@/lib/email'
 import { generateAcademyEmail } from '@/lib/utils'
