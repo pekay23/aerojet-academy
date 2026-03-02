@@ -18,13 +18,23 @@ import {
   FormDescription,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { toast } from '@/hooks/use-toast'
 import { createExamEventSchema } from '@/lib/validation/schemas'
 import { ExamEvent } from '@prisma/client'
 import { format } from 'date-fns'
 
 interface EditExamEventFormProps {
-  event: Omit<ExamEvent, 'minRevenueTarget'> & { minRevenueTarget: number | any }
+  event: Omit<ExamEvent, 'minRevenueTarget' | 'minRevenueCurrency'> & {
+    minRevenueTarget: number | any
+    minRevenueCurrency?: string
+  }
 }
 
 type ExamEventFormValues = z.infer<typeof createExamEventSchema>
@@ -48,6 +58,7 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
       paymentDeadline: formatDateForInput(event.paymentDeadline),
       joinDeadline: formatDateForInput(event.joinDeadline),
       minRevenueTarget: Number(event.minRevenueTarget),
+      minRevenueCurrency: event.minRevenueCurrency || 'EUR',
     },
   })
 
@@ -165,23 +176,47 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="minRevenueTarget"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Minimum Revenue Target</FormLabel>
-              <FormControl>
-                <div className="relative">
-                  <DollarSign className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                  <Input type="number" className="pl-10" placeholder="25000.00" {...field} />
-                </div>
-              </FormControl>
-              <FormDescription>Target revenue for Go/No-Go decision.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <FormField
+            control={form.control}
+            name="minRevenueTarget"
+            render={({ field }) => (
+              <FormItem className="md:col-span-2">
+                <FormLabel>Minimum Revenue Target</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <DollarSign className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Input type="number" className="pl-10" placeholder="25000.00" {...field} />
+                  </div>
+                </FormControl>
+                <FormDescription>Target revenue for Go/No-Go decision.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="minRevenueCurrency"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Currency</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="EUR">EUR (€)</SelectItem>
+                    <SelectItem value="USD">USD ($)</SelectItem>
+                    <SelectItem value="GHS">GHS (₵)</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="flex justify-end gap-3 pt-4">
           <Button

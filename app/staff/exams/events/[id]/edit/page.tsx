@@ -29,6 +29,7 @@ export default async function EditExamEventPage({ params }: PageProps) {
   const serializedEvent = {
     ...event,
     minRevenueTarget: Number(event.minRevenueTarget),
+    minRevenueCurrency: event.minRevenueCurrency || 'EUR',
   }
 
   if (!event) notFound()
@@ -36,11 +37,13 @@ export default async function EditExamEventPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">Edit Exam Event</h1>
+        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+          Edit Exam Event
+        </h1>
         <p className="text-slate-500 dark:text-slate-400">Update details for {event.name}</p>
       </div>
 
-      <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
+      <div className="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="p-6">
           <EditExamEventForm event={serializedEvent} />
         </div>

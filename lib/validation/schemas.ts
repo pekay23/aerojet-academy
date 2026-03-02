@@ -148,6 +148,7 @@ export const createExamEventSchema = z.object({
     .refine((val) => !val || !isNaN(Date.parse(val)), 'Invalid join deadline'),
   paymentDeadline: z.string().refine((val) => !isNaN(Date.parse(val)), 'Invalid payment deadline'),
   minRevenueTarget: z.coerce.number().positive().default(25000.0),
+  minRevenueCurrency: z.enum(['USD', 'EUR', 'GHS']).default('EUR'),
 })
 
 export const updateExamEventSchema = createExamEventSchema.partial()
