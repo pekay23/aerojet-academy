@@ -36,19 +36,42 @@ export async function getRegistrationConfig() {
 export async function getFinanceConfig() {
   const settings = await getSystemSettings([
     'course_currency',
+    'payment_methods',
+  ])
+
+  // Try new PaymentMethod model first
+  const bankMethods = await prisma.paymentMethod.findMany({
+    where: { isActive: true, type: 'BANK_TRANSFER' },
+    orderBy: { sortOrder: 'asc' },
+    take: 1,
+  })
+
+  if (bankMethods.length > 0) {
+    const bank = bankMethods[0]
+    return {
+      courseCurrency: settings.get('course_currency') || 'EUR',
+      bankAccountName: bank.bankAccountName || '',
+      bankAccountNumber: bank.bankAccountNumber || '',
+      bankName: bank.bankName || '',
+      bankSwift: bank.bankSwiftCode || '',
+      paymentMethods: ['BANK_TRANSFER'],
+    }
+  }
+
+  // Fallback to legacy flat settings
+  const legacySettings = await getSystemSettings([
     'bank_account_name',
     'bank_account_number',
     'bank_name',
     'bank_swift',
-    'payment_methods',
   ])
 
   return {
     courseCurrency: settings.get('course_currency') || 'EUR',
-    bankAccountName: settings.get('bank_account_name') || '',
-    bankAccountNumber: settings.get('bank_account_number') || '',
-    bankName: settings.get('bank_name') || 'Fidelity Bank',
-    bankSwift: settings.get('bank_swift') || '',
+    bankAccountName: legacySettings.get('bank_account_name') || '',
+    bankAccountNumber: legacySettings.get('bank_account_number') || '',
+    bankName: legacySettings.get('bank_name') || 'Fidelity Bank',
+    bankSwift: legacySettings.get('bank_swift') || '',
     paymentMethods: (settings.get('payment_methods') || 'BANK_TRANSFER').split(','),
   }
 }

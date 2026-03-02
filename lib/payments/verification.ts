@@ -1,4 +1,4 @@
-import prisma from '@/lib/database/prisma'
+import prisma from '@/lib/prisma/client'
 import type { PaymentVerificationResult } from './types'
 
 export async function verifyPaymentProof(paymentId: string): Promise<PaymentVerificationResult> {

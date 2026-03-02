@@ -61,6 +61,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       where: { id: milestone.id },
       data: { status: 'PAID', paidAt: new Date() },
     })
+
+    if (milestone.milestoneType === 'SEAT_CONFIRMATION') {
+      await tx.fullTimeEnrollment.update({
+        where: { id: milestone.enrollmentId },
+        data: { status: 'ACTIVE' },
+      })
+    }
   })
 
   await createAuditLog({

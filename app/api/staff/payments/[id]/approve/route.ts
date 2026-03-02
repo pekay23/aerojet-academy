@@ -187,7 +187,7 @@ export const POST = withErrorHandler(
             // Update enrollment status
             await prisma.fullTimeEnrollment.update({
               where: { id: enrollment.id },
-              data: { status: 'PENDING_CONFIRMATION' },
+              data: { status: 'ACTIVE' },
             })
           } else if (payment.referenceType === 'YEAR_1_FULL') {
             // Mark ALL Year 1 milestones as PAID
@@ -213,6 +213,14 @@ export const POST = withErrorHandler(
                 })
               }
             }
+            await prisma.fullTimeEnrollment.update({
+              where: { id: enrollment.id },
+              data: { status: 'ACTIVE' },
+            })
+          }
+
+          // SUSPENDED -> (Payment made + admin approval) -> ACTIVE
+          if (enrollment.status === 'SUSPENDED') {
             await prisma.fullTimeEnrollment.update({
               where: { id: enrollment.id },
               data: { status: 'ACTIVE' },

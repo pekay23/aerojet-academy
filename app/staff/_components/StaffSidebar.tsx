@@ -84,29 +84,19 @@ export default function StaffSidebar({ userName, userRole, userImage, counts }: 
       icon: FileCheck,
     },
 
-    {
-      label: 'Reports',
-      href: '/reports',
-      icon: BarChart3,
-      children: [
-        { label: 'Overview', href: '/reports' },
-        { label: 'Enrollment Trends', href: '/reports/enrollment-trends' },
-        { label: 'Revenue', href: '/reports/revenue' },
-        { label: 'Pool Analytics', href: '/reports/pool-analytics' },
-        { label: 'Attendance', href: '/reports/attendance' },
-      ],
-    },
+    { label: 'Reports', href: '/reports', icon: BarChart3 },
     { label: 'Newsroom', href: '/newsroom', icon: Megaphone },
     { label: 'Messages', href: '/messages', icon: Mail, badge: counts?.messages || undefined },
     { label: 'Audit Logs', href: '/audit-logs', icon: ScrollText },
-    { label: 'Email Previews', href: '/settings/email-previews', icon: Mail },
     {
       label: 'Settings',
       href: '/settings',
       icon: Settings,
       children: [
         { label: 'General', href: '/settings' },
-        { label: 'Academic Calendar', href: '/settings/academic-calendar' },
+        { label: 'Finance', href: '/settings?tab=finance' },
+        { label: 'Email Templates', href: '/settings?tab=emails' },
+        { label: 'Calendar', href: '/settings?tab=calendar' },
       ],
     },
   ]

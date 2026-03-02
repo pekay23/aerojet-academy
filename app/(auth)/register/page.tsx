@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { Mail, ArrowRight, Clock } from 'lucide-react'
 import RegistrationForm from './_components/RegistrationForm'
 import PaymentInstructions from './_components/PaymentInstructions'
-import { getRegistrationConfig, getFinanceConfig } from '@/lib/settings'
+import { getRegistrationConfig } from '@/lib/settings'
+import { getActivePaymentMethods } from '@/lib/payment-methods'
 
 export const metadata: Metadata = { title: 'Register | Aerojet Academy' }
 
@@ -17,7 +18,7 @@ export default async function RegisterPage({
   const hasCode = !!params.code
   const showPaymentDetails = isSuccess && hasCode
   const config = await getRegistrationConfig()
-  const finance = await getFinanceConfig()
+  const paymentMethods = await getActivePaymentMethods()
 
   return (
     <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-2xl">
@@ -35,7 +36,7 @@ export default async function RegisterPage({
       {/* Content */}
       <div className="p-8 md:p-10">
         {showPaymentDetails ? (
-          <PaymentInstructions fee={config.fee} currency={config.currency} finance={finance} />
+          <PaymentInstructions fee={config.fee} currency={config.currency} paymentMethods={paymentMethods} />
         ) : isSuccess ? (
           <div className="text-center">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50">

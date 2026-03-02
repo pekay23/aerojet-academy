@@ -31,13 +31,9 @@ export default function InstructorSidebar({
     { label: 'Students', href: '/instructor/students', icon: Users },
     {
       label: 'Grading',
-      href: '/instructor/grading/pending',
+      href: '/instructor/grading',
       icon: ClipboardCheck,
       badge: pendingCount > 0 ? pendingCount : undefined,
-      children: [
-        { label: 'Pending', href: '/instructor/grading/pending' },
-        { label: 'History', href: '/instructor/grading/history' },
-      ],
     },
     { type: 'header', label: 'Account' },
     { label: 'Profile', href: '/instructor/profile', icon: User },

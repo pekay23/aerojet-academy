@@ -56,7 +56,13 @@ export async function POST(req: NextRequest) {
       details: { updates },
     })
 
-    // Redirect back with success message or just return success
+    // Return JSON when requested (client-side form submissions)
+    const accept = req.headers.get('accept') || ''
+    if (accept.includes('application/json')) {
+      return apiSuccess({ saved: true, count: updates.length })
+    }
+
+    // Redirect back for native form submissions
     return new Response(null, {
       status: 303,
       headers: { Location: '/staff/settings?saved=1' },
