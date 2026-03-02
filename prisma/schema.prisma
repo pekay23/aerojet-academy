@@ -653,8 +653,9 @@ model ExamEvent {
   paymentDeadline DateTime // T-21 (Go/No-Go decision)
 
   // Business Rules
-  minRevenueTarget Decimal @default(25000.00) @db.Decimal(10, 2)
-  resitFee        Decimal @default(480.00) @db.Decimal(10, 2) // Resit exam fee (editable per event)
+  minRevenueTarget     Decimal  @default(25000.00) @db.Decimal(10, 2)
+  minRevenueCurrency   String   @default("EUR") // Currency for minRevenueTarget (USD, EUR, GHS)
+  resitFee             Decimal  @default(480.00) @db.Decimal(10, 2) // Resit exam fee (editable per event)
   resitFeeCurrency String @default("EUR")
   lateBookingSurcharge Decimal @default(50.00) @db.Decimal(10, 2) // Late booking surcharge (within 14 days)
   lateBookingDays Int @default(14) // Days before event to apply surcharge
