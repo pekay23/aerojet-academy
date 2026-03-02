@@ -38,7 +38,7 @@ export default async function InstructorLayout({ children }: { children: React.R
         userImage={user.image || undefined}
         pendingCount={pendingCount}
       />
-      <main className="flex min-h-screen flex-1 flex-col">
+      <main id="main-content" className="flex min-h-screen flex-1 flex-col">
         <div className="p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
           <BreadcrumbNav />
           {children}

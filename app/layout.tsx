@@ -31,6 +31,12 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
 })
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+}
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://aerojet-academy.com'),
   title: {
@@ -98,6 +104,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#002a5c" />
+        <link rel="manifest" href="/site.webmanifest" />
         <link rel="preconnect" href="https://gx1g03nvpo.ufs.sh" />
         <link rel="preconnect" href="https://utfs.io" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
@@ -109,6 +117,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body
         className={`${inter.variable} ${lexend.variable} ${montserrat.variable} ${outfit.variable} ${playfair.variable} font-sans antialiased`}
       >
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:inset-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-bold focus:text-[#002a5c] focus:shadow-lg"
+        >
+          Skip to main content
+        </a>
         <Providers>
           {children}
           <SpeedInsights />

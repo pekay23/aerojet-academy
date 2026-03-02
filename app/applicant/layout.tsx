@@ -58,7 +58,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         userImage={user.image || undefined}
         hasPathway={hasPathway}
       />
-      <main className="min-h-screen flex-1">
+      <main id="main-content" className="min-h-screen flex-1">
         <div className="p-6 sm:p-8 lg:p-10">
           <BreadcrumbNav />
           {children}
