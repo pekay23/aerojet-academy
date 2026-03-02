@@ -13,17 +13,38 @@ import {
   User,
   Mail,
   ScrollText,
+  CreditCard,
 } from 'lucide-react'
+import type { PaymentAccessLevel } from '@/lib/access-control'
+import type { SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
 
-function buildLinks(studyPathway?: string | null) {
+function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAccessLevel) {
   const isFullTime = studyPathway === 'FULL_TIME'
+  const isRestricted = paymentAccessLevel === 'RESTRICTED' || paymentAccessLevel === 'SEAT_ONLY'
+  const hasFullAccess = paymentAccessLevel === 'FULL_ACCESS'
 
-  const links = [
+  const baseLinks: SidebarLinkItem[] = [
     { label: 'Dashboard', href: '/student', icon: LayoutDashboard },
-    { label: 'Academic Calendar', href: '/student/academic-calendar', icon: CalendarCheck },
-    { label: 'Wallet', href: '/student/wallet', icon: Wallet },
-    { label: 'Resources', href: '/student/resources', icon: ScrollText },
-    {
+  ]
+
+  if (isFullTime && isRestricted) {
+    baseLinks.push(
+      { label: 'Wallet', href: '/student/wallet', icon: Wallet },
+      { label: 'Payments', href: '/student/wallet?tab=payments', icon: CreditCard }
+    )
+  } else {
+    baseLinks.push(
+      { label: 'Academic Calendar', href: '/student/academic-calendar', icon: CalendarCheck },
+      { label: 'Wallet', href: '/student/wallet', icon: Wallet }
+    )
+  }
+
+  if (!isFullTime) {
+    baseLinks.push({ label: 'Resources', href: '/student/resources', icon: ScrollText })
+  }
+
+  if (hasFullAccess || !isFullTime) {
+    baseLinks.push({
       label: 'My Courses',
       href: '/student/courses',
       icon: BookOpen,
@@ -33,29 +54,33 @@ function buildLinks(studyPathway?: string | null) {
             { label: 'Enrolled Courses', href: '/student/courses' },
             { label: 'Enroll in New', href: '/student/courses/enroll' },
           ],
-    },
-  ]
+    })
+  }
 
-  // Exam Pools — only for non-full-time students (modular, exam-only, etc.)
   if (!isFullTime) {
-    links.push({
+    baseLinks.push({
       label: 'Exam Pools',
       href: '/student/exam-pools',
       icon: FileCheck,
     })
   }
 
-  links.push(
-    { label: 'Exams', href: '/student/exams', icon: ClipboardCheck },
-    { label: 'Grades', href: '/student/grades', icon: CalendarCheck },
-    { label: 'Attendance', href: '/student/attendance', icon: CalendarCheck },
-    { label: 'Certificates', href: '/student/certificates', icon: Award },
+  if (hasFullAccess) {
+    baseLinks.push(
+      { label: 'Exams', href: '/student/exams', icon: ClipboardCheck },
+      { label: 'Grades', href: '/student/grades', icon: CalendarCheck },
+      { label: 'Attendance', href: '/student/attendance', icon: CalendarCheck },
+      { label: 'Certificates', href: '/student/certificates', icon: Award }
+    )
+  }
+
+  baseLinks.push(
     { label: 'Notifications', href: '/student/notifications', icon: Bell },
     { label: 'Messages', href: '/student/messages', icon: Mail },
     { label: 'Profile', href: '/student/profile', icon: User }
   )
 
-  return links
+  return baseLinks
 }
 
 export default function StudentSidebar({
@@ -65,6 +90,7 @@ export default function StudentSidebar({
   studyPathway,
   notificationCount = 0,
   messageCount = 0,
+  paymentAccessLevel,
 }: {
   userName?: string
   userRole?: string
@@ -72,8 +98,9 @@ export default function StudentSidebar({
   studyPathway?: string | null
   notificationCount?: number
   messageCount?: number
+  paymentAccessLevel?: PaymentAccessLevel
 }) {
-  const links = buildLinks(studyPathway)
+  const links = buildLinks(studyPathway, paymentAccessLevel)
 
   const linksWithBadge = links.map((link) => {
     if (link.label === 'Notifications') {

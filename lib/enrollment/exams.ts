@@ -82,12 +82,15 @@ export async function bookStandaloneExam(examId: string, userId: string) {
 
 /**
  * Books a resit exam for a student who has failed a previous attempt.
- * Resit fee is typically different, fetched from system settings.
+ * Resit fee is fetched from the exam's event (if set), otherwise from system settings.
  */
 export async function bookResitExam(examId: string, userId: string) {
   const exam = await prisma.exam.findUnique({
     where: { id: examId },
-    include: { examComponent: { include: { course: true } } },
+    include: {
+      examComponent: { include: { course: true } },
+      event: true,
+    },
   })
 
   if (!exam) throw new Error('Exam not found')
@@ -107,9 +110,14 @@ export async function bookResitExam(examId: string, userId: string) {
     )
   }
 
-  // Fetch resit price
-  const settingPrice = await getSystemSetting('resit_exam_fee', '250')
-  const amountToCharge = Number(settingPrice)
+  // Fetch resit price - prefer event-specific, fallback to system setting
+  let amountToCharge: number
+  if (exam.event && exam.event.resitFee) {
+    amountToCharge = Number(exam.event.resitFee)
+  } else {
+    const settingPrice = await getSystemSetting('resit_exam_fee', '480')
+    amountToCharge = Number(settingPrice)
+  }
 
   const wallet = await prisma.wallet.findUnique({ where: { userId } })
   if (!wallet || Number(wallet.availableBalance) < amountToCharge) {

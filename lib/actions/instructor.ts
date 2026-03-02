@@ -6,6 +6,19 @@ import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { revalidatePath } from 'next/cache'
 
+const EASA_PASSING_GRADE = 75
+
+export function calculateLetterGrade(percentage: number): string {
+  if (percentage >= 90) return 'A'
+  if (percentage >= 80) return 'B'
+  if (percentage >= EASA_PASSING_GRADE) return 'C'
+  return 'F'
+}
+
+export function isPassing(percentage: number): boolean {
+  return percentage >= EASA_PASSING_GRADE
+}
+
 async function getInstructorId(userId: string) {
   const profile = await prisma.instructorProfile.findUnique({
     where: { userId },
@@ -625,6 +638,7 @@ export async function createInternalGrade(data: {
   const instructorId = await getInstructorId(session.user.id)
 
   const percentage = (data.score / data.maxScore) * 100
+  const letterGrade = calculateLetterGrade(percentage)
 
   const grade = await prisma.grade.create({
     data: {
@@ -636,6 +650,7 @@ export async function createInternalGrade(data: {
       score: data.score,
       maxScore: data.maxScore,
       percentage,
+      grade: letterGrade,
       comments: data.comments,
       mcqScore: data.mcqScore,
       essay1Score: data.essay1Score,

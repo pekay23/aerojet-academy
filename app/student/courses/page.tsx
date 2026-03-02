@@ -1,11 +1,22 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BookOpen, GraduationCap, Clock, ChevronRight, AlertCircle, PlayCircle } from 'lucide-react'
+import {
+  BookOpen,
+  GraduationCap,
+  Clock,
+  ChevronRight,
+  AlertCircle,
+  PlayCircle,
+  Lock,
+} from 'lucide-react'
 import { Suspense } from 'react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { canAccessFeature } from '@/lib/access-control'
+import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
+import { getEnrollmentMilestoneStatus } from '@/lib/access-control'
 
 export const metadata: Metadata = { title: 'My Courses | Student Portal' }
 
@@ -19,6 +30,42 @@ export default async function CoursesPage() {
   })
 
   const isFullTime = studentProfile?.enrollmentType === 'FULL_TIME'
+  const hasAccess = await canAccessFeature(session.user.id, 'courses')
+
+  if (isFullTime && !hasAccess) {
+    const [milestoneStatus, wallet] = await Promise.all([
+      getEnrollmentMilestoneStatus(session.user.id),
+      prisma.wallet.findUnique({
+        where: { userId: session.user.id },
+        select: { availableBalance: true, reservedBalance: true, currency: true },
+      }),
+    ])
+
+    const walletBalance = {
+      available: Number(wallet?.availableBalance ?? 0),
+      held: Number(wallet?.reservedBalance ?? 0),
+      currency: wallet?.currency ?? 'EUR',
+    }
+
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+            My Courses
+          </h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Manage your active and upcoming courses.
+          </p>
+        </div>
+
+        <PaymentRequiredBanner
+          accessLevel="SEAT_ONLY"
+          milestoneStatus={milestoneStatus}
+          walletBalance={walletBalance}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-8">

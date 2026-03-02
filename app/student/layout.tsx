@@ -6,6 +6,7 @@ import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import WelcomeBanner from '@/components/WelcomeBanner'
 import ForcePasswordChange from '../applicant/_components/ForcePasswordChange'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
+import { getStudentPaymentAccessLevel, getEnrollmentMilestoneStatus } from '@/lib/access-control'
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
@@ -39,7 +40,14 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const userName = user.name || user.email
   const userRole = user.role
 
-  const [unreadNotifications, unreadMessages, studentProfile] = await Promise.all([
+  const [
+    unreadNotifications,
+    unreadMessages,
+    studentProfile,
+    paymentAccessLevel,
+    milestoneStatus,
+    wallet,
+  ] = await Promise.all([
     prisma.notification.count({
       where: { userId: user.id, isRead: false },
     }),
@@ -54,11 +62,40 @@ export default async function StudentLayout({ children }: { children: React.Reac
         enrollmentType: true,
       },
     }),
+    getStudentPaymentAccessLevel(user.id),
+    getEnrollmentMilestoneStatus(user.id),
+    prisma.wallet.findUnique({
+      where: { userId: user.id },
+      select: { availableBalance: true, reservedBalance: true, currency: true },
+    }),
   ])
 
   // A student "has a pathway" if they have either a specific study pathway (B1/B2)
   // or a general enrollment type (Modular/Exam-Only).
   const hasPathway = !!studentProfile?.pathwayId || !!studentProfile?.enrollmentType
+
+  // Convert milestoneStatus dates for client components
+  const milestoneStatusJson = {
+    ...milestoneStatus,
+    milestones: milestoneStatus.milestones.map((m) => ({
+      ...m,
+      dueDate: m.dueDate.toISOString(),
+      paidAt: m.paidAt?.toISOString() ?? null,
+    })),
+  }
+
+  const walletBalance = {
+    available: Number(wallet?.availableBalance ?? 0),
+    held: Number(wallet?.reservedBalance ?? 0),
+    currency: wallet?.currency ?? 'EUR',
+  }
+
+  // Store payment info in a way that can be passed via context or accessed by pages
+  const paymentInfo = {
+    accessLevel: paymentAccessLevel,
+    milestoneStatus: milestoneStatusJson,
+    walletBalance,
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -69,12 +106,15 @@ export default async function StudentLayout({ children }: { children: React.Reac
         studyPathway={studentProfile?.pathwayRel?.code || (studentProfile?.enrollmentType as any)}
         notificationCount={unreadNotifications}
         messageCount={unreadMessages}
+        paymentAccessLevel={paymentAccessLevel}
       />
       <main className="min-h-screen flex-1">
         <div className="p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
           <BreadcrumbNav />
           {hasPathway ? (
-            children
+            <div className="payment-info" data-payment-info={JSON.stringify(paymentInfo)}>
+              {children}
+            </div>
           ) : (
             <div className="space-y-8">
               <WelcomeBanner
