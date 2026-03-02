@@ -76,6 +76,8 @@ export default withAuth(
           pathname === '/reset-password' ||
           pathname.startsWith('/_next') ||
           pathname.startsWith('/images') ||
+          pathname.startsWith('/media') ||
+          pathname.startsWith('/static') ||
           pathname.startsWith('/favicon')
         ) {
           return true

@@ -4,12 +4,57 @@ import { Calendar, CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-reac
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { canAccessFeature, getEnrollmentMilestoneStatus } from '@/lib/access-control'
+import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
 export const metadata: Metadata = { title: 'Attendance | Student Portal' }
 
 export default async function AttendancePage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
+
+  const studentProfile = await prisma.studentProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { enrollmentType: true },
+  })
+
+  const isFullTime = studentProfile?.enrollmentType === 'FULL_TIME'
+  const hasAccess = await canAccessFeature(session.user.id, 'classes')
+
+  if (isFullTime && !hasAccess) {
+    const [milestoneStatus, wallet] = await Promise.all([
+      getEnrollmentMilestoneStatus(session.user.id),
+      prisma.wallet.findUnique({
+        where: { userId: session.user.id },
+        select: { availableBalance: true, reservedBalance: true, currency: true },
+      }),
+    ])
+
+    const walletBalance = {
+      available: Number(wallet?.availableBalance ?? 0),
+      held: Number(wallet?.reservedBalance ?? 0),
+      currency: wallet?.currency ?? 'EUR',
+    }
+
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+            Attendance
+          </h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            Track your class attendance and participation.
+          </p>
+        </div>
+
+        <PaymentRequiredBanner
+          accessLevel="SEAT_ONLY"
+          milestoneStatus={milestoneStatus}
+          walletBalance={walletBalance}
+        />
+      </div>
+    )
+  }
 
   const attendanceRecords = await prisma.attendanceRecord.findMany({
     where: { userId: session.user.id },
@@ -35,10 +80,12 @@ export default async function AttendancePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+        <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
           Attendance
         </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Track your class attendance and punctuality.</p>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Track your class attendance and punctuality.
+        </p>
       </div>
 
       {/* Stats Summary */}
@@ -75,7 +122,7 @@ export default async function AttendancePage() {
         ].map((stat) => (
           <div
             key={stat.label}
-            className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm"
+            className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
           >
             <div className="flex items-center gap-4">
               <div
@@ -84,10 +131,12 @@ export default async function AttendancePage() {
                 <stat.icon className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
                   {stat.label}
                 </p>
-                <p className="text-xl font-black text-slate-900 dark:text-slate-100">{stat.value}</p>
+                <p className="text-xl font-black text-slate-900 dark:text-slate-100">
+                  {stat.value}
+                </p>
               </div>
             </div>
           </div>
@@ -95,8 +144,8 @@ export default async function AttendancePage() {
       </div>
 
       {/* Attendance Table */}
-      <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">
-        <div className="border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 px-6 py-4">
+      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="border-b border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
           <h2 className="font-bold text-slate-900 dark:text-slate-100">Attendance History</h2>
         </div>
 
@@ -104,7 +153,7 @@ export default async function AttendancePage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-b border-slate-100 dark:border-slate-800 text-xs font-bold uppercase tracking-widest text-slate-400">
+                <tr className="border-b border-slate-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
                   <th className="px-6 py-4">Date</th>
                   <th className="px-6 py-4">Class / Module</th>
                   <th className="px-6 py-4">Status</th>
@@ -113,8 +162,11 @@ export default async function AttendancePage() {
               </thead>
               <tbody className="divide-y divide-slate-50">
                 {attendanceRecords.map((record) => (
-                  <tr key={record.id} className="transition-colors hover:bg-slate-50 dark:bg-slate-800/50">
-                    <td className="whitespace-nowrap px-6 py-4 font-medium text-slate-900 dark:text-slate-100">
+                  <tr
+                    key={record.id}
+                    className="transition-colors hover:bg-slate-50 dark:bg-slate-800/50"
+                  >
+                    <td className="px-6 py-4 font-medium whitespace-nowrap text-slate-900 dark:text-slate-100">
                       {record.date.toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -122,8 +174,12 @@ export default async function AttendancePage() {
                       })}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-bold text-slate-900 dark:text-slate-100">{record.class.name}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">{record.class.course.code}</div>
+                      <div className="font-bold text-slate-900 dark:text-slate-100">
+                        {record.class.name}
+                      </div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                        {record.class.course.code}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span
@@ -142,7 +198,9 @@ export default async function AttendancePage() {
                         {record.minutesLate && ` (${record.minutesLate}m)`}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-500 dark:text-slate-400">{record.notes || '—'}</td>
+                    <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
+                      {record.notes || '—'}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -150,10 +208,12 @@ export default async function AttendancePage() {
           </div>
         ) : (
           <div className="p-12 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50 text-slate-300">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 text-slate-300 dark:bg-slate-800/50">
               <AlertCircle className="h-8 w-8" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No records found</h3>
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+              No records found
+            </h3>
             <p className="mx-auto mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">
               You don&apos;t have any attendance records yet. They will appear here once marked by
               your instructors.
@@ -164,4 +224,3 @@ export default async function AttendancePage() {
     </div>
   )
 }
-

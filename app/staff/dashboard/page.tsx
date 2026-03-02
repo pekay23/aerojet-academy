@@ -222,7 +222,7 @@ export default async function StaffDashboardPage() {
       {/* Revenue + Go/No-Go */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Revenue Chart */}
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:col-span-2 dark:border-slate-800 dark:bg-slate-900/50">
+        <div className="min-w-0 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:col-span-2 dark:border-slate-800 dark:bg-slate-900/50">
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h2 className="text-sm font-black tracking-tight text-slate-800 uppercase dark:text-white">

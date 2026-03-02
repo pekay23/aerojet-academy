@@ -70,7 +70,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       where: { enrollmentId: milestone.enrollmentId, yearNumber: 1 },
     })
     const seatPaid = allMilestones.some(
-      (m) => m.milestoneType === 'SEAT_CONFIRMATION' && (m.id === milestone.id ? true : m.status === 'PAID')
+      (m) =>
+        m.milestoneType === 'SEAT_CONFIRMATION' &&
+        (m.id === milestone.id ? true : m.status === 'PAID')
     )
 
     const user = await tx.user.findUnique({ where: { id: userId } })
@@ -89,7 +91,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       const existingProfile = await tx.studentProfile.findUnique({ where: { userId } })
       if (!existingProfile) {
         const { generateStudentId } = await import('@/lib/auth/helpers')
-        const studentId = generateStudentId()
+        const studentId = await generateStudentId()
 
         const { mapProgrammeChoiceToPathwayCode } = await import('@/lib/enrollment/pathway')
         const pathwayCode = mapProgrammeChoiceToPathwayCode(user.programmeChoice)

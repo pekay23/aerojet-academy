@@ -40,7 +40,12 @@ export default async function ApplicantLayout({ children }: { children: React.Re
     select: { pathwayId: true },
   })
 
-  const hasPathway = !!studentProfile?.pathwayId
+  const hasFullTimeEnrollment = await prisma.fullTimeEnrollment.findFirst({
+    where: { studentId: user.id },
+    select: { id: true },
+  })
+
+  const hasPathway = !!studentProfile?.pathwayId || !!hasFullTimeEnrollment
 
   const userName = profile ? `${profile.firstName} ${profile.lastName}` : user.email
   const userRole = 'Applicant'

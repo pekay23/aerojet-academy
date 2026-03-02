@@ -621,6 +621,75 @@ export async function sendPaymentApprovedEmail(
   })
 }
 
+export async function renderSeatReservationConfirmedEmail(
+  firstName: string,
+  programmeName: string,
+  amount: number,
+  currency: string
+) {
+  const defaultSubject = 'Seat Reservation Confirmed - Welcome to Aerojet Academy!'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}},</p>
+    
+    <p class="text">Congratulations! Your seat reservation for <strong>{{programmeName}}</strong> has been confirmed.</p>
+    
+    <div class="info-box" style="border-left-color: #22c55e;">
+      <div class="info-row"><strong>Status:</strong> <span style="color:#15803d; font-weight:bold;">SEAT CONFIRMED ✅</span></div>
+      <div class="info-row font-bold" style="margin-top:5px;"><strong>Amount Paid:</strong> {{currency}} {{amount}}</div>
+      <div class="info-row"><strong>Programme:</strong> {{programmeName}}</div>
+    </div>
+
+    <p class="text"><strong>What's Next?</strong></p>
+    <ul style="margin-left:20px; margin-top:10px;">
+      <li>Complete the remaining payments as per your payment plan</li>
+      <li>Top up your wallet to pay future installments</li>
+      <li>You will receive login credentials once all payments are complete</li>
+    </ul>
+
+    <p class="text">You can track your enrollment progress and make additional payments through your applicant portal.</p>
+
+    <div class="btn-container">
+      <a href="{{portalUrl}}" class="btn">
+        <span>Go to Applicant Portal</span>
+      </a>
+    </div>
+    
+    <p class="text" style="margin-top:20px;">If you have any questions, please contact our admissions team.</p>
+  `
+
+  const template = await getTemplate('seat-reservation-confirmed', {
+    subject: defaultSubject,
+    body: defaultBody,
+  })
+
+  const baseUrl = await getBaseUrl()
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    programmeName,
+    amount: amount.toLocaleString(),
+    currency,
+    portalUrl: `${baseUrl}/applicant/dashboard`,
+  })
+
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+}
+
+export async function sendSeatReservationConfirmedEmail(
+  email: string,
+  firstName: string,
+  programmeName: string,
+  amount: number,
+  currency: string
+) {
+  const html = await renderSeatReservationConfirmedEmail(firstName, programmeName, amount, currency)
+
+  return sendEmail({
+    to: email,
+    subject: 'Seat Reservation Confirmed - Welcome to Aerojet Academy!',
+    html,
+  })
+}
+
 export async function renderPaymentRejectedEmail(
   firstName: string,
   paymentType: string,
@@ -713,6 +782,96 @@ export async function sendContactEnquiryConfirmation(email: string, name: string
   return sendEmail({
     to: email,
     subject: `Aerojet Academy - Enquiry Received: ${subject}`,
+    html,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// MILESTONE PAYMENT REMINDERS
+// ---------------------------------------------------------------------------
+
+export async function renderMilestoneReminderEmail(
+  firstName: string,
+  milestoneType: string,
+  amount: number,
+  daysUntil: number,
+  programmeName: string
+) {
+  const urgencyClass = daysUntil <= 3 ? 'danger' : daysUntil <= 7 ? 'warning' : 'info'
+  const urgencyText = daysUntil <= 3 ? 'URGENT' : daysUntil <= 7 ? 'Important' : 'Reminder'
+
+  const defaultSubject = `Payment ${urgencyText}: ${milestoneType} due in ${daysUntil} days`
+  const defaultBody = `
+    <p class="text">Hi {{firstName}},</p>
+    
+    <p class="text">This is a {{urgencyText}} about your upcoming payment for <strong>{{programmeName}}</strong>.</p>
+    
+    <div class="info-box" style="border-left-color: {{urgencyColor}};">
+      <div class="info-row"><strong>Payment Type:</strong> {{milestoneType}}</div>
+      <div class="info-row" style="margin-top:5px;"><strong>Amount Due:</strong> €{{amount}}</div>
+      <div class="info-row" style="margin-top:5px;"><strong>Due In:</strong> <strong>{{daysUntil}} day{{daysUntil > 1 ? 's' : ''}}</strong></div>
+    </div>
+
+    <p class="text">Please ensure your payment is made before the due date to avoid any interruption to your studies.</p>
+    
+    <div class="btn-container">
+      <a href="{{portalUrl}}" class="btn">
+        <span>Make Payment Now</span>
+      </a>
+    </div>
+    
+    <p class="text" style="margin-top:20px;">If you have already made this payment, please ignore this reminder.</p>
+    
+    <p class="text-muted" style="margin-top:20px; font-size:12px; color:#888;">
+      If you have any questions, please contact our finance team.
+    </p>
+  `
+
+  const urgencyColor = {
+    info: '#3b82f6',
+    warning: '#f59e0b',
+    danger: '#ef4444',
+  }[urgencyClass]
+
+  const template = await getTemplate('milestone-reminder', {
+    subject: defaultSubject,
+    body: defaultBody,
+  })
+
+  const baseUrl = await getBaseUrl()
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    milestoneType,
+    amount: amount.toLocaleString(),
+    daysUntil: daysUntil.toString(),
+    programmeName,
+    urgencyText,
+    urgencyColor,
+    portalUrl: `${baseUrl}/student/wallet?tab=payments`,
+  })
+
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+}
+
+export async function sendMilestoneReminderEmail(
+  email: string,
+  firstName: string,
+  milestoneType: string,
+  amount: number,
+  daysUntil: number,
+  programmeName: string
+) {
+  const html = await renderMilestoneReminderEmail(
+    firstName,
+    milestoneType,
+    amount,
+    daysUntil,
+    programmeName
+  )
+
+  return sendEmail({
+    to: email,
+    subject: `Payment Reminder: ${milestoneType} due in ${daysUntil} days`,
     html,
   })
 }

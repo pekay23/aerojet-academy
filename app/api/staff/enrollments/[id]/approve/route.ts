@@ -39,7 +39,7 @@ export const POST = withErrorHandler(
 
       // 2. If user is APPLICANT, promote to STUDENT
       if (user.role === 'APPLICANT') {
-        const studentId = generateStudentId()
+        const studentId = await generateStudentId()
 
         await tx.user.update({
           where: { id: user.id },

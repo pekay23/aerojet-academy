@@ -1,0 +1,414 @@
+PROJECT: Aerojet Aviation Training Academy (Aerojet Academy)
+
+Goal: Build a modern, high-converting public website + an integrated Student/Staff Portal.
+Primary conversion: Enquiries → Registration (GHS 350) → Application → Approval → Confirmation Payment → Portal onboarding.
+Secondary: Trust/credibility, Newsroom updates, partner interest, and candidate management.
+
+Brand voice: professional, clear, aspirational, Ghana-based, global standard, conversion-focused.
+Timezone: Africa/Accra
+Currencies: EUR (€) for programmes, GHS for registration fee (GHS 350).
+
+1) INFORMATION ARCHITECTURE (NEW SITEMAP)
+
+Top Navigation (Public)
+
+Home
+
+Courses
+
+EASA Part-66 B1 (Overview)
+
+B2 Add-On (Top-Up Modules)
+
+Modular Programme (Tuition + Exam per Module)
+
+Examination-Only (Self-Study)
+
+Revision Support (Mocks & Targeted Clinics)
+
+Module Requirements (M1–M17 + Pathways)
+
+Admissions
+
+How to Enrol (Step-by-step)
+
+Entry Requirements
+
+Fees & Payment Rules
+
+FAQ
+
+Online Application Terms
+
+About
+
+About Aerojet Academy
+
+Accra MRO Project (Context)
+
+Newsroom
+
+Contact
+
+Top-right Buttons (always visible)
+Start Registration (Primary) • Student Portal Login • Staff Portal Login
+
+Footer
+Address + Phone + Email • Student/Staff Portal Login • Privacy Policy • Online Application Terms • FAQ • Newsroom
+
+2) CONVERSION FUNNEL (AUTHORITATIVE)
+
+Global rules
+
+Registration Fee is mandatory for all programmes.
+
+Registration Fee = GHS 350 (one-time).
+
+Payment method: Bank transfer + proof upload (no cards assumed).
+
+Registration fee must be paid before the online application link is released.
+
+After approval, issue a Confirmation Invoice per chosen programme’s rules.
+
+NEXT STEPS (USE VERBATIM ON SITE)
+
+Step 1: Registration Invoice
+We will first issue an invoice for the GHS 350 registration fee. Payment of the registration fee is required before you can complete the online application.
+
+Step 2: Online Application Form
+Once payment is received and you send us confirmation, we will provide a link to complete the online application form for Academy review and approval.
+
+Step 3: Confirmation Invoice
+Upon approval, we will issue an invoice for the Confirmation payment applicable to your selected training program. Once paid, your seat is secured (or access is activated for exam-only/modular candidates).
+
+Step 4: Student Portal Onboarding & Start Date / Access Confirmation
+After confirmation, you will be onboarded onto our student portal. You will receive confirmation of the start date as per the conditions of your particular course or receive a link to access your learning materials for exam only and modular course candidates.
+
+Important removals
+No aptitude tests on public site for now. Don’t claim medical/background checks unless enabled later.
+
+3) COURSE OFFERINGS (WEBSITE-READY COPY)
+
+Courses Landing — Summary Cards
+A) Four-Year Full-Time B1.1 & B2 Licence Programme — €13,500/yr
+B) Two-Year Full-Time B1.1 Licence Programme — €11,250/yr
+C) 12-Month B1.1 Engineer Certification (Industry/Military) — €9,540 total (theory + exams; no hand-skills)
+D) Modular Training Programme (Tuition + Exam per module; pricing visible in portal after registration)
+E) Examination-Only (Self-Study) — price list below
+F) Revision Support (Mocks & Targeted Clinics) — new tuition add-on for exam-only candidates
+
+Minimum class sizes apply to cohort programmes; dates/prices may adjust if minimums are not met.
+
+A) Four-Year Full-Time (B1.1 & B2)
+
+€13,500 per year
+
+Comprehensive theory, advanced hand-skills, structured work-experience
+
+Exam fees + two free re-sits per module; logbook, materials, PPE
+
+B) Two-Year Full-Time (B1.1)
+
+€11,250 per year
+
+Theory + hand-skills, learning materials, PPE
+
+Exam fees + two free re-sits per module
+
+Optional B2 top-up taught in dedicated blocks (exams aligned with B1 sittings)
+
+Payment plan (A & B)
+
+Registration: GHS 350
+
+Seat Confirmation: 40% of Year 1 (after approval)
+
+Year 1: 30% before semester, 30% after 6 months
+
+Year 2: 50% start of semester, 50% mid-semester
+
+C) 12-Month B1.1 (Industry/Military)
+
+€9,540 total
+
+B1.1 theory + EASA exams (no hand-skills)
+
+Optional B2 top-up
+
+Payment: 40% seat → 30% before semester → 30% after 6 months
+
+Typically scheduled for working professionals (Mon–Thu late afternoon/evening + Sat consolidation)
+
+D) Modular Training (Tuition + Exam per Module)
+
+Book modules at your pace; each booking covers tuition + one EASA exam
+
+100% upfront per booked module
+
+Pricing & availability shown after registration in the portal
+
+E) Examination-Only (Self-Study) — EUR Price List
+
+Individual module seat (first attempt): €520
+
+Resit (outside standard package): €480
+
+2-seat bundle (any modules): €980 (valid 12 months; one free module change if requested by T-21)
+
+4-seat bundle (any modules): €1,900 (valid 18 months; includes one free resit seat)
+
+Organisation/Military Group Charter (up to 28 seats per sitting): €7,500 (mix up to 4 modules in a sitting)
+
+Exam-only Booking Conditions
+
+Exam Window confirmation: windows are confirmed only when minimums are met by the cutoff
+
+Cutoff (T-21): 21 days before the start of the exam window
+
+Go/No-Go threshold: GO when ≥60 paid exam modules OR ≥3 Group Charters confirmed by T-21
+
+Seat reservation: first-come after deposit clears; 28 seats max per sitting
+
+Late booking: within T-14 incurs €50 surcharge if space remains
+
+Payments:
+
+Individual seats: 50% deposit to reserve; balance due by T-14
+
+Bundles: paid in full to activate (unless a written instalment plan is issued)
+
+Group Charter: 50% on booking + 50% by T-21 to count toward confirmation
+
+Changes/postponements/refunds:
+
+If minimums not met, bookings roll to the next window at no extra cost
+
+Candidate-initiated change after publication: €50 admin fee (waived for 2-/4-seat bundles at T-21)
+
+No-show: seat forfeited once schedules are locked
+
+F) NEW — Revision Support (Mocks & Targeted Clinics)
+
+Targeted tuition add-on for exam-only candidates who need focused prep.
+
+Format: 8-week series per module; full-series booking (8 sessions) required
+
+Timetable example (Feb–Mar 2026): Mon–Fri 14:00–17:00 — M2, M4, M3, M5, M8
+
+Mocks: Week 4 (Fri) and Week 8 (Fri)
+
+Fees: €15 per session → €120 per module series
+
+Operational policy: timings/pricing may change with demand/availability; minimum class sizes apply
+
+After 8 weeks: next 8-week block scheduled (same or different modules based on demand)
+
+Short website copy:
+“Need extra prep? Join our 8-week Revision Support classes with two full mock exams (Weeks 4 & 8). Book the full 8-session series per module. From €120 per module series. Timings rotate based on demand; minimum class sizes apply.”
+
+4) MODULE REQUIREMENTS PAGE (M1–M17 + PATHWAYS)
+
+Core: M1–M10
+Specialist: B1 routes depend on M11/M12 + M15/M16 + M17; B2 uses M13 + M14
+
+Pathways
+
+B1.1: M1–M10 + M11, M15 & M17
+
+B1.2: M1–M10 + M11, M16 & M17
+
+B1.3: M1–M10 + M12 & M15
+
+B1.4: M1–M10 + M12 & M16
+
+B2: M1–M10 + M13 & M14
+
+CTA: Start Registration to view modular pricing & book in the portal.
+
+5) REQUIRED PAGES (HIGH-CONVERTING BLUEPRINTS)
+
+HOME
+Hero: “Your journey to becoming a certified Aircraft Technician starts here.”
+Subhead: “World-class aviation technical training in Accra — structured pathways aligned to EASA Part-66 standards.”
+Buttons: [Start Registration] [Explore Courses] [WhatsApp/Contact]
+Trust strip (3–5 tiles): EASA-aligned pathways • Portal tracking • Exam booking + seat allocation • Practical/hand-skills (full-time) • Cohort launches
+How to Enrol (Steps 1–4 verbatim) • Programme Cards (A–F) • About teaser • Newsroom teaser • Contact/location
+
+COURSE PAGES (A–F)
+Who it’s for • What’s included • Duration/fees/min-intake • Payment milestones • “Next Steps” box (Steps 1–4 verbatim) • CTA: Start Registration
+
+ADMISSIONS: HOW TO ENROL (Steps 1–4 verbatim) + Document checklist + “What happens after approval?” + note: “Modular pricing shown in the portal.”
+
+ENTRY REQUIREMENTS
+Separate sections: Full-time, Crash, Modular, Exam-Only (keep factual; editable).
+
+FEES & PAYMENT RULES
+Show GHS 350 registration; show EUR programme prices (A–F); bank transfer + proof; portal verification; refunds/deferrals reference Online Application Terms.
+
+ABOUT: AEROJET ACADEMY
+Mission • Who we train & why • Standards/outcomes • Link to Accra MRO Project context.
+
+ACCRA MRO PROJECT (Context)
+Vision/purpose • Why it matters (capacity/standards/impact) • Workforce development link. Avoid overpromising.
+
+NEWSROOM
+Post types: Announcements • Intakes • Exams • Partnerships • Facilities. CTA: Start Registration.
+
+CONTACT
+ATTC, Kokomlemle – Accra • +233 551 010 108 • trainingprograms@aerojet-academy.com
+ • WhatsApp click-to-chat.
+
+LEGAL
+Privacy Policy • Online Application Terms (updated to new enrolment flow).
+
+6) PORTAL INTEGRATION (STUDENT + STAFF) — MUST BE BUILT
+
+The portal ships under the same domain (e.g., /portal) or subdomain (portal.aerojet-academy.com) with shared branding.
+
+Public → Portal entry points
+Student Portal Login • Staff Portal Login • Start Registration (creates account / triggers invoice)
+
+Portal must support
+
+Bank transfer payments + proof upload + admin verification
+
+Registration fee gating before any bookings
+
+Learning materials access gated behind payment verification (OneDrive/SharePoint folder IDs)
+
+Attendance with lateness→absence conversion
+
+Student records (internal exams, behaviour, practical logs; EASA external results)
+
+Exam scheduling + seat allocation (rooms capped at 28 seats)
+
+Admin onboarding for students who paid offline
+
+Exam-Only products (Individual/Resit/2-Seat/4-Seat/Group Charter) with deposits/balances, bundle wallets, and T-21/T-14 logic
+
+Revision Support products (8-session series per module) with min-class and variable timetables
+
+Authoritative functional spec (embed verbatim):
+Use the consolidated Student Portal & Dashboard prompt (roles, RBAC, data model, workflows, attendance math with 45h/2.5h/day/5h late = 88.88%, integrations, security/NFR, APIs, deliverables) plus the Seat Allocation & Exam Scheduling add-on (exam rooms/runs, S01–S28 seating, locking, check-in, privacy-safe student view).
+
+Additions for Exam-Only:
+
+ExamProductType = INDIVIDUAL_SEAT | RESIT | BUNDLE_2 | BUNDLE_4 | GROUP_CHARTER_28
+
+BundleWallet { student_id, product_type, seats_total, seats_used, valid_until }
+
+ExamWindow { id, start_date, end_date, cutoff_t21, min_paid_required=60, min_charters=3, status }
+
+ExamBooking adds deposit_due_at, balance_due_at, late_fee_applied, rolled_from_window_id?
+
+Auto-flip window to GO at T-21 if (paid_seats ≥ 60) OR (group_charters ≥ 3)
+
+Late booking inside T-14 adds €50 surcharge if seat available
+
+Bundle rules: one free seat change (2-seat) at T-21; 4-seat includes one free resit seat
+
+UI must show
+
+Student: deposit/balance, window cutoff T-21, “GO meter,” seat/room/time once allocated
+
+Admin: paid-seat counter vs 60, number of group charters, auto Go/No-Go, surcharge flags, bundle draw-downs, roster/print/export
+
+7) WORDPRESS LEGACY CONTENT HANDLING
+
+Source: existing WordPress export (but /old/ assets/pages ignored)
+
+Replace M1–M17 “purchase pages” with portal booking flows
+
+Migrate/replace: Home • About • Training Courses • Register (remove aptitude text) • Course Modules • Student Portal (replace) • Contact • FAQ • Online Application Terms • Privacy Policy
+
+8) UX/UI REQUIREMENTS
+
+Mobile-first, fast loading
+
+Sticky primary CTA: Start Registration
+
+“Next Steps” box (Steps 1–4) on all course/admissions pages
+
+Clear separation: Public Site vs Student Portal vs Staff Portal
+
+Minimal clicks: Home → Courses → Start Registration
+
+Icons, comparison cards, FAQs to reduce friction
+
+Trust signals: location, structured process, outcomes, portal capability
+
+9) TECHNICAL EXPECTATIONS
+
+Marketing site
+SEO-ready; clean URLs; high performance; lightweight CMS for Newsroom
+
+Portal
+Authenticated app with RBAC • Postgres data model • Secure uploads (IDs, payment proofs) • Audit logs • Optional Microsoft Graph integration for OneDrive/SharePoint (MVP can use manual folder-ID gating)
+
+Non-functional
+99.9% uptime • p95 < 300ms for common reads • Seat auto-assign ≤ 2s for 28 seats • CSV export ≤ 5s for ≤10k rows • Observability • Daily backups (30-day retention) • i18n-ready; default currency EUR (with optional GHS display), timezone Africa/Accra
+
+10) EXAM EVENTS SCHEDULE (2026–2027) — WEBSITE + PORTAL COUNTERS
+
+Policy Summary
+
+Exam slots must be paid by the Payment Deadline shown below for the desired window
+
+Go/No-Go decision is made on the Payment Deadline (T-21)
+
+Windows only confirmed when minimum numbers are met by the required date
+
+Only paid bookings count toward confirmation
+
+Minimum: 60 paid exam modules (or 3 Group Charters) before examiner will travel
+
+2026
+
+Jun 2026: 23–24 Jun 2026 • Booking & Payment Deadline: 15 Mar 2026
+
+Sep 2026: 14–15 Sep 2026 • Deadline: 06 Jun 2026
+
+Dec 2026: 21–22 Dec 2026 • Deadline: 12 Sep 2026
+
+2027
+
+Mar 2027: 18–20 Mar 2027 • Deadline: 08 Dec 2026
+
+Jun 2027: 28–30 Jun 2027 • Deadline: 20 Mar 2027
+
+Sep/Oct 2027: 29 Sep–01 Oct 2027 • Deadline: 21 Jun 2027
+
+Dec 2027: 15–17 Dec 2027 • Deadline: 06 Sep 2027
+
+If minimum numbers are not met by the payment deadline, the exam window moves to the next available slot and confirmed bookings roll forward at no extra cost.
+
+Bookings & Enquiries
+Email: trainingprograms@aerojet-academy.com
+ | training@aerojet-aviation.com
+ | Phone/WhatsApp: +233 209 848 423
+
+11) DELIVERABLES
+
+High-level architecture + ERD
+
+Wireframes for student/admin/instructor/invigilator flows (desktop & mobile)
+
+OpenAPI/Swagger spec (all endpoints)
+
+DB migrations + seed data (rooms S01–S28, modules, runs, students)
+
+CSV templates: EASA results import • attendance import • finance ledger import • exam roster export
+
+Automated tests: payment gating • seat allocation/locking • check-in • attendance math • bundle wallets • T-21/T-14 rules
+
+Deployment guide, .env template, RBAC matrix, Exam-Day runbook
+
+For the email on the site, use trainingprograms@aerojet-academy.com
+The phone number should be 0209 848 423
+Bank details
+FNB Bank
+AEROJET FOUNDATION
+Acct No. - 1020003980687
+Branch Code: 330102
+SWIFT CODE: FIRNGHACXXX
+

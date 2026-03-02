@@ -39,7 +39,10 @@ export default function UploadProofForm() {
         <div className="mt-4 text-center">
           <p className="text-sm text-green-600">
             Already verified?{' '}
-            <button onClick={() => router.push('/login')} className="font-bold text-green-700 hover:underline">
+            <button
+              onClick={() => router.push('/login')}
+              className="font-bold text-green-700 hover:underline"
+            >
               Login here
             </button>
           </p>

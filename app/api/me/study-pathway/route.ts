@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
         const created = await tx.studentProfile.create({
           data: {
             userId,
-            studentId: generateStudentId(),
+            studentId: await generateStudentId(),
             pathwayId: pathway.id,
             studyPathwayLockedAt: new Date(),
             studyPathwayLocked: true,

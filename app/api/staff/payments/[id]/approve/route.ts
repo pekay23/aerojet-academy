@@ -3,7 +3,11 @@ import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
-import { sendPaymentApprovedEmail, sendPaymentRejectedEmail } from '@/lib/email/service'
+import {
+  sendPaymentApprovedEmail,
+  sendPaymentRejectedEmail,
+  sendSeatReservationConfirmedEmail,
+} from '@/lib/email/service'
 import { PaymentStatus, ProgrammeChoice } from '@prisma/client'
 import { topUpWallet } from '@/lib/wallet/operations'
 import { shouldPromoteOnPayment, promoteApplicantToStudent } from '@/lib/enrollment/pathway'
@@ -101,9 +105,12 @@ export const POST = withErrorHandler(
       }
 
       // Handle Full-Time enrollment creation + milestone tracking on seat-related payments
-      const isFTPayment = ['SEAT_CONFIRMATION', 'CUSTOM_PART_PAYMENT', 'YEAR_1_FULL', 'FULL_PROGRAMME'].includes(
-        payment.referenceType || ''
-      )
+      const isFTPayment = [
+        'SEAT_CONFIRMATION',
+        'CUSTOM_PART_PAYMENT',
+        'YEAR_1_FULL',
+        'FULL_PROGRAMME',
+      ].includes(payment.referenceType || '')
       const isFTApplicant =
         payment.user.role === 'APPLICANT' &&
         payment.user.status === 'ACTIVE' &&
@@ -147,7 +154,10 @@ export const POST = withErrorHandler(
             orderBy: { createdAt: 'asc' },
           })
 
-          if (payment.referenceType === 'SEAT_CONFIRMATION' || payment.referenceType === 'CUSTOM_PART_PAYMENT') {
+          if (
+            payment.referenceType === 'SEAT_CONFIRMATION' ||
+            payment.referenceType === 'CUSTOM_PART_PAYMENT'
+          ) {
             // Mark SEAT_CONFIRMATION milestone as PAID
             const seatMs = milestones.find((m) => m.milestoneType === 'SEAT_CONFIRMATION')
             if (seatMs && seatMs.status !== 'PAID') {
@@ -169,7 +179,12 @@ export const POST = withErrorHandler(
                   let wallet = await tx.wallet.findUnique({ where: { userId: payment.userId } })
                   if (!wallet) {
                     wallet = await tx.wallet.create({
-                      data: { userId: payment.userId, balance: 0, reservedBalance: 0, availableBalance: 0 },
+                      data: {
+                        userId: payment.userId,
+                        balance: 0,
+                        reservedBalance: 0,
+                        availableBalance: 0,
+                      },
                     })
                   }
                   await topUpWallet(
@@ -189,42 +204,19 @@ export const POST = withErrorHandler(
               where: { id: enrollment.id },
               data: { status: 'ACTIVE' },
             })
-          } else if (payment.referenceType === 'YEAR_1_FULL') {
-            // Mark ALL Year 1 milestones as PAID
-            for (const ms of milestones) {
-              if (ms.status !== 'PAID') {
-                await prisma.paymentMilestone.update({
-                  where: { id: ms.id },
-                  data: { status: 'PAID', paidAt: new Date() },
-                })
-              }
-            }
-            await prisma.fullTimeEnrollment.update({
-              where: { id: enrollment.id },
-              data: { status: 'ACTIVE' },
-            })
-          } else if (payment.referenceType === 'FULL_PROGRAMME') {
-            // Mark ALL milestones as PAID (Year 1 for now; future years generated later)
-            for (const ms of milestones) {
-              if (ms.status !== 'PAID') {
-                await prisma.paymentMilestone.update({
-                  where: { id: ms.id },
-                  data: { status: 'PAID', paidAt: new Date() },
-                })
-              }
-            }
-            await prisma.fullTimeEnrollment.update({
-              where: { id: enrollment.id },
-              data: { status: 'ACTIVE' },
-            })
-          }
 
-          // SUSPENDED -> (Payment made + admin approval) -> ACTIVE
-          if (enrollment.status === 'SUSPENDED') {
-            await prisma.fullTimeEnrollment.update({
-              where: { id: enrollment.id },
-              data: { status: 'ACTIVE' },
-            })
+            // Send seat reservation confirmation email
+            if (payment.user.profile) {
+              const programmeName =
+                programme?.name || payment.user.programmeChoice || 'Your Programme'
+              sendSeatReservationConfirmedEmail(
+                payment.user.email,
+                payment.user.profile.firstName,
+                programmeName,
+                Number(payment.amount),
+                payment.currency || 'EUR'
+              ).catch(console.error)
+            }
           }
         }
       }

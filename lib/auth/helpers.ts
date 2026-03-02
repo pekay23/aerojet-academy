@@ -1,6 +1,7 @@
 import { getAuthSession } from '@/lib/auth/auth-options'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
+import prisma from '@/lib/prisma/client'
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 
@@ -14,6 +15,41 @@ export function generateRegistrationCode(): string {
 /** Generates a random secure token */
 export function generateToken(): string {
   return crypto.randomBytes(32).toString('hex')
+}
+
+/**
+ * Generate Student ID with collision prevention
+ * Format: AATA-YYYY-XXXX (e.g., AATA-2026-0001)
+ * Uses database sequence to ensure uniqueness
+ */
+export async function generateStudentId(): Promise<string> {
+  const year = new Date().getFullYear()
+  const prefix = `AATA-${year}-`
+
+  // Get the highest existing student ID for this year from StudentProfile
+  const lastStudent = await prisma.studentProfile.findFirst({
+    where: {
+      studentId: { startsWith: prefix },
+    },
+    orderBy: { studentId: 'desc' },
+    select: { studentId: true },
+  })
+
+  let nextSequence = 1
+  if (lastStudent?.studentId) {
+    const lastSequence = parseInt(lastStudent.studentId.replace(prefix, ''), 10)
+    if (!isNaN(lastSequence)) {
+      nextSequence = lastSequence + 1
+    }
+  }
+
+  // Safety limit - if we've exceeded 9999, throw error
+  if (nextSequence > 9999) {
+    throw new Error(`Student ID sequence exhausted for year ${year}`)
+  }
+
+  const paddedSequence = nextSequence.toString().padStart(4, '0')
+  return `AATA-${year}-${paddedSequence}`
 }
 
 /**
@@ -85,12 +121,6 @@ export function generateAcademyEmail(
     return `${initials.join('.')}.${cleanSurname}@aerojet-academy.com`
   }
   return `${cleanSurname}@aerojet-academy.com`
-}
-
-export function generateStudentId(): string {
-  const year = new Date().getFullYear()
-  const random = Math.floor(1000 + Math.random() * 9000).toString()
-  return `AATA-${year}-${random}`
 }
 
 export async function requireStaff() {

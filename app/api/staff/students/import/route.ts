@@ -41,7 +41,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       const tempPassword = generateTempPassword()
       const hashedPassword = await hashPassword(tempPassword)
       const academyEmail = generateAcademyEmail(s.firstName, s.middleName, s.lastName)
-      const studentId = generateStudentId()
+      const studentId = await generateStudentId()
 
       await prisma.$transaction(async (tx) => {
         const user = await tx.user.create({

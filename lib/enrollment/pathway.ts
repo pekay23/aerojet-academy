@@ -120,9 +120,7 @@ export function shouldPromoteOnPayment(
   programmeChoice: ProgrammeChoice | null,
   paymentReferenceType: string
 ): boolean {
-  const enrollmentType = programmeChoice
-    ? resolveEnrollmentType(programmeChoice)
-    : 'MODULAR'
+  const enrollmentType = programmeChoice ? resolveEnrollmentType(programmeChoice) : 'MODULAR'
   const triggers = PROMOTION_TRIGGERS[enrollmentType] || PROMOTION_TRIGGERS['MODULAR']
   return triggers.includes(paymentReferenceType)
 }
@@ -148,7 +146,7 @@ export async function promoteApplicantToStudent(
     return { studentId: user.studentProfile.studentId }
   }
 
-  const studentId = generateStudentId()
+  const studentId = await generateStudentId()
   const enrollmentType = user.programmeChoice
     ? resolveEnrollmentType(user.programmeChoice as ProgrammeChoice)
     : 'MODULAR'
@@ -195,11 +193,7 @@ export async function promoteApplicantToStudent(
 
   // Send promotion email
   if (user.profile) {
-    sendStudentPromotionEmail(
-      user.email,
-      user.profile.firstName,
-      studentId
-    ).catch(console.error)
+    sendStudentPromotionEmail(user.email, user.profile.firstName, studentId).catch(console.error)
   }
 
   // Audit log
