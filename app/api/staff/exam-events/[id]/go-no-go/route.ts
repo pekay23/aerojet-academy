@@ -3,8 +3,9 @@ import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { failPool } from '@/lib/pools/operations'
+import { creditToWallet } from '@/lib/wallet/operations'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
-import { EventStatus } from '@prisma/client'
+import { EventStatus, PaymentStatus } from '@prisma/client'
 
 export const POST = withErrorHandler(
   async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
@@ -21,7 +22,7 @@ export const POST = withErrorHandler(
 
     const event = await prisma.examEvent.findUnique({
       where: { id },
-      include: { pools: { include: { _count: { select: { memberships: true } } } } },
+      include: { pools: { include: { memberships: true } } },
     })
     if (!event) return apiNotFound('Event not found')
 
@@ -34,6 +35,33 @@ export const POST = withErrorHandler(
           await failPool(pool.id, admin.id)
         }
       }
+
+      // For postponement: credit wallet for all confirmed bookings (per business rules)
+      if (decision === 'postpone') {
+        const confirmedBookings = await prisma.examBooking.findMany({
+          where: {
+            eventId: id,
+            status: PaymentStatus.COMPLETED,
+          },
+        })
+
+        for (const booking of confirmedBookings) {
+          const amount = Number(booking.amountPaid || 0)
+          if (amount > 0) {
+            await prisma.$transaction(async (tx) => {
+              await creditToWallet(
+                tx,
+                booking.userId,
+                amount,
+                `Refund: Exam event postponed - ${event.name}`,
+                booking.id,
+                'EVENT_POSTPONEMENT_REFUND'
+              )
+            })
+          }
+        }
+      }
+
       await prisma.examEvent.update({
         where: { id },
         data: { status: decision === 'postpone' ? EventStatus.POSTPONED : EventStatus.CANCELLED },

@@ -251,6 +251,8 @@ export async function releaseFunds(
 
 // ---------------------------------------------------------------------------
 // CREDIT TO WALLET (DIRECT CREDIT/REFUND)
+// IMPORTANT: Per business rules, NO CASH REFUNDS are allowed.
+// All refunds are credited to the user's wallet balance only.
 // ---------------------------------------------------------------------------
 
 export async function creditToWallet(

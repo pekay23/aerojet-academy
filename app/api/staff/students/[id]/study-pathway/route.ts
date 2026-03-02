@@ -57,7 +57,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         const created = await tx.studentProfile.create({
           data: {
             userId: id,
-            studentId: generateStudentId(),
+            studentId: await generateStudentId(),
             ...profileData,
           },
         })

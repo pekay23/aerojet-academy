@@ -1,3 +1,4 @@
+Database schema
 // This is your Prisma schema file
 // Learn more: https://pris.ly/d/prisma-schema
 
@@ -36,6 +37,20 @@ enum EnrollmentType {
   SHORT_COURSE // Short courses
 }
 
+enum StudyPathwayEnum {
+  B1_MECHANICAL
+  B2_AVIONICS
+  B1_B2_DUAL
+}
+
+enum LicenseCategoryEnum {
+  B1_1_AEROPLANES_TURBINE
+  B1_2_AEROPLANES_PISTON
+  B1_3_HELICOPTERS_TURBINE
+  B1_4_HELICOPTERS_PISTON
+  B2_AVIONICS
+  B3_PISTON_AEROPLANE
+}
 
 enum ProgrammeChoice {
   FULL_TIME_4YEAR
@@ -114,20 +129,6 @@ enum NotificationType {
   POOL_UPDATE
   PAYMENT_UPDATE
   EXAM_REMINDER
-}
-
-enum BookingType {
-  INDIVIDUAL   // Standard paid booking (€520)
-  POOL         // Joined via exam pool (€300)
-  MODULAR      // Included in modular package (no extra charge)
-  FULL_TIME    // Included in full-time enrollment (no extra charge)
-  COMPLIMENTARY // Admin-granted
-}
-
-enum CourseModuleType {
-  CORE        // M1-M10: mandatory for all licenses
-  SPECIALIST  // M11, M12, M15, M16, M17: category-specific mechanical
-  AVIONICS    // M13, M14: avionics/systems
 }
 
 // ============================================================================
@@ -256,14 +257,11 @@ model StudentProfile {
   graduationDate   DateTime?
 
   // Pathway
+  studyPathway              StudyPathwayEnum?
   studyPathwayLockedAt      DateTime?
   studyPathwayLocked        Boolean       @default(false)
   studyPathwayLastChangedBy String?
   studyPathwayChangeReason  String?       @db.Text
-
-  // Academic position
-  currentYearNumber     Int @default(1)
-  currentSemesterNumber Int @default(1)
 
   // Academic
   CGPA Decimal? @db.Decimal(3, 2)
@@ -438,11 +436,6 @@ model ExamComponent {
   individualPrice Decimal? @default(520.00) @db.Decimal(10, 2)
   poolPrice       Decimal? @default(300.00) @db.Decimal(10, 2)
 
-  // Relationships
-  exams           Exam[]
-  bookings        ExamBooking[]
-  poolMemberships PoolMembership[]
-
   @@map("exam_components")
 }
 
@@ -457,9 +450,8 @@ model Course {
   description String? @db.Text
   categoryId   String?
   category     CourseCategory? @relation(fields: [categoryId], references: [id])
-
-  // Classification
-  moduleType CourseModuleType? // CORE, SPECIALIST, AVIONICS
+  pathway     StudyPathwayEnum?   @default(B1_B2_DUAL)
+  licenseCategory LicenseCategoryEnum?
 
   // Details
   duration Int? // Hours
@@ -479,6 +471,7 @@ model Course {
   programmeYears ProgrammeYear[]
   enrollments    Enrollment[]
   classes        Class[]
+  exams          Exam[]
   
   // Relational Academic Updates
   licenseRequirements   LicenseModuleRequirement[]
@@ -654,10 +647,6 @@ model ExamEvent {
 
   // Business Rules
   minRevenueTarget Decimal @default(25000.00) @db.Decimal(10, 2)
-  resitFee        Decimal @default(480.00) @db.Decimal(10, 2) // Resit exam fee (editable per event)
-  resitFeeCurrency String @default("EUR")
-  lateBookingSurcharge Decimal @default(50.00) @db.Decimal(10, 2) // Late booking surcharge (within 14 days)
-  lateBookingDays Int @default(14) // Days before event to apply surcharge
 
   // Status
   status EventStatus @default(DRAFT)
@@ -665,7 +654,6 @@ model ExamEvent {
   // Relationships
   pools        ExamPool[]
   examBookings ExamBooking[]
-  exams        Exam[]
 
   // Audit
   createdAt DateTime @default(now())
@@ -734,8 +722,7 @@ model PoolMembership {
   user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   // Module Selection
-  examComponentId String?
-  examComponent   ExamComponent? @relation(fields: [examComponentId], references: [id])
+  selectedModule String // ONE module per membership: "M1", "M7", etc.
 
   // Status
   status MembershipStatus @default(RESERVED)
@@ -761,7 +748,7 @@ model PoolMembership {
   @@index([poolId])
   @@index([userId])
   @@index([status])
-  @@index([examComponentId])
+  @@index([selectedModule])
   @@index([poolId, status])
   @@map("pool_memberships")
 }
@@ -845,13 +832,9 @@ model WalletTransaction {
 // ============================================================================
 
 model Exam {
-  id              String         @id @default(cuid())
-  examComponentId String
-  examComponent   ExamComponent  @relation(fields: [examComponentId], references: [id])
-
-  // Event association
-  eventId String?
-  event   ExamEvent? @relation(fields: [eventId], references: [id])
+  id       String @id @default(cuid())
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id])
 
   // Details
   name         String
@@ -868,7 +851,7 @@ model Exam {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@index([examComponentId])
+  @@index([courseId])
   @@index([examDate])
   @@map("exams")
 }
@@ -882,13 +865,11 @@ model ExamBooking {
   eventId String?
   event   ExamEvent? @relation(fields: [eventId], references: [id])
 
-  // Module
-  examComponentId String?
-  examComponent   ExamComponent? @relation(fields: [examComponentId], references: [id])
+  // Booking Type
+  bookingType String // INDIVIDUAL, BUNDLE_2, BUNDLE_4, GROUP_CHARTER, RESIT
 
-  // Booking context
-  bookingType BookingType @default(INDIVIDUAL)
-  moduleCode  String?     // e.g. "M7" — denormalised for quick lookup
+  // Module
+  moduleCode String
 
   // Payment
   amountPaid        Decimal            @db.Decimal(10, 2)
@@ -1144,36 +1125,6 @@ model SystemSetting {
   @@map("system_settings")
 }
 
-model PaymentMethod {
-  id        String  @id @default(cuid())
-  type      String // BANK_TRANSFER, MOBILE_MONEY, CARD_STRIPE
-  label     String // Display name: "FNB Bank (GHS)", "MTN MoMo"
-  currency  String // GHS, USD, EUR
-  isActive  Boolean @default(true)
-  sortOrder Int     @default(0)
-
-  // Bank Transfer fields
-  bankName          String?
-  bankAccountName   String?
-  bankAccountNumber String?
-  bankSwiftCode     String?
-  bankBranch        String?
-
-  // Mobile Money fields
-  momoProvider     String? // MTN, TELECEL, AIRTELTIGO
-  momoNumber       String?
-  momoMerchantCode String?
-  momoAccountName  String?
-
-  // Card/Stripe fields (future)
-  stripeAccountId String?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("payment_methods")
-}
-
 model FileUpload {
   id     String @id @default(cuid())
   userId String
@@ -1315,6 +1266,7 @@ model FullTimeProgramme {
   currency      String  @default("EUR")
   description   String? @db.Text
   isActive      Boolean @default(true)
+  licenseCategoryEnum LicenseCategoryEnum? @default(B1_1_AEROPLANES_TURBINE)
 
   programmeYears ProgrammeYear[]
   enrollments    FullTimeEnrollment[]
@@ -1334,7 +1286,8 @@ model ProgrammeYear {
   seatConfirmationFee Decimal           @default(1500) @db.Decimal(10, 2)
   firstPaymentAmount  Decimal           @default(3500) @db.Decimal(10, 2)
 
-  semesters Json @default("[]") // [{name: "Semester 1", startDate: "...", endDate: "..."}]
+  semester1StartDate DateTime
+  semester2StartDate DateTime
 
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
@@ -1361,48 +1314,12 @@ model FullTimeEnrollment {
   academicYear      String?  @default("2026/2027")
 
   milestones PaymentMilestone[]
-  ojtPeriods OjtPeriod[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([studentId, programmeId])
   @@map("full_time_enrollments")
-}
-
-model OjtPeriod {
-  id           String             @id @default(cuid())
-  enrollmentId String
-  enrollment   FullTimeEnrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
-
-  // Placement Details
-  companyName    String
-  companyAddress String?
-  supervisorName String?
-  supervisorEmail String?
-
-  // Dates
-  startDate DateTime
-  endDate   DateTime?
-
-  // Progress
-  status         String @default("PENDING") // PENDING, ACTIVE, COMPLETED, FAILED
-  hoursCompleted Int    @default(0)
-  hoursRequired  Int    @default(2000) // EASA Part-66 Part-147 typical requirement
-
-  // Documentation
-  reportUrl  String?
-  verifiedBy String?   // Staff/Admin ID
-  verifiedAt DateTime?
-
-  // Metadata
-  notes     String?  @db.Text
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([enrollmentId])
-  @@index([status])
-  @@map("ojt_periods")
 }
 
 model PaymentMilestone {

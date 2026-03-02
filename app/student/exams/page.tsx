@@ -16,6 +16,8 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import ResitBookingButton from './_components/ResitBookingButton'
 import ExamsTabs from './_components/ExamsTabs'
+import { canAccessFeature, getEnrollmentMilestoneStatus } from '@/lib/access-control'
+import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
 export const metadata: Metadata = { title: 'My Exams | Student Portal' }
 export const dynamic = 'force-dynamic'
@@ -29,6 +31,49 @@ export default async function ExamsPage({
   const tab = tabParam || 'bookings'
 
   const session = await getAuthSession()
+
+  const studentProfile = await prisma.studentProfile.findUnique({
+    where: { userId: session.user.id },
+    select: { enrollmentType: true },
+  })
+
+  const isFullTime = studentProfile?.enrollmentType === 'FULL_TIME'
+  const hasAccess = await canAccessFeature(session.user.id, 'exams')
+
+  if (isFullTime && !hasAccess) {
+    const [milestoneStatus, wallet] = await Promise.all([
+      getEnrollmentMilestoneStatus(session.user.id),
+      prisma.wallet.findUnique({
+        where: { userId: session.user.id },
+        select: { availableBalance: true, reservedBalance: true, currency: true },
+      }),
+    ])
+
+    const walletBalance = {
+      available: Number(wallet?.availableBalance ?? 0),
+      held: Number(wallet?.reservedBalance ?? 0),
+      currency: wallet?.currency ?? 'EUR',
+    }
+
+    return (
+      <div className="space-y-8">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+            My Exams
+          </h1>
+          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            View and manage your exam bookings and results.
+          </p>
+        </div>
+
+        <PaymentRequiredBanner
+          accessLevel="SEAT_ONLY"
+          milestoneStatus={milestoneStatus}
+          walletBalance={walletBalance}
+        />
+      </div>
+    )
+  }
 
   const [bookings, results] = await Promise.all([
     prisma.examBooking.findMany({
