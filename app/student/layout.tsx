@@ -108,7 +108,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         messageCount={unreadMessages}
         paymentAccessLevel={paymentAccessLevel}
       />
-      <main className="min-h-screen flex-1">
+      <main id="main-content" className="min-h-screen flex-1">
         <div className="p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
           <BreadcrumbNav />
           {hasPathway ? (
