@@ -5,19 +5,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { revalidatePath } from 'next/cache'
-
-const EASA_PASSING_GRADE = 75
-
-export function calculateLetterGrade(percentage: number): string {
-  if (percentage >= 90) return 'A'
-  if (percentage >= 80) return 'B'
-  if (percentage >= EASA_PASSING_GRADE) return 'C'
-  return 'F'
-}
-
-export function isPassing(percentage: number): boolean {
-  return percentage >= EASA_PASSING_GRADE
-}
+import { calculateLetterGrade, isPassing } from '@/lib/utils/grading'
 
 async function getInstructorId(userId: string) {
   const profile = await prisma.instructorProfile.findUnique({
