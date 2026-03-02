@@ -65,21 +65,26 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     })
 
     // 3. Check if promotion conditions are now met
-    //    Both SEAT_CONFIRMATION and SEM1_DUE must be PAID to promote
+    //    SEAT_CONFIRMATION must be PAID to promote
     const allMilestones = await tx.paymentMilestone.findMany({
       where: { enrollmentId: milestone.enrollmentId, yearNumber: 1 },
     })
     const seatPaid = allMilestones.some(
-      (m) => m.milestoneType === 'SEAT_CONFIRMATION' && m.status === 'PAID'
-    )
-    const sem1Paid = allMilestones.some(
-      (m) => m.milestoneType === 'SEM1_DUE' && (m.id === milestone.id ? true : m.status === 'PAID')
+      (m) => m.milestoneType === 'SEAT_CONFIRMATION' && (m.id === milestone.id ? true : m.status === 'PAID')
     )
 
     const user = await tx.user.findUnique({ where: { id: userId } })
     let promoted = false
 
-    if (user?.role === 'APPLICANT' && seatPaid && sem1Paid) {
+    if (milestone.milestoneType === 'SEAT_CONFIRMATION') {
+      // Activate enrollment immediately when seat is paid
+      await tx.fullTimeEnrollment.update({
+        where: { id: milestone.enrollmentId },
+        data: { status: 'ACTIVE' },
+      })
+    }
+
+    if (user?.role === 'APPLICANT' && seatPaid) {
       // Promote: create StudentProfile if needed, change role
       const existingProfile = await tx.studentProfile.findUnique({ where: { userId } })
       if (!existingProfile) {

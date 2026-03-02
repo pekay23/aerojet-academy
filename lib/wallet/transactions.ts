@@ -1,6 +1,9 @@
-import prisma from '@/lib/database/prisma'
+import prisma from '@/lib/prisma/client'
 
-export async function getTransactions(userId: string, opts?: { type?: string; limit?: number; offset?: number }) {
+export async function getTransactions(
+  userId: string,
+  opts?: { type?: string; limit?: number; offset?: number }
+) {
   const wallet = await prisma.wallet.findUnique({ where: { userId } })
   if (!wallet) return { transactions: [], total: 0 }
 

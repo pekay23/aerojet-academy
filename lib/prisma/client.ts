@@ -10,21 +10,35 @@ if (!connectionString) {
 }
 
 // PostgreSQL SSL settings for Neon
-// Using ssl: { rejectUnauthorized: false } is usually safer for serverless/Vercel
+// In development, we relax SSL verification to avoid ECONNRESET issues during TLS handshakes
 const sslConfig = {
-  rejectUnauthorized: connectionString.includes('sslmode=verify-full'),
+  rejectUnauthorized:
+    process.env.NODE_ENV === 'production' &&
+    (connectionString.includes('sslmode=verify-full') ||
+      connectionString.includes('sslmode=require')),
 }
 
 const globalForPrisma = globalThis as unknown as { prisma_aja: PrismaClient }
 
 const createPrismaClient = () => {
+  // In development, we use a smaller pool size to prevent overwhelming the Neon proxy
+  // with simultaneous authentication requests during cold starts (avoiding 08P01 errors)
+  const isDev = process.env.NODE_ENV === 'development'
+
   const pool = new Pool({
     connectionString,
     ssl: sslConfig,
-    max: 10,
+    max: isDev ? 3 : 20, // Further reduced in dev to prevent handshake bursts
     idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 30000, // Increased to 30s for slow Neon wake-ups and local latency
+    connectionTimeoutMillis: 90000, // Increased to 90s (extreme)
+    keepAlive: true,
+    allowExitOnIdle: true,
   })
+
+  // Log pool errors for better visibility in development
+  if (isDev) {
+    pool.on('error', (err) => console.error('Prisma PgPool error:', err.message))
+  }
   const adapter = new PrismaPg(pool)
   return new PrismaClient({
     adapter,
@@ -32,8 +46,34 @@ const createPrismaClient = () => {
   })
 }
 
-export const prisma = globalForPrisma.prisma_aja ?? createPrismaClient()
+// Global state for connection serialization during development cold starts
+let isWarm = false
+let connectionQueue: Promise<any> = Promise.resolve()
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma_aja = prisma
+const basePrisma = globalForPrisma.prisma_aja ?? createPrismaClient()
 
-export default prisma
+// Extend the client with a connection queue for development
+// This prevents multiple simultaneous handshakes during Neon cold starts (Layout + Page parallel fetch)
+export const prisma =
+  process.env.NODE_ENV === 'development'
+    ? basePrisma.$extends({
+        query: {
+          $allModels: {
+            async $allOperations({ args, query }) {
+              if (!isWarm) {
+                return (connectionQueue = connectionQueue.then(async () => {
+                  const result = await query(args)
+                  isWarm = true
+                  return result
+                }))
+              }
+              return query(args)
+            },
+          },
+        },
+      })
+    : basePrisma
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma_aja = basePrisma as PrismaClient
+
+export default prisma as unknown as PrismaClient

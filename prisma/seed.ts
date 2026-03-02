@@ -651,6 +651,57 @@ async function main() {
   })
   console.log(`✅ Applicant: ${applicant.email}`)
 
+  // ============================================================================
+  // PAYMENT METHODS — Migrate from flat SystemSettings if needed
+  // ============================================================================
+
+  const existingMethods = await prisma.paymentMethod.count()
+  if (existingMethods === 0) {
+    // Check if there are legacy bank settings to migrate
+    const legacySettings = await prisma.systemSetting.findMany({
+      where: { key: { in: ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_swift', 'bank_branch', 'bank_currency'] } },
+    })
+    const legacy: Record<string, string> = {}
+    for (const s of legacySettings) legacy[s.key] = s.value
+
+    if (legacy.bank_name || legacy.bank_account_number) {
+      await prisma.paymentMethod.create({
+        data: {
+          type: 'BANK_TRANSFER',
+          label: `${legacy.bank_name || 'Bank Transfer'} (${legacy.bank_currency || 'GHS'})`,
+          currency: legacy.bank_currency || 'GHS',
+          isActive: true,
+          sortOrder: 0,
+          bankName: legacy.bank_name || null,
+          bankAccountName: legacy.bank_account_name || null,
+          bankAccountNumber: legacy.bank_account_number || null,
+          bankSwiftCode: legacy.bank_swift || null,
+          bankBranch: legacy.bank_branch || null,
+        },
+      })
+      console.log('✅ Migrated legacy bank settings to PaymentMethod')
+    } else {
+      // Create a default placeholder payment method
+      await prisma.paymentMethod.create({
+        data: {
+          type: 'BANK_TRANSFER',
+          label: 'FNB Bank (GHS)',
+          currency: 'GHS',
+          isActive: true,
+          sortOrder: 0,
+          bankName: 'FNB Bank',
+          bankAccountName: 'AEROJET FOUNDATION',
+          bankAccountNumber: '1020003980687',
+          bankSwiftCode: 'FIRNGHACXXX',
+          bankBranch: '330102',
+        },
+      })
+      console.log('✅ Created default PaymentMethod (FNB Bank)')
+    }
+  } else {
+    console.log(`⏭ PaymentMethod already has ${existingMethods} records, skipping`)
+  }
+
   console.log('\n🎉 Seed completed successfully!')
 }
 

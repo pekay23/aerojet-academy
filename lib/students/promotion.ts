@@ -1,4 +1,4 @@
-import prisma from '@/lib/database/prisma'
+import prisma from '@/lib/prisma/client'
 import { generateNextStudentId } from './id-generator'
 import { ensureWalletExists } from '@/lib/wallet/balance'
 import { sendEmail, promotionToStudentEmail } from '@/lib/email'

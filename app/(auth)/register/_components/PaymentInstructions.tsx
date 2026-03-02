@@ -5,15 +5,34 @@ import { toast } from 'sonner'
 import { CheckCircle2, CreditCard, Upload, Copy, Check, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
+
+interface PaymentMethodData {
+  id: string
+  type: string
+  label: string
+  currency: string
+  bankName: string | null
+  bankAccountName: string | null
+  bankAccountNumber: string | null
+  bankSwiftCode: string | null
+  bankBranch: string | null
+  momoProvider: string | null
+  momoNumber: string | null
+  momoMerchantCode: string | null
+  momoAccountName: string | null
+}
 
 export default function PaymentInstructions({
   fee,
   currency,
+  paymentMethods,
   finance,
 }: {
   fee: string
   currency: string
-  finance: {
+  paymentMethods?: PaymentMethodData[]
+  finance?: {
     bankName: string
     bankAccountName: string
     bankAccountNumber: string
@@ -31,6 +50,27 @@ export default function PaymentInstructions({
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // Build methods array — prefer paymentMethods prop, fall back to legacy finance prop
+  const methods: PaymentMethodData[] = paymentMethods && paymentMethods.length > 0
+    ? paymentMethods
+    : finance
+      ? [{
+          id: 'legacy',
+          type: 'BANK_TRANSFER',
+          label: finance.bankName || 'Bank Transfer',
+          currency,
+          bankName: finance.bankName,
+          bankAccountName: finance.bankAccountName,
+          bankAccountNumber: finance.bankAccountNumber,
+          bankSwiftCode: finance.bankSwift || null,
+          bankBranch: null,
+          momoProvider: null,
+          momoNumber: null,
+          momoMerchantCode: null,
+          momoAccountName: null,
+        }]
+      : []
+
   const steps = [
     { label: 'Register', icon: CheckCircle2, done: true },
     { label: 'Pay', icon: CreditCard, done: false, active: true },
@@ -41,19 +81,15 @@ export default function PaymentInstructions({
     <div className="space-y-6">
       {/* Progress Stepper */}
       <div className="relative mb-8 flex items-center justify-between px-2">
-        {/* Background Line */}
         <div className="absolute top-5 left-0 h-0.5 w-full bg-gray-100" />
-
         {steps.map((step, i) => (
           <div key={step.label} className="relative z-10 flex flex-1 flex-col items-center">
-            {/* Active/Done Line Segment */}
             {i > 0 && steps[i - 1].done && (
               <div
                 className={`absolute top-5 right-1/2 h-0.5 w-full -translate-x-full ${step.active || step.done ? 'bg-green-400' : 'bg-gray-100'}`}
                 style={{ width: '100.5%' }}
               />
             )}
-
             <div
               className={`flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold shadow-sm transition-all ${
                 step.done
@@ -65,7 +101,6 @@ export default function PaymentInstructions({
             >
               <step.icon className="h-5 w-5" />
             </div>
-
             <span
               className={`mt-3 text-[10px] font-bold tracking-widest uppercase transition-colors ${
                 step.done ? 'text-green-600' : step.active ? 'text-aerojet-blue' : 'text-gray-400'
@@ -110,55 +145,21 @@ export default function PaymentInstructions({
         <p className="mt-2 text-xs text-blue-500">Use this code as your payment reference</p>
       </div>
 
-      {/* Bank Details */}
-      <div className="overflow-hidden rounded-xl border border-gray-200 bg-white">
-        <div className="bg-slate-800 px-5 py-3">
-          <h4 className="flex items-center gap-2 text-sm font-bold text-white">
-            <CreditCard className="h-4 w-4" /> Payment Details
-          </h4>
-        </div>
-        <div className="space-y-3 p-5">
-          <p className="text-sm text-gray-600">
-            Please pay the registration fee of{' '}
-            <strong className="text-slate-800">
-              {currency} {fee}
-            </strong>{' '}
-            to:
-          </p>
-          <div className="space-y-2 rounded-lg bg-gray-50 p-4 text-sm">
-            <div className="flex items-start justify-between">
-              <span className="shrink-0 text-gray-500">Bank</span>
-              <span className="text-right font-bold text-slate-800">{finance.bankName}</span>
-            </div>
-            <div className="flex items-start justify-between">
-              <span className="shrink-0 text-gray-500">Account Name</span>
-              <span className="text-right font-bold text-slate-800">
-                {finance.bankAccountName || '—'}
-              </span>
-            </div>
-            <div className="flex items-start justify-between">
-              <span className="shrink-0 text-gray-500">Account No.</span>
-              <span className="text-right font-mono font-bold text-slate-800">
-                {finance.bankAccountNumber}
-              </span>
-            </div>
-            {finance.bankSwift && (
-              <div className="flex items-start justify-between">
-                <span className="shrink-0 text-gray-500">SWIFT/BIC</span>
-                <span className="text-right font-mono font-bold text-slate-800">
-                  {finance.bankSwift}
-                </span>
-              </div>
-            )}
-            <div className="flex items-start justify-between border-t pt-2">
-              <span className="shrink-0 text-gray-500">Reference</span>
-              <span className="text-aerojet-blue text-right font-mono font-bold">
-                {registrationCode}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Fee Info */}
+      <p className="text-center text-sm text-gray-600">
+        Please pay the registration fee of{' '}
+        <strong className="text-slate-800">
+          {currency} {fee}
+        </strong>{' '}
+        using one of the methods below:
+      </p>
+
+      {/* Payment Methods */}
+      <PaymentMethodsDisplay
+        methods={methods}
+        reference={registrationCode}
+        referenceLabel="Registration Code"
+      />
 
       {/* Upload CTA */}
       <Link

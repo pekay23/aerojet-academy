@@ -3,7 +3,9 @@ import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import PathwayPaymentForm from '../pathway/_components/PathwayPaymentForm'
-import { AlertCircle, FileText, Info, Wallet } from 'lucide-react'
+import { Info, Wallet } from 'lucide-react'
+import { getActivePaymentMethods } from '@/lib/payment-methods'
+import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
 
 export const metadata: Metadata = { title: 'Exam Wallet Top-Up | Applicant Portal' }
 export const dynamic = 'force-dynamic'
@@ -25,13 +27,10 @@ export default async function ApplicantWalletTopUpPage() {
 
   if (!applicant) redirect('/login')
 
-  // If already a STUDENT, they don't need this initial pathway payment page
-  // (They will manage wallet in the Student Portal instead)
   if (applicant.role === 'STUDENT') {
     redirect('/student/wallet')
   }
 
-  // Look for any pending payment for wallet
   const pendingPayment = await prisma.payment.findFirst({
     where: {
       userId,
@@ -69,18 +68,7 @@ export default async function ApplicantWalletTopUpPage() {
     },
   ]
 
-  const bankSettings = await prisma.systemSetting.findMany({
-    where: {
-      key: {
-        in: ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_swift', 'bank_branch'],
-      },
-    },
-  })
-
-  const globalSettings: Record<string, string> = {}
-  for (const s of bankSettings) {
-    globalSettings[s.key] = s.value
-  }
+  const activePaymentMethods = await getActivePaymentMethods()
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -132,38 +120,13 @@ export default async function ApplicantWalletTopUpPage() {
               </div>
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 Aerojet Academy operates a wallet system for modular exams. You can top up your
-                wallet via bank transfer below. Any unused funds remain secure in your wallet for
+                wallet via the payment methods below. Any unused funds remain secure in your wallet for
                 future pools.
               </p>
             </div>
 
-            {/* Bank Details */}
-            <div className="rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-              <h2 className="mb-4 font-bold text-slate-900 dark:text-slate-100">
-                Bank Transfer Details
-              </h2>
-              <dl className="space-y-3 text-sm">
-                {[
-                  { label: 'Bank', value: globalSettings.bank_name },
-                  { label: 'Account Name', value: globalSettings.bank_account_name },
-                  { label: 'Account Number', value: globalSettings.bank_account_number },
-                  { label: 'Swift / BIC', value: globalSettings.bank_swift },
-                  { label: 'Branch', value: globalSettings.bank_branch },
-                ].map(({ label, value }) => (
-                  <div
-                    key={label}
-                    className="flex flex-col gap-1 border-b border-slate-50 pb-2 last:border-0"
-                  >
-                    <dt className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      {label}
-                    </dt>
-                    <dd className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                      {value ?? '—'}
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </div>
+            {/* Payment Methods */}
+            <PaymentMethodsDisplay methods={activePaymentMethods} />
           </div>
 
           <div>

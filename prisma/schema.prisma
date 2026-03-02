@@ -7,6 +7,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 // ============================================================================
@@ -1133,6 +1134,36 @@ model SystemSetting {
 
   @@index([key])
   @@map("system_settings")
+}
+
+model PaymentMethod {
+  id        String  @id @default(cuid())
+  type      String // BANK_TRANSFER, MOBILE_MONEY, CARD_STRIPE
+  label     String // Display name: "FNB Bank (GHS)", "MTN MoMo"
+  currency  String // GHS, USD, EUR
+  isActive  Boolean @default(true)
+  sortOrder Int     @default(0)
+
+  // Bank Transfer fields
+  bankName          String?
+  bankAccountName   String?
+  bankAccountNumber String?
+  bankSwiftCode     String?
+  bankBranch        String?
+
+  // Mobile Money fields
+  momoProvider     String? // MTN, TELECEL, AIRTELTIGO
+  momoNumber       String?
+  momoMerchantCode String?
+  momoAccountName  String?
+
+  // Card/Stripe fields (future)
+  stripeAccountId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("payment_methods")
 }
 
 model FileUpload {

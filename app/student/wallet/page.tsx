@@ -20,6 +20,8 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import WalletTabs from '../_components/WalletTabs'
 import { UploadProofForm } from './top-up/_components/UploadProofForm'
+import { getActivePaymentMethods } from '@/lib/payment-methods'
+import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
 
 export const metadata: Metadata = { title: 'Wallet | Student Portal' }
 
@@ -62,27 +64,8 @@ export default async function WalletPage({
   const currencySymbol = getCurrencySymbol(walletBalance.currency)
   const hasPendingTopups = pendingTopups.length > 0
 
-  // Fetch bank details for top-up tab
-  let bankDetails: Record<string, string> = {}
-  if (tab === 'top-up') {
-    const bankSettings = await prisma.systemSetting.findMany({
-      where: {
-        key: {
-          in: [
-            'bank_name',
-            'bank_account_name',
-            'bank_account_number',
-            'bank_swift',
-            'bank_branch',
-            'bank_currency',
-          ],
-        },
-      },
-    })
-    for (const s of bankSettings || []) {
-      bankDetails[s.key] = s.value
-    }
-  }
+  // Fetch payment methods for top-up tab
+  const activePaymentMethods = tab === 'top-up' ? await getActivePaymentMethods() : []
 
   // Fetch transactions for transactions tab
   let allTransactions: any[] = []
@@ -347,44 +330,11 @@ export default async function WalletPage({
               </h2>
             </div>
             <div className="space-y-4">
-              <div className="rounded-xl border border-blue-50 bg-blue-50/30 p-6">
-                <div className="flex gap-4">
-                  <Building2 className="h-6 w-6 text-blue-600" />
-                  <div className="flex-1">
-                    <p className="text-xs font-bold tracking-widest text-blue-600 uppercase">
-                      Bank Transfer Details
-                    </p>
-                    <div className="mt-4 grid gap-y-3">
-                      {[
-                        ['Bank Name', bankDetails.bank_name],
-                        ['Account Name', bankDetails.bank_account_name],
-                        ['Account Number', bankDetails.bank_account_number],
-                        ['Branch / Code', bankDetails.bank_branch],
-                        ['SWIFT Code', bankDetails.bank_swift],
-                        ['Currency', bankDetails.bank_currency || 'GHS'],
-                      ].map(([label, value]) => (
-                        <div
-                          key={label}
-                          className="flex justify-between border-b border-blue-100 pb-2"
-                        >
-                          <span className="text-sm text-slate-500 dark:text-slate-400">
-                            {label}
-                          </span>
-                          <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                            {value || '—'}
-                          </span>
-                        </div>
-                      ))}
-                      <div className="flex justify-between pt-1">
-                        <span className="text-sm font-bold text-slate-500 dark:text-slate-400">
-                          Reference (Student ID)
-                        </span>
-                        <span className="text-sm font-black text-[#002a5c]">{studentId}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <PaymentMethodsDisplay
+                methods={activePaymentMethods}
+                reference={studentId}
+                referenceLabel="Student ID"
+              />
               <div className="rounded-xl border border-slate-100 p-4 transition-colors hover:border-slate-200 dark:border-slate-800">
                 <div className="flex gap-3 text-slate-500 dark:text-slate-400">
                   <Info className="h-5 w-5 shrink-0" />

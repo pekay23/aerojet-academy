@@ -211,14 +211,14 @@ export default function EmailPreviewsPage() {
   const currentTemplate = TEMPLATES.find((t) => t.id === activeTemplate)
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6 p-6">
+    <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] uppercase">
-            Email System Management
-          </h1>
-          <p className="mt-1 text-slate-500">
-            Review and customize the automated email communications sent to users.
+          <h2 className="text-xl font-black tracking-tight text-[#002a5c] dark:text-white">
+            Email Templates
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Review and customize automated email communications.
           </p>
         </div>
         <div className="flex items-center gap-2">
