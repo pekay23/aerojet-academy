@@ -1,28 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
+import { z } from 'zod'
 import { sendContactEnquiryConfirmation } from '@/lib/email/service'
+import { checkRateLimit, getClientIp } from '@/lib/auth/helpers'
+import { apiTooManyRequests } from '@/lib/api/response'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
+const contactFormSchema = z.object({
+  name: z.string().min(2).max(100),
+  email: z.string().email(),
+  phone: z
+    .string()
+    .regex(/^[0-9+\-\s()]*$/, 'Invalid phone number')
+    .optional()
+    .or(z.literal('')),
+  subject: z.string().min(1),
+  message: z.string().min(10),
+  confirm_email: z.string().optional(),
+})
+
 export async function POST(req: NextRequest) {
   try {
-    const { name, email, phone, subject, message } = await req.json()
+    // 1. Rate Limiting (Max 5 inquiries per IP per hour)
+    const ip = getClientIp(req)
+    if (!checkRateLimit(`contact:${ip}`, 5, 60 * 60 * 1000)) {
+      return apiTooManyRequests('Too many requests. Please try again later.')
+    }
 
-    // Validation
-    if (!name || name.trim().length < 2) {
-      return NextResponse.json({ error: 'Please enter a valid name' }, { status: 400 })
-    }
-    if (!email || !email.includes('@')) {
-      return NextResponse.json({ error: 'Please enter a valid email address' }, { status: 400 })
-    }
-    if (!subject) {
-      return NextResponse.json({ error: 'Please select a subject' }, { status: 400 })
-    }
-    if (!message || message.trim().length < 10) {
+    const payload = await req.json()
+
+    // 2. Validation
+    const validation = contactFormSchema.safeParse(payload)
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Message must be at least 10 characters long' },
+        { error: validation.error.errors[0]?.message || 'Invalid data provided' },
         { status: 400 }
       )
+    }
+
+    const { name, email, phone, subject, message, confirm_email } = validation.data
+
+    // 3. Honeypot check
+    // If the hidden field has any value, a bot filled it out.
+    // Return success to trick the bot, but do not send emails.
+    if (confirm_email) {
+      console.log(`[SPAM BLOCKED] Honeypot triggered by IP: ${ip}, Email: ${email}`)
+      return NextResponse.json({ success: true })
     }
 
     // Send original notification to admin
