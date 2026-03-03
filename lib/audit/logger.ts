@@ -1,95 +1,101 @@
 import prisma from '@/lib/prisma/client'
 
-export const AuditAction = {
-  CREATE: 'CREATE',
-  UPDATE: 'UPDATE',
-  DELETE: 'DELETE',
-  LOGIN: 'LOGIN',
-  LOGOUT: 'LOGOUT',
-  APPROVE: 'APPROVE',
-  REJECT: 'REJECT',
-  IMPORT: 'IMPORT',
-  EXPORT: 'EXPORT',
-  WALLET_TOP_UP: 'WALLET_TOP_UP',
-  ENROLLMENT_APPROVE: 'ENROLLMENT_APPROVE',
-  PAYMENT_APPROVE: 'PAYMENT_APPROVE',
-  PAYMENT_REJECT: 'PAYMENT_REJECT',
-  SYSTEM_UPDATE: 'SYSTEM_UPDATE',
-  PAYMENT_RECONCILE_BULK: 'PAYMENT_RECONCILE_BULK',
-} as const
+export enum AuditAction {
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  LOGIN = 'LOGIN',
+  EVENT_OVERRIDE = 'EVENT_OVERRIDE',
+  POOL_FAIL = 'POOL_FAIL',
+  POOL_CONFIRM = 'POOL_CONFIRM',
+  WITHDRAW = 'WITHDRAW',
+  SYSTEM = 'SYSTEM',
+  PAYMENT_APPROVE = 'PAYMENT_APPROVE',
+  ENROLLMENT_APPROVE = 'ENROLLMENT_APPROVE',
+  PAYMENT_RECONCILE_BULK = 'PAYMENT_RECONCILE_BULK',
+  PAYMENT_REJECT = 'PAYMENT_REJECT',
+  SYSTEM_UPDATE = 'SYSTEM_UPDATE',
+  WALLET_TOP_UP = 'WALLET_TOP_UP',
+  IMPORT = 'IMPORT',
+  APPROVE = 'APPROVE',
+}
 
-interface AuditEntry {
+interface AuditLogParams {
+  userId?: string
   action: string
   entity?: string
   entityId?: string
-  userId?: string
   description?: string
-  changes?: Record<string, unknown>
-  details?: Record<string, unknown>
+  changes?: any
   ipAddress?: string
   userAgent?: string
+  details?: any // For backward compatibility
 }
 
-export async function createAuditLog(entry: AuditEntry) {
+/**
+ * Logs a system or staff action to the audit_logs table.
+ */
+export async function logAuditEvent(params: AuditLogParams, tx?: any) {
+  const client = tx || prisma
   try {
-    return await prisma.auditLog.create({
+    return await client.auditLog.create({
       data: {
-        action: entry.action,
-        entity: entry.entity,
-        entityId: entry.entityId,
-        userId: entry.userId,
-        description: entry.description,
-        changes: (entry.changes || entry.details) as any,
-        ipAddress: entry.ipAddress,
-        userAgent: entry.userAgent,
+        userId: params.userId,
+        action: params.action,
+        entity: params.entity,
+        entityId: params.entityId,
+        description:
+          params.description || (params.details ? JSON.stringify(params.details) : undefined),
+        changes: params.changes || params.details || {},
+        ipAddress: params.ipAddress,
+        userAgent: params.userAgent,
       },
     })
   } catch (error) {
-    // Audit logging should never cause API failures
-    console.error('[Audit] Failed to create log:', error)
+    console.error('[AUDIT_LOG_ERROR]', error)
+    // We don't want to crash the main process if logging fails
     return null
   }
 }
 
-export async function queryAuditLogs(options: {
-  action?: string
+/**
+ * Fetches audit logs with filtering and pagination
+ */
+export async function queryAuditLogs(params: {
+  action?: AuditAction
   entity?: string
-  entityId?: string
   userId?: string
   startDate?: Date
   endDate?: Date
-  limit?: number
-  offset?: number
+  limit: number
+  offset: number
 }) {
   const where: any = {}
-
-  if (options.action) where.action = options.action
-  if (options.entity) where.entity = options.entity
-  if (options.entityId) where.entityId = options.entityId
-  if (options.userId) where.userId = options.userId
-
-  if (options.startDate || options.endDate) {
-    where.createdAt = {}
-    if (options.startDate) where.createdAt.gte = options.startDate
-    if (options.endDate) where.createdAt.lte = options.endDate
+  if (params.action) where.action = params.action
+  if (params.entity) where.entity = params.entity
+  if (params.userId) where.userId = params.userId
+  if (params.startDate || params.endDate) {
+    where.createdAt = {
+      ...(params.startDate && { gte: params.startDate }),
+      ...(params.endDate && { lte: params.endDate }),
+    }
   }
 
   const [logs, total] = await Promise.all([
     prisma.auditLog.findMany({
       where,
-      include: {
-        user: {
-          include: {
-            profile: { select: { firstName: true, lastName: true } },
-          },
-        },
-      },
+      take: params.limit,
+      skip: params.offset,
       orderBy: { createdAt: 'desc' },
-      take: options.limit ?? 50,
-      skip: options.offset ?? 0,
+      include: { user: { include: { profile: true } } },
     }),
     prisma.auditLog.count({ where }),
   ])
 
   return { logs, total }
 }
+
+/**
+ * Alias for logAuditEvent for legacy/cron compatibility
+ */
+export const createAuditLog = logAuditEvent

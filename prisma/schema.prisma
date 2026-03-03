@@ -62,6 +62,7 @@ enum PaymentStatus {
   PROCESSING
   COMPLETED
   FAILED
+  NO_SHOW
 }
 
 enum EventStatus {
@@ -71,6 +72,12 @@ enum EventStatus {
   POSTPONED
   CANCELLED
   COMPLETED
+}
+
+enum EventOverrideStatus {
+  NONE
+  FORCE_GO
+  FORCE_NO_GO
 }
 
 enum PoolStatus {
@@ -117,10 +124,12 @@ enum NotificationType {
 }
 
 enum BookingType {
-  INDIVIDUAL   // Standard paid booking (€520)
-  POOL         // Joined via exam pool (€300)
-  MODULAR      // Included in modular package (no extra charge)
-  FULL_TIME    // Included in full-time enrollment (no extra charge)
+  INDIVIDUAL    // Standard paid booking (€520)
+  POOL          // Joined via exam pool (€300)
+  BUNDLE        // From a purchased bundle (2-seat or 4-seat)
+  GROUP_CHARTER // Organization/Military group charter
+  MODULAR       // Included in modular package (no extra charge)
+  FULL_TIME     // Included in full-time enrollment (no extra charge)
   COMPLIMENTARY // Admin-granted
 }
 
@@ -153,6 +162,11 @@ model User {
   paymentApprovedBy    String?
   programmeChoice      ProgrammeChoice?
 
+  // Ambassador / Referral System
+  isAmbassador        Boolean  @default(false)
+  referralCode        String?  @unique
+  successfulReferrals Int      @default(0)
+
   // Security
   mustChangePassword Boolean   @default(false)
   passwordChanged    Boolean   @default(false)
@@ -176,6 +190,7 @@ model User {
   wallet                Wallet?
   enrollments           Enrollment[]
   poolMemberships       PoolMembership[]
+  waitlists             PoolWaitlist[]
   examBookings          ExamBooking[]
   grades                Grade[]
   examResults           ExamResult[]
@@ -194,6 +209,9 @@ model User {
   fullTimeEnrollments FullTimeEnrollment[]
   modularEnrollments  ModularEnrollment[]
   tuitionBookings     TuitionBooking[]
+  examBundles         ExamBundle[]
+  referralsMade       Referral[]           @relation("ReferralsMade")
+  referralsReceived   Referral[]           @relation("ReferralsReceived")
   createdTuitionRuns  TuitionRun[]         @relation("CreatedTuitionRuns")
 
   @@index([email])
@@ -442,6 +460,7 @@ model ExamComponent {
   exams           Exam[]
   bookings        ExamBooking[]
   poolMemberships PoolMembership[]
+  waitlist        PoolWaitlist[]
 
   @@map("exam_components")
 }
@@ -661,7 +680,8 @@ model ExamEvent {
   lateBookingDays Int @default(14) // Days before event to apply surcharge
 
   // Status
-  status EventStatus @default(DRAFT)
+  status         EventStatus         @default(DRAFT)
+  overrideStatus EventOverrideStatus @default(NONE)
 
   // Relationships
   pools        ExamPool[]
@@ -713,6 +733,7 @@ model ExamPool {
 
   // Relationships
   memberships PoolMembership[]
+  waitlist    PoolWaitlist[]
 
   // Audit
   createdAt   DateTime  @default(now())
@@ -765,6 +786,28 @@ model PoolMembership {
   @@index([examComponentId])
   @@index([poolId, status])
   @@map("pool_memberships")
+}
+
+model PoolWaitlist {
+  id     String   @id @default(cuid())
+  poolId String
+  pool   ExamPool @relation(fields: [poolId], references: [id], onDelete: Cascade)
+  userId String
+  user   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Module Selection
+  examComponentId String
+  examComponent   ExamComponent @relation(fields: [examComponentId], references: [id])
+
+  priority  Int      @default(0)
+  status    String   @default("PENDING") // PENDING, PROMOTED, CANCELLED
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([poolId, userId, examComponentId])
+  @@index([poolId])
+  @@index([userId])
+  @@map("pool_waitlist")
 }
 
 // ============================================================================
@@ -1544,5 +1587,60 @@ model CourseCategory {
   updatedAt   DateTime @updatedAt
 
   @@map("course_categories")
+}
+
+// ============================================================================
+// EXAM BUNDLES
+// ============================================================================
+
+model ExamBundle {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  bundleType String  // TWO_SEAT, FOUR_SEAT
+  totalSeats Int
+  usedSeats  Int     @default(0)
+  amountPaid Decimal @db.Decimal(10, 2)
+
+  // Module change perks
+  freeModuleChanges Int @default(0) // 4-seat bundles get 1 free change
+  usedModuleChanges Int @default(0)
+
+  validUntil DateTime  // 12 months from purchase
+  status     String    @default("ACTIVE") // ACTIVE, EXHAUSTED, EXPIRED
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("exam_bundles")
+}
+
+// ============================================================================
+// REFERRAL SYSTEM
+// ============================================================================
+
+model Referral {
+  id         String   @id @default(cuid())
+
+  referrerId String
+  referrer   User     @relation("ReferralsMade", fields: [referrerId], references: [id])
+
+  refereeId  String
+  referee    User     @relation("ReferralsReceived", fields: [refereeId], references: [id])
+
+  status     String   @default("PENDING") // PENDING, QUALIFIED, EXPIRED
+  qualifiedAt DateTime?
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([referrerId, refereeId])
+  @@index([referrerId])
+  @@index([refereeId])
+  @@index([status])
+  @@map("referrals")
 }
 

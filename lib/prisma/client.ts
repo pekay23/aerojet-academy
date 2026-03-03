@@ -1,9 +1,10 @@
+import { env } from '@/lib/env'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { Pool, defaults } from 'pg'
+import { Pool } from 'pg'
 import { PrismaClient } from '@prisma/client'
 
 // Ensure we have the connection string
-const connectionString = process.env.DATABASE_URL
+const connectionString = env.DATABASE_URL
 
 if (!connectionString) {
   throw new Error('DATABASE_URL is not defined')
@@ -13,7 +14,7 @@ if (!connectionString) {
 // In development, we relax SSL verification to avoid ECONNRESET issues during TLS handshakes
 const sslConfig = {
   rejectUnauthorized:
-    process.env.NODE_ENV === 'production' &&
+    env.NODE_ENV === 'production' &&
     (connectionString.includes('sslmode=verify-full') ||
       connectionString.includes('sslmode=require')),
 }
@@ -23,7 +24,7 @@ const globalForPrisma = globalThis as unknown as { prisma_aja: PrismaClient }
 const createPrismaClient = () => {
   // In development, we use a smaller pool size to prevent overwhelming the Neon proxy
   // with simultaneous authentication requests during cold starts (avoiding 08P01 errors)
-  const isDev = process.env.NODE_ENV === 'development'
+  const isDev = env.NODE_ENV === 'development'
 
   const pool = new Pool({
     connectionString,
@@ -42,7 +43,7 @@ const createPrismaClient = () => {
   const adapter = new PrismaPg(pool)
   return new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    log: env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
   })
 }
 
@@ -55,7 +56,7 @@ const basePrisma = globalForPrisma.prisma_aja ?? createPrismaClient()
 // Extend the client with a connection queue for development
 // This prevents multiple simultaneous handshakes during Neon cold starts (Layout + Page parallel fetch)
 export const prisma =
-  process.env.NODE_ENV === 'development'
+  env.NODE_ENV === 'development'
     ? basePrisma.$extends({
         query: {
           $allModels: {
@@ -74,6 +75,6 @@ export const prisma =
       })
     : basePrisma
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma_aja = basePrisma as PrismaClient
+if (env.NODE_ENV !== 'production') globalForPrisma.prisma_aja = basePrisma as PrismaClient
 
 export default prisma as unknown as PrismaClient

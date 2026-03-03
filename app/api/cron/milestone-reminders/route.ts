@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { env } from '@/lib/env'
 import prisma from '@/lib/prisma/client'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { sendMilestoneReminderEmail } from '@/lib/email/service'
@@ -151,7 +152,7 @@ async function sendMilReminderEmail(
 }
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
-  const cronSecret = process.env.CRON_SECRET
+  const cronSecret = env.CRON_SECRET
   const authHeader = req.headers.get('authorization')
 
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {

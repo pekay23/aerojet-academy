@@ -2,10 +2,8 @@ import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
-import { failPool } from '@/lib/pools/operations'
-import { creditToWallet } from '@/lib/wallet/operations'
+import { evaluateGoNoGo, executeGo, executeNoGo, executePostponement } from '@/lib/events/go-no-go'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
-import { EventStatus, PaymentStatus } from '@prisma/client'
 
 export const POST = withErrorHandler(
   async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
@@ -18,56 +16,26 @@ export const POST = withErrorHandler(
     if (!id) return apiError('Event ID required')
 
     const body = await req.json()
-    const { decision } = body // 'go' | 'no_go' | 'postpone'
+    const { decision, newStartDate, newEndDate } = body // 'go' | 'no_go' | 'postpone'
 
-    const event = await prisma.examEvent.findUnique({
-      where: { id },
-      include: { pools: { include: { memberships: true } } },
-    })
+    if (!['go', 'no_go', 'postpone'].includes(decision)) {
+      return apiError('Decision must be "go", "no_go", or "postpone"')
+    }
+
+    const event = await prisma.examEvent.findUnique({ where: { id } })
     if (!event) return apiNotFound('Event not found')
 
+    let result: any
+
     if (decision === 'go') {
-      await prisma.examEvent.update({ where: { id }, data: { status: EventStatus.CONFIRMED } })
-    } else if (decision === 'no_go' || decision === 'postpone') {
-      // Fail all non-confirmed pools (release funds)
-      for (const pool of event.pools) {
-        if (pool.status !== 'CONFIRMED' && pool.status !== 'COMPLETED') {
-          await failPool(pool.id, admin.id)
-        }
+      result = await executeGo(id, admin.id)
+    } else if (decision === 'no_go') {
+      result = await executeNoGo(id, admin.id)
+    } else if (decision === 'postpone') {
+      if (!newStartDate || !newEndDate) {
+        return apiError('newStartDate and newEndDate required for postponement')
       }
-
-      // For postponement: credit wallet for all confirmed bookings (per business rules)
-      if (decision === 'postpone') {
-        const confirmedBookings = await prisma.examBooking.findMany({
-          where: {
-            eventId: id,
-            status: PaymentStatus.COMPLETED,
-          },
-        })
-
-        for (const booking of confirmedBookings) {
-          const amount = Number(booking.amountPaid || 0)
-          if (amount > 0) {
-            await prisma.$transaction(async (tx) => {
-              await creditToWallet(
-                tx,
-                booking.userId,
-                amount,
-                `Refund: Exam event postponed - ${event.name}`,
-                booking.id,
-                'EVENT_POSTPONEMENT_REFUND'
-              )
-            })
-          }
-        }
-      }
-
-      await prisma.examEvent.update({
-        where: { id },
-        data: { status: decision === 'postpone' ? EventStatus.POSTPONED : EventStatus.CANCELLED },
-      })
-    } else {
-      return apiError('Decision must be "go", "no_go", or "postpone"')
+      result = await executePostponement(id, new Date(newStartDate), new Date(newEndDate), admin.id)
     }
 
     await createAuditLog({
@@ -75,8 +43,9 @@ export const POST = withErrorHandler(
       entity: 'ExamEvent',
       entityId: id,
       userId: admin.id,
-      details: { decision },
+      details: { decision, ...result },
     })
-    return apiSuccess({ message: `Event ${decision} decision recorded` })
+
+    return apiSuccess({ decision, ...result })
   }
 )

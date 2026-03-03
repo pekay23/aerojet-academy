@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { sendEmail } from '@/lib/email/service'
+import { env } from '@/lib/env'
 
 // Cron job: Send exam reminders to confirmed pool members
 // Sends reminders at T-7 and T-1 days before exam
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
+  const cronSecret = env.CRON_SECRET
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
