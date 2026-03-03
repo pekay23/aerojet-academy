@@ -22,7 +22,10 @@ export default async function PurchasePage({ params }: Props) {
   const userId = (session.user as any).id
 
   const [course, enrollment, paymentMethods] = await Promise.all([
-    prisma.course.findUnique({ where: { id } }),
+    prisma.course.findUnique({
+      where: { id },
+      include: { category: true },
+    }),
     prisma.enrollment.findUnique({
       where: { userId_courseId: { userId, courseId: id } },
     }),
@@ -30,6 +33,48 @@ export default async function PurchasePage({ params }: Props) {
   ])
 
   if (!course) notFound()
+
+  // Fetch user's profile and license targets to show their "entered" category
+  const studentProfile = await prisma.studentProfile.findUnique({
+    where: { userId },
+    include: {
+      licenseTargets: {
+        include: { licenseCategory: true },
+      },
+    },
+  })
+
+  const targetLicenseCodes = studentProfile?.licenseTargets
+    .map((lt) => lt.licenseCategory.code)
+    .join(', ')
+
+  // Check if this course is specifically required for their license
+  const isRequiredForTarget = await prisma.licenseModuleRequirement.findFirst({
+    where: {
+      courseId: id,
+      licenseCategory: {
+        code: { in: studentProfile?.licenseTargets.map((lt) => lt.licenseCategory.code) || [] },
+      },
+    },
+  })
+
+  const isExamOnly = studentProfile?.enrollmentType === 'EXAM_ONLY'
+  const examPrice = 300
+
+  // Fetch wallet balance if exam only
+  let balance = 0
+  if (isExamOnly) {
+    const wallet = await prisma.wallet.findUnique({
+      where: { userId },
+      select: { balance: true },
+    })
+    balance = Number(wallet?.balance || 0)
+
+    // If they landed here without enough money, send them back to top up
+    if (balance < examPrice) {
+      redirect('/applicant/exam-only?tab=dashboard')
+    }
+  }
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
@@ -42,12 +87,24 @@ export default async function PurchasePage({ params }: Props) {
           Back to Course Details
         </Link>
         <h1 className="mt-4 text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
-          Purchase Course
+          {isExamOnly ? 'Book Exam' : 'Purchase Course'}
         </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Complete enrollment for{' '}
-          <span className="font-bold text-slate-700 dark:text-slate-200">{course.name}</span>
-        </p>
+        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            {isExamOnly ? 'Complete booking for exam pool' : 'Complete enrollment for'}{' '}
+            <span className="font-bold text-slate-700 dark:text-slate-200">{course.name}</span>
+          </p>
+          <div className="flex gap-2">
+            <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+              {course.category?.name || course.categoryId || 'CORE'}
+            </span>
+            {isRequiredForTarget && (
+              <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[10px] font-bold text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                Target: {targetLicenseCodes}
+              </span>
+            )}
+          </div>
+        </div>
       </div>
 
       {enrollment?.status === 'ENROLLED' || enrollment?.status === 'APPROVED' ? (
@@ -66,10 +123,11 @@ export default async function PurchasePage({ params }: Props) {
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Total Amount
+                {isExamOnly ? 'Exam Fee (Pool)' : 'Total Amount'}
               </span>
               <span className="font-mono text-lg font-black text-[#002a5c] dark:text-blue-400">
-                {course.currency} {Number(course.price).toLocaleString()}
+                {course.currency}{' '}
+                {isExamOnly ? examPrice.toLocaleString() : Number(course.price).toLocaleString()}
               </span>
             </div>
 

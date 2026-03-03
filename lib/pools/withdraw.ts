@@ -17,6 +17,7 @@ import { Prisma } from '@prisma/client'
 import { POOL_NEAR_FULL_THRESHOLD } from './types'
 import { promoteNextFromWaitlist } from './waitlist'
 import { logAuditEvent } from '../audit/logger'
+import { sendWithdrawalConfirmationEmail, sendWaitlistPromotionEmail } from '@/lib/email/service'
 
 export interface WithdrawResult {
   success: boolean
@@ -26,7 +27,7 @@ export interface WithdrawResult {
 
 export async function withdrawFromPool(poolId: string, userId: string): Promise<WithdrawResult> {
   try {
-    return await prisma.$transaction(
+    const result = await prisma.$transaction(
       async (tx) => {
         // Lock pool row
         const [pool] = await tx.$queryRawUnsafe<any[]>(
@@ -123,10 +124,47 @@ export async function withdrawFromPool(poolId: string, userId: string): Promise<
           success: true,
           amountReleased: releaseAmount,
           promotedUserId: promotion?.candidate?.userId,
+          _emailData: { poolName: pool.name, examDate: pool.examDate },
         }
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     )
+
+    // Send emails outside transaction
+    if (result.success) {
+      const { format } = await import('date-fns')
+
+      // Withdrawal confirmation to the user who withdrew
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true, academyEmail: true, profile: { select: { firstName: true } } },
+      })
+      if (user) {
+        const email = user.academyEmail || user.email
+        const name = user.profile?.firstName || 'Student'
+        sendWithdrawalConfirmationEmail(email, name, (result as any)._emailData?.poolName || 'Pool', result.amountReleased || 0)
+          .catch(console.error)
+      }
+
+      // Waitlist promotion notification
+      if ((result as any).promotedUserId) {
+        const promoted = await prisma.user.findUnique({
+          where: { id: (result as any).promotedUserId },
+          select: { email: true, academyEmail: true, profile: { select: { firstName: true } } },
+        })
+        if (promoted) {
+          const email = promoted.academyEmail || promoted.email
+          const name = promoted.profile?.firstName || 'Student'
+          const examDateStr = (result as any)._emailData?.examDate
+            ? format(new Date((result as any)._emailData.examDate), 'dd MMM yyyy')
+            : 'TBA'
+          sendWaitlistPromotionEmail(email, name, (result as any)._emailData?.poolName || 'Pool', examDateStr, 'Module')
+            .catch(console.error)
+        }
+      }
+    }
+
+    return result
   } catch (err: any) {
     console.error('[POOL WITHDRAW ERROR]', err)
     return { success: false, error: err.message || 'Failed to withdraw from pool' }

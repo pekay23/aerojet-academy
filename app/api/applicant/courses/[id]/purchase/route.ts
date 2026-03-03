@@ -30,7 +30,8 @@ export const POST = withErrorHandler(
       const payment = await tx.payment.create({
         data: {
           userId: user.id,
-          referenceType: 'COURSE_FEE',
+          referenceType: 'COURSE',
+          referenceId: courseId,
           referenceCode,
           amount: course.price,
           currency: course.currency,

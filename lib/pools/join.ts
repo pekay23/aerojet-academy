@@ -5,6 +5,7 @@ import {
   POOL_MIN_CANDIDATES,
   POOL_NEAR_FULL_THRESHOLD,
   POOL_MAX_CANDIDATES,
+  MODULE_DIVERSITY_CAP,
 } from './types'
 import { confirmPoolInternal } from './confirm'
 import type { PoolJoinInput, PoolJoinResult } from './types'
@@ -77,11 +78,13 @@ export async function joinPool(input: PoolJoinInput): Promise<PoolJoinResult> {
  */
 export async function joinPoolInternal(
   tx: Prisma.TransactionClient,
-  { poolId, userId, examComponentId }: PoolJoinInput
+  input: PoolJoinInput
 ): Promise<PoolJoinResult & { triggeredNearFull?: boolean }> {
+  const { poolId, userId, examComponentId } = input
+
   // Lock pool row
   const [pool] = await tx.$queryRawUnsafe<any[]>(
-    `SELECT * FROM "ExamPool" WHERE id = $1 FOR UPDATE`,
+    `SELECT * FROM "exam_pools" WHERE id = $1 FOR UPDATE`,
     poolId
   )
   if (!pool) return { success: false, error: 'Pool not found' }
@@ -98,6 +101,20 @@ export async function joinPoolInternal(
     return {
       success: false,
       error: 'You already have a seat in this pool (one module per pool)',
+    }
+  }
+
+  // RULE 001: Module diversity cap — max 4 DISTINCT modules per pool
+  const distinctModules = await tx.poolMembership.findMany({
+    where: { poolId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+    select: { examComponentId: true },
+    distinct: ['examComponentId'],
+  })
+  const isNewModule = !distinctModules.some((m) => m.examComponentId === examComponentId)
+  if (isNewModule && distinctModules.length >= MODULE_DIVERSITY_CAP) {
+    return {
+      success: false,
+      error: `Pool already has ${MODULE_DIVERSITY_CAP} modules (maximum). Please choose from the existing modules in this pool.`,
     }
   }
 
@@ -129,9 +146,24 @@ export async function joinPoolInternal(
     where: { userId },
     include: { user: true },
   })
-  if (!profile) return { success: false, error: 'Student profile not found' }
 
-  if (profile.enrollmentType === 'FULL_TIME') {
+  // Allow applicants (no student profile yet) if they are EXAM_ONLY
+  if (!profile) {
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: { role: true, programmeChoice: true },
+    })
+    if (!user || (user.role !== 'APPLICANT' && user.role !== 'STUDENT')) {
+      return { success: false, error: 'User not found or unauthorized' }
+    }
+    // Applicants with EXAM_ONLY programme choice can join pools
+    if (user.role === 'APPLICANT' && user.programmeChoice !== 'EXAM_ONLY') {
+      return { success: false, error: 'Please select the Exam Only pathway first' }
+    }
+    // If role is STUDENT without profile, allow through (edge case during promotion)
+  }
+
+  if (profile?.enrollmentType === 'FULL_TIME') {
     return {
       success: false,
       error: 'Full-Time students do not join exam pools individually.',
@@ -139,9 +171,19 @@ export async function joinPoolInternal(
   }
 
   let feeToReserve = 0
+  let usedBundleId: string | null = null
   const { calculatePoolSeatPrice } = await import('./pricing')
   const priceCalc = await calculatePoolSeatPrice(userId, pool.eventId)
   feeToReserve = priceCalc.totalPrice
+
+  // Check for available bundle seat before charging wallet
+  const { getAvailableBundle, useBundleSeat } = await import('./bundles')
+  const availableBundle = await getAvailableBundle(userId)
+  if (availableBundle) {
+    await useBundleSeat(tx, availableBundle.id)
+    usedBundleId = availableBundle.id
+    feeToReserve = 0 // Bundle covers the cost
+  }
 
   const wallet = await tx.wallet.findUnique({ where: { userId } })
   if (!wallet) return { success: false, error: 'No wallet' }
@@ -188,10 +230,35 @@ export async function joinPoolInternal(
         ? 'NEAR_FULL'
         : pool.status
 
+  const allowedModules = pool.allowedModules || []
+  let newAllowedModules = [...allowedModules]
+  if (input.moduleCode && !allowedModules.includes(input.moduleCode)) {
+    newAllowedModules.push(input.moduleCode)
+  }
+
   await tx.examPool.update({
     where: { id: poolId },
-    data: { currentMemberCount: newCount, status: newStatus },
+    data: {
+      currentMemberCount: newCount,
+      status: newStatus,
+      allowedModules: newAllowedModules,
+    },
   })
+
+  let booking: any = null
+  if (input.eventId && input.moduleCode) {
+    booking = await tx.examBooking.create({
+      data: {
+        userId,
+        examComponentId,
+        eventId: input.eventId,
+        bookingType: 'POOL',
+        moduleCode: input.moduleCode,
+        amountPaid: input.amountPaid || feeToReserve,
+        status: feeToReserve > 0 ? 'PENDING' : 'APPROVED',
+      },
+    })
+  }
 
   let autoConfirmed = false
   if (newCount >= POOL_MIN_CANDIDATES && pool.status !== 'CONFIRMED') {
@@ -200,5 +267,5 @@ export async function joinPoolInternal(
   }
 
   const triggeredNearFull = newStatus === 'NEAR_FULL' && pool.status !== 'NEAR_FULL'
-  return { success: true, membership, autoConfirmed, triggeredNearFull }
+  return { success: true, membership, booking, autoConfirmed, triggeredNearFull }
 }

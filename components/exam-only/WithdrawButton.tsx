@@ -42,48 +42,23 @@ export function WithdrawButton({
 
   if (isConfirming) {
     return (
-      <div
-        style={{
-          padding: '12px',
-          background: 'rgba(239, 68, 68, 0.1)',
-          border: '1px solid rgba(239, 68, 68, 0.3)',
-          borderRadius: '8px',
-          marginTop: '8px',
-        }}
-      >
-        <p style={{ fontSize: '13px', color: '#fca5a5', margin: '0 0 8px' }}>
+      <div className="p-3 bg-red-500/10 border border-red-500/30 rounded-lg mt-2">
+        <p className="text-[13px] text-red-300 m-0 mb-2">
           Withdraw from <strong>{poolName}</strong>?
           {amountReserved > 0 && ` €${amountReserved} will be released back to your wallet.`}
         </p>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="flex gap-2">
           <button
             onClick={handleWithdraw}
             disabled={isLoading}
-            style={{
-              padding: '6px 16px',
-              background: '#ef4444',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: isLoading ? 'wait' : 'pointer',
-              fontSize: '12px',
-              fontWeight: 600,
-            }}
+            className={`px-4 py-1.5 bg-red-500 text-white border-none rounded-md text-xs font-semibold ${isLoading ? 'cursor-wait' : 'cursor-pointer'}`}
           >
             {isLoading ? 'Withdrawing...' : 'Confirm Withdraw'}
           </button>
           <button
             onClick={() => setIsConfirming(false)}
             disabled={isLoading}
-            style={{
-              padding: '6px 16px',
-              background: 'transparent',
-              color: '#888',
-              border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px',
-            }}
+            className="px-4 py-1.5 bg-transparent text-[#888] border border-white/10 rounded-md cursor-pointer text-xs"
           >
             Cancel
           </button>
@@ -95,22 +70,7 @@ export function WithdrawButton({
   return (
     <button
       onClick={() => setIsConfirming(true)}
-      style={{
-        padding: '6px 12px',
-        background: 'transparent',
-        color: '#ef4444',
-        border: '1px solid rgba(239, 68, 68, 0.3)',
-        borderRadius: '6px',
-        cursor: 'pointer',
-        fontSize: '12px',
-        transition: 'all 0.2s',
-      }}
-      onMouseEnter={(e) => {
-        ;(e.target as HTMLElement).style.background = 'rgba(239, 68, 68, 0.1)'
-      }}
-      onMouseLeave={(e) => {
-        ;(e.target as HTMLElement).style.background = 'transparent'
-      }}
+      className="px-3 py-1.5 bg-transparent text-red-500 border border-red-500/30 rounded-md cursor-pointer text-xs transition-all duration-200 hover:bg-red-500/10"
     >
       Leave Pool
     </button>

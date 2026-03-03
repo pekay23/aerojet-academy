@@ -38,6 +38,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     nationality,
     dateOfBirth,
     selectedProgramme,
+    licenseCategories,
+    referralCode,
   } = validation.data as any
 
   // Check if email already exists
@@ -62,6 +64,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         registrationFee: config.fee,
         registrationCurrency: config.currency,
         programmeChoice: selectedProgramme,
+        selectedLicenseCategories: licenseCategories || [],
         verifyToken,
         verifyTokenExpires,
       },
@@ -83,6 +86,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
     return newUser
   })
+
+  // Record referral if a referral code was provided (non-blocking)
+  if (referralCode) {
+    import('@/lib/referral/operations')
+      .then(({ recordReferral }) => recordReferral(referralCode, user.id))
+      .catch(console.error)
+  }
 
   // Send verification email (non-blocking)
   sendEmailVerificationEmail(email, firstName, verifyToken).catch(console.error)

@@ -84,11 +84,8 @@ export const authOptions: NextAuthOptions = {
         if (user.status === UserStatus.ARCHIVED || user.status === UserStatus.DELETED) {
           throw new Error('Account is no longer active. Contact administration.')
         }
-        if (user.status === UserStatus.PENDING && user.role !== 'APPLICANT') {
-          throw new Error('Account is pending activation. Please complete registration.')
-        }
 
-        // Check email verification
+        // Check email verification — required for all users
         if (!user.emailVerified) {
           throw new Error('Please verify your email before logging in.')
         }
@@ -162,12 +159,23 @@ export const authOptions: NextAuthOptions = {
   },
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
         token.role = (user as any).role
         token.status = (user as any).status
         token.mustChangePassword = (user as any).mustChangePassword
+      }
+      if (trigger === 'update') {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { role: true, status: true, mustChangePassword: true, passwordChanged: true },
+        })
+        if (dbUser) {
+          token.role = dbUser.role
+          token.status = dbUser.status
+          token.mustChangePassword = dbUser.mustChangePassword && !dbUser.passwordChanged
+        }
       }
       return token
     },

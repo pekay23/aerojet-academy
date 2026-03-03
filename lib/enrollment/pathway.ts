@@ -108,7 +108,9 @@ const PROMOTION_TRIGGERS: Record<string, string[]> = {
   // SEAT_CONFIRMATION activates enrollment and promotes to student.
   FULL_TIME: ['SEAT_CONFIRMATION', 'YEAR_1_FULL', 'FULL_PROGRAMME'],
   MODULAR: ['COURSE'],
-  EXAM_ONLY: ['EXAM', 'WALLET_TOPUP'],
+  // EXAM_ONLY promotion is handled directly in join-pool/book-exam routes on first booking,
+  // NOT on wallet top-up (topping up should not make you a student).
+  EXAM_ONLY: ['EXAM'],
   SHORT_COURSE: ['COURSE'],
 }
 
@@ -159,11 +161,12 @@ export async function promoteApplicantToStudent(
     })
 
     // Create StudentProfile
-    await tx.studentProfile.create({
+    const studentProfile = await tx.studentProfile.create({
       data: {
         userId,
         studentId,
         enrollmentType: enrollmentType as any,
+        enrollmentStatus: 'ENROLLED',
         pathwayId: pathway?.id ?? null,
       },
     })
@@ -173,6 +176,23 @@ export async function promoteApplicantToStudent(
       where: { id: userId },
       data: { role: 'STUDENT' },
     })
+
+    // Create StudentLicenseTarget entries from selected license categories
+    if (user.selectedLicenseCategories && user.selectedLicenseCategories.length > 0) {
+      const licenseCategories = await tx.licenseCategory.findMany({
+        where: { code: { in: user.selectedLicenseCategories } },
+        select: { id: true },
+      })
+      if (licenseCategories.length > 0) {
+        await tx.studentLicenseTarget.createMany({
+          data: licenseCategories.map((lc) => ({
+            studentProfileId: studentProfile.id,
+            licenseCategoryId: lc.id,
+          })),
+          skipDuplicates: true,
+        })
+      }
+    }
 
     // Ensure wallet exists
     const wallet = await tx.wallet.findUnique({ where: { userId } })

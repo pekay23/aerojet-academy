@@ -93,11 +93,11 @@ export function generateTempPassword(): string {
   return Math.random().toString(36).slice(-8)
 }
 
-export function generateAcademyEmail(
+export async function generateAcademyEmail(
   firstName: string,
   middleName: string | null | undefined,
   lastName: string
-): string {
+): Promise<string> {
   const getInitial = (name: string) =>
     name
       .charAt(0)
@@ -117,10 +117,19 @@ export function generateAcademyEmail(
 
   const initials = [...firstInitials, ...middleInitials].filter(Boolean)
 
-  if (initials.length > 0) {
-    return `${initials.join('.')}.${cleanSurname}@aerojet-academy.com`
+  const baseLocal = initials.length > 0
+    ? `${initials.join('.')}.${cleanSurname}`
+    : cleanSurname
+
+  // Ensure uniqueness — append numeric suffix if email already taken
+  let candidate = `${baseLocal}@aerojet-academy.com`
+  let suffix = 1
+  while (await prisma.user.findFirst({ where: { academyEmail: candidate } })) {
+    candidate = `${baseLocal}${suffix}@aerojet-academy.com`
+    suffix++
   }
-  return `${cleanSurname}@aerojet-academy.com`
+
+  return candidate
 }
 
 export async function requireStaff() {

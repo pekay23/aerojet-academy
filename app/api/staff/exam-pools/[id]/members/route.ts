@@ -38,14 +38,27 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: RouteP
     return apiError('Pool is full', 400)
   }
 
-  // Verify the exam component belongs to an allowed module
+  // Verify the exam component belongs to an allowed module, or check diversity cap
   const examComponent = await prisma.examComponent.findUnique({
     where: { id: examComponentId },
     include: { course: { select: { code: true } } },
   })
   if (!examComponent) return apiError('Exam component not found', 404)
-  if (pool.allowedModules.length > 0 && !pool.allowedModules.includes(examComponent.course.code)) {
-    return apiError(`Module ${examComponent.course.code} is not allowed in this pool`, 400)
+
+  const requestedModuleCode = examComponent.course.code
+  let newAllowedModules = [...pool.allowedModules]
+
+  // If the pool has a restricted module list and this module isn't in it:
+  if (pool.allowedModules.length > 0 && !pool.allowedModules.includes(requestedModuleCode)) {
+    // Determine maximum allowed diversity
+    if (pool.allowedModules.length >= 4) {
+      return apiError(
+        `Pool already has reached the maximum of 4 modules (${pool.allowedModules.join(', ')}). Cannot add ${requestedModuleCode}.`,
+        400
+      )
+    }
+    // Otherwise, append the new module to the allowed pool modules list
+    newAllowedModules.push(requestedModuleCode)
   }
 
   // 3. Check if user is already in the pool
@@ -68,10 +81,13 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: RouteP
     },
   })
 
-  // 5. Update pool count
+  // 5. Update pool count and optionally allowedModules
   await prisma.examPool.update({
     where: { id: poolId },
-    data: { currentMemberCount: { increment: 1 } },
+    data: {
+      currentMemberCount: { increment: 1 },
+      allowedModules: newAllowedModules,
+    },
   })
 
   await createAuditLog({

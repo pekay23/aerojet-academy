@@ -57,29 +57,18 @@ export function ReferralPanel() {
   }
 
   if (isLoading) {
-    return <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>Loading...</div>
+    return <div className="p-5 text-center text-[#888]">Loading...</div>
   }
 
   return (
     <div>
       {/* Ambassador Status Badge */}
       {info?.isAmbassador && (
-        <div
-          style={{
-            padding: '12px 16px',
-            background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(234, 179, 8, 0.1))',
-            border: '1px solid rgba(245, 158, 11, 0.3)',
-            borderRadius: '10px',
-            marginBottom: '16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <span style={{ fontSize: '24px' }}>🏅</span>
+        <div className="px-4 py-3 bg-linear-to-br from-amber-500/15 to-yellow-500/10 border border-amber-500/30 rounded-[10px] mb-4 flex items-center gap-3">
+          <span className="text-2xl">🏅</span>
           <div>
-            <div style={{ fontWeight: 700, color: '#fbbf24', fontSize: '14px' }}>Ambassador</div>
-            <div style={{ color: '#d97706', fontSize: '12px' }}>
+            <div className="font-bold text-amber-300 text-sm">Ambassador</div>
+            <div className="text-amber-600 text-xs">
               You receive €270/seat (lifetime discount) + €100 credit applied
             </div>
           </div>
@@ -87,48 +76,20 @@ export function ReferralPanel() {
       )}
 
       {/* Referral Code */}
-      <div
-        style={{
-          padding: '16px',
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '10px',
-          marginBottom: '16px',
-        }}
-      >
-        <div style={{ fontSize: '13px', color: '#888', marginBottom: '8px' }}>
-          Your Referral Code
-        </div>
+      <div className="p-4 bg-white/3 border border-white/8 rounded-[10px] mb-4">
+        <div className="text-[13px] text-[#888] mb-2">Your Referral Code</div>
         {info?.referralCode ? (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <code
-              style={{
-                fontSize: '18px',
-                fontWeight: 700,
-                color: '#93c5fd',
-                background: 'rgba(59, 130, 246, 0.1)',
-                padding: '8px 16px',
-                borderRadius: '8px',
-                letterSpacing: '2px',
-                flex: 1,
-                textAlign: 'center',
-              }}
-            >
+          <div className="flex items-center gap-3">
+            <code className="text-lg font-bold text-blue-300 bg-blue-500/10 px-4 py-2 rounded-lg tracking-[2px] flex-1 text-center">
               {info.referralCode}
             </code>
             <button
               onClick={copyLink}
-              style={{
-                padding: '8px 16px',
-                background: copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(59, 130, 246, 0.2)',
-                color: copied ? '#10b981' : '#93c5fd',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontSize: '12px',
-                fontWeight: 600,
-                whiteSpace: 'nowrap',
-              }}
+              className={`px-4 py-2 border-none rounded-lg cursor-pointer text-xs font-semibold whitespace-nowrap transition-colors duration-150 ${
+                copied
+                  ? 'bg-emerald-500/20 text-emerald-500'
+                  : 'bg-blue-500/20 text-blue-300'
+              }`}
             >
               {copied ? '✅ Copied!' : '📋 Copy Link'}
             </button>
@@ -136,16 +97,7 @@ export function ReferralPanel() {
         ) : (
           <button
             onClick={generateCode}
-            style={{
-              padding: '10px 20px',
-              background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontWeight: 600,
-              fontSize: '13px',
-            }}
+            className="px-5 py-2.5 bg-linear-to-br from-blue-500 to-blue-600 text-white border-none rounded-lg cursor-pointer font-semibold text-[13px]"
           >
             Generate Referral Code
           </button>
@@ -154,68 +106,35 @@ export function ReferralPanel() {
 
       {/* Progress to Ambassador */}
       {!info?.isAmbassador && (
-        <div
-          style={{
-            padding: '16px',
-            background: 'rgba(255,255,255,0.03)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: '10px',
-            marginBottom: '16px',
-          }}
-        >
-          <div style={{ fontSize: '13px', color: '#888', marginBottom: '8px' }}>
+        <div className="p-4 bg-white/3 border border-white/8 rounded-[10px] mb-4">
+          <div className="text-[13px] text-[#888] mb-2">
             Progress to Ambassador ({info?.qualifiedReferrals || 0}/10)
           </div>
-          <div
-            style={{
-              height: '8px',
-              background: 'rgba(255,255,255,0.05)',
-              borderRadius: '4px',
-              overflow: 'hidden',
-            }}
-          >
+          <div className="h-2 bg-white/5 rounded full overflow-hidden">
             <div
-              style={{
-                width: `${info?.progressToAmbassador || 0}%`,
-                height: '100%',
-                background: 'linear-gradient(90deg, #f59e0b, #fbbf24)',
-                borderRadius: '4px',
-                transition: 'width 0.5s',
-              }}
+              className="h-full bg-linear-to-r from-amber-400 to-amber-300 rounded-full transition-[width] duration-500"
+              style={{ width: `${info?.progressToAmbassador || 0}%` }}
             />
           </div>
-          <div style={{ fontSize: '11px', color: '#888', marginTop: '4px' }}>
+          <div className="text-[11px] text-[#888] mt-1">
             {info?.remainingForAmbassador || 10} more qualified referrals needed
           </div>
         </div>
       )}
 
       {/* Stats */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
-          gap: '12px',
-          marginBottom: '16px',
-        }}
-      >
+      <div className="grid grid-cols-3 gap-3 mb-4">
         {[
-          { label: 'Total', value: info?.totalReferrals || 0, color: '#3b82f6' },
-          { label: 'Qualified', value: info?.qualifiedReferrals || 0, color: '#10b981' },
-          { label: 'Pending', value: info?.pendingReferrals || 0, color: '#f59e0b' },
+          { label: 'Total', value: info?.totalReferrals || 0, colorClass: 'text-blue-500' },
+          { label: 'Qualified', value: info?.qualifiedReferrals || 0, colorClass: 'text-emerald-500' },
+          { label: 'Pending', value: info?.pendingReferrals || 0, colorClass: 'text-amber-400' },
         ].map((stat) => (
           <div
             key={stat.label}
-            style={{
-              textAlign: 'center',
-              padding: '12px',
-              background: 'rgba(255,255,255,0.02)',
-              borderRadius: '8px',
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}
+            className="text-center p-3 bg-white/2 rounded-lg border border-white/6"
           >
-            <div style={{ fontSize: '22px', fontWeight: 700, color: stat.color }}>{stat.value}</div>
-            <div style={{ fontSize: '11px', color: '#888' }}>{stat.label}</div>
+            <div className={`text-[22px] font-bold ${stat.colorClass}`}>{stat.value}</div>
+            <div className="text-[11px] text-[#888]">{stat.label}</div>
           </div>
         ))}
       </div>
@@ -223,22 +142,14 @@ export function ReferralPanel() {
       {/* Recent Referrals */}
       {info?.referrals && info.referrals.length > 0 && (
         <div>
-          <div style={{ fontSize: '13px', color: '#888', marginBottom: '8px' }}>
-            Recent Referrals
-          </div>
+          <div className="text-[13px] text-[#888] mb-2">Recent Referrals</div>
           {info.referrals.slice(0, 5).map((r) => (
             <div
               key={r.id}
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                padding: '8px 12px',
-                borderBottom: '1px solid rgba(255,255,255,0.04)',
-                fontSize: '12px',
-              }}
+              className="flex justify-between px-3 py-2 border-b border-white/4 text-xs"
             >
-              <span style={{ color: '#e0e0e0' }}>{r.refereeName}</span>
-              <span style={{ color: r.status === 'QUALIFIED' ? '#10b981' : '#f59e0b' }}>
+              <span className="text-[#e0e0e0]">{r.refereeName}</span>
+              <span className={r.status === 'QUALIFIED' ? 'text-emerald-500' : 'text-amber-400'}>
                 {r.status}
               </span>
             </div>

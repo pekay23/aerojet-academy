@@ -68,6 +68,7 @@ export async function getPoolWithDetails(poolId: string) {
     include: {
       event: true,
       memberships: {
+        where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
         include: {
           user: {
             include: {
@@ -97,7 +98,9 @@ export async function getAvailablePools() {
     },
     include: {
       event: { select: { name: true, startDate: true, endDate: true } },
-      _count: { select: { memberships: true } },
+      _count: {
+        select: { memberships: { where: { status: { in: ['RESERVED', 'CONFIRMED'] } } } },
+      },
     },
     orderBy: { examDate: 'asc' },
   })

@@ -21,8 +21,9 @@ model User {
   paymentProofUrl       String?
   paymentApprovedAt     DateTime?
   paymentApprovedBy     String?
-  programmeChoice       ProgrammeChoice?
-  isAmbassador          Boolean              @default(false)
+  programmeChoice            ProgrammeChoice?
+  selectedLicenseCategories  String[]             @default([])
+  isAmbassador               Boolean              @default(false)
   referralCode          String?              @unique
   successfulReferrals   Int                  @default(0)
   mustChangePassword    Boolean              @default(false)
@@ -626,6 +627,9 @@ model Payment {
   userId              String
   amount              Decimal       @db.Decimal(10, 2)
   currency            String        @default("EUR")
+  paymentCurrency     String?       // The actual currency the user paid in (e.g., GHS, USD)
+  originalAmount      Decimal?      @db.Decimal(10, 2) // Amount in paymentCurrency before conversion
+  exchangeRate        Decimal?      @db.Decimal(12, 6) // Rate used for conversion
   paymentMethod       String
   status              PaymentStatus @default(PENDING)
   proofUrl            String?
@@ -643,6 +647,7 @@ model Payment {
   reconciledBy        String?
   reconciliationNotes String?
   notes               String?
+  deletedAt           DateTime?     // Soft delete — retain payment records when user is deleted
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
   user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
