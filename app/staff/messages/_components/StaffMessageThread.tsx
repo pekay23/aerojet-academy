@@ -1,10 +1,19 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronDown, ChevronRight, Clock, CornerDownRight, Send, Loader2 } from 'lucide-react'
+import {
+  ChevronDown,
+  ChevronRight,
+  Clock,
+  CornerDownRight,
+  Send,
+  Loader2,
+  User,
+} from 'lucide-react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { sendStaffMessage, markMessageAsRead } from '../../actions'
+import { Badge } from '@/components/ui/badge'
 
 type MessageUser = {
   id: string
@@ -61,27 +70,29 @@ function MessageBubble({
   isOwn: boolean
   onReply: (msg: Message) => void
 }) {
-  const displayName = isOwn ? 'You' : `${userName(message.sender)} (${message.sender.role})`
+  const displayName = isOwn ? 'You' : userName(message.sender)
   return (
     <div className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
       <div
-        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${isOwn ? 'bg-[#002a5c]' : 'bg-slate-400'}`}
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-black text-white shadow-sm ring-2 ring-white dark:ring-slate-900 ${
+          isOwn ? 'bg-[#002a5c]' : 'bg-slate-400'
+        }`}
       >
-        {userName(isOwn ? message.sender : message.sender)
-          .charAt(0)
-          .toUpperCase()}
+        {userName(message.sender).charAt(0).toUpperCase()}
       </div>
       <div
-        className={`group max-w-[75%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col gap-1`}
+        className={`group max-w-[80%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col gap-1.5`}
       >
-        <p className={`text-xs text-slate-500 dark:text-slate-400 ${isOwn ? 'text-right' : 'text-left'}`}>
+        <p
+          className={`text-[10px] font-black tracking-widest text-slate-400 uppercase ${isOwn ? 'text-right' : 'text-left'}`}
+        >
           {displayName} · {formatTime(message.createdAt)}
         </p>
         <div
-          className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+          className={`rounded-2xl px-5 py-3 text-sm leading-relaxed shadow-sm ${
             isOwn
-              ? 'rounded-tr-sm bg-[#002a5c] text-white'
-              : 'rounded-tl-sm bg-slate-100 text-slate-800'
+              ? 'rounded-tr-sm bg-[#002a5c] font-medium text-white shadow-blue-500/10'
+              : 'rounded-tl-sm bg-slate-100 font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-100'
           }`}
         >
           {message.body}
@@ -89,7 +100,7 @@ function MessageBubble({
         {!isOwn && (
           <button
             onClick={() => onReply(message)}
-            className="flex items-center gap-1 text-xs text-slate-400 opacity-0 transition-opacity hover:text-[#002a5c] group-hover:opacity-100"
+            className="flex items-center gap-1.5 text-[10px] font-black tracking-widest text-slate-400 uppercase opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#002a5c] dark:hover:text-blue-400"
           >
             <CornerDownRight className="h-3 w-3" />
             Reply
@@ -155,57 +166,70 @@ export default function StaffMessageThread({
 
   return (
     <div
-      className={`rounded-2xl border bg-white dark:bg-slate-900 shadow-sm transition-shadow hover:shadow-md ${
-        thread.unreadCount > 0 ? 'border-blue-200' : 'border-slate-100'
+      className={`rounded-3xl border bg-white shadow-sm transition-all hover:shadow-md dark:bg-slate-900 ${
+        thread.unreadCount > 0
+          ? 'border-blue-200 bg-blue-50/10 ring-2 ring-blue-500/5 dark:border-blue-900 dark:bg-blue-900/10'
+          : 'border-slate-100 dark:border-slate-800'
       }`}
     >
       {/* Header */}
-      <button onClick={handleExpand} className="flex w-full items-center gap-4 px-5 py-4 text-left">
+      <button
+        onClick={handleExpand}
+        className="group flex w-full items-center gap-5 px-6 py-5 text-left"
+      >
         <div
-          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-base font-black text-white shadow-xl transition-transform group-hover:scale-110 ${
             thread.root.senderId === currentUserId ? 'bg-[#002a5c]' : 'bg-slate-500'
           }`}
         >
           {userName(otherParticipant).charAt(0).toUpperCase()}
         </div>
-        <div className="flex-1 overflow-hidden">
+        <div className="flex-1 space-y-1 overflow-hidden">
           <div className="flex items-center gap-2">
-            <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">
+            <p className="truncate text-base font-black text-[#002a5c] dark:text-slate-100">
               {userName(otherParticipant)}
             </p>
-            <span className="text-xs text-slate-400">({otherParticipant.role})</span>
+            <Badge
+              variant="outline"
+              className="rounded-md border-slate-200 px-1.5 py-0 text-[9px] font-black tracking-widest text-slate-400 uppercase dark:border-slate-700"
+            >
+              {otherParticipant.role}
+            </Badge>
             {thread.unreadCount > 0 && (
-              <span className="flex-shrink-0 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-bold text-white">
-                {thread.unreadCount} new
+              <span className="shrink-0 animate-pulse rounded-full bg-red-500 px-2 py-0.5 text-[9px] font-black tracking-widest text-white uppercase shadow-lg">
+                New
               </span>
             )}
           </div>
-          <p className="truncate text-sm font-semibold text-slate-700">{subjectDisplay}</p>
-          <p className="truncate text-xs text-slate-400">
+          <p className="truncate text-sm font-bold text-slate-700 dark:text-slate-300">
+            {subjectDisplay}
+          </p>
+          <p className="truncate text-xs font-medium text-slate-400">
             {allMessages[allMessages.length - 1].body}
           </p>
         </div>
-        <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
-          <span className="text-xs text-slate-400">
+        <div className="flex shrink-0 flex-col items-end gap-2.5">
+          <span className="flex items-center gap-1.5 font-mono text-[10px] font-black tracking-widest text-slate-400 uppercase">
+            <Clock className="h-3 w-3" />
             {formatTime(allMessages[allMessages.length - 1].createdAt)}
           </span>
           {allMessages.length > 1 && (
-            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">
-              {allMessages.length} msgs
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] font-black tracking-widest text-slate-500 uppercase dark:bg-slate-800 dark:text-slate-400">
+              {allMessages.length} Messages
             </span>
           )}
           {expanded ? (
-            <ChevronDown className="h-4 w-4 text-slate-400" />
+            <ChevronDown className="h-5 w-5 text-slate-300 transition-transform group-hover:text-slate-400" />
           ) : (
-            <ChevronRight className="h-4 w-4 text-slate-400" />
+            <ChevronRight className="h-5 w-5 text-slate-300 transition-transform group-hover:text-slate-400" />
           )}
         </div>
       </button>
 
       {/* Expanded conversation */}
       {expanded && (
-        <div className="border-t border-slate-100 dark:border-slate-800 px-5 pb-4 pt-4">
-          <div className="space-y-4">
+        <div className="border-t border-slate-100 bg-slate-50/30 px-6 py-6 dark:border-slate-800 dark:bg-slate-800/20">
+          <div className="space-y-6">
             {allMessages.map((msg) => (
               <MessageBubble
                 key={msg.id}
@@ -217,26 +241,28 @@ export default function StaffMessageThread({
           </div>
 
           {/* Reply box */}
-          <div className="mt-4 flex gap-2">
-            <input
-              type="text"
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              onKeyDown={(e) =>
-                e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendReply())
-              }
-              placeholder={`Reply to ${userName(otherParticipant)}…`}
-              className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:border-[#002a5c] focus:outline-none focus:ring-2 focus:ring-[#002a5c]/20"
-            />
+          <div className="mt-8 flex gap-3">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                onKeyDown={(e) =>
+                  e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendReply())
+                }
+                placeholder={`Type a message to ${userName(otherParticipant)}…`}
+                className="w-full rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-medium text-slate-900 placeholder-slate-400 shadow-sm transition-all focus:border-[#002a5c] focus:ring-4 focus:ring-[#002a5c]/5 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-900 dark:focus:ring-blue-500/5"
+              />
+            </div>
             <button
               onClick={handleSendReply}
               disabled={sending || !replyText.trim()}
-              className="flex items-center gap-1.5 rounded-xl bg-[#002a5c] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#003875] disabled:opacity-50"
+              className="group flex items-center justify-center rounded-2xl bg-[#002a5c] px-6 text-white shadow-xl transition-all hover:scale-105 hover:bg-[#003875] disabled:scale-100 disabled:opacity-50"
             >
               {sending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                <Send className="h-4 w-4" />
+                <Send className="h-5 w-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               )}
             </button>
           </div>

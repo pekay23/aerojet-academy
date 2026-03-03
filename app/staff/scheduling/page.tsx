@@ -44,7 +44,7 @@ export default async function SchedulingPage() {
     )
 
   return (
-    <div className="container mx-auto py-8">
+    <div className="px-4 py-8 md:px-8">
       <SchedulingClient pathways={pathways} courses={courses} />
     </div>
   )

@@ -12,7 +12,11 @@ async function main() {
   const adminPassword = await bcrypt.hash(process.env.ADMIN_PASSWORD || 'Admin@2026', 12)
   const admin = await prisma.user.upsert({
     where: { email: 'admin@aerojet-academy.com' },
-    update: {},
+    update: {
+      password: adminPassword,
+      status: 'ACTIVE',
+      mustChangePassword: false,
+    },
     create: {
       email: 'admin@aerojet-academy.com',
       academyEmail: 'admin@aerojet-academy.com',
@@ -868,7 +872,13 @@ async function main() {
   const studentPassword = await bcrypt.hash('Student@2026', 12)
   const student = await prisma.user.upsert({
     where: { email: 'student@aerojet-academy.com' },
-    update: {},
+    update: {
+      // Ensure credentials are always fresh when re-seeding
+      password: studentPassword,
+      status: 'ACTIVE',
+      emailVerified: new Date(),
+      mustChangePassword: false,
+    },
     create: {
       email: 'student@aerojet-academy.com',
       academyEmail: 'k.owusu@aerojet-academy.com',
