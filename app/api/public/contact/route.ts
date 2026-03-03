@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const validation = contactFormSchema.safeParse(payload)
     if (!validation.success) {
       return NextResponse.json(
-        { error: validation.error.errors[0]?.message || 'Invalid data provided' },
+        { error: validation.error.issues[0]?.message || 'Invalid data provided' },
         { status: 400 }
       )
     }
