@@ -14,6 +14,7 @@ export default function ContactForm() {
     phone: '',
     subject: '',
     message: '',
+    confirm_email: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,6 +31,7 @@ export default function ContactForm() {
           phone: data.phone,
           subject: data.subject,
           message: data.message,
+          confirm_email: data.confirm_email,
         }),
       })
 
@@ -61,7 +63,15 @@ export default function ContactForm() {
         <button
           onClick={() => {
             setSubmitted(false)
-            setData({ firstName: '', lastName: '', email: '', phone: '', subject: '', message: '' })
+            setData({
+              firstName: '',
+              lastName: '',
+              email: '',
+              phone: '',
+              subject: '',
+              message: '',
+              confirm_email: '',
+            })
           }}
           className="mt-6 text-xs font-bold tracking-widest text-[#4c9ded] uppercase hover:underline"
         >
@@ -178,6 +188,17 @@ export default function ContactForm() {
           onChange={(e) => setData({ ...data, message: e.target.value })}
         />
       </div>
+
+      {/* Honeypot field for bots */}
+      <input
+        type="text"
+        name="confirm_email"
+        style={{ display: 'none' }}
+        tabIndex={-1}
+        autoComplete="off"
+        value={data.confirm_email}
+        onChange={(e) => setData({ ...data, confirm_email: e.target.value })}
+      />
 
       <button
         type="submit"
