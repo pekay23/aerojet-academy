@@ -9,6 +9,7 @@ export interface PoolJoinResult {
   membership?: any
   error?: string
   autoConfirmed?: boolean
+  triggeredNearFull?: boolean
 }
 
 export interface PoolValidationResult {

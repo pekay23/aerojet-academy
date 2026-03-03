@@ -151,6 +151,11 @@ export default async function ApplicantDashboard() {
     redirect('/student')
   }
 
+  // If EXAM_ONLY pathway and registration is approved, redirect to exam-only pathway
+  if (applicant.programmeChoice === 'EXAM_ONLY' && applicant.status === 'ACTIVE') {
+    redirect('/applicant/exam-only')
+  }
+
   const firstName = applicant.profile?.firstName ?? 'Applicant'
   const appStatus = deriveStatus(applicant)
   const statusInfo = statusConfig[appStatus]
@@ -190,9 +195,7 @@ export default async function ApplicantDashboard() {
     { step: 'Verify Email', done: isEmailVerified },
     {
       step: `Upload Registration Payment (${applicant.registrationFee} ${applicant.registrationCurrency})`,
-      done:
-        appStatus !== 'payment_pending' &&
-        appStatus !== 'email_unverified',
+      done: appStatus !== 'payment_pending' && appStatus !== 'email_unverified',
     },
     {
       step: 'Registration Fee Verified',

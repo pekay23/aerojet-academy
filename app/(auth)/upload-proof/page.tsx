@@ -18,15 +18,6 @@ export default function UploadProofPage() {
 
       <UploadProofForm />
 
-      <div className="mt-8 text-center">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Already verified?{' '}
-          <Link href="/login" className="font-bold text-[#4c9ded] hover:underline">
-            Login here
-          </Link>
-        </p>
-      </div>
-
       <div className="mt-6 border-t border-slate-100 pt-6 dark:border-slate-800">
         <p className="text-center text-[10px] tracking-widest text-slate-400 uppercase">
           Secure upload powered by Aerojet Academy Admissions

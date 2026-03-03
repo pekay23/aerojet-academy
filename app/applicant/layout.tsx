@@ -14,7 +14,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { status: true, role: true, mustChangePassword: true },
+    select: { status: true, role: true, mustChangePassword: true, programmeChoice: true },
   })
 
   if (
@@ -46,6 +46,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
   })
 
   const hasPathway = !!studentProfile?.pathwayId || !!hasFullTimeEnrollment
+  const isExamOnly = dbUser?.programmeChoice === 'EXAM_ONLY'
 
   const userName = profile ? `${profile.firstName} ${profile.lastName}` : user.email
   const userRole = 'Applicant'
@@ -57,6 +58,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         userRole={userRole}
         userImage={user.image || undefined}
         hasPathway={hasPathway}
+        isExamOnly={isExamOnly}
       />
       <main id="main-content" className="min-h-screen flex-1">
         <div className="p-6 sm:p-8 lg:p-10">

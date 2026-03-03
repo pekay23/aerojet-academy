@@ -2,14 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { failPool } from '@/lib/pools/operations'
 import { createAuditLog } from '@/lib/audit/logger'
+import { env } from '@/lib/env'
 
 // Cron job: Check pools that should be auto-confirmed or failed
 // Runs daily — pools that haven't reached 25 members by T-21 days before exam are failed
 export async function GET(req: NextRequest) {
-  // Verify cron secret
+  // Verify cron secret strictly
   const authHeader = req.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  const cronSecret = env.CRON_SECRET
+
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -38,7 +40,7 @@ export async function GET(req: NextRequest) {
 
     for (const pool of poolsToFail) {
       try {
-        await failPool(pool.id, 'SYSTEM')
+        await failPool(pool.id)
         results.failed++
 
         await createAuditLog({

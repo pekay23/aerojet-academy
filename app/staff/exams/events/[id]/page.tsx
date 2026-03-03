@@ -10,11 +10,14 @@ import {
   Plus,
   Settings,
   AlertTriangle,
+  Download,
 } from 'lucide-react'
 import prisma from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
 import PoolStatusBadge from '../../../_components/PoolStatusBadge'
+import { evaluateGoNoGo } from '@/lib/events/go-no-go'
+import EventOverrideControls from './EventOverrideControls'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -44,6 +47,8 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
   })
 
   if (!event) notFound()
+
+  const evaluation = await evaluateGoNoGo(id).catch(() => null)
 
   return (
     <div className="mx-auto max-w-7xl">
@@ -97,6 +102,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
             <Settings className="h-4 w-4" />
             Edit Event
           </Link>
+          <EventOverrideControls eventId={event.id} currentOverride={event.overrideStatus} />
           <Link
             href={`/staff/exams/events/${event.id}/pools/create`}
             className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#002a5c]/90"
@@ -109,7 +115,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Statistics or Key Dates */}
-        <div className="lg:col-span-1">
+        <div className="space-y-6 lg:col-span-1">
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <h2 className="mb-4 text-lg font-bold text-slate-900 dark:text-slate-100">
               Event Details
@@ -140,6 +146,67 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
               </div>
             </div>
           </div>
+
+          {evaluation && (
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="mb-4 text-lg font-bold text-slate-900 dark:text-slate-100">
+                Revenue Tracking
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
+                      Confirmed
+                    </span>
+                    <span className="text-sm font-black text-[#002a5c] dark:text-blue-400">
+                      €{evaluation.metrics.totalConfirmedRevenue.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="mb-1 flex items-center justify-between">
+                    <span className="text-sm text-slate-500 dark:text-slate-400">Target</span>
+                    <span className="text-sm text-slate-500 dark:text-slate-400">
+                      €{evaluation.metrics.revenueTarget.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                    <div
+                      className={`h-full rounded-full ${evaluation.metrics.revenueMetPercent >= 100 ? 'bg-green-500' : 'bg-[#002a5c]'}`}
+                      style={{ width: `${Math.min(100, evaluation.metrics.revenueMetPercent)}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-50 pt-4">
+                  <div className="mb-2 text-sm font-bold text-slate-700 dark:text-slate-200">
+                    Go/No-Go Projection
+                  </div>
+                  <div
+                    className={`rounded-lg p-3 text-sm font-medium ${
+                      evaluation.decision === 'GO'
+                        ? 'border border-green-200 bg-green-50 text-green-700'
+                        : evaluation.decision === 'NO_GO'
+                          ? 'border border-red-200 bg-red-50 text-red-700'
+                          : 'border border-amber-200 bg-amber-50 text-amber-700'
+                    }`}
+                  >
+                    {evaluation.decision === 'GO'
+                      ? 'Ready for confirmation'
+                      : evaluation.decision === 'NO_GO'
+                        ? 'Cancellation criteria met'
+                        : 'Needs manual review'}
+                  </div>
+                  <ul className="mt-3 space-y-1 text-xs text-slate-500">
+                    {evaluation.reasons.map((reason: string, idx: number) => (
+                      <li key={idx} className="flex gap-2">
+                        <span className="mt-0.5">•</span>
+                        <span dangerouslySetInnerHTML={{ __html: reason }} />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Pool Management */}
@@ -183,11 +250,19 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                       </div>
                     </div>
                     <div className="flex gap-2">
+                      <a
+                        href={`/api/staff/reports/roster/${pool.id}`}
+                        className="flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                        title="Download CSV Roster"
+                      >
+                        <Download className="h-3 w-3" />
+                        Roster
+                      </a>
                       <Link
                         href={`/staff/exams/pools/${pool.id}`}
                         className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400"
                       >
-                        Manage Members
+                        Manage
                       </Link>
                       <Link
                         href={`/staff/exams/pools/${pool.id}/edit`}
