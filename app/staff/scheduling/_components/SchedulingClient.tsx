@@ -1,14 +1,23 @@
 'use client'
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import React, { useState, useMemo } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
-import { ScrollArea } from '@/components/ui/scroll-area'
+import { Input } from '@/components/ui/input'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { toggleCourseAssignment } from '../actions'
 import { toast } from 'sonner'
-import { Loader2, Calendar, BookOpen, ShieldCheck } from 'lucide-react'
+import { Loader2, Search, Layers, Sparkles } from 'lucide-react'
 
 interface SchedulingClientProps {
   pathways: any[]
@@ -17,6 +26,28 @@ interface SchedulingClientProps {
 
 export default function SchedulingClient({ pathways, courses }: SchedulingClientProps) {
   const [loading, setLoading] = useState<string | null>(null)
+  const [search, setSearch] = useState('')
+
+  // Group courses by category for cleaner organization
+  const groupedCourses = useMemo(() => {
+    const filtered = courses.filter(
+      (c) =>
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.code.toLowerCase().includes(search.toLowerCase())
+    )
+
+    // Apply natural sort to courses (e.g. M1, M2... M10)
+    const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' })
+    const sorted = [...filtered].sort((a, b) => collator.compare(a.code, b.code))
+
+    const groups: Record<string, any[]> = {}
+    sorted.forEach((course) => {
+      const cat = course.category?.name || 'General'
+      if (!groups[cat]) groups[cat] = []
+      groups[cat].push(course)
+    })
+    return groups
+  }, [courses, search])
 
   const handleToggle = async (termId: string, courseId: string, assigned: boolean) => {
     setLoading(`${termId}-${courseId}`)
@@ -35,111 +66,184 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="mx-auto max-w-7xl space-y-8">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
+      >
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
             Academic Scheduling
           </h1>
-          <p className="font-medium text-slate-500 dark:text-slate-400">
+          <p className="mt-1 flex items-center gap-2 text-base font-medium text-slate-500 dark:text-slate-400">
+            <Sparkles className="h-4 w-4 text-[#4c9ded]" />
             Map modules to academic terms for automatic enrollment.
           </p>
         </div>
-      </div>
+        <div className="relative w-full sm:w-80">
+          <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Input
+            placeholder="Search by code or name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="h-11 rounded-xl border-slate-200 bg-white pl-11 shadow-sm transition-all focus:border-[#4c9ded] focus:ring-2 focus:ring-[#4c9ded]/10 dark:border-slate-800 dark:bg-slate-950"
+          />
+        </div>
+      </motion.div>
 
       <Tabs defaultValue={pathways[0]?.id} className="w-full">
-        <TabsList className="mb-4 bg-slate-100 p-1 dark:bg-slate-800">
+        <TabsList className="mb-8 h-auto flex-wrap gap-3 bg-transparent p-0">
           {pathways.map((p) => (
             <TabsTrigger
               key={p.id}
               value={p.id}
-              className="px-6 data-[state=active]:bg-white data-[state=active]:shadow-sm dark:data-[state=active]:bg-slate-700"
+              className="rounded-xl border border-slate-200 bg-white px-8 py-3 text-sm font-bold text-[#002a5c] shadow-sm transition-all data-[state=active]:border-[#002a5c] data-[state=active]:bg-[#002a5c] data-[state=active]:text-white dark:border-slate-800 dark:bg-slate-900 dark:data-[state=active]:bg-[#002a5c]"
             >
               {p.name}
             </TabsTrigger>
           ))}
         </TabsList>
 
-        {pathways.map((pathway) => (
-          <TabsContent key={pathway.id} value={pathway.id} className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {pathway.academicTerms.map((term: any) => (
-                <Card
-                  key={term.id}
-                  className="overflow-hidden border-slate-200 dark:border-slate-800"
-                >
-                  <CardHeader className="border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-blue-500" />
-                        <CardTitle className="text-lg font-bold">{term.name}</CardTitle>
-                      </div>
-                      <Badge
-                        variant="secondary"
-                        className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                      >
-                        EY {term.yearNumber} S{term.semesterNumber}
-                      </Badge>
-                    </div>
-                    <CardDescription>
-                      {term.courseAssignments.length} Modules assigned
-                    </CardDescription>
-                  </CardHeader>
+        <AnimatePresence mode="wait">
+          {pathways.map((pathway) => (
+            <TabsContent key={pathway.id} value={pathway.id}>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Card className="overflow-hidden rounded-2xl border-slate-100 shadow-xl dark:border-slate-800">
                   <CardContent className="p-0">
-                    <ScrollArea className="h-[400px]">
-                      <div className="space-y-2 p-4">
-                        {courses.map((course) => {
-                          const isAssigned = term.courseAssignments.some(
-                            (a: any) => a.courseId === course.id
-                          )
-                          const isLoading = loading === `${term.id}-${course.id}`
-
-                          return (
-                            <div
-                              key={course.id}
-                              className={`flex items-center justify-between rounded-xl border p-3 transition-all ${
-                                isAssigned
-                                  ? 'border-blue-100 bg-blue-50/50 dark:border-blue-900/30 dark:bg-blue-900/10'
-                                  : 'border-slate-100 bg-white hover:border-slate-200 dark:border-slate-800 dark:bg-slate-900'
-                              }`}
-                            >
-                              <div className="flex items-center gap-3">
-                                <Checkbox
-                                  id={`check-${term.id}-${course.id}`}
-                                  checked={isAssigned}
-                                  onCheckedChange={(checked) =>
-                                    handleToggle(term.id, course.id, !!checked)
-                                  }
-                                  disabled={!!loading}
-                                />
-                                <div className="space-y-0.5">
-                                  <label
-                                    htmlFor={`check-${term.id}-${course.id}`}
-                                    className="cursor-pointer text-sm leading-none font-bold text-slate-900 dark:text-slate-100"
+                    <div className="scrollbar-hide relative overflow-x-auto">
+                      <Table>
+                        <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
+                          <TableRow className="hover:bg-transparent">
+                            <TableHead className="sticky left-0 z-30 w-[300px] min-w-[300px] border-r bg-slate-50 py-6 text-sm font-bold text-[#002a5c] dark:bg-slate-900 dark:text-slate-300">
+                              Module Name
+                            </TableHead>
+                            {pathway.academicTerms.map((term: any) => (
+                              <TableHead
+                                key={term.id}
+                                className="min-w-[160px] border-r text-center align-middle"
+                              >
+                                <div className="flex flex-col items-center gap-1.5">
+                                  <span className="text-sm font-bold text-[#002a5c] dark:text-slate-100">
+                                    {term.name}
+                                  </span>
+                                  <Badge
+                                    variant="outline"
+                                    className="rounded-md border-blue-200 bg-blue-50 text-[10px] font-black text-[#002a5c] uppercase dark:border-blue-900/30 dark:bg-blue-900/30 dark:text-blue-300"
                                   >
-                                    {course.code}: {course.name}
-                                  </label>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-[10px] font-bold tracking-tight text-slate-500 uppercase">
-                                      {course.category?.name || 'General'}
-                                    </span>
-                                  </div>
+                                    Year {term.yearNumber} • Sem {term.semesterNumber}
+                                  </Badge>
                                 </div>
-                              </div>
-                              {isLoading && (
-                                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                              )}
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </ScrollArea>
+                              </TableHead>
+                            ))}
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {Object.entries(groupedCourses).map(([category, catCourses]) => (
+                            <React.Fragment key={category}>
+                              {/* Category Header */}
+                              <TableRow className="bg-slate-50/50 hover:bg-slate-50/50 dark:bg-slate-800/10 dark:hover:bg-slate-800/10">
+                                <TableCell
+                                  colSpan={pathway.academicTerms.length + 1}
+                                  className="px-6 py-2.5"
+                                >
+                                  <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                                    <Layers className="h-3 w-3" />
+                                    {category}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+
+                              {/* Course Rows */}
+                              {catCourses.map((course) => (
+                                <TableRow
+                                  key={course.id}
+                                  className="group border-b border-slate-50 transition-colors hover:bg-slate-50/30 dark:border-slate-800/50 dark:hover:bg-slate-900/40"
+                                >
+                                  <TableCell className="sticky left-0 z-20 border-r bg-white py-5 group-hover:bg-slate-50 dark:bg-slate-950 dark:group-hover:bg-slate-900">
+                                    <div className="space-y-1.5 px-2">
+                                      <div className="text-lg leading-tight font-bold text-[#002a5c] dark:text-slate-100">
+                                        {course.name}
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <span className="rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-bold text-slate-500 dark:bg-slate-800">
+                                          {course.code}
+                                        </span>
+                                        {course.duration > 0 && (
+                                          <span className="text-xs font-medium text-slate-400">
+                                            {course.duration} hrs
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </TableCell>
+
+                                  {pathway.academicTerms.map((term: any) => {
+                                    const isAssigned = term.courseAssignments.some(
+                                      (a: any) => a.courseId === course.id
+                                    )
+                                    const isLoading = loading === `${term.id}-${course.id}`
+
+                                    return (
+                                      <TableCell
+                                        key={`${term.id}-${course.id}`}
+                                        className={`relative border-r p-0 text-center transition-all ${
+                                          isAssigned
+                                            ? 'bg-blue-50/20 dark:bg-blue-900/5'
+                                            : 'bg-transparent'
+                                        }`}
+                                      >
+                                        <label
+                                          htmlFor={`check-${term.id}-${course.id}`}
+                                          className="flex h-full min-h-[80px] w-full cursor-pointer items-center justify-center transition-all hover:bg-blue-50/50 dark:hover:bg-blue-900/10"
+                                        >
+                                          {isLoading ? (
+                                            <Loader2 className="h-5 w-5 animate-spin text-[#4c9ded]" />
+                                          ) : (
+                                            <Checkbox
+                                              id={`check-${term.id}-${course.id}`}
+                                              checked={isAssigned}
+                                              onCheckedChange={(checked) =>
+                                                handleToggle(term.id, course.id, !!checked)
+                                              }
+                                              className="h-6 w-6 rounded-lg border-2 border-slate-200 transition-all data-[state=checked]:border-[#002a5c] data-[state=checked]:bg-[#002a5c] dark:border-slate-800"
+                                            />
+                                          )}
+                                        </label>
+                                      </TableCell>
+                                    )
+                                  })}
+                                </TableRow>
+                              ))}
+                            </React.Fragment>
+                          ))}
+
+                          {Object.keys(groupedCourses).length === 0 && (
+                            <TableRow>
+                              <TableCell
+                                colSpan={pathway.academicTerms.length + 1}
+                                className="py-24 text-center"
+                              >
+                                <p className="text-xl font-bold text-slate-400">
+                                  No modules found matching "{search}"
+                                </p>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </CardContent>
                 </Card>
-              ))}
-            </div>
-          </TabsContent>
-        ))}
+              </motion.div>
+            </TabsContent>
+          ))}
+        </AnimatePresence>
       </Tabs>
     </div>
   )

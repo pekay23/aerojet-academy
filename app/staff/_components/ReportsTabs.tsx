@@ -23,15 +23,6 @@ export default function ReportsTabs({ children }: { children: React.ReactNode })
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
-          Reports
-        </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Key metrics, analytics, and reporting for the academy.
-        </p>
-      </div>
-
       {/* Tab Bar */}
       <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
         {TABS.map((t) => {

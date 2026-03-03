@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { isValidEmail } from '@/lib/utils/validation'
+import { isValidEmail, isStrongPassword } from '@/lib/utils/validation'
 
 describe('Auth Integration', () => {
   it('validates email format', () => {
@@ -9,7 +9,6 @@ describe('Auth Integration', () => {
   })
 
   it('validates strong password requirements', () => {
-    const { isStrongPassword } = require('@/lib/utils/validation')
     expect(isStrongPassword('REDACTED_PASSWORD').valid).toBe(true)
     expect(isStrongPassword('weak').valid).toBe(false)
     expect(isStrongPassword('nouppercase1').valid).toBe(false)
