@@ -161,7 +161,7 @@ export default async function ExamOnlyTopUpPage({
 
       {/* Wallet Balance Card */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-lg dark:border-slate-700">
-        <div className="bg-gradient-to-r from-[#002a5c] to-[#4c9ded] px-6 py-5">
+        <div className="bg-linear-to-r from-[#002a5c] to-[#4c9ded] px-6 py-5">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur">
               <Wallet className="h-7 w-7 text-white" />
@@ -194,7 +194,7 @@ export default async function ExamOnlyTopUpPage({
 
       {/* Pending Payment Alert */}
       {pendingPayment && (
-        <div className="overflow-hidden rounded-2xl border border-orange-200 bg-gradient-to-r from-orange-50 to-amber-50 shadow-md dark:border-orange-900/30 dark:from-orange-900/20 dark:to-amber-900/20">
+        <div className="overflow-hidden rounded-2xl border border-orange-200 bg-linear-to-r from-orange-50 to-amber-50 shadow-md dark:border-orange-900/30 dark:from-orange-900/20 dark:to-amber-900/20">
           <div className="flex items-start gap-4 p-5">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange-100 dark:bg-orange-900/30">
               <Clock className="h-6 w-6 text-orange-600 dark:text-orange-400" />
