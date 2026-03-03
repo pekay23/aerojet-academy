@@ -1,0 +1,375 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to main content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - generic [ref=e5]:
+        - link "Aerojet Logo" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img "Aerojet Logo" [ref=e7]
+        - navigation "Main" [ref=e9]:
+          - list [ref=e11]:
+            - listitem [ref=e12]:
+              - link "Home" [ref=e13] [cursor=pointer]:
+                - /url: /
+                - text: Home
+            - listitem [ref=e15]:
+              - button "Courses" [ref=e16]:
+                - text: Courses
+                - img [ref=e17]
+            - listitem [ref=e19]:
+              - link "Admissions" [ref=e20] [cursor=pointer]:
+                - /url: /admissions
+            - listitem [ref=e21]:
+              - link "Newsroom" [ref=e22] [cursor=pointer]:
+                - /url: /newsroom
+            - listitem [ref=e23]:
+              - link "About" [ref=e24] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e25]:
+              - link "Contact" [ref=e26] [cursor=pointer]:
+                - /url: /contact
+        - generic [ref=e27]:
+          - link "Login" [ref=e28] [cursor=pointer]:
+            - /url: /login
+          - link "Register" [ref=e29] [cursor=pointer]:
+            - /url: /register
+    - main [ref=e30]:
+      - generic [ref=e31]:
+        - generic [ref=e32]:
+          - img "Aerojet Academy background" [ref=e33]
+          - img "Aerojet Academy background" [ref=e34]
+          - img "Aerojet Academy background" [ref=e35]
+          - generic [ref=e39]:
+            - heading "Your Journey to Becoming a Certified Aircraft Technician Starts Here." [level=1] [ref=e40]:
+              - generic [ref=e41]: Your
+              - generic [ref=e42]: Journey
+              - generic [ref=e43]: to
+              - generic [ref=e44]: Becoming
+              - generic [ref=e45]: a
+              - generic [ref=e46]: Certified
+              - generic [ref=e47]: Aircraft
+              - generic [ref=e48]: Technician
+              - generic [ref=e49]: Starts
+              - generic [ref=e50]: Here.
+            - paragraph [ref=e51]: World-class aviation technical training in Accra — structured pathways to EASA Part-66 B1/B2 standards.
+            - generic [ref=e52]:
+              - link "Start Registration" [ref=e53] [cursor=pointer]:
+                - /url: /register
+              - link "Explore Courses" [ref=e54] [cursor=pointer]:
+                - /url: /courses
+        - generic [ref=e57]:
+          - generic [ref=e58]:
+            - img [ref=e59]
+            - generic [ref=e62]: Certified
+            - generic [ref=e63]: EASA Part 147 Certified
+          - generic [ref=e64]:
+            - img [ref=e65]
+            - generic [ref=e68]: B1 & B2
+            - generic [ref=e69]: Licence Categories
+          - generic [ref=e70]:
+            - img [ref=e71]
+            - generic [ref=e74]: Worldwide
+            - generic [ref=e75]: International Recognition
+          - generic [ref=e76]:
+            - img [ref=e77]
+            - generic [ref=e82]: 28 Students
+            - generic [ref=e83]: Max Class Size
+        - generic [ref=e86]:
+          - generic [ref=e88]:
+            - generic [ref=e89]: Who We Are
+            - heading "Building the Future of African Aviation" [level=2] [ref=e90]:
+              - text: Building the Future of
+              - text: African Aviation
+            - generic [ref=e91]:
+              - paragraph [ref=e92]: Aerojet Aviation Training Academy is Africa’s foremost institution and leader in the field of Aviation Training and Engineering. Training Engineers for one of the most demanding professions in the world is a truly important responsibility that we take very seriously.
+              - paragraph [ref=e93]: At Aerojet, we are committed to educating and preparing aircraft engineers to the highest standards. During your training, you will gain direct insight into how work is carried out in a live aircraft hangar, supported by opportunities to train in our EASA Part 145 Facility or at partner facilities worldwide.
+            - generic [ref=e94]:
+              - paragraph [ref=e95]: "Our Training Includes:"
+              - list [ref=e96]:
+                - listitem [ref=e97]:
+                  - img [ref=e99]
+                  - text: Live Hangar Experience
+                - listitem [ref=e102]:
+                  - img [ref=e104]
+                  - text: EASA Part-145 Standards
+                - listitem [ref=e107]:
+                  - img [ref=e109]
+                  - text: Global Partner Network
+                - listitem [ref=e112]:
+                  - img [ref=e114]
+                  - text: Hands-on Mentorship
+          - generic [ref=e117]:
+            - img "Aerojet student" [ref=e120]
+            - generic [ref=e121]:
+              - generic [ref=e122]: 100%
+              - generic [ref=e123]: EASA Standards
+        - generic [ref=e127]:
+          - generic [ref=e129]:
+            - generic [ref=e130]: Your Journey
+            - heading "Our Training Pathways" [level=2] [ref=e131]
+          - generic [ref=e134]:
+            - generic [ref=e136]:
+              - img [ref=e138]
+              - heading "Classroom & Workshop Training" [level=3] [ref=e143]
+              - paragraph [ref=e144]: Foundational theory and hands-on practice in our modern facilities.
+            - generic [ref=e146]:
+              - img [ref=e148]
+              - heading "EASA Examinations" [level=3] [ref=e152]
+              - paragraph [ref=e153]: Successfully pass all required modules to prove your knowledge.
+            - generic [ref=e155]:
+              - img [ref=e157]
+              - heading "Work Experience & Job Placement" [level=3] [ref=e159]
+              - paragraph [ref=e160]: Gain required OJT and launch your career with our partner network.
+        - generic [ref=e162]:
+          - generic [ref=e163]:
+            - generic [ref=e165]:
+              - generic [ref=e166]: Our Programmes
+              - heading "Choose Your Pathway" [level=2] [ref=e167]:
+                - text: Choose Your
+                - text: Pathway
+              - paragraph [ref=e168]: Whether you're starting fresh or are an experienced professional, we have a program tailored to your career goals. Explore our offerings to find the perfect fit for your journey in aviation.
+            - link "View All Programmes" [ref=e170] [cursor=pointer]:
+              - /url: /courses
+              - text: View All Programmes
+              - img [ref=e171]
+          - generic [ref=e174]:
+            - link "Flagship 4-Year Full-Time Our flagship EASA-certified program for aspiring engineers. Comprehensive B1/B2 training. Learn More" [ref=e176] [cursor=pointer]:
+              - /url: /courses/aircraft-engineering/easa-part-66/four-year-b1-b2
+              - generic [ref=e177]: Flagship
+              - img [ref=e179]
+              - heading "4-Year Full-Time" [level=3] [ref=e182]
+              - paragraph [ref=e183]: Our flagship EASA-certified program for aspiring engineers. Comprehensive B1/B2 training.
+              - generic [ref=e184]:
+                - text: Learn More
+                - img [ref=e185]
+            - link "2-Year Full-Time An accelerated B1.1 mechanical certification path focused on core engineering excellence. Learn More" [ref=e188] [cursor=pointer]:
+              - /url: /courses/aircraft-engineering/easa-part-66/two-year-b1
+              - img [ref=e190]
+              - heading "2-Year Full-Time" [level=3] [ref=e193]
+              - paragraph [ref=e194]: An accelerated B1.1 mechanical certification path focused on core engineering excellence.
+              - generic [ref=e195]:
+                - text: Learn More
+                - img [ref=e196]
+            - link "Modular Training Flexible, self-paced study with expert support. Enroll in specific EASA modules as needed. Learn More" [ref=e199] [cursor=pointer]:
+              - /url: /courses/aircraft-engineering/easa-part-66/modular-training
+              - img [ref=e201]
+              - heading "Modular Training" [level=3] [ref=e203]
+              - paragraph [ref=e204]: Flexible, self-paced study with expert support. Enroll in specific EASA modules as needed.
+              - generic [ref=e205]:
+                - text: Learn More
+                - img [ref=e206]
+            - link "Military / Industry A 1-year fast-track for experienced personnel entering civil aviation maintenance. Learn More" [ref=e209] [cursor=pointer]:
+              - /url: /courses/aircraft-engineering/easa-part-66/military-certification
+              - img [ref=e211]
+              - heading "Military / Industry" [level=3] [ref=e216]
+              - paragraph [ref=e217]: A 1-year fast-track for experienced personnel entering civil aviation maintenance.
+              - generic [ref=e218]:
+                - text: Learn More
+                - img [ref=e219]
+        - generic [ref=e223]:
+          - img "Aircraft Engineer working on an engine" [ref=e228]
+          - generic [ref=e230]:
+            - generic [ref=e231]: Career Opportunities
+            - heading "A Career That Takes You Anywhere" [level=2] [ref=e232]:
+              - text: A Career That Takes
+              - text: You Anywhere
+            - paragraph [ref=e233]: "An EASA Part-66 license is a globally recognized qualification that opens doors to a rewarding and high-demand career. Our graduates work in a variety of roles across the aviation industry worldwide, including:"
+            - generic [ref=e234]:
+              - generic [ref=e235]:
+                - img [ref=e237]
+                - generic [ref=e240]: Commercial Airlines
+              - generic [ref=e241]:
+                - img [ref=e243]
+                - generic [ref=e246]: Maintenance, Repair & Overhaul (MRO) Facilities
+              - generic [ref=e247]:
+                - img [ref=e249]
+                - generic [ref=e252]: Aircraft Manufacturing Companies
+              - generic [ref=e253]:
+                - img [ref=e255]
+                - generic [ref=e258]: Military and Defence Contractors
+              - generic [ref=e259]:
+                - img [ref=e261]
+                - generic [ref=e264]: Specialist Engineering Firms
+        - generic [ref=e267]:
+          - generic [ref=e268]:
+            - heading "Understanding EASA Licensing" [level=2] [ref=e269]
+            - paragraph [ref=e271]: At Aerojet, we train engineers to EASA Certification standards—the most widely accepted qualification in the industry. We focus on the higher-level Category B License.
+          - generic [ref=e272]:
+            - generic [ref=e273]:
+              - generic [ref=e274]: B1
+              - heading "Category B1 (Mechanical)" [level=3] [ref=e275]
+              - paragraph [ref=e276]: Allows the holder to issue certifications of release to service following maintenance on aircraft structure, power plants, and mechanical/electrical systems. You will be qualified for complex tasks, periodic servicing, and major overhauls.
+              - generic [ref=e277]:
+                - generic [ref=e278]:
+                  - generic [ref=e279]: B1.1
+                  - generic [ref=e280]: Aeroplanes Turbine
+                - generic [ref=e281]:
+                  - generic [ref=e282]: B1.2
+                  - generic [ref=e283]: Aeroplanes Piston
+                - generic [ref=e284]:
+                  - generic [ref=e285]: B1.3
+                  - generic [ref=e286]: Helicopters Turbine
+                - generic [ref=e287]:
+                  - generic [ref=e288]: B1.4
+                  - generic [ref=e289]: Helicopters Piston
+            - generic [ref=e290]:
+              - generic [ref=e291]: B2
+              - heading "Category B2 (Avionics)" [level=3] [ref=e292]
+              - paragraph [ref=e293]: Allows the holder to issue certificates of release to service following maintenance on avionic and electrical systems. You will specialize in all electronic systems fitted to aircraft.
+              - generic [ref=e294]:
+                - heading "Key Focus Areas:" [level=4] [ref=e295]
+                - list [ref=e296]:
+                  - listitem [ref=e297]: Communication & Navigation
+                  - listitem [ref=e299]: Radar Equipment
+                  - listitem [ref=e301]: Guidance & Control Systems
+                  - listitem [ref=e303]: Auto-pilot & Auto-land
+                  - listitem [ref=e305]: Cabin Entertainment
+          - paragraph [ref=e308]: "Note: Aerojet Academy primarily focuses on Category B License training. Other license categories may be available on an on-demand basis."
+        - generic [ref=e310]:
+          - generic [ref=e311]:
+            - generic [ref=e312]: How to Enroll
+            - heading "Four Simple Steps" [level=2] [ref=e313]
+          - generic [ref=e314]:
+            - generic [ref=e316]:
+              - generic [ref=e317]: "01"
+              - heading "Register Online" [level=3] [ref=e318]
+              - paragraph [ref=e319]: Pay the GH₵350 registration fee and create your portal account.
+            - generic [ref=e322]:
+              - generic [ref=e323]: "02"
+              - heading "Complete Application" [level=3] [ref=e324]
+              - paragraph [ref=e325]: Submit your documents and complete the online application form.
+            - generic [ref=e328]:
+              - generic [ref=e329]: "03"
+              - heading "Get Approved" [level=3] [ref=e330]
+              - paragraph [ref=e331]: Our team reviews your application and issues a confirmation invoice.
+            - generic [ref=e334]:
+              - generic [ref=e335]: "04"
+              - heading "Begin Training" [level=3] [ref=e336]
+              - paragraph [ref=e337]: Pay your confirmation fee, get onboarded, and start your journey.
+        - generic [ref=e340]:
+          - heading "Partners & Certification Standards" [level=3] [ref=e341]
+          - generic [ref=e342]:
+            - img "EASA" [ref=e344]
+            - img "USTDA" [ref=e346]
+            - img "Ghana Air Force" [ref=e348]
+            - img "Joramco" [ref=e350]
+            - img "Gaptek" [ref=e352]
+            - img "Aerojet Foundation" [ref=e354]
+        - generic [ref=e357]:
+          - img [ref=e359]
+          - generic [ref=e361]:
+            - heading "Ready to Begin?" [level=2] [ref=e362]
+            - paragraph [ref=e363]: Contact our admissions team today to request your registration invoice or to ask any questions about our 2026/2027 schedule.
+            - generic [ref=e364]:
+              - link "+233-20-984-8423" [ref=e365] [cursor=pointer]:
+                - /url: tel:+233209848423
+                - img [ref=e366]
+                - generic [ref=e368]: +233-20-984-8423
+              - link "Email Admissions" [ref=e369] [cursor=pointer]:
+                - /url: mailto:trainingprograms@aerojet-academy.com
+                - img [ref=e370]
+                - generic [ref=e373]: Email Admissions
+          - generic [ref=e374]:
+            - link "Start Registration" [ref=e375] [cursor=pointer]:
+              - /url: /register
+            - link "General Enquiry" [ref=e376] [cursor=pointer]:
+              - /url: /contact
+    - contentinfo [ref=e377]:
+      - generic [ref=e378]:
+        - generic [ref=e379]:
+          - generic [ref=e380]:
+            - link "Aerojet Footer Logo" [ref=e381] [cursor=pointer]:
+              - /url: /
+              - img "Aerojet Footer Logo" [ref=e382]
+            - paragraph [ref=e383]: Africa's foremost EASA Part-147 certified aviation training institution.
+          - generic [ref=e384]:
+            - heading "Programmes" [level=3] [ref=e385]
+            - list [ref=e386]:
+              - listitem [ref=e387]:
+                - link "4-Year Full-Time" [ref=e388] [cursor=pointer]:
+                  - /url: /courses/aircraft-engineering/easa-part-66/four-year-b1-b2
+              - listitem [ref=e389]:
+                - link "2-Year Full-Time" [ref=e390] [cursor=pointer]:
+                  - /url: /courses/aircraft-engineering/easa-part-66/two-year-b1
+              - listitem [ref=e391]:
+                - link "Military Certification" [ref=e392] [cursor=pointer]:
+                  - /url: /courses/aircraft-engineering/easa-part-66/military-certification
+              - listitem [ref=e393]:
+                - link "Modular Training" [ref=e394] [cursor=pointer]:
+                  - /url: /courses/aircraft-engineering/easa-part-66/modular-training
+              - listitem [ref=e395]:
+                - link "Exam Only" [ref=e396] [cursor=pointer]:
+                  - /url: /courses/aircraft-engineering/easa-part-66/exam-only
+              - listitem [ref=e397]:
+                - link "Revision Support" [ref=e398] [cursor=pointer]:
+                  - /url: /courses/aircraft-engineering/easa-part-66/revision-support
+          - generic [ref=e399]:
+            - heading "Admissions" [level=3] [ref=e400]
+            - list [ref=e401]:
+              - listitem [ref=e402]:
+                - link "Entry Requirements" [ref=e403] [cursor=pointer]:
+                  - /url: /admissions/entry-requirements
+              - listitem [ref=e404]:
+                - link "Fees & Payment" [ref=e405] [cursor=pointer]:
+                  - /url: /admissions/fees-and-payment
+              - listitem [ref=e406]:
+                - link "FAQ" [ref=e407] [cursor=pointer]:
+                  - /url: /admissions/faq
+              - listitem [ref=e408]:
+                - link "Register" [ref=e409] [cursor=pointer]:
+                  - /url: /register
+          - generic [ref=e410]:
+            - heading "Company" [level=3] [ref=e411]
+            - list [ref=e412]:
+              - listitem [ref=e413]:
+                - link "About Us" [ref=e414] [cursor=pointer]:
+                  - /url: /about
+              - listitem [ref=e415]:
+                - link "Accra MRO Project" [ref=e416] [cursor=pointer]:
+                  - /url: /about/accra-mro-project
+              - listitem [ref=e417]:
+                - link "Newsroom" [ref=e418] [cursor=pointer]:
+                  - /url: /newsroom
+          - generic [ref=e419]:
+            - heading "Contact Us" [level=3] [ref=e420]
+            - list [ref=e421]:
+              - listitem [ref=e422]:
+                - img [ref=e423]
+                - generic [ref=e426]: ATTC, Kokomlemle, Accra, Ghana
+              - listitem [ref=e427]:
+                - img [ref=e428]
+                - link "+233-20-984-8423" [ref=e430] [cursor=pointer]:
+                  - /url: tel:+233209848423
+              - listitem [ref=e431]:
+                - img [ref=e432]
+                - link "trainingprograms@aerojet-academy.com" [ref=e435] [cursor=pointer]:
+                  - /url: mailto:trainingprograms@aerojet-academy.com
+        - generic [ref=e436]:
+          - generic [ref=e437]:
+            - link "Facebook" [ref=e438] [cursor=pointer]:
+              - /url: https://www.facebook.com/profile.php?id=100092872480952
+              - img [ref=e439]
+            - link "Twitter/X" [ref=e441] [cursor=pointer]:
+              - /url: https://x.com/aerojet_academy
+              - img [ref=e442]
+            - link "Instagram" [ref=e444] [cursor=pointer]:
+              - /url: https://www.instagram.com/aerojet_academy/
+              - img [ref=e445]
+            - link "LinkedIn" [ref=e448] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/aerojet-aviation-training-academy/
+              - img [ref=e449]
+          - paragraph [ref=e453]: © 2026 Aerojet Aviation. All Rights Reserved.
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e459] [cursor=pointer]:
+    - generic [ref=e462]:
+      - text: Compiling
+      - generic [ref=e463]:
+        - generic [ref=e464]: .
+        - generic [ref=e465]: .
+        - generic [ref=e466]: .
+  - alert [ref=e467]
+```
