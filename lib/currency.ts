@@ -14,5 +14,8 @@ export function getCurrencySymbol(currency: string): string {
 export function formatCurrency(amount: number | string, currency: string = 'EUR'): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount
   const symbol = getCurrencySymbol(currency)
-  return `${symbol}${num.toLocaleString()}`
+
+  // Use toFixed(2) to guarantee decimals, then add thousands separators
+  const formatted = num.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+  return `${symbol}${formatted}`
 }

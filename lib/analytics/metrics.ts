@@ -1,21 +1,15 @@
 import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
-import { getCurrencySymbol } from '@/lib/currency'
+import { getCurrencySymbol, formatCurrency } from '@/lib/currency'
 
 export const calculateFillRate = (current: number, max: number): number => {
   if (max === 0) return 0
   return Math.round((current / max) * 100)
 }
 
-export const formatCurrency = (
-  amount: number | Prisma.Decimal | null,
-  currency?: string
-): string => {
-  const value = Number(amount || 0)
-  const curr = currency || 'EUR'
-  const symbol = getCurrencySymbol(curr)
-  return `${symbol}${value.toLocaleString()}`
-}
+// Re-export common formatting with the same signature if needed,
+// or just use the imported one.
+export { formatCurrency }
 
 export const calculateGrowth = (current: number, previous: number): number => {
   if (previous === 0) return current > 0 ? 100 : 0
