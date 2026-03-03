@@ -7,7 +7,14 @@ import {
   sendPaymentApprovedEmail,
   sendPaymentRejectedEmail,
   sendSeatReservationConfirmedEmail,
+  sendActivationEmail,
 } from '@/lib/email/service'
+import {
+  hashPassword,
+  generateToken,
+  generateTempPassword,
+  generateAcademyEmail,
+} from '@/lib/auth/helpers'
 import { PaymentStatus, ProgrammeChoice } from '@prisma/client'
 import { topUpWallet } from '@/lib/wallet/operations'
 import { shouldPromoteOnPayment, promoteApplicantToStudent } from '@/lib/enrollment/pathway'
@@ -232,7 +239,54 @@ export const POST = withErrorHandler(
         await promoteApplicantToStudent(payment.userId, staff.id)
       }
 
-      if (payment.user.profile) {
+      // Qualify any pending referral for this user (non-blocking)
+      import('@/lib/referral/operations')
+        .then(({ qualifyReferral }) => qualifyReferral(payment.userId))
+        .catch(console.error)
+
+      // Handle REGISTRATION payment - send activation email with credentials
+      if (payment.referenceType === 'REGISTRATION' && payment.user.profile) {
+        const profile = payment.user.profile
+
+        // Only generate credentials if user is still PENDING (not yet activated)
+        if (payment.user.status === 'PENDING') {
+          const tempPassword = generateTempPassword()
+          const hashedTempPassword = await hashPassword(tempPassword)
+          const verifyToken = generateToken()
+          const verifyTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000)
+          const academyEmail = await generateAcademyEmail(
+            profile.firstName,
+            profile.middleName || undefined,
+            profile.lastName
+          )
+
+          // Update user with credentials and activate
+          await prisma.user.update({
+            where: { id: payment.userId },
+            data: {
+              status: 'ACTIVE',
+              email: academyEmail,
+              academyEmail,
+              password: hashedTempPassword,
+              verifyToken,
+              verifyTokenExpires,
+              mustChangePassword: true,
+              paymentApprovedAt: new Date(),
+              paymentApprovedBy: staff.id,
+              registrationPaid: true,
+            },
+          })
+
+          // Send activation email
+          await sendActivationEmail(
+            payment.user.email,
+            profile.firstName,
+            academyEmail,
+            tempPassword,
+            verifyToken
+          )
+        }
+      } else if (payment.user.profile) {
         sendPaymentApprovedEmail(
           payment.user.email,
           payment.user.profile.firstName,

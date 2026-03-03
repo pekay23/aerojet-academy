@@ -60,19 +60,19 @@ export function TransactionHistory({ walletId }: TransactionHistoryProps) {
     }
   }
 
-  const getTypeColor = (type: string) => {
+  const getTypeColorClass = (type: string) => {
     switch (type) {
       case 'TOP_UP':
       case 'CREDIT':
       case 'REFUND':
       case 'RELEASE':
-        return '#10b981'
+        return 'text-[#10b981]'
       case 'PAYMENT':
-        return '#ef4444'
+        return 'text-[#ef4444]'
       case 'RESERVE':
-        return '#f59e0b'
+        return 'text-[#f59e0b]'
       default:
-        return '#888'
+        return 'text-[#888]'
     }
   }
 
@@ -81,7 +81,7 @@ export function TransactionHistory({ walletId }: TransactionHistoryProps) {
 
   if (isLoading) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+      <div className="p-5 text-center text-[#888]">
         Loading transactions...
       </div>
     )
@@ -89,7 +89,7 @@ export function TransactionHistory({ walletId }: TransactionHistoryProps) {
 
   if (transactions.length === 0) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+      <div className="p-5 text-center text-[#888]">
         No transactions yet. Top up your wallet to get started.
       </div>
     )
@@ -97,27 +97,19 @@ export function TransactionHistory({ walletId }: TransactionHistoryProps) {
 
   return (
     <div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
+      <div className="flex flex-col gap-px">
         {paginatedTx.map((tx) => (
           <div
             key={tx.id}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              padding: '12px 16px',
-              backgroundColor: 'rgba(255,255,255,0.02)',
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
-              transition: 'background 0.15s',
-            }}
+            className="flex items-center justify-between py-3 px-4 bg-white/[0.02] border-b border-white/[0.06] transition-[background] duration-150"
           >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-              <span style={{ fontSize: '18px' }}>{getTypeIcon(tx.type)}</span>
+            <div className="flex items-center gap-3 flex-1">
+              <span className="text-[18px]">{getTypeIcon(tx.type)}</span>
               <div>
-                <div style={{ fontSize: '13px', fontWeight: 500, color: '#e0e0e0' }}>
+                <div className="text-[13px] font-medium text-[#e0e0e0]">
                   {tx.description}
                 </div>
-                <div style={{ fontSize: '11px', color: '#888', marginTop: '2px' }}>
+                <div className="text-[11px] text-[#888] mt-0.5">
                   {new Date(tx.createdAt).toLocaleDateString('en-GB', {
                     day: '2-digit',
                     month: 'short',
@@ -126,24 +118,18 @@ export function TransactionHistory({ walletId }: TransactionHistoryProps) {
                     minute: '2-digit',
                   })}
                   {tx.referenceType && (
-                    <span style={{ marginLeft: '8px', color: '#666' }}>• {tx.referenceType}</span>
+                    <span className="ml-2 text-[#666]">• {tx.referenceType}</span>
                   )}
                 </div>
               </div>
             </div>
-            <div style={{ textAlign: 'right' }}>
-              <div
-                style={{
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: getTypeColor(tx.type),
-                }}
-              >
+            <div className="text-right">
+              <div className={`text-[14px] font-semibold ${getTypeColorClass(tx.type)}`}>
                 {['TOP_UP', 'CREDIT', 'REFUND', 'RELEASE'].includes(tx.type) ? '+' : '-'}€
                 {Number(tx.amount).toFixed(2)}
               </div>
               {tx.balanceAfter !== undefined && (
-                <div style={{ fontSize: '11px', color: '#666' }}>
+                <div className="text-[11px] text-[#666]">
                   Balance: €{Number(tx.balanceAfter).toFixed(2)}
                 </div>
               )}
@@ -153,46 +139,29 @@ export function TransactionHistory({ walletId }: TransactionHistoryProps) {
       </div>
 
       {totalPages > 1 && (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            gap: '8px',
-            padding: '12px',
-            marginTop: '8px',
-          }}
-        >
+        <div className="flex justify-center gap-2 p-3 mt-2">
           <button
             onClick={() => setPage(Math.max(1, page - 1))}
             disabled={page === 1}
-            style={{
-              padding: '4px 12px',
-              background: page === 1 ? 'rgba(255,255,255,0.05)' : 'rgba(59, 130, 246, 0.2)',
-              color: page === 1 ? '#666' : '#93c5fd',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: page === 1 ? 'default' : 'pointer',
-              fontSize: '12px',
-            }}
+            className={`py-1 px-3 border-none rounded text-[12px] ${
+              page === 1
+                ? 'bg-white/[0.05] text-[#666] cursor-default'
+                : 'bg-[rgba(59,130,246,0.2)] text-[#93c5fd] cursor-pointer'
+            }`}
           >
             ← Prev
           </button>
-          <span style={{ fontSize: '12px', color: '#888', padding: '4px 8px' }}>
+          <span className="text-[12px] text-[#888] py-1 px-2">
             {page} / {totalPages}
           </span>
           <button
             onClick={() => setPage(Math.min(totalPages, page + 1))}
             disabled={page === totalPages}
-            style={{
-              padding: '4px 12px',
-              background:
-                page === totalPages ? 'rgba(255,255,255,0.05)' : 'rgba(59, 130, 246, 0.2)',
-              color: page === totalPages ? '#666' : '#93c5fd',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: page === totalPages ? 'default' : 'pointer',
-              fontSize: '12px',
-            }}
+            className={`py-1 px-3 border-none rounded text-[12px] ${
+              page === totalPages
+                ? 'bg-white/[0.05] text-[#666] cursor-default'
+                : 'bg-[rgba(59,130,246,0.2)] text-[#93c5fd] cursor-pointer'
+            }`}
           >
             Next →
           </button>

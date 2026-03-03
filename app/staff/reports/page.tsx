@@ -279,7 +279,7 @@ async function RevenueTab() {
                       </Badge>
                     </td>
                     <td className="px-6 py-4 text-right font-black text-emerald-600 dark:text-emerald-400">
-                      {formatCurrency(payment.amount, currency)}
+                      {formatCurrency(Number(payment.amount), currency)}
                     </td>
                   </tr>
                 ))

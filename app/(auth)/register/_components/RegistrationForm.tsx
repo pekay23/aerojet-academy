@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { registerSchema } from '@/lib/validation/schemas'
 import type { z } from 'zod'
 import { NATIONALITIES } from '@/lib/data/nationalities'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
   Select,
   SelectContent,
@@ -54,6 +55,16 @@ const getPhonePlaceholder = (dialCode: string) => {
   }
   return formats[dialCode] || 'XXXXXXXXXX'
 }
+
+const LICENSE_CATEGORIES = [
+  { code: 'B1.1', label: 'B1.1 — Turbine Aeroplane' },
+  { code: 'B1.2', label: 'B1.2 — Piston Aeroplane' },
+  { code: 'B1.3', label: 'B1.3 — Turbine Helicopter' },
+  { code: 'B1.4', label: 'B1.4 — Piston Helicopter' },
+  { code: 'B2', label: 'B2 — Avionics' },
+]
+
+const PROGRAMMES_REQUIRING_LICENSE = ['FULL_TIME_4YEAR', 'FULL_TIME_2YEAR', 'MILITARY_1YEAR']
 
 type RegistrationFormValues = z.infer<typeof registerSchema>
 
@@ -222,7 +233,7 @@ export default function RegistrationForm({
                     type="date"
                     max={new Date().toISOString().split('T')[0]}
                     {...field}
-                    className="focus:ring-aerojet-blue block w-full rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2"
+                    className="focus:ring-aerojet-blue block h-12 w-full rounded-lg border-gray-300 bg-white px-4 text-slate-900 focus:ring-2 md:h-auto md:py-6"
                   />
                 </FormControl>
                 <FormMessage />
@@ -380,6 +391,51 @@ export default function RegistrationForm({
             )}
           />
         </div>
+
+        {/* License Category Selection — only for Full-Time & Military */}
+        {PROGRAMMES_REQUIRING_LICENSE.includes(form.watch('selectedProgramme')) && (
+          <div>
+            <FormField
+              control={form.control}
+              name="licenseCategories"
+              render={() => (
+                <FormItem>
+                  <FormLabel className="text-gray-700">
+                    License Category <span className="text-red-500">*</span>
+                  </FormLabel>
+                  <p className="mb-2 text-xs text-slate-500">
+                    Select the EASA Part-66 license category/categories you want to pursue (max 3).
+                  </p>
+                  <div className="space-y-2">
+                    {LICENSE_CATEGORIES.map((cat) => {
+                      const current = form.watch('licenseCategories') || []
+                      const isChecked = current.includes(cat.code)
+                      return (
+                        <label
+                          key={cat.code}
+                          className="flex cursor-pointer items-center gap-3 rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:bg-gray-50"
+                        >
+                          <Checkbox
+                            checked={isChecked}
+                            onCheckedChange={(checked) => {
+                              const prev = form.getValues('licenseCategories') || []
+                              const next = checked
+                                ? [...prev, cat.code]
+                                : prev.filter((c: string) => c !== cat.code)
+                              form.setValue('licenseCategories', next, { shouldValidate: true })
+                            }}
+                          />
+                          <span className="text-sm text-slate-700">{cat.label}</span>
+                        </label>
+                      )
+                    })}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        )}
 
         {/* Fee Notice */}
         <div className="flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-4">

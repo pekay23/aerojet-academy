@@ -2,11 +2,15 @@ export interface PoolJoinInput {
   poolId: string
   userId: string
   examComponentId: string
+  moduleCode?: string
+  eventId?: string
+  amountPaid?: number
 }
 
 export interface PoolJoinResult {
   success: boolean
   membership?: any
+  booking?: any
   error?: string
   autoConfirmed?: boolean
   triggeredNearFull?: boolean

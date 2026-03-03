@@ -48,7 +48,7 @@ export function MyPoolsDashboard() {
 
   if (isLoading) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>
+      <div className="p-5 text-center text-[#888]">
         Loading your pools...
       </div>
     )
@@ -59,19 +59,10 @@ export function MyPoolsDashboard() {
 
   if (memberships.length === 0) {
     return (
-      <div
-        style={{
-          padding: '40px 20px',
-          textAlign: 'center',
-          color: '#888',
-          background: 'rgba(255,255,255,0.02)',
-          borderRadius: '12px',
-          border: '1px solid rgba(255,255,255,0.06)',
-        }}
-      >
-        <div style={{ fontSize: '32px', marginBottom: '8px' }}>📋</div>
-        <div style={{ fontWeight: 600, marginBottom: '4px' }}>No pool memberships yet</div>
-        <div style={{ fontSize: '13px' }}>Browse available pools and join one to get started.</div>
+      <div className="py-10 px-5 text-center text-[#888] bg-white/2 rounded-xl border border-white/6">
+        <div className="text-[32px] mb-2">📋</div>
+        <div className="font-semibold mb-1">No pool memberships yet</div>
+        <div className="text-[13px]">Browse available pools and join one to get started.</div>
       </div>
     )
   }
@@ -80,45 +71,31 @@ export function MyPoolsDashboard() {
     <div>
       {/* Active Memberships */}
       {active.length > 0 && (
-        <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px', color: '#e0e0e0' }}>
+        <div className="mb-6">
+          <h3 className="text-base font-semibold mb-3 text-[#e0e0e0]">
             Active Pools ({active.length})
           </h3>
           {active.map((m) => (
             <div
               key={m.id}
-              style={{
-                padding: '16px',
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                borderRadius: '10px',
-                marginBottom: '12px',
-              }}
+              className="p-4 bg-white/3 border border-white/8 rounded-[10px] mb-3"
             >
-              <div
-                style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}
-              >
+              <div className="flex justify-between mb-2">
                 <div>
-                  <span style={{ fontSize: '13px', color: '#93c5fd', fontWeight: 500 }}>
+                  <span className="text-[13px] text-[#93c5fd] font-medium">
                     {m.examComponent?.course?.code || 'Module'}
                   </span>
-                  <span style={{ color: '#666', margin: '0 8px' }}>•</span>
-                  <span style={{ fontSize: '13px', color: '#888' }}>
+                  <span className="text-[#666] mx-2">•</span>
+                  <span className="text-[13px] text-[#888]">
                     {m.examComponent?.name || 'Exam'}
                   </span>
                 </div>
                 <span
-                  style={{
-                    fontSize: '11px',
-                    padding: '2px 8px',
-                    borderRadius: '999px',
-                    fontWeight: 600,
-                    background:
-                      m.status === 'CONFIRMED'
-                        ? 'rgba(16, 185, 129, 0.15)'
-                        : 'rgba(245, 158, 11, 0.15)',
-                    color: m.status === 'CONFIRMED' ? '#10b981' : '#f59e0b',
-                  }}
+                  className={`text-[11px] px-2 py-0.5 rounded-full font-semibold ${
+                    m.status === 'CONFIRMED'
+                      ? 'bg-[rgba(16,185,129,0.15)] text-[#10b981]'
+                      : 'bg-[rgba(245,158,11,0.15)] text-[#f59e0b]'
+                  }`}
                 >
                   {m.status}
                 </span>
@@ -132,15 +109,8 @@ export function MyPoolsDashboard() {
                 poolName={m.pool.name}
               />
 
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginTop: '8px',
-                }}
-              >
-                <div style={{ fontSize: '12px', color: '#888' }}>
+              <div className="flex justify-between items-center mt-2">
+                <div className="text-[12px] text-[#888]">
                   📅{' '}
                   {new Date(m.pool.examDate).toLocaleDateString('en-GB', {
                     day: '2-digit',
@@ -148,12 +118,12 @@ export function MyPoolsDashboard() {
                     year: 'numeric',
                   })}
                   {m.amountReserved > 0 && (
-                    <span style={{ marginLeft: '12px' }}>
+                    <span className="ml-3">
                       💰 €{Number(m.amountReserved).toFixed(0)} reserved
                     </span>
                   )}
                   {m.amountPaid > 0 && (
-                    <span style={{ marginLeft: '12px', color: '#10b981' }}>
+                    <span className="ml-3 text-[#10b981]">
                       ✅ €{Number(m.amountPaid).toFixed(0)} paid
                     </span>
                   )}
@@ -176,30 +146,22 @@ export function MyPoolsDashboard() {
       {/* Past Memberships */}
       {past.length > 0 && (
         <div>
-          <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '12px', color: '#888' }}>
+          <h3 className="text-base font-semibold mb-3 text-[#888]">
             Past ({past.length})
           </h3>
           {past.map((m) => (
             <div
               key={m.id}
-              style={{
-                padding: '12px 16px',
-                background: 'rgba(255,255,255,0.01)',
-                border: '1px solid rgba(255,255,255,0.04)',
-                borderRadius: '8px',
-                marginBottom: '8px',
-                opacity: 0.6,
-              }}
+              className="py-3 px-4 bg-white/1 border border-white/4 rounded-lg mb-2 opacity-60"
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '13px', color: '#888' }}>
+              <div className="flex justify-between">
+                <span className="text-[13px] text-[#888]">
                   {m.examComponent?.course?.code} — {m.pool.name}
                 </span>
                 <span
-                  style={{
-                    fontSize: '11px',
-                    color: m.status === 'COMPLETED' ? '#10b981' : '#ef4444',
-                  }}
+                  className={`text-[11px] ${
+                    m.status === 'COMPLETED' ? 'text-[#10b981]' : 'text-[#ef4444]'
+                  }`}
                 >
                   {m.status}
                 </span>

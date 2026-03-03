@@ -11,8 +11,12 @@ const tests = [
   { f: 'Alice', m: 'Marie Louise', l: 'Smith', expected: 'a.m.l.smith@aerojet-academy.com' },
 ]
 
-tests.forEach(({ f, m, l, expected }) => {
-  const result = generateAcademyEmail(f, m, l)
-  const status = result === expected ? '✅ PASS' : `❌ FAIL (Expected ${expected}, got ${result})`
-  console.log(`${f} | ${m} | ${l} => ${result} [${status}]`)
-})
+async function run() {
+  for (const { f, m, l, expected } of tests) {
+    const result = await generateAcademyEmail(f, m, l)
+    const status = result === expected ? '✅ PASS' : `❌ FAIL (Expected ${expected}, got ${result})`
+    console.log(`${f} | ${m} | ${l} => ${result} [${status}]`)
+  }
+}
+
+run().catch(console.error)

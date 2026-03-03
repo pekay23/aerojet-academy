@@ -5,6 +5,7 @@ import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/r
 import { updateUserSchema, validateBody } from '@/lib/validation/schemas'
 import { createAuditLog } from '@/lib/audit/logger'
 import { UserStatus } from '@prisma/client'
+import { evictInactiveUserFromExams } from '@/lib/users/eviction'
 
 // GET /api/staff/users/[id]
 export const GET = withErrorHandler(
@@ -77,6 +78,11 @@ export const PATCH = withErrorHandler(
       where: { id },
       data: userData,
     })
+
+    // Evict if status changed to inactive
+    if (userData.status && userData.status !== 'ACTIVE' && user.status === 'ACTIVE') {
+      await evictInactiveUserFromExams(id, staff.id, `Account status changed to ${userData.status}`)
+    }
 
     // Update profile fields if provided
     if (
@@ -190,6 +196,8 @@ export const DELETE = withErrorHandler(
         changes: { email: user.email, hardDelete: true },
       })
 
+      await evictInactiveUserFromExams(id, staff.id, 'Account permanently deleted')
+
       return apiSuccess({ message: 'User permanently deleted' })
     } else {
       // Soft delete — archive
@@ -206,6 +214,8 @@ export const DELETE = withErrorHandler(
         description: `User ${user.email} archived by staff`,
         changes: { email: user.email, softDelete: true },
       })
+
+      await evictInactiveUserFromExams(id, staff.id, 'Account archived')
 
       return apiSuccess({ message: 'User deactivated' })
     }

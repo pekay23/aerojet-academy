@@ -34,10 +34,7 @@ export async function getRegistrationConfig() {
 }
 
 export async function getFinanceConfig() {
-  const settings = await getSystemSettings([
-    'course_currency',
-    'payment_methods',
-  ])
+  const settings = await getSystemSettings(['course_currency', 'payment_methods'])
 
   // Try new PaymentMethod model first
   const bankMethods = await prisma.paymentMethod.findMany({
@@ -54,6 +51,7 @@ export async function getFinanceConfig() {
       bankAccountNumber: bank.bankAccountNumber || '',
       bankName: bank.bankName || '',
       bankSwift: bank.bankSwiftCode || '',
+      bankBranch: bank.bankBranch || '',
       paymentMethods: ['BANK_TRANSFER'],
     }
   }
@@ -64,6 +62,7 @@ export async function getFinanceConfig() {
     'bank_account_number',
     'bank_name',
     'bank_swift',
+    'bank_branch',
   ])
 
   return {
@@ -72,6 +71,7 @@ export async function getFinanceConfig() {
     bankAccountNumber: legacySettings.get('bank_account_number') || '',
     bankName: legacySettings.get('bank_name') || 'Fidelity Bank',
     bankSwift: legacySettings.get('bank_swift') || '',
+    bankBranch: legacySettings.get('bank_branch') || '',
     paymentMethods: (settings.get('payment_methods') || 'BANK_TRANSFER').split(','),
   }
 }

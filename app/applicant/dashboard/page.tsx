@@ -174,7 +174,7 @@ export default async function ApplicantDashboard() {
         return { href: '/applicant/exam-pools', label: 'Browse Exams', icon: FileCheck }
       case 'MODULAR':
         return {
-          href: '/applicant/courses?category=MODULAR',
+          href: '/applicant/courses',
           label: 'Browse Modules',
           icon: BookOpen,
         }

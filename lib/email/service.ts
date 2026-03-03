@@ -136,7 +136,7 @@ export const wrapEmail = async (title: string, bodyContent: string) => {
           .h1 { color: ${COLORS.navy}; font-size: 22px; font-weight: 800; margin: 0 0 20px 0; letter-spacing: -0.5px; }
           .text { font-size: 15px; line-height: 1.6; color: ${COLORS.text}; margin-bottom: 15px; }
           .btn-container { margin: 30px 0; }
-          .btn { background-color: ${COLORS.navy}; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block; }
+          .btn { background-color: ${COLORS.navy}; color: #ffffff !important; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; display: inline-block; border: 2px solid ${COLORS.navy}; }
           .info-box { background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid ${COLORS.navy}; padding: 15px; margin: 25px 0; border-radius: 4px; }
           .info-row { margin-bottom: 5px; font-size: 14px; }
           .footer { background-color: ${COLORS.navy}; padding: 40px 30px; color: #94a3b8; font-size: 12px; }
@@ -236,6 +236,18 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
             </td>
           </tr>
           <tr>
+            <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Branch</div>
+              <div style="font-size: 15px; font-weight: 600; color: #0f172a;">{{bankBranch}}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Swift/BIC Code</div>
+              <div style="font-family: monospace; font-size: 15px; font-weight: 600; color: #0f172a;">{{bankSwift}}</div>
+            </td>
+          </tr>
+          <tr>
             <td style="padding: 16px; background-color: #f1f5f9;">
               <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Payment Reference</div>
               <div style="font-family: monospace; font-size: 18px; font-weight: 800; color: #137fec;">{{registrationCode}}</div>
@@ -249,9 +261,6 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
       <a href="{{uploadUrl}}" class="btn">
         <span>Upload Payment Proof</span>
       </a>
-      <p style="font-size: 12px; color: #64748b; margin-top: 20px; font-style: italic;">
-        If you have already submitted your payment proof, please ignore this email.
-      </p>
     </div>
   `
 
@@ -266,6 +275,8 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
     bankName: finance.bankName || 'FNB Ghana',
     bankAccountName: finance.bankAccountName || 'Aerojet Aviation Foundation',
     bankAccountNumber: finance.bankAccountNumber || 'N/A',
+    bankBranch: (finance as any).bankBranch || 'N/A',
+    bankSwift: (finance as any).bankSwift || 'N/A',
     uploadUrl: `${baseUrl}/upload-proof?code=${registrationCode}`,
   })
 
@@ -374,13 +385,16 @@ export async function renderActivationEmail(
       </div>
     </div>
 
-    <p class="text" style="font-size: 13px; color: #1e40af; background: #eff6ff; padding: 10px; border-radius: 4px; border-left: 3px solid #1e40af;">
-      <strong>🚀 Get Started:</strong> Click the button below to auto-login to your portal and set your permanent password.
+    <p class="text" style="font-size: 13px; color: #1e40af; background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #1e40af;">
+      <strong>🚀 Get Started:</strong><br/>
+      1. <strong>Copy</strong> your temporary password above.<br/>
+      2. Click the button below to auto-login to your portal.<br/>
+      3. Use the temporary password as your "Current Password" to set a permanent one.
     </p>
 
-    <div class="btn-container">
-      <a href="{{loginUrl}}" class="btn">
-        <span>Login & Get Started</span>
+    <div class="btn-container" style="text-align: center; margin-top: 30px;">
+      <a href="{{loginUrl}}" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block; border: 2px solid #002a5c;">
+        Login &amp; Get Started
       </a>
     </div>
   `
@@ -1100,6 +1114,148 @@ export async function sendMilestoneReminderEmail(
   return sendEmail({
     to: email,
     subject: `Payment Reminder: ${milestoneType} due in ${daysUntil} days`,
+    html,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// WAITLIST PROMOTION
+// ---------------------------------------------------------------------------
+
+export async function sendWaitlistPromotionEmail(
+  email: string,
+  firstName: string,
+  poolName: string,
+  examDate: string,
+  module: string
+) {
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, great news! A spot has opened up in <strong>{{poolName}}</strong> and you've been promoted from the waitlist.</p>
+    <div class="info-box">
+      <div class="info-row"><strong>Pool:</strong> {{poolName}}</div>
+      <div class="info-row"><strong>Module:</strong> {{module}}</div>
+      <div class="info-row"><strong>Exam Date:</strong> {{examDate}}</div>
+    </div>
+    <p class="text">Your wallet has been charged and your seat is now reserved. Log in to view your booking details.</p>
+  `
+  const template = await getTemplate('waitlist-promotion', {
+    subject: 'Waitlist Promotion — You Have a Seat!',
+    body: defaultBody,
+  })
+  const body = replacePlaceholders(template.body, { firstName, poolName, examDate, module })
+  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return sendEmail({
+    to: email,
+    subject: `Aerojet Aviation - Waitlist Promotion: ${poolName}`,
+    html,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// WITHDRAWAL CONFIRMATION
+// ---------------------------------------------------------------------------
+
+export async function sendWithdrawalConfirmationEmail(
+  email: string,
+  firstName: string,
+  poolName: string,
+  refundAmount: number
+) {
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, your withdrawal from <strong>{{poolName}}</strong> has been processed.</p>
+    <div class="info-box">
+      <div class="info-row"><strong>Pool:</strong> {{poolName}}</div>
+      <div class="info-row"><strong>Refund:</strong> €{{refundAmount}} returned to your wallet</div>
+    </div>
+    <p class="text">Your funds are now available in your wallet balance for future bookings.</p>
+  `
+  const template = await getTemplate('withdrawal-confirmation', {
+    subject: 'Pool Withdrawal Confirmed',
+    body: defaultBody,
+  })
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    poolName,
+    refundAmount: refundAmount.toFixed(2),
+  })
+  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return sendEmail({
+    to: email,
+    subject: `Aerojet Aviation - Withdrawal Confirmed: ${poolName}`,
+    html,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// BUNDLE PURCHASE CONFIRMATION
+// ---------------------------------------------------------------------------
+
+export async function sendBundlePurchaseEmail(
+  email: string,
+  firstName: string,
+  bundleType: string,
+  seats: number,
+  amountPaid: number
+) {
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, your {{bundleType}} exam bundle has been purchased successfully!</p>
+    <div class="info-box">
+      <div class="info-row"><strong>Bundle:</strong> {{bundleType}}</div>
+      <div class="info-row"><strong>Seats:</strong> {{seats}}</div>
+      <div class="info-row"><strong>Amount:</strong> €{{amountPaid}}</div>
+      <div class="info-row"><strong>Validity:</strong> 12 months from purchase</div>
+    </div>
+    <p class="text">You can use your bundle seats when joining exam pools. Seats are automatically consumed from your earliest-expiring bundle.</p>
+  `
+  const template = await getTemplate('bundle-purchase', {
+    subject: 'Exam Bundle Purchased',
+    body: defaultBody,
+  })
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    bundleType,
+    seats: seats.toString(),
+    amountPaid: amountPaid.toFixed(2),
+  })
+  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return sendEmail({
+    to: email,
+    subject: `Aerojet Aviation - Bundle Purchased: ${bundleType}`,
+    html,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// AMBASSADOR PROMOTION
+// ---------------------------------------------------------------------------
+
+export async function sendAmbassadorPromotionEmail(
+  email: string,
+  firstName: string,
+  bonusAmount: number
+) {
+  const defaultBody = `
+    <p class="text">Congratulations {{firstName}}! 🎉 You've achieved <strong>Ambassador</strong> status!</p>
+    <p class="text">You've successfully referred 10 candidates whose pool bookings have been confirmed. As an Ambassador, you now enjoy:</p>
+    <div class="info-box" style="border-left-color: #10b981;">
+      <div class="info-row"><strong>Discounted Pool Seats:</strong> €270/seat (save €30 per seat)</div>
+      <div class="info-row"><strong>Wallet Bonus:</strong> €{{bonusAmount}} has been credited to your wallet</div>
+      <div class="info-row"><strong>Lifetime Benefit:</strong> Discount applies to all future pool bookings</div>
+    </div>
+    <p class="text">Keep sharing your referral link to help other candidates access affordable exam bookings!</p>
+  `
+  const template = await getTemplate('ambassador-promotion', {
+    subject: 'You Are Now an Ambassador!',
+    body: defaultBody,
+  })
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    bonusAmount: bonusAmount.toFixed(2),
+  })
+  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return sendEmail({
+    to: email,
+    subject: `Aerojet Aviation - Ambassador Status Achieved!`,
     html,
   })
 }

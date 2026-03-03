@@ -18,6 +18,8 @@ import {
   RefreshCw,
 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useSession } from 'next-auth/react'
+import TransactionHistory from './_components/TransactionHistory'
 
 interface ExamComponent {
   id: string
@@ -84,6 +86,26 @@ interface ExamBooking {
   }
 }
 
+interface WalletTransaction {
+  id: string
+  amount: number
+  type: string
+  status: string
+  createdAt: string
+  referenceType?: string
+  referenceId?: string
+  description?: string
+}
+
+interface WalletPayment {
+  id: string
+  amount: number
+  status: string
+  paymentMethod?: string
+  createdAt: string
+  rejectionReason?: string
+}
+
 type TabType = 'dashboard' | 'courses' | 'pools'
 
 const poolStatusLabel: Record<string, string> = {
@@ -105,6 +127,7 @@ const poolStatusColor: Record<string, string> = {
 }
 
 export default function ExamOnlyPathwayPage() {
+  const { update } = useSession()
   const searchParams = useSearchParams()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabType>('dashboard')
@@ -121,6 +144,8 @@ export default function ExamOnlyPathwayPage() {
   const [bookingExam, setBookingExam] = useState<string | null>(null)
   const [expandedCourse, setExpandedCourse] = useState<string | null>(null)
   const [selectedModules, setSelectedModules] = useState<Record<string, string>>({})
+  const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([])
+  const [walletPayments, setWalletPayments] = useState<WalletPayment[]>([])
 
   useEffect(() => {
     fetchData()
@@ -128,29 +153,35 @@ export default function ExamOnlyPathwayPage() {
 
   const fetchData = async () => {
     try {
-      const [walletRes, componentsRes, poolsRes, membershipsRes, bookingsRes] = await Promise.all([
-        fetch('/api/applicant/exam-only/wallet')
-          .then((r) => r.json())
-          .catch(() => null),
-        fetch('/api/applicant/exam-only/exam-components')
-          .then((r) => r.json())
-          .catch(() => []),
-        fetch('/api/applicant/exam-only/pools')
-          .then((r) => r.json())
-          .catch(() => []),
-        fetch('/api/applicant/exam-only/memberships')
-          .then((r) => r.json())
-          .catch(() => []),
-        fetch('/api/applicant/exam-only/bookings')
-          .then((r) => r.json())
-          .catch(() => []),
-      ])
+      const [walletRes, componentsRes, poolsRes, membershipsRes, bookingsRes, txRes] =
+        await Promise.all([
+          fetch('/api/applicant/exam-only/wallet')
+            .then((r) => r.json())
+            .catch(() => null),
+          fetch('/api/applicant/exam-only/exam-components')
+            .then((r) => r.json())
+            .catch(() => []),
+          fetch('/api/applicant/exam-only/pools')
+            .then((r) => r.json())
+            .catch(() => []),
+          fetch('/api/applicant/exam-only/memberships')
+            .then((r) => r.json())
+            .catch(() => []),
+          fetch('/api/applicant/exam-only/bookings')
+            .then((r) => r.json())
+            .catch(() => []),
+          fetch('/api/applicant/exam-only/wallet/transactions')
+            .then((r) => r.json())
+            .catch(() => ({ transactions: [], payments: [] })),
+        ])
 
       setWallet(walletRes)
       setExamComponents(componentsRes)
       setPools(poolsRes)
       setMemberships(membershipsRes)
       setBookings(bookingsRes)
+      setWalletTransactions(txRes.transactions || [])
+      setWalletPayments(txRes.payments || [])
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -240,8 +271,13 @@ export default function ExamOnlyPathwayPage() {
       }
 
       if (data.promotedToStudent) {
-        toast.success('Enrolled successfully! Redirecting to Student Portal...')
-        router.push('/student')
+        toast.success('Enrolled successfully! Updating your account...')
+        await update() // Refresh NextAuth session
+
+        setTimeout(() => {
+          toast.success('Redirecting to Student Portal...')
+          window.location.href = '/student'
+        }, 1500)
         return
       }
 
@@ -333,8 +369,13 @@ export default function ExamOnlyPathwayPage() {
       }
 
       if (data.promotedToStudent) {
-        toast.success('Enrolled successfully! Redirecting to Student Portal...')
-        router.push('/student')
+        toast.success('Enrolled successfully! Updating your account...')
+        await update() // Refresh NextAuth session
+
+        setTimeout(() => {
+          toast.success('Redirecting to Student Portal...')
+          window.location.href = '/student'
+        }, 1500)
         return
       }
 
@@ -619,6 +660,11 @@ export default function ExamOnlyPathwayPage() {
               </button>
             </div>
           </div>
+
+          {/* Transaction History */}
+          <div className="lg:col-span-2">
+            <TransactionHistory transactions={walletTransactions} payments={walletPayments} />
+          </div>
         </div>
       )}
 
@@ -632,103 +678,114 @@ export default function ExamOnlyPathwayPage() {
             <p className="text-sm text-slate-500">Book individual exam seats at €520 each</p>
           </div>
 
-          {Object.values(groupedComponents).map((course) => (
-            <div
-              key={course.code}
-              className="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
-            >
-              <button
-                onClick={() =>
-                  setExpandedCourse(expandedCourse === course.code ? null : course.code)
-                }
-                className="flex w-full items-center justify-between p-6 text-left"
+          {Object.values(groupedComponents)
+            .sort((a, b) =>
+              a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
+            )
+            .map((course) => (
+              <div
+                key={course.code}
+                className="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
               >
-                <div>
-                  <h3 className="font-bold text-slate-900 dark:text-slate-100">
-                    {course.code}: {course.name}
-                  </h3>
-                  <p className="text-sm text-slate-500">
-                    {course.components.length} exam component(s) available
-                  </p>
-                </div>
-                {expandedCourse === course.code ? (
-                  <ChevronUp className="h-5 w-5 text-slate-400" />
-                ) : (
-                  <ChevronDown className="h-5 w-5 text-slate-400" />
-                )}
-              </button>
-
-              {expandedCourse === course.code && (
-                <div className="border-t border-slate-100 px-6 pb-6 dark:border-slate-800">
-                  <div className="mt-4 space-y-3">
-                    {course.components.map((component) => (
-                      <div
-                        key={component.id}
-                        className="flex items-center justify-between rounded-xl bg-slate-50 p-4 dark:bg-slate-800"
-                      >
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-900 dark:text-slate-100">
-                              {component.code} - {component.name}
-                            </span>
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                component.type === 'MCQ'
-                                  ? 'bg-blue-100 text-blue-700'
-                                  : 'bg-purple-100 text-purple-700'
-                              }`}
-                            >
-                              {component.type}
-                            </span>
-                          </div>
-                          <p className="mt-1 text-sm text-slate-500">
-                            Duration: {component.duration} minutes
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="text-right">
-                            <p className="font-bold text-slate-900 dark:text-slate-100">
-                              €{Number(component.poolPrice).toFixed(2)}
-                            </p>
-                            <p className="text-xs text-slate-500">Pool</p>
-                          </div>
-                          <button
-                            onClick={() => handleBookExam(component.id, 'POOL')}
-                            disabled={bookingExam === component.id || !wallet}
-                            className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-green-700 disabled:opacity-50"
-                          >
-                            {bookingExam === component.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              'Join Pool'
-                            )}
-                          </button>
-                          <div className="h-8 w-px bg-slate-300 dark:bg-slate-600" />
-                          <div className="text-right">
-                            <p className="font-bold text-slate-900 dark:text-slate-100">
-                              €{Number(component.individualPrice).toFixed(2)}
-                            </p>
-                            <p className="text-xs text-slate-500">Individual</p>
-                          </div>
-                          <button
-                            onClick={() => handleBookExam(component.id, 'INDIVIDUAL')}
-                            disabled={bookingExam === component.id || !wallet}
-                            className="rounded-lg bg-[#002a5c] px-4 py-2 text-sm font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
-                          >
-                            {bookingExam === component.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin" />
-                            ) : (
-                              'Book'
-                            )}
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                <button
+                  onClick={() =>
+                    setExpandedCourse(expandedCourse === course.code ? null : course.code)
+                  }
+                  className="flex w-full items-center justify-between p-6 text-left"
+                >
+                  <div>
+                    <h3 className="font-bold text-slate-900 dark:text-slate-100">
+                      {course.code}: {course.name}
+                    </h3>
+                    <p className="text-sm text-slate-500">
+                      {course.components.length} exam component(s) available
+                    </p>
                   </div>
-                </div>
-              )}
-            </div>
-          ))}
+                  {expandedCourse === course.code ? (
+                    <ChevronUp className="h-5 w-5 text-slate-400" />
+                  ) : (
+                    <ChevronDown className="h-5 w-5 text-slate-400" />
+                  )}
+                </button>
+
+                {expandedCourse === course.code && (
+                  <div className="border-t border-slate-100 px-6 pb-6 dark:border-slate-800">
+                    <div className="mt-4 space-y-3">
+                      {course.components
+                        .sort((a, b) =>
+                          a.code.localeCompare(b.code, undefined, {
+                            numeric: true,
+                            sensitivity: 'base',
+                          })
+                        )
+                        .map((component) => (
+                          <div
+                            key={component.id}
+                            className="flex items-center justify-between rounded-xl bg-slate-50 p-4 dark:bg-slate-800"
+                          >
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-slate-900 dark:text-slate-100">
+                                  {component.code} - {component.name}
+                                </span>
+                                <span
+                                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                                    component.type === 'MCQ'
+                                      ? 'bg-blue-100 text-blue-700'
+                                      : 'bg-purple-100 text-purple-700'
+                                  }`}
+                                >
+                                  {component.type}
+                                </span>
+                              </div>
+                              <p className="mt-1 text-sm text-slate-500">
+                                Duration: {component.duration} minutes
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <div className="text-right">
+                                <p className="font-bold text-slate-900 dark:text-slate-100">
+                                  €{Number(component.poolPrice).toFixed(2)}
+                                </p>
+                                <p className="text-xs text-slate-500">Pool</p>
+                              </div>
+                              <button
+                                onClick={() => handleBookExam(component.id, 'POOL')}
+                                disabled={bookingExam === component.id || !wallet}
+                                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-green-700 disabled:opacity-50"
+                              >
+                                {bookingExam === component.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  'Join Pool'
+                                )}
+                              </button>
+                              <div className="h-8 w-px bg-slate-300 dark:bg-slate-600" />
+                              <div className="text-right">
+                                <p className="font-bold text-slate-900 dark:text-slate-100">
+                                  €{Number(component.individualPrice).toFixed(2)}
+                                </p>
+                                <p className="text-xs text-slate-500">Individual</p>
+                              </div>
+                              <button
+                                onClick={() => handleBookExam(component.id, 'INDIVIDUAL')}
+                                disabled={bookingExam === component.id || !wallet}
+                                className="rounded-lg bg-[#002a5c] px-4 py-2 text-sm font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
+                              >
+                                {bookingExam === component.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  'Book'
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
 
           {Object.keys(groupedComponents).length === 0 && (
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-12 text-center dark:border-slate-800 dark:bg-slate-900">
@@ -787,6 +844,46 @@ export default function ExamOnlyPathwayPage() {
                     </span>
                   </div>
                 </div>
+
+                {/* Pool Fill Rate Bar */}
+                {(() => {
+                  const fillPct =
+                    pool.maxCandidates > 0
+                      ? Math.round((pool.currentMemberCount / pool.maxCandidates) * 100)
+                      : 0
+                  return (
+                    <div className="mb-4">
+                      <div className="mb-1 flex justify-between text-[10px] font-medium">
+                        <span
+                          className={
+                            fillPct >= 90
+                              ? 'font-bold text-red-500'
+                              : fillPct >= 70
+                                ? 'font-bold text-orange-500'
+                                : fillPct >= 50
+                                  ? 'text-yellow-600'
+                                  : 'text-slate-400'
+                          }
+                        >
+                          {fillPct >= 90
+                            ? '🔴 Almost Full!'
+                            : fillPct >= 70
+                              ? '🟠 Filling Fast'
+                              : fillPct >= 50
+                                ? '🟡 Half Full'
+                                : '🟢 Seats Available'}
+                        </span>
+                        <span className="text-slate-400">{fillPct}%</span>
+                      </div>
+                      <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
+                        <div
+                          className={`h-full rounded-full transition-all duration-500 ${fillPct >= 90 ? 'bg-red-500' : fillPct >= 70 ? 'bg-orange-400' : fillPct >= 50 ? 'bg-yellow-400' : 'bg-green-400'}`}
+                          style={{ width: `${fillPct}%` }}
+                        />
+                      </div>
+                    </div>
+                  )
+                })()}
 
                 {/* Module Selection */}
                 {pool.allowedModules && pool.allowedModules.length > 0 && (

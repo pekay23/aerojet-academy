@@ -25,6 +25,6 @@ export async function ensureWalletExists(userId: string, currency: string = 'EUR
   return prisma.wallet.upsert({
     where: { userId },
     update: {},
-    create: { userId, balance: 0, reservedBalance: 0, currency },
+    create: { userId, balance: 0, reservedBalance: 0, availableBalance: 0, currency },
   })
 }

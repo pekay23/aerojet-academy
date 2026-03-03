@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { joinPool } from '@/lib/pools/join'
 import { chargeWallet } from '@/lib/wallet/operations'
-import { promoteToStudent } from '@/lib/students/promotion'
+import { promoteApplicantToStudent } from '@/lib/enrollment/pathway'
 
 export async function POST(request: Request) {
   try {
@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     const isIndividual = bookingType === 'INDIVIDUAL'
     const poolPrice = pricingConfig.poolExamFee
     const individualPrice = pricingConfig.individualExamFee
-    const depositAmount = isIndividual ? individualPrice / 2 : 0
+    const depositAmount = isIndividual ? individualPrice : 0
     const requiredAmount = isIndividual ? depositAmount : poolPrice
 
     const examComponent = await prisma.examComponent.findUnique({
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
             tx,
             userId,
             depositAmount,
-            `Individual Exam Deposit (50%): ${examComponent.course.code} - ${examComponent.name}`,
+            `Individual Exam Payment: ${examComponent.course.code} - ${examComponent.name}`,
             examComponentId,
             'EXAM_BOOKING'
           )
@@ -116,8 +116,12 @@ export async function POST(request: Request) {
           select: { role: true },
         })
         if (user && user.role === 'APPLICANT') {
-          const result = await promoteToStudent(userId, 'EXAM_ONLY')
-          if (result.success) promotedToStudent = true
+          try {
+            await promoteApplicantToStudent(userId, userId)
+            promotedToStudent = true
+          } catch (e) {
+            console.error('Promotion failed:', e)
+          }
         }
       }
 
@@ -192,24 +196,6 @@ export async function POST(request: Request) {
           preSeedModules: [moduleCode],
         },
       })
-    } else {
-      // Add module to pool if not already present (enforce diversity cap)
-      const allowedModules = pool.allowedModules || []
-      if (!allowedModules.includes(moduleCode)) {
-        if (allowedModules.length < 4) {
-          pool = await prisma.examPool.update({
-            where: { id: pool.id },
-            data: { allowedModules: [...allowedModules, moduleCode] },
-          })
-        } else {
-          return NextResponse.json(
-            {
-              error: `Pool already has 4 modules (maximum). Choose from: ${allowedModules.join(', ')}`,
-            },
-            { status: 400 }
-          )
-        }
-      }
     }
 
     // Check for existing membership in this pool
@@ -225,24 +211,14 @@ export async function POST(request: Request) {
       poolId: pool.id,
       userId,
       examComponentId,
+      eventId: examEvent.id,
+      moduleCode,
+      amountPaid: poolPrice,
     })
 
     if (!joinResult.success) {
       return NextResponse.json({ error: joinResult.error }, { status: 400 })
     }
-
-    // Create booking record for tracking
-    const booking = await prisma.examBooking.create({
-      data: {
-        userId,
-        examComponentId,
-        eventId: examEvent.id,
-        bookingType: 'POOL',
-        moduleCode: examComponent.course.code,
-        amountPaid: poolPrice,
-        status: 'PENDING',
-      },
-    })
 
     // Promote to student if first booking
     const existingMemberships = await prisma.poolMembership.count({ where: { userId } })
@@ -255,8 +231,12 @@ export async function POST(request: Request) {
         select: { role: true },
       })
       if (user && user.role === 'APPLICANT') {
-        const result = await promoteToStudent(userId, 'EXAM_ONLY')
-        if (result.success) promotedToStudent = true
+        try {
+          await promoteApplicantToStudent(userId, userId)
+          promotedToStudent = true
+        } catch (e) {
+          console.error('Promotion failed:', e)
+        }
       }
     }
 
@@ -264,7 +244,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      bookingId: booking.id,
+      bookingId: joinResult.booking?.id,
       membershipId: joinResult.membership?.id,
       autoConfirmed: joinResult.autoConfirmed,
       message: promotedToStudent

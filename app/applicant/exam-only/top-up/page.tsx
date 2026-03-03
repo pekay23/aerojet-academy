@@ -235,7 +235,11 @@ export default async function ExamOnlyTopUpPage({
 
       {/* Top Up Form or Success Message */}
       {!pendingPayment && (
-        <WalletTopUpForm minAmount={minAmount} currency="EUR" paymentMethods={formattedMethods} />
+        <WalletTopUpForm
+          minAmount={requiredAmount ? Math.max(Number(requiredAmount), minAmount) : minAmount}
+          currency="EUR"
+          paymentMethods={formattedMethods}
+        />
       )}
 
       {/* Transaction History */}

@@ -49,7 +49,7 @@ export default async function EnrollPage({
   const allCategories = await prisma.courseCategory.findMany({
     orderBy: { name: 'asc' },
   })
-  const categories = allCategories.map((c) => c.name)
+  const categories = allCategories.map((c) => ({ id: c.id, name: c.name }))
 
   // 3. Fetch courses with filter (including category relation)
   let allCourses = await prisma.course.findMany({

@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   Target,
+  RefreshCw,
+  History,
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -363,80 +365,186 @@ export default async function WalletPage({
 
       {/* ── Transactions Tab ── */}
       {tab === 'transactions' && (
-        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left">
-              <thead>
-                <tr className="bg-slate-50 dark:bg-slate-800/50">
-                  <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                    Date
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                    Description
-                  </th>
-                  <th className="px-6 py-4 text-left text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-right text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                    Amount
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                {allTransactions.length > 0 ? (
-                  allTransactions.map((tx) => (
-                    <tr
-                      key={tx.id}
-                      className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30"
-                    >
-                      <td className="px-6 py-4 text-sm whitespace-nowrap text-slate-600 dark:text-slate-400">
-                        {tx.createdAt.toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                          {tx.description}
-                        </p>
-                        <p className="text-[10px] font-medium tracking-tight text-slate-400 uppercase">
-                          {tx.type.replace('_', ' ')}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4">
-                        {tx.isPending ? (
-                          <span className="inline-flex rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold tracking-wide text-amber-700 uppercase">
-                            Pending
-                          </span>
-                        ) : (
-                          <span className="inline-flex rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-bold tracking-wide text-emerald-700 uppercase">
-                            Completed
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-right">
+        <div className="space-y-6">
+          {allTransactions.length > 0 ? (
+            (() => {
+              // Group transactions by month
+              const grouped: Record<string, typeof allTransactions> = {}
+              allTransactions.forEach((tx) => {
+                const date = new Date(tx.createdAt)
+                const month = date.toLocaleString(undefined, { month: 'long', year: 'numeric' })
+                if (!grouped[month]) grouped[month] = []
+                grouped[month].push(tx)
+              })
+
+              return Object.entries(grouped).map(([month, txs]) => (
+                <div key={month} className="space-y-3">
+                  <h3 className="px-1 text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">
+                    {month}
+                  </h3>
+
+                  {/* Desktop View: Table */}
+                  <div className="hidden overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm md:block dark:border-slate-800 dark:bg-slate-900">
+                    <table className="w-full text-left">
+                      <thead>
+                        <tr className="bg-slate-50 dark:bg-slate-800/50">
+                          <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                            Date
+                          </th>
+                          <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                            Description
+                          </th>
+                          <th className="px-6 py-4 text-center text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                            Status
+                          </th>
+                          <th className="px-6 py-4 text-right text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                            Amount
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                        {txs.map((tx) => {
+                          const credit = isCredit(tx.type)
+                          const Icon = tx.isPending ? Clock : credit ? ArrowUpRight : ArrowDownRight
+                          return (
+                            <tr
+                              key={tx.id}
+                              className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-xs font-bold text-slate-500 dark:text-slate-400">
+                                  {new Date(tx.createdAt).toLocaleDateString(undefined, {
+                                    day: 'numeric',
+                                    month: 'short',
+                                  })}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                                      tx.isPending
+                                        ? 'bg-amber-50 text-amber-600'
+                                        : credit
+                                          ? 'bg-emerald-50 text-emerald-600'
+                                          : 'bg-slate-50 text-slate-600'
+                                    } dark:bg-slate-800`}
+                                  >
+                                    <Icon className="h-4 w-4" />
+                                  </div>
+                                  <div>
+                                    <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                                      {tx.description}
+                                    </p>
+                                    <p className="text-[10px] text-slate-400 uppercase">
+                                      {tx.type.replace('_', ' ')}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-center">
+                                <span
+                                  className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide uppercase ${
+                                    tx.isPending
+                                      ? 'bg-amber-100 text-amber-700'
+                                      : 'bg-emerald-100 text-emerald-700'
+                                  }`}
+                                >
+                                  {tx.isPending ? 'Pending' : 'Completed'}
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 text-right">
+                                <p
+                                  className={`text-sm font-black ${tx.isPending ? 'text-slate-400' : credit ? 'text-emerald-600' : 'text-slate-900 dark:text-slate-100'}`}
+                                >
+                                  {!tx.isPending && (credit ? '+' : '-')}
+                                  {tx.currency}{' '}
+                                  {Number(tx.amount).toLocaleString(undefined, {
+                                    minimumFractionDigits: 2,
+                                  })}
+                                </p>
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* Mobile View: Cards */}
+                  <div className="grid gap-3 md:hidden">
+                    {txs.map((tx) => {
+                      const credit = isCredit(tx.type)
+                      const Icon = tx.isPending ? Clock : credit ? ArrowUpRight : ArrowDownRight
+                      return (
                         <div
-                          className={`flex items-center justify-end gap-1 font-black ${tx.isPending ? 'text-slate-400' : isCredit(tx.type) ? 'text-green-600' : 'text-slate-900 dark:text-slate-100'}`}
+                          key={tx.id}
+                          className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900"
                         >
-                          {!tx.isPending && (isCredit(tx.type) ? '+' : '-')}
-                          {tx.currency}{' '}
-                          {Number(tx.amount).toLocaleString(undefined, {
-                            minimumFractionDigits: 2,
-                          })}
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                                  tx.isPending
+                                    ? 'bg-amber-50 text-amber-600'
+                                    : credit
+                                      ? 'bg-emerald-50 text-emerald-600'
+                                      : 'bg-slate-50 text-slate-600'
+                                } dark:bg-slate-800`}
+                              >
+                                <Icon className="h-5 w-5" />
+                              </div>
+                              <div>
+                                <p className="text-sm leading-tight font-bold text-slate-900 dark:text-slate-100">
+                                  {tx.description}
+                                </p>
+                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                  {new Date(tx.createdAt).toLocaleDateString(undefined, {
+                                    day: 'numeric',
+                                    month: 'short',
+                                  })}{' '}
+                                  • {tx.type.replace('_', ' ')}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="pl-2 text-right">
+                              <p
+                                className={`text-sm font-black ${tx.isPending ? 'text-slate-400' : credit ? 'text-emerald-600' : 'text-slate-900 dark:text-slate-100'}`}
+                              >
+                                {!tx.isPending && (credit ? '+' : '-')}
+                                {tx.currency} {Number(tx.amount).toFixed(2)}
+                              </p>
+                              <span
+                                className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide uppercase ${
+                                  tx.isPending
+                                    ? 'bg-amber-100 text-amber-700'
+                                    : 'bg-emerald-100 text-emerald-700'
+                                }`}
+                              >
+                                {tx.isPending ? 'Pending' : 'Done'}
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="px-6 py-12 text-center text-sm font-medium text-slate-400"
-                    >
-                      No transactions found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              ))
+            })()
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-16 text-center dark:border-slate-800 dark:bg-slate-900">
+              <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-slate-300 dark:bg-slate-800">
+                <History className="h-10 w-10" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                No Transactions Yet
+              </h3>
+              <p className="mx-auto mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">
+                Your payment history will appear here once you start using your walllet.
+              </p>
+            </div>
+          )}
         </div>
       )}
     </WalletTabs>
