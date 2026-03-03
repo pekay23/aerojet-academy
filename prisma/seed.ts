@@ -786,6 +786,13 @@ async function main() {
     { key: 'bank_account_number', value: '1020003980687', type: 'STRING', description: 'bank' },
     { key: 'bank_swift', value: 'FIRNGHACXXX', type: 'STRING', description: 'bank' },
     { key: 'registration_open', value: 'true', type: 'BOOLEAN', description: 'registration' },
+    { key: 'registration_fee', value: '350', type: 'NUMBER', description: 'Registration Fee' },
+    {
+      key: 'registration_currency',
+      value: 'GHS',
+      type: 'STRING',
+      description: 'Registration Currency',
+    },
 
     // Exam Pricing — admin-editable at runtime
     { key: 'pool_exam_fee', value: '300', type: 'NUMBER', description: 'Pool seat price (EUR)' },
