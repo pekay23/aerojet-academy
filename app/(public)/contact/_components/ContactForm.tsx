@@ -135,7 +135,11 @@ export default function ContactForm() {
           placeholder="+233 XX XXX XXXX"
           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-[#4c9ded]"
           value={data.phone}
-          onChange={(e) => setData({ ...data, phone: e.target.value })}
+          onChange={(e) => {
+            // strip out any characters that are not numbers, spaces, or valid symbols
+            const val = e.target.value.replace(/[^0-9+\-\s()]/g, '')
+            setData({ ...data, phone: val })
+          }}
         />
       </div>
 

@@ -12,9 +12,10 @@ const contactFormSchema = z.object({
   email: z.string().email(),
   phone: z
     .string()
-    .regex(/^[0-9+\-\s()]*$/, 'Invalid phone number')
     .optional()
-    .or(z.literal('')),
+    .refine((val) => !val || /^[0-9+\-\s()]+$/.test(val), {
+      message: 'Invalid phone number, please use only numbers and symbols like + - ()',
+    }),
   subject: z.string().min(1),
   message: z.string().min(10),
   confirm_email: z.string().optional(),
