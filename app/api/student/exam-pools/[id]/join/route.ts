@@ -16,12 +16,25 @@ export const POST = withErrorHandler(
     const validation = validateBody(joinPoolSchema, body)
     if (!validation.success) return apiError((validation as any).error)
 
-    const membership = await joinPool(user.id, poolId, validation.data.selectedModule, user.id)
+    // Find the exam component for the selected module
+    const examComponent = await prisma.examComponent.findFirst({
+      where: { course: { code: validation.data.selectedModule } },
+    })
+
+    const result = await joinPool({
+      poolId,
+      userId: user.id,
+      examComponentId: examComponent?.id,
+    })
+
+    if (!result.success) {
+      return apiError(result.error || 'Failed to join pool')
+    }
 
     await createAuditLog({
       action: 'POOL_JOIN',
       entity: 'PoolMembership',
-      entityId: membership.id,
+      entityId: result.membership?.id || poolId,
       userId: user.id,
       details: { poolId, module: validation.data.selectedModule },
     })
@@ -35,7 +48,8 @@ export const POST = withErrorHandler(
 
     return apiCreated({
       message: `Successfully joined pool! ${symbol}300 has been held in your wallet.`,
-      membershipId: membership.id,
+      membershipId: result.membership?.id,
+      autoConfirmed: result.autoConfirmed,
     })
   }
 )

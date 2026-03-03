@@ -1,170 +1,100 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
-import { Metadata } from 'next'
-import { Search, Activity } from 'lucide-react'
-import AuditLogTable from './_components/AuditLogTable'
+import { format } from 'date-fns'
+import { ScrollText, User, Tag, Clock } from 'lucide-react'
 
-export const metadata: Metadata = { title: 'Audit Logs | Staff Portal' }
-
-export default async function AuditLogsPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ query?: string; action?: string; page?: string }>
-}) {
+export default async function AuditLogsPage() {
   const session = await getAuthSession()
-  if (!session) redirect('/login')
-
-  const { query, action, page } = await searchParams
-  const pageNum = parseInt(page ?? '1', 10)
-  const perPage = 50
+  if (!session || (session.user.role !== 'STAFF' && session.user.role !== 'ADMIN')) {
+    redirect('/login')
+  }
 
   const logs = await prisma.auditLog.findMany({
-    where: {
-      AND: [
-        query
-          ? {
-              OR: [
-                { description: { contains: query, mode: 'insensitive' } },
-                { entity: { contains: query, mode: 'insensitive' } },
-                { action: { contains: query, mode: 'insensitive' } },
-              ],
-            }
-          : {},
-        action ? { action: { contains: action, mode: 'insensitive' } } : {},
-      ],
-    },
+    take: 50,
+    orderBy: { createdAt: 'desc' },
     include: {
       user: {
-        select: {
-          email: true,
-          profile: { select: { firstName: true, lastName: true } },
+        include: {
+          profile: true,
         },
       },
     },
-    orderBy: { createdAt: 'desc' },
-    take: perPage,
-    skip: (pageNum - 1) * perPage,
   })
-
-  const total = await prisma.auditLog.count({
-    where: {
-      AND: [
-        query
-          ? {
-              OR: [
-                { description: { contains: query, mode: 'insensitive' } },
-                { entity: { contains: query, mode: 'insensitive' } },
-                { action: { contains: query, mode: 'insensitive' } },
-              ],
-            }
-          : {},
-        action ? { action: { contains: action, mode: 'insensitive' } } : {},
-      ],
-    },
-  })
-
-  // Resolve entityIds to human-readable labels.
-  const userEntityIds = [
-    ...new Set(
-      logs
-        .filter((l) => l.entity?.toLowerCase() === 'users' && l.entityId)
-        .map((l) => l.entityId as string)
-    ),
-  ]
-
-  const relatedUsers = userEntityIds.length
-    ? await prisma.user.findMany({
-        where: { id: { in: userEntityIds } },
-        select: { id: true, registrationCode: true, email: true },
-      })
-    : []
-
-  const entityLabels: Record<string, string> = {}
-  for (const u of relatedUsers) {
-    entityLabels[u.id] = u.registrationCode ?? u.email
-  }
 
   return (
-    <div className="mx-auto max-w-7xl">
-      {/* Header */}
-      <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 shadow-sm dark:bg-blue-900/30 dark:text-blue-400">
-            <Activity className="h-6 w-6" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
-              Audit Logs
-            </h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-              Track and monitor all system activity, changes, and authentications
-            </p>
-          </div>
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+          System Audit Logs
+        </h1>
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+          Track all administrative actions, overrides, and critical system changes.
+        </p>
       </div>
 
-      {/* Search */}
-      <form className="mb-6 flex gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-          <input
-            name="query"
-            defaultValue={query}
-            placeholder="Search by action, entity, or description…"
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-4 pl-10 text-sm text-slate-900 placeholder-slate-400 focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-xl bg-[#002a5c] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#003875]"
-        >
-          Filter
-        </button>
-      </form>
-
-      {/* Stats strip */}
-      <div className="mb-4 text-sm text-slate-500 dark:text-slate-400">
-        Showing <span className="font-bold text-slate-900 dark:text-slate-100">{logs.length}</span>{' '}
-        of{' '}
-        <span className="font-bold text-slate-900 dark:text-slate-100">
-          {total.toLocaleString()}
-        </span>{' '}
-        log entries
-      </div>
-
-      {/* Table Component */}
-      <div className="mt-6">
-        <AuditLogTable logs={logs} entityLabels={entityLabels} query={query} />
-      </div>
-
-      {/* Pagination */}
-      {total > perPage && (
-        <div className="mt-6 flex items-center justify-between rounded-2xl border border-slate-100 bg-white px-6 py-4 shadow-sm dark:border-slate-800/80 dark:bg-slate-900/50">
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            Page <span className="text-slate-700 dark:text-slate-300">{pageNum}</span> of{' '}
-            <span className="text-slate-700 dark:text-slate-300">{Math.ceil(total / perPage)}</span>
-          </p>
-          <div className="flex gap-2">
-            {pageNum > 1 && (
-              <a
-                href={`?query=${query ?? ''}&page=${pageNum - 1}`}
-                className="rounded-xl border border-slate-200 bg-white px-5 py-2 text-sm font-bold text-slate-600 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:bg-slate-700"
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="divide-y divide-slate-100 dark:divide-slate-800">
+          {logs.length === 0 ? (
+            <div className="p-12 text-center text-slate-500">
+              <ScrollText className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+              <p>No audit logs found.</p>
+            </div>
+          ) : (
+            logs.map((log) => (
+              <div
+                key={log.id}
+                className="p-6 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
               >
-                Previous
-              </a>
-            )}
-            {pageNum * perPage < total && (
-              <a
-                href={`?query=${query ?? ''}&page=${pageNum + 1}`}
-                className="rounded-xl border border-transparent bg-[#002a5c] px-5 py-2 text-sm font-bold text-white shadow-sm transition-all hover:bg-[#003875] hover:shadow-md dark:border-slate-700 dark:bg-slate-800 dark:hover:border-slate-600 dark:hover:bg-slate-700"
-              >
-                Next
-              </a>
-            )}
-          </div>
+                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
+                          log.action.includes('OVERRIDE')
+                            ? 'bg-purple-100 text-purple-700'
+                            : log.action.includes('REPORT')
+                              ? 'bg-blue-100 text-blue-700'
+                              : log.action.includes('WITHDRAW')
+                                ? 'bg-orange-100 text-orange-700'
+                                : 'bg-slate-100 text-slate-700'
+                        }`}
+                      >
+                        {log.action.replace(/_/g, ' ')}
+                      </span>
+                      <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                        {log.entity} {log.entityId && `#${log.entityId.substring(0, 8)}`}
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-600 dark:text-slate-400">{log.description}</p>
+                    {log.changes && Object.keys(log.changes as any).length > 0 && (
+                      <div className="mt-2 rounded-lg bg-slate-100 p-2 font-mono text-xs dark:bg-slate-800">
+                        <pre>{JSON.stringify(log.changes, null, 2)}</pre>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex shrink-0 flex-col items-end gap-1 text-xs text-slate-500">
+                    <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
+                      <User className="h-3 w-3" />
+                      {log.user?.profile?.firstName
+                        ? `${log.user.profile.firstName} ${log.user.profile.lastName}`
+                        : log.user?.email || 'System'}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3 w-3" />
+                      {format(log.createdAt, 'MMM d, yyyy HH:mm:ss')}
+                    </div>
+                    {log.ipAddress && (
+                      <div className="text-[10px] text-slate-400">IP: {log.ipAddress}</div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

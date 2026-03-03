@@ -214,23 +214,142 @@ async function main() {
   // 5. EASA MODULES (COURSES)
   // ============================================================================
   const moduleData = [
-    { code: 'M1',  name: 'Mathematics',                                        duration: 20, price: 1190.0, categoryId: coreCategory.id,      moduleType: 'CORE' as const },
-    { code: 'M2',  name: 'Physics',                                             duration: 20, price: 1190.0, categoryId: coreCategory.id,      moduleType: 'CORE' as const },
-    { code: 'M3',  name: 'Basic Electricals',                                   duration: 24, price: 1400.0, categoryId: coreCategory.id,      moduleType: 'CORE' as const },
-    { code: 'M4',  name: 'Basic Electronics',                                   duration: 20, price: 1190.0, categoryId: coreCategory.id,      moduleType: 'CORE' as const },
-    { code: 'M5',  name: 'Digital Techniques',                                  duration: 24, price: 1400.0, categoryId: coreCategory.id,      moduleType: 'CORE' as const },
-    { code: 'M6',  name: 'Materials & Hardware',                                duration: 25, price: 1400.0, categoryId: coreCategory.id,      moduleType: 'CORE' as const },
-    { code: 'M7',  name: 'Maintenance Practices',                               duration: 15, price: 1030.0, categoryId: coreCategory.id,      moduleType: 'CORE' as const },
-    { code: 'M8',  name: 'Basic Aerodynamics',                                  duration: 15, price: 1030.0, categoryId: coreCategory.id,      moduleType: 'CORE' as const },
-    { code: 'M9',  name: 'Human Factors',                                       duration: 15, price: 1030.0, categoryId: coreCategory.id,      moduleType: 'CORE' as const },
-    { code: 'M10', name: 'Aviation Legislation',                                duration: 15, price: 1030.0, categoryId: coreCategory.id,      moduleType: 'CORE' as const },
-    { code: 'M11', name: 'Turbine Aeroplane Aerodynamics & Systems',            duration: 25, price: 1400.0, categoryId: specialistCategory.id, moduleType: 'SPECIALIST' as const },
-    { code: 'M12', name: 'Helicopter Aerodynamics, Structures & Systems',       duration: 25, price: 1400.0, categoryId: specialistCategory.id, moduleType: 'SPECIALIST' as const },
-    { code: 'M13', name: 'Aircraft Aerodynamics, Structures & Systems (Avionics)', duration: 25, price: 1400.0, categoryId: avionicsCategory.id,  moduleType: 'AVIONICS' as const },
-    { code: 'M14', name: 'Propulsion',                                          duration: 15, price: 1090.0, categoryId: avionicsCategory.id,  moduleType: 'AVIONICS' as const },
-    { code: 'M15', name: 'Turbine Engines',                                     duration: 25, price: 1400.0, categoryId: specialistCategory.id, moduleType: 'SPECIALIST' as const },
-    { code: 'M16', name: 'Piston Engine',                                       duration: 25, price: 1400.0, categoryId: specialistCategory.id, moduleType: 'SPECIALIST' as const },
-    { code: 'M17', name: 'Propellers',                                          duration: 15, price: 1090.0, categoryId: specialistCategory.id, moduleType: 'SPECIALIST' as const },
+    {
+      code: 'M1',
+      name: 'Mathematics',
+      duration: 20,
+      price: 1190.0,
+      categoryId: coreCategory.id,
+      moduleType: 'CORE' as const,
+    },
+    {
+      code: 'M2',
+      name: 'Physics',
+      duration: 20,
+      price: 1190.0,
+      categoryId: coreCategory.id,
+      moduleType: 'CORE' as const,
+    },
+    {
+      code: 'M3',
+      name: 'Basic Electricals',
+      duration: 24,
+      price: 1400.0,
+      categoryId: coreCategory.id,
+      moduleType: 'CORE' as const,
+    },
+    {
+      code: 'M4',
+      name: 'Basic Electronics',
+      duration: 20,
+      price: 1190.0,
+      categoryId: coreCategory.id,
+      moduleType: 'CORE' as const,
+    },
+    {
+      code: 'M5',
+      name: 'Digital Techniques',
+      duration: 24,
+      price: 1400.0,
+      categoryId: coreCategory.id,
+      moduleType: 'CORE' as const,
+    },
+    {
+      code: 'M6',
+      name: 'Materials & Hardware',
+      duration: 25,
+      price: 1400.0,
+      categoryId: coreCategory.id,
+      moduleType: 'CORE' as const,
+    },
+    {
+      code: 'M7',
+      name: 'Maintenance Practices',
+      duration: 15,
+      price: 1030.0,
+      categoryId: coreCategory.id,
+      moduleType: 'CORE' as const,
+    },
+    {
+      code: 'M8',
+      name: 'Basic Aerodynamics',
+      duration: 15,
+      price: 1030.0,
+      categoryId: coreCategory.id,
+      moduleType: 'CORE' as const,
+    },
+    {
+      code: 'M9',
+      name: 'Human Factors',
+      duration: 15,
+      price: 1030.0,
+      categoryId: coreCategory.id,
+      moduleType: 'CORE' as const,
+    },
+    {
+      code: 'M10',
+      name: 'Aviation Legislation',
+      duration: 15,
+      price: 1030.0,
+      categoryId: coreCategory.id,
+      moduleType: 'CORE' as const,
+    },
+    {
+      code: 'M11',
+      name: 'Turbine Aeroplane Aerodynamics & Systems',
+      duration: 25,
+      price: 1400.0,
+      categoryId: specialistCategory.id,
+      moduleType: 'SPECIALIST' as const,
+    },
+    {
+      code: 'M12',
+      name: 'Helicopter Aerodynamics, Structures & Systems',
+      duration: 25,
+      price: 1400.0,
+      categoryId: specialistCategory.id,
+      moduleType: 'SPECIALIST' as const,
+    },
+    {
+      code: 'M13',
+      name: 'Aircraft Aerodynamics, Structures & Systems (Avionics)',
+      duration: 25,
+      price: 1400.0,
+      categoryId: avionicsCategory.id,
+      moduleType: 'AVIONICS' as const,
+    },
+    {
+      code: 'M14',
+      name: 'Propulsion',
+      duration: 15,
+      price: 1090.0,
+      categoryId: avionicsCategory.id,
+      moduleType: 'AVIONICS' as const,
+    },
+    {
+      code: 'M15',
+      name: 'Turbine Engines',
+      duration: 25,
+      price: 1400.0,
+      categoryId: specialistCategory.id,
+      moduleType: 'SPECIALIST' as const,
+    },
+    {
+      code: 'M16',
+      name: 'Piston Engine',
+      duration: 25,
+      price: 1400.0,
+      categoryId: specialistCategory.id,
+      moduleType: 'SPECIALIST' as const,
+    },
+    {
+      code: 'M17',
+      name: 'Propellers',
+      duration: 15,
+      price: 1090.0,
+      categoryId: specialistCategory.id,
+      moduleType: 'SPECIALIST' as const,
+    },
   ]
 
   const createdModules: Record<string, any> = {}
@@ -395,7 +514,14 @@ async function main() {
   })
 
   const semester1 = await prisma.semester.upsert({
-    where: { id: (await prisma.semester.findFirst({ where: { academicYearId: academicYear.id, name: 'Semester 1' } }))?.id ?? 'nonexistent' },
+    where: {
+      id:
+        (
+          await prisma.semester.findFirst({
+            where: { academicYearId: academicYear.id, name: 'Semester 1' },
+          })
+        )?.id ?? 'nonexistent',
+    },
     update: {},
     create: {
       name: 'Semester 1',
@@ -407,7 +533,14 @@ async function main() {
   })
 
   const semester2 = await prisma.semester.upsert({
-    where: { id: (await prisma.semester.findFirst({ where: { academicYearId: academicYear.id, name: 'Semester 2' } }))?.id ?? 'nonexistent-2' },
+    where: {
+      id:
+        (
+          await prisma.semester.findFirst({
+            where: { academicYearId: academicYear.id, name: 'Semester 2' },
+          })
+        )?.id ?? 'nonexistent-2',
+    },
     update: {},
     create: {
       name: 'Semester 2',
@@ -429,22 +562,65 @@ async function main() {
 
   if (prog4Y) {
     const years4Y = [
-      { yearNumber: 1, yearFeeAmount: 13500, seatConfirmationFee: 5400, firstPaymentAmount: 4050, sem1: '2026-09-01', sem2: '2027-02-01' },
-      { yearNumber: 2, yearFeeAmount: 13500, seatConfirmationFee: 6750, firstPaymentAmount: 6750, sem1: '2027-09-01', sem2: '2028-02-01' },
-      { yearNumber: 3, yearFeeAmount: 13500, seatConfirmationFee: 6750, firstPaymentAmount: 6750, sem1: '2028-09-01', sem2: '2029-02-01' },
-      { yearNumber: 4, yearFeeAmount: 13500, seatConfirmationFee: 6750, firstPaymentAmount: 6750, sem1: '2029-09-01', sem2: '2030-02-01' },
+      {
+        yearNumber: 1,
+        yearFeeAmount: 13500,
+        seatConfirmationFee: 5400,
+        firstPaymentAmount: 4050,
+        sem1: '2026-09-01',
+        sem2: '2027-02-01',
+      },
+      {
+        yearNumber: 2,
+        yearFeeAmount: 13500,
+        seatConfirmationFee: 6750,
+        firstPaymentAmount: 6750,
+        sem1: '2027-09-01',
+        sem2: '2028-02-01',
+      },
+      {
+        yearNumber: 3,
+        yearFeeAmount: 13500,
+        seatConfirmationFee: 6750,
+        firstPaymentAmount: 6750,
+        sem1: '2028-09-01',
+        sem2: '2029-02-01',
+      },
+      {
+        yearNumber: 4,
+        yearFeeAmount: 13500,
+        seatConfirmationFee: 6750,
+        firstPaymentAmount: 6750,
+        sem1: '2029-09-01',
+        sem2: '2030-02-01',
+      },
     ]
     for (const y of years4Y) {
       await prisma.programmeYear.upsert({
         where: { programmeId_yearNumber: { programmeId: prog4Y.id, yearNumber: y.yearNumber } },
-        update: { yearFeeAmount: y.yearFeeAmount, seatConfirmationFee: y.seatConfirmationFee, firstPaymentAmount: y.firstPaymentAmount },
+        update: {
+          yearFeeAmount: y.yearFeeAmount,
+          seatConfirmationFee: y.seatConfirmationFee,
+          firstPaymentAmount: y.firstPaymentAmount,
+        },
         create: {
           programmeId: prog4Y.id,
           yearNumber: y.yearNumber,
           yearFeeAmount: y.yearFeeAmount,
           seatConfirmationFee: y.seatConfirmationFee,
           firstPaymentAmount: y.firstPaymentAmount,
-          semesters: [{name: 'Semester 1', startDate: new Date(y.sem1).toISOString(), endDate: new Date(y.sem1).toISOString()}, {name: 'Semester 2', startDate: new Date(y.sem2).toISOString(), endDate: new Date(y.sem2).toISOString()}],
+          semesters: [
+            {
+              name: 'Semester 1',
+              startDate: new Date(y.sem1).toISOString(),
+              endDate: new Date(y.sem1).toISOString(),
+            },
+            {
+              name: 'Semester 2',
+              startDate: new Date(y.sem2).toISOString(),
+              endDate: new Date(y.sem2).toISOString(),
+            },
+          ],
           isActive: true,
         },
       })
@@ -453,20 +629,49 @@ async function main() {
 
   if (prog2Y) {
     const years2Y = [
-      { yearNumber: 1, yearFeeAmount: 11250, seatConfirmationFee: 4500, firstPaymentAmount: 3375, sem1: '2026-09-01', sem2: '2027-02-01' },
-      { yearNumber: 2, yearFeeAmount: 11250, seatConfirmationFee: 5625, firstPaymentAmount: 5625, sem1: '2027-09-01', sem2: '2028-02-01' },
+      {
+        yearNumber: 1,
+        yearFeeAmount: 11250,
+        seatConfirmationFee: 4500,
+        firstPaymentAmount: 3375,
+        sem1: '2026-09-01',
+        sem2: '2027-02-01',
+      },
+      {
+        yearNumber: 2,
+        yearFeeAmount: 11250,
+        seatConfirmationFee: 5625,
+        firstPaymentAmount: 5625,
+        sem1: '2027-09-01',
+        sem2: '2028-02-01',
+      },
     ]
     for (const y of years2Y) {
       await prisma.programmeYear.upsert({
         where: { programmeId_yearNumber: { programmeId: prog2Y.id, yearNumber: y.yearNumber } },
-        update: { yearFeeAmount: y.yearFeeAmount, seatConfirmationFee: y.seatConfirmationFee, firstPaymentAmount: y.firstPaymentAmount },
+        update: {
+          yearFeeAmount: y.yearFeeAmount,
+          seatConfirmationFee: y.seatConfirmationFee,
+          firstPaymentAmount: y.firstPaymentAmount,
+        },
         create: {
           programmeId: prog2Y.id,
           yearNumber: y.yearNumber,
           yearFeeAmount: y.yearFeeAmount,
           seatConfirmationFee: y.seatConfirmationFee,
           firstPaymentAmount: y.firstPaymentAmount,
-          semesters: [{name: 'Semester 1', startDate: new Date(y.sem1).toISOString(), endDate: new Date(y.sem1).toISOString()}, {name: 'Semester 2', startDate: new Date(y.sem2).toISOString(), endDate: new Date(y.sem2).toISOString()}],
+          semesters: [
+            {
+              name: 'Semester 1',
+              startDate: new Date(y.sem1).toISOString(),
+              endDate: new Date(y.sem1).toISOString(),
+            },
+            {
+              name: 'Semester 2',
+              startDate: new Date(y.sem2).toISOString(),
+              endDate: new Date(y.sem2).toISOString(),
+            },
+          ],
           isActive: true,
         },
       })
@@ -483,7 +688,18 @@ async function main() {
         yearFeeAmount: 9540,
         seatConfirmationFee: 3816,
         firstPaymentAmount: 2862,
-        semesters: [{name: 'Semester 1', startDate: new Date('2026-09-01').toISOString(), endDate: new Date('2026-09-01').toISOString()}, {name: 'Semester 2', startDate: new Date('2027-02-01').toISOString(), endDate: new Date('2027-02-01').toISOString()}],
+        semesters: [
+          {
+            name: 'Semester 1',
+            startDate: new Date('2026-09-01').toISOString(),
+            endDate: new Date('2026-09-01').toISOString(),
+          },
+          {
+            name: 'Semester 2',
+            startDate: new Date('2027-02-01').toISOString(),
+            endDate: new Date('2027-02-01').toISOString(),
+          },
+        ],
         isActive: true,
       },
     })
@@ -570,6 +786,64 @@ async function main() {
     { key: 'bank_account_number', value: '1020003980687', type: 'STRING', description: 'bank' },
     { key: 'bank_swift', value: 'FIRNGHACXXX', type: 'STRING', description: 'bank' },
     { key: 'registration_open', value: 'true', type: 'BOOLEAN', description: 'registration' },
+
+    // Exam Pricing — admin-editable at runtime
+    { key: 'pool_exam_fee', value: '300', type: 'NUMBER', description: 'Pool seat price (EUR)' },
+    {
+      key: 'individual_exam_fee',
+      value: '520',
+      type: 'NUMBER',
+      description: 'Individual exam seat price (EUR)',
+    },
+    {
+      key: 'multi_pool_discount_fee',
+      value: '270',
+      type: 'NUMBER',
+      description: 'Multi-pool/Ambassador discounted seat price (EUR)',
+    },
+    {
+      key: 'two_seat_bundle_price',
+      value: '980',
+      type: 'NUMBER',
+      description: 'Two-seat bundle price (EUR)',
+    },
+    {
+      key: 'four_seat_bundle_price',
+      value: '1900',
+      type: 'NUMBER',
+      description: 'Four-seat bundle price (EUR)',
+    },
+    { key: 'resit_exam_fee', value: '480', type: 'NUMBER', description: 'Resit exam fee (EUR)' },
+    {
+      key: 'group_charter_fee',
+      value: '7500',
+      type: 'NUMBER',
+      description: 'Group charter fee (EUR)',
+    },
+    {
+      key: 'late_booking_surcharge',
+      value: '50',
+      type: 'NUMBER',
+      description: 'Late booking surcharge (EUR)',
+    },
+    {
+      key: 'module_change_fee',
+      value: '50',
+      type: 'NUMBER',
+      description: 'Module change admin fee (EUR)',
+    },
+    {
+      key: 'late_booking_days',
+      value: '14',
+      type: 'NUMBER',
+      description: 'Days before exam triggering late surcharge',
+    },
+    {
+      key: 'ambassador_credit_amount',
+      value: '100',
+      type: 'NUMBER',
+      description: 'Ambassador wallet credit (EUR)',
+    },
   ]
 
   for (const setting of settings) {
@@ -659,7 +933,18 @@ async function main() {
   if (existingMethods === 0) {
     // Check if there are legacy bank settings to migrate
     const legacySettings = await prisma.systemSetting.findMany({
-      where: { key: { in: ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_swift', 'bank_branch', 'bank_currency'] } },
+      where: {
+        key: {
+          in: [
+            'bank_name',
+            'bank_account_name',
+            'bank_account_number',
+            'bank_swift',
+            'bank_branch',
+            'bank_currency',
+          ],
+        },
+      },
     })
     const legacy: Record<string, string> = {}
     for (const s of legacySettings) legacy[s.key] = s.value

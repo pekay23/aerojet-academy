@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
+import { env } from '@/lib/env'
 
 // Cron job: Check exam events for automatic status transitions
 // - OPEN events past end date → mark COMPLETED
 export async function GET(req: NextRequest) {
   const authHeader = req.headers.get('authorization')
-  const cronSecret = process.env.CRON_SECRET
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  const cronSecret = env.CRON_SECRET
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -15,10 +16,10 @@ export async function GET(req: NextRequest) {
     const now = new Date()
     const results = { completed: 0, errors: [] as string[] }
 
-    // Mark past events as COMPLETED (valid statuses: OPEN, CONFIRMED)
+    // Mark past events as COMPLETED (valid statuses: OPEN, CONFIRMED, POSTPONED)
     const pastEvents = await prisma.examEvent.findMany({
       where: {
-        status: { in: ['OPEN', 'CONFIRMED'] },
+        status: { in: ['OPEN', 'CONFIRMED', 'POSTPONED'] },
         endDate: { lt: now },
       },
     })

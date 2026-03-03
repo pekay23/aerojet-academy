@@ -745,6 +745,234 @@ export async function sendPaymentRejectedEmail(
 }
 
 // ---------------------------------------------------------------------------
+// POOL FAILED
+// ---------------------------------------------------------------------------
+
+export async function renderPoolFailedEmail(firstName: string, poolName: string, examDate: string) {
+  const defaultSubject = 'Exam Pool Did Not Reach Minimum'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, we regret to inform you that your exam pool did not reach the minimum candidates.</p>
+    
+    <div class="info-box" style="border-left-color: #ef4444;">
+      <div class="info-row"><strong>Pool:</strong> {{poolName}}</div>
+      <div class="info-row"><strong>Exam Date:</strong> {{examDate}}</div>
+    </div>
+
+    <p class="text">Your reserved funds have been fully released back to your available balance. You can log in to join an alternative pool or request a withdrawal.</p>
+  `
+
+  const template = await getTemplate('pool-failed', {
+    subject: defaultSubject,
+    body: defaultBody,
+  })
+
+  const body = replacePlaceholders(template.body, { firstName, poolName, examDate })
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+}
+
+export async function sendPoolFailedEmail(
+  email: string,
+  firstName: string,
+  poolName: string,
+  examDate: string
+) {
+  const html = await renderPoolFailedEmail(firstName, poolName, examDate)
+  return sendEmail({
+    to: email,
+    subject: `Aerojet Aviation - Exam Pool Cancelled: ${poolName}`,
+    html,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// POOL APPROACHING CONFIRMATION (NEAR_FULL)
+// ---------------------------------------------------------------------------
+
+export async function renderPoolApproachingConfirmationEmail(
+  firstName: string,
+  poolName: string,
+  examDate: string,
+  module: string
+) {
+  const defaultSubject = 'Your Exam Pool is Almost Full!'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, great news! <strong>{{poolName}}</strong> is nearing the minimum candidate threshold and is almost confirmed.</p>
+    
+    <div class="info-box" style="border-left-color: #f59e0b;">
+      <div class="info-row"><strong>Module:</strong> {{module}}</div>
+      <div class="info-row"><strong>Exam Date:</strong> {{examDate}}</div>
+      <div class="info-row"><strong>Status:</strong> NEAR CONFIRMATION</div>
+    </div>
+
+    <p class="text">We will notify you immediately once the pool hits the minimum required candidates and your booking is confirmed.</p>
+  `
+
+  const template = await getTemplate('pool-approaching-confirmation', {
+    subject: defaultSubject,
+    body: defaultBody,
+  })
+
+  const body = replacePlaceholders(template.body, { firstName, poolName, examDate, module })
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+}
+
+export async function sendPoolApproachingConfirmationEmail(
+  email: string,
+  firstName: string,
+  poolName: string,
+  examDate: string,
+  module: string
+) {
+  const html = await renderPoolApproachingConfirmationEmail(firstName, poolName, examDate, module)
+  return sendEmail({
+    to: email,
+    subject: `Aerojet Aviation - Pool Almost Confirmed: ${poolName}`,
+    html,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// EVENT GO / NO-GO OUTCOMES
+// ---------------------------------------------------------------------------
+
+export async function renderEventGoEmail(firstName: string, eventName: string) {
+  const defaultSubject = 'Exam Event Confirmed (GO)'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, the upcoming exam event <strong>{{eventName}}</strong> has been officially confirmed!</p>
+    <p class="text">All confirmed pools within this event are now locked and finalized. Please prepare for your exams.</p>
+  `
+  const template = await getTemplate('event-go', { subject: defaultSubject, body: defaultBody })
+  const body = replacePlaceholders(template.body, { firstName, eventName })
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+}
+
+export async function sendEventGoEmail(email: string, firstName: string, eventName: string) {
+  const html = await renderEventGoEmail(firstName, eventName)
+  return sendEmail({
+    to: email,
+    subject: `Aerojet Aviation - Exam Event Confirmed: ${eventName}`,
+    html,
+  })
+}
+
+// ---------------------------------------------------------------------------
+// PAYMENT DEADLINE REMINDERS
+// ---------------------------------------------------------------------------
+
+export async function renderPaymentDeadlineEmail(
+  firstName: string,
+  moduleName: string,
+  eventName: string,
+  daysRemaining: number,
+  balance: number
+) {
+  const defaultSubject = `Payment Reminder: ${daysRemaining} Days Left`
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, this is a reminder that the payment deadline for your exam booking is approaching in <strong>{{daysRemaining}} days</strong>.</p>
+    
+    <div class="info-box" style="border-left-color: #f59e0b;">
+      <div class="info-row"><strong>Module:</strong> {{moduleName}}</div>
+      <div class="info-row"><strong>Event:</strong> {{eventName}}</div>
+      <div class="info-row"><strong>Outstanding Balance:</strong> €{{balance}}</div>
+    </div>
+
+    <p class="text">If your balance is not paid by T-21, your 50% deposit will be forfeited. Please log in to complete your payment.</p>
+  `
+
+  const template = await getTemplate('payment-deadline-reminder', {
+    subject: defaultSubject,
+    body: defaultBody,
+  })
+
+  const body = replacePlaceholders(template.body, {
+    firstName,
+    moduleName,
+    eventName,
+    daysRemaining: daysRemaining.toString(),
+    balance: balance.toFixed(2),
+  })
+
+  return await wrapEmail(
+    replacePlaceholders(template.subject, { firstName, daysRemaining: daysRemaining.toString() }),
+    body
+  )
+}
+
+export async function sendPaymentDeadlineEmail(
+  email: string,
+  firstName: string,
+  moduleName: string,
+  eventName: string,
+  daysRemaining: number,
+  balance: number
+) {
+  const html = await renderPaymentDeadlineEmail(
+    firstName,
+    moduleName,
+    eventName,
+    daysRemaining,
+    balance
+  )
+  return sendEmail({
+    to: email,
+    subject: `Aerojet Aviation - Payment Reminder (${daysRemaining} Days Left)`,
+    html,
+  })
+}
+
+export async function renderEventNoGoEmail(firstName: string, eventName: string) {
+  const defaultSubject = 'Exam Event Cancelled (NO-GO)'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, we regret to inform you that the exam event <strong>{{eventName}}</strong> has been cancelled.</p>
+    <p class="text">All associated pools have failed and reserved funds have been returned to candidate wallets.</p>
+  `
+  const template = await getTemplate('event-nogo', { subject: defaultSubject, body: defaultBody })
+  const body = replacePlaceholders(template.body, { firstName, eventName })
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+}
+
+export async function sendEventNoGoEmail(email: string, firstName: string, eventName: string) {
+  const html = await renderEventNoGoEmail(firstName, eventName)
+  return sendEmail({ to: email, subject: `Exam Event Cancelled: ${eventName}`, html })
+}
+
+export async function renderEventPostponedEmail(
+  firstName: string,
+  eventName: string,
+  newDate: string,
+  newEndDate: string
+) {
+  const defaultSubject = 'Exam Event Postponed'
+  const defaultBody = `
+    <p class="text">Hi {{firstName}}, the exam event <strong>{{eventName}}</strong> has been postponed to ensure minimum thresholds can be met.</p>
+    
+    <div class="info-box" style="border-left-color: #f59e0b;">
+      <div class="info-row"><strong>New Start Date:</strong> {{newDate}}</div>
+      <div class="info-row"><strong>New End Date:</strong> {{newEndDate}}</div>
+    </div>
+
+    <p class="text">Your membership has been automatically rolled over. If the new dates do not work for you, you may withdraw your application through the portal.</p>
+  `
+  const template = await getTemplate('event-postponed', {
+    subject: defaultSubject,
+    body: defaultBody,
+  })
+  const body = replacePlaceholders(template.body, { firstName, eventName, newDate, newEndDate })
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+}
+
+export async function sendEventPostponedEmail(
+  email: string,
+  firstName: string,
+  eventName: string,
+  newDate: string,
+  newEndDate: string
+) {
+  const html = await renderEventPostponedEmail(firstName, eventName, newDate, newEndDate)
+  return sendEmail({ to: email, subject: `Exam Event Postponed: ${eventName}`, html })
+}
+
+// ---------------------------------------------------------------------------
 // CONTACT ENQUIRY
 // ---------------------------------------------------------------------------
 

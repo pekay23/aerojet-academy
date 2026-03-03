@@ -1,23 +1,28 @@
 import prisma from '@/lib/prisma/client'
-import { POOL_EXAM_FEE } from './types'
-import { sendEmail, poolConfirmedEmail, poolFailedEmail } from '@/lib/email'
 import { format } from 'date-fns'
+import { sendPoolConfirmedEmail, sendPoolFailedEmail } from '@/lib/email/service'
+import { logAuditEvent } from '../audit/logger'
 
 export async function confirmPoolInternal(poolId: string, tx: any) {
   const memberships = await tx.poolMembership.findMany({
     where: { poolId, status: 'RESERVED' },
-    include: { user: { include: { profile: true } } },
+    include: {
+      user: { include: { profile: true } },
+      examComponent: { include: { course: true } },
+    },
   })
 
   const pool = await tx.examPool.findUnique({ where: { id: poolId } })
 
   for (const m of memberships) {
+    const captureAmount = Number(m.amountReserved) || Number(pool?.seatPrice) || 300
+
     // Capture funds: deduct from balance, release from reserved
     await tx.wallet.update({
       where: { userId: m.userId },
       data: {
-        balance: { decrement: POOL_EXAM_FEE },
-        reservedBalance: { decrement: POOL_EXAM_FEE },
+        balance: { decrement: captureAmount },
+        reservedBalance: { decrement: captureAmount },
       },
     })
 
@@ -26,36 +31,59 @@ export async function confirmPoolInternal(poolId: string, tx: any) {
       data: {
         walletId: wallet!.id,
         type: 'PAYMENT',
-        amount: POOL_EXAM_FEE,
+        amount: captureAmount,
         description: `Exam fee captured: ${pool?.name}`,
         referenceId: `CAPTURE-${poolId.substring(0, 8)}`,
         referenceType: 'POOL_CAPTURE',
-        balanceBefore: Number(wallet!.balance) + POOL_EXAM_FEE,
+        balanceBefore: Number(wallet!.balance) + captureAmount,
         balanceAfter: Number(wallet!.balance),
       },
     })
 
     await tx.poolMembership.update({
       where: { id: m.id },
-      data: { status: 'CONFIRMED', amountPaid: POOL_EXAM_FEE },
+      data: { status: 'CONFIRMED', amountPaid: captureAmount },
     })
   }
 
-  await tx.examPool.update({ where: { id: poolId }, data: { status: 'CONFIRMED' } })
+  // Set pool status — CONFIRMED if under max, LOCKED if at capacity
+  const updatedPool = await tx.examPool.findUnique({ where: { id: poolId } })
+  const finalStatus =
+    updatedPool && updatedPool.currentMemberCount >= updatedPool.maxCandidates
+      ? 'LOCKED'
+      : 'CONFIRMED'
+
+  await tx.examPool.update({
+    where: { id: poolId },
+    data: { status: finalStatus, confirmedAt: new Date() },
+  })
+
+  // Log the audit event
+  await logAuditEvent(
+    {
+      action: 'POOL_CONFIRM',
+      entity: 'ExamPool',
+      entityId: poolId,
+      description: `Pool ${poolId} (Event ${pool?.eventId}) has been confirmed and seats locked.`,
+    },
+    tx
+  )
 
   // Send emails (non-blocking, outside tx)
   for (const m of memberships) {
     const name = m.user.profile?.firstName || 'Student'
-    sendEmail({
-      to: m.user.academyEmail || m.user.email,
-      subject: 'Exam Pool Confirmed!',
-      html: poolConfirmedEmail(
-        name,
-        pool?.name || '',
-        format(pool?.examDate || new Date(), 'dd MMM yyyy'),
-        m.examComponentId || 'N/A'
-      ),
-    }).catch(() => {})
+    const email = m.user.academyEmail || m.user.email
+    const moduleLabel = m.examComponent?.course?.code || 'Module'
+    const amount = Number(m.amountPaid || m.amountReserved || 300)
+
+    sendPoolConfirmedEmail(
+      email,
+      name,
+      pool?.name || '',
+      moduleLabel,
+      format(pool?.examDate || new Date(), 'dd MMM yyyy'),
+      amount
+    ).catch((e) => console.error('[EMAIL ERROR] Failed to send pool confirmed email:', e))
   }
 }
 
@@ -69,10 +97,15 @@ export async function failPool(poolId: string) {
   })
 
   for (const m of memberships) {
-    // Release reserved funds
+    const releaseAmount = Number(m.amountReserved) || Number(pool.seatPrice) || 300
+
+    // Release reserved funds back to available balance
     await prisma.wallet.update({
       where: { userId: m.userId },
-      data: { reservedBalance: { decrement: POOL_EXAM_FEE } },
+      data: {
+        reservedBalance: { decrement: releaseAmount },
+        availableBalance: { increment: releaseAmount },
+      },
     })
 
     const wallet = await prisma.wallet.findUnique({ where: { userId: m.userId } })
@@ -80,7 +113,7 @@ export async function failPool(poolId: string) {
       data: {
         walletId: wallet!.id,
         type: 'RELEASE',
-        amount: POOL_EXAM_FEE,
+        amount: releaseAmount,
         description: `Pool failed - funds released: ${pool.name}`,
         referenceId: `RELEASE-${poolId.substring(0, 8)}`,
         referenceType: 'POOL_RELEASE',
@@ -91,13 +124,21 @@ export async function failPool(poolId: string) {
 
     await prisma.poolMembership.update({ where: { id: m.id }, data: { status: 'CANCELLED' } })
 
+    const email = m.user.academyEmail || m.user.email
     const name = m.user.profile?.firstName || 'Student'
-    sendEmail({
-      to: m.user.academyEmail || m.user.email,
-      subject: 'Exam Pool Did Not Reach Minimum',
-      html: poolFailedEmail(name, pool.name, format(pool.examDate, 'dd MMM yyyy')),
-    }).catch(() => {})
+
+    sendPoolFailedEmail(email, name, pool.name, format(pool.examDate, 'dd MMM yyyy')).catch((e) =>
+      console.error('[EMAIL ERROR] Failed to send pool failed email:', e)
+    )
   }
 
   await prisma.examPool.update({ where: { id: poolId }, data: { status: 'FAILED' } })
+
+  // Log the audit event
+  await logAuditEvent({
+    action: 'POOL_FAIL',
+    entity: 'ExamPool',
+    entityId: poolId,
+    description: `Pool ${poolId} has failed Go/No-Go criteria. All funds released.`,
+  })
 }

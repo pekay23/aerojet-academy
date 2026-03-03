@@ -100,8 +100,10 @@ export default function PublicNav() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [accordionValue, setAccordionValue] = useState<string | undefined>('item-1')
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    setMounted(true)
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
@@ -162,82 +164,86 @@ export default function PublicNav() {
           </Link>
 
           <div className="hidden flex-1 items-center justify-center lg:flex">
-            <NavigationMenu delayDuration={300}>
-              <NavigationMenuList>
-                {navLinks.map((item) =>
-                  item.isDropdown ? (
-                    <NavigationMenuItem key={item.label}>
-                      <NavigationMenuTrigger
-                        onClick={() => setAccordionValue(undefined)}
-                        className={`relative px-4 py-2 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${linkColorClasses} hover:${activeLinkColorClasses} bg-transparent transition-none!`}
-                      >
-                        {item.label}
-                      </NavigationMenuTrigger>
-                      <NavigationMenuContent>
-                        <div className="w-[400px] p-4 md:w-[500px]">
-                          <Accordion
-                            type="single"
-                            collapsible
-                            value={accordionValue}
-                            onValueChange={setAccordionValue}
-                          >
-                            {item.groups?.map((group) => (
-                              <AccordionItem value={group.value} key={group.value}>
-                                <AccordionTrigger
-                                  onPointerDown={(e) => e.stopPropagation()}
-                                  className="text-public-primary px-3 text-sm font-bold hover:no-underline"
-                                >
-                                  {group.title}
-                                </AccordionTrigger>
-                                <AccordionContent className="pt-2">
-                                  {group.links.length > 0 ? (
-                                    group.links.map((link) => (
-                                      <Link
-                                        href={link.disabled ? '#' : link.href}
-                                        key={link.href}
-                                        className={`block rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-slate-100 ${link.disabled ? 'cursor-not-allowed opacity-60' : ''}`}
-                                      >
-                                        <div className="text-public-dark text-sm leading-none font-medium">
-                                          {link.label}
-                                        </div>
-                                      </Link>
-                                    ))
-                                  ) : (
-                                    <p className="px-3 py-2 text-sm text-slate-500">Coming soon.</p>
-                                  )}
-                                </AccordionContent>
-                              </AccordionItem>
-                            ))}
-                          </Accordion>
-                        </div>
-                      </NavigationMenuContent>
-                    </NavigationMenuItem>
-                  ) : (
-                    <NavigationMenuItem key={item.label}>
-                      <Link
-                        href={item.href || '#'}
-                        className={`relative px-4 py-2 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${
-                          pathname === item.href ? activeLinkColorClasses : linkColorClasses
-                        } hover:${activeLinkColorClasses}`}
-                      >
-                        {pathname === item.href && (
-                          <motion.div
-                            layoutId="nav-pill"
-                            className={`absolute inset-0 rounded-full ${
-                              scrolled || mobileOpen || forceSolid
-                                ? 'bg-[#002a5c]/5'
-                                : 'bg-white/10'
-                            }`}
-                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                          />
-                        )}
-                        <span className="relative z-10">{item.label}</span>
-                      </Link>
-                    </NavigationMenuItem>
-                  )
-                )}
-              </NavigationMenuList>
-            </NavigationMenu>
+            {mounted && (
+              <NavigationMenu delayDuration={300}>
+                <NavigationMenuList>
+                  {navLinks.map((item) =>
+                    item.isDropdown ? (
+                      <NavigationMenuItem key={item.label}>
+                        <NavigationMenuTrigger
+                          onClick={() => setAccordionValue(undefined)}
+                          className={`relative px-4 py-2 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${linkColorClasses} hover:${activeLinkColorClasses} bg-transparent transition-none!`}
+                        >
+                          {item.label}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                          <div className="w-[400px] p-4 md:w-[500px]">
+                            <Accordion
+                              type="single"
+                              collapsible
+                              value={accordionValue}
+                              onValueChange={setAccordionValue}
+                            >
+                              {item.groups?.map((group) => (
+                                <AccordionItem value={group.value} key={group.value}>
+                                  <AccordionTrigger
+                                    onPointerDown={(e) => e.stopPropagation()}
+                                    className="text-public-primary px-3 text-sm font-bold hover:no-underline"
+                                  >
+                                    {group.title}
+                                  </AccordionTrigger>
+                                  <AccordionContent className="pt-2">
+                                    {group.links.length > 0 ? (
+                                      group.links.map((link) => (
+                                        <Link
+                                          href={link.disabled ? '#' : link.href}
+                                          key={link.href}
+                                          className={`block rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-slate-100 ${link.disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                                        >
+                                          <div className="text-public-dark text-sm leading-none font-medium">
+                                            {link.label}
+                                          </div>
+                                        </Link>
+                                      ))
+                                    ) : (
+                                      <p className="px-3 py-2 text-sm text-slate-500">
+                                        Coming soon.
+                                      </p>
+                                    )}
+                                  </AccordionContent>
+                                </AccordionItem>
+                              ))}
+                            </Accordion>
+                          </div>
+                        </NavigationMenuContent>
+                      </NavigationMenuItem>
+                    ) : (
+                      <NavigationMenuItem key={item.label}>
+                        <Link
+                          href={item.href || '#'}
+                          className={`relative px-4 py-2 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${
+                            pathname === item.href ? activeLinkColorClasses : linkColorClasses
+                          } hover:${activeLinkColorClasses}`}
+                        >
+                          {pathname === item.href && (
+                            <motion.div
+                              layoutId="nav-pill"
+                              className={`absolute inset-0 rounded-full ${
+                                scrolled || mobileOpen || forceSolid
+                                  ? 'bg-[#002a5c]/5'
+                                  : 'bg-white/10'
+                              }`}
+                              transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                            />
+                          )}
+                          <span className="relative z-10">{item.label}</span>
+                        </Link>
+                      </NavigationMenuItem>
+                    )
+                  )}
+                </NavigationMenuList>
+              </NavigationMenu>
+            )}
           </div>
 
           <div className="flex items-center gap-2">

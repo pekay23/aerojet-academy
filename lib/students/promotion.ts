@@ -3,8 +3,12 @@ import { generateNextStudentId } from './id-generator'
 import { ensureWalletExists } from '@/lib/wallet/balance'
 import { sendEmail, promotionToStudentEmail } from '@/lib/email'
 import type { PromotionResult } from './types'
+import type { EnrollmentType } from '@prisma/client'
 
-export async function promoteToStudent(userId: string): Promise<PromotionResult> {
+export async function promoteToStudent(
+  userId: string,
+  enrollmentType: EnrollmentType = 'MODULAR'
+): Promise<PromotionResult> {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -12,7 +16,15 @@ export async function promoteToStudent(userId: string): Promise<PromotionResult>
     })
 
     if (!user) return { success: false, error: 'User not found' }
-    if (user.role === 'STUDENT' && user.studentProfile) {
+
+    // If student profile already exists, just ensure the role is correct and return success
+    if (user.studentProfile) {
+      if (user.role !== 'STUDENT') {
+        await prisma.user.update({
+          where: { id: userId },
+          data: { role: 'STUDENT' },
+        })
+      }
       return { success: true, studentId: user.studentProfile.studentId }
     }
 
@@ -25,7 +37,7 @@ export async function promoteToStudent(userId: string): Promise<PromotionResult>
           userId,
           studentId,
           enrollmentDate: new Date(),
-          enrollmentType: 'MODULAR', // Defaulting
+          enrollmentType,
         },
       })
 
