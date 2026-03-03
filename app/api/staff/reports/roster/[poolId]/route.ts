@@ -3,14 +3,14 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { generatePoolRosterCSV } from '@/lib/compliance/reports'
 import { logAuditEvent } from '@/lib/audit/logger'
 
-export async function GET(req: Request, { params }: { params: { poolId: string } }) {
+export async function GET(req: Request, { params }: { params: Promise<{ poolId: string }> }) {
   try {
+    const { poolId } = await params
+
     const session = await getAuthSession()
     if (!session || (session.user.role !== 'STAFF' && session.user.role !== 'ADMIN')) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const { poolId } = params
 
     if (!poolId) {
       return NextResponse.json({ error: 'Missing poolId' }, { status: 400 })
