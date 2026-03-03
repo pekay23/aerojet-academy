@@ -926,7 +926,8 @@ async function main() {
       email: 'applicant@example.com',
       password: applicantPassword,
       role: 'APPLICANT',
-      status: 'PENDING',
+      status: 'ACTIVE',
+      emailVerified: new Date(),
       registrationCode: 'AERO-2026-DEMO01',
       mustChangePassword: false,
       profile: {
@@ -1002,6 +1003,96 @@ async function main() {
     }
   } else {
     console.log(`⏭ PaymentMethod already has ${existingMethods} records, skipping`)
+  }
+
+  // ============================================================================
+  // EXAM EVENTS & POOLS (for dev/testing)
+  // ============================================================================
+
+  const existingEvents = await prisma.examEvent.count()
+  if (existingEvents === 0) {
+    const eventStart = new Date()
+    eventStart.setMonth(eventStart.getMonth() + 3)
+    eventStart.setHours(0, 0, 0, 0)
+
+    const eventEnd = new Date(eventStart)
+    eventEnd.setDate(eventEnd.getDate() + 1)
+
+    const paymentDeadline = new Date(eventStart)
+    paymentDeadline.setDate(paymentDeadline.getDate() - 21)
+
+    const joinDeadline = new Date(eventStart)
+    joinDeadline.setDate(joinDeadline.getDate() - 45)
+
+    const examEvent = await prisma.examEvent.create({
+      data: {
+        name: `${eventStart.toLocaleString('en', { month: 'short' })} ${eventStart.getFullYear()} Exam Event`,
+        startDate: eventStart,
+        endDate: eventEnd,
+        paymentDeadline,
+        joinDeadline,
+        minRevenueTarget: 25000,
+        status: 'OPEN',
+      },
+    })
+    console.log(`✅ Created ExamEvent: ${examEvent.name}`)
+
+    // Pool A — Morning session
+    const poolAStart = new Date(eventStart)
+    poolAStart.setHours(9, 0, 0, 0)
+    const poolAEnd = new Date(eventStart)
+    poolAEnd.setHours(12, 0, 0, 0)
+
+    // Get first 4 exam components for allowed modules
+    const examComponents = await prisma.examComponent.findMany({
+      take: 4,
+      include: { course: true },
+      orderBy: { course: { code: 'asc' } },
+    })
+
+    const allowedModules = examComponents.map((ec) => ec.course?.code || ec.id)
+
+    await prisma.examPool.create({
+      data: {
+        eventId: examEvent.id,
+        name: 'Pool A — Morning',
+        examDate: eventStart,
+        examStartTime: poolAStart,
+        examEndTime: poolAEnd,
+        minCandidates: 25,
+        maxCandidates: 28,
+        moduleDiversityCap: 4,
+        seatPrice: 300,
+        status: 'OPEN',
+        allowedModules,
+      },
+    })
+    console.log('✅ Created ExamPool: Pool A — Morning')
+
+    // Pool B — Afternoon session
+    const poolBStart = new Date(eventStart)
+    poolBStart.setHours(14, 0, 0, 0)
+    const poolBEnd = new Date(eventStart)
+    poolBEnd.setHours(17, 0, 0, 0)
+
+    await prisma.examPool.create({
+      data: {
+        eventId: examEvent.id,
+        name: 'Pool B — Afternoon',
+        examDate: eventStart,
+        examStartTime: poolBStart,
+        examEndTime: poolBEnd,
+        minCandidates: 25,
+        maxCandidates: 28,
+        moduleDiversityCap: 4,
+        seatPrice: 300,
+        status: 'OPEN',
+        allowedModules,
+      },
+    })
+    console.log('✅ Created ExamPool: Pool B — Afternoon')
+  } else {
+    console.log(`⏭ ExamEvent already has ${existingEvents} records, skipping`)
   }
 
   console.log('\n🎉 Seed completed successfully!')

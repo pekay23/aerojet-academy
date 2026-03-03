@@ -31,12 +31,30 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Registration fee has already been paid')
   }
 
-  await prisma.user.update({
-    where: { id: user.id },
-    data: {
-      paymentProofUrl: proofUrl,
-      status: 'PENDING',
-    },
+  await prisma.$transaction(async (tx) => {
+    // 1. Update User to PENDING status and store proof URL
+    await tx.user.update({
+      where: { id: user.id },
+      data: {
+        paymentProofUrl: proofUrl,
+        status: 'PENDING',
+      },
+    })
+
+    // 2. Create a Payment record so it shows up in the admin queue
+    await tx.payment.create({
+      data: {
+        userId: user.id,
+        amount: user.registrationFee,
+        currency: user.registrationCurrency,
+        paymentMethod: 'BANK_TRANSFER',
+        status: 'PENDING',
+        proofUrl: proofUrl,
+        proofUploadedAt: new Date(),
+        referenceCode: registrationCode,
+        referenceType: 'REGISTRATION',
+      },
+    })
   })
 
   await createAuditLog({

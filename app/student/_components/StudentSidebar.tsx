@@ -19,13 +19,26 @@ import type { PaymentAccessLevel } from '@/lib/access-control'
 import type { SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
 
 function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAccessLevel) {
-  const isFullTime = studyPathway === 'FULL_TIME'
+  const isFullTime = ['FULL_TIME', 'FULL_TIME_4Y', 'FULL_TIME_2Y', 'MILITARY_1Y'].includes(studyPathway || '')
+  const isExamOnly = studyPathway === 'EXAM_ONLY'
   const isRestricted = paymentAccessLevel === 'RESTRICTED' || paymentAccessLevel === 'SEAT_ONLY'
   const hasFullAccess = paymentAccessLevel === 'FULL_ACCESS'
 
   const baseLinks: SidebarLinkItem[] = [
     { label: 'Dashboard', href: '/student', icon: LayoutDashboard },
   ]
+
+  // Exam-Only students: limited sidebar — wallet, exam pools, notifications, profile
+  if (isExamOnly) {
+    baseLinks.push(
+      { label: 'Wallet', href: '/student/wallet', icon: Wallet },
+      { label: 'Exam Pools', href: '/student/exam-pools', icon: FileCheck },
+      { label: 'Notifications', href: '/student/notifications', icon: Bell },
+      { label: 'Messages', href: '/student/messages', icon: Mail },
+      { label: 'Profile', href: '/student/profile', icon: User }
+    )
+    return baseLinks
+  }
 
   if (isFullTime && isRestricted) {
     baseLinks.push(

@@ -14,7 +14,7 @@
 
 import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
-import { failPool } from '@/lib/pools/confirm'
+import { failPool, confirmPoolInternal } from '@/lib/pools/confirm'
 import { sendEmail } from '@/lib/email'
 import { sendEventGoEmail, sendEventNoGoEmail, sendEventPostponedEmail } from '@/lib/email/service'
 
@@ -163,7 +163,15 @@ export async function executeGo(eventId: string, adminId: string) {
       data: { status: 'CONFIRMED' },
     })
 
-    // Lock all confirmed pools
+    // Confirm all OPEN/NEAR_FULL pools first (capture funds from RESERVED members)
+    const unconfirmedPools = await tx.examPool.findMany({
+      where: { eventId, status: { in: ['OPEN', 'NEAR_FULL'] } },
+    })
+    for (const pool of unconfirmedPools) {
+      await confirmPoolInternal(pool.id, tx)
+    }
+
+    // Lock all confirmed pools (including those just confirmed above)
     await tx.examPool.updateMany({
       where: { eventId, status: 'CONFIRMED' },
       data: { status: 'LOCKED' },
@@ -357,6 +365,19 @@ export async function mergePools(sourcePoolId: string, targetPoolId: string, adm
         )
       }
 
+      // Check for duplicate users between source and target pools
+      const targetMembers = await tx.poolMembership.findMany({
+        where: { poolId: targetPoolId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+        select: { userId: true },
+      })
+      const targetUserIds = new Set(targetMembers.map(m => m.userId))
+      const duplicates = source.memberships.filter(m => targetUserIds.has(m.userId))
+      if (duplicates.length > 0) {
+        throw new Error(
+          `Cannot merge: ${duplicates.length} user(s) already exist in the target pool`
+        )
+      }
+
       // Move memberships
       for (const m of source.memberships) {
         await tx.poolMembership.update({
@@ -376,6 +397,11 @@ export async function mergePools(sourcePoolId: string, targetPoolId: string, adm
         where: { id: sourcePoolId },
         data: { status: 'MERGED', currentMemberCount: 0 },
       })
+
+      // Auto-confirm if combined count meets threshold
+      if (combinedCount >= 25 && target.status !== 'CONFIRMED') {
+        await confirmPoolInternal(targetPoolId, tx)
+      }
 
       return {
         success: true,

@@ -35,7 +35,25 @@ export const registerSchema = z.object({
       message: 'Please select a study pathway',
     }
   ),
-})
+  licenseCategories: z
+    .array(z.string().min(1))
+    .min(1, 'Please select at least one license category')
+    .max(3, 'You can select up to 3 license categories')
+    .optional(),
+  referralCode: z.string().max(50).optional(),
+}).refine(
+  (data) => {
+    const requiresLicense = ['FULL_TIME_4YEAR', 'FULL_TIME_2YEAR', 'MILITARY_1YEAR'].includes(data.selectedProgramme)
+    if (requiresLicense && (!data.licenseCategories || data.licenseCategories.length === 0)) {
+      return false
+    }
+    return true
+  },
+  {
+    message: 'License category selection is required for Full-Time and Military programmes',
+    path: ['licenseCategories'],
+  }
+)
 
 export const loginSchema = z.object({
   email: z.string().email(),

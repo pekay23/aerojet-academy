@@ -28,7 +28,10 @@ async function AvailablePoolsContent() {
         event: true,
         memberships: {
           where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
-          select: { examComponentId: true, examComponent: { select: { course: { select: { code: true } } } } },
+          select: {
+            examComponentId: true,
+            examComponent: { select: { course: { select: { code: true } } } },
+          },
         },
       },
       orderBy: { examDate: 'asc' },
@@ -61,11 +64,7 @@ async function AvailablePoolsContent() {
       {/* Action row */}
       {isExamOnly && (
         <div className="flex justify-end">
-          <StandaloneBooking
-            price={individualFee}
-            currency={currency}
-            availableBalance={balance}
-          />
+          <StandaloneBooking price={individualFee} currency={currency} availableBalance={balance} />
         </div>
       )}
 
@@ -295,7 +294,7 @@ async function MyBookingsContent() {
     <div className="space-y-8">
       {/* Summary stats */}
       {memberships.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
               Active Bookings
@@ -313,7 +312,7 @@ async function MyBookingsContent() {
               {totalReserved.toFixed(2)}
             </p>
           </div>
-          <div className="col-span-2 rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:col-span-1 dark:border-slate-800 dark:bg-slate-900">
+          <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
               Total Bookings
             </p>
@@ -325,93 +324,59 @@ async function MyBookingsContent() {
       )}
 
       {memberships.length > 0 ? (
-        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead className="bg-slate-50 dark:bg-slate-800/50">
-                <tr>
-                  <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                    Pool / Event
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                    Module
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                    Date &amp; Location
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-right text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                    Reserved
-                  </th>
-                  <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase" />
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                {memberships.map((m) => {
-                  const canLeave = m.status === 'RESERVED' && m.pool.status !== 'CONFIRMED'
-
-                  return (
-                    <tr
-                      key={`${m.userId}-${m.poolId}`}
-                      className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+        <div className="space-y-4">
+          {/* Mobile View: Card-based layout */}
+          <div className="grid gap-4 md:hidden">
+            {memberships.map((m) => {
+              const canLeave = m.status === 'RESERVED' && m.pool.status !== 'CONFIRMED'
+              return (
+                <div
+                  key={`${m.userId}-${m.poolId}`}
+                  className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <div className="mb-4 flex items-start justify-between">
+                    <div>
+                      <p className="font-bold text-slate-900 dark:text-slate-100">{m.pool.name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
+                        {m.pool.event?.name}
+                      </p>
+                    </div>
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide uppercase ${
+                        m.status === 'CONFIRMED'
+                          ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                          : m.status === 'RESERVED'
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            : m.status === 'CANCELLED'
+                              ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                              : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                      }`}
                     >
-                      <td className="px-6 py-4">
-                        <p className="font-bold text-slate-900 dark:text-slate-100">
-                          {m.pool.name}
-                        </p>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          {m.pool.event?.name}
-                        </p>
-                      </td>
-                      <td className="px-6 py-4">
-                        {m.examComponent?.course?.code ? (
-                          <div className="flex items-center gap-1.5">
-                            <BookOpen className="h-3.5 w-3.5 text-slate-400" />
-                            <span className="inline-flex rounded-lg bg-[#002a5c]/10 px-2.5 py-1 text-xs font-bold text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-300">
-                              {m.examComponent.course.code}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-slate-400 italic">Not assigned</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col gap-1 text-sm text-slate-600 dark:text-slate-400">
-                          <div className="flex items-center gap-1.5">
-                            <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                            <span>
-                              {new Date(m.pool.examDate).toLocaleDateString(undefined, {
-                                weekday: 'short',
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="h-3.5 w-3.5 text-slate-400" />
-                            <span>{m.pool.event?.location || 'Main Campus'}</span>
-                          </div>
+                      {m.status === 'RESERVED' ? 'Pending' : m.status}
+                    </span>
+                  </div>
+
+                  <div className="mb-4 grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                        Module
+                      </p>
+                      {m.examComponent?.course?.code ? (
+                        <div className="flex items-center gap-1.5 pt-1">
+                          <BookOpen className="h-3.5 w-3.5 text-slate-400" />
+                          <span className="inline-flex rounded-lg bg-[#002a5c]/10 px-2.5 py-1 text-xs font-bold text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-300">
+                            {m.examComponent.course.code}
+                          </span>
                         </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span
-                          className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide uppercase ${
-                            m.status === 'CONFIRMED'
-                              ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                              : m.status === 'RESERVED'
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                : m.status === 'CANCELLED'
-                                  ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
-                                  : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-                          }`}
-                        >
-                          {m.status === 'RESERVED' ? 'Pending Confirmation' : m.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-right">
+                      ) : (
+                        <span className="text-xs text-slate-400 italic">Not assigned</span>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                        Reserved
+                      </p>
+                      <div className="pt-1">
                         <p className="font-bold text-slate-900 dark:text-slate-100">
                           {currencySymbol}
                           {Number(m.amountReserved || 0).toFixed(2)}
@@ -419,25 +384,157 @@ async function MyBookingsContent() {
                         {m.status === 'RESERVED' && (
                           <p className="text-[10px] text-slate-400">on hold</p>
                         )}
-                        {m.status === 'CONFIRMED' && (
-                          <p className="text-[10px] text-green-600">captured</p>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        {canLeave && (
-                          <LeavePoolButton
-                            poolId={m.poolId}
-                            poolName={m.pool.name}
-                            amount={Number(m.amountReserved || 0)}
-                            currency={currency}
-                          />
-                        )}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 border-t border-slate-50 pt-4 dark:border-slate-800">
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                      <Calendar className="h-4 w-4 text-slate-400" />
+                      <span>
+                        {new Date(m.pool.examDate).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                      <MapPin className="h-4 w-4 text-slate-400" />
+                      <span>{m.pool.event?.location || 'Main Campus'}</span>
+                    </div>
+                  </div>
+
+                  {canLeave && (
+                    <div className="mt-4 border-t border-slate-50 pt-4 dark:border-slate-800">
+                      <LeavePoolButton
+                        poolId={m.poolId}
+                        poolName={m.pool.name}
+                        amount={Number(m.amountReserved || 0)}
+                        currency={currency}
+                      />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Desktop View: Traditional table */}
+          <div className="hidden overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm md:block dark:border-slate-800 dark:bg-slate-900">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left">
+                <thead className="bg-slate-50 dark:bg-slate-800/50">
+                  <tr>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                      Pool / Event
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                      Module
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                      Date &amp; Location
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-right text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                      Reserved
+                    </th>
+                    <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                  {memberships.map((m) => {
+                    const canLeave = m.status === 'RESERVED' && m.pool.status !== 'CONFIRMED'
+
+                    return (
+                      <tr
+                        key={`${m.userId}-${m.poolId}`}
+                        className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                      >
+                        <td className="px-6 py-4">
+                          <p className="font-bold text-slate-900 dark:text-slate-100">
+                            {m.pool.name}
+                          </p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {m.pool.event?.name}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4">
+                          {m.examComponent?.course?.code ? (
+                            <div className="flex items-center gap-1.5">
+                              <BookOpen className="h-3.5 w-3.5 text-slate-400" />
+                              <span className="inline-flex rounded-lg bg-[#002a5c]/10 px-2.5 py-1 text-xs font-bold text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-300">
+                                {m.examComponent.course.code}
+                              </span>
+                            </div>
+                          ) : (
+                            <span className="text-xs text-slate-400 italic">Not assigned</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col gap-1 text-sm text-slate-600 dark:text-slate-400">
+                            <div className="flex items-center gap-1.5">
+                              <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                              <span>
+                                {new Date(m.pool.examDate).toLocaleDateString(undefined, {
+                                  weekday: 'short',
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                              <MapPin className="h-3.5 w-3.5 text-slate-400" />
+                              <span>{m.pool.event?.location || 'Main Campus'}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide uppercase ${
+                              m.status === 'CONFIRMED'
+                                ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                                : m.status === 'RESERVED'
+                                  ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                                  : m.status === 'CANCELLED'
+                                    ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                                    : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
+                            }`}
+                          >
+                            {m.status === 'RESERVED' ? 'Pending Confirmation' : m.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <p className="font-bold text-slate-900 dark:text-slate-100">
+                            {currencySymbol}
+                            {Number(m.amountReserved || 0).toFixed(2)}
+                          </p>
+                          {m.status === 'RESERVED' && (
+                            <p className="text-[10px] text-slate-400">on hold</p>
+                          )}
+                          {m.status === 'CONFIRMED' && (
+                            <p className="text-[10px] text-green-600">captured</p>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {canLeave && (
+                            <LeavePoolButton
+                              poolId={m.poolId}
+                              poolName={m.pool.name}
+                              amount={Number(m.amountReserved || 0)}
+                              currency={currency}
+                            />
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       ) : (

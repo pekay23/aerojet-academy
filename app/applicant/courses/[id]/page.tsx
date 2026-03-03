@@ -26,15 +26,17 @@ export default async function CourseDetailsPage({ params }: Props) {
   if (!session) redirect('/login')
 
   const { id } = await params
+  const userId = (session.user as any).id
 
   const [course, enrollment] = await Promise.all([
     prisma.course.findUnique({
       where: { id },
+      include: { category: true },
     }),
     prisma.enrollment.findUnique({
       where: {
         userId_courseId: {
-          userId: (session.user as any).id,
+          userId,
           courseId: id,
         },
       },
@@ -42,6 +44,46 @@ export default async function CourseDetailsPage({ params }: Props) {
   ])
 
   if (!course) notFound()
+
+  // Fetch user's profile and license targets to show their "entered" category
+  const studentProfile = await prisma.studentProfile.findUnique({
+    where: { userId },
+    include: {
+      licenseTargets: {
+        include: { licenseCategory: true },
+      },
+    },
+  })
+
+  const isExamOnly = studentProfile?.enrollmentType === 'EXAM_ONLY'
+
+  // Fetch individual exam components for this course
+  const examComponents = await prisma.examComponent.findMany({
+    where: { courseId: id },
+    orderBy: { code: 'asc' },
+  })
+
+  // Fetch wallet balance
+  const wallet = await prisma.wallet.findUnique({
+    where: { userId },
+    select: { balance: true },
+  })
+  const balance = Number(wallet?.balance || 0)
+  const canAffordPool = balance >= 300
+
+  const targetLicenseCodes = studentProfile?.licenseTargets
+    .map((lt) => lt.licenseCategory.code)
+    .join(', ')
+
+  // Check if this course is specifically required for their license
+  const isRequiredForTarget = await prisma.licenseModuleRequirement.findFirst({
+    where: {
+      courseId: id,
+      licenseCategory: {
+        code: { in: studentProfile?.licenseTargets.map((lt) => lt.licenseCategory.code) || [] },
+      },
+    },
+  })
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
@@ -70,6 +112,29 @@ export default async function CourseDetailsPage({ params }: Props) {
             <div className="flex items-center gap-2 rounded-xl border border-emerald-100 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-emerald-600">
               <CheckCircle2 className="h-4 w-4" />
               Already Enrolled
+            </div>
+          ) : isExamOnly ? (
+            <div className="flex flex-col items-end gap-2">
+              <Link
+                href={
+                  canAffordPool
+                    ? `/applicant/courses/${id}/purchase`
+                    : '/applicant/exam-only?tab=dashboard'
+                }
+                className={`inline-flex items-center justify-center rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-lg transition-all active:scale-95 ${
+                  canAffordPool
+                    ? 'bg-[#002a5c] shadow-blue-900/10 hover:bg-[#003875]'
+                    : 'bg-orange-600 shadow-orange-900/10 hover:bg-orange-700'
+                }`}
+              >
+                {canAffordPool ? 'Book Exam' : 'Top Up Wallet to Book'}
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Link>
+              {!canAffordPool && (
+                <p className="animate-pulse text-[10px] font-bold text-orange-600">
+                  Insufficient Balance: €{balance.toLocaleString()}
+                </p>
+              )}
             </div>
           ) : (
             <Link
@@ -183,6 +248,50 @@ export default async function CourseDetailsPage({ params }: Props) {
               </div>
             </div>
           )}
+
+          {/* Exam Components for Exam-Only */}
+          {isExamOnly && examComponents.length > 0 && (
+            <div className="rounded-2xl border border-teal-100 bg-teal-50/20 p-6 dark:border-teal-900/30 dark:bg-teal-900/10">
+              <div className="mb-4 flex items-center gap-2">
+                <BookOpen className="h-5 w-5 text-teal-600" />
+                <h3 className="font-bold text-slate-900 dark:text-slate-100">Available Exams</h3>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {examComponents.map((comp) => (
+                  <div
+                    key={comp.id}
+                    className="flex flex-col gap-2 rounded-xl border border-white bg-white/50 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-mono text-[10px] font-black tracking-widest text-[#4c9ded]">
+                        {comp.code}
+                      </span>
+                      <span className="text-[10px] font-bold text-slate-400">
+                        {comp.type || 'EXAM'}
+                      </span>
+                    </div>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">
+                      {comp.name}
+                    </h4>
+                    <div className="mt-2 flex items-center justify-between gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+                      <div>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase">Pool Price</p>
+                        <p className="text-sm font-black text-teal-600">
+                          €{Number(comp.poolPrice).toLocaleString()}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-[9px] font-bold text-slate-400 uppercase">Individual</p>
+                        <p className="text-sm font-black text-[#002a5c] dark:text-blue-400">
+                          €{Number(comp.individualPrice).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Sidebar Info */}
@@ -200,7 +309,14 @@ export default async function CourseDetailsPage({ params }: Props) {
                   <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">
                     Category
                   </p>
-                  <p className="text-sm font-bold text-slate-700">{course.categoryId || 'CORE'}</p>
+                  <p className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                    {course.category?.name || course.categoryId || 'CORE'}
+                  </p>
+                  {isRequiredForTarget && (
+                    <p className="mt-1 text-[11px] font-bold text-blue-600 dark:text-blue-400">
+                      Target: {targetLicenseCodes}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -220,24 +336,34 @@ export default async function CourseDetailsPage({ params }: Props) {
 
               <div className="border-t border-slate-50 pt-5">
                 <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">
-                  Investment
+                  {isExamOnly ? 'Exam Fees (Pool)' : 'Investment'}
                 </p>
                 <div className="mt-1 flex items-baseline gap-1">
                   <span className="text-xl font-black text-[#002a5c] dark:text-blue-400">
-                    {course.currency} {Number(course.price).toLocaleString()}
+                    {course.currency} {isExamOnly ? '300' : Number(course.price).toLocaleString()}
                   </span>
                 </div>
                 <p className="mt-2 text-[10px] text-slate-400 italic">
-                  Price inclusive of training materials and exam fees.
+                  {isExamOnly
+                    ? 'Standard price for pooling. Individual exam seats vary.'
+                    : 'Price inclusive of training materials and exam fees.'}
                 </p>
               </div>
 
               {!enrollment && (
                 <Link
-                  href={`/applicant/courses/${id}/purchase`}
-                  className="mt-6 flex w-full items-center justify-center rounded-xl bg-[#002a5c] py-3 text-sm font-black text-white shadow-lg shadow-blue-900/10 transition-all hover:bg-[#003875] active:scale-[0.98]"
+                  href={
+                    isExamOnly && !canAffordPool
+                      ? '/applicant/exam-only?tab=dashboard'
+                      : `/applicant/courses/${id}/purchase`
+                  }
+                  className={`mt-6 flex w-full items-center justify-center rounded-xl py-3 text-sm font-black text-white shadow-lg transition-all active:scale-[0.98] ${
+                    isExamOnly && !canAffordPool
+                      ? 'bg-orange-600 shadow-orange-900/10 hover:bg-orange-700'
+                      : 'bg-[#002a5c] shadow-blue-900/10 hover:bg-[#003875]'
+                  }`}
                 >
-                  Enroll Now
+                  {isExamOnly ? (canAffordPool ? 'Book Exam' : 'Top Up Wallet') : 'Enroll Now'}
                 </Link>
               )}
             </div>

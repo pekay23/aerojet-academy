@@ -146,6 +146,19 @@ async function promoteToAmbassador(tx: any, userId: string) {
       },
     })
   }
+
+  // Send ambassador promotion email (outside the calling transaction scope, fire-and-forget)
+  import('@/lib/email/service').then(async ({ sendAmbassadorPromotionEmail }) => {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, academyEmail: true, profile: { select: { firstName: true } } },
+    })
+    if (user) {
+      const email = user.academyEmail || user.email
+      const name = user.profile?.firstName || 'Student'
+      sendAmbassadorPromotionEmail(email, name, pricing.ambassadorCredit).catch(console.error)
+    }
+  }).catch(console.error)
 }
 
 /**

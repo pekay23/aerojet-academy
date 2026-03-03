@@ -51,6 +51,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       )
     })
 
+    // Qualify any pending referral for this user (non-blocking)
+    import('@/lib/referral/operations')
+      .then(({ qualifyReferral }) => qualifyReferral(payment.userId))
+      .catch(console.error)
+
     await createAuditLog({
       action: 'SYSTEM_UPDATE' as any,
       entity: 'payments',

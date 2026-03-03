@@ -11,17 +11,8 @@ import {
 import { Filter } from 'lucide-react'
 
 interface CourseCategoryFilterProps {
-  categories: string[]
+  categories: { id: string; name: string }[]
   currentCategory?: string
-}
-
-const categoryLabel: Record<string, string> = {
-  FOUR_YEAR: '4-Year Programme',
-  TWO_YEAR: '2-Year Programme',
-  MILITARY: 'Military / Industry',
-  MODULAR: 'Modular',
-  EXAM_ONLY: 'Exam Only',
-  REVISION: 'Revision Support',
 }
 
 export function CourseCategoryFilter({ categories, currentCategory }: CourseCategoryFilterProps) {
@@ -56,11 +47,11 @@ export function CourseCategoryFilter({ categories, currentCategory }: CourseCate
           </SelectItem>
           {categories.map((cat) => (
             <SelectItem
-              key={cat}
-              value={cat}
+              key={cat.id}
+              value={cat.id}
               className="text-[10px] font-black tracking-widest text-[#002a5c] uppercase focus:bg-slate-50 dark:text-slate-300 dark:focus:bg-slate-800"
             >
-              {categoryLabel[cat] || cat.replace(/_/g, ' ')}
+              {cat.name}
             </SelectItem>
           ))}
         </SelectContent>

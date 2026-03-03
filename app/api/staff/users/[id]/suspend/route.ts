@@ -4,6 +4,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog } from '@/lib/audit/logger'
 import { UserRole } from '@prisma/client'
+import { evictInactiveUserFromExams } from '@/lib/users/eviction'
 
 export const POST = withErrorHandler(
   async (req: NextRequest, context?: { params: Record<string, string> }) => {
@@ -22,6 +23,9 @@ export const POST = withErrorHandler(
       where: { id },
       data: { status: 'SUSPENDED' },
     })
+
+    // Evict from future exams/pools and refund wallet
+    await evictInactiveUserFromExams(id, staff.id, 'Account suspended by staff')
 
     await createAuditLog({
       action: 'SUSPEND_USER',

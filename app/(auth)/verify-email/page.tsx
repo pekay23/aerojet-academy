@@ -39,13 +39,13 @@ export default function VerifyEmailPage() {
           setStatus('verified')
 
           if (data.registrationCode) {
-            setTimeout(() => {
-              router.push(`/register?success=true&code=${data.registrationCode}`)
-            }, 2000)
+            // setTimeout(() => {
+            //   router.push(`/register?success=true&code=${data.registrationCode}`)
+            // }, 2000)
           }
 
           setMessage(
-            'Your email has been verified successfully! Redirecting you to complete your registration payment...'
+            'Your email has been verified successfully! Please check your inbox for payment instructions to complete your registration.'
           )
         } else {
           // Post-approval: Verify and auto-login with credentials
@@ -104,19 +104,19 @@ export default function VerifyEmailPage() {
                 <span className="text-xs font-bold text-blue-700 uppercase">Next Steps</span>
               </div>
               <ol className="ml-5 list-decimal space-y-1 text-sm text-blue-800">
-                <li>Upload your registration fee payment proof</li>
-                <li>Wait for staff to verify your payment</li>
-                <li>Receive your login credentials via email</li>
+                <li>Check your email for the "Registration Received" message</li>
+                <li>Follow the payment instructions and copy your reference code</li>
+                <li>Log in to your portal and upload your payment proof</li>
               </ol>
             </div>
 
             <div className="mt-6">
-              <Link
-                href="/register?success=true"
+              <button
+                onClick={() => window.close()}
                 className="inline-flex items-center gap-2 rounded-xl bg-[#002a5c] px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#4c9ded]"
               >
-                Go to Payment Details
-              </Link>
+                Close Page
+              </button>
             </div>
           </>
         )}
@@ -169,8 +169,11 @@ export default function VerifyEmailPage() {
                     })
 
                     if (res.ok) {
-                      setMessage('A new verification link has been sent to your email.')
-                      alert('A new verification link has been sent to your email.')
+                      const data = await res.json()
+                      setMessage(
+                        data.message || 'A new verification link has been sent to your email.'
+                      )
+                      alert(data.message || 'A new verification link has been sent to your email.')
                     } else {
                       const data = await res.json()
                       alert(data.error || 'Failed to resend link')

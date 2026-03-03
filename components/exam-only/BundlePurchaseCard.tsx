@@ -55,7 +55,7 @@ export function BundlePurchaseCard() {
 
   if (isLoading) {
     return (
-      <div style={{ padding: '20px', textAlign: 'center', color: '#888' }}>Loading bundles...</div>
+      <div className="p-5 text-center text-[#888]">Loading bundles...</div>
     )
   }
 
@@ -64,100 +64,61 @@ export function BundlePurchaseCard() {
       type: 'TWO_SEAT' as const,
       label: '2-Seat Bundle',
       data: pricing.twoSeat,
-      gradient: 'linear-gradient(135deg, #1e3a5f, #2563eb)',
+      gradientClass: 'bg-[linear-gradient(135deg,#1e3a5f,#2563eb)]',
       icon: '🎟️',
     },
     {
       type: 'FOUR_SEAT' as const,
       label: '4-Seat Bundle',
       data: pricing.fourSeat,
-      gradient: 'linear-gradient(135deg, #1e3a5f, #7c3aed)',
+      gradientClass: 'bg-[linear-gradient(135deg,#1e3a5f,#7c3aed)]',
       icon: '🎫',
       badge: '+ 1 free module change',
     },
   ]
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+    <div className="grid grid-cols-2 gap-4">
       {bundles.map((b) => (
         <div
           key={b.type}
-          style={{
-            padding: '20px',
-            background: b.gradient,
-            borderRadius: '12px',
-            border: '1px solid rgba(255,255,255,0.1)',
-            position: 'relative',
-            overflow: 'hidden',
-          }}
+          className={`p-5 ${b.gradientClass} rounded-xl border border-white/10 relative overflow-hidden`}
         >
           {b.badge && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '8px',
-                right: '-20px',
-                transform: 'rotate(45deg)',
-                background: '#10b981',
-                color: '#fff',
-                fontSize: '9px',
-                fontWeight: 700,
-                padding: '2px 30px',
-                textTransform: 'uppercase',
-              }}
-            >
+            <div className="absolute top-2 -right-5 rotate-45 bg-[#10b981] text-white text-[9px] font-bold py-0.5 px-[30px] uppercase">
               Bonus
             </div>
           )}
 
-          <div style={{ fontSize: '24px', marginBottom: '8px' }}>{b.icon}</div>
-          <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#fff', margin: '0 0 4px' }}>
+          <div className="text-2xl mb-2">{b.icon}</div>
+          <h4 className="text-base font-bold text-white m-0 mb-1">
             {b.label}
           </h4>
-          <div style={{ fontSize: '28px', fontWeight: 800, color: '#fff', margin: '8px 0' }}>
+          <div className="text-[28px] font-extrabold text-white my-2">
             €{b.data?.price || '–'}
           </div>
-          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginBottom: '4px' }}>
+          <div className="text-[12px] text-white/70 mb-1">
             {b.data?.seats || '–'} exam seats • €{b.data?.perSeat || '–'}/seat
           </div>
           {b.data?.savings ? (
-            <div
-              style={{ fontSize: '12px', color: '#34d399', fontWeight: 600, marginBottom: '12px' }}
-            >
+            <div className="text-[12px] text-[#34d399] font-semibold mb-3">
               Save €{b.data.savings} vs individual pool seats
             </div>
           ) : (
-            <div style={{ height: '12px', marginBottom: '12px' }} />
+            <div className="h-3 mb-3" />
           )}
           {b.badge && (
-            <div style={{ fontSize: '11px', color: '#a5f3fc', marginBottom: '12px' }}>
+            <div className="text-[11px] text-[#a5f3fc] mb-3">
               {b.badge}
             </div>
           )}
-          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', marginBottom: '12px' }}>
+          <div className="text-[11px] text-white/50 mb-3">
             Valid for 12 months • Any modules
           </div>
           <button
             onClick={() => handlePurchase(b.type)}
             disabled={purchasing !== null}
-            style={{
-              width: '100%',
-              padding: '10px',
-              background: 'rgba(255,255,255,0.15)',
-              color: '#fff',
-              border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: '8px',
-              cursor: purchasing ? 'wait' : 'pointer',
-              fontWeight: 600,
-              fontSize: '13px',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={(e) => {
-              ;(e.target as HTMLElement).style.background = 'rgba(255,255,255,0.25)'
-            }}
-            onMouseLeave={(e) => {
-              ;(e.target as HTMLElement).style.background = 'rgba(255,255,255,0.15)'
-            }}
+            className={`w-full py-2.5 bg-white/15 text-white border border-white/20 rounded-lg font-semibold text-[13px] transition-all duration-200 hover:bg-white/25 ${purchasing ? 'cursor-wait' : 'cursor-pointer'}`}
           >
             {purchasing === b.type ? 'Processing...' : 'Purchase Bundle'}
           </button>

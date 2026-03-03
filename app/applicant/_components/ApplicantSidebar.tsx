@@ -28,7 +28,6 @@ const examOnlyLinks = [
 ]
 
 const restrictedLinks = [
-  { label: 'Choose Study Path', href: '/pathway', icon: LayoutDashboard },
   { label: 'Exam Only Pathway', href: '/exam-only', icon: GraduationCap },
   { label: 'Profile', href: '/profile', icon: User },
 ]

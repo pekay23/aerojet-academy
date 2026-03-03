@@ -1,4 +1,5 @@
 import { Metadata } from 'next'
+import { EnrollmentType } from '@prisma/client'
 import { redirect } from 'next/navigation'
 import { Clock, Users, Globe, BookOpen, CheckCircle2, Lock } from 'lucide-react'
 import { Suspense } from 'react'
@@ -8,15 +9,6 @@ import prisma from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Browse Courses | Applicant Portal' }
 export const dynamic = 'force-dynamic'
-
-const categoryLabel: Record<string, string> = {
-  FOUR_YEAR: '4-Year Programme',
-  TWO_YEAR: '2-Year Programme',
-  MILITARY: 'Military / Industry',
-  MODULAR: 'Modular',
-  EXAM_ONLY: 'Exam Only',
-  REVISION: 'Revision Support',
-}
 
 const categoryColor: Record<string, string> = {
   FOUR_YEAR: 'bg-blue-50 text-blue-700 border-blue-200',
@@ -49,16 +41,31 @@ export default async function CoursesPage({
   const canEnroll = session.user.status === 'ACTIVE'
   const visibility = getCatalogVisibility(studentProfile?.enrollmentType || null)
 
-  // Fetch unique categories for filter
-  const categoriesRaw = await prisma.course.findMany({
-    where: { isActive: true },
-    select: { categoryId: true },
-    distinct: ['categoryId'],
+  // Fetch categories for filter and grouping
+  const allCategories = await prisma.courseCategory.findMany({
+    orderBy: { name: 'asc' },
   })
-  const categories = categoriesRaw
-    .map((c) => c.categoryId)
-    .filter((c): c is string => !!c)
-    .sort()
+
+  // Group by ID for efficient name lookup
+  const categoryMap = allCategories.reduce(
+    (acc, cat) => {
+      acc[cat.id] = cat.name
+      return acc
+    },
+    {} as Record<string, string>
+  )
+
+  // Handle legacy category aliases (e.g., ?category=MODULAR)
+  // Maps legacy string IDs to database cuid() IDs if a match is found
+  let activeCategoryId = category
+  if (category && !categoryMap[category]) {
+    const matchedCat = allCategories.find(
+      (c) => c.name.toLowerCase() === category.toLowerCase() || c.id === category
+    )
+    if (matchedCat) {
+      activeCategoryId = matchedCat.id
+    }
+  }
 
   return (
     <div className="space-y-10">
@@ -81,7 +88,7 @@ export default async function CoursesPage({
         </div>
 
         <div className="shrink-0">
-          <CourseCategoryFilter categories={categories} currentCategory={category} />
+          <CourseCategoryFilter categories={allCategories} currentCategory={activeCategoryId} />
         </div>
       </div>
 
@@ -106,10 +113,11 @@ export default async function CoursesPage({
 
       <Suspense fallback={<CoursesSkeleton />}>
         <CourseList
+          category={activeCategoryId}
           canEnroll={canEnroll}
-          category={category}
-          visibility={visibility}
           enrollmentType={studentProfile?.enrollmentType || null}
+          categoryNames={categoryMap}
+          visibility={visibility}
         />
       </Suspense>
     </div>
@@ -127,25 +135,29 @@ function CoursesSkeleton() {
 }
 
 async function CourseList({
-  canEnroll,
   category,
-  visibility,
+  canEnroll,
   enrollmentType,
+  categoryNames,
+  visibility,
 }: {
-  canEnroll: boolean
   category?: string
+  canEnroll: boolean
+  enrollmentType: EnrollmentType | null
+  categoryNames: Record<string, string>
   visibility: ReturnType<typeof getCatalogVisibility>
-  enrollmentType: string | null
 }) {
-  const courses = await prisma.course.findMany({
+  const coursesRaw = await prisma.course.findMany({
     where: {
       isActive: true,
       ...(category ? { categoryId: category } : {}),
-      // Apply visibility filters
-      ...(visibility.showEasaModules ? {} : { NOT: { categoryId: 'EASA_MODULE' } }),
+      // Apply visibility filters if needed in the future
     },
-    orderBy: [{ code: 'asc' }],
   })
+
+  const courses = coursesRaw.sort((a, b) =>
+    a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
+  )
 
   if (courses.length === 0) {
     return (
@@ -178,7 +190,7 @@ async function CourseList({
         <div key={cat} className="space-y-8">
           <div className="flex items-center gap-4">
             <h2 className="text-[10px] font-black tracking-[0.3em] text-blue-500 uppercase dark:text-[#4c9ded]">
-              {categoryLabel[cat] || cat.replace(/_/g, ' ')}
+              {categoryNames[cat] || cat.replace(/_/g, ' ')}
             </h2>
             <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800/50" />
           </div>
@@ -234,10 +246,13 @@ async function CourseList({
                   <div className="mt-8 flex items-center justify-between gap-4 border-t border-slate-50 pt-6 dark:border-slate-800/50">
                     <div className="min-w-0">
                       <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                        Tuition
+                        {enrollmentType === 'EXAM_ONLY' ? 'Exam Fees (Pool)' : 'Tuition'}
                       </p>
                       <p className="truncate text-2xl font-black text-[#002a5c] dark:text-white">
-                        {course.currency} {Number(course.price).toLocaleString()}
+                        {course.currency}{' '}
+                        {enrollmentType === 'EXAM_ONLY'
+                          ? '300'
+                          : Number(course.price).toLocaleString()}
                       </p>
                     </div>
                     {canEnroll ? (

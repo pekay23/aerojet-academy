@@ -32,7 +32,7 @@ export async function purchaseBundle(
   const freeChanges = bundleType === 'FOUR_SEAT' ? 1 : 0
 
   try {
-    return await prisma.$transaction(
+    const txResult = await prisma.$transaction(
       async (tx) => {
         // Check wallet balance
         const wallet = await tx.wallet.findUnique({ where: { userId } })
@@ -89,6 +89,24 @@ export async function purchaseBundle(
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
     )
+
+    // Send bundle purchase confirmation email (outside transaction)
+    if (txResult.success) {
+      const { sendBundlePurchaseEmail } = await import('@/lib/email/service')
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true, academyEmail: true, profile: { select: { firstName: true } } },
+      })
+      if (user) {
+        const email = user.academyEmail || user.email
+        const name = user.profile?.firstName || 'Student'
+        const label = bundleType === 'TWO_SEAT' ? '2-Seat Bundle' : '4-Seat Bundle'
+        sendBundlePurchaseEmail(email, name, label, seats, price)
+          .catch(console.error)
+      }
+    }
+
+    return txResult
   } catch (err: any) {
     console.error('[BUNDLE PURCHASE ERROR]', err)
     return { success: false, error: err.message || 'Failed to purchase bundle' }
@@ -96,18 +114,21 @@ export async function purchaseBundle(
 }
 
 /**
- * Use a bundle seat for a pool join. Returns the bundle if one is available.
+ * Find an available bundle seat for a pool join.
+ * Returns the earliest-expiring active bundle with remaining seats, or null.
  */
 export async function getAvailableBundle(userId: string) {
-  return prisma.examBundle.findFirst({
+  // Prisma can't compare two columns (usedSeats < totalSeats) in findFirst,
+  // so we fetch all active non-expired bundles and filter in JS
+  const bundles = await prisma.examBundle.findMany({
     where: {
       userId,
       status: 'ACTIVE',
       validUntil: { gt: new Date() },
-      usedSeats: { lt: prisma.examBundle.fields.totalSeats as any },
     },
     orderBy: { validUntil: 'asc' }, // Use earliest expiring first
   })
+  return bundles.find(b => b.usedSeats < b.totalSeats) ?? null
 }
 
 /**

@@ -15,6 +15,7 @@ import { getPoolWithDetails } from '@/lib/pools/operations'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
 import PoolStatusBadge from '../../../_components/PoolStatusBadge'
+import MemberActions from './MemberActions'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -153,9 +154,12 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:text-slate-400">
-                        <MoreVertical className="h-4 w-4" />
-                      </button>
+                      <MemberActions
+                        membershipId={member.id}
+                        memberName={`${member.user.profile?.firstName || ''} ${member.user.profile?.lastName || ''}`}
+                        status={member.status}
+                        poolId={pool.id}
+                      />
                     </td>
                   </tr>
                 ))

@@ -1,22 +1,7 @@
-import { Metadata } from "next";
-import Link from "next/link";
+import { redirect } from 'next/navigation'
 
-export const metadata: Metadata = { title: "Join Pool" };
-
+// Pool joining is handled via the JoinPoolButton component on the pools browsing page.
+// Redirect here to avoid confusion from the "Coming Soon" stub.
 export default function Page() {
-  return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Join Pool</h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Join this examination pool.</p>
-      </div>
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-8 sm:p-12 text-center">
-        <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🚧</span>
-        </div>
-        <h2 className="text-lg font-bold text-slate-700 mb-2">Coming Soon</h2>
-        <p className="text-sm text-slate-400 max-w-md mx-auto">This feature is under development and will be available soon.</p>
-      </div>
-    </div>
-  );
+  redirect('/student/exam-pools')
 }
