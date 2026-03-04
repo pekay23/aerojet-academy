@@ -33,11 +33,11 @@ export default async function AdmissionsPage() {
       <div className="relative overflow-hidden">
         {/* Gradient Blobs */}
         <div
-          className="absolute top-0 left-0 h-[50rem] w-[50rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-white opacity-40 blur-3xl"
+          className="absolute top-0 left-0 h-200 w-200 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white opacity-40 blur-3xl"
           aria-hidden="true"
         />
         <div
-          className="bg-public-secondary absolute right-0 bottom-0 h-[50rem] w-[50rem] translate-x-1/2 translate-y-1/2 rounded-full opacity-10 blur-3xl"
+          className="bg-public-secondary absolute right-0 bottom-0 h-200 w-200 translate-x-1/2 translate-y-1/2 rounded-full opacity-10 blur-3xl"
           aria-hidden="true"
         />
 

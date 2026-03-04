@@ -47,15 +47,31 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ message: 'Role is already set to ' + newRole })
     }
 
-    // Role-specific ID generation (simplified)
-    const generateId = (prefix: string) => {
-      const random = Math.floor(1000 + Math.random() * 9000).toString()
-      return `${prefix}-${random}`
-    }
-
     let generatedStudentId: string | null = null
 
     const updatedUser = await prisma.$transaction(async (tx) => {
+      // Role-specific ID generation with retry loop
+      const generateUniqueId = async (prefix: string, type: 'STUDENT' | 'INSTRUCTOR' | 'STAFF') => {
+        let isUnique = false
+        let newId = ''
+        while (!isUnique) {
+          const random = Math.floor(1000 + Math.random() * 9000).toString()
+          newId = `${prefix}-${random}`
+
+          if (type === 'STUDENT') {
+            const existing = await tx.studentProfile.findUnique({ where: { studentId: newId } })
+            if (!existing) isUnique = true
+          } else if (type === 'INSTRUCTOR') {
+            const existing = await tx.instructorProfile.findUnique({ where: { employeeId: newId } })
+            if (!existing) isUnique = true
+          } else {
+            const existing = await tx.staffProfile.findUnique({ where: { employeeId: newId } })
+            if (!existing) isUnique = true
+          }
+        }
+        return newId
+      }
+
       // 1. Update the base role
       const updated = await tx.user.update({
         where: { id: userId },
@@ -64,21 +80,24 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
       // 2. Ensure the required profile exists for the new role
       if (newRole === 'INSTRUCTOR' && !user.instructorProfile) {
+        const empId = await generateUniqueId('IN', 'INSTRUCTOR')
         await tx.instructorProfile.create({
           data: {
             userId,
-            employeeId: generateId('IN'),
+            employeeId: empId,
           },
         })
       } else if (['STAFF', 'ADMIN'].includes(newRole) && !user.staffProfile) {
+        const prefix = newRole === 'ADMIN' ? 'AD' : 'ST'
+        const empId = await generateUniqueId(prefix, 'STAFF')
         await tx.staffProfile.create({
           data: {
             userId,
-            employeeId: generateId(newRole === 'ADMIN' ? 'AD' : 'ST'),
+            employeeId: empId,
           },
         })
       } else if (newRole === 'STUDENT' && !user.studentProfile) {
-        const studentId = generateId('AATA')
+        const studentId = await generateUniqueId('AATA', 'STUDENT')
         generatedStudentId = studentId
         await tx.studentProfile.create({
           data: {
