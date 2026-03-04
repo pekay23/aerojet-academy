@@ -115,6 +115,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (newRole === 'STUDENT' && generatedStudentId && user.email) {
       const firstName = user.profile?.firstName || 'Student'
       await sendStudentPromotionEmail(user.email, firstName, generatedStudentId)
+      if (user.academyEmail) {
+        await sendStudentPromotionEmail(user.academyEmail, firstName, generatedStudentId)
+      }
     }
 
     return NextResponse.json(updatedUser)

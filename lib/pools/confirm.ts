@@ -73,18 +73,34 @@ export async function confirmPoolInternal(poolId: string, tx: any) {
   // Send emails (non-blocking, outside tx)
   for (const m of memberships) {
     const name = m.user.profile?.firstName || 'Student'
-    const email = m.user.academyEmail || m.user.email
     const moduleLabel = m.examComponent?.course?.code || 'Module'
     const amount = Number(m.amountPaid || m.amountReserved || 300)
 
+    // Send to personal email
     sendPoolConfirmedEmail(
-      email,
+      m.user.email,
       name,
       pool?.name || '',
       moduleLabel,
       format(pool?.examDate || new Date(), 'dd MMM yyyy'),
       amount
-    ).catch((e) => console.error('[EMAIL ERROR] Failed to send pool confirmed email:', e))
+    ).catch((e) =>
+      console.error('[EMAIL ERROR] Failed to send pool confirmed email to personal address:', e)
+    )
+
+    // Send to academy email if exists
+    if (m.user.academyEmail) {
+      sendPoolConfirmedEmail(
+        m.user.academyEmail,
+        name,
+        pool?.name || '',
+        moduleLabel,
+        format(pool?.examDate || new Date(), 'dd MMM yyyy'),
+        amount
+      ).catch((e) =>
+        console.error('[EMAIL ERROR] Failed to send pool confirmed email to academy address:', e)
+      )
+    }
   }
 }
 
@@ -152,11 +168,29 @@ export async function failPool(poolId: string, txClient?: Prisma.TransactionClie
   // Send emails OUTSIDE the transaction to avoid blocking on I/O
   if (result?.memberships) {
     for (const m of result.memberships) {
-      const email = m.user.academyEmail || m.user.email
       const name = m.user.profile?.firstName || 'Student'
-      sendPoolFailedEmail(email, name, result.pool.name, format(result.pool.examDate, 'dd MMM yyyy')).catch((e) =>
-        console.error('[EMAIL ERROR] Failed to send pool failed email:', e)
+
+      // Send to personal email
+      sendPoolFailedEmail(
+        m.user.email,
+        name,
+        result.pool.name,
+        format(result.pool.examDate, 'dd MMM yyyy')
+      ).catch((e) =>
+        console.error('[EMAIL ERROR] Failed to send pool failed email to personal address:', e)
       )
+
+      // Send to academy email if exists
+      if (m.user.academyEmail) {
+        sendPoolFailedEmail(
+          m.user.academyEmail,
+          name,
+          result.pool.name,
+          format(result.pool.examDate, 'dd MMM yyyy')
+        ).catch((e) =>
+          console.error('[EMAIL ERROR] Failed to send pool failed email to academy address:', e)
+        )
+      }
     }
   }
 }

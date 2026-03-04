@@ -36,7 +36,11 @@ export default async function RegisterPage({
       {/* Content */}
       <div className="p-8 md:p-10">
         {showPaymentDetails ? (
-          <PaymentInstructions fee={config.fee} currency={config.currency} paymentMethods={paymentMethods} />
+          <PaymentInstructions
+            fee={config.fee}
+            currency={config.currency}
+            paymentMethods={paymentMethods}
+          />
         ) : isSuccess ? (
           <div className="text-center">
             <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-50">
@@ -54,9 +58,10 @@ export default async function RegisterPage({
                 <span className="text-xs font-bold text-blue-700 uppercase">What happens next</span>
               </div>
               <ol className="ml-5 list-decimal space-y-1 text-sm text-blue-800">
-                <li>Check your email and click the verification link</li>
-                <li>Receive your payment details via email</li>
-                <li>Upload your payment proof to complete registration</li>
+                <li>Check your email and click the verification link.</li>
+                <li>Upon verification, you'll receive your bank transfer details.</li>
+                <li>Upload your payment receipt to complete your registration.</li>
+                <li>Once approved, you will receive your portal login credentials.</li>
               </ol>
             </div>
 

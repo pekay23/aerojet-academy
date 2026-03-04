@@ -26,6 +26,10 @@ export async function POST(req: NextRequest) {
           render: () => emailService.renderRegistrationEmail('John', 'REG-123456'),
         },
         {
+          id: 'email-verification',
+          render: () => emailService.renderEmailVerificationEmail('John', 'mock-verify-token'),
+        },
+        {
           id: 'activation',
           render: () =>
             emailService.renderActivationEmail(
@@ -89,6 +93,9 @@ export async function POST(req: NextRequest) {
       switch (templateName) {
         case 'registration':
           html = await emailService.renderRegistrationEmail('John', 'REG-123456')
+          break
+        case 'email-verification':
+          html = await emailService.renderEmailVerificationEmail('John', 'mock-verify-token')
           break
         case 'activation':
           html = await emailService.renderActivationEmail(
