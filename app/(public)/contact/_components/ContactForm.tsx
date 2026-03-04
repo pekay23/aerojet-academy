@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { toast } from 'sonner'
 import { Loader2, Send, CheckCircle2 } from 'lucide-react'
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'
 
 export default function ContactForm() {
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const { executeRecaptcha } = useGoogleReCaptcha()
   const [data, setData] = useState({
     firstName: '',
     lastName: '',
@@ -17,38 +19,51 @@ export default function ContactForm() {
     confirm_email: '',
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault()
+      setLoading(true)
 
-    try {
-      const res = await fetch('/api/public/contact', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: `${data.firstName} ${data.lastName}`,
-          email: data.email,
-          phone: data.phone,
-          subject: data.subject,
-          message: data.message,
-          confirm_email: data.confirm_email,
-        }),
-      })
-
-      const responseData = await res.json()
-
-      if (res.ok) {
-        setSubmitted(true)
-        toast.success('Message sent successfully!')
-      } else {
-        toast.error(responseData.error || 'Failed to send message')
+      if (!executeRecaptcha) {
+        toast.error('ReCAPTCHA not ready. Please try again later.')
+        setLoading(false)
+        return
       }
-    } catch {
-      toast.error('Something went wrong. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }
+
+      try {
+        const captchaToken = await executeRecaptcha('contact_form')
+
+        const res = await fetch('/api/public/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: `${data.firstName} ${data.lastName}`,
+            email: data.email,
+            phone: data.phone,
+            subject: data.subject,
+            message: data.message,
+            confirm_email: data.confirm_email,
+            captchaToken,
+          }),
+        })
+
+        const responseData = await res.json()
+
+        if (res.ok) {
+          setSubmitted(true)
+          toast.success('Message sent successfully!')
+        } else {
+          toast.error(responseData.error || 'Failed to send message')
+        }
+      } catch (error) {
+        console.error('Contact form error:', error)
+        toast.error('Something went wrong. Please try again.')
+      } finally {
+        setLoading(false)
+      }
+    },
+    [data, executeRecaptcha]
+  )
 
   if (submitted) {
     return (
@@ -197,9 +212,9 @@ export default function ContactForm() {
       <input
         type="text"
         name="confirm_email"
-        style={{ display: 'none' }}
-        tabIndex={-1}
+        className="sr-only"
         autoComplete="off"
+        tabIndex={-1}
         value={data.confirm_email}
         onChange={(e) => setData({ ...data, confirm_email: e.target.value })}
       />
