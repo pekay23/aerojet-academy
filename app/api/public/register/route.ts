@@ -94,8 +94,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       .catch(console.error)
   }
 
-  // Send verification email (non-blocking)
-  sendEmailVerificationEmail(email, firstName, verifyToken).catch(console.error)
+  // Send verification email (wait for it to finish so serverless functions don't kill the request)
+  await sendEmailVerificationEmail(email, firstName, verifyToken)
 
   // Audit log
   await createAuditLog({
