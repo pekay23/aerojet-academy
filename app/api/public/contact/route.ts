@@ -19,6 +19,7 @@ const contactFormSchema = z.object({
   subject: z.string().min(1),
   message: z.string().min(10),
   confirm_email: z.string().optional(),
+  captchaToken: z.string().min(1),
 })
 
 export async function POST(req: NextRequest) {
@@ -40,9 +41,29 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const { name, email, phone, subject, message, confirm_email } = validation.data
+    const { name, email, phone, subject, message, confirm_email, captchaToken } = validation.data
 
-    // 3. Honeypot check
+    // 3. Google reCAPTCHA Verification
+    try {
+      const verifyRes = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `secret=${process.env.RECAPTCHA_SECRET_KEY}&response=${captchaToken}`,
+      })
+      const verifyData = await verifyRes.json()
+      if (!verifyData.success || verifyData.score < 0.5) {
+        console.warn(`[RECAPTCHA FAILED] Score: ${verifyData.score}, IP: ${ip}`)
+        return NextResponse.json(
+          { error: 'CAPTCHA verification failed or score too low' },
+          { status: 400 }
+        )
+      }
+    } catch (err) {
+      console.error('reCAPTCHA error:', err)
+      return NextResponse.json({ error: 'Failed to verify CAPTCHA' }, { status: 500 })
+    }
+
+    // 4. Honeypot check
     // If the hidden field has any value, a bot filled it out.
     // Return success to trick the bot, but do not send emails.
     if (confirm_email) {
