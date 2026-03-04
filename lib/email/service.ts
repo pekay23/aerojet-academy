@@ -323,6 +323,7 @@ export async function renderEmailVerificationEmail(firstName: string, verifyToke
         <li>Once verified, you will receive an email with payment details</li>
         <li>Use the payment details to transfer your registration fee</li>
         <li>Upload your payment proof to complete registration</li>
+        <li>Once your payment proof is approved, you will receive your login details via email.</li>
       </ul>
     </div>
 

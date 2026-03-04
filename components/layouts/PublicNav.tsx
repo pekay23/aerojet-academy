@@ -140,8 +140,9 @@ export default function PublicNav() {
     pathname.startsWith('/privacy-policy') ||
     pathname.startsWith('/online-application-terms')
 
-  const headerClasses = `fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled || mobileOpen || forceSolid ? 'bg-white/95 backdrop-blur-xl shadow-sm border-slate-100' : 'bg-transparent border-transparent'}`
-  const linkColorClasses = scrolled || mobileOpen || forceSolid ? 'text-slate-700' : 'text-white'
+  const headerClasses = `fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled || mobileOpen || forceSolid ? 'bg-white/95 backdrop-blur-xl shadow-sm border-slate-100 dark:bg-slate-950/95 dark:border-slate-800' : 'bg-transparent border-transparent'}`
+  const linkColorClasses =
+    scrolled || mobileOpen || forceSolid ? 'text-slate-700 dark:text-slate-200' : 'text-white'
   const activeLinkColorClasses =
     scrolled || mobileOpen || forceSolid ? 'text-public-secondary' : 'text-white'
 
@@ -188,7 +189,7 @@ export default function PublicNav() {
                                 <AccordionItem value={group.value} key={group.value}>
                                   <AccordionTrigger
                                     onPointerDown={(e) => e.stopPropagation()}
-                                    className="text-public-primary px-3 text-sm font-bold hover:no-underline"
+                                    className="text-public-primary px-3 text-sm font-bold hover:no-underline dark:text-white"
                                   >
                                     {group.title}
                                   </AccordionTrigger>
@@ -198,15 +199,15 @@ export default function PublicNav() {
                                         <Link
                                           href={link.disabled ? '#' : link.href}
                                           key={link.href}
-                                          className={`block rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-slate-100 ${link.disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                                          className={`block rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-slate-100 dark:hover:bg-slate-800 ${link.disabled ? 'cursor-not-allowed opacity-60' : ''}`}
                                         >
-                                          <div className="text-public-dark text-sm leading-none font-medium">
+                                          <div className="text-public-dark text-sm leading-none font-medium dark:text-slate-200">
                                             {link.label}
                                           </div>
                                         </Link>
                                       ))
                                     ) : (
-                                      <p className="px-3 py-2 text-sm text-slate-500">
+                                      <p className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">
                                         Coming soon.
                                       </p>
                                     )}
@@ -249,7 +250,7 @@ export default function PublicNav() {
           <div className="flex items-center gap-2">
             <Link
               href="/login"
-              className={`hidden items-center rounded-lg px-4 py-2 text-xs font-bold tracking-widest uppercase transition-all sm:inline-flex ${scrolled || forceSolid ? 'hover:text-public-primary text-slate-500' : 'text-white/80 hover:text-white'}`}
+              className={`hidden items-center rounded-lg px-4 py-2 text-xs font-bold tracking-widest uppercase transition-all sm:inline-flex ${scrolled || forceSolid ? 'hover:text-public-primary text-slate-500 dark:text-slate-300 dark:hover:text-white' : 'text-white/80 hover:text-white'}`}
             >
               Login
             </Link>
@@ -288,13 +289,15 @@ export default function PublicNav() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 bottom-0 z-50 w-[85%] max-w-sm overflow-y-auto bg-white"
+              className="fixed top-0 right-0 bottom-0 z-50 w-[85%] max-w-sm overflow-y-auto bg-white dark:bg-slate-950"
             >
-              <div className="flex items-center justify-between border-b p-6">
-                <span className="text-public-primary text-lg font-black uppercase">Menu</span>
+              <div className="flex items-center justify-between border-b p-6 dark:border-slate-800">
+                <span className="text-public-primary text-lg font-black uppercase dark:text-white">
+                  Menu
+                </span>
                 <button
                   onClick={() => setMobileOpen(false)}
-                  className="flex h-11 w-11 items-center justify-center p-2"
+                  className="flex h-11 w-11 items-center justify-center p-2 text-slate-700 dark:text-slate-300"
                   aria-label="Close menu"
                 >
                   <X className="h-5 w-5" aria-hidden="true" />
@@ -304,20 +307,28 @@ export default function PublicNav() {
                 {navLinks.map((item) =>
                   item.isDropdown ? (
                     <Accordion type="single" collapsible className="w-full" key={item.label}>
-                      <AccordionItem value="courses-mobile" className="border-b-0">
-                        <AccordionTrigger className="py-3 text-base font-bold text-slate-700 hover:no-underline">
+                      <AccordionItem
+                        value="courses-mobile"
+                        className="border-b-0 dark:border-slate-800"
+                      >
+                        <AccordionTrigger className="py-3 text-base font-bold text-slate-700 hover:no-underline dark:text-slate-200">
                           {item.label}
                         </AccordionTrigger>
                         <AccordionContent>
                           {item.groups?.map((group) => (
-                            <div key={group.value} className="mb-2 ml-4 border-l pl-4">
-                              <h4 className="text-public-primary mb-2 font-bold">{group.title}</h4>
+                            <div
+                              key={group.value}
+                              className="mb-2 ml-4 border-l pl-4 dark:border-slate-800"
+                            >
+                              <h4 className="text-public-primary mb-2 font-bold dark:text-white">
+                                {group.title}
+                              </h4>
                               {group.links.length > 0 ? (
                                 group.links.map((link) => (
                                   <Link
                                     key={link.label}
                                     href={link.disabled ? '#' : link.href}
-                                    className={`block py-2 text-sm text-slate-600 ${link.disabled ? 'cursor-not-allowed opacity-50' : 'hover:text-public-primary'}`}
+                                    className={`block py-2 text-sm text-slate-600 dark:text-slate-400 ${link.disabled ? 'cursor-not-allowed opacity-50' : 'hover:text-public-primary dark:hover:text-white'}`}
                                   >
                                     {link.label}
                                   </Link>
@@ -334,15 +345,19 @@ export default function PublicNav() {
                     <Link
                       key={item.label}
                       href={item.href || '#'}
-                      className="block py-3 text-base font-bold text-slate-700"
+                      className="block py-3 text-base font-bold text-slate-700 dark:text-slate-200"
                     >
                       {item.label}
                     </Link>
                   )
                 )}
               </div>
-              <div className="mt-4 space-y-3 border-t p-6">
-                <Button asChild variant="outline" className="w-full">
+              <div className="mt-4 space-y-3 border-t p-6 dark:border-slate-800">
+                <Button
+                  asChild
+                  variant="outline"
+                  className="w-full dark:border-slate-800 dark:text-white"
+                >
                   <Link href="/login">Login</Link>
                 </Button>
                 <Button asChild className="bg-public-secondary w-full text-white">

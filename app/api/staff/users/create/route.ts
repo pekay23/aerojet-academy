@@ -48,14 +48,30 @@ export async function POST(req: NextRequest) {
 
     const hashedPassword = await hashPassword(password)
 
-    // Generate random 4-digit number
-    const generateId = (prefix: string) => {
-      const random = Math.floor(1000 + Math.random() * 9000).toString()
-      return `${prefix}-${random}`
-    }
-
     // Create user and related profiles in a transaction
     const newUser = await prisma.$transaction(async (tx) => {
+      // Generate random 4-digit number with collision retry
+      const generateUniqueId = async (prefix: string, type: 'STUDENT' | 'INSTRUCTOR' | 'STAFF') => {
+        let isUnique = false
+        let newId = ''
+        while (!isUnique) {
+          const random = Math.floor(1000 + Math.random() * 9000).toString()
+          newId = `${prefix}-${random}`
+
+          if (type === 'STUDENT') {
+            const existing = await tx.studentProfile.findUnique({ where: { studentId: newId } })
+            if (!existing) isUnique = true
+          } else if (type === 'INSTRUCTOR') {
+            const existing = await tx.instructorProfile.findUnique({ where: { employeeId: newId } })
+            if (!existing) isUnique = true
+          } else {
+            const existing = await tx.staffProfile.findUnique({ where: { employeeId: newId } })
+            if (!existing) isUnique = true
+          }
+        }
+        return newId
+      }
+
       // 1. Create base user
       const user = await tx.user.create({
         data: {
@@ -78,32 +94,36 @@ export async function POST(req: NextRequest) {
 
       // 2. Create role-specific profiles
       if (role === 'INSTRUCTOR') {
+        const empId = await generateUniqueId('IN', 'INSTRUCTOR')
         await tx.instructorProfile.create({
           data: {
             userId: user.id,
-            employeeId: generateId('IN'),
+            employeeId: empId,
           },
         })
       } else if (role === 'STAFF') {
+        const empId = await generateUniqueId('ST', 'STAFF')
         await tx.staffProfile.create({
           data: {
             userId: user.id,
-            employeeId: generateId('ST'),
+            employeeId: empId,
           },
         })
       } else if (role === 'ADMIN') {
         // Admins share StaffProfile but get AD- prefix
+        const empId = await generateUniqueId('AD', 'STAFF')
         await tx.staffProfile.create({
           data: {
             userId: user.id,
-            employeeId: generateId('AD'),
+            employeeId: empId,
           },
         })
       } else if (role === 'STUDENT') {
+        const studentId = await generateUniqueId('AATA', 'STUDENT')
         await tx.studentProfile.create({
           data: {
             userId: user.id,
-            studentId: generateId('AATA'),
+            studentId,
             enrollmentType: EnrollmentType.FULL_TIME, // Default, can be updated later
           },
         })
@@ -121,4 +141,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
   }
 }
-

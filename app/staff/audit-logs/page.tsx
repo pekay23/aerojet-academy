@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { ScrollText, User, Tag, Clock } from 'lucide-react'
+import AuditLogTable from './_components/AuditLogTable'
 
 export default async function AuditLogsPage() {
   const session = await getAuthSession()
@@ -11,7 +12,7 @@ export default async function AuditLogsPage() {
   }
 
   const logs = await prisma.auditLog.findMany({
-    take: 50,
+    take: 100, // Show a bit more logs
     orderBy: { createdAt: 'desc' },
     include: {
       user: {
@@ -21,6 +22,137 @@ export default async function AuditLogsPage() {
       },
     },
   })
+
+  // Pre-fetch entity labels
+  const entityLabels: Record<string, string> = {}
+
+  const userIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'User')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const courseIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'Course')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const examEventIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'ExamEvent')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const examPoolIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'ExamPool')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const examComponentIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'ExamComponent')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const classIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'Class')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const paymentIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'Payment')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const studentProfileIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'StudentProfile')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const enrollmentIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'Enrollment')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+
+  if (userIds.length > 0) {
+    const users = await prisma.user.findMany({
+      where: { id: { in: userIds } },
+      include: { profile: true },
+    })
+    users.forEach(
+      (u) =>
+        (entityLabels[u.id] = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email)
+    )
+  }
+  if (courseIds.length > 0) {
+    const courses = await prisma.course.findMany({ where: { id: { in: courseIds } } })
+    courses.forEach((c) => (entityLabels[c.id] = c.name))
+  }
+  if (examEventIds.length > 0) {
+    const events = await prisma.examEvent.findMany({ where: { id: { in: examEventIds } } })
+    events.forEach((e) => (entityLabels[e.id] = e.name))
+  }
+  if (examPoolIds.length > 0) {
+    const pools = await prisma.examPool.findMany({ where: { id: { in: examPoolIds } } })
+    pools.forEach((p) => (entityLabels[p.id] = p.name))
+  }
+  if (examComponentIds.length > 0) {
+    const comps = await prisma.examComponent.findMany({ where: { id: { in: examComponentIds } } })
+    comps.forEach((c) => (entityLabels[c.id] = c.name))
+  }
+  if (classIds.length > 0) {
+    const classes = await prisma.class.findMany({ where: { id: { in: classIds } } })
+    classes.forEach((c) => (entityLabels[c.id] = c.name))
+  }
+  if (paymentIds.length > 0) {
+    const payments = await prisma.payment.findMany({ where: { id: { in: paymentIds } } })
+    payments.forEach(
+      (p) => (entityLabels[p.id] = p.referenceCode || `Payment #${p.id.substring(0, 6)}`)
+    )
+  }
+  if (studentProfileIds.length > 0) {
+    const profiles = await prisma.studentProfile.findMany({
+      where: { id: { in: studentProfileIds } },
+    })
+    profiles.forEach((p) => (entityLabels[p.id] = `Student ID: ${p.studentId}`))
+  }
+  if (enrollmentIds.length > 0) {
+    const enrollments = await prisma.enrollment.findMany({
+      where: { id: { in: enrollmentIds } },
+      include: { course: true, user: { include: { profile: true } } },
+    })
+    enrollments.forEach((e) => {
+      const name = e.user.profile
+        ? `${e.user.profile.firstName} ${e.user.profile.lastName}`
+        : e.user.email
+      entityLabels[e.id] = `${name} - ${e.course.name}`
+    })
+  }
 
   return (
     <div className="space-y-6">
@@ -33,68 +165,7 @@ export default async function AuditLogsPage() {
         </p>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="divide-y divide-slate-100 dark:divide-slate-800">
-          {logs.length === 0 ? (
-            <div className="p-12 text-center text-slate-500">
-              <ScrollText className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-              <p>No audit logs found.</p>
-            </div>
-          ) : (
-            logs.map((log) => (
-              <div
-                key={log.id}
-                className="p-6 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-              >
-                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
-                          log.action.includes('OVERRIDE')
-                            ? 'bg-purple-100 text-purple-700'
-                            : log.action.includes('REPORT')
-                              ? 'bg-blue-100 text-blue-700'
-                              : log.action.includes('WITHDRAW')
-                                ? 'bg-orange-100 text-orange-700'
-                                : 'bg-slate-100 text-slate-700'
-                        }`}
-                      >
-                        {log.action.replace(/_/g, ' ')}
-                      </span>
-                      <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                        {log.entity} {log.entityId && `#${log.entityId.substring(0, 8)}`}
-                      </span>
-                    </div>
-                    <p className="text-sm text-slate-600 dark:text-slate-400">{log.description}</p>
-                    {log.changes && Object.keys(log.changes as any).length > 0 && (
-                      <div className="mt-2 rounded-lg bg-slate-100 p-2 font-mono text-xs dark:bg-slate-800">
-                        <pre>{JSON.stringify(log.changes, null, 2)}</pre>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex shrink-0 flex-col items-end gap-1 text-xs text-slate-500">
-                    <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
-                      <User className="h-3 w-3" />
-                      {log.user?.profile?.firstName
-                        ? `${log.user.profile.firstName} ${log.user.profile.lastName}`
-                        : log.user?.email || 'System'}
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-3 w-3" />
-                      {format(log.createdAt, 'MMM d, yyyy HH:mm:ss')}
-                    </div>
-                    {log.ipAddress && (
-                      <div className="text-[10px] text-slate-400">IP: {log.ipAddress}</div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </div>
+      <AuditLogTable logs={logs as any} entityLabels={entityLabels} />
     </div>
   )
 }
