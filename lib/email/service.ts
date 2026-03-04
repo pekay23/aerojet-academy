@@ -320,10 +320,9 @@ export async function renderEmailVerificationEmail(firstName: string, verifyToke
     <div class="info-box" style="border-left-color: #137fec; margin-top: 24px;">
       <p style="margin: 0;"><strong>What happens next?</strong></p>
       <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-        <li>Once verified, you will receive an email with payment details</li>
-        <li>Use the payment details to transfer your registration fee</li>
-        <li>Upload your payment proof to complete registration</li>
-        <li>Once your payment proof is approved, you will receive your login details via email.</li>
+        <li>Upon verification, you'll receive your bank transfer details.</li>
+        <li>Upload your payment receipt to complete your registration.</li>
+        <li>Once approved, you will receive your portal login credentials.</li>
       </ul>
     </div>
 

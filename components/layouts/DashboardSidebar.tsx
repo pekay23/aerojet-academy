@@ -13,6 +13,7 @@ import {
   LogOut,
   Menu,
   X,
+  Home,
 } from 'lucide-react'
 import { ElementType } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -368,6 +369,17 @@ export default function DashboardSidebar({
 
           {/* Actions - Theme Toggle and Sign Out */}
           <div className="flex flex-col gap-1.5">
+            <Link
+              href="/"
+              className={`text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground flex items-center gap-3 rounded-lg p-2 text-sm font-medium transition-all ${
+                collapsed ? 'justify-center' : ''
+              }`}
+              title={collapsed ? 'Homepage' : undefined}
+            >
+              <Home className="h-4 w-4 shrink-0" />
+              {!collapsed && <span className="flex-1 text-left">Homepage</span>}
+            </Link>
+
             <ThemeToggle isCollapsed={collapsed} />
 
             <button

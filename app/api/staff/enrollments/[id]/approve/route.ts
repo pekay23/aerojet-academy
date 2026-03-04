@@ -70,6 +70,11 @@ export const POST = withErrorHandler(
           sendStudentPromotionEmail(user.email, user.profile.firstName, studentId).catch(
             console.error
           )
+          if (user.academyEmail) {
+            sendStudentPromotionEmail(user.academyEmail, user.profile.firstName, studentId).catch(
+              console.error
+            )
+          }
         }
       }
     })

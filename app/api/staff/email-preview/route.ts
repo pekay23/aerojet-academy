@@ -24,6 +24,9 @@ export async function GET(req: NextRequest) {
     case 'registration':
       html = await emailService.renderRegistrationEmail('John', 'REG-123456')
       break
+    case 'email-verification':
+      html = await emailService.renderEmailVerificationEmail('John', 'mock-verify-token')
+      break
     case 'activation':
       html = await emailService.renderActivationEmail(
         'Jane',
