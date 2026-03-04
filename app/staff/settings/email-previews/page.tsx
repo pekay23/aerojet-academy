@@ -17,6 +17,7 @@ import {
   RotateCcw,
   PlusCircle,
   Info,
+  Layers,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -35,6 +36,13 @@ const TEMPLATES = [
     icon: UserPlus,
     description: 'Sent after initial registration with payment details.',
     placeholders: ['firstName', 'registrationCode', 'currency', 'fee', 'bankName', 'uploadUrl'],
+  },
+  {
+    id: 'email-verification',
+    name: 'Verify Email Address',
+    icon: Mail,
+    description: 'Sent after registration for email address verification.',
+    placeholders: ['firstName', 'verifyUrl'],
   },
   {
     id: 'activation',
@@ -89,6 +97,7 @@ const TEMPLATES = [
 
 export default function EmailPreviewsPage() {
   const [activeTemplate, setActiveTemplate] = useState('registration')
+  const [allTemplates, setAllTemplates] = useState(TEMPLATES) // Start with default TEMPLATES
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -102,11 +111,46 @@ export default function EmailPreviewsPage() {
   // Fetch template data when editing starts
   useEffect(() => {
     if (isEditing) {
-      fetchTemplate()
+      fetchTemplateContent()
     }
   }, [isEditing, activeTemplate])
 
-  const fetchTemplate = async () => {
+  // Fetch all templates on mount
+  useEffect(() => {
+    fetchAllTemplates()
+  }, [])
+
+  const fetchAllTemplates = async () => {
+    try {
+      const res = await fetch('/api/staff/email-templates')
+      if (res.ok) {
+        const dbTemplates = await res.json()
+
+        // Merge DB templates with default TEMPLATES
+        const mergedTemplates = [...TEMPLATES]
+
+        dbTemplates.forEach((dbTemp: any) => {
+          const existingIndex = mergedTemplates.findIndex((t) => t.id === dbTemp.name)
+          if (existingIndex === -1 && dbTemp.name) {
+            // It's a brand new custom template
+            mergedTemplates.push({
+              id: dbTemp.name,
+              name: dbTemp.name.replace(/-/g, ' ').replace(/\b\w/g, (c: string) => c.toUpperCase()),
+              icon: Layers, // Default icon for custom templates
+              description: dbTemp.description || 'Custom Email Template',
+              placeholders: ['firstName'], // Default placeholder, maybe more if parsable
+            })
+          }
+        })
+
+        setAllTemplates(mergedTemplates)
+      }
+    } catch (error) {
+      console.error('Failed to fetch all templates:', error)
+    }
+  }
+
+  const fetchTemplateContent = async () => {
     setLoading(true)
     try {
       const res = await fetch(`/api/staff/email-templates?name=${activeTemplate}`)
@@ -148,7 +192,8 @@ export default function EmailPreviewsPage() {
 
       if (res.ok) {
         toast.success('Template saved successfully')
-        setIsEditing(false)
+        // Refresh templates list to get any new description
+        fetchAllTemplates()
         // Refresh iframe (hacky but works)
         const iframe = document.querySelector('iframe')
         if (iframe) iframe.src = iframe.src
@@ -208,7 +253,7 @@ export default function EmailPreviewsPage() {
     }
   }
 
-  const currentTemplate = TEMPLATES.find((t) => t.id === activeTemplate)
+  const currentTemplate = allTemplates.find((t) => t.id === activeTemplate)
 
   return (
     <div className="space-y-6">
@@ -288,7 +333,7 @@ export default function EmailPreviewsPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-1 p-2">
-            {TEMPLATES.map((tmpl) => (
+            {allTemplates.map((tmpl) => (
               <button
                 key={tmpl.id}
                 onClick={() => {

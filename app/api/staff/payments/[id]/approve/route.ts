@@ -287,12 +287,22 @@ export const POST = withErrorHandler(
           )
         }
       } else if (payment.user.profile) {
+        // Send payment approved email
         sendPaymentApprovedEmail(
           payment.user.email,
           payment.user.profile.firstName,
           payment.referenceType || 'Payment',
           Number(payment.amount)
         ).catch(console.error)
+
+        if (payment.user.academyEmail) {
+          sendPaymentApprovedEmail(
+            payment.user.academyEmail,
+            payment.user.profile.firstName,
+            payment.referenceType || 'Payment',
+            Number(payment.amount)
+          ).catch(console.error)
+        }
       }
 
       await createAuditLog({
@@ -322,12 +332,22 @@ export const POST = withErrorHandler(
       })
 
       if (payment.user.profile) {
+        // Send payment rejected email
         sendPaymentRejectedEmail(
           payment.user.email,
           payment.user.profile.firstName,
           payment.referenceType || 'Payment',
           reason
         ).catch(console.error)
+
+        if (payment.user.academyEmail) {
+          sendPaymentRejectedEmail(
+            payment.user.academyEmail,
+            payment.user.profile.firstName,
+            payment.referenceType || 'Payment',
+            reason
+          ).catch(console.error)
+        }
       }
 
       await createAuditLog({
