@@ -196,18 +196,17 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
       </p>
     </div>
     
-    <!-- Reference Code Card -->
-    <div style="background-color: #137fec; border-radius: 12px; padding: 24px; color: #ffffff; margin-bottom: 32px; box-shadow: 0 4px 6px -1px rgba(19, 127, 236, 0.2);">
-      <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 8px;">
+    <div style="background-color: #f8fafc; border-radius: 12px; padding: 24px; margin-bottom: 32px; border: 1px solid #e2e8f0; border-left: 4px solid #137fec;">
+      <div style="font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 8px;">
         Your Reference Code
       </div>
-      <div style="font-family: monospace; font-size: 28px; font-weight: 800; letter-spacing: 2px; margin-bottom: 20px;">
+      <div style="font-family: monospace; font-size: 28px; font-weight: 800; letter-spacing: 2px; color: #0f172a; margin-bottom: 20px;">
         {{registrationCode}}
       </div>
       
-      <div style="border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 16px;">
-        <div style="font-size: 12px; font-weight: 500; opacity: 0.8;">Fee Amount</div>
-        <div style="font-size: 20px; font-weight: 700;">{{currency}} {{fee}}</div>
+      <div style="border-top: 1px solid #e2e8f0; padding-top: 16px;">
+        <div style="font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 4px;">Fee Amount</div>
+        <div style="font-size: 20px; font-weight: 700; color: #0f172a;">{{currency}} {{fee}}</div>
       </div>
     </div>
 
@@ -215,41 +214,41 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
     <div style="margin-bottom: 32px;">
       <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin: 0 0 16px 0;">Bank Transfer Details</h3>
       
-      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
+      <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden;">
         <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
           <tr>
             <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
-              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Bank Name</div>
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Bank Name</div>
               <div style="font-size: 15px; font-weight: 700; color: #0f172a;">{{bankName}}</div>
             </td>
           </tr>
           <tr>
             <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
-              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account Name</div>
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Account Name</div>
               <div style="font-size: 15px; font-weight: 600; color: #0f172a;">{{bankAccountName}}</div>
             </td>
           </tr>
           <tr>
             <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
-              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Account Number</div>
-              <div style="font-family: monospace; font-size: 18px; font-weight: 700; color: #0f172a; letter-spacing: -0.5px;">{{bankAccountNumber}}</div>
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Account Number</div>
+              <div style="font-family: monospace; font-size: 18px; font-weight: 700; color: #0f172a;">{{bankAccountNumber}}</div>
             </td>
           </tr>
           <tr>
             <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
-              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Branch</div>
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Branch</div>
               <div style="font-size: 15px; font-weight: 600; color: #0f172a;">{{bankBranch}}</div>
             </td>
           </tr>
           <tr>
             <td style="padding: 16px; border-bottom: 1px solid #e2e8f0;">
-              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Swift/BIC Code</div>
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Swift/BIC Code</div>
               <div style="font-family: monospace; font-size: 15px; font-weight: 600; color: #0f172a;">{{bankSwift}}</div>
             </td>
           </tr>
           <tr>
-            <td style="padding: 16px; background-color: #f1f5f9;">
-              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">Payment Reference</div>
+            <td style="padding: 16px; background-color: #f8fafc;">
+              <div style="font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase;">Payment Reference</div>
               <div style="font-family: monospace; font-size: 18px; font-weight: 800; color: #137fec;">{{registrationCode}}</div>
             </td>
           </tr>
@@ -257,7 +256,7 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
       </div>
     </div>
 
-    <div class="btn-container" style="text-align: center; margin-top: 30px;">
+    <div class="btn-container" style="text-align: center;">
       <a href="{{uploadUrl}}" class="btn">
         <span>Upload Payment Proof</span>
       </a>
@@ -307,22 +306,21 @@ export async function renderEmailVerificationEmail(firstName: string, verifyToke
   const defaultBody = `
     <p class="text">Hi {{firstName}},</p>
     <p class="text">
-      Thank you for registering with Aerojet Aviation Training Academy.
       Please verify your email address to continue with your application.
     </p>
 
-    <div class="btn-container">
+    <div class="btn-container" style="text-align: center;">
       <a href="{{verifyUrl}}" class="btn">
         <span>Verify Email Address</span>
       </a>
     </div>
 
-    <div class="info-box" style="border-left-color: #137fec; margin-top: 24px;">
-      <p style="margin: 0;"><strong>What happens next?</strong></p>
-      <ul style="margin: 8px 0 0 0; padding-left: 20px;">
-        <li>Upon verification, you'll receive your bank transfer details.</li>
-        <li>Upload your payment receipt to complete your registration.</li>
-        <li>Once approved, you will receive your portal login credentials.</li>
+    <div class="info-box" style="border-left-color: #137fec;">
+      <p style="margin: 0 0 10px 0;"><strong>What happens next?</strong></p>
+      <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+        <li>Get your bank transfer details</li>
+        <li>Upload your payment receipt</li>
+        <li>Receive your portal login credentials</li>
       </ul>
     </div>
 
@@ -377,24 +375,24 @@ export async function renderActivationEmail(
       <div class="info-row"><strong>Login Credentials:</strong></div>
       <div class="info-row" style="margin-top:10px;">
         <strong>Academy Email:</strong><br/>
-        <span style="font-size: 15px; color: #002a5c; font-weight:bold;">{{academyEmail}}</span>
+        <span style="font-size: 15px; color: #0f172a; font-weight:bold;">{{academyEmail}}</span>
       </div>
       <div class="info-row" style="margin-top:5px;">
         <strong>Temporary Password:</strong><br/>
-        <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #000; background: #fff3cd; padding: 4px 8px; border-radius: 4px;">{{tempPassword}}</span>
+        <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #0f172a; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 8px; border-radius: 4px;">{{tempPassword}}</span>
       </div>
     </div>
 
-    <p class="text" style="font-size: 13px; color: #1e40af; background: #eff6ff; padding: 12px; border-radius: 8px; border-left: 4px solid #1e40af;">
+    <p class="text" style="font-size: 13px; color: #0f172a; background: #f8fafc; padding: 12px; border-radius: 8px; border-left: 4px solid #137fec;">
       <strong>🚀 Get Started:</strong><br/>
       1. <strong>Copy</strong> your temporary password above.<br/>
-      2. Click the button below to auto-login to your portal.<br/>
+      2. Click the button below to log in to your portal.<br/>
       3. Use the temporary password as your "Current Password" to set a permanent one.
     </p>
 
-    <div class="btn-container" style="text-align: center; margin-top: 30px;">
-      <a href="{{loginUrl}}" class="btn" style="background-color: #002a5c; color: #ffffff !important; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 15px; display: inline-block; border: 2px solid #002a5c;">
-        Login &amp; Get Started
+    <div class="btn-container" style="text-align: center;">
+      <a href="{{loginUrl}}" class="btn">
+        <span>Login &amp; Get Started</span>
       </a>
     </div>
   `
@@ -440,7 +438,7 @@ export async function renderStudentPromotionEmail(firstName: string, studentId: 
     <div class="info-box" style="border-left-color: #22c55e;">
       <div class="info-row"><strong>Your Student ID:</strong></div>
       <div class="info-row" style="margin-top:5px;">
-        <span style="font-family: monospace; font-size: 20px; letter-spacing: 2px; color: #2e7d32; font-weight:bold; background: #e8f5e9; padding: 4px 12px; border-radius: 4px;">{{studentId}}</span>
+        <span style="font-family: monospace; font-size: 20px; letter-spacing: 2px; color: #0f172a; font-weight: bold; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 12px; border-radius: 4px;">{{studentId}}</span>
       </div>
     </div>
 
@@ -452,7 +450,7 @@ export async function renderStudentPromotionEmail(firstName: string, studentId: 
       <li>Manage your wallet</li>
     </ul>
 
-    <div class="btn-container">
+    <div class="btn-container" style="text-align: center;">
       <a href="{{loginUrl}}" class="btn">
         <span>Go to Student Portal</span>
       </a>
@@ -503,10 +501,10 @@ export async function renderPoolConfirmedEmail(
     <div class="info-box" style="border-left-color: #22c55e;">
       <div class="info-row"><strong>Module:</strong> {{module}}</div>
       <div class="info-row"><strong>Exam Date:</strong> {{examDate}}</div>
-      <div class="info-row font-bold"><strong>Amount Paid:</strong> {{amount}}</div>
+      <div class="info-row"><strong>Amount Paid:</strong> {{currency}}{{amount}}</div>
     </div>
 
-    <p class="text">{{amount}} has been deducted from your wallet. Please prepare for your exam.</p>
+    <p class="text">{{currency}}{{amount}} has been deducted from your wallet. Please prepare for your exam.</p>
   `
 
   const template = await getTemplate('pool-confirmed', {
@@ -519,7 +517,8 @@ export async function renderPoolConfirmedEmail(
     poolName,
     module,
     examDate,
-    amount,
+    amount: amount.toLocaleString(),
+    currency: '€',
   })
 
   return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
@@ -551,7 +550,7 @@ export async function renderPasswordResetEmail(firstName: string, resetToken: st
   const defaultBody = `
     <p class="text">Hi {{firstName}}, we received a request to reset your password.</p>
     
-    <div class="btn-container">
+    <div class="btn-container" style="text-align: center;">
       <a href="{{resetUrl}}" class="btn">
         <span>Reset Password</span>
       </a>
@@ -597,11 +596,11 @@ export async function renderPaymentApprovedEmail(
 ) {
   const defaultSubject = 'Payment Approved'
   const defaultBody = `
-    <p class="text">Hi {{firstName}}, your {{paymentType}} payment of <strong>{{amount}}</strong> has been approved.</p>
+    <p class="text">Hi {{firstName}}, your {{paymentType}} payment of <strong>€{{amount}}</strong> has been approved.</p>
     
     <div class="info-box" style="border-left-color: #22c55e;">
       <div class="info-row"><strong>Status:</strong> <span style="color:#15803d; font-weight:bold;">PAID ✅</span></div>
-      <div class="info-row font-bold" style="margin-top:5px;"><strong>Amount:</strong> {{amount}}</div>
+      <div class="info-row" style="margin-top:5px;"><strong>Amount:</strong> €{{amount}}</div>
       <div class="info-row"><strong>Description:</strong> {{paymentType}}</div>
     </div>
   `
@@ -614,7 +613,7 @@ export async function renderPaymentApprovedEmail(
   const body = replacePlaceholders(template.body, {
     firstName,
     paymentType,
-    amount,
+    amount: amount.toLocaleString(),
   })
 
   return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
@@ -649,7 +648,7 @@ export async function renderSeatReservationConfirmedEmail(
     
     <div class="info-box" style="border-left-color: #22c55e;">
       <div class="info-row"><strong>Status:</strong> <span style="color:#15803d; font-weight:bold;">SEAT CONFIRMED ✅</span></div>
-      <div class="info-row font-bold" style="margin-top:5px;"><strong>Amount Paid:</strong> {{currency}} {{amount}}</div>
+      <div class="info-row" style="margin-top:5px;"><strong>Amount Paid:</strong> {{currency}}{{amount}}</div>
       <div class="info-row"><strong>Programme:</strong> {{programmeName}}</div>
     </div>
 
@@ -662,7 +661,7 @@ export async function renderSeatReservationConfirmedEmail(
 
     <p class="text">You can track your enrollment progress and make additional payments through your applicant portal.</p>
 
-    <div class="btn-container">
+    <div class="btn-container" style="text-align: center;">
       <a href="{{portalUrl}}" class="btn">
         <span>Go to Applicant Portal</span>
       </a>
@@ -720,7 +719,7 @@ export async function renderPaymentRejectedEmail(
 
     <p class="text">Please log in to your portal and re-upload a valid payment proof or contact the admissions office.</p>
 
-    <div class="btn-container">
+    <div class="btn-container" style="text-align: center;">
       <a href="{{loginUrl}}" class="btn">
         <span>Login to Upload Proof</span>
       </a>
@@ -1056,7 +1055,7 @@ export async function renderMilestoneReminderEmail(
 
     <p class="text">Please ensure your payment is made before the due date to avoid any interruption to your studies.</p>
     
-    <div class="btn-container">
+    <div class="btn-container" style="text-align: center;">
       <a href="{{portalUrl}}" class="btn">
         <span>Make Payment Now</span>
       </a>
@@ -1202,7 +1201,7 @@ export async function sendBundlePurchaseEmail(
     <div class="info-box">
       <div class="info-row"><strong>Bundle:</strong> {{bundleType}}</div>
       <div class="info-row"><strong>Seats:</strong> {{seats}}</div>
-      <div class="info-row"><strong>Amount:</strong> €{{amountPaid}}</div>
+      <div class="info-row"><strong>Amount Paid:</strong> €{{amountPaid}}</div>
       <div class="info-row"><strong>Validity:</strong> 12 months from purchase</div>
     </div>
     <p class="text">You can use your bundle seats when joining exam pools. Seats are automatically consumed from your earliest-expiring bundle.</p>
