@@ -68,7 +68,11 @@ export default function RevenueChart({ data, currency = '€' }: RevenueChartPro
             tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 700 }}
             axisLine={false}
             tickLine={false}
-            tickFormatter={(v) => `${currency}${(v / 1000).toFixed(0)}k`}
+            tickFormatter={(v) =>
+              v >= 1000
+                ? `${currency}${(v / 1000).toFixed(1).replace(/\\.0$/, '')}k`
+                : `${currency}${v}`
+            }
             width={45}
             className="dark:[&_.recharts-cartesian-axis-tick-value]:fill-slate-500"
           />

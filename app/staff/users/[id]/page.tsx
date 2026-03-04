@@ -44,15 +44,16 @@ export default async function UserProfilePage({ params }: Props) {
   if (!user) notFound()
 
   // Fetch OJT data for students with full-time enrollments
-  const ftEnrollments = user.role === 'STUDENT'
-    ? await prisma.fullTimeEnrollment.findMany({
-        where: { studentId: user.id },
-        include: {
-          programme: { select: { code: true, name: true } },
-          ojtPeriods: { orderBy: { startDate: 'desc' } },
-        },
-      })
-    : []
+  const ftEnrollments =
+    user.role === 'STUDENT'
+      ? await prisma.fullTimeEnrollment.findMany({
+          where: { studentId: user.id },
+          include: {
+            programme: { select: { code: true, name: true } },
+            ojtPeriods: { orderBy: { startDate: 'desc' } },
+          },
+        })
+      : []
 
   const ojtData = ftEnrollments.map((e) => ({
     id: e.id,
@@ -147,7 +148,7 @@ export default async function UserProfilePage({ params }: Props) {
                   ) : user.staffProfile?.employeeId ? (
                     <>ID: {user.staffProfile.employeeId}</>
                   ) : (
-                    <>Internal ID: {user.id.slice(0, 8)}</>
+                    <>No Assigned ID</>
                   )}
                 </span>
               </div>
