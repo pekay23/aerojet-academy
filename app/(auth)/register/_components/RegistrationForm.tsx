@@ -84,8 +84,8 @@ export default function RegistrationForm({
       middleName: '',
       lastName: '',
       email: '',
-      nationality: NATIONALITIES[0].name,
-      phoneCountryCode: NATIONALITIES[0].dialCode,
+      nationality: 'Ghanaian',
+      phoneCountryCode: '+233',
       phone: '',
       dateOfBirth: '',
       selectedProgramme: undefined as any, // Will require selection
@@ -94,7 +94,7 @@ export default function RegistrationForm({
   })
 
   // We need to keep track of the display name for the phone code select
-  const [phoneCountryCodeName, setPhoneCountryCodeName] = useState(NATIONALITIES[0].name)
+  const [phoneCountryCodeName, setPhoneCountryCodeName] = useState('Ghanaian')
 
   const handleNationalityChange = (val: string) => {
     const nation = NATIONALITIES.find((n) => n.name === val)
