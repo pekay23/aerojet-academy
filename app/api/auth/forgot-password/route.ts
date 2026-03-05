@@ -46,11 +46,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   })
 
   // Send the email to personal email
-  sendPasswordResetEmail(user.email, user.profile?.firstName || 'User', token).catch(console.error)
+  await sendPasswordResetEmail(user.email, user.profile?.firstName || 'User', token).catch(
+    console.error
+  )
 
   // Send to academy email if exists
   if (user.academyEmail) {
-    sendPasswordResetEmail(user.academyEmail, user.profile?.firstName || 'User', token).catch(
+    await sendPasswordResetEmail(user.academyEmail, user.profile?.firstName || 'User', token).catch(
       console.error
     )
   }
