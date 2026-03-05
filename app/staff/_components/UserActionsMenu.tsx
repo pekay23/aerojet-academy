@@ -115,6 +115,12 @@ export default function UserActionsMenu({
           href: `mailto:${userEmail}`,
           variant: 'default',
         },
+        {
+          label: 'Resend Login Credentials',
+          icon: ShieldCheck,
+          action: 'resend-credentials',
+          variant: 'default',
+        },
         isSuspended
           ? { label: 'Activate Account', icon: UserCheck, action: 'activate', variant: 'success' }
           : { label: 'Suspend Account', icon: UserX, action: 'suspend', variant: 'warning' },
