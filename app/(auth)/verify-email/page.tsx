@@ -110,13 +110,25 @@ export default function VerifyEmailPage() {
               </ol>
             </div>
 
-            <div className="mt-6">
+            <div className="mt-6 flex flex-col items-center gap-4">
               <button
-                onClick={() => window.close()}
+                onClick={() => {
+                  window.close()
+                  // Fallback: If window.close() is blocked, redirect after a short delay
+                  setTimeout(() => {
+                    window.location.href = '/'
+                  }, 1000)
+                }}
                 className="inline-flex items-center gap-2 rounded-xl bg-[#002a5c] px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#4c9ded]"
               >
                 Close Page
               </button>
+              <Link
+                href="/"
+                className="text-xs font-bold text-slate-400 hover:text-[#4c9ded] hover:underline"
+              >
+                Return to Homepage
+              </Link>
             </div>
           </>
         )}

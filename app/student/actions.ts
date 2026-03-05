@@ -190,7 +190,10 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
       event: true,
       memberships: {
         where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
-        select: { examComponentId: true, examComponent: { select: { course: { select: { code: true } } } } },
+        select: {
+          examComponentId: true,
+          examComponent: { select: { course: { select: { code: true } } } },
+        },
       },
     },
   })
@@ -341,13 +344,11 @@ export async function leaveExamPool(poolId: string) {
   if (!membership) {
     return { error: 'You are not a member of this pool.' }
   }
-  if (membership.status !== 'RESERVED') {
-    return { error: 'You can only leave a pool while your seat is in RESERVED status.' }
-  }
-  if (membership.pool.status === 'CONFIRMED') {
-    return {
-      error: 'This pool has been confirmed and seats are locked. Please contact support.',
-    }
+
+  // Students are not allowed to leave pools independently
+  return {
+    error:
+      'Independent pool withdrawal is not permitted. Please contact administration with a valid reason to request removal.',
   }
 
   const refundAmount = Number(membership.amountReserved || 0)
