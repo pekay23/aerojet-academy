@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 import {
   X,
   User,
@@ -14,6 +15,8 @@ import {
   GraduationCap,
   FileCheck,
   ExternalLink,
+  KeyRound,
+  Loader2,
 } from 'lucide-react'
 import UserActionsMenu from './UserActionsMenu'
 
@@ -128,6 +131,30 @@ export default function StudentDetailPanel({ student, onClose, onActionComplete 
                   </span>
                 )}
               </div>
+              <button
+                onClick={async () => {
+                  const btn = document.getElementById(
+                    `resend-btn-${student.id}`
+                  ) as HTMLButtonElement
+                  if (btn) btn.disabled = true
+                  try {
+                    const res = await fetch(`/api/staff/users/${student.id}/resend-credentials`, {
+                      method: 'POST',
+                    })
+                    if (!res.ok) throw new Error()
+                    toast.success('Login credentials resent')
+                  } catch {
+                    toast.error('Failed to resend credentials')
+                  } finally {
+                    if (btn) btn.disabled = false
+                  }
+                }}
+                id={`resend-btn-${student.id}`}
+                className="mt-3 flex w-fit items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-widest text-slate-500 uppercase shadow-sm transition-all hover:border-[#4c9ded] hover:text-[#4c9ded] disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800"
+              >
+                <KeyRound className="h-3 w-3" />
+                Resend Credentials
+              </button>
             </div>
           </div>
           <div className="flex items-center gap-2">
