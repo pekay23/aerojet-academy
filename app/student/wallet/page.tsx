@@ -21,6 +21,7 @@ import {
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import WalletTabs from '../_components/WalletTabs'
+import PayMilestoneButton from '../_components/PayMilestoneButton'
 import { UploadProofForm } from './top-up/_components/UploadProofForm'
 import { getActivePaymentMethods } from '@/lib/payment-methods'
 import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
@@ -306,6 +307,17 @@ export default async function WalletPage({
                         >
                           {m.status}
                         </span>
+
+                        {(m.status === 'DUE' || m.status === 'OVERDUE') &&
+                          walletBalance.available >= Number(m.amountDue) && (
+                            <PayMilestoneButton
+                              milestoneId={m.id}
+                              amount={Number(m.amountDue)}
+                              currency={walletBalance.currency}
+                              label={LABELS[m.milestoneType] || m.milestoneType}
+                            />
+                          )}
+
                         <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
                           {currencySymbol} {Number(m.amountDue).toLocaleString()}
                         </span>
