@@ -405,16 +405,7 @@ async function MyBookingsContent() {
                     </div>
                   </div>
 
-                  {canLeave && (
-                    <div className="mt-4 border-t border-slate-50 pt-4 dark:border-slate-800">
-                      <LeavePoolButton
-                        poolId={m.poolId}
-                        poolName={m.pool.name}
-                        amount={Number(m.amountReserved || 0)}
-                        currency={currency}
-                      />
-                    </div>
-                  )}
+                  {/* Students can no longer leave pools independently */}
                 </div>
               )
             })}
@@ -520,14 +511,7 @@ async function MyBookingsContent() {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {canLeave && (
-                            <LeavePoolButton
-                              poolId={m.poolId}
-                              poolName={m.pool.name}
-                              amount={Number(m.amountReserved || 0)}
-                              currency={currency}
-                            />
-                          )}
+                          {/* Students can no longer leave pools independently */}
                         </td>
                       </tr>
                     )

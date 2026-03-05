@@ -27,12 +27,23 @@ export default function MemberActions({
   const router = useRouter()
 
   async function handleRemove() {
-    if (!confirm(`Remove ${memberName} from this pool? Their reserved funds will be released.`))
+    const reason = window.prompt(
+      `Why are you removing ${memberName} from this pool? (Mandatory reason, min 5 chars)`
+    )
+
+    if (reason === null) return // Cancelled
+
+    if (reason.trim().length < 5) {
+      alert('A valid reason is required to remove a candidate.')
       return
+    }
+
     setLoading(true)
     try {
       const res = await fetch(`/api/staff/exam-pools/${poolId}/members/${membershipId}`, {
         method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reason }),
       })
       if (!res.ok) {
         const data = await res.json()
