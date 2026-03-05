@@ -15,9 +15,9 @@ import { getRegistrationConfig } from '@/lib/settings'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const config = await getRegistrationConfig()
-  // Rate limit: 3 registrations per IP per hour
+  // Rate limit: 10 registration attempts per IP per hour (allowing for early validation errors)
   const ip = getClientIp(req)
-  if (!checkRateLimit(`register:${ip}`, 3, 60 * 60 * 1000)) {
+  if (!checkRateLimit(`register:${ip}`, 10, 60 * 60 * 1000)) {
     return apiTooManyRequests('Too many registration attempts. Please try again later.')
   }
 
