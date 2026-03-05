@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma/client'
 import RevenueChart from '../_components/RevenueChart'
 import PaymentApprovalCard from '../_components/PaymentApprovalCard'
 import GoNoGoMeter from '../_components/GoNoGoMeter'
+import PoolsSummaryCard from '../_components/PoolsSummaryCard'
 import WelcomeBanner from '@/components/WelcomeBanner'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 import {
@@ -28,42 +29,54 @@ async function getDashboardData() {
   const { getCurrencySymbol } = await import('@/lib/currency')
   const currSymbol = getCurrencySymbol(currency)
 
-  const [userStatusCounts, pendingPayments, recentPendingPayments, activePool, approvedPayments] =
-    await Promise.all([
-      prisma.user.groupBy({
-        by: ['role', 'status'],
-        _count: { _all: true },
-      }),
-      prisma.payment.count({ where: { status: 'PENDING' } }),
-      prisma.payment.findMany({
-        where: { status: 'PENDING' },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              academyEmail: true,
-              role: true,
-              profile: { select: { firstName: true, lastName: true } },
-            },
+  const [
+    userStatusCounts,
+    pendingPayments,
+    recentPendingPayments,
+    activePool,
+    openPools,
+    approvedPayments,
+  ] = await Promise.all([
+    prisma.user.groupBy({
+      by: ['role', 'status'],
+      _count: { _all: true },
+    }),
+    prisma.payment.count({ where: { status: 'PENDING' } }),
+    prisma.payment.findMany({
+      where: { status: 'PENDING' },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            academyEmail: true,
+            role: true,
+            profile: { select: { firstName: true, lastName: true } },
           },
         },
-        orderBy: { createdAt: 'desc' },
-        take: 4,
-      }),
-      prisma.examPool.findFirst({
-        where: { status: { in: ['OPEN', 'NEAR_FULL'] } },
-        include: { event: true },
-        orderBy: { examDate: 'asc' },
-      }),
-      prisma.payment.findMany({
-        where: {
-          status: 'APPROVED',
-          approvedAt: { gte: sixMonthsAgo },
-        },
-        select: { amount: true, approvedAt: true, referenceType: true },
-      }),
-    ])
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 4,
+    }),
+    prisma.examPool.findFirst({
+      where: { status: { in: ['OPEN', 'NEAR_FULL'] } },
+      include: { event: true },
+      orderBy: { examDate: 'asc' },
+    }),
+    prisma.examPool.findMany({
+      where: { status: { in: ['OPEN', 'NEAR_FULL'] } },
+      include: { event: { select: { name: true } } },
+      orderBy: { examDate: 'asc' },
+      take: 5,
+    }),
+    prisma.payment.findMany({
+      where: {
+        status: 'APPROVED',
+        approvedAt: { gte: sixMonthsAgo },
+      },
+      select: { amount: true, approvedAt: true, referenceType: true },
+    }),
+  ])
 
   const monthNames = [
     'Jan',
@@ -122,7 +135,16 @@ async function getDashboardData() {
     activeStudents,
     pendingPayments,
     recentPendingPayments,
-    activePool,
+    activePool: activePool
+      ? {
+          ...activePool,
+          seatPrice: Number(activePool.seatPrice),
+        }
+      : null,
+    openPools: openPools.map((p) => ({
+      ...p,
+      seatPrice: Number(p.seatPrice),
+    })),
     revenueData,
     currency,
     currSymbol,
@@ -247,7 +269,7 @@ export default async function StaffDashboardPage() {
           )}
         </div>
 
-        {/* Go/No-Go Meter */}
+        {/* Go/No-Go Meter + Pools Summary */}
         <div className="flex flex-col gap-4">
           {data.activePool ? (
             <GoNoGoMeter
@@ -267,6 +289,8 @@ export default async function StaffDashboardPage() {
               <p className="mt-1 text-xs text-slate-300">Create an exam event to get started</p>
             </div>
           )}
+
+          <PoolsSummaryCard pools={data.openPools} />
         </div>
       </div>
 
