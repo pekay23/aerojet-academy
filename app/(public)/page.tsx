@@ -49,7 +49,7 @@ export default async function Home() {
               <div className="space-y-6 text-lg leading-relaxed text-slate-600/90">
                 <p className="font-medium">
                   Aerojet Aviation Training Academy is Africa’s foremost institution and leader in
-                  the field of Aviation Training and Engineering. Training Engineers for one of the
+                  the field of Aviation Training and Engineering. Training engineers for one of the
                   most demanding professions in the world is a truly important responsibility that
                   we take very seriously.
                 </p>
