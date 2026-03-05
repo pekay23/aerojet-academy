@@ -70,6 +70,19 @@ export default async function ApplicantWalletTopUpPage() {
 
   const activePaymentMethods = await getActivePaymentMethods()
 
+  // Bank details
+  const bankSettings = await prisma.systemSetting.findMany({
+    where: {
+      key: {
+        in: ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_swift', 'bank_branch'],
+      },
+    },
+  })
+  const bankDetails: Record<string, string> = {}
+  for (const s of bankSettings) {
+    bankDetails[s.key] = s.value
+  }
+
   return (
     <div className="max-w-4xl space-y-6">
       <div>
@@ -120,8 +133,8 @@ export default async function ApplicantWalletTopUpPage() {
               </div>
               <p className="text-sm text-slate-600 dark:text-slate-400">
                 Aerojet Academy operates a wallet system for modular exams. You can top up your
-                wallet via the payment methods below. Any unused funds remain secure in your wallet for
-                future pools.
+                wallet via the payment methods below. Any unused funds remain secure in your wallet
+                for future pools.
               </p>
             </div>
 
@@ -134,6 +147,7 @@ export default async function ApplicantWalletTopUpPage() {
               options={paymentOptions}
               currency={currency}
               programmeName="Wallet Top-Up"
+              bankDetails={bankDetails}
             />
           </div>
         </div>
