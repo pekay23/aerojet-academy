@@ -60,6 +60,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     const newUser = await tx.user.create({
       data: {
         email,
+        personalEmail: email,
         registrationCode,
         registrationFee: config.fee,
         registrationCurrency: config.currency,

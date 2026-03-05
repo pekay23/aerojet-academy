@@ -11,8 +11,18 @@ export const metadata: Metadata = { title: 'Complete Enrollment | Applicant Port
 export const dynamic = 'force-dynamic'
 
 const PRICING: Record<string, { year1: number; total: number; name: string; years: number }> = {
-  FULL_TIME_4YEAR: { year1: 8500, total: 32000, name: 'EASA Part-66 Full-Time (4 Years)', years: 4 },
-  FULL_TIME_2YEAR: { year1: 9500, total: 18000, name: 'EASA Part-66 Full-Time (2 Years)', years: 2 },
+  FULL_TIME_4YEAR: {
+    year1: 8500,
+    total: 32000,
+    name: 'EASA Part-66 Full-Time (4 Years)',
+    years: 4,
+  },
+  FULL_TIME_2YEAR: {
+    year1: 9500,
+    total: 18000,
+    name: 'EASA Part-66 Full-Time (2 Years)',
+    years: 2,
+  },
   MILITARY_1YEAR: { year1: 6500, total: 6500, name: 'Military Certification (1 Year)', years: 1 },
 }
 
@@ -76,9 +86,7 @@ export default async function PathwayPage() {
 
   // If enrollment exists and seat is confirmed, show milestone tracker
   if (enrollment) {
-    const seatMilestone = enrollment.milestones.find(
-      (m) => m.milestoneType === 'SEAT_CONFIRMATION'
-    )
+    const seatMilestone = enrollment.milestones.find((m) => m.milestoneType === 'SEAT_CONFIRMATION')
     const seatPaid = seatMilestone?.status === 'PAID'
 
     if (seatPaid) {
@@ -103,8 +111,8 @@ export default async function PathwayPage() {
                   Seat Confirmed
                 </h2>
                 <p className="mt-1 text-sm text-emerald-700 dark:text-emerald-400">
-                  Your place in <strong>{enrollment.programme.name}</strong> is secured.
-                  Year {enrollment.currentYearNumber} — {enrollment.academicYear || '2026/2027'}
+                  Your place in <strong>{enrollment.programme.name}</strong> is secured. Year{' '}
+                  {enrollment.currentYearNumber} — {enrollment.academicYear || '2026/2027'}
                 </p>
               </div>
             </div>
@@ -128,7 +136,8 @@ export default async function PathwayPage() {
                   <p className="mt-2 text-sm font-bold text-amber-800 dark:text-amber-300">
                     Amount due: {currency}{' '}
                     {Number(
-                      enrollment.milestones.find((m) => m.milestoneType === 'SEM1_DUE')?.amountDue ?? 0
+                      enrollment.milestones.find((m) => m.milestoneType === 'SEM1_DUE')
+                        ?.amountDue ?? 0
                     ).toLocaleString()}
                   </p>
                 </div>
@@ -186,7 +195,9 @@ export default async function PathwayPage() {
   const pendingTuitionPayment = await prisma.payment.findFirst({
     where: {
       userId,
-      referenceType: { in: ['SEAT_CONFIRMATION', 'YEAR_1_FULL', 'FULL_PROGRAMME', 'CUSTOM_PART_PAYMENT'] },
+      referenceType: {
+        in: ['SEAT_CONFIRMATION', 'YEAR_1_FULL', 'FULL_PROGRAMME', 'CUSTOM_PART_PAYMENT'],
+      },
       status: 'PENDING',
     },
   })
@@ -406,6 +417,13 @@ export default async function PathwayPage() {
               options={paymentOptions}
               currency={currency}
               programmeName={pricing.name}
+              bankDetails={{
+                bankName: globalSettings.bank_name,
+                accountName: globalSettings.bank_account_name,
+                accountNumber: globalSettings.bank_account_number,
+                swift: globalSettings.bank_swift,
+                branch: globalSettings.bank_branch,
+              }}
             />
           </div>
         </div>
