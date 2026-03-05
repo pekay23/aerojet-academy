@@ -318,7 +318,7 @@ export async function renderEmailVerificationEmail(firstName: string, verifyToke
     <div class="info-box" style="border-left-color: #137fec;">
       <p style="margin: 0 0 10px 0;"><strong>What happens next?</strong></p>
       <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
-        <li>Get your bank transfer details</li>
+        <li>Get bank transfer details</li>
         <li>Upload your payment receipt</li>
         <li>Receive your portal login credentials</li>
       </ul>

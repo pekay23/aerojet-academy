@@ -59,7 +59,7 @@ export default function ApplicantDetailDrawer({
   onApproved,
   onRejected,
 }: ApplicantDetailDrawerProps) {
-  const [loading, setLoading] = useState<'approve' | 'reject' | null>(null)
+  const [loading, setLoading] = useState<'approve' | 'reject' | 'resend' | null>(null)
   const [showRejectForm, setShowRejectForm] = useState(false)
   const [rejectionReason, setRejectionReason] = useState('')
 
@@ -108,6 +108,24 @@ export default function ApplicantDetailDrawer({
       onClose()
     } catch {
       toast.error('Failed to reject applicant')
+    } finally {
+      setLoading(null)
+    }
+  }
+
+  const handleResendEmail = async () => {
+    setLoading('resend')
+    try {
+      const res = await fetch(`/api/staff/applicants/${applicant.id}/resend-email`, {
+        method: 'POST',
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to resend')
+      }
+      toast.success('Payment details email resent')
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to resend email')
     } finally {
       setLoading(null)
     }
@@ -224,6 +242,20 @@ export default function ApplicantDetailDrawer({
               <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
                 <Mail className="h-3 w-3" /> {applicant.email}
               </p>
+              {!applicant.registrationPaid && applicant.registrationCode && (
+                <button
+                  onClick={handleResendEmail}
+                  disabled={loading === 'resend'}
+                  className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition-all hover:bg-slate-50 hover:text-[#4c9ded] disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                >
+                  {loading === 'resend' ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Mail className="h-3 w-3" />
+                  )}
+                  Resend Payment Details Email
+                </button>
+              )}
             </div>
           </div>
 
