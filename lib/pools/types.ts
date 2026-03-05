@@ -27,3 +27,4 @@ export const POOL_MAX_CANDIDATES = 28
 export const POOL_NEAR_FULL_THRESHOLD = 23
 export const MODULE_DIVERSITY_CAP = 4
 export const POOL_DEADLINE_DAYS = 21 // Days before exam to check
+export const MAX_TOTAL_STUDENT_POOLS = 4 // Max pools a student can join total

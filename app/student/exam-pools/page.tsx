@@ -179,11 +179,32 @@ async function AvailablePoolsContent() {
                       <MapPin className="h-4 w-4 text-slate-400" />
                       <span>{pool.event?.location || 'Main Campus'}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                      <Users className="h-4 w-4 text-slate-400" />
-                      <span>
-                        {pool.currentMemberCount} / {pool.maxCandidates} Seats
-                      </span>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-400">
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-slate-400" />
+                          <span>
+                            {pool.currentMemberCount} / {pool.maxCandidates} Seats
+                          </span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400">
+                          {Math.round((pool.currentMemberCount / pool.maxCandidates) * 100)}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                        <div
+                          className={`h-full transition-all duration-500 ${
+                            pool.status === 'NEAR_FULL'
+                              ? 'bg-amber-500'
+                              : pool.status === 'CONFIRMED'
+                                ? 'bg-emerald-500'
+                                : 'bg-blue-500'
+                          }`}
+                          style={{
+                            width: `${(pool.currentMemberCount / pool.maxCandidates) * 100}%`,
+                          }}
+                        />
+                      </div>
                     </div>
                   </div>
 

@@ -230,30 +230,8 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     return { error: 'You have already joined this exam pool.' }
   }
 
-  // 4. Time Conflict Check — no two pools on the same exam date for this user
-  const examDate = new Date(pool.examDate)
-  const dayStart = new Date(examDate)
-  dayStart.setHours(0, 0, 0, 0)
-  const dayEnd = new Date(examDate)
-  dayEnd.setHours(23, 59, 59, 999)
-
-  const conflictingMembership = await prisma.poolMembership.findFirst({
-    where: {
-      userId: user.id,
-      status: { in: ['RESERVED', 'CONFIRMED'] },
-      pool: {
-        examDate: { gte: dayStart, lte: dayEnd },
-        id: { not: poolId },
-      },
-    },
-  })
-
-  if (conflictingMembership) {
-    return {
-      error:
-        'You already have a booking in another pool on this exam date. Each candidate can only sit one pool per day.',
-    }
-  }
+  // 4. Time Conflict Check — handled by shared logic in joinPoolInternal
+  // We remove the old hard-coded day check to allow same-day bookings if times don't overlap.
 
   // 5. Check Wallet Balance
   const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
