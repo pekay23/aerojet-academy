@@ -16,6 +16,7 @@ import {
   Copy,
   CreditCard,
   ShieldCheck,
+  KeyRound,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -254,6 +255,36 @@ export default function ApplicantDetailDrawer({
                     <Mail className="h-3 w-3" />
                   )}
                   Resend Payment Details Email
+                </button>
+              )}
+              {applicant.registrationPaid && (
+                <button
+                  onClick={async () => {
+                    setLoading('resend')
+                    try {
+                      const res = await fetch(
+                        `/api/staff/users/${applicant.id}/resend-credentials`,
+                        {
+                          method: 'POST',
+                        }
+                      )
+                      if (!res.ok) throw new Error()
+                      toast.success('Login credentials resent')
+                    } catch {
+                      toast.error('Failed to resend credentials')
+                    } finally {
+                      setLoading(null)
+                    }
+                  }}
+                  disabled={loading === 'resend'}
+                  className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition-all hover:bg-slate-50 hover:text-[#4c9ded] disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                >
+                  {loading === 'resend' ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <KeyRound className="h-3 w-3" />
+                  )}
+                  Resend Login Credentials
                 </button>
               )}
             </div>
