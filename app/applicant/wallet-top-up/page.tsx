@@ -78,9 +78,17 @@ export default async function ApplicantWalletTopUpPage() {
       },
     },
   })
-  const bankDetails: Record<string, string> = {}
+  const settingsMap: Record<string, string> = {}
   for (const s of bankSettings) {
-    bankDetails[s.key] = s.value
+    settingsMap[s.key] = s.value
+  }
+
+  const bankDetails = {
+    bankName: settingsMap.bank_name,
+    accountName: settingsMap.bank_account_name,
+    accountNumber: settingsMap.bank_account_number,
+    swift: settingsMap.bank_swift,
+    branch: settingsMap.bank_branch,
   }
 
   return (
