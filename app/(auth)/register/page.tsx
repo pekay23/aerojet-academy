@@ -48,8 +48,8 @@ export default async function RegisterPage({
             </div>
             <h3 className="mb-3 text-xl font-bold text-slate-800">Verify Your Email Address</h3>
             <p className="mb-6 text-sm text-slate-500">
-              We have sent a verification link to your email. Please check your inbox and click the
-              link to complete your registration and receive payment details.
+              We have sent a verification link to your email. Please check your inbox (and spam/junk
+              folder) and click the link to complete your registration and receive payment details.
             </p>
 
             <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-left">
