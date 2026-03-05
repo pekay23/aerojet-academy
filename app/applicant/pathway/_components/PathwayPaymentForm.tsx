@@ -4,14 +4,7 @@ import { useState } from 'react'
 import { UploadDropzone } from '@/lib/uploads/uploadthing'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
-import {
-  CheckCircle2,
-  RefreshCw,
-  Wallet,
-  CircleDot,
-  Circle,
-  AlertCircle,
-} from 'lucide-react'
+import { CheckCircle2, RefreshCw, Wallet, CircleDot, Circle, AlertCircle } from 'lucide-react'
 
 interface PaymentOption {
   id: string
@@ -27,9 +20,21 @@ interface Props {
   options: PaymentOption[]
   currency: string
   programmeName: string
+  bankDetails: {
+    bankName: string | null | undefined
+    accountName: string | null | undefined
+    accountNumber: string | null | undefined
+    swift: string | null | undefined
+    branch: string | null | undefined
+  }
 }
 
-export default function PathwayPaymentForm({ options, currency, programmeName }: Props) {
+export default function PathwayPaymentForm({
+  options,
+  currency,
+  programmeName,
+  bankDetails,
+}: Props) {
   const [uploading, setUploading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [selectedOptionId, setSelectedOptionId] = useState<string>('')
@@ -81,9 +86,7 @@ export default function PathwayPaymentForm({ options, currency, programmeName }:
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#002a5c] text-xs font-bold text-white">
             1
           </div>
-          <h2 className="font-bold text-slate-900 dark:text-slate-100">
-            Choose Your Payment Plan
-          </h2>
+          <h2 className="font-bold text-slate-900 dark:text-slate-100">Choose Your Payment Plan</h2>
         </div>
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Select how you would like to pay for {programmeName}.
@@ -91,9 +94,9 @@ export default function PathwayPaymentForm({ options, currency, programmeName }:
 
         <div className="space-y-3">
           {options.map((opt, optIdx) => {
-            const isSelected = selectedOptionId === opt.id && (
-              !opt.customMin || selectedOptionId === 'CUSTOM_PART_PAYMENT'
-            )
+            const isSelected =
+              selectedOptionId === opt.id &&
+              (!opt.customMin || selectedOptionId === 'CUSTOM_PART_PAYMENT')
             const uniqueKey = `${opt.id}-${optIdx}`
             return (
               <button
@@ -250,14 +253,69 @@ export default function PathwayPaymentForm({ options, currency, programmeName }:
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#002a5c] text-xs font-bold text-white">
               2
             </div>
-            <h2 className="font-bold text-slate-900 dark:text-slate-100">
-              Upload Payment Proof
-            </h2>
+            <h2 className="font-bold text-slate-900 dark:text-slate-100">Upload Payment Proof</h2>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400">
             Upload a screenshot, scan, or PDF of your bank transfer receipt or payment confirmation.
             Accepted formats: JPG, PNG, PDF (max 4MB).
           </p>
+
+          {/* Inline Bank Details for reference */}
+          <div className="rounded-xl border border-blue-100 bg-blue-50/50 p-4 dark:border-blue-900/30 dark:bg-blue-900/20">
+            <h4 className="mb-2 text-xs font-bold tracking-wider text-blue-900 uppercase dark:text-blue-300">
+              Transfer Funds to:
+            </h4>
+            <div className="mt-1 grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+              <div>
+                <span className="block text-[10px] font-bold tracking-tighter text-slate-400 uppercase">
+                  Bank
+                </span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">
+                  {bankDetails.bankName || 'FNB Bank'}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[10px] font-bold tracking-tighter text-slate-400 uppercase">
+                  Account Name
+                </span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">
+                  {bankDetails.accountName || 'AEROJET FOUNDATION'}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[10px] font-bold tracking-tighter text-slate-400 uppercase">
+                  Account Number
+                </span>
+                <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                  {bankDetails.accountNumber || '—'}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[10px] font-bold tracking-tighter text-slate-400 uppercase">
+                  Branch
+                </span>
+                <span className="font-bold text-slate-700 dark:text-slate-300">
+                  {bankDetails.branch || 'Airport City Branch'}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[10px] font-bold tracking-tighter text-slate-400 uppercase">
+                  Swift / BIC
+                </span>
+                <span className="font-mono font-bold text-slate-900 dark:text-slate-100">
+                  {bankDetails.swift || '—'}
+                </span>
+              </div>
+              <div>
+                <span className="block text-[10px] font-bold tracking-tighter text-slate-400 uppercase">
+                  Payment Reference
+                </span>
+                <span className="font-mono font-bold text-blue-600 underline dark:text-blue-400">
+                  Enter your Reference Code
+                </span>
+              </div>
+            </div>
+          </div>
 
           <UploadDropzone
             endpoint="paymentProof"

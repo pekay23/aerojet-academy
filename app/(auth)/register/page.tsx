@@ -59,7 +59,7 @@ export default async function RegisterPage({
               </div>
               <ol className="ml-5 list-decimal space-y-1 text-sm text-blue-800">
                 <li>Check your email and click the verification link.</li>
-                <li>Upon verification, you'll receive bank transfer details.</li>
+                <li>Upon verification, you'll get bank transfer details.</li>
                 <li>Upload your payment receipt to complete your registration.</li>
                 <li>Once approved, you will receive your portal login credentials.</li>
               </ol>

@@ -67,10 +67,11 @@ export const POST = withErrorHandler(
 
         // Send promotion email
         if (user.profile) {
-          await sendStudentPromotionEmail(user.email, user.profile.firstName, studentId).catch(
+          const targetEmail = user.personalEmail || user.email
+          await sendStudentPromotionEmail(targetEmail, user.profile.firstName, studentId).catch(
             console.error
           )
-          if (user.academyEmail) {
+          if (user.academyEmail && user.academyEmail !== targetEmail) {
             await sendStudentPromotionEmail(
               user.academyEmail,
               user.profile.firstName,

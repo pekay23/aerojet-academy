@@ -216,13 +216,27 @@ export const POST = withErrorHandler(
             if (payment.user.profile) {
               const programmeName =
                 programme?.name || payment.user.programmeChoice || 'Your Programme'
+
+              const targetEmail = payment.user.personalEmail || payment.user.email
+
               await sendSeatReservationConfirmedEmail(
-                payment.user.email,
+                targetEmail,
                 payment.user.profile.firstName,
                 programmeName,
                 Number(payment.amount),
                 payment.currency || 'EUR'
               ).catch(console.error)
+
+              // Also send to academy email if different
+              if (payment.user.academyEmail && payment.user.academyEmail !== targetEmail) {
+                await sendSeatReservationConfirmedEmail(
+                  payment.user.academyEmail,
+                  payment.user.profile.firstName,
+                  programmeName,
+                  Number(payment.amount),
+                  payment.currency || 'EUR'
+                ).catch(console.error)
+              }
             }
           }
         }
@@ -279,7 +293,7 @@ export const POST = withErrorHandler(
 
           // Send activation email
           await sendActivationEmail(
-            payment.user.email,
+            payment.user.personalEmail || payment.user.email,
             profile.firstName,
             academyEmail,
             tempPassword,
@@ -287,15 +301,16 @@ export const POST = withErrorHandler(
           )
         }
       } else if (payment.user.profile) {
+        const targetEmail = payment.user.personalEmail || payment.user.email
         // Send payment approved email
         await sendPaymentApprovedEmail(
-          payment.user.email,
+          targetEmail,
           payment.user.profile.firstName,
           payment.referenceType || 'Payment',
           Number(payment.amount)
         ).catch(console.error)
 
-        if (payment.user.academyEmail) {
+        if (payment.user.academyEmail && payment.user.academyEmail !== targetEmail) {
           await sendPaymentApprovedEmail(
             payment.user.academyEmail,
             payment.user.profile.firstName,
