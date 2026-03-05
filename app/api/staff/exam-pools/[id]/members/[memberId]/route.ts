@@ -15,6 +15,11 @@ export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Rout
   const staff = await requireStaff()
   const { id: poolId, memberId } = params
 
+  const { reason } = await req.json()
+  if (!reason || reason.trim().length < 5) {
+    return apiError('A valid withdrawal reason (at least 5 characters) is required.')
+  }
+
   const result = await prisma.$transaction(
     async (tx) => {
       const membership = await tx.poolMembership.findUnique({
@@ -48,7 +53,7 @@ export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Rout
               walletId: wallet.id,
               type: 'RELEASE',
               amount: releaseAmount,
-              description: `Removed from pool by staff`,
+              description: `Removed from pool by staff. Reason: ${reason}`,
               referenceId: `REMOVE-${poolId.substring(0, 8)}`,
               referenceType: 'STAFF_REMOVAL',
               balanceBefore: Number(wallet.balance),
@@ -57,6 +62,7 @@ export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Rout
               reservedAfter: Number(wallet.reservedBalance) - releaseAmount,
               availableBefore: Number(wallet.availableBalance),
               availableAfter: Number(wallet.availableBalance) + releaseAmount,
+              metadata: { reason, staffId: staff.id },
             },
           })
         }
@@ -92,7 +98,7 @@ export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Rout
     entity: 'PoolMembership',
     entityId: memberId,
     userId: staff.id,
-    details: { poolId, removedUserId: result.userId, amountReleased: result.releaseAmount },
+    details: { poolId, removedUserId: result.userId, amountReleased: result.releaseAmount, reason },
   })
 
   return apiSuccess({ message: 'Member removed', amountReleased: result.releaseAmount })
