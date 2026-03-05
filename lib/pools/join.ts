@@ -6,6 +6,7 @@ import {
   POOL_NEAR_FULL_THRESHOLD,
   POOL_MAX_CANDIDATES,
   MODULE_DIVERSITY_CAP,
+  MAX_TOTAL_STUDENT_POOLS,
 } from './types'
 import { confirmPoolInternal } from './confirm'
 import type { PoolJoinInput, PoolJoinResult } from './types'
@@ -115,6 +116,45 @@ export async function joinPoolInternal(
     return {
       success: false,
       error: `Pool already has ${MODULE_DIVERSITY_CAP} modules (maximum). Please choose from the existing modules in this pool.`,
+    }
+  }
+
+  // RULE 005: Global student pool cap (max 4 total)
+  const totalMyPools = await tx.poolMembership.count({
+    where: {
+      userId,
+      status: { in: ['RESERVED', 'CONFIRMED'] },
+    },
+  })
+  if (totalMyPools >= MAX_TOTAL_STUDENT_POOLS) {
+    return {
+      success: false,
+      error: `You have reached the maximum of ${MAX_TOTAL_STUDENT_POOLS} pool bookings.`,
+    }
+  }
+
+  // RULE 006: Unique module per event — cannot book same module twice in the same event
+  if (pool.eventId && examComponentId) {
+    const component = await tx.examComponent.findUnique({
+      where: { id: examComponentId },
+      select: { courseId: true },
+    })
+
+    const duplicateInEvent = await tx.poolMembership.findFirst({
+      where: {
+        userId,
+        status: { in: ['RESERVED', 'CONFIRMED'] },
+        pool: { eventId: pool.eventId },
+        examComponent: { courseId: component?.courseId },
+      },
+    })
+
+    if (duplicateInEvent) {
+      return {
+        success: false,
+        error:
+          'You are already registered for this module in another pool within the same exam event.',
+      }
     }
   }
 
