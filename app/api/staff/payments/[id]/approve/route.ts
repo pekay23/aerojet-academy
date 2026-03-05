@@ -216,7 +216,7 @@ export const POST = withErrorHandler(
             if (payment.user.profile) {
               const programmeName =
                 programme?.name || payment.user.programmeChoice || 'Your Programme'
-              sendSeatReservationConfirmedEmail(
+              await sendSeatReservationConfirmedEmail(
                 payment.user.email,
                 payment.user.profile.firstName,
                 programmeName,
@@ -288,7 +288,7 @@ export const POST = withErrorHandler(
         }
       } else if (payment.user.profile) {
         // Send payment approved email
-        sendPaymentApprovedEmail(
+        await sendPaymentApprovedEmail(
           payment.user.email,
           payment.user.profile.firstName,
           payment.referenceType || 'Payment',
@@ -296,7 +296,7 @@ export const POST = withErrorHandler(
         ).catch(console.error)
 
         if (payment.user.academyEmail) {
-          sendPaymentApprovedEmail(
+          await sendPaymentApprovedEmail(
             payment.user.academyEmail,
             payment.user.profile.firstName,
             payment.referenceType || 'Payment',
@@ -333,7 +333,7 @@ export const POST = withErrorHandler(
 
       if (payment.user.profile) {
         // Send payment rejected email
-        sendPaymentRejectedEmail(
+        await sendPaymentRejectedEmail(
           payment.user.email,
           payment.user.profile.firstName,
           payment.referenceType || 'Payment',
@@ -341,7 +341,7 @@ export const POST = withErrorHandler(
         ).catch(console.error)
 
         if (payment.user.academyEmail) {
-          sendPaymentRejectedEmail(
+          await sendPaymentRejectedEmail(
             payment.user.academyEmail,
             payment.user.profile.firstName,
             payment.referenceType || 'Payment',
