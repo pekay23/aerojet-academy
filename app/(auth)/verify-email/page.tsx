@@ -171,9 +171,13 @@ export default function VerifyEmailPage() {
                     if (res.ok) {
                       const data = await res.json()
                       setMessage(
-                        data.message || 'A new verification link has been sent to your email.'
+                        data.message ||
+                          'A new verification link has been sent to your email. (Please check your spam/junk folder)'
                       )
-                      alert(data.message || 'A new verification link has been sent to your email.')
+                      alert(
+                        data.message ||
+                          'A new verification link has been sent to your email. (Please check your spam/junk folder)'
+                      )
                     } else {
                       const data = await res.json()
                       alert(data.error || 'Failed to resend link')
