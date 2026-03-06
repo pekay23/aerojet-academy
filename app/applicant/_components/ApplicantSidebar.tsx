@@ -21,14 +21,12 @@ const allLinks = [
 ]
 
 const examOnlyLinks = [
-  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'My Application', href: '/application/status', icon: ClipboardList },
-  { label: 'Exam Only Pathway', href: '/exam-only', icon: GraduationCap },
+  { label: 'Dashboard', href: '/exam-only', icon: LayoutDashboard },
   { label: 'Profile', href: '/profile', icon: User },
 ]
 
 const restrictedLinks = [
-  { label: 'Exam Only Pathway', href: '/exam-only', icon: GraduationCap },
+  { label: 'Dashboard', href: '/exam-only', icon: LayoutDashboard },
   { label: 'Profile', href: '/profile', icon: User },
 ]
 
