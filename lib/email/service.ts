@@ -90,13 +90,15 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
     })
 
     if (!res.ok) {
-      console.error('[Email] Send failed:', await res.text())
+      const errorText = await res.text()
+      console.error(`[Email] Send to ${payload.to} failed:`, errorText)
       return false
     }
 
+    console.log(`[Email] Successfully sent "${payload.subject}" to ${payload.to}`)
     return true
   } catch (error) {
-    console.error('[Email] Error:', error)
+    console.error(`[Email] Exception sending to ${payload.to}:`, error)
     return false
   }
 }
@@ -263,23 +265,31 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
     </div>
   `
 
-  const template = await getTemplate('registration', { subject: defaultSubject, body: defaultBody })
+  try {
+    const template = await getTemplate('registration', {
+      subject: defaultSubject,
+      body: defaultBody,
+    })
 
-  const baseUrl = await getBaseUrl()
-  const body = replacePlaceholders(template.body, {
-    firstName,
-    registrationCode,
-    currency: config.currency,
-    fee: config.fee,
-    bankName: finance.bankName || 'FNB Ghana',
-    bankAccountName: finance.bankAccountName || 'Aerojet Aviation Foundation',
-    bankAccountNumber: finance.bankAccountNumber || 'N/A',
-    bankBranch: (finance as any).bankBranch || 'N/A',
-    bankSwift: (finance as any).bankSwift || 'N/A',
-    uploadUrl: `${baseUrl}/upload-proof?code=${registrationCode}`,
-  })
+    const baseUrl = await getBaseUrl()
+    const body = replacePlaceholders(template.body, {
+      firstName,
+      registrationCode,
+      currency: config.currency,
+      fee: config.fee,
+      bankName: finance.bankName || 'FNB Ghana',
+      bankAccountName: finance.bankAccountName || 'Aerojet Aviation Foundation',
+      bankAccountNumber: finance.bankAccountNumber || 'N/A',
+      bankBranch: (finance as any).bankBranch || 'N/A',
+      bankSwift: (finance as any).bankSwift || 'N/A',
+      uploadUrl: `${baseUrl}/upload-proof?code=${registrationCode}`,
+    })
 
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+    return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  } catch (error) {
+    console.error('[Email] Failed to render registration email:', error)
+    throw error
+  }
 }
 
 export async function sendRegistrationEmail(

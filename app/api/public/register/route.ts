@@ -42,8 +42,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     referralCode,
   } = validation.data as any
 
-  // Check if email already exists
-  const existing = await prisma.user.findUnique({ where: { email } })
+  // Check if email already exists (case-insensitive check on both primary and personal emails)
+  const existing = await prisma.user.findFirst({
+    where: {
+      OR: [
+        { email: { equals: email, mode: 'insensitive' } },
+        { personalEmail: { equals: email, mode: 'insensitive' } },
+      ],
+    },
+  })
   if (existing) {
     return apiError('An account with this email already exists', 409)
   }

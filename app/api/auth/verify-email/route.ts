@@ -35,7 +35,12 @@ export async function GET(req: NextRequest) {
 
   if (wasNotVerified) {
     const firstName = user.profile?.firstName || 'Student'
-    sendRegistrationEmail(user.email, firstName, user.registrationCode).catch(console.error)
+    console.log(`[VerifyEmail] Sending registration confirmation to ${user.email}`)
+    try {
+      await sendRegistrationEmail(user.email, firstName, user.registrationCode)
+    } catch (error) {
+      console.error(`[VerifyEmail] Failed to send registration email to ${user.email}:`, error)
+    }
   }
 
   return NextResponse.json({

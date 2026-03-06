@@ -11,7 +11,7 @@ import {
   UserPlus,
   Settings,
 } from 'lucide-react'
-import { getPoolWithDetails } from '@/lib/pools/operations'
+import { getPoolWithDetails, type PoolWithDetails } from '@/lib/pools/operations'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
 import PoolStatusBadge from '../../../_components/PoolStatusBadge'
@@ -23,7 +23,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const pool = await getPoolWithDetails(id)
+  const pool = await getPoolWithDetails(id, { includeAllStatuses: true })
   return { title: `Pool: ${pool?.name || 'Details'} | Staff Portal` }
 }
 
@@ -32,7 +32,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
   if (!session) redirect('/login')
 
   const { id } = await params
-  const pool = await getPoolWithDetails(id)
+  const pool = await getPoolWithDetails(id, { includeAllStatuses: true })
   if (!pool) notFound()
 
   return (
@@ -134,7 +134,9 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <BookOpen className="h-4 w-4 text-[#002a5c]" />
-                        <span className="font-medium text-slate-700">{member.examComponent?.course?.code || 'N/A'}</span>
+                        <span className="font-medium text-slate-700">
+                          {member.examComponent?.course?.code || 'N/A'}
+                        </span>
                       </div>
                     </td>
 
