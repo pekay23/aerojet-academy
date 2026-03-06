@@ -40,7 +40,7 @@ export default async function WalletPage({
   const user = session.user
   const tab = tabParam || 'overview'
 
-  const [wallet, studentProfile, pendingTopups, ftEnrollment] = await Promise.all([
+  const [wallet, studentProfile, pendingTopups, ftEnrollment, activeBundles] = await Promise.all([
     prisma.wallet.findUnique({ where: { userId: user.id } }),
     prisma.studentProfile.findUnique({ where: { userId: user.id } }),
     prisma.payment.findMany({
@@ -53,6 +53,10 @@ export default async function WalletPage({
         programme: true,
         milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
       },
+    }),
+    prisma.examBundle.findMany({
+      where: { userId: user.id, status: 'ACTIVE' },
+      orderBy: { createdAt: 'desc' },
     }),
   ])
 
@@ -73,7 +77,7 @@ export default async function WalletPage({
   // Fetch transactions for transactions tab
   let allTransactions: any[] = []
   if (tab === 'transactions') {
-    const [walletTransactions, pendingPayments] = await Promise.all([
+    const [walletTransactions, pendingPayments, historyPayments] = await Promise.all([
       prisma.walletTransaction.findMany({
         where: { wallet: { userId: user.id } },
         include: { wallet: true },
@@ -83,7 +87,16 @@ export default async function WalletPage({
         where: { userId: user.id, status: { in: ['PENDING', 'PROCESSING'] } },
         orderBy: { createdAt: 'desc' },
       }),
+      prisma.payment.findMany({
+        where: {
+          userId: user.id,
+          status: 'APPROVED',
+          referenceType: { not: 'WALLET_TOPUP' }, // Wallet top-ups are already in WalletTransaction
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
     ])
+
     allTransactions = [
       ...pendingPayments.map((p) => ({
         id: p.id,
@@ -103,6 +116,16 @@ export default async function WalletPage({
         description: tx.description || tx.type.replace('_', ' '),
         status: 'COMPLETED',
         currency: tx.wallet.currency,
+        isPending: false,
+      })),
+      ...historyPayments.map((p) => ({
+        id: p.id,
+        createdAt: p.createdAt,
+        type: p.referenceType || 'PAYMENT',
+        amount: p.amount,
+        description: `${p.referenceType || 'Payment'} (${p.paymentMethod || 'Transfer'})`,
+        status: 'COMPLETED',
+        currency: p.currency,
         isPending: false,
       })),
     ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -203,6 +226,49 @@ export default async function WalletPage({
               </a>
             </div>
           </div>
+
+          {/* Active Exam Packages */}
+          {activeBundles.length > 0 && (
+            <div className="rounded-2xl border border-indigo-100 bg-white p-5 shadow-sm sm:p-6 dark:border-indigo-900/40 dark:bg-slate-900">
+              <h3 className="mb-4 text-sm font-bold text-slate-900 sm:text-base dark:text-slate-100">
+                Active Exam Packages
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {activeBundles.map((bundle) => (
+                  <div
+                    key={bundle.id}
+                    className="flex flex-col justify-between rounded-xl border border-indigo-50 bg-indigo-50/30 p-4 transition-colors hover:border-indigo-100 dark:border-slate-800 dark:bg-slate-800/50"
+                  >
+                    <div>
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="font-bold tracking-tight text-indigo-900 dark:text-indigo-300">
+                          {bundle.bundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'}
+                        </span>
+                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 uppercase">
+                          Active
+                        </span>
+                      </div>
+                      <div className="mb-1 text-sm text-slate-600 dark:text-slate-400">
+                        Remaining Seats:{' '}
+                        <strong className="text-slate-900 dark:text-slate-100">
+                          {bundle.totalSeats - bundle.usedSeats}
+                        </strong>{' '}
+                        / {bundle.totalSeats}
+                      </div>
+                      <div className="text-[10px] text-slate-500">
+                        Purchased:{' '}
+                        {new Date(bundle.createdAt).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-4 sm:p-6 dark:border-slate-700 dark:bg-slate-800/50">
             <div className="flex gap-3 sm:gap-4">

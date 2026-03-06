@@ -14,6 +14,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { requireAuth, requireStudent } from '@/lib/auth/helpers'
 import { hash, compare } from 'bcryptjs'
+import { getExamPricingConfig } from '@/lib/pools/pricing-config'
+import { studentCreatePoolSchema, CreatePoolInput, validateBody } from '@/lib/validation/schemas'
 
 export async function enrollInCourse(courseId: string) {
   const user = await requireStudent()
@@ -142,6 +144,18 @@ export async function enrollInCourse(courseId: string) {
             data: { enrollmentStatus: 'ENROLLED' },
           })
         }
+
+        // Send Notification
+        await tx.notification.create({
+          data: {
+            userId: user.id,
+            title: 'Course Enrollment Successful',
+            message: `You have successfully enrolled in ${course.code}: ${course.name}.`,
+            type: 'SUCCESS',
+            linkUrl: '/student/courses',
+            linkText: 'View Courses',
+          },
+        })
       })
     } else {
       // Mandatory FULL_TIME course
@@ -152,6 +166,17 @@ export async function enrollInCourse(courseId: string) {
           status: 'ACTIVE', // Mandatory courses are auto-active
           enrolledAt: new Date(),
           approvedAt: new Date(),
+        },
+      })
+
+      await prisma.notification.create({
+        data: {
+          userId: user.id,
+          title: 'Course Enrollment Successful',
+          message: `You have been automatically enrolled in the mandatory course ${course.code}: ${course.name}.`,
+          type: 'INFO',
+          linkUrl: '/student/courses',
+          linkText: 'View Courses',
         },
       })
     }
@@ -202,6 +227,21 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
   if (!['OPEN', 'NEAR_FULL'].includes(pool.status)) {
     return { error: 'This exam pool is no longer accepting new members.' }
   }
+
+  // 1.5 Global Event Cap — max 4 pools per event for a student
+  const eventMemberships = await prisma.poolMembership.count({
+    where: {
+      userId: user.id,
+      pool: { eventId: pool.eventId },
+      status: { in: ['RESERVED', 'CONFIRMED'] },
+    },
+  })
+  if (eventMemberships >= 4) {
+    return {
+      error: 'Module capacity reached. You can join at most 4 pools in a single exam event.',
+    }
+  }
+
   if (pool.currentMemberCount >= pool.maxCandidates) {
     return { error: 'This exam pool is full.' }
   }
@@ -228,6 +268,19 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
 
   if (existingMembership) {
     return { error: 'You have already joined this exam pool.' }
+  }
+
+  // 3.5 Duplicate Module Check per Event
+  const moduleInEvent = await prisma.poolMembership.findFirst({
+    where: {
+      userId: user.id,
+      pool: { eventId: pool.eventId },
+      examComponent: { course: { code: moduleCode } },
+      status: { in: ['RESERVED', 'CONFIRMED'] },
+    },
+  })
+  if (moduleInEvent) {
+    return { error: `You are already booked for Module ${moduleCode} in this exam event.` }
   }
 
   // 4. Time Conflict Check — handled by shared logic in joinPoolInternal
@@ -298,6 +351,17 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
           })
         }
       }
+
+      await tx.notification.create({
+        data: {
+          userId: user.id,
+          title: 'Exam Pool Joined Successfully',
+          message: `You have successfully secured a seat in ${pool.name} for module ${moduleCode}.`,
+          type: 'SUCCESS',
+          linkUrl: '/student/exam-pools/my-bookings',
+          linkText: 'View Bookings',
+        },
+      })
     })
 
     revalidatePath('/student/exam-pools')
@@ -307,6 +371,170 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
   } catch (error) {
     console.error('Join Pool Error:', error)
     return { error: (error as Error).message || 'Failed to join exam pool. Please try again.' }
+  }
+}
+
+export async function createStudentPoolAction(input: CreatePoolInput) {
+  const user = await requireStudent()
+
+  const validation = validateBody(studentCreatePoolSchema, input)
+  if (!validation.success) {
+    return { error: (validation as any).error }
+  }
+
+  const { eventId, moduleCode, examDate, examTimeSlot } = validation.data
+
+  try {
+    // 0. Pathway Restrictions
+    const profile = await prisma.studentProfile.findUnique({ where: { userId: user.id } })
+    if (profile?.enrollmentType === 'FULL_TIME') {
+      return {
+        error:
+          'Full-Time students cannot create exam pools. They follow a strictly milestone-based path.',
+      }
+    }
+
+    // 1. Get Pricing & Check Balance
+    const pricing = await getExamPricingConfig()
+    const seatPrice = pricing.poolExamFee
+
+    const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
+    if (!wallet || Number(wallet.availableBalance) < seatPrice) {
+      return {
+        error: `Insufficient funds. Starting a pool requires a seat reservation of €${seatPrice.toFixed(2)}.`,
+      }
+    }
+
+    // 2. Validate Event
+    const event = await prisma.examEvent.findUnique({ where: { id: eventId } })
+    if (!event) return { error: 'Exam event not found.' }
+    if (event.status !== 'OPEN' && event.status !== 'DRAFT') {
+      return { error: 'This exam event is not accepting new pools.' }
+    }
+
+    // 2.5 Global Event Cap
+    const eventMemberships = await prisma.poolMembership.count({
+      where: {
+        userId: user.id,
+        pool: { eventId },
+        status: { in: ['RESERVED', 'CONFIRMED'] },
+      },
+    })
+    if (eventMemberships >= 4) {
+      return {
+        error: 'Module capacity reached. You can join at most 4 pools in a single exam event.',
+      }
+    }
+
+    // 2.7 Duplicate Module Check
+    const moduleInEvent = await prisma.poolMembership.findFirst({
+      where: {
+        userId: user.id,
+        pool: { eventId },
+        examComponent: { course: { code: moduleCode } },
+        status: { in: ['RESERVED', 'CONFIRMED'] },
+      },
+    })
+    if (moduleInEvent) {
+      return { error: `You are already booked for Module ${moduleCode} in this exam event.` }
+    }
+
+    // 3. Find Exam Component
+    const examComponent = await prisma.examComponent.findFirst({
+      where: { course: { code: moduleCode } },
+    })
+    if (!examComponent) return { error: `No exam component found for module ${moduleCode}.` }
+
+    // 4. Construct Pool Times
+    const date = new Date(examDate)
+    const startTime = new Date(date)
+    const endTime = new Date(date)
+
+    if (examTimeSlot === 'MORNING') {
+      startTime.setHours(9, 0, 0, 0)
+      endTime.setHours(12, 0, 0, 0)
+    } else {
+      startTime.setHours(13, 0, 0, 0)
+      endTime.setHours(16, 0, 0, 0)
+    }
+
+    // 5. Atomic Transaction: Create Pool + Join Student
+    const pool = await prisma.$transaction(async (tx) => {
+      const { reserveFunds } = await import('@/lib/wallet/operations')
+
+      // A. Create Pool
+      const newPool = await tx.examPool.create({
+        data: {
+          eventId,
+          name: `Student Initiated - ${moduleCode}`,
+          examDate: date,
+          examStartTime: startTime,
+          examEndTime: endTime,
+          seatPrice,
+          allowedModules: [moduleCode],
+          status: 'OPEN',
+          currentMemberCount: 1,
+          createdBy: user.id,
+        },
+      })
+
+      // B. Reserve Funds
+      await reserveFunds(
+        tx,
+        user.id,
+        seatPrice,
+        `Seat reservation for new pool: ${newPool.name} — Module ${moduleCode}`,
+        newPool.id,
+        'POOL_ID'
+      )
+
+      // C. Create Membership
+      await tx.poolMembership.create({
+        data: {
+          userId: user.id,
+          poolId: newPool.id,
+          status: 'RESERVED',
+          examComponentId: examComponent.id,
+          amountReserved: seatPrice,
+        },
+      })
+
+      // D. Role Upgrade: APPLICANT → STUDENT
+      if (user.role === 'APPLICANT') {
+        await tx.user.update({
+          where: { id: user.id },
+          data: { role: 'STUDENT' },
+        })
+        if (profile) {
+          await tx.studentProfile.update({
+            where: { userId: user.id },
+            data: { enrollmentStatus: 'ENROLLED' },
+          })
+        }
+      }
+
+      // Send Notification
+      await tx.notification.create({
+        data: {
+          userId: user.id,
+          title: 'Exam Pool Created',
+          message: `You have successfully created a new exam pool for module ${moduleCode} and reserved your seat.`,
+          type: 'SUCCESS',
+          linkUrl: '/student/exam-pools/my-bookings',
+          linkText: 'View Bookings',
+        },
+      })
+
+      return newPool
+    })
+
+    revalidatePath('/student/exam-pools')
+    revalidatePath('/student/wallet')
+
+    return { success: true, poolId: pool.id }
+  } catch (error: any) {
+    console.error('Create Student Pool Error:', error)
+    return { error: error.message || 'Failed to create exam pool.' }
   }
 }
 
@@ -592,11 +820,31 @@ export async function markMessageAsRead(messageId: string) {
 export async function bookStandaloneExamAction(examId: string) {
   try {
     const user = await requireStudent()
-    await bookStandaloneExam(examId, user.id)
+    const result = await bookStandaloneExam(examId, user.id)
+
+    // Check if we need to deduce module name or exam name for notification
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+      include: { examComponent: { include: { course: true } } },
+    })
+
+    if (exam) {
+      const typeStr = result.usedBundle ? 'an Exam Package seat' : 'wallet balance'
+      await prisma.notification.create({
+        data: {
+          userId: user.id,
+          title: 'Individual Exam Booked',
+          message: `You have successfully booked the standalone exam "${exam.examComponent?.course?.code || ''} ${exam.name}" using ${typeStr}.`,
+          type: 'SUCCESS',
+          linkUrl: '/student/exams',
+          linkText: 'View Exams',
+        },
+      })
+    }
 
     revalidatePath('/student/exams')
     revalidatePath('/student/wallet')
-    return { success: true }
+    return { success: true, usedBundle: result.usedBundle }
   } catch (error: any) {
     console.error('bookStandaloneExamAction error:', error)
     return { error: error.message || 'Failed to book exam.' }
@@ -608,11 +856,45 @@ export async function bookResitExamAction(examId: string) {
     const user = await requireStudent()
     await bookResitExam(examId, user.id)
 
+    const exam = await prisma.exam.findUnique({
+      where: { id: examId },
+      include: { examComponent: { include: { course: true } } },
+    })
+
+    if (exam) {
+      await prisma.notification.create({
+        data: {
+          userId: user.id,
+          title: 'Resit Exam Booked',
+          message: `You have successfully booked a resit for "${exam.examComponent?.course?.code || ''} ${exam.name}".`,
+          type: 'SUCCESS',
+          linkUrl: '/student/exams',
+          linkText: 'View Exams',
+        },
+      })
+    }
+
     revalidatePath('/student/exams')
     revalidatePath('/student/wallet')
     return { success: true }
   } catch (error: any) {
     console.error('bookResitExamAction error:', error)
     return { error: error.message || 'Failed to book resit exam.' }
+  }
+}
+
+export async function markNotificationAsReadAction(notificationId: string) {
+  try {
+    const user = await requireAuth()
+    await prisma.notification.updateMany({
+      where: { id: notificationId, userId: user.id },
+      data: { isRead: true, readAt: new Date() },
+    })
+
+    // We do NOT call revalidatePath() here so optimistic UI handles the visual interaction without page lag.
+    return { success: true }
+  } catch (error) {
+    console.error('markNotificationAsReadAction error:', error)
+    return { error: 'Failed to mark notification as read' }
   }
 }

@@ -107,6 +107,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // NO StudentProfile creation
     // NO role change to STUDENT
     // NO auto-enrollment trigger
+
+    await tx.notification.create({
+      data: {
+        userId: id,
+        title: 'Registration Approved',
+        message:
+          'Your registration fee has been approved. Welcome to AeroJet Academy! Please check your email for login credentials.',
+        type: 'SUCCESS',
+        linkUrl: '/applicant',
+        linkText: 'Go to Dashboard',
+      },
+    })
   })
 
   // Send activation email with credentials

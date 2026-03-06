@@ -4,56 +4,60 @@ import { z } from 'zod'
 // AUTH SCHEMAS
 // ===========================================================================
 
-export const registerSchema = z.object({
-  firstName: z.string().min(2, 'First name must be at least 2 characters').max(50),
-  lastName: z.string().min(2, 'Last name must be at least 2 characters').max(50),
-  middleName: z.string().max(50).optional(),
-  email: z.string().email('Invalid email address'),
-  nationality: z.string().min(2, 'Nationality is required'),
-  dateOfBirth: z
-    .string()
-    .refine((val) => !isNaN(Date.parse(val)), 'Invalid date of birth')
-    .refine((val) => {
-      const dob = new Date(val)
-      const today = new Date()
-      return dob < today
-    }, 'Date of birth cannot be in the future')
-    .refine((val) => {
-      const dob = new Date(val)
-      const today = new Date()
-      const age = today.getFullYear() - dob.getFullYear()
-      const monthDiff = today.getMonth() - dob.getMonth()
-      const dayDiff = today.getDate() - dob.getDate()
-      const fullAge = monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0) ? age : age - 1
-      return fullAge >= 16
-    }, 'You must be at least 16 years old to register'),
-  phoneCountryCode: z.string().min(1, 'Country code is required'),
-  phone: z.string().min(7, 'Phone number is too short').max(15),
-  selectedProgramme: z.enum(
-    ['FULL_TIME_4YEAR', 'FULL_TIME_2YEAR', 'MILITARY_1YEAR', 'MODULAR', 'EXAM_ONLY'],
+export const registerSchema = z
+  .object({
+    firstName: z.string().min(2, 'First name must be at least 2 characters').max(50),
+    lastName: z.string().min(2, 'Last name must be at least 2 characters').max(50),
+    middleName: z.string().max(50).optional(),
+    email: z.string().email('Invalid email address'),
+    nationality: z.string().min(2, 'Nationality is required'),
+    dateOfBirth: z
+      .string()
+      .refine((val) => !isNaN(Date.parse(val)), 'Invalid date of birth')
+      .refine((val) => {
+        const dob = new Date(val)
+        const today = new Date()
+        return dob < today
+      }, 'Date of birth cannot be in the future')
+      .refine((val) => {
+        const dob = new Date(val)
+        const today = new Date()
+        const age = today.getFullYear() - dob.getFullYear()
+        const monthDiff = today.getMonth() - dob.getMonth()
+        const dayDiff = today.getDate() - dob.getDate()
+        const fullAge = monthDiff > 0 || (monthDiff === 0 && dayDiff >= 0) ? age : age - 1
+        return fullAge >= 16
+      }, 'You must be at least 16 years old to register'),
+    phoneCountryCode: z.string().min(1, 'Country code is required'),
+    phone: z.string().min(7, 'Phone number is too short').max(15),
+    selectedProgramme: z.enum(
+      ['FULL_TIME_4YEAR', 'FULL_TIME_2YEAR', 'MILITARY_1YEAR', 'MODULAR', 'EXAM_ONLY'],
+      {
+        message: 'Please select a study pathway',
+      }
+    ),
+    licenseCategories: z
+      .array(z.string().min(1))
+      .min(1, 'Please select at least one license category')
+      .max(3, 'You can select up to 3 license categories')
+      .optional(),
+    referralCode: z.string().max(50).optional(),
+  })
+  .refine(
+    (data) => {
+      const requiresLicense = ['FULL_TIME_4YEAR', 'FULL_TIME_2YEAR', 'MILITARY_1YEAR'].includes(
+        data.selectedProgramme
+      )
+      if (requiresLicense && (!data.licenseCategories || data.licenseCategories.length === 0)) {
+        return false
+      }
+      return true
+    },
     {
-      message: 'Please select a study pathway',
+      message: 'License category selection is required for Full-Time and Military programmes',
+      path: ['licenseCategories'],
     }
-  ),
-  licenseCategories: z
-    .array(z.string().min(1))
-    .min(1, 'Please select at least one license category')
-    .max(3, 'You can select up to 3 license categories')
-    .optional(),
-  referralCode: z.string().max(50).optional(),
-}).refine(
-  (data) => {
-    const requiresLicense = ['FULL_TIME_4YEAR', 'FULL_TIME_2YEAR', 'MILITARY_1YEAR'].includes(data.selectedProgramme)
-    if (requiresLicense && (!data.licenseCategories || data.licenseCategories.length === 0)) {
-      return false
-    }
-    return true
-  },
-  {
-    message: 'License category selection is required for Full-Time and Military programmes',
-    path: ['licenseCategories'],
-  }
-)
+  )
 
 export const loginSchema = z.object({
   email: z.string().email(),
@@ -186,6 +190,15 @@ export const createExamPoolSchema = z.object({
 })
 
 export const updateExamPoolSchema = createExamPoolSchema.partial()
+
+export const studentCreatePoolSchema = z.object({
+  eventId: z.string().cuid(),
+  moduleCode: z.string().min(1, 'Module selection is required'),
+  examDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Invalid exam date'),
+  examTimeSlot: z.enum(['MORNING', 'AFTERNOON']),
+})
+
+export type CreatePoolInput = z.infer<typeof studentCreatePoolSchema>
 
 // ===========================================================================
 // POOL JOIN SCHEMA

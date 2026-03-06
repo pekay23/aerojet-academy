@@ -39,6 +39,17 @@ export const POST = withErrorHandler(
           payment.id,
           'PAYMENT_ID'
         )
+
+        await tx.notification.create({
+          data: {
+            userId: payment.userId,
+            title: 'Wallet Top-Up Approved',
+            message: `Your wallet top-up of €${payment.amount} has been approved and credited to your account.`,
+            type: 'SUCCESS',
+            linkUrl: '/student/wallet',
+            linkText: 'View Wallet',
+          },
+        })
       })
 
       await createAuditLog({
@@ -62,6 +73,17 @@ export const POST = withErrorHandler(
           rejectedBy: staff.id,
           rejectedAt: new Date(),
           rejectionReason: reason,
+        },
+      })
+
+      await prisma.notification.create({
+        data: {
+          userId: payment.userId,
+          title: 'Wallet Top-Up Rejected',
+          message: `Your wallet top-up request of €${payment.amount} has been rejected. Reason: ${reason || 'Not provided'}.`,
+          type: 'ERROR',
+          linkUrl: '/student/wallet',
+          linkText: 'View Wallet',
         },
       })
 

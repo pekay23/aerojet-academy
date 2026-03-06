@@ -49,6 +49,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         payment.id,
         'PAYMENT_ID'
       )
+
+      await tx.notification.create({
+        data: {
+          userId: payment.userId,
+          title: 'Wallet Top-Up Approved',
+          message: `Your wallet top-up of €${payment.amount} has been approved.`,
+          type: 'SUCCESS',
+          linkUrl: '/student/wallet',
+          linkText: 'View Wallet',
+        },
+      })
     })
 
     // Qualify any pending referral for this user (non-blocking)

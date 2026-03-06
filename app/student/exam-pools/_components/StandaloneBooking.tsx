@@ -6,38 +6,27 @@ import { toast } from 'sonner'
 import { Loader2, ArrowRight, BookOpen, Wallet, CheckCircle2, X } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
 
-const EASA_MODULES = [
-  { code: 'M1', name: 'Mathematics' },
-  { code: 'M2', name: 'Physics' },
-  { code: 'M3', name: 'Electrical Fundamentals' },
-  { code: 'M4', name: 'Electronic Fundamentals' },
-  { code: 'M5', name: 'Digital Techniques / Avionics' },
-  { code: 'M6', name: 'Materials & Hardware' },
-  { code: 'M7A', name: 'Maintenance Practices' },
-  { code: 'M7B', name: 'Maintenance Practices (Avionics)' },
-  { code: 'M8', name: 'Basic Aerodynamics' },
-  { code: 'M9A', name: 'Human Factors' },
-  { code: 'M10', name: 'Aviation Legislation' },
-  { code: 'M11A', name: 'Aeroplane Aerodynamics (Turbine)' },
-  { code: 'M11B', name: 'Aeroplane Aerodynamics (Piston)' },
-  { code: 'M12', name: 'Helicopter Aerodynamics' },
-  { code: 'M13', name: 'Aircraft Aerodynamics (Structures)' },
-  { code: 'M14', name: 'Propulsion' },
-  { code: 'M15', name: 'Gas Turbine Engine' },
-  { code: 'M16', name: 'Piston Engine' },
-  { code: 'M17A', name: 'Propeller' },
-]
+interface ExamWithCourse {
+  id: string
+  name: string
+  examDate: Date
+  examComponent: {
+    course: { code: string; name: string }
+  }
+}
 
 interface StandaloneBookingProps {
   price: number
   currency: string
   availableBalance: number
+  upcomingExams: ExamWithCourse[]
 }
 
 export default function StandaloneBooking({
   price,
   currency,
   availableBalance,
+  upcomingExams,
 }: StandaloneBookingProps) {
   const [open, setOpen] = useState(false)
   const [selectedModuleId, setSelectedModuleId] = useState('')
@@ -62,9 +51,13 @@ export default function StandaloneBooking({
         if (res.error) {
           toast.error(res.error)
         } else {
-          toast.success(
-            `Exam booked successfully! ${currencySymbol}${price.toFixed(2)} charged from your wallet.`
-          )
+          if (res.usedBundle) {
+            toast.success('Exam booked successfully! 1 seat was deducted from your Exam Package.')
+          } else {
+            toast.success(
+              `Exam booked successfully! ${currencySymbol}${price.toFixed(2)} charged from your wallet.`
+            )
+          }
           setOpen(false)
           setSelectedModuleId('')
         }
@@ -80,7 +73,8 @@ export default function StandaloneBooking({
         onClick={() => setOpen(true)}
         className="w-full rounded-xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 transition-all hover:border-blue-300 hover:bg-blue-50/50 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
       >
-        Book Standalone Individual Seat ({currencySymbol}{price.toFixed(2)})
+        Book Standalone Individual Seat ({currencySymbol}
+        {price.toFixed(2)})
       </button>
 
       {open && (
@@ -140,10 +134,11 @@ export default function StandaloneBooking({
                   disabled={isPending}
                   className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
                 >
-                  <option value="">— Choose a module exam —</option>
-                  {EASA_MODULES.map((m) => (
-                    <option key={m.code} value={m.code}>
-                      {m.code} — {m.name}
+                  <option value="">— Choose a scheduled exam —</option>
+                  {upcomingExams.map((exam) => (
+                    <option key={exam.id} value={exam.id}>
+                      {exam.examComponent.course.code} — {exam.name} (
+                      {new Date(exam.examDate).toLocaleDateString()})
                     </option>
                   ))}
                 </select>

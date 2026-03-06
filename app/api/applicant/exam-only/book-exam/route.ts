@@ -27,7 +27,18 @@ export async function POST(request: Request) {
     const isIndividual = bookingType === 'INDIVIDUAL'
     const poolPrice = pricingConfig.poolExamFee
     const individualPrice = pricingConfig.individualExamFee
-    const depositAmount = isIndividual ? individualPrice : 0
+
+    // Check for active bundle first
+    let activeBundle = null
+    if (isIndividual) {
+      const bundles = await prisma.examBundle.findMany({
+        where: { userId, status: 'ACTIVE' },
+        orderBy: { createdAt: 'asc' },
+      })
+      activeBundle = bundles.find((b) => b.usedSeats < b.totalSeats) || null
+    }
+
+    const depositAmount = isIndividual ? (activeBundle ? 0 : individualPrice) : 0
     const requiredAmount = isIndividual ? depositAmount : poolPrice
 
     const examComponent = await prisma.examComponent.findUnique({
@@ -40,16 +51,18 @@ export async function POST(request: Request) {
     }
 
     // Check wallet balance upfront (fast-fail for UX)
-    const wallet = await prisma.wallet.findUnique({ where: { userId } })
-    if (!wallet || Number(wallet.availableBalance) < requiredAmount) {
-      return NextResponse.json(
-        {
-          error: 'INSUFFICIENT_BALANCE',
-          required: requiredAmount,
-          available: Number(wallet?.availableBalance || 0),
-        },
-        { status: 400 }
-      )
+    if (requiredAmount > 0) {
+      const wallet = await prisma.wallet.findUnique({ where: { userId } })
+      if (!wallet || Number(wallet.availableBalance) < requiredAmount) {
+        return NextResponse.json(
+          {
+            error: 'INSUFFICIENT_BALANCE',
+            required: requiredAmount,
+            available: Number(wallet?.availableBalance || 0),
+          },
+          { status: 400 }
+        )
+      }
     }
 
     // ====================================================================
@@ -58,15 +71,22 @@ export async function POST(request: Request) {
     if (isIndividual) {
       const booking = await prisma.$transaction(
         async (tx) => {
-          // 1. Charge wallet atomically (handles balance + availableBalance)
-          await chargeWallet(
-            tx,
-            userId,
-            depositAmount,
-            `Individual Exam Payment: ${examComponent.course.code} - ${examComponent.name}`,
-            examComponentId,
-            'EXAM_BOOKING'
-          )
+          // 1. Consume bundle seat or charge wallet atomically
+          if (activeBundle) {
+            await tx.examBundle.update({
+              where: { id: activeBundle.id },
+              data: { usedSeats: { increment: 1 } },
+            })
+          } else {
+            await chargeWallet(
+              tx,
+              userId,
+              depositAmount,
+              `Individual Exam Payment: ${examComponent.course.code} - ${examComponent.name}`,
+              examComponentId,
+              'EXAM_BOOKING'
+            )
+          }
 
           // 2. Find or create exam event
           let examEvent = await tx.examEvent.findFirst({
