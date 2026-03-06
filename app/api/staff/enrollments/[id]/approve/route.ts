@@ -80,6 +80,17 @@ export const POST = withErrorHandler(
           }
         }
       }
+
+      await tx.notification.create({
+        data: {
+          userId: user.id,
+          title: 'Course Enrollment Approved',
+          message: `Your enrollment in ${enrollment.course.code} has been approved.`,
+          type: 'SUCCESS',
+          linkUrl: '/student/courses',
+          linkText: 'View Courses',
+        },
+      })
     })
 
     await createAuditLog({
