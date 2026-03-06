@@ -332,6 +332,18 @@ export const POST = withErrorHandler(
         },
       })
 
+      // Send in-app notification
+      await prisma.notification.create({
+        data: {
+          userId: payment.userId,
+          title: 'Payment Approved',
+          message: `Your payment of ${payment.currency || 'EUR'} ${payment.amount} for ${payment.referenceType || 'services'} has been approved.`,
+          type: 'SUCCESS',
+          linkUrl: '/student/wallet?tab=payments',
+          linkText: 'View Payments',
+        },
+      })
+
       return apiSuccess({ message: 'Payment approved' })
     } else {
       if (!reason) return apiError('Rejection reason is required')
@@ -371,6 +383,18 @@ export const POST = withErrorHandler(
         entityId: id,
         userId: staff.id,
         details: { targetUserId: payment.userId, reason },
+      })
+
+      // Send in-app notification
+      await prisma.notification.create({
+        data: {
+          userId: payment.userId,
+          title: 'Payment Rejected',
+          message: `Your payment of ${payment.currency || 'EUR'} ${payment.amount} for ${payment.referenceType || 'services'} has been rejected. Reason: ${reason}.`,
+          type: 'ERROR',
+          linkUrl: '/student/wallet?tab=payments',
+          linkText: 'View Payments',
+        },
       })
 
       return apiSuccess({ message: 'Payment rejected' })

@@ -19,7 +19,9 @@ import type { PaymentAccessLevel } from '@/lib/access-control'
 import type { SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
 
 function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAccessLevel) {
-  const isFullTime = ['FULL_TIME', 'FULL_TIME_4Y', 'FULL_TIME_2Y', 'MILITARY_1Y'].includes(studyPathway || '')
+  const isFullTime = ['FULL_TIME', 'FULL_TIME_4Y', 'FULL_TIME_2Y', 'MILITARY_1Y'].includes(
+    studyPathway || ''
+  )
   const isExamOnly = studyPathway === 'EXAM_ONLY'
   const isRestricted = paymentAccessLevel === 'RESTRICTED' || paymentAccessLevel === 'SEAT_ONLY'
   const hasFullAccess = paymentAccessLevel === 'FULL_ACCESS'
@@ -41,10 +43,7 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
   }
 
   if (isFullTime && isRestricted) {
-    baseLinks.push(
-      { label: 'Wallet', href: '/student/wallet', icon: Wallet },
-      { label: 'Payments', href: '/student/wallet?tab=payments', icon: CreditCard }
-    )
+    baseLinks.push({ label: 'Wallet', href: '/student/wallet', icon: Wallet })
   } else {
     baseLinks.push(
       { label: 'Academic Calendar', href: '/student/academic-calendar', icon: CalendarCheck },

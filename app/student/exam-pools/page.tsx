@@ -9,16 +9,27 @@ import JoinPoolButton from './_components/JoinPoolButton'
 import StandaloneBooking from './_components/StandaloneBooking'
 import LeavePoolButton from './my-bookings/_components/LeavePoolButton'
 import PoolsTabs from './_components/PoolsTabs'
+import CreatePoolModal from './_components/CreatePoolModal'
 import { getSystemSetting } from '@/lib/settings'
+import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 
 export const metadata: Metadata = { title: 'Exam Pools | Student Portal' }
+
+interface ExamWithCourse {
+  id: string
+  name: string
+  examDate: Date
+  examComponent: {
+    course: { code: string; name: string }
+  }
+}
 
 /* ── Available Pools Tab ── */
 async function AvailablePoolsContent() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const [pools, wallet, studentProfile, individualFeeStr] = await Promise.all([
+  const [pools, wallet, studentProfile, pricing, openEvents, upcomingExams] = await Promise.all([
     prisma.examPool.findMany({
       where: {
         status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] },
@@ -42,14 +53,33 @@ async function AvailablePoolsContent() {
     prisma.studentProfile.findUnique({
       where: { userId: session.user.id },
     }),
-    getSystemSetting('individual_exam_fee', '520'),
+    getExamPricingConfig(),
+    prisma.examEvent.findMany({
+      where: {
+        status: { in: ['OPEN', 'DRAFT'] },
+        joinDeadline: { gt: new Date() },
+      },
+      orderBy: { startDate: 'asc' },
+    }),
+    prisma.exam.findMany({
+      where: {
+        examDate: { gt: new Date() },
+      },
+      include: {
+        examComponent: {
+          include: { course: { select: { code: true, name: true } } },
+        },
+      },
+      orderBy: { examDate: 'asc' },
+    }) as Promise<ExamWithCourse[]>, // Cast to the defined interface
   ])
 
   const balance = Number(wallet?.availableBalance || 0)
   const { getCurrencySymbol } = await import('@/lib/currency')
   const currency = wallet?.currency || 'EUR'
   const currencySymbol = getCurrencySymbol(currency)
-  const individualFee = Number(individualFeeStr)
+  const individualFee = pricing.individualExamFee
+  const poolFee = pricing.poolExamFee
 
   const myMemberships = await prisma.poolMembership.findMany({
     where: { userId: session.user.id, status: { in: ['RESERVED', 'CONFIRMED'] } },
@@ -63,8 +93,20 @@ async function AvailablePoolsContent() {
     <div className="space-y-8">
       {/* Action row */}
       {isExamOnly && (
-        <div className="flex justify-end">
-          <StandaloneBooking price={individualFee} currency={currency} availableBalance={balance} />
+        <div className="flex flex-col justify-end gap-3 sm:flex-row">
+          <CreatePoolModal
+            events={openEvents}
+            poolFee={poolFee}
+            currency={currency}
+            availableBalance={balance}
+          />
+          <div className="hidden h-10 w-px self-center bg-slate-200 sm:block dark:bg-slate-800" />
+          <StandaloneBooking
+            price={individualFee}
+            currency={currency}
+            availableBalance={balance}
+            upcomingExams={upcomingExams}
+          />
         </div>
       )}
 
@@ -352,7 +394,7 @@ async function MyBookingsContent() {
               const canLeave = m.status === 'RESERVED' && m.pool.status !== 'CONFIRMED'
               return (
                 <div
-                  key={`${m.userId}-${m.poolId}`}
+                  key={`${m.userId}-${m.pool.id}`}
                   className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
                 >
                   <div className="mb-4 flex items-start justify-between">
@@ -462,7 +504,7 @@ async function MyBookingsContent() {
 
                     return (
                       <tr
-                        key={`${m.userId}-${m.poolId}`}
+                        key={`${m.userId}-${m.pool.id}`}
                         className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
                       >
                         <td className="px-6 py-4">

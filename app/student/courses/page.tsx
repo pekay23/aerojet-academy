@@ -110,7 +110,11 @@ async function CourseList({ userId }: { userId: string }) {
   const enrollments = await prisma.enrollment.findMany({
     where: { userId },
     include: {
-      course: true,
+      course: {
+        include: {
+          category: true,
+        },
+      },
     },
     orderBy: { enrolledAt: 'desc' },
   })
@@ -181,7 +185,7 @@ async function CourseList({ userId }: { userId: string }) {
               </div>
               <div className="flex items-center gap-1.5">
                 <GraduationCap className="h-3.5 w-3.5" />
-                <span>{enrollment.course.categoryId}</span>
+                <span>{enrollment.course.category?.name || 'Uncategorized'}</span>
               </div>
             </div>
 

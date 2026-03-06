@@ -12,10 +12,11 @@ import {
   Clock,
   AlertCircle,
   ArrowRight,
-  ChevronDown,
   ChevronUp,
+  ChevronDown,
   Loader2,
   RefreshCw,
+  Package,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSession } from 'next-auth/react'
@@ -106,7 +107,17 @@ interface WalletPayment {
   rejectionReason?: string
 }
 
-type TabType = 'dashboard' | 'courses' | 'pools'
+interface ExamBundle {
+  id: string
+  bundleType: string
+  totalSeats: number
+  usedSeats: number
+  amountPaid: number
+  validUntil: string
+  status: string
+}
+
+type TabType = 'dashboard' | 'packages' | 'courses' | 'pools'
 
 const poolStatusLabel: Record<string, string> = {
   DRAFT: 'Upcoming',
@@ -146,6 +157,18 @@ export default function ExamOnlyPathwayPage() {
   const [selectedModules, setSelectedModules] = useState<Record<string, string>>({})
   const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([])
   const [walletPayments, setWalletPayments] = useState<WalletPayment[]>([])
+  const [bundles, setBundles] = useState<ExamBundle[]>([])
+  const [purchasingBundle, setPurchasingBundle] = useState<string | null>(null)
+  const [selectedBundleType, setSelectedBundleType] = useState<'TWO_SEAT' | 'FOUR_SEAT' | null>(
+    null
+  )
+  const [bundleSelectedModules, setBundleSelectedModules] = useState<string[]>([])
+  const [confirmingBooking, setConfirmingBooking] = useState<{
+    componentId: string
+    type: 'POOL' | 'INDIVIDUAL'
+    price: number
+    moduleName: string
+  } | null>(null)
 
   useEffect(() => {
     fetchData()
@@ -153,7 +176,7 @@ export default function ExamOnlyPathwayPage() {
 
   const fetchData = async () => {
     try {
-      const [walletRes, componentsRes, poolsRes, membershipsRes, bookingsRes, txRes] =
+      const [walletRes, componentsRes, poolsRes, membershipsRes, bookingsRes, txRes, bundlesRes] =
         await Promise.all([
           fetch('/api/applicant/exam-only/wallet')
             .then((r) => r.json())
@@ -173,6 +196,10 @@ export default function ExamOnlyPathwayPage() {
           fetch('/api/applicant/exam-only/wallet/transactions')
             .then((r) => r.json())
             .catch(() => ({ transactions: [], payments: [] })),
+          fetch('/api/applicant/exam-only/bundles')
+            .then((r) => r.json())
+            .then((res) => res.bundles || [])
+            .catch(() => []),
         ])
 
       setWallet(walletRes)
@@ -182,6 +209,7 @@ export default function ExamOnlyPathwayPage() {
       setBookings(bookingsRes)
       setWalletTransactions(txRes.transactions || [])
       setWalletPayments(txRes.payments || [])
+      setBundles(bundlesRes)
     } catch (error) {
       console.error('Error fetching data:', error)
     } finally {
@@ -315,16 +343,12 @@ export default function ExamOnlyPathwayPage() {
     }
   }
 
-  const handleBookExam = async (componentId: string, bookingType: 'POOL' | 'INDIVIDUAL') => {
-    if (!wallet) return
-
+  const handleBookExamClick = (componentId: string, bookingType: 'POOL' | 'INDIVIDUAL') => {
     const component = examComponents.find((c) => c.id === componentId)
     if (!component) return
 
-    // Pool price: €300, Individual price: €520
     const requiredAmount = bookingType === 'POOL' ? 300 : 520
 
-    // Check available balance before making any API call
     if (!wallet || Number(wallet.availableBalance) < requiredAmount) {
       toast.error(
         `Insufficient funds. You need €${requiredAmount} but have €${Number(wallet?.availableBalance || 0).toFixed(2)} available.`,
@@ -338,12 +362,25 @@ export default function ExamOnlyPathwayPage() {
       return
     }
 
+    setConfirmingBooking({
+      componentId,
+      type: bookingType,
+      price: requiredAmount,
+      moduleName: `${component.course.code} - ${component.name}`,
+    })
+  }
+
+  const submitBooking = async () => {
+    if (!confirmingBooking || !wallet) return
+    const { componentId, type, price } = confirmingBooking
+
     setBookingExam(componentId)
+    setConfirmingBooking(null)
     try {
       const res = await fetch('/api/applicant/exam-only/book-exam', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ examComponentId: componentId, bookingType }),
+        body: JSON.stringify({ examComponentId: componentId, bookingType: type }),
       })
 
       const data = await res.json()
@@ -351,14 +388,12 @@ export default function ExamOnlyPathwayPage() {
       if (!res.ok) {
         if (data.error === 'INSUFFICIENT_BALANCE') {
           toast.error(
-            `Insufficient funds. You need €${data.required || requiredAmount} but have €${Number(data.available || 0).toFixed(2)} available.`,
+            `Insufficient funds. You need €${data.required || price} but have €${Number(data.available || 0).toFixed(2)} available.`,
             {
               action: {
                 label: 'Top Up',
                 onClick: () =>
-                  router.push(
-                    `/applicant/exam-only/top-up?required=${data.required || requiredAmount}`
-                  ),
+                  router.push(`/applicant/exam-only/top-up?required=${data.required || price}`),
               },
             }
           )
@@ -379,8 +414,7 @@ export default function ExamOnlyPathwayPage() {
         return
       }
 
-      // Show pool or individual booking info
-      if (bookingType === 'POOL' && data.pool) {
+      if (type === 'POOL' && data.pool) {
         toast.success(`Joined ${data.pool.name}! (€300) - ${data.pool.memberCount}/28 candidates`)
       } else {
         toast.success(`Individual exam booked successfully! (€520)`)
@@ -393,9 +427,69 @@ export default function ExamOnlyPathwayPage() {
     }
   }
 
+  const handleBuyBundle = async (bundleType: 'TWO_SEAT' | 'FOUR_SEAT', componentIds: string[]) => {
+    if (!wallet) return
+
+    const requiredAmount = bundleType === 'TWO_SEAT' ? 980 : 1900
+    const requiredSeats = bundleType === 'TWO_SEAT' ? 2 : 4
+
+    if (componentIds.length !== requiredSeats) {
+      toast.error(`Please select exactly ${requiredSeats} modules for this package.`)
+      return
+    }
+
+    if (wallet.availableBalance < requiredAmount) {
+      toast.error(
+        `Insufficient funds. You need €${requiredAmount} but have €${wallet.availableBalance.toFixed(2)} available.`,
+        {
+          action: {
+            label: 'Top Up',
+            onClick: () => router.push(`/applicant/exam-only/top-up?required=${requiredAmount}`),
+          },
+        }
+      )
+      return
+    }
+
+    setPurchasingBundle(bundleType)
+    setSelectedBundleType(null)
+    setBundleSelectedModules([])
+
+    try {
+      const res = await fetch('/api/applicant/exam-only/bundles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bundleType, examComponentIds: componentIds }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast.error(data.error || 'Failed to purchase Exam Package')
+        return
+      }
+
+      if (data.promotedToStudent) {
+        toast.success(`Exam Package purchased successfully! Updating your account...`)
+        await update() // Refresh NextAuth session
+
+        setTimeout(() => {
+          toast.success('Redirecting to Student Portal...')
+          window.location.href = '/student'
+        }, 1500)
+        return
+      }
+
+      toast.success(`${bundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'} purchased successfully!`)
+      fetchData()
+    } catch (error) {
+      toast.error('Network error while purchasing package')
+    } finally {
+      setPurchasingBundle(null)
+    }
+  }
+
   const getLowestExamPrice = (): number => {
-    // Pool price is €300 - always cheaper than individual €520
-    // System automatically creates/joins pools for exam bookings
     return 300
   }
 
@@ -439,6 +533,7 @@ export default function ExamOnlyPathwayPage() {
       <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700">
         {[
           { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+          { id: 'packages', label: 'Exam Packages', icon: Package },
           { id: 'courses', label: 'Individual Exams', icon: BookOpen },
           { id: 'pools', label: 'Exam Pools', icon: Users },
         ].map((tab) => (
@@ -667,6 +762,129 @@ export default function ExamOnlyPathwayPage() {
           </div>
         </div>
       )}
+      {/* Packages Tab */}
+      {activeTab === 'packages' && (
+        <div className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Pool Seat Option */}
+            <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+              <div>
+                <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                  Exam Pool Seat
+                </h3>
+                <p className="mb-4 text-sm text-slate-500">
+                  Join an existing exam pool to save money on your exam seating. Best for flexible
+                  schedules.
+                </p>
+                <div className="mb-6 text-3xl font-black text-[#4c9ded]">€300</div>
+              </div>
+              <button
+                onClick={() => setActiveTab('pools')}
+                className="w-full rounded-xl border border-[#4c9ded] bg-[#4c9ded]/10 py-3 text-sm font-bold text-[#4c9ded] transition-all hover:bg-[#4c9ded]/20"
+              >
+                Join an Exam Pool
+              </button>
+            </div>
+
+            {/* Twin Pack Option */}
+            <div className="flex flex-col justify-between rounded-2xl border-2 border-indigo-500 bg-white p-6 shadow-lg shadow-indigo-100 dark:border-indigo-600 dark:bg-slate-900 dark:shadow-none">
+              <div className="relative">
+                <span className="absolute -top-2 -right-2 rounded-full bg-indigo-500 px-3 py-1 text-xs font-bold text-white">
+                  Save €60
+                </span>
+                <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                  Twin Pack
+                </h3>
+                <p className="mb-4 text-sm text-slate-500">
+                  Buy 2 individual exam seats upfront. Guaranteed seating whenever you are ready.
+                  Valid for 12 months.
+                </p>
+                <div className="mb-1 text-3xl font-black text-indigo-600 dark:text-indigo-400">
+                  €980
+                </div>
+                <div className="mb-6 text-xs text-slate-400 line-through">€1040 (2x €520)</div>
+              </div>
+              <button
+                onClick={() => setSelectedBundleType('TWO_SEAT')}
+                disabled={purchasingBundle !== null}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-700 disabled:opacity-50"
+              >
+                {purchasingBundle === 'TWO_SEAT' ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Package className="h-4 w-4" />
+                )}
+                Select Modules for Twin Pack
+              </button>
+            </div>
+
+            {/* 4-Pack Option */}
+            <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white bg-linear-to-br from-white to-amber-50 p-6 dark:border-slate-800 dark:bg-slate-900 dark:from-slate-900 dark:to-slate-800">
+              <div className="relative">
+                <span className="absolute -top-2 -right-2 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white">
+                  Save €180 + 1 Free Change
+                </span>
+                <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                  4-Pack
+                </h3>
+                <p className="mb-4 text-sm text-slate-500">
+                  The ultimate individual seating package. Secure 4 guaranteed seats + 1 free module
+                  change.
+                </p>
+                <div className="mb-1 text-3xl font-black text-amber-600">€1900</div>
+                <div className="mb-6 text-xs text-slate-400 line-through">€2080 (4x €520)</div>
+              </div>
+              <button
+                onClick={() => setSelectedBundleType('FOUR_SEAT')}
+                disabled={purchasingBundle !== null}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 text-sm font-bold text-white transition-all hover:bg-amber-600 disabled:opacity-50"
+              >
+                {purchasingBundle === 'FOUR_SEAT' ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Package className="h-4 w-4" />
+                )}
+                Select Modules for 4-Pack
+              </button>
+            </div>
+          </div>
+
+          {/* Show Active Bundles if any */}
+          {bundles.length > 0 && (
+            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+              <h3 className="mb-4 font-bold text-slate-900 dark:text-slate-100">
+                My Exam Packages
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {bundles.map((bundle) => (
+                  <div
+                    key={bundle.id}
+                    className="rounded-xl border border-slate-100 p-4 dark:border-slate-800"
+                  >
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                        {bundle.bundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'}
+                      </span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${bundle.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}
+                      >
+                        {bundle.status}
+                      </span>
+                    </div>
+                    <div className="mb-3 text-sm text-slate-500">
+                      Seats Remaining: <strong>{bundle.totalSeats - bundle.usedSeats}</strong> /{' '}
+                      {bundle.totalSeats}
+                    </div>
+                    <div className="text-xs text-slate-400">
+                      Valid until {new Date(bundle.validUntil).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Courses Tab */}
       {activeTab === 'courses' && (
@@ -750,7 +968,7 @@ export default function ExamOnlyPathwayPage() {
                                 <p className="text-xs text-slate-500">Pool</p>
                               </div>
                               <button
-                                onClick={() => handleBookExam(component.id, 'POOL')}
+                                onClick={() => handleBookExamClick(component.id, 'POOL')}
                                 disabled={bookingExam === component.id || !wallet}
                                 className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-green-700 disabled:opacity-50"
                               >
@@ -768,7 +986,7 @@ export default function ExamOnlyPathwayPage() {
                                 <p className="text-xs text-slate-500">Individual</p>
                               </div>
                               <button
-                                onClick={() => handleBookExam(component.id, 'INDIVIDUAL')}
+                                onClick={() => handleBookExamClick(component.id, 'INDIVIDUAL')}
                                 disabled={bookingExam === component.id || !wallet}
                                 className="rounded-lg bg-[#002a5c] px-4 py-2 text-sm font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
                               >
@@ -958,6 +1176,149 @@ export default function ExamOnlyPathwayPage() {
               <p className="text-slate-500">No exam pools available at this time</p>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Module Selection Modal for Bundles */}
+      {selectedBundleType && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
+            <div className="border-b border-slate-100 p-6 dark:border-slate-800">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                Select {selectedBundleType === 'TWO_SEAT' ? '2' : '4'} Modules
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Choose the modules you want to be booked into exam pools for this package.
+              </p>
+            </div>
+
+            <div className="max-h-[50vh] overflow-y-auto p-6">
+              <div className="space-y-3">
+                {Object.values(groupedComponents)
+                  .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
+                  .flatMap((course) => course.components)
+                  .map((component) => {
+                    const isSelected = bundleSelectedModules.includes(component.id)
+                    const requiredSeats = selectedBundleType === 'TWO_SEAT' ? 2 : 4
+                    const isMaxSelected = bundleSelectedModules.length >= requiredSeats
+
+                    return (
+                      <label
+                        key={component.id}
+                        className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors ${
+                          isSelected
+                            ? 'border-indigo-500 bg-indigo-50/50 dark:border-indigo-400 dark:bg-indigo-900/20'
+                            : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600'
+                        } ${isMaxSelected && !isSelected ? 'cursor-not-allowed opacity-50 grayscale' : ''}`}
+                      >
+                        <input
+                          type="checkbox"
+                          className="mt-1 h-5 w-5 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                          checked={isSelected}
+                          disabled={isMaxSelected && !isSelected}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              if (!isMaxSelected) {
+                                setBundleSelectedModules([...bundleSelectedModules, component.id])
+                              }
+                            } else {
+                              setBundleSelectedModules(
+                                bundleSelectedModules.filter((id) => id !== component.id)
+                              )
+                            }
+                          }}
+                        />
+                        <div>
+                          <p className="font-bold text-slate-900 dark:text-slate-100">
+                            {component.course.code} - {component.name}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {component.type} • {component.duration}m
+                          </p>
+                        </div>
+                      </label>
+                    )
+                  })}
+              </div>
+            </div>
+
+            <div className="flex gap-3 border-t border-slate-100 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
+              <button
+                onClick={() => {
+                  setSelectedBundleType(null)
+                  setBundleSelectedModules([])
+                }}
+                className="flex-1 rounded-xl border border-slate-200 bg-white py-3 pr-2 pl-2 text-center text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleBuyBundle(selectedBundleType, bundleSelectedModules)}
+                disabled={
+                  bundleSelectedModules.length !== (selectedBundleType === 'TWO_SEAT' ? 2 : 4)
+                }
+                className="flex-1 rounded-xl bg-indigo-600 py-3 pr-2 pl-2 text-center text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
+              >
+                Confirm & Purchase
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal for Individual / Pool Bookings */}
+      {confirmingBooking && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
+            onClick={() => setConfirmingBooking(null)}
+          />
+          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
+            <div className="border-b border-slate-100 p-6 dark:border-slate-800">
+              <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                Confirm Booking
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Are you sure you want to book this exam seat?
+              </p>
+            </div>
+            <div className="space-y-4 p-6">
+              <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800">
+                <p className="text-xs font-bold tracking-wider text-slate-500 uppercase">Module</p>
+                <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
+                  {confirmingBooking.moduleName}
+                </p>
+              </div>
+              <div className="flex items-center justify-between rounded-xl bg-blue-50 p-4 dark:bg-blue-900/20">
+                <div className="flex items-center gap-2">
+                  <Wallet className="h-5 w-5 text-blue-600" />
+                  <span className="font-semibold text-blue-900 dark:text-blue-100">
+                    {confirmingBooking.type === 'POOL' ? 'Pool Seat' : 'Individual Seat'}
+                  </span>
+                </div>
+                <div className="text-right">
+                  <p className="text-xs font-bold tracking-wider text-slate-500 uppercase">Fee</p>
+                  <p className="text-lg font-black text-blue-700 dark:text-blue-400">
+                    €{confirmingBooking.price.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3 border-t border-slate-100 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
+              <button
+                onClick={() => setConfirmingBooking(null)}
+                className="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitBooking}
+                className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white hover:bg-blue-700"
+              >
+                Confirm & Pay
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

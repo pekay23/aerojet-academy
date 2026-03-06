@@ -68,6 +68,17 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         data: { status: 'ACTIVE' },
       })
     }
+
+    await tx.notification.create({
+      data: {
+        userId,
+        title: 'Milestone Paid Successfully',
+        message: `You have successfully paid your milestone: ${milestone.milestoneType} (Year ${milestone.yearNumber}) for €${amountToCharge.toLocaleString()}.`,
+        type: 'SUCCESS',
+        linkUrl: '/student/wallet?tab=payments',
+        linkText: 'View Payments',
+      },
+    })
   })
 
   await createAuditLog({
