@@ -12,12 +12,32 @@ import { Prisma, PoolStatus } from '@prisma/client'
 import { AuditAction } from '@/lib/audit/logger'
 import prisma from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
+import { POOL_NEAR_FULL_THRESHOLD } from './types'
 
-// Re-export canonical join from join.ts
-export { joinPool } from './join'
+// ---------------------------------------------------------------------------
+// TYPES
+// ---------------------------------------------------------------------------
 
-// Re-export canonical confirm + fail from confirm.ts
-export { confirmPoolInternal, failPool } from './confirm'
+export type PoolWithDetails = Prisma.ExamPoolGetPayload<{
+  include: {
+    event: true
+    memberships: {
+      include: {
+        user: {
+          include: {
+            profile: true
+            studentProfile: true
+          }
+        }
+        examComponent: {
+          include: {
+            course: true
+          }
+        }
+      }
+    }
+  }
+}>
 
 // ---------------------------------------------------------------------------
 // CONFIRM POOL (standalone, for staff manual confirm)
@@ -58,26 +78,41 @@ export async function confirmPool(poolId: string, actorId: string) {
   )
 }
 
+// Re-export canonical join from join.ts
+export { joinPool } from './join'
+
+// Re-export canonical confirm + fail from confirm.ts
+export { confirmPoolInternal, failPool } from './confirm'
+
 // ---------------------------------------------------------------------------
 // GET POOL DETAILS
 // ---------------------------------------------------------------------------
 
-export async function getPoolWithDetails(poolId: string) {
+export async function getPoolWithDetails(
+  poolId: string,
+  options?: { includeAllStatuses?: boolean }
+): Promise<PoolWithDetails | null> {
+  const membershipsFilter: Prisma.PoolMembershipWhereInput = options?.includeAllStatuses
+    ? {}
+    : { status: { in: ['RESERVED', 'CONFIRMED'] } }
+
   return prisma.examPool.findUnique({
     where: { id: poolId },
     include: {
       event: true,
       memberships: {
-        where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
+        where: membershipsFilter,
         include: {
           user: {
             include: {
-              profile: { select: { firstName: true, lastName: true } },
-              studentProfile: { select: { studentId: true } },
+              profile: true,
+              studentProfile: true,
             },
           },
           examComponent: {
-            include: { course: { select: { code: true } } },
+            include: {
+              course: true,
+            },
           },
         },
         orderBy: { createdAt: 'asc' },
@@ -103,5 +138,32 @@ export async function getAvailablePools() {
       },
     },
     orderBy: { examDate: 'asc' },
+  })
+}
+// ---------------------------------------------------------------------------
+// DECREMENT POOL COUNT (Shared logic for withdrawals/removals)
+// ---------------------------------------------------------------------------
+
+/**
+ * Safely decrements a pool's member count and updates its status.
+ * Must be called within a transaction that has locked the pool row.
+ */
+export async function decrementPoolMemberCount(poolId: string, tx: Prisma.TransactionClient) {
+  // Use a raw query to lock the row if not already locked, but since we expect
+  // the caller to have locked it, we just fetch it here.
+  const pool = await tx.examPool.findUnique({ where: { id: poolId } })
+  if (!pool) return
+
+  const newCount = Math.max(0, pool.currentMemberCount - 1)
+  let newStatus = pool.status
+
+  // Downgrade NEAR_FULL -> OPEN if drops below threshold
+  if (pool.status === 'NEAR_FULL' && newCount < POOL_NEAR_FULL_THRESHOLD) {
+    newStatus = 'OPEN'
+  }
+
+  return tx.examPool.update({
+    where: { id: poolId },
+    data: { currentMemberCount: newCount, status: newStatus },
   })
 }

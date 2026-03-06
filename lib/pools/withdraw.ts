@@ -16,6 +16,7 @@ import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { POOL_NEAR_FULL_THRESHOLD } from './types'
 import { promoteNextFromWaitlist } from './waitlist'
+import { decrementPoolMemberCount } from './operations'
 import { logAuditEvent } from '../audit/logger'
 import { sendWithdrawalConfirmationEmail, sendWaitlistPromotionEmail } from '@/lib/email/service'
 
@@ -31,7 +32,7 @@ export async function withdrawFromPool(poolId: string, userId: string): Promise<
       async (tx) => {
         // Lock pool row
         const [pool] = await tx.$queryRawUnsafe<any[]>(
-          `SELECT * FROM "ExamPool" WHERE id = $1 FOR UPDATE`,
+          `SELECT * FROM "exam_pools" WHERE id = $1 FOR UPDATE`,
           poolId
         )
         if (!pool) return { success: false, error: 'Pool not found' }
@@ -95,18 +96,7 @@ export async function withdrawFromPool(poolId: string, userId: string): Promise<
         })
 
         // Decrement pool count and possibly downgrade status
-        const newCount = Math.max(0, pool.currentMemberCount - 1)
-        let newStatus = pool.status
-
-        // Downgrade NEAR_FULL → OPEN if drops below threshold
-        if (pool.status === 'NEAR_FULL' && newCount < POOL_NEAR_FULL_THRESHOLD) {
-          newStatus = 'OPEN'
-        }
-
-        await tx.examPool.update({
-          where: { id: poolId },
-          data: { currentMemberCount: newCount, status: newStatus },
-        })
+        await decrementPoolMemberCount(poolId, tx)
 
         // Log the audit event
         await logAuditEvent({
@@ -142,8 +132,12 @@ export async function withdrawFromPool(poolId: string, userId: string): Promise<
       if (user) {
         const email = user.academyEmail || user.email
         const name = user.profile?.firstName || 'Student'
-        sendWithdrawalConfirmationEmail(email, name, (result as any)._emailData?.poolName || 'Pool', result.amountReleased || 0)
-          .catch(console.error)
+        sendWithdrawalConfirmationEmail(
+          email,
+          name,
+          (result as any)._emailData?.poolName || 'Pool',
+          result.amountReleased || 0
+        ).catch(console.error)
       }
 
       // Waitlist promotion notification
@@ -158,8 +152,13 @@ export async function withdrawFromPool(poolId: string, userId: string): Promise<
           const examDateStr = (result as any)._emailData?.examDate
             ? format(new Date((result as any)._emailData.examDate), 'dd MMM yyyy')
             : 'TBA'
-          sendWaitlistPromotionEmail(email, name, (result as any)._emailData?.poolName || 'Pool', examDateStr, 'Module')
-            .catch(console.error)
+          sendWaitlistPromotionEmail(
+            email,
+            name,
+            (result as any)._emailData?.poolName || 'Pool',
+            examDateStr,
+            'Module'
+          ).catch(console.error)
         }
       }
     }
