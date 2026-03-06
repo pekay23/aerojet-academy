@@ -117,7 +117,7 @@ interface ExamBundle {
   status: string
 }
 
-type TabType = 'dashboard' | 'packages' | 'courses' | 'pools'
+type TabType = 'dashboard' | 'packages' | 'pools'
 
 const poolStatusLabel: Record<string, string> = {
   DRAFT: 'Upcoming',
@@ -534,7 +534,6 @@ export default function ExamOnlyPathwayPage() {
         {[
           { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
           { id: 'packages', label: 'Exam Packages', icon: Package },
-          { id: 'courses', label: 'Individual Exams', icon: BookOpen },
           { id: 'pools', label: 'Exam Pools', icon: Users },
         ].map((tab) => (
           <button
@@ -725,7 +724,7 @@ export default function ExamOnlyPathwayPage() {
             <h3 className="mb-4 font-bold text-slate-900 dark:text-slate-100">Quick Actions</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               <button
-                onClick={() => setActiveTab('courses')}
+                onClick={() => setActiveTab('packages')}
                 className="flex items-center gap-4 rounded-xl border border-slate-200 p-4 transition-all hover:border-[#4c9ded] hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-blue-900/20"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
@@ -766,6 +765,29 @@ export default function ExamOnlyPathwayPage() {
       {activeTab === 'packages' && (
         <div className="space-y-6">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {/* Individual Seat Option */}
+            <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+              <div>
+                <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                  Individual Seat
+                </h3>
+                <p className="mb-4 text-sm text-slate-500">
+                  Book a single, guaranteed individual exam seat at your preferred time.
+                </p>
+                <div className="mb-6 text-3xl font-black text-slate-900 dark:text-white">€520</div>
+              </div>
+              <button
+                onClick={() =>
+                  document
+                    .getElementById('individual-exams')
+                    ?.scrollIntoView({ behavior: 'smooth' })
+                }
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-bold text-slate-700 transition-all hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              >
+                Select Module Below
+              </button>
+            </div>
+
             {/* Pool Seat Option */}
             <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
               <div>
@@ -814,7 +836,7 @@ export default function ExamOnlyPathwayPage() {
                 ) : (
                   <Package className="h-4 w-4" />
                 )}
-                Select Modules for Twin Pack
+                Select Twin Pack Modules
               </button>
             </div>
 
@@ -829,7 +851,7 @@ export default function ExamOnlyPathwayPage() {
                 </h3>
                 <p className="mb-4 text-sm text-slate-500">
                   The ultimate individual seating package. Secure 4 guaranteed seats + 1 free module
-                  change.
+                  change. Valid for 12 months.
                 </p>
                 <div className="mb-1 text-3xl font-black text-amber-600">€1900</div>
                 <div className="mb-6 text-xs text-slate-400 line-through">€2080 (4x €520)</div>
@@ -844,7 +866,7 @@ export default function ExamOnlyPathwayPage() {
                 ) : (
                   <Package className="h-4 w-4" />
                 )}
-                Select Modules for 4-Pack
+                Select 4-Pack Modules
               </button>
             </div>
           </div>
@@ -883,134 +905,118 @@ export default function ExamOnlyPathwayPage() {
               </div>
             </div>
           )}
-        </div>
-      )}
 
-      {/* Courses Tab */}
-      {activeTab === 'courses' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-              Individual Exam Seats
-            </h2>
-            <p className="text-sm text-slate-500">Book individual exam seats at €520 each</p>
-          </div>
-
-          {Object.values(groupedComponents)
-            .sort((a, b) =>
-              a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
-            )
-            .map((course) => (
-              <div
-                key={course.code}
-                className="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
-              >
-                <button
-                  onClick={() =>
-                    setExpandedCourse(expandedCourse === course.code ? null : course.code)
-                  }
-                  className="flex w-full items-center justify-between p-6 text-left"
-                >
-                  <div>
-                    <h3 className="font-bold text-slate-900 dark:text-slate-100">
-                      {course.code}: {course.name}
-                    </h3>
-                    <p className="text-sm text-slate-500">
-                      {course.components.length} exam component(s) available
-                    </p>
-                  </div>
-                  {expandedCourse === course.code ? (
-                    <ChevronUp className="h-5 w-5 text-slate-400" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 text-slate-400" />
-                  )}
-                </button>
-
-                {expandedCourse === course.code && (
-                  <div className="border-t border-slate-100 px-6 pb-6 dark:border-slate-800">
-                    <div className="mt-4 space-y-3">
-                      {course.components
-                        .sort((a, b) =>
-                          a.code.localeCompare(b.code, undefined, {
-                            numeric: true,
-                            sensitivity: 'base',
-                          })
-                        )
-                        .map((component) => (
-                          <div
-                            key={component.id}
-                            className="flex items-center justify-between rounded-xl bg-slate-50 p-4 dark:bg-slate-800"
-                          >
-                            <div>
-                              <div className="flex items-center gap-2">
-                                <span className="font-bold text-slate-900 dark:text-slate-100">
-                                  {component.code} - {component.name}
-                                </span>
-                                <span
-                                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                    component.type === 'MCQ'
-                                      ? 'bg-blue-100 text-blue-700'
-                                      : 'bg-purple-100 text-purple-700'
-                                  }`}
-                                >
-                                  {component.type}
-                                </span>
-                              </div>
-                              <p className="mt-1 text-sm text-slate-500">
-                                Duration: {component.duration} minutes
-                              </p>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <div className="text-right">
-                                <p className="font-bold text-slate-900 dark:text-slate-100">
-                                  €{Number(component.poolPrice).toFixed(2)}
-                                </p>
-                                <p className="text-xs text-slate-500">Pool</p>
-                              </div>
-                              <button
-                                onClick={() => handleBookExamClick(component.id, 'POOL')}
-                                disabled={bookingExam === component.id || !wallet}
-                                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-green-700 disabled:opacity-50"
-                              >
-                                {bookingExam === component.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  'Join Pool'
-                                )}
-                              </button>
-                              <div className="h-8 w-px bg-slate-300 dark:bg-slate-600" />
-                              <div className="text-right">
-                                <p className="font-bold text-slate-900 dark:text-slate-100">
-                                  €{Number(component.individualPrice).toFixed(2)}
-                                </p>
-                                <p className="text-xs text-slate-500">Individual</p>
-                              </div>
-                              <button
-                                onClick={() => handleBookExamClick(component.id, 'INDIVIDUAL')}
-                                disabled={bookingExam === component.id || !wallet}
-                                className="rounded-lg bg-[#002a5c] px-4 py-2 text-sm font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
-                              >
-                                {bookingExam === component.id ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  'Book'
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-
-          {Object.keys(groupedComponents).length === 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-12 text-center dark:border-slate-800 dark:bg-slate-900">
-              <BookOpen className="mx-auto mb-4 h-12 w-12 text-slate-300" />
-              <p className="text-slate-500">No exam components available at this time</p>
+          <div
+            id="individual-exams"
+            className="mt-12 space-y-4 border-t border-slate-100 pt-12 dark:border-slate-800"
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                Individual Exam Modules
+              </h2>
+              <p className="text-sm text-slate-500">
+                Select a module to book an individual seat (€520)
+              </p>
             </div>
-          )}
+
+            {Object.values(groupedComponents)
+              .sort((a, b) =>
+                a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
+              )
+              .map((course) => (
+                <div
+                  key={course.code}
+                  className="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <button
+                    onClick={() =>
+                      setExpandedCourse(expandedCourse === course.code ? null : course.code)
+                    }
+                    className="flex w-full items-center justify-between p-6 text-left"
+                  >
+                    <div>
+                      <h3 className="font-bold text-slate-900 dark:text-slate-100">
+                        {course.code}: {course.name}
+                      </h3>
+                      <p className="text-sm text-slate-500">
+                        {course.components.length} exam component(s) available
+                      </p>
+                    </div>
+                    {expandedCourse === course.code ? (
+                      <ChevronUp className="h-5 w-5 text-slate-400" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5 text-slate-400" />
+                    )}
+                  </button>
+
+                  {expandedCourse === course.code && (
+                    <div className="border-t border-slate-100 px-6 pb-6 dark:border-slate-800">
+                      <div className="mt-4 space-y-3">
+                        {course.components
+                          .sort((a, b) =>
+                            a.code.localeCompare(b.code, undefined, {
+                              numeric: true,
+                              sensitivity: 'base',
+                            })
+                          )
+                          .map((component) => (
+                            <div
+                              key={component.id}
+                              className="flex items-center justify-between rounded-xl bg-slate-50 p-4 dark:bg-slate-800"
+                            >
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className="font-bold text-slate-900 dark:text-slate-100">
+                                    {component.code} - {component.name}
+                                  </span>
+                                  <span
+                                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                                      component.type === 'MCQ'
+                                        ? 'bg-blue-100 text-blue-700'
+                                        : 'bg-purple-100 text-purple-700'
+                                    }`}
+                                  >
+                                    {component.type}
+                                  </span>
+                                </div>
+                                <p className="mt-1 text-sm text-slate-500">
+                                  Duration: {component.duration} minutes
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <div className="text-right">
+                                  <p className="font-bold text-slate-900 dark:text-slate-100">
+                                    €{Number(component.individualPrice).toFixed(2)}
+                                  </p>
+                                  <p className="text-xs text-slate-500">Individual Fee</p>
+                                </div>
+                                <button
+                                  onClick={() => handleBookExamClick(component.id, 'INDIVIDUAL')}
+                                  disabled={bookingExam === component.id || !wallet}
+                                  className="rounded-lg bg-[#002a5c] px-4 py-2 text-sm font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
+                                >
+                                  {bookingExam === component.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    'Book Seat'
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+
+            {Object.keys(groupedComponents).length === 0 && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-12 text-center dark:border-slate-800 dark:bg-slate-900">
+                <BookOpen className="mx-auto mb-4 h-12 w-12 text-slate-300" />
+                <p className="text-slate-500">No exam components available at this time</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
