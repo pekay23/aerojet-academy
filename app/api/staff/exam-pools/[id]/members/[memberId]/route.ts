@@ -5,6 +5,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { POOL_NEAR_FULL_THRESHOLD } from '@/lib/pools/types'
+import { decrementPoolMemberCount } from '@/lib/pools/operations'
 
 interface RouteParams {
   params: { id: string; memberId: string }
@@ -74,19 +75,9 @@ export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Rout
         data: { status: 'CANCELLED' },
       })
 
-      // Update pool count and status
-      const pool = await tx.examPool.findUnique({ where: { id: poolId } })
-      if (pool) {
-        const newCount = Math.max(0, pool.currentMemberCount - 1)
-        let newStatus = pool.status
-        if (pool.status === 'NEAR_FULL' && newCount < POOL_NEAR_FULL_THRESHOLD) {
-          newStatus = 'OPEN'
-        }
-        await tx.examPool.update({
-          where: { id: poolId },
-          data: { currentMemberCount: newCount, status: newStatus },
-        })
-      }
+      // Lock pool row and decrement count
+      await tx.$executeRawUnsafe(`SELECT id FROM exam_pools WHERE id = $1 FOR UPDATE`, poolId)
+      await decrementPoolMemberCount(poolId, tx)
 
       return { userId: membership.userId, releaseAmount }
     },
