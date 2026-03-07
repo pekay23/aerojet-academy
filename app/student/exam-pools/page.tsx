@@ -29,50 +29,69 @@ async function AvailablePoolsContent() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const [pools, wallet, studentProfile, pricing, openEvents, upcomingExams] = await Promise.all([
-    prisma.examPool.findMany({
-      where: {
-        status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] },
-        event: { status: { in: ['OPEN', 'CONFIRMED', 'DRAFT'] } },
-      },
-      include: {
-        event: true,
-        memberships: {
-          where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
-          select: {
-            examComponentId: true,
-            examComponent: { select: { course: { select: { code: true } } } },
+  const [pools, wallet, studentProfile, pricing, openEvents, upcomingExams, examComponents] =
+    await Promise.all([
+      prisma.examPool.findMany({
+        where: {
+          status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] },
+          event: { status: { in: ['OPEN', 'CONFIRMED', 'DRAFT'] } },
+        },
+        include: {
+          event: true,
+          memberships: {
+            where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
+            select: {
+              examComponentId: true,
+              examComponent: { select: { course: { select: { code: true } } } },
+            },
           },
         },
-      },
-      orderBy: { examDate: 'asc' },
-    }),
-    prisma.wallet.findUnique({
-      where: { userId: session.user.id },
-    }),
-    prisma.studentProfile.findUnique({
-      where: { userId: session.user.id },
-    }),
-    getExamPricingConfig(),
-    prisma.examEvent.findMany({
-      where: {
-        status: { in: ['OPEN', 'DRAFT'] },
-        joinDeadline: { gt: new Date() },
-      },
-      orderBy: { startDate: 'asc' },
-    }),
-    prisma.exam.findMany({
-      where: {
-        examDate: { gt: new Date() },
-      },
-      include: {
-        examComponent: {
-          include: { course: { select: { code: true, name: true } } },
+        orderBy: { examDate: 'asc' },
+      }),
+      prisma.wallet.findUnique({
+        where: { userId: session.user.id },
+      }),
+      prisma.studentProfile.findUnique({
+        where: { userId: session.user.id },
+      }),
+      getExamPricingConfig(),
+      prisma.examEvent.findMany({
+        where: {
+          status: { in: ['OPEN', 'DRAFT'] },
+          joinDeadline: { gt: new Date() },
         },
-      },
-      orderBy: { examDate: 'asc' },
-    }) as Promise<ExamWithCourse[]>, // Cast to the defined interface
-  ])
+        select: {
+          id: true,
+          name: true,
+          startDate: true,
+          endDate: true,
+        },
+        orderBy: { startDate: 'asc' },
+      }),
+      prisma.exam.findMany({
+        where: {
+          examDate: { gt: new Date() },
+        },
+        select: {
+          id: true,
+          name: true,
+          examDate: true,
+          examComponent: {
+            select: {
+              course: { select: { code: true, name: true } },
+            },
+          },
+        },
+        orderBy: { examDate: 'asc' },
+      }),
+      prisma.examComponent.findMany({
+        select: {
+          id: true,
+          course: { select: { code: true, name: true } },
+        },
+        orderBy: { course: { code: 'asc' } },
+      }),
+    ])
 
   const balance = Number(wallet?.availableBalance || 0)
   const { getCurrencySymbol } = await import('@/lib/currency')
@@ -106,6 +125,12 @@ async function AvailablePoolsContent() {
             currency={currency}
             availableBalance={balance}
             upcomingExams={upcomingExams}
+            examComponents={examComponents.map((ec) => ({
+              id: ec.id,
+              code: ec.course.code,
+              name: ec.course.name,
+            }))}
+            events={openEvents}
           />
         </div>
       )}

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { bookStandaloneExamAction } from '@/app/student/actions'
 import { toast } from 'sonner'
-import { Loader2, ArrowRight, BookOpen, Wallet, CheckCircle2, X } from 'lucide-react'
+import { Loader2, ArrowRight, BookOpen, Wallet, Calendar, X } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
 
 interface ExamWithCourse {
@@ -15,11 +15,26 @@ interface ExamWithCourse {
   }
 }
 
+interface ExamComponent {
+  id: string
+  code: string
+  name: string
+}
+
+interface ExamEvent {
+  id: string
+  name: string
+  startDate: Date
+  endDate: Date
+}
+
 interface StandaloneBookingProps {
   price: number
   currency: string
   availableBalance: number
   upcomingExams: ExamWithCourse[]
+  examComponents: ExamComponent[]
+  events: ExamEvent[]
 }
 
 export default function StandaloneBooking({
@@ -27,42 +42,50 @@ export default function StandaloneBooking({
   currency,
   availableBalance,
   upcomingExams,
+  examComponents,
+  events,
 }: StandaloneBookingProps) {
   const [open, setOpen] = useState(false)
-  const [selectedModuleId, setSelectedModuleId] = useState('')
+  const [selectedExamId, setSelectedExamId] = useState('')
+  const [selectedModuleCode, setSelectedModuleCode] = useState('')
+  const [selectedEventId, setSelectedEventId] = useState(events[0]?.id || '')
   const [isPending, startTransition] = useTransition()
 
   const currencySymbol = getCurrencySymbol(currency)
   const canAfford = availableBalance >= price
 
   const handleConfirm = () => {
-    if (!selectedModuleId) {
-      toast.error('Please select an exam before booking.')
+    // Priority 1: Specific Scheduled Exam
+    // Priority 2: Module + Event pairing
+    if (!selectedExamId && !selectedModuleCode) {
+      toast.error('Please select an exam or module before booking.')
       return
     }
 
     startTransition(async () => {
       try {
-        // In a real scenario, we would search for an Exam ID matching the module code.
-        // For this demo/impl, we'll assume the action handles finding the next available exam for that module.
-        // Alternatively, the admin provides specific Exam IDs.
-        // For now, I'll pass the selectedModuleId as if it's the examId (placeholder logic till dynamic search is better).
-        const res = await bookStandaloneExamAction(selectedModuleId)
+        const res = await bookStandaloneExamAction({
+          examId: selectedExamId || undefined,
+          moduleCode: selectedModuleCode || undefined,
+          eventId: selectedEventId || undefined,
+        })
+
         if (res.error) {
           toast.error(res.error)
         } else {
           if (res.usedBundle) {
-            toast.success('Exam booked successfully! 1 seat was deducted from your Exam Package.')
+            toast.success('Exam booked successfully!  seat deducted from your bundle.')
           } else {
             toast.success(
               `Exam booked successfully! ${currencySymbol}${price.toFixed(2)} charged from your wallet.`
             )
           }
           setOpen(false)
-          setSelectedModuleId('')
+          setSelectedExamId('')
+          setSelectedModuleCode('')
         }
-      } catch {
-        toast.error('Something went wrong. Please try again.')
+      } catch (err: any) {
+        toast.error(err.message || 'Something went wrong. Please try again.')
       }
     })
   }
@@ -71,10 +94,10 @@ export default function StandaloneBooking({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="w-full rounded-xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 transition-all hover:border-blue-300 hover:bg-blue-50/50 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+        className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition-all hover:border-blue-300 hover:bg-blue-50/50 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
       >
-        Book Standalone Individual Seat ({currencySymbol}
-        {price.toFixed(2)})
+        Book Individual Seat ({currencySymbol}
+        {price.toFixed(0)})
       </button>
 
       {open && (
@@ -91,7 +114,7 @@ export default function StandaloneBooking({
                   Individual Exam Booking
                 </h2>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">
-                  Fixed pricing for immediate seat confirmation.
+                  Select a module and event to book your individual seat.
                 </p>
               </div>
               <button
@@ -123,26 +146,82 @@ export default function StandaloneBooking({
                 </div>
               </div>
 
-              <div>
-                <label className="mb-2 flex items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-300">
-                  <BookOpen className="h-4 w-4" />
-                  Select Module Exam
-                </label>
-                <select
-                  value={selectedModuleId}
-                  onChange={(e) => setSelectedModuleId(e.target.value)}
-                  disabled={isPending}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-                >
-                  <option value="">— Choose a scheduled exam —</option>
-                  {upcomingExams.map((exam) => (
-                    <option key={exam.id} value={exam.id}>
-                      {exam.examComponent.course.code} — {exam.name} (
-                      {new Date(exam.examDate).toLocaleDateString()})
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Scheduled Exams Dropdown (Primary) */}
+              {upcomingExams.length > 0 && (
+                <div>
+                  <label className="mb-2 flex items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-300">
+                    <Calendar className="h-4 w-4" />
+                    Scheduled Session (Optional)
+                  </label>
+                  <select
+                    value={selectedExamId}
+                    onChange={(e) => {
+                      setSelectedExamId(e.target.value)
+                      if (e.target.value) setSelectedModuleCode('')
+                    }}
+                    disabled={isPending}
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  >
+                    <option value="">— Choose a specific session —</option>
+                    {upcomingExams.map((exam) => (
+                      <option key={exam.id} value={exam.id}>
+                        {exam.examComponent.course.code} | {exam.name} (
+                        {new Date(exam.examDate).toLocaleDateString(undefined, {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                        )
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Module Dropdown (Secondary/Fallback) */}
+              {!selectedExamId && (
+                <>
+                  <div>
+                    <label className="mb-2 flex items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-300">
+                      <BookOpen className="h-4 w-4" />
+                      Select Module Exam
+                    </label>
+                    <select
+                      value={selectedModuleCode}
+                      onChange={(e) => setSelectedModuleCode(e.target.value)}
+                      disabled={isPending}
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    >
+                      <option value="">— Select a module —</option>
+                      {examComponents.map((ec) => (
+                        <option key={ec.id} value={ec.code}>
+                          {ec.code} | {ec.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {selectedModuleCode && events.length > 0 && (
+                    <div>
+                      <label className="mb-2 flex items-center gap-1.5 text-sm font-bold text-slate-700 dark:text-slate-300">
+                        <Calendar className="h-4 w-4" />
+                        Target Exam Event
+                      </label>
+                      <select
+                        value={selectedEventId}
+                        onChange={(e) => setSelectedEventId(e.target.value)}
+                        disabled={isPending}
+                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-900 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                      >
+                        {events.map((e) => (
+                          <option key={e.id} value={e.id}>
+                            {e.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
+                </>
+              )}
 
               {!canAfford && (
                 <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
@@ -150,7 +229,7 @@ export default function StandaloneBooking({
                 </div>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setOpen(false)}
                   className="flex-1 rounded-xl border border-slate-200 py-3 text-sm font-bold text-slate-700 dark:border-slate-700 dark:text-slate-300"
@@ -159,8 +238,8 @@ export default function StandaloneBooking({
                 </button>
                 <button
                   onClick={handleConfirm}
-                  disabled={isPending || !selectedModuleId || !canAfford}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#002a5c] py-3 text-sm font-bold text-white hover:bg-[#003a7c] active:scale-95 disabled:opacity-50"
+                  disabled={isPending || (!selectedExamId && !selectedModuleCode) || !canAfford}
+                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-[#002a5c] py-3 text-sm font-bold text-white hover:bg-[#003a7c] active:scale-95 disabled:opacity-50"
                 >
                   {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Booking'}
                   {!isPending && <ArrowRight className="h-4 w-4" />}
