@@ -2,6 +2,7 @@ import { NotificationType } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
 import { getFinanceConfig, getRegistrationConfig } from '@/lib/settings'
 import { getBaseUrl } from '@/lib/utils/url'
+import { formatPaymentType } from '@/lib/utils/string'
 
 type TxClient = any // Prisma transaction client
 
@@ -622,7 +623,7 @@ export async function renderPaymentApprovedEmail(
 
   const body = replacePlaceholders(template.body, {
     firstName,
-    paymentType,
+    paymentType: formatPaymentType(paymentType),
     amount: amount.toLocaleString(),
   })
 
@@ -744,7 +745,7 @@ export async function renderPaymentRejectedEmail(
   const baseUrl = await getBaseUrl()
   const body = replacePlaceholders(template.body, {
     firstName,
-    paymentType,
+    paymentType: formatPaymentType(paymentType),
     reason,
     loginUrl: `${baseUrl}/login`,
   })
