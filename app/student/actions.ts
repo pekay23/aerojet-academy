@@ -817,31 +817,37 @@ export async function markMessageAsRead(messageId: string) {
   }
 }
 
-export async function bookStandaloneExamAction(examId: string) {
+export async function bookStandaloneExamAction(params: {
+  examId?: string
+  moduleCode?: string
+  eventId?: string
+}) {
   try {
     const user = await requireStudent()
-    const result = await bookStandaloneExam(examId, user.id)
+    const result = await bookStandaloneExam(user.id, params)
 
-    // Check if we need to deduce module name or exam name for notification
-    const exam = await prisma.exam.findUnique({
-      where: { id: examId },
-      include: { examComponent: { include: { course: true } } },
+    const typeStr = result.usedBundle ? 'an Exam Package seat' : 'wallet balance'
+    const nameStr =
+      params.moduleCode ||
+      (await prisma.exam
+        .findUnique({
+          where: { id: params.examId },
+          include: { examComponent: { include: { course: true } } },
+        })
+        .then((e) => e?.examComponent.course.code || 'exam'))
+
+    await prisma.notification.create({
+      data: {
+        userId: user.id,
+        title: 'Individual Exam Booked',
+        message: `You have successfully booked the standalone exam "${nameStr}" using ${typeStr}.`,
+        type: 'SUCCESS',
+        linkUrl: '/student/exams',
+        linkText: 'View Exams',
+      },
     })
 
-    if (exam) {
-      const typeStr = result.usedBundle ? 'an Exam Package seat' : 'wallet balance'
-      await prisma.notification.create({
-        data: {
-          userId: user.id,
-          title: 'Individual Exam Booked',
-          message: `You have successfully booked the standalone exam "${exam.examComponent?.course?.code || ''} ${exam.name}" using ${typeStr}.`,
-          type: 'SUCCESS',
-          linkUrl: '/student/exams',
-          linkText: 'View Exams',
-        },
-      })
-    }
-
+    revalidatePath('/student/exam-pools')
     revalidatePath('/student/exams')
     revalidatePath('/student/wallet')
     return { success: true, usedBundle: result.usedBundle }

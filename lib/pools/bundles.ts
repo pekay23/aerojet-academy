@@ -113,6 +113,8 @@ export async function purchaseBundle(
           },
         })
 
+        const assignedPoolIds = new Set<string>()
+
         // Auto-assign into pools
         for (const comp of components) {
           const courseCode = comp.course.code
@@ -135,7 +137,10 @@ export async function purchaseBundle(
             where: {
               eventId: activeEvent.id,
               status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] },
+              // Optimization: only bother with pools we haven't already assigned this user to in this tx
+              id: { notIn: Array.from(assignedPoolIds) },
             },
+            orderBy: { currentMemberCount: 'desc' }, // Try to fill nearly-full pools first
           })
 
           let targetPool = null
@@ -152,6 +157,7 @@ export async function purchaseBundle(
           }
 
           if (targetPool) {
+            assignedPoolIds.add(targetPool.id)
             const newAllowed = [...targetPool.allowedModules]
             if (!newAllowed.includes(courseCode)) {
               newAllowed.push(courseCode)
@@ -186,6 +192,7 @@ export async function purchaseBundle(
                 seatPrice: 300,
               },
             })
+            assignedPoolIds.add(targetPool.id)
           }
 
           // Create PoolMembership
@@ -215,22 +222,11 @@ export async function purchaseBundle(
           })
         }
 
-        // Upgrade role if needed
-        const u = await tx.user.findUnique({ where: { id: userId } })
-        if (u?.role === 'APPLICANT') {
-          await tx.user.update({
-            where: { id: userId },
-            data: { role: 'STUDENT' },
-          })
-          await tx.studentProfile.update({
-            where: { userId },
-            data: { enrollmentStatus: 'ENROLLED' },
-          })
-        }
-
         return { success: true, bundleId: bundle.id }
       },
-      { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
+      {
+        timeout: 20000, // Increase to 20s for complex 4-pack transactions
+      }
     )
 
     // Send bundle purchase confirmation email (outside transaction)

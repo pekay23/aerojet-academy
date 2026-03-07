@@ -19,6 +19,7 @@ import { PaymentStatus, ProgrammeChoice } from '@prisma/client'
 import { topUpWallet } from '@/lib/wallet/operations'
 import { shouldPromoteOnPayment, promoteApplicantToStudent } from '@/lib/enrollment/pathway'
 import { generateMilestonesForYear } from '@/lib/enrollment/full-time'
+import { formatPaymentType } from '@/lib/utils/string'
 
 /** Maps ProgrammeChoice enum to FullTimeProgramme.code */
 const PROGRAMME_CODE_MAP: Record<string, string> = {
@@ -337,7 +338,7 @@ export const POST = withErrorHandler(
         data: {
           userId: payment.userId,
           title: 'Payment Approved',
-          message: `Your payment of ${payment.currency || 'EUR'} ${payment.amount} for ${payment.referenceType || 'services'} has been approved.`,
+          message: `Your payment of ${payment.currency || 'EUR'} ${payment.amount} for ${formatPaymentType(payment.referenceType || 'services')} has been approved.`,
           type: 'SUCCESS',
           linkUrl: '/student/wallet?tab=payments',
           linkText: 'View Payments',
@@ -390,7 +391,7 @@ export const POST = withErrorHandler(
         data: {
           userId: payment.userId,
           title: 'Payment Rejected',
-          message: `Your payment of ${payment.currency || 'EUR'} ${payment.amount} for ${payment.referenceType || 'services'} has been rejected. Reason: ${reason}.`,
+          message: `Your payment of ${payment.currency || 'EUR'} ${payment.amount} for ${formatPaymentType(payment.referenceType || 'services')} has been rejected. Reason: ${reason}.`,
           type: 'ERROR',
           linkUrl: '/student/wallet?tab=payments',
           linkText: 'View Payments',
