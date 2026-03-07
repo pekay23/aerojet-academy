@@ -7,6 +7,8 @@ import StudentDetailPanel from './StudentDetailPanel'
 interface Student {
   id: string
   email: string
+  personalEmail?: string | null
+  academyEmail?: string | null
   status: string
   emailVerified?: string | null
   createdAt: string

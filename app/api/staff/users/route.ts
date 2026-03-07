@@ -30,6 +30,8 @@ export async function GET(req: NextRequest) {
       select: {
         id: true,
         email: true,
+        personalEmail: true,
+        academyEmail: true,
         role: true,
         status: true,
         emailVerified: true,

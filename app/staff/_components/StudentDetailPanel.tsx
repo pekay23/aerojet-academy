@@ -23,6 +23,8 @@ import UserActionsMenu from './UserActionsMenu'
 interface Student {
   id: string
   email: string
+  personalEmail?: string | null
+  academyEmail?: string | null
   status: string
   emailVerified?: string | null
   createdAt: string
@@ -204,7 +206,14 @@ export default function StudentDetailPanel({ student, onClose, onActionComplete 
           <>
             <Section title="Personal Information">
               <Grid2>
-                <Field icon={Mail} label="Email" value={student.email} />
+                {student.academyEmail && (
+                  <Field icon={Mail} label="Academy Email" value={student.academyEmail} />
+                )}
+                {student.personalEmail ? (
+                  <Field icon={Mail} label="Personal Email" value={student.personalEmail} />
+                ) : (
+                  !student.academyEmail && <Field icon={Mail} label="Email" value={student.email} />
+                )}
                 <Field icon={Phone} label="Phone" value={student.profile?.phone ?? '—'} />
                 <Field
                   icon={Globe}
