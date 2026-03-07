@@ -24,6 +24,7 @@ interface Student {
   id: string
   email: string
   status: string
+  emailVerified?: string | null
   createdAt: string
   profile?: {
     firstName: string
@@ -162,6 +163,7 @@ export default function StudentDetailPanel({ student, onClose, onActionComplete 
               userId={student.id}
               userStatus={student.status}
               userEmail={student.email}
+              isEmailVerified={!!student.emailVerified}
               onActionComplete={onActionComplete}
             />
             <button

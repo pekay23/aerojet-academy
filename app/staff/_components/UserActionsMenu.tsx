@@ -29,6 +29,7 @@ interface UserActionsMenuProps {
   userEmail: string
   userRole?: string
   userName?: string
+  isEmailVerified?: boolean
   onActionComplete?: () => void
 }
 
@@ -38,6 +39,7 @@ export default function UserActionsMenu({
   userEmail,
   userRole,
   userName = 'this user',
+  isEmailVerified = true,
   onActionComplete,
 }: UserActionsMenuProps) {
   const [loading, setLoading] = useState<string | null>(null)
@@ -109,6 +111,12 @@ export default function UserActionsMenu({
           action: 'reset-password',
           variant: 'default',
         },
+        !isEmailVerified && {
+          label: 'Resend Verification Email',
+          icon: ShieldCheck,
+          action: 'resend-verification',
+          variant: 'default',
+        },
         {
           label: 'Send Email',
           icon: Mail,
@@ -149,7 +157,7 @@ export default function UserActionsMenu({
         </DropdownMenuTrigger>
 
         <DropdownMenuContent align="end" side="bottom" collisionPadding={10} className="w-48 p-1">
-          {actions.map((item) => {
+          {actions.filter(Boolean).map((item: any) => {
             const Icon = item.icon
             const colorClass =
               item.variant === 'danger'
