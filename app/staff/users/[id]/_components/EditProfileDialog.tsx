@@ -23,6 +23,7 @@ interface EditProfileDialogProps {
     middleName?: string
     lastName?: string
     email: string
+    personalEmail?: string | null
     phone?: string
     nationality?: string
     dateOfBirth?: string | Date | null
@@ -46,6 +47,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
     middleName: initialData.middleName || '',
     lastName: initialData.lastName || '',
     email: initialData.email || '',
+    personalEmail: initialData.personalEmail || '',
     phone: initialData.phone || '',
     nationality: initialData.nationality || '',
     dateOfBirth: formatDate(initialData.dateOfBirth),
@@ -128,7 +130,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
           </div>
 
           <div className="grid gap-2">
-            <Label htmlFor="email">Email Address</Label>
+            <Label htmlFor="email">Login / Academy Email</Label>
             <Input
               id="email"
               name="email"
@@ -136,6 +138,21 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
               value={formData.email}
               onChange={handleChange}
             />
+            <p className="text-[10px] text-slate-400">
+              Used for signing in and academy correspondence
+            </p>
+          </div>
+
+          <div className="grid gap-2">
+            <Label htmlFor="personalEmail">Personal Email</Label>
+            <Input
+              id="personalEmail"
+              name="personalEmail"
+              type="email"
+              value={formData.personalEmail}
+              onChange={handleChange}
+            />
+            <p className="text-[10px] text-slate-400">Original email for external communication</p>
           </div>
 
           <div className="grid gap-2">

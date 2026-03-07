@@ -181,6 +181,7 @@ export default async function UserProfilePage({ params }: Props) {
                   middleName: user.profile?.middleName || undefined,
                   lastName: user.profile?.lastName,
                   email: user.email,
+                  personalEmail: user.personalEmail,
                   phone: user.profile?.phone || undefined,
                   nationality: user.profile?.nationality || undefined,
                   dateOfBirth: user.profile?.dateOfBirth,
@@ -190,13 +191,24 @@ export default async function UserProfilePage({ params }: Props) {
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">
-                  Email Address
+                  {user.academyEmail ? 'Academy Email' : 'Email Address'}
                 </p>
                 <div className="flex items-center gap-2 font-bold break-all text-slate-700 dark:text-slate-300">
                   <Mail className="h-4 w-4 text-[#4c9ded] dark:text-blue-400" />
-                  {user.email}
+                  {user.academyEmail || user.email}
                 </div>
               </div>
+              {user.personalEmail && (
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                  <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">
+                    Personal Email
+                  </p>
+                  <div className="flex items-center gap-2 font-bold break-all text-slate-700 dark:text-slate-300">
+                    <Mail className="h-4 w-4 text-[#4c9ded] dark:text-blue-400" />
+                    {user.personalEmail}
+                  </div>
+                </div>
+              )}
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">
                   Phone Number

@@ -8,6 +8,8 @@ import CreateUserDialog from './CreateUserDialog'
 interface User {
   id: string
   email: string
+  personalEmail?: string | null
+  academyEmail?: string | null
   role: string
   status: string
   emailVerified: string | null
