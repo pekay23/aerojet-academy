@@ -27,13 +27,21 @@ export async function GET(req: NextRequest) {
   const [users, total] = await Promise.all([
     prisma.user.findMany({
       where,
-      include: {
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        status: true,
+        emailVerified: true,
+        createdAt: true,
         profile: {
           select: { firstName: true, lastName: true, phone: true, profilePhotoUrl: true },
         },
-        ...(role === 'INSTRUCTOR' && {
-          instructorProfile: { select: { employeeId: true, specialization: true } },
-        }),
+        ...(role === 'INSTRUCTOR'
+          ? {
+              instructorProfile: { select: { employeeId: true, specialization: true } },
+            }
+          : {}),
       },
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,

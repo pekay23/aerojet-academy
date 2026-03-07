@@ -160,6 +160,7 @@ export default async function UserProfilePage({ params }: Props) {
             userEmail={user.email}
             userRole={user.role}
             userName={fullName}
+            isEmailVerified={!!user.emailVerified}
           />
         </div>
       </div>

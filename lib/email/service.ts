@@ -1,6 +1,6 @@
 import { NotificationType } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
-import { getFinanceConfig, getRegistrationConfig } from '@/lib/settings'
+import { getFinanceConfig, getRegistrationConfig, getEmailConfig } from '@/lib/settings'
 import { getBaseUrl } from '@/lib/utils/url'
 import { formatPaymentType } from '@/lib/utils/string'
 
@@ -36,7 +36,20 @@ export async function createNotification(
 // ---------------------------------------------------------------------------
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY
-const FROM_EMAIL = process.env.FROM_EMAIL || 'noreply@aerojet-academy.com'
+
+/**
+ * Resolves the sender email address based on environment variables or dynamic settings.
+ * Defaults to the recommended subdomain pattern: noreply@mail.aerojet-academy.com
+ */
+async function getFromEmail() {
+  if (process.env.FROM_EMAIL) return process.env.FROM_EMAIL
+
+  const config = await getEmailConfig()
+  const display = config.fromName ? `"${config.fromName}" ` : ''
+  const email = `${config.fromAddress}@${config.subdomain}.${config.rootDomain}`
+
+  return `${display}<${email}>`
+}
 
 /**
  * Replaces {{handlebars}} style placeholders in a string.
@@ -70,12 +83,14 @@ interface EmailPayload {
 
 export async function sendEmail(payload: EmailPayload): Promise<boolean> {
   if (!RESEND_API_KEY) {
+    const fromAddress = await getFromEmail()
     console.warn('[Email] RESEND_API_KEY not set. Logging email instead:', payload.subject)
-    console.log(`To: ${payload.to} | Subject: ${payload.subject}`)
+    console.log(`From: ${fromAddress} | To: ${payload.to} | Subject: ${payload.subject}`)
     return true
   }
 
   try {
+    const fromAddress = await getFromEmail()
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -83,7 +98,7 @@ export async function sendEmail(payload: EmailPayload): Promise<boolean> {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: FROM_EMAIL,
+        from: fromAddress,
         to: payload.to,
         subject: payload.subject,
         html: payload.html,

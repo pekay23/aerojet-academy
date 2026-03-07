@@ -75,3 +75,18 @@ export async function getFinanceConfig() {
     paymentMethods: (settings.get('payment_methods') || 'BANK_TRANSFER').split(','),
   }
 }
+
+export async function getEmailConfig() {
+  const settings = await getSystemSettings([
+    'email_from_name',
+    'email_from_address',
+    'email_subdomain',
+  ])
+
+  return {
+    fromName: settings.get('email_from_name') || 'Aerojet Academy',
+    fromAddress: settings.get('email_from_address') || 'noreply',
+    subdomain: settings.get('email_subdomain') || 'mail',
+    rootDomain: 'aerojet-academy.com', // Base domain for the academy
+  }
+}
