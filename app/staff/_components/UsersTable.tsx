@@ -10,6 +10,7 @@ interface User {
   email: string
   role: string
   status: string
+  emailVerified: string | null
   createdAt: string
   profile?: {
     firstName: string
@@ -245,6 +246,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                           userEmail={user.email}
                           userRole={user.role}
                           userName={fullName}
+                          isEmailVerified={!!user.emailVerified}
                           onActionComplete={fetchUsers}
                         />
                       </td>

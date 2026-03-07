@@ -8,6 +8,7 @@ interface Student {
   id: string
   email: string
   status: string
+  emailVerified?: string | null
   createdAt: string
   profile?: {
     firstName: string
