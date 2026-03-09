@@ -36,7 +36,7 @@ const FAQS = [
   {
     category: "Fees & Finance",
     items: [
-      { q: "What are the costs?", a: "Costs vary by course. Exam Seats start at €300. Full pricing is available in the Applicant Portal after registration." },
+      { q: "What are the costs?", a: "Costs vary by course. Full pricing is available in the Applicant Portal after registration." },
       { q: "Are scholarships available?", a: "Yes. 10 full scholarships annually for top candidates based on aptitude test performance." },
       { q: "Is there a refund policy?", a: "No cash refunds. Short courses (<1 year): can defer. Long courses (2+ years): wallet credit for un-started academic years." },
     ],
