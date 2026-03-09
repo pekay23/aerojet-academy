@@ -299,8 +299,16 @@ async function main() {
       moduleType: 'CORE' as const,
     },
     {
-      code: 'M11',
-      name: 'Turbine Aeroplane Aerodynamics & Systems',
+      code: 'M11A',
+      name: 'Aeroplane Aerodynamics (Turbine)',
+      duration: 25,
+      price: 1400.0,
+      categoryId: specialistCategory.id,
+      moduleType: 'SPECIALIST' as const,
+    },
+    {
+      code: 'M11B',
+      name: 'Aeroplane Aerodynamics (Piston)',
       duration: 25,
       price: 1400.0,
       categoryId: specialistCategory.id,
@@ -386,17 +394,24 @@ async function main() {
   // ============================================================================
   console.log('📝 Seeding Exam Components...')
   for (const mod of moduleData) {
-    // Standard MCQ for every module (€520 individual / €300 pool)
+    const isM7 = mod.code === 'M7';
+    const isM9 = mod.code === 'M9';
+    const isM17 = mod.code === 'M17';
+    
+    // Standard MCQ component
+    // If it has a specific suffix in dropdown, we use that as the code
+    const mcqCode = isM7 ? 'M7A' : isM9 ? 'M9A' : isM17 ? 'M17A' : mod.code;
+
     await prisma.examComponent.upsert({
-      where: { code: `${mod.code}_MCQ` },
+      where: { code: mcqCode },
       update: {
         individualPrice: 520.0,
         poolPrice: 300.0,
       },
       create: {
         courseId: createdModules[mod.code].id,
-        code: `${mod.code}_MCQ`,
-        name: `${mod.code} Multiple Choice Exam`,
+        code: mcqCode,
+        name: `${mod.name} Multiple Choice Exam`,
         type: 'MCQ',
         duration: 90,
         individualPrice: 520.0,
@@ -404,9 +419,27 @@ async function main() {
       },
     })
 
-    // Create the independent MP Essay specifically for M7/M9/M10
-    if (['M7', 'M9', 'M10'].includes(mod.code)) {
+    // Special Essay component for M7 (M7B), M9, M10
+    if (isM7) {
       await prisma.examComponent.upsert({
+        where: { code: 'M7B' },
+        update: {
+          individualPrice: 340.0,
+          poolPrice: 340.0,
+        },
+        create: {
+          courseId: createdModules[mod.code].id,
+          code: 'M7B',
+          name: 'Maintenance Practices Essay Exam',
+          type: 'ESSAY',
+          duration: 40,
+          individualPrice: 340.0,
+          poolPrice: 340.0,
+        },
+      })
+    } else if (['M9', 'M10'].includes(mod.code)) {
+       // M9 Essay, M10 Essay - use _ESSAY suffix if not explicitly mapped to a sub-code
+       await prisma.examComponent.upsert({
         where: { code: `${mod.code}_ESSAY` },
         update: {
           individualPrice: 340.0,
@@ -415,10 +448,10 @@ async function main() {
         create: {
           courseId: createdModules[mod.code].id,
           code: `${mod.code}_ESSAY`,
-          name: `${mod.code} Essay Exam`,
+          name: `${mod.name} Essay Exam`,
           type: 'ESSAY',
           duration: 40,
-          individualPrice: 340.0, // Specific MP Essay modular price
+          individualPrice: 340.0,
           poolPrice: 340.0,
         },
       })
@@ -430,8 +463,8 @@ async function main() {
   // ============================================================================
   console.log('🔗 Mapping modules to licenses...')
   const requirementsMap: Record<string, string[]> = {
-    'B1.1': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M15', 'M17'],
-    'B1.2': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11', 'M16', 'M17'],
+    'B1.1': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11A', 'M15', 'M17'],
+    'B1.2': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11B', 'M16', 'M17'],
     'B1.3': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M12', 'M15'],
     'B1.4': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M12', 'M16'],
     B2: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M13', 'M14'],

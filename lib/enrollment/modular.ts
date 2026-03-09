@@ -65,7 +65,7 @@ export async function enrollInModularPackage(packageId: string, userId: string) 
     for (const moduleCode of pkg.modulesIncluded) {
       // Exam → ExamComponent → Course (not Exam → Course directly)
       const exam = await tx.exam.findFirst({
-        where: { examComponent: { course: { code: moduleCode }, type: 'MCQ' } },
+        where: { examComponent: { code: moduleCode, type: 'MCQ' } },
         orderBy: { examDate: 'asc' },
       })
 
