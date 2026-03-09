@@ -8,7 +8,7 @@ import {
   XCircle,
   Clock,
   MapPin,
-  Award,
+
   FileBarChart2,
 } from 'lucide-react'
 
@@ -351,16 +351,7 @@ export default async function ExamsPage({
                         <ResitBookingButton examId={result.examId} examName={result.exam.name} />
                       )}
                     </div>
-                    {result.certificateUrl && (
-                      <a
-                        href={result.certificateUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-2 text-xs font-bold text-white uppercase transition-colors hover:bg-slate-800"
-                      >
-                        <Award className="h-4 w-4" /> Download Certificate
-                      </a>
-                    )}
+
                   </div>
                 </div>
               ))}

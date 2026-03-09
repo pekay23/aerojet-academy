@@ -42,7 +42,7 @@ export default function ExamSchedulePage() {
                 <ul className="space-y-2 text-sm text-slate-300 list-disc pl-5">
                     <li>Exam seats must be <strong>paid in full</strong> by the Payment Deadline (T-21).</li>
                     <li>Windows are confirmed only if minimum numbers (60 seats) are met by the deadline.</li>
-                    <li>Unconfirmed windows roll forward to the next date at no extra cost.</li>
+                    <li>Unconfirmed windows roll forward to the next date.</li>
                 </ul>
             </div>
           </SectionReveal>
