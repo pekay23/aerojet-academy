@@ -25,6 +25,8 @@ import PayMilestoneButton from '../_components/PayMilestoneButton'
 import { UploadProofForm } from './top-up/_components/UploadProofForm'
 import { getActivePaymentMethods } from '@/lib/payment-methods'
 import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
+import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
+import { getCurrencySymbol } from '@/lib/currency'
 
 export const metadata: Metadata = { title: 'Wallet | Student Portal' }
 
@@ -67,7 +69,6 @@ export default async function WalletPage({
     currency: wallet?.currency || 'EUR',
   }
 
-  const { getCurrencySymbol } = await import('@/lib/currency')
   const currencySymbol = getCurrencySymbol(walletBalance.currency)
   const hasPendingTopups = pendingTopups.length > 0
 
@@ -106,6 +107,8 @@ export default async function WalletPage({
         description: `Pending Payment (${p.paymentMethod})`,
         status: p.status,
         currency: p.currency,
+        paymentCurrency: p.paymentCurrency,
+        originalAmount: p.originalAmount,
         isPending: true,
       })),
       ...walletTransactions.map((tx) => ({
@@ -126,6 +129,8 @@ export default async function WalletPage({
         description: `${p.referenceType || 'Payment'} (${p.paymentMethod || 'Transfer'})`,
         status: 'COMPLETED',
         currency: p.currency,
+        paymentCurrency: p.paymentCurrency,
+        originalAmount: p.originalAmount,
         isPending: false,
       })),
     ].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
@@ -165,12 +170,13 @@ export default async function WalletPage({
                       Available Balance
                     </p>
                     <div className="flex items-baseline gap-1.5 sm:gap-2">
-                      <span className="text-2xl font-black sm:text-4xl">
-                        {currencySymbol}
-                        {walletBalance.available.toLocaleString(undefined, {
-                          minimumFractionDigits: 2,
-                        })}
-                      </span>
+                      <CurrencyDisplay
+                        amount={walletBalance.available}
+                        baseCurrency={walletBalance.currency}
+                        clickToToggle={true}
+                        size="lg"
+                        amountClassName="text-white!"
+                      />
                     </div>
                     <p className="mt-0.5 text-[9px] font-bold tracking-widest text-blue-200/60 uppercase sm:text-[10px]">
                       Ref: {studentId}
@@ -182,10 +188,13 @@ export default async function WalletPage({
                 <p className="text-[9px] font-bold tracking-widest text-blue-200/60 uppercase sm:text-[10px]">
                   Reserved (In Bookings)
                 </p>
-                <p className="text-lg font-black sm:text-xl">
-                  {currencySymbol}
-                  {walletBalance.held.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </p>
+                <CurrencyDisplay
+                  amount={walletBalance.held}
+                  baseCurrency={walletBalance.currency}
+                  clickToToggle={true}
+                  size="md"
+                  amountClassName="text-blue-100/90!"
+                />
                 <p className="mt-1 text-[9px] text-blue-200/40 sm:text-[10px]">
                   Held pending booking confirmation. Released if booking is cancelled.
                 </p>
@@ -381,9 +390,13 @@ export default async function WalletPage({
                             />
                           )}
 
-                        <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                          {currencySymbol} {Number(m.amountDue).toLocaleString()}
-                        </span>
+                        <CurrencyDisplay
+                          amount={Number(m.amountDue)}
+                          baseCurrency={walletBalance.currency}
+                          clickToToggle={true}
+                          size="sm"
+                          amountClassName="text-emerald-600 dark:text-emerald-400"
+                        />
                       </div>
                     </div>
                   )
@@ -513,6 +526,12 @@ export default async function WalletPage({
                                     </p>
                                     <p className="text-[10px] text-slate-400 uppercase">
                                       {tx.type.replace('_', ' ')}
+                                      {tx.paymentCurrency && tx.paymentCurrency !== 'EUR' && (
+                                        <span className="ml-1">
+                                          ({tx.paymentCurrency}{' '}
+                                          {Number(tx.originalAmount || tx.amount).toFixed(2)})
+                                        </span>
+                                      )}
                                     </p>
                                   </div>
                                 </div>
@@ -529,15 +548,19 @@ export default async function WalletPage({
                                 </span>
                               </td>
                               <td className="px-6 py-4 text-right">
-                                <p
-                                  className={`text-sm font-black ${tx.isPending ? 'text-slate-400' : credit ? 'text-emerald-600' : 'text-slate-900 dark:text-slate-100'}`}
-                                >
-                                  {!tx.isPending && (credit ? '+' : '-')}
-                                  {tx.currency}{' '}
-                                  {Number(tx.amount).toLocaleString(undefined, {
-                                    minimumFractionDigits: 2,
-                                  })}
-                                </p>
+                                <CurrencyDisplay
+                                  amount={Number(tx.amount)}
+                                  baseCurrency={tx.currency}
+                                  clickToToggle={true}
+                                  size="sm"
+                                  amountClassName={
+                                    tx.isPending
+                                      ? 'text-slate-400!'
+                                      : credit
+                                        ? 'text-emerald-600!'
+                                        : 'text-slate-900! dark:text-slate-100!'
+                                  }
+                                />
                               </td>
                             </tr>
                           )
@@ -573,22 +596,35 @@ export default async function WalletPage({
                                 <p className="text-sm leading-tight font-bold text-slate-900 dark:text-slate-100">
                                   {tx.description}
                                 </p>
-                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                  {new Date(tx.createdAt).toLocaleDateString(undefined, {
-                                    day: 'numeric',
-                                    month: 'short',
-                                  })}{' '}
-                                  • {tx.type.replace('_', ' ')}
-                                </p>
+                                  <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                    {new Date(tx.createdAt).toLocaleDateString(undefined, {
+                                      day: 'numeric',
+                                      month: 'short',
+                                    })}{' '}
+                                    • {tx.type.replace('_', ' ')}
+                                    {tx.paymentCurrency && tx.paymentCurrency !== 'EUR' && (
+                                      <span className="block italic">
+                                        Org: {tx.paymentCurrency}{' '}
+                                        {Number(tx.originalAmount || tx.amount).toFixed(2)}
+                                      </span>
+                                    )}
+                                  </p>
                               </div>
                             </div>
                             <div className="pl-2 text-right">
-                              <p
-                                className={`text-sm font-black ${tx.isPending ? 'text-slate-400' : credit ? 'text-emerald-600' : 'text-slate-900 dark:text-slate-100'}`}
-                              >
-                                {!tx.isPending && (credit ? '+' : '-')}
-                                {tx.currency} {Number(tx.amount).toFixed(2)}
-                              </p>
+                              <CurrencyDisplay
+                                amount={Number(tx.amount)}
+                                baseCurrency={tx.currency}
+                                clickToToggle={true}
+                                size="sm"
+                                amountClassName={
+                                  tx.isPending
+                                    ? 'text-slate-400!'
+                                    : credit
+                                      ? 'text-emerald-600!'
+                                      : 'text-slate-900! dark:text-slate-100!'
+                                }
+                              />
                               <span
                                 className={`mt-2 inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold tracking-wide uppercase ${
                                   tx.isPending

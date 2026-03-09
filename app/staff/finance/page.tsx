@@ -1,3 +1,4 @@
+import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
@@ -39,7 +40,7 @@ import {
 } from '@/lib/analytics/reports'
 import { formatCurrency } from '@/lib/analytics/metrics'
 
-export const metadata = { title: 'Finance | Staff Portal' }
+export const metadata: Metadata = { title: 'Finance | Staff Portal' }
 export const dynamic = 'force-dynamic'
 
 const VALID_TABS = ['overview', 'transactions', 'wallet-topups', 'reconciliation', 'reports']
@@ -63,6 +64,7 @@ async function getOverviewChartData() {
     if (!p.approvedAt) continue
     const d = new Date(p.approvedAt)
     const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
+    // p.amount is now standardized to EUR for all new payments
     if (key in map) map[key] += Number(p.amount)
   }
   return Object.entries(map).map(([k, revenue]) => ({ month: k.split(' ')[0], revenue }))
@@ -126,12 +128,26 @@ async function getTransactionsData(query?: string) {
 
   const relatedPayments = await prisma.payment.findMany({
     where: { id: { in: paymentIds } },
-    select: { id: true, reconciled: true },
+    select: {
+      id: true,
+      reconciled: true,
+      paymentCurrency: true,
+      originalAmount: true,
+    },
   })
 
-  const reconciliationMap = new Map(relatedPayments.map((p) => [p.id, p.reconciled]))
+  const paymentDataMap = new Map(
+    relatedPayments.map((p) => [
+      p.id,
+      {
+        reconciled: p.reconciled,
+        originalCurrency: p.paymentCurrency,
+        originalAmount: p.originalAmount ? Number(p.originalAmount) : null,
+      },
+    ])
+  )
 
-  return { serialized, symbol, reconciliationMap }
+  return { serialized, symbol, paymentDataMap }
 }
 
 async function getReportsData() {
@@ -220,9 +236,17 @@ async function WalletTopupsTab() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="font-bold text-slate-900 dark:text-slate-100">
-                          {req.currency} {Number(req.amount).toFixed(2)}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
+                            {req.currency} {Number(req.amount).toFixed(2)}
+                          </span>
+                          {req.paymentCurrency && req.paymentCurrency !== req.currency && (
+                            <span className="text-[10px] font-medium text-slate-400">
+                              (Original: {req.paymentCurrency}{' '}
+                              {Number(req.originalAmount || 0).toFixed(2)})
+                            </span>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         {req.proofUrl ? (
@@ -243,7 +267,11 @@ async function WalletTopupsTab() {
                       <TableCell>
                         <TopupActions
                           paymentId={req.id}
-                          amount={`${req.currency} ${Number(req.amount).toFixed(2)}`}
+                          amount={`${req.currency} ${Number(req.amount).toFixed(2)}${
+                            req.paymentCurrency && req.paymentCurrency !== req.currency
+                              ? ` (${req.paymentCurrency} ${Number(req.originalAmount || 0).toFixed(2)})`
+                              : ''
+                          }`}
                           userName={userName}
                         />
                       </TableCell>
@@ -326,7 +354,7 @@ async function WalletTopupsTab() {
 
 /* ─── Transactions Tab ─── */
 async function TransactionsTab({ query }: { query?: string }) {
-  const { serialized, symbol, reconciliationMap } = await getTransactionsData(query)
+  const { serialized, symbol, paymentDataMap } = await getTransactionsData(query)
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -390,8 +418,9 @@ async function TransactionsTab({ query }: { query?: string }) {
                   ? `${user.profile.firstName} ${user.profile.lastName}`
                   : user.email
 
-                const isReconciled =
-                  tx.referenceType === 'PAYMENT_ID' && reconciliationMap.get(tx.referenceId!)
+                const paymentData =
+                  tx.referenceType === 'PAYMENT_ID' ? paymentDataMap.get(tx.referenceId!) : null
+                const isReconciled = paymentData?.reconciled
 
                 return (
                   <TableRow
@@ -417,17 +446,26 @@ async function TransactionsTab({ query }: { query?: string }) {
                       </Badge>
                     </TableCell>
                     <TableCell className="px-6 py-5">
-                      <span
-                        className={`text-sm font-black ${
-                          ['TOP_UP', 'REFUND', 'RELEASE'].includes(tx.type)
-                            ? 'text-emerald-600 dark:text-emerald-400'
-                            : 'text-slate-900 dark:text-slate-100'
-                        }`}
-                      >
-                        {['TOP_UP', 'REFUND', 'RELEASE'].includes(tx.type) ? '+' : '-'}
-                        {symbol}
-                        {tx.amount.toFixed(2)}
-                      </span>
+                      <div className="flex flex-col">
+                        <span
+                          className={`text-sm font-black ${
+                            ['TOP_UP', 'REFUND', 'RELEASE'].includes(tx.type)
+                              ? 'text-emerald-600 dark:text-emerald-400'
+                              : 'text-slate-900 dark:text-slate-100'
+                          }`}
+                        >
+                          {['TOP_UP', 'REFUND', 'RELEASE'].includes(tx.type) ? '+' : '-'}
+                          {symbol}
+                          {tx.amount.toFixed(2)}
+                        </span>
+                        {paymentData?.originalCurrency &&
+                          paymentData.originalCurrency !== symbol && (
+                            <span className="text-[10px] font-medium text-slate-400">
+                              ({paymentData.originalCurrency}{' '}
+                              {paymentData.originalAmount?.toFixed(2)})
+                            </span>
+                          )}
+                      </div>
                     </TableCell>
                     <TableCell className="px-6 py-5">
                       <div className="flex flex-col gap-1">

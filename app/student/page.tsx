@@ -11,12 +11,16 @@ import {
   CheckCircle2,
   Package,
   AlertCircle,
+  Search,
+  GraduationCap,
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import WelcomeBanner from '@/components/WelcomeBanner'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
+
+import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 
 export const metadata: Metadata = { title: 'Dashboard | Student Portal' }
 
@@ -111,11 +115,16 @@ export default async function StudentDashboard() {
     : 0
 
   // Exam Bookings Joined
-  const poolMemberships = await prisma.poolMembership.findMany({
-    where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
-    include: { pool: true },
-    take: 3,
-  })
+  const [currentPoolsCount, poolMemberships] = await Promise.all([
+    prisma.poolMembership.count({
+      where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+    }),
+    prisma.poolMembership.findMany({
+      where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+      include: { pool: true },
+      take: 3,
+    }),
+  ])
 
   const renderActiveAcademicBlock = () => {
     if (isExamOnly) {
@@ -422,8 +431,6 @@ export default async function StudentDashboard() {
     B3_PISTON_AEROPLANE: 'B3 Piston Aeroplane',
   }
 
-  const { GraduationCap } = await import('lucide-react')
-
   const licenseList = profile.licenseTargets.map((t) => t.licenseCategory.code).join(' & ')
 
   return (
@@ -468,9 +475,13 @@ export default async function StudentDashboard() {
               <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
                 Available Balance
               </p>
-              <p className="text-xl font-black text-emerald-600 dark:text-emerald-400">
-                {wallet?.currency || 'EUR'} {Number(wallet?.availableBalance || 0).toFixed(2)}
-              </p>
+              <CurrencyDisplay
+                amount={Number(wallet?.availableBalance || 0)}
+                baseCurrency={wallet?.currency || 'EUR'}
+                clickToToggle={true}
+                size="lg"
+                amountClassName="text-emerald-600 dark:text-emerald-400"
+              />
             </div>
           </div>
         </div>
