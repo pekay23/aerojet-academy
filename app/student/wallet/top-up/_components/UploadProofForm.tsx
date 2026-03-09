@@ -1,10 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { FileText, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { FileText, CheckCircle2, AlertCircle, Loader2, RefreshCw } from 'lucide-react'
 import { UploadDropzone } from '@/lib/uploads/uploadthing'
 import { toast } from 'sonner'
+
+const CURRENCIES = [
+  { code: 'EUR', symbol: '\u20AC', label: 'Euro' },
+  { code: 'GHS', symbol: 'GH\u20B5', label: 'Ghana Cedi' },
+  { code: 'USD', symbol: '$', label: 'US Dollar' },
+] as const
 
 interface UploadProofFormProps {
   studentId: string
@@ -18,9 +24,43 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
     type: string
   } | null>(null)
   const [amount, setAmount] = useState('')
+  const [currency, setCurrency] = useState('GHS')
+  const [eurEquivalent, setEurEquivalent] = useState<number | null>(null)
+  const [ratesLoading, setRatesLoading] = useState(false)
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const router = useRouter()
+
+  // Fetch EUR equivalent when amount or currency changes
+  useEffect(() => {
+    if (!amount || currency === 'EUR') {
+      setEurEquivalent(currency === 'EUR' ? Number(amount) || null : null)
+      return
+    }
+    const controller = new AbortController()
+    const fetchRate = async () => {
+      setRatesLoading(true)
+      try {
+        const res = await fetch('/api/finance/rates', { signal: controller.signal })
+        const data = await res.json()
+        if (data.rates) {
+          const rate = data.rates[currency]
+          if (rate) {
+            setEurEquivalent(Math.round((Number(amount) / rate) * 100) / 100)
+          }
+        }
+      } catch {
+        // ignore abort
+      } finally {
+        setRatesLoading(false)
+      }
+    }
+    const timeout = setTimeout(fetchRate, 500)
+    return () => {
+      clearTimeout(timeout)
+      controller.abort()
+    }
+  }, [amount, currency])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,6 +77,8 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount,
+          currency,
+          eurEquivalent: eurEquivalent || amount,
           studentId,
           proofUrl,
           filename: fileDetails?.name,
@@ -74,6 +116,7 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
             setProofUrl(null)
             setFileDetails(null)
             setAmount('')
+            setCurrency('GHS')
           }}
           className="mt-6 text-sm font-bold text-green-600 hover:underline"
         >
@@ -85,17 +128,51 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label className="mb-2 block text-sm font-bold text-slate-700">Amount Paid (GHS)</label>
+      {/* Currency & Amount */}
+      <div className="space-y-3">
+        <label className="block text-sm font-bold text-slate-700 dark:text-slate-300">
+          Amount Paid
+        </label>
+        <div className="flex gap-2">
+          <div className="flex gap-1 rounded-xl border border-slate-200 bg-slate-50 p-1 dark:border-slate-700 dark:bg-slate-800">
+            {CURRENCIES.map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                onClick={() => setCurrency(c.code)}
+                className={`rounded-lg px-3 py-2 text-xs font-bold transition-all ${
+                  currency === c.code
+                    ? 'bg-white text-[#002a5c] shadow-sm dark:bg-slate-700 dark:text-white'
+                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+                }`}
+              >
+                {c.symbol} {c.code}
+              </button>
+            ))}
+          </div>
+        </div>
         <input
           type="number"
           step="0.01"
           required
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="e.g. 500.00"
-          className="w-full rounded-xl border border-slate-200 dark:border-slate-700 px-4 py-3 text-sm focus:border-[#002a5c] focus:outline-none focus:ring-2 focus:ring-[#002a5c]/10"
+          placeholder={`e.g. ${currency === 'GHS' ? '5,000.00' : currency === 'USD' ? '500.00' : '450.00'}`}
+          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:border-[#002a5c] focus:outline-none focus:ring-2 focus:ring-[#002a5c]/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
         />
+        {amount && currency !== 'EUR' && (
+          <div className="flex items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-xs dark:bg-blue-900/20">
+            {ratesLoading ? (
+              <RefreshCw className="h-3 w-3 animate-spin text-blue-500" />
+            ) : (
+              <span className="text-blue-700 dark:text-blue-300">
+                {'\u2248'} {'\u20AC'}
+                {eurEquivalent?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '...'} EUR
+              </span>
+            )}
+            <span className="text-blue-500/60 dark:text-blue-400/60">indicative bank rate</span>
+          </div>
+        )}
       </div>
 
       <div>

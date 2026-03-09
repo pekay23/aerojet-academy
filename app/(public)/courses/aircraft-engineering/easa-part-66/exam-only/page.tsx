@@ -54,7 +54,7 @@ export default function ExamOnlyPage() {
         <div className="grid gap-10 lg:grid-cols-2">
           <SectionReveal>
             <section>
-              <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-[#002a5c]">
+              <h2 className="mb-6 text-2xl font-black tracking-tight text-[#002a5c] uppercase">
                 What's Included
               </h2>
               <p className="mb-6 leading-relaxed text-slate-700">
@@ -93,15 +93,16 @@ export default function ExamOnlyPage() {
           <SectionReveal delay={0.1}>
             <section className="rounded-2xl border border-blue-100 bg-blue-50 p-6 sm:p-8">
               <h3 className="mb-4 flex items-center gap-2 font-bold text-[#002a5c]">
-                <Users className="h-5 w-5" /> What is an Exam Pool?
+                <Users className="h-5 w-5" /> What is an Exam Booking?
               </h3>
               <p className="mb-4 text-sm text-slate-700">
-                An exam pool is a single sitting that brings together 25–28 candidates. Each pool:
+                An exam booking is a single sitting that brings together 25–28 candidates. Each
+                booking:
               </p>
               <ul className="space-y-2 text-sm text-slate-700">
                 {[
                   'Accommodates 25–28 candidates',
-                  'Each candidate takes ONE module per pool',
+                  'Each candidate takes ONE module per booking',
                   'Supports up to 4 different module codes per sitting',
                   'Confirms automatically when 25 candidates book & pay',
                 ].map((item) => (
@@ -124,7 +125,7 @@ export default function ExamOnlyPage() {
         {/* Pricing notice + Table */}
         <SectionReveal>
           <section>
-            <h2 className="mb-6 text-2xl font-black uppercase tracking-tight text-[#002a5c]">
+            <h2 className="mb-6 text-2xl font-black tracking-tight text-[#002a5c] uppercase">
               Exam Booking Options
             </h2>
 
@@ -141,10 +142,10 @@ export default function ExamOnlyPage() {
               <table className="w-full min-w-[400px]">
                 <thead>
                   <tr className="bg-[#002a5c] text-white">
-                    <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                    <th className="px-5 py-4 text-left text-xs font-bold tracking-wider uppercase">
                       Booking Type
                     </th>
-                    <th className="px-5 py-4 text-left text-xs font-bold uppercase tracking-wider">
+                    <th className="px-5 py-4 text-left text-xs font-bold tracking-wider uppercase">
                       Details
                     </th>
                   </tr>
@@ -184,7 +185,7 @@ export default function ExamOnlyPage() {
                         <span className="text-sm font-bold text-slate-900">{row.type}</span>
                         {row.tag && (
                           <span
-                            className={`ml-2 ${row.tagColor} rounded-full px-2 py-0.5 text-[9px] font-black uppercase text-white`}
+                            className={`ml-2 ${row.tagColor} rounded-full px-2 py-0.5 text-[9px] font-black text-white uppercase`}
                           >
                             {row.tag}
                           </span>
@@ -202,26 +203,28 @@ export default function ExamOnlyPage() {
         {/* Special Pricing */}
         <SectionReveal>
           <section>
-            <h2 className="mb-8 text-2xl font-black uppercase tracking-tight text-[#002a5c]">
+            <h2 className="mb-8 text-2xl font-black tracking-tight text-[#002a5c] uppercase">
               Special Pricing Programs
             </h2>
             <div className="grid gap-6 sm:grid-cols-2">
-              <div className="rounded-2xl bg-gradient-to-br from-purple-600 to-purple-700 p-6 text-white shadow-xl sm:rounded-3xl sm:p-8">
+              <div className="rounded-2xl bg-linear-to-br from-purple-600 to-purple-700 p-6 text-white shadow-xl sm:rounded-3xl sm:p-8">
                 <Award className="mb-3 h-8 w-8 text-purple-200" />
                 <h3 className="mb-1 text-lg font-bold">Multi-Pool Discount</h3>
                 <p className="mb-4 text-sm text-purple-100">
-                  Book 3+ pool seats in the same exam event and receive an automatic discount at checkout.
+                  Book 3+ pool seats in the same exam event and receive an automatic discount at
+                  checkout.
                 </p>
                 <div className="space-y-1 rounded-xl border border-white/20 bg-white/10 p-3 text-xs text-purple-100">
                   <p>✓ Automatically applied at checkout</p>
                   <p>✓ Savings vs standard pool pricing</p>
                 </div>
               </div>
-              <div className="rounded-2xl bg-gradient-to-br from-orange-600 to-orange-700 p-6 text-white shadow-xl sm:rounded-3xl sm:p-8">
+              <div className="rounded-2xl bg-linear-to-br from-orange-600 to-orange-700 p-6 text-white shadow-xl sm:rounded-3xl sm:p-8">
                 <Users className="mb-3 h-8 w-8 text-orange-200" />
                 <h3 className="mb-1 text-lg font-bold">Ambassador Program</h3>
                 <p className="mb-4 text-sm text-orange-100">
-                  Refer 10+ candidates who complete pool bookings and unlock a discounted per-seat rate for life.
+                  Refer 10+ candidates who complete pool bookings and unlock a discounted per-seat
+                  rate for life.
                 </p>
                 <div className="space-y-1 rounded-xl border border-white/20 bg-white/10 p-3 text-xs text-orange-100">
                   <p>✓ Discounted per-seat pricing for life</p>
@@ -242,8 +245,8 @@ export default function ExamOnlyPage() {
                 <ul className="space-y-2 text-xs text-slate-600">
                   {[
                     'Confirms at 25 paid candidates',
-                    'Capacity: 25–28 per pool',
-                    'Max 4 module codes per pool',
+                    'Capacity: 25–28 per booking',
+                    'Max 4 module codes per booking',
                     'Real-time status via Portal',
                   ].map((r) => (
                     <li key={r} className="flex gap-2">
@@ -289,14 +292,14 @@ export default function ExamOnlyPage() {
 
         {/* CTA */}
         <SectionReveal>
-          <section className="rounded-2xl bg-gradient-to-r from-[#002a5c] to-[#4c9ded] p-8 text-center text-white sm:rounded-3xl sm:p-10">
+          <section className="rounded-2xl bg-linear-to-r from-[#002a5c] to-[#4c9ded] p-8 text-center text-white sm:rounded-3xl sm:p-10">
             <h2 className="mb-4 text-2xl font-bold">Ready to Book Your Exam?</h2>
             <p className="mx-auto mb-6 max-w-xl text-blue-100/80">
-              Register on our portal to view available exam pools, pricing, and book your seats.
+              Register on our portal to view available exam bookings, pricing, and book your seats.
             </p>
             <Link
               href="/register"
-              className="mb-6 inline-block rounded-xl bg-white px-8 py-4 text-xs font-bold uppercase tracking-widest text-[#002a5c] transition-all hover:bg-blue-50"
+              className="mb-6 inline-block rounded-xl bg-white px-8 py-4 text-xs font-bold tracking-widest text-[#002a5c] uppercase transition-all hover:bg-blue-50"
             >
               Register Now
             </Link>

@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 import { getOrCreateWallet, topUpWallet } from '@/lib/wallet/operations'
+import { convertCurrency } from '@/lib/currency-api'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -28,6 +29,28 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Ensure wallet exists before tx
     await getOrCreateWallet(payment.userId)
 
+    // Convert to EUR if payment was in a different currency
+    const paymentCurrency = payment.currency || 'EUR'
+    let eurAmount = Number(payment.amount)
+    let conversionNote = ''
+
+    if (paymentCurrency !== 'EUR') {
+      try {
+        const { convertedAmount, rate } = await convertCurrency(
+          Number(payment.amount),
+          paymentCurrency,
+          'EUR'
+        )
+        eurAmount = convertedAmount
+        conversionNote = ` (converted from ${paymentCurrency} ${payment.amount} at rate ${rate.toFixed(4)})`
+      } catch {
+        return NextResponse.json(
+          { error: `Failed to convert ${paymentCurrency} to EUR. Try again later.` },
+          { status: 500 }
+        )
+      }
+    }
+
     // Process atomically
     await prisma.$transaction(async (tx) => {
       // Update payment status
@@ -40,12 +63,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         },
       })
 
-      // Top up wallet
+      // Top up wallet in EUR
       await topUpWallet(
         tx,
         payment.userId,
-        Number(payment.amount),
-        'Wallet top-up approved by admin',
+        eurAmount,
+        `Wallet top-up approved by admin${conversionNote}`,
         payment.id,
         'PAYMENT_ID'
       )
@@ -54,7 +77,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
         data: {
           userId: payment.userId,
           title: 'Wallet Top-Up Approved',
-          message: `Your wallet top-up of €${payment.amount} has been approved.`,
+          message: paymentCurrency !== 'EUR'
+            ? `Your ${paymentCurrency} ${payment.amount} top-up has been approved and credited as EUR ${eurAmount.toFixed(2)}.`
+            : `Your wallet top-up of EUR ${payment.amount} has been approved.`,
           type: 'SUCCESS',
           linkUrl: '/student/wallet',
           linkText: 'View Wallet',

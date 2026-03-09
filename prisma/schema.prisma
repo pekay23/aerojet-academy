@@ -239,7 +239,7 @@ model StudentLicenseTarget {
   studentProfileId  String
   licenseCategoryId String
   licenseCategory   LicenseCategory @relation(fields: [licenseCategoryId], references: [id])
-  studentProfile    StudentProfile  @relation(fields: [studentProfileId], references: [id])
+  studentProfile    StudentProfile  @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
 
   @@unique([studentProfileId, licenseCategoryId])
   @@map("student_license_targets")

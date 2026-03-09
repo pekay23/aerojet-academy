@@ -17,6 +17,7 @@ import {
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import RegistrationFeeDisplay from './_components/RegistrationFeeDisplay'
 
 export const metadata: Metadata = { title: 'Dashboard | Applicant Portal' }
 export const dynamic = 'force-dynamic'
@@ -171,7 +172,7 @@ export default async function ApplicantDashboard() {
   const getActionLink = (choice: string | null) => {
     switch (choice) {
       case 'EXAM_ONLY':
-        return { href: '/applicant/exam-pools', label: 'Browse Exams', icon: FileCheck }
+        return { href: '/applicant/exam-bookings', label: 'Browse Exams', icon: FileCheck }
       case 'MODULAR':
         return {
           href: '/applicant/courses',
@@ -194,7 +195,12 @@ export default async function ApplicantDashboard() {
     { step: 'Create Account', done: true },
     { step: 'Verify Email', done: isEmailVerified },
     {
-      step: `Upload Registration Payment (${applicant.registrationFee} ${applicant.registrationCurrency})`,
+      step: (
+        <div className="flex flex-wrap items-center gap-2">
+          <span>Upload Registration Payment</span>
+          <RegistrationFeeDisplay fee={applicant.registrationFee} currency={applicant.registrationCurrency} />
+        </div>
+      ),
       done: appStatus !== 'payment_pending' && appStatus !== 'email_unverified',
     },
     {
@@ -328,7 +334,7 @@ export default async function ApplicantDashboard() {
             icon: ClipboardList,
           },
           { label: 'Browse Courses', href: '/applicant/courses', icon: BookOpen },
-          { label: 'Exam Pools', href: '/applicant/exam-pools', icon: FileCheck },
+          { label: 'Exam Bookings', href: '/applicant/exam-bookings', icon: FileCheck },
         ].map(({ label, href, icon: Icon }) => (
           <Link
             key={label}

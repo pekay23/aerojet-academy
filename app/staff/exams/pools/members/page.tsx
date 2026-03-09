@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { ChevronLeft, Users, BookOpen, Search, Filter, Calendar } from 'lucide-react'
 import SearchInput from '@/components/SearchInput'
 
-export const metadata: Metadata = { title: 'Pool Members Report | Staff Portal' }
+export const metadata: Metadata = { title: 'Booking Members Report | Staff Portal' }
 export const dynamic = 'force-dynamic'
 
 export default async function PoolMembersReportPage({
@@ -87,10 +87,10 @@ export default async function PoolMembersReportPage({
             Back to Exams
           </Link>
           <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
-            Pool Members Overview
+            Booking Members Overview
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            A comprehensive list of all students across all active exam pools and their respective
+            A comprehensive list of all students across all active exam bookings and their respective
             modules.
           </p>
         </div>
@@ -107,7 +107,7 @@ export default async function PoolMembersReportPage({
             <p className="text-sm text-slate-500">
               {query
                 ? 'No students match your search query.'
-                : 'There are currently no students booked into any exam pools.'}
+                : 'There are currently no students booked into any exam bookings.'}
             </p>
           </div>
         ) : (

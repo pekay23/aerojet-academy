@@ -35,6 +35,7 @@ interface StandaloneBookingProps {
   upcomingExams: ExamWithCourse[]
   examComponents: ExamComponent[]
   events: ExamEvent[]
+  trigger?: React.ReactNode
 }
 
 export default function StandaloneBooking({
@@ -44,6 +45,7 @@ export default function StandaloneBooking({
   upcomingExams,
   examComponents,
   events,
+  trigger,
 }: StandaloneBookingProps) {
   const [open, setOpen] = useState(false)
   const [selectedExamId, setSelectedExamId] = useState('')
@@ -92,13 +94,18 @@ export default function StandaloneBooking({
 
   return (
     <>
-      <button
-        onClick={() => setOpen(true)}
-        className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition-all hover:border-blue-300 hover:bg-blue-50/50 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
-      >
-        Book Individual Seat ({currencySymbol}
-        {price.toFixed(0)})
-      </button>
+      {trigger ? (
+        <div onClick={() => setOpen(true)} className="cursor-pointer">
+          {trigger}
+        </div>
+      ) : (
+        <button
+          onClick={() => setOpen(true)}
+          className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 transition-all hover:border-blue-300 hover:bg-blue-50/50 active:scale-95 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100"
+        >
+          Book Individual Seat...
+        </button>
+      )}
 
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">

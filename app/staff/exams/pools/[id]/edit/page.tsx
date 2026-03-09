@@ -47,7 +47,7 @@ export default async function EditExamPoolPage({ params }: PageProps) {
       </div>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">Edit Exam Pool</h1>
+        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">Edit Exam Booking</h1>
         <p className="text-slate-500 dark:text-slate-400">Update details for {pool.name}</p>
       </div>
 

@@ -30,7 +30,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   })
 
   if (existingPool) {
-    return apiError('Exam pool with this name already exists in this event', 409)
+    return apiError('Exam booking with this name already exists in this event', 409)
   }
 
   const pool = await prisma.examPool.create({

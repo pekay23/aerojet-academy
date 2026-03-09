@@ -16,7 +16,7 @@ const allLinks = [
   { label: 'My Application', href: '/application/status', icon: ClipboardList },
   { label: 'Wallet', href: '/wallet-top-up', icon: Wallet },
   { label: 'Browse Courses', href: '/courses', icon: BookOpen },
-  { label: 'Exam Pools', href: '/exam-pools', icon: FileCheck },
+  { label: 'Exam Bookings', href: '/exam-bookings', icon: FileCheck },
   { label: 'Profile', href: '/profile', icon: User },
 ]
 

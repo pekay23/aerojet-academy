@@ -30,7 +30,7 @@ export const PATCH = withErrorHandler(
     })
 
     if (!existingPool) {
-      return apiNotFound('Exam pool not found')
+      return apiNotFound('Exam booking not found')
     }
 
     // Check for unique name within the same event (excluding current pool)

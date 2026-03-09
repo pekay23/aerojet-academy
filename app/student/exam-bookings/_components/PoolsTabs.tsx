@@ -5,7 +5,7 @@ import { FileCheck, Users } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const TABS = [
-  { key: 'available', label: 'Available Pools', icon: Users },
+  { key: 'available', label: 'Available Bookings', icon: Users },
   { key: 'my-bookings', label: 'My Bookings', icon: FileCheck },
 ] as const
 
@@ -15,17 +15,17 @@ export default function PoolsTabs({ children }: { children: React.ReactNode }) {
   const currentTab = searchParams.get('tab') || 'available'
 
   const setTab = (tab: string) => {
-    router.push(`/student/exam-pools?tab=${tab}`, { scroll: false })
+    router.push(`/student/exam-bookings?tab=${tab}`, { scroll: false })
   }
 
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
-          Exam Pools
+          Exam Bookings
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Join a pool to secure your seat for upcoming exams.
+          Join a booking to secure your seat for upcoming exams.
         </p>
       </div>
 

@@ -30,11 +30,11 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
     { label: 'Dashboard', href: '/student', icon: LayoutDashboard },
   ]
 
-  // Exam-Only students: limited sidebar — wallet, exam pools, notifications, profile
+  // Exam-Only students: limited sidebar — wallet, exam bookings, notifications, profile
   if (isExamOnly) {
     baseLinks.push(
       { label: 'Wallet', href: '/student/wallet', icon: Wallet },
-      { label: 'Exam Pools', href: '/student/exam-pools', icon: FileCheck },
+      { label: 'Exam Bookings', href: '/student/exam-bookings', icon: FileCheck },
       { label: 'Notifications', href: '/student/notifications', icon: Bell },
       { label: 'Messages', href: '/student/messages', icon: Mail },
       { label: 'Profile', href: '/student/profile', icon: User }
@@ -71,7 +71,7 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
 
   if (!isFullTime) {
     baseLinks.push({
-      label: 'Exam Pools',
+      label: 'Exam Bookings',
       href: '/student/exam-pools',
       icon: FileCheck,
     })

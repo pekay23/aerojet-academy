@@ -471,7 +471,7 @@ export async function renderStudentPromotionEmail(firstName: string, studentId: 
     <p class="text" style="margin-top: 16px;">A wallet has been created for your account. You can now:</p>
     <ul style="color: #334155; line-height: 1.6; margin-bottom: 20px;">
       <li>Access course materials</li>
-      <li>Book exam pool seats</li>
+      <li>Book exam seats</li>
       <li>Track attendance and grades</li>
       <li>Manage your wallet</li>
     </ul>
@@ -520,7 +520,7 @@ export async function renderPoolConfirmedEmail(
   examDate: string,
   amount: number
 ) {
-  const defaultSubject = 'Exam Pool Confirmed!'
+  const defaultSubject = 'Exam Booking Confirmed!'
   const defaultBody = `
     <p class="text">Hi {{firstName}}, great news! <strong>{{poolName}}</strong> has reached the minimum candidates and is confirmed.</p>
     
@@ -562,7 +562,7 @@ export async function sendPoolConfirmedEmail(
 
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation - Exam Pool Confirmed: ${poolName}`,
+    subject: `Aerojet Aviation - Exam Booking Confirmed: ${poolName}`,
     html,
   })
 }
@@ -788,9 +788,9 @@ export async function sendPaymentRejectedEmail(
 // ---------------------------------------------------------------------------
 
 export async function renderPoolFailedEmail(firstName: string, poolName: string, examDate: string) {
-  const defaultSubject = 'Exam Pool Did Not Reach Minimum'
+  const defaultSubject = 'Exam Booking Did Not Reach Minimum'
   const defaultBody = `
-    <p class="text">Hi {{firstName}}, we regret to inform you that your exam pool did not reach the minimum candidates.</p>
+    <p class="text">Hi {{firstName}}, we regret to inform you that your exam booking did not reach the minimum candidates.</p>
     
     <div class="info-box" style="border-left-color: #ef4444;">
       <div class="info-row"><strong>Pool:</strong> {{poolName}}</div>
@@ -818,7 +818,7 @@ export async function sendPoolFailedEmail(
   const html = await renderPoolFailedEmail(firstName, poolName, examDate)
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation - Exam Pool Cancelled: ${poolName}`,
+    subject: `Aerojet Aviation - Exam Booking Cancelled: ${poolName}`,
     html,
   })
 }
@@ -833,7 +833,7 @@ export async function renderPoolApproachingConfirmationEmail(
   examDate: string,
   module: string
 ) {
-  const defaultSubject = 'Your Exam Pool is Almost Full!'
+  const defaultSubject = 'Your Exam Booking is Almost Full!'
   const defaultBody = `
     <p class="text">Hi {{firstName}}, great news! <strong>{{poolName}}</strong> is nearing the minimum candidate threshold and is almost confirmed.</p>
     
@@ -1230,7 +1230,7 @@ export async function sendBundlePurchaseEmail(
       <div class="info-row"><strong>Amount Paid:</strong> €{{amountPaid}}</div>
       <div class="info-row"><strong>Validity:</strong> 12 months from purchase</div>
     </div>
-    <p class="text">You can use your bundle seats when joining exam pools. Seats are automatically consumed from your earliest-expiring bundle.</p>
+    <p class="text">You can use your bundle seats when joining exam bookings. Seats are automatically consumed from your earliest-expiring bundle.</p>
   `
   const template = await getTemplate('bundle-purchase', {
     subject: 'Exam Bundle Purchased',

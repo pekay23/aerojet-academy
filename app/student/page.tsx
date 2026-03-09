@@ -110,7 +110,7 @@ export default async function StudentDashboard() {
       })
     : 0
 
-  // Exam Pools Joined
+  // Exam Bookings Joined
   const poolMemberships = await prisma.poolMembership.findMany({
     where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
     include: { pool: true },
@@ -118,6 +118,58 @@ export default async function StudentDashboard() {
   })
 
   const renderActiveAcademicBlock = () => {
+    if (isExamOnly) {
+      return (
+        <div className="flex flex-col gap-6 lg:flex-row">
+          <div className="flex-1 space-y-6">
+            <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/30 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">
+                    Exam Only Pathway
+                  </h2>
+                  <p className="mt-1 text-slate-500">
+                    Manage your exam bookings and view results.
+                  </p>
+                </div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#002a5c] text-white">
+                  <BookOpen className="h-6 w-6" />
+                </div>
+              </div>
+
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                    <Calendar className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100">
+                    {currentPoolsCount} Exam Booking{currentPoolsCount !== 1 ? 's' : ''} Joined
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    You are currently part of {currentPoolsCount} active exam bookings.
+                  </p>
+                </div>
+                <Link
+                  href="/student/exam-bookings"
+                  className="group rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:border-blue-100 hover:bg-blue-50/50 dark:border-slate-800 dark:bg-slate-900/50"
+                >
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                    <Search className="h-5 w-5" />
+                  </div>
+                  <h3 className="font-bold text-slate-900 dark:text-slate-100">
+                    Find Exam Bookings &rarr;
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">
+                    Browse and join available exam seating options.
+                  </p>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     if (isFullTime) {
       return (
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -215,7 +267,7 @@ export default async function StudentDashboard() {
       )
     }
 
-    if (isFlexible) {
+    if (isFlexible && !isExamOnly) {
       return (
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 dark:border-slate-800">
@@ -288,7 +340,7 @@ export default async function StudentDashboard() {
       return (
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 dark:border-slate-800">
-            <h2 className="font-bold text-slate-900 dark:text-slate-100">Exam Pools Joined</h2>
+            <h2 className="font-bold text-slate-900 dark:text-slate-100">Exam Bookings Joined</h2>
             <Link
               href="/student/exam-pools/my-bookings"
               className="text-xs font-bold text-blue-600 hover:underline"
@@ -322,12 +374,12 @@ export default async function StudentDashboard() {
               </div>
             ) : (
               <div className="py-4 text-center">
-                <p className="mb-4 text-sm text-slate-500">You have not joined any Exam Pools.</p>
+                <p className="mb-4 text-sm text-slate-500">You have not joined any Exam Bookings.</p>
                 <Link
                   href="/student/exam-pools"
                   className="text-sm font-bold text-blue-600 hover:underline"
                 >
-                  Find Exam Pools →
+                  Find Exam Bookings →
                 </Link>
               </div>
             )}
@@ -508,10 +560,10 @@ export default async function StudentDashboard() {
               <div className="mb-2 text-3xl font-black tracking-tight">{unreadNotifications}</div>
               <p className="text-xs text-slate-400">Unread messages</p>
               <Link
-                href="/student/notifications"
-                className="mt-6 block w-full rounded-xl bg-blue-600 py-3 text-sm font-bold transition-colors hover:bg-blue-500"
+                href="/student/exam-bookings"
+                className="inline-flex h-9 items-center justify-center rounded-lg bg-[#002a5c] px-4 text-xs font-bold text-white transition-all hover:bg-[#003a7c] active:scale-95"
               >
-                View Notifications
+                Book Exams
               </Link>
             </div>
           </div>
@@ -544,7 +596,7 @@ export default async function StudentDashboard() {
                     <Calendar className="h-4 w-4" />
                   </div>
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Join Exam Pool
+                    Join Exam Booking
                   </span>
                 </Link>
               )}
