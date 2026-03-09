@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
         referenceType: 'REGISTRATION',
         approvedAt: { gte: startOfMonth },
       },
-      _sum: { amount: true },
+      _sum: { amount: true, originalAmount: true },
     }),
     // This month - Course
     prisma.payment.aggregate({
@@ -88,11 +88,17 @@ export async function GET(req: NextRequest) {
   ])
 
   return NextResponse.json({
-    totalRegistration: Number(totalRegistration._sum.originalAmount ?? totalRegistration._sum.amount ?? 0),
+    totalRegistration: Number(
+      totalRegistration._sum.originalAmount ?? totalRegistration._sum.amount ?? 0
+    ),
     totalCourse: Number(totalCourse._sum.amount ?? 0),
-    monthRegistration: Number(monthRegistration._sum.originalAmount ?? monthRegistration._sum.amount ?? 0),
+    monthRegistration: Number(
+      monthRegistration._sum.originalAmount ?? monthRegistration._sum.amount ?? 0
+    ),
     monthCourse: Number(monthCourse._sum.amount ?? 0),
-    lastMonthRegistration: Number(lastMonthRegistration._sum.originalAmount ?? lastMonthRegistration._sum.amount ?? 0),
+    lastMonthRegistration: Number(
+      lastMonthRegistration._sum.originalAmount ?? lastMonthRegistration._sum.amount ?? 0
+    ),
     lastMonthCourse: Number(lastMonthCourse._sum.amount ?? 0),
     pendingCount,
     pendingTotal: Number(pendingTotal._sum.amount ?? 0),
