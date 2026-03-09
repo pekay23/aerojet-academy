@@ -208,7 +208,7 @@ export default function ExamOnlyPathwayPage() {
             .catch(() => ({ transactions: [], payments: [] })),
           fetch('/api/applicant/exam-only/bundles')
             .then((r) => r.json())
-            .then((res) => res.bundles || [])
+            .then((res) => res?.bundles || [])
             .catch(() => []),
         ])
 

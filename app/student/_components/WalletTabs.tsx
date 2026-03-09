@@ -22,10 +22,10 @@ export default function WalletTabs({ children }: { children: React.ReactNode }) 
   return (
     <div className="space-y-6 sm:space-y-8">
       <div>
-        <h1 className="text-xl font-black tracking-tight text-slate-900 sm:text-2xl lg:text-3xl dark:text-slate-100">
+        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
           My Wallet
         </h1>
-        <p className="mt-1 text-xs text-slate-500 sm:text-sm dark:text-slate-400">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Manage your training funds and track your transactions.
         </p>
       </div>

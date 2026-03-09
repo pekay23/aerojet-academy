@@ -21,10 +21,14 @@ export const POST = withErrorHandler(
       where: { code: validation.data.selectedModule },
     })
 
+    if (!examComponent) {
+      return apiError(`Module ${validation.data.selectedModule} not found`)
+    }
+
     const result = await joinPool({
       poolId,
       userId: user.id,
-      examComponentId: examComponent?.id,
+      examComponentId: examComponent.id,
     })
 
     if (!result.success) {

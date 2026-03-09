@@ -565,50 +565,6 @@ export async function leaveExamPool(poolId: string) {
     error:
       'Independent pool withdrawal is not permitted. Please contact administration with a valid reason to request removal.',
   }
-
-  const refundAmount = Number(membership.amountReserved || 0)
-
-  try {
-    await prisma.$transaction(async (tx) => {
-      const { releaseFunds } = await import('@/lib/wallet/operations')
-
-      // Release reserved funds back to available
-      if (refundAmount > 0) {
-        await releaseFunds(
-          tx,
-          user.id,
-          refundAmount,
-          `Refund: Left pool ${membership.pool.name}`,
-          poolId,
-          'POOL_ID'
-        )
-      }
-
-      // Cancel membership
-      await tx.poolMembership.update({
-        where: { poolId_userId: { userId: user.id, poolId } },
-        data: { status: 'CANCELLED' },
-      })
-
-      // Decrement pool count
-      const newCount = Math.max(0, membership.pool.currentMemberCount - 1)
-      await tx.examPool.update({
-        where: { id: poolId },
-        data: {
-          currentMemberCount: { decrement: 1 },
-          status: newCount < 23 ? 'OPEN' : 'NEAR_FULL',
-        },
-      })
-    })
-
-    revalidatePath('/student/exam-pools')
-    revalidatePath('/student/exam-pools/my-bookings')
-    revalidatePath('/student/wallet')
-    return { success: true }
-  } catch (error) {
-    console.error('Leave Pool Error:', error)
-    return { error: (error as Error).message || 'Failed to leave pool. Please try again.' }
-  }
 }
 
 export async function updateStudentProfile(data: {
