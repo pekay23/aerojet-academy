@@ -81,9 +81,9 @@ const TEMPLATES = [
   },
   {
     id: 'pool-confirmed',
-    name: 'Pool Confirmed',
+    name: 'Booking Confirmed',
     icon: Mail,
-    description: 'Sent when an exam pool reaches minimum candidates.',
+    description: 'Sent when an exam booking reaches minimum candidates.',
     placeholders: ['firstName', 'poolName', 'module', 'examDate', 'amount'],
   },
   {

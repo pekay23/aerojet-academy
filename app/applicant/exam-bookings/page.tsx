@@ -7,7 +7,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import Link from 'next/link'
 
-export const metadata: Metadata = { title: 'Exam Pools | Applicant Portal' }
+export const metadata: Metadata = { title: 'Exam Bookings | Applicant Portal' }
 export const dynamic = 'force-dynamic'
 
 const poolStatusLabel: Record<string, string> = {
@@ -40,10 +40,10 @@ export default async function ExamPoolsPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
-          Exam Pools
+          Exam Bookings
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          View available examination pools. Enrollment in exam pools requires an active student
+          View available examination bookings. Enrollment in exam bookings requires an active student
           account.
         </p>
       </div>
@@ -57,7 +57,7 @@ export default async function ExamPoolsPage() {
           <div>
             <p className="text-sm font-bold text-blue-900">Credit Your Exam Wallet</p>
             <p className="mt-1 text-sm text-blue-700">
-              To join these exam pools, you must first convert your Applicant account to an active
+              To join these exam bookings, you must first convert your Applicant account to an active
               Student account by crediting your Exam Wallet.
             </p>
           </div>
@@ -122,9 +122,9 @@ async function PoolList() {
         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white text-slate-300 shadow-sm dark:bg-slate-900">
           <BookOpen className="h-8 w-8" />
         </div>
-        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No open exam pools</h3>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No open exam bookings</h3>
         <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-          There are currently no active exam pools open for registration. Exam pools will be listed
+          There are currently no active exam bookings open for registration. Exam bookings will be listed
           here when they become available.
         </p>
       </div>
@@ -146,9 +146,9 @@ async function PoolList() {
             {/* Header */}
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="mb-1 font-mono text-xs font-bold text-slate-400">Exam Pool</p>
+                <p className="mb-1 font-mono text-xs font-bold text-slate-400">Exam Booking</p>
                 <h2 className="text-base leading-snug font-bold text-slate-900 dark:text-slate-100">
-                  {pool.event?.name ?? pool.name ?? 'Exam Pool'}
+                  {pool.event?.name ?? pool.name ?? 'Exam Booking'}
                 </h2>
               </div>
               <span

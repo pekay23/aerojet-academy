@@ -196,7 +196,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
   const user = await requireStudent()
 
   if (!moduleCode || moduleCode.trim() === '') {
-    return { error: 'You must select a module before joining a pool.' }
+    return { error: 'You must select a module before joining a booking.' }
   }
 
   // 0. Pathway Restrictions
@@ -204,7 +204,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
   if (profile?.enrollmentType === 'FULL_TIME') {
     return {
       error:
-        'Full-Time students cannot join exam pools individually. They follow a strictly milestone-based path.',
+        'Full-Time students cannot join exam bookings individually. They follow a strictly milestone-based path.',
     }
   }
 
@@ -223,9 +223,9 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     },
   })
 
-  if (!pool) return { error: 'Exam pool not found.' }
+  if (!pool) return { error: 'Exam booking not found.' }
   if (!['OPEN', 'NEAR_FULL'].includes(pool.status)) {
-    return { error: 'This exam pool is no longer accepting new members.' }
+    return { error: 'This exam booking is no longer accepting new members.' }
   }
 
   // 1.5 Global Event Cap — max 4 pools per event for a student
@@ -238,12 +238,12 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
   })
   if (eventMemberships >= 4) {
     return {
-      error: 'Module capacity reached. You can join at most 4 pools in a single exam event.',
+      error: 'Module capacity reached. You can join at most 4 bookings in a single exam event.',
     }
   }
 
   if (pool.currentMemberCount >= pool.maxCandidates) {
-    return { error: 'This exam pool is full.' }
+    return { error: 'This exam booking is full.' }
   }
 
   // 2. Module Diversity Cap — max 4 unique modules per pool
@@ -267,7 +267,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
   })
 
   if (existingMembership) {
-    return { error: 'You have already joined this exam pool.' }
+    return { error: 'You have already joined this exam booking.' }
   }
 
   // 3.5 Duplicate Module Check per Event
@@ -355,22 +355,22 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
       await tx.notification.create({
         data: {
           userId: user.id,
-          title: 'Exam Pool Joined Successfully',
+          title: 'Exam Booking Joined Successfully',
           message: `You have successfully secured a seat in ${pool.name} for module ${moduleCode}.`,
           type: 'SUCCESS',
-          linkUrl: '/student/exam-pools/my-bookings',
+          linkUrl: '/student/exam-bookings/my-bookings',
           linkText: 'View Bookings',
         },
       })
     })
 
-    revalidatePath('/student/exam-pools')
-    revalidatePath('/student/exam-pools/my-bookings')
+    revalidatePath('/student/exam-bookings')
+    revalidatePath('/student/exam-bookings/my-bookings')
     revalidatePath('/student/wallet')
     return { success: true }
   } catch (error) {
     console.error('Join Pool Error:', error)
-    return { error: (error as Error).message || 'Failed to join exam pool. Please try again.' }
+    return { error: (error as Error).message || 'Failed to join exam booking. Please try again.' }
   }
 }
 
@@ -382,7 +382,8 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
     return { error: (validation as any).error }
   }
 
-  const { eventId, moduleCode, examDate, examTimeSlot } = validation.data
+  const { eventId, moduleCode, examDate, examTimeSlot, bookingType, seats, organizationName } =
+    validation.data
 
   try {
     // 0. Pathway Restrictions
@@ -390,18 +391,19 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
     if (profile?.enrollmentType === 'FULL_TIME') {
       return {
         error:
-          'Full-Time students cannot create exam pools. They follow a strictly milestone-based path.',
+          'Full-Time students cannot create exam bookings. They follow a strictly milestone-based path.',
       }
     }
 
     // 1. Get Pricing & Check Balance
     const pricing = await getExamPricingConfig()
-    const seatPrice = pricing.poolExamFee
+    const isGroup = bookingType === 'GROUP_CHARTER'
+    const seatPrice = isGroup ? pricing.groupCharterFee : pricing.poolExamFee
 
     const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
     if (!wallet || Number(wallet.availableBalance) < seatPrice) {
       return {
-        error: `Insufficient funds. Starting a pool requires a seat reservation of €${seatPrice.toFixed(2)}.`,
+        error: `Insufficient funds. Starting a ${isGroup ? 'group charter' : 'booking'} requires a reservation of €${seatPrice.toFixed(2)}.`,
       }
     }
 
@@ -422,7 +424,7 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
     })
     if (eventMemberships >= 4) {
       return {
-        error: 'Module capacity reached. You can join at most 4 pools in a single exam event.',
+        error: 'Module capacity reached. You can join at most 4 bookings in a single exam event.',
       }
     }
 
@@ -466,14 +468,15 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
       const newPool = await tx.examPool.create({
         data: {
           eventId,
-          name: `Student Initiated - ${moduleCode}`,
+          name: isGroup ? (organizationName || `Group - ${moduleCode}`) : `Student Initiated - ${moduleCode}`,
           examDate: date,
           examStartTime: startTime,
           examEndTime: endTime,
           seatPrice,
-          allowedModules: [moduleCode],
-          status: 'OPEN',
-          currentMemberCount: 1,
+          allowedModules: isGroup ? moduleCode.split(',') : [moduleCode],
+          status: isGroup ? 'CONFIRMED' : 'OPEN',
+          currentMemberCount: isGroup ? (seats || 1) : 1,
+          maxCandidates: isGroup ? (seats || 28) : 28,
           createdBy: user.id,
         },
       })
@@ -489,12 +492,17 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
       )
 
       // C. Create Membership
+      const primaryModule = isGroup ? moduleCode.split(',')[0] : moduleCode
+      const primaryExamComponent = await tx.examComponent.findFirst({
+        where: { course: { code: primaryModule } },
+      })
+
       await tx.poolMembership.create({
         data: {
           userId: user.id,
           poolId: newPool.id,
           status: 'RESERVED',
-          examComponentId: examComponent.id,
+          examComponentId: primaryExamComponent?.id,
           amountReserved: seatPrice,
         },
       })
@@ -517,10 +525,10 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
       await tx.notification.create({
         data: {
           userId: user.id,
-          title: 'Exam Pool Created',
-          message: `You have successfully created a new exam pool for module ${moduleCode} and reserved your seat.`,
+          title: 'Exam Booking Created',
+          message: `You have successfully created a new exam booking for module ${moduleCode} and reserved your seat.`,
           type: 'SUCCESS',
-          linkUrl: '/student/exam-pools/my-bookings',
+          linkUrl: '/student/exam-bookings/my-bookings',
           linkText: 'View Bookings',
         },
       })
@@ -528,13 +536,13 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
       return newPool
     })
 
-    revalidatePath('/student/exam-pools')
+    revalidatePath('/student/exam-bookings')
     revalidatePath('/student/wallet')
 
     return { success: true, poolId: pool.id }
   } catch (error: any) {
     console.error('Create Student Pool Error:', error)
-    return { error: error.message || 'Failed to create exam pool.' }
+    return { error: error.message || 'Failed to create exam booking.' }
   }
 }
 
@@ -847,7 +855,7 @@ export async function bookStandaloneExamAction(params: {
       },
     })
 
-    revalidatePath('/student/exam-pools')
+    revalidatePath('/student/exam-bookings')
     revalidatePath('/student/exams')
     revalidatePath('/student/wallet')
     return { success: true, usedBundle: result.usedBundle }

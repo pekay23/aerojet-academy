@@ -285,7 +285,7 @@ export default async function StaffDashboardPage() {
           ) : (
             <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center dark:border-slate-700 dark:bg-slate-800/50">
               <Clock className="mb-2 h-8 w-8 text-slate-300" />
-              <p className="text-sm font-bold text-slate-400">No active exam pools</p>
+              <p className="text-sm font-bold text-slate-400">No active exam bookings</p>
               <p className="mt-1 text-xs text-slate-300">Create an exam event to get started</p>
             </div>
           )}

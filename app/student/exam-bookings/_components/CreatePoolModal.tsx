@@ -72,7 +72,7 @@ export default function CreatePoolModal({
         if (res.error) {
           toast.error(res.error)
         } else {
-          toast.success(`Pool created successfully! Seat reserved for Module ${moduleCode}.`)
+          toast.success(`Booking created successfully! Seat reserved for Module ${moduleCode}.`)
           setOpen(false)
           // Reset form
           setEventId('')
@@ -92,7 +92,7 @@ export default function CreatePoolModal({
         className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-[#003a7c] active:scale-95"
       >
         <Plus className="h-4 w-4" />
-        Start New Pool
+        Start New Booking
       </button>
 
       {open && (
@@ -107,10 +107,10 @@ export default function CreatePoolModal({
             <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6 dark:border-slate-800">
               <div>
                 <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-                  Start New Exam Pool
+                  Start New Exam Booking
                 </h2>
                 <p className="mt-1 text-xs text-pretty text-slate-500 dark:text-slate-400">
-                  Initiate a pool for a module not currently listed. Minimum 25 candidates required
+                  Initiate a booking for a module not currently listed. Minimum 25 candidates required
                   for confirmation.
                 </p>
               </div>
@@ -253,7 +253,7 @@ export default function CreatePoolModal({
                   <div className="text-xs leading-relaxed text-amber-800 dark:text-amber-400">
                     <p className="mb-1 font-bold">Insufficient Wallet Balance</p>
                     You need at least {currencySymbol}
-                    {poolFee.toFixed(2)} to start a pool and reserve your seat.
+                    {poolFee.toFixed(2)} to start a booking and reserve your seat.
                   </div>
                 </div>
               )}
@@ -280,7 +280,7 @@ export default function CreatePoolModal({
                     <Loader2 className="h-5 w-5 animate-spin" />
                   ) : (
                     <>
-                      Create Pool & Join
+                      Create Booking & Join
                       <ArrowRight className="h-5 w-5" />
                     </>
                   )}

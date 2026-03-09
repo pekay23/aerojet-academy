@@ -171,9 +171,6 @@ export default async function WalletPage({
                           minimumFractionDigits: 2,
                         })}
                       </span>
-                      <span className="text-xs font-bold text-blue-200/60 sm:text-sm">
-                        {walletBalance.currency}
-                      </span>
                     </div>
                     <p className="mt-0.5 text-[9px] font-bold tracking-widest text-blue-200/60 uppercase sm:text-[10px]">
                       Ref: {studentId}
@@ -183,14 +180,14 @@ export default async function WalletPage({
               </div>
               <div className="border-t border-white/10 pt-5 sm:pt-8">
                 <p className="text-[9px] font-bold tracking-widest text-blue-200/60 uppercase sm:text-[10px]">
-                  Reserved (In Pools)
+                  Reserved (In Bookings)
                 </p>
                 <p className="text-lg font-black sm:text-xl">
                   {currencySymbol}
                   {walletBalance.held.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                 </p>
                 <p className="mt-1 text-[9px] text-blue-200/40 sm:text-[10px]">
-                  Held pending pool confirmation. Released if pool is cancelled.
+                  Held pending booking confirmation. Released if booking is cancelled.
                 </p>
               </div>
             </div>
@@ -280,7 +277,7 @@ export default async function WalletPage({
                   About Training Funds
                 </h3>
                 <p className="mt-1 text-xs leading-relaxed text-blue-700/80 sm:text-sm dark:text-slate-400">
-                  Your wallet holds verified credits for exam pool bookings and course enrollments.{' '}
+                  Your wallet holds verified credits for exam bookings and course enrollments.{' '}
                   <strong>All credits are staff-verified</strong> — funds only appear after your
                   bank transfer is reviewed and approved by the finance team.
                 </p>

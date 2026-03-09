@@ -86,7 +86,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
 
       <div className="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="border-b border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Pool Members</h2>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Booking Members</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">

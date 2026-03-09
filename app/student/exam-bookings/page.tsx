@@ -10,10 +10,13 @@ import StandaloneBooking from './_components/StandaloneBooking'
 import LeavePoolButton from './my-bookings/_components/LeavePoolButton'
 import PoolsTabs from './_components/PoolsTabs'
 import CreatePoolModal from './_components/CreatePoolModal'
+import GroupBookingModal from './_components/GroupBookingModal'
+import BundleBooking from './_components/BundleBooking'
+import QuickBookingActions from './_components/QuickBookingActions'
 import { getSystemSetting } from '@/lib/settings'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 
-export const metadata: Metadata = { title: 'Exam Pools | Student Portal' }
+export const metadata: Metadata = { title: 'Exam Bookings | Student Portal' }
 
 interface ExamWithCourse {
   id: string
@@ -24,7 +27,7 @@ interface ExamWithCourse {
   }
 }
 
-/* ── Available Pools Tab ── */
+/* ── Available Bookings Tab ── */
 async function AvailablePoolsContent() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
@@ -110,29 +113,19 @@ async function AvailablePoolsContent() {
 
   return (
     <div className="space-y-8">
-      {/* Action row */}
+      {/* Booking Actions */}
       {isExamOnly && (
-        <div className="flex flex-col justify-end gap-3 sm:flex-row">
-          <CreatePoolModal
-            events={openEvents}
-            poolFee={poolFee}
-            currency={currency}
-            availableBalance={balance}
-          />
-          <div className="hidden h-10 w-px self-center bg-slate-200 sm:block dark:bg-slate-800" />
-          <StandaloneBooking
-            price={individualFee}
-            currency={currency}
-            availableBalance={balance}
-            upcomingExams={upcomingExams}
-            examComponents={examComponents.map((ec) => ({
-              id: ec.id,
-              code: ec.course.code,
-              name: ec.course.name,
-            }))}
-            events={openEvents}
-          />
-        </div>
+        <QuickBookingActions
+          events={openEvents}
+          pricing={pricing}
+          wallet={wallet}
+          upcomingExams={upcomingExams}
+          examComponents={examComponents.map((ec) => ({
+            id: ec.id,
+            code: ec.course.code,
+            name: ec.course.name,
+          }))}
+        />
       )}
 
       {/* Wallet Banner */}
@@ -180,8 +173,8 @@ async function AvailablePoolsContent() {
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
         <span>
           Each pool accepts <strong>25–28 candidates</strong>, up to{' '}
-          <strong>4 different EASA modules</strong> per pool. You select one module per seat. Seat
-          fee is reserved from your wallet and released if the pool is cancelled.
+          <strong>4 different EASA modules</strong> per booking. You select one module per seat. Seat
+          fee is reserved from your wallet and released if the booking is cancelled.
         </span>
       </div>
 
@@ -279,7 +272,7 @@ async function AvailablePoolsContent() {
                   {existingModules.length > 0 && (
                     <div className="mb-4 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50">
                       <p className="mb-1.5 text-[9px] font-bold tracking-widest text-slate-400 uppercase">
-                        Modules in pool ({existingModules.length}/4)
+                        Modules in booking ({existingModules.length}/4)
                       </p>
                       <div className="flex flex-wrap gap-1.5">
                         {existingModules.map((m) => (
@@ -336,10 +329,10 @@ async function AvailablePoolsContent() {
             <FileCheck className="h-8 w-8" />
           </div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-            No pools available
+            No bookings available
           </h3>
           <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-            Check back later for new exam pool openings.
+            Check back later for new exam booking openings.
           </p>
         </div>
       )}
@@ -506,7 +499,7 @@ async function MyBookingsContent() {
                 <thead className="bg-slate-50 dark:bg-slate-800/50">
                   <tr>
                     <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                      Pool / Event
+                      Booking / Event
                     </th>
                     <th className="px-6 py-4 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
                       Module
@@ -618,7 +611,7 @@ async function MyBookingsContent() {
             No bookings found
           </h3>
           <p className="mx-auto mt-2 max-w-sm text-sm text-slate-500 dark:text-slate-400">
-            You haven&apos;t joined any exam pools yet. Switch to the Available Pools tab to browse.
+            You haven&apos;t joined any exam bookings yet. Switch to the Available Bookings tab to browse.
           </p>
         </div>
       )}

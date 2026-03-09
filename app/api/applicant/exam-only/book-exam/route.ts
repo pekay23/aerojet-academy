@@ -268,10 +268,10 @@ export async function POST(request: Request) {
       membershipId: joinResult.membership?.id,
       autoConfirmed: joinResult.autoConfirmed,
       message: promotedToStudent
-        ? 'Joined pool and promoted to student!'
+        ? 'Joined booking and promoted to student!'
         : joinResult.autoConfirmed
-          ? `Joined ${pool.name} — pool has been confirmed!`
-          : `Joined pool (${pool.name}) with ${updatedPool?.currentMemberCount || 1}/28 candidates`,
+          ? `Joined ${pool.name} — booking has been confirmed!`
+          : `Joined booking (${pool.name}) with ${updatedPool?.currentMemberCount || 1}/28 candidates`,
       promotedToStudent,
       pool: {
         id: pool.id,

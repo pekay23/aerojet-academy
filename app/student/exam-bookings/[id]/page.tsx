@@ -1,14 +1,14 @@
 import { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Pool Details" };
+export const metadata: Metadata = { title: "Booking Details" };
 
 export default function Page() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Pool Details</h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Exam pool information.</p>
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Booking Details</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Exam booking information.</p>
       </div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-8 sm:p-12 text-center">
         <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">

@@ -48,7 +48,7 @@ export default async function AddCandidatePage({ params }: PageProps) {
 
       <div className="mb-8">
         <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">Add Candidate</h1>
-        <p className="text-slate-500 dark:text-slate-400">Manually add a student to this exam pool.</p>
+        <p className="text-slate-500 dark:text-slate-400">Manually add a student to this exam booking.</p>
       </div>
 
       <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm">

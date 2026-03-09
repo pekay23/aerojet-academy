@@ -89,14 +89,14 @@ export default function CreateExamPoolForm({ event }: CreateExamPoolFormProps) {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to create exam pool')
+        throw new Error(error.message || 'Failed to create exam booking')
       }
 
-      toast.success('Exam pool created successfully')
+      toast.success('Exam booking created successfully')
       router.push(`/staff/exams/events/${event.id}`)
       router.refresh()
     } catch (error: any) {
-      toast.error(error.message || 'Failed to create exam pool')
+      toast.error(error.message || 'Failed to create exam booking')
     } finally {
       setIsLoading(false)
     }
@@ -110,7 +110,7 @@ export default function CreateExamPoolForm({ event }: CreateExamPoolFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Pool Name</FormLabel>
+              <FormLabel>Booking Name</FormLabel>
               <FormControl>
                 <Input placeholder="e.g., Morning Session A" {...field} />
               </FormControl>
@@ -315,10 +315,10 @@ export default function CreateExamPoolForm({ event }: CreateExamPoolFormProps) {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Creating Pool...
+                Creating Booking...
               </>
             ) : (
-              'Create Pool'
+              'Create Booking'
             )}
           </Button>
         </div>

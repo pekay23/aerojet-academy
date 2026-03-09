@@ -50,19 +50,19 @@ export default async function ApplicantWalletTopUpPage() {
   const paymentOptions = [
     {
       id: 'WALLET_TOPUP',
-      label: `Single Exam Pool — ${symbol}300`,
+      label: `Single Exam Booking — ${symbol}300`,
       amount: 300,
-      description: 'Sufficient funds to reserve a seat in one examination pool.',
+      description: 'Sufficient funds to reserve a seat in one examination booking.',
     },
     {
       id: 'WALLET_TOPUP',
-      label: `Two Exam Pools — ${symbol}600`,
+      label: `Two Exam Bookings — ${symbol}600`,
       amount: 600,
-      description: 'Funds for reserving seats in two examination pools.',
+      description: 'Funds for reserving seats in two examination bookings.',
     },
     {
       id: 'WALLET_TOPUP',
-      label: `Five Exam Pools — ${symbol}1,500`,
+      label: `Five Exam Bookings — ${symbol}1,500`,
       amount: 1500,
       description: 'Best for candidates planning multiple immediate assessments.',
     },
@@ -98,7 +98,7 @@ export default async function ApplicantWalletTopUpPage() {
           Top-Up Your Exam Wallet
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          To join an exam pool, you must first credit your Aerojet Wallet. Uploading a valid top-up
+          To join an exam booking, you must first credit your Aerojet Wallet. Uploading a valid top-up
           receipt will automatically verify your student status.
         </p>
       </div>
@@ -117,7 +117,7 @@ export default async function ApplicantWalletTopUpPage() {
             </span>
             <span>
               Our admissions team is verifying the transfer. You will be automatically promoted to
-              an active Student account once approved, at which point you can join Exam Pools.
+              an active Student account once approved, at which point you can join Exam Bookings.
             </span>
           </p>
         </div>
