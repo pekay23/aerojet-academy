@@ -21,6 +21,8 @@ interface Payment {
   id: string
   amount: number
   currency: string
+  paymentCurrency?: string | null
+  originalAmount?: number | null
   paymentMethod: string
   referenceType: string
   referenceCode: string
@@ -220,8 +222,13 @@ export default function ReconciliationQueue() {
                     </td>
                     <td className="px-6 py-5">
                       <div className="text-aerojet-blue text-sm font-black dark:text-blue-400">
-                        {p.currency} {Number(p.amount).toFixed(2)}
+                        {p.paymentCurrency || p.currency} {Number(p.originalAmount || p.amount).toFixed(2)}
                       </div>
+                      {(p.paymentCurrency || p.currency) !== 'EUR' && (
+                        <div className="text-[10px] font-medium text-slate-400">
+                          (Converted: EUR {Number(p.amount).toFixed(2)})
+                        </div>
+                      )}
                       <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase">
                         <span>{p.paymentMethod.replace(/_/g, ' ')}</span>
                         <span className="h-1 w-1 rounded-full bg-slate-200" />

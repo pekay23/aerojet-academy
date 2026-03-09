@@ -28,6 +28,8 @@ const GENERAL_FIELDS = [
 const FINANCE_FIELDS = [
   { key: 'registration_currency', label: 'Registration Currency', description: 'Currency used for registration fees', type: 'SELECT' as const, default: 'EUR', options: ['EUR', 'GHS', 'USD'] },
   { key: 'course_currency', label: 'Course Currency', description: 'Currency used for course-related fees', type: 'SELECT' as const, default: 'EUR', options: ['EUR', 'GHS', 'USD'] },
+  { key: 'exchange_rate_eur_ghs', label: 'Manual Rate: EUR to GHS', description: 'Set a fixed rate for Cedis. Leave empty to use automated bank rate.', type: 'NUMBER' as const, default: '' },
+  { key: 'exchange_rate_eur_usd', label: 'Manual Rate: EUR to USD', description: 'Set a fixed rate for Dollars. Leave empty to use automated bank rate.', type: 'NUMBER' as const, default: '' },
 ]
 
 const NOTIFICATION_FIELDS = [

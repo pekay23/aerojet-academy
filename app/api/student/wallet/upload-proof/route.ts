@@ -27,12 +27,16 @@ export async function POST(req: NextRequest) {
     const referenceCode = `W-TOPUP-${Date.now()}-${Math.floor(Math.random() * 1000)}`
 
     const eurAmt = eurEquivalent ? parseFloat(eurEquivalent) : parsedAmount
+    const rate = eurEquivalent ? (parsedAmount / parseFloat(eurEquivalent)) : 1
 
     const payment = await prisma.payment.create({
       data: {
         userId,
-        amount: parsedAmount,
-        currency: submittedCurrency,
+        amount: eurAmt,
+        currency: 'EUR',
+        paymentCurrency: submittedCurrency,
+        originalAmount: parsedAmount,
+        exchangeRate: rate,
         paymentMethod: 'BANK_TRANSFER',
         status: 'PENDING',
         proofUrl,
@@ -40,7 +44,7 @@ export async function POST(req: NextRequest) {
         referenceCode,
         referenceType: 'WALLET_TOPUP',
         referenceId: studentId,
-        notes: `Student uploaded proof for Wallet Top-up. ${submittedCurrency} ${parsedAmount}${submittedCurrency !== 'EUR' ? ` (≈ EUR ${eurAmt.toFixed(2)})` : ''}. File: ${filename || 'Unknown'}`,
+        notes: `Student uploaded proof for Wallet Top-up. Original: ${submittedCurrency} ${parsedAmount}. File: ${filename || 'Unknown'}`,
       },
     })
 

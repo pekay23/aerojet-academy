@@ -146,7 +146,7 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
                 }`}
               >
-                {c.symbol} {c.code}
+                {c.symbol}{c.code !== 'EUR' ? ` ${c.code}` : ''}
               </button>
             ))}
           </div>
@@ -167,7 +167,7 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
             ) : (
               <span className="text-blue-700 dark:text-blue-300">
                 {'\u2248'} {'\u20AC'}
-                {eurEquivalent?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '...'} EUR
+                {eurEquivalent?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '...'}
               </span>
             )}
             <span className="text-blue-500/60 dark:text-blue-400/60">indicative bank rate</span>

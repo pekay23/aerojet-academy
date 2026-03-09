@@ -170,12 +170,12 @@ export default function FinanceOverview({
             <h2 className="text-sm font-black tracking-tight text-slate-800 uppercase dark:text-slate-200">
               Revenue — Last 6 Months
             </h2>
-            <p className="mt-0.5 text-xs text-slate-400">Approved payments only</p>
+            <p className="mt-0.5 text-xs text-slate-400">Approved payments in EUR</p>
           </div>
           <TrendingUp className="text-aerojet-sky h-5 w-5" />
         </div>
         {chartData.some((d) => d.revenue > 0) ? (
-          <RevenueChart data={chartData} currency="GHS " />
+          <RevenueChart data={chartData} currency="€ " />
         ) : (
           <div className="flex h-48 items-center justify-center">
             <p className="text-sm font-bold text-slate-300">No revenue data yet</p>

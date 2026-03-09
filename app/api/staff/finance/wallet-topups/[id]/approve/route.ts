@@ -29,25 +29,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // Ensure wallet exists before tx
     await getOrCreateWallet(payment.userId)
 
-    // Convert to EUR if payment was in a different currency
-    const paymentCurrency = payment.currency || 'EUR'
-    let eurAmount = Number(payment.amount)
+    // Use paymentCurrency and originalAmount if available (standardized fields)
+    const paymentCurrency = payment.paymentCurrency || (payment.currency !== 'EUR' ? payment.currency : 'EUR')
+    const originalAmount = payment.originalAmount ? Number(payment.originalAmount) : Number(payment.amount)
+    
+    let eurAmount = Number(payment.amount) // Default to stored indicative amount
     let conversionNote = ''
 
     if (paymentCurrency !== 'EUR') {
       try {
         const { convertedAmount, rate } = await convertCurrency(
-          Number(payment.amount),
+          originalAmount,
           paymentCurrency,
           'EUR'
         )
         eurAmount = convertedAmount
-        conversionNote = ` (converted from ${paymentCurrency} ${payment.amount} at rate ${rate.toFixed(4)})`
-      } catch {
-        return NextResponse.json(
-          { error: `Failed to convert ${paymentCurrency} to EUR. Try again later.` },
-          { status: 500 }
-        )
+        conversionNote = ` (converted from ${paymentCurrency} ${originalAmount} at rate ${rate.toFixed(4)})`
+      } catch (err) {
+        console.error('Conversion failed during approval:', err)
+        // Fallback to indicative amount if live conversion fails
+        conversionNote = ` (using indicative amount; live conversion failed)`
       }
     }
 
