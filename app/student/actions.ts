@@ -275,7 +275,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     where: {
       userId: user.id,
       pool: { eventId: pool.eventId },
-      examComponent: { course: { code: moduleCode } },
+      examComponent: { code: moduleCode },
       status: { in: ['RESERVED', 'CONFIRMED'] },
     },
   })
@@ -313,7 +313,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
       )
 
       const examComponent = await tx.examComponent.findFirst({
-        where: { course: { code: moduleCode } },
+        where: { code: moduleCode },
       })
 
       await tx.poolMembership.create({
@@ -433,7 +433,7 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
       where: {
         userId: user.id,
         pool: { eventId },
-        examComponent: { course: { code: moduleCode } },
+        examComponent: { code: moduleCode },
         status: { in: ['RESERVED', 'CONFIRMED'] },
       },
     })
@@ -443,7 +443,7 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
 
     // 3. Find Exam Component
     const examComponent = await prisma.examComponent.findFirst({
-      where: { course: { code: moduleCode } },
+      where: { code: moduleCode },
     })
     if (!examComponent) return { error: `No exam component found for module ${moduleCode}.` }
 

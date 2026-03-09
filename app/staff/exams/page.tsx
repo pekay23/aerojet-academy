@@ -177,7 +177,7 @@ async function BookingsTab({ query }: { query?: string }) {
             },
             { moduleCode: { contains: query } },
             { event: { name: { contains: query } } },
-            { exam: { examComponent: { course: { code: { contains: query } } } } },
+            { exam: { examComponent: { OR: [ { code: { contains: query, mode: 'insensitive' } }, { course: { code: { contains: query, mode: 'insensitive' } } } ] } } },
           ],
         }
       : undefined,
@@ -338,7 +338,7 @@ async function ResultsTab({ query }: { query?: string }) {
                 ],
               },
             },
-            { exam: { examComponent: { course: { code: { contains: query } } } } },
+            { exam: { examComponent: { OR: [ { code: { contains: query, mode: 'insensitive' } }, { course: { code: { contains: query, mode: 'insensitive' } } } ] } } },
           ],
         }
       : undefined,

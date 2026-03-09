@@ -32,7 +32,7 @@ export async function bookStandaloneExam(
     duration = exam.duration
   } else if (moduleCode && eventId) {
     const comp = await prisma.examComponent.findFirst({
-      where: { course: { code: moduleCode } },
+      where: { code: moduleCode },
       include: { course: true },
     })
     if (!comp) throw new Error(`Exam component for module ${moduleCode} not found`)

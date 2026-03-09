@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     // Resolve exam component from module code
     const examComponent = await prisma.examComponent.findFirst({
       where: {
-        course: { code: moduleCode },
+        code: moduleCode,
       },
     })
 
