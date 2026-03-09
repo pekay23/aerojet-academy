@@ -19,6 +19,33 @@ import {
 export const metadata = { title: 'Exams | Staff Portal' }
 export const dynamic = 'force-dynamic'
 
+/** Reusable Prisma search filter for exam component code (searches both component code and parent course code) */
+function examComponentCodeFilter(query: string) {
+  return {
+    exam: {
+      examComponent: {
+        OR: [
+          { code: { contains: query, mode: 'insensitive' as const } },
+          { course: { code: { contains: query, mode: 'insensitive' as const } } },
+        ],
+      },
+    },
+  }
+}
+
+/** Reusable Prisma search filter for user by email/name */
+function userSearchFilter(query: string) {
+  return {
+    user: {
+      OR: [
+        { email: { contains: query, mode: 'insensitive' as const } },
+        { profile: { firstName: { contains: query, mode: 'insensitive' as const } } },
+        { profile: { lastName: { contains: query, mode: 'insensitive' as const } } },
+      ],
+    },
+  }
+}
+
 const VALID_TABS = ['events', 'bookings', 'results']
 
 export default async function StaffExamsPage({
@@ -166,18 +193,10 @@ async function BookingsTab({ query }: { query?: string }) {
     where: query
       ? {
           OR: [
-            {
-              user: {
-                OR: [
-                  { email: { contains: query } },
-                  { profile: { firstName: { contains: query } } },
-                  { profile: { lastName: { contains: query } } },
-                ],
-              },
-            },
-            { moduleCode: { contains: query } },
-            { event: { name: { contains: query } } },
-            { exam: { examComponent: { OR: [ { code: { contains: query, mode: 'insensitive' } }, { course: { code: { contains: query, mode: 'insensitive' } } } ] } } },
+            userSearchFilter(query),
+            { moduleCode: { contains: query, mode: 'insensitive' } },
+            { event: { name: { contains: query, mode: 'insensitive' } } },
+            examComponentCodeFilter(query),
           ],
         }
       : undefined,
@@ -329,16 +348,8 @@ async function ResultsTab({ query }: { query?: string }) {
     where: query
       ? {
           OR: [
-            {
-              user: {
-                OR: [
-                  { email: { contains: query } },
-                  { profile: { firstName: { contains: query } } },
-                  { profile: { lastName: { contains: query } } },
-                ],
-              },
-            },
-            { exam: { examComponent: { OR: [ { code: { contains: query, mode: 'insensitive' } }, { course: { code: { contains: query, mode: 'insensitive' } } } ] } } },
+            userSearchFilter(query),
+            examComponentCodeFilter(query),
           ],
         }
       : undefined,

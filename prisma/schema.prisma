@@ -250,7 +250,7 @@ model ExamComponent {
   courseId        String
   code            String           @unique
   name            String
-  type            String
+  type            ExamComponentType
   duration        Int
   individualPrice Decimal?         @default(520.00) @db.Decimal(10, 2)
   poolPrice       Decimal?         @default(300.00) @db.Decimal(10, 2)
@@ -502,6 +502,7 @@ model PoolWaitlist {
   @@unique([poolId, userId, examComponentId])
   @@index([poolId])
   @@index([userId])
+  @@index([examComponentId])
   @@map("pool_waitlist")
 }
 
@@ -606,6 +607,8 @@ model ExamBooking {
   @@index([status])
   @@index([bookingGroupRef])
   @@index([migrationRef])
+  @@index([examComponentId])
+  @@index([moduleCode])
   @@map("exam_bookings")
 }
 
@@ -1042,6 +1045,7 @@ model ModularEnrollment {
   walletTransaction WalletTransaction? @relation(fields: [walletTxnId], references: [id])
 
   @@index([studentId])
+  @@index([packageId])
   @@map("modular_enrollments")
 }
 
@@ -1275,4 +1279,9 @@ enum NewsArticleStatus {
   DRAFT
   PUBLISHED
   ARCHIVED
+}
+
+enum ExamComponentType {
+  MCQ
+  ESSAY
 }

@@ -2,6 +2,11 @@ import prisma from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
 import { chargeWallet } from '@/lib/wallet/operations'
 
+/** Resolve an ExamComponent by its unique code. Accepts an optional transaction client. */
+export async function findExamComponentByCode(code: string, tx: typeof prisma = prisma) {
+  return tx.examComponent.findFirst({ where: { code }, include: { course: true } })
+}
+
 /**
  * Books a standalone exam for an EXAM_ONLY student.
  * Supports booking a specific Exam ID, or a Module + Event combination.

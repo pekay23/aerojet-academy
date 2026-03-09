@@ -61,7 +61,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         isExamOnly={isExamOnly}
       />
       <main id="main-content" className="min-h-screen flex-1">
-        <div className="p-6 sm:p-8 lg:p-10">
+        <div className="p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
           <BreadcrumbNav />
           {children}
         </div>
