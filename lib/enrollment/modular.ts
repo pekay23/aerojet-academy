@@ -62,26 +62,28 @@ export async function enrollInModularPackage(packageId: string, userId: string) 
     // 4. Auto-Exam Booking (User Feedback: Modular enrollment guarantees exam booking)
     // For each module in the package, create a placeholder MCQ booking (amountPaid: 0, included in pkg).
     // The student will then pick a specific date/event later without further charge.
-    for (const moduleCode of pkg.modulesIncluded) {
-      // Exam → ExamComponent → Course (not Exam → Course directly)
-      const exam = await tx.exam.findFirst({
-        where: { examComponent: { code: moduleCode, type: 'MCQ' } },
-        orderBy: { examDate: 'asc' },
-      })
+    // Batch fetch: one query for all module exams instead of N+1
+    const exams = await tx.exam.findMany({
+      where: {
+        examComponent: { code: { in: pkg.modulesIncluded }, type: 'MCQ' },
+      },
+      orderBy: { examDate: 'asc' },
+      distinct: ['examComponentId'],
+      include: { examComponent: { select: { code: true } } },
+    })
 
-      if (exam) {
-        await tx.examBooking.create({
-          data: {
-            userId,
-            examId: exam.id,
-            bookingType: 'MODULAR',
-            moduleCode,
-            amountPaid: 0, // Included in package price
-            status: 'APPROVED',
-            examDate: exam.examDate,
-          },
-        })
-      }
+    if (exams.length > 0) {
+      await tx.examBooking.createMany({
+        data: exams.map((exam) => ({
+          userId,
+          examId: exam.id,
+          bookingType: 'MODULAR' as const,
+          moduleCode: exam.examComponent.code,
+          amountPaid: 0, // Included in package price
+          status: 'APPROVED' as const,
+          examDate: exam.examDate,
+        })),
+      })
     }
 
     return enrollment

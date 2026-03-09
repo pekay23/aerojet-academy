@@ -571,10 +571,10 @@ export default async function StudentDashboard() {
               <div className="mb-2 text-3xl font-black tracking-tight">{unreadNotifications}</div>
               <p className="text-xs text-slate-400">Unread messages</p>
               <Link
-                href="/student/exam-bookings"
-                className="inline-flex h-9 items-center justify-center rounded-lg bg-[#002a5c] px-4 text-xs font-bold text-white transition-all hover:bg-[#003a7c] active:scale-95"
+                href="/student/notifications"
+                className="mt-3 inline-flex h-9 items-center justify-center rounded-lg bg-[#002a5c] px-4 text-xs font-bold text-white transition-all hover:bg-[#003a7c] active:scale-95"
               >
-                Book Exams
+                View All
               </Link>
             </div>
           </div>
