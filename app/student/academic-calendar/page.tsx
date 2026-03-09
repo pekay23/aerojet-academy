@@ -25,7 +25,7 @@ export default async function StudentAcademicCalendarPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       <div>
-        <h1 className="flex items-center gap-3 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+        <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
           <CalendarIcon className="h-8 w-8 text-[#4c9ded] dark:text-blue-400" />
           Academic Calendar
         </h1>

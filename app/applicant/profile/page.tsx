@@ -28,7 +28,7 @@ export default async function ProfilePage() {
   return (
     <div className="max-w-3xl space-y-8">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] dark:text-white sm:text-3xl">
           My Profile
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Keep your personal information up to date.</p>

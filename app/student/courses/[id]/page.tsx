@@ -106,7 +106,7 @@ export default async function CourseDetailsPage({
               <span className="rounded-lg bg-blue-50 px-2 py-1 text-[10px] font-black tracking-widest text-blue-600 uppercase">
                 {course.category?.name || 'CORE'}
               </span>
-              <h1 className="mt-3 text-3xl leading-tight font-black tracking-tight text-slate-900 dark:text-slate-100">
+              <h1 className="mt-3 text-2xl leading-tight font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
                 {course.name}
               </h1>
               <p className="mt-1 text-xs font-black tracking-widest text-[#4c9ded]">
