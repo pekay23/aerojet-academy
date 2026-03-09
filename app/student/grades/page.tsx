@@ -39,7 +39,7 @@ export default async function GradesPage() {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+          <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
             My Grades
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -75,7 +75,7 @@ export default async function GradesPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
           My Grades
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
