@@ -350,6 +350,92 @@ export async function chargeWallet(
 }
 
 // ---------------------------------------------------------------------------
+// STAFF ADJUSTMENT (can increase or decrease balance with full audit)
+// Used for manual corrections, migration imports, admin overrides.
+// Positive amount = credit, negative amount = debit.
+// ---------------------------------------------------------------------------
+
+export async function adjustWallet(
+  tx: TxClient,
+  userId: string,
+  amount: number,
+  description: string,
+  referenceId?: string,
+  referenceType?: string,
+  createdBy?: string
+) {
+  const wallet = await tx.wallet.findUnique({ where: { userId } })
+  if (!wallet) throw new Error('Wallet not found')
+
+  const balanceBefore = wallet.balance.toNumber()
+  const availableBefore = wallet.availableBalance.toNumber()
+  const reservedBefore = wallet.reservedBalance.toNumber()
+
+  // For debits, ensure sufficient available balance
+  if (amount < 0 && availableBefore < Math.abs(amount)) {
+    throw new Error(
+      `Insufficient available balance for debit. Available: €${availableBefore.toFixed(2)}, Requested: €${Math.abs(amount).toFixed(2)}`
+    )
+  }
+
+  const updated = await tx.wallet.update({
+    where: { userId },
+    data: {
+      balance: { increment: amount },
+      availableBalance: { increment: amount },
+    },
+  })
+
+  await tx.walletTransaction.create({
+    data: {
+      walletId: wallet.id,
+      type: TransactionType.ADJUSTMENT,
+      amount: Math.abs(amount),
+      balanceBefore,
+      balanceAfter: balanceBefore + amount,
+      reservedBefore,
+      reservedAfter: reservedBefore,
+      availableBefore,
+      availableAfter: availableBefore + amount,
+      description: description || `Staff adjustment: €${amount}`,
+      referenceId,
+      referenceType,
+      createdBy,
+      metadata: { direction: amount >= 0 ? 'credit' : 'debit' },
+    },
+  })
+
+  return updated
+}
+
+// ---------------------------------------------------------------------------
+// SET WALLET BALANCE (idempotent — sets to exact amount, used for imports)
+// Creates an adjustment transaction for the difference.
+// ---------------------------------------------------------------------------
+
+export async function setWalletBalance(
+  tx: TxClient,
+  userId: string,
+  targetBalance: number,
+  description: string,
+  referenceId?: string,
+  referenceType?: string,
+  createdBy?: string
+) {
+  const wallet = await tx.wallet.findUnique({ where: { userId } })
+  if (!wallet) throw new Error('Wallet not found')
+
+  const currentBalance = wallet.balance.toNumber()
+  const diff = targetBalance - currentBalance
+
+  if (Math.abs(diff) < 0.01) {
+    return wallet // Already at target, no adjustment needed
+  }
+
+  return adjustWallet(tx, userId, diff, description, referenceId, referenceType, createdBy)
+}
+
+// ---------------------------------------------------------------------------
 // GET TRANSACTIONS
 // ---------------------------------------------------------------------------
 

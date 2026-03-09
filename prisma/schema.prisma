@@ -64,6 +64,7 @@ model User {
   studentProfile        StudentProfile?
   tuitionBookings       TuitionBooking[]
   createdTuitionRuns    TuitionRun[]         @relation("CreatedTuitionRuns")
+  bookingEntitlements   BookingEntitlement[]
   wallet                Wallet?
 
   @@index([email])
@@ -586,6 +587,11 @@ model ExamBooking {
   walletTxnId       String?
   bookedAt          DateTime           @default(now())
   examDate          DateTime?
+  bookingGroupRef   String?
+  attemptType       String?
+  result            String?
+  sourceNotes       String?
+  migrationRef      String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   event             ExamEvent?         @relation(fields: [eventId], references: [id])
@@ -598,7 +604,27 @@ model ExamBooking {
   @@index([examId])
   @@index([eventId])
   @@index([status])
+  @@index([bookingGroupRef])
+  @@index([migrationRef])
   @@map("exam_bookings")
+}
+
+model BookingEntitlement {
+  id                String   @id @default(cuid())
+  userId            String
+  bookingGroupRef   String
+  bookingType       String
+  includedFreeResits Int      @default(0)
+  usedFreeResits    Int      @default(0)
+  transferable      Boolean  @default(false)
+  notes             String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, bookingGroupRef])
+  @@index([userId])
+  @@map("booking_entitlements")
 }
 
 model ExamResult {
