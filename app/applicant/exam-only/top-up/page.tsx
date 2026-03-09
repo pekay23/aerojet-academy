@@ -152,7 +152,7 @@ export default async function ExamOnlyTopUpPage({
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+          <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
             Top Up Wallet
           </h1>
           <p className="mt-1 text-slate-500 dark:text-slate-400">Add funds to book exam seats</p>

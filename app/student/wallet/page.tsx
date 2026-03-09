@@ -652,7 +652,7 @@ export default async function WalletPage({
                 No Transactions Yet
               </h3>
               <p className="mx-auto mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">
-                Your payment history will appear here once you start using your walllet.
+                Your payment history will appear here once you start using your wallet.
               </p>
             </div>
           )}

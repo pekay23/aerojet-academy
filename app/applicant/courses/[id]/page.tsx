@@ -101,7 +101,7 @@ export default async function CourseDetailsPage({ params }: Props) {
             <span className="font-mono text-xs font-black tracking-widest text-[#4c9ded]">
               {course.code}
             </span>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+            <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
               {course.name}
             </h1>
           </div>

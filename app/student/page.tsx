@@ -134,7 +134,7 @@ export default async function StudentDashboard() {
             <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/30 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">
+                  <h2 className="text-2xl font-black text-[#002a5c] dark:text-white">
                     Exam Only Pathway
                   </h2>
                   <p className="mt-1 text-slate-500">
