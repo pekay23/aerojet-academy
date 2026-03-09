@@ -9,10 +9,10 @@ import {
   AlertTriangle,
   Clock,
   Award,
-  Euro,
   BookOpen,
   MonitorPlay,
   Info,
+  CreditCard,
 } from 'lucide-react'
 
 export const metadata: Metadata = {
@@ -39,11 +39,7 @@ export default function ExamOnlyPage() {
               <div>
                 <h3 className="mb-1 font-bold text-orange-900">Important Notice</h3>
                 <p className="text-sm text-orange-800">
-                  Exam events only run when minimum confirmed bookings are met. All bookings are
-                  subject to the Go/No-Go decision at{' '}
-                  <strong>T-21 (21 days before exam event)</strong>. Confirmed paid bookings that do
-                  not meet threshold will automatically roll to the next available event window at
-                  no additional cost.
+                  No minimum wait times between subject attempts — book when ready.
                 </p>
               </div>
             </div>
@@ -86,6 +82,19 @@ export default function ExamOnlyPage() {
                     </div>
                   </div>
                 ))}
+                <div className="flex gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100/50">
+                    <CreditCard className="h-4 w-4 shrink-0 text-[#4c9ded]" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-bold text-slate-900 uppercase">
+                      Transparent Pricing
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      View all exam and bundle fees before booking.
+                    </p>
+                  </div>
+                </div>
               </div>
             </section>
           </SectionReveal>
@@ -266,7 +275,7 @@ export default function ExamOnlyPage() {
                     'Late booking surcharge applies within 14 days',
                   ].map((r) => (
                     <li key={r} className="flex gap-2">
-                      <Euro className="h-4 w-4 shrink-0 text-[#4c9ded]" />
+                      <CreditCard className="h-4 w-4 shrink-0 text-[#4c9ded]" />
                       {r}
                     </li>
                   ))}

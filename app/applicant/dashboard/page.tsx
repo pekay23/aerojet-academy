@@ -15,6 +15,7 @@ import {
   GraduationCap,
 } from 'lucide-react'
 
+import { getSystemSetting } from '@/lib/settings'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import RegistrationFeeDisplay from './_components/RegistrationFeeDisplay'
@@ -122,9 +123,12 @@ function deriveStatus(user: {
   return 'payment_pending'
 }
 
-export default async function ApplicantDashboard() {
+export default async function ApplicantDashboardPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
+
+  const registrationFeeSetting = await getSystemSetting('registration_fee', '350')
+  const registrationCurrencySetting = await getSystemSetting('registration_currency', 'EUR')
 
   const userId = (session.user as any).id
 
@@ -198,7 +202,16 @@ export default async function ApplicantDashboard() {
       step: (
         <div className="flex flex-wrap items-center gap-2">
           <span>Upload Registration Payment</span>
-          <RegistrationFeeDisplay fee={Number(applicant.registrationFee)} currency={applicant.registrationCurrency} />
+          <RegistrationFeeDisplay
+            fee={
+              applicant.registrationPaid
+                ? Number(applicant.registrationFee)
+                : Number(registrationFeeSetting)
+            }
+            currency={
+              applicant.registrationPaid ? applicant.registrationCurrency : registrationCurrencySetting
+            }
+          />
         </div>
       ),
       done: appStatus !== 'payment_pending' && appStatus !== 'email_unverified',

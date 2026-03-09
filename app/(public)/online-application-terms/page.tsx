@@ -60,7 +60,7 @@ export default async function TermsPage() {
                 items: [
                   'Exam windows are confirmed 21 days prior (Go/No-Go at T-21).',
                   'If cancelled, all bookings roll to next available window at no extra cost.',
-                  'Late bookings (within T-14) incur a €50 surcharge.',
+                  'Late bookings (within T-14) incur a surcharge.',
                   'No-shows forfeit their fees.',
                 ],
               },
