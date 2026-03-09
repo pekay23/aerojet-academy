@@ -198,7 +198,7 @@ export default async function ApplicantDashboard() {
       step: (
         <div className="flex flex-wrap items-center gap-2">
           <span>Upload Registration Payment</span>
-          <RegistrationFeeDisplay fee={applicant.registrationFee} currency={applicant.registrationCurrency} />
+          <RegistrationFeeDisplay fee={Number(applicant.registrationFee)} currency={applicant.registrationCurrency} />
         </div>
       ),
       done: appStatus !== 'payment_pending' && appStatus !== 'email_unverified',

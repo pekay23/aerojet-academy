@@ -9,6 +9,7 @@ import { getCurrencySymbol } from '@/lib/currency'
 
 interface UseCurrencyRatesReturn {
   rates: Record<string, number>
+  sources: Record<string, 'admin' | 'auto'>
   loading: boolean
   error: string | null
   convert: (amount: number, from: string, to: string) => number
@@ -16,6 +17,7 @@ interface UseCurrencyRatesReturn {
 
 export function useCurrencyRates(): UseCurrencyRatesReturn {
   const [rates, setRates] = useState<Record<string, number>>({})
+  const [sources, setSources] = useState<Record<string, 'admin' | 'auto'>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -30,8 +32,8 @@ export function useCurrencyRates(): UseCurrencyRatesReturn {
         if (!res.ok) throw new Error(`Failed to fetch rates (${res.status})`)
         const data = await res.json()
         if (!cancelled) {
-          // Expect { rates: { eur: 1, ghs: x, usd: y } } or flat object
           setRates(data.rates ?? data)
+          setSources(data.sources ?? {})
         }
       } catch (err) {
         if (!cancelled) {
@@ -59,14 +61,14 @@ export function useCurrencyRates(): UseCurrencyRatesReturn {
 
       if (!fromRate || !toRate) return amount
 
-      // Convert via base: amount in "from" -> base -> "to"
+      // Convert via base (EUR is base 1)
       const inBase = amount / fromRate
       return Math.round(inBase * toRate * 100) / 100
     },
     [rates],
   )
 
-  return { rates, loading, error, convert }
+  return { rates, sources, loading, error, convert }
 }
 
 // ---------------------------------------------------------------------------
@@ -127,24 +129,47 @@ interface CurrencyDisplayProps {
   amount: number
   baseCurrency?: string
   showToggle?: boolean
+  clickToToggle?: boolean
   className?: string
+  amountClassName?: string
   size?: 'sm' | 'md' | 'lg'
   showDisclaimer?: boolean
+  onCurrencyChange?: (currency: string) => void
 }
 
 export function CurrencyDisplay({
   amount,
   baseCurrency = 'EUR',
   showToggle = false,
+  clickToToggle = false,
   className = '',
+  amountClassName = '',
   size = 'md',
   showDisclaimer = false,
+  onCurrencyChange,
 }: CurrencyDisplayProps) {
   const [activeCurrency, setActiveCurrency] = useState(baseCurrency)
-  const { rates, loading, convert } = useCurrencyRates()
+  const { rates, sources, loading, convert } = useCurrencyRates()
+
+  const handleCurrencyChange = useCallback(
+    (newCurrency: string) => {
+      setActiveCurrency(newCurrency)
+      onCurrencyChange?.(newCurrency)
+    },
+    [onCurrencyChange],
+  )
+
+  const handleClick = () => {
+    if (!clickToToggle) return
+    const currentIndex = SUPPORTED_CURRENCIES.indexOf(activeCurrency.toUpperCase())
+    const nextIndex = (currentIndex + 1) % SUPPORTED_CURRENCIES.length
+    handleCurrencyChange(SUPPORTED_CURRENCIES[nextIndex])
+  }
 
   const displayAmount =
-    activeCurrency === baseCurrency ? amount : convert(amount, baseCurrency, activeCurrency)
+    activeCurrency.toUpperCase() === baseCurrency.toUpperCase()
+      ? amount
+      : convert(amount, baseCurrency, activeCurrency)
 
   const formatted = formatAmount(displayAmount, activeCurrency)
   const textSize = sizeClasses[size] ?? sizeClasses.md
@@ -152,23 +177,47 @@ export function CurrencyDisplay({
   return (
     <div className={`inline-flex flex-col gap-1 ${className}`}>
       <div className="inline-flex items-center gap-2">
-        <span
-          className={`font-black text-slate-900 transition-all duration-200 dark:text-white ${textSize}`}
+        <div
+          onClick={handleClick}
+          className={`inline-flex items-center gap-2 transition-all duration-200 ${
+            clickToToggle
+              ? 'cursor-pointer hover:opacity-80 active:scale-[0.98]'
+              : 'cursor-default transition-none'
+          }`}
+          title={clickToToggle ? `Click to cycle: ${SUPPORTED_CURRENCIES.join(' → ')}` : undefined}
         >
-          {loading && activeCurrency !== baseCurrency ? '...' : formatted}
-        </span>
+          <span
+            className={`font-black transition-all duration-200 ${
+              amountClassName || 'text-slate-900 dark:text-white'
+            } ${textSize}`}
+          >
+            {loading && activeCurrency.toUpperCase() !== baseCurrency.toUpperCase()
+              ? '...'
+              : formatted}
+          </span>
+          {clickToToggle && activeCurrency.toUpperCase() !== 'EUR' && (
+            <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              {activeCurrency}
+            </span>
+          )}
+        </div>
         {showToggle && (
           <CurrencyToggle
             value={activeCurrency}
-            onChange={setActiveCurrency}
+            onChange={handleCurrencyChange}
             size={size === 'lg' ? 'md' : 'sm'}
           />
         )}
       </div>
-      {showDisclaimer && activeCurrency !== baseCurrency && (
-        <p className="text-xs text-slate-400 dark:text-slate-500">
-          Converted at indicative bank rate. Please check with your bank for the official and
-          approved rate when making payment.
+      {showDisclaimer && activeCurrency.toUpperCase() !== baseCurrency.toUpperCase() && (
+        <p className="max-w-[200px] text-[10px] leading-tight text-slate-400 dark:text-slate-500">
+          {sources[activeCurrency.toUpperCase()] === 'admin' ? (
+            <span className="font-semibold text-blue-500 dark:text-blue-400">
+              Official Academy Rate. Check with your bank for any transfer fees.
+            </span>
+          ) : (
+            <span>Indicative bank rate. Check with your bank for the official rate.</span>
+          )}
         </p>
       )}
     </div>
