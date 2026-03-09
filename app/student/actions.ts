@@ -315,13 +315,14 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
       const examComponent = await tx.examComponent.findFirst({
         where: { code: moduleCode },
       })
+      if (!examComponent) throw new Error(`No exam component found for module ${moduleCode}`)
 
       await tx.poolMembership.create({
         data: {
           userId: user.id,
           poolId: pool.id,
           status: 'RESERVED',
-          examComponentId: examComponent?.id,
+          examComponentId: examComponent.id,
           amountReserved: seatPrice,
         },
       })
@@ -491,18 +492,18 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
         'POOL_ID'
       )
 
-      // C. Create Membership
+      // C. Create Membership — reuse examComponent from step 3 when possible
       const primaryModule = isGroup ? moduleCode.split(',')[0] : moduleCode
-      const primaryExamComponent = await tx.examComponent.findFirst({
-        where: { course: { code: primaryModule } },
-      })
+      const primaryExamComponentId = primaryModule === moduleCode
+        ? examComponent.id
+        : (await tx.examComponent.findFirst({ where: { code: primaryModule } }))?.id
 
       await tx.poolMembership.create({
         data: {
           userId: user.id,
           poolId: newPool.id,
           status: 'RESERVED',
-          examComponentId: primaryExamComponent?.id,
+          examComponentId: primaryExamComponentId,
           amountReserved: seatPrice,
         },
       })

@@ -18,7 +18,7 @@ export const POST = withErrorHandler(
 
     // Find the exam component for the selected module
     const examComponent = await prisma.examComponent.findFirst({
-      where: { course: { code: validation.data.selectedModule } },
+      where: { code: validation.data.selectedModule },
     })
 
     const result = await joinPool({
