@@ -11,7 +11,6 @@ interface UseCurrencyRatesReturn {
   rates: Record<string, number>
   sources: Record<string, 'admin' | 'auto'>
   loading: boolean
-  error: string | null
   convert: (amount: number, from: string, to: string) => number
 }
 
@@ -19,7 +18,6 @@ export function useCurrencyRates(): UseCurrencyRatesReturn {
   const [rates, setRates] = useState<Record<string, number>>({})
   const [sources, setSources] = useState<Record<string, 'admin' | 'auto'>>({})
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -27,7 +25,6 @@ export function useCurrencyRates(): UseCurrencyRatesReturn {
     async function fetchRates() {
       try {
         setLoading(true)
-        setError(null)
         const res = await fetch('/api/finance/rates')
         if (!res.ok) throw new Error(`Failed to fetch rates (${res.status})`)
         const data = await res.json()
@@ -36,9 +33,8 @@ export function useCurrencyRates(): UseCurrencyRatesReturn {
           setSources(data.sources ?? {})
         }
       } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : 'Failed to fetch rates')
-        }
+        // setError(err instanceof Error ? err.message : 'Failed to fetch rates')
+        console.error(err)
       } finally {
         if (!cancelled) setLoading(false)
       }
@@ -68,7 +64,7 @@ export function useCurrencyRates(): UseCurrencyRatesReturn {
     [rates],
   )
 
-  return { rates, sources, loading, error, convert }
+  return { rates, sources, loading, convert }
 }
 
 // ---------------------------------------------------------------------------
