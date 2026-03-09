@@ -7,7 +7,7 @@ export default function Page() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">Pool Details</h1>
+        <h1 className="text-2xl sm:text-3xl font-black text-[#002a5c] dark:text-white tracking-tight">Pool Details</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Examination pool information.</p>
       </div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-8 sm:p-12 text-center">

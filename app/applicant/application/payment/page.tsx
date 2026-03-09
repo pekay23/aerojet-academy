@@ -53,7 +53,7 @@ export default async function PaymentPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100 sm:text-3xl">
+        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] dark:text-white sm:text-3xl">
           Upload Payment Proof
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
