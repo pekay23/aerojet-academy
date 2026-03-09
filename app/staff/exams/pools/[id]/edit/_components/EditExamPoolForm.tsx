@@ -103,14 +103,14 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
 
       if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to update exam pool')
+        throw new Error(error.message || 'Failed to update exam booking')
       }
 
-      toast.success('Exam pool updated successfully')
+      toast.success('Exam booking updated successfully')
       router.push(`/staff/exams/pools/${pool.id}`)
       router.refresh()
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update exam pool')
+      toast.error(error.message || 'Failed to update exam booking')
     } finally {
       setIsLoading(false)
     }
@@ -124,7 +124,7 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Pool Name</FormLabel>
+              <FormLabel>Booking Name</FormLabel>
               <FormControl>
                 <Input placeholder="e.g., Morning Session A" {...field} />
               </FormControl>

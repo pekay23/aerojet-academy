@@ -84,7 +84,7 @@ async function OverviewTab() {
             </div>
             <div>
               <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Open Exam Pools
+                Open Exam Bookings
               </p>
               <h3 className="text-2xl font-black text-[#002a5c] dark:text-slate-100">
                 {metrics.openPools}
@@ -305,11 +305,11 @@ async function PoolsTab() {
         </div>
         <div>
           <h2 className="text-2xl font-black tracking-tight text-[#002a5c] dark:text-white">
-            Pool Analytics
+            Booking Analytics
           </h2>
           <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
             <Sparkles className="h-3.5 w-3.5 text-[#4c9ded]" />
-            Exam pool performance and capacity utilization.
+            Exam booking performance and capacity utilization.
           </p>
         </div>
       </div>
@@ -322,14 +322,14 @@ async function PoolsTab() {
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
           <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
             <h3 className="text-sm font-black tracking-widest text-[#002a5c] uppercase dark:text-slate-100">
-              Exam Pool Detailed Breakdown
+              Exam Booking Detailed Breakdown
             </h3>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50/50 text-[10px] font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/20">
                 <tr>
-                  <th className="px-6 py-4">Pool Name</th>
+                  <th className="px-6 py-4">Booking Name</th>
                   <th className="px-6 py-4">Event</th>
                   <th className="px-6 py-4">Exam Date</th>
                   <th className="px-6 py-4">Status</th>

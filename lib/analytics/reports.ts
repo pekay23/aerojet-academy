@@ -246,7 +246,7 @@ export async function getRevenueByProgrammeType() {
       percentage: total > 0 ? Math.round((modularRevenue / total) * 100) : 0,
     },
     {
-      name: 'Exam Pools',
+      name: 'Exam Bookings',
       value: poolRevenue,
       percentage: total > 0 ? Math.round((poolRevenue / total) * 100) : 0,
     },

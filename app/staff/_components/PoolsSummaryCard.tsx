@@ -26,10 +26,10 @@ export default function PoolsSummaryCard({ pools }: Props) {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-sm font-black tracking-tight text-slate-800 uppercase dark:text-white">
-            Active Exam Pools
+            Active Exam Bookings
           </h2>
           <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
-            Current occupancy across open pools
+            Current occupancy across open bookings
           </p>
         </div>
         <Users className="text-aerojet-sky h-5 w-5" />

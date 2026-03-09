@@ -83,14 +83,9 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Actions Bar */}
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
-            Users
-          </h1>
-          <p className="mt-1 text-sm text-slate-400">{total.toLocaleString()} total users</p>
-        </div>
+        <p className="text-sm text-slate-400">{total.toLocaleString()} total users</p>
         <div className="flex gap-2">
           <CreateUserDialog />
           <button

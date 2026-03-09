@@ -21,6 +21,7 @@ import {
 import { toast } from 'sonner'
 import { useSession } from 'next-auth/react'
 import TransactionHistory from './_components/TransactionHistory'
+import { CurrencyToggle, useCurrencyRates } from '@/components/shared/CurrencyDisplay'
 
 interface ExamComponent {
   id: string
@@ -169,6 +170,15 @@ export default function ExamOnlyPathwayPage() {
     price: number
     moduleName: string
   } | null>(null)
+  const [displayCurrency, setDisplayCurrency] = useState('EUR')
+  const { convert, loading: ratesLoading } = useCurrencyRates()
+
+  const fmt = (eurAmount: number) => {
+    if (displayCurrency === 'EUR') return `\u20AC${eurAmount.toFixed(2)}`
+    const converted = convert(eurAmount, 'EUR', displayCurrency)
+    const sym = displayCurrency === 'GHS' ? 'GH\u20B5' : '$'
+    return `${sym}${converted.toFixed(2)}`
+  }
 
   useEffect(() => {
     fetchData()
@@ -294,7 +304,7 @@ export default function ExamOnlyPathwayPage() {
           )
           return
         }
-        toast.error(data.error || 'Failed to join pool')
+        toast.error(data.error || 'Failed to join booking')
         return
       }
 
@@ -309,10 +319,10 @@ export default function ExamOnlyPathwayPage() {
         return
       }
 
-      toast.success('Successfully joined pool! Funds have been reserved.')
+      toast.success('Successfully joined booking! Funds have been reserved.')
       fetchData()
     } catch (error) {
-      toast.error('Network error while joining pool')
+      toast.error('Network error while joining booking')
     } finally {
       setJoiningPool(null)
     }
@@ -525,7 +535,7 @@ export default function ExamOnlyPathwayPage() {
           Exam Only Pathway
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Book individual exams or join exam pools using your wallet
+          Book individual exams or join exam bookings using your wallet
         </p>
       </div>
 
@@ -534,7 +544,7 @@ export default function ExamOnlyPathwayPage() {
         {[
           { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
           { id: 'packages', label: 'Exam Packages', icon: Package },
-          { id: 'pools', label: 'Exam Pools', icon: Users },
+          { id: 'pools', label: 'Exam Bookings', icon: Users },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -558,33 +568,39 @@ export default function ExamOnlyPathwayPage() {
           <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="font-bold text-slate-900 dark:text-slate-100">Wallet Balance</h3>
-              <Wallet className="h-5 w-5 text-slate-400" />
+              <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} size="sm" />
             </div>
 
             {wallet ? (
               <div className="space-y-4">
                 <div className="text-3xl font-black text-[#4c9ded]">
-                  €{Number(wallet.balance).toFixed(2)}
+                  {fmt(Number(wallet.balance))}
                 </div>
                 <div className="flex gap-4 text-sm">
                   <div>
                     <span className="text-slate-500">Available: </span>
                     <span className="font-semibold text-green-600">
-                      €{Number(wallet.availableBalance).toFixed(2)}
+                      {fmt(Number(wallet.availableBalance))}
                     </span>
                   </div>
                   <div>
                     <span className="text-slate-500">Reserved: </span>
                     <span className="font-semibold text-orange-600">
-                      €{Number(wallet.reservedBalance).toFixed(2)}
+                      {fmt(Number(wallet.reservedBalance))}
                     </span>
                   </div>
                 </div>
+                {displayCurrency !== 'EUR' && (
+                  <p className="text-[10px] text-slate-400">
+                    Converted at indicative bank rate. Please check with your bank for the official
+                    and approved rate when making payment.
+                  </p>
+                )}
 
                 {/* Top Up Section */}
                 <div className="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
                   <p className="mb-3 text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Top up your wallet (min €{getLowestExamPrice()})
+                    Top up your wallet (min {fmt(getLowestExamPrice())})
                   </p>
                   <div className="flex gap-2">
                     {[300, 500, 1000, 2000].map((amount) => (
@@ -597,7 +613,7 @@ export default function ExamOnlyPathwayPage() {
                             : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
                         }`}
                       >
-                        €{amount}
+                        {fmt(amount)}
                       </button>
                     ))}
                   </div>
@@ -611,7 +627,7 @@ export default function ExamOnlyPathwayPage() {
                     ) : (
                       <CreditCard className="h-4 w-4" />
                     )}
-                    Top Up €{topUpAmount}
+                    Top Up {fmt(topUpAmount)}
                   </button>
                 </div>
               </div>
@@ -747,8 +763,8 @@ export default function ExamOnlyPathwayPage() {
                   <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div className="text-left">
-                  <p className="font-bold text-slate-900 dark:text-slate-100">Join Exam Pool</p>
-                  <p className="text-sm text-slate-500">Join a pool for discounted rates</p>
+                  <p className="font-bold text-slate-900 dark:text-slate-100">Join Exam Booking</p>
+                  <p className="text-sm text-slate-500">Join a booking for discounted rates</p>
                 </div>
                 <ArrowRight className="ml-auto h-5 w-5 text-slate-400" />
               </button>
@@ -774,7 +790,7 @@ export default function ExamOnlyPathwayPage() {
                 <p className="mb-4 text-sm text-slate-500">
                   Book a single, guaranteed individual exam seat at your preferred time.
                 </p>
-                <div className="mb-6 text-3xl font-black text-slate-900 dark:text-white">€520</div>
+                <div className="mb-6 text-3xl font-black text-slate-900 dark:text-white">{fmt(520)}</div>
               </div>
               <button
                 onClick={() =>
@@ -792,10 +808,10 @@ export default function ExamOnlyPathwayPage() {
             <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
               <div>
                 <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                  Exam Pool Seat
+                  Exam Booking Seat
                 </h3>
                 <p className="mb-4 text-sm text-slate-500">
-                  Join an existing exam pool to save money on your exam seating. Best for flexible
+                  Join an existing exam booking to save money on your exam seating. Best for flexible
                   schedules.
                 </p>
                 <div className="mb-6 text-3xl font-black text-[#4c9ded]">€300</div>
@@ -804,7 +820,7 @@ export default function ExamOnlyPathwayPage() {
                 onClick={() => setActiveTab('pools')}
                 className="w-full rounded-xl border border-[#4c9ded] bg-[#4c9ded]/10 py-3 text-sm font-bold text-[#4c9ded] transition-all hover:bg-[#4c9ded]/20"
               >
-                Join an Exam Pool
+                Join an Exam Booking
               </button>
             </div>
 
@@ -812,7 +828,7 @@ export default function ExamOnlyPathwayPage() {
             <div className="flex flex-col justify-between rounded-2xl border-2 border-indigo-500 bg-white p-6 shadow-lg shadow-indigo-100 dark:border-indigo-600 dark:bg-slate-900 dark:shadow-none">
               <div className="relative">
                 <span className="absolute -top-2 -right-2 rounded-full bg-indigo-500 px-3 py-1 text-xs font-bold text-white">
-                  Save €60
+                  Save {fmt(60)}
                 </span>
                 <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                   Twin Pack
@@ -822,9 +838,9 @@ export default function ExamOnlyPathwayPage() {
                   Valid for 12 months.
                 </p>
                 <div className="mb-1 text-3xl font-black text-indigo-600 dark:text-indigo-400">
-                  €980
+                  {fmt(980)}
                 </div>
-                <div className="mb-6 text-xs text-slate-400 line-through">€1040 (2x €520)</div>
+                <div className="mb-6 text-xs text-slate-400 line-through">{fmt(1040)} (2x {fmt(520)})</div>
               </div>
               <button
                 onClick={() => setSelectedBundleType('TWO_SEAT')}
@@ -844,7 +860,7 @@ export default function ExamOnlyPathwayPage() {
             <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white bg-linear-to-br from-white to-amber-50 p-6 dark:border-slate-800 dark:bg-slate-900 dark:from-slate-900 dark:to-slate-800">
               <div className="relative">
                 <span className="absolute -top-2 -right-2 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white">
-                  Save €180 + 1 Free Change
+                  Save {fmt(180)} + 1 Free Change
                 </span>
                 <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                   4-Pack
@@ -853,8 +869,8 @@ export default function ExamOnlyPathwayPage() {
                   The ultimate individual seating package. Secure 4 guaranteed seats + 1 free module
                   change. Valid for 12 months.
                 </p>
-                <div className="mb-1 text-3xl font-black text-amber-600">€1900</div>
-                <div className="mb-6 text-xs text-slate-400 line-through">€2080 (4x €520)</div>
+                <div className="mb-1 text-3xl font-black text-amber-600">{fmt(1900)}</div>
+                <div className="mb-6 text-xs text-slate-400 line-through">{fmt(2080)} (4x {fmt(520)})</div>
               </div>
               <button
                 onClick={() => setSelectedBundleType('FOUR_SEAT')}
@@ -915,7 +931,7 @@ export default function ExamOnlyPathwayPage() {
                 Individual Exam Modules
               </h2>
               <p className="text-sm text-slate-500">
-                Select a module to book an individual seat (€520)
+                Select a module to book an individual seat ({fmt(520)})
               </p>
             </div>
 
@@ -1024,9 +1040,9 @@ export default function ExamOnlyPathwayPage() {
       {activeTab === 'pools' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Exam Pools</h2>
+            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Exam Bookings</h2>
             <p className="text-sm text-slate-500">
-              Join a pool for €
+              Join a booking for €
               {pools.length > 0 ? Math.min(...pools.map((p) => Number(p.seatPrice))) : '300'} per
               seat
             </p>
@@ -1168,7 +1184,7 @@ export default function ExamOnlyPathwayPage() {
                     ) : pool.currentMemberCount >= pool.maxCandidates ? (
                       'Join Waitlist'
                     ) : (
-                      'Join Pool'
+                      'Join Booking'
                     )}
                   </button>
                 </div>
@@ -1179,7 +1195,7 @@ export default function ExamOnlyPathwayPage() {
           {pools.length === 0 && (
             <div className="rounded-2xl border border-slate-200 bg-slate-50 p-12 text-center dark:border-slate-800 dark:bg-slate-900">
               <Users className="mx-auto mb-4 h-12 w-12 text-slate-300" />
-              <p className="text-slate-500">No exam pools available at this time</p>
+              <p className="text-slate-500">No exam bookings available at this time</p>
             </div>
           )}
         </div>
@@ -1194,7 +1210,7 @@ export default function ExamOnlyPathwayPage() {
                 Select {selectedBundleType === 'TWO_SEAT' ? '2' : '4'} Modules
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                Choose the modules you want to be booked into exam pools for this package.
+                Choose the modules you want to be booked into exam bookings for this package.
               </p>
             </div>
 

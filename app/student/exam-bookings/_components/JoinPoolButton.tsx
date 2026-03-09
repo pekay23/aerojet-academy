@@ -97,7 +97,7 @@ export default function JoinPoolButton({
         disabled
         className="cursor-not-allowed rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold tracking-wide text-slate-400 uppercase"
       >
-        Pool Full
+        Booking Full
       </button>
     )
   }
@@ -185,7 +185,7 @@ export default function JoinPoolButton({
                   <div className="mb-3 flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
                     <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
                     <span>
-                      This pool is at the 4-module cap. You can only join for:{' '}
+                      This booking is at the 4-module cap. You can only join for:{' '}
                       <strong>{currentModules.join(', ')}</strong>
                     </span>
                   </div>
@@ -201,13 +201,13 @@ export default function JoinPoolButton({
                   {availableModules.map((m) => (
                     <option key={m.code} value={m.code}>
                       {m.code} — {m.name}
-                      {currentModules.includes(m.code) ? ' (already in pool)' : ''}
+                      {currentModules.includes(m.code) ? ' (already in booking)' : ''}
                     </option>
                   ))}
                 </select>
                 <p className="mt-1.5 text-[11px] text-slate-400 dark:text-slate-500">
-                  Each candidate takes exactly one module per pool seat. Modules already listed are
-                  shared with other candidates in this pool.
+                  Each candidate takes exactly one module per booking seat. Modules already listed are
+                  shared with other candidates in this booking.
                 </p>
               </div>
 
@@ -215,7 +215,7 @@ export default function JoinPoolButton({
               {currentModules.length > 0 && (
                 <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
                   <p className="mb-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
-                    Current Pool Modules ({moduleCount}/4 slots used)
+                    Current Booking Modules ({moduleCount}/4 slots used)
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {currentModules.map((m) => (
@@ -238,7 +238,7 @@ export default function JoinPoolButton({
                     {currencySymbol}
                     {price.toFixed(2)}
                   </strong>{' '}
-                  will be reserved from your wallet. Funds are released automatically if the pool is
+                  will be reserved from your wallet. Funds are released automatically if the booking is
                   cancelled.
                 </span>
               </div>

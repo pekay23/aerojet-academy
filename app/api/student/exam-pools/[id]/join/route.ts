@@ -28,7 +28,7 @@ export const POST = withErrorHandler(
     })
 
     if (!result.success) {
-      return apiError(result.error || 'Failed to join pool')
+      return apiError(result.error || 'Failed to join booking')
     }
 
     await createAuditLog({
@@ -47,7 +47,7 @@ export const POST = withErrorHandler(
     const symbol = getCurrencySymbol(currency)
 
     return apiCreated({
-      message: `Successfully joined pool! ${symbol}300 has been held in your wallet.`,
+      message: `Successfully joined booking! ${symbol}300 has been held in your wallet.`,
       membershipId: result.membership?.id,
       autoConfirmed: result.autoConfirmed,
     })

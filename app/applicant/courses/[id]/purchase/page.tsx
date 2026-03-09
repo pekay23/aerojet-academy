@@ -91,7 +91,7 @@ export default async function PurchasePage({ params }: Props) {
         </h1>
         <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            {isExamOnly ? 'Complete booking for exam pool' : 'Complete enrollment for'}{' '}
+            {isExamOnly ? 'Complete exam booking for' : 'Complete enrollment for'}{' '}
             <span className="font-bold text-slate-700 dark:text-slate-200">{course.name}</span>
           </p>
           <div className="flex gap-2">

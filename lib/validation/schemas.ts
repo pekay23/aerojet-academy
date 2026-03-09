@@ -197,6 +197,9 @@ export const studentCreatePoolSchema = z.object({
   moduleCode: z.string().min(1, 'Module selection is required'),
   examDate: z.string().refine((val) => !isNaN(Date.parse(val)), 'Invalid exam date'),
   examTimeSlot: z.enum(['MORNING', 'AFTERNOON']),
+  bookingType: z.enum(['INDIVIDUAL_POOL', 'GROUP_CHARTER']).optional(),
+  seats: z.number().int().min(1).max(28).optional(),
+  organizationName: z.string().max(100).optional(),
 })
 
 export type CreatePoolInput = z.infer<typeof studentCreatePoolSchema>

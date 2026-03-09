@@ -139,7 +139,7 @@ export function promotionToStudentEmail(name: string, studentId: string, academy
       <p><strong>Student ID:</strong> ${studentId}</p>
       <p><strong>Academy Email:</strong> ${academyEmail}</p>
     </div>
-    <p>Your student wallet has been created. You can now enroll in courses and join exam pools.</p>
+    <p>Your student wallet has been created. You can now enroll in courses and join exam bookings.</p>
   `
   )
 }
@@ -152,9 +152,9 @@ export function poolConfirmedEmail(
 ) {
   return baseLayout(
     `
-    <h2 style="color:#0f172a;">Exam Pool Confirmed!</h2>
+    <h2 style="color:#0f172a;">Exam Booking Confirmed!</h2>
     <p>Dear ${name},</p>
-    <p>Great news! Your exam pool has reached the minimum 25 candidates and is now confirmed.</p>
+    <p>Great news! Your exam booking has reached the minimum 25 candidates and is now confirmed.</p>
     <div style="background:#f0fdf4;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #22c55e;">
       <p><strong>Pool:</strong> ${poolName}</p>
       <p><strong>Exam Date:</strong> ${examDate}</p>
@@ -162,23 +162,23 @@ export function poolConfirmedEmail(
     </div>
     <p>Your reserved funds (€300) have been captured. Good luck with your exam!</p>
   `,
-    'Exam Pool Confirmed'
+    'Exam Booking Confirmed'
   )
 }
 
 export function poolFailedEmail(name: string, poolName: string, examDate: string) {
   return baseLayout(
     `
-    <h2 style="color:#dc2626;">Exam Pool Did Not Reach Minimum</h2>
+    <h2 style="color:#dc2626;">Exam Booking Did Not Reach Minimum</h2>
     <p>Dear ${name},</p>
-    <p>Unfortunately, the exam pool below did not reach the required 25 candidates by the deadline.</p>
+    <p>Unfortunately, the exam booking below did not reach the required 25 candidates by the deadline.</p>
     <div style="background:#fef2f2;padding:16px;border-radius:8px;margin:16px 0;border-left:4px solid #dc2626;">
       <p><strong>Pool:</strong> ${poolName}</p>
       <p><strong>Exam Date:</strong> ${examDate}</p>
     </div>
-    <p>Your reserved funds (€300) have been released back to your wallet. You may join another pool.</p>
+    <p>Your reserved funds (€300) have been released back to your wallet. You may join another booking.</p>
   `,
-    'Exam Pool Postponed'
+    'Exam Booking Postponed'
   )
 }
 

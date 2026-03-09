@@ -70,7 +70,7 @@ export async function joinPool(input: PoolJoinInput): Promise<PoolJoinResult> {
     return result
   } catch (err: any) {
     console.error('[POOL JOIN ERROR]', err)
-    return { success: false, error: err.message || 'Failed to join pool' }
+    return { success: false, error: err.message || 'Failed to join booking' }
   }
 }
 
@@ -101,7 +101,7 @@ export async function joinPoolInternal(
   if (existingInPool) {
     return {
       success: false,
-      error: 'You already have a seat in this pool (one module per pool)',
+      error: 'You already have a seat in this booking (one module per booking)',
     }
   }
 
@@ -206,7 +206,7 @@ export async function joinPoolInternal(
   if (profile?.enrollmentType === 'FULL_TIME') {
     return {
       success: false,
-      error: 'Full-Time students do not join exam pools individually.',
+      error: 'Full-Time students do not join exam bookings individually.',
     }
   }
 

@@ -95,10 +95,10 @@ export async function POST(request: Request) {
       membershipId: result.membership?.id,
       autoConfirmed: result.autoConfirmed,
       message: promotedToStudent
-        ? 'Successfully joined pool and promoted to student!'
+        ? 'Successfully joined booking and promoted to student!'
         : result.autoConfirmed
-          ? 'Successfully joined pool — pool has been confirmed!'
-          : 'Successfully joined pool',
+          ? 'Successfully joined booking — booking has been confirmed!'
+          : 'Successfully joined booking',
       promotedToStudent,
     })
   } catch (error) {

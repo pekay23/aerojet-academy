@@ -11,7 +11,8 @@ export async function POST(req: NextRequest) {
     }
 
     const userId = session.user.id
-    const { amount, studentId, proofUrl, filename, fileType, fileSize } = await req.json()
+    const { amount, currency: paymentCurrency, eurEquivalent, studentId, proofUrl, filename, fileType, fileSize } = await req.json()
+    const submittedCurrency = paymentCurrency || 'GHS'
 
     if (!amount || !proofUrl) {
       return NextResponse.json({ error: 'Amount and payment proof are required.' }, { status: 400 })
@@ -25,11 +26,13 @@ export async function POST(req: NextRequest) {
     // Generate a unique reference code
     const referenceCode = `W-TOPUP-${Date.now()}-${Math.floor(Math.random() * 1000)}`
 
+    const eurAmt = eurEquivalent ? parseFloat(eurEquivalent) : parsedAmount
+
     const payment = await prisma.payment.create({
       data: {
         userId,
         amount: parsedAmount,
-        currency: 'GHS',
+        currency: submittedCurrency,
         paymentMethod: 'BANK_TRANSFER',
         status: 'PENDING',
         proofUrl,
@@ -37,7 +40,7 @@ export async function POST(req: NextRequest) {
         referenceCode,
         referenceType: 'WALLET_TOPUP',
         referenceId: studentId,
-        notes: `Student uploaded proof for Wallet Top-up. File: ${filename || 'Unknown'}`,
+        notes: `Student uploaded proof for Wallet Top-up. ${submittedCurrency} ${parsedAmount}${submittedCurrency !== 'EUR' ? ` (≈ EUR ${eurAmt.toFixed(2)})` : ''}. File: ${filename || 'Unknown'}`,
       },
     })
 
@@ -61,7 +64,7 @@ export async function POST(req: NextRequest) {
       entity: 'payments',
       entityId: payment.id,
       userId,
-      description: `Student submitted a wallet top-up request for GHS ${parsedAmount}`,
+      description: `Student submitted a wallet top-up request for ${submittedCurrency} ${parsedAmount}`,
     })
 
     return NextResponse.json({ success: true, paymentId: payment.id }, { status: 201 })
