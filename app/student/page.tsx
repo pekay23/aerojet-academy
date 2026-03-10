@@ -229,9 +229,13 @@ export default async function StudentDashboard() {
                         <span className="font-semibold text-slate-700 dark:text-slate-300">
                           {m.milestoneType.replace('_', ' ')}
                         </span>
-                        <span className="font-black text-amber-600">
-                          €{Number(m.amountDue).toFixed(2)}
-                        </span>
+                        <CurrencyDisplay
+                          amount={Number(m.amountDue)}
+                          baseCurrency={wallet?.currency || 'EUR'}
+                          clickToToggle={true}
+                          size="sm"
+                          amountClassName="text-amber-600 dark:text-amber-400"
+                        />
                       </div>
                     ))}
                   </div>
@@ -338,58 +342,6 @@ export default async function StudentDashboard() {
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )
-    }
-
-    if (isExamOnly) {
-      return (
-        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 dark:border-slate-800">
-            <h2 className="font-bold text-slate-900 dark:text-slate-100">Exam Bookings Joined</h2>
-            <Link
-              href="/student/exam-pools/my-bookings"
-              className="text-xs font-bold text-blue-600 hover:underline"
-            >
-              View All
-            </Link>
-          </div>
-          <div className="p-4 sm:p-6">
-            {poolMemberships.length > 0 ? (
-              <div className="space-y-4">
-                {poolMemberships.map((membership) => (
-                  <div
-                    key={membership.id}
-                    className="flex items-center justify-between rounded-xl border border-slate-100 p-4 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100 text-orange-600">
-                        <Calendar className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-slate-900 dark:text-slate-100">
-                          {membership.pool.name}
-                        </h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          Status: {membership.status}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="py-4 text-center">
-                <p className="mb-4 text-sm text-slate-500">You have not joined any Exam Bookings.</p>
-                <Link
-                  href="/student/exam-pools"
-                  className="text-sm font-bold text-blue-600 hover:underline"
-                >
-                  Find Exam Bookings →
-                </Link>
               </div>
             )}
           </div>

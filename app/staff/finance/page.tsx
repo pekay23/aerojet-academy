@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma/client'
 import FinanceTabs from '../_components/FinanceTabs'
 import FinanceOverview from '../_components/FinanceOverview'
 import ReconciliationQueue from '../_components/ReconciliationQueue'
+import PendingTopupsTable from '../_components/PendingTopupsTable'
 import {
   Table,
   TableBody,
@@ -201,87 +202,7 @@ async function WalletTopupsTab() {
           Awaiting Verification ({pendingRequests.length})
         </h2>
 
-        <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <Table>
-            <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
-              <TableRow>
-                <TableHead>Student</TableHead>
-                <TableHead>Amount</TableHead>
-                <TableHead>Proof</TableHead>
-                <TableHead>Requested</TableHead>
-                <TableHead>Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pendingRequests.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="h-32 text-center text-slate-500">
-                    No pending top-up requests.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                pendingRequests.map((req) => {
-                  const userName = req.user.profile
-                    ? `${req.user.profile.firstName} ${req.user.profile.lastName}`
-                    : req.user.email
-
-                  return (
-                    <TableRow key={req.id}>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-slate-900 dark:text-slate-100">
-                            {userName}
-                          </span>
-                          <span className="text-xs text-slate-500">{req.user.email}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-bold text-slate-900 dark:text-slate-100">
-                            {req.currency} {Number(req.amount).toFixed(2)}
-                          </span>
-                          {req.paymentCurrency && req.paymentCurrency !== req.currency && (
-                            <span className="text-[10px] font-medium text-slate-400">
-                              (Original: {req.paymentCurrency}{' '}
-                              {Number(req.originalAmount || 0).toFixed(2)})
-                            </span>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {req.proofUrl ? (
-                          <Link
-                            href={req.proofUrl}
-                            target="_blank"
-                            className="flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-800 dark:text-blue-400"
-                          >
-                            View Receipt <ExternalLink className="h-3 w-3" />
-                          </Link>
-                        ) : (
-                          <span className="text-xs text-slate-400">No proof</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-xs text-slate-500">
-                        {format(new Date(req.createdAt), 'MMM d, yyyy HH:mm')}
-                      </TableCell>
-                      <TableCell>
-                        <TopupActions
-                          paymentId={req.id}
-                          amount={`${req.currency} ${Number(req.amount).toFixed(2)}${
-                            req.paymentCurrency && req.paymentCurrency !== req.currency
-                              ? ` (${req.paymentCurrency} ${Number(req.originalAmount || 0).toFixed(2)})`
-                              : ''
-                          }`}
-                          userName={userName}
-                        />
-                      </TableCell>
-                    </TableRow>
-                  )
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <PendingTopupsTable requests={pendingRequests as any} />
       </div>
 
       <div className="space-y-4">

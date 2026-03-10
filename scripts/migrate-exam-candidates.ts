@@ -9,13 +9,12 @@
  *
  * Idempotent: safe to re-run. Uses email + migrationRef for dedupe.
  */
-import { PrismaClient, UserRole, UserStatus, TransactionType, BookingType, PaymentStatus } from '@prisma/client'
+import { UserRole, UserStatus, TransactionType, BookingType, PaymentStatus } from '@prisma/client'
+import prisma from '../lib/prisma/client'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import * as fs from 'fs'
 import * as path from 'path'
-
-const prisma = new PrismaClient()
 
 const MIGRATION_REF = 'EXAM_CANDIDATE_IMPORT_2026_03'
 
@@ -676,4 +675,3 @@ main()
     console.error('FATAL migration error:', e)
     process.exit(1)
   })
-  .finally(() => prisma.$disconnect())
