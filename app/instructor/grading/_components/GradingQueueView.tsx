@@ -21,7 +21,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { format } from 'date-fns'
 import { submitGrade } from '@/lib/actions/instructor'
 import { toast } from 'sonner'
-import TablePagination from '@/app/staff/_components/TablePagination'
+import TablePagination from '@/components/shared/TablePagination'
 import {
   Dialog,
   DialogContent,

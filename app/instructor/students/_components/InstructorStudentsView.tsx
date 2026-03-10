@@ -4,7 +4,7 @@ import React, { useState, useMemo } from 'react'
 import { Search, Filter, Users } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import StudentCard from './StudentCard'
-import TablePagination from '@/app/staff/_components/TablePagination'
+import TablePagination from '@/components/shared/TablePagination'
 
 interface Student {
   id: string
