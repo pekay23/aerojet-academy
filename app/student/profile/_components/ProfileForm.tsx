@@ -20,8 +20,27 @@ import {
 } from 'lucide-react'
 import { updateStudentProfile, changePassword } from '@/app/student/actions'
 
+interface ProfileUser {
+  email: string
+  role: string
+  profile?: {
+    firstName: string
+    lastName: string
+    middleName?: string | null
+    phone?: string | null
+    address?: string | null
+    dateOfBirth?: Date | string | null
+    profilePhotoUrl?: string | null
+  } | null
+  studentProfile?: {
+    studentId?: string | null
+    enrollmentType?: string | null
+    enrollmentDate?: Date | string | null
+  } | null
+}
+
 interface ProfileFormProps {
-  user: any
+  user: ProfileUser
 }
 
 export default function ProfileForm({ user }: ProfileFormProps) {

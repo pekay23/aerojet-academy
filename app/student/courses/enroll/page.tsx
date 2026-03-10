@@ -9,7 +9,10 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import EnrollButton from './_components/EnrollButton'
 
-export const metadata: Metadata = { title: 'Enroll in Course | Student Portal' }
+export const metadata: Metadata = {
+  title: 'Enroll in Course | Student Portal',
+  description: 'Browse and enroll in available aviation training courses.',
+}
 
 import { CourseCategoryFilter } from '@/components/CourseCategoryFilter'
 

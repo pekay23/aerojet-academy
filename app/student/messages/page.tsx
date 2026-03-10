@@ -91,8 +91,8 @@ export default async function MessagesPage() {
 
   return (
     <div className="space-y-6">
-      {/* Auto-refresh every 20s */}
-      <AutoRefresh intervalMs={20000} />
+      {/* Auto-refresh every 60s */}
+      <AutoRefresh intervalMs={60000} />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>

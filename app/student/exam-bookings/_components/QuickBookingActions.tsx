@@ -6,12 +6,32 @@ import GroupBookingModal from './GroupBookingModal'
 import StandaloneBooking from './StandaloneBooking'
 import BundleBooking from './BundleBooking'
 
+interface ExamEvent {
+  id: string
+  name: string
+  startDate: Date
+  endDate: Date
+}
+
+interface ExamPricing {
+  groupCharterFee: number
+  individualExamFee: number
+  twoSeatBundle: number
+  fourSeatBundle: number
+  poolExamFee: number
+}
+
+interface WalletInfo {
+  availableBalance: number | string
+  currency: string
+}
+
 interface QuickBookingActionsProps {
-  events: any[]
-  pricing: any
-  wallet: any
-  examComponents: any[]
-  upcomingExams: any[]
+  events: ExamEvent[]
+  pricing: ExamPricing
+  wallet: WalletInfo | null
+  examComponents: { id: string; code: string; name: string }[]
+  upcomingExams: { id: string; name: string; examDate: Date; examComponent: { course: { code: string; name: string } } }[]
 }
 
 export default function QuickBookingActions({

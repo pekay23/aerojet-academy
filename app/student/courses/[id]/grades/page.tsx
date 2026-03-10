@@ -2,7 +2,10 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { Construction } from "lucide-react";
 
-export const metadata: Metadata = { title: "Course Grades" };
+export const metadata: Metadata = {
+  title: "Course Grades",
+  description: "View your grades and assessment results for this course.",
+};
 
 export default function Page() {
   return (

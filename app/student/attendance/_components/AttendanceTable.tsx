@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Clock, AlertCircle } from 'lucide-react'
-import TablePagination from '@/app/staff/_components/TablePagination'
+import TablePagination from '@/components/shared/TablePagination'
 
 interface AttendanceRecord {
   id: string
