@@ -22,6 +22,7 @@ import {
   Shield,
   Briefcase,
 } from 'lucide-react'
+import { useBadgeCounts } from '@/hooks/useBadgeCounts'
 
 interface StaffSidebarProps {
   userName?: string
@@ -35,14 +36,21 @@ interface StaffSidebarProps {
   }
 }
 
-export default function StaffSidebar({ userName, userRole, userImage, counts }: StaffSidebarProps) {
+export default function StaffSidebar({ userName, userRole, userImage, counts: initialCounts }: StaffSidebarProps) {
+  const { counts } = useBadgeCounts({
+    applicants: initialCounts?.applicants ?? 0,
+    enrollments: initialCounts?.enrollments ?? 0,
+    payments: initialCounts?.payments ?? 0,
+    messages: initialCounts?.messages ?? 0,
+  })
+
   const staffLinks: SidebarLink[] = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     {
       label: 'People',
       href: '/users',
       icon: Users,
-      badge: counts?.applicants || undefined,
+      badge: (counts.applicants ?? 0) > 0 ? counts.applicants : undefined,
       children: [
         { label: 'All Users', href: '/users' },
         { label: 'Applicants', href: '/users?tab=applicants' },
@@ -55,7 +63,7 @@ export default function StaffSidebar({ userName, userRole, userImage, counts }: 
       label: 'Enrollments',
       href: '/enrollments',
       icon: ClipboardList,
-      badge: counts?.enrollments || undefined,
+      badge: (counts.enrollments ?? 0) > 0 ? counts.enrollments : undefined,
       children: [
         { label: 'All Enrollments', href: '/enrollments' },
         { label: 'Batch Activate', href: '/enrollments/batch' },
@@ -65,7 +73,7 @@ export default function StaffSidebar({ userName, userRole, userImage, counts }: 
       label: 'Payments',
       href: '/payments',
       icon: CreditCard,
-      badge: counts?.payments || undefined,
+      badge: (counts.payments ?? 0) > 0 ? counts.payments : undefined,
     },
     {
       label: 'Finance',
@@ -86,7 +94,7 @@ export default function StaffSidebar({ userName, userRole, userImage, counts }: 
 
     { label: 'Reports', href: '/reports', icon: BarChart3 },
     { label: 'Newsroom', href: '/newsroom', icon: Megaphone },
-    { label: 'Messages', href: '/messages', icon: Mail, badge: counts?.messages || undefined },
+    { label: 'Messages', href: '/messages', icon: Mail, badge: (counts.messages ?? 0) > 0 ? counts.messages : undefined },
     { label: 'Audit Logs', href: '/audit-logs', icon: ScrollText },
     {
       label: 'Settings',

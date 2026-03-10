@@ -2,7 +2,17 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { Search, X, ArrowRight, FileText, BookOpen, GraduationCap, Calendar, Loader2 } from 'lucide-react'
+import {
+  Search,
+  X,
+  ArrowRight,
+  FileText,
+  BookOpen,
+  GraduationCap,
+  Calendar,
+  Loader2,
+  Sparkles,
+} from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface SearchResult {
@@ -19,11 +29,27 @@ const CATEGORY_ICONS: Record<string, typeof Search> = {
   Exams: Calendar,
 }
 
-const CATEGORY_COLORS: Record<string, string> = {
-  Pages: 'bg-blue-50 text-blue-600',
-  Courses: 'bg-emerald-50 text-emerald-600',
-  Modules: 'bg-purple-50 text-purple-600',
-  Exams: 'bg-amber-50 text-amber-600',
+const CATEGORY_COLORS: Record<string, { bg: string; text: string; ring: string }> = {
+  Pages: {
+    bg: 'bg-blue-50 dark:bg-blue-900/30',
+    text: 'text-blue-600 dark:text-blue-400',
+    ring: 'ring-blue-100 dark:ring-blue-800',
+  },
+  Courses: {
+    bg: 'bg-emerald-50 dark:bg-emerald-900/30',
+    text: 'text-emerald-600 dark:text-emerald-400',
+    ring: 'ring-emerald-100 dark:ring-emerald-800',
+  },
+  Modules: {
+    bg: 'bg-purple-50 dark:bg-purple-900/30',
+    text: 'text-purple-600 dark:text-purple-400',
+    ring: 'ring-purple-100 dark:ring-purple-800',
+  },
+  Exams: {
+    bg: 'bg-amber-50 dark:bg-amber-900/30',
+    text: 'text-amber-600 dark:text-amber-400',
+    ring: 'ring-amber-100 dark:ring-amber-800',
+  },
 }
 
 export default function SearchModal() {
@@ -115,19 +141,23 @@ export default function SearchModal() {
 
   let flatIndex = -1
 
+  const quickLinks = [
+    { label: 'Exam Only', icon: '🎯' },
+    { label: 'EASA Part 66', icon: '✈️' },
+    { label: 'Modular', icon: '📦' },
+    { label: 'Fees', icon: '💰' },
+    { label: 'Pool', icon: '📋' },
+  ]
+
   return (
     <>
-      {/* Search trigger button */}
+      {/* Search trigger — icon only */}
       <button
         onClick={() => setOpen(true)}
-        className="group flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-bold tracking-wider uppercase transition-all"
+        className="group flex items-center gap-2 rounded-lg px-3 py-2 transition-all"
         aria-label="Search"
       >
         <Search className="h-4 w-4" />
-        <span className="hidden xl:inline">Search</span>
-        <kbd className="hidden rounded-md border border-current/20 px-1.5 py-0.5 font-mono text-[9px] opacity-60 lg:inline">
-          ⌘K
-        </kbd>
       </button>
 
       {/* Modal overlay */}
@@ -138,20 +168,26 @@ export default function SearchModal() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-100 flex items-start justify-center bg-slate-900/60 pt-[15vh] backdrop-blur-sm"
+            className="fixed inset-0 z-100 flex items-start justify-center bg-slate-900/60 pt-[12vh] backdrop-blur-sm"
             onClick={() => setOpen(false)}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              initial={{ opacity: 0, scale: 0.96, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
-              transition={{ duration: 0.2 }}
-              className="w-full max-w-xl overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
+              exit={{ opacity: 0, scale: 0.96, y: -20 }}
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              className="w-full max-w-2xl overflow-hidden rounded-3xl border border-slate-200/50 bg-white shadow-2xl shadow-slate-900/20 dark:border-slate-700/50 dark:bg-slate-900"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Search Input */}
-              <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-                <Search className="h-5 w-5 shrink-0 text-slate-400" />
+              <div className="flex items-center gap-4 px-6 py-5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800">
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin text-blue-500" />
+                  ) : (
+                    <Search className="h-5 w-5 text-slate-400" />
+                  )}
+                </div>
                 <input
                   ref={inputRef}
                   type="text"
@@ -159,52 +195,74 @@ export default function SearchModal() {
                   onChange={(e) => setQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Search courses, exams, pages..."
-                  className="flex-1 bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100"
+                  className="flex-1 bg-transparent text-base font-medium text-slate-900 outline-none placeholder:text-slate-400 dark:text-slate-100"
                 />
-                {loading && <Loader2 className="h-4 w-4 animate-spin text-slate-400" />}
                 <button
                   onClick={() => setOpen(false)}
-                  className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
+              <div className="h-px bg-linear-to-r from-transparent via-slate-200 to-transparent dark:via-slate-700" />
+
               {/* Results */}
-              <div className="max-h-[50vh] overflow-y-auto">
+              <div
+                className="max-h-[55vh] overflow-y-auto"
+                style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,0,0,0.1) transparent' }}
+              >
                 {query.length < 2 ? (
-                  <div className="px-5 py-8 text-center">
-                    <p className="text-xs text-slate-400">Type at least 2 characters to search</p>
-                    <div className="mt-4 flex flex-wrap justify-center gap-2">
-                      {['Exam Only', 'EASA Part 66', 'Modular', 'Pool', 'Fees'].map((suggestion) => (
+                  <div className="px-6 py-10 text-center">
+                    <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800/50">
+                      <Sparkles className="h-6 w-6 text-slate-300 dark:text-slate-600" />
+                    </div>
+                    <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                      Type to search across all pages
+                    </p>
+                    <div className="mt-6 flex flex-wrap justify-center gap-2">
+                      {quickLinks.map((item) => (
                         <button
-                          key={suggestion}
-                          onClick={() => setQuery(suggestion)}
-                          className="rounded-lg bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400"
+                          key={item.label}
+                          onClick={() => setQuery(item.label)}
+                          className="flex items-center gap-1.5 rounded-xl bg-slate-50 px-3.5 py-2 text-xs font-bold text-slate-600 transition-all hover:bg-slate-100 hover:shadow-sm dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
                         >
-                          {suggestion}
+                          <span>{item.icon}</span>
+                          {item.label}
                         </button>
                       ))}
                     </div>
                   </div>
                 ) : results.length === 0 && !loading ? (
-                  <div className="px-5 py-8 text-center">
-                    <p className="text-sm font-medium text-slate-500">No results for &ldquo;{query}&rdquo;</p>
-                    <p className="mt-1 text-xs text-slate-400">Try searching for courses, exam options, or pages</p>
+                  <div className="px-6 py-12 text-center">
+                    <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 dark:bg-slate-800/50">
+                      <Search className="h-6 w-6 text-slate-300 dark:text-slate-600" />
+                    </div>
+                    <p className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                      No results for &ldquo;{query}&rdquo;
+                    </p>
+                    <p className="mt-1 text-xs text-slate-400">
+                      Try different keywords or browse courses directly
+                    </p>
                   </div>
                 ) : (
-                  <div className="py-2">
+                  <div className="py-3">
                     {Object.entries(grouped).map(([category, items]) => {
                       const CategoryIcon = CATEGORY_ICONS[category] || FileText
-                      const colorClass = CATEGORY_COLORS[category] || 'bg-slate-50 text-slate-600'
+                      const colors = CATEGORY_COLORS[category] || CATEGORY_COLORS.Pages
                       return (
                         <div key={category}>
-                          <div className="flex items-center gap-2 px-5 pt-3 pb-1">
-                            <div className={`flex h-5 w-5 items-center justify-center rounded ${colorClass}`}>
-                              <CategoryIcon className="h-3 w-3" />
+                          <div className="flex items-center gap-2.5 px-6 pt-4 pb-2">
+                            <div
+                              className={`flex h-6 w-6 items-center justify-center rounded-lg ${colors.bg}`}
+                            >
+                              <CategoryIcon className={`h-3.5 w-3.5 ${colors.text}`} />
                             </div>
-                            <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                            <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
                               {category}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-300 dark:text-slate-600">
+                              {items.length}
                             </span>
                           </div>
                           {items.map((result) => {
@@ -215,15 +273,15 @@ export default function SearchModal() {
                                 key={`${result.url}-${result.title}`}
                                 onClick={() => navigateToResult(result)}
                                 onMouseEnter={() => setSelectedIndex(idx)}
-                                className={`group flex w-full items-center gap-3 px-5 py-3 text-left transition-colors ${
+                                className={`group flex w-full items-center gap-4 px-6 py-3.5 text-left transition-all ${
                                   selectedIndex === idx
-                                    ? 'bg-blue-50 dark:bg-blue-900/20'
+                                    ? 'bg-blue-50/80 dark:bg-blue-900/20'
                                     : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
                                 }`}
                               >
                                 <div className="min-w-0 flex-1">
                                   <p
-                                    className={`truncate text-sm font-bold ${
+                                    className={`text-sm font-bold ${
                                       selectedIndex === idx
                                         ? 'text-blue-700 dark:text-blue-300'
                                         : 'text-slate-900 dark:text-slate-100'
@@ -253,22 +311,28 @@ export default function SearchModal() {
               </div>
 
               {/* Footer */}
-              <div className="flex items-center justify-between border-t border-slate-100 px-5 py-2.5 dark:border-slate-800">
-                <div className="flex items-center gap-3 text-[10px] text-slate-400">
-                  <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-slate-200 px-1 py-0.5 font-mono dark:border-slate-700">↑↓</kbd>
+              <div className="flex items-center justify-between border-t border-slate-100 px-6 py-3 dark:border-slate-800">
+                <div className="flex items-center gap-4 text-[10px] text-slate-400">
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[9px] dark:border-slate-700 dark:bg-slate-800">
+                      ↑↓
+                    </kbd>
                     Navigate
                   </span>
-                  <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-slate-200 px-1 py-0.5 font-mono dark:border-slate-700">↵</kbd>
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[9px] dark:border-slate-700 dark:bg-slate-800">
+                      ↵
+                    </kbd>
                     Open
                   </span>
-                  <span className="flex items-center gap-1">
-                    <kbd className="rounded border border-slate-200 px-1 py-0.5 font-mono dark:border-slate-700">Esc</kbd>
+                  <span className="flex items-center gap-1.5">
+                    <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[9px] dark:border-slate-700 dark:bg-slate-800">
+                      Esc
+                    </kbd>
                     Close
                   </span>
                 </div>
-                <span className="text-[10px] font-bold text-slate-300 dark:text-slate-600">
+                <span className="text-[10px] font-black tracking-widest text-slate-300 uppercase dark:text-slate-600">
                   Aerojet Search
                 </span>
               </div>

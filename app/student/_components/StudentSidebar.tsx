@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import type { PaymentAccessLevel } from '@/lib/access-control'
 import type { SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
+import { useBadgeCounts } from '@/hooks/useBadgeCounts'
 
 function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAccessLevel) {
   const isFullTime = ['FULL_TIME', 'FULL_TIME_4Y', 'FULL_TIME_2Y', 'MILITARY_1Y'].includes(
@@ -112,14 +113,19 @@ export default function StudentSidebar({
   messageCount?: number
   paymentAccessLevel?: PaymentAccessLevel
 }) {
+  const { counts } = useBadgeCounts({
+    notifications: notificationCount,
+    messages: messageCount,
+  })
+
   const links = buildLinks(studyPathway, paymentAccessLevel)
 
   const linksWithBadge = links.map((link) => {
     if (link.label === 'Notifications') {
-      return { ...link, badge: notificationCount > 0 ? notificationCount : undefined }
+      return { ...link, badge: counts.notifications > 0 ? counts.notifications : undefined }
     }
     if (link.label === 'Messages') {
-      return { ...link, badge: messageCount > 0 ? messageCount : undefined }
+      return { ...link, badge: counts.messages > 0 ? counts.messages : undefined }
     }
     return link
   })

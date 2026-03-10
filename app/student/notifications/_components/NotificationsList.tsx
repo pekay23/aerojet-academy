@@ -4,17 +4,7 @@ import { useState } from 'react'
 import { BellOff } from 'lucide-react'
 import TablePagination from '@/app/staff/_components/TablePagination'
 import NotificationCard from './NotificationCard'
-
-interface Notification {
-  id: string
-  title: string
-  message: string
-  type: string
-  isRead: boolean
-  createdAt: Date
-  userId: string
-  link: string | null
-}
+import { Notification } from '@prisma/client'
 
 export default function NotificationsList({ notifications }: { notifications: Notification[] }) {
   const [page, setPage] = useState(1)
