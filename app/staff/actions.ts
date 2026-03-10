@@ -224,3 +224,45 @@ export async function bulkUpdatePaymentStatus(paymentIds: string[], status: any)
     return { error: 'Failed to update payments.' }
   }
 }
+
+/**
+ * Bulk archives multiple users (soft delete - sets status to ARCHIVED).
+ */
+export async function bulkArchiveUsers(userIds: string[]) {
+  try {
+    await requireStaff()
+    if (!userIds.length) return { error: 'No users selected.' }
+
+    await prisma.user.updateMany({
+      where: { id: { in: userIds } },
+      data: { status: 'ARCHIVED' as any },
+    })
+
+    revalidatePath('/staff/users')
+    return { success: true }
+  } catch (error) {
+    console.error('Bulk archive users error:', error)
+    return { error: 'Failed to archive users.' }
+  }
+}
+
+/**
+ * Bulk bypasses the password change requirement for multiple users.
+ */
+export async function bulkBypassPasswordChange(userIds: string[]) {
+  try {
+    await requireStaff()
+    if (!userIds.length) return { error: 'No users selected.' }
+
+    await prisma.user.updateMany({
+      where: { id: { in: userIds } },
+      data: { mustChangePassword: false },
+    })
+
+    revalidatePath('/staff/users')
+    return { success: true }
+  } catch (error) {
+    console.error('Bulk bypass password change error:', error)
+    return { error: 'Failed to update users.' }
+  }
+}

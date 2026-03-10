@@ -3,20 +3,21 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import { 
-  CheckSquare, 
-  Square, 
-  CheckCircle2, 
-  XCircle, 
-  ExternalLink,
-  Clock
-} from 'lucide-react'
+import { CheckSquare, Square, CheckCircle2, XCircle, ExternalLink, Clock } from 'lucide-react'
 import { bulkUpdatePaymentStatus } from '../actions'
 import { toast } from 'sonner'
 import Link from 'next/link'
-import BulkActionsBar from './BulkActionsBar'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import TablePagination from './TablePagination'
+import BulkActionsDropdown from './BulkActionsDropdown'
 
 interface PendingTopup {
   id: string
@@ -54,13 +55,47 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
   }
 
   const toggleOne = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    )
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
   }
 
   return (
     <div className="relative">
+      <div className="mb-3 flex items-center justify-end">
+        <BulkActionsDropdown
+          selectedIds={selectedIds}
+          onClear={() => setSelectedIds([])}
+          actions={[
+            {
+              label: 'Approve',
+              icon: CheckCircle2,
+              variant: 'success',
+              confirmTitle: 'Approve Top-ups',
+              confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected top-up requests?`,
+              onClick: async (ids) => {
+                const res = await bulkUpdatePaymentStatus(ids, 'APPROVED')
+                if (res.success) {
+                  toast.success(`Approved ${ids.length} top-ups`)
+                  router.refresh()
+                } else toast.error(res.error)
+              },
+            },
+            {
+              label: 'Reject',
+              icon: XCircle,
+              variant: 'danger',
+              confirmTitle: 'Reject Top-ups',
+              confirmMessage: `Are you sure you want to reject ${selectedIds.length} selected top-up requests?`,
+              onClick: async (ids) => {
+                const res = await bulkUpdatePaymentStatus(ids, 'REJECTED')
+                if (res.success) {
+                  toast.success(`Rejected ${ids.length} top-ups`)
+                  router.refresh()
+                } else toast.error(res.error)
+              },
+            },
+          ]}
+        />
+      </div>
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <Table>
           <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
@@ -68,10 +103,10 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
               <TableHead className="w-12 px-6">
                 <button
                   onClick={toggleAll}
-                  className="text-slate-400 hover:text-aerojet-blue transition-colors"
+                  className="hover:text-aerojet-blue text-slate-400 transition-colors"
                 >
                   {selectedIds.length === paged.length && paged.length > 0 ? (
-                    <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                    <CheckSquare className="text-aerojet-blue h-4 w-4" />
                   ) : (
                     <Square className="h-4 w-4" />
                   )}
@@ -97,14 +132,17 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
                   : req.user.email
 
                 return (
-                  <TableRow key={req.id} className={selectedIds.includes(req.id) ? 'bg-aerojet-blue/5' : ''}>
+                  <TableRow
+                    key={req.id}
+                    className={selectedIds.includes(req.id) ? 'bg-aerojet-blue/5' : ''}
+                  >
                     <TableCell className="px-6">
                       <button
                         onClick={() => toggleOne(req.id)}
-                        className="text-slate-300 transition-colors hover:text-aerojet-blue"
+                        className="hover:text-aerojet-blue text-slate-300 transition-colors"
                       >
                         {selectedIds.includes(req.id) ? (
-                          <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                          <CheckSquare className="text-aerojet-blue h-4 w-4" />
                         ) : (
                           <Square className="h-4 w-4" />
                         )}
@@ -153,43 +191,14 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
             )}
           </TableBody>
         </Table>
-        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+        <TablePagination
+          page={page}
+          perPage={perPage}
+          total={total}
+          onPageChange={setPage}
+          onPerPageChange={setPerPage}
+        />
       </div>
-
-      <BulkActionsBar
-        selectedIds={selectedIds}
-        onClear={() => setSelectedIds([])}
-        actions={[
-          {
-            label: 'Approve',
-            icon: CheckCircle2,
-            variant: 'success',
-            confirmTitle: 'Approve Top-ups',
-            confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected top-up requests? This will credit the students' wallets.`,
-            onClick: async (ids) => {
-              const res = await bulkUpdatePaymentStatus(ids, 'APPROVED')
-              if (res.success) {
-                toast.success(`Approved ${ids.length} top-ups`)
-                router.refresh()
-              } else toast.error(res.error)
-            },
-          },
-          {
-            label: 'Reject',
-            icon: XCircle,
-            variant: 'danger',
-            confirmTitle: 'Reject Top-ups',
-            confirmMessage: `Are you sure you want to reject ${selectedIds.length} selected top-up requests?`,
-            onClick: async (ids) => {
-              const res = await bulkUpdatePaymentStatus(ids, 'REJECTED')
-              if (res.success) {
-                toast.success(`Rejected ${ids.length} top-ups`)
-                router.refresh()
-              } else toast.error(res.error)
-            },
-          },
-        ]}
-      />
     </div>
   )
 }

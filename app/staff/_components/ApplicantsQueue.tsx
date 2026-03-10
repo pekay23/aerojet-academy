@@ -12,13 +12,15 @@ import {
   CheckSquare,
   Square,
   Trash2,
+  Mail,
 } from 'lucide-react'
 import { bulkUpdateUserStatus, bulkDeleteUsers } from '../actions'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import ApplicantDetailDrawer from './ApplicantDetailDrawer'
-import BulkActionsBar from './BulkActionsBar'
+
 import TablePagination from './TablePagination'
+import BulkActionsDropdown from './BulkActionsDropdown'
 
 interface Applicant {
   id: string
@@ -158,6 +160,54 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
               <RefreshCw className="h-3.5 w-3.5" />
               Refresh
             </button>
+            <BulkActionsDropdown
+              selectedIds={selectedIds}
+              onClear={() => setSelectedIds([])}
+              actions={[
+                {
+                  label: 'Approve',
+                  icon: UserCheck,
+                  variant: 'success',
+                  confirmTitle: 'Approve Applicants',
+                  confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected applicants?`,
+                  onClick: async (ids) => {
+                    const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
+                    if (res.success) {
+                      toast.success(`Approved ${ids.length} applicants`)
+                      fetchApplicants()
+                    } else toast.error(res.error)
+                  },
+                },
+                {
+                  label: 'Delete',
+                  icon: Trash2,
+                  variant: 'danger',
+                  confirmTitle: 'Delete Applicants',
+                  confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected applicants?`,
+                  onClick: async (ids) => {
+                    const res = await bulkDeleteUsers(ids)
+                    if (res.success) {
+                      toast.success(`Deleted ${ids.length} applicants`)
+                      fetchApplicants()
+                    } else toast.error(res.error)
+                  },
+                },
+                {
+                  label: 'Send Email',
+                  icon: Mail,
+                  variant: 'default',
+                  onClick: async (ids) => {
+                    const selectedEmails = applicants
+                      .filter((a) => ids.includes(a.id))
+                      .map((a) => a.email)
+                      .filter(Boolean)
+                    if (selectedEmails.length > 0) {
+                      window.location.href = `mailto:${selectedEmails.join(',')}`
+                    }
+                  },
+                },
+              ]}
+            />
           </div>
         </div>
 
@@ -244,10 +294,10 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                           setSelectedIds(paged.map((a) => a.id))
                         }
                       }}
-                      className="text-slate-400 hover:text-aerojet-blue transition-colors"
+                      className="hover:text-aerojet-blue text-slate-400 transition-colors"
                     >
                       {selectedIds.length === paged.length && paged.length > 0 ? (
-                        <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                        <CheckSquare className="text-aerojet-blue h-4 w-4" />
                       ) : (
                         <Square className="h-4 w-4" />
                       )}
@@ -268,16 +318,16 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
               <tbody className="divide-y divide-slate-100">
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i}>
-                    <td className="px-6 py-4">
-                      <div className="h-4 w-4 animate-pulse rounded bg-slate-100" />
-                    </td>
-                    {Array.from({ length: 5 }).map((_, j) => (
-                      <td key={j} className="px-6 py-4">
-                        <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100" />
+                    <tr key={i}>
+                      <td className="px-6 py-4">
+                        <div className="h-4 w-4 animate-pulse rounded bg-slate-100" />
                       </td>
-                    ))}
-                  </tr>
+                      {Array.from({ length: 5 }).map((_, j) => (
+                        <td key={j} className="px-6 py-4">
+                          <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100" />
+                        </td>
+                      ))}
+                    </tr>
                   ))
                 ) : applicants.length === 0 ? (
                   <tr>
@@ -315,10 +365,10 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                                   : [...prev, applicant.id]
                               )
                             }}
-                            className="text-slate-300 transition-colors hover:text-aerojet-blue"
+                            className="hover:text-aerojet-blue text-slate-300 transition-colors"
                           >
                             {selectedIds.includes(applicant.id) ? (
-                              <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                              <CheckSquare className="text-aerojet-blue h-4 w-4" />
                             ) : (
                               <Square className="h-4 w-4" />
                             )}
@@ -385,7 +435,13 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
 
           {/* Pagination Footer */}
           {total > 0 && (
-            <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+            <TablePagination
+              page={page}
+              perPage={perPage}
+              total={total}
+              onPageChange={setPage}
+              onPerPageChange={setPerPage}
+            />
           )}
         </div>
       </div>
@@ -399,42 +455,6 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
           onRejected={handleRejected}
         />
       )}
-      {/* Bulk Actions */}
-      <BulkActionsBar
-        selectedIds={selectedIds}
-        onClear={() => setSelectedIds([])}
-        actions={[
-          {
-            label: 'Approve',
-            icon: UserCheck,
-            variant: 'success',
-            confirmTitle: 'Approve Applicants',
-            confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected applicants?`,
-            onClick: async (ids) => {
-              // Note: Approval might need more logic like role assignment, but for now we follow status update
-              const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
-              if (res.success) {
-                toast.success(`Approved ${ids.length} applicants`)
-                fetchApplicants()
-              } else toast.error(res.error)
-            },
-          },
-          {
-            label: 'Delete',
-            icon: Trash2,
-            variant: 'danger',
-            confirmTitle: 'Delete Applicants',
-            confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected applicants?`,
-            onClick: async (ids) => {
-              const res = await bulkDeleteUsers(ids)
-              if (res.success) {
-                toast.success(`Deleted ${ids.length} applicants`)
-                fetchApplicants()
-              } else toast.error(res.error)
-            },
-          },
-        ]}
-      />
     </>
   )
 }
