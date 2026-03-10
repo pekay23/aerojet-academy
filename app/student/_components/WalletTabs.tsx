@@ -38,8 +38,10 @@ export default function WalletTabs({ children }: { children: React.ReactNode }) 
           return (
             <button
               key={t.key}
+              id={`tab-${t.key}`}
               role="tab"
               aria-selected={isActive}
+              aria-controls="wallet-tabpanel"
               aria-label={t.label}
               onClick={() => setTab(t.key)}
               className={`relative flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#002a5c]/50 ${
@@ -63,7 +65,9 @@ export default function WalletTabs({ children }: { children: React.ReactNode }) 
         })}
       </div>
 
-      {children}
+      <div role="tabpanel" id="wallet-tabpanel" aria-labelledby={`tab-${currentTab}`}>
+        {children}
+      </div>
     </div>
   )
 }

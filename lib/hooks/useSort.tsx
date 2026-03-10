@@ -79,6 +79,7 @@ export function SortHeader({
 
   return (
     <th
+      scope="col"
       className={cn(
         'cursor-pointer px-6 py-4 transition-colors select-none hover:bg-slate-100/50 dark:hover:bg-slate-800/50',
         align === 'center' && 'text-center',
