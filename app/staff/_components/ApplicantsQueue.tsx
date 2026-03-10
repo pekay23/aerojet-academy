@@ -13,8 +13,9 @@ import {
   Square,
   Trash2,
   Mail,
+  Archive,
 } from 'lucide-react'
-import { bulkUpdateUserStatus, bulkDeleteUsers } from '../actions'
+import { bulkUpdateUserStatus, bulkDeleteUsers, bulkArchiveUsers } from '../actions'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import ApplicantDetailDrawer from './ApplicantDetailDrawer'
@@ -27,6 +28,7 @@ interface Applicant {
   email: string
   registrationCode?: string | null
   registrationPaid: boolean
+  status: string
   createdAt: string
   profile?: {
     firstName: string
@@ -178,20 +180,38 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                     } else toast.error(res.error)
                   },
                 },
-                {
-                  label: 'Delete',
-                  icon: Trash2,
-                  variant: 'danger',
-                  confirmTitle: 'Delete Applicants',
-                  confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected applicants?`,
-                  onClick: async (ids) => {
-                    const res = await bulkDeleteUsers(ids)
-                    if (res.success) {
-                      toast.success(`Deleted ${ids.length} applicants`)
-                      fetchApplicants()
-                    } else toast.error(res.error)
-                  },
-                },
+                applicants.filter((a) => selectedIds.includes(a.id)).length > 0 &&
+                applicants
+                  .filter((a) => selectedIds.includes(a.id))
+                  .every((a) => a.status === 'ARCHIVED')
+                  ? {
+                      label: 'Permanently Delete',
+                      icon: Trash2,
+                      variant: 'danger',
+                      confirmTitle: 'Permanently Delete Applicants',
+                      confirmMessage: `Are you sure you want to permanently delete ${selectedIds.length} applicants? This cannot be undone.`,
+                      onClick: async (ids) => {
+                        const res = await bulkDeleteUsers(ids)
+                        if (res.success) {
+                          toast.success(`Permanently deleted ${ids.length} applicants`)
+                          fetchApplicants()
+                        } else toast.error(res.error)
+                      },
+                    }
+                  : {
+                      label: 'Archive',
+                      icon: Archive,
+                      variant: 'warning',
+                      confirmTitle: 'Archive Applicants',
+                      confirmMessage: `Are you sure you want to archive ${selectedIds.length} applicants?`,
+                      onClick: async (ids) => {
+                        const res = await bulkArchiveUsers(ids)
+                        if (res.success) {
+                          toast.success(`Archived ${ids.length} applicants`)
+                          fetchApplicants()
+                        } else toast.error(res.error)
+                      },
+                    },
                 {
                   label: 'Send Email',
                   icon: Mail,

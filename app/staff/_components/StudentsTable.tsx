@@ -160,34 +160,38 @@ export default function StudentsTable({
                   } else toast.error(res.error)
                 },
               },
-              {
-                label: 'Delete',
-                icon: Trash2,
-                variant: 'danger',
-                confirmTitle: 'Delete Students',
-                confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected students?`,
-                onClick: async (ids) => {
-                  const res = await bulkDeleteUsers(ids)
-                  if (res.success) {
-                    toast.success(`Deleted ${ids.length} students`)
-                    fetchStudents()
-                  } else toast.error(res.error)
-                },
-              },
-              {
-                label: 'Archive',
-                icon: Archive,
-                variant: 'warning',
-                confirmTitle: 'Archive Students',
-                confirmMessage: `Are you sure you want to archive ${selectedIds.length} selected students?`,
-                onClick: async (ids) => {
-                  const res = await bulkArchiveUsers(ids)
-                  if (res.success) {
-                    toast.success(`Archived ${ids.length} students`)
-                    fetchStudents()
-                  } else toast.error(res.error)
-                },
-              },
+              students.filter((s) => selectedIds.includes(s.id)).length > 0 &&
+              students
+                .filter((s) => selectedIds.includes(s.id))
+                .every((s) => s.status === 'ARCHIVED')
+                ? {
+                    label: 'Permanently Delete',
+                    icon: Trash2,
+                    variant: 'danger',
+                    confirmTitle: 'Permanently Delete Students',
+                    confirmMessage: `Are you sure you want to permanently delete ${selectedIds.length} students? This cannot be undone.`,
+                    onClick: async (ids) => {
+                      const res = await bulkDeleteUsers(ids)
+                      if (res.success) {
+                        toast.success(`Permanently deleted ${ids.length} students`)
+                        fetchStudents()
+                      } else toast.error(res.error)
+                    },
+                  }
+                : {
+                    label: 'Archive',
+                    icon: Archive,
+                    variant: 'warning',
+                    confirmTitle: 'Archive Students',
+                    confirmMessage: `Are you sure you want to archive ${selectedIds.length} students?`,
+                    onClick: async (ids) => {
+                      const res = await bulkArchiveUsers(ids)
+                      if (res.success) {
+                        toast.success(`Archived ${ids.length} students`)
+                        fetchStudents()
+                      } else toast.error(res.error)
+                    },
+                  },
               {
                 label: 'Bypass PW Change',
                 icon: LockOpen,

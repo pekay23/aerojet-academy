@@ -30,6 +30,7 @@ interface Instructor {
   id: string
   email: string
   academyEmail: string | null
+  status: string
   profile: { firstName: string; lastName: string } | null
   instructorProfile: { employeeId: string | null; specialization: string | null } | null
 }
@@ -114,34 +115,38 @@ export default function InstructorsTable() {
                   } else toast.error(res.error)
                 },
               },
-              {
-                label: 'Delete',
-                icon: Trash2,
-                variant: 'danger',
-                confirmTitle: 'Delete Instructors',
-                confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected instructors?`,
-                onClick: async (ids) => {
-                  const res = await bulkDeleteUsers(ids)
-                  if (res.success) {
-                    toast.success(`Deleted ${ids.length} instructors`)
-                    fetchInstructors()
-                  } else toast.error(res.error)
-                },
-              },
-              {
-                label: 'Archive',
-                icon: Archive,
-                variant: 'warning',
-                confirmTitle: 'Archive Instructors',
-                confirmMessage: `Are you sure you want to archive ${selectedIds.length} selected instructors?`,
-                onClick: async (ids) => {
-                  const res = await bulkArchiveUsers(ids)
-                  if (res.success) {
-                    toast.success(`Archived ${ids.length} instructors`)
-                    fetchInstructors()
-                  } else toast.error(res.error)
-                },
-              },
+              instructors.filter((i) => selectedIds.includes(i.id)).length > 0 &&
+              instructors
+                .filter((i) => selectedIds.includes(i.id))
+                .every((i) => i.status === 'ARCHIVED')
+                ? {
+                    label: 'Permanently Delete',
+                    icon: Trash2,
+                    variant: 'danger',
+                    confirmTitle: 'Permanently Delete Instructors',
+                    confirmMessage: `Are you sure you want to permanently delete ${selectedIds.length} instructors? This cannot be undone.`,
+                    onClick: async (ids) => {
+                      const res = await bulkDeleteUsers(ids)
+                      if (res.success) {
+                        toast.success(`Permanently deleted ${ids.length} instructors`)
+                        fetchInstructors()
+                      } else toast.error(res.error)
+                    },
+                  }
+                : {
+                    label: 'Archive',
+                    icon: Archive,
+                    variant: 'warning',
+                    confirmTitle: 'Archive Instructors',
+                    confirmMessage: `Are you sure you want to archive ${selectedIds.length} instructors?`,
+                    onClick: async (ids) => {
+                      const res = await bulkArchiveUsers(ids)
+                      if (res.success) {
+                        toast.success(`Archived ${ids.length} instructors`)
+                        fetchInstructors()
+                      } else toast.error(res.error)
+                    },
+                  },
               {
                 label: 'Bypass PW Change',
                 icon: LockOpen,
