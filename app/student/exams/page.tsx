@@ -23,7 +23,10 @@ import { format } from 'date-fns'
 import { canAccessFeature, getEnrollmentMilestoneStatus } from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
-export const metadata: Metadata = { title: 'My Exams | Student Portal' }
+export const metadata: Metadata = {
+  title: 'My Exams | Student Portal',
+  description: 'View your exam bookings, results, and history.',
+}
 export const dynamic = 'force-dynamic'
 
 export default async function ExamsPage({
@@ -141,7 +144,9 @@ export default async function ExamsPage({
     })
     .map((b: any) => {
       const score = b.score ? Number(b.score) : undefined
-      const passed = score !== undefined ? score >= 75 : b.result === 'pass'
+      // User requested: "for now the pass should still show until admin add the exam score"
+      // Also: "make sure that unwritten/completed/unpaid for exams ... do not show as failed"
+      const passed = score !== undefined ? score >= 75 : b.result !== 'fail'
 
       return {
         id: b.id,

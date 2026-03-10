@@ -34,7 +34,7 @@ export default function StudentWalletTransactionsTable({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <table className="w-full text-left">
+      <table className="w-full text-left" aria-label="Wallet transactions">
         <thead>
           <tr className="bg-slate-50 dark:bg-slate-800/50">
             <SortHeader
@@ -51,7 +51,7 @@ export default function StudentWalletTransactionsTable({
               onSort={requestSort}
               className="text-[10px] font-bold tracking-widest text-slate-400 uppercase"
             />
-            <th className="px-6 py-4 text-center text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+            <th scope="col" className="px-6 py-4 text-center text-[10px] font-bold tracking-widest text-slate-400 uppercase">
               Status
             </th>
             <SortHeader
@@ -96,7 +96,7 @@ export default function StudentWalletTransactionsTable({
                         {tx.description}
                       </p>
                       <p className="text-[10px] text-slate-400 uppercase">
-                        {tx.type.replace('_', ' ')}
+                        {tx.type.replaceAll('_', ' ')}
                         {tx.paymentCurrency && tx.paymentCurrency !== 'EUR' && (
                           <span className="ml-1">
                             ({tx.paymentCurrency}{' '}

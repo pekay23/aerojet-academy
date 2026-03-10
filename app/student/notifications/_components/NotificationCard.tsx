@@ -17,11 +17,6 @@ export default function NotificationCard({ notification }: NotificationCardProps
   const handleMarkAsRead = () => {
     if (isRead || isPending) return
 
-    // Haptic feedback
-    if (typeof navigator !== 'undefined' && navigator.vibrate) {
-      navigator.vibrate(50)
-    }
-
     // Optimistic update
     setIsRead(true)
 
@@ -38,7 +33,15 @@ export default function NotificationCard({ notification }: NotificationCardProps
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={handleMarkAsRead}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          handleMarkAsRead()
+        }
+      }}
       className={`group flex cursor-pointer items-start gap-4 p-6 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${!isRead ? 'bg-blue-50/20 dark:bg-blue-900/10' : ''}`}
     >
       <div

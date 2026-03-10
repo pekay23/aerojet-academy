@@ -324,18 +324,24 @@ function ResitModal(props: {
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto p-4 pt-20">
       <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={props.onClose} />
-      <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="resit-modal-title"
+        onKeyDown={(e) => { if (e.key === 'Escape') props.onClose() }}
+        className="relative z-10 w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
+      >
         <div className="flex items-center justify-between border-b border-slate-100 p-6 dark:border-slate-800">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
               <RefreshCcw className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Book a Resit</h3>
+              <h3 id="resit-modal-title" className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Book a Resit</h3>
               <p className="text-sm text-slate-500">Select a failed exam to rebook</p>
             </div>
           </div>
-          <button onClick={props.onClose} className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <button onClick={props.onClose} aria-label="Close" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
             <X className="h-5 w-5" />
           </button>
         </div>

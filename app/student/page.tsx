@@ -23,7 +23,10 @@ import { getWelcomeMessages } from '@/lib/welcome-messages'
 
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 
-export const metadata: Metadata = { title: 'Dashboard | Student Portal' }
+export const metadata: Metadata = {
+  title: 'Dashboard | Student Portal',
+  description: 'Your student dashboard with courses, exams, and wallet overview.',
+}
 
 export default async function StudentDashboard() {
   const session = await getAuthSession()
@@ -55,8 +58,17 @@ export default async function StudentDashboard() {
   }
 
   if (!profile) {
-    // Handled by layout — this is a safety fallback
-    return null
+    return (
+      <div className="flex items-center justify-center min-h-[40vh]" role="alert">
+        <div className="text-center max-w-md">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-600">
+            <AlertCircle className="h-7 w-7" />
+          </div>
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">Profile Not Found</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Your student profile has not been set up yet. Please contact the administration office for assistance.</p>
+        </div>
+      </div>
+    )
   }
 
   const enrollmentType = profile.enrollmentType
@@ -96,8 +108,14 @@ export default async function StudentDashboard() {
     }
   }
 
-  // Flexible (Modular) Courses — simple course enrollments
-  const flexEnrollments: any[] = []
+  // Flexible (Modular) Courses — course enrollments for modular students
+  const flexEnrollments = isFlexible
+    ? await prisma.enrollment.findMany({
+        where: { userId, status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
+        include: { course: true },
+        take: 3,
+      })
+    : []
 
   // General Courses — only for non-full-time students
   const genericEnrollments = isFullTime
@@ -329,7 +347,7 @@ export default async function StudentDashboard() {
                       </div>
                       <div>
                         <h3 className="font-bold text-slate-900 dark:text-slate-100">
-                          {enrollment.package.name}
+                          {enrollment.course.name}
                         </h3>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
                           {enrollment.status}

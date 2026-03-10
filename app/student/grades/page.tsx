@@ -8,7 +8,10 @@ import { canAccessFeature, getEnrollmentMilestoneStatus } from '@/lib/access-con
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 import GradesTable from './_components/GradesTable'
 
-export const metadata: Metadata = { title: 'Grades | Student Portal' }
+export const metadata: Metadata = {
+  title: 'Grades | Student Portal',
+  description: 'View your academic grades and assessment results.',
+}
 
 export default async function GradesPage() {
   const session = await getAuthSession()

@@ -71,16 +71,18 @@ function MessageBubble({
   return (
     <div className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
       <div
-        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${isOwn ? 'bg-[#002a5c]' : 'bg-slate-400'}`}
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${isOwn ? 'bg-[#002a5c]' : 'bg-slate-400'}`}
       >
-        {userName(isOwn ? message.sender : message.sender)
+        {userName(isOwn ? message.sender : message.recipient)
           .charAt(0)
           .toUpperCase()}
       </div>
       <div
         className={`group max-w-[75%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col gap-1`}
       >
-        <p className={`text-xs text-slate-500 dark:text-slate-400 ${isOwn ? 'text-right' : 'text-left'}`}>
+        <p
+          className={`text-xs text-slate-500 dark:text-slate-400 ${isOwn ? 'text-right' : 'text-left'}`}
+        >
           {isOwn ? 'You' : userName(message.sender)} · {formatTime(message.createdAt)}
         </p>
         <div
@@ -95,7 +97,7 @@ function MessageBubble({
         {!isOwn && (
           <button
             onClick={() => onReply(message)}
-            className="flex items-center gap-1 text-xs text-slate-400 opacity-0 transition-opacity hover:text-[#002a5c] group-hover:opacity-100"
+            className="flex items-center gap-1 text-xs text-slate-400 opacity-100 sm:opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#002a5c]"
           >
             <CornerDownRight className="h-3 w-3" />
             Reply
@@ -127,9 +129,7 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
       const unreadIds = allMessages
         .filter((m) => m.recipientId === currentUserId && !m.isRead)
         .map((m) => m.id)
-      for (const id of unreadIds) {
-        await markMessageAsRead(id)
-      }
+      await Promise.all(unreadIds.map((id) => markMessageAsRead(id)))
       router.refresh()
     }
     setExpanded(!expanded)
@@ -161,14 +161,14 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
 
   return (
     <div
-      className={`rounded-2xl border bg-white dark:bg-slate-900 shadow-sm transition-shadow hover:shadow-md ${
+      className={`rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-slate-900 ${
         thread.unreadCount > 0 ? 'border-blue-200' : 'border-slate-100'
       }`}
     >
       {/* Thread header – click to expand */}
       <button onClick={handleExpand} className="flex w-full items-center gap-4 px-5 py-4 text-left">
         <div
-          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
             thread.root.senderId === currentUserId ? 'bg-[#002a5c]' : 'bg-slate-500'
           }`}
         >
@@ -180,17 +180,17 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
               {userName(otherParticipant)}
             </p>
             {thread.unreadCount > 0 && (
-              <span className="flex-shrink-0 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-bold text-white">
+              <span className="shrink-0 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-bold text-white">
                 {thread.unreadCount} new
               </span>
             )}
           </div>
-          <p className="truncate text-sm font-semibold text-slate-700">{subjectDisplay}</p>
-          <p className="truncate text-xs text-slate-400">
+          <p className="truncate text-sm font-semibold text-slate-700" title={subjectDisplay}>{subjectDisplay}</p>
+          <p className="truncate text-xs text-slate-400" title={allMessages[allMessages.length - 1].body}>
             {allMessages[allMessages.length - 1].body}
           </p>
         </div>
-        <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
           <span className="text-xs text-slate-400">
             {formatTime(allMessages[allMessages.length - 1].createdAt)}
           </span>
@@ -209,7 +209,7 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
 
       {/* Expanded conversation */}
       {expanded && (
-        <div className="border-t border-slate-100 dark:border-slate-800 px-5 pb-4 pt-4">
+        <div className="border-t border-slate-100 px-5 pt-4 pb-4 dark:border-slate-800">
           <div className="space-y-4">
             {allMessages.map((msg) => (
               <MessageBubble
@@ -231,7 +231,7 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
                 e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendReply())
               }
               placeholder={`Reply to ${userName(otherParticipant)}…`}
-              className="flex-1 rounded-xl border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:border-[#002a5c] focus:outline-none focus:ring-2 focus:ring-[#002a5c]/20"
+              className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 focus:outline-none dark:border-slate-700 dark:text-slate-100"
             />
             <button
               onClick={handleSendReply}

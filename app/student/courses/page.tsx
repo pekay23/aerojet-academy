@@ -18,7 +18,10 @@ import { canAccessFeature } from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 import { getEnrollmentMilestoneStatus } from '@/lib/access-control'
 
-export const metadata: Metadata = { title: 'My Courses | Student Portal' }
+export const metadata: Metadata = {
+  title: 'My Courses | Student Portal',
+  description: 'View and manage your enrolled courses.',
+}
 
 export default async function CoursesPage() {
   const session = await getAuthSession()

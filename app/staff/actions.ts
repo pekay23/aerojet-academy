@@ -304,3 +304,116 @@ export async function updateExamBooking(
     return { error: 'Failed to update booking.' }
   }
 }
+
+/**
+ * Creates a new exam record (booking) for a student.
+ * Supports multiple resit attempts for the same module.
+ */
+export async function createExamRecord(data: {
+  userId: string
+  moduleCode: string
+  examDate: string
+  score?: number
+  attemptType?: string
+  notes?: string
+}) {
+  try {
+    await requireStaff()
+
+    const { userId, moduleCode, examDate, score, attemptType, notes } = data
+
+    // Verify user exists
+    const user = await prisma.user.findUnique({ where: { id: userId } })
+    if (!user) return { error: 'Student not found.' }
+
+    // Derive result from score
+    let result: string | undefined
+    let percentage: number | undefined
+    if (score !== undefined && score !== null) {
+      percentage = score
+      result = score >= 75 ? 'pass' : 'fail'
+    }
+
+    await prisma.examBooking.create({
+      data: {
+        userId,
+        moduleCode: moduleCode.toUpperCase(),
+        examDate: new Date(examDate),
+        amountPaid: 0,
+        status: 'COMPLETED',
+        bookingType: 'INDIVIDUAL',
+        attemptType: attemptType || 'FIRST',
+        result,
+        score: score !== undefined ? score : undefined,
+        percentage: percentage !== undefined ? percentage : undefined,
+        sourceNotes: notes || 'Manually added by staff',
+      } as any,
+    })
+
+    revalidatePath('/staff/exams')
+    revalidatePath('/student/exams')
+    return { success: true }
+  } catch (error) {
+    console.error('Create exam record error:', error)
+    return { error: 'Failed to create record.' }
+  }
+}
+
+/**
+ * Deletes an exam booking record.
+ */
+export async function deleteExamRecord(bookingId: string) {
+  try {
+    await requireStaff()
+
+    await prisma.examBooking.delete({ where: { id: bookingId } })
+
+    revalidatePath('/staff/exams')
+    revalidatePath('/student/exams')
+    return { success: true }
+  } catch (error) {
+    console.error('Delete exam record error:', error)
+    return { error: 'Failed to delete record.' }
+  }
+}
+
+/**
+ * Searches students by email, name, or student ID for the exam records form.
+ */
+export async function searchStudents(query: string) {
+  try {
+    await requireStaff()
+
+    if (!query || query.length < 2) return { students: [] }
+
+    const users = await prisma.user.findMany({
+      where: {
+        role: { in: ['STUDENT', 'APPLICANT'] },
+        OR: [
+          { email: { contains: query, mode: 'insensitive' } },
+          { profile: { firstName: { contains: query, mode: 'insensitive' } } },
+          { profile: { lastName: { contains: query, mode: 'insensitive' } } },
+          { studentProfile: { studentId: { contains: query, mode: 'insensitive' } } },
+        ],
+      },
+      include: {
+        profile: { select: { firstName: true, lastName: true } },
+        studentProfile: { select: { studentId: true } },
+      },
+      take: 10,
+    })
+
+    return {
+      students: users.map((u) => ({
+        id: u.id,
+        email: u.email,
+        firstName: u.profile?.firstName || '',
+        lastName: u.profile?.lastName || '',
+        studentId: u.studentProfile?.studentId || '',
+      })),
+    }
+  } catch (error) {
+    console.error('Search students error:', error)
+    return { students: [] }
+  }
+}

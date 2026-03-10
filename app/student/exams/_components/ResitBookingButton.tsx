@@ -51,14 +51,20 @@ export default function ResitBookingButton({ examId, examName }: ResitBookingBut
             className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
             onClick={() => setShowConfirm(false)}
           />
-          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="resit-booking-title"
+            onKeyDown={(e) => { if (e.key === 'Escape') setShowConfirm(false) }}
+            className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
+          >
             <div className="border-b border-slate-100 p-6 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
                   <RefreshCcw className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                  <h3 id="resit-booking-title" className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                     Confirm Resit Booking
                   </h3>
                   <p className="text-sm text-slate-500">Are you sure you want to book a resit?</p>

@@ -29,7 +29,10 @@ import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import { getCurrencySymbol } from '@/lib/currency'
 
-export const metadata: Metadata = { title: 'Wallet | Student Portal' }
+export const metadata: Metadata = {
+  title: 'Wallet | Student Portal',
+  description: 'Manage your training wallet and transactions.',
+}
 
 export default async function WalletPage({
   searchParams,
