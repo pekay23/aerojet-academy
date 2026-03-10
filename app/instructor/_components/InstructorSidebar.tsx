@@ -10,6 +10,7 @@ import {
   FolderOpen,
   User,
 } from 'lucide-react'
+import { useBadgeCounts } from '@/hooks/useBadgeCounts'
 
 export default function InstructorSidebar({
   userName,
@@ -22,6 +23,8 @@ export default function InstructorSidebar({
   userImage?: string
   pendingCount?: number
 }) {
+  const { counts } = useBadgeCounts({ pendingGrading: pendingCount })
+
   const links: SidebarLink[] = [
     { label: 'Dashboard', href: '/instructor/dashboard', icon: LayoutDashboard },
     { label: 'Schedule', href: '/instructor/schedule', icon: Calendar },
@@ -33,7 +36,7 @@ export default function InstructorSidebar({
       label: 'Grading',
       href: '/instructor/grading',
       icon: ClipboardCheck,
-      badge: pendingCount > 0 ? pendingCount : undefined,
+      badge: (counts.pendingGrading ?? 0) > 0 ? counts.pendingGrading : undefined,
     },
     { type: 'header', label: 'Account' },
     { label: 'Profile', href: '/instructor/profile', icon: User },
