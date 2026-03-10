@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { BellOff } from 'lucide-react'
-import TablePagination from '@/app/staff/_components/TablePagination'
+import TablePagination from '@/components/shared/TablePagination'
 import NotificationCard from './NotificationCard'
 import { Notification } from '@prisma/client'
 

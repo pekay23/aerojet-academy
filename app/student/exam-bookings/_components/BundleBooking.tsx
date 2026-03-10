@@ -103,7 +103,7 @@ export default function BundleBooking({
           <span className="sm:hidden">{shortLabel}</span>
           <span className="text-xs opacity-70">
             ({currencySymbol}
-            {bundlePrice.toFixed(0)})
+            {bundlePrice.toFixed(2)})
           </span>
         </button>
       )}
@@ -157,11 +157,11 @@ export default function BundleBooking({
                 <div className="text-right">
                   <p className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
                     Save {currencySymbol}
-                    {savings.toFixed(0)}
+                    {savings.toFixed(2)}
                   </p>
                   <p className="text-xs text-slate-500">
                     vs {currencySymbol}
-                    {individualPrice.toFixed(0)}/seat
+                    {individualPrice.toFixed(2)}/seat
                   </p>
                 </div>
               </div>

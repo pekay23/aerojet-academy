@@ -380,8 +380,8 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
   const user = await requireStudent()
 
   const validation = validateBody(studentCreatePoolSchema, input)
-  if (!validation.success) {
-    return { error: (validation as any).error }
+  if ('error' in validation) {
+    return { error: validation.error }
   }
 
   const { eventId, moduleCode, examDate, examTimeSlot, bookingType, seats, organizationName } =

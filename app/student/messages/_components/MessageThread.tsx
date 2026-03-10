@@ -125,14 +125,14 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
 
   async function handleExpand() {
     if (!expanded) {
-      // Mark unread messages as read
+      // Mark unread messages as read (batched)
       const unreadIds = allMessages
         .filter((m) => m.recipientId === currentUserId && !m.isRead)
         .map((m) => m.id)
-      for (const id of unreadIds) {
-        await markMessageAsRead(id)
+      if (unreadIds.length > 0) {
+        await Promise.all(unreadIds.map((id) => markMessageAsRead(id)))
+        router.refresh()
       }
-      router.refresh()
     }
     setExpanded(!expanded)
   }

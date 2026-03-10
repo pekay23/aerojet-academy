@@ -117,13 +117,13 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                   <div className="flex flex-col items-end gap-1">
                     <p className="font-bold text-slate-900 dark:text-white">
                       {booking.amountPaid > 0 ? (
-                        <>&euro;{booking.amountPaid.toFixed(2)}</>
+                        <>€{booking.amountPaid.toFixed(2)}</>
                       ) : booking.bookingGroupRef ? (
                         <span className="text-xs text-slate-400 uppercase italic">
                           Bundle Seat
                         </span>
                       ) : (
-                        <>&euro;0.00</>
+                        <>€0.00</>
                       )}
                     </p>
                     {booking.status === 'PENDING' && (

@@ -1,7 +1,10 @@
 import { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Booking Details" };
+export const metadata: Metadata = {
+  title: "Booking Details",
+  description: "View details and status of your exam booking.",
+};
 
 export default function Page() {
   return (

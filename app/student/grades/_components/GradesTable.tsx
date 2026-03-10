@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import TablePagination from '@/app/staff/_components/TablePagination'
+import TablePagination from '@/components/shared/TablePagination'
 
 interface Grade {
   id: string
