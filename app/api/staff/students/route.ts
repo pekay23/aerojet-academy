@@ -33,7 +33,7 @@ export async function GET(req: NextRequest) {
       include: {
         profile: true,
         studentProfile: true,
-        wallet: { select: { availableBalance: true, balance: true } },
+        wallet: { select: { availableBalance: true, balance: true, currency: true } },
         enrollments: {
           include: { course: { select: { code: true, name: true } } },
           take: 3,

@@ -61,7 +61,7 @@ export function useCurrencyRates(): UseCurrencyRatesReturn {
       const inBase = amount / fromRate
       return Math.round(inBase * toRate * 100) / 100
     },
-    [rates],
+    [rates]
   )
 
   return { rates, sources, loading, convert }
@@ -124,6 +124,7 @@ const sizeClasses: Record<string, string> = {
 interface CurrencyDisplayProps {
   amount: number
   baseCurrency?: string
+  currency?: string
   showToggle?: boolean
   clickToToggle?: boolean
   className?: string
@@ -136,6 +137,7 @@ interface CurrencyDisplayProps {
 export function CurrencyDisplay({
   amount,
   baseCurrency = 'EUR',
+  currency: controlledCurrency,
   showToggle = false,
   clickToToggle = false,
   className = '',
@@ -144,15 +146,16 @@ export function CurrencyDisplay({
   showDisclaimer = false,
   onCurrencyChange,
 }: CurrencyDisplayProps) {
-  const [activeCurrency, setActiveCurrency] = useState(baseCurrency)
+  const [internalCurrency, setInternalCurrency] = useState(baseCurrency)
+  const activeCurrency = controlledCurrency || internalCurrency
   const { rates, sources, loading, convert } = useCurrencyRates()
 
   const handleCurrencyChange = useCallback(
     (newCurrency: string) => {
-      setActiveCurrency(newCurrency)
+      setInternalCurrency(newCurrency)
       onCurrencyChange?.(newCurrency)
     },
-    [onCurrencyChange],
+    [onCurrencyChange]
   )
 
   const handleClick = () => {
