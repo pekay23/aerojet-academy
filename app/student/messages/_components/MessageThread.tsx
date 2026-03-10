@@ -97,7 +97,7 @@ function MessageBubble({
         {!isOwn && (
           <button
             onClick={() => onReply(message)}
-            className="flex items-center gap-1 text-xs text-slate-400 opacity-100 sm:opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#002a5c]"
+            className="flex items-center gap-1 text-xs text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#002a5c]"
           >
             <CornerDownRight className="h-3 w-3" />
             Reply
@@ -129,7 +129,9 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
       const unreadIds = allMessages
         .filter((m) => m.recipientId === currentUserId && !m.isRead)
         .map((m) => m.id)
-      await Promise.all(unreadIds.map((id) => markMessageAsRead(id)))
+      for (const id of unreadIds) {
+        await markMessageAsRead(id)
+      }
       router.refresh()
     }
     setExpanded(!expanded)
@@ -168,7 +170,7 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
       {/* Thread header – click to expand */}
       <button onClick={handleExpand} className="flex w-full items-center gap-4 px-5 py-4 text-left">
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
+          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
             thread.root.senderId === currentUserId ? 'bg-[#002a5c]' : 'bg-slate-500'
           }`}
         >
@@ -180,17 +182,17 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
               {userName(otherParticipant)}
             </p>
             {thread.unreadCount > 0 && (
-              <span className="shrink-0 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-bold text-white">
+              <span className="flex-shrink-0 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-bold text-white">
                 {thread.unreadCount} new
               </span>
             )}
           </div>
-          <p className="truncate text-sm font-semibold text-slate-700" title={subjectDisplay}>{subjectDisplay}</p>
-          <p className="truncate text-xs text-slate-400" title={allMessages[allMessages.length - 1].body}>
+          <p className="truncate text-sm font-semibold text-slate-700">{subjectDisplay}</p>
+          <p className="truncate text-xs text-slate-400">
             {allMessages[allMessages.length - 1].body}
           </p>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-1.5">
+        <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
           <span className="text-xs text-slate-400">
             {formatTime(allMessages[allMessages.length - 1].createdAt)}
           </span>

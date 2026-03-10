@@ -379,7 +379,7 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
 
   const validation = validateBody(studentCreatePoolSchema, input)
   if (!validation.success) {
-    return { error: validation.error }
+    return { error: (validation as any).error }
   }
 
   const { eventId, moduleCode, examDate, examTimeSlot, bookingType, seats, organizationName } =
@@ -468,15 +468,17 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
       const newPool = await tx.examPool.create({
         data: {
           eventId,
-          name: isGroup ? (organizationName || `Group - ${moduleCode}`) : `Student Initiated - ${moduleCode}`,
+          name: isGroup
+            ? organizationName || `Group - ${moduleCode}`
+            : `Student Initiated - ${moduleCode}`,
           examDate: date,
           examStartTime: startTime,
           examEndTime: endTime,
           seatPrice,
           allowedModules: isGroup ? moduleCode.split(',') : [moduleCode],
           status: isGroup ? 'CONFIRMED' : 'OPEN',
-          currentMemberCount: isGroup ? (seats || 1) : 1,
-          maxCandidates: isGroup ? (seats || 28) : 28,
+          currentMemberCount: isGroup ? seats || 1 : 1,
+          maxCandidates: isGroup ? seats || 28 : 28,
           createdBy: user.id,
         },
       })
@@ -493,9 +495,10 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
 
       // C. Create Membership — reuse examComponent from step 3 when possible
       const primaryModule = isGroup ? moduleCode.split(',')[0] : moduleCode
-      const primaryExamComponentId = primaryModule === moduleCode
-        ? examComponent.id
-        : (await tx.examComponent.findFirst({ where: { code: primaryModule } }))?.id
+      const primaryExamComponentId =
+        primaryModule === moduleCode
+          ? examComponent.id
+          : (await tx.examComponent.findFirst({ where: { code: primaryModule } }))?.id
 
       await tx.poolMembership.create({
         data: {
@@ -711,7 +714,11 @@ export async function getAvailableRecipients() {
 
   // Combine and format
   const formatRecipient = (
-    u: { id: string; role: string; profile?: { firstName: string; lastName: string; profilePhotoUrl?: string | null } | null },
+    u: {
+      id: string
+      role: string
+      profile?: { firstName: string; lastName: string; profilePhotoUrl?: string | null } | null
+    },
     roleOverride?: string
   ) => {
     const role = roleOverride || u.role
