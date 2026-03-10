@@ -7,6 +7,7 @@ import CreateUserDialog from './CreateUserDialog'
 import BulkActionsBar from './BulkActionsBar'
 import { bulkUpdateUserStatus, bulkDeleteUsers } from '../actions'
 import { toast } from 'sonner'
+import TablePagination from './TablePagination'
 
 interface User {
   id: string
@@ -54,6 +55,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
   const [status, setStatus] = useState('all')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const fetchUsers = useCallback(async () => {
@@ -63,6 +65,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
         role,
         status,
         page: String(page),
+        limit: String(perPage),
         ...(search && { search }),
       })
       const res = await fetch(`/api/staff/users?${params}`)
@@ -72,7 +75,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
     } finally {
       setLoading(false)
     }
-  }, [role, status, search, page])
+  }, [role, status, search, page, perPage])
 
   useEffect(() => {
     const t = setTimeout(fetchUsers, search ? 350 : 0)
@@ -84,7 +87,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
     setPage(1)
   }, [role, status, search])
 
-  const totalPages = Math.ceil(total / 25)
+
 
   return (
     <div className="space-y-6">
@@ -103,27 +106,8 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:flex-row sm:items-center dark:border-slate-800 dark:bg-slate-900">
-        <div
-          className="flex gap-1 overflow-x-auto rounded-xl bg-slate-100 p-1 dark:bg-slate-800"
-          style={{ scrollbarWidth: 'none' }}
-        >
-          {ROLE_FILTERS.map((r) => (
-            <button
-              key={r}
-              onClick={() => setRole(r)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-bold whitespace-nowrap transition-all ${
-                role === r
-                  ? 'text-aerojet-blue bg-white shadow-sm dark:bg-slate-700 dark:text-white'
-                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-              }`}
-            >
-              {r === 'all' ? 'All Roles' : r}
-            </button>
-          ))}
-        </div>
-
-        <div className="flex w-full gap-2 sm:w-auto">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
           {/* Status filter */}
           <select
             value={status}
@@ -137,17 +121,30 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
             ))}
           </select>
 
-          {/* Search */}
-          <div className="relative flex-1 sm:w-56">
-            <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search user..."
-              className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
-            />
-          </div>
+          {/* Role filter */}
+          <select
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
+            className="focus:ring-aerojet-sky rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+          >
+            {ROLE_FILTERS.map((r) => (
+              <option key={r} value={r}>
+                {r === 'all' ? 'All Roles' : r}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Search */}
+        <div className="relative w-64">
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search user..."
+            className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
+          />
         </div>
       </div>
 
@@ -300,30 +297,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           </table>
         </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 dark:border-slate-800">
-            <p className="text-xs text-slate-400">
-              Page {page} of {totalPages} — {total.toLocaleString()} users
-            </p>
-            <div className="flex gap-1">
-              <button
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page === 1}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400"
-              >
-                ← Prev
-              </button>
-              <button
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page === totalPages}
-                className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400"
-              >
-                Next →
-              </button>
-            </div>
-          </div>
-        )}
+        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
       </div>
 
       <BulkActionsBar

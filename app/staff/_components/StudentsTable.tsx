@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Search, GraduationCap, RefreshCw, CheckSquare, Square, AlignJustify, CheckCircle2, AlertTriangle, Trash2 } from 'lucide-react'
 import StudentDetailPanel from './StudentDetailPanel'
 import BulkActionsBar from './BulkActionsBar'
+import TablePagination from './TablePagination'
 import { bulkUpdateUserStatus, bulkDeleteUsers } from '../actions'
 import { toast } from 'sonner'
 
@@ -60,6 +61,10 @@ export default function StudentsTable({
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Student | null>(null)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
+
+  const paged = students.slice((page - 1) * perPage, page * perPage)
 
   const fetchStudents = useCallback(async () => {
     setLoading(true)
@@ -137,14 +142,14 @@ export default function StudentsTable({
             <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
               <button
                 onClick={() => {
-                  if (selectedIds.length === students.length && students.length > 0) {
+                  if (selectedIds.length === paged.length && paged.length > 0) {
                     setSelectedIds([])
                   } else {
-                    setSelectedIds(students.map((s) => s.id))
+                    setSelectedIds(paged.map((s) => s.id))
                   }
                 }}
                 className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all ${
-                  selectedIds.length === students.length && students.length > 0
+                  selectedIds.length === paged.length && paged.length > 0
                     ? 'border-aerojet-blue bg-aerojet-blue text-white'
                     : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300'
                 }`}
@@ -192,7 +197,7 @@ export default function StudentsTable({
                 <p className="text-sm font-bold text-slate-400">No students found</p>
               </div>
             ) : (
-              students.map((student) => {
+              paged.map((student) => {
                 const fullName = student.profile
                   ? `${student.profile.firstName} ${student.profile.lastName}`
                   : student.email
@@ -288,9 +293,7 @@ export default function StudentsTable({
 
           {/* Footer */}
           {total > 0 && (
-            <div className="border-t border-slate-100 px-4 py-3 text-xs font-medium text-slate-400 dark:border-slate-800">
-              {students.length} of {total} students
-            </div>
+            <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
           )}
         </div>
 

@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react'
 import { Search, Filter, Users } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import StudentCard from './StudentCard'
+import TablePagination from '@/app/staff/_components/TablePagination'
 
 interface Student {
   id: string
@@ -25,6 +26,8 @@ interface InstructorStudentsViewProps {
 
 export default function InstructorStudentsView({ initialStudents }: InstructorStudentsViewProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
 
   const filteredStudents = useMemo(() => {
     return initialStudents.filter((student) => {
@@ -40,6 +43,9 @@ export default function InstructorStudentsView({ initialStudents }: InstructorSt
       )
     })
   }, [initialStudents, searchQuery])
+
+  const total = filteredStudents.length
+  const paged = filteredStudents.slice((page - 1) * perPage, page * perPage)
 
   return (
     <div className="flex flex-col space-y-8">
@@ -66,7 +72,7 @@ export default function InstructorStudentsView({ initialStudents }: InstructorSt
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         <AnimatePresence mode="popLayout">
           {filteredStudents.length > 0 ? (
-            filteredStudents.map((student) => (
+            paged.map((student) => (
               <motion.div
                 key={student.id}
                 layout
@@ -97,6 +103,10 @@ export default function InstructorStudentsView({ initialStudents }: InstructorSt
           )}
         </AnimatePresence>
       </div>
+
+      {total > 0 && (
+        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+      )}
     </div>
   )
 }
