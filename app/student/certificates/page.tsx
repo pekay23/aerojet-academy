@@ -7,7 +7,10 @@ import prisma from '@/lib/prisma/client'
 import { canAccessFeature, getEnrollmentMilestoneStatus } from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
-export const metadata: Metadata = { title: 'Certificates | Student Portal' }
+export const metadata: Metadata = {
+  title: 'Certificates | Student Portal',
+  description: 'Download your certificates and credentials.',
+}
 
 export default async function CertificatesPage() {
   const session = await getAuthSession()
@@ -92,11 +95,11 @@ export default async function CertificatesPage() {
               </div>
 
               <div className="space-y-1">
-                <h3 className="line-clamp-1 font-black text-slate-900 dark:text-slate-100">
-                  {cert.exam.examComponent.course.name}
+                <h3 className="line-clamp-1 font-black text-slate-900 dark:text-slate-100" title={cert.exam?.examComponent?.course?.name ?? 'Certificate'}>
+                  {cert.exam?.examComponent?.course?.name ?? 'Certificate'}
                 </h3>
                 <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
-                  {cert.exam.examComponent.course.code} • Result: {cert.percentage.toString()}%
+                  {cert.exam?.examComponent?.course?.code ?? '—'} • Result: {cert.percentage != null ? `${cert.percentage}%` : 'N/A'}
                 </p>
               </div>
 
@@ -115,9 +118,10 @@ export default async function CertificatesPage() {
                   href={cert.certificateUrl!}
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={`Download certificate for ${cert.exam?.examComponent?.course?.name ?? 'exam'}`}
                   className="flex items-center gap-1.5 text-xs font-bold text-blue-600 transition-colors hover:text-blue-700"
                 >
-                  <Download className="h-3.5 w-3.5" />
+                  <Download className="h-3.5 w-3.5" aria-hidden="true" />
                   Download
                 </a>
               </div>

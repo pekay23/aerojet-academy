@@ -10,7 +10,10 @@ import NewMessageDialog from './_components/NewMessageDialog'
 import MessageThread from './_components/MessageThread'
 import AutoRefresh from '@/components/AutoRefresh'
 
-export const metadata: Metadata = { title: 'Messages | Student Portal' }
+export const metadata: Metadata = {
+  title: 'Messages | Student Portal',
+  description: 'View and manage your messages.',
+}
 export const dynamic = 'force-dynamic'
 
 export default async function MessagesPage() {
@@ -42,6 +45,7 @@ export default async function MessagesPage() {
         },
       },
       orderBy: { createdAt: 'asc' },
+      take: 50,
     }),
   ])
 

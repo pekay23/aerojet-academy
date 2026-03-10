@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import Link from "next/link";
+import { Construction } from "lucide-react";
 
 export const metadata: Metadata = { title: "Course Grades" };
 
@@ -12,10 +13,10 @@ export default function Page() {
       </div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-8 sm:p-12 text-center">
         <div className="w-16 h-16 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🚧</span>
+          <Construction className="h-8 w-8 text-slate-400" />
         </div>
-        <h2 className="text-lg font-bold text-slate-700 mb-2">Coming Soon</h2>
-        <p className="text-sm text-slate-400 max-w-md mx-auto">This feature is under development and will be available soon.</p>
+        <h2 className="text-lg font-bold text-slate-700 dark:text-slate-200 mb-2">Coming Soon</h2>
+        <p className="text-sm text-slate-400 max-w-md mx-auto">Course grades will appear here once your instructor has published them.</p>
       </div>
     </div>
   );

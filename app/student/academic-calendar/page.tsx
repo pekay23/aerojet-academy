@@ -4,8 +4,11 @@ import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { Calendar as CalendarIcon, Clock, Layers } from 'lucide-react'
 
-export const metadata: Metadata = { title: 'Academic Calendar | Student Portal' }
-export const dynamic = 'force-dynamic'
+export const metadata: Metadata = {
+  title: 'Academic Calendar | Student Portal',
+  description: 'View upcoming academic events and exam schedules.',
+}
+export const revalidate = 3600
 
 export default async function StudentAcademicCalendarPage() {
   const session = await getAuthSession()

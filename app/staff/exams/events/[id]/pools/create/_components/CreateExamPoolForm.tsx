@@ -21,6 +21,7 @@ import { toast } from '@/hooks/use-toast'
 import { createExamPoolSchema } from '@/lib/validation/schemas'
 import { ExamEvent } from '@prisma/client'
 import { Checkbox } from '@/components/ui/checkbox'
+import { EASA_MODULE_CODES } from '@/lib/constants/easa-modules'
 
 interface CreateExamPoolFormProps {
   event: Omit<ExamEvent, 'minRevenueTarget'> & { minRevenueTarget: number | any }
@@ -28,25 +29,7 @@ interface CreateExamPoolFormProps {
 
 type ExamPoolFormValues = z.infer<typeof createExamPoolSchema>
 
-const EASA_MODULES = [
-  'M1',
-  'M2',
-  'M3',
-  'M4',
-  'M5',
-  'M6',
-  'M7',
-  'M8',
-  'M9',
-  'M10',
-  'M11',
-  'M12',
-  'M13',
-  'M14',
-  'M15',
-  'M16',
-  'M17',
-]
+const EASA_MODULES = EASA_MODULE_CODES
 
 export default function CreateExamPoolForm({ event }: CreateExamPoolFormProps) {
   const router = useRouter()

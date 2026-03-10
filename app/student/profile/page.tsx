@@ -7,7 +7,10 @@ import ProfileForm from './_components/ProfileForm'
 import ProfileTabs from './_components/ProfileTabs'
 import ChangePasswordForm from '@/components/shared/ChangePasswordForm'
 
-export const metadata: Metadata = { title: 'My Profile | Student Portal' }
+export const metadata: Metadata = {
+  title: 'My Profile | Student Portal',
+  description: 'Manage your personal and academic profile.',
+}
 export const dynamic = 'force-dynamic'
 
 async function InfoTab() {

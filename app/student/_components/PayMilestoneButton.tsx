@@ -60,14 +60,20 @@ export default function PayMilestoneButton({ milestoneId, amount, currency, labe
             className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
             onClick={() => setShowConfirm(false)}
           />
-          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="pay-milestone-title"
+            onKeyDown={(e) => { if (e.key === 'Escape') setShowConfirm(false) }}
+            className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
+          >
             <div className="border-b border-slate-100 p-6 dark:border-slate-800">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400">
                   <Wallet className="h-5 w-5" />
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                  <h3 id="pay-milestone-title" className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                     Confirm Payment
                   </h3>
                   <p className="text-sm text-slate-500">

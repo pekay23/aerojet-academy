@@ -1,13 +1,14 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Calendar, ClipboardList, Trophy } from 'lucide-react'
+import { Calendar, ClipboardList, Trophy, FilePlus2 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const TABS = [
   { key: 'events', label: 'Events', icon: Calendar },
   { key: 'bookings', label: 'Bookings', icon: ClipboardList },
   { key: 'results', label: 'Results', icon: Trophy },
+  { key: 'records', label: 'Records', icon: FilePlus2 },
 ] as const
 
 export default function StaffExamsTabs({ children }: { children: React.ReactNode }) {

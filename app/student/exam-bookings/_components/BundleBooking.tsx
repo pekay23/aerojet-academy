@@ -5,28 +5,7 @@ import { bookStandaloneExamAction } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight, BookOpen, Wallet, Calendar, X, Package, Info } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
-
-const EASA_MODULES = [
-  { code: 'M1', name: 'Mathematics' },
-  { code: 'M2', name: 'Physics' },
-  { code: 'M3', name: 'Electrical Fundamentals' },
-  { code: 'M4', name: 'Electronic Fundamentals' },
-  { code: 'M5', name: 'Digital Techniques / Avionics' },
-  { code: 'M6', name: 'Materials & Hardware' },
-  { code: 'M7A', name: 'Maintenance Practices' },
-  { code: 'M7B', name: 'Maintenance Practices (Avionics)' },
-  { code: 'M8', name: 'Basic Aerodynamics' },
-  { code: 'M9A', name: 'Human Factors' },
-  { code: 'M10', name: 'Aviation Legislation' },
-  { code: 'M11A', name: 'Aeroplane Aerodynamics (Turbine)' },
-  { code: 'M11B', name: 'Aeroplane Aerodynamics (Piston)' },
-  { code: 'M12', name: 'Helicopter Aerodynamics' },
-  { code: 'M13', name: 'Aircraft Aerodynamics (Structures)' },
-  { code: 'M14', name: 'Propulsion' },
-  { code: 'M15', name: 'Gas Turbine Engine' },
-  { code: 'M16', name: 'Piston Engine' },
-  { code: 'M17A', name: 'Propeller' },
-]
+import { EASA_MODULES } from '@/lib/constants/easa-modules'
 
 interface ExamEvent {
   id: string
@@ -139,11 +118,17 @@ export default function BundleBooking({
             onClick={() => !isPending && setOpen(false)}
           />
 
-          <div className="relative z-10 w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="bundle-booking-title"
+            onKeyDown={(e) => { if (e.key === 'Escape' && !isPending) setOpen(false) }}
+            className="relative z-10 w-full max-w-lg overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900"
+          >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6 dark:border-slate-800">
               <div>
-                <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                <h2 id="bundle-booking-title" className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
                   Book {label}
                 </h2>
                 <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
@@ -152,6 +137,7 @@ export default function BundleBooking({
               </div>
               <button
                 onClick={() => !isPending && setOpen(false)}
+                aria-label="Close"
                 className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <X className="h-5 w-5" />

@@ -36,14 +36,14 @@ export default function GradesTable({ grades }: { grades: Grade[] }) {
       {paged.length > 0 ? (
         <>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm" aria-label="Academic grades">
               <thead>
                 <tr className="border-b border-slate-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
-                  <th className="px-6 py-4">Assessment</th>
-                  <th className="px-6 py-4">Course / Module</th>
-                  <th className="px-6 py-4">Score</th>
-                  <th className="px-6 py-4">Grade</th>
-                  <th className="px-6 py-4 text-right">Date</th>
+                  <th scope="col" className="px-6 py-4">Assessment</th>
+                  <th scope="col" className="px-6 py-4">Course / Module</th>
+                  <th scope="col" className="px-6 py-4">Score</th>
+                  <th scope="col" className="px-6 py-4">Grade</th>
+                  <th scope="col" className="px-6 py-4 text-right">Date</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -96,7 +96,7 @@ export default function GradesTable({ grades }: { grades: Grade[] }) {
                                 : 'bg-red-50 text-red-600'
                         }`}
                       >
-                        {grade.grade || '—'}
+                        {grade.grade || <span aria-label="No grade assigned">&mdash;</span>}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right font-medium whitespace-nowrap text-slate-500 dark:text-slate-400">

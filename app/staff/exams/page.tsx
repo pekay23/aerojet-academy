@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import StaffExamsTabs from '../_components/StaffExamsTabs'
 import ExamBookingsTable from '../_components/ExamBookingsTable'
+import RecordsTab from './_components/RecordsTab'
 import Link from 'next/link'
 import SearchInput from '@/components/SearchInput'
 import { format } from 'date-fns'
@@ -17,7 +18,9 @@ import {
   BookOpen,
 } from 'lucide-react'
 
-export const metadata = { title: 'Exams | Staff Portal' }
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Exams | Staff Portal' }
 export const dynamic = 'force-dynamic'
 
 /** Reusable Prisma search filter for exam component code (searches both component code and parent course code) */
@@ -47,7 +50,7 @@ function userSearchFilter(query: string) {
   }
 }
 
-const VALID_TABS = ['events', 'bookings', 'results']
+const VALID_TABS = ['events', 'bookings', 'results', 'records']
 
 export default async function StaffExamsPage({
   searchParams,
@@ -65,6 +68,7 @@ export default async function StaffExamsPage({
       {tab === 'events' && <EventsTab />}
       {tab === 'bookings' && <BookingsTab query={params.query} />}
       {tab === 'results' && <ResultsTab query={params.query} />}
+      {tab === 'records' && <RecordsTabServer query={params.query} />}
     </StaffExamsTabs>
   )
 }
@@ -223,7 +227,6 @@ async function BookingsTab({ query }: { query?: string }) {
         </div>
       </div>
 
-
       <ExamBookingsTable bookings={bookings} />
     </div>
   )
@@ -234,10 +237,7 @@ async function ResultsTab({ query }: { query?: string }) {
   const results = await prisma.examResult.findMany({
     where: query
       ? {
-          OR: [
-            userSearchFilter(query),
-            examComponentCodeFilter(query),
-          ],
+          OR: [userSearchFilter(query), examComponentCodeFilter(query)],
         }
       : undefined,
     include: {
@@ -333,9 +333,7 @@ async function ResultsTab({ query }: { query?: string }) {
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
-                          result.passed
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
+                          result.passed ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
                         }`}
                       >
                         {result.passed ? 'PASS' : 'FAIL'}
@@ -364,4 +362,47 @@ async function ResultsTab({ query }: { query?: string }) {
       </div>
     </div>
   )
+}
+
+/* ─── Records Tab (Server Component Wrapper) ─── */
+async function RecordsTabServer({ query }: { query?: string }) {
+  const records = await prisma.examBooking.findMany({
+    where: query
+      ? {
+          OR: [userSearchFilter(query), { moduleCode: { contains: query, mode: 'insensitive' } }],
+        }
+      : undefined,
+    include: {
+      user: {
+        include: {
+          profile: { select: { firstName: true, lastName: true } },
+          studentProfile: { select: { studentId: true } },
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  const serialized = records.map((recordRaw) => {
+    const r: any = recordRaw
+    return {
+      id: r.id,
+      moduleCode: r.moduleCode,
+      examDate: r.examDate,
+      bookedAt: r.bookedAt,
+      status: r.status,
+      result: r.result,
+      score: r.score ? Number(r.score) : null,
+      percentage: r.percentage ? Number(r.percentage) : null,
+      attemptType: r.attemptType,
+      sourceNotes: r.sourceNotes,
+      user: {
+        email: r.user.email,
+        profile: r.user.profile,
+        studentProfile: r.user.studentProfile,
+      },
+    }
+  })
+
+  return <RecordsTab records={serialized} />
 }

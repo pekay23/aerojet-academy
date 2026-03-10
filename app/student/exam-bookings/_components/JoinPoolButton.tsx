@@ -5,29 +5,7 @@ import { joinExamPool } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight, BookOpen, Wallet, AlertCircle, CheckCircle2, X } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
-
-// All EASA Part-66 module options
-const EASA_MODULES = [
-  { code: 'M1', name: 'Mathematics' },
-  { code: 'M2', name: 'Physics' },
-  { code: 'M3', name: 'Electrical Fundamentals' },
-  { code: 'M4', name: 'Electronic Fundamentals' },
-  { code: 'M5', name: 'Digital Techniques / Avionics' },
-  { code: 'M6', name: 'Materials & Hardware' },
-  { code: 'M7A', name: 'Maintenance Practices' },
-  { code: 'M7B', name: 'Maintenance Practices (Avionics)' },
-  { code: 'M8', name: 'Basic Aerodynamics' },
-  { code: 'M9A', name: 'Human Factors' },
-  { code: 'M10', name: 'Aviation Legislation' },
-  { code: 'M11A', name: 'Aeroplane Aerodynamics (Turbine)' },
-  { code: 'M11B', name: 'Aeroplane Aerodynamics (Piston)' },
-  { code: 'M12', name: 'Helicopter Aerodynamics' },
-  { code: 'M13', name: 'Aircraft Aerodynamics (Structures)' },
-  { code: 'M14', name: 'Propulsion' },
-  { code: 'M15', name: 'Gas Turbine Engine' },
-  { code: 'M16', name: 'Piston Engine' },
-  { code: 'M17A', name: 'Propeller' },
-]
+import { EASA_MODULES } from '@/lib/constants/easa-modules'
 
 interface JoinPoolButtonProps {
   poolId: string
@@ -133,17 +111,24 @@ export default function JoinPoolButton({
           />
 
           {/* Modal */}
-          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="join-pool-title"
+            onKeyDown={(e) => { if (e.key === 'Escape' && !isPending) setOpen(false) }}
+            className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900"
+          >
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
               <div>
-                <h2 className="text-lg font-black tracking-tight text-slate-900 dark:text-slate-100">
+                <h2 id="join-pool-title" className="text-lg font-black tracking-tight text-slate-900 dark:text-slate-100">
                   Reserve Exam Seat
                 </h2>
                 <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">{poolName}</p>
               </div>
               <button
                 onClick={() => !isPending && setOpen(false)}
+                aria-label="Close"
                 className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800"
               >
                 <X className="h-4 w-4" />

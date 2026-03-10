@@ -58,14 +58,21 @@ export default function LeavePoolButton({
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             onClick={() => !isPending && setOpen(false)}
           />
-          <div className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="leave-pool-title"
+            onKeyDown={(e) => { if (e.key === 'Escape' && !isPending) setOpen(false) }}
+            className="relative z-10 w-full max-w-sm overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-slate-900"
+          >
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-4 dark:border-slate-800">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-5 w-5 text-amber-500" />
-                <h2 className="font-black text-slate-900 dark:text-slate-100">Leave Pool?</h2>
+                <h2 id="leave-pool-title" className="font-black text-slate-900 dark:text-slate-100">Leave Pool?</h2>
               </div>
               <button
                 onClick={() => !isPending && setOpen(false)}
+                aria-label="Close"
                 className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 <X className="h-4 w-4" />

@@ -186,9 +186,9 @@ export async function enrollInCourse(courseId: string) {
     revalidatePath('/student/wallet')
 
     return { success: true }
-  } catch (error: any) {
-    console.error('Enrollment error:', error)
-    return { error: error.message || 'Failed to enroll in course.' }
+  } catch (error) {
+    console.error('Enrollment error:', error instanceof Error ? error.message : 'Unknown error')
+    return { error: error instanceof Error ? error.message : 'Failed to enroll in course.' }
   }
 }
 
@@ -291,9 +291,8 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
   const seatPrice = Number(pool.seatPrice)
 
   if (!wallet || Number(wallet.availableBalance) < seatPrice) {
-    const available = Number(wallet?.availableBalance || 0)
     return {
-      error: `Insufficient funds. You need €${seatPrice.toFixed(2)} but have €${available.toFixed(2)} available. Please top up your wallet.`,
+      error: 'Insufficient wallet balance. Please top up your wallet and try again.',
     }
   }
 
@@ -380,7 +379,7 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
 
   const validation = validateBody(studentCreatePoolSchema, input)
   if (!validation.success) {
-    return { error: (validation as any).error }
+    return { error: validation.error }
   }
 
   const { eventId, moduleCode, examDate, examTimeSlot, bookingType, seats, organizationName } =
@@ -711,23 +710,24 @@ export async function getAvailableRecipients() {
   const instructors = Array.from(instructorMap.values())
 
   // Combine and format
+  const formatRecipient = (
+    u: { id: string; role: string; profile?: { firstName: string; lastName: string; profilePhotoUrl?: string | null } | null },
+    roleOverride?: string
+  ) => {
+    const role = roleOverride || u.role
+    return {
+      id: u.id,
+      label: u.profile
+        ? `${u.profile.firstName} ${u.profile.lastName} (${role})`
+        : `${role === 'INSTRUCTOR' ? 'Instructor' : 'User'} ${u.id}`,
+      role,
+      avatarUrl: u.profile?.profilePhotoUrl,
+    }
+  }
+
   const recipients = [
-    ...admins.map((u: any) => ({
-      id: u.id,
-      label: u.profile
-        ? `${u.profile.firstName} ${u.profile.lastName} (${u.role})`
-        : `User ${u.id}`,
-      role: u.role,
-      avatarUrl: u.profile?.profilePhotoUrl,
-    })),
-    ...instructors.map((u: any) => ({
-      id: u.id,
-      label: u.profile
-        ? `${u.profile.firstName} ${u.profile.lastName} (INSTRUCTOR)`
-        : `Instructor ${u.id}`,
-      role: 'INSTRUCTOR',
-      avatarUrl: u.profile?.profilePhotoUrl,
-    })),
+    ...admins.map((u) => formatRecipient(u)),
+    ...instructors.map((u) => formatRecipient(u, 'INSTRUCTOR')),
   ]
 
   // Deduplicate

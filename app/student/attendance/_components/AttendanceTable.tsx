@@ -34,13 +34,13 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
       {paged.length > 0 ? (
         <>
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm" aria-label="Attendance records">
               <thead>
                 <tr className="border-b border-slate-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
-                  <th className="px-6 py-4">Date</th>
-                  <th className="px-6 py-4">Class / Module</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Notes</th>
+                  <th scope="col" className="px-6 py-4">Date</th>
+                  <th scope="col" className="px-6 py-4">Class / Module</th>
+                  <th scope="col" className="px-6 py-4">Status</th>
+                  <th scope="col" className="px-6 py-4">Notes</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -76,13 +76,13 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
                                 : 'bg-slate-100 text-slate-600'
                         }`}
                       >
-                        {record.status === 'LATE' && <Clock className="h-3 w-3" />}
+                        {record.status === 'LATE' && <Clock className="h-3 w-3" aria-hidden="true" />}
                         {record.status}
                         {record.minutesLate && ` (${record.minutesLate}m)`}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
-                      {record.notes || '—'}
+                      {record.notes || <span aria-label="No notes">—</span>}
                     </td>
                   </tr>
                 ))}

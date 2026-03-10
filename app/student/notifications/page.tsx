@@ -6,7 +6,10 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import NotificationsList from './_components/NotificationsList'
 
-export const metadata: Metadata = { title: 'Notifications | Student Portal' }
+export const metadata: Metadata = {
+  title: 'Notifications | Student Portal',
+  description: 'View your notifications and alerts.',
+}
 
 export default async function NotificationsPage() {
   const session = await getAuthSession()
@@ -15,6 +18,7 @@ export default async function NotificationsPage() {
   const notifications = await prisma.notification.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: 'desc' },
+    take: 50,
   })
 
   const unreadCount = notifications.filter((n) => !n.isRead).length
