@@ -246,6 +246,9 @@ export default function PublicNav() {
                 </NavigationMenuList>
               </NavigationMenu>
             )}
+            <div className={scrolled || forceSolid ? 'text-slate-500 dark:text-slate-300' : 'text-white/80'}>
+              <SearchModal />
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -255,9 +258,6 @@ export default function PublicNav() {
             >
               Login
             </Link>
-            <div className={scrolled || forceSolid ? 'text-slate-500 dark:text-slate-300' : 'text-white/80'}>
-              <SearchModal />
-            </div>
             <Link
               href="/register"
               className="bg-public-secondary hover:bg-public-primary hidden h-11 items-center rounded-xl px-5 py-2.5 text-[10px] font-black tracking-widest text-white uppercase transition-all sm:inline-flex"
