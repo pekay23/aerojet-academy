@@ -184,6 +184,7 @@ export async function enrollInCourse(courseId: string) {
     revalidatePath('/student/courses')
     revalidatePath('/student/courses/enroll')
     revalidatePath('/student/wallet')
+    revalidatePath('/student')
 
     return { success: true }
   } catch (error) {
@@ -367,6 +368,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     revalidatePath('/student/exam-bookings')
     revalidatePath('/student/exam-bookings/my-bookings')
     revalidatePath('/student/wallet')
+    revalidatePath('/student')
     return { success: true }
   } catch (error) {
     console.error('Join Pool Error:', error instanceof Error ? error.message : 'Unknown error')
@@ -541,10 +543,14 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
 
     revalidatePath('/student/exam-bookings')
     revalidatePath('/student/wallet')
+    revalidatePath('/student')
 
     return { success: true, poolId: pool.id }
   } catch (error: any) {
-    console.error('Create Student Pool Error:', error instanceof Error ? error.message : 'Unknown error')
+    console.error(
+      'Create Student Pool Error:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
     return { error: 'Failed to create exam booking. Please try again.' }
   }
 }
@@ -666,6 +672,7 @@ export async function payPendingExamBooking(bookingId: string) {
 
     revalidatePath('/student/exams')
     revalidatePath('/student/wallet')
+    revalidatePath('/student')
     return { success: true }
   } catch (error) {
     console.error('Pay booking error:', error)
@@ -947,6 +954,7 @@ export async function bookStandaloneExamAction(params: {
     revalidatePath('/student/exam-bookings')
     revalidatePath('/student/exams')
     revalidatePath('/student/wallet')
+    revalidatePath('/student')
     return { success: true, usedBundle: result.usedBundle }
   } catch (error: any) {
     console.error('bookStandaloneExamAction error:', error)
@@ -954,10 +962,7 @@ export async function bookStandaloneExamAction(params: {
   }
 }
 
-export async function bookBundleExamsAction(params: {
-  moduleCodes: string[]
-  eventId: string
-}) {
+export async function bookBundleExamsAction(params: { moduleCodes: string[]; eventId: string }) {
   try {
     const user = await requireStudent()
     const { moduleCodes, eventId } = params
@@ -991,6 +996,7 @@ export async function bookBundleExamsAction(params: {
     revalidatePath('/student/exam-bookings')
     revalidatePath('/student/exams')
     revalidatePath('/student/wallet')
+    revalidatePath('/student')
     return { success: true, bookedCount: results.length }
   } catch (error: any) {
     console.error('bookBundleExamsAction error:', error)
@@ -1023,6 +1029,7 @@ export async function bookResitExamAction(examId: string) {
 
     revalidatePath('/student/exams')
     revalidatePath('/student/wallet')
+    revalidatePath('/student')
     return { success: true }
   } catch (error: any) {
     console.error('bookResitExamAction error:', error)
