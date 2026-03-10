@@ -1,8 +1,11 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Search, GraduationCap, RefreshCw } from 'lucide-react'
+import { Search, GraduationCap, RefreshCw, CheckSquare, Square, AlignJustify, CheckCircle2, AlertTriangle, Trash2 } from 'lucide-react'
 import StudentDetailPanel from './StudentDetailPanel'
+import BulkActionsBar from './BulkActionsBar'
+import { bulkUpdateUserStatus, bulkDeleteUsers } from '../actions'
+import { toast } from 'sonner'
 
 interface Student {
   id: string
@@ -56,6 +59,7 @@ export default function StudentsTable({
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Student | null>(null)
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const fetchStudents = useCallback(async () => {
     setLoading(true)
@@ -130,7 +134,24 @@ export default function StudentsTable({
                 className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
               />
             </div>
-            <div className="flex gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+              <button
+                onClick={() => {
+                  if (selectedIds.length === students.length && students.length > 0) {
+                    setSelectedIds([])
+                  } else {
+                    setSelectedIds(students.map((s) => s.id))
+                  }
+                }}
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full border transition-all ${
+                  selectedIds.length === students.length && students.length > 0
+                    ? 'border-aerojet-blue bg-aerojet-blue text-white'
+                    : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300'
+                }`}
+                title="Select All"
+              >
+                <CheckSquare className="h-3.5 w-3.5" />
+              </button>
               {STATUS_FILTERS.map((f) => (
                 <button
                   key={f.key}
@@ -156,6 +177,7 @@ export default function StudentsTable({
               Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="animate-pulse p-4">
                   <div className="flex items-center gap-3">
+                    <div className="h-4 w-4 rounded bg-slate-100" />
                     <div className="h-10 w-10 rounded-full bg-slate-100" />
                     <div className="flex-1 space-y-2">
                       <div className="h-3 w-2/3 rounded bg-slate-100" />
@@ -184,16 +206,40 @@ export default function StudentsTable({
                 return (
                   <div
                     key={student.id}
-                    onClick={() => setSelected(student)}
-                    className={`relative cursor-pointer p-4 transition-all ${
+                    className={`group relative cursor-pointer p-4 transition-all ${
                       isSelected
                         ? 'border-aerojet-blue bg-aerojet-blue/5 border-l-2'
                         : 'border-l-2 border-transparent hover:bg-slate-50'
-                    }`}
+                    } ${selectedIds.includes(student.id) ? 'bg-aerojet-blue/5' : ''}`}
                   >
                     <div className="mb-2 flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedIds((prev) =>
+                              prev.includes(student.id)
+                                ? prev.filter((id) => id !== student.id)
+                                : [...prev, student.id]
+                            )
+                          }}
+                          className={`flex h-5 w-5 shrink-0 items-center justify-center rounded transition-all ${
+                            selectedIds.includes(student.id)
+                              ? 'text-aerojet-blue'
+                              : 'text-slate-300 hover:text-aerojet-blue opacity-0 group-hover:opacity-100'
+                          }`}
+                        >
+                          {selectedIds.includes(student.id) ? (
+                            <CheckSquare className="h-4 w-4" />
+                          ) : (
+                            <Square className="h-4 w-4" />
+                          )}
+                        </button>
+
+                        <div 
+                          onClick={() => setSelected(student)}
+                          className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black"
+                        >
                           {student.profile?.profilePhotoUrl ? (
                             <img
                               src={student.profile.profilePhotoUrl}
@@ -204,7 +250,7 @@ export default function StudentsTable({
                             initials
                           )}
                         </div>
-                        <div>
+                        <div onClick={() => setSelected(student)}>
                           <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                             {fullName}
                           </p>
@@ -214,12 +260,14 @@ export default function StudentsTable({
                         </div>
                       </div>
                       <span
+                        onClick={() => setSelected(student)}
                         className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${statusStyle}`}
                       >
                         {student.status}
                       </span>
                     </div>
                     <div
+                      onClick={() => setSelected(student)}
                       className="mt-1 ml-13 flex items-center justify-between pl-13 text-xs"
                       style={{ marginLeft: '52px' }}
                     >
@@ -253,6 +301,55 @@ export default function StudentsTable({
           onActionComplete={handleActionComplete}
         />
       </div>
+
+      <BulkActionsBar
+        selectedIds={selectedIds}
+        onClear={() => setSelectedIds([])}
+        actions={[
+          {
+            label: 'Activate',
+            icon: CheckCircle2,
+            variant: 'success',
+            confirmTitle: 'Activate Students',
+            confirmMessage: `Are you sure you want to activate ${selectedIds.length} selected students?`,
+            onClick: async (ids) => {
+              const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
+              if (res.success) {
+                toast.success(`Activated ${ids.length} students`)
+                fetchStudents()
+              } else toast.error(res.error)
+            },
+          },
+          {
+            label: 'Suspend',
+            icon: AlertTriangle,
+            variant: 'warning',
+            confirmTitle: 'Suspend Students',
+            confirmMessage: `Are you sure you want to suspend ${selectedIds.length} selected students?`,
+            onClick: async (ids) => {
+              const res = await bulkUpdateUserStatus(ids, 'SUSPENDED')
+              if (res.success) {
+                toast.success(`Suspended ${ids.length} students`)
+                fetchStudents()
+              } else toast.error(res.error)
+            },
+          },
+          {
+            label: 'Delete',
+            icon: Trash2,
+            variant: 'danger',
+            confirmTitle: 'Delete Students',
+            confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected students? This action is reversible.`,
+            onClick: async (ids) => {
+              const res = await bulkDeleteUsers(ids)
+              if (res.success) {
+                toast.success(`Deleted ${ids.length} students`)
+                fetchStudents()
+              } else toast.error(res.error)
+            },
+          },
+        ]}
+      />
     </div>
   )
 }
