@@ -38,6 +38,7 @@ interface Student {
   createdAt: string
   profile?: {
     firstName: string
+    middleName?: string | null
     lastName: string
     phone?: string | null
     nationality?: string | null
@@ -83,7 +84,7 @@ export default function StudentsTable({
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
-  const [viewCurrency, setViewCurrency] = useState('GHS')
+  const [viewCurrency, setViewCurrency] = useState('EUR')
 
   const paged = students.slice((page - 1) * perPage, page * perPage)
 
@@ -312,7 +313,13 @@ export default function StudentsTable({
             ) : (
               paged.map((student) => {
                 const fullName = student.profile
-                  ? `${student.profile.firstName} ${student.profile.lastName}`
+                  ? [
+                      student.profile.firstName,
+                      student.profile.middleName,
+                      student.profile.lastName,
+                    ]
+                      .filter(Boolean)
+                      .join(' ')
                   : student.email
                 const initials = student.profile
                   ? `${student.profile.firstName[0]}${student.profile.lastName[0]}`

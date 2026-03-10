@@ -20,6 +20,7 @@ import {
 } from 'lucide-react'
 import UserActionsMenu from './UserActionsMenu'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
+import ManualWalletAdjustmentDialog from '../users/[id]/_components/ManualWalletAdjustmentDialog'
 
 interface Student {
   id: string
@@ -31,6 +32,7 @@ interface Student {
   createdAt: string
   profile?: {
     firstName: string
+    middleName?: string | null
     lastName: string
     phone?: string | null
     nationality?: string | null
@@ -93,7 +95,9 @@ export default function StudentDetailPanel({
   }
 
   const fullName = student.profile
-    ? `${student.profile.firstName} ${student.profile.lastName}`
+    ? [student.profile.firstName, student.profile.middleName, student.profile.lastName]
+        .filter(Boolean)
+        .join(' ')
     : student.email
   const initials = student.profile
     ? `${student.profile.firstName[0]}${student.profile.lastName[0]}`
@@ -283,9 +287,18 @@ export default function StudentDetailPanel({
               <div
                 className={`rounded-xl p-4 ${walletBal >= 0 ? 'border border-emerald-100 bg-emerald-50' : 'border border-red-100 bg-red-50'}`}
               >
-                <p className="mb-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Available Balance
-                </p>
+                <div className="mb-1 flex items-center justify-between">
+                  <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                    Available Balance
+                  </p>
+                  <ManualWalletAdjustmentDialog
+                    userId={student.id}
+                    userName={fullName}
+                    currentBalance={walletBal}
+                    currency={student.wallet?.currency || 'EUR'}
+                    onSuccess={onActionComplete}
+                  />
+                </div>
                 <CurrencyDisplay
                   amount={walletBal}
                   baseCurrency={student.wallet?.currency || 'EUR'}

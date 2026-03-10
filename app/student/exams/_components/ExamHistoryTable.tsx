@@ -27,7 +27,7 @@ export default function ExamHistoryTable({ records }: ExamHistoryTableProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm" aria-label="Exam history records">
           <thead className="bg-slate-50 dark:bg-slate-800/50">
-            <tr className="border-b border-slate-100 text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
+            <tr className="border-b border-slate-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
               <SortHeader
                 label="Module"
                 sortKey="moduleCode"
@@ -61,13 +61,13 @@ export default function ExamHistoryTable({ records }: ExamHistoryTableProps) {
                   <p className="font-bold text-slate-900 uppercase dark:text-white">
                     {h.moduleCode}
                   </p>
-                  <p className="max-w-[150px] truncate text-[10px] font-medium text-slate-500" title={h.moduleName}>
+                  <p className="max-w-[150px] truncate text-xs font-medium text-slate-500" title={h.moduleName}>
                     {h.moduleName}
                   </p>
                 </td>
                 <td className="px-6 py-4">
                   <span
-                    className={`rounded-md px-2 py-0.5 text-[9px] font-bold uppercase ${
+                    className={`rounded-md px-2 py-0.5 text-xs font-bold uppercase ${
                       h.type === 'MIGRATED'
                         ? 'bg-purple-50 text-purple-600'
                         : 'bg-blue-50 text-blue-600'
@@ -102,7 +102,7 @@ export default function ExamHistoryTable({ records }: ExamHistoryTableProps) {
                       {Number(h.score).toFixed(0)}%
                     </span>
                   ) : (
-                    <span className="text-[10px] font-medium tracking-tight text-slate-400 uppercase italic">
+                    <span className="text-xs font-medium tracking-tight text-slate-400 uppercase italic">
                       Record Pending
                     </span>
                   )}

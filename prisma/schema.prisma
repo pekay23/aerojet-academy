@@ -66,6 +66,7 @@ model User {
   createdTuitionRuns    TuitionRun[]         @relation("CreatedTuitionRuns")
   bookingEntitlements   BookingEntitlement[]
   wallet                Wallet?
+  settings              Json?                @default("{}")
 
   @@index([email])
   @@index([academyEmail])
@@ -287,6 +288,7 @@ model Course {
   licenseRequirements  LicenseModuleRequirement[]
   termAssignments      TermCourseAssignment[]
   programmeYears       ProgrammeYear[]            @relation("CourseToProgrammeYear")
+  examBookings         ExamBooking[]
 
   @@index([code])
   @@index([categoryId])
@@ -598,6 +600,8 @@ model ExamBooking {
   migrationRef      String?
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
+  courseId          String?
+  course            Course?            @relation(fields: [courseId], references: [id])
   event             ExamEvent?         @relation(fields: [eventId], references: [id])
   examComponent     ExamComponent?     @relation(fields: [examComponentId], references: [id])
   exam              Exam?              @relation(fields: [examId], references: [id])
@@ -1266,6 +1270,8 @@ enum BookingType {
   INDIVIDUAL
   POOL
   BUNDLE
+  TWIN_PACK
+  FOUR_PACK
   GROUP_CHARTER
   MODULAR
   FULL_TIME

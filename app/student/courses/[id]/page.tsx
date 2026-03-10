@@ -103,7 +103,7 @@ export default async function CourseDetailsPage({
         <div className="flex-1 space-y-6">
           <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-6">
-              <span className="rounded-lg bg-blue-50 px-2 py-1 text-[10px] font-black tracking-widest text-blue-600 uppercase">
+              <span className="rounded-lg bg-blue-50 px-2 py-1 text-xs font-black tracking-widest text-blue-600 uppercase">
                 {course.category?.name || 'CORE'}
               </span>
               <h1 className="mt-3 text-2xl leading-tight font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
@@ -124,7 +124,7 @@ export default async function CourseDetailsPage({
                   <Clock className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">
+                  <p className="text-xs font-bold tracking-wide text-slate-400 uppercase">
                     Duration
                   </p>
                   <p className="text-sm font-bold text-slate-700">
@@ -137,7 +137,7 @@ export default async function CourseDetailsPage({
                   <Activity className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">
+                  <p className="text-xs font-bold tracking-wide text-slate-400 uppercase">
                     Enrollment Status
                   </p>
                   <p className="text-sm font-bold text-slate-700">{enrollment.status}</p>
@@ -147,7 +147,7 @@ export default async function CourseDetailsPage({
           </div>
 
           <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="mb-6 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+            <h2 className="mb-6 text-xs font-black tracking-widest text-slate-400 uppercase">
               Course Resources
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -170,7 +170,7 @@ export default async function CourseDetailsPage({
                     <ChevronRight className="ml-1 h-3 w-3" />
                   </a>
                 ) : (
-                  <span className="mt-4 inline-block text-[10px] text-slate-400 italic">
+                  <span className="mt-4 inline-block text-xs text-slate-400 italic">
                     Not available
                   </span>
                 )}
@@ -194,12 +194,12 @@ export default async function CourseDetailsPage({
                       <ChevronRight className="ml-1 h-3 w-3" />
                     </Link>
                   ) : (
-                    <span className="mt-4 inline-block text-[10px] font-bold text-slate-400 italic">
+                    <span className="mt-4 inline-block text-xs font-bold text-slate-400 italic">
                       Available after paying for a course
                     </span>
                   )
                 ) : (
-                  <span className="mt-4 inline-block text-[10px] text-slate-400 italic">
+                  <span className="mt-4 inline-block text-xs text-slate-400 italic">
                     Not available
                   </span>
                 )}

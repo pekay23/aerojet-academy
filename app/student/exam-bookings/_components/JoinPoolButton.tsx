@@ -199,7 +199,7 @@ export default function JoinPoolButton({
               {/* Pool Module Summary */}
               {currentModules.length > 0 && (
                 <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
-                  <p className="mb-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                  <p className="mb-2 text-xs font-bold tracking-widest text-slate-400 uppercase">
                     Current Booking Modules ({moduleCount}/4 slots used)
                   </p>
                   <div className="flex flex-wrap gap-2">

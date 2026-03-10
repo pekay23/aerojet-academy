@@ -11,7 +11,6 @@ import {
   CheckCircle2,
   Package,
   AlertCircle,
-  Search,
   GraduationCap,
   History as HistoryIcon,
 } from 'lucide-react'
@@ -79,81 +78,91 @@ export default async function StudentDashboard() {
   const isFlexible = enrollmentType === 'MODULAR' || activePathway?.code === 'MODULAR'
   const isExamOnly = enrollmentType === 'EXAM_ONLY' || activePathway?.code === 'EXAM_ONLY'
 
-  // Common: Exams
-  const upcomingExams = await prisma.examBooking.findMany({
-    where: {
-      userId,
-      status: { in: ['APPROVED', 'PENDING'] },
-      examDate: { gte: new Date() },
-    },
-    include: { exam: { include: { examComponent: { include: { course: true } } } }, event: true },
-    orderBy: { examDate: 'asc' },
-    take: 3,
-  })
+  // 2b. Parallel data fetching — all independent queries run concurrently
+  const [
+    upcomingExams,
+    ftEnrollmentRaw,
+    flexEnrollments,
+    genericEnrollments,
+    ftCourseEnrollmentCount,
+    currentPoolsCount,
+    poolMemberships,
+    latestResultRecord,
+    latestMigratedRecord,
+  ] = await Promise.all([
+    // Common: Upcoming exams
+    prisma.examBooking.findMany({
+      where: {
+        userId,
+        status: { in: ['APPROVED', 'PENDING'] },
+        examDate: { gte: new Date() },
+      },
+      include: { exam: { include: { examComponent: { include: { course: true } } } }, event: true },
+      orderBy: { examDate: 'asc' },
+      take: 3,
+    }),
+    // Full-Time enrollment
+    isFullTime
+      ? prisma.fullTimeEnrollment.findFirst({
+          where: { studentId: userId },
+          include: { programme: true },
+        })
+      : Promise.resolve(null),
+    // Flexible (Modular) course enrollments
+    isFlexible
+      ? prisma.enrollment.findMany({
+          where: { userId, status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
+          include: { course: true },
+          take: 3,
+        })
+      : Promise.resolve([]),
+    // General course enrollments (non-full-time)
+    !isFullTime && !isExamOnly
+      ? prisma.enrollment.findMany({
+          where: { userId, status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
+          include: { course: true },
+          take: 3,
+        })
+      : Promise.resolve([]),
+    // Full-time course enrollment count
+    isFullTime
+      ? prisma.enrollment.count({
+          where: { userId, status: { in: ['ACTIVE', 'APPROVED'] } },
+        })
+      : Promise.resolve(0),
+    // Pool memberships count
+    prisma.poolMembership.count({
+      where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+    }),
+    // Pool memberships list
+    prisma.poolMembership.findMany({
+      where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+      include: { pool: true },
+      take: 3,
+    }),
+    // Latest exam result
+    prisma.examResult.findFirst({
+      where: { userId },
+      include: { exam: { include: { examComponent: { include: { course: true } } } } },
+      orderBy: { createdAt: 'desc' },
+    }),
+    // Latest migrated booking result
+    prisma.examBooking.findFirst({
+      where: { userId, result: { in: ['pass', 'fail'] } },
+      orderBy: { examDate: 'desc' },
+    }),
+  ])
 
-  // Full-Time Data
-  let ftEnrollment = null
-  let ftMilestones = []
-  if (isFullTime) {
-    ftEnrollment = await prisma.fullTimeEnrollment.findFirst({
-      where: { studentId: userId },
-      include: { programme: true },
+  // Full-Time: fetch milestones if enrollment exists (depends on ftEnrollment)
+  const ftEnrollment = ftEnrollmentRaw
+  let ftMilestones: any[] = []
+  if (ftEnrollment) {
+    ftMilestones = await prisma.paymentMilestone.findMany({
+      where: { enrollmentId: ftEnrollment.id, status: { in: ['DUE', 'OVERDUE'] } },
+      orderBy: { dueDate: 'asc' },
+      take: 2,
     })
-    if (ftEnrollment) {
-      ftMilestones = await prisma.paymentMilestone.findMany({
-        where: { enrollmentId: ftEnrollment.id, status: { in: ['DUE', 'OVERDUE'] } },
-        orderBy: { dueDate: 'asc' },
-        take: 2,
-      })
-    }
   }
-
-  // Flexible (Modular) Courses — course enrollments for modular students
-  const flexEnrollments = isFlexible
-    ? await prisma.enrollment.findMany({
-        where: { userId, status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
-        include: { course: true },
-        take: 3,
-      })
-    : []
-
-  // General Courses — only for non-full-time students
-  const genericEnrollments = isFullTime
-    ? []
-    : await prisma.enrollment.findMany({
-        where: { userId, status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
-        include: { course: true },
-        take: isExamOnly ? 0 : 3,
-      })
-
-  // Count active course enrollments for full-time students (for "courses activated" check)
-  const ftCourseEnrollmentCount = isFullTime
-    ? await prisma.enrollment.count({
-        where: { userId, status: { in: ['ACTIVE', 'APPROVED'] } },
-      })
-    : 0
-
-  // Exam Bookings Joined
-  const [currentPoolsCount, poolMemberships, latestResultRecord, latestMigratedRecord] =
-    await Promise.all([
-      prisma.poolMembership.count({
-        where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
-      }),
-      prisma.poolMembership.findMany({
-        where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
-        include: { pool: true },
-        take: 3,
-      }),
-      prisma.examResult.findFirst({
-        where: { userId },
-        include: { exam: { include: { examComponent: { include: { course: true } } } } },
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.examBooking.findFirst({
-        where: { userId, result: { in: ['pass', 'fail'] } },
-        orderBy: { examDate: 'desc' },
-      }),
-    ])
 
   const dashboardResult = latestResultRecord
     ? {
@@ -241,11 +250,11 @@ export default async function StudentDashboard() {
                   </div>
                   <div className="flex-1">
                     <div className="mb-1 flex items-center gap-2">
-                      <span className="rounded-md bg-blue-600 px-2 py-0.5 text-[10px] font-black tracking-widest text-white uppercase">
+                      <span className="rounded-md bg-blue-600 px-2 py-0.5 text-xs font-black tracking-widest text-white uppercase">
                         ID: {ftEnrollment.programme.code}
                       </span>
-                      <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400">
-                        {ftEnrollment.academicYear || '2026/2027'}
+                      <span className="text-xs font-bold text-blue-600 dark:text-blue-400">
+                        {ftEnrollment.academicYear || ''}
                       </span>
                     </div>
                     <h3 className="text-sm leading-tight font-bold text-slate-900 dark:text-slate-100">
@@ -457,17 +466,17 @@ export default async function StudentDashboard() {
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
         <div className="flex flex-wrap gap-2">
           {profile.pathwayRel && (
-            <span className="inline-flex items-center justify-center rounded-xl bg-slate-100 px-4 py-2.5 text-[10px] font-black tracking-widest text-slate-600 uppercase dark:bg-slate-800 dark:text-slate-300">
+            <span className="inline-flex items-center justify-center rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-black tracking-widest text-slate-600 uppercase dark:bg-slate-800 dark:text-slate-300">
               PATHWAY: {profile.pathwayRel.name}
             </span>
           )}
           {licenseList && (
-            <span className="inline-flex items-center justify-center rounded-xl bg-blue-100 px-4 py-2.5 text-[10px] font-black tracking-widest text-blue-700 uppercase dark:bg-blue-900/40 dark:text-blue-300">
+            <span className="inline-flex items-center justify-center rounded-xl bg-blue-100 px-4 py-2.5 text-xs font-black tracking-widest text-blue-700 uppercase dark:bg-blue-900/40 dark:text-blue-300">
               LICENSE: {licenseList}
             </span>
           )}
           {!profile.pathwayRel && (
-            <span className="inline-flex items-center justify-center rounded-xl bg-slate-100 px-4 py-2.5 text-[10px] font-black tracking-widest text-slate-600 uppercase dark:bg-slate-800 dark:text-slate-300">
+            <span className="inline-flex items-center justify-center rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-black tracking-widest text-slate-600 uppercase dark:bg-slate-800 dark:text-slate-300">
               TYPE: {(enrollmentType ?? '').replace(/_/g, ' ')}
             </span>
           )}
@@ -549,7 +558,7 @@ export default async function StudentDashboard() {
                       className="flex items-center gap-3 rounded-xl border border-slate-100 p-3 sm:gap-4 sm:p-4 dark:border-slate-800"
                     >
                       <div className="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:text-slate-400">
-                        <span className="text-[10px] font-bold uppercase">
+                        <span className="text-xs font-bold uppercase">
                           {exam.examDate?.toLocaleString('default', { month: 'short' })}
                         </span>
                         <span className="text-lg font-black">{exam.examDate?.getDate()}</span>

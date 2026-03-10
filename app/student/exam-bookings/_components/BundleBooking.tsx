@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { bookStandaloneExamAction } from '@/app/student/actions'
+import { bookBundleExamsAction } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight, BookOpen, Wallet, Calendar, X, Package, Info } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
@@ -64,16 +64,13 @@ export default function BundleBooking({
 
     startTransition(async () => {
       try {
-        // Book each module in the bundle
-        for (const moduleCode of selectedModules) {
-          const res = await bookStandaloneExamAction({
-            moduleCode,
-            eventId: selectedEventId,
-          })
-          if (res.error) {
-            toast.error(`Error booking ${moduleCode}: ${res.error}`)
-            return
-          }
+        const res = await bookBundleExamsAction({
+          moduleCodes: selectedModules,
+          eventId: selectedEventId,
+        })
+        if (res.error) {
+          toast.error(res.error)
+          return
         }
         toast.success(
           `${label} booked successfully! ${bundleSize} exam seats reserved.`
@@ -158,7 +155,7 @@ export default function BundleBooking({
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
+                  <p className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
                     Save {currencySymbol}
                     {savings.toFixed(0)}
                   </p>
@@ -216,7 +213,7 @@ export default function BundleBooking({
                         }`}
                       >
                         <span className="font-bold">{m.code}</span>{' '}
-                        <span className="text-[10px] opacity-70">{m.name}</span>
+                        <span className="text-xs opacity-70">{m.name}</span>
                       </button>
                     )
                   })}

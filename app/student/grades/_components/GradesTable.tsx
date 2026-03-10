@@ -80,7 +80,7 @@ export default function GradesTable({ grades }: { grades: Grade[] }) {
                           {grade.percentage}%
                         </span>
                       </div>
-                      <div className="text-[10px] text-slate-400">
+                      <div className="text-xs text-slate-400">
                         {grade.score} / {grade.maxScore}
                       </div>
                     </td>

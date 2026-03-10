@@ -18,7 +18,11 @@ export default async function StaffLayout({ children }: { children: React.ReactN
 
   const dbUser = await prisma.user.findUnique({
     where: { id: user.id },
-    select: { status: true, role: true },
+    select: {
+      status: true,
+      role: true,
+      profile: { select: { firstName: true, middleName: true, lastName: true } },
+    },
   })
 
   if (
@@ -29,7 +33,11 @@ export default async function StaffLayout({ children }: { children: React.ReactN
     redirect('/login')
   }
 
-  const userName = user.name ?? user.email
+  const userName = dbUser?.profile
+    ? [dbUser.profile.firstName, dbUser.profile.middleName, dbUser.profile.lastName]
+        .filter(Boolean)
+        .join(' ')
+    : (user.name ?? user.email)
   const userRole = user.role
 
   const [

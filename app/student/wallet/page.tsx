@@ -87,10 +87,12 @@ export default async function WalletPage({
         where: { wallet: { userId: user.id } },
         include: { wallet: true },
         orderBy: { createdAt: 'desc' },
+        take: 100,
       }),
       prisma.payment.findMany({
         where: { userId: user.id, status: { in: ['PENDING', 'PROCESSING'] } },
         orderBy: { createdAt: 'desc' },
+        take: 50,
       }),
       prisma.payment.findMany({
         where: {
@@ -99,6 +101,7 @@ export default async function WalletPage({
           referenceType: { not: 'WALLET_TOPUP' }, // Wallet top-ups are already in WalletTransaction
         },
         orderBy: { createdAt: 'desc' },
+        take: 100,
       }),
     ])
 
@@ -170,7 +173,7 @@ export default async function WalletPage({
                     <Wallet className="h-5 w-5 text-blue-200 sm:h-6 sm:w-6" />
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold tracking-widest text-blue-200 uppercase sm:text-xs">
+                    <p className="text-xs font-bold tracking-widest text-blue-200 uppercase sm:text-xs">
                       Available Balance
                     </p>
                     <div className="flex items-baseline gap-1.5 sm:gap-2">
@@ -182,14 +185,14 @@ export default async function WalletPage({
                         amountClassName="text-white!"
                       />
                     </div>
-                    <p className="mt-0.5 text-[9px] font-bold tracking-widest text-blue-200/60 uppercase sm:text-[10px]">
+                    <p className="mt-0.5 text-xs font-bold tracking-widest text-blue-200/60 uppercase sm:text-xs">
                       Ref: {studentId}
                     </p>
                   </div>
                 </div>
               </div>
               <div className="border-t border-white/10 pt-5 sm:pt-8">
-                <p className="text-[9px] font-bold tracking-widest text-blue-200/60 uppercase sm:text-[10px]">
+                <p className="text-xs font-bold tracking-widest text-blue-200/60 uppercase sm:text-xs">
                   Reserved (In Bookings)
                 </p>
                 <CurrencyDisplay
@@ -199,7 +202,7 @@ export default async function WalletPage({
                   size="md"
                   amountClassName="text-blue-100/90!"
                 />
-                <p className="mt-1 text-[9px] text-blue-200/40 sm:text-[10px]">
+                <p className="mt-1 text-xs text-blue-200/40 sm:text-xs">
                   Held pending booking confirmation. Released if booking is cancelled.
                 </p>
               </div>
@@ -254,7 +257,7 @@ export default async function WalletPage({
                         <span className="font-bold tracking-tight text-indigo-900 dark:text-indigo-300">
                           {bundle.bundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'}
                         </span>
-                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700 uppercase">
+                        <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700 uppercase">
                           Active
                         </span>
                       </div>
@@ -265,7 +268,7 @@ export default async function WalletPage({
                         </strong>{' '}
                         / {bundle.totalSeats}
                       </div>
-                      <div className="text-[10px] text-slate-500">
+                      <div className="text-xs text-slate-500">
                         Purchased:{' '}
                         {new Date(bundle.createdAt).toLocaleDateString(undefined, {
                           month: 'short',
@@ -373,7 +376,7 @@ export default async function WalletPage({
                       </div>
                       <div className="flex items-center gap-3">
                         <span
-                          className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                          className={`rounded-full px-2 py-0.5 text-xs font-bold ${
                             m.status === 'PAID'
                               ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                               : m.status === 'OVERDUE'

@@ -122,7 +122,7 @@ export default function CreatePoolModal({
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="mb-1 inline-block rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
+                  <p className="mb-1 inline-block rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
                     On Hold
                   </p>
                   <p className="text-xs text-slate-500">Refundable if failed</p>
@@ -215,7 +215,7 @@ export default function CreatePoolModal({
                       }`}
                     >
                       <span className="text-xs font-black uppercase">Morning</span>
-                      <span className="text-[10px] opacity-70">09:00 - 12:00</span>
+                      <span className="text-xs opacity-70">09:00 - 12:00</span>
                     </button>
                     <button
                       type="button"
@@ -227,7 +227,7 @@ export default function CreatePoolModal({
                       }`}
                     >
                       <span className="text-xs font-black uppercase">Afternoon</span>
-                      <span className="text-[10px] opacity-70">13:00 - 16:00</span>
+                      <span className="text-xs opacity-70">13:00 - 16:00</span>
                     </button>
                   </div>
                 </div>

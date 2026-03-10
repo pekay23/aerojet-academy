@@ -42,16 +42,16 @@ export default function StudentWalletTransactionsTable({
               sortKey="createdAt"
               currentSort={sortConfig}
               onSort={requestSort}
-              className="text-[10px] font-bold tracking-widest text-slate-400 uppercase"
+              className="text-xs font-bold tracking-widest text-slate-400 uppercase"
             />
             <SortHeader
               label="Description"
               sortKey="description"
               currentSort={sortConfig}
               onSort={requestSort}
-              className="text-[10px] font-bold tracking-widest text-slate-400 uppercase"
+              className="text-xs font-bold tracking-widest text-slate-400 uppercase"
             />
-            <th scope="col" className="px-6 py-4 text-center text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+            <th scope="col" className="px-6 py-4 text-center text-xs font-bold tracking-widest text-slate-400 uppercase">
               Status
             </th>
             <SortHeader
@@ -60,7 +60,7 @@ export default function StudentWalletTransactionsTable({
               currentSort={sortConfig}
               onSort={requestSort}
               align="right"
-              className="text-[10px] font-bold tracking-widest text-slate-400 uppercase"
+              className="text-xs font-bold tracking-widest text-slate-400 uppercase"
             />
           </tr>
         </thead>
@@ -95,7 +95,7 @@ export default function StudentWalletTransactionsTable({
                       <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                         {tx.description}
                       </p>
-                      <p className="text-[10px] text-slate-400 uppercase">
+                      <p className="text-xs text-slate-400 uppercase">
                         {tx.type.replaceAll('_', ' ')}
                         {tx.paymentCurrency && tx.paymentCurrency !== 'EUR' && (
                           <span className="ml-1">
@@ -109,7 +109,7 @@ export default function StudentWalletTransactionsTable({
                 </td>
                 <td className="px-6 py-4 text-center">
                   <span
-                    className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wide uppercase ${
+                    className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold tracking-wide uppercase ${
                       tx.isPending
                         ? 'bg-amber-100 text-amber-700'
                         : 'bg-emerald-100 text-emerald-700'
