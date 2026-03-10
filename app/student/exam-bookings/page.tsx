@@ -17,7 +17,10 @@ import ResitBooking from './_components/ResitBooking'
 import { getSystemSetting } from '@/lib/settings'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 
-export const metadata: Metadata = { title: 'Exam Bookings | Student Portal' }
+export const metadata: Metadata = {
+  title: 'Exam Bookings | Student Portal',
+  description: 'Browse and join exam bookings.',
+}
 
 interface ExamWithCourse {
   id: string

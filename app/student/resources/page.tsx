@@ -9,6 +9,7 @@ import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
 export const metadata: Metadata = {
   title: 'Student Resources | Student Portal',
+  description: 'Access course materials and learning resources.',
 }
 
 export default async function StudentResourcesPage() {

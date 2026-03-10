@@ -8,7 +8,10 @@ import { canAccessFeature, getEnrollmentMilestoneStatus } from '@/lib/access-con
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 import AttendanceTable from './_components/AttendanceTable'
 
-export const metadata: Metadata = { title: 'Attendance | Student Portal' }
+export const metadata: Metadata = {
+  title: 'Attendance | Student Portal',
+  description: 'Track your class attendance records.',
+}
 
 export default async function AttendancePage() {
   const session = await getAuthSession()

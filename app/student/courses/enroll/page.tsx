@@ -61,17 +61,6 @@ export default async function EnrollPage({
     orderBy: [{ category: { name: 'asc' } }, { code: 'asc' }],
   })
 
-  // 4. Client-side Visibility Filtering (Pathway-based)
-  // If student has a specific pathway, only show relevant courses + B1/B2 Dual courses
-  const pathwayCode = studentProfile?.pathwayRel?.code
-  if (pathwayCode && pathwayCode !== 'B1_B2_DUAL') {
-    allCourses = allCourses.filter((course) => {
-      const mt = course.moduleType
-      if (!mt) return true
-      return true
-    })
-  }
-
   // Group by category name
   const grouped = allCourses.reduce(
     (acc, c) => {
@@ -125,7 +114,7 @@ export default async function EnrollPage({
           {Object.entries(grouped).map(([cat, items]) => (
             <div key={cat} className="space-y-8">
               <div className="flex items-center gap-4">
-                <h2 className="text-[10px] font-black tracking-[0.3em] text-blue-500 uppercase dark:text-[#4c9ded]">
+                <h2 className="text-xs font-black tracking-[0.3em] text-blue-500 uppercase dark:text-[#4c9ded]">
                   {categoryLabel[cat] || cat.replace(/_/g, ' ')}
                 </h2>
                 <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800/50" />
@@ -143,11 +132,11 @@ export default async function EnrollPage({
                       <TrackedImpression courseId={course.id} />
                       <div className="flex flex-1 flex-col p-7">
                         <div className="mb-4 flex items-center justify-between">
-                          <span className="rounded-lg bg-slate-50 px-2.5 py-1 font-mono text-[10px] font-black tracking-widest text-[#4c9ded] uppercase dark:bg-slate-800">
+                          <span className="rounded-lg bg-slate-50 px-2.5 py-1 font-mono text-xs font-black tracking-widest text-[#4c9ded] uppercase dark:bg-slate-800">
                             {course.code}
                           </span>
                           {isEnrolled && (
-                            <span className="flex items-center gap-1 text-[10px] font-black tracking-widest text-emerald-600 uppercase">
+                            <span className="flex items-center gap-1 text-xs font-black tracking-widest text-emerald-600 uppercase">
                               <CheckCircle2 className="h-3.5 w-3.5" />
                               Active
                             </span>
@@ -177,7 +166,7 @@ export default async function EnrollPage({
 
                         <div className="mt-8 flex items-center justify-between gap-4 border-t border-slate-50 pt-6 dark:border-slate-800/50">
                           <div>
-                            <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                            <p className="text-xs font-black tracking-widest text-slate-400 uppercase">
                               Investment
                             </p>
                             <p className="text-2xl font-black text-[#002a5c] dark:text-white">

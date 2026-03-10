@@ -43,7 +43,7 @@ export function PaymentRequiredBanner({
   )
 
   const formatCurrency = (amount: number) => {
-    return `${milestoneStatus.programmeName?.includes('EUR') || milestoneStatus.programmeName?.includes('Full-Time') ? '€' : milestoneStatus.currentYear ? '€' : '€'}${amount.toLocaleString()}`
+    return `€${amount.toLocaleString()}`
   }
 
   const getDaysUntilDue = (dueDate: Date | string) => {
