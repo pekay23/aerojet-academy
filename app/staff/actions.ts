@@ -91,3 +91,136 @@ export async function markMessageAsRead(messageId: string) {
     return { error: 'Failed to mark message as read.' }
   }
 }
+
+/**
+ * Bulk updates the status of multiple users.
+ */
+export async function bulkUpdateUserStatus(userIds: string[], status: string) {
+  try {
+    await requireStaff()
+
+    if (!userIds.length || !status) {
+      return { error: 'Invalid parameters.' }
+    }
+
+    await prisma.user.updateMany({
+      where: { id: { in: userIds } },
+      data: { status },
+    })
+
+    revalidatePath('/staff/users')
+    return { success: true }
+  } catch (error) {
+    console.error('Bulk update user status error:', error)
+    return { error: 'Failed to update users.' }
+  }
+}
+
+/**
+ * Bulk deletes multiple users (soft delete if possible, here it seems hard delete is used in this prisma schema based on other parts, but I'll check).
+ * Note: Check if there's a deletedAt field in the schema.
+ */
+export async function bulkDeleteUsers(userIds: string[]) {
+  try {
+    await requireStaff()
+
+    if (!userIds.length) {
+      return { error: 'No users selected.' }
+    }
+
+    // Checking if deletedAt exists (from previous view_file of seed.ts I saw deletedAt in the SELECT query)
+    await prisma.user.updateMany({
+      where: { id: { in: userIds } },
+      data: { deletedAt: new Date(), status: 'DELETED' },
+    })
+
+    revalidatePath('/staff/users')
+    return { success: true }
+  } catch (error) {
+    console.error('Bulk delete users error:', error)
+    return { error: 'Failed to delete users.' }
+  }
+}
+
+/**
+ * Bulk updates the status of multiple enrollments.
+ */
+export async function bulkUpdateEnrollmentStatus(enrollmentIds: string[], status: string) {
+  try {
+    await requireStaff()
+    if (!enrollmentIds.length || !status) return { error: 'Invalid parameters.' }
+
+    await prisma.enrollment.updateMany({
+      where: { id: { in: enrollmentIds } },
+      data: { status },
+    })
+
+    revalidatePath('/staff/enrollments')
+    return { success: true }
+  } catch (error) {
+    console.error('Bulk update enrollment status error:', error)
+    return { error: 'Failed to update enrollments.' }
+  }
+}
+
+/**
+ * Bulk deletes multiple enrollments.
+ */
+export async function bulkDeleteEnrollments(enrollmentIds: string[]) {
+  try {
+    await requireStaff()
+    if (!enrollmentIds.length) return { error: 'No enrollments selected.' }
+
+    await prisma.enrollment.deleteMany({
+      where: { id: { in: enrollmentIds } },
+    })
+
+    revalidatePath('/staff/enrollments')
+    return { success: true }
+  } catch (error) {
+    console.error('Bulk delete enrollments error:', error)
+    return { error: 'Failed to delete enrollments.' }
+  }
+}
+
+/**
+ * Bulk updates the status of multiple exam bookings.
+ */
+export async function bulkUpdateExamBookingStatus(bookingIds: string[], status: any) {
+  try {
+    await requireStaff()
+    if (!bookingIds.length || !status) return { error: 'Invalid parameters.' }
+
+    await prisma.examBooking.updateMany({
+      where: { id: { in: bookingIds } },
+      data: { status },
+    })
+
+    revalidatePath('/staff/exams')
+    return { success: true }
+  } catch (error) {
+    console.error('Bulk update exam booking status error:', error)
+    return { error: 'Failed to update bookings.' }
+  }
+}
+
+/**
+ * Bulk updates the status of multiple payments/top-ups.
+ */
+export async function bulkUpdatePaymentStatus(paymentIds: string[], status: any) {
+  try {
+    await requireStaff()
+    if (!paymentIds.length || !status) return { error: 'Invalid parameters.' }
+
+    await prisma.payment.updateMany({
+      where: { id: { in: paymentIds } },
+      data: { status },
+    })
+
+    revalidatePath('/staff/finance')
+    return { success: true }
+  } catch (error) {
+    console.error('Bulk update payment status error:', error)
+    return { error: 'Failed to update payments.' }
+  }
+}

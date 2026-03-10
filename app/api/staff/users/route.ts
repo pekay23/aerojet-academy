@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
         role: true,
         status: true,
         emailVerified: true,
+        mustChangePassword: true,
         createdAt: true,
         profile: {
           select: { firstName: true, lastName: true, phone: true, profilePhotoUrl: true },

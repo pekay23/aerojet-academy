@@ -13,6 +13,8 @@ import {
   Mail,
   Loader2,
   ShieldCheck,
+  LockOpen,
+  Lock,
 } from 'lucide-react'
 import {
   DropdownMenu,
@@ -30,6 +32,7 @@ interface UserActionsMenuProps {
   userRole?: string
   userName?: string
   isEmailVerified?: boolean
+  mustChangePassword?: boolean
   onActionComplete?: () => void
 }
 
@@ -40,6 +43,7 @@ export default function UserActionsMenu({
   userRole,
   userName = 'this user',
   isEmailVerified = true,
+  mustChangePassword,
   onActionComplete,
 }: UserActionsMenuProps) {
   const [loading, setLoading] = useState<string | null>(null)
@@ -127,6 +131,12 @@ export default function UserActionsMenu({
           label: 'Resend Login Credentials',
           icon: ShieldCheck,
           action: 'resend-credentials',
+          variant: 'default',
+        },
+        mustChangePassword !== undefined && {
+          label: mustChangePassword ? 'Bypass Password Change' : 'Require Password Change',
+          icon: mustChangePassword ? LockOpen : Lock,
+          action: 'toggle-password-change',
           variant: 'default',
         },
         isSuspended

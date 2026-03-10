@@ -11,9 +11,7 @@
  * created by the migration. It will NOT delete users that existed
  * before the migration (it checks audit logs).
  */
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '../lib/prisma/client'
 
 const MIGRATION_REF = 'EXAM_CANDIDATE_IMPORT_2026_03'
 
@@ -135,4 +133,3 @@ main()
     console.error('Rollback failed:', e)
     process.exit(1)
   })
-  .finally(() => prisma.$disconnect())

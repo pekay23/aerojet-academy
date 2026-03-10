@@ -1,5 +1,11 @@
 'use client'
 
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { CheckSquare, Square, CheckCircle2, XCircle, Trash2 } from 'lucide-react'
+import { bulkUpdateEnrollmentStatus, bulkDeleteEnrollments } from '../../actions'
+import { toast } from 'sonner'
+import BulkActionsBar from '../../_components/BulkActionsBar'
 import {
   Table,
   TableBody,
@@ -28,6 +34,9 @@ interface EnrollmentsTableProps {
 }
 
 export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps) {
+  const router = useRouter()
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'APPROVED':
@@ -48,67 +57,166 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
     }
   }
 
+  const toggleAll = () => {
+    if (selectedIds.length === enrollments.length && enrollments.length > 0) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(enrollments.map((e) => e.id))
+    }
+  }
+
+  const toggleOne = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    )
+  }
+
   return (
-    <div className="rounded-md border bg-white shadow-sm dark:bg-slate-900">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Student</TableHead>
-            <TableHead>Course</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Enrolled Date</TableHead>
-            <TableHead>Amount Paid</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {enrollments.length === 0 ? (
+    <div className="relative">
+      <div className="rounded-md border bg-white shadow-sm dark:bg-slate-900">
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell
-                colSpan={5}
-                className="h-24 text-center text-slate-500 dark:text-slate-400"
-              >
-                No enrollments found.
-              </TableCell>
+              <TableHead className="w-12 px-6">
+                <button
+                  onClick={toggleAll}
+                  className="text-slate-400 hover:text-aerojet-blue transition-colors"
+                >
+                  {selectedIds.length === enrollments.length && enrollments.length > 0 ? (
+                    <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                  ) : (
+                    <Square className="h-4 w-4" />
+                  )}
+                </button>
+              </TableHead>
+              <TableHead>Student</TableHead>
+              <TableHead>Course</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Enrolled Date</TableHead>
+              <TableHead>Amount Paid</TableHead>
             </TableRow>
-          ) : (
-            enrollments.map((enrollment) => (
-              <TableRow key={enrollment.id}>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="font-medium">
-                      {enrollment.user.profile
-                        ? `${enrollment.user.profile.firstName} ${enrollment.user.profile.lastName}`
-                        : 'Unknown'}
-                    </span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
-                      {enrollment.user.email}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div className="flex flex-col">
-                    <span className="font-medium">{enrollment.course.name}</span>
-                    <span className="text-xs text-slate-500 dark:text-slate-400">
-                      {enrollment.course.code || 'No Code'}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <Badge className={getStatusColor(enrollment.status)} variant="secondary">
-                    {enrollment.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>{format(new Date(enrollment.enrolledAt), 'MMM d, yyyy')}</TableCell>
-                <TableCell>
-                  {enrollment.amountPaid !== null && enrollment.amountPaid !== undefined
-                    ? `€${Number(enrollment.amountPaid).toFixed(2)}`
-                    : '€0.00'}
+          </TableHeader>
+          <TableBody>
+            {enrollments.length === 0 ? (
+              <TableRow>
+                <TableCell
+                  colSpan={6}
+                  className="h-24 text-center text-slate-500 dark:text-slate-400"
+                >
+                  No enrollments found.
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
+            ) : (
+              enrollments.map((enrollment) => (
+                <TableRow
+                  key={enrollment.id}
+                  className={selectedIds.includes(enrollment.id) ? 'bg-aerojet-blue/5' : ''}
+                >
+                  <TableCell className="px-6">
+                    <button
+                      onClick={() => toggleOne(enrollment.id)}
+                      className="text-slate-300 transition-colors hover:text-aerojet-blue"
+                    >
+                      {selectedIds.includes(enrollment.id) ? (
+                        <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+                    </button>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col text-sm">
+                      <span className="font-bold text-[#002a5c] dark:text-white">
+                        {enrollment.user.profile
+                          ? `${enrollment.user.profile.firstName} ${enrollment.user.profile.lastName}`
+                          : 'Unknown'}
+                      </span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        {enrollment.user.email}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex flex-col text-sm">
+                      <span className="font-bold text-slate-700 dark:text-slate-200">
+                        {enrollment.course.name}
+                      </span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">
+                        {enrollment.course.code || 'No Code'}
+                      </span>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge
+                      className={getStatusColor(enrollment.status)}
+                      variant="secondary"
+                    >
+                      {enrollment.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {format(new Date(enrollment.enrolledAt), 'MMM d, yyyy')}
+                  </TableCell>
+                  <TableCell className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                    {enrollment.amountPaid !== null && enrollment.amountPaid !== undefined
+                      ? `€${Number(enrollment.amountPaid).toFixed(2)}`
+                      : '€0.00'}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      <BulkActionsBar
+        selectedIds={selectedIds}
+        onClear={() => setSelectedIds([])}
+        actions={[
+          {
+            label: 'Approve',
+            icon: CheckCircle2,
+            variant: 'success',
+            confirmTitle: 'Approve Enrollments',
+            confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected enrollments?`,
+            onClick: async (ids) => {
+              const res = await bulkUpdateEnrollmentStatus(ids, 'APPROVED')
+              if (res.success) {
+                toast.success(`Approved ${ids.length} enrollments`)
+                router.refresh()
+              } else toast.error(res.error)
+            },
+          },
+          {
+            label: 'Cancel',
+            icon: XCircle,
+            variant: 'warning',
+            confirmTitle: 'Cancel Enrollments',
+            confirmMessage: `Are you sure you want to cancel ${selectedIds.length} selected enrollments?`,
+            onClick: async (ids) => {
+              const res = await bulkUpdateEnrollmentStatus(ids, 'CANCELLED')
+              if (res.success) {
+                toast.success(`Cancelled ${ids.length} enrollments`)
+                router.refresh()
+              } else toast.error(res.error)
+            },
+          },
+          {
+            label: 'Delete',
+            icon: Trash2,
+            variant: 'danger',
+            confirmTitle: 'Delete Enrollments',
+            confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected enrollments? This action is permanent.`,
+            onClick: async (ids) => {
+              const res = await bulkDeleteEnrollments(ids)
+              if (res.success) {
+                toast.success(`Deleted ${ids.length} enrollments`)
+                router.refresh()
+              } else toast.error(res.error)
+            },
+          },
+        ]}
+      />
     </div>
   )
 }

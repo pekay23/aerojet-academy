@@ -2,7 +2,10 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import { GraduationCap, RefreshCw, Search } from 'lucide-react'
+import { GraduationCap, RefreshCw, Search, CheckSquare, Square, CheckCircle2, AlertTriangle, Trash2 } from 'lucide-react'
+import BulkActionsBar from './BulkActionsBar'
+import { bulkUpdateUserStatus, bulkDeleteUsers } from '../actions'
+import { toast } from 'sonner'
 
 interface Instructor {
   id: string
@@ -16,6 +19,7 @@ export default function InstructorsTable() {
   const [instructors, setInstructors] = useState<Instructor[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const fetchInstructors = useCallback(async () => {
     setLoading(true)
@@ -65,6 +69,24 @@ export default function InstructorsTable() {
           <table className="w-full text-left text-sm">
             <thead className="bg-slate-50 text-xs font-bold uppercase text-slate-500 dark:bg-slate-800/50 dark:text-slate-400">
               <tr>
+                <th className="w-12 px-6 py-4">
+                  <button
+                    onClick={() => {
+                      if (selectedIds.length === instructors.length && instructors.length > 0) {
+                        setSelectedIds([])
+                      } else {
+                        setSelectedIds(instructors.map((i) => i.id))
+                      }
+                    }}
+                    className="text-slate-400 hover:text-aerojet-blue transition-colors"
+                  >
+                    {selectedIds.length === instructors.length && instructors.length > 0 ? (
+                      <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                    ) : (
+                      <Square className="h-4 w-4" />
+                    )}
+                  </button>
+                </th>
                 <th className="px-6 py-4">Instructor</th>
                 <th className="px-6 py-4">Employee ID</th>
                 <th className="px-6 py-4">Specialization</th>
@@ -76,6 +98,9 @@ export default function InstructorsTable() {
               {loading ? (
                 Array.from({ length: 4 }).map((_, i) => (
                   <tr key={i}>
+                    <td className="px-6 py-4">
+                      <div className="h-4 w-4 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
+                    </td>
                     {Array.from({ length: 5 }).map((_, j) => (
                       <td key={j} className="px-6 py-4">
                         <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100 dark:bg-slate-800" />
@@ -85,7 +110,7 @@ export default function InstructorsTable() {
                 ))
               ) : instructors.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
+                  <td colSpan={6} className="px-6 py-12 text-center">
                     <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
                       <GraduationCap className="h-6 w-6 text-slate-300" />
                     </div>
@@ -97,7 +122,25 @@ export default function InstructorsTable() {
                 </tr>
               ) : (
                 instructors.map((instructor) => (
-                  <tr key={instructor.id} className="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <tr key={instructor.id} className={`group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${selectedIds.includes(instructor.id) ? 'bg-aerojet-blue/5' : ''}`}>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => {
+                          setSelectedIds((prev) =>
+                            prev.includes(instructor.id)
+                              ? prev.filter((id) => id !== instructor.id)
+                              : [...prev, instructor.id]
+                          )
+                        }}
+                        className="text-slate-300 transition-colors hover:text-aerojet-blue"
+                      >
+                        {selectedIds.includes(instructor.id) ? (
+                          <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                        ) : (
+                          <Square className="h-4 w-4" />
+                        )}
+                      </button>
+                    </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-[#002a5c] dark:bg-slate-800">
@@ -136,6 +179,54 @@ export default function InstructorsTable() {
           </table>
         </div>
       </div>
+      <BulkActionsBar
+        selectedIds={selectedIds}
+        onClear={() => setSelectedIds([])}
+        actions={[
+          {
+            label: 'Activate',
+            icon: CheckCircle2,
+            variant: 'success',
+            confirmTitle: 'Activate Instructors',
+            confirmMessage: `Are you sure you want to activate ${selectedIds.length} selected instructors?`,
+            onClick: async (ids) => {
+              const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
+              if (res.success) {
+                toast.success(`Activated ${ids.length} instructors`)
+                fetchInstructors()
+              } else toast.error(res.error)
+            },
+          },
+          {
+            label: 'Suspend',
+            icon: AlertTriangle,
+            variant: 'warning',
+            confirmTitle: 'Suspend Instructors',
+            confirmMessage: `Are you sure you want to suspend ${selectedIds.length} selected instructors?`,
+            onClick: async (ids) => {
+              const res = await bulkUpdateUserStatus(ids, 'SUSPENDED')
+              if (res.success) {
+                toast.success(`Suspended ${ids.length} instructors`)
+                fetchInstructors()
+              } else toast.error(res.error)
+            },
+          },
+          {
+            label: 'Delete',
+            icon: Trash2,
+            variant: 'danger',
+            confirmTitle: 'Delete Instructors',
+            confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected instructors?`,
+            onClick: async (ids) => {
+              const res = await bulkDeleteUsers(ids)
+              if (res.success) {
+                toast.success(`Deleted ${ids.length} instructors`)
+                fetchInstructors()
+              } else toast.error(res.error)
+            },
+          },
+        ]}
+      />
     </div>
   )
 }

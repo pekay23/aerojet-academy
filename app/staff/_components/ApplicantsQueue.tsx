@@ -9,9 +9,15 @@ import {
   Clock,
   CreditCard,
   ShieldCheck,
+  CheckSquare,
+  Square,
+  Trash2,
 } from 'lucide-react'
+import { bulkUpdateUserStatus, bulkDeleteUsers } from '../actions'
+import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import ApplicantDetailDrawer from './ApplicantDetailDrawer'
+import BulkActionsBar from './BulkActionsBar'
 
 interface Applicant {
   id: string
@@ -52,6 +58,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
   const [search, setSearch] = useState('')
   const [selected, setSelected] = useState<Applicant | null>(null)
   const [counts, setCounts] = useState(initialCounts)
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const fetchApplicants = useCallback(async () => {
     setLoading(true)
@@ -223,6 +230,24 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
+                  <th className="w-12 px-6 py-3">
+                    <button
+                      onClick={() => {
+                        if (selectedIds.length === applicants.length && applicants.length > 0) {
+                          setSelectedIds([])
+                        } else {
+                          setSelectedIds(applicants.map((a) => a.id))
+                        }
+                      }}
+                      className="text-slate-400 hover:text-aerojet-blue transition-colors"
+                    >
+                      {selectedIds.length === applicants.length && applicants.length > 0 ? (
+                        <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                      ) : (
+                        <Square className="h-4 w-4" />
+                      )}
+                    </button>
+                  </th>
                   {['Applicant', 'Registration Code', 'Date Applied', 'Fee Status', 'Action'].map(
                     (h) => (
                       <th
@@ -238,17 +263,20 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
               <tbody className="divide-y divide-slate-100">
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i}>
-                      {Array.from({ length: 5 }).map((_, j) => (
-                        <td key={j} className="px-6 py-4">
-                          <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100" />
-                        </td>
-                      ))}
-                    </tr>
+                  <tr key={i}>
+                    <td className="px-6 py-4">
+                      <div className="h-4 w-4 animate-pulse rounded bg-slate-100" />
+                    </td>
+                    {Array.from({ length: 5 }).map((_, j) => (
+                      <td key={j} className="px-6 py-4">
+                        <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100" />
+                      </td>
+                    ))}
+                  </tr>
                   ))
                 ) : applicants.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="py-16 text-center">
+                    <td colSpan={6} className="py-16 text-center">
                       <UserCheck className="mx-auto mb-3 h-10 w-10 text-slate-200" />
                       <p className="text-sm font-bold text-slate-400">No applicants found</p>
                     </td>
@@ -270,10 +298,28 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                     return (
                       <tr
                         key={applicant.id}
-                        className="cursor-pointer transition-colors hover:bg-slate-50 dark:bg-slate-800/50"
-                        onClick={() => setSelected(applicant)}
+                        className={`cursor-pointer transition-colors hover:bg-slate-50 dark:bg-slate-800/50 ${selectedIds.includes(applicant.id) ? 'bg-aerojet-blue/5' : ''}`}
                       >
                         <td className="px-6 py-4">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setSelectedIds((prev) =>
+                                prev.includes(applicant.id)
+                                  ? prev.filter((id) => id !== applicant.id)
+                                  : [...prev, applicant.id]
+                              )
+                            }}
+                            className="text-slate-300 transition-colors hover:text-aerojet-blue"
+                          >
+                            {selectedIds.includes(applicant.id) ? (
+                              <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                            ) : (
+                              <Square className="h-4 w-4" />
+                            )}
+                          </button>
+                        </td>
+                        <td className="px-6 py-4" onClick={() => setSelected(applicant)}>
                           <div className="flex items-center gap-3">
                             <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
                               {applicant.profile?.profilePhotoUrl ? (
@@ -350,6 +396,42 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
           onRejected={handleRejected}
         />
       )}
+      {/* Bulk Actions */}
+      <BulkActionsBar
+        selectedIds={selectedIds}
+        onClear={() => setSelectedIds([])}
+        actions={[
+          {
+            label: 'Approve',
+            icon: UserCheck,
+            variant: 'success',
+            confirmTitle: 'Approve Applicants',
+            confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected applicants?`,
+            onClick: async (ids) => {
+              // Note: Approval might need more logic like role assignment, but for now we follow status update
+              const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
+              if (res.success) {
+                toast.success(`Approved ${ids.length} applicants`)
+                fetchApplicants()
+              } else toast.error(res.error)
+            },
+          },
+          {
+            label: 'Delete',
+            icon: Trash2,
+            variant: 'danger',
+            confirmTitle: 'Delete Applicants',
+            confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected applicants?`,
+            onClick: async (ids) => {
+              const res = await bulkDeleteUsers(ids)
+              if (res.success) {
+                toast.success(`Deleted ${ids.length} applicants`)
+                fetchApplicants()
+              } else toast.error(res.error)
+            },
+          },
+        ]}
+      />
     </>
   )
 }

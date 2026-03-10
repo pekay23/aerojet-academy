@@ -1,9 +1,12 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
-import { Search, Users, RefreshCw, UserPlus, ShieldCheck } from 'lucide-react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
+import { Search, Users, RefreshCw, UserPlus, ShieldCheck, CheckSquare, Square, CheckCircle2, AlertTriangle, Trash2, Mail } from 'lucide-react'
 import UserActionsMenu from './UserActionsMenu'
 import CreateUserDialog from './CreateUserDialog'
+import BulkActionsBar from './BulkActionsBar'
+import { bulkUpdateUserStatus, bulkDeleteUsers } from '../actions'
+import { toast } from 'sonner'
 
 interface User {
   id: string
@@ -13,6 +16,7 @@ interface User {
   role: string
   status: string
   emailVerified: string | null
+  mustChangePassword?: boolean
   createdAt: string
   profile?: {
     firstName: string
@@ -50,6 +54,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
   const [status, setStatus] = useState('all')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -152,6 +157,24 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
+                <th className="w-12 px-5 py-3">
+                  <button
+                    onClick={() => {
+                      if (selectedIds.length === users.length && users.length > 0) {
+                        setSelectedIds([])
+                      } else {
+                        setSelectedIds(users.map((u) => u.id))
+                      }
+                    }}
+                    className="text-slate-400 hover:text-aerojet-blue transition-colors"
+                  >
+                    {selectedIds.length === users.length && users.length > 0 ? (
+                      <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                    ) : (
+                      <Square className="h-4 w-4" />
+                    )}
+                  </button>
+                </th>
                 {['User', 'Role', 'Status', 'Joined', 'Actions'].map((h) => (
                   <th
                     key={h}
@@ -166,6 +189,9 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
               {loading ? (
                 Array.from({ length: 8 }).map((_, i) => (
                   <tr key={i}>
+                    <td className="px-5 py-3.5">
+                      <div className="h-4 w-4 animate-pulse rounded bg-slate-100" />
+                    </td>
                     {Array.from({ length: 5 }).map((_, j) => (
                       <td key={j} className="px-5 py-3.5">
                         <div className="h-4 w-3/4 animate-pulse rounded bg-slate-100" />
@@ -175,7 +201,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                 ))
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-16 text-center">
+                  <td colSpan={6} className="py-16 text-center">
                     <Users className="mx-auto mb-2 h-10 w-10 text-slate-200" />
                     <p className="text-sm font-bold text-slate-400">No users found</p>
                   </td>
@@ -192,8 +218,26 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                   return (
                     <tr
                       key={user.id}
-                      className="transition-colors hover:bg-slate-50 dark:bg-slate-800/50"
+                      className={`transition-colors hover:bg-slate-50 dark:bg-slate-800/50 ${selectedIds.includes(user.id) ? 'bg-aerojet-blue/5' : ''}`}
                     >
+                      <td className="px-5 py-3.5">
+                        <button
+                          onClick={() => {
+                            setSelectedIds((prev) =>
+                              prev.includes(user.id)
+                                ? prev.filter((id) => id !== user.id)
+                                : [...prev, user.id]
+                            )
+                          }}
+                          className="text-slate-300 transition-colors hover:text-aerojet-blue"
+                        >
+                          {selectedIds.includes(user.id) ? (
+                            <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                          ) : (
+                            <Square className="h-4 w-4" />
+                          )}
+                        </button>
+                      </td>
                       <td className="px-5 py-3.5">
                         <div className="flex items-center gap-3">
                           <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
@@ -244,6 +288,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                           userRole={user.role}
                           userName={fullName}
                           isEmailVerified={!!user.emailVerified}
+                          mustChangePassword={user.mustChangePassword}
                           onActionComplete={fetchUsers}
                         />
                       </td>
@@ -280,6 +325,77 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           </div>
         )}
       </div>
+
+      <BulkActionsBar
+        selectedIds={selectedIds}
+        onClear={() => setSelectedIds([])}
+        actions={[
+          {
+            label: 'Activate',
+            icon: CheckCircle2,
+            variant: 'success',
+            confirmTitle: 'Activate Users',
+            confirmMessage: `Are you sure you want to activate ${selectedIds.length} selected users?`,
+            onClick: async (ids) => {
+              const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
+              if (res.success) {
+                toast.success(`Activated ${ids.length} users`)
+                fetchUsers()
+              } else toast.error(res.error)
+            },
+          },
+          {
+            label: 'Suspend',
+            icon: AlertTriangle,
+            variant: 'warning',
+            confirmTitle: 'Suspend Users',
+            confirmMessage: `Are you sure you want to suspend ${selectedIds.length} selected users?`,
+            onClick: async (ids) => {
+              const res = await bulkUpdateUserStatus(ids, 'SUSPENDED')
+              if (res.success) {
+                toast.success(`Suspended ${ids.length} users`)
+                fetchUsers()
+              } else toast.error(res.error)
+            },
+          },
+          {
+            label: 'Send Credentials',
+            icon: Mail,
+            variant: 'primary',
+            confirmTitle: 'Send Login Credentials',
+            confirmMessage: `This will generate new temporary passwords and email login credentials to ${selectedIds.length} selected users. They will be required to change their password on first login.`,
+            onClick: async (ids) => {
+              try {
+                const res = await fetch('/api/admin/bulk-send-credentials', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ users: ids.map((id) => ({ userId: id })) }),
+                })
+                const data = await res.json()
+                if (!res.ok) throw new Error(data.error || 'Failed to send credentials')
+                toast.success(`Credentials sent to ${data.data.summary.sent} users${data.data.summary.failed > 0 ? `, ${data.data.summary.failed} failed` : ''}`)
+                fetchUsers()
+              } catch (err: any) {
+                toast.error(err.message || 'Failed to send credentials')
+              }
+            },
+          },
+          {
+            label: 'Delete',
+            icon: Trash2,
+            variant: 'danger',
+            confirmTitle: 'Delete Users',
+            confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected users? This action is reversible by staff.`,
+            onClick: async (ids) => {
+              const res = await bulkDeleteUsers(ids)
+              if (res.success) {
+                toast.success(`Deleted ${ids.length} users`)
+                fetchUsers()
+              } else toast.error(res.error)
+            },
+          },
+        ]}
+      />
     </div>
   )
 }
