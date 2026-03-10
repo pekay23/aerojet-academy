@@ -1,11 +1,30 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import { Search, GraduationCap, RefreshCw, CheckSquare, Square, AlignJustify, CheckCircle2, AlertTriangle, Trash2 } from 'lucide-react'
+import {
+  Search,
+  GraduationCap,
+  RefreshCw,
+  CheckSquare,
+  Square,
+  AlignJustify,
+  CheckCircle2,
+  AlertTriangle,
+  Trash2,
+  Mail,
+  LockOpen,
+  Archive,
+} from 'lucide-react'
 import StudentDetailPanel from './StudentDetailPanel'
-import BulkActionsBar from './BulkActionsBar'
+
 import TablePagination from './TablePagination'
-import { bulkUpdateUserStatus, bulkDeleteUsers } from '../actions'
+import BulkActionsDropdown from './BulkActionsDropdown'
+import {
+  bulkUpdateUserStatus,
+  bulkDeleteUsers,
+  bulkArchiveUsers,
+  bulkBypassPasswordChange,
+} from '../actions'
 import { toast } from 'sonner'
 
 interface Student {
@@ -108,15 +127,97 @@ export default function StudentsTable({
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
           >
             <RefreshCw className="h-3.5 w-3.5" />
-            Refresh
           </button>
-          <a
-            href="/staff/students/import"
-            className="bg-aerojet-blue hover:bg-aerojet-sky flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-black text-white transition-all"
-          >
-            <GraduationCap className="h-3.5 w-3.5" />
-            Import CSV
-          </a>
+          <BulkActionsDropdown
+            selectedIds={selectedIds}
+            onClear={() => setSelectedIds([])}
+            actions={[
+              {
+                label: 'Activate',
+                icon: CheckCircle2,
+                variant: 'success',
+                confirmTitle: 'Activate Students',
+                confirmMessage: `Are you sure you want to activate ${selectedIds.length} selected students?`,
+                onClick: async (ids) => {
+                  const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
+                  if (res.success) {
+                    toast.success(`Activated ${ids.length} students`)
+                    fetchStudents()
+                  } else toast.error(res.error)
+                },
+              },
+              {
+                label: 'Suspend',
+                icon: AlertTriangle,
+                variant: 'warning',
+                confirmTitle: 'Suspend Students',
+                confirmMessage: `Are you sure you want to suspend ${selectedIds.length} selected students?`,
+                onClick: async (ids) => {
+                  const res = await bulkUpdateUserStatus(ids, 'SUSPENDED')
+                  if (res.success) {
+                    toast.success(`Suspended ${ids.length} students`)
+                    fetchStudents()
+                  } else toast.error(res.error)
+                },
+              },
+              {
+                label: 'Delete',
+                icon: Trash2,
+                variant: 'danger',
+                confirmTitle: 'Delete Students',
+                confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected students?`,
+                onClick: async (ids) => {
+                  const res = await bulkDeleteUsers(ids)
+                  if (res.success) {
+                    toast.success(`Deleted ${ids.length} students`)
+                    fetchStudents()
+                  } else toast.error(res.error)
+                },
+              },
+              {
+                label: 'Archive',
+                icon: Archive,
+                variant: 'warning',
+                confirmTitle: 'Archive Students',
+                confirmMessage: `Are you sure you want to archive ${selectedIds.length} selected students?`,
+                onClick: async (ids) => {
+                  const res = await bulkArchiveUsers(ids)
+                  if (res.success) {
+                    toast.success(`Archived ${ids.length} students`)
+                    fetchStudents()
+                  } else toast.error(res.error)
+                },
+              },
+              {
+                label: 'Bypass PW Change',
+                icon: LockOpen,
+                variant: 'primary',
+                confirmTitle: 'Bypass Password Change',
+                confirmMessage: `Are you sure you want to bypass the required password change for ${selectedIds.length} selected students?`,
+                onClick: async (ids) => {
+                  const res = await bulkBypassPasswordChange(ids)
+                  if (res.success) {
+                    toast.success(`Bypassed password change for ${ids.length} students`)
+                    fetchStudents()
+                  } else toast.error(res.error)
+                },
+              },
+              {
+                label: 'Send Email',
+                icon: Mail,
+                variant: 'default',
+                onClick: async (ids) => {
+                  const selectedEmails = students
+                    .filter((s) => ids.includes(s.id))
+                    .map((s) => s.email)
+                    .filter(Boolean)
+                  if (selectedEmails.length > 0) {
+                    window.location.href = `mailto:${selectedEmails.join(',')}`
+                  }
+                },
+              },
+            ]}
+          />
         </div>
       </div>
 
@@ -139,7 +240,10 @@ export default function StudentsTable({
                 className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
               />
             </div>
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5" style={{ scrollbarWidth: 'none' }}>
+            <div
+              className="flex items-center gap-1.5 overflow-x-auto pb-0.5"
+              style={{ scrollbarWidth: 'none' }}
+            >
               <button
                 onClick={() => {
                   if (selectedIds.length === paged.length && paged.length > 0) {
@@ -231,7 +335,7 @@ export default function StudentsTable({
                           className={`flex h-5 w-5 shrink-0 items-center justify-center rounded transition-all ${
                             selectedIds.includes(student.id)
                               ? 'text-aerojet-blue'
-                              : 'text-slate-300 hover:text-aerojet-blue opacity-0 group-hover:opacity-100'
+                              : 'hover:text-aerojet-blue text-slate-300 opacity-0 group-hover:opacity-100'
                           }`}
                         >
                           {selectedIds.includes(student.id) ? (
@@ -241,7 +345,7 @@ export default function StudentsTable({
                           )}
                         </button>
 
-                        <div 
+                        <div
                           onClick={() => setSelected(student)}
                           className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black"
                         >
@@ -293,7 +397,13 @@ export default function StudentsTable({
 
           {/* Footer */}
           {total > 0 && (
-            <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+            <TablePagination
+              page={page}
+              perPage={perPage}
+              total={total}
+              onPageChange={setPage}
+              onPerPageChange={setPerPage}
+            />
           )}
         </div>
 
@@ -304,55 +414,6 @@ export default function StudentsTable({
           onActionComplete={handleActionComplete}
         />
       </div>
-
-      <BulkActionsBar
-        selectedIds={selectedIds}
-        onClear={() => setSelectedIds([])}
-        actions={[
-          {
-            label: 'Activate',
-            icon: CheckCircle2,
-            variant: 'success',
-            confirmTitle: 'Activate Students',
-            confirmMessage: `Are you sure you want to activate ${selectedIds.length} selected students?`,
-            onClick: async (ids) => {
-              const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
-              if (res.success) {
-                toast.success(`Activated ${ids.length} students`)
-                fetchStudents()
-              } else toast.error(res.error)
-            },
-          },
-          {
-            label: 'Suspend',
-            icon: AlertTriangle,
-            variant: 'warning',
-            confirmTitle: 'Suspend Students',
-            confirmMessage: `Are you sure you want to suspend ${selectedIds.length} selected students?`,
-            onClick: async (ids) => {
-              const res = await bulkUpdateUserStatus(ids, 'SUSPENDED')
-              if (res.success) {
-                toast.success(`Suspended ${ids.length} students`)
-                fetchStudents()
-              } else toast.error(res.error)
-            },
-          },
-          {
-            label: 'Delete',
-            icon: Trash2,
-            variant: 'danger',
-            confirmTitle: 'Delete Students',
-            confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected students? This action is reversible.`,
-            onClick: async (ids) => {
-              const res = await bulkDeleteUsers(ids)
-              if (res.success) {
-                toast.success(`Deleted ${ids.length} students`)
-                fetchStudents()
-              } else toast.error(res.error)
-            },
-          },
-        ]}
-      />
     </div>
   )
 }
