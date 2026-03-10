@@ -117,8 +117,8 @@ export async function bulkUpdateUserStatus(userIds: string[], status: string) {
 }
 
 /**
- * Bulk deletes multiple users (soft delete if possible, here it seems hard delete is used in this prisma schema based on other parts, but I'll check).
- * Note: Check if there's a deletedAt field in the schema.
+ * Bulk permanently deletes multiple users.
+ * To soft delete, use bulkArchiveUsers instead.
  */
 export async function bulkDeleteUsers(userIds: string[]) {
   try {
@@ -128,17 +128,15 @@ export async function bulkDeleteUsers(userIds: string[]) {
       return { error: 'No users selected.' }
     }
 
-    // Checking if deletedAt exists (from previous view_file of seed.ts I saw deletedAt in the SELECT query)
-    await prisma.user.updateMany({
+    await prisma.user.deleteMany({
       where: { id: { in: userIds } },
-      data: { deletedAt: new Date(), status: 'DELETED' as any },
     })
 
     revalidatePath('/staff/users')
     return { success: true }
   } catch (error) {
     console.error('Bulk delete users error:', error)
-    return { error: 'Failed to delete users.' }
+    return { error: 'Failed to delete users permanently.' }
   }
 }
 

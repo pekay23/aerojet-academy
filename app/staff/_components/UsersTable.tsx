@@ -19,7 +19,12 @@ import {
 import UserActionsMenu from './UserActionsMenu'
 import CreateUserDialog from './CreateUserDialog'
 
-import { bulkUpdateUserStatus, bulkDeleteUsers, bulkArchiveUsers, bulkBypassPasswordChange } from '../actions'
+import {
+  bulkUpdateUserStatus,
+  bulkDeleteUsers,
+  bulkArchiveUsers,
+  bulkBypassPasswordChange,
+} from '../actions'
 import { toast } from 'sonner'
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
@@ -169,34 +174,36 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                   }
                 },
               },
-              {
-                label: 'Delete',
-                icon: Trash2,
-                variant: 'danger',
-                confirmTitle: 'Delete Users',
-                confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected users?`,
-                onClick: async (ids) => {
-                  const res = await bulkDeleteUsers(ids)
-                  if (res.success) {
-                    toast.success(`Deleted ${ids.length} users`)
-                    fetchUsers()
-                  } else toast.error(res.error)
-                },
-              },
-              {
-                label: 'Archive',
-                icon: Archive,
-                variant: 'warning',
-                confirmTitle: 'Archive Users',
-                confirmMessage: `Are you sure you want to archive ${selectedIds.length} selected users?`,
-                onClick: async (ids) => {
-                  const res = await bulkArchiveUsers(ids)
-                  if (res.success) {
-                    toast.success(`Archived ${ids.length} users`)
-                    fetchUsers()
-                  } else toast.error(res.error)
-                },
-              },
+              users.filter((u) => selectedIds.includes(u.id)).length > 0 &&
+              users.filter((u) => selectedIds.includes(u.id)).every((u) => u.status === 'ARCHIVED')
+                ? {
+                    label: 'Permanently Delete',
+                    icon: Trash2,
+                    variant: 'danger',
+                    confirmTitle: 'Permanently Delete Users',
+                    confirmMessage: `Are you sure you want to permanently delete ${selectedIds.length} users? This cannot be undone.`,
+                    onClick: async (ids) => {
+                      const res = await bulkDeleteUsers(ids)
+                      if (res.success) {
+                        toast.success(`Permanently deleted ${ids.length} users`)
+                        fetchUsers()
+                      } else toast.error(res.error)
+                    },
+                  }
+                : {
+                    label: 'Archive',
+                    icon: Archive,
+                    variant: 'warning',
+                    confirmTitle: 'Archive Users',
+                    confirmMessage: `Are you sure you want to archive ${selectedIds.length} users?`,
+                    onClick: async (ids) => {
+                      const res = await bulkArchiveUsers(ids)
+                      if (res.success) {
+                        toast.success(`Archived ${ids.length} users`)
+                        fetchUsers()
+                      } else toast.error(res.error)
+                    },
+                  },
               {
                 label: 'Bypass PW Change',
                 icon: LockOpen,
