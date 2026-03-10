@@ -49,8 +49,9 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
             setEurEquivalent(Math.round((Number(amount) / rate) * 100) / 100)
           }
         }
-      } catch {
-        // ignore abort
+      } catch (err: unknown) {
+        if (err instanceof DOMException && err.name === 'AbortError') return
+        console.error('Rate fetch error:', err instanceof Error ? err.message : 'Unknown error')
       } finally {
         setRatesLoading(false)
       }
