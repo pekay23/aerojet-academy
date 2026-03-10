@@ -1,13 +1,28 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { Search, Users, RefreshCw, UserPlus, ShieldCheck, CheckSquare, Square, CheckCircle2, AlertTriangle, Trash2, Mail } from 'lucide-react'
+import {
+  Search,
+  Users,
+  RefreshCw,
+  UserPlus,
+  ShieldCheck,
+  CheckSquare,
+  Square,
+  CheckCircle2,
+  AlertTriangle,
+  Trash2,
+  Mail,
+  LockOpen,
+  Archive,
+} from 'lucide-react'
 import UserActionsMenu from './UserActionsMenu'
 import CreateUserDialog from './CreateUserDialog'
-import BulkActionsBar from './BulkActionsBar'
-import { bulkUpdateUserStatus, bulkDeleteUsers } from '../actions'
+
+import { bulkUpdateUserStatus, bulkDeleteUsers, bulkArchiveUsers, bulkBypassPasswordChange } from '../actions'
 import { toast } from 'sonner'
 import TablePagination from './TablePagination'
+import BulkActionsDropdown from './BulkActionsDropdown'
 
 interface User {
   id: string
@@ -87,8 +102,6 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
     setPage(1)
   }, [role, status, search])
 
-
-
   return (
     <div className="space-y-6">
       {/* Actions Bar */}
@@ -102,6 +115,118 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           >
             <RefreshCw className="h-3.5 w-3.5" /> Refresh
           </button>
+          <BulkActionsDropdown
+            selectedIds={selectedIds}
+            onClear={() => setSelectedIds([])}
+            actions={[
+              {
+                label: 'Activate',
+                icon: CheckCircle2,
+                variant: 'success',
+                confirmTitle: 'Activate Users',
+                confirmMessage: `Are you sure you want to activate ${selectedIds.length} selected users?`,
+                onClick: async (ids) => {
+                  const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
+                  if (res.success) {
+                    toast.success(`Activated ${ids.length} users`)
+                    fetchUsers()
+                  } else toast.error(res.error)
+                },
+              },
+              {
+                label: 'Suspend',
+                icon: AlertTriangle,
+                variant: 'warning',
+                confirmTitle: 'Suspend Users',
+                confirmMessage: `Are you sure you want to suspend ${selectedIds.length} selected users?`,
+                onClick: async (ids) => {
+                  const res = await bulkUpdateUserStatus(ids, 'SUSPENDED')
+                  if (res.success) {
+                    toast.success(`Suspended ${ids.length} users`)
+                    fetchUsers()
+                  } else toast.error(res.error)
+                },
+              },
+              {
+                label: 'Send Credentials',
+                icon: Mail,
+                variant: 'primary',
+                confirmTitle: 'Send Login Credentials',
+                confirmMessage: `This will generate new temporary passwords and email login credentials to ${selectedIds.length} selected users.`,
+                onClick: async (ids) => {
+                  try {
+                    const res = await fetch('/api/admin/bulk-send-credentials', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ users: ids.map((id) => ({ userId: id })) }),
+                    })
+                    const data = await res.json()
+                    if (!res.ok) throw new Error(data.error || 'Failed')
+                    toast.success(`Credentials sent to ${data.data.summary.sent} users`)
+                    fetchUsers()
+                  } catch (err: any) {
+                    toast.error(err.message || 'Failed')
+                  }
+                },
+              },
+              {
+                label: 'Delete',
+                icon: Trash2,
+                variant: 'danger',
+                confirmTitle: 'Delete Users',
+                confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected users?`,
+                onClick: async (ids) => {
+                  const res = await bulkDeleteUsers(ids)
+                  if (res.success) {
+                    toast.success(`Deleted ${ids.length} users`)
+                    fetchUsers()
+                  } else toast.error(res.error)
+                },
+              },
+              {
+                label: 'Archive',
+                icon: Archive,
+                variant: 'warning',
+                confirmTitle: 'Archive Users',
+                confirmMessage: `Are you sure you want to archive ${selectedIds.length} selected users?`,
+                onClick: async (ids) => {
+                  const res = await bulkArchiveUsers(ids)
+                  if (res.success) {
+                    toast.success(`Archived ${ids.length} users`)
+                    fetchUsers()
+                  } else toast.error(res.error)
+                },
+              },
+              {
+                label: 'Bypass PW Change',
+                icon: LockOpen,
+                variant: 'primary',
+                confirmTitle: 'Bypass Password Change',
+                confirmMessage: `Are you sure you want to bypass the required password change for ${selectedIds.length} selected users?`,
+                onClick: async (ids) => {
+                  const res = await bulkBypassPasswordChange(ids)
+                  if (res.success) {
+                    toast.success(`Bypassed password change for ${ids.length} users`)
+                    fetchUsers()
+                  } else toast.error(res.error)
+                },
+              },
+              {
+                label: 'Send Email',
+                icon: Mail,
+                variant: 'default',
+                onClick: async (ids) => {
+                  const selectedEmails = users
+                    .filter((u) => ids.includes(u.id))
+                    .map((u) => u.email)
+                    .filter(Boolean)
+                  if (selectedEmails.length > 0) {
+                    window.location.href = `mailto:${selectedEmails.join(',')}`
+                  }
+                },
+              },
+            ]}
+          />
         </div>
       </div>
 
@@ -163,10 +288,10 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                         setSelectedIds(users.map((u) => u.id))
                       }
                     }}
-                    className="text-slate-400 hover:text-aerojet-blue transition-colors"
+                    className="hover:text-aerojet-blue text-slate-400 transition-colors"
                   >
                     {selectedIds.length === users.length && users.length > 0 ? (
-                      <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                      <CheckSquare className="text-aerojet-blue h-4 w-4" />
                     ) : (
                       <Square className="h-4 w-4" />
                     )}
@@ -226,10 +351,10 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                                 : [...prev, user.id]
                             )
                           }}
-                          className="text-slate-300 transition-colors hover:text-aerojet-blue"
+                          className="hover:text-aerojet-blue text-slate-300 transition-colors"
                         >
                           {selectedIds.includes(user.id) ? (
-                            <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                            <CheckSquare className="text-aerojet-blue h-4 w-4" />
                           ) : (
                             <Square className="h-4 w-4" />
                           )}
@@ -297,79 +422,14 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           </table>
         </div>
 
-        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+        <TablePagination
+          page={page}
+          perPage={perPage}
+          total={total}
+          onPageChange={setPage}
+          onPerPageChange={setPerPage}
+        />
       </div>
-
-      <BulkActionsBar
-        selectedIds={selectedIds}
-        onClear={() => setSelectedIds([])}
-        actions={[
-          {
-            label: 'Activate',
-            icon: CheckCircle2,
-            variant: 'success',
-            confirmTitle: 'Activate Users',
-            confirmMessage: `Are you sure you want to activate ${selectedIds.length} selected users?`,
-            onClick: async (ids) => {
-              const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
-              if (res.success) {
-                toast.success(`Activated ${ids.length} users`)
-                fetchUsers()
-              } else toast.error(res.error)
-            },
-          },
-          {
-            label: 'Suspend',
-            icon: AlertTriangle,
-            variant: 'warning',
-            confirmTitle: 'Suspend Users',
-            confirmMessage: `Are you sure you want to suspend ${selectedIds.length} selected users?`,
-            onClick: async (ids) => {
-              const res = await bulkUpdateUserStatus(ids, 'SUSPENDED')
-              if (res.success) {
-                toast.success(`Suspended ${ids.length} users`)
-                fetchUsers()
-              } else toast.error(res.error)
-            },
-          },
-          {
-            label: 'Send Credentials',
-            icon: Mail,
-            variant: 'primary',
-            confirmTitle: 'Send Login Credentials',
-            confirmMessage: `This will generate new temporary passwords and email login credentials to ${selectedIds.length} selected users. They will be required to change their password on first login.`,
-            onClick: async (ids) => {
-              try {
-                const res = await fetch('/api/admin/bulk-send-credentials', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ users: ids.map((id) => ({ userId: id })) }),
-                })
-                const data = await res.json()
-                if (!res.ok) throw new Error(data.error || 'Failed to send credentials')
-                toast.success(`Credentials sent to ${data.data.summary.sent} users${data.data.summary.failed > 0 ? `, ${data.data.summary.failed} failed` : ''}`)
-                fetchUsers()
-              } catch (err: any) {
-                toast.error(err.message || 'Failed to send credentials')
-              }
-            },
-          },
-          {
-            label: 'Delete',
-            icon: Trash2,
-            variant: 'danger',
-            confirmTitle: 'Delete Users',
-            confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected users? This action is reversible by staff.`,
-            onClick: async (ids) => {
-              const res = await bulkDeleteUsers(ids)
-              if (res.success) {
-                toast.success(`Deleted ${ids.length} users`)
-                fetchUsers()
-              } else toast.error(res.error)
-            },
-          },
-        ]}
-      />
     </div>
   )
 }

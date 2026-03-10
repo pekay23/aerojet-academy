@@ -3,19 +3,20 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { format } from 'date-fns'
-import { 
-  CheckSquare, 
-  Square, 
-  CheckCircle2, 
-  XCircle, 
-  Trash2, 
-  Calendar, 
-  CreditCard 
+import {
+  CheckSquare,
+  Square,
+  CheckCircle2,
+  XCircle,
+  Trash2,
+  Calendar,
+  CreditCard,
 } from 'lucide-react'
 import { bulkUpdateExamBookingStatus } from '../actions'
 import { toast } from 'sonner'
-import BulkActionsBar from './BulkActionsBar'
+
 import TablePagination from './TablePagination'
+import BulkActionsDropdown from './BulkActionsDropdown'
 
 interface ExamBookingWithDetails {
   id: string
@@ -58,13 +59,47 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
   }
 
   const toggleOne = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    )
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
   }
 
   return (
     <div className="relative">
+      <div className="mb-3 flex items-center justify-end">
+        <BulkActionsDropdown
+          selectedIds={selectedIds}
+          onClear={() => setSelectedIds([])}
+          actions={[
+            {
+              label: 'Approve',
+              icon: CheckCircle2,
+              variant: 'success',
+              confirmTitle: 'Approve Bookings',
+              confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected bookings?`,
+              onClick: async (ids) => {
+                const res = await bulkUpdateExamBookingStatus(ids, 'APPROVED')
+                if (res.success) {
+                  toast.success(`Approved ${ids.length} bookings`)
+                  router.refresh()
+                } else toast.error(res.error)
+              },
+            },
+            {
+              label: 'Fail/Reject',
+              icon: XCircle,
+              variant: 'danger',
+              confirmTitle: 'Reject Bookings',
+              confirmMessage: `Are you sure you want to reject ${selectedIds.length} selected bookings?`,
+              onClick: async (ids) => {
+                const res = await bulkUpdateExamBookingStatus(ids, 'REJECTED')
+                if (res.success) {
+                  toast.success(`Rejected ${ids.length} bookings`)
+                  router.refresh()
+                } else toast.error(res.error)
+              },
+            },
+          ]}
+        />
+      </div>
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
@@ -73,10 +108,10 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                 <th className="w-12 px-6 py-4">
                   <button
                     onClick={toggleAll}
-                    className="text-slate-400 hover:text-aerojet-blue transition-colors"
+                    className="hover:text-aerojet-blue text-slate-400 transition-colors"
                   >
                     {selectedIds.length === paged.length && paged.length > 0 ? (
-                      <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                      <CheckSquare className="text-aerojet-blue h-4 w-4" />
                     ) : (
                       <Square className="h-4 w-4" />
                     )}
@@ -108,10 +143,10 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                     <td className="px-6 py-4">
                       <button
                         onClick={() => toggleOne(booking.id)}
-                        className="text-slate-300 transition-colors hover:text-aerojet-blue"
+                        className="hover:text-aerojet-blue text-slate-300 transition-colors"
                       >
                         {selectedIds.includes(booking.id) ? (
-                          <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                          <CheckSquare className="text-aerojet-blue h-4 w-4" />
                         ) : (
                           <Square className="h-4 w-4" />
                         )}
@@ -138,7 +173,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                         <span className="font-medium text-slate-900 dark:text-slate-100">
                           {booking.moduleCode}
                         </span>
-                        <span className="text-xs capitalize text-slate-500 dark:text-slate-400">
+                        <span className="text-xs text-slate-500 capitalize dark:text-slate-400">
                           {booking.bookingType.replace(/_/g, ' ').toLowerCase()}
                         </span>
                       </div>
@@ -153,7 +188,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                           </div>
                         </div>
                       ) : (
-                        <span className="italic text-slate-400">Not scheduled</span>
+                        <span className="text-slate-400 italic">Not scheduled</span>
                       )}
                     </td>
                     <td className="px-6 py-4">
@@ -184,43 +219,14 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
             </tbody>
           </table>
         </div>
-        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+        <TablePagination
+          page={page}
+          perPage={perPage}
+          total={total}
+          onPageChange={setPage}
+          onPerPageChange={setPerPage}
+        />
       </div>
-
-      <BulkActionsBar
-        selectedIds={selectedIds}
-        onClear={() => setSelectedIds([])}
-        actions={[
-          {
-            label: 'Approve',
-            icon: CheckCircle2,
-            variant: 'success',
-            confirmTitle: 'Approve Bookings',
-            confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected bookings?`,
-            onClick: async (ids) => {
-              const res = await bulkUpdateExamBookingStatus(ids, 'APPROVED')
-              if (res.success) {
-                toast.success(`Approved ${ids.length} bookings`)
-                router.refresh()
-              } else toast.error(res.error)
-            },
-          },
-          {
-            label: 'Fail/Reject',
-            icon: XCircle,
-            variant: 'danger',
-            confirmTitle: 'Reject Bookings',
-            confirmMessage: `Are you sure you want to reject/fail ${selectedIds.length} selected bookings?`,
-            onClick: async (ids) => {
-              const res = await bulkUpdateExamBookingStatus(ids, 'REJECTED')
-              if (res.success) {
-                toast.success(`Rejected ${ids.length} bookings`)
-                router.refresh()
-              } else toast.error(res.error)
-            },
-          },
-        ]}
-      />
     </div>
   )
 }

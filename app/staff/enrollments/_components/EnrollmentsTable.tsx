@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation'
 import { CheckSquare, Square, CheckCircle2, XCircle, Trash2 } from 'lucide-react'
 import { bulkUpdateEnrollmentStatus, bulkDeleteEnrollments } from '../../actions'
 import { toast } from 'sonner'
-import BulkActionsBar from '../../_components/BulkActionsBar'
+
 import TablePagination from '../../_components/TablePagination'
+import BulkActionsDropdown from '../../_components/BulkActionsDropdown'
 import {
   Table,
   TableBody,
@@ -72,13 +73,61 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
   }
 
   const toggleOne = (id: string) => {
-    setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    )
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]))
   }
 
   return (
     <div className="relative">
+      <div className="mb-3 flex items-center justify-end">
+        <BulkActionsDropdown
+          selectedIds={selectedIds}
+          onClear={() => setSelectedIds([])}
+          actions={[
+            {
+              label: 'Approve',
+              icon: CheckCircle2,
+              variant: 'success',
+              confirmTitle: 'Approve Enrollments',
+              confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected enrollments?`,
+              onClick: async (ids) => {
+                const res = await bulkUpdateEnrollmentStatus(ids, 'APPROVED')
+                if (res.success) {
+                  toast.success(`Approved ${ids.length} enrollments`)
+                  router.refresh()
+                } else toast.error(res.error)
+              },
+            },
+            {
+              label: 'Cancel',
+              icon: XCircle,
+              variant: 'warning',
+              confirmTitle: 'Cancel Enrollments',
+              confirmMessage: `Are you sure you want to cancel ${selectedIds.length} selected enrollments?`,
+              onClick: async (ids) => {
+                const res = await bulkUpdateEnrollmentStatus(ids, 'CANCELLED')
+                if (res.success) {
+                  toast.success(`Cancelled ${ids.length} enrollments`)
+                  router.refresh()
+                } else toast.error(res.error)
+              },
+            },
+            {
+              label: 'Delete',
+              icon: Trash2,
+              variant: 'danger',
+              confirmTitle: 'Delete Enrollments',
+              confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected enrollments?`,
+              onClick: async (ids) => {
+                const res = await bulkDeleteEnrollments(ids)
+                if (res.success) {
+                  toast.success(`Deleted ${ids.length} enrollments`)
+                  router.refresh()
+                } else toast.error(res.error)
+              },
+            },
+          ]}
+        />
+      </div>
       <div className="rounded-md border bg-white shadow-sm dark:bg-slate-900">
         <Table>
           <TableHeader>
@@ -86,10 +135,10 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
               <TableHead className="w-12 px-6">
                 <button
                   onClick={toggleAll}
-                  className="text-slate-400 hover:text-aerojet-blue transition-colors"
+                  className="hover:text-aerojet-blue text-slate-400 transition-colors"
                 >
                   {selectedIds.length === paged.length && paged.length > 0 ? (
-                    <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                    <CheckSquare className="text-aerojet-blue h-4 w-4" />
                   ) : (
                     <Square className="h-4 w-4" />
                   )}
@@ -121,10 +170,10 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                   <TableCell className="px-6">
                     <button
                       onClick={() => toggleOne(enrollment.id)}
-                      className="text-slate-300 transition-colors hover:text-aerojet-blue"
+                      className="hover:text-aerojet-blue text-slate-300 transition-colors"
                     >
                       {selectedIds.includes(enrollment.id) ? (
-                        <CheckSquare className="h-4 w-4 text-aerojet-blue" />
+                        <CheckSquare className="text-aerojet-blue h-4 w-4" />
                       ) : (
                         <Square className="h-4 w-4" />
                       )}
@@ -153,10 +202,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge
-                      className={getStatusColor(enrollment.status)}
-                      variant="secondary"
-                    >
+                    <Badge className={getStatusColor(enrollment.status)} variant="secondary">
                       {enrollment.status}
                     </Badge>
                   </TableCell>
@@ -173,57 +219,14 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
             )}
           </TableBody>
         </Table>
-        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+        <TablePagination
+          page={page}
+          perPage={perPage}
+          total={total}
+          onPageChange={setPage}
+          onPerPageChange={setPerPage}
+        />
       </div>
-
-      <BulkActionsBar
-        selectedIds={selectedIds}
-        onClear={() => setSelectedIds([])}
-        actions={[
-          {
-            label: 'Approve',
-            icon: CheckCircle2,
-            variant: 'success',
-            confirmTitle: 'Approve Enrollments',
-            confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected enrollments?`,
-            onClick: async (ids) => {
-              const res = await bulkUpdateEnrollmentStatus(ids, 'APPROVED')
-              if (res.success) {
-                toast.success(`Approved ${ids.length} enrollments`)
-                router.refresh()
-              } else toast.error(res.error)
-            },
-          },
-          {
-            label: 'Cancel',
-            icon: XCircle,
-            variant: 'warning',
-            confirmTitle: 'Cancel Enrollments',
-            confirmMessage: `Are you sure you want to cancel ${selectedIds.length} selected enrollments?`,
-            onClick: async (ids) => {
-              const res = await bulkUpdateEnrollmentStatus(ids, 'CANCELLED')
-              if (res.success) {
-                toast.success(`Cancelled ${ids.length} enrollments`)
-                router.refresh()
-              } else toast.error(res.error)
-            },
-          },
-          {
-            label: 'Delete',
-            icon: Trash2,
-            variant: 'danger',
-            confirmTitle: 'Delete Enrollments',
-            confirmMessage: `Are you sure you want to delete ${selectedIds.length} selected enrollments? This action is permanent.`,
-            onClick: async (ids) => {
-              const res = await bulkDeleteEnrollments(ids)
-              if (res.success) {
-                toast.success(`Deleted ${ids.length} enrollments`)
-                router.refresh()
-              } else toast.error(res.error)
-            },
-          },
-        ]}
-      />
     </div>
   )
 }
