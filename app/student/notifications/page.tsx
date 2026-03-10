@@ -1,10 +1,10 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import { BellOff, Mail } from 'lucide-react'
+import { Mail } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
-import NotificationCard from './_components/NotificationCard'
+import NotificationsList from './_components/NotificationsList'
 
 export const metadata: Metadata = { title: 'Notifications | Student Portal' }
 
@@ -37,28 +37,7 @@ export default async function NotificationsPage() {
         )}
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        {notifications.length > 0 ? (
-          <div className="divide-y divide-slate-100">
-            {notifications.map((notification) => (
-              <NotificationCard key={notification.id} notification={notification} />
-            ))}
-          </div>
-        ) : (
-          <div className="p-16 text-center">
-            <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-slate-50 text-slate-200 dark:bg-slate-800/50">
-              <BellOff className="h-10 w-10" />
-            </div>
-            <h3 className="text-xl font-black text-slate-900 dark:text-slate-100">
-              All caught up!
-            </h3>
-            <p className="mx-auto mt-2 max-w-xs text-sm font-medium text-slate-500 dark:text-slate-400">
-              You don&apos;t have any notifications at the moment. We&apos;ll notify you when
-              there&apos;s something new.
-            </p>
-          </div>
-        )}
-      </div>
+      <NotificationsList notifications={notifications} />
 
       <div className="flex items-center justify-center gap-2 text-xs font-bold tracking-widest text-slate-400 uppercase">
         <Mail className="h-3.5 w-3.5" />
@@ -72,3 +51,4 @@ export default async function NotificationsPage() {
     </div>
   )
 }
+

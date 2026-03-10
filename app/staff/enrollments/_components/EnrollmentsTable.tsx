@@ -6,6 +6,7 @@ import { CheckSquare, Square, CheckCircle2, XCircle, Trash2 } from 'lucide-react
 import { bulkUpdateEnrollmentStatus, bulkDeleteEnrollments } from '../../actions'
 import { toast } from 'sonner'
 import BulkActionsBar from '../../_components/BulkActionsBar'
+import TablePagination from '../../_components/TablePagination'
 import {
   Table,
   TableBody,
@@ -36,6 +37,11 @@ interface EnrollmentsTableProps {
 export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps) {
   const router = useRouter()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
+
+  const total = enrollments.length
+  const paged = enrollments.slice((page - 1) * perPage, page * perPage)
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -58,10 +64,10 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
   }
 
   const toggleAll = () => {
-    if (selectedIds.length === enrollments.length && enrollments.length > 0) {
+    if (selectedIds.length === paged.length && paged.length > 0) {
       setSelectedIds([])
     } else {
-      setSelectedIds(enrollments.map((e) => e.id))
+      setSelectedIds(paged.map((e) => e.id))
     }
   }
 
@@ -82,7 +88,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                   onClick={toggleAll}
                   className="text-slate-400 hover:text-aerojet-blue transition-colors"
                 >
-                  {selectedIds.length === enrollments.length && enrollments.length > 0 ? (
+                  {selectedIds.length === paged.length && paged.length > 0 ? (
                     <CheckSquare className="h-4 w-4 text-aerojet-blue" />
                   ) : (
                     <Square className="h-4 w-4" />
@@ -97,7 +103,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
             </TableRow>
           </TableHeader>
           <TableBody>
-            {enrollments.length === 0 ? (
+            {paged.length === 0 ? (
               <TableRow>
                 <TableCell
                   colSpan={6}
@@ -107,7 +113,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                 </TableCell>
               </TableRow>
             ) : (
-              enrollments.map((enrollment) => (
+              paged.map((enrollment) => (
                 <TableRow
                   key={enrollment.id}
                   className={selectedIds.includes(enrollment.id) ? 'bg-aerojet-blue/5' : ''}
@@ -167,6 +173,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
             )}
           </TableBody>
         </Table>
+        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
       </div>
 
       <BulkActionsBar

@@ -20,6 +20,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { format } from 'date-fns'
 import { submitGrade } from '@/lib/actions/instructor'
 import { toast } from 'sonner'
+import TablePagination from '@/app/staff/_components/TablePagination'
 import {
   Dialog,
   DialogContent,
@@ -61,6 +62,8 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
   const [score, setScore] = useState<string>('')
   const [comments, setComments] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
 
   const filteredHistory = useMemo(() => {
     return initialHistory.filter((item) => {
@@ -75,6 +78,9 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
       )
     })
   }, [initialHistory, searchQuery])
+
+  const total = filteredHistory.length
+  const paged = filteredHistory.slice((page - 1) * perPage, page * perPage)
 
   const handleEditSubmit = async () => {
     if (!selectedGrade || !score) return
@@ -131,7 +137,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
       <div className="grid gap-4">
         <AnimatePresence mode="popLayout">
           {filteredHistory.length > 0 ? (
-            filteredHistory.map((item) => (
+            paged.map((item) => (
               <motion.div
                 key={item.id}
                 layout
@@ -206,6 +212,10 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
           )}
         </AnimatePresence>
       </div>
+
+      {total > 0 && (
+        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+      )}
 
       {/* Edit Grading Dialog */}
       <Dialog open={!!selectedGrade} onOpenChange={(open) => !open && setSelectedGrade(null)}>

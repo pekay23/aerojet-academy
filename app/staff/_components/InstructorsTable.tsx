@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { GraduationCap, RefreshCw, Search, CheckSquare, Square, CheckCircle2, AlertTriangle, Trash2 } from 'lucide-react'
 import BulkActionsBar from './BulkActionsBar'
+import TablePagination from './TablePagination'
 import { bulkUpdateUserStatus, bulkDeleteUsers } from '../actions'
 import { toast } from 'sonner'
 
@@ -20,6 +21,8 @@ export default function InstructorsTable() {
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
 
   const fetchInstructors = useCallback(async () => {
     setLoading(true)
@@ -72,15 +75,16 @@ export default function InstructorsTable() {
                 <th className="w-12 px-6 py-4">
                   <button
                     onClick={() => {
-                      if (selectedIds.length === instructors.length && instructors.length > 0) {
+                      const paged = instructors.slice((page - 1) * perPage, page * perPage)
+                      if (selectedIds.length === paged.length && paged.length > 0) {
                         setSelectedIds([])
                       } else {
-                        setSelectedIds(instructors.map((i) => i.id))
+                        setSelectedIds(paged.map((i) => i.id))
                       }
                     }}
                     className="text-slate-400 hover:text-aerojet-blue transition-colors"
                   >
-                    {selectedIds.length === instructors.length && instructors.length > 0 ? (
+                    {selectedIds.length === instructors.slice((page - 1) * perPage, page * perPage).length && instructors.slice((page - 1) * perPage, page * perPage).length > 0 ? (
                       <CheckSquare className="h-4 w-4 text-aerojet-blue" />
                     ) : (
                       <Square className="h-4 w-4" />
@@ -121,7 +125,7 @@ export default function InstructorsTable() {
                   </td>
                 </tr>
               ) : (
-                instructors.map((instructor) => (
+                instructors.slice((page - 1) * perPage, page * perPage).map((instructor) => (
                   <tr key={instructor.id} className={`group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${selectedIds.includes(instructor.id) ? 'bg-aerojet-blue/5' : ''}`}>
                     <td className="px-6 py-4">
                       <button
@@ -178,6 +182,7 @@ export default function InstructorsTable() {
             </tbody>
           </table>
         </div>
+        <TablePagination page={page} perPage={perPage} total={instructors.length} onPageChange={setPage} onPerPageChange={setPerPage} />
       </div>
       <BulkActionsBar
         selectedIds={selectedIds}

@@ -105,7 +105,7 @@ export async function bulkUpdateUserStatus(userIds: string[], status: string) {
 
     await prisma.user.updateMany({
       where: { id: { in: userIds } },
-      data: { status },
+      data: { status: status as any },
     })
 
     revalidatePath('/staff/users')
@@ -131,7 +131,7 @@ export async function bulkDeleteUsers(userIds: string[]) {
     // Checking if deletedAt exists (from previous view_file of seed.ts I saw deletedAt in the SELECT query)
     await prisma.user.updateMany({
       where: { id: { in: userIds } },
-      data: { deletedAt: new Date(), status: 'DELETED' },
+      data: { deletedAt: new Date(), status: 'DELETED' as any },
     })
 
     revalidatePath('/staff/users')
@@ -152,7 +152,7 @@ export async function bulkUpdateEnrollmentStatus(enrollmentIds: string[], status
 
     await prisma.enrollment.updateMany({
       where: { id: { in: enrollmentIds } },
-      data: { status },
+      data: { status: status as any },
     })
 
     revalidatePath('/staff/enrollments')
