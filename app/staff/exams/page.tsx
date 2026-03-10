@@ -235,22 +235,73 @@ async function BookingsTab({ query }: { query?: string }) {
 
 /* ─── Results Tab ─── */
 async function ResultsTab({ query }: { query?: string }) {
-  const results = await prisma.examResult.findMany({
-    where: query
-      ? {
-          OR: [userSearchFilter(query), examComponentCodeFilter(query)],
-        }
-      : undefined,
-    include: {
-      user: { include: { profile: { select: { firstName: true, lastName: true } } } },
-      exam: {
-        include: {
-          examComponent: { include: { course: { select: { name: true, code: true } } } },
+  const [formalResults, manualResults] = await Promise.all([
+    prisma.examResult.findMany({
+      where: query
+        ? {
+            OR: [userSearchFilter(query), examComponentCodeFilter(query)],
+          }
+        : undefined,
+      include: {
+        user: { include: { profile: { select: { firstName: true, lastName: true } } } },
+        exam: {
+          include: {
+            examComponent: { include: { course: { select: { name: true, code: true } } } },
+          },
         },
       },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+      orderBy: { createdAt: 'desc' },
+    }),
+    prisma.examBooking.findMany({
+      where: {
+        status: 'COMPLETED' as const,
+        ...(query
+          ? {
+              OR: [
+                userSearchFilter(query),
+                { moduleCode: { contains: query, mode: 'insensitive' } },
+                examComponentCodeFilter(query),
+              ],
+            }
+          : {}),
+      },
+      include: {
+        user: { include: { profile: { select: { firstName: true, lastName: true } } } },
+        exam: {
+          include: {
+            examComponent: { include: { course: { select: { name: true, code: true } } } },
+          },
+        },
+      },
+      orderBy: { examDate: 'desc' },
+    }),
+  ])
+
+  // Unify results
+  const allResults = [
+    ...formalResults.map((r) => ({
+      id: r.id,
+      type: 'FORMAL' as const,
+      user: r.user,
+      moduleCode: r.exam.examComponent?.course?.code || '—',
+      examName: r.exam.name,
+      date: r.exam.examDate,
+      score: Number(r.score),
+      passed: r.passed,
+      certificateUrl: r.certificateUrl,
+    })),
+    ...manualResults.map((r) => ({
+      id: r.id,
+      type: 'MANUAL' as const,
+      user: r.user,
+      moduleCode: r.moduleCode || '—',
+      examName: r.exam?.name || 'Manual Record',
+      date: r.examDate || r.bookedAt,
+      score: r.score ? Number(r.score) : null,
+      passed: r.result === 'PASS',
+      certificateUrl: null,
+    })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   return (
     <div className="space-y-6">
@@ -267,16 +318,17 @@ async function ResultsTab({ query }: { query?: string }) {
               <tr>
                 <th className="px-6 py-4">Student</th>
                 <th className="px-6 py-4">Module / Exam</th>
-                <th className="px-6 py-4">Date</th>
-                <th className="px-6 py-4">Score</th>
+                <th className="px-6 py-4 text-center">Date</th>
+                <th className="px-6 py-4 text-center">Score</th>
+                <th className="px-6 py-4 text-center">Type</th>
                 <th className="px-6 py-4">Result</th>
                 <th className="px-6 py-4 text-right">Certificate</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {results.length === 0 ? (
+              {allResults.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center">
+                  <td colSpan={7} className="px-6 py-12 text-center">
                     <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
                       <Trophy className="h-6 w-6 text-slate-300" />
                     </div>
@@ -291,7 +343,7 @@ async function ResultsTab({ query }: { query?: string }) {
                   </td>
                 </tr>
               ) : (
-                results.map((result) => (
+                allResults.map((result) => (
                   <tr
                     key={result.id}
                     className="group hover:bg-slate-50 dark:hover:bg-slate-800/50"
@@ -316,20 +368,31 @@ async function ResultsTab({ query }: { query?: string }) {
                       <div className="flex items-center gap-2">
                         <BookOpen className="h-4 w-4 text-[#002a5c]" />
                         <span className="font-medium text-slate-700">
-                          {result.exam.examComponent?.course?.code || '—'} - {result.exam.name}
+                          {result.moduleCode} - {result.examName}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                         <Calendar className="h-3 w-3" />
-                        {format(result.exam.examDate, 'MMM d, yyyy')}
+                        {result.date ? format(new Date(result.date), 'MMM d, yyyy') : '—'}
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-center">
                       <div className="font-bold text-slate-900 dark:text-slate-100">
-                        {Number(result.score)}%
+                        {result.score !== null ? `${result.score}%` : '—'}
                       </div>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span
+                        className={`inline-flex rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase ${
+                          result.type === 'FORMAL'
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {result.type}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <span
