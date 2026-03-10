@@ -28,8 +28,15 @@ interface StudentOption {
   id: string
   email: string
   firstName: string
+  middleName?: string | null
   lastName: string
   studentId: string
+}
+
+interface ModuleOption {
+  id: string
+  code: string
+  name: string
 }
 
 interface ExamRecord {
@@ -45,13 +52,14 @@ interface ExamRecord {
   sourceNotes: string | null
   user: {
     email: string
-    profile: { firstName: string; lastName: string } | null
+    profile: { firstName: string; middleName?: string | null; lastName: string } | null
     studentProfile: { studentId: string } | null
   }
 }
 
 interface RecordsTabProps {
   records: ExamRecord[]
+  modules: ModuleOption[]
 }
 
 const ATTEMPT_TYPES = [
@@ -61,7 +69,13 @@ const ATTEMPT_TYPES = [
   { value: 'RESIT_3', label: 'Resit (4th+)' },
 ]
 
-export default function RecordsTab({ records }: RecordsTabProps) {
+const BOOKING_TYPES = [
+  { value: 'INDIVIDUAL', label: 'Individual Exam (€520)', seats: 1 },
+  { value: 'TWIN_PACK', label: 'Twin Pack (€980)', seats: 2 },
+  { value: 'FOUR_PACK', label: '4-Pack Bundle (€1900)', seats: 4 },
+]
+
+export default function RecordsTab({ records, modules }: RecordsTabProps) {
   const router = useRouter()
   const {
     items: sortedRecords,
@@ -84,6 +98,14 @@ export default function RecordsTab({ records }: RecordsTabProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
+
+  // Bundle state
+  const [bookingType, setBookingType] = useState<'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK'>(
+    'INDIVIDUAL'
+  )
+  const [moduleSelections, setModuleSelections] = useState<
+    { query: string; selected: ModuleOption | null; showDropdown: boolean }[]
+  >([{ query: '', selected: null, showDropdown: false }])
 
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -114,16 +136,47 @@ export default function RecordsTab({ records }: RecordsTabProps) {
     return () => clearTimeout(timeout)
   }, [studentQuery])
 
+  const updateModuleSelection = (
+    index: number,
+    updates: Partial<{ query: string; selected: ModuleOption | null; showDropdown: boolean }>
+  ) => {
+    setModuleSelections((prev) => {
+      const next = [...prev]
+      next[index] = { ...next[index], ...updates }
+      return next
+    })
+  }
+
+  // Adjust module slots when booking type changes
+  useEffect(() => {
+    const seats = BOOKING_TYPES.find((t) => t.value === bookingType)?.seats || 1
+    setModuleSelections((prev) => {
+      const next = [...prev]
+      if (next.length < seats) {
+        while (next.length < seats) {
+          next.push({ query: '', selected: null, showDropdown: false })
+        }
+      } else if (next.length > seats) {
+        return next.slice(0, seats)
+      }
+      return next
+    })
+  }, [bookingType])
+
   const selectStudent = (student: StudentOption) => {
     setSelectedStudent(student)
-    setStudentQuery(`${student.firstName} ${student.lastName} (${student.email})`)
+    setStudentQuery(
+      [student.firstName, student.middleName, student.lastName].filter(Boolean).join(' ') +
+        ` (${student.email})`
+    )
     setShowDropdown(false)
   }
 
   const resetForm = () => {
     setStudentQuery('')
     setSelectedStudent(null)
-    setModuleCode('')
+    setBookingType('INDIVIDUAL')
+    setModuleSelections([{ query: '', selected: null, showDropdown: false }])
     setExamDate('')
     setScore('')
     setAttemptType('FIRST')
@@ -136,10 +189,14 @@ export default function RecordsTab({ records }: RecordsTabProps) {
       toast.error('Please select a student')
       return
     }
-    if (!moduleCode.trim()) {
-      toast.error('Please enter a module code')
+
+    // Validate all module selections
+    const invalid = moduleSelections.some((m) => !m.query.trim())
+    if (invalid) {
+      toast.error('Please fill in all module selections')
       return
     }
+
     if (!examDate) {
       toast.error('Please enter an exam date')
       return
@@ -148,21 +205,26 @@ export default function RecordsTab({ records }: RecordsTabProps) {
     setIsSubmitting(true)
     const res = await createExamRecord({
       userId: selectedStudent.id,
-      moduleCode: moduleCode.trim(),
+      bookingType,
       examDate,
-      score: score ? Number(score) : undefined,
       attemptType,
       notes: notes.trim() || undefined,
+      entries: moduleSelections.map((m) => ({
+        courseId: m.selected?.id,
+        moduleCode: m.selected?.code || m.query.trim(),
+        score: score ? Number(score) : undefined,
+      })),
     })
 
-    setIsSubmitting(false)
+    setIsSubmitting(true)
     if (res.success) {
-      toast.success('Exam record added successfully')
+      toast.success(`Added ${bookingType === 'INDIVIDUAL' ? 'exam record' : 'bundle'} successfully`)
       resetForm()
       router.refresh()
     } else {
       toast.error(res.error || 'Failed to add record')
     }
+    setIsSubmitting(false)
   }
 
   const handleDelete = async (id: string) => {
@@ -272,7 +334,7 @@ export default function RecordsTab({ records }: RecordsTabProps) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
-                        {s.firstName} {s.lastName}
+                        {[s.firstName, (s as any).middleName, s.lastName].filter(Boolean).join(' ')}
                       </p>
                       <p className="truncate text-xs text-slate-500">
                         {s.email}
@@ -298,26 +360,35 @@ export default function RecordsTab({ records }: RecordsTabProps) {
             {selectedStudent && (
               <div className="mt-2 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                Selected: {selectedStudent.firstName} {selectedStudent.lastName} (
-                {selectedStudent.email})
+                Selected:{' '}
+                {[
+                  selectedStudent.firstName,
+                  (selectedStudent as any).middleName,
+                  selectedStudent.lastName,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}{' '}
+                ({selectedStudent.email})
               </div>
             )}
           </div>
 
-          {/* Module, Date, Attempt Type row */}
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
-                Module Code <span className="text-red-500">*</span>
+                Booking Type <span className="text-red-500">*</span>
               </label>
-              <input
-                type="text"
-                value={moduleCode}
-                onChange={(e) => setModuleCode(e.target.value)}
-                placeholder="e.g. M1, M8, M7A"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm uppercase transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
-                required
-              />
+              <select
+                value={bookingType}
+                onChange={(e) => setBookingType(e.target.value as any)}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+              >
+                {BOOKING_TYPES.map((t) => (
+                  <option key={t.value} value={t.value}>
+                    {t.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
@@ -331,6 +402,75 @@ export default function RecordsTab({ records }: RecordsTabProps) {
                 required
               />
             </div>
+          </div>
+
+          <div className={`grid gap-4 ${bookingType === 'INDIVIDUAL' ? '' : 'sm:grid-cols-2'}`}>
+            {moduleSelections.map((selection, idx) => (
+              <div key={idx} className="relative">
+                <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
+                  {bookingType === 'INDIVIDUAL' ? 'Module' : `Module ${idx + 1}`}{' '}
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="text"
+                    value={selection.query}
+                    onChange={(e) => {
+                      const q = e.target.value
+                      updateModuleSelection(idx, {
+                        query: q,
+                        selected: null,
+                        showDropdown: q.length > 0,
+                      })
+                    }}
+                    onFocus={() => {
+                      if (selection.query.length > 0)
+                        updateModuleSelection(idx, { showDropdown: true })
+                    }}
+                    placeholder="Search module code..."
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm font-bold uppercase transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                  />
+                </div>
+
+                {selection.showDropdown && (
+                  <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                    {modules
+                      .filter(
+                        (m) =>
+                          m.code.toLowerCase().includes(selection.query.toLowerCase()) ||
+                          m.name.toLowerCase().includes(selection.query.toLowerCase())
+                      )
+                      .slice(0, 10)
+                      .map((m) => (
+                        <button
+                          key={m.id}
+                          type="button"
+                          onClick={() => {
+                            updateModuleSelection(idx, {
+                              query: m.code,
+                              selected: m,
+                              showDropdown: false,
+                            })
+                          }}
+                          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
+                              {m.code}
+                            </p>
+                            <p className="truncate text-xs text-slate-500">{m.name}</p>
+                          </div>
+                        </button>
+                      ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Attempt Type + Score + Notes */}
+          <div className="grid gap-4 sm:grid-cols-3">
             <div>
               <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
                 Attempt Type
@@ -347,10 +487,6 @@ export default function RecordsTab({ records }: RecordsTabProps) {
                 ))}
               </select>
             </div>
-          </div>
-
-          {/* Score + Notes row */}
-          <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
                 Score (%)
@@ -359,15 +495,12 @@ export default function RecordsTab({ records }: RecordsTabProps) {
                 type="number"
                 value={score}
                 onChange={(e) => setScore(e.target.value)}
-                placeholder="Leave blank if awaiting result"
+                placeholder="—"
                 min="0"
                 max="100"
                 step="0.01"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               />
-              <p className="mt-1 text-[10px] text-slate-400 italic">
-                Score ≥ 75% = Pass. Leave blank for &quot;Awaiting Result&quot;.
-              </p>
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
@@ -377,7 +510,7 @@ export default function RecordsTab({ records }: RecordsTabProps) {
                 type="text"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Optional internal notes"
+                placeholder="Optional notes"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               />
             </div>
@@ -485,7 +618,13 @@ export default function RecordsTab({ records }: RecordsTabProps) {
                             </div>
                             <div>
                               <p className="font-bold text-slate-900 dark:text-white">
-                                {record.user.profile?.firstName} {record.user.profile?.lastName}
+                                {[
+                                  record.user.profile?.firstName,
+                                  record.user.profile?.middleName,
+                                  record.user.profile?.lastName,
+                                ]
+                                  .filter(Boolean)
+                                  .join(' ')}
                               </p>
                               <p className="text-[10px] text-slate-500">{record.user.email}</p>
                             </div>

@@ -170,7 +170,7 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
       {/* Thread header – click to expand */}
       <button onClick={handleExpand} className="flex w-full items-center gap-4 px-5 py-4 text-left">
         <div
-          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
             thread.root.senderId === currentUserId ? 'bg-[#002a5c]' : 'bg-slate-500'
           }`}
         >
@@ -182,7 +182,7 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
               {userName(otherParticipant)}
             </p>
             {thread.unreadCount > 0 && (
-              <span className="flex-shrink-0 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-bold text-white">
+              <span className="shrink-0 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-bold text-white">
                 {thread.unreadCount} new
               </span>
             )}
@@ -192,7 +192,7 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
             {allMessages[allMessages.length - 1].body}
           </p>
         </div>
-        <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
+        <div className="flex shrink-0 flex-col items-end gap-1.5">
           <span className="text-xs text-slate-400">
             {formatTime(allMessages[allMessages.length - 1].createdAt)}
           </span>

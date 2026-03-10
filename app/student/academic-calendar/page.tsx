@@ -96,7 +96,7 @@ export default async function StudentAcademicCalendarPage() {
                               {sem.name}
                             </h3>
                             <span
-                              className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${statusColors[status]}`}
+                              className={`rounded-full px-2 py-0.5 text-xs font-black tracking-widest uppercase ${statusColors[status]}`}
                             >
                               {status}
                             </span>

@@ -68,6 +68,7 @@ export default async function AttendancePage() {
       },
     },
     orderBy: { date: 'desc' },
+    take: 200,
   })
 
   const stats = {

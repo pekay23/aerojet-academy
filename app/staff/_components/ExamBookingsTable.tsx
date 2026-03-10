@@ -30,7 +30,7 @@ interface ExamBookingWithDetails {
   moduleCode: string
   user: {
     email: string
-    profile: { firstName: string; lastName: string } | null
+    profile: { firstName: string; middleName?: string | null; lastName: string } | null
   }
   event: { name: string; startDate: Date } | null
   exam: {
@@ -200,7 +200,13 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                         </div>
                         <div>
                           <div className="font-bold text-slate-900 dark:text-slate-100">
-                            {booking.user.profile?.firstName} {booking.user.profile?.lastName}
+                            {[
+                              booking.user.profile?.firstName,
+                              booking.user.profile?.middleName,
+                              booking.user.profile?.lastName,
+                            ]
+                              .filter(Boolean)
+                              .join(' ')}
                           </div>
                           <div className="text-xs text-slate-500 dark:text-slate-400">
                             {booking.user.email}

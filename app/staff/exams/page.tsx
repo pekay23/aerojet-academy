@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma/client'
 import StaffExamsTabs from '../_components/StaffExamsTabs'
 import ExamBookingsTable from '../_components/ExamBookingsTable'
 import RecordsTab from './_components/RecordsTab'
+import { getAvailableModules } from '../actions'
 import Link from 'next/link'
 import SearchInput from '@/components/SearchInput'
 import { format } from 'date-fns'
@@ -366,27 +367,31 @@ async function ResultsTab({ query }: { query?: string }) {
 
 /* ─── Records Tab (Server Component Wrapper) ─── */
 async function RecordsTabServer({ query }: { query?: string }) {
-  const records = await prisma.examBooking.findMany({
-    where: query
-      ? {
-          OR: [userSearchFilter(query), { moduleCode: { contains: query, mode: 'insensitive' } }],
-        }
-      : undefined,
-    include: {
-      user: {
-        include: {
-          profile: { select: { firstName: true, lastName: true } },
-          studentProfile: { select: { studentId: true } },
+  const [records, modules] = await Promise.all([
+    prisma.examBooking.findMany({
+      where: query
+        ? {
+            OR: [userSearchFilter(query), { moduleCode: { contains: query, mode: 'insensitive' } }],
+          }
+        : undefined,
+      include: {
+        user: {
+          include: {
+            profile: { select: { firstName: true, middleName: true, lastName: true } },
+            studentProfile: { select: { studentId: true } },
+          },
         },
       },
-    },
-    orderBy: { createdAt: 'desc' },
-  })
+      orderBy: { createdAt: 'desc' },
+    }),
+    getAvailableModules(),
+  ])
 
   const serialized = records.map((recordRaw) => {
     const r: any = recordRaw
     return {
       id: r.id,
+      courseId: r.courseId,
       moduleCode: r.moduleCode,
       examDate: r.examDate,
       bookedAt: r.bookedAt,
@@ -404,5 +409,5 @@ async function RecordsTabServer({ query }: { query?: string }) {
     }
   })
 
-  return <RecordsTab records={serialized} />
+  return <RecordsTab records={serialized} modules={modules} />
 }

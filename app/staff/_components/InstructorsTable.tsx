@@ -31,7 +31,7 @@ interface Instructor {
   email: string
   academyEmail: string | null
   status: string
-  profile: { firstName: string; lastName: string } | null
+  profile: { firstName: string; middleName?: string | null; lastName: string } | null
   instructorProfile: { employeeId: string | null; specialization: string | null } | null
 }
 
@@ -273,7 +273,18 @@ export default function InstructorsTable() {
                         </div>
                         <div>
                           <div className="font-bold text-slate-900 dark:text-slate-100">
-                            {instructor.profile?.firstName} {instructor.profile?.lastName}
+                            {(() => {
+                              const fullName = instructor.profile
+                                ? [
+                                    instructor.profile.firstName,
+                                    instructor.profile.middleName,
+                                    instructor.profile.lastName,
+                                  ]
+                                    .filter(Boolean)
+                                    .join(' ')
+                                : instructor.email
+                              return fullName
+                            })()}
                           </div>
                           <div className="text-xs text-slate-500 dark:text-slate-400">
                             {instructor.email}

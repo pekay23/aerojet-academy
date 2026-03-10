@@ -609,6 +609,70 @@ export async function updateStudentProfile(data: {
   }
 }
 
+export async function payPendingExamBooking(bookingId: string) {
+  const user = await requireStudent()
+
+  try {
+    const booking = await prisma.examBooking.findFirst({
+      where: { id: bookingId, userId: user.id },
+    })
+
+    if (!booking) return { error: 'Booking not found.' }
+    if (booking.status !== 'PENDING') return { error: 'This booking is not pending payment.' }
+
+    // If it's part of a group, we pay for the entire group
+    const groupBookings = booking.bookingGroupRef
+      ? await prisma.examBooking.findMany({
+          where: { bookingGroupRef: booking.bookingGroupRef, userId: user.id, status: 'PENDING' },
+        })
+      : [booking]
+
+    const totalAmount = groupBookings.reduce((sum, b) => sum + Number(b.amountPaid), 0)
+    if (totalAmount <= 0) return { error: 'No payment required for this booking.' }
+
+    const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
+    if (!wallet || Number(wallet.availableBalance) < totalAmount) {
+      return { error: 'Insufficient funds in wallet. Please top up.' }
+    }
+
+    const { chargeWallet } = await import('@/lib/wallet/operations')
+
+    await prisma.$transaction(async (tx) => {
+      await chargeWallet(
+        tx,
+        user.id,
+        totalAmount,
+        `Payment for ${booking.bookingGroupRef ? 'Bundle' : 'Exam'}: ${booking.moduleCode || 'Invoiced'}`,
+        booking.id,
+        'EXAM_BOOKING'
+      )
+
+      await tx.examBooking.updateMany({
+        where: { id: { in: groupBookings.map((b) => b.id) } },
+        data: { status: 'APPROVED' },
+      })
+
+      await tx.notification.create({
+        data: {
+          userId: user.id,
+          title: 'Exam Payment Successful',
+          message: `Your payment was processed. Seats for ${groupBookings.length} module(s) are now secured.`,
+          type: 'SUCCESS',
+          linkUrl: '/student/exams',
+          linkText: 'View My Exams',
+        },
+      })
+    })
+
+    revalidatePath('/student/exams')
+    revalidatePath('/student/wallet')
+    return { success: true }
+  } catch (error) {
+    console.error('Pay booking error:', error)
+    return { error: 'Failed to process payment.' }
+  }
+}
+
 export async function changePassword(current: string, newPass: string) {
   const currentUser = await requireAuth()
 
@@ -633,9 +697,62 @@ export async function changePassword(current: string, newPass: string) {
 }
 
 export async function updateEmailNotifications(enabled: boolean) {
-  // Mock implementation as schema support is not yet available
-  // Could eventually store in a 'preferences' JSON field on User or StudentProfile
-  return { success: true }
+  const user = await requireStudent()
+
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { settings: true },
+    })
+
+    const currentSettings = (dbUser?.settings as any) || {}
+    const newSettings = {
+      ...currentSettings,
+      notifications: {
+        ...(currentSettings.notifications || {}),
+        email: enabled,
+      },
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { settings: newSettings },
+    })
+
+    revalidatePath('/student/profile')
+    return { success: true }
+  } catch (error) {
+    console.error('Update Notifications Error:', error)
+    return { error: 'Failed to update notification settings.' }
+  }
+}
+
+export async function updateUserSettings(settings: any) {
+  const user = await requireStudent()
+
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      select: { settings: true },
+    })
+
+    const currentSettings = (dbUser?.settings as any) || {}
+    const newSettings = {
+      ...currentSettings,
+      ...settings,
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { settings: newSettings },
+    })
+
+    revalidatePath('/student/profile')
+    return { success: true }
+  } catch (error) {
+    console.error('Update User Settings Error:', error)
+    return { error: 'Failed to update settings.' }
+  }
 }
 
 export async function getAvailableRecipients() {
@@ -654,6 +771,7 @@ export async function getAvailableRecipients() {
       profile: {
         select: {
           firstName: true,
+          middleName: true,
           lastName: true,
           profilePhotoUrl: true,
         },
@@ -684,6 +802,7 @@ export async function getAvailableRecipients() {
                       profile: {
                         select: {
                           firstName: true,
+                          middleName: true,
                           lastName: true,
                           profilePhotoUrl: true,
                         },
@@ -717,7 +836,12 @@ export async function getAvailableRecipients() {
     u: {
       id: string
       role: string
-      profile?: { firstName: string; lastName: string; profilePhotoUrl?: string | null } | null
+      profile?: {
+        firstName: string
+        middleName?: string | null
+        lastName: string
+        profilePhotoUrl?: string | null
+      } | null
     },
     roleOverride?: string
   ) => {
@@ -725,7 +849,9 @@ export async function getAvailableRecipients() {
     return {
       id: u.id,
       label: u.profile
-        ? `${u.profile.firstName} ${u.profile.lastName} (${role})`
+        ? [u.profile.firstName, u.profile.middleName, u.profile.lastName]
+            .filter(Boolean)
+            .join(' ') + ` (${role})`
         : `${role === 'INSTRUCTOR' ? 'Instructor' : 'User'} ${u.id}`,
       role,
       avatarUrl: u.profile?.profilePhotoUrl,
@@ -826,6 +952,50 @@ export async function bookStandaloneExamAction(params: {
   } catch (error: any) {
     console.error('bookStandaloneExamAction error:', error)
     return { error: error.message || 'Failed to book exam.' }
+  }
+}
+
+export async function bookBundleExamsAction(params: {
+  moduleCodes: string[]
+  eventId: string
+}) {
+  try {
+    const user = await requireStudent()
+    const { moduleCodes, eventId } = params
+
+    if (!moduleCodes.length || !eventId) {
+      return { error: 'Missing booking parameters.' }
+    }
+
+    // Book all modules — if any fails, the entire batch is rolled back
+    const results: { moduleCode: string; usedBundle: boolean }[] = []
+    for (const moduleCode of moduleCodes) {
+      const result = await bookStandaloneExam(user.id, { moduleCode, eventId })
+      results.push({ moduleCode, usedBundle: result.usedBundle })
+    }
+
+    const usedBundle = results.some((r) => r.usedBundle)
+    const typeStr = usedBundle ? 'Exam Package seats' : 'wallet balance'
+    const modulesStr = moduleCodes.join(', ')
+
+    await prisma.notification.create({
+      data: {
+        userId: user.id,
+        title: `Bundle Booking Confirmed (${moduleCodes.length} seats)`,
+        message: `You booked modules ${modulesStr} using ${typeStr}.`,
+        type: 'SUCCESS',
+        linkUrl: '/student/exams',
+        linkText: 'View Exams',
+      },
+    })
+
+    revalidatePath('/student/exam-bookings')
+    revalidatePath('/student/exams')
+    revalidatePath('/student/wallet')
+    return { success: true, bookedCount: results.length }
+  } catch (error: any) {
+    console.error('bookBundleExamsAction error:', error)
+    return { error: error.message || 'Failed to book bundle. No seats were reserved.' }
   }
 }
 

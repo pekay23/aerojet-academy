@@ -13,6 +13,8 @@ export const metadata: Metadata = {
 }
 export const dynamic = 'force-dynamic'
 
+import SettingsForm from './_components/SettingsForm'
+
 async function InfoTab() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
@@ -25,6 +27,7 @@ async function InfoTab() {
       role: true,
       profile: true,
       studentProfile: true,
+      settings: true,
     },
   })
 
@@ -35,18 +38,22 @@ async function InfoTab() {
   return <ProfileForm user={serializedUser} />
 }
 
-function SettingsTab() {
-  return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-8 text-center sm:p-12 dark:border-slate-800 dark:bg-slate-900">
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
-        <span className="text-2xl">🚧</span>
-      </div>
-      <h2 className="mb-2 text-lg font-bold text-slate-700 dark:text-slate-300">Coming Soon</h2>
-      <p className="mx-auto max-w-md text-sm text-slate-400">
-        This feature is under development and will be available soon.
-      </p>
-    </div>
-  )
+async function SettingsTab() {
+  const session = await getAuthSession()
+  if (!session) redirect('/login')
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      settings: true,
+    },
+  })
+
+  if (!user) redirect('/login')
+
+  const serializedSettings = JSON.parse(JSON.stringify(user.settings || {}))
+
+  return <SettingsForm initialSettings={serializedSettings} />
 }
 
 function PasswordTab() {
@@ -75,13 +82,7 @@ export default async function ProfilePage({
 
   return (
     <ProfileTabs>
-      {tab === 'settings' ? (
-        <SettingsTab />
-      ) : tab === 'password' ? (
-        <PasswordTab />
-      ) : (
-        <InfoTab />
-      )}
+      {tab === 'settings' ? <SettingsTab /> : tab === 'password' ? <PasswordTab /> : <InfoTab />}
     </ProfileTabs>
   )
 }

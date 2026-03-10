@@ -266,10 +266,12 @@ export async function bulkBypassPasswordChange(userIds: string[]) {
 }
 /**
  * Updates an individual exam booking (used for historical record corrections).
+ * Fixed invalid 'passed' field error.
  */
 export async function updateExamBooking(
   bookingId: string,
   data: {
+    courseId?: string
     moduleCode?: string
     examDate?: Date
     score?: number
@@ -280,18 +282,22 @@ export async function updateExamBooking(
   try {
     await requireStaff()
 
-    const updateData: any = { ...data }
+    const resultData: any = { ...data }
+
+    if (data.courseId) {
+      const course = await prisma.course.findUnique({ where: { id: data.courseId } })
+      if (course) resultData.moduleCode = course.code.toUpperCase()
+    }
 
     // Derive result from score if score is provided
     if (data.score !== undefined) {
-      updateData.percentage = data.score
-      updateData.passed = data.score >= 75
-      updateData.result = data.score >= 75 ? 'pass' : 'fail'
+      resultData.percentage = data.score
+      resultData.result = data.score >= 75 ? 'pass' : 'fail'
     }
 
     await prisma.examBooking.update({
       where: { id: bookingId },
-      data: updateData,
+      data: resultData,
     })
 
     revalidatePath('/staff/exams')
@@ -304,53 +310,89 @@ export async function updateExamBooking(
 }
 
 /**
- * Creates a new exam record (booking) for a student.
- * Supports multiple resit attempts for the same module.
+ * Creates one or more exam records (booking) for a student.
+ * Supports INDIVIDUAL, TWIN_PACK, and FOUR_PACK booking types.
  */
 export async function createExamRecord(data: {
   userId: string
-  moduleCode: string
+  bookingType: 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK'
   examDate: string
-  score?: number
   attemptType?: string
   notes?: string
+  entries: { courseId?: string; moduleCode: string; score?: number }[]
 }) {
   try {
     await requireStaff()
 
-    const { userId, moduleCode, examDate, score, attemptType, notes } = data
+    const { getExamPricingConfig } = await import('@/lib/pools/pricing-config')
+    const pricingConfig = await getExamPricingConfig()
+
+    const { userId, bookingType, examDate, attemptType, notes, entries } = data
 
     // Verify user exists
     const user = await prisma.user.findUnique({ where: { id: userId } })
     if (!user) return { error: 'Student not found.' }
 
-    // Derive result from score
-    let result: string | undefined
-    let percentage: number | undefined
-    if (score !== undefined && score !== null) {
-      percentage = score
-      result = score >= 75 ? 'pass' : 'fail'
+    // Pricing mapping
+    const pricingMap = {
+      INDIVIDUAL: pricingConfig.individualExamFee,
+      TWIN_PACK: pricingConfig.twoSeatBundle,
+      FOUR_PACK: pricingConfig.fourSeatBundle,
     }
 
-    await prisma.examBooking.create({
-      data: {
-        userId,
-        moduleCode: moduleCode.toUpperCase(),
-        examDate: new Date(examDate),
-        amountPaid: 0,
-        status: 'COMPLETED',
-        bookingType: 'INDIVIDUAL',
-        attemptType: attemptType || 'FIRST',
-        result,
-        score: score !== undefined ? score : undefined,
-        percentage: percentage !== undefined ? percentage : undefined,
-        sourceNotes: notes || 'Manually added by staff',
-      } as any,
+    const totalFee = Number((pricingMap as any)[bookingType] || pricingConfig.individualExamFee)
+    const bookingGroupRef = entries.length > 1 ? `STAFF_BUNDLE_${Date.now()}` : undefined
+
+    const results = await prisma.$transaction(async (tx) => {
+      const createdBookings = []
+
+      for (let i = 0; i < entries.length; i++) {
+        const entry = entries[i]
+        let finalModuleCode = entry.moduleCode.toUpperCase()
+        if (entry.courseId) {
+          const course = await tx.course.findUnique({ where: { id: entry.courseId } })
+          if (course) finalModuleCode = course.code.toUpperCase()
+        }
+
+        // Derive result from score if provided
+        let result: string | undefined
+        let percentage: number | undefined
+        if (entry.score !== undefined && entry.score !== null) {
+          percentage = entry.score
+          result = entry.score >= 75 ? 'pass' : 'fail'
+        }
+
+        const isFutureBooking = entry.score === undefined || entry.score === null
+        // Attach the full fee to the first booking in the group if it's a bundle
+        // or just to the single individual booking.
+        const amountPaid = i === 0 && isFutureBooking ? totalFee : 0
+        const status = isFutureBooking ? 'PENDING' : 'COMPLETED'
+
+        const booking = await tx.examBooking.create({
+          data: {
+            userId,
+            courseId: entry.courseId,
+            moduleCode: finalModuleCode,
+            examDate: new Date(examDate),
+            amountPaid,
+            status: status as any,
+            bookingType: bookingType as any,
+            attemptType: attemptType || 'FIRST',
+            result,
+            score: entry.score !== undefined ? entry.score : undefined,
+            percentage: percentage !== undefined ? percentage : undefined,
+            sourceNotes: notes || 'Manually added by staff',
+            bookingGroupRef,
+          },
+        })
+        createdBookings.push(booking)
+      }
+      return createdBookings
     })
 
     revalidatePath('/staff/exams')
     revalidatePath('/student/exams')
-    return { success: true }
+    return { success: true, count: results.length }
   } catch (error) {
     console.error('Create exam record error:', error)
     return { error: 'Failed to create record.' }
@@ -413,5 +455,23 @@ export async function searchStudents(query: string) {
   } catch (error) {
     console.error('Search students error:', error)
     return { students: [] }
+  }
+}
+
+/**
+ * Fetches all active courses/modules to populate the dropdown.
+ */
+export async function getAvailableModules() {
+  try {
+    await requireStaff()
+    const modules = await prisma.course.findMany({
+      where: { isActive: true },
+      select: { id: true, code: true, name: true },
+      orderBy: { code: 'asc' },
+    })
+    return modules
+  } catch (error) {
+    console.error('Get available modules error:', error)
+    return []
   }
 }
