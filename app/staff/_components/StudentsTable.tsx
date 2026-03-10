@@ -397,6 +397,8 @@ export default function StudentsTable({
                         baseCurrency={student.wallet?.currency || 'EUR'}
                         currency={viewCurrency}
                         showToggle={false}
+                        clickToToggle={true}
+                        onCurrencyChange={setViewCurrency}
                         size="sm"
                         amountClassName={`${walletBal >= 0 ? 'text-emerald-600!' : 'text-red-500!'}`}
                       />
@@ -423,6 +425,7 @@ export default function StudentsTable({
         <StudentDetailPanel
           student={selected}
           viewCurrency={viewCurrency}
+          onCurrencyChange={setViewCurrency}
           onClose={() => setSelected(null)}
           onActionComplete={handleActionComplete}
         />
