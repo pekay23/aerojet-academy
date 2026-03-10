@@ -323,7 +323,7 @@ export default function GroupBookingModal({
                       }`}
                     >
                       <span className="text-xs font-black uppercase">Morning</span>
-                      <span className="text-[10px] opacity-70">09:00 - 12:00</span>
+                      <span className="text-xs opacity-70">09:00 - 12:00</span>
                     </button>
                     <button
                       type="button"
@@ -335,7 +335,7 @@ export default function GroupBookingModal({
                       }`}
                     >
                       <span className="text-xs font-black uppercase">Afternoon</span>
-                      <span className="text-[10px] opacity-70">13:00 - 16:00</span>
+                      <span className="text-xs opacity-70">13:00 - 16:00</span>
                     </button>
                   </div>
                 </div>

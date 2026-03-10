@@ -48,7 +48,7 @@ export default function PayMilestoneButton({ milestoneId, amount, currency, labe
       <button
         onClick={() => setShowConfirm(true)}
         disabled={loading}
-        className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-[10px] font-bold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
+        className="flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white transition-colors hover:bg-emerald-700 disabled:opacity-50"
       >
         {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Wallet className="h-3 w-3" />}
         Pay from Wallet

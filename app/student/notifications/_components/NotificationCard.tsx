@@ -68,7 +68,7 @@ export default function NotificationCard({ notification }: NotificationCardProps
           >
             {notification.title}
           </h3>
-          <div className="flex shrink-0 items-center gap-2 text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+          <div className="flex shrink-0 items-center gap-2 text-xs font-bold tracking-widest text-slate-400 uppercase">
             <Clock className="h-3 w-3" />
             {new Date(notification.createdAt).toLocaleDateString(undefined, {
               month: 'short',

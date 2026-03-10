@@ -166,7 +166,7 @@ function ResitContent({
               {freeResits.map((r) => (
                 <span
                   key={r.bookingGroupRef}
-                  className="inline-flex items-center gap-1 rounded-lg bg-emerald-100 px-2.5 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                  className="inline-flex items-center gap-1 rounded-lg bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
                 >
                   {r.bookingType} — {r.remaining} free
                 </span>
@@ -208,7 +208,7 @@ function ResitContent({
                   <BookOpen className="h-3.5 w-3.5" />
                   {exam.moduleCode}
                 </span>
-                <span className="rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-bold text-red-600 uppercase dark:bg-red-900/30 dark:text-red-400">
+                <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600 uppercase dark:bg-red-900/30 dark:text-red-400">
                   Failed
                 </span>
               </div>
@@ -235,7 +235,7 @@ function ResitContent({
                   <span>{new Date(exam.examDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </div>
                 {exam.eventName && (
-                  <p className="text-[10px] text-slate-400">{exam.eventName}</p>
+                  <p className="text-xs text-slate-400">{exam.eventName}</p>
                 )}
               </div>
 

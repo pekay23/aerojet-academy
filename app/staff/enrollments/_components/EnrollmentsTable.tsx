@@ -183,7 +183,13 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                     <div className="flex flex-col text-sm">
                       <span className="font-bold text-[#002a5c] dark:text-white">
                         {enrollment.user.profile
-                          ? `${enrollment.user.profile.firstName} ${enrollment.user.profile.lastName}`
+                          ? [
+                              enrollment.user.profile.firstName,
+                              enrollment.user.profile.middleName,
+                              enrollment.user.profile.lastName,
+                            ]
+                              .filter(Boolean)
+                              .join(' ')
                           : 'Unknown'}
                       </span>
                       <span className="text-xs text-slate-500 dark:text-slate-400">

@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { AlertTriangle, Wallet, CreditCard, ArrowRight, CheckCircle2, Clock } from 'lucide-react'
+import { getCurrencySymbol } from '@/lib/currency'
 
 interface MilestoneInfo {
   id: string
@@ -42,9 +43,7 @@ export function PaymentRequiredBanner({
     (m) => m.status === 'DUE' || m.status === 'OVERDUE'
   )
 
-  const formatCurrency = (amount: number) => {
-    return `€${amount.toLocaleString()}`
-  }
+  const currencySymbol = getCurrencySymbol(walletBalance.currency)
 
   const getDaysUntilDue = (dueDate: Date | string) => {
     const now = new Date()
@@ -108,7 +107,7 @@ export function PaymentRequiredBanner({
                 Wallet Balance
               </p>
               <p className="text-xl font-black text-slate-900 dark:text-slate-100">
-                €{walletBalance.available.toLocaleString()}
+                {currencySymbol}{walletBalance.available.toLocaleString()}
               </p>
             </div>
           </div>
@@ -195,7 +194,7 @@ export function PaymentRequiredBanner({
               <h3 className="font-bold text-blue-900 dark:text-blue-200">Next Payment Due</h3>
               <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
                 {getMilestoneLabel(nextUnpaidMilestone.type)} -{' '}
-                <strong>€{nextUnpaidMilestone.amountDue.toLocaleString()}</strong>
+                <strong>{currencySymbol}{nextUnpaidMilestone.amountDue.toLocaleString()}</strong>
               </p>
               {nextUnpaidMilestone.status === 'OVERDUE' ? (
                 <p className="mt-1 text-sm font-bold text-red-600">Payment overdue!</p>

@@ -23,7 +23,7 @@ interface Transaction {
   approvedAt?: string | null
   user: {
     email: string
-    profile?: { firstName: string; lastName: string } | null
+    profile?: { firstName: string; middleName?: string | null; lastName: string } | null
   }
 }
 
@@ -224,7 +224,13 @@ export default function FinanceOverview({
               ) : (
                 data.recentTransactions.map((tx) => {
                   const fullName = tx.user.profile
-                    ? `${tx.user.profile.firstName} ${tx.user.profile.lastName}`
+                    ? [
+                        tx.user.profile.firstName,
+                        tx.user.profile.middleName,
+                        tx.user.profile.lastName,
+                      ]
+                        .filter(Boolean)
+                        .join(' ')
                     : tx.user.email
                   const cfg = STATUS_CONFIG[tx.status] ?? {
                     label: tx.status,
@@ -289,7 +295,9 @@ export default function FinanceOverview({
           ) : (
             data.recentTransactions.map((tx) => {
               const fullName = tx.user.profile
-                ? `${tx.user.profile.firstName} ${tx.user.profile.lastName}`
+                ? [tx.user.profile.firstName, tx.user.profile.middleName, tx.user.profile.lastName]
+                    .filter(Boolean)
+                    .join(' ')
                 : tx.user.email
               const cfg = STATUS_CONFIG[tx.status] ?? {
                 label: tx.status,

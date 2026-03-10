@@ -3,7 +3,11 @@
 import { format } from 'date-fns'
 import { Calendar, Clock, CreditCard, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
+import { payPendingExamBooking } from '@/app/student/actions'
 
 interface BookingRecord {
   id: string
@@ -13,6 +17,7 @@ interface BookingRecord {
   status: string
   amountPaid: number
   bookingType: string
+  bookingGroupRef?: string | null
 }
 
 interface StudentBookingsTableProps {
@@ -21,13 +26,28 @@ interface StudentBookingsTableProps {
 
 export default function StudentBookingsTable({ bookings }: StudentBookingsTableProps) {
   const { items, requestSort, sortConfig } = useSort(bookings, { key: 'date', order: 'asc' })
+  const router = useRouter()
+  const [isPaying, setIsPaying] = useState<string | null>(null)
+
+  const handlePay = async (bookingId: string) => {
+    setIsPaying(bookingId)
+    const res = await payPendingExamBooking(bookingId)
+    setIsPaying(null)
+
+    if (res.success) {
+      toast.success('Payment successful!')
+      router.refresh()
+    } else {
+      toast.error(res.error || 'Payment failed')
+    }
+  }
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm" aria-label="Exam bookings">
           <thead className="bg-slate-50 dark:bg-slate-800/50">
-            <tr className="border-b border-slate-100 text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
+            <tr className="border-b border-slate-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
               <SortHeader
                 label="Module"
                 sortKey="moduleCode"
@@ -40,7 +60,9 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                 currentSort={sortConfig}
                 onSort={requestSort}
               />
-              <th scope="col" className="px-6 py-4">Status</th>
+              <th scope="col" className="px-6 py-4">
+                Status
+              </th>
               <SortHeader
                 label="Fee"
                 sortKey="amountPaid"
@@ -60,7 +82,10 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                   <p className="font-bold text-slate-900 uppercase dark:text-white">
                     {booking.moduleCode}
                   </p>
-                  <p className="max-w-[150px] truncate text-[10px] font-medium text-slate-500" title={booking.moduleName}>
+                  <p
+                    className="max-w-[150px] truncate text-xs font-medium text-slate-500"
+                    title={booking.moduleName}
+                  >
                     {booking.moduleName}
                   </p>
                 </td>
@@ -72,7 +97,7 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                 </td>
                 <td className="px-6 py-4">
                   <span
-                    className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
+                    className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-bold uppercase ${
                       booking.status === 'APPROVED' || booking.status === 'COMPLETED'
                         ? 'bg-emerald-50 text-emerald-700'
                         : booking.status === 'CANCELLED' || booking.status === 'REJECTED'
@@ -88,8 +113,33 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                     {booking.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 text-right font-bold text-slate-900 dark:text-white">
-                  &euro;{booking.amountPaid.toFixed(2)}
+                <td className="px-6 py-4 text-right">
+                  <div className="flex flex-col items-end gap-1">
+                    <p className="font-bold text-slate-900 dark:text-white">
+                      {booking.amountPaid > 0 ? (
+                        <>&euro;{booking.amountPaid.toFixed(2)}</>
+                      ) : booking.bookingGroupRef ? (
+                        <span className="text-xs text-slate-400 uppercase italic">
+                          Bundle Seat
+                        </span>
+                      ) : (
+                        <>&euro;0.00</>
+                      )}
+                    </p>
+                    {booking.status === 'PENDING' && (
+                      <button
+                        onClick={() => handlePay(booking.id)}
+                        disabled={isPaying === booking.id}
+                        className="rounded-lg bg-[#002a5c] px-3 py-1 text-xs font-bold text-white transition-all hover:bg-blue-800 disabled:opacity-50"
+                      >
+                        {isPaying === booking.id
+                          ? 'Processing...'
+                          : booking.amountPaid > 0
+                            ? 'Pay Bundle'
+                            : 'Validate'}
+                      </button>
+                    )}
+                  </div>
                 </td>
               </tr>
             ))}

@@ -29,6 +29,7 @@ interface Applicant {
   createdAt: string
   profile?: {
     firstName: string
+    middleName?: string | null
     lastName: string
     phone?: string | null
     nationality?: string | null
@@ -67,7 +68,9 @@ export default function ApplicantDetailDrawer({
   if (!applicant) return null
 
   const fullName = applicant.profile
-    ? `${applicant.profile.firstName} ${applicant.profile.lastName}`
+    ? [applicant.profile.firstName, applicant.profile.middleName, applicant.profile.lastName]
+        .filter(Boolean)
+        .join(' ')
     : applicant.email
 
   const initials = applicant.profile

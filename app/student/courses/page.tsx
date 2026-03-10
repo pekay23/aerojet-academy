@@ -120,6 +120,7 @@ async function CourseList({ userId }: { userId: string }) {
       },
     },
     orderBy: { enrolledAt: 'desc' },
+    take: 50,
   })
 
   if (enrollments.length === 0) {
@@ -159,7 +160,7 @@ async function CourseList({ userId }: { userId: string }) {
           <div className="bg-slate-50 p-6 transition-colors group-hover:bg-blue-50/50 dark:bg-slate-800/50">
             <div className="mb-4 flex items-center justify-between">
               <span
-                className={`rounded-lg px-2 py-1 text-[10px] font-black tracking-widest uppercase ${
+                className={`rounded-lg px-2 py-1 text-xs font-black tracking-widest uppercase ${
                   enrollment.status === 'ACTIVE'
                     ? 'bg-green-100 text-green-700'
                     : enrollment.status === 'PENDING'

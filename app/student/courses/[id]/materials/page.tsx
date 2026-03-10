@@ -90,7 +90,7 @@ export default async function MaterialsPage({ params }: PageProps) {
 
           <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 px-4 py-2 dark:bg-emerald-500/10">
             <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
-            <span className="text-[10px] font-black tracking-widest text-emerald-600 uppercase dark:text-emerald-400">
+            <span className="text-xs font-black tracking-widest text-emerald-600 uppercase dark:text-emerald-400">
               Access Verified
             </span>
           </div>
@@ -137,7 +137,7 @@ export default async function MaterialsPage({ params }: PageProps) {
                       <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                         Course_Syllabus_{course.code}.pdf
                       </p>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase">PDF Document</p>
+                      <p className="text-xs font-bold text-slate-400 uppercase">PDF Document</p>
                     </div>
                   </div>
                   <a
@@ -188,7 +188,7 @@ export default async function MaterialsPage({ params }: PageProps) {
                         <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
                           Study Guide Portal
                         </p>
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">
+                        <p className="text-xs font-bold text-slate-400 uppercase">
                           External Resource
                         </p>
                       </div>
@@ -206,7 +206,7 @@ export default async function MaterialsPage({ params }: PageProps) {
                 </div>
 
                 <div className="mt-8 rounded-2xl bg-slate-50 p-6 dark:bg-slate-800/30">
-                  <h4 className="flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  <h4 className="flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
                     <Info className="h-3 w-3" />
                     Usage Policy
                   </h4>
@@ -242,7 +242,7 @@ export default async function MaterialsPage({ params }: PageProps) {
           </div>
 
           <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="mb-6 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+            <h3 className="mb-6 text-xs font-black tracking-widest text-slate-400 uppercase">
               Need more help?
             </h3>
             <div className="space-y-4">

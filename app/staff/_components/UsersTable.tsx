@@ -41,6 +41,7 @@ interface User {
   createdAt: string
   profile?: {
     firstName: string
+    middleName?: string | null
     lastName: string
     phone?: string | null
     profilePhotoUrl?: string | null
@@ -338,7 +339,9 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
               ) : (
                 users.map((user) => {
                   const fullName = user.profile
-                    ? `${user.profile.firstName} ${user.profile.lastName}`
+                    ? [user.profile.firstName, user.profile.middleName, user.profile.lastName]
+                        .filter(Boolean)
+                        .join(' ')
                     : user.email
                   const initials = user.profile
                     ? `${user.profile.firstName[0]}${user.profile.lastName[0]}`

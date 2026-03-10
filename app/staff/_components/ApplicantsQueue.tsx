@@ -32,6 +32,7 @@ interface Applicant {
   createdAt: string
   profile?: {
     firstName: string
+    middleName?: string | null
     lastName: string
     phone?: string | null
     nationality?: string | null
@@ -359,7 +360,13 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                 ) : (
                   paged.map((applicant) => {
                     const fullName = applicant.profile
-                      ? `${applicant.profile.firstName} ${applicant.profile.lastName}`
+                      ? [
+                          applicant.profile.firstName,
+                          applicant.profile.middleName,
+                          applicant.profile.lastName,
+                        ]
+                          .filter(Boolean)
+                          .join(' ')
                       : applicant.email
                     const initials = applicant.profile
                       ? `${applicant.profile.firstName[0]}${applicant.profile.lastName[0]}`

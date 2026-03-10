@@ -68,6 +68,7 @@ export default async function GradesPage() {
       },
     },
     orderBy: { assessmentDate: 'desc' },
+    take: 100,
   })
 
   // Calculate Average Score

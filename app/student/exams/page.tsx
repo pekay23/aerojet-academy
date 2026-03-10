@@ -252,7 +252,7 @@ export default async function ExamsPage({
       {/* ── Results Tab ── */}
       {tab === 'results' && (
         <div className="space-y-8">
-          {formalResults.length === 0 ? (
+          {allHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
                 <FileBarChart2 className="h-8 w-8 text-slate-400" />
@@ -266,46 +266,46 @@ export default async function ExamsPage({
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {formalResults.map((result) => (
-                <div
-                  key={result.id}
-                  className="flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold tracking-wide text-blue-600 uppercase">
-                      {result.moduleCode}
-                    </div>
-                    {result.passed ? (
-                      <div className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700 uppercase">
-                        <CheckCircle2 className="h-3 w-3" /> Passed
+              {allHistory
+                .filter((r) => r.score !== undefined || r.grade !== undefined) // Only show records with some form of result
+                .map((result) => (
+                  <div
+                    key={`${result.type}-${result.id}`}
+                    className="flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold tracking-wide text-blue-600 uppercase">
+                        {result.moduleCode}
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black text-red-700 uppercase">
-                        <XCircle className="h-3 w-3" /> Failed
+                      {result.passed ? (
+                        <div className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-black text-emerald-700 uppercase">
+                          <CheckCircle2 className="h-3 w-3" /> Passed
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-black text-red-700 uppercase">
+                          <XCircle className="h-3 w-3" /> Failed
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="mt-4 text-lg leading-tight font-bold text-slate-900 dark:text-slate-100">
+                      {result.moduleName}
+                    </h3>
+                    <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-50 pt-4 dark:border-slate-800">
+                      <div>
+                        <p className="text-xs font-bold text-slate-400 uppercase">Score</p>
+                        <p className="text-lg font-black text-slate-900 dark:text-slate-100">
+                          {result.score !== undefined ? `${result.score}%` : result.grade || '—'}
+                        </p>
                       </div>
-                    )}
-                  </div>
-                  <h3 className="mt-4 text-lg leading-tight font-bold text-slate-900 dark:text-slate-100">
-                    {result.moduleName}
-                  </h3>
-                  <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-50 pt-4 dark:border-slate-800">
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase">Score</p>
-                      <p className="text-lg font-black text-slate-900 dark:text-slate-100">
-                        {result.score} / {result.maxScore}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase">Grade</p>
-                      <p
-                        className={`text-lg font-black ${result.passed ? 'text-emerald-600' : 'text-red-600'}`}
-                      >
-                        {result.percentage}%
-                      </p>
+                      <div>
+                        <p className="text-xs font-bold text-slate-400 uppercase">Type</p>
+                        <p className="text-sm font-bold text-slate-500 uppercase">
+                          {result.type === 'RESULT' ? 'Formal' : 'Manual'}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           )}
         </div>
@@ -332,23 +332,23 @@ export default async function ExamsPage({
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
-                <p className="text-[10px] font-bold text-slate-400 uppercase">Total Attempts</p>
+                <p className="text-xs font-bold text-slate-400 uppercase">Total Attempts</p>
                 <p className="mt-1 text-2xl font-black text-slate-900 dark:text-white">
                   {allHistory.length}
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
-                <p className="text-[10px] font-bold text-slate-400 uppercase">Total Passed</p>
+                <p className="text-xs font-bold text-slate-400 uppercase">Total Passed</p>
                 <p className="mt-1 text-2xl font-black text-emerald-600">
                   {allHistory.filter((h) => h.passed).length}
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
-                <p className="text-[10px] font-bold text-slate-400 uppercase">Total Failed</p>
+                <p className="text-xs font-bold text-slate-400 uppercase">Total Failed</p>
                 <p className="mt-1 text-2xl font-black text-red-600">{failedAttempts.length}</p>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
-                <p className="text-[10px] font-bold text-slate-400 uppercase">Success Rate</p>
+                <p className="text-xs font-bold text-slate-400 uppercase">Success Rate</p>
                 <p className="mt-1 text-2xl font-black text-[#002a5c] dark:text-blue-400">
                   {allHistory.length > 0
                     ? Math.round(
