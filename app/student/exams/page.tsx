@@ -8,14 +8,18 @@ import {
   XCircle,
   Clock,
   MapPin,
-
   FileBarChart2,
+  History as HistoryIcon,
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import ResitBookingButton from './_components/ResitBookingButton'
+import Link from 'next/link'
 import ExamsTabs from './_components/ExamsTabs'
+import ExamHistoryTable from './_components/ExamHistoryTable'
+import StudentBookingsTable from './_components/StudentBookingsTable'
+import { format } from 'date-fns'
 import { canAccessFeature, getEnrollmentMilestoneStatus } from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
@@ -32,12 +36,12 @@ export default async function ExamsPage({
 
   const session = await getAuthSession()
 
-  const studentProfile = await prisma.studentProfile.findUnique({
+  const initialProfile = await prisma.studentProfile.findUnique({
     where: { userId: session.user.id },
     select: { enrollmentType: true },
   })
 
-  const isFullTime = studentProfile?.enrollmentType === 'FULL_TIME'
+  const isFullTime = initialProfile?.enrollmentType === 'FULL_TIME'
   const hasAccess = await canAccessFeature(session.user.id, 'exams')
 
   if (isFullTime && !hasAccess) {
@@ -75,14 +79,14 @@ export default async function ExamsPage({
     )
   }
 
-  const [bookings, results] = await Promise.all([
+  const [bookings, results, studentProfile] = await Promise.all([
     prisma.examBooking.findMany({
       where: { userId: session.user.id },
       include: {
         exam: { include: { examComponent: { include: { course: true } } } },
         event: true,
       },
-      orderBy: { bookedAt: 'desc' },
+      orderBy: { examDate: 'desc' },
     }),
     prisma.examResult.findMany({
       where: { userId: session.user.id },
@@ -91,10 +95,70 @@ export default async function ExamsPage({
       },
       orderBy: { createdAt: 'desc' },
     }),
+    prisma.studentProfile.findUnique({
+      where: { userId: session.user.id },
+      include: { pathwayRel: true },
+    }),
   ])
 
-  const upcomingExams = bookings.filter((b) => b.status === 'APPROVED' || b.status === 'COMPLETED')
-  const pendingExams = bookings.filter((b) => b.status === 'PENDING')
+  // Map raw bookings to BookingRecord interface for child components
+  const mappedBookings = bookings.map((b: any) => ({
+    id: b.id,
+    moduleCode: b.moduleCode || b.exam?.examComponent?.code || '—',
+    moduleName: b.exam?.examComponent?.course?.name || 'Exam Module',
+    date: b.examDate || b.bookedAt,
+    status: b.status,
+    amountPaid: Number(b.amountPaid),
+    bookingType: b.bookingType.replace(/_/g, ' '),
+  }))
+
+  const upcomingExams = mappedBookings.filter(
+    (b) => (b.status === 'APPROVED' || b.status === 'PENDING') && b.date && b.date >= new Date()
+  )
+  const pendingExams = mappedBookings.filter((b) => b.status === 'PENDING')
+
+  // Unify results and historical passes/fails
+  const formalResults = results.map((r) => ({
+    id: r.id,
+    type: 'RESULT',
+    moduleCode: r.exam.examComponent?.course?.code || '—',
+    moduleName: r.exam.examComponent?.course?.name || r.exam.name,
+    date: r.exam.examDate,
+    passed: r.passed,
+    score: Number(r.score),
+    maxScore: Number(r.maxScore),
+    percentage: Number(r.percentage),
+    grade: r.grade,
+  }))
+
+  const historicalResults = bookings
+    .filter((b: any) => b.result === 'pass' || b.result === 'fail' || b.score !== null)
+    .filter((b: any) => {
+      // Deduplicate: if there is a formal result for the same module on the same date, skip the booking
+      const bCode = b.moduleCode || b.exam?.examComponent?.course?.code
+      const bDate = (b.examDate || b.bookedAt).getTime()
+      return !formalResults.some((f) => f.moduleCode === bCode && f.date.getTime() === bDate)
+    })
+    .map((b: any) => {
+      const score = b.score ? Number(b.score) : undefined
+      const passed = score !== undefined ? score >= 75 : b.result === 'pass'
+
+      return {
+        id: b.id,
+        type: 'MIGRATED',
+        moduleCode: b.moduleCode || b.exam?.examComponent?.course?.code || '—',
+        moduleName: b.exam?.examComponent?.course?.name || 'Historical Exam',
+        date: b.examDate || b.bookedAt,
+        passed,
+        score,
+        percentage: score,
+        grade: b.result?.toUpperCase(),
+        attemptType: b.attemptType,
+      }
+    })
+
+  const allHistory = [...formalResults, ...historicalResults]
+  const failedAttempts = allHistory.filter((r) => !r.passed)
 
   return (
     <ExamsTabs>
@@ -116,11 +180,11 @@ export default async function ExamsPage({
             bg: 'bg-amber-50',
           },
           {
-            label: 'Total Results',
-            value: results.length,
-            icon: ClipboardCheck,
-            color: 'text-green-600',
-            bg: 'bg-green-50',
+            label: 'Failed Attempts',
+            value: failedAttempts.length,
+            icon: AlertCircle,
+            color: 'text-red-600',
+            bg: 'bg-red-50',
           },
         ].map((stat) => (
           <div
@@ -148,216 +212,190 @@ export default async function ExamsPage({
 
       {/* ── Bookings Tab ── */}
       {tab === 'bookings' && (
-        <>
-          {/* Upcoming Schedule Cards */}
-          {bookings.filter(
-            (b) =>
-              (b.status === 'APPROVED' || b.status === 'PENDING') &&
-              b.examDate &&
-              b.examDate >= new Date()
-          ).length > 0 && (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {bookings
-                .filter(
-                  (b) =>
-                    (b.status === 'APPROVED' || b.status === 'PENDING') &&
-                    b.examDate &&
-                    b.examDate >= new Date()
-                )
-                .sort((a, b) => (a.examDate?.getTime() || 0) - (b.examDate?.getTime() || 0))
-                .map((booking) => (
-                  <div
-                    key={booking.id}
-                    className="flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
-                  >
-                    <div>
-                      <div className="mb-4 flex items-start justify-between">
-                        {booking.exam?.examComponent?.course?.code && (
-                          <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold tracking-wide text-blue-600 uppercase">
-                            {booking.exam.examComponent.course.code}
-                          </div>
-                        )}
-                        {booking.status === 'PENDING' && (
-                          <div className="flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[10px] font-bold text-amber-600 uppercase">
-                            <AlertCircle className="h-3 w-3" /> Pending
-                          </div>
-                        )}
-                      </div>
-                      <h3 className="mb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
-                        {booking.exam?.examComponent?.course?.name || 'Unknown Course'}
-                      </h3>
-                      <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                        {booking.exam?.name || 'Individual Exam'}
-                      </p>
-                    </div>
-                    <div className="mt-6 space-y-3 border-t border-slate-100 pt-4 dark:border-slate-800">
-                      <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
-                        <Calendar className="h-4 w-4 text-slate-400" />
-                        <span>
-                          {booking.examDate?.toLocaleDateString(undefined, {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          }) || 'Date Not Set'}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
-                        <Clock className="h-4 w-4 text-slate-400" />
-                        <span>
-                          {booking.examDate
-                            ? booking.examDate.toLocaleTimeString(undefined, {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : 'N/A'}
-                        </span>
-                      </div>
-                      {booking.event?.location && (
-                        <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-400">
-                          <MapPin className="h-4 w-4 text-slate-400" />
-                          <span>{booking.event.location}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
+        <div className="space-y-6">
+          {upcomingExams.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="flex items-center gap-2 px-1 text-lg font-black text-slate-900 dark:text-white">
+                <Calendar className="h-5 w-5 text-blue-600" />
+                Upcoming Exams
+              </h3>
+              <StudentBookingsTable bookings={upcomingExams} />
             </div>
           )}
 
-          {/* All Bookings Table */}
-          <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div className="border-b border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-              <h2 className="font-bold text-slate-900 dark:text-slate-100">All Bookings</h2>
+          {pendingExams.length > 0 && (
+            <div className="space-y-4">
+              <h3 className="flex items-center gap-2 px-1 text-lg font-black text-slate-900 dark:text-white">
+                <Clock className="h-5 w-5 text-amber-500" />
+                Awaiting Payment / Verification
+              </h3>
+              <StudentBookingsTable bookings={pendingExams} />
             </div>
-            {bookings.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
-                      <th className="px-6 py-4">Exam / Module</th>
-                      <th className="px-6 py-4">Event</th>
-                      <th className="px-6 py-4">Date</th>
-                      <th className="px-6 py-4">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                    {bookings.map((booking) => (
-                      <tr
-                        key={booking.id}
-                        className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
-                      >
-                        <td className="px-6 py-4">
-                          <div className="font-bold text-slate-900 dark:text-slate-100">
-                            {booking.exam?.examComponent?.course?.name || booking.moduleCode}
-                          </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
-                            {booking.bookingType}
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
-                          {booking.event?.name || 'Individual Booking'}
-                        </td>
-                        <td className="px-6 py-4 font-medium whitespace-nowrap text-slate-600 dark:text-slate-400">
-                          {booking.examDate ? booking.examDate.toLocaleDateString() : 'TBD'}
-                        </td>
-                        <td className="px-6 py-4">
-                          <span
-                            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${booking.status === 'COMPLETED' || booking.status === 'APPROVED' ? 'bg-green-50 text-green-600' : booking.status === 'PENDING' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600'}`}
-                          >
-                            {booking.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <div className="p-8 text-center text-slate-500 italic dark:text-slate-400">
-                No bookings found.
-              </div>
-            )}
+          )}
+
+          {/* All Bookings List */}
+          <div className="space-y-4">
+            <h3 className="flex items-center gap-2 px-1 text-lg font-black text-slate-900 dark:text-white">
+              <HistoryIcon className="h-5 w-5 text-slate-400" />
+              Booking History
+            </h3>
+            <StudentBookingsTable bookings={mappedBookings} />
           </div>
-        </>
+        </div>
       )}
 
       {/* ── Results Tab ── */}
       {tab === 'results' && (
-        <>
-          {results.length === 0 ? (
+        <div className="space-y-8">
+          {formalResults.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
                 <FileBarChart2 className="h-8 w-8 text-slate-400" />
               </div>
               <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                No Results Available
+                Formal Results Pending
               </h3>
               <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                You haven&apos;t taken any exams yet, or your results are pending publication.
+                Your graded results will appear here once published by the examination board.
               </p>
             </div>
           ) : (
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {results.map((result) => (
+              {formalResults.map((result) => (
                 <div
                   key={result.id}
                   className="flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
                 >
-                  <div>
-                    <div className="mb-4 flex items-start justify-between">
-                      <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold tracking-wide text-blue-600 uppercase">
-                        {result.exam.examComponent?.course?.code || '—'}
-                      </div>
-                      {result.passed ? (
-                        <div className="flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600 uppercase">
-                          <CheckCircle2 className="h-3 w-3" /> Passed
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-bold text-red-600 uppercase">
-                          <XCircle className="h-3 w-3" /> Failed
-                        </div>
-                      )}
+                  <div className="flex items-start justify-between">
+                    <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold tracking-wide text-blue-600 uppercase">
+                      {result.moduleCode}
                     </div>
-                    <h3 className="mb-1 text-lg font-bold text-slate-900 dark:text-slate-100">
-                      {result.exam.examComponent?.course?.name || 'Unknown'}
-                    </h3>
-                    <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      {result.exam.name}
-                    </p>
+                    {result.passed ? (
+                      <div className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black text-emerald-700 uppercase">
+                        <CheckCircle2 className="h-3 w-3" /> Passed
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-[10px] font-black text-red-700 uppercase">
+                        <XCircle className="h-3 w-3" /> Failed
+                      </div>
+                    )}
                   </div>
-                  <div className="mt-6 space-y-4 border-t border-slate-100 pt-4 dark:border-slate-800">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase">Score</p>
-                        <p className="text-xl font-black text-slate-900 dark:text-slate-100">
-                          {Number(result.score)} / {Number(result.maxScore)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase">Grade</p>
-                        <p
-                          className={`text-xl font-black ${result.passed ? 'text-emerald-600' : 'text-red-600'}`}
-                        >
-                          {result.grade || '-'}
-                        </p>
-                      </div>
+                  <h3 className="mt-4 text-lg leading-tight font-bold text-slate-900 dark:text-slate-100">
+                    {result.moduleName}
+                  </h3>
+                  <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-50 pt-4 dark:border-slate-800">
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">Score</p>
+                      <p className="text-lg font-black text-slate-900 dark:text-slate-100">
+                        {result.score} / {result.maxScore}
+                      </p>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-slate-400">
-                        {result.createdAt.toLocaleDateString()}
-                      </span>
-                      {!result.passed && (
-                        <ResitBookingButton examId={result.examId} examName={result.exam.name} />
-                      )}
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase">Grade</p>
+                      <p
+                        className={`text-lg font-black ${result.passed ? 'text-emerald-600' : 'text-red-600'}`}
+                      >
+                        {result.percentage}%
+                      </p>
                     </div>
-
                   </div>
                 </div>
               ))}
             </div>
           )}
-        </>
+        </div>
+      )}
+
+      {/* ── History & Pathway Tab ── */}
+      {tab === 'history' && (
+        <div className="space-y-8">
+          {/* Pathway Progress (License Progress) */}
+          <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/20 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-black text-[#002a5c] dark:text-white">
+                  {studentProfile?.pathwayRel?.name || 'General Pathway'} Progress
+                </h2>
+                <p className="mt-1 text-xs font-medium text-slate-500">
+                  Track your progress towards licensing requirements across all modules.
+                </p>
+              </div>
+              <div className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-[#002a5c] text-white sm:flex">
+                <ClipboardCheck className="h-6 w-6" />
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
+                <p className="text-[10px] font-bold text-slate-400 uppercase">Total Attempts</p>
+                <p className="mt-1 text-2xl font-black text-slate-900 dark:text-white">
+                  {allHistory.length}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
+                <p className="text-[10px] font-bold text-slate-400 uppercase">Total Passed</p>
+                <p className="mt-1 text-2xl font-black text-emerald-600">
+                  {allHistory.filter((h) => h.passed).length}
+                </p>
+              </div>
+              <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
+                <p className="text-[10px] font-bold text-slate-400 uppercase">Total Failed</p>
+                <p className="mt-1 text-2xl font-black text-red-600">{failedAttempts.length}</p>
+              </div>
+              <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
+                <p className="text-[10px] font-bold text-slate-400 uppercase">Success Rate</p>
+                <p className="mt-1 text-2xl font-black text-[#002a5c] dark:text-blue-400">
+                  {allHistory.length > 0
+                    ? Math.round(
+                        (allHistory.filter((h) => h.passed).length / allHistory.length) * 100
+                      )
+                    : 0}
+                  %
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Unified History List (Formal + Migrated) */}
+          <div className="space-y-4">
+            <h3 className="flex items-center gap-2 px-1 text-lg font-black text-slate-900 dark:text-white">
+              <HistoryIcon className="h-5 w-5 text-blue-600" />
+              All Historical Records
+            </h3>
+
+            <ExamHistoryTable records={allHistory} />
+          </div>
+
+          {/* Failed Attempts Logic (Call to action) */}
+          {failedAttempts.length > 0 && (
+            <div className="rounded-2xl border border-red-100 bg-red-50/30 p-6 dark:border-red-900/30 dark:bg-red-900/10">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+                  <AlertCircle className="h-5 w-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-red-900 dark:text-red-400">
+                    Modules Pending Resit
+                  </h4>
+                  <p className="mt-1 text-sm text-red-700 dark:text-red-400/80">
+                    You have {failedAttempts.length} module{failedAttempts.length > 1 ? 's' : ''}{' '}
+                    that need to be cleared. Visit the "Bookings" tab to schedule a resit session.
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    {Array.from(new Set(failedAttempts.map((f) => f.moduleCode))).map((code) => (
+                      <span
+                        key={code}
+                        className="inline-flex rounded-lg bg-red-100 px-3 py-1 text-xs font-black text-red-700"
+                      >
+                        {code}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       )}
     </ExamsTabs>
   )
