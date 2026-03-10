@@ -4,28 +4,48 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiNotFound, apiError, withErrorHandler } from '@/lib/api/response'
 
 // GET /api/staff/students/[id]
-export const GET = withErrorHandler(async (
-  req: NextRequest,
-  context?: { params: Record<string, string> }
-) => {
-  await requireStaff()
-  const id = context?.params?.id
-  if (!id) return apiError('Student ID required')
+export const GET = withErrorHandler(
+  async (req: NextRequest, context?: { params: Record<string, string> }) => {
+    await requireStaff()
+    const id = context?.params?.id
+    if (!id) return apiError('Student ID required')
 
-  const student = await prisma.user.findUnique({
-    where: { id, role: 'STUDENT' },
-    include: {
-      profile: true,
-      studentProfile: true,
-      wallet: { include: { transactions: { orderBy: { createdAt: 'desc' }, take: 20 } } },
-      enrollments: { include: { course: true, grades: true } },
-      poolMemberships: { include: { pool: { include: { event: true } } } },
-      attendanceRecords: { orderBy: { date: 'desc' }, take: 30 },
-    },
-  })
+    const student = await prisma.user.findUnique({
+      where: { id, role: 'STUDENT' },
+      include: {
+        profile: true,
+        studentProfile: true,
+        wallet: { include: { transactions: { orderBy: { createdAt: 'desc' }, take: 20 } } },
+        enrollments: { include: { course: true, grades: true } },
+        poolMemberships: { include: { pool: { include: { event: true } } } },
+        attendanceRecords: { orderBy: { date: 'desc' }, take: 30 },
+        examResults: {
+          include: {
+            exam: {
+              include: {
+                examComponent: { include: { course: { select: { name: true, code: true } } } },
+              },
+            },
+          },
+          orderBy: { createdAt: 'desc' },
+        },
+        examBookings: {
+          where: { status: 'COMPLETED' },
+          include: {
+            exam: {
+              include: {
+                examComponent: { include: { course: { select: { name: true, code: true } } } },
+              },
+            },
+          },
+          orderBy: { examDate: 'desc' },
+        },
+      },
+    })
 
-  if (!student) return apiNotFound('Student not found')
+    if (!student) return apiNotFound('Student not found')
 
-  const { password, ...safe } = student
-  return apiSuccess(safe)
-})
+    const { password, ...safe } = student
+    return apiSuccess(safe)
+  }
+)

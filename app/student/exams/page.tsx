@@ -106,7 +106,10 @@ export default async function ExamsPage({
       }),
     ])
   } catch (error) {
-    console.error('Exams page data fetch error:', error instanceof Error ? error.message : 'Unknown error')
+    console.error(
+      'Exams page data fetch error:',
+      error instanceof Error ? error.message : 'Unknown error'
+    )
     throw new Error('Failed to load exam data. Please try again.')
   }
 
@@ -257,7 +260,7 @@ export default async function ExamsPage({
 
       {/* ── Results Tab ── */}
       {tab === 'results' && (
-        <div className="space-y-8">
+        <div className="space-y-6">
           {allHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
@@ -271,47 +274,63 @@ export default async function ExamsPage({
               </p>
             </div>
           ) : (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {allHistory
-                .filter((r) => r.score !== undefined || r.grade !== undefined) // Only show records with some form of result
-                .map((result) => (
-                  <div
-                    key={`${result.type}-${result.id}`}
-                    className="flex flex-col justify-between rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="rounded-lg bg-blue-50 px-3 py-1 text-xs font-bold tracking-wide text-blue-600 uppercase">
-                        {result.moduleCode}
-                      </div>
-                      {result.passed ? (
-                        <div className="flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-black text-emerald-700 uppercase">
-                          <CheckCircle2 className="h-3 w-3" /> Passed
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-black text-red-700 uppercase">
-                          <XCircle className="h-3 w-3" /> Failed
-                        </div>
-                      )}
-                    </div>
-                    <h3 className="mt-4 text-lg leading-tight font-bold text-slate-900 dark:text-slate-100">
-                      {result.moduleName}
-                    </h3>
-                    <div className="mt-6 grid grid-cols-2 gap-4 border-t border-slate-50 pt-4 dark:border-slate-800">
-                      <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase">Score</p>
-                        <p className="text-lg font-black text-slate-900 dark:text-slate-100">
-                          {result.score !== undefined ? `${result.score}%` : result.grade || '—'}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-xs font-bold text-slate-400 uppercase">Type</p>
-                        <p className="text-sm font-bold text-slate-500 uppercase">
-                          {result.type === 'RESULT' ? 'Formal' : 'Manual'}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+            <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-slate-50 text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:bg-slate-800/50">
+                    <tr className="border-b border-slate-100 dark:border-slate-800">
+                      <th className="px-6 py-4">Module / Course</th>
+                      <th className="px-6 py-4 text-center">Score</th>
+                      <th className="px-6 py-4 text-center">Type</th>
+                      <th className="px-6 py-4 text-right">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {allHistory
+                      .filter((r) => r.score !== undefined || r.grade !== undefined)
+                      .map((result, idx) => (
+                        <tr
+                          key={`${result.type}-${result.id}-${idx}`}
+                          className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
+                        >
+                          <td className="px-6 py-4">
+                            <div className="min-w-0">
+                              <p className="font-bold text-slate-900 dark:text-white">
+                                {result.moduleCode}
+                              </p>
+                              <p className="truncate text-xs text-slate-500">{result.moduleName}</p>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <p className="font-mono text-lg font-black text-slate-900 dark:text-white">
+                              {result.score !== undefined
+                                ? `${result.score}%`
+                                : result.grade || '—'}
+                            </p>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className="inline-flex rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 uppercase dark:bg-slate-800 dark:text-slate-400">
+                              {result.type === 'RESULT' ? 'Formal' : 'Manual'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            <div className="flex justify-end">
+                              {result.passed ? (
+                                <div className="flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black text-emerald-700 uppercase">
+                                  <CheckCircle2 className="h-3 w-3" /> Passed
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-[10px] font-black text-red-700 uppercase">
+                                  <XCircle className="h-3 w-3" /> Failed
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>

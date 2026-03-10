@@ -195,6 +195,7 @@ export async function bulkUpdateExamBookingStatus(bookingIds: string[], status: 
     })
 
     revalidatePath('/staff/exams')
+    revalidatePath('/student')
     return { success: true }
   } catch (error) {
     console.error('Bulk update exam booking status error:', error)
@@ -216,6 +217,7 @@ export async function bulkUpdatePaymentStatus(paymentIds: string[], status: any)
     })
 
     revalidatePath('/staff/finance')
+    revalidatePath('/student')
     return { success: true }
   } catch (error) {
     console.error('Bulk update payment status error:', error)
@@ -392,6 +394,7 @@ export async function createExamRecord(data: {
 
     revalidatePath('/staff/exams')
     revalidatePath('/student/exams')
+    revalidatePath('/student')
     return { success: true, count: results.length }
   } catch (error) {
     console.error('Create exam record error:', error)
@@ -410,6 +413,7 @@ export async function deleteExamRecord(bookingId: string) {
 
     revalidatePath('/staff/exams')
     revalidatePath('/student/exams')
+    revalidatePath('/student')
     return { success: true }
   } catch (error) {
     console.error('Delete exam record error:', error)
