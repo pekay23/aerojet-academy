@@ -102,8 +102,10 @@ export default function PoolsTabs({ children }: { children: React.ReactNode }) {
           return (
             <button
               key={t.key}
+              id={`tab-${t.key}`}
               role="tab"
               aria-selected={isActive}
+              aria-controls="pools-tabpanel"
               onClick={() => setTab(t.key)}
               className={`relative flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#002a5c]/50 ${
                 isActive
@@ -152,7 +154,7 @@ export default function PoolsTabs({ children }: { children: React.ReactNode }) {
                       : `${action.bg} ${action.iconColor} group-hover:scale-105`
                   }`}
                 >
-                  <Icon className="h-5 w-5" />
+                  <Icon className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <div className="min-w-0">
                   <p
@@ -172,7 +174,9 @@ export default function PoolsTabs({ children }: { children: React.ReactNode }) {
         </div>
       </div>
 
-      {children}
+      <div role="tabpanel" id="pools-tabpanel" aria-labelledby={`tab-${currentTab}`}>
+        {children}
+      </div>
     </div>
   )
 }

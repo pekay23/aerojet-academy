@@ -369,8 +369,8 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     revalidatePath('/student/wallet')
     return { success: true }
   } catch (error) {
-    console.error('Join Pool Error:', error)
-    return { error: (error as Error).message || 'Failed to join exam booking. Please try again.' }
+    console.error('Join Pool Error:', error instanceof Error ? error.message : 'Unknown error')
+    return { error: 'Failed to join exam booking. Please try again.' }
   }
 }
 
@@ -403,7 +403,7 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
     const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
     if (!wallet || Number(wallet.availableBalance) < seatPrice) {
       return {
-        error: `Insufficient funds. Starting a ${isGroup ? 'group charter' : 'booking'} requires a reservation of €${seatPrice.toFixed(2)}.`,
+        error: `Insufficient funds. Starting a ${isGroup ? 'group charter' : 'booking'} requires a reservation of ${seatPrice.toFixed(2)}. Please top up your wallet.`,
       }
     }
 
@@ -544,8 +544,8 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
 
     return { success: true, poolId: pool.id }
   } catch (error: any) {
-    console.error('Create Student Pool Error:', error)
-    return { error: error.message || 'Failed to create exam booking.' }
+    console.error('Create Student Pool Error:', error instanceof Error ? error.message : 'Unknown error')
+    return { error: 'Failed to create exam booking. Please try again.' }
   }
 }
 
@@ -891,9 +891,8 @@ export async function sendMessage(recipientId: string, subject: string, body: st
     revalidatePath('/student/messages')
     return { success: true }
   } catch (error) {
-    console.error('Send message error:', error)
-    const msg = error instanceof Error ? error.message : 'Unknown error'
-    return { error: `Failed to send message: ${msg}` }
+    console.error('Send message error:', error instanceof Error ? error.message : 'Unknown error')
+    return { error: 'Failed to send message. Please try again.' }
   }
 }
 

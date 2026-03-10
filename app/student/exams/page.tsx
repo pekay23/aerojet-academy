@@ -82,27 +82,33 @@ export default async function ExamsPage({
     )
   }
 
-  const [bookings, results, studentProfile] = await Promise.all([
-    prisma.examBooking.findMany({
-      where: { userId: session.user.id },
-      include: {
-        exam: { include: { examComponent: { include: { course: true } } } },
-        event: true,
-      },
-      orderBy: { examDate: 'desc' },
-    }),
-    prisma.examResult.findMany({
-      where: { userId: session.user.id },
-      include: {
-        exam: { include: { examComponent: { include: { course: true } } } },
-      },
-      orderBy: { createdAt: 'desc' },
-    }),
-    prisma.studentProfile.findUnique({
-      where: { userId: session.user.id },
-      include: { pathwayRel: true },
-    }),
-  ])
+  let bookings, results, studentProfile
+  try {
+    ;[bookings, results, studentProfile] = await Promise.all([
+      prisma.examBooking.findMany({
+        where: { userId: session.user.id },
+        include: {
+          exam: { include: { examComponent: { include: { course: true } } } },
+          event: true,
+        },
+        orderBy: { examDate: 'desc' },
+      }),
+      prisma.examResult.findMany({
+        where: { userId: session.user.id },
+        include: {
+          exam: { include: { examComponent: { include: { course: true } } } },
+        },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.studentProfile.findUnique({
+        where: { userId: session.user.id },
+        include: { pathwayRel: true },
+      }),
+    ])
+  } catch (error) {
+    console.error('Exams page data fetch error:', error instanceof Error ? error.message : 'Unknown error')
+    throw new Error('Failed to load exam data. Please try again.')
+  }
 
   // Map raw bookings to BookingRecord interface for child components
   const mappedBookings = bookings.map((b: any) => ({
