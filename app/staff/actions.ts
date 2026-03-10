@@ -266,3 +266,41 @@ export async function bulkBypassPasswordChange(userIds: string[]) {
     return { error: 'Failed to update users.' }
   }
 }
+/**
+ * Updates an individual exam booking (used for historical record corrections).
+ */
+export async function updateExamBooking(
+  bookingId: string,
+  data: {
+    moduleCode?: string
+    examDate?: Date
+    score?: number
+    result?: string
+    status?: any
+  }
+) {
+  try {
+    await requireStaff()
+
+    const updateData: any = { ...data }
+
+    // Derive result from score if score is provided
+    if (data.score !== undefined) {
+      updateData.percentage = data.score
+      updateData.passed = data.score >= 75
+      updateData.result = data.score >= 75 ? 'pass' : 'fail'
+    }
+
+    await prisma.examBooking.update({
+      where: { id: bookingId },
+      data: updateData,
+    })
+
+    revalidatePath('/staff/exams')
+    revalidatePath('/student/exams')
+    return { success: true }
+  } catch (error) {
+    console.error('Update exam booking error:', error)
+    return { error: 'Failed to update booking.' }
+  }
+}

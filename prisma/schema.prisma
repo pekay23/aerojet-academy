@@ -591,6 +591,9 @@ model ExamBooking {
   bookingGroupRef   String?
   attemptType       String?
   result            String?
+  score             Decimal?           @db.Decimal(5, 2)
+  maxScore          Decimal?           @db.Decimal(5, 2)
+  percentage        Decimal?           @db.Decimal(5, 2)
   sourceNotes       String?
   migrationRef      String?
   createdAt         DateTime           @default(now())
