@@ -13,6 +13,7 @@ import {
   AlertCircle,
   Search,
   GraduationCap,
+  History as HistoryIcon,
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -115,16 +116,40 @@ export default async function StudentDashboard() {
     : 0
 
   // Exam Bookings Joined
-  const [currentPoolsCount, poolMemberships] = await Promise.all([
-    prisma.poolMembership.count({
-      where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
-    }),
-    prisma.poolMembership.findMany({
-      where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
-      include: { pool: true },
-      take: 3,
-    }),
-  ])
+  const [currentPoolsCount, poolMemberships, latestResultRecord, latestMigratedRecord] =
+    await Promise.all([
+      prisma.poolMembership.count({
+        where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+      }),
+      prisma.poolMembership.findMany({
+        where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+        include: { pool: true },
+        take: 3,
+      }),
+      prisma.examResult.findFirst({
+        where: { userId },
+        include: { exam: { include: { examComponent: { include: { course: true } } } } },
+        orderBy: { createdAt: 'desc' },
+      }),
+      prisma.examBooking.findFirst({
+        where: { userId, result: { in: ['pass', 'fail'] } },
+        orderBy: { examDate: 'desc' },
+      }),
+    ])
+
+  const dashboardResult = latestResultRecord
+    ? {
+        module: latestResultRecord.exam.examComponent?.course?.code || '—',
+        passed: latestResultRecord.passed,
+        status: `${Number(latestResultRecord.percentage)}%`,
+      }
+    : latestMigratedRecord
+      ? {
+          module: latestMigratedRecord.moduleCode || '—',
+          passed: latestMigratedRecord.result === 'pass',
+          status: latestMigratedRecord.result?.toUpperCase() || '—',
+        }
+      : null
 
   const renderActiveAcademicBlock = () => {
     if (isExamOnly) {
@@ -137,9 +162,7 @@ export default async function StudentDashboard() {
                   <h2 className="text-2xl font-black text-[#002a5c] dark:text-white">
                     Exam Only Pathway
                   </h2>
-                  <p className="mt-1 text-slate-500">
-                    Manage your exam bookings and view results.
-                  </p>
+                  <p className="mt-1 text-slate-500">Manage your exam bookings and view results.</p>
                 </div>
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#002a5c] text-white">
                   <BookOpen className="h-6 w-6" />
@@ -159,17 +182,17 @@ export default async function StudentDashboard() {
                   </p>
                 </div>
                 <Link
-                  href="/student/exam-bookings"
+                  href="/student/exams"
                   className="group rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:border-blue-100 hover:bg-blue-50/50 dark:border-slate-800 dark:bg-slate-900/50"
                 >
-                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                    <Search className="h-5 w-5" />
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-all group-hover:bg-emerald-600 group-hover:text-white">
+                    <HistoryIcon className="h-5 w-5" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100">
-                    Find Exam Bookings &rarr;
+                    View Exam History &rarr;
                   </h3>
                   <p className="mt-1 text-sm text-slate-500">
-                    Browse and join available exam seating options.
+                    See your results, passes, and licensing progress.
                   </p>
                 </Link>
               </div>
@@ -352,8 +375,32 @@ export default async function StudentDashboard() {
     return null
   }
 
-  // Attendance block can be hidden for EXAM_ONLY
-  const attendanceBlock = !isExamOnly && (
+  // Attendance block or Result Highlight
+  const attendanceBlock = isExamOnly ? (
+    <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-center gap-4">
+        <div
+          className={`flex h-12 w-12 items-center justify-center rounded-xl ${dashboardResult?.passed ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-600'}`}
+        >
+          {dashboardResult?.passed ? (
+            <CheckCircle2 className="h-6 w-6" />
+          ) : (
+            <AlertCircle className="h-6 w-6" />
+          )}
+        </div>
+        <div>
+          <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+            Latest Result
+          </p>
+          <p className="text-xl font-black text-slate-900 dark:text-slate-100">
+            {dashboardResult
+              ? `${dashboardResult.module}: ${dashboardResult.status}`
+              : 'No results yet'}
+          </p>
+        </div>
+      </div>
+    </div>
+  ) : (
     <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
       <div className="flex items-center gap-4">
         <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
@@ -552,7 +599,7 @@ export default async function StudentDashboard() {
               )}
               {!isFullTime && (
                 <Link
-                  href="/student/exam-pools"
+                  href="/student/exam-bookings"
                   className="group flex items-center gap-3 rounded-xl p-3 transition-colors hover:bg-slate-50 dark:bg-slate-800/50"
                 >
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-50 text-purple-600 transition-colors group-hover:bg-purple-600 group-hover:text-white">

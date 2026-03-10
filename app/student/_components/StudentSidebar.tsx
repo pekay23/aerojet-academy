@@ -36,55 +36,52 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
     baseLinks.push(
       { label: 'Wallet', href: '/student/wallet', icon: Wallet },
       { label: 'Exam Bookings', href: '/student/exam-bookings', icon: FileCheck },
-      { label: 'Notifications', href: '/student/notifications', icon: Bell },
-      { label: 'Messages', href: '/student/messages', icon: Mail },
-      { label: 'Profile', href: '/student/profile', icon: User }
+      { label: 'Exams', href: '/student/exams', icon: ClipboardCheck }
     )
-    return baseLinks
-  }
-
-  if (isFullTime && isRestricted) {
-    baseLinks.push({ label: 'Wallet', href: '/student/wallet', icon: Wallet })
   } else {
-    baseLinks.push(
-      { label: 'Academic Calendar', href: '/student/academic-calendar', icon: CalendarCheck },
-      { label: 'Wallet', href: '/student/wallet', icon: Wallet }
-    )
-  }
+    if (isFullTime && isRestricted) {
+      baseLinks.push({ label: 'Wallet', href: '/student/wallet', icon: Wallet })
+    } else {
+      baseLinks.push(
+        { label: 'Academic Calendar', href: '/student/academic-calendar', icon: CalendarCheck },
+        { label: 'Wallet', href: '/student/wallet', icon: Wallet }
+      )
+    }
 
-  if (!isFullTime) {
-    baseLinks.push({ label: 'Resources', href: '/student/resources', icon: ScrollText })
-  }
+    if (!isFullTime) {
+      baseLinks.push({ label: 'Resources', href: '/student/resources', icon: ScrollText })
+    }
 
-  if (hasFullAccess || !isFullTime) {
-    baseLinks.push({
-      label: 'My Courses',
-      href: '/student/courses',
-      icon: BookOpen,
-      children: isFullTime
-        ? [{ label: 'Enrolled Courses', href: '/student/courses' }]
-        : [
-            { label: 'Enrolled Courses', href: '/student/courses' },
-            { label: 'Enroll in New', href: '/student/courses/enroll' },
-          ],
-    })
-  }
+    if (hasFullAccess || !isFullTime) {
+      baseLinks.push({
+        label: 'My Courses',
+        href: '/student/courses',
+        icon: BookOpen,
+        children: isFullTime
+          ? [{ label: 'Enrolled Courses', href: '/student/courses' }]
+          : [
+              { label: 'Enrolled Courses', href: '/student/courses' },
+              { label: 'Enroll in New', href: '/student/courses/enroll' },
+            ],
+      })
+    }
 
-  if (!isFullTime) {
-    baseLinks.push({
-      label: 'Exam Bookings',
-      href: '/student/exam-pools',
-      icon: FileCheck,
-    })
-  }
+    if (!isFullTime) {
+      baseLinks.push({
+        label: 'Exam Bookings',
+        href: '/student/exam-bookings',
+        icon: FileCheck,
+      })
+    }
 
-  if (hasFullAccess) {
-    baseLinks.push(
-      { label: 'Exams', href: '/student/exams', icon: ClipboardCheck },
-      { label: 'Grades', href: '/student/grades', icon: CalendarCheck },
-      { label: 'Attendance', href: '/student/attendance', icon: CalendarCheck },
-      { label: 'Certificates', href: '/student/certificates', icon: Award }
-    )
+    if (hasFullAccess) {
+      baseLinks.push(
+        { label: 'Exams', href: '/student/exams', icon: ClipboardCheck },
+        { label: 'Grades', href: '/student/grades', icon: CalendarCheck },
+        { label: 'Attendance', href: '/student/attendance', icon: CalendarCheck },
+        { label: 'Certificates', href: '/student/certificates', icon: Award }
+      )
+    }
   }
 
   baseLinks.push(

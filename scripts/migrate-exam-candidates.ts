@@ -111,8 +111,46 @@ const candidates: CandidateData[] = [
     personalEmail: 'davarcher111@gmail.com',
     academyEmail: 'd.archer@aerojet-academy.com',
     walletCreditEur: 2010,
-    walletNotes: 'Historical modules: M1, M8, M2, M3, M4, M5. M4/M5 refunded. Approved wallet credit carried forward.',
-    examHistory: [],
+    walletNotes:
+      'Historical modules: M1, M8, M2, M3, M4, M5. M4/M5 refunded. Approved wallet credit carried forward.',
+    examHistory: [
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M1',
+        bookingGroupRef: 'DAVID-HIST-1',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M8',
+        bookingGroupRef: 'DAVID-HIST-1',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M2',
+        bookingGroupRef: 'DAVID-HIST-2',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M3',
+        bookingGroupRef: 'DAVID-HIST-2',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+    ],
     entitlements: [],
     plannedBookings: [],
   },
@@ -123,7 +161,44 @@ const candidates: CandidateData[] = [
     academyEmail: 'a.adam@aerojet-academy.com',
     walletCreditEur: 1340,
     walletNotes: 'Consolidated record. Intended modules: M1, M8, M2, M3.',
-    examHistory: [],
+    examHistory: [
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M1',
+        bookingGroupRef: 'ABDUL-HIST-1',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M8',
+        bookingGroupRef: 'ABDUL-HIST-1',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M2',
+        bookingGroupRef: 'ABDUL-HIST-2',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M3',
+        bookingGroupRef: 'ABDUL-HIST-2',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+    ],
     entitlements: [],
     plannedBookings: [],
   },
@@ -134,7 +209,26 @@ const candidates: CandidateData[] = [
     academyEmail: 'd.korku@aerojet-academy.com',
     walletCreditEur: 670,
     walletNotes: 'Intended modules: M1, M8.',
-    examHistory: [],
+    examHistory: [
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M1',
+        bookingGroupRef: 'DZATOR-HIST-1',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M8',
+        bookingGroupRef: 'DZATOR-HIST-1',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+    ],
     entitlements: [],
     plannedBookings: [],
   },
@@ -145,7 +239,26 @@ const candidates: CandidateData[] = [
     academyEmail: 'f.ampeh@aerojet-academy.com',
     walletCreditEur: 670,
     walletNotes: 'Intended modules: M2, M3.',
-    examHistory: [],
+    examHistory: [
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M2',
+        bookingGroupRef: 'FRED-HIST-1',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M3',
+        bookingGroupRef: 'FRED-HIST-1',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+    ],
     entitlements: [],
     plannedBookings: [],
   },
@@ -156,7 +269,44 @@ const candidates: CandidateData[] = [
     academyEmail: 'b.bandor@aerojet-academy.com',
     walletCreditEur: 3090,
     walletNotes: 'Intended modules: M1, M2, M3, M8. Admin notes: B1 & B2.',
-    examHistory: [],
+    examHistory: [
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M1',
+        bookingGroupRef: 'BENARD-HIST-1',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M8',
+        bookingGroupRef: 'BENARD-HIST-1',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M2',
+        bookingGroupRef: 'BENARD-HIST-2',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+      {
+        sittingLabel: 'Historical Import',
+        moduleCode: 'M3',
+        bookingGroupRef: 'BENARD-HIST-2',
+        bookingType: 'bundle',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Imported historical pass',
+      },
+    ],
     entitlements: [],
     plannedBookings: [],
   },
@@ -166,24 +316,91 @@ const candidates: CandidateData[] = [
     personalEmail: 'puredzifa1@gmail.com',
     academyEmail: 'e.avege@aerojet-academy.com',
     walletCreditEur: 670,
-    walletNotes: 'Upcoming M2+M3 twin booking paid USD 780 = EUR 670. Historical exam history imported.',
+    walletNotes:
+      'Upcoming M2+M3 twin booking paid USD 780 = EUR 670. Historical exam history imported.',
     examHistory: [
       // Earlier sitting: twin M10+M8, both failed
-      { sittingLabel: 'Earlier Sitting', moduleCode: 'M10', bookingGroupRef: 'EDITH-TWIN-1', bookingType: 'twin', attemptType: 'first_attempt', result: 'fail', sourceNotes: 'Twin package USD 780 — M10+M8' },
-      { sittingLabel: 'Earlier Sitting', moduleCode: 'M8', bookingGroupRef: 'EDITH-TWIN-1', bookingType: 'twin', attemptType: 'first_attempt', result: 'fail', sourceNotes: 'Twin package USD 780 — M10+M8' },
+      {
+        sittingLabel: 'Earlier Sitting',
+        moduleCode: 'M10',
+        bookingGroupRef: 'EDITH-TWIN-1',
+        bookingType: 'twin',
+        attemptType: 'first_attempt',
+        result: 'fail',
+        sourceNotes: 'Twin package USD 780 — M10+M8',
+      },
+      {
+        sittingLabel: 'Earlier Sitting',
+        moduleCode: 'M8',
+        bookingGroupRef: 'EDITH-TWIN-1',
+        bookingType: 'twin',
+        attemptType: 'first_attempt',
+        result: 'fail',
+        sourceNotes: 'Twin package USD 780 — M10+M8',
+      },
       // Last sitting: twin M1+M9, both passed
-      { sittingLabel: 'Last Sitting', moduleCode: 'M1', bookingGroupRef: 'EDITH-TWIN-2', bookingType: 'twin', attemptType: 'first_attempt', result: 'pass', sourceNotes: 'Twin package USD 780 — M1+M9' },
-      { sittingLabel: 'Last Sitting', moduleCode: 'M9', bookingGroupRef: 'EDITH-TWIN-2', bookingType: 'twin', attemptType: 'first_attempt', result: 'pass', sourceNotes: 'Twin package USD 780 — M1+M9' },
+      {
+        sittingLabel: 'Last Sitting',
+        moduleCode: 'M1',
+        bookingGroupRef: 'EDITH-TWIN-2',
+        bookingType: 'twin',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Twin package USD 780 — M1+M9',
+      },
+      {
+        sittingLabel: 'Last Sitting',
+        moduleCode: 'M9',
+        bookingGroupRef: 'EDITH-TWIN-2',
+        bookingType: 'twin',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Twin package USD 780 — M1+M9',
+      },
       // Last sitting: M10 resit, failed
-      { sittingLabel: 'Last Sitting', moduleCode: 'M10', bookingGroupRef: 'EDITH-TWIN-1', bookingType: 'twin', attemptType: 'resit', result: 'fail', sourceNotes: 'Resit of M10 using free resit from EDITH-TWIN-1' },
+      {
+        sittingLabel: 'Last Sitting',
+        moduleCode: 'M10',
+        bookingGroupRef: 'EDITH-TWIN-1',
+        bookingType: 'twin',
+        attemptType: 'resit',
+        result: 'fail',
+        sourceNotes: 'Resit of M10 using free resit from EDITH-TWIN-1',
+      },
     ],
     entitlements: [
-      { bookingGroupRef: 'EDITH-TWIN-1', bookingType: 'twin', includedFreeResits: 1, usedFreeResits: 1, transferable: false, notes: 'M10+M8 twin. Free resit used on M10 resit (failed). Exhausted.' },
-      { bookingGroupRef: 'EDITH-TWIN-2', bookingType: 'twin', includedFreeResits: 1, usedFreeResits: 0, transferable: false, notes: 'M1+M9 twin. Free resit unused. NOT transferable to M10.' },
+      {
+        bookingGroupRef: 'EDITH-TWIN-1',
+        bookingType: 'twin',
+        includedFreeResits: 1,
+        usedFreeResits: 1,
+        transferable: false,
+        notes: 'M10+M8 twin. Free resit used on M10 resit (failed). Exhausted.',
+      },
+      {
+        bookingGroupRef: 'EDITH-TWIN-2',
+        bookingType: 'twin',
+        includedFreeResits: 1,
+        usedFreeResits: 0,
+        transferable: false,
+        notes: 'M1+M9 twin. Free resit unused. NOT transferable to M10.',
+      },
     ],
     plannedBookings: [
-      { moduleCode: 'M2', bookingGroupRef: 'EDITH-TWIN-3', bookingType: 'twin', paymentStatus: 'paid', sourceNotes: 'Upcoming twin M2+M3, paid USD 780 = EUR 670' },
-      { moduleCode: 'M3', bookingGroupRef: 'EDITH-TWIN-3', bookingType: 'twin', paymentStatus: 'paid', sourceNotes: 'Upcoming twin M2+M3, paid USD 780 = EUR 670' },
+      {
+        moduleCode: 'M2',
+        bookingGroupRef: 'EDITH-TWIN-3',
+        bookingType: 'twin',
+        paymentStatus: 'paid',
+        sourceNotes: 'Upcoming twin M2+M3, paid USD 780 = EUR 670',
+      },
+      {
+        moduleCode: 'M3',
+        bookingGroupRef: 'EDITH-TWIN-3',
+        bookingType: 'twin',
+        paymentStatus: 'paid',
+        sourceNotes: 'Upcoming twin M2+M3, paid USD 780 = EUR 670',
+      },
     ],
   },
   {
@@ -194,15 +411,50 @@ const candidates: CandidateData[] = [
     walletCreditEur: 0,
     walletNotes: 'No prepaid credit. Upcoming M2+M3 not yet paid.',
     examHistory: [
-      { sittingLabel: 'Last Sitting', moduleCode: 'M1', bookingGroupRef: 'PRINCE-TWIN-1', bookingType: 'twin', attemptType: 'first_attempt', result: 'pass', sourceNotes: 'Twin package USD 780 — M1+M8' },
-      { sittingLabel: 'Last Sitting', moduleCode: 'M8', bookingGroupRef: 'PRINCE-TWIN-1', bookingType: 'twin', attemptType: 'first_attempt', result: 'pass', sourceNotes: 'Twin package USD 780 — M1+M8' },
+      {
+        sittingLabel: 'Last Sitting',
+        moduleCode: 'M1',
+        bookingGroupRef: 'PRINCE-TWIN-1',
+        bookingType: 'twin',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Twin package USD 780 — M1+M8',
+      },
+      {
+        sittingLabel: 'Last Sitting',
+        moduleCode: 'M8',
+        bookingGroupRef: 'PRINCE-TWIN-1',
+        bookingType: 'twin',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Twin package USD 780 — M1+M8',
+      },
     ],
     entitlements: [
-      { bookingGroupRef: 'PRINCE-TWIN-1', bookingType: 'twin', includedFreeResits: 1, usedFreeResits: 0, transferable: false, notes: 'M1+M8 twin. Both passed, free resit unused.' },
+      {
+        bookingGroupRef: 'PRINCE-TWIN-1',
+        bookingType: 'twin',
+        includedFreeResits: 1,
+        usedFreeResits: 0,
+        transferable: false,
+        notes: 'M1+M8 twin. Both passed, free resit unused.',
+      },
     ],
     plannedBookings: [
-      { moduleCode: 'M2', bookingGroupRef: 'PRINCE-TWIN-2', bookingType: 'twin', paymentStatus: 'unpaid', sourceNotes: 'Upcoming twin M2+M3 — NOT YET PAID' },
-      { moduleCode: 'M3', bookingGroupRef: 'PRINCE-TWIN-2', bookingType: 'twin', paymentStatus: 'unpaid', sourceNotes: 'Upcoming twin M2+M3 — NOT YET PAID' },
+      {
+        moduleCode: 'M2',
+        bookingGroupRef: 'PRINCE-TWIN-2',
+        bookingType: 'twin',
+        paymentStatus: 'unpaid',
+        sourceNotes: 'Upcoming twin M2+M3 — NOT YET PAID',
+      },
+      {
+        moduleCode: 'M3',
+        bookingGroupRef: 'PRINCE-TWIN-2',
+        bookingType: 'twin',
+        paymentStatus: 'unpaid',
+        sourceNotes: 'Upcoming twin M2+M3 — NOT YET PAID',
+      },
     ],
   },
   {
@@ -213,15 +465,50 @@ const candidates: CandidateData[] = [
     walletCreditEur: 0,
     walletNotes: 'No prepaid credit. Upcoming M2+M3 not yet paid.',
     examHistory: [
-      { sittingLabel: 'Last Sitting', moduleCode: 'M1', bookingGroupRef: 'EBENEZER-TWIN-1', bookingType: 'twin', attemptType: 'first_attempt', result: 'pass', sourceNotes: 'Twin package USD 780 — M1+M8' },
-      { sittingLabel: 'Last Sitting', moduleCode: 'M8', bookingGroupRef: 'EBENEZER-TWIN-1', bookingType: 'twin', attemptType: 'first_attempt', result: 'pass', sourceNotes: 'Twin package USD 780 — M1+M8' },
+      {
+        sittingLabel: 'Last Sitting',
+        moduleCode: 'M1',
+        bookingGroupRef: 'EBENEZER-TWIN-1',
+        bookingType: 'twin',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Twin package USD 780 — M1+M8',
+      },
+      {
+        sittingLabel: 'Last Sitting',
+        moduleCode: 'M8',
+        bookingGroupRef: 'EBENEZER-TWIN-1',
+        bookingType: 'twin',
+        attemptType: 'first_attempt',
+        result: 'pass',
+        sourceNotes: 'Twin package USD 780 — M1+M8',
+      },
     ],
     entitlements: [
-      { bookingGroupRef: 'EBENEZER-TWIN-1', bookingType: 'twin', includedFreeResits: 1, usedFreeResits: 0, transferable: false, notes: 'M1+M8 twin. Both passed, free resit unused.' },
+      {
+        bookingGroupRef: 'EBENEZER-TWIN-1',
+        bookingType: 'twin',
+        includedFreeResits: 1,
+        usedFreeResits: 0,
+        transferable: false,
+        notes: 'M1+M8 twin. Both passed, free resit unused.',
+      },
     ],
     plannedBookings: [
-      { moduleCode: 'M2', bookingGroupRef: 'EBENEZER-TWIN-2', bookingType: 'twin', paymentStatus: 'unpaid', sourceNotes: 'Upcoming twin M2+M3 — NOT YET PAID' },
-      { moduleCode: 'M3', bookingGroupRef: 'EBENEZER-TWIN-2', bookingType: 'twin', paymentStatus: 'unpaid', sourceNotes: 'Upcoming twin M2+M3 — NOT YET PAID' },
+      {
+        moduleCode: 'M2',
+        bookingGroupRef: 'EBENEZER-TWIN-2',
+        bookingType: 'twin',
+        paymentStatus: 'unpaid',
+        sourceNotes: 'Upcoming twin M2+M3 — NOT YET PAID',
+      },
+      {
+        moduleCode: 'M3',
+        bookingGroupRef: 'EBENEZER-TWIN-2',
+        bookingType: 'twin',
+        paymentStatus: 'unpaid',
+        sourceNotes: 'Upcoming twin M2+M3 — NOT YET PAID',
+      },
     ],
   },
 ]
@@ -233,7 +520,15 @@ const candidates: CandidateData[] = [
 interface MigrationReport {
   created: string[]
   updated: string[]
-  credentials: { firstName: string; lastName: string; email: string; academyEmail: string; temporaryPassword: string; walletBalanceEur: number; notes: string }[]
+  credentials: {
+    firstName: string
+    lastName: string
+    email: string
+    academyEmail: string
+    temporaryPassword: string
+    walletBalanceEur: number
+    notes: string
+  }[]
   wallets: { email: string; balance: number }[]
   examBookings: { email: string; module: string; result: string; type: string }[]
   errors: { email: string; error: string }[]
@@ -254,9 +549,15 @@ const report: MigrationReport = {
 
 async function migrateCandidate(candidate: CandidateData) {
   const {
-    firstName, lastName, personalEmail, academyEmail,
-    walletCreditEur, walletNotes,
-    examHistory, entitlements, plannedBookings,
+    firstName,
+    lastName,
+    personalEmail,
+    academyEmail,
+    walletCreditEur,
+    walletNotes,
+    examHistory,
+    entitlements,
+    plannedBookings,
   } = candidate
 
   console.log(`\n--- Processing: ${firstName} ${lastName} (${personalEmail}) ---`)
@@ -332,8 +633,8 @@ async function migrateCandidate(candidate: CandidateData) {
         role: UserRole.STUDENT,
         status: UserStatus.ACTIVE,
         programmeChoice: 'EXAM_ONLY',
-        mustChangePassword: true,
-        passwordChanged: false,
+        // mustChangePassword preserved if user already exists
+        passwordChanged: user.passwordChanged,
         emailVerified: user.emailVerified || new Date(),
         registrationPaid: true,
       },
@@ -479,10 +780,18 @@ async function migrateCandidate(candidate: CandidateData) {
         },
       })
       console.log(`  Exam booking: ${entry.moduleCode} (${entry.attemptType}) = ${entry.result}`)
-      report.examBookings.push({ email: personalEmail, module: entry.moduleCode, result: entry.result, type: entry.attemptType })
     } else {
-      console.log(`  Exam booking already exists: ${entry.moduleCode} (${entry.attemptType}) — skip`)
+      console.log(
+        `  Exam booking already exists: ${entry.moduleCode} (${entry.attemptType}) — skip`
+      )
     }
+    // Always add to report for completeness
+    report.examBookings.push({
+      email: personalEmail,
+      module: entry.moduleCode,
+      result: entry.result,
+      type: entry.attemptType,
+    })
   }
 
   // Step 4: Planned/upcoming bookings
@@ -494,9 +803,8 @@ async function migrateCandidate(candidate: CandidateData) {
     })
 
     if (!existing) {
-      const paymentStatus = planned.paymentStatus === 'paid'
-        ? PaymentStatus.COMPLETED
-        : PaymentStatus.PENDING
+      const paymentStatus =
+        planned.paymentStatus === 'paid' ? PaymentStatus.COMPLETED : PaymentStatus.PENDING
 
       await prisma.examBooking.create({
         data: {
@@ -517,6 +825,13 @@ async function migrateCandidate(candidate: CandidateData) {
     } else {
       console.log(`  Planned booking already exists: ${planned.moduleCode} — skip`)
     }
+    // Always add to report for completeness
+    report.examBookings.push({
+      email: personalEmail,
+      module: planned.moduleCode,
+      result: 'pending',
+      type: 'first_attempt',
+    })
   }
 
   // Step 5: Booking entitlements (free resit tracking)
@@ -542,7 +857,9 @@ async function migrateCandidate(candidate: CandidateData) {
           notes: `[Migration] ${ent.notes || ''}`,
         },
       })
-      console.log(`  Entitlement: ${ent.bookingGroupRef} (free resits: ${ent.includedFreeResits}, used: ${ent.usedFreeResits})`)
+      console.log(
+        `  Entitlement: ${ent.bookingGroupRef} (free resits: ${ent.includedFreeResits}, used: ${ent.usedFreeResits})`
+      )
     } else {
       console.log(`  Entitlement already exists: ${ent.bookingGroupRef} — skip`)
     }
@@ -591,8 +908,9 @@ function generateReports() {
   // 1. Credentials CSV (SENSITIVE — admin only)
   const credCsv = [
     'first_name,last_name,personal_email,academy_email,temporary_password,wallet_balance_eur,notes',
-    ...report.credentials.map((c) =>
-      `"${c.firstName}","${c.lastName}","${c.email}","${c.academyEmail}","${c.temporaryPassword}",${c.walletBalanceEur},"${c.notes.replace(/"/g, '""')}"`
+    ...report.credentials.map(
+      (c) =>
+        `"${c.firstName}","${c.lastName}","${c.email}","${c.academyEmail}","${c.temporaryPassword}",${c.walletBalanceEur},"${c.notes.replace(/"/g, '""')}"`
     ),
   ].join('\n')
   const credPath = path.join(outDir, `credentials-${timestamp}.csv`)
@@ -619,17 +937,25 @@ function generateReports() {
 
   // 4. Summary JSON
   const summaryPath = path.join(outDir, `migration-summary-${timestamp}.json`)
-  fs.writeFileSync(summaryPath, JSON.stringify({
-    migrationRef: MIGRATION_REF,
-    timestamp: new Date().toISOString(),
-    totalCandidates: candidates.length,
-    created: report.created.length,
-    updated: report.updated.length,
-    errors: report.errors,
-    credentialsFile: credPath,
-    walletFile: walletPath,
-    examHistoryFile: examPath,
-  }, null, 2), 'utf-8')
+  fs.writeFileSync(
+    summaryPath,
+    JSON.stringify(
+      {
+        migrationRef: MIGRATION_REF,
+        timestamp: new Date().toISOString(),
+        totalCandidates: candidates.length,
+        created: report.created.length,
+        updated: report.updated.length,
+        errors: report.errors,
+        credentialsFile: credPath,
+        walletFile: walletPath,
+        examHistoryFile: examPath,
+      },
+      null,
+      2
+    ),
+    'utf-8'
+  )
   console.log(`  Summary: ${summaryPath}`)
 
   // 5. Errors
@@ -670,8 +996,7 @@ async function main() {
   console.log('='.repeat(60))
 }
 
-main()
-  .catch((e) => {
-    console.error('FATAL migration error:', e)
-    process.exit(1)
-  })
+main().catch((e) => {
+  console.error('FATAL migration error:', e)
+  process.exit(1)
+})

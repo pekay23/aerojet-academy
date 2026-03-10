@@ -11,9 +11,12 @@ import {
   Trash2,
   Calendar,
   CreditCard,
+  Edit,
 } from 'lucide-react'
-import { bulkUpdateExamBookingStatus } from '../actions'
+import { bulkUpdateExamBookingStatus, updateExamBooking } from '../actions'
 import { toast } from 'sonner'
+import Modal from '../../../components/shared/Modal'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
@@ -35,6 +38,9 @@ interface ExamBookingWithDetails {
     examDate: Date
     examComponent: { course: { code: string } } | null
   } | null
+  score?: any
+  maxScore?: any
+  percentage?: any
 }
 
 interface ExamBookingsTableProps {
@@ -43,12 +49,20 @@ interface ExamBookingsTableProps {
 
 export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) {
   const router = useRouter()
+  const {
+    items: sortedBookings,
+    requestSort,
+    sortConfig,
+  } = useSort(bookings, { key: 'bookedAt', order: 'desc' })
+
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
+  const [editingBooking, setEditingBooking] = useState<ExamBookingWithDetails | null>(null)
+  const [isUpdating, setIsUpdating] = useState(false)
 
-  const total = bookings.length
-  const paged = bookings.slice((page - 1) * perPage, page * perPage)
+  const total = sortedBookings.length
+  const paged = sortedBookings.slice((page - 1) * perPage, page * perPage)
 
   const toggleAll = () => {
     if (selectedIds.length === paged.length && paged.length > 0) {
@@ -117,12 +131,38 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                     )}
                   </button>
                 </th>
-                <th className="px-6 py-4">Student</th>
-                <th className="px-6 py-4">Module / Type</th>
-                <th className="px-6 py-4">Event / Date</th>
+                <SortHeader
+                  label="Student"
+                  sortKey="user.email"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                />
+                <SortHeader
+                  label="Module / Type"
+                  sortKey="moduleCode"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                />
+                <SortHeader
+                  label="Event / Date"
+                  sortKey="event.startDate"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                />
                 <th className="px-6 py-4">Payment Status</th>
-                <th className="px-6 py-4">Amount</th>
-                <th className="px-6 py-4">Booked On</th>
+                <SortHeader
+                  label="Amount"
+                  sortKey="amountPaid"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                />
+                <SortHeader
+                  label="Booked On"
+                  sortKey="bookedAt"
+                  currentSort={sortConfig}
+                  onSort={requestSort}
+                />
+                <th className="px-6 py-4"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -205,13 +245,23 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-1 font-medium text-slate-700">
-                        <CreditCard className="h-3 w-3 text-slate-400" />
-                        {Number(booking.amountPaid).toFixed(2)}
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-1 font-medium text-slate-700">
+                          <CreditCard className="h-3 w-3 text-slate-400" />
+                          {Number(booking.amountPaid).toFixed(2)}
+                        </div>
+                        <div className="text-[10px] text-slate-400">
+                          {format(new Date(booking.bookedAt), 'MMM d, yyyy')}
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-500 dark:text-slate-400">
-                      {format(new Date(booking.bookedAt), 'MMM d, yyyy')}
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => setEditingBooking(booking)}
+                        className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-[#002a5c]"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </button>
                     </td>
                   </tr>
                 ))
@@ -227,6 +277,101 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
           onPerPageChange={setPerPage}
         />
       </div>
+
+      {editingBooking && (
+        <Modal
+          isOpen={!!editingBooking}
+          onClose={() => setEditingBooking(null)}
+          title="Edit Historical Record"
+          size="md"
+        >
+          <form
+            onSubmit={async (e) => {
+              e.preventDefault()
+              setIsUpdating(true)
+              const formData = new FormData(e.currentTarget)
+              const score = formData.get('score') ? Number(formData.get('score')) : undefined
+
+              const res = await updateExamBooking(editingBooking.id, {
+                moduleCode: formData.get('moduleCode') as string,
+                examDate: formData.get('examDate')
+                  ? new Date(formData.get('examDate') as string)
+                  : undefined,
+                score,
+              })
+
+              setIsUpdating(false)
+              if (res.success) {
+                toast.success('Record updated successfully')
+                setEditingBooking(null)
+                router.refresh()
+              } else {
+                toast.error(res.error || 'Failed to update record')
+              }
+            }}
+            className="space-y-4"
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 uppercase">Module Code</label>
+                <input
+                  name="moduleCode"
+                  defaultValue={editingBooking.moduleCode || ''}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-[#002a5c] focus:outline-hidden"
+                  required
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-500 uppercase">Exam Date</label>
+                <input
+                  name="examDate"
+                  type="date"
+                  defaultValue={
+                    editingBooking.exam
+                      ? format(new Date(editingBooking.exam.examDate), 'yyyy-MM-dd')
+                      : ''
+                  }
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-[#002a5c] focus:outline-hidden"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-bold text-slate-500 uppercase">Exam Score (%)</label>
+              <input
+                name="score"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                defaultValue={editingBooking.score ? Number(editingBooking.score) : ''}
+                placeholder="Leave blank if not yet graded"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-[#002a5c] focus:outline-hidden"
+              />
+              <p className="text-[10px] text-slate-400 italic">
+                Scores &ge; 75% will be marked as PASS automatically.
+              </p>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                type="button"
+                onClick={() => setEditingBooking(null)}
+                className="rounded-xl px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isUpdating}
+                className="bg-aerojet-blue rounded-xl px-4 py-2 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
+              >
+                {isUpdating ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   )
 }
