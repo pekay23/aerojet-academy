@@ -26,6 +26,7 @@ import {
   bulkBypassPasswordChange,
 } from '../actions'
 import { toast } from 'sonner'
+import { CurrencyDisplay, CurrencyToggle } from '@/components/shared/CurrencyDisplay'
 
 interface Student {
   id: string
@@ -50,7 +51,7 @@ interface Student {
     licenceCategory?: string | null
     enrolledAt?: string | null
   } | null
-  wallet?: { availableBalance: number; balance: number } | null
+  wallet?: { availableBalance: number; balance: number; currency: string } | null
   enrollments?: { id: string; status: string; course: { code: string; name: string } }[]
 }
 
@@ -82,6 +83,7 @@ export default function StudentsTable({
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
+  const [viewCurrency, setViewCurrency] = useState('GHS')
 
   const paged = students.slice((page - 1) * perPage, page * perPage)
 
@@ -128,6 +130,9 @@ export default function StudentsTable({
           >
             <RefreshCw className="h-3.5 w-3.5" />
           </button>
+
+          <CurrencyToggle value={viewCurrency} onChange={setViewCurrency} size="sm" />
+
           <BulkActionsDropdown
             selectedIds={selectedIds}
             onClear={() => setSelectedIds([])}
@@ -387,11 +392,14 @@ export default function StudentsTable({
                       <span className="text-slate-400">
                         {student.studentProfile?.cohort ?? 'No cohort'}
                       </span>
-                      <span
-                        className={`font-bold ${walletBal >= 0 ? 'text-emerald-600' : 'text-red-500'}`}
-                      >
-                        GHS {walletBal.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-                      </span>
+                      <CurrencyDisplay
+                        amount={walletBal}
+                        baseCurrency={student.wallet?.currency || 'EUR'}
+                        currency={viewCurrency}
+                        showToggle={false}
+                        size="sm"
+                        amountClassName={`${walletBal >= 0 ? 'text-emerald-600!' : 'text-red-500!'}`}
+                      />
                     </div>
                   </div>
                 )
@@ -414,6 +422,7 @@ export default function StudentsTable({
         {/* Right: Detail Panel */}
         <StudentDetailPanel
           student={selected}
+          viewCurrency={viewCurrency}
           onClose={() => setSelected(null)}
           onActionComplete={handleActionComplete}
         />

@@ -19,6 +19,7 @@ import {
   Loader2,
 } from 'lucide-react'
 import UserActionsMenu from './UserActionsMenu'
+import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 
 interface Student {
   id: string
@@ -46,6 +47,7 @@ interface Student {
   wallet?: {
     availableBalance: number
     balance: number
+    currency: string
   } | null
   enrollments?: {
     id: string
@@ -68,9 +70,15 @@ interface Props {
   student: Student | null
   onClose: () => void
   onActionComplete: () => void
+  viewCurrency?: string
 }
 
-export default function StudentDetailPanel({ student, onClose, onActionComplete }: Props) {
+export default function StudentDetailPanel({
+  student,
+  onClose,
+  onActionComplete,
+  viewCurrency,
+}: Props) {
   const [tab, setTab] = useState<Tab>('Overview')
 
   if (!student) {
@@ -276,22 +284,25 @@ export default function StudentDetailPanel({ student, onClose, onActionComplete 
                 <p className="mb-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Available Balance
                 </p>
-                <p
-                  className={`text-2xl font-black ${walletBal >= 0 ? 'text-emerald-700' : 'text-red-600'}`}
-                >
-                  GHS {walletBal.toLocaleString('en-GH', { minimumFractionDigits: 2 })}
-                </p>
+                <CurrencyDisplay
+                  amount={walletBal}
+                  baseCurrency={student.wallet?.currency || 'EUR'}
+                  currency={viewCurrency}
+                  size="lg"
+                  amountClassName={walletBal >= 0 ? 'text-emerald-700!' : 'text-red-600!'}
+                />
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Total Balance
                 </p>
-                <p className="text-2xl font-black text-slate-700">
-                  GHS{' '}
-                  {Number(student.wallet?.balance ?? 0).toLocaleString('en-GH', {
-                    minimumFractionDigits: 2,
-                  })}
-                </p>
+                <CurrencyDisplay
+                  amount={Number(student.wallet?.balance ?? 0)}
+                  baseCurrency={student.wallet?.currency || 'EUR'}
+                  currency={viewCurrency}
+                  size="lg"
+                  amountClassName="text-slate-700!"
+                />
               </div>
             </div>
             <p className="text-xs text-slate-400">
