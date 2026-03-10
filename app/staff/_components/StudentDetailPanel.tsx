@@ -71,6 +71,7 @@ interface Props {
   onClose: () => void
   onActionComplete: () => void
   viewCurrency?: string
+  onCurrencyChange?: (currency: string) => void
 }
 
 export default function StudentDetailPanel({
@@ -78,6 +79,7 @@ export default function StudentDetailPanel({
   onClose,
   onActionComplete,
   viewCurrency,
+  onCurrencyChange,
 }: Props) {
   const [tab, setTab] = useState<Tab>('Overview')
 
@@ -288,6 +290,8 @@ export default function StudentDetailPanel({
                   amount={walletBal}
                   baseCurrency={student.wallet?.currency || 'EUR'}
                   currency={viewCurrency}
+                  clickToToggle={true}
+                  onCurrencyChange={onCurrencyChange}
                   size="lg"
                   amountClassName={walletBal >= 0 ? 'text-emerald-700!' : 'text-red-600!'}
                 />
@@ -300,6 +304,8 @@ export default function StudentDetailPanel({
                   amount={Number(student.wallet?.balance ?? 0)}
                   baseCurrency={student.wallet?.currency || 'EUR'}
                   currency={viewCurrency}
+                  clickToToggle={true}
+                  onCurrencyChange={onCurrencyChange}
                   size="lg"
                   amountClassName="text-slate-700!"
                 />
