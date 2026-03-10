@@ -18,7 +18,7 @@ import {
   BookOpen,
 } from 'lucide-react'
 
-import type { Metadata } from 'next'
+import { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Exams | Staff Portal' }
 export const dynamic = 'force-dynamic'
