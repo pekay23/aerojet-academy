@@ -347,6 +347,16 @@ export default async function UserProfilePage({ params }: Props) {
                     {user.instructorProfile.specialization || 'None listed'}
                   </p>
                 </div>
+                {user.instructorProfile.qualifications && (
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                    <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">
+                      Qualifications
+                    </p>
+                    <p className="font-medium text-slate-700 dark:text-slate-300">
+                      {user.instructorProfile.qualifications}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -381,6 +391,16 @@ export default async function UserProfilePage({ params }: Props) {
                     {user.staffProfile.department ?? 'General'}
                   </p>
                 </div>
+                {user.staffProfile.position && (
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                    <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">
+                      Position
+                    </p>
+                    <p className="font-bold text-slate-700 dark:text-slate-300">
+                      {user.staffProfile.position}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}

@@ -18,6 +18,7 @@ import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import ApplicantDetailDrawer from './ApplicantDetailDrawer'
 import BulkActionsBar from './BulkActionsBar'
+import TablePagination from './TablePagination'
 
 interface Applicant {
   id: string
@@ -59,6 +60,10 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
   const [selected, setSelected] = useState<Applicant | null>(null)
   const [counts, setCounts] = useState(initialCounts)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
+
+  const paged = applicants.slice((page - 1) * perPage, page * perPage)
 
   const fetchApplicants = useCallback(async () => {
     setLoading(true)
@@ -233,15 +238,15 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                   <th className="w-12 px-6 py-3">
                     <button
                       onClick={() => {
-                        if (selectedIds.length === applicants.length && applicants.length > 0) {
+                        if (selectedIds.length === paged.length && paged.length > 0) {
                           setSelectedIds([])
                         } else {
-                          setSelectedIds(applicants.map((a) => a.id))
+                          setSelectedIds(paged.map((a) => a.id))
                         }
                       }}
                       className="text-slate-400 hover:text-aerojet-blue transition-colors"
                     >
-                      {selectedIds.length === applicants.length && applicants.length > 0 ? (
+                      {selectedIds.length === paged.length && paged.length > 0 ? (
                         <CheckSquare className="h-4 w-4 text-aerojet-blue" />
                       ) : (
                         <Square className="h-4 w-4" />
@@ -282,7 +287,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                     </td>
                   </tr>
                 ) : (
-                  applicants.map((applicant) => {
+                  paged.map((applicant) => {
                     const fullName = applicant.profile
                       ? `${applicant.profile.firstName} ${applicant.profile.lastName}`
                       : applicant.email
@@ -380,9 +385,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
 
           {/* Pagination Footer */}
           {total > 0 && (
-            <div className="border-t border-slate-100 px-6 py-3 text-xs font-medium text-slate-400 dark:border-slate-800">
-              Showing {applicants.length} of {total} applicants
-            </div>
+            <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
           )}
         </div>
       </div>

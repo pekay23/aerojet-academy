@@ -21,6 +21,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { format } from 'date-fns'
 import { submitGrade } from '@/lib/actions/instructor'
 import { toast } from 'sonner'
+import TablePagination from '@/app/staff/_components/TablePagination'
 import {
   Dialog,
   DialogContent,
@@ -60,6 +61,8 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
   const [score, setScore] = useState<string>('')
   const [comments, setComments] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
 
   const filteredQueue = useMemo(() => {
     return initialQueue.filter((item) => {
@@ -74,6 +77,9 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
       )
     })
   }, [initialQueue, searchQuery])
+
+  const total = filteredQueue.length
+  const paged = filteredQueue.slice((page - 1) * perPage, page * perPage)
 
   const handleGradeSubmit = async () => {
     if (!selectedGrade || !score) return
@@ -126,7 +132,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
       <div className="grid gap-4">
         <AnimatePresence mode="popLayout">
           {filteredQueue.length > 0 ? (
-            filteredQueue.map((item) => (
+            paged.map((item) => (
               <motion.div
                 key={item.id}
                 layout
@@ -209,6 +215,10 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
           )}
         </AnimatePresence>
       </div>
+
+      {total > 0 && (
+        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
+      )}
 
       {/* Grading Dialog */}
       <Dialog open={!!selectedGrade} onOpenChange={(open) => !open && setSelectedGrade(null)}>

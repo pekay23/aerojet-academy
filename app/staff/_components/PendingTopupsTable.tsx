@@ -16,6 +16,7 @@ import { toast } from 'sonner'
 import Link from 'next/link'
 import BulkActionsBar from './BulkActionsBar'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import TablePagination from './TablePagination'
 
 interface PendingTopup {
   id: string
@@ -38,12 +39,17 @@ interface PendingTopupsTableProps {
 export default function PendingTopupsTable({ requests }: PendingTopupsTableProps) {
   const router = useRouter()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
+
+  const total = requests.length
+  const paged = requests.slice((page - 1) * perPage, page * perPage)
 
   const toggleAll = () => {
-    if (selectedIds.length === requests.length && requests.length > 0) {
+    if (selectedIds.length === paged.length && paged.length > 0) {
       setSelectedIds([])
     } else {
-      setSelectedIds(requests.map((r) => r.id))
+      setSelectedIds(paged.map((r) => r.id))
     }
   }
 
@@ -64,7 +70,7 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
                   onClick={toggleAll}
                   className="text-slate-400 hover:text-aerojet-blue transition-colors"
                 >
-                  {selectedIds.length === requests.length && requests.length > 0 ? (
+                  {selectedIds.length === paged.length && paged.length > 0 ? (
                     <CheckSquare className="h-4 w-4 text-aerojet-blue" />
                   ) : (
                     <Square className="h-4 w-4" />
@@ -78,14 +84,14 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
             </TableRow>
           </TableHeader>
           <TableBody>
-            {requests.length === 0 ? (
+            {paged.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="h-32 text-center text-slate-500">
                   No pending top-up requests.
                 </TableCell>
               </TableRow>
             ) : (
-              requests.map((req) => {
+              paged.map((req) => {
                 const userName = req.user.profile
                   ? `${req.user.profile.firstName} ${req.user.profile.lastName}`
                   : req.user.email
@@ -147,6 +153,7 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
             )}
           </TableBody>
         </Table>
+        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
       </div>
 
       <BulkActionsBar

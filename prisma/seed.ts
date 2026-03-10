@@ -16,6 +16,16 @@ async function main() {
       password: adminPassword,
       status: 'ACTIVE',
       mustChangePassword: false,
+      staffProfile: {
+        upsert: {
+          create: {
+            employeeId: 'AD-001',
+            department: 'Administration',
+            position: 'Super Administrator',
+          },
+          update: {},
+        },
+      },
     },
     create: {
       email: 'admin@aerojet-academy.com',
@@ -35,6 +45,13 @@ async function main() {
           city: 'Accra',
         },
       },
+      staffProfile: {
+        create: {
+          employeeId: 'AD-001',
+          department: 'Administration',
+          position: 'Super Administrator',
+        },
+      },
     },
   })
   console.log(`✅ Super Admin: ${admin.email}`)
@@ -43,7 +60,18 @@ async function main() {
   const staffPassword = await bcrypt.hash('Staff@2026', 12)
   const staff = await prisma.user.upsert({
     where: { email: 'staff@aerojet-academy.com' },
-    update: {},
+    update: {
+      staffProfile: {
+        upsert: {
+          create: {
+            employeeId: 'ST-001',
+            department: 'Academic Affairs',
+            position: 'Academic Coordinator',
+          },
+          update: {},
+        },
+      },
+    },
     create: {
       email: 'staff@aerojet-academy.com',
       academyEmail: 'staff@aerojet-academy.com',
@@ -64,8 +92,9 @@ async function main() {
       },
       staffProfile: {
         create: {
-          employeeId: 'STAFF-001',
+          employeeId: 'ST-001',
           department: 'Academic Affairs',
+          position: 'Academic Coordinator',
         },
       },
     },
@@ -76,7 +105,18 @@ async function main() {
   const instructorPassword = await bcrypt.hash('Instructor@2026', 12)
   const instructor = await prisma.user.upsert({
     where: { email: 'instructor@aerojet-academy.com' },
-    update: {},
+    update: {
+      instructorProfile: {
+        upsert: {
+          create: {
+            employeeId: 'IN-001',
+            specialization: 'B1 Mechanical',
+            qualifications: 'EASA-GH-2024-001',
+          },
+          update: {},
+        },
+      },
+    },
     create: {
       email: 'instructor@aerojet-academy.com',
       academyEmail: 'instructor@aerojet-academy.com',
@@ -97,7 +137,7 @@ async function main() {
       },
       instructorProfile: {
         create: {
-          employeeId: 'EMP-001',
+          employeeId: 'IN-001',
           specialization: 'B1 Mechanical',
           qualifications: 'EASA-GH-2024-001',
         },

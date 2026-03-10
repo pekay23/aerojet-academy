@@ -15,6 +15,7 @@ import {
 import { bulkUpdateExamBookingStatus } from '../actions'
 import { toast } from 'sonner'
 import BulkActionsBar from './BulkActionsBar'
+import TablePagination from './TablePagination'
 
 interface ExamBookingWithDetails {
   id: string
@@ -42,12 +43,17 @@ interface ExamBookingsTableProps {
 export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) {
   const router = useRouter()
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
+
+  const total = bookings.length
+  const paged = bookings.slice((page - 1) * perPage, page * perPage)
 
   const toggleAll = () => {
-    if (selectedIds.length === bookings.length && bookings.length > 0) {
+    if (selectedIds.length === paged.length && paged.length > 0) {
       setSelectedIds([])
     } else {
-      setSelectedIds(bookings.map((b) => b.id))
+      setSelectedIds(paged.map((b) => b.id))
     }
   }
 
@@ -69,7 +75,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                     onClick={toggleAll}
                     className="text-slate-400 hover:text-aerojet-blue transition-colors"
                   >
-                    {selectedIds.length === bookings.length && bookings.length > 0 ? (
+                    {selectedIds.length === paged.length && paged.length > 0 ? (
                       <CheckSquare className="h-4 w-4 text-aerojet-blue" />
                     ) : (
                       <Square className="h-4 w-4" />
@@ -85,14 +91,14 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {bookings.length === 0 ? (
+              {paged.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
                     No bookings found.
                   </td>
                 </tr>
               ) : (
-                bookings.map((booking) => (
+                paged.map((booking) => (
                   <tr
                     key={booking.id}
                     className={`group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
@@ -178,6 +184,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
             </tbody>
           </table>
         </div>
+        <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
       </div>
 
       <BulkActionsBar

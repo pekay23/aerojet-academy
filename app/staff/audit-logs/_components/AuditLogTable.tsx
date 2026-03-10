@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import TablePagination from '../../_components/TablePagination'
 import { format } from 'date-fns'
 import {
   ScrollText,
@@ -170,6 +171,11 @@ interface AuditLogTableProps {
 
 export default function AuditLogTable({ logs, entityLabels, query }: AuditLogTableProps) {
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null)
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
+
+  const total = logs.length
+  const paged = logs.slice((page - 1) * perPage, page * perPage)
 
   function actionStyle(act: string) {
     if (
@@ -267,7 +273,7 @@ export default function AuditLogTable({ logs, entityLabels, query }: AuditLogTab
                 </td>
               </tr>
             ) : (
-              logs.map((log, idx) => (
+              paged.map((log, idx) => (
                 <LogRow
                   key={log.id}
                   log={log}
@@ -284,6 +290,7 @@ export default function AuditLogTable({ logs, entityLabels, query }: AuditLogTab
           </tbody>
         </table>
       </div>
+      <TablePagination page={page} perPage={perPage} total={total} onPageChange={setPage} onPerPageChange={setPerPage} />
 
       {/* Glassmorphic Detail Modal */}
       {selectedLog && (
