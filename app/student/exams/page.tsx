@@ -14,14 +14,16 @@ import {
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
-import ResitBookingButton from './_components/ResitBookingButton'
-import Link from 'next/link'
 import ExamsTabs from './_components/ExamsTabs'
 import ExamHistoryTable from './_components/ExamHistoryTable'
-import StudentBookingsTable from './_components/StudentBookingsTable'
-import { format } from 'date-fns'
 import { canAccessFeature, getEnrollmentMilestoneStatus } from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
+
+// The newly extracted tabs
+import AvailablePoolsTab from './_components/AvailablePoolsTab'
+import MyBookingsTab from './_components/MyBookingsTab'
+import BookingActionTab from './_components/BookingActionTab'
+import ResitBookingTab from './_components/ResitBookingTab'
 
 export const metadata: Metadata = {
   title: 'My Exams | Student Portal',
@@ -35,7 +37,7 @@ export default async function ExamsPage({
   searchParams: Promise<{ tab?: string }>
 }) {
   const { tab: tabParam } = await searchParams
-  const tab = tabParam || 'bookings'
+  const tab = tabParam || 'available'
 
   const session = await getAuthSession()
 
@@ -82,262 +84,113 @@ export default async function ExamsPage({
     )
   }
 
+  // Common data for Records tab
   let bookings, results, studentProfile
-  try {
-    ;[bookings, results, studentProfile] = await Promise.all([
-      prisma.examBooking.findMany({
-        where: { userId: session.user.id },
-        include: {
-          exam: { include: { examComponent: { include: { course: true } } } },
-          event: true,
-        },
-        orderBy: { examDate: 'desc' },
-      }),
-      prisma.examResult.findMany({
-        where: { userId: session.user.id },
-        include: {
-          exam: { include: { examComponent: { include: { course: true } } } },
-        },
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.studentProfile.findUnique({
-        where: { userId: session.user.id },
-        include: { pathwayRel: true },
-      }),
-    ])
-  } catch (error) {
-    console.error(
-      'Exams page data fetch error:',
-      error instanceof Error ? error.message : 'Unknown error'
-    )
-    throw new Error('Failed to load exam data. Please try again.')
+  if (tab === 'records') {
+    try {
+      ;[bookings, results, studentProfile] = await Promise.all([
+        prisma.examBooking.findMany({
+          where: { userId: session.user.id },
+          include: {
+            exam: { include: { examComponent: { include: { course: true } } } },
+            event: true,
+          },
+          orderBy: { examDate: 'desc' },
+        }),
+        prisma.examResult.findMany({
+          where: { userId: session.user.id },
+          include: {
+            exam: { include: { examComponent: { include: { course: true } } } },
+          },
+          orderBy: { createdAt: 'desc' },
+        }),
+        prisma.studentProfile.findUnique({
+          where: { userId: session.user.id },
+          include: { pathwayRel: true },
+        }),
+      ])
+    } catch (error) {
+      console.error(
+        'Exams page data fetch error:',
+        error instanceof Error ? error.message : 'Unknown error'
+      )
+      throw new Error('Failed to load exam data. Please try again.')
+    }
   }
 
-  // Map raw bookings to BookingRecord interface for child components
-  const mappedBookings = bookings.map((b: any) => ({
-    id: b.id,
-    moduleCode: b.moduleCode || b.exam?.examComponent?.code || '—',
-    moduleName: b.exam?.examComponent?.course?.name || 'Exam Module',
-    date: b.examDate || b.bookedAt,
-    status: b.status,
-    amountPaid: Number(b.amountPaid),
-    bookingType: b.bookingType.replace(/_/g, ' '),
-  }))
+  // Formal and migrated historical records logic, only computed if Records tab is active
+  let allHistory: any[] = []
+  let failedAttempts: any[] = []
+  
+  if (tab === 'records' && results && bookings) {
+    const formalResults = results.map((r) => ({
+      id: r.id,
+      type: 'RESULT',
+      moduleCode: r.exam.examComponent?.course?.code || '—',
+      moduleName: r.exam.examComponent?.course?.name || r.exam.name,
+      date: r.exam.examDate,
+      passed: r.passed,
+      score: Number(r.score),
+      maxScore: Number(r.maxScore),
+      percentage: Number(r.percentage),
+      grade: r.grade,
+    }))
 
-  const upcomingExams = mappedBookings.filter(
-    (b) => (b.status === 'APPROVED' || b.status === 'PENDING') && b.date && b.date >= new Date()
-  )
-  const pendingExams = mappedBookings.filter((b) => b.status === 'PENDING')
+    const historicalResults = bookings
+      .filter((b: any) => {
+        const r = b.result?.toLowerCase()
+        return r === 'pass' || r === 'fail' || (b.score !== null && b.score !== undefined)
+      })
+      .filter((b: any) => {
+        // Deduplicate: if there is a formal result for the same module on the same date, skip the booking
+        const bCode = b.moduleCode || b.exam?.examComponent?.course?.code
+        const bDate = (b.examDate || b.bookedAt).getTime()
+        return !formalResults.some((f) => f.moduleCode === bCode && f.date.getTime() === bDate)
+      })
+      .map((b: any) => {
+        const score = b.score !== null && b.score !== undefined ? Number(b.score) : undefined
+        const resultStr = b.result?.toLowerCase()
+        
+        let passed: boolean | null = null
+        if (score !== undefined) {
+          passed = score >= 75
+        } else if (resultStr === 'pass') {
+          passed = true
+        } else if (resultStr === 'fail') {
+          passed = false
+        }
 
-  // Unify results and historical passes/fails
-  const formalResults = results.map((r) => ({
-    id: r.id,
-    type: 'RESULT',
-    moduleCode: r.exam.examComponent?.course?.code || '—',
-    moduleName: r.exam.examComponent?.course?.name || r.exam.name,
-    date: r.exam.examDate,
-    passed: r.passed,
-    score: Number(r.score),
-    maxScore: Number(r.maxScore),
-    percentage: Number(r.percentage),
-    grade: r.grade,
-  }))
+        return {
+          id: b.id,
+          type: 'MIGRATED',
+          moduleCode: b.moduleCode || b.exam?.examComponent?.course?.code || '—',
+          moduleName: b.exam?.examComponent?.course?.name || 'Historical Exam',
+          date: b.examDate || b.bookedAt,
+          passed,
+          score,
+          percentage: score,
+          grade: b.result?.toUpperCase(),
+          attemptType: b.attemptType,
+        }
+      })
 
-  const historicalResults = bookings
-    .filter((b: any) => b.result === 'pass' || b.result === 'fail' || b.score !== null)
-    .filter((b: any) => {
-      // Deduplicate: if there is a formal result for the same module on the same date, skip the booking
-      const bCode = b.moduleCode || b.exam?.examComponent?.course?.code
-      const bDate = (b.examDate || b.bookedAt).getTime()
-      return !formalResults.some((f) => f.moduleCode === bCode && f.date.getTime() === bDate)
-    })
-    .map((b: any) => {
-      const score = b.score ? Number(b.score) : undefined
-      // User requested: "for now the pass should still show until admin add the exam score"
-      // Also: "make sure that unwritten/completed/unpaid for exams ... do not show as failed"
-      const passed = score !== undefined ? score >= 75 : b.result !== 'fail'
-
-      return {
-        id: b.id,
-        type: 'MIGRATED',
-        moduleCode: b.moduleCode || b.exam?.examComponent?.course?.code || '—',
-        moduleName: b.exam?.examComponent?.course?.name || 'Historical Exam',
-        date: b.examDate || b.bookedAt,
-        passed,
-        score,
-        percentage: score,
-        grade: b.result?.toUpperCase(),
-        attemptType: b.attemptType,
-      }
-    })
-
-  const allHistory = [...formalResults, ...historicalResults]
-  const failedAttempts = allHistory.filter((r) => !r.passed)
+    allHistory = [...formalResults, ...historicalResults]
+    failedAttempts = allHistory.filter((r) => r.passed === false)
+  }
 
   return (
     <ExamsTabs>
-      {/* Summary Cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        {[
-          {
-            label: 'Upcoming',
-            value: upcomingExams.length,
-            icon: Calendar,
-            color: 'text-blue-600',
-            bg: 'bg-blue-50',
-          },
-          {
-            label: 'Pending Payment',
-            value: pendingExams.length,
-            icon: Clock,
-            color: 'text-amber-600',
-            bg: 'bg-amber-50',
-          },
-          {
-            label: 'Failed Attempts',
-            value: failedAttempts.length,
-            icon: AlertCircle,
-            color: 'text-red-600',
-            bg: 'bg-red-50',
-          },
-        ].map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
-          >
-            <div className="flex items-center gap-4">
-              <div
-                className={`flex h-12 w-12 items-center justify-center rounded-xl ${stat.bg} ${stat.color}`}
-              >
-                <stat.icon className="h-6 w-6" />
-              </div>
-              <div>
-                <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
-                  {stat.label}
-                </p>
-                <p className="text-xl font-black text-slate-900 dark:text-slate-100">
-                  {stat.value}
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+      {tab === 'available' && <AvailablePoolsTab />}
 
-      {/* ── Bookings Tab ── */}
-      {tab === 'bookings' && (
-        <div className="space-y-6">
-          {upcomingExams.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="flex items-center gap-2 px-1 text-lg font-black text-slate-900 dark:text-white">
-                <Calendar className="h-5 w-5 text-blue-600" />
-                Upcoming Exams
-              </h3>
-              <StudentBookingsTable bookings={upcomingExams} />
-            </div>
-          )}
+      {tab === 'individual' && <BookingActionTab type="individual" />}
 
-          {pendingExams.length > 0 && (
-            <div className="space-y-4">
-              <h3 className="flex items-center gap-2 px-1 text-lg font-black text-slate-900 dark:text-white">
-                <Clock className="h-5 w-5 text-amber-500" />
-                Awaiting Payment / Verification
-              </h3>
-              <StudentBookingsTable bookings={pendingExams} />
-            </div>
-          )}
+      {tab === 'group' && <BookingActionTab type="group" />}
 
-          {/* All Bookings List */}
-          <div className="space-y-4">
-            <h3 className="flex items-center gap-2 px-1 text-lg font-black text-slate-900 dark:text-white">
-              <HistoryIcon className="h-5 w-5 text-slate-400" />
-              Booking History
-            </h3>
-            <StudentBookingsTable bookings={mappedBookings} />
-          </div>
-        </div>
-      )}
+      {tab === 'resit' && <ResitBookingTab />}
 
-      {/* ── Results Tab ── */}
-      {tab === 'results' && (
-        <div className="space-y-6">
-          {allHistory.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-100 bg-white p-12 text-center dark:border-slate-800 dark:bg-slate-900">
-              <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
-                <FileBarChart2 className="h-8 w-8 text-slate-400" />
-              </div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                Formal Results Pending
-              </h3>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                Your graded results will appear here once published by the examination board.
-              </p>
-            </div>
-          ) : (
-            <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
-                  <thead className="bg-slate-50 text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:bg-slate-800/50">
-                    <tr className="border-b border-slate-100 dark:border-slate-800">
-                      <th className="px-6 py-4">Module / Course</th>
-                      <th className="px-6 py-4 text-center">Score</th>
-                      <th className="px-6 py-4 text-center">Type</th>
-                      <th className="px-6 py-4 text-right">Result</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {allHistory
-                      .filter((r) => r.score !== undefined || r.grade !== undefined)
-                      .map((result, idx) => (
-                        <tr
-                          key={`${result.type}-${result.id}-${idx}`}
-                          className="group transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/50"
-                        >
-                          <td className="px-6 py-4">
-                            <div className="min-w-0">
-                              <p className="font-bold text-slate-900 dark:text-white">
-                                {result.moduleCode}
-                              </p>
-                              <p className="truncate text-xs text-slate-500">{result.moduleName}</p>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <p className="font-mono text-lg font-black text-slate-900 dark:text-white">
-                              {result.score !== undefined
-                                ? `${result.score}%`
-                                : result.grade || '—'}
-                            </p>
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <span className="inline-flex rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-500 uppercase dark:bg-slate-800 dark:text-slate-400">
-                              {result.type === 'RESULT' ? 'Formal' : 'Manual'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex justify-end">
-                              {result.passed ? (
-                                <div className="flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-[10px] font-black text-emerald-700 uppercase">
-                                  <CheckCircle2 className="h-3 w-3" /> Passed
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-[10px] font-black text-red-700 uppercase">
-                                  <XCircle className="h-3 w-3" /> Failed
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      {tab === 'bookings' && <MyBookingsTab />}
 
-      {/* ── History & Pathway Tab ── */}
-      {tab === 'history' && (
+      {tab === 'records' && (
         <div className="space-y-8">
           {/* Pathway Progress (License Progress) */}
           <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/20 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
@@ -389,11 +242,24 @@ export default async function ExamsPage({
           {/* Unified History List (Formal + Migrated) */}
           <div className="space-y-4">
             <h3 className="flex items-center gap-2 px-1 text-lg font-black text-slate-900 dark:text-white">
-              <HistoryIcon className="h-5 w-5 text-blue-600" />
-              All Historical Records
+              <HistoryIcon className="h-5 w-5 text-slate-400" />
+              Detailed Record
             </h3>
-
-            <ExamHistoryTable records={allHistory} />
+            {allHistory.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-12 text-center dark:border-slate-700 dark:bg-slate-800/50">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white shadow-sm dark:bg-slate-900">
+                  <FileBarChart2 className="h-8 w-8 text-slate-300" />
+                </div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
+                  No records found
+                </h3>
+                <p className="mx-auto mt-1 max-w-sm text-sm text-slate-500">
+                  Graded exam results will appear here.
+                </p>
+              </div>
+            ) : (
+              <ExamHistoryTable results={allHistory} />
+            )}
           </div>
 
           {/* Failed Attempts Logic (Call to action) */}
