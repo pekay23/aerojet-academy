@@ -1000,29 +1000,22 @@ export async function bookBundleExamsAction(params: { moduleCodes: string[]; eve
   }
 }
 
-export async function bookResitExamAction(examId: string) {
+export async function bookResitExamAction(moduleCode: string, eventId: string) {
   try {
     const user = await requireStudent()
     await assertExamOnlyPathway(user.id)
-    await bookResitExam(examId, user.id)
+    await bookResitExam(user.id, moduleCode, eventId)
 
-    const exam = await prisma.exam.findUnique({
-      where: { id: examId },
-      include: { examComponent: { include: { course: true } } },
+    await prisma.notification.create({
+      data: {
+        userId: user.id,
+        title: 'Resit Exam Booked',
+        message: `You have successfully booked a resit for module "${moduleCode}".`,
+        type: 'SUCCESS',
+        linkUrl: '/student/exams',
+        linkText: 'View Exams',
+      },
     })
-
-    if (exam) {
-      await prisma.notification.create({
-        data: {
-          userId: user.id,
-          title: 'Resit Exam Booked',
-          message: `You have successfully booked a resit for "${exam.examComponent?.course?.code || ''} ${exam.name}".`,
-          type: 'SUCCESS',
-          linkUrl: '/student/exams',
-          linkText: 'View Exams',
-        },
-      })
-    }
 
     revalidatePath('/student/exams')
     revalidatePath('/student/wallet')

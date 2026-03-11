@@ -24,12 +24,20 @@ interface FreeResit {
   notes: string | null
 }
 
+interface ExamEvent {
+  id: string
+  name: string
+  startDate: Date
+  endDate: Date
+}
+
 interface ResitBookingProps {
   failedExams: FailedExam[]
   freeResits: FreeResit[]
   resitPrice: number
   currency: string
   availableBalance: number
+  events: ExamEvent[]
   trigger?: React.ReactNode
 }
 
@@ -39,10 +47,12 @@ export default function ResitBooking({
   resitPrice,
   currency,
   availableBalance,
+  events,
   trigger,
 }: ResitBookingProps) {
   const [open, setOpen] = useState(false)
   const [selectedExam, setSelectedExam] = useState<FailedExam | null>(null)
+  const [selectedEventId, setSelectedEventId] = useState(events[0]?.id || '')
   const [isPending, startTransition] = useTransition()
 
   const currencySymbol = getCurrencySymbol(currency)
@@ -50,10 +60,18 @@ export default function ResitBooking({
   const canAfford = availableBalance >= resitPrice || totalFreeResits > 0
 
   const handleConfirm = () => {
-    if (!selectedExam) return
+    if (!selectedExam) {
+      toast.error('Please select a module to resit.')
+      return
+    }
+    if (!selectedEventId) {
+      toast.error('Please select an exam window/event.')
+      return
+    }
+
     startTransition(async () => {
       try {
-        const res = await bookResitExamAction(selectedExam.examId)
+        const res = await bookResitExamAction(selectedExam.moduleCode, selectedEventId)
         if (res.error) {
           toast.error(res.error)
         } else {
@@ -82,8 +100,14 @@ export default function ResitBooking({
             canAfford={canAfford}
             selectedExam={selectedExam}
             setSelectedExam={setSelectedExam}
+            events={events}
+            selectedEventId={selectedEventId}
+            setSelectedEventId={setSelectedEventId}
             onConfirm={handleConfirm}
-            onClose={() => { setOpen(false); setSelectedExam(null) }}
+            onClose={() => {
+              setOpen(false)
+              setSelectedExam(null)
+            }}
             isPending={isPending}
           />
         )}
@@ -103,6 +127,9 @@ export default function ResitBooking({
       canAfford={canAfford}
       selectedExam={selectedExam}
       setSelectedExam={setSelectedExam}
+      events={events}
+      selectedEventId={selectedEventId}
+      setSelectedEventId={setSelectedEventId}
       onConfirm={handleConfirm}
       isPending={isPending}
     />
@@ -120,6 +147,9 @@ function ResitContent({
   canAfford,
   selectedExam,
   setSelectedExam,
+  events,
+  selectedEventId,
+  setSelectedEventId,
   onConfirm,
   isPending,
 }: {
@@ -132,6 +162,9 @@ function ResitContent({
   canAfford: boolean
   selectedExam: FailedExam | null
   setSelectedExam: (e: FailedExam | null) => void
+  events: ExamEvent[]
+  selectedEventId: string
+  setSelectedEventId: (id: string) => void
   onConfirm: () => void
   isPending: boolean
 }) {
@@ -191,10 +224,10 @@ function ResitContent({
       {/* Failed Exams Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {failedExams.map((exam) => {
-          const isSelected = selectedExam?.examId === exam.examId
+          const isSelected = selectedExam?.moduleCode === exam.moduleCode
           return (
             <button
-              key={exam.examId}
+              key={exam.moduleCode}
               onClick={() => setSelectedExam(isSelected ? null : exam)}
               className={`group relative flex flex-col rounded-2xl border p-5 text-left transition-all ${
                 isSelected
@@ -232,11 +265,15 @@ function ResitContent({
               <div className="mt-auto space-y-1.5 border-t border-slate-50 pt-3 dark:border-slate-800">
                 <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
                   <Calendar className="h-3 w-3" />
-                  <span>{new Date(exam.examDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  <span>
+                    Last attempt: {new Date(exam.examDate).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </span>
                 </div>
-                {exam.eventName && (
-                  <p className="text-xs text-slate-400">{exam.eventName}</p>
-                )}
+                {exam.eventName && <p className="text-xs text-slate-400">{exam.eventName}</p>}
               </div>
 
               {/* Selection indicator */}
@@ -253,27 +290,62 @@ function ResitContent({
       {/* Action Bar */}
       {selectedExam && (
         <div className="sticky bottom-4 rounded-2xl border border-slate-100 bg-white/90 p-5 shadow-xl backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                Resit: {selectedExam.moduleCode} — {selectedExam.moduleName}
-              </p>
-              <div className="mt-1 flex items-center gap-3 text-xs text-slate-500">
-                <span className="flex items-center gap-1">
-                  <Wallet className="h-3.5 w-3.5" />
-                  {totalFreeResits > 0 ? (
-                    <span className="font-bold text-emerald-600">Free resit credit</span>
+          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  Resit: {selectedExam.moduleCode} — {selectedExam.moduleName}
+                </p>
+                <div className="mt-1 flex items-center gap-3 text-xs text-slate-500">
+                  <span className="flex items-center gap-1">
+                    <Wallet className="h-3.5 w-3.5" />
+                    {totalFreeResits > 0 ? (
+                      <span className="font-bold text-emerald-600">Free resit credit</span>
+                    ) : (
+                      <span>
+                        Cost:{' '}
+                        <span className="font-bold text-slate-900 dark:text-slate-100">
+                          {currencySymbol}
+                          {resitPrice.toFixed(2)}
+                        </span>
+                      </span>
+                    )}
+                  </span>
+                  <span>
+                    Balance: {currencySymbol}
+                    {availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </div>
+
+              {/* Event Selector */}
+              <div className="w-full max-w-xs space-y-2">
+                <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">
+                  Target Exam Window
+                </label>
+                <select
+                  value={selectedEventId}
+                  onChange={(e) => setSelectedEventId(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-red-500 focus:ring-0 dark:border-slate-700 dark:bg-slate-800"
+                >
+                  {events.length === 0 ? (
+                    <option value="">No upcoming exam windows</option>
                   ) : (
-                    <span>
-                      Cost: <span className="font-bold text-slate-900 dark:text-slate-100">{currencySymbol}{resitPrice.toFixed(2)}</span>
-                    </span>
+                    events.map((ev) => (
+                      <option key={ev.id} value={ev.id}>
+                        {ev.name} (
+                        {new Date(ev.startDate).toLocaleDateString(undefined, {
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                        )
+                      </option>
+                    ))
                   )}
-                </span>
-                <span>
-                  Balance: {currencySymbol}{availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                </span>
+                </select>
               </div>
             </div>
+
             <div className="flex gap-3">
               <button
                 onClick={() => setSelectedExam(null)}
@@ -283,7 +355,7 @@ function ResitContent({
               </button>
               <button
                 onClick={onConfirm}
-                disabled={isPending || (!canAfford && totalFreeResits === 0)}
+                disabled={isPending || (!canAfford && totalFreeResits === 0) || !selectedEventId}
                 className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-xs font-bold text-white transition-all hover:bg-red-700 disabled:opacity-50 active:scale-[0.98]"
               >
                 {isPending ? (
@@ -317,6 +389,9 @@ function ResitModal(props: {
   canAfford: boolean
   selectedExam: FailedExam | null
   setSelectedExam: (e: FailedExam | null) => void
+  events: ExamEvent[]
+  selectedEventId: string
+  setSelectedEventId: (id: string) => void
   onConfirm: () => void
   onClose: () => void
   isPending: boolean
@@ -328,8 +403,10 @@ function ResitModal(props: {
         role="dialog"
         aria-modal="true"
         aria-labelledby="resit-modal-title"
-        onKeyDown={(e) => { if (e.key === 'Escape') props.onClose() }}
-        className="relative z-10 w-full max-w-3xl overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') props.onClose()
+        }}
+        className="relative z-10 w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900"
       >
         <div className="flex items-center justify-between border-b border-slate-100 p-6 dark:border-slate-800">
           <div className="flex items-center gap-3">
@@ -337,15 +414,24 @@ function ResitModal(props: {
               <RefreshCcw className="h-5 w-5" />
             </div>
             <div>
-              <h3 id="resit-modal-title" className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Book a Resit</h3>
-              <p className="text-sm text-slate-500">Select a failed exam to rebook</p>
+              <h3
+                id="resit-modal-title"
+                className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100"
+              >
+                Book a Resit
+              </h3>
+              <p className="text-sm text-slate-500">Select a failed module to rebook</p>
             </div>
           </div>
-          <button onClick={props.onClose} aria-label="Close" className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <button
+            onClick={props.onClose}
+            aria-label="Close"
+            className="rounded-lg p-2 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+          >
             <X className="h-5 w-5" />
           </button>
         </div>
-        <div className="max-h-[65vh] overflow-y-auto p-6">
+        <div className="max-h-[75vh] overflow-y-auto p-6">
           <ResitContent
             failedExams={props.failedExams}
             freeResits={props.freeResits}
@@ -356,6 +442,9 @@ function ResitModal(props: {
             canAfford={props.canAfford}
             selectedExam={props.selectedExam}
             setSelectedExam={props.setSelectedExam}
+            events={props.events}
+            selectedEventId={props.selectedEventId}
+            setSelectedEventId={props.setSelectedEventId}
             onConfirm={props.onConfirm}
             isPending={props.isPending}
           />
