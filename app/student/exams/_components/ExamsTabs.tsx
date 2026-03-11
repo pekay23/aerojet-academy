@@ -1,19 +1,22 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Calendar, FileBarChart2, History } from 'lucide-react'
+import { Calendar, FileBarChart2, History, Users, User, Layers, RefreshCcw, FileCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const TABS = [
-  { key: 'bookings', label: 'Bookings', icon: Calendar },
-  { key: 'results', label: 'Results', icon: FileBarChart2 },
-  { key: 'history', label: 'History', icon: History },
+  { key: 'available', label: 'Join Pools', shortLabel: 'Pools', icon: Users },
+  { key: 'bookings', label: 'My Bookings', shortLabel: 'My Bookings', icon: FileCheck },
+  { key: 'individual', label: 'Individual', shortLabel: 'Individual', icon: User },
+  { key: 'group', label: 'Group', shortLabel: 'Group', icon: Layers },
+  { key: 'resit', label: 'Resit', shortLabel: 'Resit', icon: RefreshCcw },
+  { key: 'records', label: 'Exam Records', shortLabel: 'Records', icon: History },
 ] as const
 
 export default function ExamsTabs({ children }: { children: React.ReactNode }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const currentTab = searchParams.get('tab') || 'bookings'
+  const currentTab = searchParams.get('tab') || 'available'
 
   const setTab = (tab: string) => {
     router.push(`/student/exams?tab=${tab}`, { scroll: false })
@@ -58,7 +61,8 @@ export default function ExamsTabs({ children }: { children: React.ReactNode }) {
                 />
               )}
               <Icon className="relative z-10 h-3.5 w-3.5" aria-hidden="true" />
-              <span className="relative z-10">{t.label}</span>
+              <span className="relative z-10 hidden sm:inline">{t.label}</span>
+              <span className="relative z-10 sm:hidden">{t.shortLabel}</span>
             </button>
           )
         })}
