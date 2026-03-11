@@ -38,7 +38,15 @@ async function getBookingData(userId: string) {
   const balance = Number(wallet?.availableBalance || 0)
   const currency = wallet?.currency || 'EUR'
   const currencySymbol = getCurrencySymbol(currency)
-  const ecMapped = examComponents.map((ec) => ({ id: ec.id, code: ec.course.code, name: ec.course.name }))
+  const uniqueMap = new Map<string, { id: string; code: string; name: string }>()
+  examComponents.forEach((ec) => {
+    if (!uniqueMap.has(ec.course.code)) {
+      uniqueMap.set(ec.course.code, { id: ec.id, code: ec.course.code, name: ec.course.name })
+    }
+  })
+  const ecMapped = Array.from(uniqueMap.values()).sort((a, b) =>
+    a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
+  )
 
   // Compute eligible components for resit: user must have failed these previously
   const failedResults = await prisma.examResult.findMany({

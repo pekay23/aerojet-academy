@@ -5,7 +5,12 @@ import { bookBundleExamsAction } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight, BookOpen, Wallet, Calendar, X, Package, Info } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
-import { EASA_MODULES } from '@/lib/constants/easa-modules'
+
+interface ExamComponent {
+  id: string
+  code: string
+  name: string
+}
 
 interface ExamEvent {
   id: string
@@ -21,6 +26,7 @@ interface BundleBookingProps {
   currency: string
   availableBalance: number
   events: ExamEvent[]
+  examComponents: ExamComponent[]
   trigger?: React.ReactNode
 }
 
@@ -31,6 +37,7 @@ export default function BundleBooking({
   currency,
   availableBalance,
   events,
+  examComponents,
   trigger,
 }: BundleBookingProps) {
   const [open, setOpen] = useState(false)
@@ -98,7 +105,6 @@ export default function BundleBooking({
               : 'border-purple-200 bg-purple-50/50 text-purple-700 hover:border-purple-300 hover:bg-purple-100/50 dark:border-purple-800 dark:bg-purple-900/20 dark:text-purple-300'
           }`}
         >
-          <Package className="h-4 w-4" />
           <span className="hidden sm:inline">{label}</span>
           <span className="sm:hidden">{shortLabel}</span>
           <span className="text-xs opacity-70">
@@ -111,7 +117,7 @@ export default function BundleBooking({
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             onClick={() => !isPending && setOpen(false)}
           />
 
@@ -125,17 +131,17 @@ export default function BundleBooking({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6 dark:border-slate-800">
               <div>
-                <h2 id="bundle-booking-title" className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
-                  Book {label}
+                <h2 id="bundle-booking-title" className="text-xl font-black tracking-tight text-[#002a5c] dark:text-white">
+                   {label}
                 </h2>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Select {bundleSize} modules for your bundle. Valid for 12 months.
+                <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  Select {bundleSize} modules for your bundle.
                 </p>
               </div>
               <button
                 onClick={() => !isPending && setOpen(false)}
-                aria-label="Close"
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50 hover:text-slate-700 dark:hover:bg-slate-800 transition-colors"
+                disabled={isPending}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -143,77 +149,81 @@ export default function BundleBooking({
 
             <div className="max-h-[70vh] space-y-6 overflow-y-auto p-8">
               {/* Pricing Summary */}
-              <div className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-900/20">
-                <Wallet className="h-6 w-6 text-blue-600" />
+              <div className="flex items-center gap-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-5 dark:border-blue-800 dark:bg-blue-900/20">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
+                  <Package className="h-6 w-6" />
+                </div>
                 <div className="flex-1">
-                  <p className="text-xs font-bold tracking-widest text-slate-500 uppercase">
-                    Bundle Price
+                  <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                    Total Bundle Price
                   </p>
-                  <p className="mt-1 text-lg font-black leading-none text-slate-900 dark:text-slate-100">
-                    {currencySymbol}
-                    {bundlePrice.toFixed(2)}
+                  <p className="mt-1 text-xl font-black text-slate-900 dark:text-white">
+                    {currencySymbol}{bundlePrice.toFixed(2)}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400">
-                    Save {currencySymbol}
-                    {savings.toFixed(2)}
+                  <p className="mb-1 inline-block rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-black tracking-tight text-emerald-600 dark:bg-emerald-900/40 dark:text-emerald-400 uppercase">
+                    Save {currencySymbol}{savings.toFixed(2)}
                   </p>
-                  <p className="text-xs text-slate-500">
-                    vs {currencySymbol}
-                    {individualPrice.toFixed(2)}/seat
+                  <p className="text-xs font-medium text-slate-500">
+                    Just {currencySymbol}{(bundlePrice / bundleSize).toFixed(0)}/seat
                   </p>
                 </div>
               </div>
 
               {/* Event Selection */}
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
+                  <Calendar className="h-4 w-4 text-[#002a5c]" />
                   Target Exam Event
                 </label>
                 <select
                   value={selectedEventId}
                   onChange={(e) => setSelectedEventId(e.target.value)}
                   disabled={isPending}
-                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-medium outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-4 text-sm font-bold text-slate-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
                   <option value="">-- Select an event --</option>
                   {events.map((e) => (
                     <option key={e.id} value={e.id}>
-                      {e.name} ({new Date(e.startDate).toLocaleDateString()} -{' '}
-                      {new Date(e.endDate).toLocaleDateString()})
+                      {e.name}
                     </option>
                   ))}
                 </select>
               </div>
 
               {/* Module Selection */}
-              <div>
-                <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
+                  <BookOpen className="h-4 w-4 text-[#002a5c]" />
                   Select {bundleSize} Modules ({selectedModules.length}/{bundleSize})
                 </label>
                 <div className="grid grid-cols-2 gap-2">
-                  {EASA_MODULES.map((m) => {
-                    const isSelected = selectedModules.includes(m.code)
+                  {examComponents.map((ec) => {
+                    const isSelected = selectedModules.includes(ec.code)
                     const isDisabled =
                       !isSelected && selectedModules.length >= bundleSize
 
                     return (
                       <button
-                        key={m.code}
+                        key={ec.id}
                         type="button"
-                        onClick={() => toggleModule(m.code)}
+                        onClick={() => toggleModule(ec.code)}
                         disabled={isDisabled || isPending}
-                        className={`rounded-xl border px-3 py-2 text-left text-xs font-medium transition-all ${
+                        className={`group relative rounded-xl border p-3 text-left transition-all ${
                           isSelected
-                            ? 'border-blue-600 bg-blue-50 text-blue-700 dark:border-blue-500 dark:bg-blue-900/20 dark:text-blue-300'
+                            ? 'border-[#002a5c] bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/20'
                             : isDisabled
-                              ? 'cursor-not-allowed border-slate-100 text-slate-300 dark:border-slate-800 dark:text-slate-600'
-                              : 'border-slate-200 hover:border-blue-300 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-blue-700 dark:hover:bg-slate-800'
+                              ? 'opacity-40 cursor-not-allowed border-slate-100 dark:border-slate-800'
+                              : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:hover:border-slate-600 dark:hover:bg-slate-800/50 shadow-sm'
                         }`}
                       >
-                        <span className="font-bold">{m.code}</span>{' '}
-                        <span className="text-xs opacity-70">{m.name}</span>
+                        <p className={`text-xs font-black tracking-tighter uppercase ${isSelected ? 'text-[#002a5c] dark:text-blue-300' : 'text-slate-900 dark:text-slate-100'}`}>
+                          {ec.code}
+                        </p>
+                        <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                          {ec.name}
+                        </p>
                       </button>
                     )
                   })}
@@ -221,22 +231,21 @@ export default function BundleBooking({
               </div>
 
               {/* Info note */}
-              <div className="flex gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+              <div className="flex gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
                 <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
-                <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-                  Bundle seats can be used for any exam events within 12 months of purchase. You can
-                  assign modules to specific dates later.
+                <p className="text-[10px] font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+                  Bundle seats are auto-assigned to pools by the enrollment deadline. You can update your module selection from the <strong>My Bookings</strong> tab before the deadline.
                 </p>
               </div>
 
               {!canAfford && (
-                <div className="flex gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-4 dark:border-amber-900/30 dark:bg-amber-900/20">
-                  <Info className="h-5 w-5 shrink-0 text-amber-600" />
-                  <div className="text-xs leading-relaxed text-amber-800 dark:text-amber-400">
-                    <p className="mb-1 font-bold">Insufficient Wallet Balance</p>
-                    You need {currencySymbol}
-                    {bundlePrice.toFixed(2)} but only have {currencySymbol}
-                    {availableBalance.toFixed(2)} available.
+                <div className="flex items-start gap-4 rounded-2xl border border-amber-100 bg-amber-50/50 p-5 dark:border-amber-900/30 dark:bg-amber-900/20">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400">
+                    <Wallet className="h-5 w-5" />
+                  </div>
+                  <div className="text-xs font-medium leading-relaxed text-amber-800 dark:text-amber-300">
+                    <p className="mb-1 font-black uppercase tracking-tight">Insufficient Wallet Balance</p>
+                    Your current balance is <strong>{currencySymbol}{availableBalance.toFixed(2)}</strong>. You need an additional <strong>{currencySymbol}{(bundlePrice - availableBalance).toFixed(2)}</strong> to complete this purchase.
                   </div>
                 </div>
               )}
@@ -249,7 +258,7 @@ export default function BundleBooking({
                   type="button"
                   onClick={() => setOpen(false)}
                   disabled={isPending}
-                  className="flex-1 rounded-2xl border border-slate-200 bg-white py-4 text-sm font-bold text-slate-700 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  className="flex-1 rounded-2xl border border-slate-200 bg-white py-4 text-sm font-black text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                 >
                   Cancel
                 </button>
@@ -262,13 +271,16 @@ export default function BundleBooking({
                     selectedModules.length !== bundleSize ||
                     !selectedEventId
                   }
-                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-[#002a5c] py-4 text-sm font-bold text-white shadow-lg shadow-blue-900/20 hover:bg-[#003a7c] active:scale-95 disabled:opacity-50"
+                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-[#002a5c] py-4 text-sm font-black text-white shadow-lg shadow-[#002a5c]/20 transition-all hover:bg-[#003a7c] hover:shadow-xl active:scale-95 disabled:opacity-50"
                 >
                   {isPending ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Processing...
+                    </>
                   ) : (
                     <>
-                      Book {label}
+                      Complete Purchase
                       <ArrowRight className="h-5 w-5" />
                     </>
                   )}
