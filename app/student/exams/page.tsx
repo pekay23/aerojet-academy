@@ -275,7 +275,7 @@ export default async function ExamsPage({
                   </h4>
                   <p className="mt-1 text-sm text-red-700 dark:text-red-400/80">
                     You have {failedAttempts.length} module{failedAttempts.length > 1 ? 's' : ''}{' '}
-                    that need to be cleared. Visit the "Bookings" tab to schedule a resit session.
+                    that need to be cleared. Visit the "Resit" tab to schedule a resit session.
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     {Array.from(new Set(failedAttempts.map((f) => f.moduleCode))).map((code) => (
