@@ -5,7 +5,7 @@ import { FileCheck, Users, Calendar, MapPin, Wallet, Info } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
-import JoinPoolButton from '../../exam-bookings/_components/JoinPoolButton'
+import JoinPoolButton from './JoinPoolButton'
 
 /* ── Helper: fetch common booking data ── */
 async function getBookingData(userId: string) {
@@ -21,7 +21,15 @@ async function getBookingData(userId: string) {
   const balance = Number(wallet?.availableBalance || 0)
   const currency = wallet?.currency || 'EUR'
   const currencySymbol = getCurrencySymbol(currency)
-  const ecMapped = examComponents.map((ec) => ({ id: ec.id, code: ec.course.code, name: ec.course.name }))
+  const uniqueMap = new Map<string, { id: string; code: string; name: string }>()
+  examComponents.forEach((ec) => {
+    if (!uniqueMap.has(ec.course.code)) {
+      uniqueMap.set(ec.course.code, { id: ec.id, code: ec.course.code, name: ec.course.name })
+    }
+  })
+  const ecMapped = Array.from(uniqueMap.values()).sort((a, b) =>
+    a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
+  )
 
   return { wallet, pricing, examComponents: ecMapped, balance, currency, currencySymbol }
 }
@@ -61,7 +69,7 @@ export default async function AvailablePoolsTab() {
     }),
   ])
 
-  const { wallet, balance, currency, currencySymbol } = bookingData
+  const { wallet, balance, currency, currencySymbol, examComponents } = bookingData
   const joinedPoolIds = new Set(myMemberships.map((m) => m.poolId))
 
   return (
@@ -153,7 +161,7 @@ export default async function AvailablePoolsTab() {
                     {isJoined ? (
                       <button disabled className="rounded-xl bg-emerald-100 px-4 py-2 text-xs font-bold tracking-wide text-emerald-700 uppercase dark:bg-emerald-900/30 dark:text-emerald-400">Joined ✓</button>
                     ) : (
-                      <JoinPoolButton poolId={pool.id} poolName={pool.name} price={seatPrice} currency={currency} canAfford={canAfford} availableBalance={balance} currentModules={existingModules} isFull={isFull} />
+                      <JoinPoolButton poolId={pool.id} poolName={pool.name} price={seatPrice} currency={currency} canAfford={canAfford} availableBalance={balance} currentModules={existingModules} isFull={isFull} examComponents={examComponents} />
                     )}
                   </div>
                 </div>

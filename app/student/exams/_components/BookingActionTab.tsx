@@ -5,9 +5,9 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 
-import GroupBookingModal from '../../exam-bookings/_components/GroupBookingModal'
-import StandaloneBooking from '../../exam-bookings/_components/StandaloneBooking'
-import BundleBooking from '../../exam-bookings/_components/BundleBooking'
+import GroupBookingModal from './GroupBookingModal'
+import StandaloneBooking from './StandaloneBooking'
+import BundleBooking from './BundleBooking'
 
 /* ── Helper: fetch common booking data ── */
 async function getBookingData(userId: string) {
@@ -41,7 +41,15 @@ async function getBookingData(userId: string) {
   const balance = Number(wallet?.availableBalance || 0)
   const currency = wallet?.currency || 'EUR'
   const currencySymbol = getCurrencySymbol(currency)
-  const ecMapped = examComponents.map((ec) => ({ id: ec.id, code: ec.course.code, name: ec.course.name }))
+  const uniqueMap = new Map<string, { id: string; code: string; name: string }>()
+  examComponents.forEach((ec) => {
+    if (!uniqueMap.has(ec.course.code)) {
+      uniqueMap.set(ec.course.code, { id: ec.id, code: ec.course.code, name: ec.course.name })
+    }
+  })
+  const ecMapped = Array.from(uniqueMap.values()).sort((a, b) =>
+    a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
+  )
 
   return { wallet, pricing, openEvents, upcomingExams, examComponents: ecMapped, balance, currency, currencySymbol }
 }
@@ -100,6 +108,7 @@ export default async function BookingActionTab({ type }: { type: 'group' | 'indi
             <p className="mb-6 text-sm text-slate-500">Book a full exam session for up to 28 candidates.</p>
             <GroupBookingModal
               events={openEvents}
+              examComponents={examComponents}
               groupCharterFee={pricing.groupCharterFee}
               currency={currency}
               availableBalance={balance}
@@ -139,6 +148,7 @@ export default async function BookingActionTab({ type }: { type: 'group' | 'indi
                   currency={currency}
                   availableBalance={balance}
                   events={openEvents}
+                  examComponents={examComponents}
                   trigger={<button className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.indigo}`}>Purchase Twin Pack</button>}
                 />
               </div>
@@ -156,6 +166,7 @@ export default async function BookingActionTab({ type }: { type: 'group' | 'indi
                   currency={currency}
                   availableBalance={balance}
                   events={openEvents}
+                  examComponents={examComponents}
                   trigger={<button className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.amber}`}>Purchase 4-Pack</button>}
                 />
               </div>

@@ -3,15 +3,21 @@
 import { useState, useTransition } from 'react'
 import { createStudentPoolAction } from '@/app/student/actions'
 import { toast } from 'sonner'
-import { Loader2, ArrowRight, Users, Wallet, Calendar, Clock, X, Info } from 'lucide-react'
+import { Loader2, ArrowRight, Users, Wallet, Calendar, Clock, X, Info, BookOpen } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
-import { EASA_MODULES } from '@/lib/constants/easa-modules'
 
 const MAX_MODULES = 4
 const MAX_SEATS = 28
 
+interface ExamComponent {
+  id: string
+  code: string
+  name: string
+}
+
 interface GroupBookingModalProps {
   events: { id: string; name: string; startDate: Date; endDate: Date }[]
+  examComponents: ExamComponent[]
   groupCharterFee: number
   currency: string
   availableBalance: number
@@ -20,6 +26,7 @@ interface GroupBookingModalProps {
 
 export default function GroupBookingModal({
   events,
+  examComponents,
   groupCharterFee = 7500,
   currency,
   availableBalance,
@@ -135,7 +142,7 @@ export default function GroupBookingModal({
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
             onClick={() => !isPending && setOpen(false)}
           />
 
@@ -149,17 +156,17 @@ export default function GroupBookingModal({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6 dark:border-slate-800">
               <div>
-                <h2 id="group-booking-title" className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100">
+                <h2 id="group-booking-title" className="text-xl font-black tracking-tight text-[#002a5c] dark:text-white">
                   Group Charter Booking
                 </h2>
-                <p className="mt-1 text-xs text-pretty text-slate-500 dark:text-slate-400">
+                <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                   Reserve an exam session for your organization or group.
                 </p>
               </div>
               <button
                 onClick={() => !isPending && setOpen(false)}
-                aria-label="Close"
-                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
+                className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50 hover:text-slate-700 dark:hover:bg-slate-800 transition-colors"
+                disabled={isPending}
               >
                 <X className="h-5 w-5" />
               </button>
@@ -167,34 +174,33 @@ export default function GroupBookingModal({
 
             <div className="max-h-[70vh] space-y-6 overflow-y-auto p-8">
               {/* Cost & Balance */}
-              <div className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50 p-5 dark:border-blue-800 dark:bg-blue-900/20">
-                <Wallet className="h-6 w-6 text-blue-600" />
+              <div className="flex items-center gap-4 rounded-2xl border border-blue-100 bg-blue-50/50 p-5 dark:border-blue-800 dark:bg-blue-900/20">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400">
+                  <Wallet className="h-6 w-6" />
+                </div>
                 <div className="flex-1">
-                  <p className="text-xs font-bold tracking-widest text-slate-500 uppercase">
+                  <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                     Your Balance
                   </p>
-                  <p className="mt-1 text-lg leading-none font-black text-slate-900 dark:text-slate-100">
-                    {currencySymbol}
-                    {availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                  <p className="mt-1 text-xl font-black text-slate-900 dark:text-white">
+                    {currencySymbol}{availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs font-bold tracking-widest text-slate-500 uppercase">
+                  <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                     Total Cost
                   </p>
-                  <p className="mt-1 text-lg leading-none font-black text-blue-700 dark:text-blue-400">
-                    {currencySymbol}
-                    {groupCharterFee.toFixed(2)}
+                  <p className="mt-1 text-xl font-black text-[#002a5c] dark:text-blue-300">
+                    {currencySymbol}{groupCharterFee.toFixed(2)}
                   </p>
                 </div>
               </div>
 
               {/* Info note */}
-              <div className="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
-                <Info className="h-5 w-5 shrink-0 text-slate-500" />
-                <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
-                  Group Charter covers up to 28 seats for your organization. All seats share the
-                  same exam date and time slot.
+              <div className="flex gap-3 rounded-2xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+                <Info className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
+                <p className="text-[10px] font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+                  Group Charter covers up to 28 seats for your organization. All seats share the same exam date and time slot.
                 </p>
               </div>
 
@@ -202,7 +208,7 @@ export default function GroupBookingModal({
               <div className="grid gap-6 sm:grid-cols-2">
                 {/* Organization Name */}
                 <div className="sm:col-span-2">
-                  <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+                  <label className="mb-2 block text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
                     Organization / Group Name
                   </label>
                   <input
@@ -211,13 +217,13 @@ export default function GroupBookingModal({
                     onChange={(e) => setOrganizationName(e.target.value)}
                     disabled={isPending}
                     placeholder="e.g. Aerojet Academy Cohort 12"
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-medium transition-all outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-bold text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>
 
                 {/* Target Exam Event */}
                 <div className="sm:col-span-2">
-                  <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+                  <label className="mb-2 block text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
                     Target Exam Event
                   </label>
                   <select
@@ -227,13 +233,12 @@ export default function GroupBookingModal({
                       setExamDate('')
                     }}
                     disabled={isPending}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-medium transition-all outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-bold text-slate-900 transition-all outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     <option value="">-- Select an upcoming event --</option>
                     {events.map((e) => (
                       <option key={e.id} value={e.id}>
-                        {e.name} ({new Date(e.startDate).toLocaleDateString()} -{' '}
-                        {new Date(e.endDate).toLocaleDateString()})
+                        {e.name}
                       </option>
                     ))}
                   </select>
@@ -241,21 +246,21 @@ export default function GroupBookingModal({
 
                 {/* EASA Modules (checkboxes) */}
                 <div className="sm:col-span-2">
-                  <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
-                    EASA Modules{' '}
-                    <span className="font-medium text-slate-400">
+                  <label className="mb-2 block text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
+                    EASA Modules Exam{' '}
+                    <span className="text-xs font-medium text-slate-400 normal-case">
                       ({selectedModules.length}/{MAX_MODULES} selected)
                     </span>
                   </label>
-                  <div className="max-h-48 overflow-y-auto rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800">
-                    {EASA_MODULES.map((m) => {
-                      const isChecked = selectedModules.includes(m.code)
+                  <div className="max-h-48 overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+                    {examComponents.map((ec) => {
+                      const isChecked = selectedModules.includes(ec.code)
                       const isDisabled =
                         isPending || (!isChecked && selectedModules.length >= MAX_MODULES)
                       return (
                         <label
-                          key={m.code}
-                          className={`flex cursor-pointer items-center gap-3 border-b border-slate-100 px-4 py-2.5 transition-colors last:border-b-0 dark:border-slate-700 ${
+                          key={ec.id}
+                          className={`flex cursor-pointer items-center gap-3 border-b border-slate-100 px-4 py-3 transition-colors last:border-b-0 dark:border-slate-700 ${
                             isDisabled && !isChecked
                               ? 'cursor-not-allowed opacity-40'
                               : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
@@ -264,16 +269,18 @@ export default function GroupBookingModal({
                           <input
                             type="checkbox"
                             checked={isChecked}
-                            onChange={() => toggleModule(m.code)}
+                            onChange={() => toggleModule(ec.code)}
                             disabled={isDisabled}
                             className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
                           />
-                          <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                            {m.code}
-                          </span>
-                          <span className="text-xs text-slate-500 dark:text-slate-400">
-                            {m.name}
-                          </span>
+                          <div className="flex-1">
+                            <p className="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                              {ec.code}
+                            </p>
+                            <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                              {ec.name}
+                            </p>
+                          </div>
                         </label>
                       )
                     })}
@@ -281,8 +288,8 @@ export default function GroupBookingModal({
                 </div>
 
                 {/* Preferred Date */}
-                <div>
-                  <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+                <div className="space-y-2">
+                  <label className="block text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
                     Preferred Exam Date
                   </label>
                   <div className="relative">
@@ -302,14 +309,14 @@ export default function GroupBookingModal({
                           ? new Date(selectedEvent.endDate).toISOString().split('T')[0]
                           : undefined
                       }
-                      className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-sm font-medium transition-all outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                      className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-sm font-bold text-slate-900 transition-all outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     />
                   </div>
                 </div>
 
                 {/* Time Slot */}
-                <div>
-                  <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+                <div className="space-y-2">
+                  <label className="block text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
                     Preferred Slot
                   </label>
                   <div className="grid grid-cols-2 gap-2">
@@ -318,33 +325,33 @@ export default function GroupBookingModal({
                       onClick={() => setExamTimeSlot('MORNING')}
                       className={`flex flex-col items-center justify-center gap-1 rounded-2xl border px-3 py-2.5 transition-all ${
                         examTimeSlot === 'MORNING'
-                          ? 'border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                          : 'border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800'
+                          ? 'border-[#002a5c] bg-blue-50/50 text-[#002a5c] dark:bg-blue-900/20 dark:text-blue-300'
+                          : 'border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50'
                       }`}
                     >
                       <span className="text-xs font-black uppercase">Morning</span>
-                      <span className="text-xs opacity-70">09:00 - 12:00</span>
+                      <span className="text-[10px] font-medium opacity-70">09:00 - 12:00</span>
                     </button>
                     <button
                       type="button"
                       onClick={() => setExamTimeSlot('AFTERNOON')}
                       className={`flex flex-col items-center justify-center gap-1 rounded-2xl border px-3 py-2.5 transition-all ${
                         examTimeSlot === 'AFTERNOON'
-                          ? 'border-blue-600 bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400'
-                          : 'border-slate-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800'
+                          ? 'border-[#002a5c] bg-blue-50/50 text-[#002a5c] dark:bg-blue-900/20 dark:text-blue-300'
+                          : 'border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50'
                       }`}
                     >
                       <span className="text-xs font-black uppercase">Afternoon</span>
-                      <span className="text-xs opacity-70">13:00 - 16:00</span>
+                      <span className="text-[10px] font-medium opacity-70">13:00 - 16:00</span>
                     </button>
                   </div>
                 </div>
 
                 {/* Number of Seats */}
-                <div className="sm:col-span-2">
-                  <label className="mb-2 block text-sm font-bold text-slate-700 dark:text-slate-300">
+                <div className="sm:col-span-2 space-y-2">
+                  <label className="block text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
                     Number of Seats{' '}
-                    <span className="font-medium text-slate-400">(max {MAX_SEATS})</span>
+                    <span className="text-xs font-medium text-slate-400 normal-case">(max {MAX_SEATS})</span>
                   </label>
                   <input
                     type="number"
@@ -356,18 +363,19 @@ export default function GroupBookingModal({
                     disabled={isPending}
                     min={1}
                     max={MAX_SEATS}
-                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-medium transition-all outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                    className="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-bold text-slate-900 transition-all outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/5 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   />
                 </div>
               </div>
 
               {!canAfford && (
-                <div className="flex gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-4 dark:border-amber-900/30 dark:bg-amber-900/20">
-                  <Info className="h-5 w-5 shrink-0 text-amber-600" />
-                  <div className="text-xs leading-relaxed text-amber-800 dark:text-amber-400">
-                    <p className="mb-1 font-bold">Insufficient Wallet Balance</p>
-                    You need at least {currencySymbol}
-                    {groupCharterFee.toFixed(2)} to request a group charter.
+                <div className="flex items-start gap-4 rounded-2xl border border-amber-100 bg-amber-50/50 p-5 dark:border-amber-900/30 dark:bg-amber-900/20">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/40 dark:text-amber-400">
+                    <Wallet className="h-5 w-5" />
+                  </div>
+                  <div className="text-xs font-medium leading-relaxed text-amber-800 dark:text-amber-300">
+                    <p className="mb-1 font-black uppercase tracking-tight">Insufficient Wallet Balance</p>
+                    You need at least <strong>{currencySymbol}{groupCharterFee.toFixed(2)}</strong> to request a group charter.
                   </div>
                 </div>
               )}
@@ -380,7 +388,7 @@ export default function GroupBookingModal({
                   type="button"
                   onClick={() => setOpen(false)}
                   disabled={isPending}
-                  className="flex-1 rounded-2xl border border-slate-200 bg-white py-4 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+                  className="flex-1 rounded-2xl border border-slate-200 bg-white py-4 text-sm font-black text-slate-700 transition-all hover:bg-slate-50 hover:border-slate-300 active:scale-95 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
                 >
                   Cancel
                 </button>
@@ -388,10 +396,13 @@ export default function GroupBookingModal({
                   type="button"
                   onClick={handleSubmit}
                   disabled={isPending || !canAfford || !isFormValid}
-                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-[#002a5c] py-4 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition-all hover:bg-[#003a7c] active:scale-95 disabled:opacity-50"
+                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-[#002a5c] py-4 text-sm font-black text-white shadow-lg shadow-[#002a5c]/20 transition-all hover:bg-[#003a7c] hover:shadow-xl active:scale-95 disabled:opacity-50"
                 >
                   {isPending ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                      Processing...
+                    </>
                   ) : (
                     <>
                       Request Group Charter
