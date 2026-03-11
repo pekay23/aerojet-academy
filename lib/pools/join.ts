@@ -94,6 +94,14 @@ export async function joinPoolInternal(
   if (pool.currentMemberCount >= POOL_MAX_CANDIDATES)
     return { success: false, error: 'Pool is full' }
 
+  // Only allow direct joins to STANDARD pools — AUTO and GROUP_CHARTER are system-managed
+  if (pool.poolType === 'AUTO') {
+    return { success: false, error: 'Cannot join auto pools directly. Please book an exam instead.' }
+  }
+  if (pool.poolType === 'GROUP_CHARTER') {
+    return { success: false, error: 'Group charter pools require a group booking representative.' }
+  }
+
   // RULE: One module per candidate per pool
   const existingInPool = await tx.poolMembership.findFirst({
     where: { poolId, userId, status: { in: ['RESERVED', 'CONFIRMED'] } },

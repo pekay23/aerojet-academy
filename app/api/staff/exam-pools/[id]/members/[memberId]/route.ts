@@ -4,8 +4,8 @@ import { Prisma } from '@prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
-import { POOL_NEAR_FULL_THRESHOLD } from '@/lib/pools/types'
 import { decrementPoolMemberCount } from '@/lib/pools/operations'
+import { releaseFunds, creditToWallet } from '@/lib/wallet/operations'
 
 interface RouteParams {
   params: { id: string; memberId: string }
@@ -25,7 +25,10 @@ export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Rout
     async (tx) => {
       const membership = await tx.poolMembership.findUnique({
         where: { id: memberId },
-        include: { user: { select: { id: true, email: true } } },
+        include: {
+          user: { select: { id: true, email: true, profile: { select: { firstName: true } } } },
+          pool: { select: { name: true } },
+        },
       })
 
       if (!membership) throw new Error('NOT_FOUND')
@@ -35,37 +38,34 @@ export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Rout
         throw new Error(`Cannot remove member with status ${membership.status}`)
       }
 
-      const releaseAmount = Number(membership.amountReserved) || 0
+      let refundAmount = 0
+      let refundType: 'RELEASE' | 'CREDIT' = 'RELEASE'
 
-      // Release reserved funds if any
-      if (releaseAmount > 0) {
-        const wallet = await tx.wallet.findUnique({ where: { userId: membership.userId } })
-        if (wallet) {
-          await tx.wallet.update({
-            where: { userId: membership.userId },
-            data: {
-              reservedBalance: { decrement: releaseAmount },
-              availableBalance: { increment: releaseAmount },
-            },
-          })
-
-          await tx.walletTransaction.create({
-            data: {
-              walletId: wallet.id,
-              type: 'RELEASE',
-              amount: releaseAmount,
-              description: `Removed from pool by staff. Reason: ${reason}`,
-              referenceId: `REMOVE-${poolId.substring(0, 8)}`,
-              referenceType: 'STAFF_REMOVAL',
-              balanceBefore: Number(wallet.balance),
-              balanceAfter: Number(wallet.balance),
-              reservedBefore: Number(wallet.reservedBalance),
-              reservedAfter: Number(wallet.reservedBalance) - releaseAmount,
-              availableBefore: Number(wallet.availableBalance),
-              availableAfter: Number(wallet.availableBalance) + releaseAmount,
-              metadata: { reason, staffId: staff.id },
-            },
-          })
+      if (membership.status === 'RESERVED') {
+        refundAmount = Number(membership.amountReserved) || 0
+        if (refundAmount > 0) {
+          await releaseFunds(
+            tx,
+            membership.userId,
+            refundAmount,
+            `Removed from pool by staff: ${membership.pool.name}. Reason: ${reason}`,
+            poolId,
+            'STAFF_REMOVAL'
+          )
+        }
+      } else if (membership.status === 'CONFIRMED') {
+        // Wallet credit for confirmed members (no bank refund)
+        refundAmount = Number(membership.amountPaid) || Number(membership.amountReserved) || 0
+        refundType = 'CREDIT'
+        if (refundAmount > 0) {
+          await creditToWallet(
+            tx,
+            membership.userId,
+            refundAmount,
+            `Removed from pool by staff: ${membership.pool.name}. Reason: ${reason}`,
+            poolId,
+            'STAFF_REMOVAL'
+          )
         }
       }
 
@@ -79,7 +79,21 @@ export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Rout
       await tx.$executeRawUnsafe(`SELECT id FROM exam_pools WHERE id = $1 FOR UPDATE`, poolId)
       await decrementPoolMemberCount(poolId, tx)
 
-      return { userId: membership.userId, releaseAmount }
+      // Notify the student
+      await tx.notification.create({
+        data: {
+          userId: membership.userId,
+          title: 'Removed from Exam Pool',
+          message: refundAmount > 0
+            ? `You have been removed from "${membership.pool.name}". €${refundAmount.toFixed(2)} has been ${refundType === 'CREDIT' ? 'credited to' : 'released to'} your wallet. Reason: ${reason}`
+            : `You have been removed from "${membership.pool.name}". Reason: ${reason}`,
+          type: 'POOL_UPDATE',
+          linkUrl: '/student/exam-bookings',
+          linkText: 'View Bookings',
+        },
+      })
+
+      return { userId: membership.userId, refundAmount, refundType }
     },
     { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
   )
@@ -89,8 +103,18 @@ export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Rout
     entity: 'PoolMembership',
     entityId: memberId,
     userId: staff.id,
-    details: { poolId, removedUserId: result.userId, amountReleased: result.releaseAmount, reason },
+    details: {
+      poolId,
+      removedUserId: result.userId,
+      amountRefunded: result.refundAmount,
+      refundType: result.refundType,
+      reason,
+    },
   })
 
-  return apiSuccess({ message: 'Member removed', amountReleased: result.releaseAmount })
+  return apiSuccess({
+    message: 'Member removed',
+    amountRefunded: result.refundAmount,
+    refundType: result.refundType,
+  })
 })
