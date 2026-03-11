@@ -9,18 +9,18 @@ interface HistoryRecord {
   moduleCode: string
   moduleName: string
   date: Date
-  passed: boolean
+  passed: boolean | null
   score?: number
   percentage?: number
   grade?: string
 }
 
 interface ExamHistoryTableProps {
-  records: HistoryRecord[]
+  results: HistoryRecord[]
 }
 
-export default function ExamHistoryTable({ records }: ExamHistoryTableProps) {
-  const { items, requestSort, sortConfig } = useSort(records, { key: 'date', order: 'desc' })
+export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
+  const { items, requestSort, sortConfig } = useSort(results, { key: 'date', order: 'desc' })
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -81,17 +81,22 @@ export default function ExamHistoryTable({ records }: ExamHistoryTableProps) {
                 </td>
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
-                    {h.passed ? (
+                    {h.passed === true ? (
                       <>
                         <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-hidden="true" />
                         <span className="font-bold text-emerald-600">
-                          {h.score !== undefined ? 'PASS' : 'AWAITING RESULT'}
+                          {h.score !== undefined ? 'PASS' : 'PASS/EXEMPT'}
                         </span>
                       </>
-                    ) : (
+                    ) : h.passed === false ? (
                       <>
                         <XCircle className="h-4 w-4 text-red-500" aria-hidden="true" />
                         <span className="font-bold text-red-600">FAIL</span>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                        <span className="font-bold text-slate-500">PENDING</span>
                       </>
                     )}
                   </div>

@@ -136,7 +136,11 @@ export default async function StudentDashboard() {
     }),
     // Pool memberships list
     prisma.poolMembership.findMany({
-      where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+      where: { 
+        userId, 
+        status: { in: ['RESERVED', 'CONFIRMED'] },
+        pool: { isAutoPool: false } // Only show standard/group pools on dashboard
+      },
       include: { pool: true },
       take: 3,
     }),

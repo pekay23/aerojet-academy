@@ -1,0 +1,168 @@
+import { redirect } from 'next/navigation'
+import { Wallet } from 'lucide-react'
+
+import { getAuthSession } from '@/lib/auth/helpers'
+import prisma from '@/lib/prisma/client'
+import { getExamPricingConfig } from '@/lib/pools/pricing-config'
+
+import GroupBookingModal from '../../exam-bookings/_components/GroupBookingModal'
+import StandaloneBooking from '../../exam-bookings/_components/StandaloneBooking'
+import BundleBooking from '../../exam-bookings/_components/BundleBooking'
+
+/* ── Helper: fetch common booking data ── */
+async function getBookingData(userId: string) {
+  const [wallet, pricing, openEvents, upcomingExams, examComponents] = await Promise.all([
+    prisma.wallet.findUnique({ where: { userId } }),
+    getExamPricingConfig(),
+    prisma.examEvent.findMany({
+      where: {
+        status: { in: ['OPEN', 'DRAFT'] },
+        joinDeadline: { gt: new Date() },
+      },
+      select: { id: true, name: true, startDate: true, endDate: true },
+      orderBy: { startDate: 'asc' },
+    }),
+    prisma.exam.findMany({
+      where: { examDate: { gt: new Date() } },
+      select: {
+        id: true,
+        name: true,
+        examDate: true,
+        examComponent: { select: { course: { select: { code: true, name: true } } } },
+      },
+      orderBy: { examDate: 'asc' },
+    }),
+    prisma.examComponent.findMany({
+      select: { id: true, course: { select: { code: true, name: true } } },
+      orderBy: { course: { code: 'asc' } },
+    }),
+  ])
+  const { getCurrencySymbol } = await import('@/lib/currency')
+  const balance = Number(wallet?.availableBalance || 0)
+  const currency = wallet?.currency || 'EUR'
+  const currencySymbol = getCurrencySymbol(currency)
+  const ecMapped = examComponents.map((ec) => ({ id: ec.id, code: ec.course.code, name: ec.course.name }))
+
+  return { wallet, pricing, openEvents, upcomingExams, examComponents: ecMapped, balance, currency, currencySymbol }
+}
+
+export default async function BookingActionTab({ type }: { type: 'group' | 'individual' | 'twin' | 'four-pack' }) {
+  const session = await getAuthSession()
+  if (!session) redirect('/login')
+
+  const { wallet, pricing, openEvents, upcomingExams, examComponents, balance, currency, currencySymbol } =
+    await getBookingData(session.user.id)
+
+  const BOOKING_META: Record<string, { title: string; description: string; color: string }> = {
+    group: {
+      title: 'Group Booking',
+      description: '1 rep for companies/entities/bulk individuals who books for the companies. Create a custom group charter for your organization or study group.',
+      color: 'blue',
+    },
+    individual: {
+      title: 'Individual Booking',
+      description: 'Choose between a single seat, twin pack, or 4-pack. All individual bookings are auto-assigned to a pool by the booking deadline.',
+      color: 'emerald',
+    },
+  }
+
+  const meta = BOOKING_META[type]
+  const colorClasses: Record<string, string> = {
+    blue: 'border-l-blue-500 bg-blue-50/30 dark:bg-blue-900/10',
+    emerald: 'border-l-emerald-500 bg-emerald-50/30 dark:bg-emerald-900/10',
+  }
+  const btnColors: Record<string, string> = {
+    blue: 'bg-blue-600 hover:bg-blue-700',
+    emerald: 'bg-emerald-600 hover:bg-emerald-700',
+    indigo: 'bg-indigo-600 hover:bg-indigo-700',
+    amber: 'bg-amber-600 hover:bg-amber-700',
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className={`rounded-xl border border-l-4 border-slate-100 p-5 ${colorClasses[meta.color]} dark:border-slate-800`}>
+        <h2 className="text-lg font-black text-slate-900 dark:text-slate-100">{meta.title}</h2>
+        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">{meta.description}</p>
+        <div className="mt-3 flex items-center gap-2 text-sm">
+          <Wallet className="h-4 w-4 text-slate-400" />
+          <span className="font-bold text-slate-700 dark:text-slate-300">
+            Available: {currencySymbol}{balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+          </span>
+        </div>
+      </div>
+
+      {/* Booking Form / Options */}
+      <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+        {type === 'group' ? (
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+            <h3 className="mb-4 text-lg font-bold">Group Charter</h3>
+            <p className="mb-6 text-sm text-slate-500">Book a full exam session for up to 28 candidates.</p>
+            <GroupBookingModal
+              events={openEvents}
+              groupCharterFee={pricing.groupCharterFee}
+              currency={currency}
+              availableBalance={balance}
+              trigger={<button className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.blue}`}>Configure Group Booking</button>}
+            />
+          </div>
+        ) : (
+          <>
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-bold">Single Seat</h3>
+                <span className="text-lg font-black text-emerald-600">{currencySymbol}{pricing.individualExamFee}</span>
+              </div>
+              <p className="mb-6 text-sm text-slate-500">Book a single exam seat and join the auto-pool.</p>
+              <StandaloneBooking
+                price={pricing.individualExamFee}
+                currency={currency}
+                availableBalance={balance}
+                upcomingExams={upcomingExams}
+                examComponents={examComponents}
+                events={openEvents}
+                trigger={<button className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.emerald}`}>Book Single Seat</button>}
+              />
+            </div>
+
+            <div className="space-y-6">
+              <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-lg font-bold">Twin Pack</h3>
+                  <span className="text-lg font-black text-indigo-600">{currencySymbol}{pricing.twoSeatBundle}</span>
+                </div>
+                <p className="mb-6 text-sm text-slate-500">Bundle 2 exam seats at a discounted rate.</p>
+                <BundleBooking
+                  bundleSize={2}
+                  bundlePrice={pricing.twoSeatBundle}
+                  individualPrice={pricing.individualExamFee}
+                  currency={currency}
+                  availableBalance={balance}
+                  events={openEvents}
+                  trigger={<button className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.indigo}`}>Purchase Twin Pack</button>}
+                />
+              </div>
+
+              <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+                <div className="mb-4 flex items-center justify-between">
+                  <h3 className="text-lg font-bold">4-Pack</h3>
+                  <span className="text-lg font-black text-amber-600">{currencySymbol}{pricing.fourSeatBundle}</span>
+                </div>
+                <p className="mb-6 text-sm text-slate-500">Best value — 4 exam seats for maximum flexibility.</p>
+                <BundleBooking
+                  bundleSize={4}
+                  bundlePrice={pricing.fourSeatBundle}
+                  individualPrice={pricing.individualExamFee}
+                  currency={currency}
+                  availableBalance={balance}
+                  events={openEvents}
+                  trigger={<button className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.amber}`}>Purchase 4-Pack</button>}
+                />
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  )
+}
