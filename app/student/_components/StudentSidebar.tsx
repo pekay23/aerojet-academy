@@ -35,7 +35,6 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
   if (isExamOnly) {
     baseLinks.push(
       { label: 'Wallet', href: '/student/wallet', icon: Wallet },
-      { label: 'Exam Bookings', href: '/student/exam-bookings', icon: FileCheck },
       { label: 'Exams', href: '/student/exams', icon: ClipboardCheck }
     )
   } else {
@@ -63,14 +62,6 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
               { label: 'Enrolled Courses', href: '/student/courses' },
               { label: 'Enroll in New', href: '/student/courses/enroll' },
             ],
-      })
-    }
-
-    if (!isFullTime) {
-      baseLinks.push({
-        label: 'Exam Bookings',
-        href: '/student/exam-bookings',
-        icon: FileCheck,
       })
     }
 
