@@ -16,6 +16,7 @@ import { requireAuth, requireStudent } from '@/lib/auth/helpers'
 import { hash, compare } from 'bcryptjs'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 import { studentCreatePoolSchema, CreatePoolInput, validateBody } from '@/lib/validation/schemas'
+import { assertExamOnlyPathway } from '@/lib/pools/access-control'
 
 export async function enrollInCourse(courseId: string) {
   const user = await requireStudent()
@@ -200,13 +201,11 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     return { error: 'You must select a module before joining a booking.' }
   }
 
-  // 0. Pathway Restrictions
-  const profile = await prisma.studentProfile.findUnique({ where: { userId: user.id } })
-  if (profile?.enrollmentType === 'FULL_TIME') {
-    return {
-      error:
-        'Full-Time students cannot join exam bookings individually. They follow a strictly milestone-based path.',
-    }
+  // 0. Pathway Restrictions — only EXAM_ONLY students can book exams
+  try {
+    await assertExamOnlyPathway(user.id)
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Access denied.' }
   }
 
   // 1. Get Pool Details & Check availability
@@ -388,14 +387,8 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
     validation.data
 
   try {
-    // 0. Pathway Restrictions
-    const profile = await prisma.studentProfile.findUnique({ where: { userId: user.id } })
-    if (profile?.enrollmentType === 'FULL_TIME') {
-      return {
-        error:
-          'Full-Time students cannot create exam bookings. They follow a strictly milestone-based path.',
-      }
-    }
+    // 0. Pathway Restrictions — only EXAM_ONLY students can book exams
+    await assertExamOnlyPathway(user.id)
 
     // 1. Get Pricing & Check Balance
     const pricing = await getExamPricingConfig()
@@ -518,7 +511,8 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
           where: { id: user.id },
           data: { role: 'STUDENT' },
         })
-        if (profile) {
+        const studentProfile = await tx.studentProfile.findUnique({ where: { userId: user.id } })
+        if (studentProfile) {
           await tx.studentProfile.update({
             where: { userId: user.id },
             data: { enrollmentStatus: 'ENROLLED' },
@@ -928,6 +922,7 @@ export async function bookStandaloneExamAction(params: {
 }) {
   try {
     const user = await requireStudent()
+    await assertExamOnlyPathway(user.id)
     const result = await bookStandaloneExam(user.id, params)
 
     const typeStr = result.usedBundle ? 'an Exam Package seat' : 'wallet balance'
@@ -965,6 +960,7 @@ export async function bookStandaloneExamAction(params: {
 export async function bookBundleExamsAction(params: { moduleCodes: string[]; eventId: string }) {
   try {
     const user = await requireStudent()
+    await assertExamOnlyPathway(user.id)
     const { moduleCodes, eventId } = params
 
     if (!moduleCodes.length || !eventId) {
@@ -1007,6 +1003,7 @@ export async function bookBundleExamsAction(params: { moduleCodes: string[]; eve
 export async function bookResitExamAction(examId: string) {
   try {
     const user = await requireStudent()
+    await assertExamOnlyPathway(user.id)
     await bookResitExam(examId, user.id)
 
     const exam = await prisma.exam.findUnique({
@@ -1050,5 +1047,69 @@ export async function markNotificationAsReadAction(notificationId: string) {
   } catch (error) {
     console.error('markNotificationAsReadAction error:', error)
     return { error: 'Failed to mark notification as read' }
+  }
+}
+
+export async function cancelMyBookingAction(bookingId: string, reason?: string) {
+  try {
+    const user = await requireStudent()
+
+    // Verify the booking belongs to this student
+    const booking = await prisma.examBooking.findUnique({
+      where: { id: bookingId },
+      select: { userId: true },
+    })
+    if (!booking || booking.userId !== user.id) {
+      return { error: 'Booking not found or access denied.' }
+    }
+
+    const { cancelBooking } = await import('@/lib/pools/cancellation')
+    const result = await cancelBooking(bookingId, user.id, reason)
+
+    if (!result.success) {
+      return { error: result.error || 'Failed to cancel booking.' }
+    }
+
+    revalidatePath('/student/exam-bookings')
+    revalidatePath('/student/wallet')
+    revalidatePath('/student/exams')
+    revalidatePath('/student')
+    return {
+      success: true,
+      refundAmount: result.refundAmount,
+      refundType: result.refundType,
+    }
+  } catch (error: unknown) {
+    console.error('cancelMyBookingAction error:', error instanceof Error ? error.message : 'Unknown error')
+    return { error: 'Failed to cancel booking. Please try again.' }
+  }
+}
+
+export async function createGroupBookingAction(params: {
+  eventId: string
+  groupName: string
+  memberCount: number
+  modules: string[]
+}) {
+  try {
+    const user = await requireStudent()
+    await assertExamOnlyPathway(user.id)
+
+    const { createGroupBooking } = await import('@/lib/pools/group-booking')
+    const result = await createGroupBooking({
+      repUserId: user.id,
+      eventId: params.eventId,
+      groupName: params.groupName,
+      memberCount: params.memberCount,
+      modules: params.modules,
+    })
+
+    revalidatePath('/student/exam-bookings')
+    revalidatePath('/student/wallet')
+    revalidatePath('/student')
+    return { success: true, poolId: result.pool.id, bookingId: result.booking.id }
+  } catch (error: unknown) {
+    console.error('createGroupBookingAction error:', error instanceof Error ? error.message : 'Unknown error')
+    return { error: error instanceof Error ? error.message : 'Failed to create group booking.' }
   }
 }

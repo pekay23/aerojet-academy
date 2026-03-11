@@ -18,6 +18,7 @@ import { Metadata } from 'next'
 import PoolStatusBadge from '../../../_components/PoolStatusBadge'
 import { evaluateGoNoGo } from '@/lib/events/go-no-go'
 import EventOverrideControls from './EventOverrideControls'
+import RedistributePoolButton from './RedistributePoolButton'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -49,6 +50,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
   if (!event) notFound()
 
   const evaluation = await evaluateGoNoGo(id).catch(() => null)
+  const hasAutoPool = event.pools.some((p) => p.isAutoPool && p.poolType === 'AUTO' && p.status === 'OPEN')
 
   return (
     <div className="mx-auto max-w-7xl">
@@ -94,7 +96,10 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
             </div>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
+          {hasAutoPool && (
+            <RedistributePoolButton eventId={event.id} />
+          )}
           <Link
             href={`/staff/exams/events/${event.id}/edit`}
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
@@ -235,16 +240,31 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                           {pool.name}
                         </h3>
                         <PoolStatusBadge status={pool.status} />
+                        {pool.poolType === 'AUTO' && (
+                          <span className="inline-flex rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-bold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">Auto</span>
+                        )}
+                        {pool.poolType === 'GROUP_CHARTER' && (
+                          <span className="inline-flex rounded-full bg-purple-100 px-2 py-0.5 text-xs font-bold text-purple-700 dark:bg-purple-900/30 dark:text-purple-400">Group Charter</span>
+                        )}
+                        {pool.poolType === 'STANDARD' && pool.poolLabel && (
+                          <span className="inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Pool {pool.poolLabel}</span>
+                        )}
                       </div>
                       <div className="mt-1 flex gap-3 text-xs text-slate-500 dark:text-slate-400">
                         <span className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
                           {pool.currentMemberCount} / {pool.maxCandidates} Capacity
                         </span>
+                        {pool.timeSlot && (
+                          <span>Day {pool.dayNumber} · {pool.timeSlot === 'MORNING' ? 'Morning' : 'Afternoon'}</span>
+                        )}
+                        {pool.isAutoPool && (
+                          <span className="text-indigo-600 dark:text-indigo-400">Will redistribute at booking deadline</span>
+                        )}
                         {pool.allowedModules.length > 0 && (
                           <span className="flex items-center gap-1">
                             <AlertTriangle className="h-3 w-3 text-amber-500" />
-                            {pool.allowedModules.length} Modules Allowed
+                            {pool.allowedModules.length} Modules
                           </span>
                         )}
                       </div>

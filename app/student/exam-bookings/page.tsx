@@ -77,6 +77,7 @@ async function AvailablePoolsContent() {
     prisma.examPool.findMany({
       where: {
         status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] },
+        poolType: 'STANDARD', // Only show standard pools — AUTO and GROUP_CHARTER are system-managed
         event: { status: { in: ['OPEN', 'CONFIRMED', 'DRAFT'] } },
       },
       include: {
@@ -133,7 +134,7 @@ async function AvailablePoolsContent() {
       {/* How It Works */}
       <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/40 px-5 py-4 text-sm text-blue-800 dark:border-blue-900/50 dark:bg-blue-900/10 dark:text-blue-300">
         <Info className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
-        <span>Each pool accepts <strong>25–28 candidates</strong>, up to <strong>4 different EASA modules</strong> per booking. You select one module per seat. Seat fee is reserved from your wallet and released if the booking is cancelled.</span>
+        <span><strong>Join a pool</strong> at the cheapest rate (€300/seat) or <strong>book individually</strong> (€520) — individual, twin pack, 4-pack, and resit bookings are auto-assigned to a pool by the booking deadline. Each pool accepts <strong>25–28 candidates</strong>. No refund until admin refunds (wallet credit only).</span>
       </div>
 
       {/* Pool Cards */}
@@ -148,8 +149,9 @@ async function AvailablePoolsContent() {
 
             return (
               <div key={pool.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-                <div className={`px-6 py-2 text-xs font-black tracking-widest text-white uppercase ${pool.status === 'NEAR_FULL' ? 'bg-amber-500' : pool.status === 'DRAFT' ? 'bg-slate-500' : pool.status === 'CONFIRMED' ? 'bg-blue-600' : 'bg-aerojet-blue'}`}>
-                  {pool.status === 'DRAFT' ? 'Upcoming' : pool.status.replace('_', ' ')}
+                <div className={`flex items-center justify-between px-6 py-2 text-xs font-black tracking-widest text-white uppercase ${pool.status === 'NEAR_FULL' ? 'bg-amber-500' : pool.status === 'DRAFT' ? 'bg-slate-500' : pool.status === 'CONFIRMED' ? 'bg-blue-600' : 'bg-aerojet-blue'}`}>
+                  <span>{pool.status === 'DRAFT' ? 'Upcoming' : pool.status.replace('_', ' ')}</span>
+                  {pool.timeSlot && <span className="text-white/80">{pool.poolLabel ? `Pool ${pool.poolLabel}` : ''} · Day {pool.dayNumber} {pool.timeSlot === 'MORNING' ? 'AM' : 'PM'}</span>}
                 </div>
                 <div className="flex flex-1 flex-col p-6">
                   <h3 className="mb-1 text-lg font-black text-slate-900 dark:text-slate-100">{pool.name}</h3>
@@ -209,7 +211,10 @@ async function MyBookingsContent() {
 
   const memberships = await prisma.poolMembership.findMany({
     where: { userId: session.user.id },
-    include: { pool: { include: { event: true } }, examComponent: { include: { course: { select: { code: true } } } } },
+    include: {
+      pool: { include: { event: true } },
+      examComponent: { include: { course: { select: { code: true } } } },
+    },
     orderBy: { createdAt: 'desc' },
     take: 50,
   })
@@ -250,6 +255,12 @@ async function MyBookingsContent() {
                   <div>
                     <p className="font-bold text-slate-900 dark:text-slate-100">{m.pool.name}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400">{m.pool.event?.name}</p>
+                    {m.pool.isAutoPool && (
+                      <span className="mt-1 inline-flex rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-bold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">Pending Assignment</span>
+                    )}
+                    {m.pool.poolType === 'STANDARD' && m.pool.poolLabel && (
+                      <span className="mt-1 inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Pool {m.pool.poolLabel}{m.pool.timeSlot ? ` · Day ${m.pool.dayNumber} ${m.pool.timeSlot === 'MORNING' ? 'AM' : 'PM'}` : ''}</span>
+                    )}
                   </div>
                   <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold tracking-wide uppercase ${m.status === 'CONFIRMED' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : m.status === 'RESERVED' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' : m.status === 'CANCELLED' ? 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}>
                     {m.status === 'RESERVED' ? 'Pending' : m.status}
@@ -295,7 +306,16 @@ async function MyBookingsContent() {
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                   {memberships.map((m) => (
                     <tr key={`${m.userId}-${m.pool.id}`} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
-                      <td className="px-6 py-4"><p className="font-bold text-slate-900 dark:text-slate-100">{m.pool.name}</p><p className="text-xs text-slate-500 dark:text-slate-400">{m.pool.event?.name}</p></td>
+                      <td className="px-6 py-4">
+                        <p className="font-bold text-slate-900 dark:text-slate-100">{m.pool.name}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{m.pool.event?.name}</p>
+                        {m.pool.isAutoPool && (
+                          <span className="mt-1 inline-flex rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-bold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">Pending Assignment</span>
+                        )}
+                        {m.pool.poolType === 'STANDARD' && m.pool.poolLabel && !m.pool.isAutoPool && (
+                          <span className="mt-1 inline-flex rounded-full bg-blue-100 px-2 py-0.5 text-xs font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">Pool {m.pool.poolLabel}</span>
+                        )}
+                      </td>
                       <td className="px-6 py-4">
                         {m.examComponent?.course?.code ? (
                           <div className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-slate-400" /><span className="inline-flex rounded-lg bg-[#002a5c]/10 px-2.5 py-1 text-xs font-bold text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-300">{m.examComponent.course.code}</span></div>
@@ -352,17 +372,17 @@ async function BookingActionContent({ type }: { type: 'group' | 'individual' | '
     },
     individual: {
       title: 'Book an Individual Seat',
-      description: 'Reserve a single seat for any scheduled exam event. Choose your module and preferred date.',
+      description: 'Reserve a single exam seat (€520). Your seat will be auto-assigned to an available pool by the booking deadline.',
       color: 'emerald',
     },
     twin: {
       title: 'Book a Twin Pack',
-      description: "Bundle 2 exam seats at a discounted rate. Valid for 12 months from purchase — use them when you're ready.",
+      description: 'Bundle 2 exam seats at a discounted rate (€980). Seats are auto-assigned to pools by the booking deadline.',
       color: 'indigo',
     },
     'four-pack': {
       title: 'Book a 4-Pack',
-      description: 'Best value for regular students. Secure 4 exam seats at a significant discount. Valid for 12 months.',
+      description: 'Best value — 4 exam seats at €1,900. Seats are auto-assigned to pools by the booking deadline.',
       color: 'amber',
     },
   }

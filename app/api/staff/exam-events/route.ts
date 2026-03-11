@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { createStandardPools } from '@/lib/pools/standard-pools'
 import { apiCreated, apiError, apiPaginated, withErrorHandler } from '@/lib/api/response'
 import { parsePagination } from '@/lib/api/response'
 import { createExamEventSchema, validateBody } from '@/lib/validation/schemas'
@@ -50,6 +51,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   const event = await prisma.examEvent.create({ data: validation.data as any })
+
+  // Auto-create 4 standard pools (A-D) for the new exam event
+  await createStandardPools(event.id)
+
   await createAuditLog({
     action: AuditAction.CREATE,
     entity: 'ExamEvent',

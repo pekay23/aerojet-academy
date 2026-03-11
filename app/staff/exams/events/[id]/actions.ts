@@ -6,6 +6,8 @@ import { logAuditEvent } from '@/lib/audit/logger'
 import { prisma } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 
+import { redistributeAutoPool } from '@/lib/pools/auto-pool'
+
 export async function setEventOverride(eventId: string, status: EventOverrideStatus) {
   const session = await getAuthSession()
   if (!session) return { success: false, error: 'Unauthorized' }
@@ -29,4 +31,20 @@ export async function setEventOverride(eventId: string, status: EventOverrideSta
 
   revalidatePath(`/staff/exams/events/${eventId}`)
   return { success: true }
+}
+
+export async function triggerRedistribution(eventId: string) {
+  const session = await getAuthSession()
+  if (!session) return { success: false, error: 'Unauthorized' }
+
+  try {
+    const result = await redistributeAutoPool(eventId)
+    revalidatePath(`/staff/exams/events/${eventId}`)
+    return { 
+      success: true, 
+      message: `Redistributed ${result.redistributed} students. ${result.converted} overflow pool(s) created. ${result.confirmed} pool(s) confirmed.` 
+    }
+  } catch (error: any) {
+    return { success: false, error: error.message || 'Failed to redistribute auto pool' }
+  }
 }
