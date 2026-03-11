@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { Users, User, Package, Calculator } from 'lucide-react'
-import GroupBookingModal from './GroupBookingModal'
-import StandaloneBooking from './StandaloneBooking'
-import BundleBooking from './BundleBooking'
+import GroupBookingModal from '../../exams/_components/GroupBookingModal'
+import StandaloneBooking from '../../exams/_components/StandaloneBooking'
+import BundleBooking from '../../exams/_components/BundleBooking'
 
 interface ExamEvent {
   id: string
@@ -67,6 +67,7 @@ export default function QuickBookingActions({
           </p>
           <GroupBookingModal
             events={events}
+            examComponents={examComponents}
             groupCharterFee={pricing.groupCharterFee}
             currency={currency}
             availableBalance={balance}
@@ -118,6 +119,7 @@ export default function QuickBookingActions({
             currency={currency}
             availableBalance={balance}
             events={events}
+            examComponents={examComponents}
             trigger={
               <button className="w-full rounded-xl bg-indigo-600 py-2.5 text-xs font-bold text-white transition-all hover:bg-indigo-700">
                 Book Twin Pack
@@ -142,6 +144,7 @@ export default function QuickBookingActions({
             currency={currency}
             availableBalance={balance}
             events={events}
+            examComponents={examComponents}
             trigger={
               <button className="w-full rounded-xl bg-amber-600 py-2.5 text-xs font-bold text-white transition-all hover:bg-amber-700">
                 Book 4 Pack
