@@ -11,6 +11,7 @@
 import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { getExamPricingConfig } from './pricing-config'
+import { addToAutoPool } from './auto-pool'
 
 export interface BundlePurchaseResult {
   success: boolean
@@ -57,6 +58,8 @@ export async function purchaseBundle(
   }
 
   try {
+    const bundleBookingType = bundleType === 'TWO_SEAT' ? 'TWIN_PACK' as const : 'FOUR_PACK' as const
+
     const txResult = await prisma.$transaction(
       async (tx) => {
         // Check wallet balance
@@ -71,7 +74,7 @@ export async function purchaseBundle(
           }
         }
 
-        // Charge wallet
+        // Charge wallet for bundle price
         await tx.wallet.update({
           where: { userId },
           data: {
@@ -80,7 +83,6 @@ export async function purchaseBundle(
           },
         })
 
-        // Create transaction record
         await tx.walletTransaction.create({
           data: {
             walletId: wallet.id,
@@ -97,29 +99,26 @@ export async function purchaseBundle(
 
         // Create bundle
         const validUntil = new Date()
-        validUntil.setFullYear(validUntil.getFullYear() + 1) // 12 months validity
+        validUntil.setFullYear(validUntil.getFullYear() + 1)
 
         const bundle = await tx.examBundle.create({
           data: {
             userId,
             bundleType,
             totalSeats: seats,
-            // Since all seats are immediately used by the selected modules
             usedSeats: seats,
-            status: 'EXHAUSTED', // fully used up on purchase
+            status: 'EXHAUSTED',
             amountPaid: price,
             freeModuleChanges: freeChanges,
             validUntil,
           },
         })
 
-        const assignedPoolIds = new Set<string>()
-
-        // Auto-assign into pools
+        // Route each module through auto-pool (cost = 0 since bundle covers it)
         for (const comp of components) {
           const courseCode = comp.course.code
 
-          // Prevent duplication in same event
+          // Duplicate check
           const duplicate = await tx.poolMembership.findFirst({
             where: {
               userId,
@@ -132,100 +131,21 @@ export async function purchaseBundle(
             throw new Error(`You are already booked for module ${courseCode}.`)
           }
 
-          // Fetch open pools
-          const matchingPools = await tx.examPool.findMany({
-            where: {
-              eventId: activeEvent.id,
-              status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] },
-              // Optimization: only bother with pools we haven't already assigned this user to in this tx
-              id: { notIn: Array.from(assignedPoolIds) },
-            },
-            orderBy: { currentMemberCount: 'desc' }, // Try to fill nearly-full pools first
-          })
-
-          let targetPool = null
-          for (const pool of matchingPools) {
-            if (pool.currentMemberCount >= pool.maxCandidates) continue
-            if (pool.allowedModules.includes(courseCode)) {
-              targetPool = pool
-              break
-            }
-            if (pool.allowedModules.length < pool.moduleDiversityCap) {
-              targetPool = pool
-              break
-            }
-          }
-
-          if (targetPool) {
-            assignedPoolIds.add(targetPool.id)
-            const newAllowed = [...targetPool.allowedModules]
-            if (!newAllowed.includes(courseCode)) {
-              newAllowed.push(courseCode)
-            }
-            await tx.examPool.update({
-              where: { id: targetPool.id },
-              data: {
-                currentMemberCount: targetPool.currentMemberCount + 1,
-                allowedModules: newAllowed,
-                status:
-                  targetPool.currentMemberCount + 1 >= targetPool.maxCandidates
-                    ? 'NEAR_FULL'
-                    : targetPool.status,
-              },
-            })
-          } else {
-            // Create New Pool
-            const examStartTime = new Date(activeEvent.startDate)
-            examStartTime.setHours(9, 0, 0, 0)
-            const examEndTime = new Date(examStartTime.getTime() + comp.duration * 60000)
-
-            targetPool = await tx.examPool.create({
-              data: {
-                eventId: activeEvent.id,
-                name: `Auto Pool - ${courseCode}`,
-                examDate: activeEvent.startDate,
-                examStartTime,
-                examEndTime,
-                status: 'OPEN',
-                currentMemberCount: 1,
-                allowedModules: [courseCode],
-                seatPrice: 300,
-              },
-            })
-            assignedPoolIds.add(targetPool.id)
-          }
-
-          // Create PoolMembership
-          await tx.poolMembership.create({
-            data: {
-              userId,
-              poolId: targetPool.id,
-              examComponentId: comp.id,
-              status: 'CONFIRMED',
-              amountReserved: 0,
-              amountPaid: 0, // Paid via bundle
-              discountType: 'BUNDLE',
-            },
-          })
-
-          // Create ExamBooking
-          await tx.examBooking.create({
-            data: {
-              userId,
-              examComponentId: comp.id,
-              bookingType: 'INDIVIDUAL', // Handled via pool internally
-              moduleCode: courseCode,
-              amountPaid: 0, // Paid via bundle
-              status: 'APPROVED',
-              examDate: targetPool.examDate,
-            },
+          await addToAutoPool({
+            userId,
+            eventId: activeEvent.id,
+            bookingType: bundleBookingType,
+            examComponentId: comp.id,
+            moduleCode: courseCode,
+            amount: 0, // Bundle covers the cost
+            tx,
           })
         }
 
         return { success: true, bundleId: bundle.id }
       },
       {
-        timeout: 20000, // Increase to 20s for complex 4-pack transactions
+        timeout: 20000,
       }
     )
 

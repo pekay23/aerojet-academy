@@ -207,6 +207,28 @@ export const POST = withErrorHandler(
       },
     })
 
+    // Notify the student about the wallet adjustment
+    const actionLabels: Record<string, string> = {
+      top_up: 'Top-Up',
+      credit: 'Credit',
+      debit: 'Debit',
+      adjustment: 'Adjustment',
+      set_balance: 'Balance Update',
+    }
+    const actionLabel = actionLabels[action] || 'Update'
+    const adjustmentAmount = amount || targetBalance || 0
+
+    await prisma.notification.create({
+      data: {
+        userId: id,
+        title: `Wallet ${actionLabel}`,
+        message: operationDescription,
+        type: 'WALLET_ADJUSTMENT',
+        linkUrl: '/student/wallet',
+        linkText: 'View Wallet',
+      },
+    })
+
     return apiSuccess({
       message: operationDescription,
       wallet: {

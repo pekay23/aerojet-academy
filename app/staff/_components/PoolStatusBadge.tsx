@@ -7,8 +7,9 @@ const config: Record<PoolStatus, { label: string; classes: string }> = {
   CONFIRMED:  { label: "Confirmed",  classes: "bg-green-100 text-green-700" },
   LOCKED:     { label: "Locked",     classes: "bg-purple-100 text-purple-700" },
   FAILED:     { label: "Failed",     classes: "bg-red-100 text-red-600" },
-  MERGED:     { label: "Merged",     classes: "bg-orange-100 text-orange-700" },
-  COMPLETED:  { label: "Completed",  classes: "bg-teal-100 text-teal-700" },
+  MERGED:          { label: "Merged",          classes: "bg-orange-100 text-orange-700" },
+  COMPLETED:       { label: "Completed",       classes: "bg-teal-100 text-teal-700" },
+  REDISTRIBUTING:  { label: "Redistributing",  classes: "bg-indigo-100 text-indigo-700" },
 };
 
 interface PoolStatusBadgeProps {

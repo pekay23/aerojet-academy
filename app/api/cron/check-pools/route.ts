@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { failPool } from '@/lib/pools/operations'
+import { redistributeAutoPool } from '@/lib/pools/auto-pool'
 import { createAuditLog } from '@/lib/audit/logger'
 import { env } from '@/lib/env'
 
@@ -18,6 +19,29 @@ export async function GET(req: NextRequest) {
   try {
     const now = new Date()
     const cutoffDate = new Date(now.getTime() + 21 * 24 * 60 * 60 * 1000) // T-21 days
+
+    // Step 0: Redistribute auto pools for events at or past payment deadline
+    const eventsAtDeadline = await prisma.examEvent.findMany({
+      where: {
+        paymentDeadline: { lte: now },
+        status: { in: ['OPEN', 'CONFIRMED'] },
+        pools: {
+          some: { poolType: 'AUTO', isAutoPool: true, status: { in: ['OPEN', 'DRAFT'] } },
+        },
+      },
+      select: { id: true, name: true },
+    })
+
+    const redistributionResults = { events: 0, redistributed: 0, errors: [] as string[] }
+    for (const event of eventsAtDeadline) {
+      try {
+        const result = await redistributeAutoPool(event.id)
+        redistributionResults.events++
+        redistributionResults.redistributed += result.redistributed
+      } catch (err: any) {
+        redistributionResults.errors.push(`Event ${event.id}: ${err.message}`)
+      }
+    }
 
     // Find OPEN/NEAR_FULL pools where exam date is within 21 days and not enough members
     const poolsToFail = await prisma.examPool.findMany({
@@ -81,7 +105,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Pool check completed',
-      results: { ...results, confirmed },
+      results: { ...results, confirmed, redistribution: redistributionResults },
       timestamp: now.toISOString(),
     })
   } catch (error: any) {

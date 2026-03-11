@@ -1,15 +1,16 @@
 /**
- * Pool Withdrawal — Allows candidates to leave a pool before confirmation.
+ * Pool Withdrawal — Allows candidates to leave a pool.
  *
- * RULE: Only RESERVED memberships can be withdrawn. CONFIRMED memberships
- * are locked and cannot be withdrawn (per spec: "Pool seat cancellations:
- * wallet credit retained until pool confirms or fails").
+ * Supports both RESERVED and CONFIRMED memberships:
+ * - RESERVED: release reserved funds back to available balance
+ * - CONFIRMED: credit wallet (no bank refund, wallet credit only)
  *
  * On withdrawal:
- * 1. Release reserved funds back to available balance
+ * 1. Release/credit funds to wallet
  * 2. Update membership to CANCELLED
  * 3. Decrement pool member count
  * 4. Downgrade pool status (NEAR_FULL → OPEN if count drops below 23)
+ * 5. Send notifications to student and admin
  */
 
 import prisma from '@/lib/prisma/client'
@@ -17,6 +18,7 @@ import { Prisma } from '@prisma/client'
 import { POOL_NEAR_FULL_THRESHOLD } from './types'
 import { promoteNextFromWaitlist } from './waitlist'
 import { decrementPoolMemberCount } from './operations'
+import { creditToWallet } from '@/lib/wallet/operations'
 import { logAuditEvent } from '../audit/logger'
 import { sendWithdrawalConfirmationEmail, sendWaitlistPromotionEmail } from '@/lib/email/service'
 
@@ -37,53 +39,78 @@ export async function withdrawFromPool(poolId: string, userId: string): Promise<
         )
         if (!pool) return { success: false, error: 'Pool not found' }
 
-        // Find active membership
+        // Find active membership (RESERVED or CONFIRMED)
         const membership = await tx.poolMembership.findFirst({
-          where: { poolId, userId, status: { in: ['RESERVED'] } },
+          where: { poolId, userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
         })
 
         if (!membership) {
-          // Check if they have a CONFIRMED membership
-          const confirmed = await tx.poolMembership.findFirst({
-            where: { poolId, userId, status: 'CONFIRMED' },
-          })
-          if (confirmed) {
-            return {
-              success: false,
-              error: 'Cannot withdraw from a confirmed pool. Your seat is locked.',
-            }
-          }
           return { success: false, error: 'No active membership found in this pool' }
         }
 
-        const releaseAmount = Number(membership.amountReserved) || 0
+        let releaseAmount = 0
 
-        // Release reserved funds back to available balance
-        if (releaseAmount > 0) {
-          const wallet = await tx.wallet.findUnique({ where: { userId } })
-          if (wallet) {
-            await tx.wallet.update({
-              where: { userId },
-              data: {
-                reservedBalance: { decrement: releaseAmount },
-                availableBalance: { increment: releaseAmount },
-              },
-            })
+        if (membership.status === 'RESERVED') {
+          // Release reserved funds back to available balance
+          releaseAmount = Number(membership.amountReserved) || 0
+          if (releaseAmount > 0) {
+            const wallet = await tx.wallet.findUnique({ where: { userId } })
+            if (wallet) {
+              await tx.wallet.update({
+                where: { userId },
+                data: {
+                  reservedBalance: { decrement: releaseAmount },
+                  availableBalance: { increment: releaseAmount },
+                },
+              })
 
-            await tx.walletTransaction.create({
+              await tx.walletTransaction.create({
+                data: {
+                  walletId: wallet.id,
+                  type: 'RELEASE',
+                  amount: releaseAmount,
+                  description: `Withdrew from pool: ${pool.name}`,
+                  referenceId: `WITHDRAW-${poolId.substring(0, 8)}`,
+                  referenceType: 'POOL_WITHDRAWAL',
+                  balanceBefore: Number(wallet.balance),
+                  balanceAfter: Number(wallet.balance),
+                  reservedBefore: Number(wallet.reservedBalance),
+                  reservedAfter: Number(wallet.reservedBalance) - releaseAmount,
+                  availableBefore: Number(wallet.availableBalance),
+                  availableAfter: Number(wallet.availableBalance) + releaseAmount,
+                },
+              })
+            }
+          }
+        } else if (membership.status === 'CONFIRMED') {
+          // Credit wallet for confirmed memberships (no bank refund, wallet credit only)
+          releaseAmount = Number(membership.amountPaid) || Number(membership.amountReserved) || 0
+          if (releaseAmount > 0) {
+            await creditToWallet(
+              tx,
+              userId,
+              releaseAmount,
+              `Pool withdrawal credit: ${pool.name}`,
+              poolId,
+              'POOL_WITHDRAWAL'
+            )
+          }
+
+          // Notify admin about confirmed withdrawal
+          const staffUsers = await tx.user.findMany({
+            where: { role: { in: ['ADMIN', 'STAFF'] } },
+            select: { id: true },
+            take: 20,
+          })
+          for (const staff of staffUsers) {
+            await tx.notification.create({
               data: {
-                walletId: wallet.id,
-                type: 'RELEASE',
-                amount: releaseAmount,
-                description: `Withdrew from pool: ${pool.name}`,
-                referenceId: `WITHDRAW-${poolId.substring(0, 8)}`,
-                referenceType: 'POOL_WITHDRAWAL',
-                balanceBefore: Number(wallet.balance),
-                balanceAfter: Number(wallet.balance),
-                reservedBefore: Number(wallet.reservedBalance),
-                reservedAfter: Number(wallet.reservedBalance) - releaseAmount,
-                availableBefore: Number(wallet.availableBalance),
-                availableAfter: Number(wallet.availableBalance) + releaseAmount,
+                userId: staff.id,
+                title: 'Confirmed Member Withdrew',
+                message: `A confirmed member withdrew from "${pool.name}". €${releaseAmount.toFixed(2)} wallet credit issued.`,
+                type: 'POOL_UPDATE',
+                linkUrl: '/staff/exam-pools',
+                linkText: 'View Pools',
               },
             })
           }
