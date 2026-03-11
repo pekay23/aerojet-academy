@@ -118,21 +118,25 @@ export async function bookStandaloneExam(
 }
 
 /**
- * Books a resit exam at fixed price (default 480 EUR from event settings).
+ * Books a resit exam for a specific module into an upcoming event.
  * Routes through auto-pool — seat is assigned at booking deadline.
  */
-export async function bookResitExam(examId: string, userId: string) {
-  const exam = await prisma.exam.findUnique({
-    where: { id: examId },
-    include: { examComponent: { include: { course: true } }, event: true },
-  })
+export async function bookResitExam(userId: string, moduleCode: string, eventId: string) {
+  const [comp, event] = await Promise.all([
+    prisma.examComponent.findFirst({
+      where: { code: moduleCode },
+      include: { course: true },
+    }),
+    prisma.examEvent.findUnique({ where: { id: eventId } }),
+  ])
 
-  if (!exam) throw new Error('Exam not found')
+  if (!comp) throw new Error(`Exam component for module ${moduleCode} not found`)
+  if (!event) throw new Error('Exam event not found')
 
   // Get resit fee from event or system setting
   let resitFee = 480
-  if (exam.event?.resitFee) {
-    resitFee = Number(exam.event.resitFee)
+  if (event.resitFee) {
+    resitFee = Number(event.resitFee)
   } else {
     const resitFeeSetting = await getSystemSetting('resit_exam_fee', '480')
     resitFee = Number(resitFeeSetting)
@@ -143,30 +147,27 @@ export async function bookResitExam(examId: string, userId: string) {
     throw new Error(`Insufficient funds for resit. Cost: €${resitFee.toFixed(2)}`)
   }
 
-  const targetEventId = exam.eventId
-  if (!targetEventId) throw new Error('No exam event associated with this exam.')
-
   return prisma.$transaction(async (tx) => {
     // Duplicate check
     const duplicate = await tx.poolMembership.findFirst({
       where: {
         userId,
-        pool: { eventId: targetEventId },
-        examComponentId: exam.examComponentId,
+        pool: { eventId },
+        examComponentId: comp.id,
         status: { in: ['RESERVED', 'CONFIRMED'] },
       },
     })
     if (duplicate) {
-      throw new Error(`You already have a booking for ${exam.examComponent.course.code} in this event.`)
+      throw new Error(`You already have a booking for ${moduleCode} in this event.`)
     }
 
     // Route through auto-pool with resit type
     const result = await addToAutoPool({
       userId,
-      eventId: targetEventId,
+      eventId,
       bookingType: 'RESIT',
-      examComponentId: exam.examComponentId,
-      moduleCode: exam.examComponent.course.code,
+      examComponentId: comp.id,
+      moduleCode: comp.course.code,
       amount: resitFee,
       isResit: true,
       tx,

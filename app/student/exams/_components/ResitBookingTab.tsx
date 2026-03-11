@@ -78,7 +78,7 @@ export default async function ResitBookingTab() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const { wallet, pricing, balance, currency, currencySymbol } = await getBookingData(session.user.id)
+  const { wallet, pricing, balance, currency, currencySymbol, openEvents } = await getBookingData(session.user.id)
 
   const [failedResults, historicalBookings] = await Promise.all([
     prisma.examResult.findMany({
@@ -143,40 +143,40 @@ export default async function ResitBookingTab() {
     })
     .filter((r) => r.remaining > 0 && r.bookingGroupRef)
 
-  // Deduplicate and map failed exams
+  // Deduplicate and map failed exams by Module Code to handle legacy migrated data
   const failedMap = new Map<string, any>()
 
   failedResults.forEach((r) => {
-    if (r.exam.examComponentId) {
-      failedMap.set(r.exam.examComponentId, {
+    const code = r.exam.examComponent?.course?.code || '—'
+    if (code !== '—') {
+      failedMap.set(code, {
         examId: r.exam.id,
         examName: r.exam.name,
-        moduleCode: r.exam.examComponent?.course?.code || '—',
+        moduleCode: code,
         moduleName: r.exam.examComponent?.course?.name || '—',
         score: Number(r.score),
-        passingScore: Number(r.exam.passingScore || 75), // Note: passingScore is on Exam, not ExamComponent
+        passingScore: Number(r.exam.passingScore || 75),
         examDate: r.exam.examDate.toISOString(),
         eventName: r.exam.event?.name || null,
+        // Keep component ID for booking logic if needed
+        examComponentId: r.exam.examComponentId,
       })
     }
   })
 
   historicalBookings.forEach((b) => {
-    // Only add if explicitly failed and not already formally recorded
-    if (
-      b.result?.toLowerCase() === 'fail' &&
-      b.examComponentId &&
-      !failedMap.has(b.examComponentId)
-    ) {
-      failedMap.set(b.examComponentId, {
-        examId: b.examId,
+    const code = b.moduleCode || b.exam?.examComponent?.course?.code || '—'
+    if (b.result?.toLowerCase() === 'fail' && code !== '—' && !failedMap.has(code)) {
+      failedMap.set(code, {
+        examId: b.examId || b.id, // Fallback to booking ID if migrated without exam
         examName: b.exam?.name || 'Historical Exam',
-        moduleCode: b.moduleCode || b.exam?.examComponent?.course?.code || '—',
+        moduleCode: code,
         moduleName: b.exam?.examComponent?.course?.name || '—',
         score: b.score ? Number(b.score) : 0,
         passingScore: 75,
         examDate: (b.examDate || b.bookedAt).toISOString(),
         eventName: b.exam?.event?.name || null,
+        examComponentId: b.examComponentId,
       })
     }
   })
@@ -184,10 +184,11 @@ export default async function ResitBookingTab() {
   // Exclude active module memberships
   const activeMemberships = await prisma.poolMembership.findMany({
     where: { userId: session.user.id, status: { in: ['RESERVED', 'CONFIRMED'] } },
-    select: { examComponentId: true },
+    select: { examComponent: { select: { course: { select: { code: true } } } } },
   })
   activeMemberships.forEach((m) => {
-    if (m.examComponentId) failedMap.delete(m.examComponentId)
+    const code = m.examComponent?.course?.code
+    if (code) failedMap.delete(code)
   })
 
   const failedExams = Array.from(failedMap.values())
@@ -214,7 +215,7 @@ export default async function ResitBookingTab() {
           </span>
         </div>
         <p className="mb-6 text-sm text-slate-500">
-          Select a failed module. Resit attempts are automatically queued for pool assignment.
+          Select a failed module and an upcoming exam window. Resit attempts are automatically queued for pool assignment.
         </p>
 
         <ResitBooking
@@ -223,6 +224,7 @@ export default async function ResitBookingTab() {
           resitPrice={pricing.resitExamFee}
           currency={currency}
           availableBalance={balance}
+          events={openEvents}
         />
       </div>
     </div>
