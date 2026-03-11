@@ -67,10 +67,10 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
                 </td>
                 <td className="px-6 py-4">
                   <span
-                    className={`rounded-md px-2 py-0.5 text-xs font-bold uppercase ${
-                      h.type === 'MIGRATED'
-                        ? 'bg-purple-50 text-purple-600'
-                        : 'bg-blue-50 text-blue-600'
+                    className={`rounded-md px-2 py-0.5 text-[10px] font-black tracking-tight uppercase ${
+                      h.type === 'HISTORICAL'
+                        ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400'
+                        : 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400'
                     }`}
                   >
                     {h.type}

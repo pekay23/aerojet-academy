@@ -93,6 +93,7 @@ export default async function ExamsPage({
           where: { userId: session.user.id },
           include: {
             exam: { include: { examComponent: { include: { course: true } } } },
+            examComponent: { include: { course: true } },
             event: true,
           },
           orderBy: { examDate: 'desc' },
@@ -125,7 +126,7 @@ export default async function ExamsPage({
   if (tab === 'records' && results && bookings) {
     const formalResults = results.map((r) => ({
       id: r.id,
-      type: 'RESULT',
+      type: 'ORIGINAL',
       moduleCode: r.exam.examComponent?.course?.code || '—',
       moduleName: r.exam.examComponent?.course?.name || r.exam.name,
       date: r.exam.examDate,
@@ -162,9 +163,9 @@ export default async function ExamsPage({
 
         return {
           id: b.id,
-          type: 'MIGRATED',
-          moduleCode: b.moduleCode || b.exam?.examComponent?.course?.code || '—',
-          moduleName: b.exam?.examComponent?.course?.name || 'Historical Exam',
+          type: 'HISTORICAL',
+          moduleCode: b.moduleCode || b.exam?.examComponent?.course?.code || b.examComponent?.course?.code || '—',
+          moduleName: b.examComponent?.course?.name || b.exam?.examComponent?.course?.name || 'Historical Exam',
           date: b.examDate || b.bookedAt,
           passed,
           score,
