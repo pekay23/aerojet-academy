@@ -79,6 +79,8 @@ export async function POST(req: NextRequest) {
           password: hashedPassword,
           role,
           status: 'ACTIVE', // Active by default when created by staff
+          emailVerified: new Date(), // Automatically verify email for staff-created users
+          mustChangePassword: true, // Require password change for temporary passwords
           profile: {
             create: {
               firstName,
