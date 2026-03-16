@@ -101,7 +101,7 @@ export default async function BookingActionTab({ type }: { type: 'group' | 'indi
       </div>
 
       {/* Booking Form / Options */}
-      <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
+      <div className={`grid gap-6 sm:grid-cols-1 ${type === 'group' ? 'lg:grid-cols-1' : 'lg:grid-cols-3'}`}>
         {type === 'group' ? (
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
             <h3 className="mb-4 text-lg font-bold">Group Charter</h3>
@@ -117,12 +117,13 @@ export default async function BookingActionTab({ type }: { type: 'group' | 'indi
           </div>
         ) : (
           <>
-            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+            {/* Single Seat */}
+            <div className="flex flex-col rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-bold">Single Seat</h3>
                 <span className="text-lg font-black text-emerald-600">{currencySymbol}{pricing.individualExamFee}</span>
               </div>
-              <p className="mb-6 text-sm text-slate-500">Book a single exam seat and join the auto-pool.</p>
+              <p className="mb-6 flex-1 text-sm text-slate-500">Book a single exam seat and join the auto-pool.</p>
               <StandaloneBooking
                 price={pricing.individualExamFee}
                 currency={currency}
@@ -134,42 +135,42 @@ export default async function BookingActionTab({ type }: { type: 'group' | 'indi
               />
             </div>
 
-            <div className="space-y-6">
-              <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-bold">Twin Pack</h3>
-                  <span className="text-lg font-black text-indigo-600">{currencySymbol}{pricing.twoSeatBundle}</span>
-                </div>
-                <p className="mb-6 text-sm text-slate-500">Bundle 2 exam seats at a discounted rate.</p>
-                <BundleBooking
-                  bundleSize={2}
-                  bundlePrice={pricing.twoSeatBundle}
-                  individualPrice={pricing.individualExamFee}
-                  currency={currency}
-                  availableBalance={balance}
-                  events={openEvents}
-                  examComponents={examComponents}
-                  trigger={<button className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.indigo}`}>Purchase Twin Pack</button>}
-                />
+            {/* Twin Pack */}
+            <div className="flex flex-col rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-bold">Twin Pack</h3>
+                <span className="text-lg font-black text-indigo-600">{currencySymbol}{pricing.twoSeatBundle}</span>
               </div>
+              <p className="mb-6 flex-1 text-sm text-slate-500">Bundle 2 exam seats at a discounted rate.</p>
+              <BundleBooking
+                bundleSize={2}
+                bundlePrice={pricing.twoSeatBundle}
+                individualPrice={pricing.individualExamFee}
+                currency={currency}
+                availableBalance={balance}
+                events={openEvents}
+                examComponents={examComponents}
+                trigger={<button className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.indigo}`}>Purchase Twin Pack</button>}
+              />
+            </div>
 
-              <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-lg font-bold">4-Pack</h3>
-                  <span className="text-lg font-black text-amber-600">{currencySymbol}{pricing.fourSeatBundle}</span>
-                </div>
-                <p className="mb-6 text-sm text-slate-500">Best value — 4 exam seats for maximum flexibility.</p>
-                <BundleBooking
-                  bundleSize={4}
-                  bundlePrice={pricing.fourSeatBundle}
-                  individualPrice={pricing.individualExamFee}
-                  currency={currency}
-                  availableBalance={balance}
-                  events={openEvents}
-                  examComponents={examComponents}
-                  trigger={<button className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.amber}`}>Purchase 4-Pack</button>}
-                />
+            {/* 4-Pack */}
+            <div className="flex flex-col rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-lg font-bold">4-Pack</h3>
+                <span className="text-lg font-black text-amber-600">{currencySymbol}{pricing.fourSeatBundle}</span>
               </div>
+              <p className="mb-6 flex-1 text-sm text-slate-500">Best value — 4 exam seats for maximum flexibility.</p>
+              <BundleBooking
+                bundleSize={4}
+                bundlePrice={pricing.fourSeatBundle}
+                individualPrice={pricing.individualExamFee}
+                currency={currency}
+                availableBalance={balance}
+                events={openEvents}
+                examComponents={examComponents}
+                trigger={<button className={`w-full rounded-xl py-3 text-sm font-bold text-white transition-all active:scale-[0.98] ${btnColors.amber}`}>Purchase 4-Pack</button>}
+              />
             </div>
           </>
         )}

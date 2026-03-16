@@ -3,37 +3,40 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronRight, Home } from 'lucide-react'
+import { cn } from '@/lib/utils'
+
+const PORTAL_LABELS: Record<string, string> = {
+  student: 'Student Dashboard',
+  staff: 'Staff Dashboard',
+  instructor: 'Instructor Dashboard',
+  applicant: 'Applicant Dashboard',
+}
 
 function segmentToLabel(segment: string): string {
-  // Check if it's a UUID-like or MongoDB-like ID (very long string)
   if (segment.length > 20) return '...'
-
   return segment
     .replace(/\[.*?\]/g, '')
     .replace(/-/g, ' ')
     .replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
-/**
- * Desktop-only breadcrumb. On mobile, the MobileTopBar in DashboardSidebar
- * handles breadcrumb display — so this only renders on md+ screens.
- */
-export default function BreadcrumbNav() {
+export default function BreadcrumbNav({ className }: { className?: string }) {
   const pathname = usePathname()
   const [resolvedNames, setResolvedNames] = useState<Record<string, string>>({})
-  const segments = pathname.split('/').filter(Boolean)
 
-  // Remove route group prefixes
-  const cleanSegments = segments.filter((s) => !s.startsWith('(') && !s.endsWith(')'))
+  const segments = pathname
+    .split('/')
+    .filter((s) => Boolean(s) && !s.startsWith('(') && !s.endsWith(')'))
+
+  const portal = segments[0] || ''
+  const portalDashboardLabel = PORTAL_LABELS[portal] || 'Dashboard'
+  const subSegments = segments.slice(1)
 
   useEffect(() => {
     const fetchNames = async () => {
-      for (let i = 0; i < cleanSegments.length; i++) {
-        const segment = cleanSegments[i]
-        // Only attempt to resolved long IDs if they are preceded by 'courses'
-        // This prevents 404s when viewing users, staff, etc.
-        const prevSegment = i > 0 ? cleanSegments[i - 1] : null
+      for (let i = 0; i < subSegments.length; i++) {
+        const segment = subSegments[i]
+        const prevSegment = i > 0 ? subSegments[i - 1] : null
         const isCourseId = segment.length > 20 && prevSegment === 'courses'
 
         if (isCourseId && !resolvedNames[segment]) {
@@ -51,37 +54,39 @@ export default function BreadcrumbNav() {
     }
 
     fetchNames()
-  }, [cleanSegments])
-
-  if (cleanSegments.length <= 1) return null
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname])
 
   return (
     <nav
-      className="mb-6 hidden items-center gap-1.5 overflow-x-auto text-xs text-slate-400 lg:flex dark:text-slate-500"
+      className={cn(
+        'hidden items-center gap-1.5 text-[13px] text-muted-foreground lg:flex',
+        className
+      )}
       aria-label="Breadcrumb"
     >
       <Link
-        href="/"
-        className="shrink-0 transition-colors hover:text-slate-600 dark:hover:text-slate-300"
+        href={`/${portal}`}
+        className="shrink-0 transition-colors hover:text-foreground"
       >
-        <Home className="h-3.5 w-3.5" />
+        {portalDashboardLabel}
       </Link>
-      {cleanSegments.map((segment, i) => {
-        const href = '/' + cleanSegments.slice(0, i + 1).join('/')
-        const isLast = i === cleanSegments.length - 1
+      {subSegments.map((segment, i) => {
+        const href = '/' + portal + '/' + subSegments.slice(0, i + 1).join('/')
+        const isLast = i === subSegments.length - 1
         const label = resolvedNames[segment] || segmentToLabel(segment)
 
         return (
           <span key={href} className="flex shrink-0 items-center gap-1.5">
-            <ChevronRight className="h-3 w-3 text-slate-300 dark:text-slate-700" />
+            <span className="text-muted-foreground/40">/</span>
             {isLast ? (
-              <span className="max-w-[200px] truncate font-semibold text-slate-700 dark:text-slate-200">
+              <span className="max-w-[240px] truncate font-medium text-foreground">
                 {label}
               </span>
             ) : (
               <Link
                 href={href}
-                className="max-w-[150px] truncate transition-colors hover:text-slate-600 dark:hover:text-slate-300"
+                className="max-w-[150px] truncate transition-colors hover:text-foreground"
               >
                 {label}
               </Link>

@@ -1,12 +1,13 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Wallet, PlusCircle, History } from 'lucide-react'
+import { Wallet, PlusCircle, History, CreditCard } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const TABS = [
   { key: 'overview', label: 'Overview', icon: Wallet },
   { key: 'top-up', label: 'Top Up', icon: PlusCircle },
+  { key: 'payments', label: 'Payments', icon: CreditCard },
   { key: 'transactions', label: 'Transactions', icon: History },
 ] as const
 

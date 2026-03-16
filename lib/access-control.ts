@@ -11,14 +11,9 @@ const FEATURE_ACCESS_MATRIX: Record<PaymentAccessLevel, FeatureType[]> = {
 }
 
 export async function getStudentPaymentAccessLevel(userId: string): Promise<PaymentAccessLevel> {
-  const studentProfile = await prisma.studentProfile.findUnique({
-    where: { userId },
-    select: { enrollmentType: true },
-  })
+  const { isModular, isExamOnly } = await getStudentStatus(userId)
 
-  const enrollmentType = studentProfile?.enrollmentType
-
-  if (enrollmentType === 'MODULAR' || enrollmentType === 'EXAM_ONLY') {
+  if (isModular || isExamOnly) {
     return 'FULL_ACCESS'
   }
 
@@ -54,28 +49,44 @@ export async function getStudentPaymentAccessLevel(userId: string): Promise<Paym
   return 'FULL_ACCESS'
 }
 
+export async function getStudentStatus(userId: string) {
+  const profile = await prisma.studentProfile.findUnique({
+    where: { userId },
+    select: { 
+      enrollmentType: true,
+      pathwayRel: { select: { code: true } }
+    },
+  })
+
+  const enrollmentType = profile?.enrollmentType
+  const pathwayCode = profile?.pathwayRel?.code
+
+  const isFullTime = enrollmentType === 'FULL_TIME' || 
+                     (pathwayCode && ['FULL_TIME', 'FULL_TIME_4Y', 'FULL_TIME_2Y', 'MILITARY_2Y', 'MILITARY_1Y'].includes(pathwayCode))
+  
+  const isExamOnly = enrollmentType === 'EXAM_ONLY' || pathwayCode === 'EXAM_ONLY'
+  const isModular = enrollmentType === 'MODULAR' || pathwayCode === 'MODULAR'
+
+  return { isFullTime, isExamOnly, isModular, enrollmentType, pathwayCode }
+}
+
 export async function canAccessFeature(userId: string, feature: FeatureType): Promise<boolean> {
   const accessLevel = await getStudentPaymentAccessLevel(userId)
   return FEATURE_ACCESS_MATRIX[accessLevel].includes(feature)
 }
 
 export async function getEnrollmentMilestoneStatus(userId: string) {
-  const studentProfile = await prisma.studentProfile.findUnique({
-    where: { userId },
-    select: { enrollmentType: true },
-  })
+  const { isExamOnly, isModular, enrollmentType, pathwayCode } = await getStudentStatus(userId)
 
-  if (
-    studentProfile?.enrollmentType === 'MODULAR' ||
-    studentProfile?.enrollmentType === 'EXAM_ONLY'
-  ) {
+  if (isModular || isExamOnly) {
+    const label = isExamOnly ? 'Exam-Only Pathway' : 'Modular Programme'
     return {
       hasEnrollment: true,
       seatPaid: true,
       sem1Paid: true,
       sem2Paid: true,
       currentYear: null,
-      programmeName: studentProfile?.enrollmentType || 'Modular Programme',
+      programmeName: label,
       milestones: [],
     }
   }

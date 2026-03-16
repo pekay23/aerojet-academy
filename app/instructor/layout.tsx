@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import InstructorSidebar from './_components/InstructorSidebar'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
+import PortalHeader from '@/components/layouts/PortalHeader'
 import { getPendingGradingCount } from '@/lib/actions/instructor'
 
 export default async function InstructorLayout({ children }: { children: React.ReactNode }) {
@@ -38,9 +39,11 @@ export default async function InstructorLayout({ children }: { children: React.R
         userImage={user.image || undefined}
         pendingCount={pendingCount}
       />
-      <main id="main-content" className="flex min-h-screen flex-1 flex-col">
-        <div className="p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
-          <BreadcrumbNav />
+      <main id="main-content" className="min-h-screen min-w-0 flex-1 overflow-x-hidden">
+        <div className="mx-auto max-w-7xl p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
+          <PortalHeader>
+            <BreadcrumbNav />
+          </PortalHeader>
           {children}
         </div>
       </main>

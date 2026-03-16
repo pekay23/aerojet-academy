@@ -24,14 +24,6 @@ export default function ExamsTabs({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
-          My Exams
-        </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Track your exam bookings, schedules, and results.
-        </p>
-      </div>
 
       {/* Tab Bar */}
       <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="tablist" aria-label="Exam sections">

@@ -96,17 +96,6 @@ export default function StaffSidebar({ userName, userRole, userImage, counts: in
     { label: 'Newsroom', href: '/newsroom', icon: Megaphone },
     { label: 'Messages', href: '/messages', icon: Mail, badge: (counts.messages ?? 0) > 0 ? counts.messages : undefined },
     { label: 'Audit Logs', href: '/audit-logs', icon: ScrollText },
-    {
-      label: 'Settings',
-      href: '/settings',
-      icon: Settings,
-      children: [
-        { label: 'General', href: '/settings' },
-        { label: 'Finance', href: '/settings?tab=finance' },
-        { label: 'Email Templates', href: '/settings?tab=emails' },
-        { label: 'Calendar', href: '/settings?tab=calendar' },
-      ],
-    },
   ]
 
   return (
@@ -118,6 +107,9 @@ export default function StaffSidebar({ userName, userRole, userImage, counts: in
       userName={userName}
       userRole={userRole}
       userImage={userImage}
+      userMenuItems={[
+        { label: 'Settings', href: '/settings', icon: Settings },
+      ]}
     />
   )
 }

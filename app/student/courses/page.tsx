@@ -14,9 +14,8 @@ import { Suspense } from 'react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
-import { canAccessFeature } from '@/lib/access-control'
+import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
-import { getEnrollmentMilestoneStatus } from '@/lib/access-control'
 
 export const metadata: Metadata = {
   title: 'My Courses | Student Portal',
@@ -27,12 +26,7 @@ export default async function CoursesPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const studentProfile = await prisma.studentProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { enrollmentType: true },
-  })
-
-  const isFullTime = studentProfile?.enrollmentType === 'FULL_TIME'
+  const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'courses')
 
   if (isFullTime && !hasAccess) {

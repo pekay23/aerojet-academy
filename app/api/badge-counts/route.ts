@@ -53,6 +53,10 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(counts)
   } catch (error) {
     console.error('Badge counts error:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    // Return empty counts instead of 500 to keep UI functional during DB spikes
+    return NextResponse.json({
+      notifications: 0,
+      messages: 0,
+    })
   }
 }
