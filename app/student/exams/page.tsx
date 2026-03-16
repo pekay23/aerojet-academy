@@ -16,7 +16,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import ExamsTabs from './_components/ExamsTabs'
 import ExamHistoryTable from './_components/ExamHistoryTable'
-import { canAccessFeature, getEnrollmentMilestoneStatus } from '@/lib/access-control'
+import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
 // The newly extracted tabs
@@ -41,12 +41,7 @@ export default async function ExamsPage({
 
   const session = await getAuthSession()
 
-  const initialProfile = await prisma.studentProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { enrollmentType: true },
-  })
-
-  const isFullTime = initialProfile?.enrollmentType === 'FULL_TIME'
+  const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'exams')
 
   if (isFullTime && !hasAccess) {
@@ -66,14 +61,6 @@ export default async function ExamsPage({
 
     return (
       <div className="space-y-8">
-        <div>
-          <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
-            My Exams
-          </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            View and manage your exam bookings and results.
-          </p>
-        </div>
 
         <PaymentRequiredBanner
           accessLevel="SEAT_ONLY"
@@ -194,13 +181,13 @@ export default async function ExamsPage({
       {tab === 'records' && (
         <div className="space-y-8">
           {/* Pathway Progress (License Progress) */}
-          <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/20 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+          <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/20 p-8 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-900/50">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-xl font-black text-[#002a5c] dark:text-white">
                   {studentProfile?.pathwayRel?.name || 'General Pathway'} Progress
                 </h2>
-                <p className="mt-1 text-xs font-medium text-slate-500">
+                <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                   Track your progress towards licensing requirements across all modules.
                 </p>
               </div>
@@ -218,13 +205,13 @@ export default async function ExamsPage({
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
                 <p className="text-xs font-bold text-slate-400 uppercase">Total Passed</p>
-                <p className="mt-1 text-2xl font-black text-emerald-600">
+                <p className="mt-1 text-2xl font-black text-emerald-600 dark:text-emerald-400">
                   {allHistory.filter((h) => h.passed).length}
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
                 <p className="text-xs font-bold text-slate-400 uppercase">Total Failed</p>
-                <p className="mt-1 text-2xl font-black text-red-600">{failedAttempts.length}</p>
+                <p className="mt-1 text-2xl font-black text-red-600 dark:text-red-400">{failedAttempts.length}</p>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
                 <p className="text-xs font-bold text-slate-400 uppercase">Success Rate</p>

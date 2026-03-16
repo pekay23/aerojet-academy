@@ -241,18 +241,18 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         </form>
 
         {/* Academic Information (Read Only) */}
-        <div className="rounded-2xl border border-slate-100 bg-slate-900 p-8 text-white shadow-sm dark:border-slate-800 dark:bg-slate-950">
-          <h3 className="mb-6 flex items-center gap-2 border-b border-white/10 pb-4 text-lg font-black italic">
-            <GraduationCap className="h-5 w-5 text-blue-400" />
+        <div className="rounded-2xl border border-slate-100 bg-white p-8 text-slate-900 shadow-sm dark:border-slate-800 dark:bg-slate-900/50 dark:text-white">
+          <h3 className="mb-6 flex items-center gap-2 border-b border-slate-50 pb-4 text-lg font-black italic dark:border-slate-800">
+            <GraduationCap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             Academic Details
           </h3>
 
-          <div className="grid gap-6 text-slate-300 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2">
             <div>
               <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase dark:text-slate-400">
                 Current Program
               </p>
-              <p className="text-xs font-bold tracking-wider text-white uppercase">
+              <p className="text-xs font-bold tracking-wider text-slate-900 uppercase dark:text-white">
                 {user.studentProfile?.enrollmentType?.replace('_', ' ') || 'Modular Training'}
               </p>
             </div>
@@ -260,7 +260,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
               <p className="mb-1 text-xs font-bold tracking-widest text-slate-500 uppercase dark:text-slate-400">
                 Admission Date
               </p>
-              <p className="font-bold text-white">
+              <p className="font-bold text-slate-900 dark:text-white">
                 {formatDate(user.studentProfile?.enrollmentDate)}
               </p>
             </div>
@@ -269,8 +269,10 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                 Status
               </p>
               <div className="mt-1 flex items-center gap-2">
-                <BadgeCheck className="h-4 w-4 text-green-400" />
-                <span className="text-xs font-black text-white uppercase">Active Student</span>
+                <BadgeCheck className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <span className="text-xs font-black text-slate-900 uppercase dark:text-white">
+                  Active Student
+                </span>
               </div>
             </div>
           </div>

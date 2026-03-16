@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import {
   Wallet,
   PlusCircle,
@@ -37,18 +38,21 @@ export const metadata: Metadata = {
 export default async function WalletPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>
+  searchParams: Promise<{ tab?: string; action?: string }>
 }) {
-  const { tab: tabParam } = await searchParams
+  const { tab: tabParam, action: actionParam } = await searchParams
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
   const user = session.user
   const tab = tabParam || 'overview'
 
-  const [wallet, studentProfile, pendingTopups, ftEnrollment, activeBundles] = await Promise.all([
+  const [wallet, studentProfile, pendingTopups, ftEnrollment, activeBundles, pendingTuition] = await Promise.all([
     prisma.wallet.findUnique({ where: { userId: user.id } }),
-    prisma.studentProfile.findUnique({ where: { userId: user.id } }),
+    prisma.studentProfile.findUnique({
+      where: { userId: user.id },
+      include: { pathwayRel: true }
+    }),
     prisma.payment.findMany({
       where: { userId: user.id, referenceType: 'WALLET_TOPUP', status: 'PENDING' },
       orderBy: { createdAt: 'desc' },
@@ -64,6 +68,14 @@ export default async function WalletPage({
       where: { userId: user.id, status: 'ACTIVE' },
       orderBy: { createdAt: 'desc' },
     }),
+    prisma.payment.findMany({
+      where: {
+        userId: user.id,
+        referenceType: { in: ['SEAT_CONFIRMATION', 'YEAR_1_FULL', 'FULL_PROGRAMME', 'CUSTOM_PART_PAYMENT'] },
+        status: 'PENDING'
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
   ])
 
   const studentId = studentProfile?.studentId || 'N/A'
@@ -77,7 +89,37 @@ export default async function WalletPage({
   const hasPendingTopups = pendingTopups.length > 0
 
   // Fetch payment methods for top-up tab
-  const activePaymentMethods = tab === 'top-up' ? await getActivePaymentMethods() : []
+  const activePaymentMethods = (tab === 'top-up' || tab === 'payments') ? await getActivePaymentMethods() : []
+
+  // Logic for action-based top-up requirements
+  let requiredAmount = 0
+  let actionLabel = ''
+  
+  if (actionParam && ftEnrollment) {
+    const milestoneTypeMap: Record<string, string> = {
+      seat: 'SEAT_CONFIRMATION',
+      sem1: 'SEM1_DUE',
+      sem2: 'SEM2_DUE',
+      full: 'FULL_YEAR'
+    }
+    
+    const targetType = milestoneTypeMap[actionParam]
+    if (targetType) {
+      if (targetType === 'FULL_YEAR') {
+        requiredAmount = ftEnrollment.milestones
+          .filter(m => m.status !== 'PAID')
+          .reduce((sum, m) => sum + Number(m.amountDue), 0)
+        actionLabel = 'Full Year Payment'
+      } else {
+        const milestone = ftEnrollment.milestones.find(m => m.milestoneType === targetType)
+        if (milestone) {
+          requiredAmount = Number(milestone.amountDue)
+          actionLabel = targetType === 'SEAT_CONFIRMATION' ? 'Seat Confirmation' : 
+                        targetType === 'SEM1_DUE' ? 'Semester 1' : 'Semester 2'
+        }
+      }
+    }
+  }
 
   // Fetch transactions for transactions tab
   let allTransactions: any[] = []
@@ -302,7 +344,7 @@ export default async function WalletPage({
           </div>
 
           {/* Payment Milestones for Full-Time Students */}
-          {ftEnrollment && ftEnrollment.milestones.length > 0 && (
+          {ftEnrollment && ftEnrollment.milestones.length > 0 && studentProfile?.enrollmentType !== 'EXAM_ONLY' && (
             <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 sm:h-10 sm:w-10 dark:bg-indigo-900/30 dark:text-indigo-400">
@@ -414,9 +456,206 @@ export default async function WalletPage({
         </div>
       )}
 
+      {/* ── Payments Tab ── */}
+      {tab === 'payments' && (
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-6 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                <Target className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Payment Milestones</h2>
+                <p className="text-sm text-slate-500">Track and pay your programme fees.</p>
+              </div>
+            </div>
+
+            {!ftEnrollment || studentProfile?.enrollmentType === 'EXAM_ONLY' ? (
+              <div className="space-y-6 rounded-2xl border border-slate-100 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900/50">
+                {studentProfile?.enrollmentType === 'EXAM_ONLY' ? (
+                  <div className="mx-auto max-w-md">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20">
+                      <Target className="h-8 w-8 text-blue-500" />
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white">Exam-Only Pathway</h3>
+                    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                      You are enrolled in the Exam-Only pathway. You do not have scheduled tuition milestones.
+                      Payments are made per exam booking or bundle. Use the "Top Up" tab to add funds to your wallet.
+                    </p>
+                    <div className="mt-6 flex flex-wrap justify-center gap-3">
+                      <Link
+                        href="/student/exams"
+                        className="rounded-xl bg-[#002a5c] px-6 py-2.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#003875]"
+                      >
+                        Browse Exams
+                      </Link>
+                    </div>
+                  </div>
+                ) : pendingTuition.length > 0 ? (
+                  <div className="mx-auto max-w-md">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20">
+                      <Clock className="h-8 w-8 text-blue-500" />
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white">Enrollment Under Review</h3>
+                    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                      We have received your tuition payment proof. Our admissions team is currently verifying it.
+                      Once approved, your enrollment milestones will appear here.
+                    </p>
+                    <div className="mt-6 flex flex-wrap justify-center gap-3">
+                      <Link
+                        href="/student/messages?subject=Question regarding enrollment approval"
+                        className="rounded-xl bg-[#002a5c] px-6 py-2.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#003875]"
+                      >
+                        Message Admin
+                      </Link>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mx-auto max-w-md">
+                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-50 dark:bg-amber-900/20">
+                      <AlertTriangle className="h-8 w-8 text-amber-500" />
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 dark:text-white">Enrollment Not Found</h3>
+                    <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                      Your full-time enrollment record has not been created yet. This usually happens if you haven't selected a programme or if your seat confirmation is still pending.
+                    </p>
+                    <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                      <Link
+                        href="/applicant/pathway"
+                        className="flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 transition-all hover:border-blue-200 hover:bg-blue-50/50 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-blue-900/30"
+                      >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
+                          <PlusCircle className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div className="text-center">
+                          <span className="block text-xs font-black tracking-widest text-slate-900 uppercase dark:text-white">Choose Programme</span>
+                          <span className="text-[10px] text-slate-500">Pick your study path</span>
+                        </div>
+                      </Link>
+                      
+                      <Link
+                        href="/student/messages?subject=Report Enrollment Issue"
+                        className="flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 transition-all hover:border-amber-200 hover:bg-amber-50/50 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-amber-900/30"
+                      >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/30">
+                          <Info className="h-5 w-5 text-amber-600" />
+                        </div>
+                        <div className="text-center">
+                          <span className="block text-xs font-black tracking-widest text-slate-900 uppercase dark:text-white">Report to Admin</span>
+                          <span className="text-[10px] text-slate-500">Get technical help</span>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {ftEnrollment.milestones.map((m) => {
+                  const LABELS: Record<string, string> = {
+                    SEAT_CONFIRMATION: 'Seat Confirmation (40%)',
+                    SEM1_DUE: 'Semester 1 Payment (30%)',
+                    SEM2_DUE: 'Semester 2 Payment (30%)',
+                    FULL_YEAR: 'Full Year Payment',
+                  }
+                  const isPaid = m.status === 'PAID'
+                  const isOverdue = m.status === 'OVERDUE'
+                  const canPay = (m.status === 'DUE' || m.status === 'OVERDUE') && walletBalance.available >= Number(m.amountDue)
+
+                  return (
+                    <div
+                      key={m.id}
+                      className={`flex flex-col gap-4 rounded-2xl border p-5 transition-all md:flex-row md:items-center md:justify-between ${
+                        isPaid
+                          ? 'border-emerald-100 bg-emerald-50/30 dark:border-emerald-900/20 dark:bg-emerald-900/10'
+                          : isOverdue
+                          ? 'border-red-100 bg-red-50/30 dark:border-red-900/20 dark:bg-red-900/10'
+                          : 'border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900'
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
+                          isPaid ? 'bg-emerald-100 text-emerald-600' : 
+                          isOverdue ? 'bg-red-100 text-red-600' : 
+                          'bg-slate-100 text-slate-400'
+                        }`}>
+                          {isPaid ? <CheckCircle2 className="h-5 w-5" /> : 
+                           isOverdue ? <AlertTriangle className="h-5 w-5" /> : 
+                           <Clock className="h-5 w-5" />}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900 dark:text-slate-100">
+                            {LABELS[m.milestoneType] || m.milestoneType}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            Year {m.yearNumber} • Due {new Date(m.dueDate).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between gap-6 md:justify-end">
+                        <div className="text-right">
+                          <p className="text-lg font-black text-slate-900 dark:text-slate-100">
+                            {currencySymbol}{Number(m.amountDue).toLocaleString()}
+                          </p>
+                          <p className={`text-[10px] font-bold uppercase tracking-wider ${
+                            isPaid ? 'text-emerald-600' : isOverdue ? 'text-red-600' : 'text-amber-600'
+                          }`}>
+                            {m.status}
+                          </p>
+                        </div>
+
+                        {canPay ? (
+                          <PayMilestoneButton
+                            milestoneId={m.id}
+                            amount={Number(m.amountDue)}
+                            currency={walletBalance.currency}
+                            label={LABELS[m.milestoneType] || m.milestoneType}
+                          />
+                        ) : !isPaid && (
+                          <Link
+                            href={`/student/wallet?tab=top-up&action=${
+                              m.milestoneType === 'SEAT_CONFIRMATION' ? 'seat' : 
+                              m.milestoneType === 'SEM1_DUE' ? 'sem1' : 'sem2'
+                            }`}
+                            className="rounded-xl bg-[#002a5c] px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-800"
+                          >
+                            Top Up to Pay
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Top Up Tab ── */}
       {tab === 'top-up' && (
         <div className="mx-auto max-w-2xl space-y-6">
+          {actionParam && requiredAmount > 0 && walletBalance.available < requiredAmount && (
+            <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6 dark:border-blue-800/50 dark:bg-blue-900/20">
+              <div className="flex items-start gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                  <Info className="h-5 w-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-blue-900 dark:text-blue-200">Payment Requirement</h3>
+                  <p className="mt-1 text-sm text-blue-700 dark:text-blue-300">
+                    To complete your <strong>{actionLabel}</strong>, you need a total of{' '}
+                    <strong className="text-lg font-black">{currencySymbol}{requiredAmount.toLocaleString()}</strong> in your available balance.
+                  </p>
+                  <p className="mt-2 text-xs text-blue-600 dark:text-blue-400">
+                    You currently have {currencySymbol}{walletBalance.available.toLocaleString()} available. 
+                    Please transfer at least <strong>{currencySymbol}{(requiredAmount - walletBalance.available).toLocaleString()}</strong> more.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-6 flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#002a5c] text-white">

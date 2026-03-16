@@ -23,11 +23,11 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
   const { items, requestSort, sortConfig } = useSort(results, { key: 'date', order: 'desc' })
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="overflow-hidden rounded-xl border border-stone-200/60 bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:border-white/10 dark:bg-card dark:shadow-none">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm" aria-label="Exam history records">
-          <thead className="bg-slate-50 dark:bg-slate-800/50">
-            <tr className="border-b border-slate-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
+          <thead className="bg-stone-50/50 dark:bg-white/5">
+            <tr className="border-b border-stone-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-white/5">
               <SortHeader
                 label="Module"
                 sortKey="moduleCode"
@@ -51,11 +51,11 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
               />
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+          <tbody className="divide-y divide-stone-100 dark:divide-white/5">
             {items.map((h, idx) => (
               <tr
                 key={h.id}
-                className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/20"
+                className="transition-colors hover:bg-stone-50 dark:hover:bg-white/5"
               >
                 <td className="px-6 py-4">
                   <p className="font-bold text-slate-900 uppercase dark:text-white">

@@ -14,6 +14,7 @@ import {
   Mail,
   ScrollText,
   CreditCard,
+  Settings,
 } from 'lucide-react'
 import type { PaymentAccessLevel } from '@/lib/access-control'
 import type { SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
@@ -78,7 +79,6 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
   baseLinks.push(
     { label: 'Notifications', href: '/student/notifications', icon: Bell },
     { label: 'Messages', href: '/student/messages', icon: Mail },
-    { label: 'Profile', href: '/student/profile', icon: User }
   )
 
   return baseLinks
@@ -126,6 +126,9 @@ export default function StudentSidebar({
       userName={userName}
       userRole={userRole}
       userImage={userImage}
+      userMenuItems={[
+        { label: 'Settings', href: '/student/profile?tab=settings', icon: Settings },
+      ]}
     />
   )
 }

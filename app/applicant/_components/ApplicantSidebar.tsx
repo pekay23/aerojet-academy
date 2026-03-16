@@ -17,17 +17,14 @@ const allLinks = [
   { label: 'Wallet', href: '/wallet-top-up', icon: Wallet },
   { label: 'Browse Courses', href: '/courses', icon: BookOpen },
   { label: 'Exam Bookings', href: '/exam-bookings', icon: FileCheck },
-  { label: 'Profile', href: '/profile', icon: User },
 ]
 
 const examOnlyLinks = [
   { label: 'Dashboard', href: '/exam-only', icon: LayoutDashboard },
-  { label: 'Profile', href: '/profile', icon: User },
 ]
 
 const restrictedLinks = [
   { label: 'Dashboard', href: '/exam-only', icon: LayoutDashboard },
-  { label: 'Profile', href: '/profile', icon: User },
 ]
 
 interface ApplicantSidebarProps {
@@ -56,6 +53,9 @@ export default function ApplicantSidebar({
       userName={userName}
       userRole={userRole}
       userImage={userImage}
+      userMenuItems={[
+        { label: 'Profile', href: '/profile', icon: User },
+      ]}
     />
   )
 }
