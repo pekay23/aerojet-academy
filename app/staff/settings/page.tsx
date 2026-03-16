@@ -10,6 +10,7 @@ import WelcomeMessagesManager from './_components/WelcomeMessagesManager'
 import { getWelcomeMessagesGrouped } from '@/lib/welcome-messages'
 import EmailPreviewsPage from './email-previews/page'
 import AcademicCalendarManager from './academic-calendar/_components/AcademicCalendarManager'
+import BackupManager from './_components/BackupManager'
 
 export const metadata: Metadata = { title: 'Settings | Staff Portal' }
 export const dynamic = 'force-dynamic'
@@ -87,6 +88,9 @@ export default async function SettingsPage({
 
         {/* ── Academic Calendar Tab ── */}
         {tab === 'calendar' && <CalendarContent />}
+
+        {/* ── Backup Tab ── */}
+        {tab === 'backup' && <BackupManager adminEmail={session.user?.email || ''} />}
       </SettingsTabs>
     </div>
   )
