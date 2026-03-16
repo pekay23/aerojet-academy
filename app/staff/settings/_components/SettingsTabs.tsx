@@ -9,6 +9,7 @@ import {
   Sparkles,
   Send,
   Calendar,
+  DatabaseBackup,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 
@@ -20,6 +21,7 @@ const TABS = [
   { key: 'welcome', label: 'Welcome', icon: Sparkles },
   { key: 'emails', label: 'Email Templates', icon: Send },
   { key: 'calendar', label: 'Calendar', icon: Calendar },
+  { key: 'backup', label: 'Backup', icon: DatabaseBackup },
 ] as const
 
 export default function SettingsTabs({ children }: { children: React.ReactNode }) {
