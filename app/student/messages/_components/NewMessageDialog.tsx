@@ -36,14 +36,20 @@ interface Recipient {
 
 interface NewMessageDialogProps {
   recipients: Recipient[]
+  defaultSubject?: string
+  defaultOpen?: boolean
 }
 
-export default function NewMessageDialog({ recipients }: NewMessageDialogProps) {
-  const [open, setOpen] = useState(false)
+export default function NewMessageDialog({
+  recipients,
+  defaultSubject = '',
+  defaultOpen = false,
+}: NewMessageDialogProps) {
+  const [open, setOpen] = useState(defaultOpen)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     recipientId: '',
-    subject: '',
+    subject: defaultSubject,
     body: '',
   })
   const router = useRouter()

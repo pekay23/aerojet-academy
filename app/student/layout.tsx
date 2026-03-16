@@ -3,7 +3,10 @@ import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import StudentSidebar from './_components/StudentSidebar'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
+import PortalHeader from '@/components/layouts/PortalHeader'
 import WelcomeBanner from '@/components/WelcomeBanner'
+import StudentTopbarActions from './_components/StudentTopbarActions'
+import DynamicPageHeader from './_components/DynamicPageHeader'
 import ForcePasswordChange from '../applicant/_components/ForcePasswordChange'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 import { getStudentPaymentAccessLevel, getEnrollmentMilestoneStatus } from '@/lib/access-control'
@@ -32,7 +35,6 @@ export default async function StudentLayout({ children }: { children: React.Reac
     redirect('/login')
   }
 
-  // Mandatory password change check
   if (dbUser.mustChangePassword) {
     return (
       <ForcePasswordChange
@@ -52,16 +54,51 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const [
     unreadNotifications,
     unreadMessages,
+    recentNotifications,
+    recentMessages,
     studentProfile,
     paymentAccessLevel,
     milestoneStatus,
     wallet,
+    welcomeMessages,
   ] = await Promise.all([
     prisma.notification.count({
       where: { userId: user.id, isRead: false },
     }),
     prisma.message.count({
       where: { recipientId: user.id, isRead: false },
+    }),
+    prisma.notification.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      select: {
+        id: true,
+        title: true,
+        message: true,
+        type: true,
+        isRead: true,
+        createdAt: true,
+        linkUrl: true,
+      },
+    }),
+    prisma.message.findMany({
+      where: { recipientId: user.id },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      select: {
+        id: true,
+        subject: true,
+        body: true,
+        isRead: true,
+        createdAt: true,
+        sender: {
+          select: {
+            email: true,
+            profile: { select: { firstName: true, lastName: true } },
+          },
+        },
+      },
     }),
     prisma.studentProfile.findUnique({
       where: { userId: user.id },
@@ -77,13 +114,11 @@ export default async function StudentLayout({ children }: { children: React.Reac
       where: { userId: user.id },
       select: { availableBalance: true, reservedBalance: true, currency: true },
     }),
+    getWelcomeMessages(prisma, session.user.role),
   ])
 
-  // A student "has a pathway" if they have either a specific study pathway (B1/B2)
-  // or a general enrollment type (Modular/Exam-Only).
   const hasPathway = !!studentProfile?.pathwayId || !!studentProfile?.enrollmentType
 
-  // Convert milestoneStatus dates for client components
   const milestoneStatusJson = {
     ...milestoneStatus,
     milestones: milestoneStatus.milestones.map((m) => ({
@@ -99,12 +134,24 @@ export default async function StudentLayout({ children }: { children: React.Reac
     currency: wallet?.currency ?? 'EUR',
   }
 
-  // Store payment info in a way that can be passed via context or accessed by pages
   const paymentInfo = {
     accessLevel: paymentAccessLevel,
     milestoneStatus: milestoneStatusJson,
     walletBalance,
   }
+
+  const firstName = dbUser?.profile?.firstName || user.name?.split(' ')[0] || ''
+
+  // Transform messages to match TopbarMessage interface
+  const transformedMessages = recentMessages.map((msg) => ({
+    ...msg,
+    sender: {
+      name: msg.sender.profile
+        ? `${msg.sender.profile.firstName} ${msg.sender.profile.lastName}`
+        : null,
+      email: msg.sender.email,
+    },
+  }))
 
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
@@ -117,19 +164,27 @@ export default async function StudentLayout({ children }: { children: React.Reac
         messageCount={unreadMessages}
         paymentAccessLevel={paymentAccessLevel}
       />
-      <main id="main-content" className="min-h-screen flex-1">
-        <div className="p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
-          <BreadcrumbNav />
+      <main id="main-content" className="min-h-screen min-w-0 flex-1 overflow-x-hidden">
+        <div className="mx-auto max-w-7xl p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
+          <PortalHeader
+            actions={
+              <StudentTopbarActions
+                initialNotifications={JSON.parse(JSON.stringify(recentNotifications))}
+                initialMessages={JSON.parse(JSON.stringify(transformedMessages))}
+                initialUnreadNotifications={unreadNotifications}
+                initialUnreadMessages={unreadMessages}
+              />
+            }
+          >
+            <BreadcrumbNav />
+          </PortalHeader>
           {hasPathway ? (
             <div className="payment-info" data-payment-info={JSON.stringify(paymentInfo)}>
               {children}
             </div>
           ) : (
             <div className="space-y-8">
-              <WelcomeBanner
-                messages={await getWelcomeMessages(prisma, session.user.role)}
-                userName={session.user.name?.split(' ')[0]}
-              />
+              <WelcomeBanner messages={welcomeMessages} userName={firstName} />
               <div className="mx-auto max-w-lg rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center dark:border-amber-800/50 dark:bg-amber-900/10">
                 <h2 className="mb-2 text-lg font-black text-amber-800 dark:text-amber-200">
                   Study Pathway Not Set

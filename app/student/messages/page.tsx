@@ -16,7 +16,12 @@ export const metadata: Metadata = {
 }
 export const dynamic = 'force-dynamic'
 
-export default async function MessagesPage() {
+export default async function MessagesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ subject?: string }>
+}) {
+  const { subject: subjectParam } = await searchParams
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
@@ -108,7 +113,11 @@ export default async function MessagesPage() {
             Your conversations with staff and instructors.
           </p>
         </div>
-        <NewMessageDialog recipients={recipients} />
+        <NewMessageDialog 
+          recipients={recipients} 
+          defaultSubject={subjectParam}
+          defaultOpen={!!subjectParam} 
+        />
       </div>
 
       {threads.length === 0 ? (

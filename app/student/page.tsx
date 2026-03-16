@@ -7,7 +7,6 @@ import {
   Wallet,
   TrendingUp,
   ArrowRight,
-  Bell,
   CheckCircle2,
   Package,
   AlertCircle,
@@ -18,6 +17,7 @@ import {
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import WelcomeBanner from '@/components/WelcomeBanner'
+import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from '@/lib/access-control'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
@@ -34,7 +34,7 @@ export default async function StudentDashboard() {
   const userId = session.user.id
 
   // 1. Fetch Profile & Shared Data
-  const [profile, wallet, unreadNotifications, welcomeMessages, userRecord] = await Promise.all([
+  const [profile, wallet, welcomeMessages, userRecord] = await Promise.all([
     prisma.studentProfile.findUnique({
       where: { userId },
       include: {
@@ -47,7 +47,6 @@ export default async function StudentDashboard() {
       },
     }),
     prisma.wallet.findUnique({ where: { userId } }),
-    prisma.notification.count({ where: { userId, isRead: false } }),
     getWelcomeMessages(prisma, session.user.role),
     prisma.user.findUnique({ where: { id: userId }, select: { mustChangePassword: true } }),
   ])
@@ -70,13 +69,8 @@ export default async function StudentDashboard() {
     )
   }
 
-  const enrollmentType = profile.enrollmentType
+  const { isFullTime, isExamOnly, isModular: isFlexible, enrollmentType, pathwayCode } = await getStudentStatus(userId)
   const activePathway = profile.pathwayRel
-
-  // 2. Conditional Data Fetching based on Pathway/EnrollmentType
-  const isFullTime = enrollmentType === 'FULL_TIME' || activePathway?.code.startsWith('FULL_TIME')
-  const isFlexible = enrollmentType === 'MODULAR' || activePathway?.code === 'MODULAR'
-  const isExamOnly = enrollmentType === 'EXAM_ONLY' || activePathway?.code === 'EXAM_ONLY'
 
   // 2b. Parallel data fetching — all independent queries run concurrently
   const [
@@ -187,28 +181,28 @@ export default async function StudentDashboard() {
       return (
         <div className="flex flex-col gap-6 lg:flex-row">
           <div className="flex-1 space-y-6">
-            <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/30 p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+            <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/30 p-8 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-900/50">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-2xl font-black text-[#002a5c] dark:text-white">
                     Exam Only Pathway
                   </h2>
-                  <p className="mt-1 text-slate-500">Manage your exam bookings and view results.</p>
+                  <p className="mt-1 text-slate-500 dark:text-slate-400">Manage your exam bookings and view results.</p>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#002a5c] text-white">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#002a5c] text-white dark:bg-blue-600">
                   <BookOpen className="h-6 w-6" />
                 </div>
               </div>
 
               <div className="mt-8 grid gap-4 sm:grid-cols-2">
                 <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600 dark:bg-orange-500/10 dark:text-orange-400">
                     <Calendar className="h-5 w-5" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100">
                     {currentPoolsCount} Exam Booking{currentPoolsCount !== 1 ? 's' : ''} Joined
                   </h3>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     You are currently part of {currentPoolsCount} active exam bookings.
                   </p>
                 </div>
@@ -216,13 +210,13 @@ export default async function StudentDashboard() {
                   href="/student/exams"
                   className="group rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:border-blue-100 hover:bg-blue-50/50 dark:border-slate-800 dark:bg-slate-900/50"
                 >
-                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-all group-hover:bg-emerald-600 group-hover:text-white">
+                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-all group-hover:bg-emerald-600 group-hover:text-white dark:bg-emerald-500/10 dark:text-emerald-400">
                     <HistoryIcon className="h-5 w-5" />
                   </div>
                   <h3 className="font-bold text-slate-900 dark:text-slate-100">
                     View Exam History &rarr;
                   </h3>
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     See your results, passes, and licensing progress.
                   </p>
                 </Link>
@@ -589,26 +583,6 @@ export default async function StudentDashboard() {
 
         {/* Right Column */}
         <div className="space-y-8">
-          {/* Notifications */}
-          <div className="overflow-hidden rounded-2xl border border-slate-100 bg-slate-900 text-white shadow-sm dark:border-slate-800">
-            <div className="border-b border-white/10 px-4 py-3 sm:px-6 sm:py-4">
-              <h2 className="flex items-center gap-2 font-bold">
-                <Bell className="h-4 w-4 text-blue-400" />
-                Notifications
-              </h2>
-            </div>
-            <div className="p-4 text-center sm:p-6">
-              <div className="mb-2 text-3xl font-black tracking-tight">{unreadNotifications}</div>
-              <p className="text-xs text-slate-400">Unread messages</p>
-              <Link
-                href="/student/notifications"
-                className="mt-3 inline-flex h-9 items-center justify-center rounded-lg bg-[#002a5c] px-4 text-xs font-bold text-white transition-all hover:bg-[#003a7c] active:scale-95"
-              >
-                View All
-              </Link>
-            </div>
-          </div>
-
           {/* Quick Actions */}
           <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="border-b border-slate-100 px-4 py-3 sm:px-6 sm:py-4 dark:border-slate-800">

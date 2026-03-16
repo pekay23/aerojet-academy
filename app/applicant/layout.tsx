@@ -2,6 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import ApplicantSidebar from './_components/ApplicantSidebar'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
+import PortalHeader from '@/components/layouts/PortalHeader'
 import prisma from '@/lib/prisma/client'
 import ForcePasswordChange from './_components/ForcePasswordChange'
 
@@ -60,9 +61,11 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         hasPathway={hasPathway}
         isExamOnly={isExamOnly}
       />
-      <main id="main-content" className="min-h-screen flex-1">
-        <div className="p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
-          <BreadcrumbNav />
+      <main id="main-content" className="min-h-screen min-w-0 flex-1 overflow-x-hidden">
+        <div className="mx-auto max-w-7xl p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
+          <PortalHeader>
+            <BreadcrumbNav />
+          </PortalHeader>
           {children}
         </div>
       </main>

@@ -4,7 +4,7 @@ import { Award, Download, Calendar, ExternalLink, AlertCircle } from 'lucide-rea
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
-import { canAccessFeature, getEnrollmentMilestoneStatus } from '@/lib/access-control'
+import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
 export const metadata: Metadata = {
@@ -16,12 +16,7 @@ export default async function CertificatesPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const studentProfile = await prisma.studentProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { enrollmentType: true },
-  })
-
-  const isFullTime = studentProfile?.enrollmentType === 'FULL_TIME'
+  const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'courses')
 
   if (isFullTime && !hasAccess) {

@@ -38,8 +38,6 @@ export default function InstructorSidebar({
       icon: ClipboardCheck,
       badge: (counts.pendingGrading ?? 0) > 0 ? counts.pendingGrading : undefined,
     },
-    { type: 'header', label: 'Account' },
-    { label: 'Profile', href: '/instructor/profile', icon: User },
   ]
 
   return (
@@ -50,6 +48,9 @@ export default function InstructorSidebar({
       userName={userName}
       userRole={userRole}
       userImage={userImage}
+      userMenuItems={[
+        { label: 'Profile', href: '/instructor/profile', icon: User },
+      ]}
     />
   )
 }

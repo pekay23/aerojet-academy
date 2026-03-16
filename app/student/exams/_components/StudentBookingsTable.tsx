@@ -43,11 +43,11 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
   }
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <div className="overflow-hidden rounded-xl border border-stone-200/60 bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:border-white/10 dark:bg-card dark:shadow-none">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm" aria-label="Exam bookings">
-          <thead className="bg-slate-50 dark:bg-slate-800/50">
-            <tr className="border-b border-slate-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
+          <thead className="bg-stone-50/50 dark:bg-white/5">
+            <tr className="border-b border-stone-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-white/5">
               <SortHeader
                 label="Module"
                 sortKey="moduleCode"
@@ -72,11 +72,11 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
               />
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+          <tbody className="divide-y divide-stone-100 dark:divide-white/5">
             {items.map((booking) => (
               <tr
                 key={booking.id}
-                className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/20"
+                className="transition-colors hover:bg-stone-50 dark:hover:bg-white/5"
               >
                 <td className="px-6 py-4">
                   <p className="font-bold text-slate-900 uppercase dark:text-white">
@@ -130,7 +130,7 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                       <button
                         onClick={() => handlePay(booking.id)}
                         disabled={isPaying === booking.id}
-                        className="rounded-lg bg-[#002a5c] px-3 py-1 text-xs font-bold text-white transition-all hover:bg-blue-800 disabled:opacity-50"
+                        className="rounded-lg bg-primary px-3 py-1 text-xs font-bold text-white transition-all hover:bg-primary/90 disabled:opacity-50"
                       >
                         {isPaying === booking.id
                           ? 'Processing...'

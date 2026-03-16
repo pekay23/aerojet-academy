@@ -43,8 +43,17 @@ export default async function PathwayPage() {
 
   if (!applicant) redirect('/login')
 
-  // If already a STUDENT, redirect to student portal
-  if (applicant.role === 'STUDENT') {
+  // Check for existing enrollment
+  const enrollment = await prisma.fullTimeEnrollment.findFirst({
+    where: { studentId: userId },
+    include: {
+      programme: true,
+      milestones: { orderBy: { yearNumber: 'asc' } },
+    },
+  })
+
+  // If already a STUDENT and has enrollment, redirect to student portal
+  if (applicant.role === 'STUDENT' && enrollment) {
     redirect('/student')
   }
 
@@ -71,15 +80,6 @@ export default async function PathwayPage() {
     where: { key: 'course_currency' },
   })
   const currency = currencySettings[0]?.value || 'EUR'
-
-  // Check for existing enrollment + milestones (seat already confirmed)
-  const enrollment = await prisma.fullTimeEnrollment.findFirst({
-    where: { studentId: userId },
-    include: {
-      programme: true,
-      milestones: { orderBy: { yearNumber: 'asc' } },
-    },
-  })
 
   // Check wallet balance
   const wallet = await prisma.wallet.findUnique({ where: { userId } })
