@@ -6,7 +6,6 @@ import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import PortalHeader from '@/components/layouts/PortalHeader'
 import WelcomeBanner from '@/components/WelcomeBanner'
 import StudentTopbarActions from './_components/StudentTopbarActions'
-import DynamicPageHeader from './_components/DynamicPageHeader'
 import ForcePasswordChange from '../applicant/_components/ForcePasswordChange'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 import { getStudentPaymentAccessLevel, getEnrollmentMilestoneStatus } from '@/lib/access-control'
@@ -54,8 +53,6 @@ export default async function StudentLayout({ children }: { children: React.Reac
   const [
     unreadNotifications,
     unreadMessages,
-    recentNotifications,
-    recentMessages,
     studentProfile,
     paymentAccessLevel,
     milestoneStatus,
@@ -67,38 +64,6 @@ export default async function StudentLayout({ children }: { children: React.Reac
     }),
     prisma.message.count({
       where: { recipientId: user.id, isRead: false },
-    }),
-    prisma.notification.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      select: {
-        id: true,
-        title: true,
-        message: true,
-        type: true,
-        isRead: true,
-        createdAt: true,
-        linkUrl: true,
-      },
-    }),
-    prisma.message.findMany({
-      where: { recipientId: user.id },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      select: {
-        id: true,
-        subject: true,
-        body: true,
-        isRead: true,
-        createdAt: true,
-        sender: {
-          select: {
-            email: true,
-            profile: { select: { firstName: true, lastName: true } },
-          },
-        },
-      },
     }),
     prisma.studentProfile.findUnique({
       where: { userId: user.id },
@@ -142,17 +107,6 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   const firstName = dbUser?.profile?.firstName || user.name?.split(' ')[0] || ''
 
-  // Transform messages to match TopbarMessage interface
-  const transformedMessages = recentMessages.map((msg) => ({
-    ...msg,
-    sender: {
-      name: msg.sender.profile
-        ? `${msg.sender.profile.firstName} ${msg.sender.profile.lastName}`
-        : null,
-      email: msg.sender.email,
-    },
-  }))
-
   return (
     <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
       <StudentSidebar
@@ -167,14 +121,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       <main id="main-content" className="min-h-screen min-w-0 flex-1 overflow-x-hidden">
         <div className="mx-auto max-w-7xl p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
           <PortalHeader
-            actions={
-              <StudentTopbarActions
-                initialNotifications={JSON.parse(JSON.stringify(recentNotifications))}
-                initialMessages={JSON.parse(JSON.stringify(transformedMessages))}
-                initialUnreadNotifications={unreadNotifications}
-                initialUnreadMessages={unreadMessages}
-              />
-            }
+            actions={<StudentTopbarActions />}
           >
             <BreadcrumbNav />
           </PortalHeader>
