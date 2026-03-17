@@ -47,27 +47,23 @@ function formatBadge(count: number): string {
   return count > 9 ? '9+' : String(count)
 }
 
-export default function StudentTopbarActions({
-  initialNotifications,
-  initialMessages,
-  initialUnreadNotifications,
-  initialUnreadMessages,
-}: {
-  initialNotifications: TopbarNotification[]
-  initialMessages: TopbarMessage[]
-  initialUnreadNotifications: number
-  initialUnreadMessages: number
-}) {
+export default function StudentTopbarActions() {
   const { counts } = useBadgeCounts()
-  const [unreadNotifCount, setUnreadNotifCount] = useState(initialUnreadNotifications)
-  const [unreadMsgCount, setUnreadMsgCount] = useState(initialUnreadMessages)
+  const [notifications, setNotifications] = useState<TopbarNotification[]>([])
+  const [messages, setMessages] = useState<TopbarMessage[]>([])
 
   useEffect(() => {
-    if (counts) {
-      setUnreadNotifCount(counts.notifications ?? initialUnreadNotifications)
-      setUnreadMsgCount(counts.messages ?? initialUnreadMessages)
-    }
-  }, [counts, initialUnreadNotifications, initialUnreadMessages])
+    fetch('/api/student/topbar-items')
+      .then((r) => (r.ok ? r.json() : { notifications: [], messages: [] }))
+      .then((data) => {
+        setNotifications(data.notifications ?? [])
+        setMessages(data.messages ?? [])
+      })
+      .catch(() => {})
+  }, [])
+
+  const unreadNotifCount = counts.notifications ?? 0
+  const unreadMsgCount = counts.messages ?? 0
 
   return (
     <div className="flex items-center gap-1.5">
@@ -96,13 +92,13 @@ export default function StudentTopbarActions({
             )}
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {initialNotifications.length === 0 ? (
+          {notifications.length === 0 ? (
             <div className="px-4 py-6 text-center text-sm text-muted-foreground">
               No notifications
             </div>
           ) : (
             <div className="max-h-[300px] overflow-y-auto">
-              {initialNotifications.map((notif) => {
+              {notifications.map((notif) => {
                 const typeConfig = notificationTypeIcons[notif.type] || notificationTypeIcons.INFO
                 const TypeIcon = typeConfig.icon
                 return (
@@ -170,13 +166,13 @@ export default function StudentTopbarActions({
             </Link>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {initialMessages.length === 0 ? (
+          {messages.length === 0 ? (
             <div className="px-4 py-6 text-center text-sm text-muted-foreground">
               No messages
             </div>
           ) : (
             <div className="max-h-[300px] overflow-y-auto">
-              {initialMessages.map((msg) => (
+              {messages.map((msg) => (
                 <DropdownMenuItem key={msg.id} asChild>
                   <Link
                     href={`/student/messages?thread=${msg.id}`}
