@@ -58,7 +58,7 @@ export const POST = withErrorHandler(
           userId: studentId,
           courseId: entry.courseId,
           moduleCode: finalModuleCode,
-          examDate: new Date(examDate),
+          examDate: examDate ? new Date(examDate) : null,
           amountPaid: 0,
           status: 'COMPLETED',
           bookingType: bookingType as any,

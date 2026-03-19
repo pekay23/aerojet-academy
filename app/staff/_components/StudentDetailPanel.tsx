@@ -161,18 +161,22 @@ export default function StudentDetailPanel({
   const statusStyle = STATUS_STYLE[currentStudent.status] ?? 'bg-slate-100 text-slate-500'
   const walletBal = Number(currentStudent.wallet?.availableBalance ?? 0)
 
-  // Unify results for the Exams tab
-  const allExamHistory = [
-    ...(currentStudent.examResults?.map((r: any) => ({
-      id: r.id,
-      type: 'FORMAL',
-      moduleCode: r.exam.examComponent?.course?.code || '—',
-      examName: r.exam.name,
-      date: r.exam.examDate,
-      score: Number(r.score),
-      passed: r.passed,
-    })) || []),
-    ...(currentStudent.examBookings?.map((r: any) => ({
+  // Separate completed exams (with results) from upcoming/pending bookings
+  const completedExamResults = currentStudent.examResults?.map((r: any) => ({
+    id: r.id,
+    type: 'FORMAL',
+    moduleCode: r.exam.examComponent?.course?.code || '—',
+    examName: r.exam.name,
+    date: r.exam.examDate,
+    score: Number(r.score),
+    passed: r.passed,
+    result: r.passed ? 'PASS' : 'FAIL',
+  })) || []
+
+  // Only include exam bookings that have a result (PASS, FAIL, ABSENT) - not pending/upcoming
+  const completedExamBookings = currentStudent.examBookings
+    ?.filter((r: any) => r.result && ['PASS', 'FAIL', 'ABSENT'].includes(r.result))
+    .map((r: any) => ({
       id: r.id,
       type: 'MANUAL',
       moduleCode: r.moduleCode || '—',
@@ -180,8 +184,24 @@ export default function StudentDetailPanel({
       date: r.examDate || r.bookedAt,
       score: r.score ? Number(r.score) : null,
       passed: r.result === 'PASS',
-    })) || []),
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      result: r.result,
+    })) || []
+
+  // Upcoming/pending exams (no result yet)
+  const upcomingExams = currentStudent.examBookings
+    ?.filter((r: any) => !r.result || !['PASS', 'FAIL', 'ABSENT'].includes(r.result))
+    .map((r: any) => ({
+      id: r.id,
+      type: r.exam?.name ? 'BOOKED' : 'MANUAL',
+      moduleCode: r.moduleCode || '—',
+      examName: r.exam?.name || 'Exam Booking',
+      date: r.examDate || r.bookedAt,
+      status: r.status,
+    })) || []
+
+  const allExamHistory = [...completedExamResults, ...completedExamBookings].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+  )
 
   return (
     <div
@@ -501,55 +521,94 @@ export default function StudentDetailPanel({
             )}
 
             {tab === 'Exams' && (
-              <Section title="Exam History">
-                {!allExamHistory.length ? (
-                  <EmptyState icon={FileCheck} message="No exam records yet" />
-                ) : (
-                  <div className="space-y-2">
-                    {allExamHistory.map((h, idx) => (
-                      <div
-                        key={`${h.type}-${h.id}-${idx}`}
-                        className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-800 dark:text-slate-200">
-                              {h.moduleCode}
-                            </span>
-                            <span
-                              className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
-                                h.type === 'FORMAL'
-                                  ? 'bg-blue-50 text-blue-600'
-                                  : 'bg-slate-50 text-slate-500'
-                              }`}
-                            >
-                              {h.type}
+              <>
+                {/* Upcoming/Pending Exams */}
+                {upcomingExams.length > 0 && (
+                  <Section title="Upcoming / Pending Exams">
+                    <div className="space-y-2">
+                      {upcomingExams.map((exam, idx) => (
+                        <div
+                          key={`upcoming-${exam.id}-${idx}`}
+                          className="flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 dark:border-blue-900/30 dark:bg-blue-900/20"
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-800 dark:text-slate-200">
+                                {exam.moduleCode}
+                              </span>
+                              <span className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase bg-blue-100 text-blue-600">
+                                {exam.type}
+                              </span>
+                            </div>
+                            <p className="truncate text-xs text-slate-500">{exam.examName}</p>
+                            <p className="mt-0.5 text-[10px] text-slate-400">
+                              {exam.date ? new Date(exam.date).toLocaleDateString() : '—'}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="rounded-full px-2 py-0.5 text-[9px] font-black uppercase bg-amber-100 text-amber-700">
+                              {exam.status || 'PENDING'}
                             </span>
                           </div>
-                          <p className="truncate text-xs text-slate-500">{h.examName}</p>
-                          <p className="mt-0.5 text-[10px] text-slate-400">
-                            {h.date ? new Date(h.date).toLocaleDateString() : '—'}
-                          </p>
                         </div>
-                        <div className="flex flex-col items-end gap-1">
-                          <span className="font-mono text-xs font-black">
-                            {h.score !== null ? `${h.score}%` : '—'}
-                          </span>
-                          <span
-                            className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                              h.passed
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : 'bg-red-100 text-red-700'
-                            }`}
-                          >
-                            {h.passed ? 'PASS' : 'FAIL'}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  </Section>
                 )}
-              </Section>
+
+                {/* Completed Exam History */}
+                <Section title="Exam History">
+                  {!allExamHistory.length ? (
+                    <EmptyState icon={FileCheck} message="No exam records yet" />
+                  ) : (
+                    <div className="space-y-2">
+                      {allExamHistory.map((h, idx) => (
+                        <div
+                          key={`${h.type}-${h.id}-${idx}`}
+                          className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-800 dark:text-slate-200">
+                                {h.moduleCode}
+                              </span>
+                              <span
+                                className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
+                                  h.type === 'FORMAL'
+                                    ? 'bg-blue-50 text-blue-600'
+                                    : 'bg-slate-50 text-slate-500'
+                                }`}
+                              >
+                                {h.type}
+                              </span>
+                            </div>
+                            <p className="truncate text-xs text-slate-500">{h.examName}</p>
+                            <p className="mt-0.5 text-[10px] text-slate-400">
+                              {h.date ? new Date(h.date).toLocaleDateString() : '—'}
+                            </p>
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className="font-mono text-xs font-black">
+                              {h.score !== null ? `${h.score}%` : '—'}
+                            </span>
+                            <span
+                              className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
+                                h.passed
+                                  ? 'bg-emerald-100 text-emerald-700'
+                                  : h.result === 'ABSENT'
+                                    ? 'bg-slate-100 text-slate-500'
+                                    : 'bg-red-100 text-red-700'
+                              }`}
+                            >
+                              {h.result || (h.passed ? 'PASS' : 'FAIL')}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </Section>
+              </>
             )}
           </>
         )}
