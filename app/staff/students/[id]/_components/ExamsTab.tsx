@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { naturalCompare } from '@/lib/utils/array'
 import {
   Search,
   Plus,
@@ -13,6 +14,8 @@ import {
   FileCheck,
   ShoppingCart,
   Filter,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { updateExamBooking, deleteExamRecord } from '@/app/staff/actions'
@@ -56,6 +59,9 @@ export default function ExamsTab({
     examDate?: string
     moduleCode?: string
   }>({})
+  const [quickAddModule, setQuickAddModule] = useState<any>(null)
+  const [sortBy, setSortBy] = useState<'moduleCode' | 'examDate' | 'score' | 'result'>('examDate')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
   // Merge exam bookings and exam results into unified history
   const allExamRecords = useMemo(() => {
@@ -154,8 +160,25 @@ export default function ExamsTab({
       )
     }
 
-    return filtered
-  }, [allExamRecords, filter, search])
+    // Apply sorting with natural sort for module codes
+    const sorted = [...filtered].sort((a, b) => {
+      let cmp = 0
+      if (sortBy === 'moduleCode') {
+        cmp = naturalCompare(a.moduleCode || '', b.moduleCode || '')
+      } else if (sortBy === 'examDate') {
+        const dateA = a.examDate ? new Date(a.examDate).getTime() : 0
+        const dateB = b.examDate ? new Date(b.examDate).getTime() : 0
+        cmp = dateA - dateB
+      } else if (sortBy === 'score') {
+        cmp = (a.score ?? -1) - (b.score ?? -1)
+      } else if (sortBy === 'result') {
+        cmp = (a.result || '').localeCompare(b.result || '')
+      }
+      return sortOrder === 'asc' ? cmp : -cmp
+    })
+
+    return sorted
+  }, [allExamRecords, filter, search, sortBy, sortOrder])
 
   // Filter counts
   const counts = useMemo(
@@ -211,7 +234,68 @@ export default function ExamsTab({
     }
   }
 
+  // Quick add handlers
+  const handleQuickAdd = (module: any) => {
+    setQuickAddModule(module)
+  }
+
+  // Handle column header click for sorting
+  const handleSort = (column: 'moduleCode' | 'examDate' | 'score' | 'result') => {
+    if (sortBy === column) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortBy(column)
+      setSortOrder('asc')
+    }
+  }
+
+  const handleQuickAddSave = async () => {
+    if (!quickAddModule) return
+    
+    const moduleCode = quickAddModule.course?.code || quickAddModule.code
+    const courseId = quickAddModule.course?.id
+    
+    try {
+      const res = await fetch('/api/staff/students/' + student.id + '/exam-record', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          entries: [{
+            courseId,
+            moduleCode,
+            score: undefined,
+          }],
+          bookingType: 'INDIVIDUAL',
+          examDate: undefined, // Leave date blank for admin to fill
+          attemptType: 'FIRST',
+          notes: 'Quick added from exam tab',
+        }),
+      })
+      
+      const data = await res.json()
+      if (res.ok && data.success) {
+        toast.success('Module added! Click edit to add exam date and score.')
+        setQuickAddModule(null)
+        onRefresh()
+      } else {
+        toast.error(data.error || 'Failed to add module')
+      }
+    } catch {
+      toast.error('Failed to add module')
+    }
+  }
+
   const walletBalance = Number(student.wallet?.availableBalance ?? 0)
+
+  // Get list of modules that already have records
+  const existingModuleCodes = new Set(
+    allExamRecords.map((r) => r.moduleCode).filter(Boolean)
+  )
+
+  // Available modules to add (not yet in records)
+  const availableModules = examComponents.filter(
+    (m) => !existingModuleCodes.has(m.course?.code || m.code)
+  )
 
   return (
     <div className="space-y-6">
@@ -251,6 +335,63 @@ export default function ExamsTab({
           />
         </div>
       </div>
+
+      {/* Quick Add Available Modules */}
+      {availableModules.length > 0 && (
+        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50">
+          <h4 className="mb-3 text-xs font-black tracking-widest text-slate-400 uppercase">
+            Quick Add: Available Modules
+          </h4>
+          <div className="flex flex-wrap gap-2">
+            {availableModules.slice(0, 12).map((module) => (
+              <button
+                key={module.id}
+                onClick={() => handleQuickAdd(module)}
+                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:border-[#002a5c] hover:text-[#002a5c] dark:border-slate-600 dark:bg-slate-700"
+              >
+                <Plus className="h-3 w-3" />
+                {module.course?.code || module.code}
+              </button>
+            ))}
+            {availableModules.length > 12 && (
+              <span className="px-3 py-1.5 text-xs text-slate-400">
+                +{availableModules.length - 12} more
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Quick Add Dialog */}
+      {quickAddModule && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl dark:bg-slate-900">
+            <h3 className="mb-4 text-lg font-bold">
+              Add {quickAddModule.course?.code || quickAddModule.code}
+            </h3>
+            <p className="mb-4 text-sm text-slate-500">
+              Module: {quickAddModule.course?.name || quickAddModule.name}
+            </p>
+            <p className="mb-4 text-xs text-amber-600">
+              You can add the exam date and score later by editing this record.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setQuickAddModule(null)}
+                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleQuickAddSave}
+                className="rounded-lg bg-[#002a5c] px-4 py-2 text-sm font-medium text-white"
+              >
+                Add Module
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Search & Filters */}
       <div className="flex flex-wrap items-center gap-3">
@@ -327,20 +468,52 @@ export default function ExamsTab({
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-900/50">
-                <th className="px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Module
+                <th
+                  className="cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-[#002a5c]"
+                  onClick={() => handleSort('moduleCode')}
+                >
+                  <span className="flex items-center gap-1">
+                    Module
+                    {sortBy === 'moduleCode' && (
+                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+                    )}
+                  </span>
                 </th>
                 <th className="px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Exam / Event
                 </th>
-                <th className="px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Date
+                <th
+                  className="cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-[#002a5c]"
+                  onClick={() => handleSort('examDate')}
+                >
+                  <span className="flex items-center gap-1">
+                    Date
+                    {sortBy === 'examDate' && (
+                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+                    )}
+                  </span>
                 </th>
-                <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Score
+                <th
+                  className="cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-[#002a5c]"
+                  onClick={() => handleSort('score')}
+                >
+                  <span className="flex items-center justify-center gap-1">
+                    Score
+                    {sortBy === 'score' && (
+                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+                    )}
+                  </span>
                 </th>
-                <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Result
+                <th
+                  className="cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-[#002a5c]"
+                  onClick={() => handleSort('result')}
+                >
+                  <span className="flex items-center justify-center gap-1">
+                    Result
+                    {sortBy === 'result' && (
+                      sortOrder === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+                    )}
+                  </span>
                 </th>
                 <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Type
@@ -361,12 +534,17 @@ export default function ExamsTab({
                 >
                   <td className="px-4 py-3">
                     {editingId === record.id ? (
-                      <input
-                        type="text"
+                      <select
                         value={editData.moduleCode ?? record.moduleCode}
                         onChange={(e) => setEditData((d) => ({ ...d, moduleCode: e.target.value }))}
-                        className="w-20 rounded border border-slate-200 px-2 py-1 font-mono text-xs"
-                      />
+                        className="w-28 rounded border border-slate-200 px-2 py-1 font-mono text-xs"
+                      >
+                        {examComponents.map((ec: any) => (
+                          <option key={ec.id} value={ec.course?.code || ec.code}>
+                            {ec.course?.code || ec.code}
+                          </option>
+                        ))}
+                      </select>
                     ) : (
                       <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
                         {record.moduleCode}

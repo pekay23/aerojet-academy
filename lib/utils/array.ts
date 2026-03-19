@@ -1,10 +1,13 @@
 export function groupBy<T>(arr: T[], key: keyof T): Record<string, T[]> {
-  return arr.reduce((acc, item) => {
-    const k = String(item[key])
-    if (!acc[k]) acc[k] = []
-    acc[k].push(item)
-    return acc
-  }, {} as Record<string, T[]>)
+  return arr.reduce(
+    (acc, item) => {
+      const k = String(item[key])
+      if (!acc[k]) acc[k] = []
+      acc[k].push(item)
+      return acc
+    },
+    {} as Record<string, T[]>
+  )
 }
 
 export function unique<T>(arr: T[], key?: keyof T): T[] {
@@ -19,12 +22,44 @@ export function unique<T>(arr: T[], key?: keyof T): T[] {
 }
 
 export function chunk<T>(arr: T[], size: number): T[][] {
-  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, (i + 1) * size))
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+    arr.slice(i * size, (i + 1) * size)
+  )
 }
 
 export function sortBy<T>(arr: T[], key: keyof T, dir: 'asc' | 'desc' = 'asc'): T[] {
   return [...arr].sort((a, b) => {
     const cmp = a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0
+    return dir === 'asc' ? cmp : -cmp
+  })
+}
+
+/**
+ * Natural sort comparison - sorts strings containing numbers naturally
+ * e.g., "Module 1", "Module 2", "Module 10" instead of "Module 1", "Module 10", "Module 2"
+ */
+export function naturalCompare(a: string, b: string): number {
+  const numA = a.match(/\d+/)
+  const numB = b.match(/\d+/)
+
+  if (numA && numB) {
+    const intA = parseInt(numA[0], 10)
+    const intB = parseInt(numB[0], 10)
+    if (intA !== intB) return intA - intB
+  }
+
+  return a.localeCompare(b)
+}
+
+export function sortNaturally<T>(
+  arr: T[],
+  key: (item: T) => string,
+  dir: 'asc' | 'desc' = 'asc'
+): T[] {
+  return [...arr].sort((a, b) => {
+    const valA = key(a) || ''
+    const valB = key(b) || ''
+    const cmp = naturalCompare(valA, valB)
     return dir === 'asc' ? cmp : -cmp
   })
 }
