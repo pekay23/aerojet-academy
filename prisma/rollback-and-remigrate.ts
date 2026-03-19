@@ -148,7 +148,13 @@ async function rollbackStudent(email: string, targetWallet: number, adminNote: s
     }
   }
 
-  console.log(`  ✓ Admin note: "${adminNote.substring(0, 50)}..."`)
+  // Update StudentProfile adminNotes
+  await prisma.studentProfile.update({
+    where: { userId: user.id },
+    data: { adminNotes: adminNote },
+  })
+
+  console.log(`  ✓ Admin note saved to profile: "${adminNote.substring(0, 50)}..."`)
 }
 
 async function createExamHistory(email: string, examHistory: Array<{module: string, result: string, attempt: number}>) {

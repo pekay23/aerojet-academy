@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Metadata } from 'next'
 import StudentDetailTabs from './_components/StudentDetailTabs'
+import EditProfileDialog from '@/app/staff/users/[id]/_components/EditProfileDialog'
 
 export const metadata: Metadata = { title: 'Student Details | Staff Portal' }
 
@@ -98,19 +99,28 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
     },
   })
 
+  // Fetch modular enrollments
+  const modularEnrollments = await prisma.modularEnrollment.findMany({
+    where: { studentId: id },
+    include: {
+      package: { select: { id: true, name: true } },
+    },
+  })
+
   // Fetch available exam components and upcoming events for booking dialog
-  const [examComponentsRaw, upcomingEvents, academicYears, semesters, studyPathways] = await Promise.all([
-    prisma.examComponent.findMany({
-      include: { course: { select: { id: true, name: true, code: true } } },
-    }),
-    prisma.examEvent.findMany({
-      where: { status: { in: ['OPEN', 'DRAFT'] }, startDate: { gte: new Date() } },
-      orderBy: { startDate: 'asc' },
-    }),
-    prisma.academicYear.findMany({ orderBy: { startDate: 'desc' } }),
-    prisma.semester.findMany({ orderBy: { startDate: 'desc' } }),
-    prisma.studyPathwayModel?.findMany?.() ?? [],
-  ])
+  const [examComponentsRaw, upcomingEvents, academicYears, semesters, studyPathways] =
+    await Promise.all([
+      prisma.examComponent.findMany({
+        include: { course: { select: { id: true, name: true, code: true } } },
+      }),
+      prisma.examEvent.findMany({
+        where: { status: { in: ['OPEN', 'DRAFT'] }, startDate: { gte: new Date() } },
+        orderBy: { startDate: 'asc' },
+      }),
+      prisma.academicYear.findMany({ orderBy: { startDate: 'desc' } }),
+      prisma.semester.findMany({ orderBy: { startDate: 'desc' } }),
+      prisma.studyPathwayModel?.findMany?.() ?? [],
+    ])
 
   // Natural sort by module code (M1, M2, M3... M10, M12 instead of M1, M10, M12)
   // and remove any duplicates by code (keep first occurrence)
@@ -131,6 +141,27 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
       return (a.code || '').localeCompare(b.code || '')
     })
 
+  // Serialize data for client components
+  const serializedStudent = JSON.parse(
+    JSON.stringify({
+      ...student,
+      password: undefined,
+      walletTransactions,
+      fullTimeEnrollments,
+      modularEnrollments,
+      examResults: student.examResults.map((r: any) => ({
+        ...r,
+        score: Number(r.score),
+        percentage: Number(r.percentage),
+      })),
+      examBookings: student.examBookings.map((b: any) => ({
+        ...b,
+        score: b.score != null ? Number(b.score) : null,
+        percentage: b.percentage != null ? Number(b.percentage) : null,
+      })),
+    })
+  )
+
   const fullName = student.profile
     ? [student.profile.firstName, student.profile.middleName, student.profile.lastName]
         .filter(Boolean)
@@ -138,29 +169,8 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
     : student.email
 
   const initials = student.profile
-    ? `${student.profile.firstName[0]}${student.profile.lastName[0]}`
+    ? `${student.profile.firstName?.[0]}${student.profile.lastName?.[0]}`
     : student.email[0].toUpperCase()
-
-  // Serialize data for client components
-  const serializedStudent = JSON.parse(JSON.stringify({
-    ...student,
-    password: undefined,
-    walletTransactions,
-    fullTimeEnrollments: fullTimeEnrollments.map((e) => {
-      const { ojtPeriods, milestones, ...rest } = e
-      return {
-        ...rest,
-        ojtPeriods: ojtPeriods.map((o) => ({
-          ...o,
-          startDate: o.startDate.toISOString(),
-          endDate: o.endDate?.toISOString() ?? null,
-          createdAt: o.createdAt.toISOString(),
-          updatedAt: o.updatedAt.toISOString(),
-        })),
-        milestones,
-      }
-    }),
-  }))
 
   return (
     <div className="min-h-screen px-4 py-6 md:px-6 lg:px-8">
@@ -186,12 +196,23 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
               initials
             )}
           </div>
+          <EditProfileDialog
+            userId={student.id}
+            initialData={{
+              firstName: student.profile?.firstName || '',
+              middleName: student.profile?.middleName || '',
+              lastName: student.profile?.lastName || '',
+              email: student.email,
+              personalEmail: student.personalEmail,
+              phone: student.profile?.phone || '',
+              nationality: student.profile?.nationality || '',
+              dateOfBirth: student.profile?.dateOfBirth,
+            }}
+          />
           <div>
             <h1 className="text-2xl font-black text-slate-800 dark:text-white">{fullName}</h1>
             <p className="mt-0.5 flex items-center gap-2 text-sm text-slate-400">
-              <span className="font-mono">
-                {student.studentProfile?.studentId ?? '—'}
-              </span>
+              <span className="font-mono">{student.studentProfile?.studentId ?? '—'}</span>
               {student.studentProfile?.pathwayRel && (
                 <>
                   <span className="h-1 w-1 rounded-full bg-slate-300" />
