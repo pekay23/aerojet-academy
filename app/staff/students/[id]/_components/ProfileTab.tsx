@@ -10,11 +10,11 @@ import {
   User,
   KeyRound,
   ExternalLink,
+  Camera,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import EditProfileDialog from '@/app/staff/users/[id]/_components/EditProfileDialog'
 import EditIdDialog from '@/app/staff/users/[id]/_components/EditIdDialog'
-import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
 import EditPathwayDialog from '@/app/staff/users/[id]/_components/EditPathwayDialog'
 import EditAcademicPeriodDialog from '@/app/staff/users/[id]/_components/EditAcademicPeriodDialog'
 import UserActionsMenu from '@/app/staff/_components/UserActionsMenu'
@@ -142,37 +142,35 @@ export default function ProfileTab({
         </Section>
       )}
 
-      {/* Student ID & Photo */}
+      {/* Student ID Section */}
       <Section
-        title="Student Identity"
+        title="Student ID"
         action={
-          <div className="flex gap-2">
-            {sp?.studentId && (
-              <EditIdDialog
-                userId={student.id}
-                currentId={sp.studentId}
-                type="studentId"
-                label="Student ID"
-              />
-            )}
-            <EditProfilePhotoDialog
+          sp?.studentId ? (
+            <EditIdDialog
               userId={student.id}
-              currentPhotoUrl={profile?.profilePhotoUrl}
+              currentId={sp.studentId}
+              type="studentId"
+              label="Student ID"
             />
-          </div>
+          ) : null
         }
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field icon={User} label="Student ID" value={sp?.studentId ?? '—'} />
-          <Field icon={Calendar} label="Enrollment Date" value={
-            sp?.enrollmentDate
-              ? new Date(sp.enrollmentDate).toLocaleDateString('en-GB', {
-                  day: 'numeric',
-                  month: 'short',
-                  year: 'numeric',
-                })
-              : '—'
-          } />
+          <Field
+            icon={Calendar}
+            label="Enrollment Date"
+            value={
+              sp?.enrollmentDate
+                ? new Date(sp.enrollmentDate).toLocaleDateString('en-GB', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  })
+                : '—'
+            }
+          />
           <Field icon={User} label="Enrollment Status" value={sp?.enrollmentStatus ?? '—'} />
         </div>
       </Section>
@@ -322,10 +320,14 @@ function Section({
   action?: React.ReactNode
 }) {
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between">
+    <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+      <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-700">
         <h3 className="text-xs font-black tracking-widest text-slate-400 uppercase">{title}</h3>
-        {action}
+        {action && (
+          <div className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 dark:border-slate-700 dark:bg-slate-800">
+            {action}
+          </div>
+        )}
       </div>
       {children}
     </div>
