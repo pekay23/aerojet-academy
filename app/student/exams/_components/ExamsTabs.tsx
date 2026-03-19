@@ -4,7 +4,12 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Calendar, FileBarChart2, History, Users, User, Layers, RefreshCcw, FileCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
 
-const TABS = [
+interface Props {
+  isFullTime?: boolean
+  children: React.ReactNode
+}
+
+const ALL_TABS = [
   { key: 'available', label: 'Join Pools', shortLabel: 'Pools', icon: Users },
   { key: 'bookings', label: 'My Bookings', shortLabel: 'My Bookings', icon: FileCheck },
   { key: 'individual', label: 'Individual', shortLabel: 'Individual', icon: User },
@@ -13,10 +18,18 @@ const TABS = [
   { key: 'records', label: 'Exam Records', shortLabel: 'Records', icon: History },
 ] as const
 
-export default function ExamsTabs({ children }: { children: React.ReactNode }) {
+// Full-time students can only view their exam records - admin books exams for them
+const FULL_TIME_TABS = [
+  { key: 'records', label: 'Exam Records', shortLabel: 'Records', icon: History },
+] as const
+
+export default function ExamsTabs({ isFullTime, children }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentTab = searchParams.get('tab') || 'available'
+
+  // For full-time students, only show records tab - admin books exams for them
+  const TABS = isFullTime ? FULL_TIME_TABS : ALL_TABS
 
   const setTab = (tab: string) => {
     router.push(`/student/exams?tab=${tab}`, { scroll: false })
