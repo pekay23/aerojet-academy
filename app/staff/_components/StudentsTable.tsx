@@ -14,8 +14,11 @@ import {
   Mail,
   LockOpen,
   Archive,
+  ExternalLink,
 } from 'lucide-react'
+import Link from 'next/link'
 import StudentDetailPanel from './StudentDetailPanel'
+import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
 
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
@@ -363,7 +366,7 @@ export default function StudentsTable({
 
                         <div
                           onClick={() => setSelected(student)}
-                          className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black"
+                          className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full text-xs font-black transition-transform hover:scale-105"
                         >
                           {student.profile?.profilePhotoUrl ? (
                             <img
@@ -375,13 +378,23 @@ export default function StudentsTable({
                             initials
                           )}
                         </div>
-                        <div onClick={() => setSelected(student)}>
-                          <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
-                            {fullName}
-                          </p>
-                          <p className="font-mono text-xs text-slate-400">
-                            {student.studentProfile?.studentId ?? '—'}
-                          </p>
+                        <div className="flex flex-1 items-center gap-2">
+                          <div onClick={() => setSelected(student)} className="flex-1">
+                            <p className="cursor-pointer text-sm font-bold text-slate-800 hover:text-blue-600 dark:text-slate-200 dark:hover:text-blue-400">
+                              {fullName}
+                            </p>
+                            <p className="font-mono text-xs text-slate-400">
+                              {student.studentProfile?.studentId ?? '—'}
+                            </p>
+                          </div>
+                          <Link
+                            href={`/staff/students/${student.id}`}
+                            className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
+                            title="View Full Profile"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                          </Link>
                         </div>
                       </div>
                       <span
