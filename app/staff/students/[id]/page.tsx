@@ -6,6 +6,7 @@ import { ArrowLeft } from 'lucide-react'
 import { Metadata } from 'next'
 import StudentDetailTabs from './_components/StudentDetailTabs'
 import EditProfileDialog from '@/app/staff/users/[id]/_components/EditProfileDialog'
+import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
 
 export const metadata: Metadata = { title: 'Student Details | Staff Portal' }
 
@@ -184,33 +185,41 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
           Back to Students
         </Link>
 
-        <div className="flex items-center gap-5">
-          <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#002a5c] text-xl font-black text-white">
-            {student.profile?.profilePhotoUrl ? (
-              <img
-                src={student.profile.profilePhotoUrl}
-                alt={fullName}
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              initials
-            )}
+        <div className="flex items-start gap-5">
+          <div className="relative">
+            <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#002a5c] text-2xl font-black text-white shadow-lg">
+              {student.profile?.profilePhotoUrl ? (
+                <img
+                  src={student.profile.profilePhotoUrl}
+                  alt={fullName}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                initials
+              )}
+            </div>
+            <EditProfilePhotoDialog
+              userId={student.id}
+              currentPhotoUrl={student.profile?.profilePhotoUrl ?? null}
+            />
           </div>
-          <EditProfileDialog
-            userId={student.id}
-            initialData={{
-              firstName: student.profile?.firstName || '',
-              middleName: student.profile?.middleName || '',
-              lastName: student.profile?.lastName || '',
-              email: student.email,
-              personalEmail: student.personalEmail,
-              phone: student.profile?.phone || '',
-              nationality: student.profile?.nationality || '',
-              dateOfBirth: student.profile?.dateOfBirth,
-            }}
-          />
-          <div>
-            <h1 className="text-2xl font-black text-slate-800 dark:text-white">{fullName}</h1>
+          <div className="flex-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-black text-slate-800 dark:text-white">{fullName}</h1>
+              <EditProfileDialog
+                userId={student.id}
+                initialData={{
+                  firstName: student.profile?.firstName || '',
+                  middleName: student.profile?.middleName || '',
+                  lastName: student.profile?.lastName || '',
+                  email: student.email,
+                  personalEmail: student.personalEmail,
+                  phone: student.profile?.phone || '',
+                  nationality: student.profile?.nationality || '',
+                  dateOfBirth: student.profile?.dateOfBirth,
+                }}
+              />
+            </div>
             <p className="mt-0.5 flex items-center gap-2 text-sm text-slate-400">
               <span className="font-mono">{student.studentProfile?.studentId ?? '—'}</span>
               {student.studentProfile?.pathwayRel && (
