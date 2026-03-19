@@ -263,6 +263,14 @@ export default function StudentDetailPanel({
               isEmailVerified={!!currentStudent.emailVerified}
               onActionComplete={onActionComplete}
             />
+            <a
+              href={`/staff/students/${currentStudent.id}`}
+              className="flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-widest text-slate-500 uppercase shadow-sm transition-all hover:border-[#4c9ded] hover:text-[#4c9ded] dark:border-slate-700 dark:bg-slate-800"
+              title="Open Full Profile"
+            >
+              <ExternalLink className="h-3 w-3" />
+              Full Profile
+            </a>
             <button
               onClick={onClose}
               className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 lg:hidden"

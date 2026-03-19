@@ -166,19 +166,24 @@ export default async function ExamsPage({
     failedAttempts = allHistory.filter((r) => r.passed === false)
   }
 
+  // For full-time students, redirect to records tab if trying to access booking tabs
+  const isFullTimeStudent = isFullTime
+  const validTabs = isFullTimeStudent ? ['records', 'bookings'] : ['available', 'individual', 'group', 'resit', 'bookings', 'records']
+  const effectiveTab = validTabs.includes(tab) ? tab : (isFullTimeStudent ? 'records' : 'available')
+
   return (
-    <ExamsTabs>
-      {tab === 'available' && <AvailablePoolsTab />}
+    <ExamsTabs isFullTime={isFullTimeStudent}>
+      {effectiveTab === 'available' && <AvailablePoolsTab />}
 
-      {tab === 'individual' && <BookingActionTab type="individual" />}
+      {effectiveTab === 'individual' && <BookingActionTab type="individual" />}
 
-      {tab === 'group' && <BookingActionTab type="group" />}
+      {effectiveTab === 'group' && <BookingActionTab type="group" />}
 
-      {tab === 'resit' && <ResitBookingTab />}
+      {effectiveTab === 'resit' && <ResitBookingTab />}
 
-      {tab === 'bookings' && <MyBookingsTab />}
+      {effectiveTab === 'bookings' && <MyBookingsTab />}
 
-      {tab === 'records' && (
+      {effectiveTab === 'records' && (
         <div className="space-y-8">
           {/* Pathway Progress (License Progress) */}
           <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/20 p-8 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-900/50">
