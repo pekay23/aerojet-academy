@@ -1,9 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import { Wallet as WalletIcon, ArrowUpRight, ArrowDownRight, Search, Filter } from 'lucide-react'
+import {
+  Wallet as WalletIcon,
+  ArrowUpRight,
+  ArrowDownRight,
+  Search,
+  ChevronDown,
+  FileText,
+  Upload,
+  User,
+  ArrowRight,
+} from 'lucide-react'
+import { toast } from 'sonner'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import ManualWalletAdjustmentDialog from '@/app/staff/users/[id]/_components/ManualWalletAdjustmentDialog'
+import { UploadButton } from '@/lib/uploads/uploadthing'
 
 const TRANSACTION_TYPES = [
   { value: '', label: 'All Types' },
@@ -18,6 +30,18 @@ const TRANSACTION_TYPES = [
   { value: 'ADJUSTMENT', label: 'Adjustment' },
 ]
 
+const TYPE_COLOR: Record<string, string> = {
+  TOP_UP: 'bg-emerald-100 text-emerald-700',
+  CREDIT: 'bg-emerald-100 text-emerald-700',
+  REFUND: 'bg-emerald-100 text-emerald-700',
+  RELEASE: 'bg-emerald-100 text-emerald-700',
+  DEBIT: 'bg-red-100 text-red-700',
+  CAPTURE: 'bg-red-100 text-red-700',
+  PAYMENT: 'bg-red-100 text-red-700',
+}
+
+const POSITIVE_TYPES = ['TOP_UP', 'CREDIT', 'REFUND', 'RELEASE']
+
 interface Props {
   student: any
   onRefresh: () => void
@@ -27,9 +51,9 @@ export default function WalletTab({ student, onRefresh }: Props) {
   const [typeFilter, setTypeFilter] = useState('')
   const [search, setSearch] = useState('')
   const [viewCurrency, setViewCurrency] = useState('EUR')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const wallet = student.wallet
-  // Use walletTransactions from the student object (passed from server)
   const transactions = student.walletTransactions || wallet?.transactions || []
 
   const filteredTransactions = transactions.filter((t: any) => {
@@ -38,7 +62,8 @@ export default function WalletTab({ student, onRefresh }: Props) {
       const q = search.toLowerCase()
       const matchesDescription = t.description?.toLowerCase().includes(q)
       const matchesRef = t.referenceType?.toLowerCase().includes(q)
-      if (!matchesDescription && !matchesRef) return false
+      const matchesStaff = t.staffName?.toLowerCase().includes(q)
+      if (!matchesDescription && !matchesRef && !matchesStaff) return false
     }
     return true
   })
@@ -53,10 +78,27 @@ export default function WalletTab({ student, onRefresh }: Props) {
     })
   }
 
+  const currencySymbol = wallet?.currency === 'GHS' ? 'GH₵' : wallet?.currency === 'USD' ? '$' : '€'
+
   const formatAmount = (amount: number, type: string) => {
     const isNegative = ['DEBIT', 'CAPTURE', 'PAYMENT', 'REFUND'].includes(type)
     const display = Number(amount).toFixed(2)
-    return isNegative ? `-€${display}` : `+€${display}`
+    return isNegative ? `-${currencySymbol}${display}` : `+${currencySymbol}${display}`
+  }
+
+  const handleProofUploaded = async (txnId: string, proofUrl: string) => {
+    try {
+      const res = await fetch(`/api/staff/students/${student.id}/wallet/${txnId}/proof`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ proofUrl }),
+      })
+      if (!res.ok) throw new Error('Failed to attach proof')
+      toast.success('Proof attached to transaction')
+      onRefresh()
+    } catch {
+      toast.error('Failed to attach proof')
+    }
   }
 
   return (
@@ -136,7 +178,7 @@ export default function WalletTab({ student, onRefresh }: Props) {
             Total Top-ups
           </p>
           <p className="text-lg font-black text-emerald-600">
-            €
+            {currencySymbol}
             {transactions
               .filter((t: any) => t.type === 'TOP_UP')
               .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
@@ -148,7 +190,7 @@ export default function WalletTab({ student, onRefresh }: Props) {
             Total Debits
           </p>
           <p className="text-lg font-black text-red-600">
-            €
+            {currencySymbol}
             {transactions
               .filter((t: any) => t.type === 'DEBIT')
               .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
@@ -160,7 +202,7 @@ export default function WalletTab({ student, onRefresh }: Props) {
             Captures
           </p>
           <p className="text-lg font-black text-orange-600">
-            €
+            {currencySymbol}
             {transactions
               .filter((t: any) => t.type === 'CAPTURE')
               .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
@@ -172,7 +214,7 @@ export default function WalletTab({ student, onRefresh }: Props) {
             Adjustments
           </p>
           <p className="text-lg font-black text-blue-600">
-            €
+            {currencySymbol}
             {transactions
               .filter((t: any) => t.type === 'ADJUSTMENT')
               .reduce((sum: number, t: any) => sum + Number(t.amount), 0)
@@ -228,71 +270,44 @@ export default function WalletTab({ student, onRefresh }: Props) {
                 <th className="px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Description
                 </th>
+                <th className="px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  By
+                </th>
                 <th className="px-4 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Amount
                 </th>
                 <th className="px-4 py-3 text-right text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Balance After
+                  Balance
+                </th>
+                <th className="w-8 px-2 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  Proof
                 </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-              {filteredTransactions.map((txn: any) => (
-                <tr
-                  key={txn.id}
-                  className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
-                >
-                  <td className="px-4 py-3 text-xs whitespace-nowrap text-slate-500">
-                    {formatDate(txn.createdAt)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                        txn.type === 'TOP_UP' ||
-                        txn.type === 'CREDIT' ||
-                        txn.type === 'REFUND' ||
-                        txn.type === 'RELEASE'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : txn.type === 'DEBIT' || txn.type === 'CAPTURE' || txn.type === 'PAYMENT'
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-slate-100 text-slate-500'
-                      }`}
-                    >
-                      {txn.type}
-                    </span>
-                  </td>
-                  <td className="max-w-[250px] truncate px-4 py-3 text-xs text-slate-500">
-                    <div>{txn.description || '—'}</div>
-                    {txn.referenceType && (
-                      <div className="text-[10px] text-slate-400">
-                        Ref: {txn.referenceType}
-                        {txn.referenceId && ` (${txn.referenceId.slice(0, 8)}...)`}
-                      </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-3 text-right whitespace-nowrap">
-                    <div
-                      className={`flex items-center justify-end gap-1 font-mono text-xs font-black ${
-                        ['TOP_UP', 'CREDIT', 'REFUND', 'RELEASE'].includes(txn.type)
-                          ? 'text-emerald-600'
-                          : 'text-red-600'
-                      }`}
-                    >
-                      {['TOP_UP', 'CREDIT', 'REFUND', 'RELEASE'].includes(txn.type) ? (
-                        <ArrowUpRight className="h-3 w-3" />
-                      ) : (
-                        <ArrowDownRight className="h-3 w-3" />
-                      )}
-                      {formatAmount(Number(txn.amount), txn.type)}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-right whitespace-nowrap">
-                    <span className="font-mono text-xs font-black text-slate-600">
-                      €{Number(txn.balanceAfter ?? 0).toFixed(2)}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+              {filteredTransactions.map((txn: any) => {
+                const isExpanded = expandedId === txn.id
+                const isPositive = POSITIVE_TYPES.includes(txn.type)
+                const typeColor = TYPE_COLOR[txn.type] || 'bg-slate-100 text-slate-500'
+                const isStaffAction = !!txn.createdBy
+
+                return (
+                  <TransactionRow
+                    key={txn.id}
+                    txn={txn}
+                    isExpanded={isExpanded}
+                    isPositive={isPositive}
+                    typeColor={typeColor}
+                    isStaffAction={isStaffAction}
+                    currencySymbol={currencySymbol}
+                    formatDate={formatDate}
+                    formatAmount={formatAmount}
+                    onToggle={() => setExpandedId(isExpanded ? null : txn.id)}
+                    onProofUploaded={handleProofUploaded}
+                    studentId={student.id}
+                  />
+                )
+              })}
             </tbody>
           </table>
         </div>
@@ -303,6 +318,266 @@ export default function WalletTab({ student, onRefresh }: Props) {
         <p className="text-xs text-slate-400">
           Showing {filteredTransactions.length} of {transactions.length} transactions
         </p>
+      )}
+    </div>
+  )
+}
+
+function TransactionRow({
+  txn,
+  isExpanded,
+  isPositive,
+  typeColor,
+  isStaffAction,
+  currencySymbol,
+  formatDate,
+  formatAmount,
+  onToggle,
+  onProofUploaded,
+  studentId,
+}: {
+  txn: any
+  isExpanded: boolean
+  isPositive: boolean
+  typeColor: string
+  isStaffAction: boolean
+  currencySymbol: string
+  formatDate: (d: string | Date) => string
+  formatAmount: (a: number, t: string) => string
+  onToggle: () => void
+  onProofUploaded: (txnId: string, proofUrl: string) => void
+  studentId: string
+}) {
+  return (
+    <>
+      <tr
+        onClick={onToggle}
+        className={`cursor-pointer transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30 ${
+          isExpanded ? 'bg-slate-50/80 dark:bg-slate-800/40' : ''
+        }`}
+      >
+        <td className="px-4 py-3 text-xs whitespace-nowrap text-slate-500">
+          {formatDate(txn.createdAt)}
+        </td>
+        <td className="px-4 py-3">
+          <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${typeColor}`}>
+            {txn.type}
+          </span>
+        </td>
+        <td className="max-w-[200px] truncate px-4 py-3 text-xs text-slate-500">
+          <div>{txn.description || '—'}</div>
+          {txn.referenceType && (
+            <div className="text-[10px] text-slate-400">
+              Ref: {txn.referenceType}
+              {txn.referenceId && ` (${txn.referenceId.slice(0, 8)}...)`}
+            </div>
+          )}
+        </td>
+        <td className="px-4 py-3 text-xs whitespace-nowrap text-slate-400">
+          {txn.staffName ? (
+            <span className="flex items-center gap-1">
+              <User className="h-3 w-3" />
+              {txn.staffName}
+            </span>
+          ) : (
+            <span className="text-slate-300">System</span>
+          )}
+        </td>
+        <td className="px-4 py-3 text-right whitespace-nowrap">
+          <div
+            className={`flex items-center justify-end gap-1 font-mono text-xs font-black ${
+              isPositive ? 'text-emerald-600' : 'text-red-600'
+            }`}
+          >
+            {isPositive ? (
+              <ArrowUpRight className="h-3 w-3" />
+            ) : (
+              <ArrowDownRight className="h-3 w-3" />
+            )}
+            {formatAmount(Number(txn.amount), txn.type)}
+          </div>
+        </td>
+        <td className="px-4 py-3 text-right whitespace-nowrap">
+          <span className="font-mono text-xs font-black text-slate-600">
+            {currencySymbol}{Number(txn.balanceAfter ?? 0).toFixed(2)}
+          </span>
+        </td>
+        <td className="px-2 py-3 text-center">
+          {txn.proofUrl ? (
+            <a
+              href={txn.proofUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex h-6 w-6 items-center justify-center rounded-md text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              title="View proof"
+            >
+              <FileText className="h-3.5 w-3.5" />
+            </a>
+          ) : isStaffAction ? (
+            <span className="inline-flex h-6 w-6 items-center justify-center text-slate-300" title="No proof — click row to upload">
+              <Upload className="h-3 w-3" />
+            </span>
+          ) : (
+            <span className="text-slate-200">—</span>
+          )}
+        </td>
+      </tr>
+
+      {/* Expandable Detail Row */}
+      {isExpanded && (
+        <tr>
+          <td colSpan={7} className="border-l-2 border-l-[#002a5c] bg-slate-50/60 px-6 py-4 dark:bg-slate-800/20">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {/* Left: Transaction Chain */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  Transaction Audit Chain
+                </h4>
+
+                {txn.staffName && (
+                  <div className="flex items-center gap-2 text-xs">
+                    <User className="h-3.5 w-3.5 text-slate-400" />
+                    <span className="font-bold text-slate-600 dark:text-slate-300">{txn.staffName}</span>
+                    <span className="text-slate-400">·</span>
+                    <span className="text-slate-400">{formatDate(txn.createdAt)}</span>
+                  </div>
+                )}
+
+                {/* Balance Snapshot */}
+                <div className="rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+                  <p className="mb-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                    Balance Snapshot
+                  </p>
+                  <div className="space-y-1.5 font-mono text-xs">
+                    <SnapshotRow
+                      label="Balance"
+                      before={txn.balanceBefore}
+                      after={txn.balanceAfter}
+                      symbol={currencySymbol}
+                    />
+                    <SnapshotRow
+                      label="Reserved"
+                      before={txn.reservedBefore}
+                      after={txn.reservedAfter}
+                      symbol={currencySymbol}
+                    />
+                    <SnapshotRow
+                      label="Available"
+                      before={txn.availableBefore}
+                      after={txn.availableAfter}
+                      symbol={currencySymbol}
+                    />
+                  </div>
+                </div>
+
+                {/* Reference */}
+                {txn.referenceType && (
+                  <div className="text-xs">
+                    <span className="font-bold text-slate-500">Reference:</span>{' '}
+                    <span className="font-mono text-slate-400">
+                      {txn.referenceType}
+                      {txn.referenceId && ` · ${txn.referenceId}`}
+                    </span>
+                  </div>
+                )}
+
+                {/* Metadata */}
+                {txn.metadata && Object.keys(txn.metadata).length > 0 && (
+                  <div className="text-xs">
+                    <span className="font-bold text-slate-500">Metadata:</span>{' '}
+                    <span className="font-mono text-slate-400">
+                      {JSON.stringify(txn.metadata)}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Right: Proof & Actions */}
+              <div className="space-y-3">
+                <h4 className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  Payment Proof
+                </h4>
+
+                {txn.proofUrl ? (
+                  <div className="space-y-2">
+                    {txn.proofUrl.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? (
+                      <a href={txn.proofUrl} target="_blank" rel="noopener noreferrer">
+                        <img
+                          src={txn.proofUrl}
+                          alt="Payment proof"
+                          className="max-h-40 rounded-lg border border-slate-200 object-contain"
+                        />
+                      </a>
+                    ) : (
+                      <a
+                        href={txn.proofUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 transition-colors hover:bg-blue-100 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-400"
+                      >
+                        <FileText className="h-4 w-4" />
+                        View Proof Document
+                      </a>
+                    )}
+                  </div>
+                ) : isStaffAction ? (
+                  <div className="space-y-2">
+                    <p className="text-xs text-slate-400">
+                      No proof attached. Upload a receipt or bank statement.
+                    </p>
+                    <UploadButton
+                      endpoint="paymentProof"
+                      onClientUploadComplete={(res) => {
+                        const url = res[0]?.ufsUrl || res[0]?.url
+                        if (url) onProofUploaded(txn.id, url)
+                      }}
+                      onUploadError={(err) => { toast.error(err.message || 'Upload failed') }}
+                      appearance={{
+                        button: 'ut-ready:bg-slate-100 ut-ready:text-slate-600 ut-ready:border ut-ready:border-slate-200 ut-ready:rounded-lg ut-ready:text-xs ut-ready:font-bold ut-uploading:bg-slate-50 ut-uploading:text-slate-400',
+                        allowedContent: 'text-[10px] text-slate-400',
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-300 italic">
+                    System-generated transaction — no proof required.
+                  </p>
+                )}
+              </div>
+            </div>
+          </td>
+        </tr>
+      )}
+    </>
+  )
+}
+
+function SnapshotRow({
+  label,
+  before,
+  after,
+  symbol,
+}: {
+  label: string
+  before: number | null
+  after: number | null
+  symbol: string
+}) {
+  const b = Number(before ?? 0)
+  const a = Number(after ?? 0)
+  const changed = Math.abs(a - b) >= 0.01
+
+  return (
+    <div className={`flex items-center gap-2 ${changed ? 'text-slate-700 dark:text-slate-200' : 'text-slate-400'}`}>
+      <span className="w-16 text-[10px] font-bold text-slate-400 uppercase">{label}</span>
+      <span>{symbol}{b.toFixed(2)}</span>
+      <ArrowRight className="h-3 w-3 text-slate-300" />
+      <span className={changed ? 'font-bold' : ''}>{symbol}{a.toFixed(2)}</span>
+      {changed && (
+        <span className={`text-[10px] ${a > b ? 'text-emerald-500' : 'text-red-500'}`}>
+          ({a > b ? '+' : ''}{(a - b).toFixed(2)})
+        </span>
       )}
     </div>
   )

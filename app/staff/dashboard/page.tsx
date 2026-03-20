@@ -5,8 +5,6 @@ import RevenueChart from '../_components/RevenueChart'
 import PaymentApprovalCard from '../_components/PaymentApprovalCard'
 import GoNoGoMeter from '../_components/GoNoGoMeter'
 import PoolsSummaryCard from '../_components/PoolsSummaryCard'
-import WelcomeBanner from '@/components/WelcomeBanner'
-import { getWelcomeMessages } from '@/lib/welcome-messages'
 import {
   Users,
   UserCheck,
@@ -151,21 +149,11 @@ async function getDashboardData() {
   }
 }
 
-function getGreeting() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Good morning'
-  if (h < 17) return 'Good afternoon'
-  return 'Good evening'
-}
-
 export default async function StaffDashboardPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
   const data = await getDashboardData()
-  const welcomeMessages = await getWelcomeMessages(prisma, session.user.role)
-  const user = session.user
-  const firstName = user.name?.split(' ')[0] ?? 'Admin'
 
   const stats = [
     {
@@ -206,9 +194,6 @@ export default async function StaffDashboardPage() {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Banner — replaces static greeting */}
-      <WelcomeBanner messages={welcomeMessages} userName={firstName} />
-
       {/* Stat Cards */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
         {stats.map((stat) => {

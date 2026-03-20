@@ -31,7 +31,7 @@ export const POST = withErrorHandler(
     if (!courseId) return apiError('Course ID required')
 
     const body = await req.json()
-    const { code, name, type, duration, individualPrice, poolPrice } = body
+    const { code, name, type, duration, individualPrice, poolPrice, questionCount, categoryCode } = body
 
     if (!code || !name || !type || !duration) {
       return apiError('Code, name, type, and duration are required')
@@ -56,6 +56,8 @@ export const POST = withErrorHandler(
         duration: parseInt(duration),
         individualPrice: individualPrice ?? 520,
         poolPrice: poolPrice ?? 300,
+        ...(questionCount !== undefined && { questionCount: questionCount ? parseInt(questionCount) : null }),
+        ...(categoryCode !== undefined && { categoryCode: categoryCode || null }),
       },
     })
 

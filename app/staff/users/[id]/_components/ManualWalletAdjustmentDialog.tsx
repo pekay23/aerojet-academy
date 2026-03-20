@@ -22,7 +22,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Wallet, Loader2, AlertCircle } from 'lucide-react'
+import { Wallet, Loader2, AlertCircle, FileCheck, X } from 'lucide-react'
+import { UploadButton } from '@/lib/uploads/uploadthing'
 
 interface ManualWalletAdjustmentDialogProps {
   userId: string
@@ -47,6 +48,8 @@ export default function ManualWalletAdjustmentDialog({
   const [amount, setAmount] = useState<string>('')
   const [description, setDescription] = useState('')
   const [reference, setReference] = useState('')
+  const [proofUrl, setProofUrl] = useState<string | null>(null)
+  const [uploading, setUploading] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -73,6 +76,7 @@ export default function ManualWalletAdjustmentDialog({
           targetBalance: action === 'set_balance' ? numAmount : undefined,
           description,
           reference,
+          ...(proofUrl && { proofUrl }),
         }),
       })
 
@@ -96,6 +100,8 @@ export default function ManualWalletAdjustmentDialog({
     setAmount('')
     setDescription('')
     setReference('')
+    setProofUrl(null)
+    setUploading(false)
   }
 
   const isDebit = action === 'debit'
@@ -210,6 +216,45 @@ export default function ManualWalletAdjustmentDialog({
             />
           </div>
 
+          <div className="space-y-2">
+            <Label className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+              Payment Proof (Optional)
+            </Label>
+            {proofUrl ? (
+              <div className="flex items-center gap-2 rounded-xl bg-emerald-50 p-3 text-xs text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400">
+                <FileCheck className="h-4 w-4 shrink-0" />
+                <span className="flex-1 truncate">Proof uploaded</span>
+                <button
+                  type="button"
+                  onClick={() => setProofUrl(null)}
+                  className="flex h-5 w-5 items-center justify-center rounded-full hover:bg-emerald-200 dark:hover:bg-emerald-800"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ) : (
+              <UploadButton
+                endpoint="paymentProof"
+                onUploadBegin={() => setUploading(true)}
+                onClientUploadComplete={(res) => {
+                  setProofUrl(res[0]?.ufsUrl || res[0]?.url || null)
+                  setUploading(false)
+                }}
+                onUploadError={(err) => {
+                  toast.error(err.message || 'Upload failed')
+                  setUploading(false)
+                }}
+                appearance={{
+                  button: 'ut-ready:bg-slate-100 ut-ready:text-slate-600 ut-ready:border ut-ready:border-slate-200 ut-ready:rounded-xl ut-ready:text-xs ut-ready:font-bold ut-uploading:bg-slate-50 ut-uploading:text-slate-400',
+                  allowedContent: 'text-[10px] text-slate-400',
+                }}
+              />
+            )}
+            <p className="text-[10px] text-slate-400">
+              Attach receipt, bank statement, or payment proof. Can also be added later.
+            </p>
+          </div>
+
           {isDebit && currentBalance < (parseFloat(amount) || 0) && (
             <div className="flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-400">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -230,7 +275,7 @@ export default function ManualWalletAdjustmentDialog({
             <Button
               type="submit"
               className="rounded-xl bg-[#002a5c] hover:bg-[#003d85] dark:bg-blue-600 dark:hover:bg-blue-700"
-              disabled={loading}
+              disabled={loading || uploading}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Apply Adjustment

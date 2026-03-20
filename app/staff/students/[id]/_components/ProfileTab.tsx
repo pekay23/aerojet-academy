@@ -8,17 +8,12 @@ import {
   BookOpen,
   GraduationCap,
   User,
-  KeyRound,
-  ExternalLink,
-  Camera,
 } from 'lucide-react'
-import { toast } from 'sonner'
 import EditProfileDialog from '@/app/staff/users/[id]/_components/EditProfileDialog'
 import EditIdDialog from '@/app/staff/users/[id]/_components/EditIdDialog'
 import EditPathwayDialog from '@/app/staff/users/[id]/_components/EditPathwayDialog'
 import EditAcademicPeriodDialog from '@/app/staff/users/[id]/_components/EditAcademicPeriodDialog'
 import UserActionsMenu from '@/app/staff/_components/UserActionsMenu'
-import Link from 'next/link'
 
 interface Props {
   student: any
@@ -44,58 +39,32 @@ export default function ProfileTab({
 
   return (
     <div className="space-y-8">
-      {/* Quick Actions */}
-      <div className="flex flex-wrap items-center gap-3">
-        <UserActionsMenu
-          userId={student.id}
-          userStatus={student.status}
-          userEmail={student.email}
-          isEmailVerified={!!student.emailVerified}
-          onActionComplete={onRefresh}
-        />
-        <button
-          onClick={async () => {
-            try {
-              const res = await fetch(`/api/staff/users/${student.id}/resend-credentials`, {
-                method: 'POST',
-              })
-              if (!res.ok) throw new Error()
-              toast.success('Login credentials resent')
-            } catch {
-              toast.error('Failed to resend credentials')
-            }
-          }}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-500 transition-all hover:border-[#4c9ded] hover:text-[#4c9ded] dark:border-slate-700 dark:bg-slate-800"
-        >
-          <KeyRound className="h-3.5 w-3.5" />
-          Resend Credentials
-        </button>
-        <Link
-          href={`/staff/users/${student.id}`}
-          className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-500 transition-all hover:border-[#4c9ded] hover:text-[#4c9ded] dark:border-slate-700 dark:bg-slate-800"
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-          Full User Page
-        </Link>
-      </div>
-
       {/* Personal Information */}
       <Section
         title="Personal Information"
         action={
-          <EditProfileDialog
-            userId={student.id}
-            initialData={{
-              firstName: profile?.firstName || '',
-              middleName: profile?.middleName || '',
-              lastName: profile?.lastName || '',
-              email: student.email,
-              personalEmail: student.personalEmail,
-              phone: profile?.phone || '',
-              nationality: profile?.nationality || '',
-              dateOfBirth: profile?.dateOfBirth,
-            }}
-          />
+          <div className="flex items-center gap-2">
+            <UserActionsMenu
+              userId={student.id}
+              userStatus={student.status}
+              userEmail={student.email}
+              isEmailVerified={!!student.emailVerified}
+              onActionComplete={onRefresh}
+            />
+            <EditProfileDialog
+              userId={student.id}
+              initialData={{
+                firstName: profile?.firstName || '',
+                middleName: profile?.middleName || '',
+                lastName: profile?.lastName || '',
+                email: student.email,
+                personalEmail: student.personalEmail,
+                phone: profile?.phone || '',
+                nationality: profile?.nationality || '',
+                dateOfBirth: profile?.dateOfBirth,
+              }}
+            />
+          </div>
         }
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -125,35 +94,25 @@ export default function ProfileTab({
         </div>
       </Section>
 
-      {/* Emergency Contact */}
-      {(profile?.emergencyContactName || profile?.emergencyContactPhone) && (
-        <Section title="Emergency Contact">
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {profile?.emergencyContactName && (
-              <Field icon={User} label="Contact Name" value={profile.emergencyContactName} />
-            )}
-            {profile?.emergencyContactPhone && (
-              <Field icon={Phone} label="Contact Phone" value={profile.emergencyContactPhone} />
-            )}
-            {profile?.emergencyContactRelation && (
-              <Field icon={User} label="Relationship" value={profile.emergencyContactRelation} />
-            )}
-          </div>
-        </Section>
-      )}
-
-      {/* Student ID Section */}
+      {/* Programme & Pathway (merged with Student ID) */}
       <Section
-        title="Student ID"
+        title="Programme & Pathway"
         action={
-          sp?.studentId ? (
-            <EditIdDialog
+          <div className="flex items-center gap-2">
+            {sp?.studentId && (
+              <EditIdDialog
+                userId={student.id}
+                currentId={sp.studentId}
+                type="studentId"
+                label="Student ID"
+              />
+            )}
+            <EditPathwayDialog
               userId={student.id}
-              currentId={sp.studentId}
-              type="studentId"
-              label="Student ID"
+              currentPathway={sp?.pathwayRel?.code || null}
+              isLocked={sp?.studyPathwayLocked || false}
             />
-          ) : null
+          </div>
         }
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -172,21 +131,6 @@ export default function ProfileTab({
             }
           />
           <Field icon={User} label="Enrollment Status" value={sp?.enrollmentStatus ?? '—'} />
-        </div>
-      </Section>
-
-      {/* Programme & Pathway */}
-      <Section
-        title="Programme & Pathway"
-        action={
-          <EditPathwayDialog
-            userId={student.id}
-            currentPathway={sp?.pathwayRel?.code || null}
-            isLocked={sp?.studyPathwayLocked || false}
-          />
-        }
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Field
             icon={GraduationCap}
             label="Enrollment Type"
@@ -258,6 +202,23 @@ export default function ProfileTab({
           )}
         </div>
       </Section>
+
+      {/* Emergency Contact */}
+      {(profile?.emergencyContactName || profile?.emergencyContactPhone) && (
+        <Section title="Emergency Contact">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {profile?.emergencyContactName && (
+              <Field icon={User} label="Contact Name" value={profile.emergencyContactName} />
+            )}
+            {profile?.emergencyContactPhone && (
+              <Field icon={Phone} label="Contact Phone" value={profile.emergencyContactPhone} />
+            )}
+            {profile?.emergencyContactRelation && (
+              <Field icon={User} label="Relationship" value={profile.emergencyContactRelation} />
+            )}
+          </div>
+        </Section>
+      )}
 
       {/* Account Info */}
       <Section title="Account Information">

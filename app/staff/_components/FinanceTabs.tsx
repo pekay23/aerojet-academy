@@ -12,7 +12,13 @@ const TABS = [
   { key: 'reports', label: 'Reports', icon: FileBarChart2 },
 ] as const
 
-export default function FinanceTabs({ children }: { children: React.ReactNode }) {
+export default function FinanceTabs({
+  children,
+  pendingTopupCount = 0,
+}: {
+  children: React.ReactNode
+  pendingTopupCount?: number
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentTab = searchParams.get('tab') || 'overview'
@@ -57,6 +63,11 @@ export default function FinanceTabs({ children }: { children: React.ReactNode })
               )}
               <Icon className="relative z-10 h-3.5 w-3.5" />
               <span className="relative z-10">{t.label}</span>
+              {t.key === 'wallet-topups' && pendingTopupCount > 0 && (
+                <span className="relative z-10 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                  {pendingTopupCount}
+                </span>
+              )}
             </button>
           )
         })}

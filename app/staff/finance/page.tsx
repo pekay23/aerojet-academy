@@ -173,8 +173,12 @@ export default async function FinancePage({
   const params = await searchParams
   const tab = VALID_TABS.includes(params.tab ?? '') ? params.tab! : 'overview'
 
+  const pendingTopupCount = await prisma.payment.count({
+    where: { referenceType: 'WALLET_TOPUP', status: 'PENDING' },
+  })
+
   return (
-    <FinanceTabs>
+    <FinanceTabs pendingTopupCount={pendingTopupCount}>
       {tab === 'overview' && <OverviewTab />}
       {tab === 'transactions' && <TransactionsTab query={params.query} />}
       {tab === 'wallet-topups' && <WalletTopupsTab />}

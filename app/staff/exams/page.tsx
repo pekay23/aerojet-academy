@@ -66,7 +66,7 @@ export default async function StaffExamsPage({
 
   return (
     <StaffExamsTabs>
-      {tab === 'events' && <EventsTab />}
+      {tab === 'events' && <EventsTab query={params.query} />}
       {tab === 'bookings' && <BookingsTab query={params.query} />}
       {tab === 'results' && <ResultsTab query={params.query} />}
       {tab === 'records' && <RecordsTabServer query={params.query} />}
@@ -75,8 +75,11 @@ export default async function StaffExamsPage({
 }
 
 /* ─── Events Tab ─── */
-async function EventsTab() {
+async function EventsTab({ query }: { query?: string }) {
   const events = await prisma.examEvent.findMany({
+    where: query
+      ? { name: { contains: query, mode: 'insensitive' } }
+      : undefined,
     include: {
       pools: { select: { currentMemberCount: true, maxCandidates: true } },
       _count: { select: { pools: true } },
@@ -86,10 +89,13 @@ async function EventsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-end">
+      <div className="flex items-center justify-between gap-4">
+        <div className="w-full max-w-sm">
+          <SearchInput placeholder="Search events..." />
+        </div>
         <Link
           href="/staff/exams/events/create"
-          className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#002a5c]/90"
+          className="flex shrink-0 items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#002a5c]/90"
         >
           <Plus className="h-4 w-4" />
           Create Event

@@ -254,6 +254,8 @@ model ExamComponent {
   name            String
   type            ExamComponentType
   duration        Int
+  questionCount   Int?
+  categoryCode    String?
   individualPrice Decimal?         @default(520.00) @db.Decimal(10, 2)
   poolPrice       Decimal?         @default(300.00) @db.Decimal(10, 2)
   bookings        ExamBooking[]
@@ -262,6 +264,7 @@ model ExamComponent {
   poolMemberships PoolMembership[]
   waitlist        PoolWaitlist[]
 
+  @@index([courseId, categoryCode, type])
   @@map("exam_components")
 }
 
@@ -278,6 +281,11 @@ model Course {
   isActive             Boolean                    @default(true)
   requiresPrerequisite Boolean                    @default(false)
   prerequisites        String[]
+  subtitle             String?
+  topics               String[]
+  estimatedStudyHoursMin Int?
+  estimatedStudyHoursMax Int?
+  applicableCategories String[]
   syllabusUrl          String?
   materialsUrl         String?
   createdAt            DateTime                   @default(now())

@@ -3,11 +3,18 @@ export interface Course {
   code: string
   name: string
   description?: string | null
+  subtitle?: string | null
   type: 'FOUR_YEAR' | 'TWO_YEAR' | 'MILITARY' | 'MODULAR' | 'EXAM_ONLY' | 'REVISION'
   hours?: number | null
   price: number
   currency: string
   isActive: boolean
+  prerequisites?: string[]
+  requiresPrerequisite?: boolean
+  topics?: string[]
+  estimatedStudyHoursMin?: number | null
+  estimatedStudyHoursMax?: number | null
+  applicableCategories?: string[]
   createdAt: Date | string
 }
 
