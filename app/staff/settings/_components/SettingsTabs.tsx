@@ -68,7 +68,7 @@ export default function SettingsTabs({ children }: { children: React.ReactNode }
                 />
               )}
               <Icon className="relative z-10 h-3.5 w-3.5" />
-              <span className="relative z-10 hidden sm:inline">{t.label}</span>
+              <span className="relative z-10">{t.label}</span>
             </button>
           )
         })}

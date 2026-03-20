@@ -14,9 +14,7 @@ import {
   Mail,
   LockOpen,
   Archive,
-  ExternalLink,
 } from 'lucide-react'
-import Link from 'next/link'
 import StudentDetailPanel from './StudentDetailPanel'
 import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
 
@@ -169,6 +167,28 @@ export default function StudentsTable({
                   } else toast.error(res.error)
                 },
               },
+              {
+                label: 'Send Credentials',
+                icon: Mail,
+                variant: 'primary',
+                confirmTitle: 'Send Login Credentials',
+                confirmMessage: `This will generate new temporary passwords and email login credentials to ${selectedIds.length} selected students.`,
+                onClick: async (ids) => {
+                  try {
+                    const res = await fetch('/api/admin/bulk-send-credentials', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ users: ids.map((id) => ({ userId: id })) }),
+                    })
+                    const data = await res.json()
+                    if (!res.ok) throw new Error(data.error || 'Failed')
+                    toast.success(`Credentials sent to ${data.data.summary.sent} students`)
+                    fetchStudents()
+                  } catch (err: any) {
+                    toast.error(err.message || 'Failed')
+                  }
+                },
+              },
               students.filter((s) => selectedIds.includes(s.id)).length > 0 &&
               students
                 .filter((s) => selectedIds.includes(s.id))
@@ -237,7 +257,7 @@ export default function StudentsTable({
       {/* Split Panel */}
       <div
         className="flex overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
-        style={{ minHeight: '70vh' }}
+        style={{ minHeight: '50vh' }}
       >
         {/* Left: List */}
         <div className="flex w-full shrink-0 flex-col border-r border-slate-100 lg:w-80 xl:w-96 dark:border-slate-800">
@@ -274,19 +294,28 @@ export default function StudentsTable({
               >
                 <CheckSquare className="h-3.5 w-3.5" />
               </button>
-              {STATUS_FILTERS.map((f) => (
-                <button
-                  key={f.key}
-                  onClick={() => setFilter(f.key)}
-                  className={`rounded-full border px-3 py-1 text-xs font-bold whitespace-nowrap transition-all ${
-                    filter === f.key
-                      ? 'border-aerojet-blue bg-aerojet-blue text-white'
-                      : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
+              {STATUS_FILTERS.map((f) => {
+                const count =
+                  f.key === 'all'
+                    ? initialCounts.all
+                    : initialCounts[f.key]
+                return (
+                  <button
+                    key={f.key}
+                    onClick={() => setFilter(f.key)}
+                    className={`rounded-full border px-3 py-1 text-xs font-bold whitespace-nowrap transition-all ${
+                      filter === f.key
+                        ? 'border-aerojet-blue bg-aerojet-blue text-white'
+                        : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
+                    }`}
+                  >
+                    {f.label}
+                    {count !== undefined && (
+                      <span className="ml-1 opacity-70">({count})</span>
+                    )}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
@@ -378,23 +407,13 @@ export default function StudentsTable({
                             initials
                           )}
                         </div>
-                        <div className="flex flex-1 items-center gap-2">
-                          <div onClick={() => setSelected(student)} className="flex-1">
-                            <p className="cursor-pointer text-sm font-bold text-slate-800 hover:text-blue-600 dark:text-slate-200 dark:hover:text-blue-400">
-                              {fullName}
-                            </p>
-                            <p className="font-mono text-xs text-slate-400">
-                              {student.studentProfile?.studentId ?? '—'}
-                            </p>
-                          </div>
-                          <Link
-                            href={`/staff/students/${student.id}`}
-                            className="rounded-md p-1 text-slate-400 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 dark:hover:text-blue-400"
-                            title="View Full Profile"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                          </Link>
+                        <div onClick={() => setSelected(student)} className="flex-1">
+                          <p className="cursor-pointer text-sm font-bold text-slate-800 hover:text-blue-600 dark:text-slate-200 dark:hover:text-blue-400">
+                            {fullName}
+                          </p>
+                          <p className="font-mono text-xs text-slate-400">
+                            {student.studentProfile?.studentId ?? '—'}
+                          </p>
                         </div>
                       </div>
                       <span

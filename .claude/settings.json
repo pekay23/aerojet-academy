@@ -1,7 +1,30 @@
 {
   "permissions": {
     "allow": [
-      "Bash(xargs grep -l \"milestone\\\\|Milestone\")"
+      "Bash(xargs grep -l \"milestone\\\\|Milestone\")",
+      "Bash(ls -la /d/Projects/aerojet-academy/app/\\\\\\(public\\\\\\)/courses/aircraft-engineering/easa-part-66/)",
+      "Bash(npx prisma:*)",
+      "Bash(npx next:*)",
+      "Bash(ls -la /d/Projects/aerojet-academy/app/staff/students/[id]/_components/)",
+      "Bash(grep -E \"\\\\.tsx$\")",
+      "Bash(find d:Projectsaerojet-academyappstaffstudents[id] -type f -name *.tsx)",
+      "Bash(find d:Projectsaerojet-academyappstaffusers[id] -type f -name *.tsx)",
+      "Bash(find d:/Projects/aerojet-academy/app/api -type f -name *notes* -o -name *admin*)",
+      "Bash(find d:/Projects/aerojet-academy/prisma/migrations -type f -name *.sql)",
+      "Bash(grep -r \"adminNotes\\\\|admin_notes\\\\|AdminNote\" d:/Projects/aerojet-academy/app --include=*.ts --include=*.tsx)",
+      "Bash(find d:Projectsaerojet-academyappapistaffpayments -type f -name *.ts)",
+      "Bash(grep -r studentProfile d:/Projects/aerojet-academy/app/staff/students --include=*.ts --include=*.tsx)",
+      "Bash(find d:Projectsaerojet-academyappapistafffinance -type f -name *.ts)",
+      "Bash(find d:/Projects/aerojet-academy -name *.log -o -name *migration* -type f)",
+      "Bash(grep -r \"examResult\\\\|ExamResult\" d:Projectsaerojet-academyappapi --include=*.ts -l)",
+      "Bash(find d:Projectsaerojet-academylibpools -name *.ts)",
+      "Bash(find d:Projectsaerojet-academyappapistaffexams -name *.ts)",
+      "Bash(find /d/Projects/aerojet-academy/app/staff/students -type f -name *Tab* -o -name *tab*)",
+      "Bash(wc -l /d/Projects/aerojet-academy/app/student/exams/_components/*.tsx)",
+      "Bash(find /d/Projects/aerojet-academy -type f -name *ExamsTab* -o -name *WalletTab*)"
+    ],
+    "additionalDirectories": [
+      "d:\\Projects\\aerojet-academy\\app\\api\\staff\\students\\[id]\\wallet\\[txnId]"
     ]
   }
 }

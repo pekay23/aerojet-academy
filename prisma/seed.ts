@@ -181,11 +181,13 @@ async function main() {
   // 3. LICENSE CATEGORIES
   // ============================================================================
   const licenses = [
-    { code: 'B1.1', name: 'Aeroplanes Turbine – Mechanical' },
-    { code: 'B1.2', name: 'Aeroplanes Piston – Mechanical' },
-    { code: 'B1.3', name: 'Helicopters Turbine – Mechanical' },
+    { code: 'A', name: 'Category A \u2013 Line Maintenance Certifying Mechanic' },
+    { code: 'B1.1', name: 'Aeroplanes Turbine \u2013 Mechanical' },
+    { code: 'B1.2', name: 'Aeroplanes Piston \u2013 Mechanical' },
+    { code: 'B1.3', name: 'Helicopters Turbine \u2013 Mechanical' },
     { code: 'B1.4', name: 'Helicopters Piston - Mechanical' },
     { code: 'B2', name: 'Avionics' },
+    { code: 'B3', name: 'Non-pressurised Piston Aeroplanes \u22642,000 kg' },
   ]
 
   const createdLicenses: Record<string, any> = {}
@@ -261,146 +263,306 @@ async function main() {
     {
       code: 'M1',
       name: 'Mathematics',
+      subtitle: 'Arithmetic \u00b7 Algebra \u00b7 Geometry',
+      description: 'Covers the essential mathematical foundation for all subsequent technical modules. Topics include arithmetic operations, fractions, decimals, percentages, algebra, logarithms, geometry, trigonometry, and co-ordinate geometry. Required by all licence categories.',
       duration: 20,
       price: 1190.0,
       categoryId: coreCategory.id,
       moduleType: 'CORE' as const,
+      prerequisites: [] as string[],
+      requiresPrerequisite: false,
+      topics: ['Arithmetic', 'Algebra', 'Geometry', 'Trigonometry', 'Logarithms', 'Statistics'],
+      estimatedStudyHoursMin: 40,
+      estimatedStudyHoursMax: 60,
+      applicableCategories: ['A', 'B1', 'B2', 'B3'],
     },
     {
       code: 'M2',
       name: 'Physics',
+      subtitle: 'Matter \u00b7 Mechanics \u00b7 Thermodynamics \u00b7 Optics',
+      description: 'Provides the scientific underpinning for all engineering modules. Covers the structure of matter and atoms, mechanics (forces, energy, motion), fluid mechanics, thermodynamics, optics, and wave motion/sound. Bridges the gap between mathematics and engineering applications.',
       duration: 20,
       price: 1190.0,
       categoryId: coreCategory.id,
       moduleType: 'CORE' as const,
+      prerequisites: ['M1'],
+      requiresPrerequisite: true,
+      topics: ['Matter & Atoms', 'Mechanics', 'Fluid Dynamics', 'Thermodynamics', 'Optics', 'Wave Motion'],
+      estimatedStudyHoursMin: 60,
+      estimatedStudyHoursMax: 80,
+      applicableCategories: ['A', 'B1', 'B2', 'B3'],
     },
     {
       code: 'M3',
-      name: 'Basic Electricals',
+      name: 'Electrical Fundamentals',
+      subtitle: 'DC/AC Theory \u00b7 Circuits \u00b7 Motors & Generators',
+      description: 'Comprehensive coverage of electrical theory from electron theory and static electricity through to complex AC circuits. Includes DC and AC sources, resistance, capacitance, inductance, transformers, filters, and motor/generator theory. Critical for both mechanical (B1) and avionics (B2) pathways.',
       duration: 24,
       price: 1400.0,
       categoryId: coreCategory.id,
       moduleType: 'CORE' as const,
+      prerequisites: ['M1', 'M2'],
+      requiresPrerequisite: true,
+      topics: ['DC Circuits', 'AC Theory', 'Capacitance', 'Magnetism', 'Inductance', 'Transformers', 'Motors'],
+      estimatedStudyHoursMin: 80,
+      estimatedStudyHoursMax: 120,
+      applicableCategories: ['A', 'B1', 'B2', 'B3'],
     },
     {
       code: 'M4',
-      name: 'Basic Electronics',
+      name: 'Electronic Fundamentals',
+      subtitle: 'Semiconductors \u00b7 PCBs \u00b7 Servomechanisms',
+      description: 'Builds on Module 3 to cover semiconductor devices (diodes, transistors, integrated circuits), printed circuit boards, and servomechanisms (synchros). B2 licence requires deeper knowledge than B1. Not required for Category A. Foundational for understanding modern aircraft electronics.',
       duration: 20,
       price: 1190.0,
       categoryId: coreCategory.id,
       moduleType: 'CORE' as const,
+      prerequisites: ['M3'],
+      requiresPrerequisite: true,
+      topics: ['Diodes', 'Transistors', 'Integrated Circuits', 'PCBs', 'Synchros', 'Servomechanisms'],
+      estimatedStudyHoursMin: 40,
+      estimatedStudyHoursMax: 70,
+      applicableCategories: ['B1', 'B2', 'B3'],
     },
     {
       code: 'M5',
       name: 'Digital Techniques',
+      subtitle: 'Electronic Instrument Systems \u00b7 Avionics \u00b7 Data Buses',
+      description: 'Covers the digital and avionics environment essential for modern aircraft maintenance. Topics include numbering systems, data conversion, logic circuits, microprocessors, data buses (ARINC 429, ARINC 629), multiplexing, fibre optics, electronic displays (EFIS), software management, and ESD precautions. B2 exam is significantly more extensive.',
       duration: 24,
       price: 1400.0,
       categoryId: coreCategory.id,
       moduleType: 'CORE' as const,
+      prerequisites: ['M1', 'M3', 'M4'],
+      requiresPrerequisite: true,
+      topics: ['Logic Circuits', 'Microprocessors', 'Data Buses', 'EFIS', 'Fibre Optics', 'ESD', 'Software Mgmt'],
+      estimatedStudyHoursMin: 60,
+      estimatedStudyHoursMax: 100,
+      applicableCategories: ['A', 'B1', 'B2', 'B3'],
     },
     {
       code: 'M6',
       name: 'Materials & Hardware',
+      subtitle: 'Metals \u00b7 Composites \u00b7 Fasteners \u00b7 Cables',
+      description: 'Introduces the full range of aircraft materials (ferrous alloys, non-ferrous alloys, composites, non-metallics) and the hardware that holds aircraft together. Covers corrosion causes and prevention, fasteners, pipes and unions, springs, bearings, transmissions, control cables, and electrical connectors.',
       duration: 25,
       price: 1400.0,
       categoryId: coreCategory.id,
       moduleType: 'CORE' as const,
+      prerequisites: ['M2'],
+      requiresPrerequisite: true,
+      topics: ['Alloys', 'Composites', 'Corrosion', 'Fasteners', 'Bearings', 'Control Cables', 'Pipes'],
+      estimatedStudyHoursMin: 80,
+      estimatedStudyHoursMax: 120,
+      applicableCategories: ['A', 'B1', 'B2', 'B3'],
     },
     {
       code: 'M7',
       name: 'Maintenance Practices',
+      subtitle: 'Safety \u00b7 Tools \u00b7 Inspection \u00b7 Documentation',
+      description: 'The core practical module covering the day-to-day activities of aircraft maintenance. Includes safety precautions, workshop practices, tools, test equipment, engineering drawings, fits and clearances, riveting, welding, aircraft weight and balance, handling/storage, disassembly/inspection/repair, and maintenance procedures. Updated June 2024 \u2014 essay component removed.',
       duration: 15,
       price: 1030.0,
       categoryId: coreCategory.id,
       moduleType: 'CORE' as const,
+      prerequisites: ['M1', 'M2', 'M6'],
+      requiresPrerequisite: true,
+      topics: ['Safety', 'Tools & Equipment', 'Riveting', 'Welding', 'Weight & Balance', 'Inspections', 'Documentation'],
+      estimatedStudyHoursMin: 100,
+      estimatedStudyHoursMax: 140,
+      applicableCategories: ['A', 'B1', 'B2', 'B3'],
     },
     {
       code: 'M8',
       name: 'Basic Aerodynamics',
+      subtitle: 'Atmosphere \u00b7 Lift & Drag \u00b7 Flight Stability',
+      description: 'Builds on Module 2 physics to explain the principles of flight. Covers the International Standard Atmosphere (ISA), airflow over aerofoils, generation of lift and drag, theory of flight, high-speed flight (compressibility), and aircraft stability and control (static and dynamic). Essential groundwork for the aircraft-specific modules (11\u201313).',
       duration: 15,
       price: 1030.0,
       categoryId: coreCategory.id,
       moduleType: 'CORE' as const,
+      prerequisites: ['M2'],
+      requiresPrerequisite: true,
+      topics: ['ISA', 'Aerofoils', 'Lift & Drag', 'Theory of Flight', 'Compressibility', 'Stability'],
+      estimatedStudyHoursMin: 40,
+      estimatedStudyHoursMax: 60,
+      applicableCategories: ['A', 'B1', 'B2', 'B3'],
     },
     {
       code: 'M9',
       name: 'Human Factors',
+      subtitle: 'Performance \u00b7 Error \u00b7 CRM \u00b7 Safety Culture',
+      description: 'Examines the human element in aviation maintenance safety. Covers human performance and limitations, social psychology, team dynamics and communication (CRM), workload, fatigue, stress, situational awareness, and maintenance error. Critically studies accident causation models. Essay requirement removed June 2024 \u2014 MCQ only.',
       duration: 15,
       price: 1030.0,
       categoryId: coreCategory.id,
       moduleType: 'CORE' as const,
+      prerequisites: [] as string[],
+      requiresPrerequisite: false,
+      topics: ['Human Performance', 'Error Models', 'CRM', 'Fatigue', 'Stress', 'Safety Culture'],
+      estimatedStudyHoursMin: 30,
+      estimatedStudyHoursMax: 50,
+      applicableCategories: ['A', 'B1', 'B2', 'B3'],
     },
     {
       code: 'M10',
       name: 'Aviation Legislation',
+      subtitle: 'EASA \u00b7 Part-M \u00b7 Part-145 \u00b7 Part-66',
+      description: 'Covers the regulatory framework governing aviation maintenance. Topics include the role of ICAO and EASA, certifying staff regulations (Part-66), approved maintenance organisations (Part-145/CAMO), commercial air transport operations, aircraft certification, Part-M airworthiness, and international requirements. Essay requirement removed June 2024.',
       duration: 15,
       price: 1030.0,
       categoryId: coreCategory.id,
       moduleType: 'CORE' as const,
+      prerequisites: [] as string[],
+      requiresPrerequisite: false,
+      topics: ['ICAO', 'EASA', 'Part-66', 'Part-145', 'Part-M / CAMO', 'Aircraft Certification'],
+      estimatedStudyHoursMin: 40,
+      estimatedStudyHoursMax: 60,
+      applicableCategories: ['A', 'B1', 'B2', 'B3'],
     },
     {
       code: 'M11A',
-      name: 'Aeroplane Aerodynamics (Turbine)',
+      name: 'Turbine Aeroplane Aerodynamics, Structures & Systems',
+      subtitle: 'Fixed-wing Turbine \u00b7 Cat A1/A3 \u00b7 B1.1/B1.3',
+      description: 'The most extensive B1 module \u2014 covers all major systems of turbine-powered aeroplanes in detail. Includes advanced theory of flight, airframe structures (fuselage, wings, empennage), air conditioning & pressurisation, instruments/avionics, electrical power, flight controls, fuel systems, hydraulics, ice protection, landing gear, oxygen, pneumatics, and onboard maintenance systems (ATA chapters 21\u201345).',
       duration: 25,
       price: 1400.0,
       categoryId: specialistCategory.id,
       moduleType: 'SPECIALIST' as const,
+      prerequisites: ['M1', 'M2', 'M3', 'M5', 'M6', 'M7', 'M8'],
+      requiresPrerequisite: true,
+      topics: ['Theory of Flight', 'Airframe Structures', 'Pressurisation', 'Flight Controls', 'Hydraulics', 'Fuel Systems', 'Landing Gear', 'OBMS'],
+      estimatedStudyHoursMin: 200,
+      estimatedStudyHoursMax: 280,
+      applicableCategories: ['A', 'B1'],
     },
     {
       code: 'M11B',
-      name: 'Aeroplane Aerodynamics (Piston)',
+      name: 'Piston Aeroplane Aerodynamics, Structures & Systems',
+      subtitle: 'Fixed-wing Piston \u00b7 Cat A2 \u00b7 B1.2',
+      description: 'Equivalent to Module 11A but scoped for piston-engine aeroplanes above 2,000 kg (A2/B1.2 subcategories). Covers airframe structures, flight controls, fuel systems, electrical systems, instruments, hydraulics, landing gear, and all major ATA systems relevant to piston-powered fixed-wing aircraft. Not applicable to B3.',
       duration: 25,
       price: 1400.0,
       categoryId: specialistCategory.id,
       moduleType: 'SPECIALIST' as const,
+      prerequisites: ['M1', 'M2', 'M3', 'M5', 'M6', 'M7', 'M8'],
+      requiresPrerequisite: true,
+      topics: ['Piston Airframe', 'Flight Controls', 'Electrical Systems', 'Instruments', 'Fuel Systems', 'Landing Gear'],
+      estimatedStudyHoursMin: 150,
+      estimatedStudyHoursMax: 200,
+      applicableCategories: ['A', 'B1'],
+    },
+    {
+      code: 'M11C',
+      name: 'Piston Aeroplane Aerodynamics, Structures & Systems (B3)',
+      subtitle: 'Non-pressurised Light Aircraft \u00b7 Cat B3 \u00b7 \u22642,000 kg MTOM',
+      description: 'Specifically scoped for Category B3 \u2014 non-pressurised piston-engine aeroplanes of 2,000 kg MTOM and below. Covers the same general subjects as 11B but with simpler systems appropriate to light aircraft: structures, flight controls, basic electrical systems, fuel systems, and landing gear.',
+      duration: 25,
+      price: 1400.0,
+      categoryId: specialistCategory.id,
+      moduleType: 'SPECIALIST' as const,
+      prerequisites: ['M1', 'M2', 'M3', 'M5', 'M6', 'M7', 'M8'],
+      requiresPrerequisite: true,
+      topics: ['Light Aircraft Structures', 'Flight Controls', 'Basic Electrics', 'Fuel Systems', 'Landing Gear'],
+      estimatedStudyHoursMin: 120,
+      estimatedStudyHoursMax: 160,
+      applicableCategories: ['B3'],
     },
     {
       code: 'M12',
       name: 'Helicopter Aerodynamics, Structures & Systems',
+      subtitle: 'Rotary Wing \u00b7 Cat A3/A4 \u00b7 B1.3/B1.4',
+      description: 'Helicopter-specific module covering rotary-wing aerodynamics, hover, climb, descent, and autorotation theory. Includes rotor systems (blade tracking, vibration), transmission (gearboxes, clutches), flight control systems (collective, cyclic, anti-torque), and all major helicopter systems: air conditioning, electrical power, fuel, hydraulics, ice protection, landing gear, and instruments.',
       duration: 25,
       price: 1400.0,
       categoryId: specialistCategory.id,
       moduleType: 'SPECIALIST' as const,
+      prerequisites: ['M1', 'M2', 'M3', 'M5', 'M6', 'M7', 'M8'],
+      requiresPrerequisite: true,
+      topics: ['Rotary Aerodynamics', 'Rotor Systems', 'Transmission', 'Cyclic/Collective', 'Anti-torque', 'Autorotation', 'Vibration Analysis'],
+      estimatedStudyHoursMin: 180,
+      estimatedStudyHoursMax: 240,
+      applicableCategories: ['A', 'B1'],
     },
     {
       code: 'M13',
-      name: 'Aircraft Aerodynamics, Structures & Systems (Avionics)',
+      name: 'Aircraft Aerodynamics, Structures & Systems',
+      subtitle: 'Avionics Focus \u00b7 Cat B2 Only',
+      description: 'The B2-specific equivalent of Module 11. Provides avionics engineers with the comprehensive knowledge of aircraft systems they need to maintain and troubleshoot avionics, electrical systems, and instruments. Includes flight control surfaces, auto-flight (autopilot, autothrust), communications, navigation, electrical power, fuel systems, fire detection, landing gear, pressurisation, and IMA (Integrated Modular Avionics). Updated June 2024.',
       duration: 25,
       price: 1400.0,
       categoryId: avionicsCategory.id,
       moduleType: 'AVIONICS' as const,
+      prerequisites: ['M1', 'M2', 'M3', 'M4', 'M5', 'M8'],
+      requiresPrerequisite: true,
+      topics: ['Autopilot / AFCS', 'Communications', 'Navigation', 'Electrical Power', 'IMA', 'EFIS/ECAM', 'Glass Cockpit'],
+      estimatedStudyHoursMin: 250,
+      estimatedStudyHoursMax: 320,
+      applicableCategories: ['B2'],
     },
     {
       code: 'M14',
       name: 'Propulsion',
+      subtitle: 'Engine Systems Interface \u00b7 Cat B2 Only',
+      description: 'Provides B2 avionics engineers with essential propulsion knowledge needed to understand the engine/avionics interface. Covers turbine engine fundamentals, FADEC (Full Authority Digital Engine Control), engine indication systems (EICAS/ECAM), engine health monitoring, and the integration of propulsion systems with the wider aircraft avionics architecture.',
       duration: 15,
       price: 1090.0,
       categoryId: avionicsCategory.id,
       moduleType: 'AVIONICS' as const,
+      prerequisites: ['M2', 'M3', 'M5', 'M13'],
+      requiresPrerequisite: true,
+      topics: ['Turbine Fundamentals', 'FADEC', 'EICAS/ECAM', 'Engine Monitoring', 'Propulsion Interface'],
+      estimatedStudyHoursMin: 40,
+      estimatedStudyHoursMax: 60,
+      applicableCategories: ['B2'],
     },
     {
       code: 'M15',
-      name: 'Turbine Engines',
+      name: 'Gas Turbine Engine',
+      subtitle: 'Turbofan \u00b7 Turboprop \u00b7 Turboshaft \u00b7 APU',
+      description: 'Comprehensive coverage of gas turbine engines for turbine-rated licences (A1/A3/B1.1/B1.3). Covers thermodynamic fundamentals, engine performance, intake, compressors, combustion, turbine, exhaust, bearings/seals, lubrication, fuel systems, air systems, starting/ignition, engine indication, power augmentation, turboprop/turboshaft/APU variants, powerplant installation, fire protection, engine monitoring, and storage.',
       duration: 25,
       price: 1400.0,
       categoryId: specialistCategory.id,
       moduleType: 'SPECIALIST' as const,
+      prerequisites: ['M1', 'M2', 'M3', 'M6', 'M7', 'M8'],
+      requiresPrerequisite: true,
+      topics: ['Thermodynamics', 'Compressors', 'Combustion', 'Turbine', 'Lubrication', 'Fuel Systems', 'FADEC', 'APU', 'Turboprop'],
+      estimatedStudyHoursMin: 150,
+      estimatedStudyHoursMax: 200,
+      applicableCategories: ['A', 'B1'],
     },
     {
       code: 'M16',
       name: 'Piston Engine',
+      subtitle: 'Reciprocating Engines \u00b7 Cat A2/A4 \u00b7 B1.2/B1.4 \u00b7 B3',
+      description: 'Covers reciprocating piston engines used in non-turbine aircraft. Topics include engine fundamentals (2/4-stroke cycles, engine types), performance, engine construction, induction/exhaust/cooling systems, supercharging, lubrication systems, fuel systems and carburettors, ignition systems, engine starting, and engine monitoring. Required for piston-rated licence subcategories.',
       duration: 25,
       price: 1400.0,
       categoryId: specialistCategory.id,
       moduleType: 'SPECIALIST' as const,
+      prerequisites: ['M1', 'M2', 'M6', 'M7'],
+      requiresPrerequisite: true,
+      topics: ['Engine Cycles', 'Engine Construction', 'Carburettors', 'Magneto Ignition', 'Supercharging', 'Lubrication', 'Cooling'],
+      estimatedStudyHoursMin: 120,
+      estimatedStudyHoursMax: 160,
+      applicableCategories: ['A', 'B1', 'B3'],
     },
     {
       code: 'M17',
-      name: 'Propellers',
+      name: 'Propeller',
+      subtitle: 'Fixed & Variable Pitch \u00b7 Governors \u00b7 Synchronisation',
+      description: 'Covers propeller theory, construction, and maintenance for piston and turboprop aircraft. Topics include propeller theory (blade angle, pitch, slip), propeller construction (fixed pitch, ground adjustable, variable pitch), propeller governor and control systems, synchronisation/synchrophasing, ice protection, propeller storage, and inspection/maintenance procedures.',
       duration: 15,
       price: 1090.0,
       categoryId: specialistCategory.id,
       moduleType: 'SPECIALIST' as const,
+      prerequisites: ['M2', 'M6', 'M8'],
+      requiresPrerequisite: true,
+      topics: ['Propeller Theory', 'Fixed Pitch', 'Variable Pitch', 'Governor Systems', 'Synchronisation', 'Ice Protection'],
+      estimatedStudyHoursMin: 40,
+      estimatedStudyHoursMax: 60,
+      applicableCategories: ['A', 'B1', 'B3'],
     },
   ]
 
@@ -410,19 +572,35 @@ async function main() {
       where: { code: mod.code },
       update: {
         name: mod.name,
+        description: mod.description,
+        subtitle: mod.subtitle,
         duration: mod.duration,
         price: mod.price,
         categoryId: mod.categoryId,
         moduleType: mod.moduleType,
+        prerequisites: mod.prerequisites,
+        requiresPrerequisite: mod.requiresPrerequisite,
+        topics: mod.topics,
+        estimatedStudyHoursMin: mod.estimatedStudyHoursMin,
+        estimatedStudyHoursMax: mod.estimatedStudyHoursMax,
+        applicableCategories: mod.applicableCategories,
         isActive: true,
       },
       create: {
         code: mod.code,
         name: mod.name,
+        description: mod.description,
+        subtitle: mod.subtitle,
         duration: mod.duration,
         price: mod.price,
         categoryId: mod.categoryId,
         moduleType: mod.moduleType,
+        prerequisites: mod.prerequisites,
+        requiresPrerequisite: mod.requiresPrerequisite,
+        topics: mod.topics,
+        estimatedStudyHoursMin: mod.estimatedStudyHoursMin,
+        estimatedStudyHoursMax: mod.estimatedStudyHoursMax,
+        applicableCategories: mod.applicableCategories,
         isActive: true,
       },
     })
@@ -430,84 +608,147 @@ async function main() {
   console.log(`✅ ${moduleData.length} EASA Modules seeded`)
 
   // ============================================================================
-  // 6. EXAM COMPONENTS (Handling A/B Splits)
+  // 6. EXAM COMPONENTS (Per-Category with Question Counts & Durations)
   // ============================================================================
   console.log('📝 Seeding Exam Components...')
-  for (const mod of moduleData) {
-    const isM7 = mod.code === 'M7';
-    const isM9 = mod.code === 'M9';
-    const isM17 = mod.code === 'M17';
-    
-    // Standard MCQ component
-    // If it has a specific suffix in dropdown, we use that as the code
-    const mcqCode = isM7 ? 'M7A' : isM9 ? 'M9A' : isM17 ? 'M17A' : mod.code;
 
+  // Per-category exam specifications from EASA Part 66 regulation
+  // Format: { code, courseCode, categoryCode, name, type, questionCount, duration, individualPrice, poolPrice }
+  const examComponents = [
+    // M1 — Mathematics
+    { code: 'M1-A',  courseCode: 'M1', categoryCode: 'A',  name: 'Mathematics MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 16, duration: 20 },
+    { code: 'M1-B1', courseCode: 'M1', categoryCode: 'B1', name: 'Mathematics MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 32, duration: 40 },
+    { code: 'M1-B2', courseCode: 'M1', categoryCode: 'B2', name: 'Mathematics MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 32, duration: 40 },
+    { code: 'M1-B3', courseCode: 'M1', categoryCode: 'B3', name: 'Mathematics MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 30, duration: 40 },
+
+    // M2 — Physics
+    { code: 'M2-A',  courseCode: 'M2', categoryCode: 'A',  name: 'Physics MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 32, duration: 40 },
+    { code: 'M2-B1', courseCode: 'M2', categoryCode: 'B1', name: 'Physics MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 52, duration: 65 },
+    { code: 'M2-B2', courseCode: 'M2', categoryCode: 'B2', name: 'Physics MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 52, duration: 65 },
+    { code: 'M2-B3', courseCode: 'M2', categoryCode: 'B3', name: 'Physics MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 30, duration: 40 },
+
+    // M3 — Electrical Fundamentals
+    { code: 'M3-A',  courseCode: 'M3', categoryCode: 'A',  name: 'Electrical Fundamentals MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M3-B1', courseCode: 'M3', categoryCode: 'B1', name: 'Electrical Fundamentals MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 52, duration: 65 },
+    { code: 'M3-B2', courseCode: 'M3', categoryCode: 'B2', name: 'Electrical Fundamentals MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 52, duration: 65 },
+    { code: 'M3-B3', courseCode: 'M3', categoryCode: 'B3', name: 'Electrical Fundamentals MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 24, duration: 30 },
+
+    // M4 — Electronic Fundamentals (not required for Cat A)
+    { code: 'M4-B1', courseCode: 'M4', categoryCode: 'B1', name: 'Electronic Fundamentals MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M4-B2', courseCode: 'M4', categoryCode: 'B2', name: 'Electronic Fundamentals MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 40, duration: 50 },
+    { code: 'M4-B3', courseCode: 'M4', categoryCode: 'B3', name: 'Electronic Fundamentals MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+
+    // M5 — Digital Techniques
+    { code: 'M5-A',  courseCode: 'M5', categoryCode: 'A',  name: 'Digital Techniques MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M5-B1', courseCode: 'M5', categoryCode: 'B1', name: 'Digital Techniques MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 40, duration: 50 },
+    { code: 'M5-B2', courseCode: 'M5', categoryCode: 'B2', name: 'Digital Techniques MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 72, duration: 90 },
+    { code: 'M5-B3', courseCode: 'M5', categoryCode: 'B3', name: 'Digital Techniques MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+
+    // M6 — Materials & Hardware
+    { code: 'M6-A',  courseCode: 'M6', categoryCode: 'A',  name: 'Materials & Hardware MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 52, duration: 65 },
+    { code: 'M6-B1', courseCode: 'M6', categoryCode: 'B1', name: 'Materials & Hardware MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 80, duration: 100 },
+    { code: 'M6-B2', courseCode: 'M6', categoryCode: 'B2', name: 'Materials & Hardware MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 60, duration: 75 },
+    { code: 'M6-B3', courseCode: 'M6', categoryCode: 'B3', name: 'Materials & Hardware MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 80, duration: 100 },
+
+    // M7 — Maintenance Practices (post June 2024)
+    { code: 'M7-A',  courseCode: 'M7', categoryCode: 'A',  name: 'Maintenance Practices MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 76, duration: 95 },
+    { code: 'M7-B1', courseCode: 'M7', categoryCode: 'B1', name: 'Maintenance Practices MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 80, duration: 100 },
+    { code: 'M7-B2', courseCode: 'M7', categoryCode: 'B2', name: 'Maintenance Practices MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 60, duration: 75 },
+    { code: 'M7-B3', courseCode: 'M7', categoryCode: 'B3', name: 'Maintenance Practices MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 80, duration: 100 },
+
+    // M8 — Basic Aerodynamics
+    { code: 'M8-A',  courseCode: 'M8', categoryCode: 'A',  name: 'Basic Aerodynamics MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 24, duration: 30 },
+    { code: 'M8-B1', courseCode: 'M8', categoryCode: 'B1', name: 'Basic Aerodynamics MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 24, duration: 30 },
+    { code: 'M8-B2', courseCode: 'M8', categoryCode: 'B2', name: 'Basic Aerodynamics MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 24, duration: 30 },
+    { code: 'M8-B3', courseCode: 'M8', categoryCode: 'B3', name: 'Basic Aerodynamics MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 24, duration: 30 },
+
+    // M9 — Human Factors (post June 2024 — MCQ only)
+    { code: 'M9-A',  courseCode: 'M9', categoryCode: 'A',  name: 'Human Factors MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M9-B1', courseCode: 'M9', categoryCode: 'B1', name: 'Human Factors MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M9-B2', courseCode: 'M9', categoryCode: 'B2', name: 'Human Factors MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M9-B3', courseCode: 'M9', categoryCode: 'B3', name: 'Human Factors MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 16, duration: 20 },
+
+    // M10 — Aviation Legislation (post June 2024 — MCQ only)
+    { code: 'M10-A',  courseCode: 'M10', categoryCode: 'A',  name: 'Aviation Legislation MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 32, duration: 40 },
+    { code: 'M10-B1', courseCode: 'M10', categoryCode: 'B1', name: 'Aviation Legislation MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 40, duration: 50 },
+    { code: 'M10-B2', courseCode: 'M10', categoryCode: 'B2', name: 'Aviation Legislation MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 40, duration: 50 },
+    { code: 'M10-B3', courseCode: 'M10', categoryCode: 'B3', name: 'Aviation Legislation MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 32, duration: 40 },
+
+    // M11A — Turbine Aeroplane Aerodynamics, Structures & Systems
+    { code: 'M11A-A',  courseCode: 'M11A', categoryCode: 'A',  name: 'Turbine Aeroplane Systems MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 100, duration: 125 },
+    { code: 'M11A-B1', courseCode: 'M11A', categoryCode: 'B1', name: 'Turbine Aeroplane Systems MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 128, duration: 160 },
+
+    // M11B — Piston Aeroplane Aerodynamics, Structures & Systems
+    { code: 'M11B-A',  courseCode: 'M11B', categoryCode: 'A',  name: 'Piston Aeroplane Systems MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 72, duration: 90 },
+    { code: 'M11B-B1', courseCode: 'M11B', categoryCode: 'B1', name: 'Piston Aeroplane Systems MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 92, duration: 115 },
+
+    // M11C — Piston Aeroplane (B3)
+    { code: 'M11C-B3', courseCode: 'M11C', categoryCode: 'B3', name: 'Piston Aeroplane Systems MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 72, duration: 90 },
+
+    // M12 — Helicopter Aerodynamics, Structures & Systems
+    { code: 'M12-A',  courseCode: 'M12', categoryCode: 'A',  name: 'Helicopter Systems MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 82, duration: 103 },
+    { code: 'M12-B1', courseCode: 'M12', categoryCode: 'B1', name: 'Helicopter Systems MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 108, duration: 135 },
+
+    // M13 — Aircraft Aerodynamics, Structures & Systems (B2 only)
+    { code: 'M13-B2', courseCode: 'M13', categoryCode: 'B2', name: 'Aircraft Systems MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 180, duration: 225 },
+
+    // M14 — Propulsion (B2 only)
+    { code: 'M14-B2', courseCode: 'M14', categoryCode: 'B2', name: 'Propulsion MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 24, duration: 30 },
+
+    // M15 — Gas Turbine Engine
+    { code: 'M15-A',  courseCode: 'M15', categoryCode: 'A',  name: 'Gas Turbine Engine MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 60, duration: 75 },
+    { code: 'M15-B1', courseCode: 'M15', categoryCode: 'B1', name: 'Gas Turbine Engine MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 92, duration: 115 },
+
+    // M16 — Piston Engine
+    { code: 'M16-A',  courseCode: 'M16', categoryCode: 'A',  name: 'Piston Engine MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 52, duration: 65 },
+    { code: 'M16-B1', courseCode: 'M16', categoryCode: 'B1', name: 'Piston Engine MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 72, duration: 90 },
+    { code: 'M16-B3', courseCode: 'M16', categoryCode: 'B3', name: 'Piston Engine MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 68, duration: 85 },
+
+    // M17 — Propeller
+    { code: 'M17-A',  courseCode: 'M17', categoryCode: 'A',  name: 'Propeller MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M17-B1', courseCode: 'M17', categoryCode: 'B1', name: 'Propeller MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 32, duration: 40 },
+    { code: 'M17-B3', courseCode: 'M17', categoryCode: 'B3', name: 'Propeller MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 28, duration: 35 },
+  ]
+
+  for (const exam of examComponents) {
     await prisma.examComponent.upsert({
-      where: { code: mcqCode },
+      where: { code: exam.code },
       update: {
+        name: exam.name,
+        type: exam.type,
+        questionCount: exam.questionCount,
+        duration: exam.duration,
+        categoryCode: exam.categoryCode,
         individualPrice: 520.0,
         poolPrice: 300.0,
       },
       create: {
-        courseId: createdModules[mod.code].id,
-        code: mcqCode,
-        name: `${mod.name} Multiple Choice Exam`,
-        type: 'MCQ',
-        duration: 90,
+        courseId: createdModules[exam.courseCode].id,
+        code: exam.code,
+        name: exam.name,
+        type: exam.type,
+        questionCount: exam.questionCount,
+        duration: exam.duration,
+        categoryCode: exam.categoryCode,
         individualPrice: 520.0,
         poolPrice: 300.0,
       },
     })
-
-    // Special Essay component for M7 (M7B), M9, M10
-    if (isM7) {
-      await prisma.examComponent.upsert({
-        where: { code: 'M7B' },
-        update: {
-          individualPrice: 340.0,
-          poolPrice: 340.0,
-        },
-        create: {
-          courseId: createdModules[mod.code].id,
-          code: 'M7B',
-          name: 'Maintenance Practices Essay Exam',
-          type: 'ESSAY',
-          duration: 40,
-          individualPrice: 340.0,
-          poolPrice: 340.0,
-        },
-      })
-    } else if (['M9', 'M10'].includes(mod.code)) {
-       // M9 Essay, M10 Essay - use _ESSAY suffix if not explicitly mapped to a sub-code
-       await prisma.examComponent.upsert({
-        where: { code: `${mod.code}_ESSAY` },
-        update: {
-          individualPrice: 340.0,
-          poolPrice: 340.0,
-        },
-        create: {
-          courseId: createdModules[mod.code].id,
-          code: `${mod.code}_ESSAY`,
-          name: `${mod.name} Essay Exam`,
-          type: 'ESSAY',
-          duration: 40,
-          individualPrice: 340.0,
-          poolPrice: 340.0,
-        },
-      })
-    }
   }
+  console.log(`✅ ${examComponents.length} Exam Components seeded`)
 
   // ============================================================================
   // 7. LICENSE MODULE REQUIREMENTS (Overlap Logic)
   // ============================================================================
   console.log('🔗 Mapping modules to licenses...')
   const requirementsMap: Record<string, string[]> = {
+    A: ['M1', 'M2', 'M3', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10'],
     'B1.1': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11A', 'M15', 'M17'],
     'B1.2': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11B', 'M16', 'M17'],
     'B1.3': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M12', 'M15'],
     'B1.4': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M12', 'M16'],
     B2: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M13', 'M14'],
+    B3: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11C', 'M16', 'M17'],
   }
 
   for (const [licenseCode, requiredModules] of Object.entries(requirementsMap)) {

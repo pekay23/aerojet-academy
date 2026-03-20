@@ -283,7 +283,14 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                       transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                     />
                   )}
-                  <span className="relative z-10">{t.label}</span>
+                  <span className="relative z-10">
+                    {t.label}
+                    {counts[t.key as keyof Counts] !== undefined && (
+                      <span className="ml-1 opacity-70">
+                        ({counts[t.key as keyof Counts] ?? 0})
+                      </span>
+                    )}
+                  </span>
                 </button>
               ))}
             </div>
@@ -447,9 +454,9 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                               e.stopPropagation()
                               setSelected(applicant)
                             }}
-                            className="text-aerojet-sky text-xs font-bold hover:underline"
+                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
                           >
-                            Review →
+                            Review
                           </button>
                         </td>
                       </tr>

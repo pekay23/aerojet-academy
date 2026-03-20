@@ -22,11 +22,13 @@ type Course = {
   id: string
   code: string
   name: string
+  subtitle?: string | null
   price: string | number
   currency: string
   isActive: boolean
   moduleType: string | null
   duration: number | null
+  applicableCategories?: string[]
 }
 
 type Category = {
@@ -440,12 +442,19 @@ export default function CoursesClient({ categories }: Props) {
                                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
                                   <BookOpen className="h-4 w-4" />
                                 </div>
-                                <Link
-                                  href={`/staff/courses/${course.id}`}
-                                  className="font-bold text-slate-900 hover:text-[#4c9ded] dark:text-slate-100"
-                                >
-                                  {course.name}
-                                </Link>
+                                <div>
+                                  <Link
+                                    href={`/staff/courses/${course.id}`}
+                                    className="font-bold text-slate-900 hover:text-[#4c9ded] dark:text-slate-100"
+                                  >
+                                    {course.name}
+                                  </Link>
+                                  {course.subtitle && (
+                                    <p className="text-xs text-slate-400 dark:text-slate-500">
+                                      {course.subtitle}
+                                    </p>
+                                  )}
+                                </div>
                               </div>
                             </td>
 
@@ -457,6 +466,14 @@ export default function CoursesClient({ categories }: Props) {
                                     {course.moduleType.replace(/_/g, ' ')}
                                   </span>
                                 )}
+                                {course.applicableCategories?.map((cat) => (
+                                  <span
+                                    key={cat}
+                                    className="rounded-md bg-blue-50 px-1.5 py-0.5 text-[10px] font-bold text-blue-600 dark:bg-blue-900/20 dark:text-blue-400"
+                                  >
+                                    {cat}
+                                  </span>
+                                ))}
                               </div>
                             </td>
 

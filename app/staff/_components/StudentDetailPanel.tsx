@@ -15,7 +15,6 @@ import {
   GraduationCap,
   FileCheck,
   ExternalLink,
-  KeyRound,
   Loader2,
 } from 'lucide-react'
 import UserActionsMenu from './UserActionsMenu'
@@ -89,7 +88,7 @@ const STATUS_STYLE: Record<string, string> = {
   PENDING: 'bg-blue-100 text-blue-700',
 }
 
-const TABS = ['Overview', 'Wallet', 'Enrollments', 'Exams'] as const
+const TABS = ['Overview', 'Enrollments', 'Exams'] as const
 type Tab = (typeof TABS)[number]
 
 interface Props {
@@ -196,7 +195,7 @@ export default function StudentDetailPanel({
       moduleCode: r.moduleCode || '—',
       examName: r.exam?.name || 'Exam Booking',
       date: r.examDate || r.bookedAt,
-      status: r.status,
+      paymentStatus: r.status,
     })) || []
 
   const allExamHistory = [...completedExamResults, ...completedExamBookings].sort(
@@ -246,33 +245,6 @@ export default function StudentDetailPanel({
                   </span>
                 )}
               </div>
-              <button
-                onClick={async () => {
-                  const btn = document.getElementById(
-                    `resend-btn-${currentStudent.id}`
-                  ) as HTMLButtonElement
-                  if (btn) btn.disabled = true
-                  try {
-                    const res = await fetch(
-                      `/api/staff/users/${currentStudent.id}/resend-credentials`,
-                      {
-                        method: 'POST',
-                      }
-                    )
-                    if (!res.ok) throw new Error()
-                    toast.success('Login credentials resent')
-                  } catch {
-                    toast.error('Failed to resend credentials')
-                  } finally {
-                    if (btn) btn.disabled = false
-                  }
-                }}
-                id={`resend-btn-${currentStudent.id}`}
-                className="mt-3 flex w-fit items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-widest text-slate-500 uppercase shadow-sm transition-all hover:border-[#4c9ded] hover:text-[#4c9ded] disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800"
-              >
-                <KeyRound className="h-3 w-3" />
-                Resend Credentials
-              </button>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -418,71 +390,70 @@ export default function StudentDetailPanel({
                     />
                   </Grid2>
                 </Section>
-              </>
-            )}
 
-            {tab === 'Wallet' && (
-              <Section title="Wallet Balance">
-                <div className="mb-4 grid grid-cols-2 gap-4">
-                  <div
-                    className={`rounded-xl p-4 ${walletBal >= 0 ? 'border border-emerald-100 bg-emerald-50' : 'border border-red-100 bg-red-50'}`}
-                  >
-                    <div className="mb-1 flex items-center justify-between">
-                      <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                        Available Balance
-                      </p>
-                      <ManualWalletAdjustmentDialog
-                        userId={currentStudent.id}
-                        userName={fullName}
-                        currentBalance={walletBal}
-                        currency={currentStudent.wallet?.currency || 'EUR'}
-                        onSuccess={() => {
-                          onActionComplete()
-                          // Trigger a re-fetch of full details
-                          const fetchFullDetails = async () => {
-                            try {
-                              const res = await fetch(`/api/staff/students/${currentStudent.id}`)
-                              if (res.ok) {
-                                const data = await res.json()
-                                setStudent(data.data)
+                {/* Wallet Summary on Overview */}
+                <Section title="Wallet Summary">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div
+                      className={`rounded-xl p-3 ${(Number(currentStudent.wallet?.availableBalance ?? 0)) >= 0 ? 'border border-emerald-100 bg-emerald-50' : 'border border-red-100 bg-red-50'}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                          Available
+                        </p>
+                        <ManualWalletAdjustmentDialog
+                          userId={currentStudent.id}
+                          userName={fullName}
+                          currentBalance={walletBal}
+                          currency={currentStudent.wallet?.currency || 'EUR'}
+                          onSuccess={() => {
+                            onActionComplete()
+                            const refetch = async () => {
+                              try {
+                                const res = await fetch(`/api/staff/students/${currentStudent.id}`)
+                                if (res.ok) {
+                                  const data = await res.json()
+                                  setStudent(data.data)
+                                }
+                              } catch (err) {
+                                console.error(err)
                               }
-                            } catch (err) {
-                              console.error(err)
                             }
-                          }
-                          fetchFullDetails()
-                        }}
+                            refetch()
+                          }}
+                        />
+                      </div>
+                      <CurrencyDisplay
+                        amount={Number(currentStudent.wallet?.availableBalance ?? 0)}
+                        baseCurrency={currentStudent.wallet?.currency || 'EUR'}
+                        currency={viewCurrency}
+                        clickToToggle={true}
+                        onCurrencyChange={onCurrencyChange}
+                        size="sm"
+                        amountClassName={
+                          (Number(currentStudent.wallet?.availableBalance ?? 0)) >= 0
+                            ? 'text-emerald-700!'
+                            : 'text-red-600!'
+                        }
                       />
                     </div>
-                    <CurrencyDisplay
-                      amount={walletBal}
-                      baseCurrency={currentStudent.wallet?.currency || 'EUR'}
-                      currency={viewCurrency}
-                      clickToToggle={true}
-                      onCurrencyChange={onCurrencyChange}
-                      size="lg"
-                      amountClassName={walletBal >= 0 ? 'text-emerald-700!' : 'text-red-600!'}
-                    />
+                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
+                      <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                        Total
+                      </p>
+                      <CurrencyDisplay
+                        amount={Number(currentStudent.wallet?.balance ?? 0)}
+                        baseCurrency={currentStudent.wallet?.currency || 'EUR'}
+                        currency={viewCurrency}
+                        clickToToggle={true}
+                        onCurrencyChange={onCurrencyChange}
+                        size="sm"
+                        amountClassName="text-slate-700!"
+                      />
+                    </div>
                   </div>
-                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
-                    <p className="mb-1 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      Total Balance
-                    </p>
-                    <CurrencyDisplay
-                      amount={Number(currentStudent.wallet?.balance ?? 0)}
-                      baseCurrency={currentStudent.wallet?.currency || 'EUR'}
-                      currency={viewCurrency}
-                      clickToToggle={true}
-                      onCurrencyChange={onCurrencyChange}
-                      size="lg"
-                      amountClassName="text-slate-700!"
-                    />
-                  </div>
-                </div>
-                <p className="text-xs text-slate-400">
-                  Full transaction history available in Finance → Transactions.
-                </p>
-              </Section>
+                </Section>
+              </>
             )}
 
             {tab === 'Enrollments' && (
@@ -521,99 +492,163 @@ export default function StudentDetailPanel({
             )}
 
             {tab === 'Exams' && (
-              <>
-                {/* Upcoming/Pending Exams */}
-                {upcomingExams.length > 0 && (
-                  <Section title="Upcoming / Pending Exams">
-                    <div className="space-y-2">
-                      {upcomingExams.map((exam, idx) => (
-                        <div
-                          key={`upcoming-${exam.id}-${idx}`}
-                          className="flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 dark:border-blue-900/30 dark:bg-blue-900/20"
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-slate-800 dark:text-slate-200">
-                                {exam.moduleCode}
-                              </span>
-                              <span className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase bg-blue-100 text-blue-600">
-                                {exam.type}
-                              </span>
-                            </div>
-                            <p className="truncate text-xs text-slate-500">{exam.examName}</p>
-                            <p className="mt-0.5 text-[10px] text-slate-400">
-                              {exam.date ? new Date(exam.date).toLocaleDateString() : '—'}
-                            </p>
-                          </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <span className="rounded-full px-2 py-0.5 text-[9px] font-black uppercase bg-amber-100 text-amber-700">
-                              {exam.status || 'PENDING'}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </Section>
-                )}
-
-                {/* Completed Exam History */}
-                <Section title="Exam History">
-                  {!allExamHistory.length ? (
-                    <EmptyState icon={FileCheck} message="No exam records yet" />
-                  ) : (
-                    <div className="space-y-2">
-                      {allExamHistory.map((h, idx) => (
-                        <div
-                          key={`${h.type}-${h.id}-${idx}`}
-                          className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
-                        >
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="font-bold text-slate-800 dark:text-slate-200">
-                                {h.moduleCode}
-                              </span>
-                              <span
-                                className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
-                                  h.type === 'FORMAL'
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'bg-slate-50 text-slate-500'
-                                }`}
-                              >
-                                {h.type}
-                              </span>
-                            </div>
-                            <p className="truncate text-xs text-slate-500">{h.examName}</p>
-                            <p className="mt-0.5 text-[10px] text-slate-400">
-                              {h.date ? new Date(h.date).toLocaleDateString() : '—'}
-                            </p>
-                          </div>
-                          <div className="flex flex-col items-end gap-1">
-                            <span className="font-mono text-xs font-black">
-                              {h.score !== null ? `${h.score}%` : '—'}
-                            </span>
-                            <span
-                              className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                                h.passed
-                                  ? 'bg-emerald-100 text-emerald-700'
-                                  : h.result === 'ABSENT'
-                                    ? 'bg-slate-100 text-slate-500'
-                                    : 'bg-red-100 text-red-700'
-                              }`}
-                            >
-                              {h.result || (h.passed ? 'PASS' : 'FAIL')}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </Section>
-              </>
+              <ExamTabContent
+                upcomingExams={upcomingExams}
+                allExamHistory={allExamHistory}
+              />
             )}
           </>
         )}
       </div>
     </div>
+  )
+}
+
+type ExamFilter = 'ALL' | 'PASSED' | 'FAILED' | 'PENDING'
+
+function ExamTabContent({
+  upcomingExams,
+  allExamHistory,
+}: {
+  upcomingExams: any[]
+  allExamHistory: any[]
+}) {
+  const [filter, setFilter] = useState<ExamFilter>('ALL')
+
+  const filteredHistory = allExamHistory.filter((h) => {
+    if (filter === 'ALL') return true
+    if (filter === 'PASSED') return h.passed
+    if (filter === 'FAILED') return !h.passed && h.result !== 'ABSENT'
+    return false
+  })
+
+  const showUpcoming = filter === 'ALL' || filter === 'PENDING'
+
+  const filters: { key: ExamFilter; label: string; count: number }[] = [
+    { key: 'ALL', label: 'All', count: allExamHistory.length + upcomingExams.length },
+    { key: 'PASSED', label: 'Passed', count: allExamHistory.filter((h) => h.passed).length },
+    { key: 'FAILED', label: 'Failed', count: allExamHistory.filter((h) => !h.passed && h.result !== 'ABSENT').length },
+    { key: 'PENDING', label: 'Pending', count: upcomingExams.length },
+  ]
+
+  return (
+    <>
+      {/* Filter Chips */}
+      <div className="flex flex-wrap gap-1.5">
+        {filters.map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`rounded-full px-3 py-1 text-xs font-bold transition-colors ${
+              filter === f.key
+                ? 'bg-[#002a5c] text-white'
+                : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
+            }`}
+          >
+            {f.label} ({f.count})
+          </button>
+        ))}
+      </div>
+
+      {/* Upcoming/Pending Exams */}
+      {showUpcoming && upcomingExams.length > 0 && (
+        <Section title="Upcoming / Pending Exams">
+          <div className="space-y-2">
+            {upcomingExams.map((exam, idx) => (
+              <div
+                key={`upcoming-${exam.id}-${idx}`}
+                className="flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 dark:border-blue-900/30 dark:bg-blue-900/20"
+              >
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-800 dark:text-slate-200">
+                      {exam.moduleCode}
+                    </span>
+                    <span className="rounded px-1.5 py-0.5 text-[9px] font-bold uppercase bg-blue-100 text-blue-600">
+                      {exam.type}
+                    </span>
+                  </div>
+                  <p className="truncate text-xs text-slate-500">{exam.examName}</p>
+                  <p className="mt-0.5 text-[10px] text-slate-400">
+                    {exam.date ? new Date(exam.date).toLocaleDateString() : '—'}
+                  </p>
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
+                    exam.paymentStatus === 'APPROVED' || exam.paymentStatus === 'COMPLETED'
+                      ? 'bg-blue-100 text-blue-700'
+                      : exam.paymentStatus === 'REJECTED'
+                        ? 'bg-red-100 text-red-700'
+                        : 'bg-amber-100 text-amber-700'
+                  }`}>
+                    {exam.paymentStatus === 'APPROVED' || exam.paymentStatus === 'COMPLETED'
+                      ? 'UPCOMING'
+                      : exam.paymentStatus === 'REJECTED'
+                        ? 'REJECTED'
+                        : 'PAYMENT PENDING'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+
+      {/* Completed Exam History */}
+      {(filter === 'ALL' || filter === 'PASSED' || filter === 'FAILED') && (
+        <Section title="Exam History">
+          {!filteredHistory.length ? (
+            <EmptyState icon={FileCheck} message="No exam records match this filter" />
+          ) : (
+            <div className="space-y-2">
+              {filteredHistory.map((h, idx) => (
+                <div
+                  key={`${h.type}-${h.id}-${idx}`}
+                  className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-800 dark:text-slate-200">
+                        {h.moduleCode}
+                      </span>
+                      <span
+                        className={`rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${
+                          h.type === 'FORMAL'
+                            ? 'bg-blue-50 text-blue-600'
+                            : 'bg-slate-50 text-slate-500'
+                        }`}
+                      >
+                        {h.type}
+                      </span>
+                    </div>
+                    <p className="truncate text-xs text-slate-500">{h.examName}</p>
+                    <p className="mt-0.5 text-[10px] text-slate-400">
+                      {h.date ? new Date(h.date).toLocaleDateString() : '—'}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="font-mono text-xs font-black">
+                      {h.score !== null ? `${h.score}%` : '—'}
+                    </span>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
+                        h.passed
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : h.result === 'ABSENT'
+                            ? 'bg-slate-100 text-slate-500'
+                            : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      {h.result || (h.passed ? 'PASS' : 'FAIL')}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </Section>
+      )}
+    </>
   )
 }
 

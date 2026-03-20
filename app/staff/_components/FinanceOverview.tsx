@@ -87,6 +87,7 @@ export default function FinanceOverview({
       bg: 'bg-blue-50',
       color: 'text-aerojet-sky',
       sub: data ? `${regGrowth >= 0 ? '+' : ''}${regGrowth.toFixed(1)}% vs last month` : undefined,
+      growthPositive: regGrowth >= 0,
     },
     {
       label: 'Course Revenue',
@@ -97,6 +98,7 @@ export default function FinanceOverview({
       sub: data
         ? `${courseGrowth >= 0 ? '+' : ''}${courseGrowth.toFixed(1)}% vs last month`
         : undefined,
+      growthPositive: courseGrowth >= 0,
     },
     {
       label: 'Pending Verification',
@@ -130,7 +132,7 @@ export default function FinanceOverview({
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {statCards.map((s) => {
           const Icon = s.icon
           const card = (
@@ -149,7 +151,19 @@ export default function FinanceOverview({
                 <p className="truncate text-[11px] font-bold tracking-wider text-slate-400 uppercase">
                   {s.label}
                 </p>
-                {s.sub && <p className="mt-0.5 text-[11px] font-bold text-slate-400">{s.sub}</p>}
+                {s.sub && (
+                  <p
+                    className={`mt-0.5 text-[11px] font-bold ${
+                      'growthPositive' in s
+                        ? s.growthPositive
+                          ? 'text-emerald-600'
+                          : 'text-red-500'
+                        : 'text-slate-400'
+                    }`}
+                  >
+                    {s.sub}
+                  </p>
+                )}
               </div>
             </div>
           )

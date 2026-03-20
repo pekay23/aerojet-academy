@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { FileText, Save, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface Props {
   student: any
@@ -52,10 +53,14 @@ export default function AdminNotesTab({ student, onRefresh }: Props) {
       })
 
       if (response.ok) {
+        toast.success('Notes saved')
         onRefresh()
+      } else {
+        toast.error('Failed to save notes')
       }
     } catch (error) {
       console.error('Failed to save notes:', error)
+      toast.error('Failed to save notes')
     } finally {
       setIsSaving(false)
     }
