@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/dialog'
 import { Pencil, Loader2 } from 'lucide-react'
 
+const LICENCE_CATEGORIES = ['A', 'B1', 'B2', 'B3'] as const
+
 export default function CourseInfoEditDialog({
   course,
   categories,
@@ -26,9 +28,26 @@ export default function CourseInfoEditDialog({
 
   // Form state
   const [description, setDescription] = useState(course.description || '')
+  const [subtitle, setSubtitle] = useState(course.subtitle || '')
   const [duration, setDuration] = useState(course.duration?.toString() || '')
   const [categoryId, setCategoryId] = useState(course.categoryId || '')
   const [prerequisites, setPrerequisites] = useState(course.prerequisites?.join(', ') || '')
+  const [topics, setTopics] = useState(course.topics?.join(', ') || '')
+  const [studyHoursMin, setStudyHoursMin] = useState(
+    course.estimatedStudyHoursMin?.toString() || ''
+  )
+  const [studyHoursMax, setStudyHoursMax] = useState(
+    course.estimatedStudyHoursMax?.toString() || ''
+  )
+  const [applicableCategories, setApplicableCategories] = useState<string[]>(
+    course.applicableCategories || []
+  )
+
+  const toggleCategory = (cat: string) => {
+    setApplicableCategories((prev) =>
+      prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat]
+    )
+  }
 
   const handleSave = async () => {
     setLoading(true)
@@ -39,10 +58,21 @@ export default function CourseInfoEditDialog({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           description,
+          subtitle: subtitle || undefined,
           duration: duration ? parseInt(duration) : null,
           categoryId: categoryId || null,
-          prerequisites: prerequisites.split(',').map(p => p.trim()).filter(Boolean),
+          prerequisites: prerequisites
+            .split(',')
+            .map((p) => p.trim())
+            .filter(Boolean),
           requiresPrerequisite: prerequisites.trim().length > 0,
+          topics: topics
+            .split(',')
+            .map((t) => t.trim())
+            .filter(Boolean),
+          estimatedStudyHoursMin: studyHoursMin ? parseInt(studyHoursMin) : null,
+          estimatedStudyHoursMax: studyHoursMax ? parseInt(studyHoursMax) : null,
+          applicableCategories,
         }),
       })
       const data = await res.json()
@@ -63,7 +93,7 @@ export default function CourseInfoEditDialog({
           <Pencil className="h-3 w-3" /> Edit Info
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-[560px]">
         <DialogHeader>
           <DialogTitle>Edit Course Info</DialogTitle>
         </DialogHeader>
@@ -73,13 +103,37 @@ export default function CourseInfoEditDialog({
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              rows={4}
+              rows={3}
+              className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-bold text-slate-600">Subtitle</label>
+            <input
+              type="text"
+              value={subtitle}
+              onChange={(e) => setSubtitle(e.target.value)}
+              placeholder="e.g. Arithmetic · Algebra · Geometry"
+              className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-xs font-bold text-slate-600">
+              Topics (comma separated)
+            </label>
+            <input
+              type="text"
+              value={topics}
+              onChange={(e) => setTopics(e.target.value)}
+              placeholder="e.g. Arithmetic, Algebra, Geometry"
               className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
             />
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="mb-1 block text-xs font-bold text-slate-600">Duration (Hours)</label>
+              <label className="mb-1 block text-xs font-bold text-slate-600">
+                Duration (Hours)
+              </label>
               <input
                 type="number"
                 value={duration}
@@ -96,13 +150,43 @@ export default function CourseInfoEditDialog({
               >
                 <option value="">None</option>
                 {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
                 ))}
               </select>
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="mb-1 block text-xs font-bold text-slate-600">
+                Study Hours (Min)
+              </label>
+              <input
+                type="number"
+                value={studyHoursMin}
+                onChange={(e) => setStudyHoursMin(e.target.value)}
+                placeholder="e.g. 40"
+                className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+              />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold text-slate-600">
+                Study Hours (Max)
+              </label>
+              <input
+                type="number"
+                value={studyHoursMax}
+                onChange={(e) => setStudyHoursMax(e.target.value)}
+                placeholder="e.g. 60"
+                className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+              />
+            </div>
+          </div>
           <div>
-            <label className="mb-1 block text-xs font-bold text-slate-600">Prerequisites (comma separated codes)</label>
+            <label className="mb-1 block text-xs font-bold text-slate-600">
+              Prerequisites (comma separated codes)
+            </label>
             <input
               type="text"
               value={prerequisites}
@@ -110,6 +194,27 @@ export default function CourseInfoEditDialog({
               placeholder="e.g. M1, M2"
               className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
             />
+          </div>
+          <div>
+            <label className="mb-2 block text-xs font-bold text-slate-600">
+              Applicable Licence Categories
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {LICENCE_CATEGORIES.map((cat) => (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => toggleCategory(cat)}
+                  className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors ${
+                    applicableCategories.includes(cat)
+                      ? 'border-[#002a5c] bg-[#002a5c] text-white'
+                      : 'border-slate-200 text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:text-slate-400'
+                  }`}
+                >
+                  Cat {cat}
+                </button>
+              ))}
+            </div>
           </div>
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>

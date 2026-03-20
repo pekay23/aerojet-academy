@@ -127,6 +127,7 @@ export const createCourseSchema = z.object({
   code: z.string().min(1).max(20),
   name: z.string().min(2).max(200),
   description: z.string().optional(),
+  subtitle: z.string().optional(),
   categoryId: z.string().min(1, 'Category is required'),
   moduleType: z.enum(['CORE', 'SPECIALIST', 'AVIONICS']).optional(),
   duration: z.coerce.number().int().positive().optional(),
@@ -135,6 +136,10 @@ export const createCourseSchema = z.object({
   isActive: z.boolean().default(true),
   requiresPrerequisite: z.boolean().default(false),
   prerequisites: z.array(z.string()).optional(),
+  topics: z.array(z.string()).optional(),
+  estimatedStudyHoursMin: z.coerce.number().int().positive().optional().nullable(),
+  estimatedStudyHoursMax: z.coerce.number().int().positive().optional().nullable(),
+  applicableCategories: z.array(z.string()).optional(),
   syllabusUrl: z.string().optional(),
   materialsUrl: z.string().optional(),
 })

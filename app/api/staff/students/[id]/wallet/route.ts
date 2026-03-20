@@ -48,6 +48,47 @@ export const GET = withErrorHandler(
       },
     })
 
+    // Resolve staff names for transactions with createdBy
+    const staffIds = [...new Set(transactions.filter((t) => t.createdBy).map((t) => t.createdBy!))]
+    const staffUsers =
+      staffIds.length > 0
+        ? await prisma.user.findMany({
+            where: { id: { in: staffIds } },
+            select: { id: true, profile: { select: { firstName: true, lastName: true } } },
+          })
+        : []
+    const staffMap = Object.fromEntries(
+      staffUsers.map((u) => [
+        u.id,
+        u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : 'Staff',
+      ])
+    )
+
+    // Check for linked payment proofs on staff transactions
+    const txnIds = transactions.map((t) => t.id)
+    const linkedPayments =
+      txnIds.length > 0
+        ? await prisma.payment.findMany({
+            where: {
+              OR: [
+                { referenceId: { in: txnIds } },
+                { referenceType: 'wallet_transaction_proof', referenceId: { in: txnIds } },
+              ],
+            },
+            select: { referenceId: true, proofUrl: true },
+          })
+        : []
+    const proofMap = Object.fromEntries(
+      linkedPayments.filter((p) => p.proofUrl && p.referenceId).map((p) => [p.referenceId!, p.proofUrl!])
+    )
+
+    // Enrich transactions with staff names and proof URLs
+    const enrichedTransactions = transactions.map((t) => ({
+      ...t,
+      staffName: t.createdBy ? staffMap[t.createdBy] || null : null,
+      proofUrl: proofMap[t.id] || null,
+    }))
+
     return apiSuccess({
       wallet: {
         id: wallet.id,
@@ -65,7 +106,7 @@ export const GET = withErrorHandler(
           ? `${user.profile.firstName} ${user.profile.middleName || ''} ${user.profile.lastName}`.replace(/\s+/g, ' ').trim()
           : user.email,
       } : null,
-      transactions,
+      transactions: enrichedTransactions,
       meta: { total, limit, offset },
     })
   }

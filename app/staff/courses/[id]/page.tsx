@@ -11,6 +11,9 @@ import {
   Clock,
   DollarSign,
   CheckCircle2,
+  Tag,
+  Hourglass,
+  Shield,
 } from 'lucide-react'
 import CourseActionsMenu from '../../_components/CourseActionsMenu'
 import ExamComponentsSection from './_components/ExamComponentsSection'
@@ -73,7 +76,7 @@ export default async function CourseDetailsPage({ params }: Props) {
   const serializedCategories = serializePrisma(categories) as any
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-6xl">
       {/* Header */}
       <div className="mb-6">
         <Link
@@ -105,6 +108,11 @@ export default async function CourseDetailsPage({ params }: Props) {
               <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
                 {serializedCourse.name}
               </h1>
+              {serializedCourse.subtitle && (
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  {serializedCourse.subtitle}
+                </p>
+              )}
             </div>
           </div>
           <CourseActionsMenu courseId={serializedCourse.id} courseName={serializedCourse.name} />
@@ -126,35 +134,70 @@ export default async function CourseDetailsPage({ params }: Props) {
               {serializedCourse.description || 'No description provided for this course.'}
             </p>
 
-            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-2">
+            {/* Topics */}
+            {serializedCourse.topics?.length > 0 && (
+              <div className="mt-4 flex flex-wrap gap-2">
+                {serializedCourse.topics.map((t: string) => (
+                  <span
+                    key={t}
+                    className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400"
+                  >
+                    <Tag className="h-3 w-3" />
+                    {t}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Price</p>
-                <div className="flex items-center gap-2 font-black text-slate-700">
+                <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
                   <DollarSign className="h-4 w-4 text-[#4c9ded]" />
                   {serializedCourse.currency} {serializedCourse.price}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Duration</p>
-                <div className="flex items-center gap-2 font-black text-slate-700">
+                <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
                   <Clock className="h-4 w-4 text-[#4c9ded]" />
                   {serializedCourse.duration ? `${serializedCourse.duration} Hours` : 'N/A'}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Study Hours</p>
+                <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
+                  <Hourglass className="h-4 w-4 text-[#4c9ded]" />
+                  {serializedCourse.estimatedStudyHoursMin && serializedCourse.estimatedStudyHoursMax
+                    ? `${serializedCourse.estimatedStudyHoursMin}–${serializedCourse.estimatedStudyHoursMax} hrs`
+                    : 'N/A'}
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Category</p>
-                <div className="flex items-center gap-2 font-black text-slate-700">
+                <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
                   <GraduationCap className="h-4 w-4 text-[#4c9ded]" />
                   {serializedCourse.category?.name || 'Standard'}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Prerequisites</p>
-                <div className="flex items-center gap-2 font-black text-slate-700">
+                <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
                   <CheckCircle2 className="h-4 w-4 text-[#4c9ded]" />
                   {serializedCourse.requiresPrerequisite
                     ? serializedCourse.prerequisites.join(', ')
                     : 'None'}
+                </div>
+              </div>
+              <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
+                <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">
+                  Applicable Categories
+                </p>
+                <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
+                  <Shield className="h-4 w-4 text-[#4c9ded]" />
+                  {serializedCourse.applicableCategories?.length > 0
+                    ? serializedCourse.applicableCategories.join(', ')
+                    : 'All'}
                 </div>
               </div>
             </div>
