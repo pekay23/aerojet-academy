@@ -291,6 +291,7 @@ export default function StudentsTable({
                     : 'border-slate-200 bg-white text-slate-400 hover:border-slate-300'
                 }`}
                 title="Select All"
+                aria-label="Select all students"
               >
                 <CheckSquare className="h-3.5 w-3.5" />
               </button>
@@ -385,6 +386,7 @@ export default function StudentsTable({
                               ? 'text-aerojet-blue'
                               : 'hover:text-aerojet-blue text-slate-300 opacity-0 group-hover:opacity-100'
                           }`}
+                          aria-label={`Select ${fullName}`}
                         >
                           {selectedIds.includes(student.id) ? (
                             <CheckSquare className="h-4 w-4" />

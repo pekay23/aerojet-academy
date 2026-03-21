@@ -27,13 +27,14 @@ export default function TablePagination({
     <div className="flex items-center justify-between border-t border-slate-100 px-5 py-3 dark:border-slate-800">
       {/* Left: entries selector */}
       <div className="flex items-center gap-2">
-        <span className="text-xs text-slate-400 dark:text-slate-500">Show</span>
+        <span className="text-xs text-slate-500 dark:text-slate-400">Show</span>
         <select
           value={perPage}
           onChange={(e) => {
             onPerPageChange(Number(e.target.value))
             onPageChange(1)
           }}
+          aria-label="Rows per page"
           className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-600 outline-none transition-colors focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
         >
           {PER_PAGE_OPTIONS.map((n) => (
@@ -42,11 +43,11 @@ export default function TablePagination({
             </option>
           ))}
         </select>
-        <span className="text-xs text-slate-400 dark:text-slate-500">entries</span>
+        <span className="text-xs text-slate-500 dark:text-slate-400">entries</span>
       </div>
 
       {/* Center: page info */}
-      <span className="text-xs text-slate-400 dark:text-slate-500">
+      <span className="text-xs text-slate-500 dark:text-slate-400">
         {total === 0 ? 'No results' : `${start}–${end} of ${total.toLocaleString()}`}
       </span>
 

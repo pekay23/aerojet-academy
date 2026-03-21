@@ -100,7 +100,7 @@ async function getSupabasePrismaClient() {
     database: parsed.pathname.replace('/', ''),
     user: decodeURIComponent(parsed.username),
     password: decodeURIComponent(parsed.password),
-    ssl: { rejectUnauthorized: false },
+    ssl: true,
     max: 5,
   })
 
