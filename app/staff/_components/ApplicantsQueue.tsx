@@ -151,7 +151,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
             <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
               Applicant Queue
             </h1>
-            <p className="mt-1 text-sm text-slate-400">
+            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
               Review and approve new applicant registrations
             </p>
           </div>
@@ -250,7 +250,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                   <p className="text-2xl font-black text-slate-800 dark:text-slate-200">
                     {s.value}
                   </p>
-                  <p className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">
+                  <p className="text-[11px] font-bold tracking-wider text-slate-500 uppercase">
                     {s.label}
                   </p>
                 </div>
@@ -427,7 +427,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                               <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                                 {fullName}
                               </p>
-                              <p className="text-xs text-slate-400">{applicant.email}</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">{applicant.email}</p>
                             </div>
                           </div>
                         </td>
