@@ -65,6 +65,8 @@ model User {
   tuitionBookings       TuitionBooking[]
   createdTuitionRuns    TuitionRun[]         @relation("CreatedTuitionRuns")
   bookingEntitlements   BookingEntitlement[]
+  adminNotesAuthored    AdminNote[]          @relation("AdminNoteAuthor")
+  examExemptions        ExamExemption[]
   wallet                Wallet?
   settings              Json?                @default("{}")
 
@@ -129,6 +131,7 @@ model StudentProfile {
   updatedAt                 DateTime               @updatedAt
   pathwayId                 String?
   licenseTargets            StudentLicenseTarget[]
+  notes                     AdminNote[]
   academicYear              AcademicYear?          @relation(fields: [academicYearId], references: [id])
   pathwayRel                StudyPathwayModel?     @relation(fields: [pathwayId], references: [id])
   semester                  Semester?              @relation(fields: [semesterId], references: [id])
@@ -140,6 +143,37 @@ model StudentProfile {
   @@index([academicYearId])
   @@index([semesterId])
   @@map("student_profiles")
+}
+
+model AdminNote {
+  id               String         @id @default(cuid())
+  studentProfileId String
+  content          String         @db.Text
+  createdBy        String
+  updatedAt        DateTime       @updatedAt
+  createdAt        DateTime       @default(now())
+  studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
+  author           User           @relation("AdminNoteAuthor", fields: [createdBy], references: [id])
+
+  @@index([studentProfileId])
+  @@index([createdBy])
+  @@map("admin_notes")
+}
+
+model ExamExemption {
+  id                   String   @id @default(cuid())
+  userId               String
+  moduleCode           String
+  exemptedCategory     String
+  grantedByCategory    String
+  grantedByComponentId String?
+  notes                String?
+  createdAt            DateTime @default(now())
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, moduleCode, exemptedCategory])
+  @@index([userId])
+  @@map("exam_exemptions")
 }
 
 model InstructorProfile {
@@ -286,6 +320,7 @@ model Course {
   estimatedStudyHoursMin Int?
   estimatedStudyHoursMax Int?
   applicableCategories String[]
+  hasCombinedExam      Boolean                    @default(false)
   syllabusUrl          String?
   materialsUrl         String?
   createdAt            DateTime                   @default(now())
@@ -622,6 +657,7 @@ model ExamBooking {
   groupName          String?
   isResit            Boolean            @default(false)
   autoPoolId         String?
+  combinedGroupRef   String?
   cancellationReason String?
   cancelledAt        DateTime?
   cancelledBy        String?
@@ -646,6 +682,7 @@ model ExamBooking {
   @@index([examComponentId])
   @@index([moduleCode])
   @@index([autoPoolId])
+  @@index([combinedGroupRef])
   @@map("exam_bookings")
 }
 

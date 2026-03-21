@@ -129,14 +129,14 @@ export default function ExamComponentsSection({
       const url = isEditing
         ? `/api/staff/courses/${courseId}/exam-components/${editingId}`
         : `/api/staff/courses/${courseId}/exam-components`
-      const method = isEditing ? 'PUT' : 'POST'
+      const method = isEditing ? 'PATCH' : 'POST'
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, name, type, duration, individualPrice, poolPrice, questionCount: questionCount || undefined, categoryCode: categoryCode || undefined }),
       })
-      const data = await res.json()
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || 'Failed to save')
       setOpen(false)
       resetForm()
@@ -148,14 +148,19 @@ export default function ExamComponentsSection({
     }
   }
 
-  const handleDelete = async (componentId: string) => {
-    if (!confirm('Delete this exam component? This cannot be undone.')) return
+  const handleDelete = async (componentId: string, hasRelated = false) => {
+    const comp = components.find((c) => c.id === componentId)
+    const msg = hasRelated
+      ? `This component has ${comp?._count.exams || 0} exam(s) and ${comp?._count.bookings || 0} booking(s). Force-deleting will remove all related records. Continue?`
+      : 'Delete this exam component? This cannot be undone.'
+    if (!confirm(msg)) return
     setDeleting(componentId)
     try {
-      const res = await fetch(`/api/staff/courses/${courseId}/exam-components/${componentId}`, {
-        method: 'DELETE',
-      })
-      const data = await res.json()
+      const url = hasRelated
+        ? `/api/staff/courses/${courseId}/exam-components/${componentId}?force=true`
+        : `/api/staff/courses/${courseId}/exam-components/${componentId}`
+      const res = await fetch(url, { method: 'DELETE' })
+      const data = await res.json().catch(() => ({}))
       if (!res.ok) throw new Error(data.error || 'Failed to delete')
       router.refresh()
     } catch (err: any) {
@@ -205,14 +210,12 @@ export default function ExamComponentsSection({
           {Number(comp.poolPrice || 0).toFixed(0)}
         </span>
         <button
-          onClick={() => handleDelete(comp.id)}
-          disabled={
-            deleting === comp.id || comp._count.exams > 0 || comp._count.bookings > 0
-          }
+          onClick={() => handleDelete(comp.id, comp._count.exams > 0 || comp._count.bookings > 0)}
+          disabled={deleting === comp.id}
           className="rounded p-1 text-slate-400 transition-colors hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-30"
           title={
             comp._count.exams > 0 || comp._count.bookings > 0
-              ? 'Cannot delete: has exams or bookings'
+              ? 'Force-delete: has exams or bookings'
               : 'Delete'
           }
         >

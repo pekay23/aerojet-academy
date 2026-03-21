@@ -118,7 +118,7 @@ interface ExamBundle {
   status: string
 }
 
-type TabType = 'dashboard' | 'packages' | 'pools'
+type TabType = 'packages' | 'pools'
 
 const poolStatusLabel: Record<string, string> = {
   DRAFT: 'Upcoming',
@@ -142,7 +142,8 @@ export default function ExamOnlyPathwayPage() {
   const { update } = useSession()
   const searchParams = useSearchParams()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<TabType>('dashboard')
+  const [activeTab, setActiveTab] = useState<TabType>('packages')
+  const [showIndividualModal, setShowIndividualModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [wallet, setWallet] = useState<WalletInfo | null>(null)
   const [examComponents, setExamComponents] = useState<ExamComponent[]>([])
@@ -542,7 +543,6 @@ export default function ExamOnlyPathwayPage() {
       {/* Tab Navigation */}
       <div className="flex gap-2 border-b border-slate-200 dark:border-slate-700">
         {[
-          { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
           { id: 'packages', label: 'Exam Packages', icon: Package },
           { id: 'pools', label: 'Exam Bookings', icon: Users },
         ].map((tab) => (
@@ -561,222 +561,6 @@ export default function ExamOnlyPathwayPage() {
         ))}
       </div>
 
-      {/* Dashboard Tab */}
-      {activeTab === 'dashboard' && (
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Wallet Card */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 dark:text-slate-100">Wallet Balance</h3>
-              <CurrencyToggle value={displayCurrency} onChange={setDisplayCurrency} size="sm" />
-            </div>
-
-            {wallet ? (
-              <div className="space-y-4">
-                <div className="text-3xl font-black text-[#4c9ded]">
-                  {fmt(Number(wallet.balance))}
-                </div>
-                <div className="flex gap-4 text-sm">
-                  <div>
-                    <span className="text-slate-500">Available: </span>
-                    <span className="font-semibold text-green-600">
-                      {fmt(Number(wallet.availableBalance))}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-slate-500">Reserved: </span>
-                    <span className="font-semibold text-orange-600">
-                      {fmt(Number(wallet.reservedBalance))}
-                    </span>
-                  </div>
-                </div>
-                {displayCurrency !== 'EUR' && (
-                  <p className="text-[10px] text-slate-400">
-                    Converted at indicative bank rate. Please check with your bank for the official
-                    and approved rate when making payment.
-                  </p>
-                )}
-
-                {/* Top Up Section */}
-                <div className="mt-4 border-t border-slate-100 pt-4 dark:border-slate-800">
-                  <p className="mb-3 text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Top up your wallet (min {fmt(getLowestExamPrice())})
-                  </p>
-                  <div className="flex gap-2">
-                    {[300, 500, 1000, 2000].map((amount) => (
-                      <button
-                        key={amount}
-                        onClick={() => setTopUpAmount(amount)}
-                        className={`flex-1 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                          topUpAmount === amount
-                            ? 'bg-[#4c9ded] text-white'
-                            : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
-                        }`}
-                      >
-                        {fmt(amount)}
-                      </button>
-                    ))}
-                  </div>
-                  <button
-                    onClick={handleTopUp}
-                    disabled={processingPayment}
-                    className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-[#002a5c] px-6 py-3 text-sm font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
-                  >
-                    {processingPayment ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <CreditCard className="h-4 w-4" />
-                    )}
-                    Top Up {fmt(topUpAmount)}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center text-slate-500">
-                <p>No wallet found. Please contact support.</p>
-              </div>
-            )}
-          </div>
-
-          {/* My Bookings Card */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 dark:text-slate-100">My Exam Bookings</h3>
-              <Clock className="h-5 w-5 text-slate-400" />
-            </div>
-
-            {/* Pool Memberships */}
-            {memberships.length > 0 && (
-              <div className="mb-4">
-                <h4 className="mb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                  Pool Reservations
-                </h4>
-                <div className="space-y-2">
-                  {memberships.map((m) => (
-                    <div
-                      key={m.id}
-                      className="flex items-center justify-between rounded-lg bg-slate-50 p-3 dark:bg-slate-800"
-                    >
-                      <div>
-                        <p className="font-medium text-slate-900 dark:text-slate-100">
-                          {m.pool.name}
-                          {m.examComponent && (
-                            <span className="ml-2 text-sm text-slate-500">
-                              - {m.examComponent.course.code}
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {new Date(m.pool.examDate).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <span
-                        className={`rounded-full px-2 py-1 text-xs font-medium ${
-                          m.status === 'CONFIRMED'
-                            ? 'bg-green-100 text-green-700'
-                            : m.status === 'RESERVED'
-                              ? 'bg-orange-100 text-orange-700'
-                              : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        {m.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Individual Bookings */}
-            {bookings.length > 0 && (
-              <div>
-                <h4 className="mb-2 text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                  Individual Exams
-                </h4>
-                <div className="space-y-2">
-                  {bookings.map((b) => (
-                    <div
-                      key={b.id}
-                      className="flex items-center justify-between rounded-lg bg-slate-50 p-3 dark:bg-slate-800"
-                    >
-                      <div>
-                        <p className="font-medium text-slate-900 dark:text-slate-100">
-                          {b.examComponent?.course.code} - {b.examComponent?.course.name}
-                        </p>
-                        <p className="text-xs text-slate-500">
-                          {b.examDate ? new Date(b.examDate).toLocaleDateString() : 'Date TBD'}
-                        </p>
-                      </div>
-                      <span
-                        className={`rounded-full px-2 py-1 text-xs font-medium ${
-                          b.status === 'COMPLETED'
-                            ? 'bg-green-100 text-green-700'
-                            : b.status === 'APPROVED'
-                              ? 'bg-blue-100 text-blue-700'
-                              : b.status === 'PENDING'
-                                ? 'bg-orange-100 text-orange-700'
-                                : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        {b.status}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {memberships.length === 0 && bookings.length === 0 && (
-              <div className="text-center text-slate-500">
-                <BookOpen className="mx-auto mb-2 h-8 w-8 text-slate-300" />
-                <p>No exam bookings yet</p>
-                <p className="text-xs">Browse courses or pools to book your exams</p>
-              </div>
-            )}
-          </div>
-
-          {/* Quick Stats */}
-          <div className="rounded-2xl border border-slate-200 bg-white p-6 lg:col-span-2 dark:border-slate-800 dark:bg-slate-900">
-            <h3 className="mb-4 font-bold text-slate-900 dark:text-slate-100">Quick Actions</h3>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <button
-                onClick={() => setActiveTab('packages')}
-                className="flex items-center gap-4 rounded-xl border border-slate-200 p-4 transition-all hover:border-[#4c9ded] hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-blue-900/20"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
-                  <BookOpen className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-bold text-slate-900 dark:text-slate-100">
-                    Book Individual Exam
-                  </p>
-                  <p className="text-sm text-slate-500">Browse available exam components</p>
-                </div>
-                <ArrowRight className="ml-auto h-5 w-5 text-slate-400" />
-              </button>
-
-              <button
-                onClick={() => setActiveTab('pools')}
-                className="flex items-center gap-4 rounded-xl border border-slate-200 p-4 transition-all hover:border-[#4c9ded] hover:bg-blue-50 dark:border-slate-700 dark:hover:bg-blue-900/20"
-              >
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 dark:bg-purple-900/30">
-                  <Users className="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div className="text-left">
-                  <p className="font-bold text-slate-900 dark:text-slate-100">Join Exam Booking</p>
-                  <p className="text-sm text-slate-500">Join a booking for discounted rates</p>
-                </div>
-                <ArrowRight className="ml-auto h-5 w-5 text-slate-400" />
-              </button>
-            </div>
-          </div>
-
-          {/* Transaction History */}
-          <div className="lg:col-span-2">
-            <TransactionHistory transactions={walletTransactions} payments={walletPayments} />
-          </div>
-        </div>
-      )}
       {/* Packages Tab */}
       {activeTab === 'packages' && (
         <div className="space-y-6">
@@ -793,14 +577,10 @@ export default function ExamOnlyPathwayPage() {
                 <div className="mb-6 text-3xl font-black text-slate-900 dark:text-white">{fmt(520)}</div>
               </div>
               <button
-                onClick={() =>
-                  document
-                    .getElementById('individual-exams')
-                    ?.scrollIntoView({ behavior: 'smooth' })
-                }
+                onClick={() => setShowIndividualModal(true)}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-bold text-slate-700 transition-all hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
               >
-                Select Module Below
+                Select Module
               </button>
             </div>
 
@@ -922,117 +702,6 @@ export default function ExamOnlyPathwayPage() {
             </div>
           )}
 
-          <div
-            id="individual-exams"
-            className="mt-12 space-y-4 border-t border-slate-100 pt-12 dark:border-slate-800"
-          >
-            <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                Individual Exam Modules
-              </h2>
-              <p className="text-sm text-slate-500">
-                Select a module to book an individual seat ({fmt(520)})
-              </p>
-            </div>
-
-            {Object.values(groupedComponents)
-              .sort((a, b) =>
-                a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
-              )
-              .map((course) => (
-                <div
-                  key={course.code}
-                  className="rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
-                >
-                  <button
-                    onClick={() =>
-                      setExpandedCourse(expandedCourse === course.code ? null : course.code)
-                    }
-                    className="flex w-full items-center justify-between p-6 text-left"
-                  >
-                    <div>
-                      <h3 className="font-bold text-slate-900 dark:text-slate-100">
-                        {course.code}: {course.name}
-                      </h3>
-                      <p className="text-sm text-slate-500">
-                        {course.components.length} exam component(s) available
-                      </p>
-                    </div>
-                    {expandedCourse === course.code ? (
-                      <ChevronUp className="h-5 w-5 text-slate-400" />
-                    ) : (
-                      <ChevronDown className="h-5 w-5 text-slate-400" />
-                    )}
-                  </button>
-
-                  {expandedCourse === course.code && (
-                    <div className="border-t border-slate-100 px-6 pb-6 dark:border-slate-800">
-                      <div className="mt-4 space-y-3">
-                        {course.components
-                          .sort((a, b) =>
-                            a.code.localeCompare(b.code, undefined, {
-                              numeric: true,
-                              sensitivity: 'base',
-                            })
-                          )
-                          .map((component) => (
-                            <div
-                              key={component.id}
-                              className="flex items-center justify-between rounded-xl bg-slate-50 p-4 dark:bg-slate-800"
-                            >
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-bold text-slate-900 dark:text-slate-100">
-                                    {component.code} - {component.name}
-                                  </span>
-                                  <span
-                                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                                      component.type === 'MCQ'
-                                        ? 'bg-blue-100 text-blue-700'
-                                        : 'bg-purple-100 text-purple-700'
-                                    }`}
-                                  >
-                                    {component.type}
-                                  </span>
-                                </div>
-                                <p className="mt-1 text-sm text-slate-500">
-                                  Duration: {component.duration} minutes
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-3">
-                                <div className="text-right">
-                                  <p className="font-bold text-slate-900 dark:text-slate-100">
-                                    €{Number(component.individualPrice).toFixed(2)}
-                                  </p>
-                                  <p className="text-xs text-slate-500">Individual Fee</p>
-                                </div>
-                                <button
-                                  onClick={() => handleBookExamClick(component.id, 'INDIVIDUAL')}
-                                  disabled={bookingExam === component.id || !wallet}
-                                  className="rounded-lg bg-[#002a5c] px-4 py-2 text-sm font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
-                                >
-                                  {bookingExam === component.id ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    'Book Seat'
-                                  )}
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ))}
-
-            {Object.keys(groupedComponents).length === 0 && (
-              <div className="rounded-2xl border border-slate-200 bg-slate-50 p-12 text-center dark:border-slate-800 dark:bg-slate-900">
-                <BookOpen className="mx-auto mb-4 h-12 w-12 text-slate-300" />
-                <p className="text-slate-500">No exam components available at this time</p>
-              </div>
-            )}
-          </div>
         </div>
       )}
 
@@ -1201,7 +870,111 @@ export default function ExamOnlyPathwayPage() {
         </div>
       )}
 
-      {/* Module Selection Modal for Bundles */}
+      {/* Individual Module Selection Modal */}
+      {showIndividualModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
+            <div className="border-b border-slate-100 p-6 dark:border-slate-800">
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                Select Exam Module
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Choose an exam component to book an individual seat ({fmt(520)})
+              </p>
+            </div>
+
+            <div className="max-h-[50vh] overflow-y-auto p-6">
+              {Object.keys(groupedComponents).length === 0 ? (
+                <div className="py-8 text-center">
+                  <BookOpen className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+                  <p className="text-sm text-slate-500">No exam components available</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {Object.values(groupedComponents)
+                    .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
+                    .map((course) => {
+                      const isExpanded = expandedCourse === `ind_${course.code}`
+                      return (
+                        <div key={course.code} className="rounded-xl border border-slate-200 dark:border-slate-700">
+                          <button
+                            onClick={() => setExpandedCourse(isExpanded ? null : `ind_${course.code}`)}
+                            className="flex w-full items-center justify-between p-4 text-left"
+                          >
+                            <div>
+                              <span className="font-bold text-slate-900 dark:text-slate-100">
+                                {course.code}: {course.name}
+                              </span>
+                              <span className="ml-2 text-xs text-slate-400">
+                                {course.components.length} component(s)
+                              </span>
+                            </div>
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4 text-slate-400" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4 text-slate-400" />
+                            )}
+                          </button>
+                          {isExpanded && (
+                            <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-800">
+                              <div className="mt-3 space-y-2">
+                                {course.components
+                                  .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
+                                  .map((component) => (
+                                    <div
+                                      key={component.id}
+                                      className="flex items-center justify-between rounded-lg bg-slate-50 p-3 dark:bg-slate-800"
+                                    >
+                                      <div>
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                            {component.code} - {component.name}
+                                          </span>
+                                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${component.type === 'MCQ' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>
+                                            {component.type}
+                                          </span>
+                                        </div>
+                                        <p className="mt-0.5 text-xs text-slate-500">{component.duration}m</p>
+                                      </div>
+                                      <button
+                                        onClick={() => {
+                                          setShowIndividualModal(false)
+                                          handleBookExamClick(component.id, 'INDIVIDUAL')
+                                        }}
+                                        disabled={bookingExam === component.id || !wallet}
+                                        className="rounded-lg bg-[#002a5c] px-3 py-1.5 text-xs font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
+                                      >
+                                        {bookingExam === component.id ? (
+                                          <Loader2 className="h-3 w-3 animate-spin" />
+                                        ) : (
+                                          `Book ${fmt(Number(component.individualPrice))}`
+                                        )}
+                                      </button>
+                                    </div>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-slate-100 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
+              <button
+                onClick={() => setShowIndividualModal(false)}
+                className="w-full rounded-xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Module Selection Modal for Bundles (grouped by course) */}
       {selectedBundleType && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
@@ -1210,55 +983,94 @@ export default function ExamOnlyPathwayPage() {
                 Select {selectedBundleType === 'TWO_SEAT' ? '2' : '4'} Modules
               </h3>
               <p className="mt-1 text-sm text-slate-500">
-                Choose the modules you want to be booked into exam bookings for this package.
+                Choose the modules for your {selectedBundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'}.
+                <span className="ml-1 font-semibold text-indigo-600">
+                  {bundleSelectedModules.length}/{selectedBundleType === 'TWO_SEAT' ? 2 : 4} selected
+                </span>
               </p>
             </div>
 
             <div className="max-h-[50vh] overflow-y-auto p-6">
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {Object.values(groupedComponents)
                   .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
-                  .flatMap((course) => course.components)
-                  .map((component) => {
-                    const isSelected = bundleSelectedModules.includes(component.id)
+                  .map((course) => {
+                    const isExpanded = expandedCourse === `bun_${course.code}`
+                    const selectedInCourse = course.components.filter((c) =>
+                      bundleSelectedModules.includes(c.id)
+                    ).length
                     const requiredSeats = selectedBundleType === 'TWO_SEAT' ? 2 : 4
                     const isMaxSelected = bundleSelectedModules.length >= requiredSeats
 
                     return (
-                      <label
-                        key={component.id}
-                        className={`flex cursor-pointer items-start gap-4 rounded-xl border p-4 transition-colors ${
-                          isSelected
-                            ? 'border-indigo-500 bg-indigo-50/50 dark:border-indigo-400 dark:bg-indigo-900/20'
-                            : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600'
-                        } ${isMaxSelected && !isSelected ? 'cursor-not-allowed opacity-50 grayscale' : ''}`}
-                      >
-                        <input
-                          type="checkbox"
-                          className="mt-1 h-5 w-5 rounded-md border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                          checked={isSelected}
-                          disabled={isMaxSelected && !isSelected}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              if (!isMaxSelected) {
-                                setBundleSelectedModules([...bundleSelectedModules, component.id])
-                              }
-                            } else {
-                              setBundleSelectedModules(
-                                bundleSelectedModules.filter((id) => id !== component.id)
-                              )
-                            }
-                          }}
-                        />
-                        <div>
-                          <p className="font-bold text-slate-900 dark:text-slate-100">
-                            {component.course.code} - {component.name}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            {component.type} • {component.duration}m
-                          </p>
-                        </div>
-                      </label>
+                      <div key={course.code} className="rounded-xl border border-slate-200 dark:border-slate-700">
+                        <button
+                          onClick={() => setExpandedCourse(isExpanded ? null : `bun_${course.code}`)}
+                          className="flex w-full items-center justify-between p-4 text-left"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-slate-900 dark:text-slate-100">
+                              {course.code}: {course.name}
+                            </span>
+                            {selectedInCourse > 0 && (
+                              <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-bold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                                {selectedInCourse} selected
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-slate-400">{course.components.length}</span>
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4 text-slate-400" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4 text-slate-400" />
+                            )}
+                          </div>
+                        </button>
+                        {isExpanded && (
+                          <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-800">
+                            <div className="mt-3 space-y-2">
+                              {course.components
+                                .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
+                                .map((component) => {
+                                  const isSelected = bundleSelectedModules.includes(component.id)
+                                  return (
+                                    <label
+                                      key={component.id}
+                                      className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
+                                        isSelected
+                                          ? 'border-indigo-500 bg-indigo-50/50 dark:border-indigo-400 dark:bg-indigo-900/20'
+                                          : 'border-slate-100 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-600'
+                                      } ${isMaxSelected && !isSelected ? 'cursor-not-allowed opacity-50' : ''}`}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                                        checked={isSelected}
+                                        disabled={isMaxSelected && !isSelected}
+                                        onChange={(e) => {
+                                          if (e.target.checked && !isMaxSelected) {
+                                            setBundleSelectedModules([...bundleSelectedModules, component.id])
+                                          } else if (!e.target.checked) {
+                                            setBundleSelectedModules(bundleSelectedModules.filter((id) => id !== component.id))
+                                          }
+                                        }}
+                                      />
+                                      <div className="flex-1">
+                                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                          {component.code} - {component.name}
+                                        </p>
+                                        <p className="text-xs text-slate-500">
+                                          {component.type} &bull; {component.duration}m
+                                        </p>
+                                      </div>
+                                    </label>
+                                  )
+                                })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     )
                   })}
               </div>
@@ -1269,8 +1081,9 @@ export default function ExamOnlyPathwayPage() {
                 onClick={() => {
                   setSelectedBundleType(null)
                   setBundleSelectedModules([])
+                  setExpandedCourse(null)
                 }}
-                className="flex-1 rounded-xl border border-slate-200 bg-white py-3 pr-2 pl-2 text-center text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                className="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-center text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
               >
                 Cancel
               </button>
@@ -1279,9 +1092,9 @@ export default function ExamOnlyPathwayPage() {
                 disabled={
                   bundleSelectedModules.length !== (selectedBundleType === 'TWO_SEAT' ? 2 : 4)
                 }
-                className="flex-1 rounded-xl bg-indigo-600 py-3 pr-2 pl-2 text-center text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
+                className="flex-1 rounded-xl bg-indigo-600 py-3 text-center text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
               >
-                Confirm & Purchase
+                Confirm & Purchase ({fmt(selectedBundleType === 'TWO_SEAT' ? 980 : 1900)})
               </button>
             </div>
           </div>

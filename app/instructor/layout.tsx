@@ -32,18 +32,22 @@ export default async function InstructorLayout({ children }: { children: React.R
   const pendingCount = await getPendingGradingCount()
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
       <InstructorSidebar
         userName={userName}
         userRole={userRole}
         userImage={user.image || undefined}
         pendingCount={pendingCount}
       />
-      <main id="main-content" className="min-h-screen min-w-0 flex-1 overflow-x-hidden">
-        <div className="mx-auto max-w-7xl p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
-          <PortalHeader>
-            <BreadcrumbNav />
-          </PortalHeader>
+      <main id="main-content" className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="sticky top-0 z-30 border-b border-slate-100 bg-slate-50/80 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-900/80">
+          <div className="mx-auto max-w-7xl px-4 py-3 sm:px-8 lg:px-8">
+            <PortalHeader>
+              <BreadcrumbNav />
+            </PortalHeader>
+          </div>
+        </div>
+        <div className="mx-auto max-w-7xl p-4 sm:p-8 lg:px-8 lg:py-6">
           {children}
         </div>
       </main>

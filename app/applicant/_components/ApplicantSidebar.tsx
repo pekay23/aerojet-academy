@@ -6,25 +6,34 @@ import {
   ClipboardList,
   BookOpen,
   FileCheck,
+  FileText,
   User,
   Wallet,
   GraduationCap,
+  Bell,
 } from 'lucide-react'
 
 const allLinks = [
   { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { label: 'My Application', href: '/application/status', icon: ClipboardList },
+  { label: 'My Application', href: '/application/status', icon: FileText },
   { label: 'Wallet', href: '/wallet-top-up', icon: Wallet },
   { label: 'Browse Courses', href: '/courses', icon: BookOpen },
-  { label: 'Exam Bookings', href: '/exam-bookings', icon: FileCheck },
+  { label: 'Exam Bookings', href: '/exam-bookings', icon: ClipboardList },
+  { label: 'Notifications', href: '/notifications', icon: Bell },
 ]
 
 const examOnlyLinks = [
-  { label: 'Dashboard', href: '/exam-only', icon: LayoutDashboard },
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'Wallet', href: '/wallet-top-up', icon: Wallet },
+  { label: 'Exams', href: '/exam-only', icon: ClipboardList },
+  { label: 'Courses', href: '/courses', icon: BookOpen },
+  { label: 'Notifications', href: '/notifications', icon: Bell },
 ]
 
 const restrictedLinks = [
-  { label: 'Dashboard', href: '/exam-only', icon: LayoutDashboard },
+  { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { label: 'My Application', href: '/application/status', icon: FileText },
+  { label: 'Notifications', href: '/notifications', icon: Bell },
 ]
 
 interface ApplicantSidebarProps {

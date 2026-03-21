@@ -72,7 +72,7 @@ export default async function PurchasePage({ params }: Props) {
 
     // If they landed here without enough money, send them back to top up
     if (balance < examPrice) {
-      redirect('/applicant/exam-only?tab=dashboard')
+      redirect('/applicant/wallet-top-up')
     }
   }
 
