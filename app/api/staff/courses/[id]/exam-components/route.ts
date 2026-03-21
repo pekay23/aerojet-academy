@@ -4,12 +4,24 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
+// Helper: resolve param that could be a database ID or course code
+async function resolveCourseId(param: string) {
+  const course = await prisma.course.findFirst({
+    where: { OR: [{ id: param }, { code: param }] },
+    select: { id: true },
+  })
+  return course?.id ?? null
+}
+
 // GET /api/staff/courses/[id]/exam-components
 export const GET = withErrorHandler(
   async (req: NextRequest, context?: { params: Record<string, string> }) => {
     await requireStaff()
-    const courseId = context?.params?.id
-    if (!courseId) return apiError('Course ID required')
+    const param = context?.params?.id
+    if (!param) return apiError('Course ID required')
+
+    const courseId = await resolveCourseId(param)
+    if (!courseId) return apiError('Course not found', 404)
 
     const components = await prisma.examComponent.findMany({
       where: { courseId },
@@ -27,8 +39,11 @@ export const GET = withErrorHandler(
 export const POST = withErrorHandler(
   async (req: NextRequest, context?: { params: Record<string, string> }) => {
     const staff = await requireStaff()
-    const courseId = context?.params?.id
-    if (!courseId) return apiError('Course ID required')
+    const param = context?.params?.id
+    if (!param) return apiError('Course ID required')
+
+    const courseId = await resolveCourseId(param)
+    if (!courseId) return apiError('Course not found', 404)
 
     const body = await req.json()
     const { code, name, type, duration, individualPrice, poolPrice, questionCount, categoryCode } = body
@@ -40,9 +55,6 @@ export const POST = withErrorHandler(
     if (!['MCQ', 'ESSAY'].includes(type)) {
       return apiError('Type must be MCQ or ESSAY')
     }
-
-    const course = await prisma.course.findUnique({ where: { id: courseId } })
-    if (!course) return apiError('Course not found', 404)
 
     const existing = await prisma.examComponent.findUnique({ where: { code } })
     if (existing) return apiError(`Exam component with code "${code}" already exists`)

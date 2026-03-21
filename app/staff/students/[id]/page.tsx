@@ -266,6 +266,8 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
         semesters={JSON.parse(JSON.stringify(semesters))}
         studyPathways={JSON.parse(JSON.stringify(studyPathways))}
         initialTab={tab || 'profile'}
+        staffId={session.user.id}
+        staffRole={session.user.role}
       />
     </div>
   )

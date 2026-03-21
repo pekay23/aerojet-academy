@@ -4,17 +4,21 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Wallet, PlusCircle, History, CreditCard } from 'lucide-react'
 import { motion } from 'framer-motion'
 
-const TABS = [
+const ALL_TABS = [
   { key: 'overview', label: 'Overview', icon: Wallet },
   { key: 'top-up', label: 'Top Up', icon: PlusCircle },
   { key: 'payments', label: 'Payments', icon: CreditCard },
   { key: 'transactions', label: 'Transactions', icon: History },
 ] as const
 
-export default function WalletTabs({ children }: { children: React.ReactNode }) {
+export default function WalletTabs({ children, enrollmentType }: { children: React.ReactNode; enrollmentType?: string | null }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentTab = searchParams.get('tab') || 'overview'
+
+  // Hide Payments tab for MODULAR and EXAM_ONLY students
+  const hideMilestones = enrollmentType === 'EXAM_ONLY' || enrollmentType === 'MODULAR'
+  const tabs = hideMilestones ? ALL_TABS.filter((t) => t.key !== 'payments') : ALL_TABS
 
   const setTab = (tab: string) => {
     router.push(`/student/wallet?tab=${tab}`, { scroll: false })
@@ -33,7 +37,7 @@ export default function WalletTabs({ children }: { children: React.ReactNode }) 
 
       {/* Tab Bar */}
       <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="tablist" aria-label="Wallet sections">
-        {TABS.map((t) => {
+        {tabs.map((t) => {
           const Icon = t.icon
           const isActive = currentTab === t.key
           return (

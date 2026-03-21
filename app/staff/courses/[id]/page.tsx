@@ -33,8 +33,8 @@ export default async function CourseDetailsPage({ params }: Props) {
 
   const { id } = await params
 
-  const course = await prisma.course.findUnique({
-    where: { id },
+  const course = await prisma.course.findFirst({
+    where: { OR: [{ id }, { code: id }] },
     include: {
       category: true,
       examComponents: {
@@ -115,7 +115,7 @@ export default async function CourseDetailsPage({ params }: Props) {
               )}
             </div>
           </div>
-          <CourseActionsMenu courseId={serializedCourse.id} courseName={serializedCourse.name} />
+          <CourseActionsMenu courseId={serializedCourse.id} courseCode={serializedCourse.code} courseName={serializedCourse.name} />
         </div>
       </div>
 

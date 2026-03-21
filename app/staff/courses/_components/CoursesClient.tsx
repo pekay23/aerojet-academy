@@ -50,15 +50,35 @@ function isEasaCategory(cat: Category) {
   return n.includes('EASA') || n.includes('MODULE')
 }
 
+const STORAGE_KEY_PINNED = 'aerojet_courses_pinned'
+const STORAGE_KEY_COLLAPSED = 'aerojet_courses_collapsed'
+
+function readSet(key: string): Set<string> | null {
+  if (typeof window === 'undefined') return null
+  try {
+    const val = sessionStorage.getItem(key)
+    return val ? new Set(JSON.parse(val)) : null
+  } catch { return null }
+}
+
+function writeSet(key: string, set: Set<string>) {
+  if (typeof window === 'undefined') return
+  sessionStorage.setItem(key, JSON.stringify([...set]))
+}
+
 export default function CoursesClient({ categories }: Props) {
   // Which category IDs are manually pinned on top
   const [pinnedIds, setPinnedIds] = useState<Set<string>>(() => {
+    const stored = readSet(STORAGE_KEY_PINNED)
+    if (stored && stored.size > 0) return stored
     const easaIds = categories.filter(isEasaCategory).map((c) => c.id)
     return new Set(easaIds)
   })
 
-  // Which categories are collapsed
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set())
+  // Which categories are collapsed — persisted across navigation
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => {
+    return readSet(STORAGE_KEY_COLLAPSED) ?? new Set()
+  })
 
   // Filters
   const [search, setSearch] = useState('')
@@ -83,6 +103,7 @@ export default function CoursesClient({ categories }: Props) {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
       else next.add(id)
+      writeSet(STORAGE_KEY_PINNED, next)
       return next
     })
   }
@@ -92,6 +113,7 @@ export default function CoursesClient({ categories }: Props) {
       const next = new Set(prev)
       if (next.has(id)) next.delete(id)
       else next.add(id)
+      writeSet(STORAGE_KEY_COLLAPSED, next)
       return next
     })
   }
@@ -444,7 +466,7 @@ export default function CoursesClient({ categories }: Props) {
                                 </div>
                                 <div>
                                   <Link
-                                    href={`/staff/courses/${course.id}`}
+                                    href={`/staff/courses/${course.code}`}
                                     className="font-bold text-slate-900 hover:text-[#4c9ded] dark:text-slate-100"
                                   >
                                     {course.name}
@@ -497,7 +519,7 @@ export default function CoursesClient({ categories }: Props) {
 
                             {/* Actions */}
                             <td className="px-6 py-4 text-right">
-                              <CourseActionsMenu courseId={course.id} courseName={course.name} />
+                              <CourseActionsMenu courseId={course.id} courseCode={course.code} courseName={course.name} />
                             </td>
                           </tr>
                         ))

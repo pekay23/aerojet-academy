@@ -16,3 +16,21 @@ export function calculateLetterGrade(percentage: number): string {
 export function isPassing(percentage: number): boolean {
   return percentage >= EASA_PASSING_GRADE
 }
+
+/**
+ * Evaluate a combined MCQ + Essay exam result.
+ * Both components must meet the EASA passing grade (75%) to pass overall.
+ * If either fails, the entire combined exam requires a resit.
+ */
+export function evaluateCombinedExamResult(mcqPercentage: number, essayPercentage: number) {
+  const mcqPassed = mcqPercentage >= EASA_PASSING_GRADE
+  const essayPassed = essayPercentage >= EASA_PASSING_GRADE
+  return {
+    passed: mcqPassed && essayPassed,
+    mcqPassed,
+    essayPassed,
+    mcqPercentage,
+    essayPercentage,
+    requiresResit: !mcqPassed || !essayPassed,
+  }
+}

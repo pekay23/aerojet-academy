@@ -29,6 +29,8 @@ interface Props {
   semesters: any[]
   studyPathways: any[]
   initialTab: string
+  staffId: string
+  staffRole: string
 }
 
 export default function StudentDetailTabs({
@@ -39,6 +41,8 @@ export default function StudentDetailTabs({
   semesters,
   studyPathways,
   initialTab,
+  staffId,
+  staffRole,
 }: Props) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState<TabKey>(
@@ -112,7 +116,7 @@ export default function StudentDetailTabs({
           )}
           {activeTab === 'wallet' && <WalletTab student={student} onRefresh={handleRefresh} />}
           {activeTab === 'academic' && <AcademicTab student={student} onRefresh={handleRefresh} />}
-          {activeTab === 'notes' && <AdminNotesTab student={student} onRefresh={handleRefresh} />}
+          {activeTab === 'notes' && <AdminNotesTab student={student} onRefresh={handleRefresh} staffId={staffId} staffRole={staffRole} />}
         </div>
       </div>
     </div>

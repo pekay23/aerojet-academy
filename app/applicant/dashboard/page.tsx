@@ -156,9 +156,9 @@ export default async function ApplicantDashboardPage() {
     redirect('/student')
   }
 
-  // If EXAM_ONLY pathway and registration is approved, redirect to exam-only pathway
+  // If EXAM_ONLY pathway and registration is approved, redirect to exam-only dashboard
   if (applicant.programmeChoice === 'EXAM_ONLY' && applicant.status === 'ACTIVE') {
-    redirect('/applicant/exam-only')
+    redirect('/applicant/exam-only/dashboard')
   }
 
   const firstName = applicant.profile?.firstName ?? 'Applicant'

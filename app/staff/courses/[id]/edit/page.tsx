@@ -14,8 +14,8 @@ export default async function EditCoursePage({ params }: Props) {
   await requireStaff()
   const { id } = await params
 
-  const course = await prisma.course.findUnique({
-    where: { id },
+  const course = await prisma.course.findFirst({
+    where: { OR: [{ id }, { code: id }] },
   })
 
   if (!course) notFound()
