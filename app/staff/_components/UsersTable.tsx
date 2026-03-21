@@ -245,6 +245,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
+            aria-label="Filter by status"
             className="focus:ring-aerojet-sky rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
           >
             {STATUS_FILTERS.map((s) => (
@@ -258,6 +259,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value)}
+            aria-label="Filter by role"
             className="focus:ring-aerojet-sky rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
           >
             {ROLE_FILTERS.map((r) => (
@@ -297,6 +299,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                       }
                     }}
                     className="hover:text-aerojet-blue text-slate-400 transition-colors"
+                    aria-label="Select all users"
                   >
                     {selectedIds.length === users.length && users.length > 0 ? (
                       <CheckSquare className="text-aerojet-blue h-4 w-4" />
@@ -308,7 +311,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                 {['User', 'Role', 'Status', 'Joined', 'Actions'].map((h) => (
                   <th
                     key={h}
-                    className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase"
+                    className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-500 uppercase"
                   >
                     {h}
                   </th>
@@ -362,6 +365,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                             )
                           }}
                           className="hover:text-aerojet-blue text-slate-300 transition-colors"
+                          aria-label={`Select ${fullName}`}
                         >
                           {selectedIds.includes(user.id) ? (
                             <CheckSquare className="text-aerojet-blue h-4 w-4" />

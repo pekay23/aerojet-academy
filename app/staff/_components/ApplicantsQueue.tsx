@@ -323,6 +323,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                         }
                       }}
                       className="hover:text-aerojet-blue text-slate-400 transition-colors"
+                      aria-label="Select all applicants"
                     >
                       {selectedIds.length === paged.length && paged.length > 0 ? (
                         <CheckSquare className="text-aerojet-blue h-4 w-4" />
@@ -335,7 +336,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                     (h) => (
                       <th
                         key={h}
-                        className="px-6 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase"
+                        className="px-6 py-3 text-[10px] font-black tracking-wider text-slate-500 uppercase"
                       >
                         {h}
                       </th>
@@ -400,6 +401,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                               )
                             }}
                             className="hover:text-aerojet-blue text-slate-300 transition-colors"
+                            aria-label={`Select ${fullName}`}
                           >
                             {selectedIds.includes(applicant.id) ? (
                               <CheckSquare className="text-aerojet-blue h-4 w-4" />

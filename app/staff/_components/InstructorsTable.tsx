@@ -196,6 +196,7 @@ export default function InstructorsTable() {
                       }
                     }}
                     className="hover:text-aerojet-blue text-slate-400 transition-colors"
+                    aria-label="Select all instructors"
                   >
                     {selectedIds.length ===
                       instructors.slice((page - 1) * perPage, page * perPage).length &&
@@ -257,6 +258,7 @@ export default function InstructorsTable() {
                           )
                         }}
                         className="hover:text-aerojet-blue text-slate-300 transition-colors"
+                        aria-label={`Select ${instructor.profile ? `${instructor.profile.firstName} ${instructor.profile.lastName}` : instructor.email}`}
                       >
                         {selectedIds.includes(instructor.id) ? (
                           <CheckSquare className="text-aerojet-blue h-4 w-4" />
