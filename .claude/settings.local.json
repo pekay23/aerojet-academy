@@ -7,7 +7,13 @@
       "Bash(npx dotenv -e .env -- npx tsx prisma/seed.ts)",
       "Bash(grep -r \"PUT\" /c/Projects/aerojet-academy/app/api/staff/courses/[id]/exam-components/)",
       "Bash(node -e \"console.log\\(encodeURIComponent\\(''Morph232#234''\\)\\)\")",
-      "Bash(node -e \":*)"
+      "Bash(node -e \":*)",
+      "Bash(find \"d:\\\\Projects\\\\raymond-gray-platform\\\\src\\\\app\\\\\\(portal\\)\\\\admin\\\\discovery\" -type f -name \"*.tsx\" -o -name \"*.ts\" -o -name \"*.json\" -o -name \"*.md\")",
+      "Bash(ls -la \"d:\\\\Projects\\\\raymond-gray-platform\\\\src\\\\app\\\\\\(portal\\)\\\\admin\\\\discovery\")",
+      "Read(//d/Projects/raymond-gray-platform/**)",
+      "Read(//d/Projects/raymond-gray-platform/src/**)",
+      "Read(//d/Projects/raymond-gray-platform/src/app/api/**)",
+      "Bash(git -C \"d:\\\\Projects\\\\raymond-gray-platform\" log --oneline -5)"
     ]
   }
 }
