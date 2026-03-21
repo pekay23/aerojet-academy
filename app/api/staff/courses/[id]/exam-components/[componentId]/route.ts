@@ -54,22 +54,114 @@ export const DELETE = withErrorHandler(
 
     const component = await prisma.examComponent.findUnique({
       where: { id: componentId },
-      include: { _count: { select: { exams: true, bookings: true } } },
+      include: {
+        _count: { select: { exams: true, bookings: true, poolMemberships: true } },
+      },
     })
     if (!component) return apiNotFound('Exam component not found')
 
-    if (component._count.exams > 0 || component._count.bookings > 0) {
-      return apiError('Cannot delete exam component that has exams or bookings')
+    const url = new URL(req.url)
+    const transfer = url.searchParams.get('transfer')
+    const force = url.searchParams.get('force') === 'true'
+    const hasRelated = component._count.exams > 0 || component._count.bookings > 0
+
+    // Auto-transfer: move bookings to a compatible component, then delete
+    if (hasRelated && transfer === 'auto') {
+      const courseId = context?.params?.id
+
+      // Find a suitable replacement component (same course, same type, different ID)
+      const replacement = await prisma.examComponent.findFirst({
+        where: {
+          courseId,
+          type: component.type,
+          id: { not: componentId },
+        },
+      })
+
+      if (!replacement) {
+        return apiError(
+          'No compatible component found for auto-transfer. Create a replacement first.',
+          409
+        )
+      }
+
+      await prisma.$transaction(async (tx) => {
+        // Transfer bookings to replacement
+        await tx.examBooking.updateMany({
+          where: { examComponentId: componentId },
+          data: {
+            examComponentId: replacement.id,
+            moduleCode: replacement.code,
+          },
+        })
+
+        // Transfer pool memberships to replacement
+        await tx.poolMembership.updateMany({
+          where: { examComponentId: componentId },
+          data: { examComponentId: replacement.id },
+        })
+
+        // Delete remaining related records and the component
+        await tx.exam.deleteMany({ where: { examComponentId: componentId } })
+        await tx.examComponent.delete({ where: { id: componentId } })
+      })
+
+      await createAuditLog({
+        action: AuditAction.DELETE,
+        entity: 'ExamComponent',
+        entityId: componentId,
+        userId: staff.id,
+        details: {
+          code: component.code,
+          transfer: 'auto',
+          transferredTo: replacement.code,
+          transferredToId: replacement.id,
+          bookingsTransferred: component._count.bookings,
+          poolMembershipsTransferred: component._count.poolMemberships,
+          examsDeleted: component._count.exams,
+        },
+      })
+
+      return apiSuccess({
+        message: 'Exam component deleted, bookings transferred',
+        transferredTo: replacement.code,
+        bookingsTransferred: component._count.bookings,
+      })
     }
 
-    await prisma.examComponent.delete({ where: { id: componentId } })
+    if (hasRelated && !force) {
+      return apiError(
+        `Cannot delete: has ${component._count.exams} exam(s) and ${component._count.bookings} booking(s). Use force=true to cascade delete or transfer=auto to transfer bookings.`,
+        409
+      )
+    }
+
+    if (hasRelated && force) {
+      await prisma.$transaction(async (tx) => {
+        // Delete in dependency order
+        await tx.poolMembership.deleteMany({ where: { examComponentId: componentId } })
+        await tx.examBooking.deleteMany({ where: { examComponentId: componentId } })
+        await tx.exam.deleteMany({ where: { examComponentId: componentId } })
+        await tx.examComponent.delete({ where: { id: componentId } })
+      })
+    } else {
+      await prisma.examComponent.delete({ where: { id: componentId } })
+    }
 
     await createAuditLog({
       action: AuditAction.DELETE,
       entity: 'ExamComponent',
       entityId: componentId,
       userId: staff.id,
-      details: { code: component.code },
+      details: {
+        code: component.code,
+        force,
+        cascaded: hasRelated ? {
+          exams: component._count.exams,
+          bookings: component._count.bookings,
+          poolMemberships: component._count.poolMemberships,
+        } : undefined,
+      },
     })
 
     return apiSuccess({ message: 'Exam component deleted' })

@@ -119,7 +119,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                 href={
                   canAffordPool
                     ? `/applicant/courses/${id}/purchase`
-                    : '/applicant/exam-only?tab=dashboard'
+                    : '/applicant/wallet-top-up'
                 }
                 className={`inline-flex items-center justify-center rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-lg transition-all active:scale-95 ${
                   canAffordPool
@@ -354,7 +354,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                 <Link
                   href={
                     isExamOnly && !canAffordPool
-                      ? '/applicant/exam-only?tab=dashboard'
+                      ? '/applicant/wallet-top-up'
                       : `/applicant/courses/${id}/purchase`
                   }
                   className={`mt-6 flex w-full items-center justify-center rounded-xl py-3 text-sm font-black text-white shadow-lg transition-all active:scale-[0.98] ${

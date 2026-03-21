@@ -21,7 +21,15 @@
       "Bash(find d:Projectsaerojet-academyappapistaffexams -name *.ts)",
       "Bash(find /d/Projects/aerojet-academy/app/staff/students -type f -name *Tab* -o -name *tab*)",
       "Bash(wc -l /d/Projects/aerojet-academy/app/student/exams/_components/*.tsx)",
-      "Bash(find /d/Projects/aerojet-academy -type f -name *ExamsTab* -o -name *WalletTab*)"
+      "Bash(find /d/Projects/aerojet-academy -type f -name *ExamsTab* -o -name *WalletTab*)",
+      "Bash(grep -E \"\\\\.\\(ts|js|json\\)$\")",
+      "Bash(wc -l /d/Projects/aerojet-academy/app/api/staff/courses/[id]/route.ts)",
+      "Bash(grep -r \"categoryHierarchy\\\\|higher.*category\\\\|lower.*category\\\\|supersede.*exam\\\\|exempt.*exam\\\\|waive.*exam\" /d/Projects/aerojet-academy/app /d/Projects/aerojet-academy/lib --include=*.ts --include=*.tsx)",
+      "Bash(grep -E \"\\\\.\\(tsx|ts\\)$\")",
+      "Bash(find /d/Projects/aerojet-academy/app/applicant -type d -name *[*])",
+      "Bash(grep -r \"from.*lib/supabase\\\\|import.*supabase\" /d/Projects/aerojet-academy/app --include=*.ts --include=*.tsx)",
+      "Bash(npm run:*)",
+      "Bash(node -e \":*)"
     ],
     "additionalDirectories": [
       "d:\\Projects\\aerojet-academy\\app\\api\\staff\\students\\[id]\\wallet\\[txnId]"

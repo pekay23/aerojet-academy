@@ -48,7 +48,7 @@ export function CourseCategoryFilter({ categories, currentCategory }: CourseCate
           {categories.map((cat) => (
             <SelectItem
               key={cat.id}
-              value={cat.id}
+              value={cat.name}
               className="text-[10px] font-black tracking-widest text-[#002a5c] uppercase focus:bg-slate-50 dark:text-slate-300 dark:focus:bg-slate-800"
             >
               {cat.name}

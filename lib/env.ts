@@ -20,6 +20,14 @@ const envSchema = z.object({
   NEXT_PUBLIC_SANITY_PROJECT_ID: z.string().min(1),
   NEXT_PUBLIC_SANITY_DATASET: z.string().min(1).default('production'),
 
+  // Supabase (Optional - for backup/replica)
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
+  SUPABASE_DATABASE_URL: z.string().url().optional(),
+  SUPABASE_BACKUP_ENABLED: z.boolean().optional().default(false),
+  SUPABASE_BACKUP_BUCKET: z.string().optional().default('backups'),
+
   // Application
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   NEXT_PUBLIC_APP_URL: z.string().url(),
@@ -46,6 +54,12 @@ const processEnv = {
   UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID,
   NEXT_PUBLIC_SANITY_PROJECT_ID: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
   NEXT_PUBLIC_SANITY_DATASET: process.env.NEXT_PUBLIC_SANITY_DATASET,
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  SUPABASE_DATABASE_URL: process.env.SUPABASE_DATABASE_URL,
+  SUPABASE_BACKUP_ENABLED: process.env.SUPABASE_BACKUP_ENABLED === 'true',
+  SUPABASE_BACKUP_BUCKET: process.env.SUPABASE_BACKUP_BUCKET,
   NODE_ENV: process.env.NODE_ENV,
   NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   CRON_SECRET: process.env.CRON_SECRET,

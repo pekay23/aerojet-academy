@@ -188,7 +188,7 @@ export default async function WalletPage({
   const isCredit = (type: string) => ['TOP_UP', 'RELEASE', 'REFUND', 'ADJUSTMENT'].includes(type)
 
   return (
-    <WalletTabs>
+    <WalletTabs enrollmentType={studentProfile?.enrollmentType}>
       {/* ── Overview Tab ── */}
       {tab === 'overview' && (
         <div className="space-y-6">
@@ -344,7 +344,7 @@ export default async function WalletPage({
           </div>
 
           {/* Payment Milestones for Full-Time Students */}
-          {ftEnrollment && ftEnrollment.milestones.length > 0 && studentProfile?.enrollmentType !== 'EXAM_ONLY' && (
+          {ftEnrollment && ftEnrollment.milestones.length > 0 && studentProfile?.enrollmentType !== 'EXAM_ONLY' && studentProfile?.enrollmentType !== 'MODULAR' && (
             <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 sm:h-10 sm:w-10 dark:bg-indigo-900/30 dark:text-indigo-400">
