@@ -85,7 +85,7 @@ function LiveClock() {
   if (!now) return null
 
   return (
-    <span className="text-xs font-medium text-slate-400 dark:text-slate-500">
+    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
       {now.toLocaleDateString('en-GB', {
         weekday: 'short',
         day: 'numeric',
@@ -161,7 +161,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
         {welcomeMsg && (
           <div className="hidden max-w-md items-center gap-2 xl:flex">
             <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
-            <p className="truncate text-xs text-slate-400 italic dark:text-slate-500">
+            <p className="truncate text-xs text-slate-500 italic dark:text-slate-400">
               {userName && <span className="not-italic font-medium text-slate-500 dark:text-slate-400">Hi {userName}</span>}
               {userName && <span className="mx-1">—</span>}
               {welcomeMsg}

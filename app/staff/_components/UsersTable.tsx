@@ -391,7 +391,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                             <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                               {fullName}
                             </p>
-                            <p className="text-xs text-slate-400">{user.email}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400">{user.email}</p>
                           </div>
                         </div>
                       </td>

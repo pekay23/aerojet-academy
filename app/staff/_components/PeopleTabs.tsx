@@ -45,7 +45,7 @@ export default function PeopleTabs({
         <h1 className="text-2xl font-black tracking-tight text-[#002a5c] uppercase dark:text-white">
           People
         </h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
           Manage all users, applicants, students, and instructors
         </p>
       </div>
