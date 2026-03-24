@@ -45,17 +45,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     },
   })
 
-  // Send the email to personal email
-  await sendPasswordResetEmail(user.email, user.profile?.firstName || 'User', token).catch(
+  // Send the email to personal email (primary)
+  const targetEmail = user.personalEmail || user.email
+  await sendPasswordResetEmail(targetEmail, user.profile?.firstName || 'User', token).catch(
     console.error
   )
-
-  // Send to academy email if exists
-  if (user.academyEmail) {
-    await sendPasswordResetEmail(user.academyEmail, user.profile?.firstName || 'User', token).catch(
-      console.error
-    )
-  }
 
   await createAuditLog({
     action: AuditAction.UPDATE,

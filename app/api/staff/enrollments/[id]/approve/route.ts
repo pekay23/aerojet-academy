@@ -71,13 +71,7 @@ export const POST = withErrorHandler(
           await sendStudentPromotionEmail(targetEmail, user.profile.firstName, studentId).catch(
             console.error
           )
-          if (user.academyEmail && user.academyEmail !== targetEmail) {
-            await sendStudentPromotionEmail(
-              user.academyEmail,
-              user.profile.firstName,
-              studentId
-            ).catch(console.error)
-          }
+          // Academy email domain not active — skip sending there
         }
       }
 
