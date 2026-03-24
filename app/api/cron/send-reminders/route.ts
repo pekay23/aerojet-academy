@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
     for (const pool of pools7Day) {
       for (const membership of pool.memberships) {
         try {
-          const email = membership.user.academyEmail || membership.user.email
+          const email = membership.user.personalEmail || membership.user.email
           const name = membership.user.profile?.firstName || 'Student'
           const moduleLabel = membership.examComponent?.course?.code ?? 'Module'
 
@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
     for (const pool of pools1Day) {
       for (const membership of pool.memberships) {
         try {
-          const email = membership.user.academyEmail || membership.user.email
+          const email = membership.user.personalEmail || membership.user.email
           const name = membership.user.profile?.firstName || 'Student'
           const moduleLabel = membership.examComponent?.course?.code ?? 'Module'
 

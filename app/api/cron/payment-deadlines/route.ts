@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
 
           for (const booking of pendingBookings) {
             try {
-              const email = booking.user.academyEmail || booking.user.email
+              const email = booking.user.personalEmail || booking.user.email
               const name = booking.user.profile?.firstName || 'Student'
               const moduleLabel = booking.examComponent?.course?.code ?? 'Module'
 
