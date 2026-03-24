@@ -85,7 +85,7 @@ export async function getEmailConfig() {
 
   return {
     fromName: settings.get('email_from_name') || 'Aerojet Academy',
-    fromAddress: settings.get('email_from_address') || 'noreply',
+    fromAddress: settings.get('email_from_address') || 'admissions',
     subdomain: settings.get('email_subdomain') || 'mail',
     rootDomain: 'aerojet-academy.com', // Base domain for the academy
   }

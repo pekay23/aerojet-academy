@@ -29,7 +29,11 @@
       "Bash(find /d/Projects/aerojet-academy/app/applicant -type d -name *[*])",
       "Bash(grep -r \"from.*lib/supabase\\\\|import.*supabase\" /d/Projects/aerojet-academy/app --include=*.ts --include=*.tsx)",
       "Bash(npm run:*)",
-      "Bash(node -e \":*)"
+      "Bash(node -e \":*)",
+      "Bash(find . -type f \\\\\\(-name *.env* -o -name .env* \\\\\\))",
+      "Bash(find app:*)",
+      "Bash(grep -r \"RESEND\\\\|FROM_EMAIL\\\\|MAIL_FROM\\\\|EMAIL_FROM\\\\|SENDER\" /d/Projects/aerojet-academy/.env*)",
+      "Bash(wc -l /d/Projects/aerojet-academy/app/api/auth/[...nextauth]/route.ts)"
     ],
     "additionalDirectories": [
       "d:\\Projects\\aerojet-academy\\app\\api\\staff\\students\\[id]\\wallet\\[txnId]"

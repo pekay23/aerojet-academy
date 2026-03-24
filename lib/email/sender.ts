@@ -3,7 +3,7 @@ import type { EmailOptions, EmailResult } from './types'
 
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
-const DEFAULT_FROM = 'Aerojet Academy <noreply@aerojet-academy.com>'
+const DEFAULT_FROM = 'Aerojet Academy <admissions@mail.aerojet-academy.com>'
 
 export async function sendEmail(options: EmailOptions): Promise<EmailResult> {
   const { to, subject, html, from = DEFAULT_FROM, replyTo } = options
