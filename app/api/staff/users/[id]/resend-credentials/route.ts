@@ -60,15 +60,6 @@ export const POST = withErrorHandler(
       ).catch((err) => console.error(`Failed to send activation to ${personalEmail}:`, err))
     )
 
-    // Also send to academy email if it exists and is different
-    if (academyEmail && academyEmail !== personalEmail) {
-      sendPromises.push(
-        sendActivationEmail(academyEmail, firstName, academyEmail, tempPassword, verifyToken).catch(
-          (err) => console.error(`Failed to send activation to ${academyEmail}:`, err)
-        )
-      )
-    }
-
     // 5. If User is a STUDENT, also resend their Student ID (Promotion Email)
     if (user.role === 'STUDENT' && user.studentProfile?.studentId) {
       const studentId = user.studentProfile.studentId
@@ -78,14 +69,6 @@ export const POST = withErrorHandler(
           console.error(`Failed to send promotion to ${personalEmail}:`, err)
         )
       )
-
-      if (academyEmail && academyEmail !== personalEmail) {
-        sendPromises.push(
-          sendStudentPromotionEmail(academyEmail, firstName, studentId).catch((err) =>
-            console.error(`Failed to send promotion to ${academyEmail}:`, err)
-          )
-        )
-      }
     }
 
     await Promise.all(sendPromises)

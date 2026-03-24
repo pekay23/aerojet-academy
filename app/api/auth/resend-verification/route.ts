@@ -44,18 +44,20 @@ export async function POST(req: NextRequest) {
 
     const firstName = user.profile?.firstName || 'User'
 
+    const targetEmail = user.personalEmail || user.email
+
     if (user.password) {
       // Post-approval user: has credentials, send activation email
       await sendActivationEmail(
-        user.email,
+        targetEmail,
         firstName,
-        user.academyEmail || user.email,
+        user.academyEmail || targetEmail,
         '(use your existing password)',
         verifyToken
       )
     } else {
       // Pre-approval user: no credentials yet, send simple verification email
-      await sendEmailVerificationEmail(user.email, firstName, verifyToken)
+      await sendEmailVerificationEmail(targetEmail, firstName, verifyToken)
     }
 
     return NextResponse.json({ success: true, message: 'Verification link has been resent' })

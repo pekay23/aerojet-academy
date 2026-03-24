@@ -48,7 +48,7 @@ export const POST = withErrorHandler(
     )
 
     await sendEmail({
-      to: user.email,
+      to: user.personalEmail || user.email,
       subject: 'Temporary Password - Aerojet Academy',
       html: emailBody,
     })

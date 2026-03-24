@@ -311,14 +311,7 @@ export const POST = withErrorHandler(
           Number(payment.amount)
         ).catch(console.error)
 
-        if (payment.user.academyEmail && payment.user.academyEmail !== targetEmail) {
-          await sendPaymentApprovedEmail(
-            payment.user.academyEmail,
-            payment.user.profile.firstName,
-            payment.referenceType || 'Payment',
-            Number(payment.amount)
-          ).catch(console.error)
-        }
+        // Academy email domain not active — skip sending there
       }
 
       await createAuditLog({
@@ -360,22 +353,14 @@ export const POST = withErrorHandler(
       })
 
       if (payment.user.profile) {
-        // Send payment rejected email
+        // Send payment rejected email to personal email
+        const rejectEmail = payment.user.personalEmail || payment.user.email
         await sendPaymentRejectedEmail(
-          payment.user.email,
+          rejectEmail,
           payment.user.profile.firstName,
           payment.referenceType || 'Payment',
           reason
         ).catch(console.error)
-
-        if (payment.user.academyEmail) {
-          await sendPaymentRejectedEmail(
-            payment.user.academyEmail,
-            payment.user.profile.firstName,
-            payment.referenceType || 'Payment',
-            reason
-          ).catch(console.error)
-        }
       }
 
       await createAuditLog({
