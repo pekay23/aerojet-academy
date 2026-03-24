@@ -32,7 +32,7 @@ const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   NEXT_PUBLIC_APP_URL: z.string().url(),
   CRON_SECRET: z.string().min(1),
-  FROM_EMAIL: z.string().email().optional().default('noreply@aerojet-academy.com'),
+  FROM_EMAIL: z.string().email().optional().default('admissions@mail.aerojet-academy.com'),
 
   // Optional Stripe
   STRIPE_SECRET_KEY: z.string().optional(),
