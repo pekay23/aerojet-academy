@@ -1,12 +1,13 @@
 import { env } from '@/lib/env'
-import { Pool, neonConfig } from '@neondatabase/serverless'
-import { PrismaNeon } from '@prisma/adapter-neon'
 import { Prisma, PrismaClient } from '@prisma/client'
+import { neonConfig } from '@neondatabase/serverless'
+import { PrismaNeon } from '@prisma/adapter-neon'
 import ws from 'ws'
 
 const connectionString = env.DATABASE_URL
+const isDev = env.NODE_ENV === 'development'
 
-if (process.env.NODE_ENV === 'development') {
+if (isDev) {
   const maskedUrl = connectionString.replace(/:([^:@]+)@/, ':****@')
   console.log('Prisma connecting to:', maskedUrl)
 }
@@ -81,19 +82,18 @@ const globalForPrisma = globalThis as unknown as {
   prisma_aja_ext: ReturnType<typeof createExtendedClient>
 }
 
-const createPrismaClient = () => {
-  const isDev = env.NODE_ENV === 'development'
+const createAdapter = () => {
+  // PrismaNeon@7.5 expects a config object, not a Pool instance — it creates its own Pool internally
+  return new PrismaNeon({ connectionString })
+}
 
+const createPrismaClient = () => {
   if (!connectionString) {
     console.warn('PRISMA CLIENT INITIALIZED WITH UNDEFINED CONNECTION STRING')
   }
 
-  const pool = new Pool({ connectionString })
-  // @ts-expect-error - Prisma Neon adapter type mismatch with newer Neon serverless driver
-  const adapter = new PrismaNeon(pool)
-
   return new PrismaClient({
-    adapter,
+    adapter: createAdapter(),
     log: isDev ? ['query', 'error', 'warn'] : ['error'],
   })
 }

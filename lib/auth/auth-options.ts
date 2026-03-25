@@ -59,30 +59,20 @@ export const authOptions: NextAuthOptions = {
           throw new Error('Email and password are required')
         }
 
-        console.log('[AUTH DEBUG] Looking up user:', credentials.email)
-
-        let user
-        try {
-          user = await prisma.user.findFirst({
-            where: {
-              OR: [
-                { email: credentials.email },
-                { academyEmail: credentials.email },
-                { personalEmail: credentials.email },
-              ],
-            },
-            include: {
-              profile: { select: { firstName: true, lastName: true } },
-            },
-          })
-          console.log('[AUTH DEBUG] User found:', !!user, user?.role, user?.status, 'emailVerified:', !!user?.emailVerified)
-        } catch (err) {
-          console.error('[AUTH DEBUG] Prisma query failed:', err)
-          throw new Error('Database error during login')
-        }
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: credentials.email },
+              { academyEmail: credentials.email },
+              { personalEmail: credentials.email },
+            ],
+          },
+          include: {
+            profile: { select: { firstName: true, lastName: true } },
+          },
+        })
 
         if (!user || !user.password) {
-          console.log('[AUTH DEBUG] No user or no password')
           throw new Error('Invalid email or password')
         }
 
