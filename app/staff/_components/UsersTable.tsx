@@ -356,7 +356,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                     <tr
                       key={user.id}
                       onClick={() => router.push(`/staff/users/${user.id}`)}
-                      className={`cursor-pointer transition-all duration-150 ease-out hover:bg-slate-50 hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] dark:hover:bg-slate-800/60 ${selectedIds.includes(user.id) ? 'bg-aerojet-blue/5' : ''}`}
+                      className={`cursor-pointer transition-colors duration-100 ease-out hover:bg-accent dark:hover:bg-accent ${selectedIds.includes(user.id) ? 'bg-aerojet-blue/5' : ''}`}
                     >
                       <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
                         <button
