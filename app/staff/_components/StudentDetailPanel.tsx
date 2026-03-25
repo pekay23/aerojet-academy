@@ -160,6 +160,11 @@ export default function StudentDetailPanel({
   const statusStyle = STATUS_STYLE[currentStudent.status] ?? 'bg-slate-100 text-slate-500'
   const walletBal = Number(currentStudent.wallet?.availableBalance ?? 0)
 
+  // Helper: check if a result string means the exam is completed (case-insensitive)
+  const COMPLETED_RESULT_VALUES = ['pass', 'fail', 'absent', 'no_show', 'noshow', 'withdrawn']
+  const isCompletedResult = (result: string | null | undefined) =>
+    !!result && COMPLETED_RESULT_VALUES.includes(result.toLowerCase())
+
   // Separate completed exams (with results) from upcoming/pending bookings
   const completedExamResults = currentStudent.examResults?.map((r: any) => ({
     id: r.id,
@@ -172,9 +177,9 @@ export default function StudentDetailPanel({
     result: r.passed ? 'PASS' : 'FAIL',
   })) || []
 
-  // Only include exam bookings that have a result (PASS, FAIL, ABSENT) - not pending/upcoming
+  // Only include exam bookings that have a completed result — case-insensitive
   const completedExamBookings = currentStudent.examBookings
-    ?.filter((r: any) => r.result && ['PASS', 'FAIL', 'ABSENT'].includes(r.result))
+    ?.filter((r: any) => isCompletedResult(r.result))
     .map((r: any) => ({
       id: r.id,
       type: 'MANUAL',
@@ -182,13 +187,13 @@ export default function StudentDetailPanel({
       examName: r.exam?.name || 'Manual Record',
       date: r.examDate || r.bookedAt,
       score: r.score ? Number(r.score) : null,
-      passed: r.result === 'PASS',
-      result: r.result,
+      passed: r.result?.toLowerCase() === 'pass',
+      result: r.result?.toUpperCase(),
     })) || []
 
-  // Upcoming/pending exams (no result yet)
+  // Upcoming/pending exams (no completed result yet)
   const upcomingExams = currentStudent.examBookings
-    ?.filter((r: any) => !r.result || !['PASS', 'FAIL', 'ABSENT'].includes(r.result))
+    ?.filter((r: any) => !isCompletedResult(r.result))
     .map((r: any) => ({
       id: r.id,
       type: r.exam?.name ? 'BOOKED' : 'MANUAL',

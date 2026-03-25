@@ -89,6 +89,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   const pct = booking.percentage ? Number(booking.percentage) : null
   const passing = pct !== null && pct >= 75
+  const resultNorm = booking.result?.toLowerCase() ?? ''
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
@@ -332,12 +333,12 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                 {booking.result ? (
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-black tracking-widest uppercase ${
-                      booking.result === 'PASS' || passing
+                      resultNorm === 'pass' || passing
                         ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
                         : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
                     }`}
                   >
-                    {booking.result === 'PASS' || passing ? (
+                    {resultNorm === 'pass' || passing ? (
                       <CheckCircle2 className="h-3.5 w-3.5" />
                     ) : (
                       <XCircle className="h-3.5 w-3.5" />

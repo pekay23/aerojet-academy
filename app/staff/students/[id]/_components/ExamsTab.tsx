@@ -80,7 +80,11 @@ export default function ExamsTab({
         percentage: b.percentage != null ? Number(b.percentage) : null,
         result: b.result,
         passed: b.result?.toLowerCase() === 'pass',
-        status: b.status,
+        status:
+          (b.result != null && b.result !== '') ||
+          (b.score != null && b.examDate && new Date(b.examDate) < new Date())
+            ? 'COMPLETED'
+            : b.status,
         bookingType: b.bookingType,
         attemptType: b.attemptType,
         isResit: b.isResit,
