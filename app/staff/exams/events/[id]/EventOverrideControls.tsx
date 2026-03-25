@@ -44,7 +44,7 @@ export default function EventOverrideControls({ eventId, currentOverride }: Prop
 
           <button
             onClick={() => handleOverride('FORCE_GO')}
-            className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 ${
+            className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${
               currentOverride === 'FORCE_GO'
                 ? 'bg-green-50 text-green-700 dark:bg-green-900/20'
                 : 'text-slate-600 dark:text-slate-300'
@@ -56,7 +56,7 @@ export default function EventOverrideControls({ eventId, currentOverride }: Prop
 
           <button
             onClick={() => handleOverride('FORCE_NO_GO')}
-            className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 ${
+            className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${
               currentOverride === 'FORCE_NO_GO'
                 ? 'bg-red-50 text-red-700 dark:bg-red-900/20'
                 : 'text-slate-600 dark:text-slate-300'
@@ -68,7 +68,7 @@ export default function EventOverrideControls({ eventId, currentOverride }: Prop
 
           <button
             onClick={() => handleOverride('NONE')}
-            className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800 ${
+            className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${
               currentOverride === 'NONE'
                 ? 'bg-slate-100 text-slate-900 dark:bg-slate-800'
                 : 'text-slate-600 dark:text-slate-300'

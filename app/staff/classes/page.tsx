@@ -94,7 +94,7 @@ export default async function ClassesPage() {
                 </tr>
               ) : (
                 classes.map((cls) => (
-                  <tr key={cls.id} className="group hover:bg-slate-50 dark:bg-slate-800/50">
+                  <tr key={cls.id} className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40">
                     <td className="px-6 py-4">
                       <div className="font-bold text-slate-900 dark:text-slate-100">{cls.name}</div>
                       <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">

@@ -250,7 +250,7 @@ export default function ApplicantDetailDrawer({
                 <button
                   onClick={handleResendEmail}
                   disabled={loading === 'resend'}
-                  className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition-all hover:bg-slate-50 hover:text-aerojet-sky disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:text-aerojet-sky hover:shadow-md disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                 >
                   {loading === 'resend' ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -280,7 +280,7 @@ export default function ApplicantDetailDrawer({
                     }
                   }}
                   disabled={loading === 'resend'}
-                  className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition-all hover:bg-slate-50 hover:text-aerojet-sky disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  className="mt-2 flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:text-aerojet-sky hover:shadow-md disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                 >
                   {loading === 'resend' ? (
                     <Loader2 className="h-3 w-3 animate-spin" />
@@ -422,7 +422,7 @@ export default function ApplicantDetailDrawer({
                         href={latestPayment.proofUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mt-2 flex items-center justify-center gap-2 rounded-xl bg-white py-3 text-xs font-black tracking-widest text-aerojet-blue uppercase shadow-sm transition-all hover:bg-slate-50 dark:bg-slate-900/50 dark:text-aerojet-sky dark:hover:bg-slate-900"
+                        className="mt-2 flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-3 text-xs font-black tracking-widest text-aerojet-blue uppercase shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-md dark:border-slate-700 dark:bg-slate-900/50 dark:text-aerojet-sky dark:hover:border-slate-600"
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
                         Verify Payment Proof

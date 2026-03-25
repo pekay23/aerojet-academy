@@ -208,7 +208,7 @@ export default function AcademicCalendarManager({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="rounded-xl border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  className="rounded-xl border-slate-200 bg-white text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
                   onClick={() => {
                     setEditingSemester({ sem: null, yearId: year.id })
                     setSemModalOpen(true)

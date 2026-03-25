@@ -530,7 +530,7 @@ export default function ExamsTab({
               {filteredRecords.map((record) => (
                 <tr
                   key={record.id}
-                  className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                  className="transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                 >
                   <td className="px-4 py-3">
                     {editingId === record.id ? (

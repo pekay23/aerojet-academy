@@ -79,7 +79,7 @@ export default function InstructorsTable() {
           </div>
           <button
             onClick={fetchInstructors}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"
           >
             <RefreshCw className="h-3.5 w-3.5" />
           </button>
@@ -246,7 +246,7 @@ export default function InstructorsTable() {
                 instructors.slice((page - 1) * perPage, page * perPage).map((instructor) => (
                   <tr
                     key={instructor.id}
-                    className={`group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${selectedIds.includes(instructor.id) ? 'bg-aerojet-blue/5' : ''}`}
+                    className={`group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${selectedIds.includes(instructor.id) ? 'bg-aerojet-blue/5' : ''}`}
                   >
                     <td className="px-6 py-4">
                       <button
@@ -306,7 +306,7 @@ export default function InstructorsTable() {
                     <td className="px-6 py-4 text-right">
                       <Link
                         href={`/staff/users/${instructor.id}`}
-                        className="text-xs font-bold text-aerojet-blue hover:underline dark:text-aerojet-sky"
+                        className="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-blue transition-all duration-150 ease-out hover:bg-aerojet-blue/8 hover:shadow-sm dark:text-aerojet-sky"
                       >
                         View
                       </Link>

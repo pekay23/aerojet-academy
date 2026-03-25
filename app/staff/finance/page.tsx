@@ -350,7 +350,7 @@ async function TransactionsTab({ query }: { query?: string }) {
                 return (
                   <TableRow
                     key={tx.id}
-                    className="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                    className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                   >
                     <TableCell className="px-6 py-5">
                       <div className="flex flex-col">

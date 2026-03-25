@@ -176,7 +176,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                 paged.map((booking) => (
                   <tr
                     key={booking.id}
-                    className={`group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
+                    className={`group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${
                       selectedIds.includes(booking.id) ? 'bg-aerojet-blue/5' : ''
                     }`}
                   >

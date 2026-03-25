@@ -187,7 +187,7 @@ export default function CoursesClient({ categories }: Props) {
         <div className="flex flex-wrap gap-3">
           <Link
             href="/staff/courses/categories"
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-aerojet-blue transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-aerojet-blue transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:hover:border-slate-600"
           >
             <Layers className="h-4 w-4" />
             Manage Categories
@@ -451,7 +451,7 @@ export default function CoursesClient({ categories }: Props) {
                         cat.courses.map((course) => (
                           <tr
                             key={course.id}
-                            className="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                            className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
                           >
                             {/* Code */}
                             <td className="px-6 py-4 font-mono text-sm font-bold text-slate-500 dark:text-slate-400">

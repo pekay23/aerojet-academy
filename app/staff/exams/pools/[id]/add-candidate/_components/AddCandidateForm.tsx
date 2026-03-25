@@ -155,7 +155,7 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
                     <button
                       key={user.id}
                       type="button"
-                      className="flex w-full items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:bg-slate-800/50"
+                      className="flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-150 ease-out hover:bg-white/80 dark:bg-slate-800/50 dark:hover:bg-slate-700/60"
                       onClick={() => handleSelectUser(user)}
                     >
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-slate-600 dark:text-slate-400">

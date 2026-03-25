@@ -162,7 +162,7 @@ export default function PaymentsQueue({
         </div>
         <button
           onClick={fetchPayments}
-          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"
         >
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
         </button>
@@ -180,7 +180,7 @@ export default function PaymentsQueue({
                 className={`relative rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${
                   tab === t.key
                     ? 'text-aerojet-blue dark:text-white'
-                    : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                    : 'text-slate-500 hover:bg-white/60 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-slate-200'
                 }`}
               >
                 {tab === t.key && (
@@ -263,7 +263,7 @@ export default function PaymentsQueue({
                     <Fragment key={p.id}>
                       <tr
                         key={p.id}
-                        className="transition-colors hover:bg-slate-50 dark:bg-slate-800/50"
+                        className="transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
                       >
                         <td className="px-5 py-3.5">
                           <p className="text-sm font-bold text-slate-700">{fullName}</p>
@@ -293,7 +293,7 @@ export default function PaymentsQueue({
                                 href={p.proofUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-xs font-bold text-aerojet-sky hover:underline"
+                                className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-sky transition-all duration-150 ease-out hover:bg-aerojet-sky/10 hover:shadow-sm"
                               >
                                 <ExternalLink className="h-3.5 w-3.5" /> Latest
                               </a>
@@ -465,7 +465,7 @@ export default function PaymentsQueue({
                         href={p.proofUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-bold text-aerojet-sky hover:underline"
+                        className="inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-sky transition-all duration-150 ease-out hover:bg-aerojet-sky/10 hover:shadow-sm"
                       >
                         <ExternalLink className="h-3.5 w-3.5" /> View Proof
                       </a>
@@ -596,7 +596,7 @@ export default function PaymentsQueue({
                         href={file.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 hover:text-aerojet-blue dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:text-aerojet-blue hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600 dark:hover:text-white"
                       >
                         <ExternalLink className="h-3.5 w-3.5" /> Open
                       </a>
