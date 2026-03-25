@@ -264,23 +264,23 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
           {/* Toolbar */}
           <div className="flex flex-col items-start justify-between gap-3 border-b border-slate-100 px-6 py-4 sm:flex-row sm:items-center dark:border-slate-800">
             {/* Tabs */}
-            <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+            <div className="flex gap-1 rounded-2xl bg-slate-100 p-1.5 shadow-inner ring-1 ring-black/5 dark:bg-slate-800/80 dark:ring-white/5">
               {TABS.map((t) => (
                 <button
                   key={t.key}
                   onClick={() => setTab(t.key)}
-                  className={`relative rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                  className={`relative rounded-full px-3 py-1.5 text-xs font-bold transition-colors duration-150 ${
                     tab === t.key
                       ? 'text-aerojet-blue dark:text-white'
-                      : 'text-slate-500 hover:bg-white/60 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-slate-200'
+                      : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
                   }`}
                 >
                   {tab === t.key && (
                     <motion.div
                       layoutId="applicants-tab"
-                      className="absolute inset-0 bg-white shadow-sm dark:bg-slate-700"
-                      style={{ borderRadius: 8, zIndex: 0 }}
-                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                      className="absolute inset-0 bg-white shadow-md ring-1 ring-black/5 dark:bg-slate-700 dark:ring-white/10"
+                      style={{ borderRadius: 9999, zIndex: 0 }}
+                      transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
                     />
                   )}
                   <span className="relative z-10">
