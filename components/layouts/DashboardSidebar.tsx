@@ -18,18 +18,10 @@ import {
   Sun,
   Moon,
   Monitor,
-  User,
+  Settings,
 } from 'lucide-react'
 import { ElementType } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 export type SidebarLinkItem = {
@@ -290,119 +282,173 @@ function GroupItem({
   )
 }
 
-/* ── User dropdown menu ── */
+/* ── User profile panel ── */
+const THEME_OPTIONS = [
+  { value: 'light', icon: Sun, label: 'Light' },
+  { value: 'dark', icon: Moon, label: 'Dark' },
+  { value: 'system', icon: Monitor, label: 'System' },
+] as const
+
 function UserMenu({
   collapsed,
   userImage,
   userName,
   userRole,
   portalColor,
-  userMenuItems,
   basePath,
-  toggleTheme,
-  renderThemeIcon,
-  renderThemeLabel,
+  theme,
+  setTheme,
 }: {
   collapsed: boolean
   userImage?: string
   userName?: string
   userRole?: string
   portalColor: string
-  userMenuItems?: SidebarLinkItem[]
   basePath: string
-  toggleTheme: () => void
-  renderThemeIcon: () => React.ReactNode
-  renderThemeLabel: () => string
+  theme: string | undefined
+  setTheme: (t: string) => void
 }) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const trigger = (
-    <DropdownMenuTrigger asChild>
-      <button
-        className={`flex w-full items-center gap-3 rounded-xl border border-sidebar-border/50 bg-sidebar-accent/30 px-3 py-2.5 text-left transition-all hover:bg-sidebar-accent ${
-          collapsed ? 'justify-center px-0' : ''
-        }`}
-      >
-        <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full border border-sidebar-border bg-sidebar-accent">
-          {userImage ? (
-            <Image src={userImage} alt={userName || 'User'} fill className="object-cover" />
-          ) : (
-            <div className="text-sidebar-foreground/50 flex h-full w-full items-center justify-center text-[10px] font-black uppercase">
-              {userName ? userName.substring(0, 2) : <User className="h-3.5 w-3.5" />}
-            </div>
-          )}
+  const [open, setOpen] = useState(false)
+
+  const initials = userName
+    ? userName.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
+    : '?'
+
+  const avatar = () => (
+    <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/50 bg-sidebar-accent">
+      {userImage ? (
+        <Image src={userImage} alt={userName || 'User'} fill className="object-cover" />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-[11px] font-black uppercase text-sidebar-foreground/50">
+          {initials}
         </div>
-        {!collapsed && (
-          <>
-            <div className="min-w-0 flex-1">
-              <p className="text-sidebar-foreground truncate text-xs font-bold">
-                {userName || 'User'}
-              </p>
-              {userRole && (
-                <p
-                  className={`mt-0.5 truncate text-[10px] font-bold tracking-widest uppercase ${portalColor}`}
-                >
-                  {userRole}
-                </p>
-              )}
-            </div>
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-sidebar-foreground/40" />
-          </>
-        )}
-      </button>
-    </DropdownMenuTrigger>
+      )}
+    </div>
   )
 
+  const menuLink =
+    'flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-sidebar-foreground/70 transition-all duration-150 ease-out hover:bg-sidebar-accent hover:text-sidebar-foreground'
+
   return (
-    <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
+    <div className="relative">
+      {/* Click-outside overlay */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-40"
+            onClick={() => setOpen(false)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Panel */}
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            key="panel"
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 6 }}
+            transition={{ type: 'spring', bounce: 0.1, duration: 0.22 }}
+            className="absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-2xl border border-white/15 bg-sidebar/95 shadow-2xl backdrop-blur-xl"
+          >
+            <div className="p-1.5">
+              {/* Settings */}
+              <Link href={`${basePath}/settings`} onClick={() => setOpen(false)} className={menuLink}>
+                <Settings className="h-4 w-4 text-sidebar-foreground/40" />
+                {!collapsed && 'Settings'}
+              </Link>
+
+              {/* Homepage */}
+              <Link href="/" onClick={() => setOpen(false)} className={menuLink}>
+                <Home className="h-4 w-4 text-sidebar-foreground/40" />
+                {!collapsed && 'Homepage'}
+              </Link>
+
+              {/* Appearance */}
+              {!collapsed && (
+                <>
+                  <div className="my-1.5 h-px bg-sidebar-border/50" />
+                  <div className="px-1 py-1.5">
+                    <p className="mb-2 px-2 text-[10px] font-black tracking-widest uppercase text-sidebar-foreground/30">
+                      Appearance
+                    </p>
+                    <div className="flex gap-1 rounded-2xl bg-black/20 p-1.5 ring-1 ring-white/5">
+                      {THEME_OPTIONS.map(({ value, icon: Icon, label }) => (
+                        <button
+                          key={value}
+                          onClick={() => setTheme(value)}
+                          className={`relative flex flex-1 items-center justify-center gap-1.5 rounded-full py-1.5 text-[10px] font-bold transition-all duration-150 ${
+                            theme === value
+                              ? 'bg-sidebar-accent text-sidebar-foreground shadow-md ring-1 ring-white/10'
+                              : 'text-sidebar-foreground/35 hover:text-sidebar-foreground/70'
+                          }`}
+                        >
+                          <Icon className="h-3 w-3" />
+                          <span>{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="my-1.5 h-px bg-sidebar-border/50" />
+
+              {/* Sign out */}
+              <button
+                onClick={() => signOut({ callbackUrl: '/login' })}
+                className="flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-red-400 transition-all duration-150 hover:bg-red-500/10 hover:text-red-300"
+              >
+                <LogOut className="h-4 w-4" />
+                {!collapsed && 'Sign Out'}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Trigger */}
       {collapsed ? (
         <Tooltip>
-          <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setOpen((v) => !v)}
+              className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-sidebar-border/40 bg-sidebar-accent/20 transition-all duration-150 ease-out hover:border-sidebar-border/70 hover:bg-sidebar-accent/50"
+            >
+              {avatar()}
+            </button>
+          </TooltipTrigger>
           <TooltipContent side="right">{userName || 'User menu'}</TooltipContent>
         </Tooltip>
       ) : (
-        trigger
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="flex w-full items-center gap-3 rounded-xl border border-sidebar-border/40 bg-sidebar-accent/20 px-3 py-2.5 text-left transition-all duration-150 ease-out hover:border-sidebar-border/70 hover:bg-sidebar-accent/50"
+        >
+          {avatar()}
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-xs font-bold text-sidebar-foreground">
+              {userName || 'User'}
+            </p>
+            {userRole && (
+              <p className={`mt-0.5 truncate text-[10px] font-bold tracking-widest uppercase ${portalColor}`}>
+                {userRole}
+              </p>
+            )}
+          </div>
+          <ChevronDown
+            className={`h-3.5 w-3.5 shrink-0 text-sidebar-foreground/30 transition-transform duration-200 ${
+              open ? 'rotate-180' : ''
+            }`}
+          />
+        </button>
       )}
-      <DropdownMenuContent side="top" align="start" className="w-56">
-        <DropdownMenuLabel>My Account</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {userMenuItems?.map((item) => (
-          <DropdownMenuItem key={item.href} asChild>
-            <Link href={basePath + item.href} className="flex items-center gap-2">
-              {item.icon && <item.icon className="h-4 w-4" />}
-              {item.label}
-            </Link>
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onSelect={(e) => {
-            e.preventDefault()
-          }}
-          onClick={() => {
-            toggleTheme()
-            setMenuOpen(true)
-          }}
-          className="flex items-center gap-2"
-        >
-          {renderThemeIcon()}
-          Theme: {renderThemeLabel()}
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href="/" className="flex items-center gap-2">
-            <Home className="h-4 w-4" />
-            Homepage
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => signOut({ callbackUrl: '/login' })}
-          className="text-red-600 focus:text-red-600 dark:text-red-400 dark:focus:text-red-400"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    </div>
   )
 }
 
@@ -423,9 +469,8 @@ function renderSidebarContent({
   isActivePath,
   isGroupActive,
   setMobileOpen,
-  toggleTheme,
-  renderThemeIcon,
-  renderThemeLabel,
+  theme,
+  setTheme,
   forceFull = false,
 }: {
   isCollapsed: boolean
@@ -443,9 +488,8 @@ function renderSidebarContent({
   isActivePath: (href: string) => boolean
   isGroupActive: (link: SidebarLink) => boolean
   setMobileOpen: (open: boolean) => void
-  toggleTheme: () => void
-  renderThemeIcon: () => React.ReactNode
-  renderThemeLabel: () => string
+  theme: string | undefined
+  setTheme: (t: string) => void
   forceFull?: boolean
 }) {
   const collapsed = forceFull ? false : isCollapsed
@@ -577,11 +621,9 @@ function renderSidebarContent({
           userName={userName}
           userRole={userRole}
           portalColor={portalColor}
-          userMenuItems={userMenuItems}
           basePath={basePath}
-          toggleTheme={toggleTheme}
-          renderThemeIcon={renderThemeIcon}
-          renderThemeLabel={renderThemeLabel}
+          theme={theme}
+          setTheme={setTheme}
         />
       </div>
     </div>
@@ -636,25 +678,6 @@ export default function DashboardSidebar({
     )
   }
 
-  const toggleTheme = () => {
-    if (theme === 'light') setTheme('dark')
-    else if (theme === 'dark') setTheme('system')
-    else setTheme('light')
-  }
-
-  const renderThemeIcon = () => {
-    if (!mounted) return <Sun className="h-4 w-4 shrink-0" />
-    if (theme === 'dark') return <Moon className="h-4 w-4 shrink-0" />
-    if (theme === 'system') return <Monitor className="h-4 w-4 shrink-0" />
-    return <Sun className="h-4 w-4 shrink-0" />
-  }
-
-  const renderThemeLabel = () => {
-    if (!mounted) return 'Light'
-    if (theme === 'dark') return 'Dark'
-    if (theme === 'system') return 'System'
-    return 'Light'
-  }
 
 
   return (
@@ -681,9 +704,8 @@ export default function DashboardSidebar({
           isActivePath,
           isGroupActive,
           setMobileOpen,
-          toggleTheme,
-          renderThemeIcon,
-          renderThemeLabel,
+          theme,
+          setTheme,
         })}
       </aside>
 
@@ -733,9 +755,8 @@ export default function DashboardSidebar({
                   isActivePath,
                   isGroupActive,
                   setMobileOpen,
-                  toggleTheme,
-                  renderThemeIcon,
-                  renderThemeLabel,
+                  theme,
+                  setTheme,
                   forceFull: true,
                 })}
               </div>
