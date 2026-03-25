@@ -41,6 +41,8 @@ interface ModuleOption {
 
 interface ExamRecord {
   id: string
+  courseId: string | null
+  bookingType: string
   moduleCode: string | null
   examDate: Date | null
   bookedAt: Date
@@ -109,9 +111,13 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
 
   // Edit state
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [editCourseId, setEditCourseId] = useState<string | null>(null)
+  const [editBookingType, setEditBookingType] = useState('INDIVIDUAL')
   const [editModuleCode, setEditModuleCode] = useState('')
   const [editScore, setEditScore] = useState('')
   const [editDate, setEditDate] = useState('')
+  const [editCourseQuery, setEditCourseQuery] = useState('')
+  const [showEditCourseDropdown, setShowEditCourseDropdown] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
 
   // Search filter
@@ -240,9 +246,15 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
 
   const startEdit = (record: ExamRecord) => {
     setEditingId(record.id)
+    setEditCourseId(record.courseId || null)
+    setEditBookingType(record.bookingType || 'INDIVIDUAL')
     setEditModuleCode(record.moduleCode || '')
     setEditScore(record.score ? Number(record.score).toString() : '')
     setEditDate(record.examDate ? format(record.examDate, 'yyyy-MM-dd') : '')
+    // Pre-fill course query with current module code so admin can see what's linked
+    const linkedCourse = modules.find((m) => m.id === record.courseId)
+    setEditCourseQuery(linkedCourse ? `${linkedCourse.code} — ${linkedCourse.name}` : '')
+    setShowEditCourseDropdown(false)
   }
 
   const handleUpdate = async () => {
@@ -250,9 +262,11 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
     setIsUpdating(true)
 
     const res = await updateExamBooking(editingId, {
+      courseId: editCourseId || undefined,
       moduleCode: editModuleCode || undefined,
       examDate: editDate ? new Date(editDate) : undefined,
       score: editScore ? Number(editScore) : undefined,
+      bookingType: editBookingType as any,
     })
 
     setIsUpdating(false)
@@ -633,11 +647,66 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                         {/* Module */}
                         <td className="px-6 py-4">
                           {isEditing ? (
-                            <input
-                              value={editModuleCode}
-                              onChange={(e) => setEditModuleCode(e.target.value)}
-                              className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-sm uppercase focus:border-aerojet-blue focus:outline-hidden"
-                            />
+                            <div className="space-y-1.5" style={{ minWidth: 200 }}>
+                              {/* Course dropdown */}
+                              <div className="relative">
+                                <input
+                                  value={editCourseQuery}
+                                  onChange={(e) => {
+                                    setEditCourseQuery(e.target.value)
+                                    setShowEditCourseDropdown(true)
+                                    if (!e.target.value) {
+                                      setEditCourseId(null)
+                                      setEditModuleCode('')
+                                    }
+                                  }}
+                                  onFocus={() => setShowEditCourseDropdown(true)}
+                                  placeholder="Search course..."
+                                  className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-aerojet-blue focus:outline-hidden"
+                                />
+                                {showEditCourseDropdown && (
+                                  <div className="absolute z-30 mt-0.5 max-h-40 w-56 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
+                                    {modules
+                                      .filter(
+                                        (m) =>
+                                          m.code.toLowerCase().includes(editCourseQuery.toLowerCase()) ||
+                                          m.name.toLowerCase().includes(editCourseQuery.toLowerCase())
+                                      )
+                                      .slice(0, 10)
+                                      .map((m) => (
+                                        <button
+                                          key={m.id}
+                                          type="button"
+                                          onClick={() => {
+                                            setEditCourseId(m.id)
+                                            setEditModuleCode(m.code.toUpperCase())
+                                            setEditCourseQuery(`${m.code} — ${m.name}`)
+                                            setShowEditCourseDropdown(false)
+                                          }}
+                                          className="flex w-full flex-col px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800"
+                                        >
+                                          <span className="text-xs font-bold text-slate-900 dark:text-white">{m.code}</span>
+                                          <span className="truncate text-[10px] text-slate-500">{m.name}</span>
+                                        </button>
+                                      ))}
+                                    {modules.filter(
+                                      (m) =>
+                                        m.code.toLowerCase().includes(editCourseQuery.toLowerCase()) ||
+                                        m.name.toLowerCase().includes(editCourseQuery.toLowerCase())
+                                    ).length === 0 && (
+                                      <div className="px-3 py-2 text-[10px] text-slate-400">No courses found</div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                              {/* Manual module code override */}
+                              <input
+                                value={editModuleCode}
+                                onChange={(e) => setEditModuleCode(e.target.value.toUpperCase())}
+                                placeholder="Module code"
+                                className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold uppercase focus:border-aerojet-blue focus:outline-hidden"
+                              />
+                            </div>
                           ) : (
                             <span className="font-bold text-slate-900 uppercase dark:text-white">
                               {record.moduleCode || '—'}
@@ -663,15 +732,27 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                         </td>
                         {/* Attempt */}
                         <td className="px-6 py-4">
-                          <span
-                            className={`rounded-md px-2 py-0.5 text-[9px] font-bold uppercase ${
-                              record.attemptType?.startsWith('RESIT')
-                                ? 'bg-amber-50 text-amber-600'
-                                : 'bg-blue-50 text-blue-600'
-                            }`}
-                          >
-                            {record.attemptType || 'FIRST'}
-                          </span>
+                          {isEditing ? (
+                            <select
+                              value={editBookingType}
+                              onChange={(e) => setEditBookingType(e.target.value)}
+                              className="rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-aerojet-blue focus:outline-hidden"
+                            >
+                              {BOOKING_TYPES.map((t) => (
+                                <option key={t.value} value={t.value}>{t.value}</option>
+                              ))}
+                            </select>
+                          ) : (
+                            <span
+                              className={`rounded-md px-2 py-0.5 text-[9px] font-bold uppercase ${
+                                record.attemptType?.startsWith('RESIT')
+                                  ? 'bg-amber-50 text-amber-600'
+                                  : 'bg-blue-50 text-blue-600'
+                              }`}
+                            >
+                              {record.attemptType || 'FIRST'}
+                            </span>
+                          )}
                         </td>
                         {/* Result */}
                         <td className="px-6 py-4">
@@ -733,7 +814,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                               </button>
                             </div>
                           ) : (
-                            <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+                            <div className="flex items-center justify-end gap-1">
                               <button
                                 onClick={() => startEdit(record)}
                                 className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-aerojet-blue"
