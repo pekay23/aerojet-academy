@@ -30,11 +30,11 @@ export const Default: Story = {
 }
 
 export const Loading: Story = {
-  args: { columns, data: [], loading: true },
+  args: { columns, data: [], loading: true } as any,
 }
 
 export const Empty: Story = {
-  args: { columns, data: [], emptyMessage: 'No students found' },
+  args: { columns, data: [], emptyMessage: 'No students found' } as any,
 }
 
 export const Clickable: Story = {
@@ -42,5 +42,5 @@ export const Clickable: Story = {
     columns,
     data: mockData,
     onRowClick: (row: Record<string, any>) => alert(`Clicked: ${row.name}`),
-  },
+  } as any,
 }
