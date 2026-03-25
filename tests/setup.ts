@@ -11,6 +11,7 @@ vi.mock('next-auth/react', () => ({
 vi.mock('@/lib/prisma/client', () => ({
   default: {
     user: {
+      findFirst: vi.fn(),
       findUnique: vi.fn(),
       findMany: vi.fn(),
       create: vi.fn(),

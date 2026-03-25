@@ -43,7 +43,10 @@
       "Bash(ls -lh /d/Projects/aerojet-academy/*.tsbuildinfo /d/Projects/aerojet-academy/*.pdf)",
       "Bash(find d:/Projects/aerojet-academy -name .DS_Store -o -name ._*)",
       "Bash(npm view:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npx tsc:*)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(node -e \"const { Prisma } = require\\(''@prisma/client''\\); console.log\\(typeof Prisma.defineExtension\\)\")"
     ],
     "additionalDirectories": [
       "d:\\Projects\\aerojet-academy\\app\\api\\staff\\students\\[id]\\wallet\\[txnId]"

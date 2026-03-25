@@ -1,7 +1,11 @@
 /**
  * Soft-delete utilities for Prisma queries.
  *
- * Use `notDeleted()` to add `{ deletedAt: null }` to where clauses.
+ * NOTE: The default `prisma` client (from lib/prisma/client) already
+ * auto-injects `deletedAt: null` on all read operations for soft-deletable
+ * models via a Prisma Client Extension. You only need `notDeleted()` if
+ * you are building a where clause for a raw query or need explicit control.
+ *
  * Use `softDeleteData()` as the `data` argument for update calls that
  * replace hard deletes.
  */
