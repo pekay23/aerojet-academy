@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   GraduationCap,
   RefreshCw,
@@ -42,6 +43,7 @@ export default function InstructorsTable() {
   const [selectedIds, setSelectedIds] = useState<string[]>([])
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
+  const router = useRouter()
 
   const fetchInstructors = useCallback(async () => {
     setLoading(true)
@@ -246,9 +248,10 @@ export default function InstructorsTable() {
                 instructors.slice((page - 1) * perPage, page * perPage).map((instructor) => (
                   <tr
                     key={instructor.id}
-                    className={`group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${selectedIds.includes(instructor.id) ? 'bg-aerojet-blue/5' : ''}`}
+                    onClick={() => router.push(`/staff/users/${instructor.id}`)}
+                    className={`group cursor-pointer transition-all duration-150 ease-out hover:bg-slate-50 hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] dark:hover:bg-slate-800/60 ${selectedIds.includes(instructor.id) ? 'bg-aerojet-blue/5' : ''}`}
                   >
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={() => {
                           setSelectedIds((prev) =>

@@ -364,12 +364,13 @@ export default function StudentsTable({
                 return (
                   <div
                     key={student.id}
+                    onClick={() => setSelected(student)}
                     className={`group relative mx-2 my-1 cursor-pointer rounded-xl border p-4 transition-all duration-150 ease-out ${
                       isSelected
-                        ? 'border-aerojet-blue/30 bg-aerojet-blue/5 shadow-sm'
+                        ? 'border-aerojet-blue/30 bg-aerojet-blue/5 shadow-sm ring-1 ring-aerojet-blue/20'
                         : selectedIds.includes(student.id)
                           ? 'border-aerojet-blue/20 bg-aerojet-blue/5'
-                          : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50 hover:shadow-md dark:border-slate-800 dark:hover:border-slate-600 dark:hover:bg-slate-800/60'
+                          : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50/80 hover:shadow-md dark:border-slate-800 dark:hover:border-slate-600 dark:hover:bg-slate-800/60'
                     }`}
                   >
                     <div className="mb-2 flex items-start justify-between">
@@ -397,10 +398,7 @@ export default function StudentsTable({
                           )}
                         </button>
 
-                        <div
-                          onClick={() => setSelected(student)}
-                          className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full text-xs font-black transition-transform hover:scale-105"
-                        >
+                        <div className="bg-aerojet-blue/10 text-aerojet-blue relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-black">
                           {student.profile?.profilePhotoUrl ? (
                             <img
                               src={student.profile.profilePhotoUrl}
@@ -411,8 +409,8 @@ export default function StudentsTable({
                             initials
                           )}
                         </div>
-                        <div onClick={() => setSelected(student)} className="flex-1">
-                          <p className="cursor-pointer text-sm font-bold text-slate-800 hover:text-blue-600 dark:text-slate-200 dark:hover:text-blue-400">
+                        <div className="flex-1">
+                          <p className="text-sm font-bold text-slate-800 group-hover:text-aerojet-blue dark:text-slate-200 transition-colors duration-150">
                             {fullName}
                           </p>
                           <p className="font-mono text-xs text-slate-400">
@@ -420,16 +418,12 @@ export default function StudentsTable({
                           </p>
                         </div>
                       </div>
-                      <span
-                        onClick={() => setSelected(student)}
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${statusStyle}`}
-                      >
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${statusStyle}`}>
                         {student.status}
                       </span>
                     </div>
                     <div
-                      onClick={() => setSelected(student)}
-                      className="mt-1 ml-13 flex items-center justify-between pl-13 text-xs"
+                      className="mt-1 flex items-center justify-between text-xs"
                       style={{ marginLeft: '52px' }}
                     >
                       <span className="text-slate-400">

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import {
   Search,
   Users,
@@ -78,6 +79,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
   const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const router = useRouter()
 
   const fetchUsers = useCallback(async () => {
     setLoading(true)
@@ -353,9 +355,10 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                   return (
                     <tr
                       key={user.id}
-                      className={`transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${selectedIds.includes(user.id) ? 'bg-aerojet-blue/5' : ''}`}
+                      onClick={() => router.push(`/staff/users/${user.id}`)}
+                      className={`cursor-pointer transition-all duration-150 ease-out hover:bg-slate-50 hover:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.04)] dark:hover:bg-slate-800/60 ${selectedIds.includes(user.id) ? 'bg-aerojet-blue/5' : ''}`}
                     >
-                      <td className="px-5 py-3.5">
+                      <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
                         <button
                           onClick={() => {
                             setSelectedIds((prev) =>
