@@ -274,6 +274,7 @@ export async function updateExamBooking(
   bookingId: string,
   data: {
     courseId?: string
+    bookingType?: string
     moduleCode?: string
     examDate?: Date
     score?: number

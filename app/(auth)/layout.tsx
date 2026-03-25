@@ -21,6 +21,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 width={160}
                 height={40}
                 className="object-contain"
+                style={{ height: 'auto' }}
               />
             </Link>
             <h1 className="max-w-md text-4xl leading-[1.05] font-black tracking-tight text-white uppercase xl:text-5xl">

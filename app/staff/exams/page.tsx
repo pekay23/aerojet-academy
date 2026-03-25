@@ -226,6 +226,15 @@ async function BookingsTab({ query }: { query?: string }) {
     orderBy: { createdAt: 'desc' },
   })
 
+  const serialized = bookings.map((b) => ({
+    ...b,
+    amountPaid: b.amountPaid != null ? Number(b.amountPaid) : null,
+    score: b.score != null ? Number(b.score) : null,
+    maxScore: b.maxScore != null ? Number(b.maxScore) : null,
+    percentage: b.percentage != null ? Number(b.percentage) : null,
+    refundAmount: b.refundAmount != null ? Number(b.refundAmount) : null,
+  }))
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-end">
@@ -234,7 +243,7 @@ async function BookingsTab({ query }: { query?: string }) {
         </div>
       </div>
 
-      <ExamBookingsTable bookings={bookings} />
+      <ExamBookingsTable bookings={serialized} />
     </div>
   )
 }
@@ -304,7 +313,7 @@ async function ResultsTab({ query }: { query?: string }) {
       examName: r.exam?.name || 'Manual Record',
       date: r.examDate || r.bookedAt,
       score: r.score ? Number(r.score) : null,
-      passed: r.result === 'PASS',
+      passed: r.result?.toLowerCase() === 'pass',
       certificateUrl: null,
     })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -461,6 +470,7 @@ async function RecordsTabServer({ query }: { query?: string }) {
     return {
       id: r.id,
       courseId: r.courseId,
+      bookingType: r.bookingType,
       moduleCode: r.moduleCode,
       examDate: r.examDate,
       bookedAt: r.bookedAt,

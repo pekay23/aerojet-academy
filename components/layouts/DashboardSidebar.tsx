@@ -478,6 +478,7 @@ function renderSidebarContent({
                 width={130}
                 height={32}
                 className="object-contain"
+                style={{ height: 'auto' }}
               />
             )}
           </Link>
