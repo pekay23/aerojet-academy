@@ -370,7 +370,7 @@ export default function StudentsTable({
                         ? 'border-aerojet-blue/30 bg-aerojet-blue/5 shadow-sm ring-1 ring-aerojet-blue/20'
                         : selectedIds.includes(student.id)
                           ? 'border-aerojet-blue/20 bg-aerojet-blue/5'
-                          : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50/80 hover:shadow-md dark:border-slate-800 dark:hover:border-slate-600 dark:hover:bg-slate-800/60'
+                          : 'border-slate-100 bg-white hover:border-slate-200 hover:bg-accent hover:shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700 dark:hover:bg-accent'
                     }`}
                   >
                     <div className="mb-2 flex items-start justify-between">
