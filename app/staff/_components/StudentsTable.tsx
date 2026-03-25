@@ -128,7 +128,7 @@ export default function StudentsTable({
         <div className="flex gap-2">
           <button
             onClick={fetchStudents}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"
           >
             <RefreshCw className="h-3.5 w-3.5" />
           </button>
@@ -322,7 +322,7 @@ export default function StudentsTable({
 
           {/* Student Cards */}
           <div
-            className="flex-1 divide-y divide-slate-50 overflow-y-auto"
+            className="flex-1 overflow-y-auto py-2"
             style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,0,0,0.06) transparent' }}
           >
             {loading ? (
@@ -364,11 +364,13 @@ export default function StudentsTable({
                 return (
                   <div
                     key={student.id}
-                    className={`group relative cursor-pointer p-4 transition-all ${
+                    className={`group relative mx-2 my-1 cursor-pointer rounded-xl border p-4 transition-all duration-150 ease-out ${
                       isSelected
-                        ? 'border-aerojet-blue bg-aerojet-blue/5 border-l-2'
-                        : 'border-l-2 border-transparent hover:bg-slate-50'
-                    } ${selectedIds.includes(student.id) ? 'bg-aerojet-blue/5' : ''}`}
+                        ? 'border-aerojet-blue/30 bg-aerojet-blue/5 shadow-sm'
+                        : selectedIds.includes(student.id)
+                          ? 'border-aerojet-blue/20 bg-aerojet-blue/5'
+                          : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50 hover:shadow-md dark:border-slate-800 dark:hover:border-slate-600 dark:hover:bg-slate-800/60'
+                    }`}
                   >
                     <div className="mb-2 flex items-start justify-between">
                       <div className="flex items-center gap-3">

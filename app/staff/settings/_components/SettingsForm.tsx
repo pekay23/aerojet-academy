@@ -63,7 +63,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
           return (
             <div
               key={field.key}
-              className="group flex flex-col justify-between gap-4 px-6 py-5 transition-colors hover:bg-slate-50/50 md:flex-row md:items-center dark:hover:bg-white/1"
+              className="group flex flex-col justify-between gap-4 px-6 py-5 transition-all duration-150 ease-out hover:bg-white/80 md:flex-row md:items-center dark:hover:bg-slate-800/40"
             >
               <div className="max-w-xl flex-1">
                 <label

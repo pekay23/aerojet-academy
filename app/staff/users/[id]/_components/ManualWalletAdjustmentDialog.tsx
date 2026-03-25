@@ -119,7 +119,7 @@ export default function ManualWalletAdjustmentDialog({
         <Button
           variant="outline"
           size="sm"
-          className="flex h-8 items-center gap-1.5 rounded-lg border-slate-200 bg-white px-3 text-[10px] font-black tracking-widest text-aerojet-blue uppercase shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900"
+          className="flex h-8 items-center gap-1.5 rounded-lg border-slate-200 bg-white px-3 text-[10px] font-black tracking-widest text-aerojet-blue uppercase shadow-sm transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-600"
         >
           <Wallet className="h-3.5 w-3.5" />
           Adjust Balance

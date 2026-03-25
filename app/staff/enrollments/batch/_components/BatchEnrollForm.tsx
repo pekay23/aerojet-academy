@@ -230,7 +230,7 @@ export default function BatchEnrollForm({
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                         isSelected
                           ? 'bg-emerald-50 ring-1 ring-emerald-200 dark:bg-emerald-900/20 dark:ring-emerald-800'
-                          : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                          : 'hover:bg-white/80 dark:hover:bg-slate-800/40'
                       }`}
                     >
                       <div
@@ -300,7 +300,7 @@ export default function BatchEnrollForm({
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                           isSelected
                             ? 'bg-purple-50 ring-1 ring-purple-200 dark:bg-purple-900/20 dark:ring-purple-800'
-                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                            : 'hover:bg-white/80 dark:hover:bg-slate-800/40'
                         }`}
                       >
                         <div
@@ -340,7 +340,7 @@ export default function BatchEnrollForm({
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                           isSelected
                             ? 'bg-purple-50 ring-1 ring-purple-200 dark:bg-purple-900/20 dark:ring-purple-800'
-                            : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
+                            : 'hover:bg-white/80 dark:hover:bg-slate-800/40'
                         }`}
                       >
                         <div

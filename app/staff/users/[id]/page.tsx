@@ -123,7 +123,7 @@ export default async function UserProfilePage({ params }: Props) {
       <div className="mb-6">
         <Link
           href="/staff/users"
-          className="mb-4 inline-flex items-center text-sm font-bold text-slate-400 transition-colors hover:text-aerojet-blue dark:text-slate-500 dark:hover:text-blue-400"
+          className="mb-4 inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-bold text-slate-400 transition-all duration-150 ease-out hover:bg-slate-100 hover:text-aerojet-blue dark:hover:bg-slate-800/60 dark:text-slate-500 dark:hover:text-blue-400"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Back to Users
         </Link>

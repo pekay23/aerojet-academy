@@ -154,7 +154,7 @@ async function EnrollmentTab() {
                   data.map((item) => (
                     <tr
                       key={item.courseCode}
-                      className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                      className="transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                     >
                       <td className="px-6 py-4 font-mono text-sm font-bold text-slate-500 dark:text-slate-400">
                         {item.courseCode}
@@ -248,7 +248,7 @@ async function RevenueTab() {
                 recentPayments.map((payment) => (
                   <tr
                     key={payment.id}
-                    className="text-lg font-bold transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                    className="text-lg font-bold transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                   >
                     <td className="px-6 py-4 font-mono text-sm text-slate-400">
                       {format(new Date(payment.updatedAt), 'MMM d, yyyy')}
@@ -352,7 +352,7 @@ async function PoolsTab() {
                     return (
                       <tr
                         key={pool.id}
-                        className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                        className="transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                       >
                         <td className="px-6 py-4 text-base font-bold text-aerojet-blue dark:text-white">
                           {pool.name}
@@ -469,7 +469,7 @@ async function AttendanceTab() {
                   records.map((record) => (
                     <tr
                       key={record.id}
-                      className="text-lg font-bold transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                      className="text-lg font-bold transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                     >
                       <td className="px-6 py-4 font-mono text-sm text-slate-400">
                         {format(new Date(record.date), 'MMM d, yyyy')}

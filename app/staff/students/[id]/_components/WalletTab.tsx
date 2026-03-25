@@ -352,7 +352,7 @@ function TransactionRow({
     <>
       <tr
         onClick={onToggle}
-        className={`cursor-pointer transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30 ${
+        className={`cursor-pointer transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40 ${
           isExpanded ? 'bg-slate-50/80 dark:bg-slate-800/40' : ''
         }`}
       >

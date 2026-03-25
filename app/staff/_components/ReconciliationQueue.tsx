@@ -118,7 +118,7 @@ export default function ReconciliationQueue() {
         <div className="flex items-center gap-3">
           <button
             onClick={fetchPayments}
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-600"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
           </button>
@@ -202,7 +202,7 @@ export default function ReconciliationQueue() {
                 filteredPayments.map((p) => (
                   <tr
                     key={p.id}
-                    className="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
+                    className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                   >
                     <td className="px-6 py-5">
                       <input

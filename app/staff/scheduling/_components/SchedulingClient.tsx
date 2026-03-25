@@ -163,9 +163,9 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
                               {catCourses.map((course) => (
                                 <TableRow
                                   key={course.id}
-                                  className="group border-b border-slate-50 transition-colors hover:bg-slate-50/30 dark:border-slate-800/50 dark:hover:bg-slate-900/40"
+                                  className="group border-b border-slate-50 transition-all duration-150 ease-out hover:bg-white/80 dark:border-slate-800/50 dark:hover:bg-slate-800/40"
                                 >
-                                  <TableCell className="sticky left-0 z-20 border-r bg-white py-5 group-hover:bg-slate-50 dark:bg-slate-950 dark:group-hover:bg-slate-900">
+                                  <TableCell className="sticky left-0 z-20 border-r bg-white py-5 transition-all duration-150 ease-out group-hover:bg-white group-hover:shadow-sm dark:bg-slate-950 dark:group-hover:bg-slate-900">
                                     <div className="space-y-1.5 px-2">
                                       <div className="text-lg leading-tight font-bold text-aerojet-blue dark:text-slate-100">
                                         {course.name}

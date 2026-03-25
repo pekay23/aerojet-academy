@@ -128,7 +128,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
           currentMessages.map((msg, idx) => (
             <div
               key={idx}
-              className="group flex items-start gap-3 px-6 py-3 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-800"
+              className="group flex items-start gap-3 px-6 py-3 transition-all duration-150 ease-out hover:bg-white/80 dark:bg-slate-800/50 dark:hover:bg-slate-800/60"
             >
               <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-aerojet-blue/10 text-[10px] font-bold text-aerojet-blue dark:bg-blue-500/10 dark:text-blue-400">
                 {idx + 1}

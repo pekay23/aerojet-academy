@@ -177,7 +177,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+              className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition-all duration-150 ease-out hover:border-slate-200 hover:bg-white hover:text-slate-600 hover:shadow-sm dark:hover:border-slate-700 dark:hover:bg-slate-800/80 dark:hover:text-slate-300"
               aria-label="Pending actions"
             >
               <Bell className="h-4 w-4" />
@@ -348,7 +348,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
-              className="relative flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300"
+              className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition-all duration-150 ease-out hover:border-slate-200 hover:bg-white hover:text-slate-600 hover:shadow-sm dark:hover:border-slate-700 dark:hover:bg-slate-800/80 dark:hover:text-slate-300"
               aria-label="Messages"
             >
               <MessageSquare className="h-4 w-4" />

@@ -143,7 +143,7 @@ async function EventsTab({ query }: { query?: string }) {
                   return (
                     <tr
                       key={event.id}
-                      className="group hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                      className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                     >
                       <td className="px-6 py-4">
                         <div className="font-bold text-slate-900 dark:text-slate-100">
@@ -181,7 +181,7 @@ async function EventsTab({ query }: { query?: string }) {
                       <td className="px-6 py-4 text-right">
                         <Link
                           href={`/staff/exams/events/${event.id}`}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800/50"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:bg-white hover:shadow-sm dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600"
                         >
                           <FileCheck className="h-3.5 w-3.5" />
                           Manage
@@ -361,7 +361,7 @@ async function ResultsTab({ query }: { query?: string }) {
                 allResults.map((result) => (
                   <tr
                     key={result.id}
-                    className="group hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                    className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
@@ -424,7 +424,7 @@ async function ResultsTab({ query }: { query?: string }) {
                           href={result.certificateUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs font-bold text-aerojet-blue hover:underline"
+                          className="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-blue transition-all duration-150 ease-out hover:bg-aerojet-blue/8 hover:shadow-sm"
                         >
                           View
                         </a>

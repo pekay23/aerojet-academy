@@ -316,10 +316,10 @@ export default function AcademicSchedulingPage() {
                 {sortedCourses.map((course) => (
                   <tr
                     key={course.id}
-                    className="group border-b border-slate-100 transition-colors hover:bg-slate-50/50 dark:border-slate-800/50 dark:hover:bg-slate-800/20"
+                    className="group border-b border-slate-100 transition-all duration-150 ease-out hover:bg-white/80 dark:border-slate-800/50 dark:hover:bg-slate-800/40"
                   >
                     {/* Course name column */}
-                    <td className="sticky left-0 z-10 border-r border-slate-200 bg-white px-6 py-4 group-hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:group-hover:bg-slate-800/30">
+                    <td className="sticky left-0 z-10 border-r border-slate-200 bg-white px-6 py-4 transition-all duration-150 ease-out group-hover:bg-white dark:border-slate-800 dark:bg-slate-900 dark:group-hover:bg-slate-800/40">
                       <div className="space-y-1">
                         <div className="text-sm font-bold leading-tight text-aerojet-blue dark:text-slate-100">
                           {course.name}
