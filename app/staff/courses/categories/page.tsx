@@ -168,7 +168,7 @@ export default function CourseCategoriesPage() {
             <ArrowLeft className="h-5 w-5 text-slate-500" />
           </Link>
           <div>
-            <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+            <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
               Course Categories
             </h1>
             <p className="text-slate-500 dark:text-slate-400">
@@ -181,7 +181,7 @@ export default function CourseCategoriesPage() {
         {/* Create dialog trigger */}
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-[#002a5c] hover:bg-[#002a5c]/90">
+            <Button className="bg-aerojet-blue hover:bg-aerojet-blue/90">
               <Plus className="mr-2 h-4 w-4" />
               Add Category
             </Button>
@@ -218,7 +218,7 @@ export default function CourseCategoriesPage() {
                 <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={isSubmitting} className="bg-[#002a5c]">
+                <Button type="submit" disabled={isSubmitting} className="bg-aerojet-blue">
                   {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create'}
                 </Button>
               </DialogFooter>
@@ -244,13 +244,13 @@ export default function CourseCategoriesPage() {
               className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
             >
               {/* Accent stripe */}
-              <div className="h-1 w-full bg-linear-to-r from-[#002a5c] to-[#4c9ded]" />
+              <div className="h-1 w-full bg-linear-to-r from-aerojet-blue to-aerojet-sky" />
 
               <div className="flex flex-1 flex-col p-6">
                 {/* Top row: name + actions */}
                 <div className="mb-3 flex items-start justify-between gap-2">
                   <div className="min-w-0">
-                    <h3 className="truncate font-black text-[#002a5c] dark:text-white">
+                    <h3 className="truncate font-black text-aerojet-blue dark:text-white">
                       {cat.name.replace(/_/g, ' ')}
                     </h3>
                     <code className="font-mono text-[10px] text-slate-400">{cat.id}</code>
@@ -288,7 +288,7 @@ export default function CourseCategoriesPage() {
                 <div className="flex items-center justify-between border-t border-slate-50 pt-4 dark:border-slate-800">
                   <div className="flex items-center gap-2">
                     <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20">
-                      <BookOpen className="h-3.5 w-3.5 text-[#4c9ded]" />
+                      <BookOpen className="h-3.5 w-3.5 text-aerojet-sky" />
                     </div>
                     <span className="text-sm font-black text-slate-700 dark:text-slate-300">
                       {cat._count?.courses ?? 0}
@@ -299,7 +299,7 @@ export default function CourseCategoriesPage() {
                   </div>
                   <Link
                     href={`/staff/courses?category=${cat.id}`}
-                    className="text-xs font-bold text-[#4c9ded] hover:underline"
+                    className="text-xs font-bold text-aerojet-sky hover:underline"
                   >
                     View courses →
                   </Link>
@@ -341,7 +341,7 @@ export default function CourseCategoriesPage() {
               <Button type="button" variant="outline" onClick={() => setEditTarget(null)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isSubmitting} className="bg-[#002a5c]">
+              <Button type="submit" disabled={isSubmitting} className="bg-aerojet-blue">
                 {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Changes'}
               </Button>
             </DialogFooter>

@@ -627,11 +627,11 @@ export default function DashboardSidebar({
   }
 
   const isActivePath = (href: string) => pathname === basePath + href
-  const isGroupActive = (link: SidebarLink) => {
+  const isGroupActive = (link: SidebarLink): boolean => {
     if (link.type === 'header') return false
     return (
-      pathname.startsWith(basePath + link.href) ||
-      link.children?.some((c) => pathname.startsWith(basePath + c.href))
+      pathname.startsWith(basePath + (link.href ?? '')) ||
+      (link.children?.some((c) => pathname.startsWith(basePath + c.href)) ?? false)
     )
   }
 

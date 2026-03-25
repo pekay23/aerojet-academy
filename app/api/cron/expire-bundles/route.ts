@@ -13,15 +13,35 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    const result = await prisma.examBundle.updateMany({
+    // Find bundles about to expire so we can notify their owners
+    const expiredBundles = await prisma.examBundle.findMany({
       where: {
         status: 'ACTIVE',
         validUntil: { lt: new Date() },
+      },
+      select: { id: true, userId: true, bundleType: true },
+    })
+
+    const result = await prisma.examBundle.updateMany({
+      where: {
+        id: { in: expiredBundles.map((b) => b.id) },
       },
       data: { status: 'EXPIRED' },
     })
 
     if (result.count > 0) {
+      // Notify each user whose bundle expired
+      for (const bundle of expiredBundles) {
+        await prisma.notification.create({
+          data: {
+            userId: bundle.userId,
+            title: 'Exam Bundle Expired',
+            message: `Your ${bundle.bundleType} exam bundle has expired. Contact admin for renewal options.`,
+            type: 'WARNING',
+          },
+        }).catch(() => {}) // Don't fail the cron if notification fails
+      }
+
       await createAuditLog({
         action: 'SYSTEM_UPDATE' as any,
         entity: 'ExamBundle',

@@ -73,11 +73,11 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
         className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between"
       >
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Academic Scheduling
           </h1>
           <p className="mt-1 flex items-center gap-2 text-base font-medium text-slate-500 dark:text-slate-400">
-            <Sparkles className="h-4 w-4 text-[#4c9ded]" />
+            <Sparkles className="h-4 w-4 text-aerojet-sky" />
             Map modules to academic terms for automatic enrollment.
           </p>
         </div>
@@ -87,7 +87,7 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
             placeholder="Search by code or name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-11 rounded-xl border-slate-200 bg-white pl-11 shadow-sm transition-all focus:border-[#4c9ded] focus:ring-2 focus:ring-[#4c9ded]/10 dark:border-slate-800 dark:bg-slate-950"
+            className="h-11 rounded-xl border-slate-200 bg-white pl-11 shadow-sm transition-all focus:border-aerojet-sky focus:ring-2 focus:ring-aerojet-sky/10 dark:border-slate-800 dark:bg-slate-950"
           />
         </div>
       </motion.div>
@@ -98,7 +98,7 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
             <TabsTrigger
               key={p.id}
               value={p.id}
-              className="rounded-xl border border-slate-200 bg-white px-8 py-3 text-sm font-bold text-[#002a5c] shadow-sm transition-all data-[state=active]:border-[#002a5c] data-[state=active]:bg-[#002a5c] data-[state=active]:text-white dark:border-slate-800 dark:bg-slate-900 dark:data-[state=active]:bg-[#002a5c]"
+              className="rounded-xl border border-slate-200 bg-white px-8 py-3 text-sm font-bold text-aerojet-blue shadow-sm transition-all data-[state=active]:border-aerojet-blue data-[state=active]:bg-aerojet-blue data-[state=active]:text-white dark:border-slate-800 dark:bg-slate-900 dark:data-[state=active]:bg-aerojet-blue"
             >
               {p.name}
             </TabsTrigger>
@@ -120,7 +120,7 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
                       <Table>
                         <TableHeader className="bg-slate-50 dark:bg-slate-900/50">
                           <TableRow className="hover:bg-transparent">
-                            <TableHead className="sticky left-0 z-30 w-[300px] min-w-[300px] border-r bg-slate-50 py-6 text-sm font-bold text-[#002a5c] dark:bg-slate-900 dark:text-slate-300">
+                            <TableHead className="sticky left-0 z-30 w-[300px] min-w-[300px] border-r bg-slate-50 py-6 text-sm font-bold text-aerojet-blue dark:bg-slate-900 dark:text-slate-300">
                               Module Name
                             </TableHead>
                             {pathway.academicTerms.map((term: any) => (
@@ -129,12 +129,12 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
                                 className="min-w-[160px] border-r text-center align-middle"
                               >
                                 <div className="flex flex-col items-center gap-1.5">
-                                  <span className="text-sm font-bold text-[#002a5c] dark:text-slate-100">
+                                  <span className="text-sm font-bold text-aerojet-blue dark:text-slate-100">
                                     {term.name}
                                   </span>
                                   <Badge
                                     variant="outline"
-                                    className="rounded-md border-blue-200 bg-blue-50 text-[10px] font-black text-[#002a5c] uppercase dark:border-blue-900/30 dark:bg-blue-900/30 dark:text-blue-300"
+                                    className="rounded-md border-blue-200 bg-blue-50 text-[10px] font-black text-aerojet-blue uppercase dark:border-blue-900/30 dark:bg-blue-900/30 dark:text-blue-300"
                                   >
                                     Year {term.yearNumber} • Sem {term.semesterNumber}
                                   </Badge>
@@ -167,7 +167,7 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
                                 >
                                   <TableCell className="sticky left-0 z-20 border-r bg-white py-5 group-hover:bg-slate-50 dark:bg-slate-950 dark:group-hover:bg-slate-900">
                                     <div className="space-y-1.5 px-2">
-                                      <div className="text-lg leading-tight font-bold text-[#002a5c] dark:text-slate-100">
+                                      <div className="text-lg leading-tight font-bold text-aerojet-blue dark:text-slate-100">
                                         {course.name}
                                       </div>
                                       <div className="flex items-center gap-2">
@@ -203,7 +203,7 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
                                           className="flex h-full min-h-[80px] w-full cursor-pointer items-center justify-center transition-all hover:bg-blue-50/50 dark:hover:bg-blue-900/10"
                                         >
                                           {isLoading ? (
-                                            <Loader2 className="h-5 w-5 animate-spin text-[#4c9ded]" />
+                                            <Loader2 className="h-5 w-5 animate-spin text-aerojet-sky" />
                                           ) : (
                                             <Checkbox
                                               id={`check-${term.id}-${course.id}`}
@@ -211,7 +211,7 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
                                               onCheckedChange={(checked) =>
                                                 handleToggle(term.id, course.id, !!checked)
                                               }
-                                              className="h-6 w-6 rounded-lg border-2 border-slate-200 transition-all data-[state=checked]:border-[#002a5c] data-[state=checked]:bg-[#002a5c] dark:border-slate-800"
+                                              className="h-6 w-6 rounded-lg border-2 border-slate-200 transition-all data-[state=checked]:border-aerojet-blue data-[state=checked]:bg-aerojet-blue dark:border-slate-800"
                                             />
                                           )}
                                         </label>

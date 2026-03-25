@@ -102,7 +102,7 @@ export default async function ApplicationStatusPage() {
   return (
     <div className="max-w-3xl space-y-8">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] dark:text-white sm:text-3xl">
+        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white sm:text-3xl">
           Application Status
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -112,7 +112,7 @@ export default async function ApplicationStatusPage() {
 
       {/* Application Reference */}
       {applicant.registrationCode && (
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-[#002a5c] p-6 text-white">
+        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-aerojet-blue p-6 text-white">
           <div>
             <p className="mb-1 text-xs font-semibold uppercase tracking-widest text-white/60">
               Registration Code
@@ -177,7 +177,7 @@ export default async function ApplicationStatusPage() {
                   {step.action && (
                     <Link
                       href={step.action.href}
-                      className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-[#002a5c] underline underline-offset-2 hover:text-[#4c9ded]"
+                      className="mt-2 inline-flex items-center gap-1.5 text-xs font-bold text-aerojet-blue underline underline-offset-2 hover:text-aerojet-sky"
                     >
                       <CreditCard className="h-3.5 w-3.5" />
                       {step.action.label}
@@ -196,7 +196,7 @@ export default async function ApplicationStatusPage() {
           <h2 className="font-bold text-slate-900 dark:text-slate-100">Personal Details</h2>
           <Link
             href="/applicant/profile"
-            className="text-xs font-bold text-[#002a5c] hover:underline"
+            className="text-xs font-bold text-aerojet-blue hover:underline"
           >
             Edit Profile →
           </Link>

@@ -131,8 +131,17 @@ const COLORS = {
   text: '#334155',
 }
 
+let cachedBaseUrl: { value: string; expiresAt: number } | null = null
+
+async function getCachedBaseUrl(): Promise<string> {
+  if (cachedBaseUrl && Date.now() < cachedBaseUrl.expiresAt) return cachedBaseUrl.value
+  const url = await getBaseUrl()
+  cachedBaseUrl = { value: url, expiresAt: Date.now() + 5 * 60 * 1000 }
+  return url
+}
+
 export const wrapEmail = async (title: string, bodyContent: string) => {
-  const baseUrl = await getBaseUrl()
+  const baseUrl = await getCachedBaseUrl()
   const logoDarkOnWhite = `${baseUrl}/images/logos/AATA_logo_hor_onWhite.png`
   const logoWhiteOnDark = `${baseUrl}/images/logos/ATA_logo_hor_onDark.png`
 
@@ -186,6 +195,9 @@ export const wrapEmail = async (title: string, bodyContent: string) => {
                   <a href="${baseUrl}/login" style="color: ${COLORS.sky} !important;">Portal</a>
                 </div>
                 <div class="copyright" style="color: #94a3b8 !important; opacity: 1 !important;">&copy; ${new Date().getFullYear()} Aerojet Aviation. All rights reserved.</div>
+                <div style="margin-top: 8px; font-size: 11px; color: #94a3b8;">
+                  <a href="${baseUrl}/unsubscribe" style="color: #94a3b8; text-decoration: underline;">Unsubscribe</a> from marketing emails.
+                </div>
               </td>
             </tr>
           </table>

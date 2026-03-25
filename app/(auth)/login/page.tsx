@@ -8,7 +8,7 @@ export default function LoginPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl sm:text-3xl font-black text-[#002a5c] uppercase tracking-tight">Welcome Back</h2>
+        <h2 className="text-2xl sm:text-3xl font-black text-aerojet-blue uppercase tracking-tight">Welcome Back</h2>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Sign in to your portal account.</p>
       </div>
 
@@ -17,7 +17,7 @@ export default function LoginPage() {
       <div className="mt-8 text-center">
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Don't have an account?{" "}
-          <Link href="/register" className="font-bold text-[#4c9ded] hover:underline">
+          <Link href="/register" className="font-bold text-aerojet-sky hover:underline">
             Register here
           </Link>
         </p>

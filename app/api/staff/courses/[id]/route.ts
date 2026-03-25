@@ -4,6 +4,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { updateCourseSchema, validateBody } from '@/lib/validation/schemas'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
+import { softDeleteData } from '@/lib/prisma/soft-delete'
 
 // Helper: resolve param that could be a database ID or course code
 async function resolveCourseId(param: string) {
@@ -114,17 +115,17 @@ export const DELETE = withErrorHandler(
     if (hasRelated && force) {
       await prisma.$transaction(async (tx) => {
         // Delete bookings first
-        await tx.examBooking.deleteMany({ where: { courseId: id } })
+        await tx.examBooking.updateMany({ where: { courseId: id }, data: softDeleteData() })
         // Exam component dependencies
         const componentIds = (
           await tx.examComponent.findMany({ where: { courseId: id }, select: { id: true } })
         ).map((c) => c.id)
         if (componentIds.length > 0) {
-          await tx.poolMembership.deleteMany({ where: { examComponentId: { in: componentIds } } })
+          await tx.poolMembership.updateMany({ where: { examComponentId: { in: componentIds } }, data: softDeleteData() })
           await tx.exam.deleteMany({ where: { examComponentId: { in: componentIds } } })
           await tx.examComponent.deleteMany({ where: { courseId: id } })
         }
-        await tx.enrollment.deleteMany({ where: { courseId: id } })
+        await tx.enrollment.updateMany({ where: { courseId: id }, data: softDeleteData() })
         await tx.class.deleteMany({ where: { courseId: id } })
         await tx.licenseModuleRequirement.deleteMany({ where: { courseId: id } })
         await tx.termCourseAssignment.deleteMany({ where: { courseId: id } })

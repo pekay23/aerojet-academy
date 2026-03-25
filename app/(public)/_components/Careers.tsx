@@ -20,7 +20,7 @@ export default function Careers() {
         <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-24">
           <SectionReveal className="order-2 lg:order-1">
             <div className="relative">
-              <div className="absolute -top-6 -left-6 z-0 h-24 w-24 rounded-full border-4 border-white bg-[#4c9ded]/10 blur-xl" />
+              <div className="absolute -top-6 -left-6 z-0 h-24 w-24 rounded-full border-4 border-white bg-aerojet-sky/10 blur-xl" />
               <div className="relative z-10 overflow-hidden rounded-3xl shadow-2xl">
                 <NextImage
                   src="/images/careers/aircraftcareers.webp"
@@ -35,12 +35,12 @@ export default function Careers() {
           </SectionReveal>
           <SectionReveal delay={0.2} className="order-1 lg:order-2">
             <div>
-              <span className="mb-4 block text-sm font-black tracking-[0.3em] text-[#4c9ded] uppercase">
+              <span className="mb-4 block text-sm font-black tracking-[0.3em] text-aerojet-sky uppercase">
                 Career Opportunities
               </span>
-              <h2 className="mb-8 text-4xl leading-tight font-black tracking-tight text-[#002a5c] uppercase sm:text-5xl">
+              <h2 className="mb-8 text-4xl leading-tight font-black tracking-tight text-aerojet-blue uppercase sm:text-5xl">
                 A Career That Takes <br />
-                <span className="text-[#4c9ded]">You Anywhere</span>
+                <span className="text-aerojet-sky">You Anywhere</span>
               </h2>
               <p className="mb-10 text-lg leading-relaxed text-slate-600">
                 An EASA Part-66 license is a globally recognized qualification that opens doors to a
@@ -55,7 +55,7 @@ export default function Careers() {
                     whileInView={{ opacity: 1, x: 0 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.3 + i * 0.1 }}
-                    className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-[#4c9ded] hover:shadow-md"
+                    className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:border-aerojet-sky hover:shadow-md"
                   >
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
                       <CheckCircle2 className="h-5 w-5" />

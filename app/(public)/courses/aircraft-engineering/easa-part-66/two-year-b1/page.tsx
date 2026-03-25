@@ -25,11 +25,11 @@ export default function TwoYearPage() {
               <span className="rounded-full bg-green-600 px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase">
                 Accelerated
               </span>
-              <span className="rounded-full bg-blue-100 px-4 py-2 text-[10px] font-black tracking-widest text-[#002a5c] uppercase">
+              <span className="rounded-full bg-blue-100 px-4 py-2 text-[10px] font-black tracking-widest text-aerojet-blue uppercase">
                 B1.1 License
               </span>
             </div>
-            <h2 className="mb-6 text-3xl font-black tracking-tight text-[#002a5c] sm:text-4xl">
+            <h2 className="mb-6 text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl">
               Focused. Intensive. Career-Ready.
             </h2>
             <p className="mb-4 text-lg leading-relaxed text-slate-700">
@@ -48,7 +48,7 @@ export default function TwoYearPage() {
         <SectionReveal>
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:p-8">
-              <Zap className="mb-4 h-8 w-8 text-[#4c9ded]" />
+              <Zap className="mb-4 h-8 w-8 text-aerojet-sky" />
               <h3 className="mb-2 font-bold text-slate-900">Why 2 Years?</h3>
               <p className="text-sm leading-relaxed text-slate-600">
                 By focusing exclusively on B1.1 modules and streamlining the curriculum, this
@@ -57,7 +57,7 @@ export default function TwoYearPage() {
               </p>
             </div>
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:p-8">
-              <BookOpen className="mb-4 h-8 w-8 text-[#4c9ded]" />
+              <BookOpen className="mb-4 h-8 w-8 text-aerojet-sky" />
               <h3 className="mb-2 font-bold text-slate-900">What's Covered</h3>
               <p className="text-sm leading-relaxed text-slate-600">
                 Core modules M1–M10 plus specialist modules M11, M15, and M17 — everything required
@@ -68,8 +68,8 @@ export default function TwoYearPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <section className="rounded-2xl bg-[#002a5c] p-6 text-white sm:rounded-3xl sm:p-10">
-            <h3 className="mb-6 text-xl font-black tracking-tight text-[#4c9ded] uppercase">
+          <section className="rounded-2xl bg-aerojet-blue p-6 text-white sm:rounded-3xl sm:p-10">
+            <h3 className="mb-6 text-xl font-black tracking-tight text-aerojet-sky uppercase">
               Program Details
             </h3>
             <div className="grid gap-6 sm:grid-cols-2">
@@ -95,7 +95,7 @@ export default function TwoYearPage() {
 
         <SectionReveal>
           <section>
-            <h3 className="mb-5 text-xl font-bold text-[#002a5c]">Required Modules</h3>
+            <h3 className="mb-5 text-xl font-bold text-aerojet-blue">Required Modules</h3>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[
                 'M1',
@@ -116,14 +116,14 @@ export default function TwoYearPage() {
                   key={m}
                   className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center"
                 >
-                  <span className="font-black text-[#4c9ded]">{m}</span>
+                  <span className="font-black text-aerojet-sky">{m}</span>
                 </div>
               ))}
             </div>
             <p className="mt-4 text-xs text-slate-500">
               <Link
                 href="/courses/module-requirements"
-                className="font-bold text-[#4c9ded] hover:underline"
+                className="font-bold text-aerojet-sky hover:underline"
               >
                 View full module details →
               </Link>
@@ -133,7 +133,7 @@ export default function TwoYearPage() {
 
         {/* CTA */}
         <SectionReveal>
-          <div className="rounded-2xl bg-linear-to-r from-[#002a5c] to-[#4c9ded] p-8 text-center text-white sm:rounded-3xl sm:p-12">
+          <div className="rounded-2xl bg-linear-to-r from-aerojet-blue to-aerojet-sky p-8 text-center text-white sm:rounded-3xl sm:p-12">
             <h2 className="mb-4 text-2xl font-black tracking-tight uppercase">
               Interested in the 2-Year Program?
             </h2>
@@ -143,7 +143,7 @@ export default function TwoYearPage() {
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Link
                 href="/register"
-                className="inline-block rounded-xl bg-white px-8 py-4 text-xs font-black tracking-widest text-[#002a5c] uppercase transition-all hover:bg-blue-50"
+                className="inline-block rounded-xl bg-white px-8 py-4 text-xs font-black tracking-widest text-aerojet-blue uppercase transition-all hover:bg-blue-50"
               >
                 Register Now
               </Link>

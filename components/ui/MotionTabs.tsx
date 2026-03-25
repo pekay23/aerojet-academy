@@ -44,7 +44,7 @@ export default function MotionTabs({
             className={cn(
               'relative rounded-full px-4 py-1.5 text-xs font-bold tracking-tight transition-colors md:px-6',
               isActive
-                ? cn('text-white dark:text-[#002a5c]', activeTabClassName)
+                ? cn('text-white dark:text-aerojet-blue', activeTabClassName)
                 : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200',
               tabClassName
             )}
@@ -52,7 +52,7 @@ export default function MotionTabs({
             {isActive && (
               <motion.div
                 layoutId={layoutId}
-                className="absolute inset-0 bg-[#002a5c] dark:bg-white"
+                className="absolute inset-0 bg-aerojet-blue dark:bg-white"
                 style={{ borderRadius: 9999, zIndex: 0 }}
                 transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
               />

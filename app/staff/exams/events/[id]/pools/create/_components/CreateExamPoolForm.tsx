@@ -292,7 +292,7 @@ export default function CreateExamPoolForm({ event }: CreateExamPoolFormProps) {
           </Button>
           <Button
             type="submit"
-            className="bg-[#002a5c] px-8 hover:bg-[#002a5c]/90"
+            className="bg-aerojet-blue px-8 hover:bg-aerojet-blue/90"
             disabled={isLoading}
           >
             {isLoading ? (

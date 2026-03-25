@@ -35,7 +35,7 @@ export default function TablePagination({
             onPageChange(1)
           }}
           aria-label="Rows per page"
-          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-600 outline-none transition-colors focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+          className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold text-slate-600 outline-none transition-colors focus:ring-2 focus:ring-aerojet-sky dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
         >
           {PER_PAGE_OPTIONS.map((n) => (
             <option key={n} value={n}>

@@ -101,7 +101,7 @@ export default async function MessagesPage({
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+          <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
             Messages
             {totalUnread > 0 && (
               <span className="inline-flex h-6 min-w-[24px] items-center justify-center rounded-full bg-red-500 px-2 text-xs font-bold text-white">

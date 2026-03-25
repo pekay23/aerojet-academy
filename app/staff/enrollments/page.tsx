@@ -65,7 +65,7 @@ export default async function EnrollmentsPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">Enrollments</h1>
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">Enrollments</h1>
           <p className="text-slate-500 dark:text-slate-400">Manage student course enrollments</p>
         </div>
         <div className="w-72">

@@ -67,7 +67,7 @@ export default function ResourcesView({ initialResources }: ResourcesViewProps) 
                 className={withBadge(
                   'flex items-center gap-2 rounded-xl border px-4 py-2 text-xs font-bold tracking-widest uppercase transition-all',
                   isActive
-                    ? 'border-[#4c9ded] bg-[#4c9ded] text-white'
+                    ? 'border-aerojet-sky bg-aerojet-sky text-white'
                     : 'border-slate-100 bg-white text-slate-500 hover:border-slate-200 hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-700'
                 )}
               >

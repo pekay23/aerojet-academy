@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { getSystemSetting } from '@/lib/settings'
 import PathwayPaymentForm from '../pathway/_components/PathwayPaymentForm'
 import { Info, Wallet } from 'lucide-react'
 import { getActivePaymentMethods } from '@/lib/payment-methods'
@@ -39,10 +40,7 @@ export default async function ApplicantWalletTopUpPage() {
     },
   })
 
-  const settings = await prisma.systemSetting.findMany({
-    where: { key: 'course_currency' },
-  })
-  const currency = settings[0]?.value || 'EUR'
+  const currency = await getSystemSetting('course_currency', 'EUR')
 
   const { getCurrencySymbol } = await import('@/lib/currency')
   const symbol = getCurrencySymbol(currency)
@@ -94,7 +92,7 @@ export default async function ApplicantWalletTopUpPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           Top-Up Your Exam Wallet
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

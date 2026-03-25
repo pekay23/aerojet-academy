@@ -17,7 +17,7 @@ export default function EntryRequirementsPage() {
       <div className="mx-auto max-w-5xl space-y-16 px-6 py-20">
         <SectionReveal>
           <section>
-            <h2 className="mb-8 text-2xl font-black uppercase tracking-tight text-[#002a5c]">
+            <h2 className="mb-8 text-2xl font-black uppercase tracking-tight text-aerojet-blue">
               Full-Time & Modular Courses
             </h2>
             <div className="grid gap-5 sm:grid-cols-2">
@@ -52,13 +52,13 @@ export default function EntryRequirementsPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <section className="rounded-2xl bg-[#002a5c] p-8 text-white shadow-xl sm:rounded-3xl sm:p-12">
+          <section className="rounded-2xl bg-aerojet-blue p-8 text-white shadow-xl sm:rounded-3xl sm:p-12">
             <h2 className="mb-8 text-2xl font-black uppercase tracking-tight">
               Modular & Exam-Only Candidates
             </h2>
             <div className="grid gap-8 sm:grid-cols-2">
               <div>
-                <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-[#4c9ded]">
+                <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-aerojet-sky">
                   Professional Standing
                 </h4>
                 <p className="text-sm leading-relaxed text-blue-100">
@@ -68,7 +68,7 @@ export default function EntryRequirementsPage() {
                 </p>
               </div>
               <div>
-                <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-[#4c9ded]">
+                <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-aerojet-sky">
                   Identification
                 </h4>
                 <p className="text-sm leading-relaxed text-blue-100">
@@ -82,7 +82,7 @@ export default function EntryRequirementsPage() {
 
         <SectionReveal>
           <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm sm:rounded-3xl sm:p-12">
-            <h2 className="mb-4 text-2xl font-black uppercase tracking-tight text-[#002a5c]">
+            <h2 className="mb-4 text-2xl font-black uppercase tracking-tight text-aerojet-blue">
               Unsure of your eligibility?
             </h2>
             <p className="mx-auto mb-8 max-w-xl text-slate-500">
@@ -92,7 +92,7 @@ export default function EntryRequirementsPage() {
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Link
                 href="/contact"
-                className="rounded-xl bg-[#4c9ded] px-8 py-4 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-[#002a5c]"
+                className="rounded-xl bg-aerojet-sky px-8 py-4 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-aerojet-blue"
               >
                 Contact Admissions
               </Link>

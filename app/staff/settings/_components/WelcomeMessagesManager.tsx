@@ -130,7 +130,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
               key={idx}
               className="group flex items-start gap-3 px-6 py-3 hover:bg-slate-50 dark:bg-slate-800/50 dark:hover:bg-slate-800"
             >
-              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#002a5c]/10 text-[10px] font-bold text-[#002a5c] dark:bg-blue-500/10 dark:text-blue-400">
+              <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-aerojet-blue/10 text-[10px] font-bold text-aerojet-blue dark:bg-blue-500/10 dark:text-blue-400">
                 {idx + 1}
               </span>
               <p className="flex-1 text-sm text-slate-700 dark:text-slate-300">{msg}</p>
@@ -165,7 +165,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
             onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addMessage())}
             placeholder={`Type a message for ${activeRole}s…`}
             maxLength={200}
-            className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+            className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:placeholder-slate-500 dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
           />
           <button
             type="button"
@@ -193,7 +193,7 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-6 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#003875] active:scale-95 disabled:opacity-60 dark:bg-blue-600 dark:shadow-blue-900/20 dark:hover:bg-blue-700"
+          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 text-sm font-bold text-white shadow-lg transition-all hover:bg-[#003875] active:scale-95 disabled:opacity-60 dark:bg-blue-600 dark:shadow-blue-900/20 dark:hover:bg-blue-700"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Save All Changes

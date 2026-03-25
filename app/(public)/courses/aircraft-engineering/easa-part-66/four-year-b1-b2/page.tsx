@@ -33,14 +33,14 @@ export default function FourYearPage() {
         <SectionReveal>
           <section className="max-w-4xl">
             <div className="mb-6 flex flex-wrap gap-3">
-              <span className="rounded-full bg-[#002a5c] px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase">
+              <span className="rounded-full bg-aerojet-blue px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase">
                 Full-Time Training
               </span>
-              <span className="rounded-full bg-blue-100 px-4 py-2 text-[10px] font-black tracking-widest text-[#002a5c] uppercase">
+              <span className="rounded-full bg-blue-100 px-4 py-2 text-[10px] font-black tracking-widest text-aerojet-blue uppercase">
                 B1.1 & B2 License
               </span>
             </div>
-            <h2 className="mb-6 text-3xl font-black tracking-tight text-[#002a5c] sm:text-4xl">
+            <h2 className="mb-6 text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl">
               Your Career Starts Here
             </h2>
             <p className="mb-4 text-lg leading-relaxed text-slate-700">
@@ -61,8 +61,8 @@ export default function FourYearPage() {
         {/* What Does It Involve */}
         <SectionReveal>
           <section className="rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:rounded-3xl sm:p-10">
-            <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-[#002a5c]">
-              <Hammer className="h-5 w-5 text-[#4c9ded]" /> What Does It Involve?
+            <h3 className="mb-4 flex items-center gap-2 text-xl font-bold text-aerojet-blue">
+              <Hammer className="h-5 w-5 text-aerojet-sky" /> What Does It Involve?
             </h3>
             <p className="mb-6 leading-relaxed text-slate-700">
               As an aircraft maintenance engineer, your work involves installing, maintaining,
@@ -74,14 +74,14 @@ export default function FourYearPage() {
                 (s) => (
                   <div
                     key={s}
-                    className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-[#002a5c]"
+                    className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-center text-sm font-semibold text-aerojet-blue"
                   >
                     {s}
                   </div>
                 )
               )}
             </div>
-            <p className="border-l-4 border-[#4c9ded] pl-4 text-slate-600 italic">
+            <p className="border-l-4 border-aerojet-sky pl-4 text-slate-600 italic">
               "You may work on flight systems on one day and wing or fuselage materials on another."
             </p>
           </section>
@@ -105,8 +105,8 @@ export default function FourYearPage() {
         <div className="grid gap-8 sm:gap-12 lg:grid-cols-2">
           <SectionReveal>
             <div>
-              <h4 className="mb-5 flex items-center gap-2 font-bold text-[#002a5c]">
-                <Clock className="h-5 w-5 text-[#4c9ded]" /> Course Details
+              <h4 className="mb-5 flex items-center gap-2 font-bold text-aerojet-blue">
+                <Clock className="h-5 w-5 text-aerojet-sky" /> Course Details
               </h4>
               <ul className="space-y-4">
                 {[
@@ -117,7 +117,7 @@ export default function FourYearPage() {
                   { label: 'Hands-on Training', value: 'Over 2,000 hours required' },
                 ].map((item) => (
                   <li key={item.label} className="flex items-start gap-3 text-sm">
-                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#4c9ded]" />
+                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-aerojet-sky" />
                     <span className="text-slate-700">
                       <strong className="text-slate-900">{item.label}:</strong> {item.value}
                     </span>
@@ -129,8 +129,8 @@ export default function FourYearPage() {
 
           <SectionReveal delay={0.1}>
             <div>
-              <h4 className="mb-5 flex items-center gap-2 font-bold text-[#002a5c]">
-                <BookOpen className="h-5 w-5 text-[#4c9ded]" /> What You'll Learn
+              <h4 className="mb-5 flex items-center gap-2 font-bold text-aerojet-blue">
+                <BookOpen className="h-5 w-5 text-aerojet-sky" /> What You'll Learn
               </h4>
               <div className="space-y-2">
                 {[
@@ -145,7 +145,7 @@ export default function FourYearPage() {
                     key={topic}
                     className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-700"
                   >
-                    <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#4c9ded]" />
+                    <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-aerojet-sky" />
                     {topic}
                   </div>
                 ))}
@@ -157,7 +157,7 @@ export default function FourYearPage() {
         {/* What's Provided */}
         <SectionReveal>
           <section className="rounded-2xl border border-blue-100 bg-blue-50 p-6 sm:rounded-3xl sm:p-10">
-            <h4 className="mb-5 font-bold text-[#002a5c]">What's Provided</h4>
+            <h4 className="mb-5 font-bold text-aerojet-blue">What's Provided</h4>
             <div className="grid gap-3 sm:grid-cols-2">
               {[
                 'All learning materials & study resources',
@@ -166,7 +166,7 @@ export default function FourYearPage() {
                 'EASA Part 66 License application assistance',
               ].map((item) => (
                 <div key={item} className="flex items-center gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="h-4 w-4 shrink-0 text-[#4c9ded]" />
+                  <CheckCircle2 className="h-4 w-4 shrink-0 text-aerojet-sky" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -180,7 +180,7 @@ export default function FourYearPage() {
 
         {/* Admission Process */}
         <SectionReveal>
-          <section className="rounded-r-2xl border-l-4 border-[#002a5c] bg-white p-6 shadow-sm sm:p-8">
+          <section className="rounded-r-2xl border-l-4 border-aerojet-blue bg-white p-6 shadow-sm sm:p-8">
             <h3 className="mb-8 text-2xl font-bold text-slate-900">How to Apply</h3>
             <div className="max-w-3xl space-y-6">
               {[
@@ -206,11 +206,11 @@ export default function FourYearPage() {
                 },
               ].map((step, i) => (
                 <div key={i} className="flex gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#002a5c] font-bold text-white">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-aerojet-blue font-bold text-white">
                     {i + 1}
                   </div>
                   <div>
-                    <h5 className="mb-1 font-bold text-[#002a5c]">{step.title}</h5>
+                    <h5 className="mb-1 font-bold text-aerojet-blue">{step.title}</h5>
                     <p className="text-sm text-slate-600">{step.desc}</p>
                   </div>
                 </div>
@@ -231,7 +231,7 @@ export default function FourYearPage() {
 
         {/* CTA */}
         <SectionReveal>
-          <div className="rounded-2xl bg-linear-to-r from-[#002a5c] to-[#4c9ded] p-8 text-center text-white sm:rounded-3xl sm:p-12">
+          <div className="rounded-2xl bg-linear-to-r from-aerojet-blue to-aerojet-sky p-8 text-center text-white sm:rounded-3xl sm:p-12">
             <h2 className="mb-4 text-2xl font-black tracking-tight uppercase sm:text-3xl">
               Ready to Apply?
             </h2>
@@ -240,7 +240,7 @@ export default function FourYearPage() {
             </p>
             <Link
               href="/register"
-              className="inline-block rounded-xl bg-white px-10 py-4 text-xs font-black tracking-widest text-[#002a5c] transition-all hover:bg-blue-50 active:scale-[0.98]"
+              className="inline-block rounded-xl bg-white px-10 py-4 text-xs font-black tracking-widest text-aerojet-blue transition-all hover:bg-blue-50 active:scale-[0.98]"
             >
               Start Registration
             </Link>

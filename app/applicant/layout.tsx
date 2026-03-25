@@ -49,7 +49,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
   const hasPathway = !!studentProfile?.pathwayId || !!hasFullTimeEnrollment
   const isExamOnly = dbUser?.programmeChoice === 'EXAM_ONLY'
 
-  const userName = profile ? `${profile.firstName} ${profile.lastName}` : user.email
+  const userName = profile ? `${profile.firstName} ${profile.lastName}` : (user.email ?? '')
   const userRole = 'Applicant'
 
   return (
@@ -57,7 +57,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
       <ApplicantSidebar
         userName={userName}
         userRole={userRole}
-        userImage={user.image || undefined}
+        userImage={user.image ?? undefined}
         hasPathway={hasPathway}
         isExamOnly={isExamOnly}
       />

@@ -102,8 +102,8 @@ export default function PaymentApprovalCard({
       {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#002a5c]/10 dark:bg-blue-500/10">
-            <User className="h-4 w-4 text-[#002a5c] dark:text-blue-400" />
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-aerojet-blue/10 dark:bg-blue-500/10">
+            <User className="h-4 w-4 text-aerojet-blue dark:text-blue-400" />
           </div>
           <div>
             <p className="text-sm font-bold text-slate-800 dark:text-white">{fullName}</p>
@@ -121,7 +121,7 @@ export default function PaymentApprovalCard({
           <p className="mb-0.5 text-[10px] font-bold tracking-widest text-slate-400 uppercase dark:text-slate-500">
             Amount
           </p>
-          <p className="text-base font-black text-[#002a5c] dark:text-blue-400">
+          <p className="text-base font-black text-aerojet-blue dark:text-blue-400">
             {payment.currency ?? 'GHS'} {Number(payment.amount).toFixed(2)}
           </p>
         </div>
@@ -156,7 +156,7 @@ export default function PaymentApprovalCard({
             href={payment.proofUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#4c9ded] hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-aerojet-sky hover:underline"
           >
             <ExternalLink className="h-3.5 w-3.5" />
             View Payment Proof

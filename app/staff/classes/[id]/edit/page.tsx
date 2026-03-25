@@ -52,7 +52,7 @@ export default async function EditClassPage({ params }: Props) {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">Edit Class</h1>
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">Edit Class</h1>
         <p className="text-slate-500 dark:text-slate-400">Update class details and schedule</p>
       </div>
 

@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { sanitizeHtml } from '@/lib/utils/sanitize'
 import {
   ArrowLeft,
   Save,
@@ -185,7 +186,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           <button
             onClick={handleSubmit}
             disabled={loading || isDeleting}
-            className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-[#002a5c]/90 disabled:opacity-70 dark:bg-blue-600 dark:hover:bg-blue-700"
+            className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-2.5 text-sm font-semibold text-white transition-all hover:bg-aerojet-blue/90 disabled:opacity-70 dark:bg-blue-600 dark:hover:bg-blue-700"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             {isPublishing ? 'Publish Changes' : 'Save Changes'}
@@ -205,7 +206,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                   type="text"
                   required
                   placeholder="Enter a compelling title..."
-                  className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-3 text-lg font-medium text-slate-900 outline-none focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                  className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-3 text-lg font-medium text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                   value={formData.title}
                   onChange={handleTitleChange}
                 />
@@ -236,12 +237,12 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                     <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-transparent" />
                   </>
                 ) : (
-                  <div className="absolute inset-0 bg-[#002a5c]" />
+                  <div className="absolute inset-0 bg-aerojet-blue" />
                 )}
 
                 <div className="absolute inset-0 flex items-end pb-8">
                   <div className="px-8">
-                    <div className="mb-4 inline-block rounded-full bg-[#4c9ded] px-3 py-1 text-[8px] font-black tracking-widest text-white uppercase">
+                    <div className="mb-4 inline-block rounded-full bg-aerojet-sky px-3 py-1 text-[8px] font-black tracking-widest text-white uppercase">
                       Academy News
                     </div>
                     <h1 className="mb-4 text-2xl font-black tracking-tight text-white sm:text-3xl">
@@ -249,11 +250,11 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                     </h1>
                     <div className="flex flex-wrap items-center gap-4 text-[9px] font-bold tracking-widest text-slate-200 uppercase">
                       <div className="flex items-center gap-2">
-                        <UserIcon className="h-3 w-3 text-[#4c9ded]" />
+                        <UserIcon className="h-3 w-3 text-aerojet-sky" />
                         <span>{formData.customAuthorName || 'Aerojet Academy'}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-3 w-3 text-[#4c9ded]" />
+                        <Calendar className="h-3 w-3 text-aerojet-sky" />
                         <span>
                           {formData.customPublishedAt
                             ? new Date(formData.customPublishedAt).toLocaleDateString()
@@ -277,7 +278,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 <div
                   className="prose dark:prose-invert prose-slate max-w-none"
                   dangerouslySetInnerHTML={{
-                    __html: formData.content || 'Start writing to see preview...',
+                    __html: sanitizeHtml(formData.content || 'Start writing to see preview...'),
                   }}
                 />
               </div>
@@ -302,7 +303,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                       status: e.target.value as 'DRAFT' | 'PUBLISHED' | 'ARCHIVED',
                     })
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                  className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                 >
                   <option value="DRAFT">Draft</option>
                   <option value="PUBLISHED">Published</option>
@@ -338,7 +339,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 </label>
                 <textarea
                   rows={3}
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-transparent px-4 py-3 text-sm text-slate-900 outline-none focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                  className="w-full resize-none rounded-xl border border-slate-200 bg-transparent px-4 py-3 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                   value={formData.excerpt}
                   onChange={(e) => setFormData({ ...formData, excerpt: e.target.value })}
                   placeholder="Short summary for preview cards..."
@@ -351,7 +352,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 </label>
                 <input
                   type="text"
-                  className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                  className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                   placeholder="e.g. Aviation, News, Training"
                   value={formData.tags?.join(', ') || ''}
                   onChange={(e) => {
@@ -371,7 +372,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                   </label>
                   <input
                     type="text"
-                    className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                    className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                     placeholder="Enter author name..."
                     value={formData.customAuthorName}
                     onChange={(e) => setFormData({ ...formData, customAuthorName: e.target.value })}
@@ -383,7 +384,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                   </label>
                   <input
                     type="datetime-local"
-                    className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                    className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                     value={formData.publishedAt}
                     onChange={(e) => setFormData({ ...formData, publishedAt: e.target.value })}
                   />
@@ -396,7 +397,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                 </label>
                 <input
                   type="datetime-local"
-                  className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                  className="w-full rounded-xl border border-slate-200 bg-transparent px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                   value={formData.customPublishedAt}
                   onChange={(e) => setFormData({ ...formData, customPublishedAt: e.target.value })}
                 />
@@ -416,7 +417,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                     </div>
                     <input
                       type="url"
-                      className="w-full rounded-xl border border-slate-200 bg-transparent py-2.5 pr-4 pl-10 text-sm text-slate-900 outline-none focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
+                      className="w-full rounded-xl border border-slate-200 bg-transparent py-2.5 pr-4 pl-10 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-500/20"
                       placeholder="https://..."
                       value={formData.coverImage}
                       onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
@@ -444,7 +445,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
                     }}
                     appearance={{
                       button:
-                        'ut-ready:bg-[#002a5c] ut-uploading:cursor-not-allowed rounded-xl bg-[#002a5c] bg-none after:bg-blue-400',
+                        'ut-ready:bg-aerojet-blue ut-uploading:cursor-not-allowed rounded-xl bg-aerojet-blue bg-none after:bg-blue-400',
                       container: 'w-full',
                       allowedContent: 'text-slate-400 text-[10px] uppercase font-bold',
                     }}

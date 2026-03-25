@@ -336,7 +336,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
             <DropdownMenuItem asChild>
               <Link
                 href="/staff/payments?tab=PENDING"
-                className="justify-center text-center text-sm font-medium text-[#4c9ded]"
+                className="justify-center text-center text-sm font-medium text-aerojet-sky"
               >
                 View All Pending
               </Link>
@@ -364,7 +364,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
               <span>Messages</span>
               <Link
                 href="/staff/messages?compose=true"
-                className="text-xs font-normal text-[#4c9ded] hover:underline"
+                className="text-xs font-normal text-aerojet-sky hover:underline"
               >
                 New Message
               </Link>
@@ -412,7 +412,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
             <DropdownMenuItem asChild>
               <Link
                 href="/staff/messages"
-                className="justify-center text-center text-sm font-medium text-[#4c9ded]"
+                className="justify-center text-center text-sm font-medium text-aerojet-sky"
               >
                 View All Messages
               </Link>

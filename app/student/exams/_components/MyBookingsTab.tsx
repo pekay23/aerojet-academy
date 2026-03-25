@@ -54,7 +54,7 @@ export default async function MyBookingsTab() {
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Funds Reserved</p>
-            <p className="mt-1 text-2xl font-black text-[#002a5c] dark:text-blue-400">{currencySymbol}{totalReserved.toFixed(2)}</p>
+            <p className="mt-1 text-2xl font-black text-aerojet-blue dark:text-blue-400">{currencySymbol}{totalReserved.toFixed(2)}</p>
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Total Bookings</p>
@@ -92,7 +92,7 @@ export default async function MyBookingsTab() {
                   <div className="space-y-1">
                     <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Module</p>
                     {m.examComponent?.course?.code ? (
-                      <div className="flex items-center gap-1.5 pt-1"><BookOpen className="h-3.5 w-3.5 text-slate-400" /><span className="inline-flex rounded-lg bg-[#002a5c]/10 px-2.5 py-1 text-xs font-bold text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-300">{m.examComponent.course.code}</span></div>
+                      <div className="flex items-center gap-1.5 pt-1"><BookOpen className="h-3.5 w-3.5 text-slate-400" /><span className="inline-flex rounded-lg bg-aerojet-blue/10 px-2.5 py-1 text-xs font-bold text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-300">{m.examComponent.course.code}</span></div>
                     ) : (<span className="text-xs text-slate-400 italic">Not assigned</span>)}
                   </div>
                   <div className="space-y-1">
@@ -144,7 +144,7 @@ export default async function MyBookingsTab() {
                       </td>
                       <td className="px-6 py-4">
                         {m.examComponent?.course?.code ? (
-                          <div className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-slate-400" /><span className="inline-flex rounded-lg bg-[#002a5c]/10 px-2.5 py-1 text-xs font-bold text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-300">{m.examComponent.course.code}</span></div>
+                          <div className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-slate-400" /><span className="inline-flex rounded-lg bg-aerojet-blue/10 px-2.5 py-1 text-xs font-bold text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-300">{m.examComponent.course.code}</span></div>
                         ) : (<span className="text-xs text-slate-400 italic">Not assigned</span>)}
                       </td>
                       <td className="px-6 py-4">

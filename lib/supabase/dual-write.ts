@@ -205,7 +205,21 @@ async function writeToSupabase<T>(
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    console.error(`[Supabase] Backup failed for ${modelKey}:`, message)
+    console.error(`[Supabase] Backup failed for ${modelKey} (${operation}):`, message)
+
+    // Retry once after a brief delay for transient failures
+    try {
+      await new Promise((r) => setTimeout(r, 1000))
+      const retryClient = await getSupabasePrismaClient()
+      if (!retryClient) return
+      const retryModel = (retryClient as any)[modelKey]
+      if (operation === 'create' && data) await retryModel.create({ data: transformForSupabase(data) })
+      else if (operation === 'update' && data && where) await retryModel.update({ where, data: transformForSupabase(data) })
+      else if (operation === 'delete' && where) await retryModel.delete({ where })
+      console.log(`[Supabase] Retry succeeded for ${modelKey} (${operation})`)
+    } catch (retryError) {
+      console.error(`[Supabase] Retry also failed for ${modelKey} (${operation}):`, retryError instanceof Error ? retryError.message : String(retryError))
+    }
   }
 }
 

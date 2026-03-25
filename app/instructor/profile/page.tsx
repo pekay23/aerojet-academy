@@ -20,7 +20,7 @@ export default async function InstructorProfilePage() {
         </p>
       </div>
 
-      <InstructorProfileView initialData={profile} />
+      <InstructorProfileView initialData={profile as any} />
     </div>
   )
 }

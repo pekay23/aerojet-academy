@@ -61,7 +61,7 @@ export default function WalletTopUpForm({
 
   const isAmountSelected = (): boolean => {
     if (selectedAmount !== null) return true
-    return customAmount && isCustomValid()
+    return !!customAmount && isCustomValid()
   }
 
   const selectedMethod = paymentMethods.find((m) => m.id === selectedMethodId)
@@ -141,7 +141,7 @@ export default function WalletTopUpForm({
       <div className="space-y-6">
         {/* Amount Selection Card */}
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <div className="bg-gradient-to-r from-[#002a5c] to-[#4c9ded] px-6 py-4">
+          <div className="bg-linear-to-r from-aerojet-blue to-aerojet-sky px-6 py-4">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/20 backdrop-blur">
                 <PiggyBank className="h-5 w-5 text-white" />
@@ -170,19 +170,19 @@ export default function WalletTopUpForm({
                   }}
                   className={`group relative overflow-hidden rounded-xl border-2 p-4 text-center transition-all hover:shadow-md ${
                     selectedAmount === amount
-                      ? 'border-[#002a5c] bg-[#002a5c]/5 dark:border-blue-500 dark:bg-blue-500/10'
+                      ? 'border-aerojet-blue bg-aerojet-blue/5 dark:border-blue-500 dark:bg-blue-500/10'
                       : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
                   }`}
                 >
                   {selectedAmount === amount && (
                     <div className="absolute top-0 right-0">
-                      <div className="h-0 w-0 border-b-[20px] border-l-[20px] border-b-transparent border-l-[#002a5c]" />
+                      <div className="h-0 w-0 border-b-20 border-l-20 border-b-transparent border-l-aerojet-blue" />
                     </div>
                   )}
                   <span
                     className={`text-xl font-black ${
                       selectedAmount === amount
-                        ? 'text-[#002a5c] dark:text-blue-400'
+                        ? 'text-aerojet-blue dark:text-blue-400'
                         : 'text-slate-900 dark:text-slate-100'
                     }`}
                   >
@@ -206,7 +206,7 @@ export default function WalletTopUpForm({
                   className="flex items-center"
                 >
                   {selectedAmount === null && !customAmount ? (
-                    <CircleDot className="mr-2 h-5 w-5 text-[#002a5c] dark:text-blue-400" />
+                    <CircleDot className="mr-2 h-5 w-5 text-aerojet-blue dark:text-blue-400" />
                   ) : (
                     <Circle className="mr-2 h-5 w-5 text-slate-300" />
                   )}
@@ -225,7 +225,7 @@ export default function WalletTopUpForm({
                     min={minAmount}
                     step="0.01"
                     placeholder={`Min. ${minAmount}`}
-                    className="w-full rounded-xl border-2 border-slate-200 bg-slate-50 py-3 pr-4 pl-10 text-lg font-bold transition-all outline-none focus:border-[#002a5c] focus:bg-white dark:border-slate-700 dark:bg-slate-800"
+                    className="w-full rounded-xl border-2 border-slate-200 bg-slate-50 py-3 pr-4 pl-10 text-lg font-bold transition-all outline-none focus:border-aerojet-blue focus:bg-white dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
               )}
@@ -244,13 +244,13 @@ export default function WalletTopUpForm({
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-slate-500 dark:text-slate-400">Amount to pay</p>
-                  <p className="text-2xl font-black text-[#002a5c] dark:text-blue-400">
+                  <p className="text-2xl font-black text-aerojet-blue dark:text-blue-400">
                     €{getAmount().toLocaleString()}
                   </p>
                 </div>
                 <button
                   onClick={handleAmountContinue}
-                  className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#002a5c] to-[#4c9ded] px-6 py-3 font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30"
+                  className="flex items-center gap-2 rounded-xl bg-linear-to-r from-aerojet-blue to-aerojet-sky px-6 py-3 font-bold text-white shadow-lg shadow-blue-500/25 transition-all hover:shadow-xl hover:shadow-blue-500/30"
                 >
                   Continue
                   <ArrowRight className="h-4 w-4" />
@@ -281,13 +281,13 @@ export default function WalletTopUpForm({
                 </h3>
                 <p className="text-sm text-slate-500">
                   Amount:{' '}
-                  <span className="font-bold text-[#002a5c]">€{getAmount().toLocaleString()}</span>
+                  <span className="font-bold text-aerojet-blue">€{getAmount().toLocaleString()}</span>
                 </p>
               </div>
             </div>
             <button
               onClick={handleBack}
-              className="text-sm font-medium text-slate-500 hover:text-[#002a5c]"
+              className="text-sm font-medium text-slate-500 hover:text-aerojet-blue"
             >
               Change
             </button>
@@ -330,7 +330,7 @@ export default function WalletTopUpForm({
 
         {/* Upload Proof Card */}
         <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
-          <div className="border-b border-slate-100 bg-gradient-to-r from-green-50 to-emerald-50 px-6 py-4 dark:border-slate-800 dark:from-green-900/20 dark:to-emerald-900/20">
+          <div className="border-b border-slate-100 bg-linear-to-r from-green-50 to-emerald-50 px-6 py-4 dark:border-slate-800 dark:from-green-900/20 dark:to-emerald-900/20">
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-100 dark:bg-green-900/30">
                 <Upload className="h-5 w-5 text-green-600 dark:text-green-400" />
@@ -356,11 +356,11 @@ export default function WalletTopUpForm({
                 }}
                 appearance={{
                   container:
-                    'border-2 border-dashed border-slate-300 rounded-xl p-8 cursor-pointer hover:border-[#4c9ded] hover:bg-blue-50/50 transition-all dark:border-slate-600 dark:hover:border-blue-400',
+                    'border-2 border-dashed border-slate-300 rounded-xl p-8 cursor-pointer hover:border-aerojet-sky hover:bg-blue-50/50 transition-all dark:border-slate-600 dark:hover:border-blue-400',
                   label: 'text-slate-700 dark:text-slate-300 font-semibold text-base',
                   allowedContent: 'text-slate-400 text-sm mt-2',
                   button:
-                    'bg-[#002a5c] text-white font-bold px-6 py-3 rounded-xl hover:bg-[#003875] transition-all shadow-lg shadow-blue-500/20',
+                    'bg-aerojet-blue text-white font-bold px-6 py-3 rounded-xl hover:bg-[#003875] transition-all shadow-lg shadow-blue-500/20',
                 }}
               />
             ) : uploading ? (
@@ -413,7 +413,7 @@ export default function WalletTopUpForm({
   if (step === 'success') {
     return (
       <div className="space-y-6">
-        <div className="overflow-hidden rounded-2xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 shadow-lg shadow-green-500/10 dark:border-green-900/30 dark:from-green-900/20 dark:to-emerald-900/20">
+        <div className="overflow-hidden rounded-2xl border-2 border-green-200 bg-linear-to-br from-green-50 to-emerald-50 shadow-lg shadow-green-500/10 dark:border-green-900/30 dark:from-green-900/20 dark:to-emerald-900/20">
           <div className="flex flex-col items-center justify-center p-10 text-center">
             <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-green-100 shadow-lg dark:bg-green-900/30">
               <CheckCircle2 className="h-10 w-10 text-green-600 dark:text-green-400" />

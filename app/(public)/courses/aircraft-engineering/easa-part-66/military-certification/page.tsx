@@ -23,14 +23,14 @@ export default function MilitaryCertPage() {
           <section className="grid items-start gap-10 lg:grid-cols-2">
             <div>
               <div className="mb-6 flex flex-wrap gap-3">
-                <span className="rounded-full bg-[#4c9ded] px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase">
+                <span className="rounded-full bg-aerojet-sky px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase">
                   Fast-Track
                 </span>
                 <span className="rounded-full bg-orange-100 px-4 py-2 text-[10px] font-black tracking-widest text-orange-700 uppercase">
                   Theory Only
                 </span>
               </div>
-              <h2 className="mb-6 text-3xl font-black tracking-tight text-[#002a5c] uppercase">
+              <h2 className="mb-6 text-3xl font-black tracking-tight text-aerojet-blue uppercase">
                 Certify Your Experience
               </h2>
               <p className="mb-4 text-lg leading-relaxed text-slate-700">
@@ -46,8 +46,8 @@ export default function MilitaryCertPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl bg-[#002a5c] p-6 text-white sm:rounded-3xl sm:p-8">
-              <Shield className="mb-4 h-10 w-10 text-[#4c9ded]" />
+            <div className="rounded-2xl bg-aerojet-blue p-6 text-white sm:rounded-3xl sm:p-8">
+              <Shield className="mb-4 h-10 w-10 text-aerojet-sky" />
               <h3 className="mb-4 text-lg font-bold">Program Details</h3>
               <ul className="space-y-4">
                 {[
@@ -67,7 +67,7 @@ export default function MilitaryCertPage() {
               </ul>
               <Link
                 href="/register"
-                className="mt-8 block w-full rounded-xl bg-[#4c9ded] py-4 text-center text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-white hover:text-[#002a5c]"
+                className="mt-8 block w-full rounded-xl bg-aerojet-sky py-4 text-center text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-white hover:text-aerojet-blue"
               >
                 Apply for Fast-Track
               </Link>
@@ -77,7 +77,7 @@ export default function MilitaryCertPage() {
 
         <SectionReveal>
           <section className="rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:rounded-3xl sm:p-10">
-            <h3 className="mb-6 text-xl font-bold text-[#002a5c]">What's Included</h3>
+            <h3 className="mb-6 text-xl font-bold text-aerojet-blue">What's Included</h3>
             <div className="grid gap-4 sm:grid-cols-2">
               {[
                 'All B1.1 theory modules & EASA examinations',
@@ -88,7 +88,7 @@ export default function MilitaryCertPage() {
                 'Special subsidized pricing for military personnel',
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#4c9ded]" />
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-aerojet-sky" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -111,7 +111,7 @@ export default function MilitaryCertPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <div className="rounded-2xl bg-linear-to-r from-[#002a5c] to-[#4c9ded] p-8 text-center text-white sm:rounded-3xl sm:p-12">
+          <div className="rounded-2xl bg-linear-to-r from-aerojet-blue to-aerojet-sky p-8 text-center text-white sm:rounded-3xl sm:p-12">
             <h2 className="mb-4 text-2xl font-black tracking-tight uppercase">
               Questions About Eligibility?
             </h2>
@@ -122,7 +122,7 @@ export default function MilitaryCertPage() {
             <div className="flex flex-col justify-center gap-4 sm:flex-row">
               <Link
                 href="/register"
-                className="inline-block rounded-xl bg-white px-8 py-4 text-xs font-black tracking-widest text-[#002a5c] uppercase transition-all hover:bg-blue-50"
+                className="inline-block rounded-xl bg-white px-8 py-4 text-xs font-black tracking-widest text-aerojet-blue uppercase transition-all hover:bg-blue-50"
               >
                 Register Now
               </Link>

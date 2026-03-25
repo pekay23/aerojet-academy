@@ -98,9 +98,9 @@ export function SortHeader({
         <span>{label}</span>
         <div className="flex flex-col text-slate-300">
           {order === 'asc' ? (
-            <ChevronUp className="h-3 w-3 text-[#002a5c] dark:text-blue-400" />
+            <ChevronUp className="h-3 w-3 text-aerojet-blue dark:text-blue-400" />
           ) : order === 'desc' ? (
-            <ChevronDown className="h-3 w-3 text-[#002a5c] dark:text-blue-400" />
+            <ChevronDown className="h-3 w-3 text-aerojet-blue dark:text-blue-400" />
           ) : (
             <ChevronsUpDown className="h-3 w-3 opacity-30" />
           )}

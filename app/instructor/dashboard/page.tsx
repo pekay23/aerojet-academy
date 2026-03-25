@@ -89,7 +89,7 @@ export default async function Page() {
             </h2>
             <Link
               href="/instructor/schedule"
-              className="flex items-center gap-1 text-xs font-bold tracking-widest text-[#4c9ded] uppercase hover:underline"
+              className="flex items-center gap-1 text-xs font-bold tracking-widest text-aerojet-sky uppercase hover:underline"
             >
               Full Schedule <ArrowRight className="h-3 w-3" />
             </Link>
@@ -104,10 +104,10 @@ export default async function Page() {
                 >
                   <div className="flex items-center gap-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">
-                      <Clock className="h-5 w-5 text-[#4c9ded]" />
+                      <Clock className="h-5 w-5 text-aerojet-sky" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-slate-800 transition-colors group-hover:text-[#002a5c] dark:text-slate-200">
+                      <p className="text-sm font-bold text-slate-800 transition-colors group-hover:text-aerojet-blue dark:text-slate-200">
                         {cls.course.name}
                       </p>
                       <p className="mt-0.5 text-xs text-slate-400">
@@ -146,7 +146,7 @@ export default async function Page() {
               instructorData.pendingGradingDetails.map((item, i) => (
                 <div key={i} className="px-6 py-4">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-black text-[#4c9ded]">{item.module}</span>
+                    <span className="text-sm font-black text-aerojet-sky">{item.module}</span>
                     <span className="rounded-full bg-orange-50 px-2 py-0.5 text-[9px] font-black text-orange-600 uppercase">
                       Needs Grading
                     </span>
@@ -166,7 +166,7 @@ export default async function Page() {
           <div className="border-t border-slate-50 p-4">
             <Link
               href="/instructor/grading/pending"
-              className="block w-full rounded-xl bg-slate-50 py-3 text-center text-xs font-bold tracking-widest text-slate-600 uppercase transition-all hover:bg-[#002a5c] hover:text-white dark:bg-slate-800/50 dark:text-slate-400"
+              className="block w-full rounded-xl bg-slate-50 py-3 text-center text-xs font-bold tracking-widest text-slate-600 uppercase transition-all hover:bg-aerojet-blue hover:text-white dark:bg-slate-800/50 dark:text-slate-400"
             >
               Go to Grading Hub
             </Link>
@@ -212,7 +212,7 @@ export default async function Page() {
             <Link
               key={action.label}
               href={action.href}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-4 py-2.5 text-xs font-bold tracking-widest text-slate-600 uppercase transition-all hover:bg-[#002a5c] hover:text-white dark:bg-slate-800/50 dark:text-slate-400"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-slate-50 px-4 py-2.5 text-xs font-bold tracking-widest text-slate-600 uppercase transition-all hover:bg-aerojet-blue hover:text-white dark:bg-slate-800/50 dark:text-slate-400"
             >
               {action.label}
             </Link>

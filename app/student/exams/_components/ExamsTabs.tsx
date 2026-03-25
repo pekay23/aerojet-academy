@@ -51,9 +51,9 @@ export default function ExamsTabs({ isFullTime, children }: Props) {
               aria-selected={isActive}
               aria-controls="exams-tabpanel"
               onClick={() => setTab(t.key)}
-              className={`relative flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#002a5c]/50 ${
+              className={`relative flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-aerojet-blue/50 ${
                 isActive
-                  ? 'text-[#002a5c] dark:text-white'
+                  ? 'text-aerojet-blue dark:text-white'
                   : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
             >

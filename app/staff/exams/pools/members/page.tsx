@@ -81,12 +81,12 @@ export default async function PoolMembersReportPage({
         <div>
           <Link
             href="/staff/exams"
-            className="mb-2 inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#002a5c] dark:text-slate-400"
+            className="mb-2 inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-aerojet-blue dark:text-slate-400"
           >
             <ChevronLeft className="h-4 w-4" />
             Back to Exams
           </Link>
-          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Booking Members Overview
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -164,7 +164,7 @@ export default async function PoolMembersReportPage({
                             >
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-3">
-                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 font-bold text-[#002a5c] dark:bg-slate-800 dark:text-blue-400">
+                                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue dark:bg-slate-800 dark:text-blue-400">
                                     {member.user.profile?.firstName?.charAt(0)}
                                     {member.user.profile?.lastName?.charAt(0)}
                                   </div>
@@ -204,7 +204,7 @@ export default async function PoolMembersReportPage({
                               <td className="px-6 py-4 text-right">
                                 <Link
                                   href={`/staff/exams/pools/${pool.id}`}
-                                  className="text-xs font-bold text-[#002a5c] underline-offset-4 hover:underline dark:text-blue-400"
+                                  className="text-xs font-bold text-aerojet-blue underline-offset-4 hover:underline dark:text-blue-400"
                                 >
                                   Manage
                                 </Link>

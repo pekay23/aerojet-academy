@@ -259,7 +259,7 @@ export default function EmailPreviewsPage() {
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h2 className="text-xl font-black tracking-tight text-[#002a5c] dark:text-white">
+          <h2 className="text-xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Email Templates
           </h2>
           <p className="mt-1 text-sm text-slate-500">
@@ -272,7 +272,7 @@ export default function EmailPreviewsPage() {
             onClick={() => setIsEditing(!isEditing)}
             className={cn(
               'text-xs font-bold tracking-widest uppercase transition-all',
-              isEditing ? 'border-amber-500 text-amber-500' : 'border-[#002a5c] text-[#002a5c]'
+              isEditing ? 'border-amber-500 text-amber-500' : 'border-aerojet-blue text-aerojet-blue'
             )}
           >
             {isEditing ? (
@@ -288,7 +288,7 @@ export default function EmailPreviewsPage() {
           <Button
             disabled={sendingTest}
             onClick={() => handleSendTest(true)}
-            className="bg-[#002a5c] text-xs font-bold tracking-widest uppercase shadow-lg transition-all hover:bg-[#4c9ded]"
+            className="bg-aerojet-blue text-xs font-bold tracking-widest uppercase shadow-lg transition-all hover:bg-aerojet-sky"
           >
             <Send className="mr-2 h-4 w-4" />
             {sendingTest ? 'Sending...' : 'Send Global Test'}
@@ -342,7 +342,7 @@ export default function EmailPreviewsPage() {
                 }}
                 className={`relative flex w-full items-center gap-3 rounded-xl p-3 text-left transition-all ${
                   activeTemplate === tmpl.id
-                    ? 'font-bold text-[#002a5c]'
+                    ? 'font-bold text-aerojet-blue'
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
@@ -356,7 +356,7 @@ export default function EmailPreviewsPage() {
                 )}
                 <div
                   className={`relative z-10 rounded-lg p-2 ${
-                    activeTemplate === tmpl.id ? 'bg-[#002a5c] text-white' : 'bg-slate-200'
+                    activeTemplate === tmpl.id ? 'bg-aerojet-blue text-white' : 'bg-slate-200'
                   }`}
                 >
                   <tmpl.icon className="h-4 w-4" />
@@ -380,7 +380,7 @@ export default function EmailPreviewsPage() {
                 <Card className="overflow-hidden border-slate-200 shadow-none">
                   <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 bg-white">
                     <div>
-                      <CardTitle className="text-xl font-bold text-[#002a5c]">
+                      <CardTitle className="text-xl font-bold text-aerojet-blue">
                         {currentTemplate?.name}
                       </CardTitle>
                       <CardDescription className="mt-1">
@@ -430,7 +430,7 @@ export default function EmailPreviewsPage() {
                   <CardHeader className="border-b border-slate-100 pb-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="text-xl font-bold text-[#002a5c]">
+                        <CardTitle className="text-xl font-bold text-aerojet-blue">
                           Edit Template: {currentTemplate?.name}
                         </CardTitle>
                         <CardDescription>
@@ -478,7 +478,7 @@ export default function EmailPreviewsPage() {
                             placeholder="Enter subject line..."
                             value={editData.subject}
                             onChange={(e) => setEditData({ ...editData, subject: e.target.value })}
-                            className="text-lg font-bold text-[#002a5c]"
+                            className="text-lg font-bold text-aerojet-blue"
                           />
                         </div>
 
@@ -514,10 +514,10 @@ export default function EmailPreviewsPage() {
                                   navigator.clipboard.writeText(`{{${p}}}`)
                                   toast.success(`Copied {{${p}}}`)
                                 }}
-                                className="group flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 font-mono text-[11px] transition-all hover:border-[#002a5c]"
+                                className="group flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 font-mono text-[11px] transition-all hover:border-aerojet-blue"
                               >
                                 <PlusCircle
-                                  className="h-3 w-3 text-slate-300 group-hover:text-[#002a5c]"
+                                  className="h-3 w-3 text-slate-300 group-hover:text-aerojet-blue"
                                   role="presentation"
                                 />
                                 <span>
@@ -543,8 +543,8 @@ export default function EmailPreviewsPage() {
           {!isEditing && (
             <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4">
               <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#4c9ded]/10">
-                  <Mail className="h-5 w-5 text-[#4c9ded]" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-aerojet-sky/10">
+                  <Mail className="h-5 w-5 text-aerojet-sky" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">Individual Template Test</p>
@@ -557,7 +557,7 @@ export default function EmailPreviewsPage() {
                 variant="outline"
                 disabled={sendingTest}
                 onClick={() => handleSendTest(false)}
-                className="border-[#002a5c] text-[10px] font-bold tracking-widest text-[#002a5c] uppercase transition-all hover:bg-[#002a5c] hover:text-white"
+                className="border-aerojet-blue text-[10px] font-bold tracking-widest text-aerojet-blue uppercase transition-all hover:bg-aerojet-blue hover:text-white"
               >
                 {sendingTest ? 'Sending...' : 'Send Live Test'}
               </Button>

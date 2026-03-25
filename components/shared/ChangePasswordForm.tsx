@@ -109,7 +109,7 @@ export default function ChangePasswordForm({ apiEndpoint, onSuccess }: ChangePas
                     {...field}
                     type={showCurrent ? 'text' : 'password'}
                     placeholder="••••••••"
-                    className="h-12 border-slate-200 bg-white pr-12 pl-11 text-sm shadow-sm transition-all focus:border-transparent focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-800 dark:bg-slate-900"
+                    className="h-12 border-slate-200 bg-white pr-12 pl-11 text-sm shadow-sm transition-all focus:border-transparent focus:ring-2 focus:ring-aerojet-sky dark:border-slate-800 dark:bg-slate-900"
                   />
                   <button
                     type="button"
@@ -140,7 +140,7 @@ export default function ChangePasswordForm({ apiEndpoint, onSuccess }: ChangePas
                     {...field}
                     type={showNew ? 'text' : 'password'}
                     placeholder="••••••••"
-                    className="h-12 border-slate-200 bg-white pr-12 pl-11 text-sm shadow-sm transition-all focus:border-transparent focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-800 dark:bg-slate-900"
+                    className="h-12 border-slate-200 bg-white pr-12 pl-11 text-sm shadow-sm transition-all focus:border-transparent focus:ring-2 focus:ring-aerojet-sky dark:border-slate-800 dark:bg-slate-900"
                   />
                   <button
                     type="button"
@@ -171,7 +171,7 @@ export default function ChangePasswordForm({ apiEndpoint, onSuccess }: ChangePas
                     {...field}
                     type={showConfirm ? 'text' : 'password'}
                     placeholder="••••••••"
-                    className="h-12 border-slate-200 bg-white pr-12 pl-11 text-sm shadow-sm transition-all focus:border-transparent focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-800 dark:bg-slate-900"
+                    className="h-12 border-slate-200 bg-white pr-12 pl-11 text-sm shadow-sm transition-all focus:border-transparent focus:ring-2 focus:ring-aerojet-sky dark:border-slate-800 dark:bg-slate-900"
                   />
                   <button
                     type="button"
@@ -190,7 +190,7 @@ export default function ChangePasswordForm({ apiEndpoint, onSuccess }: ChangePas
         <Button
           type="submit"
           disabled={loading}
-          className="h-12 w-full bg-[#002a5c] text-[11px] font-black tracking-widest text-white uppercase shadow-lg transition-all hover:bg-[#4c9ded] disabled:opacity-50"
+          className="h-12 w-full bg-aerojet-blue text-[11px] font-black tracking-widest text-white uppercase shadow-lg transition-all hover:bg-aerojet-sky disabled:opacity-50"
         >
           {loading ? (
             <>

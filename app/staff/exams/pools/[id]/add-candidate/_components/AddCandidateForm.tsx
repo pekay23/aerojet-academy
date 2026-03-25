@@ -125,7 +125,7 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
           {selectedUser ? (
             <div className="flex items-center justify-between rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-slate-900 font-bold text-[#002a5c] shadow-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white dark:bg-slate-900 font-bold text-aerojet-blue shadow-sm">
                   <User className="h-5 w-5" />
                 </div>
                 <div>
@@ -218,7 +218,7 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
           </Button>
           <Button
             type="submit"
-            className="bg-[#002a5c] px-8 hover:bg-[#002a5c]/90"
+            className="bg-aerojet-blue px-8 hover:bg-aerojet-blue/90"
             disabled={isLoading || !selectedUser}
           >
             {isLoading ? (

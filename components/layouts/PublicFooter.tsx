@@ -35,7 +35,7 @@ const companyLinks = [
 
 export default function PublicFooter() {
   return (
-    <footer className="bg-[#002a5c] text-white">
+    <footer className="bg-aerojet-blue text-white">
       <div className="container mx-auto max-w-7xl px-6 py-10">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-4 lg:grid-cols-5">
           {/* Column 1: Logo */}

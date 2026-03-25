@@ -11,6 +11,7 @@ import EditProfilePhotoDialog from './_components/EditProfilePhotoDialog'
 import EditPathwayDialog from './_components/EditPathwayDialog'
 import EditAcademicPeriodDialog from './_components/EditAcademicPeriodDialog'
 import OjtSection from './_components/OjtSection'
+import AcademicHistorySection from './_components/AcademicHistorySection'
 import { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'User Details | Staff Portal' }
@@ -38,6 +39,28 @@ export default async function UserProfilePage({ params }: Props) {
       },
       instructorProfile: true,
       staffProfile: true,
+      enrollments: {
+        include: {
+          course: { select: { code: true, name: true } },
+          academicYear: { select: { name: true } },
+          semester: { select: { name: true } },
+        },
+        orderBy: { createdAt: 'asc' },
+      },
+      examBookings: {
+        orderBy: { createdAt: 'asc' },
+        select: {
+          id: true,
+          moduleCode: true,
+          result: true,
+          score: true,
+          percentage: true,
+          attemptType: true,
+          sourceNotes: true,
+          examDate: true,
+          status: true,
+        },
+      },
     },
   })
 
@@ -80,6 +103,7 @@ export default async function UserProfilePage({ params }: Props) {
     ACTIVE: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
     PENDING: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
     SUSPENDED: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+    DEFERRED: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400',
     ARCHIVED: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400',
     DEACTIVATED: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400',
   }
@@ -99,14 +123,14 @@ export default async function UserProfilePage({ params }: Props) {
       <div className="mb-6">
         <Link
           href="/staff/users"
-          className="mb-4 inline-flex items-center text-sm font-bold text-slate-400 transition-colors hover:text-[#002a5c] dark:text-slate-500 dark:hover:text-blue-400"
+          className="mb-4 inline-flex items-center text-sm font-bold text-slate-400 transition-colors hover:text-aerojet-blue dark:text-slate-500 dark:hover:text-blue-400"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Back to Users
         </Link>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-6">
             <div className="relative">
-              <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-[#002a5c] text-3xl font-black text-white shadow-lg shadow-blue-900/10 transition-all hover:shadow-xl dark:bg-blue-600">
+              <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-aerojet-blue text-3xl font-black text-white shadow-lg shadow-blue-900/10 transition-all hover:shadow-xl dark:bg-blue-600">
                 {user.profile?.profilePhotoUrl ? (
                   <Image
                     src={user.profile.profilePhotoUrl}
@@ -124,7 +148,7 @@ export default async function UserProfilePage({ params }: Props) {
               />
             </div>
             <div>
-              <h1 className="mb-2 text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+              <h1 className="mb-2 text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
                 {fullName}
               </h1>
               <div className="flex items-center gap-3">
@@ -194,7 +218,7 @@ export default async function UserProfilePage({ params }: Props) {
                   {user.academyEmail ? 'Academy Email' : 'Email Address'}
                 </p>
                 <div className="flex items-center gap-2 font-bold break-all text-slate-700 dark:text-slate-300">
-                  <Mail className="h-4 w-4 text-[#4c9ded] dark:text-blue-400" />
+                  <Mail className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
                   {user.academyEmail || user.email}
                 </div>
               </div>
@@ -204,7 +228,7 @@ export default async function UserProfilePage({ params }: Props) {
                     Personal Email
                   </p>
                   <div className="flex items-center gap-2 font-bold break-all text-slate-700 dark:text-slate-300">
-                    <Mail className="h-4 w-4 text-[#4c9ded] dark:text-blue-400" />
+                    <Mail className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
                     {user.personalEmail}
                   </div>
                 </div>
@@ -214,7 +238,7 @@ export default async function UserProfilePage({ params }: Props) {
                   Phone Number
                 </p>
                 <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
-                  <Phone className="h-4 w-4 text-[#4c9ded] dark:text-blue-400" />
+                  <Phone className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
                   {user.profile?.phone ?? '—'}
                 </div>
               </div>
@@ -223,7 +247,7 @@ export default async function UserProfilePage({ params }: Props) {
                   Nationality
                 </p>
                 <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
-                  <Globe className="h-4 w-4 text-[#4c9ded] dark:text-blue-400" />
+                  <Globe className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
                   {user.profile?.nationality ?? '—'}
                 </div>
               </div>
@@ -232,7 +256,7 @@ export default async function UserProfilePage({ params }: Props) {
                   Date of Birth
                 </p>
                 <div className="flex items-center gap-2 font-bold text-slate-700 dark:text-slate-300">
-                  <Calendar className="h-4 w-4 text-[#4c9ded] dark:text-blue-400" />
+                  <Calendar className="h-4 w-4 text-aerojet-sky dark:text-blue-400" />
                   {user.profile?.dateOfBirth
                     ? new Date(user.profile.dateOfBirth).toLocaleDateString()
                     : '—'}
@@ -310,6 +334,39 @@ export default async function UserProfilePage({ params }: Props) {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Academic History for Students */}
+          {['STUDENT', 'APPLICANT'].includes(user.role) && (
+            <AcademicHistorySection
+              enrollments={(user.enrollments || []).map((e) => ({
+                id: e.id,
+                status: e.status,
+                completedAt: e.completedAt?.toISOString() ?? null,
+                course: e.course,
+                academicYear: e.academicYear,
+                semester: e.semester,
+              }))}
+              examBookings={(user.examBookings || []).map((b) => ({
+                id: b.id,
+                moduleCode: b.moduleCode,
+                result: b.result,
+                score: b.score != null ? Number(b.score) : null,
+                percentage: b.percentage != null ? Number(b.percentage) : null,
+                attemptType: b.attemptType,
+                sourceNotes: b.sourceNotes,
+                examDate: b.examDate?.toISOString() ?? null,
+                status: b.status,
+              }))}
+              studentProfile={user.studentProfile ? {
+                studentId: user.studentProfile.studentId,
+                enrollmentStatus: user.studentProfile.enrollmentStatus,
+                fundingSource: user.studentProfile.fundingSource,
+                currentYearNumber: user.studentProfile.currentYearNumber,
+                currentSemesterNumber: user.studentProfile.currentSemesterNumber,
+                programmeChoice: user.studentProfile.programmeChoice,
+              } : null}
+            />
           )}
 
           {/* OJT Section for Full-Time Students */}

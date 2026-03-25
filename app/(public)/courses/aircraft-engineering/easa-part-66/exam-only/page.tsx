@@ -50,7 +50,7 @@ export default function ExamOnlyPage() {
         <div className="grid gap-10 lg:grid-cols-2">
           <SectionReveal>
             <section>
-              <h2 className="mb-6 text-2xl font-black tracking-tight text-[#002a5c] uppercase">
+              <h2 className="mb-6 text-2xl font-black tracking-tight text-aerojet-blue uppercase">
                 What's Included
               </h2>
               <p className="mb-6 leading-relaxed text-slate-700">
@@ -75,7 +75,7 @@ export default function ExamOnlyPage() {
                     key={title}
                     className="flex gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4"
                   >
-                    <Icon className="mt-0.5 h-5 w-5 shrink-0 text-[#4c9ded]" />
+                    <Icon className="mt-0.5 h-5 w-5 shrink-0 text-aerojet-sky" />
                     <div>
                       <h5 className="text-sm font-bold text-slate-900">{title}</h5>
                       <p className="text-xs text-slate-600">{desc}</p>
@@ -84,7 +84,7 @@ export default function ExamOnlyPage() {
                 ))}
                 <div className="flex gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100/50">
-                    <CreditCard className="h-4 w-4 shrink-0 text-[#4c9ded]" />
+                    <CreditCard className="h-4 w-4 shrink-0 text-aerojet-sky" />
                   </div>
                   <div className="flex-1">
                     <p className="text-xs font-bold text-slate-900 uppercase">
@@ -101,7 +101,7 @@ export default function ExamOnlyPage() {
 
           <SectionReveal delay={0.1}>
             <section className="rounded-2xl border border-blue-100 bg-blue-50 p-6 sm:p-8">
-              <h3 className="mb-4 flex items-center gap-2 font-bold text-[#002a5c]">
+              <h3 className="mb-4 flex items-center gap-2 font-bold text-aerojet-blue">
                 <Users className="h-5 w-5" /> What is an Exam Booking?
               </h3>
               <p className="mb-4 text-sm text-slate-700">
@@ -116,7 +116,7 @@ export default function ExamOnlyPage() {
                   'Confirms automatically when 25 candidates book & pay',
                 ].map((item) => (
                   <li key={item} className="flex gap-2">
-                    <CheckCircle2 className="h-5 w-5 shrink-0 text-[#4c9ded]" />
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-aerojet-sky" />
                     {item}
                   </li>
                 ))}
@@ -134,15 +134,15 @@ export default function ExamOnlyPage() {
         {/* Pricing notice + Table */}
         <SectionReveal>
           <section>
-            <h2 className="mb-6 text-2xl font-black tracking-tight text-[#002a5c] uppercase">
+            <h2 className="mb-6 text-2xl font-black tracking-tight text-aerojet-blue uppercase">
               Exam Booking Options
             </h2>
 
             {/* Pricing notice */}
             <div className="mb-6 flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
-              <Info className="mt-0.5 h-5 w-5 shrink-0 text-[#4c9ded]" />
+              <Info className="mt-0.5 h-5 w-5 shrink-0 text-aerojet-sky" />
               <p className="text-sm text-slate-700">
-                <strong className="text-[#002a5c]">All pricing is available in the portal.</strong>{' '}
+                <strong className="text-aerojet-blue">All pricing is available in the portal.</strong>{' '}
                 Register or log in to view current rates for all booking types and bundle packages.
               </p>
             </div>
@@ -150,7 +150,7 @@ export default function ExamOnlyPage() {
             <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm sm:rounded-2xl">
               <table className="w-full min-w-[400px]">
                 <thead>
-                  <tr className="bg-[#002a5c] text-white">
+                  <tr className="bg-aerojet-blue text-white">
                     <th className="px-5 py-4 text-left text-xs font-bold tracking-wider uppercase">
                       Booking Type
                     </th>
@@ -212,7 +212,7 @@ export default function ExamOnlyPage() {
         {/* Special Pricing */}
         <SectionReveal>
           <section>
-            <h2 className="mb-8 text-2xl font-black tracking-tight text-[#002a5c] uppercase">
+            <h2 className="mb-8 text-2xl font-black tracking-tight text-aerojet-blue uppercase">
               Special Pricing Programs
             </h2>
             <div className="grid gap-6 sm:grid-cols-2">
@@ -247,7 +247,7 @@ export default function ExamOnlyPage() {
         {/* Booking Conditions */}
         <SectionReveal>
           <section className="rounded-2xl bg-slate-50 p-6 sm:rounded-3xl sm:p-10">
-            <h2 className="mb-6 text-xl font-bold text-[#002a5c]">Booking Conditions</h2>
+            <h2 className="mb-6 text-xl font-bold text-aerojet-blue">Booking Conditions</h2>
             <div className="mb-8 grid gap-6 sm:grid-cols-2">
               <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
                 <h5 className="mb-3 text-sm font-bold text-slate-900">Pool-Specific Rules</h5>
@@ -259,7 +259,7 @@ export default function ExamOnlyPage() {
                     'Real-time status via Portal',
                   ].map((r) => (
                     <li key={r} className="flex gap-2">
-                      <CheckCircle2 className="h-4 w-4 shrink-0 text-[#4c9ded]" />
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-aerojet-sky" />
                       {r}
                     </li>
                   ))}
@@ -275,7 +275,7 @@ export default function ExamOnlyPage() {
                     'Late booking surcharge applies within 14 days',
                   ].map((r) => (
                     <li key={r} className="flex gap-2">
-                      <CreditCard className="h-4 w-4 shrink-0 text-[#4c9ded]" />
+                      <CreditCard className="h-4 w-4 shrink-0 text-aerojet-sky" />
                       {r}
                     </li>
                   ))}
@@ -301,14 +301,14 @@ export default function ExamOnlyPage() {
 
         {/* CTA */}
         <SectionReveal>
-          <section className="rounded-2xl bg-linear-to-r from-[#002a5c] to-[#4c9ded] p-8 text-center text-white sm:rounded-3xl sm:p-10">
+          <section className="rounded-2xl bg-linear-to-r from-aerojet-blue to-aerojet-sky p-8 text-center text-white sm:rounded-3xl sm:p-10">
             <h2 className="mb-4 text-2xl font-bold">Ready to Book Your Exam?</h2>
             <p className="mx-auto mb-6 max-w-xl text-blue-100/80">
               Register on our portal to view available exam bookings, pricing, and book your seats.
             </p>
             <Link
               href="/register"
-              className="mb-6 inline-block rounded-xl bg-white px-8 py-4 text-xs font-bold tracking-widest text-[#002a5c] uppercase transition-all hover:bg-blue-50"
+              className="mb-6 inline-block rounded-xl bg-white px-8 py-4 text-xs font-bold tracking-widest text-aerojet-blue uppercase transition-all hover:bg-blue-50"
             >
               Register Now
             </Link>

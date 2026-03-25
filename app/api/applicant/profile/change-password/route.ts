@@ -26,6 +26,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       password: hashedPassword,
       mustChangePassword: false,
       passwordChanged: true,
+      passwordChangedAt: new Date(),
     },
   })
 

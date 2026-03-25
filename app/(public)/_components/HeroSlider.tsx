@@ -2,9 +2,10 @@
 
 import Link from 'next/link'
 import NextImage from 'next/image'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Button } from '@/components/ui/button' // Using ShadCN button for consistency
+import { Pause, Play } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 const slides = [
   {
@@ -27,16 +28,39 @@ const slides = [
 
 export default function HeroSlider() {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
-  useEffect(() => {
-    const timer = setInterval(() => {
+  const startTimer = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current)
+    timerRef.current = setInterval(() => {
       setCurrentSlide((prev) => (prev === slides.length - 1 ? 0 : prev + 1))
     }, 7000)
-    return () => clearInterval(timer)
   }, [])
 
+  const stopTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!paused) startTimer()
+    else stopTimer()
+    return stopTimer
+  }, [paused, startTimer, stopTimer])
+
   return (
-    <section className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-black md:min-h-[80vh]">
+    <section
+      className="relative flex min-h-dvh w-full items-center justify-center overflow-hidden bg-black md:min-h-[80vh]"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
+      aria-roledescription="carousel"
+      aria-label="Hero image slideshow"
+    >
       {/* Background Images */}
       {slides.map((slide, index) => (
         <NextImage
@@ -88,7 +112,7 @@ export default function HeroSlider() {
                   asChild
                   size="lg"
                   variant="outline"
-                  className="h-14 rounded-full border-2 border-white/30 bg-white/10 px-10 text-xs font-black tracking-widest text-white backdrop-blur-sm transition-all hover:bg-white hover:text-[#002a5c]"
+                  className="h-14 rounded-full border-2 border-white/30 bg-white/10 px-10 text-xs font-black tracking-widest text-white backdrop-blur-sm transition-all hover:bg-white hover:text-aerojet-blue"
                 >
                   <Link href="/courses">Explore Courses</Link>
                 </Button>
@@ -97,6 +121,15 @@ export default function HeroSlider() {
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Pause/Play button (WCAG 2.2.2) */}
+      <button
+        onClick={() => setPaused((p) => !p)}
+        className="absolute bottom-6 right-6 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/50"
+        aria-label={paused ? 'Play slideshow' : 'Pause slideshow'}
+      >
+        {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
+      </button>
     </section>
   )
 }

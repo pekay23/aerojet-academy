@@ -28,8 +28,8 @@ export default async function StudentAcademicCalendarPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-8">
       <div>
-        <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
-          <CalendarIcon className="h-8 w-8 text-[#4c9ded] dark:text-blue-400" />
+        <h1 className="flex items-center gap-3 text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+          <CalendarIcon className="h-8 w-8 text-aerojet-sky dark:text-blue-400" />
           Academic Calendar
         </h1>
         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
@@ -54,7 +54,7 @@ export default async function StudentAcademicCalendarPage() {
               key={year.id}
               className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
             >
-              <div className="border-b border-slate-100 bg-[#002a5c] px-6 py-4 dark:border-slate-800">
+              <div className="border-b border-slate-100 bg-aerojet-blue px-6 py-4 dark:border-slate-800">
                 <h2 className="text-xl font-bold tracking-tight text-white">{year.name}</h2>
                 <div className="mt-1 flex items-center gap-2 text-sm text-blue-200">
                   <Clock className="h-4 w-4" />
@@ -96,7 +96,7 @@ export default async function StudentAcademicCalendarPage() {
                               {sem.name}
                             </h3>
                             <span
-                              className={`rounded-full px-2 py-0.5 text-xs font-black tracking-widest uppercase ${statusColors[status]}`}
+                              className={`rounded-full px-2 py-0.5 text-xs font-black tracking-widest uppercase ${statusColors[status as keyof typeof statusColors]}`}
                             >
                               {status}
                             </span>

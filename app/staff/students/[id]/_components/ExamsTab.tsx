@@ -347,7 +347,7 @@ export default function ExamsTab({
               <button
                 key={module.id}
                 onClick={() => handleQuickAdd(module)}
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:border-[#002a5c] hover:text-[#002a5c] dark:border-slate-600 dark:bg-slate-700"
+                className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-all hover:border-aerojet-blue hover:text-aerojet-blue dark:border-slate-600 dark:bg-slate-700"
               >
                 <Plus className="h-3 w-3" />
                 {module.course?.code || module.code}
@@ -384,7 +384,7 @@ export default function ExamsTab({
               </button>
               <button
                 onClick={handleQuickAddSave}
-                className="rounded-lg bg-[#002a5c] px-4 py-2 text-sm font-medium text-white"
+                className="rounded-lg bg-aerojet-blue px-4 py-2 text-sm font-medium text-white"
               >
                 Add Module
               </button>
@@ -402,7 +402,7 @@ export default function ExamsTab({
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search module or exam..."
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-700 dark:bg-slate-800/50"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 focus:ring-aerojet-sky dark:border-slate-700 dark:bg-slate-800/50"
           />
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
@@ -412,7 +412,7 @@ export default function ExamsTab({
               onClick={() => setFilter(f.key)}
               className={`rounded-full border px-3 py-1 text-xs font-bold whitespace-nowrap transition-all ${
                 filter === f.key
-                  ? 'border-[#002a5c] bg-[#002a5c] text-white'
+                  ? 'border-aerojet-blue bg-aerojet-blue text-white'
                   : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-800'
               }`}
             >
@@ -469,7 +469,7 @@ export default function ExamsTab({
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50/80 dark:border-slate-800 dark:bg-slate-900/50">
                 <th
-                  className="cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-[#002a5c]"
+                  className="cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
                   onClick={() => handleSort('moduleCode')}
                 >
                   <span className="flex items-center gap-1">
@@ -483,7 +483,7 @@ export default function ExamsTab({
                   Exam / Event
                 </th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-[#002a5c]"
+                  className="cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
                   onClick={() => handleSort('examDate')}
                 >
                   <span className="flex items-center gap-1">
@@ -494,7 +494,7 @@ export default function ExamsTab({
                   </span>
                 </th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-[#002a5c]"
+                  className="cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
                   onClick={() => handleSort('score')}
                 >
                   <span className="flex items-center justify-center gap-1">
@@ -505,7 +505,7 @@ export default function ExamsTab({
                   </span>
                 </th>
                 <th
-                  className="cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-[#002a5c]"
+                  className="cursor-pointer px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
                   onClick={() => handleSort('result')}
                 >
                   <span className="flex items-center justify-center gap-1">

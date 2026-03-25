@@ -38,7 +38,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
     ? [dbUser.profile.firstName, dbUser.profile.middleName, dbUser.profile.lastName]
         .filter(Boolean)
         .join(' ')
-    : (user.name ?? user.email)
+    : (user.name ?? user.email ?? '')
   const firstName = dbUser?.profile?.firstName ?? user.name?.split(' ')[0] ?? 'Admin'
   const userRole = user.role
 
@@ -63,7 +63,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
       <StaffSidebar
         userName={fullName}
         userRole={userRole}
-        userImage={user.image || undefined}
+        userImage={user.image ?? undefined}
         counts={{
           applicants: pendingApplicantsCount,
           enrollments: pendingEnrollmentsCount,

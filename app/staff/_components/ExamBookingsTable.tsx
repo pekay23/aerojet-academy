@@ -27,7 +27,7 @@ interface ExamBookingWithDetails {
   bookingType: string
   amountPaid: any
   bookedAt: Date
-  moduleCode: string
+  moduleCode: string | null
   user: {
     email: string
     profile: { firstName: string; middleName?: string | null; lastName: string } | null
@@ -194,7 +194,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-[#002a5c]">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue">
                           {booking.user.profile?.firstName?.charAt(0)}
                           {booking.user.profile?.lastName?.charAt(0)}
                         </div>
@@ -264,7 +264,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                     <td className="px-6 py-4 text-right">
                       <button
                         onClick={() => setEditingBooking(booking)}
-                        className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-[#002a5c]"
+                        className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-aerojet-blue"
                       >
                         <Edit className="h-4 w-4" />
                       </button>
@@ -323,7 +323,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                 <input
                   name="moduleCode"
                   defaultValue={editingBooking.moduleCode || ''}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-[#002a5c] focus:outline-hidden"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-aerojet-blue focus:outline-hidden"
                   required
                 />
               </div>
@@ -337,7 +337,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                       ? format(new Date(editingBooking.exam.examDate), 'yyyy-MM-dd')
                       : ''
                   }
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-[#002a5c] focus:outline-hidden"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-aerojet-blue focus:outline-hidden"
                 />
               </div>
             </div>
@@ -352,7 +352,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                 max="100"
                 defaultValue={editingBooking.score ? Number(editingBooking.score) : ''}
                 placeholder="Leave blank if not yet graded"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-[#002a5c] focus:outline-hidden"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-aerojet-blue focus:outline-hidden"
               />
               <p className="text-[10px] text-slate-400 italic">
                 Scores &ge; 75% will be marked as PASS automatically.

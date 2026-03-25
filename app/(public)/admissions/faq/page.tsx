@@ -60,15 +60,15 @@ export default function FAQPage() {
         {FAQS.map((category, idx) => (
           <SectionReveal key={idx} delay={idx * 0.05}>
             <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100">
-              <h2 className="text-xl font-black text-[#002a5c] uppercase tracking-tight mb-6 border-b border-slate-100 pb-4">
+              <h2 className="text-xl font-black text-aerojet-blue uppercase tracking-tight mb-6 border-b border-slate-100 pb-4">
                 {category.category}
               </h2>
               <div className="space-y-6">
                 {category.items.map((item, i) => (
                   <details key={i} className="group">
-                    <summary className="cursor-pointer font-bold text-slate-800 hover:text-[#4c9ded] transition-colors py-2 text-base flex items-start justify-between gap-4 list-none">
+                    <summary className="cursor-pointer font-bold text-slate-800 hover:text-aerojet-sky transition-colors py-2 text-base flex items-start justify-between gap-4 list-none">
                       <span>{item.q}</span>
-                      <span className="text-[#4c9ded] text-xl leading-none shrink-0 group-open:rotate-45 transition-transform duration-200">+</span>
+                      <span className="text-aerojet-sky text-xl leading-none shrink-0 group-open:rotate-45 transition-transform duration-200">+</span>
                     </summary>
                     <p className="text-slate-600 leading-relaxed pb-2 pl-0 text-sm mt-1">{item.a}</p>
                   </details>
@@ -80,9 +80,9 @@ export default function FAQPage() {
 
         <SectionReveal>
           <div className="text-center mt-8">
-            <h3 className="text-lg font-bold text-[#002a5c] mb-3">Still have questions?</h3>
+            <h3 className="text-lg font-bold text-aerojet-blue mb-3">Still have questions?</h3>
             <p className="text-slate-500 mb-6 text-sm">Can't find the answer you're looking for? Chat to our friendly team.</p>
-            <Link href="/contact" className="inline-block bg-[#002a5c] text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#4c9ded] transition-all">
+            <Link href="/contact" className="inline-block bg-aerojet-blue text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-aerojet-sky transition-all">
               Contact Support
             </Link>
           </div>

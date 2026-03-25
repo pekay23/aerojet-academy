@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
+import { getSystemSetting } from '@/lib/settings'
 import { requireStudent } from '@/lib/auth/helpers'
 import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 import { walletTopUpSchema, validateBody } from '@/lib/validation/schemas'
@@ -27,10 +28,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   })
 
   const { getCurrencySymbol } = await import('@/lib/currency')
-  const settings = await prisma.systemSetting.findMany({
-    where: { key: 'course_currency' },
-  })
-  const currency = settings[0]?.value || 'EUR'
+  const currency = await getSystemSetting('course_currency', 'EUR')
   const symbol = getCurrencySymbol(currency)
 
   return apiCreated({

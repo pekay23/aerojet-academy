@@ -81,14 +81,14 @@ export default function CreateExamEventPage() {
     <div className="mx-auto max-w-3xl">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Create Exam Event
           </h1>
           <p className="text-slate-500 dark:text-slate-400">Schedule a new examination session.</p>
         </div>
         <Link
           href="/staff/exams/events"
-          className="text-sm font-bold text-slate-500 hover:text-[#002a5c] dark:text-slate-400"
+          className="text-sm font-bold text-slate-500 hover:text-aerojet-blue dark:text-slate-400"
         >
           Cancel
         </Link>
@@ -232,7 +232,7 @@ export default function CreateExamEventPage() {
                 </Button>
                 <Button
                   type="submit"
-                  className="bg-[#002a5c] px-8 hover:bg-[#002a5c]/90"
+                  className="bg-aerojet-blue px-8 hover:bg-aerojet-blue/90"
                   disabled={isLoading}
                 >
                   {isLoading ? (

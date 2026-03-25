@@ -5,6 +5,7 @@ import { Suspense } from 'react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { getSystemSetting } from '@/lib/settings'
 import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Exam Bookings | Applicant Portal' }
@@ -39,7 +40,7 @@ export default async function ExamPoolsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           Exam Bookings
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -89,10 +90,7 @@ function PoolsSkeleton() {
 
 async function PoolList() {
   // Get open/upcoming exam pools
-  const settings = await prisma.systemSetting.findMany({
-    where: { key: 'course_currency' },
-  })
-  const currency = settings[0]?.value || 'EUR'
+  const currency = await getSystemSetting('course_currency', 'EUR')
 
   const { getCurrencySymbol } = await import('@/lib/currency')
   const symbol = getCurrencySymbol(currency)
@@ -202,7 +200,7 @@ async function PoolList() {
             <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-3">
               <div>
                 <p className="text-[10px] text-slate-400">Exam Fee</p>
-                <p className="text-base font-black text-[#002a5c] dark:text-blue-400">
+                <p className="text-base font-black text-aerojet-blue dark:text-blue-400">
                   {currency} {Number(pool.seatPrice).toLocaleString()}
                 </p>
               </div>

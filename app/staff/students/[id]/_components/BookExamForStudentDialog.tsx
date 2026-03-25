@@ -188,7 +188,7 @@ export default function BookExamForStudentDialog({
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2 text-xs font-bold text-white transition-all hover:bg-[#001f45]"
+          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white transition-all hover:bg-[#001f45]"
         >
           <ShoppingCart className="h-3.5 w-3.5" />
           Book Exam
@@ -238,7 +238,7 @@ export default function BookExamForStudentDialog({
                       }}
                       className={`rounded-xl border p-3 text-left transition-all ${
                         bookingType === type.value
-                          ? 'border-[#002a5c] bg-[#002a5c]/5 ring-1 ring-[#002a5c]'
+                          ? 'border-aerojet-blue bg-aerojet-blue/5 ring-1 ring-aerojet-blue'
                           : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
                       }`}
                     >
@@ -246,7 +246,7 @@ export default function BookExamForStudentDialog({
                         {type.label}
                       </div>
                       <div className="text-[10px] text-slate-400">{type.desc}</div>
-                      <div className="mt-1 text-sm font-black text-[#002a5c]">
+                      <div className="mt-1 text-sm font-black text-aerojet-blue">
                         €{DEFAULT_PRICES[type.value]}
                       </div>
                     </button>
@@ -271,7 +271,7 @@ export default function BookExamForStudentDialog({
                         disabled={isFull}
                         className={`rounded-lg border px-3 py-2 text-left text-xs transition-all ${
                           isSelected
-                            ? 'border-[#002a5c] bg-[#002a5c]/10 font-bold text-[#002a5c]'
+                            ? 'border-aerojet-blue bg-aerojet-blue/10 font-bold text-aerojet-blue'
                             : isFull
                               ? 'cursor-not-allowed border-slate-100 bg-slate-100/50 text-slate-300'
                               : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900'
@@ -404,12 +404,12 @@ export default function BookExamForStudentDialog({
                     onClick={() => setPaymentMethod('AUTO_DEBIT')}
                     className={`rounded-xl border p-3 text-left transition-all ${
                       paymentMethod === 'AUTO_DEBIT'
-                        ? 'border-[#002a5c] bg-[#002a5c]/5 ring-1 ring-[#002a5c]'
+                        ? 'border-aerojet-blue bg-aerojet-blue/5 ring-1 ring-aerojet-blue'
                         : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
                     }`}
                   >
                     <div className="flex items-center gap-2">
-                      <Wallet className="h-4 w-4 text-[#002a5c]" />
+                      <Wallet className="h-4 w-4 text-aerojet-blue" />
                       <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
                         Auto-Debit Wallet
                       </span>
@@ -428,7 +428,7 @@ export default function BookExamForStudentDialog({
                     onClick={() => setPaymentMethod('MANUAL_LATER')}
                     className={`rounded-xl border p-3 text-left transition-all ${
                       paymentMethod === 'MANUAL_LATER'
-                        ? 'border-[#002a5c] bg-[#002a5c]/5 ring-1 ring-[#002a5c]'
+                        ? 'border-aerojet-blue bg-aerojet-blue/5 ring-1 ring-aerojet-blue'
                         : 'border-slate-200 hover:border-slate-300 dark:border-slate-700'
                     }`}
                   >
@@ -481,7 +481,7 @@ export default function BookExamForStudentDialog({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Price</span>
-                    <span className="text-lg font-black text-[#002a5c]">€{price}</span>
+                    <span className="text-lg font-black text-aerojet-blue">€{price}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Payment</span>
@@ -512,7 +512,7 @@ export default function BookExamForStudentDialog({
                   (!eventId && !examDate) ||
                   (paymentMethod === 'AUTO_DEBIT' && !canAfford)
                 }
-                className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-6 py-2 text-sm font-bold text-white transition-all hover:bg-[#001f45] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-2 text-sm font-bold text-white transition-all hover:bg-[#001f45] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 {paymentMethod === 'AUTO_DEBIT'

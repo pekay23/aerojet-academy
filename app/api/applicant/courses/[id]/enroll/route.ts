@@ -4,9 +4,9 @@ import { requireApplicant } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 
 export const POST = withErrorHandler(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
+  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
     const user = await requireApplicant()
-    const { id: courseId } = params
+    const courseId = ctx?.params?.id
     const body = await req.json()
     const { proofUrl } = body
 
@@ -21,26 +21,29 @@ export const POST = withErrorHandler(
     // Update enrollment and create payment record in a transaction
     await prisma.$transaction(async (tx) => {
       // 1. Create or Update Enrollment
-      await tx.enrollment.upsert({
-        where: {
-          userId_courseId: {
+      const existingEnrollment = await tx.enrollment.findFirst({
+        where: { userId: user.id, courseId: course.id },
+      })
+      if (existingEnrollment) {
+        await tx.enrollment.update({
+          where: { id: existingEnrollment.id },
+          data: {
+            status: 'PENDING',
+            paymentProofUrl: proofUrl,
+            amountPaid: course.price,
+          },
+        })
+      } else {
+        await tx.enrollment.create({
+          data: {
             userId: user.id,
             courseId: course.id,
+            status: 'PENDING',
+            paymentProofUrl: proofUrl,
+            amountPaid: course.price,
           },
-        },
-        update: {
-          status: 'PENDING',
-          paymentProofUrl: proofUrl,
-          amountPaid: course.price,
-        },
-        create: {
-          userId: user.id,
-          courseId: course.id,
-          status: 'PENDING',
-          paymentProofUrl: proofUrl,
-          amountPaid: course.price,
-        },
-      })
+        })
+      }
 
       // 2. Create Payment Record
       await tx.payment.create({

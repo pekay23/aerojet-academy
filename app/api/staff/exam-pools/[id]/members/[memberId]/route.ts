@@ -7,14 +7,11 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { decrementPoolMemberCount } from '@/lib/pools/operations'
 import { releaseFunds, creditToWallet } from '@/lib/wallet/operations'
 
-interface RouteParams {
-  params: { id: string; memberId: string }
-}
-
 // DELETE /api/staff/exam-pools/[id]/members/[memberId] — Remove a member from a pool
-export const DELETE = withErrorHandler(async (req: NextRequest, { params }: RouteParams) => {
+export const DELETE = withErrorHandler(async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
   const staff = await requireStaff()
-  const { id: poolId, memberId } = params
+  const poolId = ctx?.params?.id
+  const memberId = ctx?.params?.memberId
 
   const { reason } = await req.json()
   if (!reason || reason.trim().length < 5) {

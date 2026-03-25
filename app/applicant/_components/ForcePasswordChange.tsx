@@ -24,7 +24,7 @@ export default function ForcePasswordChange({
       <div className="w-full max-w-md">
         {/* Branding/Header */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#002a5c] shadow-lg shadow-blue-900/20">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-aerojet-blue shadow-lg shadow-blue-900/20">
             <Lock className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
