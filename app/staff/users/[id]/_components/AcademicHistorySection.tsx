@@ -346,13 +346,13 @@ export default function AcademicHistorySection({ enrollments, examBookings, stud
       <div className="mt-4 flex flex-wrap gap-2">
         <Link
           href="/staff/exams?tab=records"
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:bg-white hover:shadow-sm dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
         >
           <FileText className="h-3 w-3" /> Add Exam Record
         </Link>
         <Link
           href="/staff/enrollments/batch"
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:bg-white hover:shadow-sm dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
         >
           <BookOpen className="h-3 w-3" /> Batch Enroll
         </Link>

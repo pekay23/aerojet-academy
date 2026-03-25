@@ -125,7 +125,7 @@ export default function FinanceOverview({
         </div>
         <button
           onClick={fetchData}
-          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"
         >
           <RefreshCw className="h-3.5 w-3.5" /> Refresh
         </button>
@@ -255,7 +255,7 @@ export default function FinanceOverview({
                   return (
                     <tr
                       key={tx.id}
-                      className="transition-colors hover:bg-slate-50 dark:bg-slate-800/50"
+                      className="transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
                     >
                       <td className="px-5 py-3.5">
                         <p className="text-sm font-bold text-slate-700">{fullName}</p>

@@ -257,7 +257,7 @@ export default function AddExamRecordDialog({
                   setOpen(false)
                   resetForm()
                 }}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700"
+                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:bg-white hover:shadow-sm dark:border-slate-700 dark:hover:border-slate-600"
               >
                 Cancel
               </button>

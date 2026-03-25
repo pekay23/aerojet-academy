@@ -156,7 +156,7 @@ export default function PaymentApprovalCard({
             href={payment.proofUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-aerojet-sky hover:underline"
+            className="inline-flex items-center gap-1.5 rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-sky transition-all duration-150 ease-out hover:bg-aerojet-sky/10 hover:shadow-sm"
           >
             <ExternalLink className="h-3.5 w-3.5" />
             View Payment Proof

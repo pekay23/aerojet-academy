@@ -72,7 +72,7 @@ const LogRow = memo(
         tabIndex={0}
         role="button"
         aria-label={`View details for ${log.action} on ${log.entity || 'system'}`}
-        className="group relative cursor-pointer transition-all hover:bg-slate-50/50 dark:hover:bg-white/2"
+        className="group relative cursor-pointer transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
       >
         {/* Timestamp */}
         <td className="px-6 py-5">

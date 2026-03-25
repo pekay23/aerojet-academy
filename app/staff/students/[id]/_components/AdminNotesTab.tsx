@@ -196,7 +196,7 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
                         setEditingId(note.id)
                         setEditContent(note.content)
                       }}
-                      className="rounded-lg p-1.5 text-slate-300 transition-colors hover:bg-slate-50 hover:text-slate-500 dark:hover:bg-slate-800"
+                      className="rounded-lg p-1.5 text-slate-300 transition-all duration-150 ease-out hover:bg-slate-100 hover:text-slate-500 dark:hover:bg-slate-800/60"
                       title="Edit"
                     >
                       <Pencil className="h-3.5 w-3.5" />

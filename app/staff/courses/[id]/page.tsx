@@ -81,7 +81,7 @@ export default async function CourseDetailsPage({ params }: Props) {
       <div className="mb-6">
         <Link
           href="/staff/courses"
-          className="mb-4 inline-flex items-center text-sm font-bold text-slate-400 transition-colors hover:text-aerojet-blue"
+          className="mb-4 inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-bold text-slate-400 transition-all duration-150 ease-out hover:bg-slate-100 hover:text-aerojet-blue dark:hover:bg-slate-800/60"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Back to Courses
         </Link>
@@ -218,7 +218,7 @@ export default async function CourseDetailsPage({ params }: Props) {
               </h2>
               <Link
                 href="/staff/classes/create"
-                className="text-xs font-bold text-blue-600 hover:underline"
+                className="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-bold text-blue-600 transition-all duration-150 ease-out hover:bg-blue-50 hover:shadow-sm"
               >
                 + Schedule New
               </Link>

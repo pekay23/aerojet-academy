@@ -50,7 +50,7 @@ const VARIANT_STYLES: Record<
   default: {
     text: 'text-slate-600 dark:text-slate-300',
     bg: '',
-    hover: 'hover:bg-slate-50 dark:hover:bg-slate-800',
+    hover: 'transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60',
     confirmBg: 'bg-slate-800 hover:bg-slate-900',
   },
 }

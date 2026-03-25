@@ -75,7 +75,7 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
               resources.map((resource) => (
                 <TableRow
                   key={resource.id}
-                  className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                  className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                 >
                   <TableCell>
                     <div className="flex items-center gap-3">

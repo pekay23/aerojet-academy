@@ -197,7 +197,7 @@ export default async function StaffDashboardPage() {
         {stats.map((stat) => {
           const Icon = stat.icon
           const card = (
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md sm:p-5 dark:border-slate-800 dark:bg-slate-900/50">
+            <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-all duration-150 ease-out hover:border-slate-200 hover:shadow-md sm:p-5 dark:border-slate-800 dark:bg-slate-900/50 dark:hover:border-slate-700">
               <div
                 className={`h-11 w-11 rounded-xl ${stat.bg} flex shrink-0 items-center justify-center`}
               >

@@ -156,7 +156,7 @@ export default function LicenseRequirementsClient({
           <thead>
             <tr className="border-b border-slate-100 dark:border-slate-800">
               <th
-                className="group sticky left-0 z-10 cursor-pointer bg-white px-4 py-3 text-left text-xs font-black tracking-widest text-slate-400 uppercase transition-colors hover:bg-slate-50 dark:bg-slate-900 dark:hover:bg-slate-800"
+                className="group sticky left-0 z-10 cursor-pointer bg-white px-4 py-3 text-left text-xs font-black tracking-widest text-slate-400 uppercase transition-all duration-150 ease-out hover:bg-white hover:text-slate-600 hover:shadow-sm dark:bg-slate-900 dark:hover:bg-slate-800/60"
                 onClick={() => handleSort('code')}
               >
                 Module <SortIndicator column="code" />
@@ -164,7 +164,7 @@ export default function LicenseRequirementsClient({
               {licenseCategories.map((lc) => (
                 <th
                   key={lc.id}
-                  className="group cursor-pointer px-3 py-3 text-center text-xs font-black tracking-wider text-slate-500 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+                  className="group cursor-pointer px-3 py-3 text-center text-xs font-black tracking-wider text-slate-500 transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
                   onClick={() => handleSort(lc.id)}
                 >
                   {lc.code} <SortIndicator column={lc.id} />
@@ -176,7 +176,7 @@ export default function LicenseRequirementsClient({
             {sortedCourses.map((course) => (
               <tr
                 key={course.id}
-                className="border-b border-slate-50 transition-colors hover:bg-slate-50 dark:border-slate-800/50 dark:hover:bg-slate-800/30"
+                className="border-b border-slate-50 transition-all duration-150 ease-out hover:bg-white/80 dark:border-slate-800/50 dark:hover:bg-slate-800/40"
               >
                 <td className="sticky left-0 z-10 bg-white px-4 py-2 dark:bg-slate-900">
                   <span className="mr-2 font-mono text-xs font-bold text-slate-400">
@@ -197,7 +197,7 @@ export default function LicenseRequirementsClient({
                         className={`inline-flex h-7 w-7 items-center justify-center rounded-md border transition-all ${
                           isRequired
                             ? 'border-blue-300 bg-blue-100 text-blue-700 hover:bg-blue-200 dark:border-blue-700 dark:bg-blue-900/40 dark:text-blue-400'
-                            : 'border-slate-200 bg-white text-slate-300 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-600'
+                            : 'border-slate-200 bg-white text-slate-300 hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-600 dark:hover:border-slate-600'
                         }`}
                       >
                         {isLoading ? (

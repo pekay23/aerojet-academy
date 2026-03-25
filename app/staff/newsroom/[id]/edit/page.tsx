@@ -150,7 +150,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
         <div className="flex items-center gap-4">
           <Link
             href="/staff/newsroom"
-            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700"
+            className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-400 dark:hover:border-slate-600"
           >
             <ArrowLeft className="h-5 w-5" />
           </Link>
@@ -177,7 +177,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
           <button
             type="button"
             onClick={() => setIsPreview(!isPreview)}
-            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:border-slate-600"
           >
             <Eye className="h-4 w-4" />
             {isPreview ? 'Edit Mode' : 'Preview'}

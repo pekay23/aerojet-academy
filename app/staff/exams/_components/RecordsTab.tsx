@@ -340,7 +340,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                     key={s.id}
                     type="button"
                     onClick={() => selectStudent(s)}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
                   >
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-aerojet-blue">
                       {s.firstName.charAt(0)}
@@ -467,7 +467,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                               showDropdown: false,
                             })
                           }}
-                          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+                          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
                         >
                           <div className="min-w-0 flex-1">
                             <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
@@ -621,7 +621,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                     return (
                       <tr
                         key={record.id}
-                        className="group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                        className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                       >
                         {/* Student */}
                         <td className="px-6 py-4">
@@ -683,7 +683,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                                             setEditCourseQuery(`${m.code} — ${m.name}`)
                                             setShowEditCourseDropdown(false)
                                           }}
-                                          className="flex w-full flex-col px-3 py-2 text-left hover:bg-slate-50 dark:hover:bg-slate-800"
+                                          className="flex w-full flex-col px-3 py-2 text-left transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
                                         >
                                           <span className="text-xs font-bold text-slate-900 dark:text-white">{m.code}</span>
                                           <span className="truncate text-[10px] text-slate-500">{m.name}</span>

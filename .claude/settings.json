@@ -50,7 +50,9 @@
       "Bash(node -e \"const pg = require\\(''pg''\\); console.log\\(''pg available:'', Boolean\\(pg.Pool\\)\\)\")",
       "Bash(node -e \"require\\(''dotenv''\\).config\\(\\); const { Pool } = require\\(''pg''\\); const pool = new Pool\\({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }\\); pool.query\\(''SELECT 1 as test''\\).then\\(r => { console.log\\(''OK:'', r.rows\\); pool.end\\(\\); }\\).catch\\(e => console.error\\(''FAIL:'', e.message\\)\\)\")",
       "Bash(node -e \"require\\(''dotenv''\\).config\\(\\); const { PrismaPg } = require\\(''@prisma/adapter-pg''\\); const { Pool } = require\\(''pg''\\); const { PrismaClient } = require\\(''@prisma/client''\\); const pool = new Pool\\({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } }\\); const adapter = new PrismaPg\\(pool\\); const prisma = new PrismaClient\\({ adapter }\\); prisma.user.findFirst\\(\\).then\\(u => { console.log\\(''OK, found user:'', u?.email\\); process.exit\\(0\\); }\\).catch\\(e => { console.error\\(''FAIL:'', e.message\\); process.exit\\(1\\); }\\)\")",
-      "Bash(npx dotenv-cli:*)"
+      "Bash(npx dotenv-cli:*)",
+      "Bash(find /c/Projects/aerojet-academy/app/staff -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
+      "Bash(find /c/Projects/aerojet-academy/components -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\))"
     ],
     "additionalDirectories": [
       "d:\\Projects\\aerojet-academy\\app\\api\\staff\\students\\[id]\\wallet\\[txnId]"

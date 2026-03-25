@@ -299,7 +299,7 @@ export default function CourseCategoriesPage() {
                   </div>
                   <Link
                     href={`/staff/courses?category=${cat.id}`}
-                    className="text-xs font-bold text-aerojet-sky hover:underline"
+                    className="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-sky transition-all duration-150 ease-out hover:bg-aerojet-sky/10 hover:shadow-sm"
                   >
                     View courses →
                   </Link>

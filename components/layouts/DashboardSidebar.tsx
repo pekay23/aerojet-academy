@@ -164,12 +164,12 @@ function NavItem({
     <Link
       href={basePath + href}
       onClick={() => setMobileOpen(false)}
-      className={`flex items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+      className={`flex items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-out ${
         collapsed ? 'mx-auto h-10 w-10 justify-center p-0' : 'gap-3'
       } ${
         active
-          ? 'bg-sidebar-accent font-semibold text-sidebar-foreground'
-          : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+          ? 'border-sidebar-border/40 bg-sidebar-accent font-semibold text-sidebar-foreground shadow-sm'
+          : 'border-transparent text-sidebar-foreground/60 hover:border-sidebar-border/30 hover:bg-sidebar-accent hover:text-sidebar-foreground hover:shadow-sm'
       }`}
     >
       {Icon && <Icon className="h-[18px] w-[18px] shrink-0" />}
@@ -228,12 +228,12 @@ function GroupItem({
   const trigger = (
     <button
       onClick={() => toggleGroup(link.label)}
-      className={`flex w-full items-center rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+      className={`flex w-full items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-out ${
         collapsed ? 'mx-auto h-10 w-10 justify-center p-0' : 'gap-3'
       } ${
         active
-          ? 'bg-sidebar-accent font-semibold text-sidebar-foreground'
-          : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
+          ? 'border-sidebar-border/40 bg-sidebar-accent font-semibold text-sidebar-foreground shadow-sm'
+          : 'border-transparent text-sidebar-foreground/60 hover:border-sidebar-border/30 hover:bg-sidebar-accent hover:text-sidebar-foreground hover:shadow-sm'
       }`}
     >
       {Icon && <Icon className="h-[18px] w-[18px] shrink-0" />}

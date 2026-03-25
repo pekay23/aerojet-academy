@@ -158,7 +158,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
           <div className="flex items-center gap-2">
             <button
               onClick={fetchApplicants}
-              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+              className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"
             >
               <RefreshCw className="h-3.5 w-3.5" />
               Refresh
@@ -272,7 +272,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                   className={`relative rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                     tab === t.key
                       ? 'text-aerojet-blue dark:text-white'
-                      : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                      : 'text-slate-500 hover:bg-white/60 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-slate-200'
                   }`}
                 >
                   {tab === t.key && (
@@ -388,7 +388,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                     return (
                       <tr
                         key={applicant.id}
-                        className={`cursor-pointer transition-colors hover:bg-slate-50 dark:bg-slate-800/50 ${selectedIds.includes(applicant.id) ? 'bg-aerojet-blue/5' : ''}`}
+                        className={`cursor-pointer transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${selectedIds.includes(applicant.id) ? 'bg-aerojet-blue/5' : ''}`}
                       >
                         <td className="px-6 py-4">
                           <button
@@ -456,7 +456,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                               e.stopPropagation()
                               setSelected(applicant)
                             }}
-                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+                            className="rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:bg-white hover:shadow-sm dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
                           >
                             Review
                           </button>

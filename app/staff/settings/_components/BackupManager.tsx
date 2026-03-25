@@ -344,7 +344,7 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
           <button
             onClick={() => handleDownload('html')}
             disabled={downloading !== null}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition-colors hover:bg-slate-50 disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600"
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 transition-all duration-150 ease-out hover:border-slate-400 hover:shadow-sm disabled:opacity-50 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:hover:border-slate-500"
           >
             {downloading === 'html' ? (
               <Loader2 className="h-4 w-4 animate-spin" />
