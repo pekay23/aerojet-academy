@@ -53,7 +53,7 @@ function Field({
         defaultValue={defaultValue ?? ''}
         required={required}
         placeholder={placeholder}
-        className="w-full rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 transition-shadow placeholder:text-slate-300 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#002a5c]"
+        className="w-full rounded-xl border border-slate-200 dark:border-slate-700 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 transition-shadow placeholder:text-slate-300 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-aerojet-blue"
       />
     </div>
   )
@@ -78,7 +78,7 @@ function SelectField({
       <select
         name={name}
         defaultValue={defaultValue ?? ''}
-        className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 transition-shadow focus:border-transparent focus:outline-none focus:ring-2 focus:ring-[#002a5c]"
+        className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-3.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 transition-shadow focus:border-transparent focus:outline-none focus:ring-2 focus:ring-aerojet-blue"
       >
         <option value="">— Select —</option>
         {options.map(({ value, label }) => (
@@ -202,7 +202,7 @@ export default function ProfileForm({ profile }: Props) {
         <button
           type="submit"
           disabled={isPending}
-          className="inline-flex items-center gap-2 rounded-xl bg-[#002a5c] px-7 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#003875] disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-7 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#003875] disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {isPending ? 'Saving…' : 'Save Profile'}

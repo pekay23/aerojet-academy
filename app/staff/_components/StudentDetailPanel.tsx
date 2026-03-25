@@ -211,7 +211,7 @@ export default function StudentDetailPanel({
       <div className="border-b border-slate-100 bg-white px-8 pt-8 pb-0 dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-6 flex items-start justify-between">
           <div className="flex items-center gap-5">
-            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#002a5c] text-xl font-black text-white">
+            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-aerojet-blue text-xl font-black text-white">
               {currentStudent.profile?.profilePhotoUrl ? (
                 <img
                   src={currentStudent.profile.profilePhotoUrl}
@@ -240,7 +240,7 @@ export default function StudentDetailPanel({
                   {currentStudent.status}
                 </span>
                 {currentStudent.studentProfile?.programType && (
-                  <span className="rounded-full bg-[#002a5c]/10 px-2 py-0.5 text-[10px] font-black text-[#002a5c] uppercase">
+                  <span className="rounded-full bg-aerojet-blue/10 px-2 py-0.5 text-[10px] font-black text-aerojet-blue uppercase">
                     {currentStudent.studentProfile.programType.replace(/_/g, ' ')}
                   </span>
                 )}
@@ -257,7 +257,7 @@ export default function StudentDetailPanel({
             />
             <a
               href={`/staff/students/${currentStudent.id}`}
-              className="flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-widest text-slate-500 uppercase shadow-sm transition-all hover:border-[#4c9ded] hover:text-[#4c9ded] dark:border-slate-700 dark:bg-slate-800"
+              className="flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-widest text-slate-500 uppercase shadow-sm transition-all hover:border-aerojet-sky hover:text-aerojet-sky dark:border-slate-700 dark:bg-slate-800"
               title="Open Full Profile"
             >
               <ExternalLink className="h-3 w-3" />
@@ -279,13 +279,13 @@ export default function StudentDetailPanel({
               key={t}
               onClick={() => setTab(t)}
               className={`relative pb-3 text-sm font-bold transition-all ${
-                tab === t ? 'text-[#002a5c]' : 'text-slate-400 hover:text-slate-600'
+                tab === t ? 'text-aerojet-blue' : 'text-slate-400 hover:text-slate-600'
               }`}
             >
               {tab === t && (
                 <motion.div
                   layoutId="student-detail-underline"
-                  className="absolute bottom-0 left-0 h-0.5 w-full bg-[#002a5c]"
+                  className="absolute bottom-0 left-0 h-0.5 w-full bg-aerojet-blue"
                   transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                 />
               )}
@@ -299,7 +299,7 @@ export default function StudentDetailPanel({
       <div className="space-y-6 px-8 py-6">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Loader2 className="h-8 w-8 animate-spin text-[#002a5c]" />
+            <Loader2 className="h-8 w-8 animate-spin text-aerojet-blue" />
             <p className="mt-2 text-sm font-bold text-slate-400">Loading student details...</p>
           </div>
         ) : (
@@ -541,7 +541,7 @@ function ExamTabContent({
             onClick={() => setFilter(f.key)}
             className={`rounded-full px-3 py-1 text-xs font-bold transition-colors ${
               filter === f.key
-                ? 'bg-[#002a5c] text-white'
+                ? 'bg-aerojet-blue text-white'
                 : 'bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
             }`}
           >

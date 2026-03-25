@@ -74,7 +74,7 @@ export default function InstructorsTable() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search instructors..."
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-700 dark:bg-slate-800/50"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 focus:ring-aerojet-sky dark:border-slate-700 dark:bg-slate-800/50"
             />
           </div>
           <button
@@ -269,7 +269,7 @@ export default function InstructorsTable() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-[#002a5c] dark:bg-slate-800">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue dark:bg-slate-800">
                           {instructor.profile?.firstName?.charAt(0)}
                           {instructor.profile?.lastName?.charAt(0)}
                         </div>
@@ -306,7 +306,7 @@ export default function InstructorsTable() {
                     <td className="px-6 py-4 text-right">
                       <Link
                         href={`/staff/users/${instructor.id}`}
-                        className="text-xs font-bold text-[#002a5c] hover:underline dark:text-[#4c9ded]"
+                        className="text-xs font-bold text-aerojet-blue hover:underline dark:text-aerojet-sky"
                       >
                         View
                       </Link>

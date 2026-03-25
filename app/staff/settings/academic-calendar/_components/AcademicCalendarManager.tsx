@@ -110,7 +110,7 @@ export default function AcademicCalendarManager({
 
     try {
       const isEdit = !!editingSemester?.sem?.id
-      const url = isEdit ? `/api/staff/semesters/${editingSemester.sem.id}` : '/api/staff/semesters'
+      const url = isEdit ? `/api/staff/semesters/${editingSemester!.sem!.id}` : '/api/staff/semesters'
       const method = isEdit ? 'PUT' : 'POST'
 
       const res = await fetch(url, {
@@ -156,7 +156,7 @@ export default function AcademicCalendarManager({
     <div className="space-y-8">
       <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div>
-          <h2 className="text-sm font-bold tracking-widest text-[#002a5c] uppercase dark:text-blue-400">
+          <h2 className="text-sm font-bold tracking-widest text-aerojet-blue uppercase dark:text-blue-400">
             Control Panel
           </h2>
           <p className="mt-1 text-xs text-slate-500">Add or manage global academic entities.</p>
@@ -367,7 +367,7 @@ export default function AcademicCalendarManager({
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full rounded-xl bg-[#002a5c] text-white hover:bg-blue-800"
+              className="w-full rounded-xl bg-aerojet-blue text-white hover:bg-blue-800"
             >
               {isLoading ? 'Saving...' : 'Save Year'}
             </Button>

@@ -63,12 +63,12 @@ export default function CourseInfoEditDialog({
           categoryId: categoryId || null,
           prerequisites: prerequisites
             .split(',')
-            .map((p) => p.trim())
+            .map((p: string) => p.trim())
             .filter(Boolean),
           requiresPrerequisite: prerequisites.trim().length > 0,
           topics: topics
             .split(',')
-            .map((t) => t.trim())
+            .map((t: string) => t.trim())
             .filter(Boolean),
           estimatedStudyHoursMin: studyHoursMin ? parseInt(studyHoursMin) : null,
           estimatedStudyHoursMax: studyHoursMax ? parseInt(studyHoursMax) : null,
@@ -207,7 +207,7 @@ export default function CourseInfoEditDialog({
                   onClick={() => toggleCategory(cat)}
                   className={`rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors ${
                     applicableCategories.includes(cat)
-                      ? 'border-[#002a5c] bg-[#002a5c] text-white'
+                      ? 'border-aerojet-blue bg-aerojet-blue text-white'
                       : 'border-slate-200 text-slate-500 hover:border-slate-300 dark:border-slate-700 dark:text-slate-400'
                   }`}
                 >

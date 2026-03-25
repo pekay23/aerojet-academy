@@ -118,12 +118,12 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
             placeholder="Search by student, assessment, or module..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="h-14 rounded-2xl border-slate-100 bg-white pl-11 text-sm font-medium shadow-sm transition-all focus:border-[#4c9ded] focus:ring-4 focus:ring-blue-50/50 dark:border-slate-800 dark:bg-slate-900"
+            className="h-14 rounded-2xl border-slate-100 bg-white pl-11 text-sm font-medium shadow-sm transition-all focus:border-aerojet-sky focus:ring-4 focus:ring-blue-50/50 dark:border-slate-800 dark:bg-slate-900"
           />
         </div>
 
         <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-500 uppercase">
-          <ClipboardCheck className="h-4 w-4 text-[#4c9ded]" />
+          <ClipboardCheck className="h-4 w-4 text-aerojet-sky" />
           <span>{filteredQueue.length} Pending Submissions</span>
         </div>
       </div>
@@ -141,16 +141,16 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
                 exit={{ opacity: 0, scale: 0.98 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className="group overflow-hidden rounded-3xl border-slate-100 bg-white transition-all hover:border-[#4c9ded]/30 hover:shadow-xl hover:shadow-blue-500/5 dark:border-slate-800 dark:bg-slate-900">
+                <Card className="group overflow-hidden rounded-3xl border-slate-100 bg-white transition-all hover:border-aerojet-sky/30 hover:shadow-xl hover:shadow-blue-500/5 dark:border-slate-800 dark:bg-slate-900">
                   <CardContent className="p-0">
                     <div className="flex flex-col md:flex-row md:items-center">
                       {/* Left: Module Info */}
                       <div className="flex items-center gap-4 border-b border-slate-50 p-6 md:w-64 md:border-r md:border-b-0 dark:border-slate-800/50">
                         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 dark:bg-blue-900/20">
-                          <BookOpen className="h-6 w-6 text-[#4c9ded]" />
+                          <BookOpen className="h-6 w-6 text-aerojet-sky" />
                         </div>
                         <div>
-                          <p className="text-[10px] font-black tracking-widest text-[#4c9ded] uppercase">
+                          <p className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase">
                             {item.enrollment.course.code}
                           </p>
                           <h4 className="line-clamp-1 text-sm font-black text-slate-900 dark:text-white">
@@ -190,7 +190,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
 
                           <Button
                             onClick={() => setSelectedGrade(item)}
-                            className="rounded-xl bg-[#002a5c] px-6 font-black text-white hover:bg-[#003a7c] dark:bg-blue-600 dark:hover:bg-blue-700"
+                            className="rounded-xl bg-aerojet-blue px-6 font-black text-white hover:bg-[#003a7c] dark:bg-blue-600 dark:hover:bg-blue-700"
                           >
                             Grade Now
                             <ChevronRight className="ml-2 h-4 w-4" />
@@ -223,7 +223,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
       {/* Grading Dialog */}
       <Dialog open={!!selectedGrade} onOpenChange={(open) => !open && setSelectedGrade(null)}>
         <DialogContent className="max-w-lg overflow-hidden rounded-4xl border-none p-0">
-          <div className="bg-[#002a5c] p-8 text-white dark:bg-slate-900">
+          <div className="bg-aerojet-blue p-8 text-white dark:bg-slate-900">
             <DialogHeader className="space-y-1">
               <div className="flex items-center gap-2 text-[10px] font-black tracking-[0.2em] text-blue-300 uppercase">
                 <ClipboardCheck className="h-4 w-4" />
@@ -280,7 +280,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
                   value={comments}
                   onChange={(e) => setComments(e.target.value)}
                   placeholder="Provide constructive feedback for the student..."
-                  className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm font-medium focus:border-[#4c9ded] focus:ring-4 focus:ring-blue-50/50 focus:outline-none dark:border-slate-800 dark:bg-slate-900"
+                  className="w-full rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm font-medium focus:border-aerojet-sky focus:ring-4 focus:ring-blue-50/50 focus:outline-none dark:border-slate-800 dark:bg-slate-900"
                 />
               </div>
             </div>
@@ -289,7 +289,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
               <Button
                 onClick={handleGradeSubmit}
                 disabled={isSubmitting || !score}
-                className="h-14 w-full rounded-2xl bg-[#4c9ded] text-base font-black text-white hover:bg-[#3b8dcd] disabled:opacity-50"
+                className="h-14 w-full rounded-2xl bg-aerojet-sky text-base font-black text-white hover:bg-[#3b8dcd] disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">

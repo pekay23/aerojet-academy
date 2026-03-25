@@ -61,9 +61,9 @@ export async function getStudentStatus(userId: string) {
   const enrollmentType = profile?.enrollmentType
   const pathwayCode = profile?.pathwayRel?.code
 
-  const isFullTime = enrollmentType === 'FULL_TIME' || 
-                     (pathwayCode && ['FULL_TIME', 'FULL_TIME_4Y', 'FULL_TIME_2Y', 'MILITARY_2Y', 'MILITARY_1Y'].includes(pathwayCode))
-  
+  const isFullTime = enrollmentType === 'FULL_TIME' ||
+                     !!(pathwayCode && ['FULL_TIME', 'FULL_TIME_4Y', 'FULL_TIME_2Y', 'MILITARY_2Y', 'MILITARY_1Y'].includes(pathwayCode))
+
   const isExamOnly = enrollmentType === 'EXAM_ONLY' || pathwayCode === 'EXAM_ONLY'
   const isModular = enrollmentType === 'MODULAR' || pathwayCode === 'MODULAR'
 

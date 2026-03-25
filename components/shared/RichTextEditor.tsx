@@ -83,7 +83,7 @@ export default function RichTextEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={cn('h-8 w-8 p-0', editor.isActive('bold') && 'bg-slate-200 text-[#002a5c]')}
+          className={cn('h-8 w-8 p-0', editor.isActive('bold') && 'bg-slate-200 text-aerojet-blue')}
         >
           <Bold className="h-4 w-4" />
         </Button>
@@ -91,7 +91,7 @@ export default function RichTextEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={cn('h-8 w-8 p-0', editor.isActive('italic') && 'bg-slate-200 text-[#002a5c]')}
+          className={cn('h-8 w-8 p-0', editor.isActive('italic') && 'bg-slate-200 text-aerojet-blue')}
         >
           <Italic className="h-4 w-4" />
         </Button>
@@ -102,7 +102,7 @@ export default function RichTextEditor({
           onClick={() => editor.chain().focus().toggleBulletList().run()}
           className={cn(
             'h-8 w-8 p-0',
-            editor.isActive('bulletList') && 'bg-slate-200 text-[#002a5c]'
+            editor.isActive('bulletList') && 'bg-slate-200 text-aerojet-blue'
           )}
         >
           <List className="h-4 w-4" />
@@ -113,7 +113,7 @@ export default function RichTextEditor({
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
           className={cn(
             'h-8 w-8 p-0',
-            editor.isActive('orderedList') && 'bg-slate-200 text-[#002a5c]'
+            editor.isActive('orderedList') && 'bg-slate-200 text-aerojet-blue'
           )}
         >
           <ListOrdered className="h-4 w-4" />
@@ -123,7 +123,7 @@ export default function RichTextEditor({
           variant="ghost"
           size="sm"
           onClick={setLink}
-          className={cn('h-8 w-8 p-0', editor.isActive('link') && 'bg-slate-200 text-[#002a5c]')}
+          className={cn('h-8 w-8 p-0', editor.isActive('link') && 'bg-slate-200 text-aerojet-blue')}
         >
           <LinkIcon className="h-4 w-4" />
         </Button>
@@ -133,7 +133,7 @@ export default function RichTextEditor({
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
           className={cn(
             'h-8 w-8 p-0',
-            editor.isActive('blockquote') && 'bg-slate-200 text-[#002a5c]'
+            editor.isActive('blockquote') && 'bg-slate-200 text-aerojet-blue'
           )}
         >
           <Quote className="h-4 w-4" />
@@ -142,7 +142,7 @@ export default function RichTextEditor({
           variant="ghost"
           size="sm"
           onClick={() => editor.chain().focus().toggleCode().run()}
-          className={cn('h-8 w-8 p-0', editor.isActive('code') && 'bg-slate-200 text-[#002a5c]')}
+          className={cn('h-8 w-8 p-0', editor.isActive('code') && 'bg-slate-200 text-aerojet-blue')}
         >
           <Code className="h-4 w-4" />
         </Button>

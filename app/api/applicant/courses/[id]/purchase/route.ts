@@ -16,8 +16,8 @@ export const POST = withErrorHandler(
     const course = await prisma.course.findUnique({ where: { id: courseId, isActive: true } })
     if (!course) return apiNotFound('Course not found')
 
-    const existing = await prisma.enrollment.findUnique({
-      where: { userId_courseId: { userId: user.id, courseId } },
+    const existing = await prisma.enrollment.findFirst({
+      where: { userId: user.id, courseId },
     })
     if (existing) return apiError('Already enrolled in this course')
 

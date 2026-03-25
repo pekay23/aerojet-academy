@@ -184,12 +184,12 @@ export default async function StudentDashboard() {
             <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/30 p-8 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-900/50">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-black text-[#002a5c] dark:text-white">
+                  <h2 className="text-2xl font-black text-aerojet-blue dark:text-white">
                     Exam Only Pathway
                   </h2>
                   <p className="mt-1 text-slate-500 dark:text-slate-400">Manage your exam bookings and view results.</p>
                 </div>
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#002a5c] text-white dark:bg-blue-600">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-aerojet-blue text-white dark:bg-blue-600">
                   <BookOpen className="h-6 w-6" />
                 </div>
               </div>

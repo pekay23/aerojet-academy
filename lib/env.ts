@@ -37,6 +37,10 @@ const envSchema = z.object({
   // Optional Stripe
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+
+  // Webhook Signing Secrets
+  RESEND_WEBHOOK_SECRET: z.string().optional(),
 })
 
 // Build-time safe-checks
@@ -66,6 +70,7 @@ const processEnv = {
   FROM_EMAIL: process.env.FROM_EMAIL,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
+  RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET,
 }
 
 const parsed = isBuildTime

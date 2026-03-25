@@ -9,6 +9,7 @@ import {
   Tooltip,
   CartesianGrid,
 } from 'recharts'
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface RevenueChartProps {
@@ -53,7 +54,7 @@ export function RevenueChart({ data, title = 'Revenue History' }: RevenueChartPr
                 border: 'none',
                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
               }}
-              formatter={(value: number) => [`€${value.toLocaleString()}`, 'Revenue']}
+              formatter={((value: any) => [`€${typeof value === 'number' ? value.toLocaleString() : value}`, 'Revenue']) as any}
             />
             <Area
               type="monotone"

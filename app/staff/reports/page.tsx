@@ -4,6 +4,7 @@ import { TrendingUp, Users, DollarSign, Calendar, Sparkles } from 'lucide-react'
 import { Metadata } from 'next'
 import { format } from 'date-fns'
 import prisma from '@/lib/prisma/client'
+import { getSystemSetting } from '@/lib/settings'
 import { Badge } from '@/components/ui/badge'
 import { getDashboardMetrics, formatCurrency } from '@/lib/analytics/metrics'
 import {
@@ -38,7 +39,7 @@ async function OverviewTab() {
               <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 Total Students
               </p>
-              <h3 className="text-2xl font-black text-[#002a5c] dark:text-slate-100">
+              <h3 className="text-2xl font-black text-aerojet-blue dark:text-slate-100">
                 {metrics.totalStudents}
               </h3>
             </div>
@@ -54,7 +55,7 @@ async function OverviewTab() {
               <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 Enrollments
               </p>
-              <h3 className="text-2xl font-black text-[#002a5c] dark:text-slate-100">
+              <h3 className="text-2xl font-black text-aerojet-blue dark:text-slate-100">
                 {metrics.activeEnrollments}
               </h3>
             </div>
@@ -70,7 +71,7 @@ async function OverviewTab() {
               <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 Total Revenue
               </p>
-              <h3 className="text-2xl font-black text-[#002a5c] dark:text-slate-100">
+              <h3 className="text-2xl font-black text-aerojet-blue dark:text-slate-100">
                 {formatCurrency(metrics.totalRevenue)}
               </h3>
             </div>
@@ -86,7 +87,7 @@ async function OverviewTab() {
               <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 Open Exam Bookings
               </p>
-              <h3 className="text-2xl font-black text-[#002a5c] dark:text-slate-100">
+              <h3 className="text-2xl font-black text-aerojet-blue dark:text-slate-100">
                 {metrics.openPools}
               </h3>
             </div>
@@ -109,11 +110,11 @@ async function EnrollmentTab() {
           <TrendingUp className="h-7 w-7" />
         </div>
         <div>
-          <h2 className="text-2xl font-black tracking-tight text-[#002a5c] dark:text-white">
+          <h2 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Enrollment Trends
           </h2>
           <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
-            <Sparkles className="h-3.5 w-3.5 text-[#4c9ded]" />
+            <Sparkles className="h-3.5 w-3.5 text-aerojet-sky" />
             Real-time breakdown of module enrollments
           </p>
         </div>
@@ -126,7 +127,7 @@ async function EnrollmentTab() {
 
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
           <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-            <h3 className="text-sm font-black tracking-widest text-[#002a5c] uppercase dark:text-slate-100">
+            <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-slate-100">
               Module Enrollment Detail
             </h3>
           </div>
@@ -183,10 +184,7 @@ async function EnrollmentTab() {
 async function RevenueTab() {
   const { recentPayments, totalRevenue, chartData } = await getRevenueReport()
 
-  const settings = await prisma.systemSetting.findMany({
-    where: { key: 'course_currency' },
-  })
-  const currency = settings[0]?.value || 'EUR'
+  const currency = await getSystemSetting('course_currency', 'EUR')
 
   return (
     <div className="mx-auto max-w-7xl space-y-8">
@@ -196,11 +194,11 @@ async function RevenueTab() {
             <DollarSign className="h-7 w-7" />
           </div>
           <div>
-            <h2 className="text-2xl font-black tracking-tight text-[#002a5c] dark:text-white">
+            <h2 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
               Revenue Analytics
             </h2>
             <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
-              <Sparkles className="h-3.5 w-3.5 text-[#4c9ded]" />
+              <Sparkles className="h-3.5 w-3.5 text-aerojet-sky" />
               Financial overview and recent transactions
             </p>
           </div>
@@ -209,7 +207,7 @@ async function RevenueTab() {
           <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
             Total Revenue
           </p>
-          <h2 className="text-2xl font-black text-[#002a5c] dark:text-white">
+          <h2 className="text-2xl font-black text-aerojet-blue dark:text-white">
             {formatCurrency(totalRevenue, currency)}
           </h2>
         </div>
@@ -221,7 +219,7 @@ async function RevenueTab() {
 
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
         <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-          <h3 className="text-sm font-black tracking-widest text-[#002a5c] uppercase dark:text-slate-100">
+          <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-slate-100">
             Recent Transactions
           </h3>
         </div>
@@ -257,7 +255,7 @@ async function RevenueTab() {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col">
-                        <span className="font-bold text-[#002a5c] dark:text-slate-100">
+                        <span className="font-bold text-aerojet-blue dark:text-slate-100">
                           {payment.user.profile
                             ? `${payment.user.profile.firstName} ${payment.user.profile.lastName}`
                             : 'Unknown User'}
@@ -304,11 +302,11 @@ async function PoolsTab() {
           <Calendar className="h-7 w-7" />
         </div>
         <div>
-          <h2 className="text-2xl font-black tracking-tight text-[#002a5c] dark:text-white">
+          <h2 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Booking Analytics
           </h2>
           <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
-            <Sparkles className="h-3.5 w-3.5 text-[#4c9ded]" />
+            <Sparkles className="h-3.5 w-3.5 text-aerojet-sky" />
             Exam booking performance and capacity utilization.
           </p>
         </div>
@@ -321,7 +319,7 @@ async function PoolsTab() {
 
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
           <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-            <h3 className="text-sm font-black tracking-widest text-[#002a5c] uppercase dark:text-slate-100">
+            <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-slate-100">
               Exam Booking Detailed Breakdown
             </h3>
           </div>
@@ -356,7 +354,7 @@ async function PoolsTab() {
                         key={pool.id}
                         className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
                       >
-                        <td className="px-6 py-4 text-base font-bold text-[#002a5c] dark:text-white">
+                        <td className="px-6 py-4 text-base font-bold text-aerojet-blue dark:text-white">
                           {pool.name}
                         </td>
                         <td className="px-6 py-4 font-medium text-slate-600 dark:text-slate-400">
@@ -380,7 +378,7 @@ async function PoolsTab() {
                         </td>
                         <td className="px-6 py-4 text-right">
                           <div className="flex flex-col items-end gap-1">
-                            <span className="font-mono text-sm font-black text-[#002a5c] dark:text-slate-100">
+                            <span className="font-mono text-sm font-black text-aerojet-blue dark:text-slate-100">
                               {pool.currentMemberCount} / {pool.maxCandidates}
                             </span>
                             <div className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
@@ -425,11 +423,11 @@ async function AttendanceTab() {
           <Calendar className="h-7 w-7" />
         </div>
         <div>
-          <h2 className="text-2xl font-black tracking-tight text-[#002a5c] dark:text-white">
+          <h2 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Attendance Reports
           </h2>
           <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
-            <Sparkles className="h-3.5 w-3.5 text-[#4c9ded]" />
+            <Sparkles className="h-3.5 w-3.5 text-aerojet-sky" />
             Real-time student attendance tracking and metrics.
           </p>
         </div>
@@ -442,7 +440,7 @@ async function AttendanceTab() {
 
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-xl dark:border-slate-800 dark:bg-slate-900">
           <div className="border-b border-slate-100 bg-slate-50/50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-            <h3 className="text-sm font-black tracking-widest text-[#002a5c] uppercase dark:text-slate-100">
+            <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-slate-100">
               Recent Attendance History
             </h3>
           </div>
@@ -476,7 +474,7 @@ async function AttendanceTab() {
                       <td className="px-6 py-4 font-mono text-sm text-slate-400">
                         {format(new Date(record.date), 'MMM d, yyyy')}
                       </td>
-                      <td className="px-6 py-4 font-bold text-[#002a5c] dark:text-slate-100">
+                      <td className="px-6 py-4 font-bold text-aerojet-blue dark:text-slate-100">
                         {record.user.profile
                           ? `${record.user.profile.firstName} ${record.user.profile.lastName}`
                           : record.user.email}
@@ -527,11 +525,11 @@ export default async function ReportsPage({
   return (
     <div className="mx-auto max-w-7xl space-y-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] sm:text-4xl dark:text-white">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-white">
           Analytics Dashboard
         </h1>
         <p className="flex items-center gap-2 text-base font-medium text-slate-500 dark:text-slate-400">
-          <Sparkles className="h-5 w-5 text-[#4c9ded]" />
+          <Sparkles className="h-5 w-5 text-aerojet-sky" />
           Comprehensive reports and insights for Aerojet Academy.
         </p>
       </div>

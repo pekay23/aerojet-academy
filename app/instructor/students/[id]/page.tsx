@@ -36,9 +36,9 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       {/* Back Link */}
       <Link
         href="/instructor/students"
-        className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-[#4c9ded]"
+        className="group flex items-center gap-2 text-sm font-bold text-slate-500 transition-colors hover:text-aerojet-sky"
       >
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-100 bg-white transition-all group-hover:border-[#4c9ded]/50 group-hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex h-8 w-8 items-center justify-center rounded-xl border border-slate-100 bg-white transition-all group-hover:border-aerojet-sky/50 group-hover:bg-blue-50 dark:border-slate-800 dark:bg-slate-900">
           <ArrowLeft className="h-4 w-4" />
         </div>
         Back to Students
@@ -63,7 +63,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               </h1>
               <Badge
                 variant="outline"
-                className="rounded-full border-[#4c9ded] bg-blue-50 px-4 py-1.5 text-xs font-black text-[#4c9ded] uppercase dark:bg-blue-900/20"
+                className="rounded-full border-aerojet-sky bg-blue-50 px-4 py-1.5 text-xs font-black text-aerojet-sky uppercase dark:bg-blue-900/20"
               >
                 Active Student
               </Badge>
@@ -96,8 +96,8 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <div className="space-y-8 lg:col-span-2">
           <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
             <CardHeader className="border-b border-slate-50 dark:border-slate-800/50">
-              <CardTitle className="flex items-center gap-3 text-xl font-black text-[#002a5c] dark:text-white">
-                <BookOpen className="h-5 w-5 text-[#4c9ded]" />
+              <CardTitle className="flex items-center gap-3 text-xl font-black text-aerojet-blue dark:text-white">
+                <BookOpen className="h-5 w-5 text-aerojet-sky" />
                 Enrolled Modules (Your Classes)
               </CardTitle>
             </CardHeader>
@@ -114,7 +114,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                           <h4 className="font-black text-slate-900 dark:text-white">
                             {enr.course.name}
                           </h4>
-                          <p className="text-sm font-bold tracking-widest text-[#4c9ded] uppercase">
+                          <p className="text-sm font-bold tracking-widest text-aerojet-sky uppercase">
                             {enr.course.code}
                           </p>
                         </div>
@@ -142,7 +142,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                                     {format(new Date(grade.assessmentDate), 'MMM d, yyyy')}
                                   </p>
                                 </div>
-                                <span className="text-sm font-black text-[#4c9ded]">
+                                <span className="text-sm font-black text-aerojet-sky">
                                   {grade.score}%
                                 </span>
                               </div>
@@ -170,7 +170,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <div className="space-y-8">
           <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
             <CardHeader>
-              <CardTitle className="text-lg font-black text-[#002a5c] dark:text-white">
+              <CardTitle className="text-lg font-black text-aerojet-blue dark:text-white">
                 Student Info
               </CardTitle>
             </CardHeader>

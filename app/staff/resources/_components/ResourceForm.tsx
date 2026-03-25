@@ -217,7 +217,7 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
         </div>
 
         <div className="flex justify-end gap-3">
-          <Button type="submit" className="bg-[#002a5c] hover:bg-[#002a5c]/90" disabled={isLoading}>
+          <Button type="submit" className="bg-aerojet-blue hover:bg-aerojet-blue/90" disabled={isLoading}>
             {isLoading ? (
               <Loader2 className="h-4 w-4 animate-spin" />
             ) : initialData ? (

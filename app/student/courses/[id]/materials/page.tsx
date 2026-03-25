@@ -70,7 +70,7 @@ export default async function MaterialsPage({ params }: PageProps) {
       <div className="space-y-4">
         <Link
           href={`/student/courses/${id}`}
-          className="group inline-flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase transition-colors hover:text-[#002a5c] dark:hover:text-blue-400"
+          className="group inline-flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-blue dark:hover:text-blue-400"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Course Detail
@@ -78,11 +78,11 @@ export default async function MaterialsPage({ params }: PageProps) {
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
-            <h1 className="text-3xl font-black tracking-tight text-[#002a5c] uppercase sm:text-4xl dark:text-white">
+            <h1 className="text-3xl font-black tracking-tight text-aerojet-blue uppercase sm:text-4xl dark:text-white">
               Course Resources
             </h1>
             <p className="flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400">
-              <span className="font-extrabold text-[#4c9ded]">{course.code}</span>
+              <span className="font-extrabold text-aerojet-sky">{course.code}</span>
               <span className="h-1 w-1 rounded-full bg-slate-200 dark:bg-slate-700" />
               <span>{course.name}</span>
             </p>
@@ -97,7 +97,7 @@ export default async function MaterialsPage({ params }: PageProps) {
         </div>
 
         {!allowClasses && (
-          <div className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 text-[#002a5c] dark:border-blue-500/10 dark:bg-blue-500/5 dark:text-blue-400">
+          <div className="flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 text-aerojet-blue dark:border-blue-500/10 dark:bg-blue-500/5 dark:text-blue-400">
             <Info className="h-5 w-5 shrink-0" />
             <p className="text-xs leading-relaxed font-bold">
               STUDY ONLY PATHWAY: You have full access to learning materials for this module. Live
@@ -117,7 +117,7 @@ export default async function MaterialsPage({ params }: PageProps) {
                 <BookOpen className="h-6 w-6" />
               </div>
               <div>
-                <h2 className="text-lg font-black tracking-tight text-[#002a5c] uppercase dark:text-white">
+                <h2 className="text-lg font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
                   Course Syllabus
                 </h2>
                 <p className="text-xs font-medium text-slate-500">
@@ -144,7 +144,7 @@ export default async function MaterialsPage({ params }: PageProps) {
                     href={course.syllabusUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-sm transition-all hover:bg-[#002a5c] hover:text-white active:scale-95 dark:bg-slate-700 dark:text-white"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-sm transition-all hover:bg-aerojet-blue hover:text-white active:scale-95 dark:bg-slate-700 dark:text-white"
                   >
                     <Download className="h-4 w-4" />
                   </a>
@@ -167,7 +167,7 @@ export default async function MaterialsPage({ params }: PageProps) {
                 <FileText className="h-6 w-6" />
               </div>
               <div>
-                <h2 className="text-lg font-black tracking-tight text-[#002a5c] uppercase dark:text-white">
+                <h2 className="text-lg font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
                   Learning Materials
                 </h2>
                 <p className="text-xs font-medium text-slate-500">
@@ -197,7 +197,7 @@ export default async function MaterialsPage({ params }: PageProps) {
                       href={course.materialsUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-[#4c9ded] active:scale-95"
+                      className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-sky active:scale-95"
                     >
                       Access
                       <ChevronRight className="h-3 w-3" />
@@ -230,9 +230,9 @@ export default async function MaterialsPage({ params }: PageProps) {
 
         {/* Sidebar Info */}
         <div className="space-y-6">
-          <div className="overflow-hidden rounded-3xl border border-slate-100 bg-[#002a5c] p-1 shadow-lg dark:border-slate-800">
+          <div className="overflow-hidden rounded-3xl border border-slate-100 bg-aerojet-blue p-1 shadow-lg dark:border-slate-800">
             <div className="rounded-[calc(1.5rem-1px)] bg-slate-900 p-8 text-white">
-              <LockIcon className="mb-4 h-8 w-8 text-[#4c9ded]" />
+              <LockIcon className="mb-4 h-8 w-8 text-aerojet-sky" />
               <h3 className="text-xl font-black tracking-tight italic">Security Notice</h3>
               <p className="mt-4 text-sm leading-relaxed font-medium text-slate-400">
                 Your access is tied to your verified enrollment. Session-based monitoring is active
@@ -252,7 +252,7 @@ export default async function MaterialsPage({ params }: PageProps) {
               </p>
               <Link
                 href="/student/messages"
-                className="block w-full rounded-xl border border-slate-100 py-3 text-center text-xs font-black tracking-widest text-[#002a5c] uppercase transition-all hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
+                className="block w-full rounded-xl border border-slate-100 py-3 text-center text-xs font-black tracking-widest text-aerojet-blue uppercase transition-all hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
               >
                 Contact Support
               </Link>

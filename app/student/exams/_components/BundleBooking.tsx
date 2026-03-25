@@ -131,7 +131,7 @@ export default function BundleBooking({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6 dark:border-slate-800">
               <div>
-                <h2 id="bundle-booking-title" className="text-xl font-black tracking-tight text-[#002a5c] dark:text-white">
+                <h2 id="bundle-booking-title" className="text-xl font-black tracking-tight text-aerojet-blue dark:text-white">
                    {label}
                 </h2>
                 <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -174,7 +174,7 @@ export default function BundleBooking({
               {/* Event Selection */}
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
-                  <Calendar className="h-4 w-4 text-[#002a5c]" />
+                  <Calendar className="h-4 w-4 text-aerojet-blue" />
                   Target Exam Event
                 </label>
                 <select
@@ -195,7 +195,7 @@ export default function BundleBooking({
               {/* Module Selection */}
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
-                  <BookOpen className="h-4 w-4 text-[#002a5c]" />
+                  <BookOpen className="h-4 w-4 text-aerojet-blue" />
                   Select {bundleSize} Modules ({selectedModules.length}/{bundleSize})
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -212,13 +212,13 @@ export default function BundleBooking({
                         disabled={isDisabled || isPending}
                         className={`group relative rounded-xl border p-3 text-left transition-all ${
                           isSelected
-                            ? 'border-[#002a5c] bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/20'
+                            ? 'border-aerojet-blue bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/20'
                             : isDisabled
                               ? 'opacity-40 cursor-not-allowed border-slate-100 dark:border-slate-800'
                               : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:hover:border-slate-600 dark:hover:bg-slate-800/50 shadow-sm'
                         }`}
                       >
-                        <p className={`text-xs font-black tracking-tighter uppercase ${isSelected ? 'text-[#002a5c] dark:text-blue-300' : 'text-slate-900 dark:text-slate-100'}`}>
+                        <p className={`text-xs font-black tracking-tighter uppercase ${isSelected ? 'text-aerojet-blue dark:text-blue-300' : 'text-slate-900 dark:text-slate-100'}`}>
                           {ec.code}
                         </p>
                         <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
@@ -271,7 +271,7 @@ export default function BundleBooking({
                     selectedModules.length !== bundleSize ||
                     !selectedEventId
                   }
-                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-[#002a5c] py-4 text-sm font-black text-white shadow-lg shadow-[#002a5c]/20 transition-all hover:bg-[#003a7c] hover:shadow-xl active:scale-95 disabled:opacity-50"
+                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-aerojet-blue py-4 text-sm font-black text-white shadow-lg shadow-aerojet-blue/20 transition-all hover:bg-[#003a7c] hover:shadow-xl active:scale-95 disabled:opacity-50"
                 >
                   {isPending ? (
                     <>

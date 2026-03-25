@@ -39,7 +39,7 @@ export default function PoolList({ pools }: { pools: Pool[] }) {
               placeholder="Search pools..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-[#002a5c] focus:outline-none focus:ring-1 focus:ring-[#002a5c] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm text-slate-700 placeholder:text-slate-400 focus:border-aerojet-blue focus:outline-none focus:ring-1 focus:ring-aerojet-blue dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
             />
           </div>
         </div>

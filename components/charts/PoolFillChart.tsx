@@ -1,6 +1,7 @@
 'use client'
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface PoolFillChartProps {
@@ -44,10 +45,10 @@ export function PoolFillChart({ data, title = 'Pool Capacity Utilization' }: Poo
                 border: 'none',
                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
               }}
-              formatter={(value: number, name: string, props: any) => {
+              formatter={((value: any, name: string) => {
                 if (name === 'fill') return [`${value}%`, 'Fill Rate']
                 return [value, name]
-              }}
+              }) as any}
             />
             <Bar
               dataKey="fill"

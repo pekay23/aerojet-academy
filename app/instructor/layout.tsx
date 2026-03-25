@@ -27,7 +27,7 @@ export default async function InstructorLayout({ children }: { children: React.R
     redirect('/login')
   }
 
-  const userName = user.name || user.email
+  const userName = user.name || user.email || ''
   const userRole = user.role
   const pendingCount = await getPendingGradingCount()
 
@@ -36,7 +36,7 @@ export default async function InstructorLayout({ children }: { children: React.R
       <InstructorSidebar
         userName={userName}
         userRole={userRole}
-        userImage={user.image || undefined}
+        userImage={user.image ?? undefined}
         pendingCount={pendingCount}
       />
       <main id="main-content" className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">

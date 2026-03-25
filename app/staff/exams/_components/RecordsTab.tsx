@@ -282,7 +282,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
       {/* ── Add Record Form ── */}
       <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#002a5c] text-white">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-aerojet-blue text-white">
             <FilePlus2 className="h-5 w-5" />
           </div>
           <div>
@@ -309,11 +309,11 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                   if (selectedStudent) setSelectedStudent(null)
                 }}
                 placeholder="Search by name, email, or student ID..."
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               />
               {isSearching && (
                 <div className="absolute top-1/2 right-3 -translate-y-1/2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-[#002a5c]" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-aerojet-blue" />
                 </div>
               )}
             </div>
@@ -328,7 +328,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                     onClick={() => selectStudent(s)}
                     className="flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
                   >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-[#002a5c]">
+                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-aerojet-blue">
                       {s.firstName.charAt(0)}
                       {s.lastName.charAt(0)}
                     </div>
@@ -381,7 +381,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               <select
                 value={bookingType}
                 onChange={(e) => setBookingType(e.target.value as any)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               >
                 {BOOKING_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
@@ -398,7 +398,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 type="date"
                 value={examDate}
                 onChange={(e) => setExamDate(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
                 required
               />
             </div>
@@ -429,7 +429,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                         updateModuleSelection(idx, { showDropdown: true })
                     }}
                     placeholder="Search module code..."
-                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm font-bold uppercase transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                    className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm font-bold uppercase transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
 
@@ -478,7 +478,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               <select
                 value={attemptType}
                 onChange={(e) => setAttemptType(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               >
                 {ATTEMPT_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
@@ -499,7 +499,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 min="0"
                 max="100"
                 step="0.01"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               />
             </div>
             <div>
@@ -511,7 +511,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Optional notes"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               />
             </div>
           </div>
@@ -527,7 +527,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#002a5c]/90 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90 disabled:opacity-50"
             >
               <Plus className="h-4 w-4" />
               {isSubmitting ? 'Adding...' : 'Add Record'}
@@ -549,7 +549,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               value={tableFilter}
               onChange={(e) => setTableFilter(e.target.value)}
               placeholder="Filter records..."
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-10 text-sm transition-colors focus:border-[#002a5c] focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-10 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
             />
           </div>
         </div>
@@ -612,7 +612,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                         {/* Student */}
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-[#002a5c]">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-aerojet-blue">
                               {record.user.profile?.firstName?.charAt(0)}
                               {record.user.profile?.lastName?.charAt(0)}
                             </div>
@@ -636,7 +636,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                             <input
                               value={editModuleCode}
                               onChange={(e) => setEditModuleCode(e.target.value)}
-                              className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-sm uppercase focus:border-[#002a5c] focus:outline-hidden"
+                              className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-sm uppercase focus:border-aerojet-blue focus:outline-hidden"
                             />
                           ) : (
                             <span className="font-bold text-slate-900 uppercase dark:text-white">
@@ -651,7 +651,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                               type="date"
                               value={editDate}
                               onChange={(e) => setEditDate(e.target.value)}
-                              className="rounded-lg border border-slate-200 px-2 py-1 text-sm focus:border-[#002a5c] focus:outline-hidden"
+                              className="rounded-lg border border-slate-200 px-2 py-1 text-sm focus:border-aerojet-blue focus:outline-hidden"
                             />
                           ) : (
                             <span className="text-slate-600 dark:text-slate-400">
@@ -702,7 +702,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                               max="100"
                               step="0.01"
                               placeholder="—"
-                              className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-right text-sm focus:border-[#002a5c] focus:outline-hidden"
+                              className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-right text-sm focus:border-aerojet-blue focus:outline-hidden"
                             />
                           ) : scoreNum !== null ? (
                             <span className="font-bold text-slate-900 dark:text-white">
@@ -727,7 +727,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                               <button
                                 onClick={handleUpdate}
                                 disabled={isUpdating}
-                                className="rounded-lg bg-[#002a5c] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#002a5c]/90 disabled:opacity-50"
+                                className="rounded-lg bg-aerojet-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50"
                               >
                                 {isUpdating ? 'Saving...' : 'Save'}
                               </button>
@@ -736,7 +736,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                             <div className="flex items-center justify-end gap-1 opacity-0 transition-opacity group-hover:opacity-100">
                               <button
                                 onClick={() => startEdit(record)}
-                                className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-[#002a5c]"
+                                className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-aerojet-blue"
                                 title="Edit"
                               >
                                 <Edit className="h-4 w-4" />

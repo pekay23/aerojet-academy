@@ -7,8 +7,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <AuthThemeProvider>
       <div className="flex min-h-screen">
         {/* Left branding panel - hidden on mobile */}
-        <div className="relative hidden flex-col justify-between overflow-hidden bg-[#002a5c] p-12 lg:flex lg:w-[45%] xl:w-[40%]">
-          <div className="absolute inset-0 bg-linear-to-br from-[#002a5c] via-[#003a7c] to-[#001a3c]" />
+        <div className="relative hidden flex-col justify-between overflow-hidden bg-aerojet-blue p-12 lg:flex lg:w-[45%] xl:w-[40%]">
+          <div className="absolute inset-0 bg-linear-to-br from-aerojet-blue via-[#003a7c] to-[#001a3c]" />
           <div
             className="absolute inset-0 bg-cover bg-center opacity-20"
             style={{ backgroundImage: 'url(/images/hero/registration.webp)' }}

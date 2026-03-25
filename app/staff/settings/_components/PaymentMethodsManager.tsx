@@ -222,7 +222,7 @@ export default function PaymentMethodsManager() {
         </div>
         <button
           onClick={() => { setShowForm(true); setEditingId(null); setForm({ ...emptyForm }) }}
-          className="flex items-center gap-1.5 rounded-xl bg-[#002a5c] px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#003875]"
+          className="flex items-center gap-1.5 rounded-xl bg-aerojet-blue px-4 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#003875]"
         >
           <Plus className="h-3.5 w-3.5" />
           Add Method
@@ -341,7 +341,7 @@ export default function PaymentMethodsManager() {
                     onClick={() => setForm({ ...form, type })}
                     className={`flex items-center gap-2 rounded-xl border-2 p-3 text-left text-xs font-bold transition-all ${
                       isSelected
-                        ? 'border-[#002a5c] bg-[#002a5c]/5 text-[#002a5c]'
+                        ? 'border-aerojet-blue bg-aerojet-blue/5 text-aerojet-blue'
                         : 'border-slate-200 text-slate-500 hover:border-slate-300'
                     }`}
                   >
@@ -360,7 +360,7 @@ export default function PaymentMethodsManager() {
                   value={form.label}
                   onChange={(e) => setForm({ ...form, label: e.target.value })}
                   placeholder={form.type === 'BANK_TRANSFER' ? 'e.g. FNB Bank (GHS)' : form.type === 'MOBILE_MONEY' ? 'e.g. MTN MoMo Pay' : 'e.g. Stripe'}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/10 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/10 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
                   required
                 />
               </div>
@@ -369,7 +369,7 @@ export default function PaymentMethodsManager() {
                 <select
                   value={form.currency}
                   onChange={(e) => setForm({ ...form, currency: e.target.value })}
-                  className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/10 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
+                  className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/10 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c} value={c}>{c}</option>
@@ -402,7 +402,7 @@ export default function PaymentMethodsManager() {
                     <select
                       value={form.momoProvider}
                       onChange={(e) => setForm({ ...form, momoProvider: e.target.value })}
-                      className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/10 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
+                      className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/10 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
                     >
                       {MOMO_PROVIDERS.map((p) => (
                         <option key={p.value} value={p.value}>{p.label}</option>
@@ -432,7 +432,7 @@ export default function PaymentMethodsManager() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#003875] disabled:opacity-50"
+                className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2.5 text-xs font-bold text-white shadow-sm transition-colors hover:bg-[#003875] disabled:opacity-50"
               >
                 {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 {editingId ? 'Update' : 'Add Method'}
@@ -463,7 +463,7 @@ function Input({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/10 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
+        className="w-full rounded-lg border border-slate-200 px-3 py-2.5 text-sm focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/10 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
       />
     </div>
   )

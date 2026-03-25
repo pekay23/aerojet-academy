@@ -1,5 +1,6 @@
 import { Prisma, TransactionType } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
+import { getCurrencySymbol } from '@/lib/currency'
 
 type TxClient = Omit<
   typeof prisma,
@@ -84,7 +85,7 @@ export async function topUpWallet(
       reservedAfter: reservedBefore,
       availableBefore,
       availableAfter: availableBefore + amount,
-      description: description || `Wallet top-up of €${amount}`,
+      description: description || `Wallet top-up of ${getCurrencySymbol(wallet.currency)}${amount}`,
       referenceId,
       referenceType,
     },
@@ -111,7 +112,7 @@ export async function reserveFunds(
   const available = wallet.availableBalance.toNumber()
   if (available < amount) {
     throw new Error(
-      `Insufficient funds. Available: €${available.toFixed(2)}, Required: €${amount.toFixed(2)}`
+      `Insufficient funds. Available: ${getCurrencySymbol(wallet.currency)}${available.toFixed(2)}, Required: ${getCurrencySymbol(wallet.currency)}${amount.toFixed(2)}`
     )
   }
 
@@ -138,7 +139,7 @@ export async function reserveFunds(
       reservedAfter: reservedBefore + amount,
       availableBefore,
       availableAfter: availableBefore - amount,
-      description: description || `Funds reserved: €${amount}`,
+      description: description || `Funds reserved: ${getCurrencySymbol(wallet.currency)}${amount}`,
       referenceId,
       referenceType,
     },
@@ -189,7 +190,7 @@ export async function captureFunds(
       reservedAfter: reservedBefore - amount,
       availableBefore,
       availableAfter: availableBefore,
-      description: description || `Payment captured: €${amount}`,
+      description: description || `Payment captured: ${getCurrencySymbol(wallet.currency)}${amount}`,
       referenceId,
       referenceType,
     },
@@ -240,7 +241,7 @@ export async function releaseFunds(
       reservedAfter: reservedBefore - amount,
       availableBefore,
       availableAfter: availableBefore + amount,
-      description: description || `Funds released: €${amount}`,
+      description: description || `Funds released: ${getCurrencySymbol(wallet.currency)}${amount}`,
       referenceId,
       referenceType,
     },
@@ -289,7 +290,7 @@ export async function creditToWallet(
       reservedAfter: reservedBefore,
       availableBefore,
       availableAfter: availableBefore + amount,
-      description: description || `Wallet credited: €${amount}`,
+      description: description || `Wallet credited: ${getCurrencySymbol(wallet.currency)}${amount}`,
       referenceId,
       referenceType,
     },
@@ -340,7 +341,7 @@ export async function chargeWallet(
       reservedAfter: reservedBefore,
       availableBefore,
       availableAfter: availableBefore - amount,
-      description: description || `Direct payment: €${amount}`,
+      description: description || `Direct payment: ${getCurrencySymbol(wallet.currency)}${amount}`,
       referenceId,
       referenceType,
     },
@@ -374,7 +375,7 @@ export async function adjustWallet(
   // For debits, ensure sufficient available balance
   if (amount < 0 && availableBefore < Math.abs(amount)) {
     throw new Error(
-      `Insufficient available balance for debit. Available: €${availableBefore.toFixed(2)}, Requested: €${Math.abs(amount).toFixed(2)}`
+      `Insufficient available balance for debit. Available: ${getCurrencySymbol(wallet.currency)}${availableBefore.toFixed(2)}, Requested: ${getCurrencySymbol(wallet.currency)}${Math.abs(amount).toFixed(2)}`
     )
   }
 
@@ -397,7 +398,7 @@ export async function adjustWallet(
       reservedAfter: reservedBefore,
       availableBefore,
       availableAfter: availableBefore + amount,
-      description: description || `Staff adjustment: €${amount}`,
+      description: description || `Staff adjustment: ${getCurrencySymbol(wallet.currency)}${amount}`,
       referenceId,
       referenceType,
       createdBy,

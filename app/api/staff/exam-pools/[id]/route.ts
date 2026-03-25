@@ -7,19 +7,19 @@ import { updateExamPoolSchema, validateBody } from '@/lib/validation/schemas'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
+  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
     await requireStaff()
-    const { id } = params
-    const pool = await getPoolWithDetails(id)
+    const id = ctx?.params?.id
+    const pool = await getPoolWithDetails(id!)
     if (!pool) return apiNotFound('Pool not found')
     return apiSuccess(pool)
   }
 )
 
 export const PATCH = withErrorHandler(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
+  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
     const staff = await requireStaff()
-    const { id } = params
+    const id = ctx?.params?.id
     const body = await req.json()
     const validation = validateBody(updateExamPoolSchema, body)
 

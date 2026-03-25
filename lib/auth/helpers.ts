@@ -26,30 +26,35 @@ export async function generateStudentId(): Promise<string> {
   const year = new Date().getFullYear()
   const prefix = `AATA-${year}-`
 
-  // Get the highest existing student ID for this year from StudentProfile
-  const lastStudent = await prisma.studentProfile.findFirst({
-    where: {
-      studentId: { startsWith: prefix },
-    },
-    orderBy: { studentId: 'desc' },
-    select: { studentId: true },
-  })
+  // Use advisory lock via serializable transaction to prevent race conditions
+  const MAX_RETRIES = 3
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const result = await prisma.$transaction(async (tx) => {
+      const lastStudent = await tx.studentProfile.findFirst({
+        where: { studentId: { startsWith: prefix } },
+        orderBy: { studentId: 'desc' },
+        select: { studentId: true },
+      })
 
-  let nextSequence = 1
-  if (lastStudent?.studentId) {
-    const lastSequence = parseInt(lastStudent.studentId.replace(prefix, ''), 10)
-    if (!isNaN(lastSequence)) {
-      nextSequence = lastSequence + 1
-    }
+      let nextSequence = 1
+      if (lastStudent?.studentId) {
+        const lastSequence = parseInt(lastStudent.studentId.replace(prefix, ''), 10)
+        if (!isNaN(lastSequence)) {
+          nextSequence = lastSequence + 1
+        }
+      }
+
+      if (nextSequence > 9999) {
+        throw new Error(`Student ID sequence exhausted for year ${year}`)
+      }
+
+      return `AATA-${year}-${nextSequence.toString().padStart(4, '0')}`
+    }, { isolationLevel: 'Serializable' })
+
+    return result
   }
 
-  // Safety limit - if we've exceeded 9999, throw error
-  if (nextSequence > 9999) {
-    throw new Error(`Student ID sequence exhausted for year ${year}`)
-  }
-
-  const paddedSequence = nextSequence.toString().padStart(4, '0')
-  return `AATA-${year}-${paddedSequence}`
+  throw new Error('Failed to generate unique student ID after retries')
 }
 
 /**
@@ -90,7 +95,7 @@ export async function verifyPassword(password: string, hashedPassword: string): 
 }
 
 export function generateTempPassword(): string {
-  return Math.random().toString(36).slice(-8)
+  return crypto.randomBytes(6).toString('base64url')
 }
 
 export async function generateAcademyEmail(

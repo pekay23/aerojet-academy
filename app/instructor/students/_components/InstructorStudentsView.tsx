@@ -58,7 +58,7 @@ export default function InstructorStudentsView({ initialStudents }: InstructorSt
             placeholder="Search by name, ID, email or course..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-2xl border border-slate-100 bg-white py-4 pr-4 pl-11 text-sm font-medium text-slate-900 shadow-sm transition-all outline-none placeholder:text-slate-400 focus:border-[#4c9ded] focus:ring-4 focus:ring-blue-50/50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-blue-900/40 dark:focus:ring-blue-900/20"
+            className="w-full rounded-2xl border border-slate-100 bg-white py-4 pr-4 pl-11 text-sm font-medium text-slate-900 shadow-sm transition-all outline-none placeholder:text-slate-400 focus:border-aerojet-sky focus:ring-4 focus:ring-blue-50/50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-100 dark:focus:border-blue-900/40 dark:focus:ring-blue-900/20"
           />
         </div>
 

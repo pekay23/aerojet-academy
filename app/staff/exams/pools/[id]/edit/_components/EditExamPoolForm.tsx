@@ -278,7 +278,7 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
                                 return checked
                                   ? field.onChange([...field.value, moduleCode])
                                   : field.onChange(
-                                      field.value?.filter((value) => value !== moduleCode)
+                                      field.value?.filter((value: string) => value !== moduleCode)
                                     )
                               }}
                             />
@@ -320,7 +320,7 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
           </Button>
           <Button
             type="submit"
-            className="bg-[#002a5c] px-8 hover:bg-[#002a5c]/90"
+            className="bg-aerojet-blue px-8 hover:bg-aerojet-blue/90"
             disabled={isLoading}
           >
             {isLoading ? (

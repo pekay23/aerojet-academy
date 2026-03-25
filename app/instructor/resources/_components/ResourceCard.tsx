@@ -72,7 +72,7 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
         {/* Title */}
         <div className="mb-4 flex-1">
           {resource.courseCode && (
-            <span className="mb-1 text-[10px] font-black text-[#4c9ded] uppercase">
+            <span className="mb-1 text-[10px] font-black text-aerojet-sky uppercase">
               {resource.courseCode}
             </span>
           )}

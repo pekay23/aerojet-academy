@@ -60,6 +60,15 @@ interface CompletedModule {
   sourceNotes?: string
 }
 
+interface SemesterEnrollment {
+  academicYearName: string
+  semesterName: string
+  yearNumber: number
+  semesterNumber: number
+  courseCodes: string[]
+  status?: string
+}
+
 interface ImportStudent {
   firstName: string
   middleName?: string
@@ -77,6 +86,11 @@ interface ImportStudent {
   plannedBookings?: any[]
   notes?: string
   selectedLicenseCategories?: string[]
+  fundingSource?: string
+  enrollmentStatus?: string
+  currentYearNumber?: number
+  currentSemesterNumber?: number
+  semesterEnrollments?: SemesterEnrollment[]
 }
 
 interface CredentialRow {
@@ -88,6 +102,8 @@ interface CredentialRow {
   walletBalanceEur: number
   studentId: string
   enrollmentType: string
+  fundingSource: string
+  enrollmentStatus: string
   notes: string
 }
 
@@ -204,6 +220,51 @@ export default function ImportStudentsPage() {
               student.selectedLicenseCategories = val.split(';').map((s: string) => s.trim()).filter(Boolean)
             }
           }
+          else if (header.includes('funding') && header.includes('source') || header === 'funding') {
+            student.fundingSource = val.toUpperCase()
+          }
+          else if (header.includes('enrollment') && header.includes('status') || header === 'status') {
+            student.enrollmentStatus = val.toUpperCase()
+          }
+          else if (header.includes('current') && header.includes('year') || header === 'current_year') {
+            student.currentYearNumber = parseInt(val) || undefined
+          }
+          else if (header.includes('current') && header.includes('semester') || header === 'current_semester') {
+            student.currentSemesterNumber = parseInt(val) || undefined
+          }
+          else if (header.match(/year\d+_sem\d+_courses/)) {
+            // Parse semester enrollment columns like year1_sem1_courses, year2_sem2_courses
+            const match = header.match(/year(\d+)_sem(\d+)_courses/)
+            if (match) {
+              const yearNum = parseInt(match[1])
+              const semNum = parseInt(match[2])
+              const courseCodes = val.split(/[,;]/).map((c: string) => c.trim()).filter(Boolean)
+              if (courseCodes.length > 0) {
+                if (!student.semesterEnrollments) student.semesterEnrollments = []
+                student.semesterEnrollments.push({
+                  academicYearName: '', // Will be set from dedicated columns or defaults
+                  semesterName: `Semester ${semNum}`,
+                  yearNumber: yearNum,
+                  semesterNumber: semNum,
+                  courseCodes,
+                  status: 'COMPLETED',
+                })
+              }
+            }
+          }
+          else if (header.match(/year\d+_name/)) {
+            // Map academic year names: year1_name -> "2024/2025"
+            const match = header.match(/year(\d+)_name/)
+            if (match && val) {
+              const yearNum = parseInt(match[1])
+              if (!student.semesterEnrollments) student.semesterEnrollments = []
+              student.semesterEnrollments.forEach((se: SemesterEnrollment) => {
+                if (se.yearNumber === yearNum && !se.academicYearName) {
+                  se.academicYearName = val
+                }
+              })
+            }
+          }
         })
 
         if (student.firstName && student.lastName && student.email) {
@@ -250,9 +311,9 @@ export default function ImportStudentsPage() {
   const exportCredentials = () => {
     if (!importResult?.credentials?.length) return
 
-    const csvHeader = 'First Name,Last Name,Personal Email,Academy Email,Temporary Password,Wallet EUR,Student ID,Enrollment Type,Notes'
+    const csvHeader = 'First Name,Last Name,Personal Email,Academy Email,Temporary Password,Wallet EUR,Student ID,Enrollment Type,Funding Source,Status,Notes'
     const csvRows = importResult.credentials.map((c) =>
-      `"${c.firstName}","${c.lastName}","${c.personalEmail}","${c.academyEmail}","${c.temporaryPassword}",${c.walletBalanceEur},"${c.studentId}","${c.enrollmentType}","${(c.notes || '').replace(/"/g, '""')}"`
+      `"${c.firstName}","${c.lastName}","${c.personalEmail}","${c.academyEmail}","${c.temporaryPassword}",${c.walletBalanceEur},"${c.studentId}","${c.enrollmentType}","${c.fundingSource || ''}","${c.enrollmentStatus || ''}","${(c.notes || '').replace(/"/g, '""')}"`
     )
     const csv = [csvHeader, ...csvRows].join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
@@ -323,11 +384,11 @@ export default function ImportStudentsPage() {
       <div className="mb-6">
         <Link
           href="/staff/users?tab=students"
-          className="mb-4 inline-flex items-center text-sm font-bold text-slate-400 transition-colors hover:text-[#002a5c]"
+          className="mb-4 inline-flex items-center text-sm font-bold text-slate-400 transition-colors hover:text-aerojet-blue"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Back to Students
         </Link>
-        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           Import Students
         </h1>
         <p className="text-slate-500 dark:text-slate-400">
@@ -363,7 +424,7 @@ export default function ImportStudentsPage() {
                   <div className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-12 transition-colors hover:bg-slate-100">
                     <FileUp className="mb-4 h-10 w-10 text-slate-400" />
                     <label htmlFor="file-upload" className="cursor-pointer">
-                      <span className="rounded-md bg-[#002a5c] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#002a5c]/90">
+                      <span className="rounded-md bg-aerojet-blue px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90">
                         Select CSV File
                       </span>
                       <input id="file-upload" type="file" accept=".csv" className="hidden" onChange={handleFileChange} />
@@ -492,7 +553,7 @@ export default function ImportStudentsPage() {
                   onClick={() => setExpandedStudent(expandedStudent === idx ? null : idx)}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-[#002a5c] text-xs font-bold text-white">
+                    <span className="flex h-7 w-7 items-center justify-center rounded-full bg-aerojet-blue text-xs font-bold text-white">
                       {idx + 1}
                     </span>
                     <span className="font-semibold text-slate-700 dark:text-slate-300">
@@ -504,6 +565,21 @@ export default function ImportStudentsPage() {
                     {student.programmeChoice && (
                       <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">
                         {student.programmeChoice}
+                      </span>
+                    )}
+                    {student.fundingSource === 'SCHOLARSHIP' && (
+                      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-300">
+                        Scholarship
+                      </span>
+                    )}
+                    {student.enrollmentStatus && student.enrollmentStatus !== 'ACTIVE' && (
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                        {student.enrollmentStatus}
+                      </span>
+                    )}
+                    {(student.semesterEnrollments?.length ?? 0) > 0 && (
+                      <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">
+                        {student.semesterEnrollments!.length} semesters
                       </span>
                     )}
                     {(student.walletCreditEur ?? 0) > 0 && (
@@ -607,6 +683,191 @@ export default function ImportStudentsPage() {
                           />
                         </div>
                       </div>
+                    </div>
+
+                    {/* Scholarship & Status */}
+                    <div>
+                      <h3 className="mb-3 text-sm font-bold uppercase tracking-wider text-slate-500">Scholarship & Status</h3>
+                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div>
+                          <Label>Funding Source</Label>
+                          <Select
+                            value={student.fundingSource || 'SCHOLARSHIP'}
+                            onValueChange={(v) => updateManualStudent(idx, 'fundingSource', v)}
+                          >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="SELF_FUNDED">Self Funded</SelectItem>
+                              <SelectItem value="SCHOLARSHIP">Scholarship</SelectItem>
+                              <SelectItem value="SPONSORED">Sponsored</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Enrollment Status</Label>
+                          <Select
+                            value={student.enrollmentStatus || 'ACTIVE'}
+                            onValueChange={(v) => updateManualStudent(idx, 'enrollmentStatus', v)}
+                          >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="ACTIVE">Active</SelectItem>
+                              <SelectItem value="ENROLLED">Enrolled</SelectItem>
+                              <SelectItem value="DEFERRED">Deferred (Paused)</SelectItem>
+                              <SelectItem value="SUSPENDED">Suspended</SelectItem>
+                              <SelectItem value="WITHDRAWN">Withdrawn</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Current Year</Label>
+                          <Select
+                            value={String(student.currentYearNumber || 1)}
+                            onValueChange={(v) => updateManualStudent(idx, 'currentYearNumber', parseInt(v))}
+                          >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              {[1, 2, 3, 4].map((y) => <SelectItem key={y} value={String(y)}>Year {y}</SelectItem>)}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div>
+                          <Label>Current Semester</Label>
+                          <Select
+                            value={String(student.currentSemesterNumber || 1)}
+                            onValueChange={(v) => updateManualStudent(idx, 'currentSemesterNumber', parseInt(v))}
+                          >
+                            <SelectTrigger><SelectValue /></SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1">Semester 1</SelectItem>
+                              <SelectItem value="2">Semester 2</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Semester Enrollments */}
+                    <div>
+                      <div className="mb-3 flex items-center justify-between">
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">
+                          Semester Enrollments
+                        </h3>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const sems = [...(student.semesterEnrollments || [])]
+                            const nextYear = sems.length > 0 ? sems[sems.length - 1].yearNumber : 1
+                            const nextSem = sems.length > 0 ? (sems[sems.length - 1].semesterNumber === 1 ? 2 : 1) : 1
+                            const yearNum = nextSem === 1 && sems.length > 0 ? nextYear + 1 : nextYear
+                            sems.push({
+                              academicYearName: '',
+                              semesterName: `Semester ${nextSem}`,
+                              yearNumber: yearNum,
+                              semesterNumber: nextSem,
+                              courseCodes: [],
+                              status: 'COMPLETED',
+                            })
+                            updateManualStudent(idx, 'semesterEnrollments', sems)
+                          }}
+                        >
+                          <Plus className="mr-1 h-3 w-3" /> Add Semester
+                        </Button>
+                      </div>
+                      {(student.semesterEnrollments || []).length === 0 && (
+                        <p className="text-xs italic text-slate-400">
+                          No semester enrollments added. Add semesters to track course history.
+                        </p>
+                      )}
+                      {(student.semesterEnrollments || []).map((sem, semIdx) => (
+                        <div key={semIdx} className="mb-3 rounded-lg border border-slate-200 dark:border-slate-700 p-4">
+                          <div className="mb-3 flex items-center justify-between">
+                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                              Year {sem.yearNumber} - Semester {sem.semesterNumber}
+                            </span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                const sems = [...(student.semesterEnrollments || [])]
+                                sems.splice(semIdx, 1)
+                                updateManualStudent(idx, 'semesterEnrollments', sems)
+                              }}
+                            >
+                              <Trash2 className="h-3 w-3 text-red-500" />
+                            </Button>
+                          </div>
+                          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                            <div>
+                              <Label className="text-xs">Academic Year</Label>
+                              <Input
+                                value={sem.academicYearName}
+                                onChange={(e) => {
+                                  const sems = [...(student.semesterEnrollments || [])]
+                                  sems[semIdx] = { ...sems[semIdx], academicYearName: e.target.value }
+                                  updateManualStudent(idx, 'semesterEnrollments', sems)
+                                }}
+                                placeholder="e.g. 2024/2025"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Semester</Label>
+                              <Select
+                                value={`${sem.yearNumber}-${sem.semesterNumber}`}
+                                onValueChange={(v) => {
+                                  const [y, s] = v.split('-').map(Number)
+                                  const sems = [...(student.semesterEnrollments || [])]
+                                  sems[semIdx] = { ...sems[semIdx], yearNumber: y, semesterNumber: s, semesterName: `Semester ${s}` }
+                                  updateManualStudent(idx, 'semesterEnrollments', sems)
+                                }}
+                              >
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  {[1, 2, 3, 4].flatMap((y) =>
+                                    [1, 2].map((s) => (
+                                      <SelectItem key={`${y}-${s}`} value={`${y}-${s}`}>Year {y} Sem {s}</SelectItem>
+                                    ))
+                                  )}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-xs">Course Codes</Label>
+                              <Input
+                                value={sem.courseCodes.join(', ')}
+                                onChange={(e) => {
+                                  const sems = [...(student.semesterEnrollments || [])]
+                                  sems[semIdx] = {
+                                    ...sems[semIdx],
+                                    courseCodes: e.target.value.split(/[,;]/).map((c) => c.trim()).filter(Boolean),
+                                  }
+                                  updateManualStudent(idx, 'semesterEnrollments', sems)
+                                }}
+                                placeholder="M1, M2, M3, M4"
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Status</Label>
+                              <Select
+                                value={sem.status || 'COMPLETED'}
+                                onValueChange={(v) => {
+                                  const sems = [...(student.semesterEnrollments || [])]
+                                  sems[semIdx] = { ...sems[semIdx], status: v }
+                                  updateManualStudent(idx, 'semesterEnrollments', sems)
+                                }}
+                              >
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="COMPLETED">Completed</SelectItem>
+                                  <SelectItem value="ACTIVE">Active</SelectItem>
+                                  <SelectItem value="FAILED">Failed</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </div>
 
                     {/* Wallet */}
@@ -860,10 +1121,15 @@ function createEmptyStudent(): ImportStudent {
     firstName: '',
     lastName: '',
     email: '',
-    programmeChoice: 'EXAM_ONLY',
-    enrollmentType: 'EXAM_ONLY',
+    programmeChoice: 'FULL_TIME_4YEAR',
+    enrollmentType: 'FULL_TIME',
+    fundingSource: 'SCHOLARSHIP',
+    enrollmentStatus: 'ACTIVE',
+    currentYearNumber: 1,
+    currentSemesterNumber: 1,
     walletCreditEur: 0,
     completedModules: [],
+    semesterEnrollments: [],
   }
 }
 

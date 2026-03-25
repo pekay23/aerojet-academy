@@ -83,7 +83,7 @@ export default function LoginForm() {
             placeholder="you@example.com"
             required
             autoComplete="email"
-            className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-[#4c9ded] focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
         </div>
       </div>
@@ -99,7 +99,7 @@ export default function LoginForm() {
           </label>
           <Link
             href="/forgot-password"
-            className="text-xs font-bold text-[#4c9ded] hover:underline"
+            className="text-xs font-bold text-aerojet-sky hover:underline"
           >
             Forgot?
           </Link>
@@ -114,7 +114,7 @@ export default function LoginForm() {
             placeholder="••••••••"
             required
             autoComplete="current-password"
-            className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-12 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-[#4c9ded] focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-12 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
           <button
             type="button"
@@ -130,7 +130,7 @@ export default function LoginForm() {
       <button
         type="submit"
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#002a5c] py-4 text-xs font-black tracking-widest text-white uppercase shadow-lg transition-all hover:bg-[#4c9ded] disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-4 text-xs font-black tracking-widest text-white uppercase shadow-lg transition-all hover:bg-aerojet-sky disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? (
           <>

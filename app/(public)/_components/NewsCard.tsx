@@ -50,7 +50,7 @@ export default function NewsCard({
         </div>
 
         <div className="flex grow flex-col p-6 sm:p-9">
-          <div className="mb-4 flex items-center gap-3 text-[10px] font-black tracking-[0.25em] text-[#4c9ded] uppercase">
+          <div className="mb-4 flex items-center gap-3 text-[10px] font-black tracking-[0.25em] text-aerojet-sky uppercase">
             <span>{date}</span>
             {readTime && (
               <>
@@ -59,7 +59,7 @@ export default function NewsCard({
               </>
             )}
           </div>
-          <h3 className="mb-4 line-clamp-2 text-xl leading-tight font-black text-[#002a5c] transition-colors group-hover:text-[#4c9ded] sm:text-2xl">
+          <h3 className="mb-4 line-clamp-2 text-xl leading-tight font-black text-aerojet-blue transition-colors group-hover:text-aerojet-sky sm:text-2xl">
             {title}
           </h3>
 

@@ -119,7 +119,7 @@ export default function ManualWalletAdjustmentDialog({
         <Button
           variant="outline"
           size="sm"
-          className="flex h-8 items-center gap-1.5 rounded-lg border-slate-200 bg-white px-3 text-[10px] font-black tracking-widest text-[#002a5c] uppercase shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900"
+          className="flex h-8 items-center gap-1.5 rounded-lg border-slate-200 bg-white px-3 text-[10px] font-black tracking-widest text-aerojet-blue uppercase shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900"
         >
           <Wallet className="h-3.5 w-3.5" />
           Adjust Balance
@@ -128,7 +128,7 @@ export default function ManualWalletAdjustmentDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Wallet className="h-5 w-5 text-[#002a5c]" />
+            <Wallet className="h-5 w-5 text-aerojet-blue" />
             Adjust Wallet: {userName}
           </DialogTitle>
         </DialogHeader>
@@ -151,7 +151,7 @@ export default function ManualWalletAdjustmentDialog({
               Operation Type
             </Label>
             <Select value={action} onValueChange={(val: any) => setAction(val)}>
-              <SelectTrigger className="w-full rounded-xl border-slate-200 bg-white focus:ring-[#002a5c] dark:border-slate-800 dark:bg-slate-950">
+              <SelectTrigger className="w-full rounded-xl border-slate-200 bg-white focus:ring-aerojet-blue dark:border-slate-800 dark:bg-slate-950">
                 <SelectValue placeholder="Select action" />
               </SelectTrigger>
               <SelectContent>
@@ -177,7 +177,7 @@ export default function ManualWalletAdjustmentDialog({
               placeholder={isSetBalance ? 'Enter new balance' : '0.00'}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="rounded-xl border-slate-200 focus:ring-[#002a5c] dark:border-slate-800"
+              className="rounded-xl border-slate-200 focus:ring-aerojet-blue dark:border-slate-800"
               required
             />
           </div>
@@ -195,7 +195,7 @@ export default function ManualWalletAdjustmentDialog({
               placeholder="e.g. Cash payment received, Refund for course cancellation, Correction of previous error."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="min-h-[80px] rounded-xl border-slate-200 focus:ring-[#002a5c] dark:border-slate-800"
+              className="min-h-[80px] rounded-xl border-slate-200 focus:ring-aerojet-blue dark:border-slate-800"
               required={isDebit || action === 'adjustment'}
             />
           </div>
@@ -212,7 +212,7 @@ export default function ManualWalletAdjustmentDialog({
               placeholder="e.g. Receipt #, Bank Tx ID"
               value={reference}
               onChange={(e) => setReference(e.target.value)}
-              className="rounded-xl border-slate-200 focus:ring-[#002a5c] dark:border-slate-800"
+              className="rounded-xl border-slate-200 focus:ring-aerojet-blue dark:border-slate-800"
             />
           </div>
 
@@ -274,7 +274,7 @@ export default function ManualWalletAdjustmentDialog({
             </Button>
             <Button
               type="submit"
-              className="rounded-xl bg-[#002a5c] hover:bg-[#003d85] dark:bg-blue-600 dark:hover:bg-blue-700"
+              className="rounded-xl bg-aerojet-blue hover:bg-[#003d85] dark:bg-blue-600 dark:hover:bg-blue-700"
               disabled={loading || uploading}
             >
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

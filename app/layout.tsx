@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Lexend, Montserrat, Outfit, Playfair_Display } from 'next/font/google'
+import { Inter, Outfit } from 'next/font/google'
 import './globals.css'
 // import '@uploadthing/react/styles.css'
 import { Providers } from './providers'
@@ -9,26 +9,13 @@ import { Analytics } from '@vercel/analytics/next'
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-inter',
-})
-
-const lexend = Lexend({
-  subsets: ['latin'],
-  variable: '--font-lexend',
-})
-
-const montserrat = Montserrat({
-  subsets: ['latin'],
-  variable: '--font-montserrat',
+  display: 'swap',
 })
 
 const outfit = Outfit({
   subsets: ['latin'],
   variable: '--font-outfit',
-})
-
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
+  display: 'swap',
 })
 
 export const viewport = {
@@ -108,18 +95,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="manifest" href="/site.webmanifest" />
         <link rel="preconnect" href="https://gx1g03nvpo.ufs.sh" />
         <link rel="preconnect" href="https://utfs.io" />
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
-          rel="stylesheet"
-        />
       </head>
       <body
-        className={`${inter.variable} ${lexend.variable} ${montserrat.variable} ${outfit.variable} ${playfair.variable} font-sans antialiased`}
+        className={`${inter.variable} ${outfit.variable} font-sans antialiased`}
       >
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:inset-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-bold focus:text-[#002a5c] focus:shadow-lg"
+          className="sr-only focus:not-sr-only focus:fixed focus:inset-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-bold focus:text-aerojet-blue focus:shadow-lg"
         >
           Skip to main content
         </a>

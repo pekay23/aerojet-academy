@@ -3,8 +3,8 @@ import prisma from '@/lib/prisma/client'
 import { withErrorHandler } from '@/lib/api/response'
 
 export const GET = withErrorHandler(
-  async (req: NextRequest, { params }: { params: { id: string } }) => {
-    const { id } = params
+  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+    const id = ctx?.params?.id
 
     const course = await prisma.course.findUnique({
       where: { id },

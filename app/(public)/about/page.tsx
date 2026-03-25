@@ -18,8 +18,8 @@ export default function AboutPage() {
           <div className="space-y-12 lg:col-span-2">
             <SectionReveal>
               <section>
-                <div className="mb-5 h-1.5 w-14 rounded-full bg-[#4c9ded]" />
-                <h2 className="mb-6 text-3xl font-black uppercase tracking-tight text-[#002a5c]">
+                <div className="mb-5 h-1.5 w-14 rounded-full bg-aerojet-sky" />
+                <h2 className="mb-6 text-3xl font-black uppercase tracking-tight text-aerojet-blue">
                   Our Mission
                 </h2>
                 <p className="mb-4 text-lg leading-relaxed text-slate-600">
@@ -34,8 +34,8 @@ export default function AboutPage() {
             </SectionReveal>
             <SectionReveal delay={0.1}>
               <section>
-                <div className="mb-5 h-1.5 w-14 rounded-full bg-[#4c9ded]" />
-                <h2 className="mb-6 text-3xl font-black uppercase tracking-tight text-[#002a5c]">
+                <div className="mb-5 h-1.5 w-14 rounded-full bg-aerojet-sky" />
+                <h2 className="mb-6 text-3xl font-black uppercase tracking-tight text-aerojet-blue">
                   The Accra MRO Project
                 </h2>
                 <p className="mb-4 leading-relaxed text-slate-600">
@@ -44,7 +44,7 @@ export default function AboutPage() {
                 </p>
                 <Link
                   href="/about/accra-mro-project"
-                  className="inline-flex items-center font-bold text-[#4c9ded] hover:underline"
+                  className="inline-flex items-center font-bold text-aerojet-sky hover:underline"
                 >
                   Read more about the MRO Project →
                 </Link>
@@ -54,7 +54,7 @@ export default function AboutPage() {
           <SectionReveal delay={0.15}>
             <aside>
               <div className="sticky top-28 rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm sm:rounded-3xl sm:p-8">
-                <h3 className="mb-6 border-b border-slate-200 pb-4 text-sm font-black uppercase tracking-widest text-[#002a5c]">
+                <h3 className="mb-6 border-b border-slate-200 pb-4 text-sm font-black uppercase tracking-widest text-aerojet-blue">
                   Academy Highlights
                 </h3>
                 <ul className="space-y-5">
@@ -64,7 +64,7 @@ export default function AboutPage() {
                     'Strategically located at the Accra Technical Training Centre (ATTC).',
                   ].map((text) => (
                     <li key={text} className="flex items-start gap-3">
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#4c9ded] text-[10px] font-bold text-white">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-aerojet-sky text-[10px] font-bold text-white">
                         ✓
                       </span>
                       <p className="text-sm text-slate-700">{text}</p>
@@ -74,7 +74,7 @@ export default function AboutPage() {
                 <div className="mt-8 border-t border-slate-200 pt-6">
                   <Link
                     href="/courses"
-                    className="block rounded-xl bg-[#002a5c] py-4 text-center text-[10px] font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-[#4c9ded]"
+                    className="block rounded-xl bg-aerojet-blue py-4 text-center text-[10px] font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-aerojet-sky"
                   >
                     Explore Programmes
                   </Link>

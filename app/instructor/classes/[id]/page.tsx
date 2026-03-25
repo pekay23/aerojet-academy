@@ -100,7 +100,7 @@ export default async function Page({
       <div>
         <Link
           href="/instructor/classes"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-[#4c9ded]"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-sky"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Classes
@@ -108,7 +108,7 @@ export default async function Page({
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black tracking-widest text-[#4c9ded] uppercase">
+              <span className="text-xs font-black tracking-widest text-aerojet-sky uppercase">
                 {course.code}
               </span>
               <span className="h-1 w-1 rounded-full bg-slate-200 dark:bg-slate-700" />
@@ -148,7 +148,7 @@ export default async function Page({
               className={cn(
                 'flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold tracking-wide uppercase transition-all',
                 isActive
-                  ? 'bg-[#4c9ded] text-white shadow-sm'
+                  ? 'bg-aerojet-sky text-white shadow-sm'
                   : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600 dark:hover:bg-slate-800'
               )}
             >
@@ -180,7 +180,7 @@ export default async function Page({
               </h2>
               <Link
                 href={`/instructor/attendance/${id}`}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#4c9ded] px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-[#002a5c]"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-aerojet-sky px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-blue"
               >
                 <ClipboardCheck className="h-3 w-3" />
                 Take Attendance
@@ -245,7 +245,7 @@ export default async function Page({
               </h2>
               <Link
                 href={`/instructor/attendance/${id}`}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#4c9ded] px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-[#002a5c]"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-aerojet-sky px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-blue"
               >
                 <ClipboardCheck className="h-3 w-3" />
                 Mark Attendance
@@ -301,7 +301,7 @@ export default async function Page({
                   <p className="text-sm font-medium">No attendance records yet.</p>
                   <Link
                     href={`/instructor/attendance/${id}`}
-                    className="mt-3 inline-flex text-xs font-bold text-[#4c9ded] hover:underline"
+                    className="mt-3 inline-flex text-xs font-bold text-aerojet-sky hover:underline"
                   >
                     Start taking attendance
                   </Link>
@@ -320,7 +320,7 @@ export default async function Page({
               </h2>
               <Link
                 href="/instructor/grading"
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#4c9ded] px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-[#002a5c]"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-aerojet-sky px-3 py-1.5 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-blue"
               >
                 <BarChart3 className="h-3 w-3" />
                 Grading Hub

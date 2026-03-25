@@ -106,10 +106,10 @@ export default async function CourseDetailsPage({
               <span className="rounded-lg bg-blue-50 px-2 py-1 text-xs font-black tracking-widest text-blue-600 uppercase">
                 {course.category?.name || 'CORE'}
               </span>
-              <h1 className="mt-3 text-2xl leading-tight font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+              <h1 className="mt-3 text-2xl leading-tight font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
                 {course.name}
               </h1>
-              <p className="mt-1 text-xs font-black tracking-widest text-[#4c9ded]">
+              <p className="mt-1 text-xs font-black tracking-widest text-aerojet-sky">
                 {course.code}
               </p>
             </div>
@@ -152,7 +152,7 @@ export default async function CourseDetailsPage({
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-xl border border-slate-100 p-5 transition-all hover:border-blue-100 hover:bg-blue-50/20 dark:border-slate-800">
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#4c9ded]">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-aerojet-sky">
                   <FileText className="h-5 w-5" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Syllabus</h3>
@@ -164,7 +164,7 @@ export default async function CourseDetailsPage({
                     href={course.syllabusUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center text-xs font-bold text-[#002a5c] hover:underline"
+                    className="mt-4 inline-flex items-center text-xs font-bold text-aerojet-blue hover:underline"
                   >
                     Download Syllabus
                     <ChevronRight className="ml-1 h-3 w-3" />
@@ -188,7 +188,7 @@ export default async function CourseDetailsPage({
                   isPaid ? (
                     <Link
                       href={`/student/courses/${enrollment.id}/materials`}
-                      className="mt-4 inline-flex items-center text-xs font-black tracking-widest text-[#002a5c] uppercase hover:underline dark:text-[#4c9ded]"
+                      className="mt-4 inline-flex items-center text-xs font-black tracking-widest text-aerojet-blue uppercase hover:underline dark:text-aerojet-sky"
                     >
                       View Materials Dashboard
                       <ChevronRight className="ml-1 h-3 w-3" />

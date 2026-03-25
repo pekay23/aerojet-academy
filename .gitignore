@@ -19,7 +19,14 @@
 
 # misc
 .DS_Store
+._*
 *.pem
+*.HEIC
+tmp*
+inspect-*.ts
+inspect-*.js
+proxy.ts
+migrate*.cjs
 
 # debug
 npm-debug.log*

@@ -9,7 +9,7 @@ import {
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { topUpWallet } from '@/lib/wallet/operations'
-import { EnrollmentType, ProgrammeChoice, UserRole, UserStatus, TransactionType, BookingType, PaymentStatus } from '@prisma/client'
+import { EnrollmentType, EnrollmentStatus, ProgrammeChoice, UserRole, UserStatus, TransactionType, BookingType, PaymentStatus, FundingSource } from '@prisma/client'
 import crypto from 'crypto'
 
 // ---------------------------------------------------------------------------
@@ -50,6 +50,15 @@ interface ImportStudent {
 
   // Admin notes
   notes?: string
+
+  // Scholarship / status
+  fundingSource?: 'SELF_FUNDED' | 'SCHOLARSHIP' | 'SPONSORED'
+  enrollmentStatus?: string    // ACTIVE, DEFERRED, WITHDRAWN, SUSPENDED, ENROLLED
+  currentYearNumber?: number
+  currentSemesterNumber?: number
+
+  // Semester-by-semester course enrollments
+  semesterEnrollments?: SemesterEnrollmentEntry[]
 }
 
 interface CompletedModuleEntry {
@@ -67,7 +76,21 @@ interface ExamHistoryEntry {
   bookingType: string       // twin, single, quad, etc.
   attemptType: 'first_attempt' | 'resit'
   result: 'pass' | 'fail'
+  score?: number
+  percentage?: number
+  examDate?: string         // ISO date string
+  academicYearName?: string // e.g. "2024/2025" — links exam to semester
+  semesterName?: string     // e.g. "Semester 1"
   sourceNotes?: string
+}
+
+interface SemesterEnrollmentEntry {
+  academicYearName: string    // e.g. "2024/2025"
+  semesterName: string        // e.g. "Semester 1"
+  yearNumber: number          // 1, 2, 3, 4
+  semesterNumber: number      // 1 or 2
+  courseCodes: string[]       // e.g. ["M1", "M2", "M3"]
+  status?: string             // "COMPLETED" | "ACTIVE" | "FAILED"
 }
 
 interface EntitlementEntry {
@@ -124,6 +147,15 @@ function resolveEnrollmentType(programme: string | undefined): EnrollmentType {
   }
 }
 
+function mapEnrollmentStatusToUserStatus(enrollmentStatus: string | undefined): UserStatus {
+  switch (enrollmentStatus) {
+    case 'SUSPENDED': return UserStatus.SUSPENDED
+    case 'WITHDRAWN':
+    case 'EXPELLED': return UserStatus.ARCHIVED
+    default: return UserStatus.ACTIVE // ACTIVE, DEFERRED, ENROLLED, APPROVED, GRADUATED
+  }
+}
+
 function mapProgrammeToPathwayCode(choice: string | undefined): string {
   const map: Record<string, string> = {
     FULL_TIME_4YEAR: 'FULL_TIME_4Y',
@@ -167,6 +199,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       walletBalanceEur: number
       studentId: string
       enrollmentType: string
+      fundingSource: string
+      enrollmentStatus: string
       notes: string
     }[],
   }
@@ -222,7 +256,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
               academyEmail,
               password: hashedPassword,
               role: UserRole.STUDENT,
-              status: UserStatus.ACTIVE,
+              status: mapEnrollmentStatusToUserStatus(s.enrollmentStatus),
               programmeChoice: Object.values(ProgrammeChoice).includes(programmeChoice as ProgrammeChoice)
                 ? (programmeChoice as ProgrammeChoice)
                 : ProgrammeChoice.EXAM_ONLY,
@@ -245,6 +279,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             },
           })
 
+          const resolvedEnrollmentStatus = Object.values(EnrollmentStatus).includes(s.enrollmentStatus as EnrollmentStatus)
+            ? (s.enrollmentStatus as EnrollmentStatus)
+            : EnrollmentStatus.ENROLLED
+          const resolvedFundingSource = Object.values(FundingSource).includes(s.fundingSource as unknown as FundingSource)
+            ? (s.fundingSource as unknown as FundingSource)
+            : FundingSource.SELF_FUNDED
+
           await tx.studentProfile.create({
             data: {
               userId: newUser.id,
@@ -253,8 +294,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
               programmeChoice: Object.values(ProgrammeChoice).includes(programmeChoice as ProgrammeChoice)
                 ? (programmeChoice as ProgrammeChoice)
                 : ProgrammeChoice.EXAM_ONLY,
-              enrollmentStatus: 'ENROLLED',
+              enrollmentStatus: resolvedEnrollmentStatus,
+              fundingSource: resolvedFundingSource,
               pathwayId: pathway?.id ?? null,
+              currentYearNumber: s.currentYearNumber || 1,
+              currentSemesterNumber: s.currentSemesterNumber || 1,
             },
           })
 
@@ -301,7 +345,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             academyEmail,
             password: hashedPassword,
             role: UserRole.STUDENT,
-            status: UserStatus.ACTIVE,
+            status: mapEnrollmentStatusToUserStatus(s.enrollmentStatus),
             programmeChoice: Object.values(ProgrammeChoice).includes(programmeChoice as ProgrammeChoice)
               ? (programmeChoice as ProgrammeChoice)
               : existingUser.programmeChoice,
@@ -337,6 +381,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         }
 
         // Ensure student profile
+        const resolvedEnrollmentStatus = Object.values(EnrollmentStatus).includes(s.enrollmentStatus as EnrollmentStatus)
+          ? (s.enrollmentStatus as EnrollmentStatus)
+          : undefined
+        const resolvedFundingSource = Object.values(FundingSource).includes(s.fundingSource as unknown as FundingSource)
+          ? (s.fundingSource as unknown as FundingSource)
+          : undefined
+
         if (!existingUser.studentProfile) {
           const studentId = await generateStudentId()
           await prisma.studentProfile.create({
@@ -347,13 +398,16 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
               programmeChoice: Object.values(ProgrammeChoice).includes(programmeChoice as ProgrammeChoice)
                 ? (programmeChoice as ProgrammeChoice)
                 : ProgrammeChoice.EXAM_ONLY,
-              enrollmentStatus: 'ENROLLED',
+              enrollmentStatus: resolvedEnrollmentStatus || EnrollmentStatus.ENROLLED,
+              fundingSource: resolvedFundingSource || FundingSource.SELF_FUNDED,
               pathwayId: pathway?.id ?? null,
+              currentYearNumber: s.currentYearNumber || 1,
+              currentSemesterNumber: s.currentSemesterNumber || 1,
             },
           })
           finalStudentId = studentId
         } else {
-          // Update existing student profile with pathway if changed
+          // Update existing student profile
           await prisma.studentProfile.update({
             where: { userId: existingUser.id },
             data: {
@@ -362,6 +416,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
               ...(Object.values(ProgrammeChoice).includes(programmeChoice as ProgrammeChoice) && {
                 programmeChoice: programmeChoice as ProgrammeChoice,
               }),
+              ...(resolvedEnrollmentStatus && { enrollmentStatus: resolvedEnrollmentStatus }),
+              ...(resolvedFundingSource && { fundingSource: resolvedFundingSource }),
+              ...(s.currentYearNumber && { currentYearNumber: s.currentYearNumber }),
+              ...(s.currentSemesterNumber && { currentSemesterNumber: s.currentSemesterNumber }),
             },
           })
           finalStudentId = existingUser.studentProfile.studentId
@@ -455,6 +513,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
                 bookingGroupRef: entry.bookingGroupRef,
                 attemptType: entry.attemptType,
                 result: entry.result,
+                ...(entry.score != null && { score: entry.score }),
+                ...(entry.percentage != null && { percentage: entry.percentage }),
+                ...(entry.examDate && { examDate: new Date(entry.examDate) }),
                 sourceNotes: `[Import] ${entry.sittingLabel}. ${entry.sourceNotes || ''}`.trim(),
                 migrationRef: migRef,
               },
@@ -520,6 +581,107 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         }
       }
 
+      // ===================== FULL-TIME ENROLLMENT =====================
+      if (
+        programmeChoice === 'FULL_TIME_4YEAR' ||
+        programmeChoice === 'FULL_TIME_2YEAR' ||
+        programmeChoice === 'MILITARY_1YEAR'
+      ) {
+        const ftCodeMap: Record<string, string> = {
+          FULL_TIME_4YEAR: 'FT4Y',
+          FULL_TIME_2YEAR: 'FT2Y',
+          MILITARY_1YEAR: 'MIL1Y',
+        }
+        const ftProgramme = await prisma.fullTimeProgramme.findFirst({
+          where: { code: ftCodeMap[programmeChoice] },
+          include: { programmeYears: { orderBy: { yearNumber: 'asc' } } },
+        })
+
+        if (ftProgramme) {
+          const currentYear = s.currentYearNumber || 1
+          const targetProgrammeYear = ftProgramme.programmeYears.find(
+            (py) => py.yearNumber === currentYear
+          ) || ftProgramme.programmeYears[0]
+
+          if (targetProgrammeYear) {
+            await prisma.fullTimeEnrollment.upsert({
+              where: {
+                studentId_programmeId: {
+                  studentId: userId,
+                  programmeId: ftProgramme.id,
+                },
+              },
+              update: {
+                currentYearNumber: currentYear,
+                programmeYearId: targetProgrammeYear.id,
+              },
+              create: {
+                studentId: userId,
+                programmeId: ftProgramme.id,
+                programmeYearId: targetProgrammeYear.id,
+                currentYearNumber: currentYear,
+                status: 'ACTIVE',
+                startDate: new Date(),
+              },
+            })
+          }
+        }
+      }
+
+      // ===================== SEMESTER ENROLLMENTS =====================
+      if (s.semesterEnrollments && s.semesterEnrollments.length > 0) {
+        for (const sem of s.semesterEnrollments) {
+          // Look up academic year
+          let academicYear = await prisma.academicYear.findFirst({
+            where: { name: sem.academicYearName },
+          })
+          if (!academicYear) continue // Skip if academic year not configured
+
+          // Look up semester
+          let semester = await prisma.semester.findFirst({
+            where: {
+              name: sem.semesterName,
+              academicYearId: academicYear.id,
+            },
+          })
+          if (!semester) continue // Skip if semester not configured
+
+          // Create enrollment for each course
+          for (const courseCode of sem.courseCodes) {
+            const course = await prisma.course.findFirst({
+              where: { code: courseCode },
+            })
+            if (!course) continue
+
+            const enrollmentStatus = sem.status === 'COMPLETED' ? 'COMPLETED' : (sem.status || 'ACTIVE')
+
+            // Use createMany-style idempotency: check first
+            const existingEnrollment = await prisma.enrollment.findFirst({
+              where: {
+                userId,
+                courseId: course.id,
+                semesterId: semester.id,
+              },
+            })
+
+            if (!existingEnrollment) {
+              await prisma.enrollment.create({
+                data: {
+                  userId,
+                  courseId: course.id,
+                  academicYearId: academicYear.id,
+                  semesterId: semester.id,
+                  status: enrollmentStatus,
+                  amountPaid: 0, // Scholarship — no payment
+                  enrolledAt: academicYear.startDate,
+                  completedAt: enrollmentStatus === 'COMPLETED' ? semester.endDate : null,
+                },
+              })
+            }
+          }
+        }
+      }
+
       // ===================== AUDIT =====================
       await createAuditLog({
         action: AuditAction.IMPORT,
@@ -551,6 +713,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         walletBalanceEur: finalWallet?.balance.toNumber() || 0,
         studentId: finalStudentId,
         enrollmentType: enrollmentType,
+        fundingSource: s.fundingSource || 'SELF_FUNDED',
+        enrollmentStatus: s.enrollmentStatus || 'ENROLLED',
         notes: s.notes || '',
       })
     } catch (error: any) {

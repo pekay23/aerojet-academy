@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
+import { getSystemSetting } from '@/lib/settings'
 import FinanceTabs from '../_components/FinanceTabs'
 import FinanceOverview from '../_components/FinanceOverview'
 import ReconciliationQueue from '../_components/ReconciliationQueue'
@@ -89,8 +90,7 @@ async function getWalletTopupsData() {
 }
 
 async function getTransactionsData(query?: string) {
-  const settings = await prisma.systemSetting.findMany({ where: { key: 'course_currency' } })
-  const currency = settings[0]?.value || 'EUR'
+  const currency = await getSystemSetting('course_currency', 'EUR')
   const symbol = getCurrencySymbol(currency)
 
   const transactions = await prisma.walletTransaction.findMany({
@@ -543,7 +543,7 @@ async function ReportsTab() {
                         </div>
                         <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                           <div
-                            className="h-full rounded-full bg-[#002a5c] dark:bg-blue-400"
+                            className="h-full rounded-full bg-aerojet-blue dark:bg-blue-400"
                             style={{ width: `${item.percentage}%` }}
                           />
                         </div>

@@ -1,4 +1,9 @@
 import prisma from '@/lib/prisma/client'
+import { encrypt } from '@/lib/security/encryption'
+
+function encryptBackup(json: string): string {
+  return encrypt(json)
+}
 
 // All Prisma model names (camelCase delegates) with human-readable labels
 export const BACKUP_MODELS = [
@@ -293,8 +298,8 @@ export async function sendBackupEmail(email: string, backup: BackupData) {
       html: emailHtml,
       attachments: [
         {
-          filename: jsonFilename,
-          content: Buffer.from(jsonStr).toString('base64'),
+          filename: `${jsonFilename}.enc`,
+          content: Buffer.from(encryptBackup(jsonStr)).toString('base64'),
         },
         {
           filename: htmlFilename,

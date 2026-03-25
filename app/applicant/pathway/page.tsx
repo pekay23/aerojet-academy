@@ -93,7 +93,7 @@ export default async function PathwayPage() {
       return (
         <div className="max-w-4xl space-y-6">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+            <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
               Enrollment Progress
             </h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -163,7 +163,7 @@ export default async function PathwayPage() {
               </div>
               <Link
                 href="/applicant/wallet-top-up"
-                className="flex items-center gap-1.5 rounded-xl bg-[#002a5c] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#003875]"
+                className="flex items-center gap-1.5 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#003875]"
               >
                 Top Up Wallet
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -282,7 +282,7 @@ export default async function PathwayPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           Complete Your Enrollment
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

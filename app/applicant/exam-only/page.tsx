@@ -532,7 +532,7 @@ export default function ExamOnlyPathwayPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           Exam Only Pathway
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -551,7 +551,7 @@ export default function ExamOnlyPathwayPage() {
             onClick={() => setActiveTab(tab.id as TabType)}
             className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.id
-                ? 'border-[#4c9ded] text-[#4c9ded]'
+                ? 'border-aerojet-sky text-aerojet-sky'
                 : 'border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
             }`}
           >
@@ -594,11 +594,11 @@ export default function ExamOnlyPathwayPage() {
                   Join an existing exam booking to save money on your exam seating. Best for flexible
                   schedules.
                 </p>
-                <div className="mb-6 text-3xl font-black text-[#4c9ded]">€300</div>
+                <div className="mb-6 text-3xl font-black text-aerojet-sky">€300</div>
               </div>
               <button
                 onClick={() => setActiveTab('pools')}
-                className="w-full rounded-xl border border-[#4c9ded] bg-[#4c9ded]/10 py-3 text-sm font-bold text-[#4c9ded] transition-all hover:bg-[#4c9ded]/20"
+                className="w-full rounded-xl border border-aerojet-sky bg-aerojet-sky/10 py-3 text-sm font-bold text-aerojet-sky transition-all hover:bg-aerojet-sky/20"
               >
                 Join an Exam Booking
               </button>
@@ -801,7 +801,7 @@ export default function ExamOnlyPathwayPage() {
                       Select Module
                     </label>
                     <select
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#002a5c] focus:ring-1 focus:ring-[#002a5c] dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-1 focus:ring-aerojet-blue dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
                       value={selectedModules[pool.id] || pool.allowedModules[0] || 'M1'}
                       onChange={(e) =>
                         setSelectedModules({ ...selectedModules, [pool.id]: e.target.value })
@@ -842,7 +842,7 @@ export default function ExamOnlyPathwayPage() {
                       pool.status === 'FAILED' ||
                       pool.status === 'CONFIRMED'
                     }
-                    className="rounded-lg bg-[#002a5c] px-4 py-2 text-sm font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
+                    className="rounded-lg bg-aerojet-blue px-4 py-2 text-sm font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
                   >
                     {joiningPool === pool.id || joiningWaitlist === pool.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -942,7 +942,7 @@ export default function ExamOnlyPathwayPage() {
                                           handleBookExamClick(component.id, 'INDIVIDUAL')
                                         }}
                                         disabled={bookingExam === component.id || !wallet}
-                                        className="rounded-lg bg-[#002a5c] px-3 py-1.5 text-xs font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
+                                        className="rounded-lg bg-aerojet-blue px-3 py-1.5 text-xs font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
                                       >
                                         {bookingExam === component.id ? (
                                           <Loader2 className="h-3 w-3 animate-spin" />

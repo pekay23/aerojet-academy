@@ -1,6 +1,7 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
+import { getSystemSetting } from '@/lib/settings'
 import RevenueChart from '../_components/RevenueChart'
 import PaymentApprovalCard from '../_components/PaymentApprovalCard'
 import GoNoGoMeter from '../_components/GoNoGoMeter'
@@ -20,10 +21,7 @@ async function getDashboardData() {
   const now = new Date()
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
-  const settings = await prisma.systemSetting.findMany({
-    where: { key: 'course_currency' },
-  })
-  const currency = settings[0]?.value || 'EUR'
+  const currency = await getSystemSetting('course_currency', 'EUR')
   const { getCurrencySymbol } = await import('@/lib/currency')
   const currSymbol = getCurrencySymbol(currency)
 

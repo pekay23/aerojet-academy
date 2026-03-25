@@ -141,7 +141,7 @@ export default function LicenseRequirementsClient({
   return (
     <div className="mx-auto max-w-6xl">
       <div className="mb-6">
-        <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight text-[#002a5c] dark:text-white">
+        <h1 className="flex items-center gap-2 text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
           <Shield className="h-6 w-6 text-blue-600" />
           License Module Requirements
         </h1>

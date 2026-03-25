@@ -12,11 +12,8 @@ const addMemberSchema = z.object({
   examComponentId: z.string().cuid(),
 })
 
-interface RouteParams {
-  params: { id: string }
-}
-
-export const POST = withErrorHandler(async (req: NextRequest, { params }: RouteParams) => {
+export const POST = withErrorHandler(async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
+  const params = ctx?.params ?? {}
   const staff = await requireStaff()
   const body = await req.json()
   const validation = validateBody(addMemberSchema, body)

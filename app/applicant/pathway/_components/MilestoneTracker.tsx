@@ -188,7 +188,7 @@ export default function MilestoneTracker({ milestones, walletBalance, currency }
                         <button
                           onClick={() => handlePayFromWallet(m.id)}
                           disabled={isPaying}
-                          className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#003875] disabled:opacity-50"
+                          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#003875] disabled:opacity-50"
                         >
                           {isPaying ? (
                             <>

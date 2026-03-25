@@ -3,21 +3,19 @@ import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiError, apiSuccess, withErrorHandler } from '@/lib/api/response'
 import { updateExamEventSchema, validateBody } from '@/lib/validation/schemas'
+import { softDeleteData } from '@/lib/prisma/soft-delete'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
-interface RouteParams {
-  params: { id: string }
-}
-
-export const PUT = withErrorHandler(async (req: NextRequest, { params }: RouteParams) => {
+export const PUT = withErrorHandler(async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
   const staff = await requireStaff()
+  const id = ctx?.params?.id
   const body = await req.json()
   const validation = validateBody(updateExamEventSchema, body)
 
   if (validation.success === false) return apiError((validation as any).error)
 
   const existingEvent = await prisma.examEvent.findUnique({
-    where: { id: params.id },
+    where: { id },
   })
 
   if (!existingEvent) {
@@ -25,7 +23,7 @@ export const PUT = withErrorHandler(async (req: NextRequest, { params }: RoutePa
   }
 
   const updatedEvent = await prisma.examEvent.update({
-    where: { id: params.id },
+    where: { id },
     data: validation.data as any,
   })
 
@@ -40,11 +38,12 @@ export const PUT = withErrorHandler(async (req: NextRequest, { params }: RoutePa
   return apiSuccess(updatedEvent)
 })
 
-export const DELETE = withErrorHandler(async (req: NextRequest, { params }: RouteParams) => {
+export const DELETE = withErrorHandler(async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
   const staff = await requireStaff()
+  const id = ctx?.params?.id
 
   const existingEvent = await prisma.examEvent.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { _count: { select: { pools: true, examBookings: true } } },
   })
 
@@ -56,14 +55,15 @@ export const DELETE = withErrorHandler(async (req: NextRequest, { params }: Rout
     return apiError('Cannot delete event with existing pools or bookings', 400)
   }
 
-  await prisma.examEvent.delete({
-    where: { id: params.id },
+  await prisma.examEvent.update({
+    where: { id },
+    data: softDeleteData(),
   })
 
   await createAuditLog({
     action: AuditAction.DELETE,
     entity: 'ExamEvent',
-    entityId: params.id,
+    entityId: id,
     userId: staff.id,
   })
 

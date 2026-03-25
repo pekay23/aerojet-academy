@@ -22,10 +22,10 @@ export default async function TermsPage() {
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-xl sm:rounded-3xl sm:p-14">
           <div className="mb-10 border-b border-slate-100 pb-6">
-            <span className="mb-4 inline-block rounded-full bg-blue-50 px-3 py-1 text-[10px] font-black tracking-widest text-[#4c9ded] uppercase">
+            <span className="mb-4 inline-block rounded-full bg-blue-50 px-3 py-1 text-[10px] font-black tracking-widest text-aerojet-sky uppercase">
               Legal Policy
             </span>
-            <h1 className="text-3xl leading-tight font-black tracking-tight text-[#002a5c] uppercase sm:text-4xl dark:text-white">
+            <h1 className="text-3xl leading-tight font-black tracking-tight text-aerojet-blue uppercase sm:text-4xl dark:text-white">
               Online Application Terms & Conditions
             </h1>
             <p className="mt-3 text-sm text-slate-400 italic">Last Updated: February 2026</p>
@@ -86,7 +86,7 @@ export default async function TermsPage() {
               },
             ].map((section) => (
               <section key={section.title}>
-                <h3 className="mb-3 text-lg font-black tracking-tight text-[#002a5c] uppercase">
+                <h3 className="mb-3 text-lg font-black tracking-tight text-aerojet-blue uppercase">
                   {section.title}
                 </h3>
                 <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
@@ -99,19 +99,19 @@ export default async function TermsPage() {
 
             <div className="mt-12 flex flex-col items-center justify-between gap-5 border-t border-slate-100 pt-8 sm:flex-row">
               <div>
-                <p className="text-sm font-black text-[#002a5c] uppercase">Have Questions?</p>
+                <p className="text-sm font-black text-aerojet-blue uppercase">Have Questions?</p>
                 <p className="text-xs text-slate-500">Send us an enquiry.</p>
               </div>
               <div className="flex items-center gap-4">
                 <Link
                   href="/contact"
-                  className="text-xs font-bold tracking-widest text-[#4c9ded] uppercase hover:underline"
+                  className="text-xs font-bold tracking-widest text-aerojet-sky uppercase hover:underline"
                 >
                   Contact Us
                 </Link>
                 <Link
                   href="/register"
-                  className="rounded-xl bg-[#4c9ded] px-6 py-3 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-[#002a5c]"
+                  className="rounded-xl bg-aerojet-sky px-6 py-3 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-blue"
                 >
                   Start Registration
                 </Link>

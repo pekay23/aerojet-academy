@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
+import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import {
@@ -30,8 +31,8 @@ const PROGRAMME_CODE_MAP: Record<string, string> = {
 
 // POST /api/staff/payments/[id]/approve — Approve or reject a payment
 export const POST = withErrorHandler(
-  async (req: NextRequest, context: { params: Record<string, string> }) => {
-    const staff = await requireStaff()
+  async (req: NextRequest, context?: { params: Record<string, string> }) => {
+    const staff = await requirePermission(PERMISSIONS.APPROVE_PAYMENTS)
     const id = context?.params?.id
 
     if (!id) return apiError('Payment ID required')
@@ -97,19 +98,19 @@ export const POST = withErrorHandler(
 
       // Handle Course Enrollment (Modular)
       if (payment.referenceType === 'COURSE' && payment.referenceId) {
-        await prisma.enrollment.update({
-          where: {
-            userId_courseId: {
-              userId: payment.userId,
-              courseId: payment.referenceId,
-            },
-          },
-          data: {
-            status: 'ENROLLED',
-            approvedAt: new Date(),
-            amountPaid: payment.amount,
-          },
+        const courseEnrollment = await prisma.enrollment.findFirst({
+          where: { userId: payment.userId, courseId: payment.referenceId },
         })
+        if (courseEnrollment) {
+          await prisma.enrollment.update({
+            where: { id: courseEnrollment.id },
+            data: {
+              status: 'ENROLLED',
+              approvedAt: new Date(),
+              amountPaid: payment.amount,
+            },
+          })
+        }
       }
 
       // Handle Full-Time enrollment creation + milestone tracking on seat-related payments

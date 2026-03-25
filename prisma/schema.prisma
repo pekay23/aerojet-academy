@@ -28,6 +28,7 @@ model User {
   successfulReferrals   Int                  @default(0)
   mustChangePassword    Boolean              @default(false)
   passwordChanged       Boolean              @default(false)
+  passwordChangedAt     DateTime?
   emailVerified         DateTime?
   verifyToken           String?              @unique
   verifyTokenExpires    DateTime?
@@ -126,6 +127,7 @@ model StudentProfile {
   academicYearId            String?
   semesterId                String?
   preferredModules          String[]
+  fundingSource             FundingSource          @default(SELF_FUNDED)
   adminNotes                String?                @db.Text
   createdAt                 DateTime               @default(now())
   updatedAt                 DateTime               @updatedAt
@@ -152,11 +154,13 @@ model AdminNote {
   createdBy        String
   updatedAt        DateTime       @updatedAt
   createdAt        DateTime       @default(now())
+  deletedAt        DateTime?
   studentProfile   StudentProfile @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
   author           User           @relation("AdminNoteAuthor", fields: [createdBy], references: [id])
 
   @@index([studentProfileId])
   @@index([createdBy])
+  @@index([deletedAt])
   @@map("admin_notes")
 }
 
@@ -354,18 +358,20 @@ model Enrollment {
   paymentProofUrl String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?
   academicYear    AcademicYear? @relation(fields: [academicYearId], references: [id])
   course          Course        @relation(fields: [courseId], references: [id])
   semester        Semester?     @relation(fields: [semesterId], references: [id])
   user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   grades          Grade[]
 
-  @@unique([userId, courseId])
+  @@unique([userId, courseId, semesterId])
   @@index([userId])
   @@index([courseId])
   @@index([status])
   @@index([academicYearId])
   @@index([semesterId])
+  @@index([deletedAt])
   @@map("enrollments")
 }
 
@@ -435,12 +441,14 @@ model Grade {
   comments       String?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+  deletedAt      DateTime?
   enrollment     Enrollment @relation(fields: [enrollmentId], references: [id], onDelete: Cascade)
   user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([enrollmentId])
   @@index([assessmentDate])
+  @@index([deletedAt])
   @@map("grades")
 }
 
@@ -462,6 +470,7 @@ model ExamEvent {
   overrideStatus       EventOverrideStatus @default(NONE)
   createdAt            DateTime            @default(now())
   updatedAt            DateTime            @updatedAt
+  deletedAt            DateTime?
   createdBy            String?
   examBookings         ExamBooking[]
   pools                ExamPool[]
@@ -470,6 +479,7 @@ model ExamEvent {
   @@index([status])
   @@index([startDate, endDate])
   @@index([paymentDeadline])
+  @@index([deletedAt])
   @@map("exam_events")
 }
 
@@ -525,6 +535,7 @@ model PoolMembership {
   referralCode     String?
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
+  deletedAt        DateTime?
   confirmedAt      DateTime?
   paidAt           DateTime?
   paymentReference String?
@@ -540,6 +551,7 @@ model PoolMembership {
   @@index([examComponentId])
   @@index([poolId, status])
   @@index([bookingId])
+  @@index([deletedAt])
   @@map("pool_memberships")
 }
 
@@ -664,6 +676,7 @@ model ExamBooking {
   refundAmount       Decimal?           @db.Decimal(10, 2)
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
+  deletedAt          DateTime?
   courseId            String?
   course             Course?            @relation(fields: [courseId], references: [id])
   event              ExamEvent?         @relation(fields: [eventId], references: [id])
@@ -683,6 +696,7 @@ model ExamBooking {
   @@index([moduleCode])
   @@index([autoPoolId])
   @@index([combinedGroupRef])
+  @@index([deletedAt])
   @@map("exam_bookings")
 }
 
@@ -1260,9 +1274,16 @@ enum EnrollmentStatus {
   ACTIVE
   APPROVED
   GRADUATED
+  DEFERRED
   SUSPENDED
   WITHDRAWN
   EXPELLED
+}
+
+enum FundingSource {
+  SELF_FUNDED
+  SCHOLARSHIP
+  SPONSORED
 }
 
 enum PaymentStatus {

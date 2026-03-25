@@ -6,6 +6,7 @@ import { prisma } from '@/lib/prisma/client'
 import { Eye, Clock, Calendar, User as UserIcon, ArrowLeft } from 'lucide-react'
 import ShareButtons from '../_components/ShareButtons'
 import { getBaseUrl } from '@/lib/utils/url'
+import { sanitizeHtml } from '@/lib/utils/sanitize'
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -82,7 +83,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
             <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-transparent" />
           </>
         ) : (
-          <div className="absolute inset-0 bg-[#002a5c]" />
+          <div className="absolute inset-0 bg-aerojet-blue" />
         )}
 
         {/* Hero Content Overlay */}
@@ -96,13 +97,13 @@ export default async function NewsroomArticlePage({ params }: Props) {
               <div className="flex flex-wrap items-center gap-6 text-[11px] font-bold tracking-widest text-slate-200 uppercase">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
-                    <UserIcon className="h-3.5 w-3.5 text-[#4c9ded]" />
+                    <UserIcon className="h-3.5 w-3.5 text-aerojet-sky" />
                   </div>
                   <span>{authorName}</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
-                    <Calendar className="h-3.5 w-3.5 text-[#4c9ded]" />
+                    <Calendar className="h-3.5 w-3.5 text-aerojet-sky" />
                   </div>
                   <span>
                     {new Date(
@@ -116,13 +117,13 @@ export default async function NewsroomArticlePage({ params }: Props) {
                 </div>
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
-                    <Clock className="h-3.5 w-3.5 text-[#4c9ded]" />
+                    <Clock className="h-3.5 w-3.5 text-aerojet-sky" />
                   </div>
                   <span>{readTime} Min Read</span>
                 </div>
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
-                    <Eye className="h-3.5 w-3.5 text-[#4c9ded]" />
+                    <Eye className="h-3.5 w-3.5 text-aerojet-sky" />
                   </div>
                   <span>{article.viewCount} Views</span>
                 </div>
@@ -136,8 +137,8 @@ export default async function NewsroomArticlePage({ params }: Props) {
       <div className="mx-auto max-w-4xl px-6 py-20">
         <article>
           <div
-            className="prose prose-slate prose-lg prose-headings:text-[#002a5c] prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-[#002a5c] prose-a:text-[#4c9ded] prose-a:font-bold prose-a:no-underline hover:prose-a:underline dark:prose-invert max-w-none"
-            dangerouslySetInnerHTML={{ __html: article.content }}
+            className="prose prose-slate prose-lg prose-headings:text-aerojet-blue prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-aerojet-blue prose-a:text-aerojet-sky prose-a:font-bold prose-a:no-underline hover:prose-a:underline dark:prose-invert max-w-none"
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(article.content) }}
           />
 
           {/* Social Share & Tags Section */}
@@ -149,7 +150,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
                 article.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase transition-all hover:border-[#4c9ded] hover:bg-white hover:text-[#002a5c] dark:border-slate-800 dark:bg-slate-900"
+                    className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase transition-all hover:border-aerojet-sky hover:bg-white hover:text-aerojet-blue dark:border-slate-800 dark:bg-slate-900"
                   >
                     #{tag}
                   </span>
@@ -172,9 +173,9 @@ export default async function NewsroomArticlePage({ params }: Props) {
           <div className="mt-20 flex justify-center">
             <Link
               href="/newsroom"
-              className="group flex items-center gap-3 text-sm font-black tracking-widest text-slate-400 uppercase transition-all hover:text-[#002a5c] dark:hover:text-white"
+              className="group flex items-center gap-3 text-sm font-black tracking-widest text-slate-400 uppercase transition-all hover:text-aerojet-blue dark:hover:text-white"
             >
-              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-100 bg-slate-50 transition-all group-hover:border-[#4c9ded] group-hover:bg-[#4c9ded] group-hover:text-white dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full border border-slate-100 bg-slate-50 transition-all group-hover:border-aerojet-sky group-hover:bg-aerojet-sky group-hover:text-white dark:border-slate-800 dark:bg-slate-900">
                 <ArrowLeft className="h-4 w-4" />
               </div>
               <span>Back to Newsroom</span>

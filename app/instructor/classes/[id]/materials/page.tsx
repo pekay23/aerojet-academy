@@ -42,7 +42,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <div className="space-y-4">
         <Link
           href="/instructor/classes"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-[#4c9ded]"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-sky"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Classes
@@ -52,7 +52,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             Course Materials
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            <span className="font-extrabold text-[#4c9ded]">{course.code}</span>
+            <span className="font-extrabold text-aerojet-sky">{course.code}</span>
             <span className="mx-2 inline-block h-1 w-1 rounded-full bg-slate-200 align-middle dark:bg-slate-700" />
             {course.name}
           </p>
@@ -96,7 +96,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                     href={course.syllabusUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-sm transition-all hover:bg-[#002a5c] hover:text-white active:scale-95 dark:bg-slate-700 dark:text-white"
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-sm transition-all hover:bg-aerojet-blue hover:text-white active:scale-95 dark:bg-slate-700 dark:text-white"
                   >
                     <Download className="h-4 w-4" />
                   </a>
@@ -148,7 +148,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                     href={course.materialsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-[#4c9ded] active:scale-95"
+                    className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-sky active:scale-95"
                   >
                     Access
                     <ChevronRight className="h-3 w-3" />
@@ -207,7 +207,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
                           href={resource.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-sm transition-all hover:bg-[#002a5c] hover:text-white active:scale-95 dark:bg-slate-700 dark:text-white"
+                          className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 shadow-sm transition-all hover:bg-aerojet-blue hover:text-white active:scale-95 dark:bg-slate-700 dark:text-white"
                         >
                           <Download className="h-4 w-4" />
                         </a>
@@ -233,7 +233,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               </p>
               <Link
                 href="/instructor/resources"
-                className="block w-full rounded-xl border border-slate-100 py-3 text-center text-xs font-black tracking-widest text-[#002a5c] uppercase transition-all hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
+                className="block w-full rounded-xl border border-slate-100 py-3 text-center text-xs font-black tracking-widest text-aerojet-blue uppercase transition-all hover:bg-slate-50 dark:border-slate-800 dark:text-slate-400 dark:hover:bg-slate-800"
               >
                 View All Resources
               </Link>

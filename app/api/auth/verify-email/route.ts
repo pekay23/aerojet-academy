@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
     const firstName = user.profile?.firstName || 'Student'
     console.log(`[VerifyEmail] Sending registration confirmation to ${user.email}`)
     try {
-      await sendRegistrationEmail(user.email, firstName, user.registrationCode)
+      await sendRegistrationEmail(user.email, firstName, user.registrationCode ?? '')
     } catch (error) {
       console.error(`[VerifyEmail] Failed to send registration email to ${user.email}:`, error)
     }

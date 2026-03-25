@@ -50,7 +50,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
     ? [dbUser.profile.firstName, dbUser.profile.middleName, dbUser.profile.lastName]
         .filter(Boolean)
         .join(' ')
-    : user.name || user.email
+    : (user.name || user.email || '')
   const userRole = user.role
 
   const [
@@ -115,7 +115,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       <StudentSidebar
         userName={userName}
         userRole={userRole}
-        userImage={user.image || undefined}
+        userImage={user.image ?? undefined}
         studyPathway={studentProfile?.pathwayRel?.code || (studentProfile?.enrollmentType as any)}
         notificationCount={unreadNotifications}
         messageCount={unreadMessages}

@@ -245,7 +245,7 @@ export default function ReconciliationQueue() {
                           href={p.proofUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="mt-1 flex items-center gap-1 text-[10px] font-black tracking-widest text-[#4c9ded] uppercase hover:underline dark:text-blue-400"
+                          className="mt-1 flex items-center gap-1 text-[10px] font-black tracking-widest text-aerojet-sky uppercase hover:underline dark:text-blue-400"
                         >
                           <ExternalLink className="h-3 w-3" /> View Proof
                         </a>

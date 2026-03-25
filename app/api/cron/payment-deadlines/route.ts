@@ -56,6 +56,19 @@ export async function GET(req: NextRequest) {
 
           for (const booking of pendingBookings) {
             try {
+              // Idempotency: check if reminder already sent today for this booking + day combo
+              const todayStart = new Date(now)
+              todayStart.setHours(0, 0, 0, 0)
+              const existingReminder = await prisma.notification.findFirst({
+                where: {
+                  userId: booking.userId,
+                  type: 'WARNING',
+                  title: { contains: `T-${days}` },
+                  createdAt: { gte: todayStart },
+                },
+              })
+              if (existingReminder) continue // Already reminded today
+
               const email = booking.user.personalEmail || booking.user.email
               const name = booking.user.profile?.firstName || 'Student'
               const moduleLabel = booking.examComponent?.course?.code ?? 'Module'
@@ -64,6 +77,16 @@ export async function GET(req: NextRequest) {
               const balance = pricingConfig.individualExamFee - Number(booking.amountPaid)
 
               await sendPaymentDeadlineEmail(email, name, moduleLabel, event.name, days, balance)
+
+              // Record notification for idempotency
+              await prisma.notification.create({
+                data: {
+                  userId: booking.userId,
+                  title: `Payment Reminder T-${days}`,
+                  message: `Balance of €${balance} due for ${moduleLabel} exam`,
+                  type: 'WARNING',
+                },
+              })
 
               results.remindersSent++
             } catch (err: any) {
@@ -99,9 +122,26 @@ export async function GET(req: NextRequest) {
 
       for (const booking of expiredBookings) {
         try {
+          // Safety check: don't forfeit if there's a pending or approved payment for this booking
+          const linkedPayment = await prisma.payment.findFirst({
+            where: {
+              userId: booking.userId,
+              referenceId: booking.id,
+              status: { in: ['PENDING', 'APPROVED'] },
+            },
+          })
+          if (linkedPayment) {
+            results.errors.push(`Booking ${booking.id}: skipped forfeit — payment ${linkedPayment.id} (${linkedPayment.status}) exists`)
+            continue
+          }
+
+          // Idempotency: re-check status in case another cron run already forfeited
+          const current = await prisma.examBooking.findUnique({ where: { id: booking.id }, select: { status: true } })
+          if (!current || current.status !== 'PENDING') continue
+
           await prisma.examBooking.update({
             where: { id: booking.id },
-            data: { status: 'FAILED' }, // Mark as failed due to non-payment
+            data: { status: 'FAILED' },
           })
 
           await createAuditLog({

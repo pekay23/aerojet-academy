@@ -169,18 +169,35 @@ export const authOptions: NextAuthOptions = {
         token.role = (user as any).role
         token.status = (user as any).status
         token.mustChangePassword = (user as any).mustChangePassword
+        token.issuedAt = Date.now()
       }
-      if (trigger === 'update') {
+
+      // Periodic session validation (every 5 minutes) — checks if password was changed after token issued
+      const REVALIDATION_INTERVAL = 5 * 60 * 1000
+      const lastChecked = (token.lastChecked as number) || 0
+      const shouldRevalidate = trigger === 'update' || Date.now() - lastChecked > REVALIDATION_INTERVAL
+
+      if (shouldRevalidate && token.id) {
         const dbUser = await prisma.user.findUnique({
           where: { id: token.id as string },
-          select: { role: true, status: true, mustChangePassword: true, passwordChanged: true },
+          select: { role: true, status: true, mustChangePassword: true, passwordChanged: true, passwordChangedAt: true },
         })
         if (dbUser) {
+          // Invalidate session if password was changed after this token was issued
+          if (dbUser.passwordChangedAt && token.issuedAt && dbUser.passwordChangedAt.getTime() > (token.issuedAt as number)) {
+            // Invalidate by clearing identity — middleware/auth checks will reject
+            token.id = ''
+            token.role = ''
+            token.status = ''
+            return token
+          }
           token.role = dbUser.role
           token.status = dbUser.status
           token.mustChangePassword = dbUser.mustChangePassword && !dbUser.passwordChanged
         }
+        token.lastChecked = Date.now()
       }
+
       return token
     },
 

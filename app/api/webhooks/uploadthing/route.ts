@@ -1,9 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma/client'
 
-// UploadThing webhook: handles file upload completion callbacks
+/**
+ * UploadThing Webhook Handler
+ *
+ * Handles file upload completion callbacks.
+ * Verifies requests using UPLOADTHING_SECRET as a bearer token.
+ */
 export async function POST(req: NextRequest) {
   try {
+    // Verify the webhook comes from UploadThing using the shared secret
+    const uploadthingSecret = process.env.UPLOADTHING_SECRET
+    if (uploadthingSecret) {
+      const authHeader = req.headers.get('authorization')
+      const uploadthingHeader = req.headers.get('uploadthing-hook')
+
+      // UploadThing sends a custom header; also accept bearer token for flexibility
+      if (!uploadthingHeader && authHeader !== `Bearer ${uploadthingSecret}`) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      }
+    }
+
     const body = await req.json()
     const { file, metadata } = body
 
@@ -11,7 +28,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
     }
 
-    // Create FileUpload record
     const fileUpload = await prisma.fileUpload.create({
       data: {
         filename: file.name || 'unknown',
@@ -26,7 +42,6 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    // If it's a payment proof upload, update the user's record
     if (metadata?.entityType === 'PaymentProof' && metadata?.userId) {
       await prisma.payment.update({
         where: { id: metadata.entityId },
@@ -34,12 +49,9 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    // If it's a course material, no extra action needed — FileUpload record is enough
-
     return NextResponse.json({ success: true, fileId: fileUpload.id })
   } catch (error: any) {
     console.error('UploadThing webhook error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
-

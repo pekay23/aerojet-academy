@@ -10,7 +10,7 @@ export default async function Page() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           My Students
         </h1>
         <p className="mt-1 text-slate-500 dark:text-slate-400">

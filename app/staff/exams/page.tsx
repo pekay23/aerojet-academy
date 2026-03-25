@@ -95,7 +95,7 @@ async function EventsTab({ query }: { query?: string }) {
         </div>
         <Link
           href="/staff/exams/events/create"
-          className="flex shrink-0 items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#002a5c]/90"
+          className="flex shrink-0 items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
         >
           <Plus className="h-4 w-4" />
           Create Event
@@ -356,7 +356,7 @@ async function ResultsTab({ query }: { query?: string }) {
                   >
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-[#002a5c]">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue">
                           {result.user.profile?.firstName?.charAt(0)}
                           {result.user.profile?.lastName?.charAt(0)}
                         </div>
@@ -372,7 +372,7 @@ async function ResultsTab({ query }: { query?: string }) {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-[#002a5c]" />
+                        <BookOpen className="h-4 w-4 text-aerojet-blue" />
                         <span className="font-medium text-slate-700">
                           {result.moduleCode} - {result.examName}
                         </span>
@@ -415,7 +415,7 @@ async function ResultsTab({ query }: { query?: string }) {
                           href={result.certificateUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-xs font-bold text-[#002a5c] hover:underline"
+                          className="text-xs font-bold text-aerojet-blue hover:underline"
                         >
                           View
                         </a>

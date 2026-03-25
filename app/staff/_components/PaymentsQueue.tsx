@@ -151,7 +151,7 @@ export default function PaymentsQueue({
       {/* Header */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-[#002a5c] uppercase dark:text-white">
+          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
             Payments
           </h1>
           <p className="mt-1 text-sm text-slate-400">
@@ -179,7 +179,7 @@ export default function PaymentsQueue({
                 onClick={() => setTab(t.key)}
                 className={`relative rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${
                   tab === t.key
-                    ? 'text-[#002a5c] dark:text-white'
+                    ? 'text-aerojet-blue dark:text-white'
                     : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
                 }`}
               >
@@ -202,7 +202,7 @@ export default function PaymentsQueue({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search user or ref..."
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-700 dark:bg-slate-800/50"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 focus:ring-aerojet-sky dark:border-slate-700 dark:bg-slate-800/50"
             />
           </div>
         </div>
@@ -272,7 +272,7 @@ export default function PaymentsQueue({
                         <td className="px-5 py-3.5 text-xs font-bold text-slate-600 dark:text-slate-400">
                           {p.referenceType?.replace(/_/g, ' ') ?? '—'}
                         </td>
-                        <td className="px-5 py-3.5 text-sm font-black text-[#002a5c]">
+                        <td className="px-5 py-3.5 text-sm font-black text-aerojet-blue">
                           {p.currency}{' '}
                           {Number(p.amount).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                         </td>
@@ -293,7 +293,7 @@ export default function PaymentsQueue({
                                 href={p.proofUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-xs font-bold text-[#4c9ded] hover:underline"
+                                className="inline-flex items-center gap-1 text-xs font-bold text-aerojet-sky hover:underline"
                               >
                                 <ExternalLink className="h-3.5 w-3.5" /> Latest
                               </a>
@@ -429,7 +429,7 @@ export default function PaymentsQueue({
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div>
                       <p className="font-bold tracking-wider text-slate-400 uppercase">Amount</p>
-                      <p className="font-black text-[#002a5c] dark:text-blue-400">
+                      <p className="font-black text-aerojet-blue dark:text-blue-400">
                         {p.currency}{' '}
                         {Number(p.amount).toLocaleString('en-GH', { minimumFractionDigits: 2 })}
                       </p>
@@ -465,7 +465,7 @@ export default function PaymentsQueue({
                         href={p.proofUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs font-bold text-[#4c9ded] hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-bold text-aerojet-sky hover:underline"
                       >
                         <ExternalLink className="h-3.5 w-3.5" /> View Proof
                       </a>
@@ -556,7 +556,7 @@ export default function PaymentsQueue({
           <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
           <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-4 flex items-center justify-between">
-              <Dialog.Title className="text-lg font-black text-[#002a5c] dark:text-white">
+              <Dialog.Title className="text-lg font-black text-aerojet-blue dark:text-white">
                 Upload History
               </Dialog.Title>
               <Dialog.Close className="rounded-full p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-300">
@@ -567,7 +567,7 @@ export default function PaymentsQueue({
             <div className="space-y-3">
               {historyLoading ? (
                 <div className="flex justify-center py-8">
-                  <Loader2 className="h-6 w-6 animate-spin text-[#4c9ded]" />
+                  <Loader2 className="h-6 w-6 animate-spin text-aerojet-sky" />
                 </div>
               ) : uploadHistory.length === 0 ? (
                 <div className="py-6 text-center text-sm text-slate-500">
@@ -589,14 +589,14 @@ export default function PaymentsQueue({
                             dateStyle: 'medium',
                             timeStyle: 'short',
                           })}
-                          {i === 0 && <span className="ml-2 font-bold text-[#4c9ded]">Latest</span>}
+                          {i === 0 && <span className="ml-2 font-bold text-aerojet-sky">Latest</span>}
                         </p>
                       </div>
                       <a
                         href={file.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 hover:text-[#002a5c] dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
+                        className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 transition-colors hover:bg-slate-50 hover:text-aerojet-blue dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700 dark:hover:text-white"
                       >
                         <ExternalLink className="h-3.5 w-3.5" /> Open
                       </a>

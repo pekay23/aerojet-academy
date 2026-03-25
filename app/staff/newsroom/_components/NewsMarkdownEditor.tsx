@@ -1,5 +1,6 @@
 'use client'
 
+import { sanitizeHtml } from '@/lib/utils/sanitize'
 import { useEditor, EditorContent, Node, mergeAttributes } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { Color } from '@tiptap/extension-color'
@@ -114,11 +115,10 @@ const brandingColors = [
 ]
 
 const fonts = [
-  { name: 'Lexend', value: 'var(--font-lexend)' },
-  { name: 'Inter', value: 'var(--font-sans)' },
-  { name: 'Montserrat', value: 'var(--font-montserrat)' },
+  { name: 'Inter', value: 'var(--font-inter)' },
   { name: 'Outfit', value: 'var(--font-outfit)' },
-  { name: 'Playfair', value: 'var(--font-playfair)' },
+  { name: 'Georgia', value: 'Georgia, serif' },
+  { name: 'System', value: 'system-ui, sans-serif' },
 ]
 
 const spacingPresets = [
@@ -165,7 +165,7 @@ export default function NewsMarkdownEditor({
     editorProps: {
       attributes: {
         class:
-          'prose prose-slate prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[500px] p-8 prose-headings:text-[#002a5c] prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-[#002a5c] prose-a:text-[#4c9ded] prose-a:font-bold prose-a:no-underline hover:prose-a:underline',
+          'prose prose-slate prose-lg dark:prose-invert max-w-none focus:outline-none min-h-[500px] p-8 prose-headings:text-aerojet-blue prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-aerojet-blue prose-a:text-aerojet-sky prose-a:font-bold prose-a:no-underline hover:prose-a:underline',
       },
     },
     onUpdate: ({ editor }) => {
@@ -183,34 +183,34 @@ export default function NewsMarkdownEditor({
   if (!editor) return null
 
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white ring-offset-white focus-within:ring-2 focus-within:ring-[#002a5c]/20 dark:border-slate-800 dark:bg-slate-900/50 dark:ring-offset-slate-950">
+    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white ring-offset-white focus-within:ring-2 focus-within:ring-aerojet-blue/20 dark:border-slate-800 dark:bg-slate-900/50 dark:ring-offset-slate-950">
       {/* Toolbar */}
       <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b border-slate-100 bg-white/80 p-2 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80">
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('bold') ? 'bg-blue-50 text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('bold') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
         >
           <Bold className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('italic') ? 'bg-blue-50 text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('italic') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
         >
           <Italic className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-blue-50 text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
         >
           <Heading1 className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-blue-50 text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
         >
           <Heading2 className="h-4 w-4" />
         </button>
@@ -220,21 +220,21 @@ export default function NewsMarkdownEditor({
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('bulletList') ? 'bg-blue-50 text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('bulletList') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
         >
           <List className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('orderedList') ? 'bg-blue-50 text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('orderedList') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
         >
           <ListOrdered className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('blockquote') ? 'bg-blue-50 text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('blockquote') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
         >
           <Quote className="h-4 w-4" />
         </button>
@@ -249,7 +249,7 @@ export default function NewsMarkdownEditor({
               editor.chain().focus().setLink({ href: url }).run()
             }
           }}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('link') ? 'bg-blue-50 text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('link') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800'}`}
         >
           <LinkIcon className="h-4 w-4" />
         </button>
@@ -275,21 +275,21 @@ export default function NewsMarkdownEditor({
         <button
           type="button"
           onClick={() => editor.chain().focus().setTextAlign('left').run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'left' }) ? 'bg-blue-50 text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'left' }) ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50'}`}
         >
           <AlignLeft className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().setTextAlign('center').run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'center' }) ? 'bg-blue-50 text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'center' }) ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50'}`}
         >
           <AlignCenter className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().setTextAlign('right').run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'right' }) ? 'bg-blue-50 text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'right' }) ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 hover:bg-slate-50'}`}
         >
           <AlignRight className="h-4 w-4" />
         </button>
@@ -343,7 +343,7 @@ export default function NewsMarkdownEditor({
             onClick={() => setMode('WRITE')}
             className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-widest uppercase transition-all ${
               mode === 'WRITE'
-                ? 'bg-white text-[#002a5c] shadow-sm dark:bg-slate-900 dark:text-white'
+                ? 'bg-white text-aerojet-blue shadow-sm dark:bg-slate-900 dark:text-white'
                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
@@ -355,7 +355,7 @@ export default function NewsMarkdownEditor({
             onClick={() => setMode('SPLIT')}
             className={`hidden items-center gap-2 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-widest uppercase transition-all lg:flex ${
               mode === 'SPLIT'
-                ? 'bg-white text-[#002a5c] shadow-sm dark:bg-slate-900 dark:text-white'
+                ? 'bg-white text-aerojet-blue shadow-sm dark:bg-slate-900 dark:text-white'
                 : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
             }`}
           >
@@ -594,8 +594,8 @@ export default function NewsMarkdownEditor({
           {mode === 'SPLIT' && (
             <div className="max-h-[800px] overflow-y-auto bg-slate-50/30 p-8 dark:bg-slate-950/30">
               <div
-                className="prose prose-slate prose-lg dark:prose-invert prose-headings:text-[#002a5c] prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-[#002a5c] prose-a:text-[#4c9ded] prose-a:font-bold prose-a:no-underline hover:prose-a:underline max-w-none"
-                dangerouslySetInnerHTML={{ __html: editor.getHTML() }}
+                className="prose prose-slate prose-lg dark:prose-invert prose-headings:text-aerojet-blue prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-aerojet-blue prose-a:text-aerojet-sky prose-a:font-bold prose-a:no-underline hover:prose-a:underline max-w-none"
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(editor.getHTML()) }}
               />
             </div>
           )}

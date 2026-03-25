@@ -33,12 +33,10 @@ export default async function CourseDetailsPage({ params }: Props) {
       where: { id },
       include: { category: true },
     }),
-    prisma.enrollment.findUnique({
+    prisma.enrollment.findFirst({
       where: {
-        userId_courseId: {
-          userId,
-          courseId: id,
-        },
+        userId,
+        courseId: id,
       },
     }),
   ])
@@ -98,10 +96,10 @@ export default async function CourseDetailsPage({ params }: Props) {
             Back to Courses
           </Link>
           <div className="mt-4 flex items-center gap-3">
-            <span className="font-mono text-xs font-black tracking-widest text-[#4c9ded]">
+            <span className="font-mono text-xs font-black tracking-widest text-aerojet-sky">
               {course.code}
             </span>
-            <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+            <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
               {course.name}
             </h1>
           </div>
@@ -123,7 +121,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                 }
                 className={`inline-flex items-center justify-center rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-lg transition-all active:scale-95 ${
                   canAffordPool
-                    ? 'bg-[#002a5c] shadow-blue-900/10 hover:bg-[#003875]'
+                    ? 'bg-aerojet-blue shadow-blue-900/10 hover:bg-[#003875]'
                     : 'bg-orange-600 shadow-orange-900/10 hover:bg-orange-700'
                 }`}
               >
@@ -139,7 +137,7 @@ export default async function CourseDetailsPage({ params }: Props) {
           ) : (
             <Link
               href={`/applicant/courses/${id}/purchase`}
-              className="inline-flex items-center justify-center rounded-xl bg-[#002a5c] px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-900/10 transition-all hover:bg-[#003875] active:scale-95"
+              className="inline-flex items-center justify-center rounded-xl bg-aerojet-blue px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-900/10 transition-all hover:bg-[#003875] active:scale-95"
             >
               Enroll Now
               <ChevronRight className="ml-1 h-4 w-4" />
@@ -166,7 +164,7 @@ export default async function CourseDetailsPage({ params }: Props) {
           {/* Resources & Content */}
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#4c9ded]">
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-aerojet-sky">
                 <FileText className="h-5 w-5" />
               </div>
               <h3 className="font-bold text-slate-900 dark:text-slate-100">Syllabus</h3>
@@ -178,7 +176,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   href={course.syllabusUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-4 inline-flex items-center text-sm font-bold text-[#002a5c] hover:underline"
+                  className="mt-4 inline-flex items-center text-sm font-bold text-aerojet-blue hover:underline"
                 >
                   Download Syllabus
                   <ChevronRight className="h-4 w-4" />
@@ -204,7 +202,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                     href={course.materialsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center text-sm font-bold text-[#002a5c] hover:underline dark:text-[#4c9ded]"
+                    className="mt-4 inline-flex items-center text-sm font-bold text-aerojet-blue hover:underline dark:text-aerojet-sky"
                   >
                     View Materials
                     <ChevronRight className="h-4 w-4" />
@@ -237,7 +235,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   course.prerequisites.map((code) => (
                     <span
                       key={code}
-                      className="rounded-lg border border-blue-100 bg-white px-3 py-1.5 text-xs font-black text-[#002a5c] shadow-sm dark:bg-slate-900"
+                      className="rounded-lg border border-blue-100 bg-white px-3 py-1.5 text-xs font-black text-aerojet-blue shadow-sm dark:bg-slate-900"
                     >
                       {code}
                     </span>
@@ -263,7 +261,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                     className="flex flex-col gap-2 rounded-xl border border-white bg-white/50 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono text-[10px] font-black tracking-widest text-[#4c9ded]">
+                      <span className="font-mono text-[10px] font-black tracking-widest text-aerojet-sky">
                         {comp.code}
                       </span>
                       <span className="text-[10px] font-bold text-slate-400">
@@ -282,7 +280,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                       </div>
                       <div className="text-right">
                         <p className="text-[9px] font-bold text-slate-400 uppercase">Individual</p>
-                        <p className="text-sm font-black text-[#002a5c] dark:text-blue-400">
+                        <p className="text-sm font-black text-aerojet-blue dark:text-blue-400">
                           €{Number(comp.individualPrice).toLocaleString()}
                         </p>
                       </div>
@@ -339,7 +337,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   {isExamOnly ? 'Exam Fees (Pool)' : 'Investment'}
                 </p>
                 <div className="mt-1 flex items-baseline gap-1">
-                  <span className="text-xl font-black text-[#002a5c] dark:text-blue-400">
+                  <span className="text-xl font-black text-aerojet-blue dark:text-blue-400">
                     {course.currency} {isExamOnly ? '300' : Number(course.price).toLocaleString()}
                   </span>
                 </div>
@@ -360,7 +358,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   className={`mt-6 flex w-full items-center justify-center rounded-xl py-3 text-sm font-black text-white shadow-lg transition-all active:scale-[0.98] ${
                     isExamOnly && !canAffordPool
                       ? 'bg-orange-600 shadow-orange-900/10 hover:bg-orange-700'
-                      : 'bg-[#002a5c] shadow-blue-900/10 hover:bg-[#003875]'
+                      : 'bg-aerojet-blue shadow-blue-900/10 hover:bg-[#003875]'
                   }`}
                 >
                   {isExamOnly ? (canAffordPool ? 'Book Exam' : 'Top Up Wallet') : 'Enroll Now'}

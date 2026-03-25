@@ -33,7 +33,17 @@
       "Bash(find . -type f \\\\\\(-name *.env* -o -name .env* \\\\\\))",
       "Bash(find app:*)",
       "Bash(grep -r \"RESEND\\\\|FROM_EMAIL\\\\|MAIL_FROM\\\\|EMAIL_FROM\\\\|SENDER\" /d/Projects/aerojet-academy/.env*)",
-      "Bash(wc -l /d/Projects/aerojet-academy/app/api/auth/[...nextauth]/route.ts)"
+      "Bash(wc -l /d/Projects/aerojet-academy/app/api/auth/[...nextauth]/route.ts)",
+      "Bash(git -C /d/Projects/aerojet-academy ls-files)",
+      "Bash(git -C /d/Projects/aerojet-academy status --porcelain)",
+      "Bash(git -C /d/Projects/aerojet-academy log --name-status --oneline)",
+      "Read(//d/Projects/aerojet-academy/**)",
+      "Bash(ls -lh /d/Projects/aerojet-academy/*.md)",
+      "Bash(git -C /d/Projects/aerojet-academy log --all --full-history --oneline -- \".env*\")",
+      "Bash(ls -lh /d/Projects/aerojet-academy/*.tsbuildinfo /d/Projects/aerojet-academy/*.pdf)",
+      "Bash(find d:/Projects/aerojet-academy -name .DS_Store -o -name ._*)",
+      "Bash(npm view:*)",
+      "Bash(npm install:*)"
     ],
     "additionalDirectories": [
       "d:\\Projects\\aerojet-academy\\app\\api\\staff\\students\\[id]\\wallet\\[txnId]"

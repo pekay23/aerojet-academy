@@ -415,7 +415,7 @@ export default function BatchEnrollForm({
         <button
           onClick={handleSubmit}
           disabled={loading || selectedStudentIds.size === 0 || selectedCourseIds.size === 0}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#002a5c] py-3 text-sm font-bold text-white transition-all hover:bg-[#003a7c] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-8"
+          className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-3 text-sm font-bold text-white transition-all hover:bg-[#003a7c] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto sm:px-8"
         >
           {loading ? (
             <>

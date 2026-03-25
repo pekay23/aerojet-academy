@@ -63,15 +63,21 @@ export function clearRateLimit(key: string): void {
   rateLimitMap.delete(key)
 }
 
+const MAX_MAP_SIZE = 5000
+
+function cleanup() {
+  const now = Date.now()
+  for (const [key, entry] of rateLimitMap) {
+    if (now > entry.resetAt) rateLimitMap.delete(key)
+  }
+  // If still over limit after cleanup, evict oldest entries
+  if (rateLimitMap.size > MAX_MAP_SIZE) {
+    const entries = [...rateLimitMap.entries()].sort((a, b) => a[1].resetAt - b[1].resetAt)
+    const toRemove = entries.slice(0, rateLimitMap.size - MAX_MAP_SIZE)
+    for (const [key] of toRemove) rateLimitMap.delete(key)
+  }
+}
+
 if (typeof setInterval !== 'undefined') {
-  setInterval(() => {
-    const now = Date.now()
-    for (const [key, entry] of rateLimitMap) {
-      if (now > entry.resetAt) rateLimitMap.delete(key)
-    }
-    if (rateLimitMap.size > 10000) {
-      console.warn('[RateLimit] Map size exceeded 10000, clearing all entries')
-      rateLimitMap.clear()
-    }
-  }, 60000)
+  setInterval(cleanup, 60000)
 }

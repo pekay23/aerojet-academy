@@ -104,7 +104,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
         <Button
           variant="outline"
           size="sm"
-          className="h-8 gap-2 border-[1.5px] border-[#4c9ded]/20 bg-[#4c9ded]/5 text-xs font-bold text-[#4c9ded] hover:bg-[#4c9ded]/10 dark:border-[#4c9ded]/30 dark:bg-[#4c9ded]/10 dark:hover:bg-[#4c9ded]/20"
+          className="h-8 gap-2 border-[1.5px] border-aerojet-sky/20 bg-aerojet-sky/5 text-xs font-bold text-aerojet-sky hover:bg-aerojet-sky/10 dark:border-aerojet-sky/30 dark:bg-aerojet-sky/10 dark:hover:bg-aerojet-sky/20"
         >
           <PlusCircle className="h-3.5 w-3.5" />
           Add Internal Grade
@@ -113,7 +113,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
       <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto rounded-3xl border border-slate-100 p-0 sm:rounded-[2rem] dark:border-slate-800 dark:bg-slate-950">
         <div className="bg-slate-50 p-6 pb-8 dark:bg-slate-900/50">
           <DialogHeader className="mb-2">
-            <DialogTitle className="text-xl font-black text-[#002a5c] dark:text-white">
+            <DialogTitle className="text-xl font-black text-aerojet-blue dark:text-white">
               Record Grade for {courseCode}
             </DialogTitle>
             <DialogDescription className="font-medium text-slate-500">
@@ -126,7 +126,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
               <div className="space-y-3">
                 <Label
                   htmlFor="assessmentType"
-                  className="text-[10px] font-black tracking-widest text-[#4c9ded] uppercase"
+                  className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
                 >
                   Assessment Type
                 </Label>
@@ -145,7 +145,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
               <div className="space-y-3">
                 <Label
                   htmlFor="assessmentDate"
-                  className="text-[10px] font-black tracking-widest text-[#4c9ded] uppercase"
+                  className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
                 >
                   Assessment Date
                 </Label>
@@ -163,7 +163,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
             <div className="space-y-3">
               <Label
                 htmlFor="assessmentName"
-                className="text-[10px] font-black tracking-widest text-[#4c9ded] uppercase"
+                className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
               >
                 Assessment Name
               </Label>
@@ -182,7 +182,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
               <div className="space-y-3">
                 <Label
                   htmlFor="score"
-                  className="text-[10px] font-black tracking-widest text-[#4c9ded] uppercase"
+                  className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
                 >
                   Total Score
                 </Label>
@@ -201,7 +201,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
               <div className="space-y-3">
                 <Label
                   htmlFor="maxScore"
-                  className="text-[10px] font-black tracking-widest text-[#4c9ded] uppercase"
+                  className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
                 >
                   Max Score
                 </Label>
@@ -258,7 +258,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
             <div className="space-y-3 pt-2">
               <Label
                 htmlFor="comments"
-                className="text-[10px] font-black tracking-widest text-[#4c9ded] uppercase"
+                className="text-[10px] font-black tracking-widest text-aerojet-sky uppercase"
               >
                 Feedback Comments (Optional)
               </Label>
@@ -283,7 +283,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
               </Button>
               <Button
                 type="submit"
-                className="h-12 rounded-xl bg-gradient-to-r from-[#4c9ded] to-[#002a5c] px-8 font-black text-white hover:from-[#3a8bdf] hover:to-[#001f44]"
+                className="h-12 rounded-xl bg-gradient-to-r from-aerojet-sky to-aerojet-blue px-8 font-black text-white hover:from-[#3a8bdf] hover:to-[#001f44]"
                 disabled={isSubmitting}
               >
                 {isSubmitting ? 'Saving...' : 'Save Grade'}

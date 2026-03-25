@@ -75,7 +75,7 @@ export default function StudentDetailTabs({
                 onClick={() => handleTabChange(tab.key)}
                 className={`relative flex items-center gap-2 px-6 py-4 text-sm font-bold transition-all ${
                   isActive
-                    ? 'text-[#002a5c] dark:text-white'
+                    ? 'text-aerojet-blue dark:text-white'
                     : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
                 }`}
               >
@@ -84,7 +84,7 @@ export default function StudentDetailTabs({
                 {isActive && (
                   <motion.div
                     layoutId="student-tab-underline"
-                    className="absolute bottom-0 left-0 h-0.5 w-full bg-[#002a5c] dark:bg-white"
+                    className="absolute bottom-0 left-0 h-0.5 w-full bg-aerojet-blue dark:bg-white"
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                   />
                 )}

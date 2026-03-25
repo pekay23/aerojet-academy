@@ -76,9 +76,9 @@ export default function BulkActionsBar({
           exit={{ y: 100, opacity: 0 }}
           className="fixed bottom-8 left-1/2 z-50 -translate-x-1/2"
         >
-          <div className="flex items-center gap-6 rounded-2xl bg-[#002a5c] px-6 py-4 text-white shadow-2xl dark:bg-slate-900 border border-white/10">
+          <div className="flex items-center gap-6 rounded-2xl bg-aerojet-blue px-6 py-4 text-white shadow-2xl dark:bg-slate-900 border border-white/10">
             <div className="flex items-center gap-3 border-r border-white/10 pr-6">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-[#002a5c] text-[10px] font-black">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-aerojet-blue text-[10px] font-black">
                 {count}
               </div>
               <span className="text-sm font-bold tracking-tight">Selected</span>
@@ -127,7 +127,7 @@ export default function BulkActionsBar({
                 <div className={`mb-4 flex h-16 w-16 items-center justify-center rounded-3xl ${activeAction.variant === 'danger' ? 'bg-red-50 text-red-500' : 'bg-blue-50 text-blue-500'}`}>
                   <activeAction.icon className="h-8 w-8" />
                 </div>
-                <h3 className="text-xl font-black text-[#002a5c] dark:text-white">
+                <h3 className="text-xl font-black text-aerojet-blue dark:text-white">
                   {activeAction.confirmTitle || 'Confirm Action'}
                 </h3>
                 <p className="mt-2 text-sm text-slate-500">
@@ -139,7 +139,7 @@ export default function BulkActionsBar({
                     disabled={loading}
                     onClick={() => handleExecute(activeAction)}
                     className={`w-full rounded-2xl py-3 text-sm font-black text-white transition-all ${
-                      activeAction.variant === 'danger' ? 'bg-red-500 hover:bg-red-600' : 'bg-[#002a5c] hover:bg-slate-800'
+                      activeAction.variant === 'danger' ? 'bg-red-500 hover:bg-red-600' : 'bg-aerojet-blue hover:bg-slate-800'
                     }`}
                   >
                     {loading ? 'Processing...' : 'Confirm Action'}

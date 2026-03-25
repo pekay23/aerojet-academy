@@ -95,6 +95,6 @@
 
   /* Premium Blockquote Styling */
   .prose blockquote {
-    @apply border-l-4 border-[#4c9ded] bg-slate-50 py-2 pl-6 font-medium text-slate-700 italic dark:bg-slate-800/50 dark:text-slate-300;
+    @apply border-l-4 border-aerojet-sky bg-slate-50 py-2 pl-6 font-medium text-slate-700 italic dark:bg-slate-800/50 dark:text-slate-300;
   }
 }

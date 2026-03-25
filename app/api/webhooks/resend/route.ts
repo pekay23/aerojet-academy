@@ -1,30 +1,52 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma/client'
+import { Webhook } from 'svix'
+import prisma from '@/lib/prisma/client'
 
 /**
  * Resend Webhook Handler
  *
- * This endpoint receives events from Resend (sent, delivered, bounced, etc.)
+ * Receives events from Resend (sent, delivered, bounced, etc.)
  * and logs them to the AuditLog for tracking.
+ * Verifies webhook signatures using Svix when RESEND_WEBHOOK_SECRET is configured.
  */
 export async function POST(req: Request) {
   try {
-    const payload = await req.json()
+    const body = await req.text()
+    const webhookSecret = process.env.RESEND_WEBHOOK_SECRET
 
-    // Resend webhook payload structure:
-    // {
-    //   "type": "email.sent",
-    //   "created_at": "2023-01-01T00:00:00.000Z",
-    //   "data": { ... }
-    // }
+    let payload: any
+
+    if (webhookSecret) {
+      const svixId = req.headers.get('svix-id')
+      const svixTimestamp = req.headers.get('svix-timestamp')
+      const svixSignature = req.headers.get('svix-signature')
+
+      if (!svixId || !svixTimestamp || !svixSignature) {
+        return NextResponse.json({ error: 'Missing webhook signature headers' }, { status: 401 })
+      }
+
+      const wh = new Webhook(webhookSecret)
+      try {
+        payload = wh.verify(body, {
+          'svix-id': svixId,
+          'svix-timestamp': svixTimestamp,
+          'svix-signature': svixSignature,
+        })
+      } catch {
+        console.error('[Webhooks] Resend signature verification failed')
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+      }
+    } else {
+      console.warn('[Webhooks] RESEND_WEBHOOK_SECRET not set — skipping signature verification')
+      payload = JSON.parse(body)
+    }
+
     const { type, data, created_at } = payload
 
     if (!type || !data) {
       return NextResponse.json({ error: 'Invalid payload' }, { status: 400 })
     }
 
-    // Log the event to AuditLog
-    // We prefix with EMAIL_ for easy filtering
     await prisma.auditLog.create({
       data: {
         action: `EMAIL_${type.replace('.', '_').toUpperCase()}`,
@@ -38,9 +60,6 @@ export async function POST(req: Request) {
         },
       },
     })
-
-    // TODO: Add specific logic for 'email.bounced' or 'email.complained'
-    // to flag user emails as invalid in the database.
 
     return NextResponse.json({ received: true })
   } catch (error) {

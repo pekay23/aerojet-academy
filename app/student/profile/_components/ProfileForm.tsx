@@ -192,7 +192,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                 <input
                   type="text"
                   disabled
-                  value={formatDate(user.profile?.dateOfBirth)}
+                  value={formatDate(user.profile?.dateOfBirth ?? null)}
                   className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-500 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-400"
                 />
               </div>
@@ -261,7 +261,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                 Admission Date
               </p>
               <p className="font-bold text-slate-900 dark:text-white">
-                {formatDate(user.studentProfile?.enrollmentDate)}
+                {formatDate(user.studentProfile?.enrollmentDate ?? null)}
               </p>
             </div>
             <div>

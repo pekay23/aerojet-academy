@@ -276,7 +276,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                   </div>
                   <button
                     onClick={() => setExpandedOjt(expandedOjt === fte.id ? null : fte.id)}
-                    className="flex items-center gap-1 text-xs font-bold text-[#002a5c]"
+                    className="flex items-center gap-1 text-xs font-bold text-aerojet-blue"
                   >
                     {expandedOjt === fte.id ? 'Hide' : 'View'} OJT Periods
                   </button>

@@ -209,7 +209,7 @@ export default function AcademicSchedulingPage() {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
         <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-[#4c9ded]" />
+          <Loader2 className="h-8 w-8 animate-spin text-aerojet-sky" />
           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
             Loading scheduling data...
           </p>
@@ -225,8 +225,8 @@ export default function AcademicSchedulingPage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3">
-          <CalendarDays className="h-8 w-8 text-[#4c9ded]" />
-          <h1 className="text-3xl font-bold tracking-tight text-[#002a5c] dark:text-white">
+          <CalendarDays className="h-8 w-8 text-aerojet-sky" />
+          <h1 className="text-3xl font-bold tracking-tight text-aerojet-blue dark:text-white">
             Academic Scheduling
           </h1>
         </div>
@@ -243,8 +243,8 @@ export default function AcademicSchedulingPage() {
             onClick={() => setSelectedPathwayId(p.id)}
             className={`rounded-xl border px-6 py-3 text-sm font-bold transition-all ${
               selectedPathwayId === p.id
-                ? 'border-[#002a5c] bg-[#002a5c] text-white shadow-lg'
-                : 'border-slate-200 bg-white text-[#002a5c] hover:border-[#4c9ded] hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-[#4c9ded]'
+                ? 'border-aerojet-blue bg-aerojet-blue text-white shadow-lg'
+                : 'border-slate-200 bg-white text-aerojet-blue hover:border-aerojet-sky hover:shadow-md dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-aerojet-sky'
             }`}
           >
             {p.name}
@@ -287,9 +287,9 @@ export default function AcademicSchedulingPage() {
               {/* Header */}
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
-                  <th className="sticky left-0 z-20 min-w-[280px] border-r border-slate-200 bg-slate-50 px-6 py-5 text-left text-sm font-bold text-[#002a5c] dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
+                  <th className="sticky left-0 z-20 min-w-[280px] border-r border-slate-200 bg-slate-50 px-6 py-5 text-left text-sm font-bold text-aerojet-blue dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
                     <div className="flex items-center gap-2">
-                      <BookOpen className="h-4 w-4 text-[#4c9ded]" />
+                      <BookOpen className="h-4 w-4 text-aerojet-sky" />
                       Course
                     </div>
                   </th>
@@ -299,10 +299,10 @@ export default function AcademicSchedulingPage() {
                       className="min-w-[140px] border-r border-slate-200 px-4 py-5 text-center dark:border-slate-800"
                     >
                       <div className="flex flex-col items-center gap-1">
-                        <span className="text-sm font-bold text-[#002a5c] dark:text-slate-100">
+                        <span className="text-sm font-bold text-aerojet-blue dark:text-slate-100">
                           Year {term.yearNumber}
                         </span>
-                        <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[#002a5c] dark:bg-blue-900/30 dark:text-blue-300">
+                        <span className="rounded-md bg-blue-50 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-300">
                           Sem {term.semesterNumber}
                         </span>
                       </div>
@@ -321,7 +321,7 @@ export default function AcademicSchedulingPage() {
                     {/* Course name column */}
                     <td className="sticky left-0 z-10 border-r border-slate-200 bg-white px-6 py-4 group-hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:group-hover:bg-slate-800/30">
                       <div className="space-y-1">
-                        <div className="text-sm font-bold leading-tight text-[#002a5c] dark:text-slate-100">
+                        <div className="text-sm font-bold leading-tight text-aerojet-blue dark:text-slate-100">
                           {course.name}
                         </div>
                         <span className="inline-block rounded bg-slate-100 px-1.5 py-0.5 font-mono text-xs font-bold text-slate-500 dark:bg-slate-800 dark:text-slate-400">
@@ -366,7 +366,7 @@ export default function AcademicSchedulingPage() {
                             }
                           >
                             {isCellLoading ? (
-                              <Loader2 className="h-5 w-5 animate-spin text-[#4c9ded]" />
+                              <Loader2 className="h-5 w-5 animate-spin text-aerojet-sky" />
                             ) : isAssigned ? (
                               <div className="group/cell flex items-center justify-center">
                                 <Check className="h-5 w-5 text-emerald-500 group-hover/cell:hidden" />
@@ -400,7 +400,7 @@ export default function AcademicSchedulingPage() {
               {/* Footer: totals */}
               <tfoot>
                 <tr className="border-t border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
-                  <td className="sticky left-0 z-10 border-r border-slate-200 bg-slate-50 px-6 py-4 text-sm font-bold text-[#002a5c] dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
+                  <td className="sticky left-0 z-10 border-r border-slate-200 bg-slate-50 px-6 py-4 text-sm font-bold text-aerojet-blue dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-300">
                     Total courses per term
                   </td>
                   {termColumns.map((term) => (
@@ -408,7 +408,7 @@ export default function AcademicSchedulingPage() {
                       key={term.id}
                       className="border-r border-slate-200 px-4 py-4 text-center dark:border-slate-800"
                     >
-                      <span className="inline-flex min-w-[28px] items-center justify-center rounded-lg bg-[#002a5c] px-2 py-1 text-xs font-bold text-white">
+                      <span className="inline-flex min-w-[28px] items-center justify-center rounded-lg bg-aerojet-blue px-2 py-1 text-xs font-bold text-white">
                         {termCounts[term.id] ?? 0}
                       </span>
                     </td>
