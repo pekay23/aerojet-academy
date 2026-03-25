@@ -29,7 +29,7 @@ type AuditLog = {
     email: string
     profile: { firstName: string; lastName: string } | null
   } | null
-} | null
+}
 
 import { memo } from 'react'
 
@@ -308,7 +308,7 @@ export default function AuditLogTable({ logs, entityLabels, query }: AuditLogTab
                   {getEntityIcon(selectedLog.entity)}
                 </div>
                 <div>
-                  <h2 className="text-xl font-black tracking-tight text-[#002a5c] dark:text-white">
+                  <h2 className="text-xl font-black tracking-tight text-aerojet-blue dark:text-white">
                     Event Detail
                   </h2>
                   <p className="mt-0.5 font-mono text-[10px] text-slate-500 dark:text-slate-400">
@@ -419,7 +419,7 @@ export default function AuditLogTable({ logs, entityLabels, query }: AuditLogTab
             <div className="flex justify-end border-t border-slate-200/60 bg-slate-50/50 px-8 py-5 dark:border-slate-800/80 dark:bg-slate-900/50">
               <button
                 onClick={() => setSelectedLog(null)}
-                className="rounded-xl bg-[#002a5c] px-8 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[#003875] hover:shadow-lg dark:hover:bg-[#4c9ded]"
+                className="rounded-xl bg-aerojet-blue px-8 py-3 text-sm font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[#003875] hover:shadow-lg dark:hover:bg-aerojet-sky"
               >
                 Done
               </button>

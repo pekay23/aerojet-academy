@@ -86,7 +86,7 @@ export default function CreateUserDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2 text-xs font-bold text-white transition-all hover:bg-[#002a5c]/90">
+        <Button className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white transition-all hover:bg-aerojet-blue/90">
           <UserPlus className="h-3.5 w-3.5" /> Add User
         </Button>
       </DialogTrigger>
@@ -175,7 +175,7 @@ export default function CreateUserDialog() {
           <Button variant="outline" onClick={() => setOpen(false)} disabled={loading}>
             Cancel
           </Button>
-          <Button onClick={handleCreate} disabled={loading} className="bg-[#002a5c]">
+          <Button onClick={handleCreate} disabled={loading} className="bg-aerojet-blue">
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Create User
           </Button>

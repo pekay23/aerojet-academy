@@ -57,7 +57,7 @@ export default function Modal({
                   )}
                 >
                   <div className="mb-6 flex items-center justify-between">
-                    <Dialog.Title className="text-xl font-black tracking-tight text-[#002a5c] dark:text-white">
+                    <Dialog.Title className="text-xl font-black tracking-tight text-aerojet-blue dark:text-white">
                       {title}
                     </Dialog.Title>
                     {showClose && (

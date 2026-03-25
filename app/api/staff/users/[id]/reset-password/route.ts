@@ -25,7 +25,7 @@ export const POST = withErrorHandler(
 
     await prisma.user.update({
       where: { id },
-      data: { password: hashedPassword },
+      data: { password: hashedPassword, mustChangePassword: true, passwordChanged: false, passwordChangedAt: new Date() },
     })
 
     // Send email with tempPassword

@@ -105,7 +105,7 @@ export default function ChangeRoleDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>
             Cancel
           </Button>
-          <Button onClick={handleUpdate} disabled={loading} className="bg-[#002a5c]">
+          <Button onClick={handleUpdate} disabled={loading} className="bg-aerojet-blue">
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Update Role
           </Button>

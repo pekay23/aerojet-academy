@@ -246,7 +246,7 @@ export default function StandaloneBooking({
                 <button
                   onClick={handleConfirm}
                   disabled={isPending || (!selectedExamId && !selectedModuleCode) || !canAfford}
-                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-[#002a5c] py-3 text-sm font-bold text-white hover:bg-[#003a7c] active:scale-95 disabled:opacity-50"
+                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-3 text-sm font-bold text-white hover:bg-[#003a7c] active:scale-95 disabled:opacity-50"
                 >
                   {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Booking'}
                   {!isPending && <ArrowRight className="h-4 w-4" />}

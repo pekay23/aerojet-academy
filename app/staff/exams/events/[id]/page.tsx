@@ -1,6 +1,7 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
+import { sanitizeHtml } from '@/lib/utils/sanitize'
 import {
   Calendar,
   Clock,
@@ -53,7 +54,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
       <div className="mb-6">
         <Link
           href="/staff/exams/events"
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#002a5c] dark:text-slate-400"
+          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-aerojet-blue dark:text-slate-400"
         >
           <ChevronLeft className="h-4 w-4" />
           Back to Events
@@ -63,7 +64,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <div className="mb-2 flex items-center gap-3">
-            <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+            <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
               {event.name}
             </h1>
             <span
@@ -106,7 +107,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
           <EventOverrideControls eventId={event.id} currentOverride={event.overrideStatus} />
           <Link
             href={`/staff/exams/events/${event.id}/pools/create`}
-            className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#002a5c]/90"
+            className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
           >
             <Plus className="h-4 w-4" />
             Add Pool
@@ -159,7 +160,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                     <span className="text-sm font-bold text-slate-600 dark:text-slate-300">
                       Confirmed
                     </span>
-                    <span className="text-sm font-black text-[#002a5c] dark:text-blue-400">
+                    <span className="text-sm font-black text-aerojet-blue dark:text-blue-400">
                       €{evaluation.metrics.totalConfirmedRevenue.toLocaleString()}
                     </span>
                   </div>
@@ -171,7 +172,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                   </div>
                   <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                     <div
-                      className={`h-full rounded-full ${evaluation.metrics.revenueMetPercent >= 100 ? 'bg-green-500' : 'bg-[#002a5c]'}`}
+                      className={`h-full rounded-full ${evaluation.metrics.revenueMetPercent >= 100 ? 'bg-green-500' : 'bg-aerojet-blue'}`}
                       style={{ width: `${Math.min(100, evaluation.metrics.revenueMetPercent)}%` }}
                     />
                   </div>
@@ -200,7 +201,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                     {evaluation.reasons.map((reason: string, idx: number) => (
                       <li key={idx} className="flex gap-2">
                         <span className="mt-0.5">•</span>
-                        <span dangerouslySetInnerHTML={{ __html: reason }} />
+                        <span dangerouslySetInnerHTML={{ __html: sanitizeHtml(reason) }} />
                       </li>
                     ))}
                   </ul>

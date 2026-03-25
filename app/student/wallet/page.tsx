@@ -253,7 +253,7 @@ export default async function WalletPage({
             <div className="flex flex-col gap-3 sm:gap-4">
               <a
                 href="/student/wallet?tab=top-up"
-                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-[#4c9ded]/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-aerojet-sky/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-green-600 transition-colors group-hover:bg-green-100 sm:h-12 sm:w-12">
                   <ArrowUpRight className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -267,7 +267,7 @@ export default async function WalletPage({
               </a>
               <a
                 href="/student/wallet?tab=transactions"
-                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-[#4c9ded]/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-aerojet-sky/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-100 sm:h-12 sm:w-12">
                   <CreditCard className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -485,7 +485,7 @@ export default async function WalletPage({
                     <div className="mt-6 flex flex-wrap justify-center gap-3">
                       <Link
                         href="/student/exams"
-                        className="rounded-xl bg-[#002a5c] px-6 py-2.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#003875]"
+                        className="rounded-xl bg-aerojet-blue px-6 py-2.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#003875]"
                       >
                         Browse Exams
                       </Link>
@@ -504,7 +504,7 @@ export default async function WalletPage({
                     <div className="mt-6 flex flex-wrap justify-center gap-3">
                       <Link
                         href="/student/messages?subject=Question regarding enrollment approval"
-                        className="rounded-xl bg-[#002a5c] px-6 py-2.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#003875]"
+                        className="rounded-xl bg-aerojet-blue px-6 py-2.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#003875]"
                       >
                         Message Admin
                       </Link>
@@ -618,7 +618,7 @@ export default async function WalletPage({
                               m.milestoneType === 'SEAT_CONFIRMATION' ? 'seat' : 
                               m.milestoneType === 'SEM1_DUE' ? 'sem1' : 'sem2'
                             }`}
-                            className="rounded-xl bg-[#002a5c] px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-800"
+                            className="rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white transition hover:bg-blue-800"
                           >
                             Top Up to Pay
                           </Link>
@@ -658,7 +658,7 @@ export default async function WalletPage({
           )}
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#002a5c] text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-aerojet-blue text-white">
                 <span className="font-bold">1</span>
               </div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">
@@ -685,7 +685,7 @@ export default async function WalletPage({
 
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-6 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#4c9ded] text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-aerojet-sky text-white">
                 <span className="font-bold">2</span>
               </div>
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">

@@ -31,7 +31,7 @@ export default async function Page({
         <div>
           <Link
             href="/instructor/classes"
-            className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-[#4c9ded]"
+            className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-sky"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
             Back to My Classes
@@ -45,7 +45,7 @@ export default async function Page({
         </div>
 
         <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-2.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <CalendarIcon className="h-4 w-4 text-[#4c9ded]" />
+          <CalendarIcon className="h-4 w-4 text-aerojet-sky" />
           <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
             {format(targetDate, 'MMMM d, yyyy')}
           </span>

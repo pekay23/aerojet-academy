@@ -187,7 +187,7 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
 
         <div className="flex items-start gap-5">
           <div className="relative">
-            <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-[#002a5c] text-2xl font-black text-white shadow-lg">
+            <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-aerojet-blue text-2xl font-black text-white shadow-lg">
               {student.profile?.profilePhotoUrl ? (
                 <img
                   src={student.profile.profilePhotoUrl}
@@ -248,7 +248,7 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
                 {student.status}
               </span>
               {student.studentProfile?.enrollmentType && (
-                <span className="rounded-full bg-[#002a5c]/10 px-2.5 py-0.5 text-[10px] font-black text-[#002a5c] uppercase">
+                <span className="rounded-full bg-aerojet-blue/10 px-2.5 py-0.5 text-[10px] font-black text-aerojet-blue uppercase">
                   {student.studentProfile.enrollmentType.replace(/_/g, ' ')}
                 </span>
               )}

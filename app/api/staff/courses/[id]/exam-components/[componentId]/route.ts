@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { softDeleteData } from '@/lib/prisma/soft-delete'
 
 // PATCH /api/staff/courses/[id]/exam-components/[componentId]
 export const PATCH = withErrorHandler(
@@ -139,8 +140,8 @@ export const DELETE = withErrorHandler(
     if (hasRelated && force) {
       await prisma.$transaction(async (tx) => {
         // Delete in dependency order
-        await tx.poolMembership.deleteMany({ where: { examComponentId: componentId } })
-        await tx.examBooking.deleteMany({ where: { examComponentId: componentId } })
+        await tx.poolMembership.updateMany({ where: { examComponentId: componentId }, data: softDeleteData() })
+        await tx.examBooking.updateMany({ where: { examComponentId: componentId }, data: softDeleteData() })
         await tx.exam.deleteMany({ where: { examComponentId: componentId } })
         await tx.examComponent.delete({ where: { id: componentId } })
       })

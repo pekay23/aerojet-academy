@@ -120,7 +120,7 @@ export default function EditAcademicPeriodDialog({
       <DialogContent className="sm:max-w-[440px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <GraduationCap className="h-5 w-5 text-[#4c9ded]" />
+            <GraduationCap className="h-5 w-5 text-aerojet-sky" />
             Edit Academic Period
           </DialogTitle>
         </DialogHeader>

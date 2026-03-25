@@ -230,7 +230,7 @@ export default async function ApplicantDashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           Welcome, {firstName}
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -287,7 +287,7 @@ export default async function ApplicantDashboardPage() {
             {(appStatus === 'payment_pending' || appStatus === 'registered') && (
               <Link
                 href="/applicant/application/payment"
-                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-bold tracking-widest text-[#002a5c] uppercase shadow-sm transition-all hover:bg-[#002a5c] hover:text-white dark:bg-slate-900"
+                className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-xs font-bold tracking-widest text-aerojet-blue uppercase shadow-sm transition-all hover:bg-aerojet-blue hover:text-white dark:bg-slate-900"
               >
                 <CreditCard className="h-4 w-4" />
                 Upload Payment Proof
@@ -352,15 +352,15 @@ export default async function ApplicantDashboardPage() {
           <Link
             key={label}
             href={href}
-            className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-[#4c9ded] hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
+            className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-aerojet-sky hover:shadow-lg dark:border-slate-800 dark:bg-slate-900"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 transition-colors group-hover:bg-[#002a5c] dark:bg-slate-800/50">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-50 transition-colors group-hover:bg-aerojet-blue dark:bg-slate-800/50">
               <Icon className="h-5 w-5 text-slate-400 transition-colors group-hover:text-white" />
             </div>
             <div className="flex-1">
               <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{label}</span>
             </div>
-            <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-[#4c9ded]" />
+            <ArrowRight className="h-4 w-4 text-slate-300 group-hover:text-aerojet-sky" />
           </Link>
         ))}
       </div>

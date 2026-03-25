@@ -83,7 +83,7 @@ export default function PathwayPaymentForm({
       {/* Step 1: Payment Plan Selection */}
       <div className="space-y-4 rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#002a5c] text-xs font-bold text-white">
+          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-aerojet-blue text-xs font-bold text-white">
             1
           </div>
           <h2 className="font-bold text-slate-900 dark:text-slate-100">Choose Your Payment Plan</h2>
@@ -108,14 +108,14 @@ export default function PathwayPaymentForm({
                 }}
                 className={`w-full rounded-xl border-2 p-4 text-left transition-all ${
                   isSelected
-                    ? 'border-[#002a5c] bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/10'
+                    ? 'border-aerojet-blue bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/10'
                     : 'border-slate-200 hover:border-slate-300 dark:border-slate-700 dark:hover:border-slate-600'
                 }`}
               >
                 <div className="flex items-start gap-3">
                   <div className="mt-0.5 shrink-0">
                     {isSelected ? (
-                      <CircleDot className="h-5 w-5 text-[#002a5c] dark:text-blue-400" />
+                      <CircleDot className="h-5 w-5 text-aerojet-blue dark:text-blue-400" />
                     ) : (
                       <Circle className="h-5 w-5 text-slate-300 dark:text-slate-600" />
                     )}
@@ -136,7 +136,7 @@ export default function PathwayPaymentForm({
                     </p>
 
                     {!opt.customMin && (
-                      <p className="mt-2 text-lg font-black text-[#002a5c] dark:text-blue-400">
+                      <p className="mt-2 text-lg font-black text-aerojet-blue dark:text-blue-400">
                         {currency} {opt.amount.toLocaleString()}
                       </p>
                     )}
@@ -156,7 +156,7 @@ export default function PathwayPaymentForm({
                               <div
                                 className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-bold ${
                                   idx === 0
-                                    ? 'bg-[#002a5c] text-white'
+                                    ? 'bg-aerojet-blue text-white'
                                     : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
                                 }`}
                               >
@@ -193,7 +193,7 @@ export default function PathwayPaymentForm({
                             min={opt.customMin}
                             step="0.01"
                             placeholder={`Min. ${opt.customMin.toLocaleString()}`}
-                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-bold outline-none focus:border-[#002a5c] focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800"
+                            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-bold outline-none focus:border-aerojet-blue focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800"
                           />
                         </div>
                         {customAmount && !isCustomValid() && (
@@ -250,7 +250,7 @@ export default function PathwayPaymentForm({
       {selectedOption && isCustomValid() && getPaymentAmount() > 0 && (
         <div className="space-y-4 rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#002a5c] text-xs font-bold text-white">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-aerojet-blue text-xs font-bold text-white">
               2
             </div>
             <h2 className="font-bold text-slate-900 dark:text-slate-100">Upload Payment Proof</h2>
@@ -357,11 +357,11 @@ export default function PathwayPaymentForm({
             }}
             appearance={{
               container:
-                'border-2 border-dashed border-slate-200 rounded-xl p-8 cursor-pointer hover:border-[#4c9ded] transition-colors',
+                'border-2 border-dashed border-slate-200 rounded-xl p-8 cursor-pointer hover:border-aerojet-sky transition-colors',
               label: 'text-slate-700 font-semibold',
               allowedContent: 'text-slate-400 text-xs',
               button:
-                'bg-[#002a5c] text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#003875] transition-colors',
+                'bg-aerojet-blue text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#003875] transition-colors',
             }}
           />
 

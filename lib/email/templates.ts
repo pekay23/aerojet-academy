@@ -148,8 +148,10 @@ export function poolConfirmedEmail(
   name: string,
   poolName: string,
   examDate: string,
-  module: string
+  module: string,
+  capturedAmount?: string
 ) {
+  const amountText = capturedAmount || 'your reserved funds'
   return baseLayout(
     `
     <h2 style="color:#0f172a;">Exam Booking Confirmed!</h2>
@@ -160,13 +162,14 @@ export function poolConfirmedEmail(
       <p><strong>Exam Date:</strong> ${examDate}</p>
       <p><strong>Module:</strong> ${module}</p>
     </div>
-    <p>Your reserved funds (€300) have been captured. Good luck with your exam!</p>
+    <p>Your reserved funds (${amountText}) have been captured. Good luck with your exam!</p>
   `,
     'Exam Booking Confirmed'
   )
 }
 
-export function poolFailedEmail(name: string, poolName: string, examDate: string) {
+export function poolFailedEmail(name: string, poolName: string, examDate: string, releasedAmount?: string) {
+  const amountText = releasedAmount || 'your reserved funds'
   return baseLayout(
     `
     <h2 style="color:#dc2626;">Exam Booking Did Not Reach Minimum</h2>
@@ -176,7 +179,7 @@ export function poolFailedEmail(name: string, poolName: string, examDate: string
       <p><strong>Pool:</strong> ${poolName}</p>
       <p><strong>Exam Date:</strong> ${examDate}</p>
     </div>
-    <p>Your reserved funds (€300) have been released back to your wallet. You may join another booking.</p>
+    <p>Your reserved funds (${amountText}) have been released back to your wallet. You may join another booking.</p>
   `,
     'Exam Booking Postponed'
   )

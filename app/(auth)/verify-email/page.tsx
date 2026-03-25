@@ -79,7 +79,7 @@ export default function VerifyEmailPage() {
       <div className="text-center">
         {status === 'loading' && (
           <>
-            <Loader2 className="mx-auto mb-6 h-12 w-12 animate-spin text-[#4c9ded]" />
+            <Loader2 className="mx-auto mb-6 h-12 w-12 animate-spin text-aerojet-sky" />
             <h2 className="mb-3 text-2xl font-black tracking-tight text-slate-800 uppercase">
               {type === 'registration' ? 'Verifying Email' : 'Logging You In'}
             </h2>
@@ -119,13 +119,13 @@ export default function VerifyEmailPage() {
                     window.location.href = '/'
                   }, 1000)
                 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-[#002a5c] px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#4c9ded]"
+                className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-aerojet-sky"
               >
                 Close Page
               </button>
               <Link
                 href="/"
-                className="text-xs font-bold text-slate-400 hover:text-[#4c9ded] hover:underline"
+                className="text-xs font-bold text-slate-400 hover:text-aerojet-sky hover:underline"
               >
                 Return to Homepage
               </Link>
@@ -207,18 +207,18 @@ export default function VerifyEmailPage() {
                   type="email"
                   placeholder="Enter your email address"
                   required
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-[#4c9ded] focus:outline-none"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 focus:ring-2 focus:ring-aerojet-sky focus:outline-none"
                 />
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-[#002a5c] px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#4c9ded] disabled:opacity-50"
+                  className="w-full rounded-xl bg-aerojet-blue px-6 py-3 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-aerojet-sky disabled:opacity-50"
                 >
                   Resend Verification Link
                 </button>
               </form>
 
               <div className="pt-4">
-                <Link href="/login" className="text-sm font-bold text-[#4c9ded] hover:underline">
+                <Link href="/login" className="text-sm font-bold text-aerojet-sky hover:underline">
                   Return to Login
                 </Link>
               </div>

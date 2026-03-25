@@ -83,7 +83,7 @@ export default function CourseComparison() {
             {pathways.map((p) => (
               <th key={p.name} className="p-4 text-center">
                 <div
-                  className={`inline-block rounded-xl px-4 py-2 text-sm font-black tracking-wide uppercase ${p.highlight ? 'bg-[#002a5c] text-white' : 'bg-slate-100 text-slate-700'}`}
+                  className={`inline-block rounded-xl px-4 py-2 text-sm font-black tracking-wide uppercase ${p.highlight ? 'bg-aerojet-blue text-white' : 'bg-slate-100 text-slate-700'}`}
                 >
                   {p.name}
                 </div>
@@ -115,7 +115,7 @@ export default function CourseComparison() {
                   href={p.href}
                   className={`inline-block rounded-xl px-5 py-2.5 text-xs font-black tracking-widest uppercase transition-all ${
                     p.highlight
-                      ? 'bg-[#4c9ded] text-white hover:bg-[#002a5c]'
+                      ? 'bg-aerojet-sky text-white hover:bg-aerojet-blue'
                       : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                   }`}
                 >

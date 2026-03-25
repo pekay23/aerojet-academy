@@ -89,11 +89,11 @@ export default function PaymentUploadForm({ existingProofUrl }: Props) {
         }}
         appearance={{
           container:
-            'border-2 border-dashed border-slate-200 rounded-xl p-8 cursor-pointer hover:border-[#4c9ded] transition-colors',
+            'border-2 border-dashed border-slate-200 rounded-xl p-8 cursor-pointer hover:border-aerojet-sky transition-colors',
           label: 'text-slate-700 font-semibold',
           allowedContent: 'text-slate-400 text-xs',
           button:
-            'bg-[#002a5c] text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#003875] transition-colors',
+            'bg-aerojet-blue text-white font-bold px-6 py-2.5 rounded-xl hover:bg-[#003875] transition-colors',
         }}
       />
 

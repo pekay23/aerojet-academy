@@ -75,7 +75,7 @@ function MessageBubble({
     <div className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
       <div
         className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xs font-black text-white shadow-sm ring-2 ring-white dark:ring-slate-900 ${
-          isOwn ? 'bg-[#002a5c]' : 'bg-slate-400'
+          isOwn ? 'bg-aerojet-blue' : 'bg-slate-400'
         }`}
       >
         {userName(message.sender).charAt(0).toUpperCase()}
@@ -91,7 +91,7 @@ function MessageBubble({
         <div
           className={`rounded-2xl px-5 py-3 text-sm leading-relaxed shadow-sm ${
             isOwn
-              ? 'rounded-tr-sm bg-[#002a5c] font-medium text-white shadow-blue-500/10'
+              ? 'rounded-tr-sm bg-aerojet-blue font-medium text-white shadow-blue-500/10'
               : 'rounded-tl-sm bg-slate-100 font-medium text-slate-800 dark:bg-slate-800 dark:text-slate-100'
           }`}
         >
@@ -100,7 +100,7 @@ function MessageBubble({
         {!isOwn && (
           <button
             onClick={() => onReply(message)}
-            className="flex items-center gap-1.5 text-[10px] font-black tracking-widest text-slate-400 uppercase opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#002a5c] dark:hover:text-blue-400"
+            className="flex items-center gap-1.5 text-[10px] font-black tracking-widest text-slate-400 uppercase opacity-0 transition-opacity group-hover:opacity-100 hover:text-aerojet-blue dark:hover:text-blue-400"
           >
             <CornerDownRight className="h-3 w-3" />
             Reply
@@ -179,14 +179,14 @@ export default function StaffMessageThread({
       >
         <div
           className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-base font-black text-white shadow-xl transition-transform group-hover:scale-110 ${
-            thread.root.senderId === currentUserId ? 'bg-[#002a5c]' : 'bg-slate-500'
+            thread.root.senderId === currentUserId ? 'bg-aerojet-blue' : 'bg-slate-500'
           }`}
         >
           {userName(otherParticipant).charAt(0).toUpperCase()}
         </div>
         <div className="flex-1 space-y-1 overflow-hidden">
           <div className="flex items-center gap-2">
-            <p className="truncate text-base font-black text-[#002a5c] dark:text-slate-100">
+            <p className="truncate text-base font-black text-aerojet-blue dark:text-slate-100">
               {userName(otherParticipant)}
             </p>
             <Badge
@@ -251,13 +251,13 @@ export default function StaffMessageThread({
                   e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendReply())
                 }
                 placeholder={`Type a message to ${userName(otherParticipant)}…`}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-medium text-slate-900 placeholder-slate-400 shadow-sm transition-all focus:border-[#002a5c] focus:ring-4 focus:ring-[#002a5c]/5 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-900 dark:focus:ring-blue-500/5"
+                className="w-full rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-medium text-slate-900 placeholder-slate-400 shadow-sm transition-all focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-900 dark:focus:ring-blue-500/5"
               />
             </div>
             <button
               onClick={handleSendReply}
               disabled={sending || !replyText.trim()}
-              className="group flex items-center justify-center rounded-2xl bg-[#002a5c] px-6 text-white shadow-xl transition-all hover:scale-105 hover:bg-[#003875] disabled:scale-100 disabled:opacity-50"
+              className="group flex items-center justify-center rounded-2xl bg-aerojet-blue px-6 text-white shadow-xl transition-all hover:scale-105 hover:bg-[#003875] disabled:scale-100 disabled:opacity-50"
             >
               {sending ? (
                 <Loader2 className="h-5 w-5 animate-spin" />

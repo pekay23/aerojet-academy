@@ -5,6 +5,7 @@ import { joinPoolSchema, validateBody } from '@/lib/validation/schemas'
 import { joinPool } from '@/lib/pools/operations'
 import { createAuditLog } from '@/lib/audit/logger'
 import prisma from '@/lib/prisma/client'
+import { getSystemSetting } from '@/lib/settings'
 
 export const POST = withErrorHandler(
   async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
@@ -44,10 +45,7 @@ export const POST = withErrorHandler(
     })
 
     const { getCurrencySymbol } = await import('@/lib/currency')
-    const settings = await prisma.systemSetting.findMany({
-      where: { key: 'course_currency' },
-    })
-    const currency = settings[0]?.value || 'EUR'
+    const currency = await getSystemSetting('course_currency', 'EUR')
     const symbol = getCurrencySymbol(currency)
 
     return apiCreated({

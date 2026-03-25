@@ -26,8 +26,8 @@ export default async function PurchasePage({ params }: Props) {
       where: { id },
       include: { category: true },
     }),
-    prisma.enrollment.findUnique({
-      where: { userId_courseId: { userId, courseId: id } },
+    prisma.enrollment.findFirst({
+      where: { userId, courseId: id },
     }),
     getActivePaymentMethods(),
   ])
@@ -86,7 +86,7 @@ export default async function PurchasePage({ params }: Props) {
           <ArrowLeft className="h-4 w-4" />
           Back to Course Details
         </Link>
-        <h1 className="mt-4 text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+        <h1 className="mt-4 text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           {isExamOnly ? 'Book Exam' : 'Purchase Course'}
         </h1>
         <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
@@ -125,7 +125,7 @@ export default async function PurchasePage({ params }: Props) {
               <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 {isExamOnly ? 'Exam Fee (Pool)' : 'Total Amount'}
               </span>
-              <span className="font-mono text-lg font-black text-[#002a5c] dark:text-blue-400">
+              <span className="font-mono text-lg font-black text-aerojet-blue dark:text-blue-400">
                 {course.currency}{' '}
                 {isExamOnly ? examPrice.toLocaleString() : Number(course.price).toLocaleString()}
               </span>

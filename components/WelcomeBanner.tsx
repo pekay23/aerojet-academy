@@ -20,7 +20,7 @@ export default function WelcomeBanner({ messages, userName }: WelcomeBannerProps
   if (!message) return null
 
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-linear-to-r from-[#002a5c] via-[#003875] to-[#0059a8] px-4 py-4 text-white shadow-lg sm:px-6 sm:py-5">
+    <div className="relative overflow-hidden rounded-2xl bg-linear-to-r from-aerojet-blue via-[#003875] to-[#0059a8] px-4 py-4 text-white shadow-lg sm:px-6 sm:py-5">
       {/* Decorative circles */}
       <div className="pointer-events-none absolute -top-8 -right-8 h-32 w-32 rounded-full bg-white/5" />
       <div className="pointer-events-none absolute right-16 -bottom-6 h-20 w-20 rounded-full bg-white/5" />

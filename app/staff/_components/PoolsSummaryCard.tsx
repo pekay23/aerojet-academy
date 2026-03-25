@@ -88,7 +88,7 @@ export default function PoolsSummaryCard({ pools }: Props) {
         <div className="mt-6 border-t border-slate-50 pt-4 dark:border-slate-800">
           <Link
             href="/staff/exams"
-            className="group flex items-center justify-center gap-1.5 text-xs font-bold text-slate-400 transition-colors hover:text-[#002a5c] dark:hover:text-blue-400"
+            className="group flex items-center justify-center gap-1.5 text-xs font-bold text-slate-400 transition-colors hover:text-aerojet-blue dark:hover:text-blue-400"
           >
             View All Events
             <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />

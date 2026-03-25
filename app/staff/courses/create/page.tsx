@@ -120,12 +120,12 @@ export default function CreateCoursePage() {
     <div className="mx-auto max-w-7xl">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Create Course
           </h1>
           <p className="text-slate-500 dark:text-slate-400">Add a new course to the catalog.</p>
         </div>
-        <Link href="/staff/courses" className="text-sm font-bold text-[#002a5c] hover:underline">
+        <Link href="/staff/courses" className="text-sm font-bold text-aerojet-blue hover:underline">
           Cancel
         </Link>
       </div>
@@ -388,7 +388,7 @@ export default function CreateCoursePage() {
               <div className="flex justify-end">
                 <Button
                   type="submit"
-                  className="bg-[#002a5c] hover:bg-[#002a5c]/90"
+                  className="bg-aerojet-blue hover:bg-aerojet-blue/90"
                   disabled={isLoading}
                 >
                   {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Create Course'}

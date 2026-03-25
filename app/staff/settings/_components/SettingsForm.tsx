@@ -90,7 +90,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                       />
                       <label
                         htmlFor={field.key}
-                        className="peer h-7 w-12 cursor-pointer rounded-full bg-slate-200 shadow-inner transition-colors peer-checked:bg-[#002a5c] peer-focus:ring-4 peer-focus:ring-[#002a5c]/20 peer-focus:outline-none after:absolute after:top-[4px] after:left-[4px] after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600"
+                        className="peer h-7 w-12 cursor-pointer rounded-full bg-slate-200 shadow-inner transition-colors peer-checked:bg-aerojet-blue peer-focus:ring-4 peer-focus:ring-aerojet-blue/20 peer-focus:outline-none after:absolute after:top-[4px] after:left-[4px] after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600"
                       />
                     </div>
                   </div>
@@ -101,7 +101,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                       id={field.key}
                       name={field.key}
                       defaultValue={currentValue}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm transition-all focus:border-[#002a5c] focus:ring-4 focus:ring-[#002a5c]/5 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm transition-all focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
                     >
                       {field.options.map((opt) => (
                         <option key={opt} value={opt}>
@@ -118,7 +118,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                       name={field.key}
                       type={field.type === 'NUMBER' ? 'number' : 'text'}
                       defaultValue={currentValue}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:border-[#002a5c] focus:ring-4 focus:ring-[#002a5c]/5 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
                     />
                   </div>
                 )}
@@ -132,7 +132,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
         <button
           type="submit"
           disabled={saving}
-          className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#003875] disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#003875] disabled:opacity-50"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {saving ? 'Saving...' : 'Save Settings'}

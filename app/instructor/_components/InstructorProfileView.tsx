@@ -32,7 +32,7 @@ import { format } from 'date-fns'
 interface ProfileData {
   id: string
   email: string
-  academyEmail: string
+  academyEmail: string | null
   profile: {
     firstName: string
     middleName?: string
@@ -121,7 +121,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-4xl bg-[#002a5c] p-8 text-white shadow-2xl dark:bg-slate-900"
+        className="relative overflow-hidden rounded-4xl bg-aerojet-blue p-8 text-white shadow-2xl dark:bg-slate-900"
       >
         <div className="absolute top-0 right-0 h-64 w-64 translate-x-12 translate-y-[-12] rounded-full bg-blue-500/10 blur-3xl" />
         <div className="absolute bottom-0 left-0 h-48 w-48 translate-x-[-12] translate-y-12 rounded-full bg-blue-400/5 blur-3xl" />
@@ -167,7 +167,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
             {!isEditing ? (
               <Button
                 onClick={() => setIsEditing(true)}
-                className="rounded-2xl bg-white text-sm font-black text-[#002a5c] hover:bg-blue-50"
+                className="rounded-2xl bg-white text-sm font-black text-aerojet-blue hover:bg-blue-50"
               >
                 Edit Profile
               </Button>
@@ -218,7 +218,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
             <div className="grid gap-6 md:grid-cols-2">
               <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
                 <CardContent className="p-8">
-                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-[#4c9ded] uppercase">
+                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-aerojet-sky uppercase">
                     <UserIcon className="h-4 w-4" />
                     Basic Information
                   </h3>
@@ -291,7 +291,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
 
               <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
                 <CardContent className="p-8">
-                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-[#4c9ded] uppercase">
+                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-aerojet-sky uppercase">
                     <Phone className="h-4 w-4" />
                     Contact & Address
                   </h3>
@@ -390,7 +390,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
             <div className="grid gap-6 md:grid-cols-2">
               <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
                 <CardContent className="p-8">
-                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-[#4c9ded] uppercase">
+                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-aerojet-sky uppercase">
                     <BadgeCheck className="h-4 w-4" />
                     Qualifications
                   </h3>
@@ -429,7 +429,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
 
               <Card className="rounded-4xl border-slate-100 shadow-sm dark:border-slate-800">
                 <CardContent className="p-8">
-                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-[#4c9ded] uppercase">
+                  <h3 className="mb-6 flex items-center gap-2 text-sm font-black tracking-widest text-aerojet-sky uppercase">
                     <Clock className="h-4 w-4" />
                     Employment History
                   </h3>

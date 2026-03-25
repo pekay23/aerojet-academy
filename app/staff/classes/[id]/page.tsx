@@ -56,14 +56,14 @@ export default async function ClassDetailsPage({ params }: Props) {
       <div className="mb-6">
         <Link
           href="/staff/classes"
-          className="mb-4 inline-flex items-center text-sm font-bold text-slate-400 transition-colors hover:text-[#002a5c]"
+          className="mb-4 inline-flex items-center text-sm font-bold text-slate-400 transition-colors hover:text-aerojet-blue"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Back to Classes
         </Link>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-6">
-            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-[#002a5c]/5 text-3xl font-black text-[#002a5c] shadow-sm">
-              <Users className="h-10 w-10 text-[#4c9ded]" />
+            <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-aerojet-blue/5 text-3xl font-black text-aerojet-blue shadow-sm">
+              <Users className="h-10 w-10 text-aerojet-sky" />
             </div>
             <div>
               <div className="flex items-center gap-3">
@@ -74,7 +74,7 @@ export default async function ClassDetailsPage({ params }: Props) {
                   {cls.semester?.name || 'Current Semester'}
                 </span>
               </div>
-              <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+              <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
                 {cls.name}
               </h1>
             </div>
@@ -95,14 +95,14 @@ export default async function ClassDetailsPage({ params }: Props) {
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Course</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
-                  <BookOpen className="h-4 w-4 text-[#4c9ded]" />
+                  <BookOpen className="h-4 w-4 text-aerojet-sky" />
                   {cls.course.name}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Instructor</p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
-                  <UserIcon className="h-4 w-4 text-[#4c9ded]" />
+                  <UserIcon className="h-4 w-4 text-aerojet-sky" />
                   {instructorName}
                 </div>
               </div>
@@ -111,7 +111,7 @@ export default async function ClassDetailsPage({ params }: Props) {
                   Current Occupancy
                 </p>
                 <div className="flex items-center gap-2 font-black text-slate-700">
-                  <Users className="h-4 w-4 text-[#4c9ded]" />
+                  <Users className="h-4 w-4 text-aerojet-sky" />
                   {cls.currentStudents} / {cls.maxStudents} Students
                 </div>
               </div>

@@ -30,7 +30,7 @@ export default function MobileNav() {
               key={href}
               href={href}
               className={`flex flex-col items-center justify-center gap-0.5 transition-all ${
-                active ? "text-[#4c9ded]" : "text-slate-400"
+                active ? "text-aerojet-sky" : "text-slate-400"
               }`}
             >
               <Icon className={`w-5 h-5 ${active ? "stroke-[2.5]" : ""}`} />

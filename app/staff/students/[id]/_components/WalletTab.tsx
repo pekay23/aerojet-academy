@@ -232,7 +232,7 @@ export default function WalletTab({ student, onRefresh }: Props) {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search transactions..."
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 focus:ring-[#4c9ded] dark:border-slate-700 dark:bg-slate-800/50"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 focus:ring-aerojet-sky dark:border-slate-700 dark:bg-slate-800/50"
           />
         </div>
         <select
@@ -427,7 +427,7 @@ function TransactionRow({
       {/* Expandable Detail Row */}
       {isExpanded && (
         <tr>
-          <td colSpan={7} className="border-l-2 border-l-[#002a5c] bg-slate-50/60 px-6 py-4 dark:bg-slate-800/20">
+          <td colSpan={7} className="border-l-2 border-l-aerojet-blue bg-slate-50/60 px-6 py-4 dark:bg-slate-800/20">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               {/* Left: Transaction Chain */}
               <div className="space-y-3">

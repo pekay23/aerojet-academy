@@ -102,7 +102,7 @@ export default function JoinPoolButton({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-1.5 rounded-xl bg-[#002a5c] px-4 py-2 text-xs font-bold tracking-wide text-white uppercase transition-all hover:bg-[#003a7c] active:scale-95 shadow-sm hover:shadow-md"
+        className="inline-flex items-center gap-1.5 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold tracking-wide text-white uppercase transition-all hover:bg-[#003a7c] active:scale-95 shadow-sm hover:shadow-md"
       >
         Reserve Seat
         <ArrowRight className="h-3.5 w-3.5" />
@@ -126,7 +126,7 @@ export default function JoinPoolButton({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5 dark:border-slate-800">
               <div>
-                <h2 id="join-pool-title" className="text-lg font-black tracking-tight text-[#002a5c] dark:text-white">
+                <h2 id="join-pool-title" className="text-lg font-black tracking-tight text-aerojet-blue dark:text-white">
                   Reserve Exam Seat
                 </h2>
                 <p className="mt-0.5 text-xs font-medium text-slate-500 dark:text-slate-400">{poolName}</p>
@@ -151,7 +151,7 @@ export default function JoinPoolButton({
                 </div>
                 <div className="rounded-xl bg-blue-50 p-4 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/50">
                   <p className="text-[10px] font-black tracking-widest text-blue-400 uppercase">Seat Price</p>
-                  <p className="mt-1 text-lg font-black text-[#002a5c] dark:text-blue-300">
+                  <p className="mt-1 text-lg font-black text-aerojet-blue dark:text-blue-300">
                     {currencySymbol}{price.toFixed(2)}
                   </p>
                 </div>
@@ -160,7 +160,7 @@ export default function JoinPoolButton({
               {/* Module Selection */}
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
-                  <BookOpen className="h-4 w-4 text-[#002a5c]" />
+                  <BookOpen className="h-4 w-4 text-aerojet-blue" />
                   Select EASA Module Exam
                 </label>
 
@@ -179,7 +179,7 @@ export default function JoinPoolButton({
                     value={selectedModule}
                     onChange={(e) => setSelectedModule(e.target.value)}
                     disabled={isPending}
-                    className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-4 text-sm font-bold text-slate-900 shadow-sm transition-all focus:border-[#002a5c] focus:ring-4 focus:ring-[#002a5c]/5 outline-none disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                    className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-4 text-sm font-bold text-slate-900 shadow-sm transition-all focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 outline-none disabled:opacity-60 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     <option value="">— Choose a module —</option>
                     {availableModules.map((m) => (
@@ -205,7 +205,7 @@ export default function JoinPoolButton({
                     {currentModules.map((m) => (
                       <span
                         key={m}
-                        className="inline-flex rounded-lg bg-white border border-slate-100 px-2.5 py-1 text-xs font-black text-[#002a5c] shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:text-blue-300"
+                        className="inline-flex rounded-lg bg-white border border-slate-100 px-2.5 py-1 text-xs font-black text-aerojet-blue shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:text-blue-300"
                       >
                         {m}
                       </span>
@@ -235,7 +235,7 @@ export default function JoinPoolButton({
                 <button
                   onClick={handleConfirm}
                   disabled={isPending || !selectedModule}
-                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-[#002a5c] py-4 text-sm font-black text-white shadow-lg shadow-[#002a5c]/20 transition-all hover:bg-[#003a7c] hover:shadow-xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-4 text-sm font-black text-white shadow-lg shadow-aerojet-blue/20 transition-all hover:bg-[#003a7c] hover:shadow-xl active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isPending ? (
                     <>

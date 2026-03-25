@@ -24,7 +24,7 @@ export default function SearchInput({ placeholder }: { placeholder: string }) {
       <input
         type="text"
         placeholder={placeholder}
-        className="h-10 w-full rounded-xl border border-slate-200 pl-10 pr-4 text-sm focus:border-[#002a5c] focus:outline-none focus:ring-1 focus:ring-[#002a5c]"
+        className="h-10 w-full rounded-xl border border-slate-200 pl-10 pr-4 text-sm focus:border-aerojet-blue focus:outline-none focus:ring-1 focus:ring-aerojet-blue"
         onChange={(e) => handleSearch(e.target.value)}
         defaultValue={searchParams.get('query')?.toString()}
       />

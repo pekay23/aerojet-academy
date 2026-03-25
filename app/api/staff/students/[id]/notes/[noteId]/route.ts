@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { softDeleteData } from '@/lib/prisma/soft-delete'
 
 // PATCH /api/staff/students/[id]/notes/[noteId] — Update an admin note
 export const PATCH = withErrorHandler(
@@ -114,8 +115,9 @@ export const DELETE = withErrorHandler(
       return apiError('You can only delete your own notes', 403)
     }
 
-    await prisma.adminNote.delete({
+    await prisma.adminNote.update({
       where: { id: noteId },
+      data: softDeleteData(),
     })
 
     await createAuditLog({

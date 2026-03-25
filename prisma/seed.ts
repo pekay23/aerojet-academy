@@ -1113,49 +1113,49 @@ async function main() {
     },
 
     // Exam Pricing — admin-editable at runtime
-    { key: 'pool_exam_fee', value: '300', type: 'NUMBER', description: 'Pool seat price (EUR)' },
+    { key: 'pool_exam_fee', value: '300', type: 'NUMBER', description: 'Pool seat price' },
     {
       key: 'individual_exam_fee',
       value: '520',
       type: 'NUMBER',
-      description: 'Individual exam seat price (EUR)',
+      description: 'Individual exam seat price',
     },
     {
       key: 'multi_pool_discount_fee',
       value: '270',
       type: 'NUMBER',
-      description: 'Multi-pool/Ambassador discounted seat price (EUR)',
+      description: 'Multi-pool/Ambassador discounted seat price',
     },
     {
       key: 'two_seat_bundle_price',
       value: '980',
       type: 'NUMBER',
-      description: 'Two-seat bundle price (EUR)',
+      description: 'Two-seat bundle price',
     },
     {
       key: 'four_seat_bundle_price',
       value: '1900',
       type: 'NUMBER',
-      description: 'Four-seat bundle price (EUR)',
+      description: 'Four-seat bundle price',
     },
-    { key: 'resit_exam_fee', value: '480', type: 'NUMBER', description: 'Resit exam fee (EUR)' },
+    { key: 'resit_exam_fee', value: '480', type: 'NUMBER', description: 'Resit exam fee' },
     {
       key: 'group_charter_fee',
       value: '7500',
       type: 'NUMBER',
-      description: 'Group charter fee (EUR)',
+      description: 'Group charter fee',
     },
     {
       key: 'late_booking_surcharge',
       value: '50',
       type: 'NUMBER',
-      description: 'Late booking surcharge (EUR)',
+      description: 'Late booking surcharge',
     },
     {
       key: 'module_change_fee',
       value: '50',
       type: 'NUMBER',
-      description: 'Module change admin fee (EUR)',
+      description: 'Module change admin fee',
     },
     {
       key: 'late_booking_days',
@@ -1167,7 +1167,7 @@ async function main() {
       key: 'ambassador_credit_amount',
       value: '100',
       type: 'NUMBER',
-      description: 'Ambassador wallet credit (EUR)',
+      description: 'Ambassador wallet credit',
     },
   ]
 

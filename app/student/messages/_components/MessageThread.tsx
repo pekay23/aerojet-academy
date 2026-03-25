@@ -71,7 +71,7 @@ function MessageBubble({
   return (
     <div className={`flex gap-3 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
       <div
-        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${isOwn ? 'bg-[#002a5c]' : 'bg-slate-400'}`}
+        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white ${isOwn ? 'bg-aerojet-blue' : 'bg-slate-400'}`}
       >
         {userName(isOwn ? message.sender : message.recipient)
           .charAt(0)
@@ -88,7 +88,7 @@ function MessageBubble({
         <div
           className={`rounded-2xl px-4 py-3 text-sm leading-relaxed ${
             isOwn
-              ? 'rounded-tr-sm bg-[#002a5c] text-white'
+              ? 'rounded-tr-sm bg-aerojet-blue text-white'
               : 'rounded-tl-sm bg-slate-100 text-slate-800'
           }`}
         >
@@ -97,7 +97,7 @@ function MessageBubble({
         {!isOwn && (
           <button
             onClick={() => onReply(message)}
-            className="flex items-center gap-1 text-xs text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-[#002a5c]"
+            className="flex items-center gap-1 text-xs text-slate-400 opacity-0 transition-opacity group-hover:opacity-100 hover:text-aerojet-blue"
           >
             <CornerDownRight className="h-3 w-3" />
             Reply
@@ -171,7 +171,7 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
       <button onClick={handleExpand} className="flex w-full items-center gap-4 px-5 py-4 text-left">
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
-            thread.root.senderId === currentUserId ? 'bg-[#002a5c]' : 'bg-slate-500'
+            thread.root.senderId === currentUserId ? 'bg-aerojet-blue' : 'bg-slate-500'
           }`}
         >
           {userName(otherParticipant).charAt(0).toUpperCase()}
@@ -233,12 +233,12 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
                 e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendReply())
               }
               placeholder={`Reply to ${userName(otherParticipant)}…`}
-              className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-[#002a5c] focus:ring-2 focus:ring-[#002a5c]/20 focus:outline-none dark:border-slate-700 dark:text-slate-100"
+              className="flex-1 rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20 focus:outline-none dark:border-slate-700 dark:text-slate-100"
             />
             <button
               onClick={handleSendReply}
               disabled={sending || !replyText.trim()}
-              className="flex items-center gap-1.5 rounded-xl bg-[#002a5c] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#003875] disabled:opacity-50"
+              className="flex items-center gap-1.5 rounded-xl bg-aerojet-blue px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#003875] disabled:opacity-50"
             >
               {sending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />

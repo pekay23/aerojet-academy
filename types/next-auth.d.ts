@@ -31,5 +31,7 @@ declare module 'next-auth/jwt' {
     mustChangePassword: boolean
     academyEmail?: string | null
     studentId?: string | null
+    issuedAt?: number
+    lastChecked?: number
   }
 }

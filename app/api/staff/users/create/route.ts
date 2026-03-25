@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAuthSession, hashPassword } from '@/lib/auth/helpers'
+import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import prisma from '@/lib/prisma/client'
 import { UserRole, EnrollmentType } from '@prisma/client'
 
@@ -16,14 +17,8 @@ const createUserSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    await requirePermission(PERMISSIONS.MANAGE_USERS)
     const session = await getAuthSession()
-
-    // Check if user is authenticated
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    // TODO: Add stricter role checks here if needed (e.g. only ADMIN can create STAFF/ADMIN)
 
     const body = await req.json()
     const validation = createUserSchema.safeParse(body)

@@ -23,7 +23,7 @@ export default function StaffExamsTabs({ children }: { children: React.ReactNode
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           Exams
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -42,7 +42,7 @@ export default function StaffExamsTabs({ children }: { children: React.ReactNode
               onClick={() => setTab(t.key)}
               className={`relative flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-all ${
                 isActive
-                  ? 'text-[#002a5c] dark:text-white'
+                  ? 'text-aerojet-blue dark:text-white'
                   : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
               }`}
             >

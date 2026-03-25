@@ -179,7 +179,7 @@ export default function PaymentMethodsDisplay({
                 onClick={() => setActiveIdx(idx)}
                 className={`relative flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
                   isActive
-                    ? 'text-[#002a5c] dark:text-white'
+                    ? 'text-aerojet-blue dark:text-white'
                     : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
                 }`}
               >

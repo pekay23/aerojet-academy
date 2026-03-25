@@ -1,9 +1,13 @@
 export function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  // Stricter email validation: local part allows alphanumeric, dots, hyphens, underscores, plus;
+  // domain must have at least two labels, TLD at least 2 chars
+  return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/.test(email)
 }
 
 export function isValidPhone(phone: string): boolean {
-  return /^(\+233|0)?[2-5]\d{8}$/.test(phone.replace(/\s/g, ''))
+  // Accept international phone numbers: optional + prefix, 7-15 digits, allow spaces/dashes/parens
+  const cleaned = phone.replace(/[\s\-()]/g, '')
+  return /^\+?[0-9]{7,15}$/.test(cleaned)
 }
 
 export function isValidStudentId(id: string): boolean {

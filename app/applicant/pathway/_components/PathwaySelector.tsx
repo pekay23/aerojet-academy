@@ -124,7 +124,7 @@ export default function PathwaySelector({ currency = 'EUR' }: { currency?: strin
               <ul className="mt-4 space-y-2">
                 {path.features.map((feature, idx) => (
                   <li key={idx} className="flex text-xs text-slate-600 dark:text-slate-300">
-                    <span className="mr-2 text-[#4c9ded]">•</span>
+                    <span className="mr-2 text-aerojet-sky">•</span>
                     {feature}
                   </li>
                 ))}
@@ -143,7 +143,7 @@ export default function PathwaySelector({ currency = 'EUR' }: { currency?: strin
         <button
           onClick={() => setIsConfirming(true)}
           disabled={!selected}
-          className="inline-flex h-12 w-full max-w-sm items-center justify-center gap-2 rounded-xl bg-[#002a5c] px-8 text-sm font-bold tracking-widest text-white uppercase transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex h-12 w-full max-w-sm items-center justify-center gap-2 rounded-xl bg-aerojet-blue px-8 text-sm font-bold tracking-widest text-white uppercase transition-colors hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Confirm Pathway
           <ArrowRight className="h-4 w-4" />

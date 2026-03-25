@@ -156,7 +156,7 @@ export default function UserActionsMenu({
         <DropdownMenuTrigger asChild>
           <button
             disabled={!!loading}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all outline-none hover:bg-slate-100 hover:text-slate-700 focus:ring-2 focus:ring-[#002a5c] focus:ring-offset-2 disabled:opacity-50"
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all outline-none hover:bg-slate-100 hover:text-slate-700 focus:ring-2 focus:ring-aerojet-blue focus:ring-offset-2 disabled:opacity-50"
           >
             {loading ? (
               <Loader2 className="h-4 w-4 animate-spin" />

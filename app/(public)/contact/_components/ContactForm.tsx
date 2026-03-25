@@ -71,7 +71,7 @@ export default function ContactForm() {
         <div className="mb-4 inline-flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
           <CheckCircle2 className="h-8 w-8 text-green-600" />
         </div>
-        <h3 className="mb-2 text-xl font-black text-[#002a5c]">Message Sent!</h3>
+        <h3 className="mb-2 text-xl font-black text-aerojet-blue">Message Sent!</h3>
         <p className="max-w-xs text-sm text-slate-500">
           Thank you for reaching out. Our admissions team will get back to you via email shortly.
         </p>
@@ -88,7 +88,7 @@ export default function ContactForm() {
               confirm_email: '',
             })
           }}
-          className="mt-6 text-xs font-bold tracking-widest text-[#4c9ded] uppercase hover:underline"
+          className="mt-6 text-xs font-bold tracking-widest text-aerojet-sky uppercase hover:underline"
         >
           Send another message
         </button>
@@ -107,7 +107,7 @@ export default function ContactForm() {
             required
             type="text"
             placeholder="John"
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-[#4c9ded]"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
             value={data.firstName}
             onChange={(e) => setData({ ...data, firstName: e.target.value })}
           />
@@ -120,7 +120,7 @@ export default function ContactForm() {
             required
             type="text"
             placeholder="Doe"
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-[#4c9ded]"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
             value={data.lastName}
             onChange={(e) => setData({ ...data, lastName: e.target.value })}
           />
@@ -135,7 +135,7 @@ export default function ContactForm() {
           required
           type="email"
           placeholder="john@example.com"
-          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-[#4c9ded]"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
           value={data.email}
           onChange={(e) => setData({ ...data, email: e.target.value })}
         />
@@ -148,7 +148,7 @@ export default function ContactForm() {
         <input
           type="tel"
           placeholder="+233 XX XXX XXXX"
-          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-[#4c9ded]"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
           value={data.phone}
           onChange={(e) => {
             // strip out any characters that are not numbers, spaces, or valid symbols
@@ -167,7 +167,7 @@ export default function ContactForm() {
             required
             value={data.subject}
             onChange={(e) => setData({ ...data, subject: e.target.value })}
-            className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none focus:border-transparent focus:ring-2 focus:ring-[#4c9ded]"
+            className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
           >
             <option value="" disabled>
               Select a subject...
@@ -202,7 +202,7 @@ export default function ContactForm() {
           minLength={10}
           rows={5}
           placeholder="Tell us about your enquiry..."
-          className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-[#4c9ded]"
+          className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
           value={data.message}
           onChange={(e) => setData({ ...data, message: e.target.value })}
         />
@@ -222,7 +222,7 @@ export default function ContactForm() {
       <button
         type="submit"
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#002a5c] py-4 font-bold text-white shadow-lg transition-all hover:bg-[#4c9ded]"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-4 font-bold text-white shadow-lg transition-all hover:bg-aerojet-sky"
       >
         {loading ? (
           <Loader2 className="h-5 w-5 animate-spin" />

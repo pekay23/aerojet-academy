@@ -18,7 +18,10 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: {
       bodySizeLimit: '4mb',
-      allowedOrigins: ['localhost:3000', '*.ngrok-free.dev', '*.ngrok-free.app'],
+      allowedOrigins: [
+        'localhost:3000',
+        ...(process.env.EXTRA_ALLOWED_ORIGINS?.split(',').filter(Boolean) || []),
+      ],
     },
   },
   typescript: {

@@ -25,7 +25,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const hashedPassword = await hashPassword(newPassword)
   await prisma.user.update({
     where: { id: user.id },
-    data: { password: hashedPassword, mustChangePassword: false, passwordChanged: true },
+    data: { password: hashedPassword, mustChangePassword: false, passwordChanged: true, passwordChangedAt: new Date() },
   })
 
   await createAuditLog({

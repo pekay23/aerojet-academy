@@ -47,7 +47,7 @@ export default async function CoursesPage() {
     return (
       <div className="space-y-8">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
             My Courses
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -68,7 +68,7 @@ export default async function CoursesPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
             My Courses
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -78,7 +78,7 @@ export default async function CoursesPage() {
         {!isFullTime && (
           <Link
             href="/student/courses/enroll"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-[#002a5c]/90 hover:shadow-lg active:scale-95"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-aerojet-blue/90 hover:shadow-lg active:scale-95"
           >
             <BookOpen className="h-4 w-4" />
             Enroll in New Course

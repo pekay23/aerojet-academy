@@ -51,14 +51,14 @@ export default async function ClassesPage() {
     <div className="mx-auto max-w-7xl">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Classes
           </h1>
           <p className="text-slate-500 dark:text-slate-400">Manage class schedules and rosters</p>
         </div>
         <Link
           href="/staff/classes/create"
-          className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#002a5c]/90"
+          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
         >
           <Plus className="h-4 w-4" />
           Schedule Class
@@ -129,7 +129,7 @@ export default async function ClassesPage() {
                       <div className="flex items-center gap-2">
                         <div className="flex h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
                           <div
-                            className="bg-[#002a5c]"
+                            className="bg-aerojet-blue"
                             style={{
                               width: `${Math.min(100, (cls.currentStudents / cls.maxStudents) * 100)}%`,
                             }}

@@ -123,7 +123,7 @@ export default function AddExamRecordDialog({
       {!open && (
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:border-[#4c9ded] hover:text-[#4c9ded] dark:border-slate-700 dark:bg-slate-800"
+          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all hover:border-aerojet-sky hover:text-aerojet-sky dark:border-slate-700 dark:bg-slate-800"
         >
           <Plus className="h-3.5 w-3.5" />
           Add Record
@@ -264,7 +264,7 @@ export default function AddExamRecordDialog({
               <button
                 onClick={handleSubmit}
                 disabled={loading || !moduleId || !examDate}
-                className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-6 py-2 text-sm font-bold text-white transition-all hover:bg-[#001f45] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-2 text-sm font-bold text-white transition-all hover:bg-[#001f45] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {loading && <Loader2 className="h-4 w-4 animate-spin" />}
                 Add Record

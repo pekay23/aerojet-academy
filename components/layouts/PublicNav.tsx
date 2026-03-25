@@ -232,7 +232,7 @@ export default function PublicNav() {
                               layoutId="nav-pill"
                               className={`absolute inset-0 rounded-full ${
                                 scrolled || mobileOpen || forceSolid
-                                  ? 'bg-[#002a5c]/5'
+                                  ? 'bg-aerojet-blue/5'
                                   : 'bg-white/10'
                               }`}
                               transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}

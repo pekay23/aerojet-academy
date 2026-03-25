@@ -10,8 +10,8 @@ export const GET = withErrorHandler(
     if (!courseId) return apiError('Course ID required')
 
     // Verify enrollment
-    const enrollment = await prisma.enrollment.findUnique({
-      where: { userId_courseId: { userId: user.id, courseId } },
+    const enrollment = await prisma.enrollment.findFirst({
+      where: { userId: user.id, courseId },
     })
     if (!enrollment || enrollment.status === 'PENDING')
       return apiNotFound('Not enrolled in this course')

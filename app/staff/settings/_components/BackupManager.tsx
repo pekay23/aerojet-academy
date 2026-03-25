@@ -300,7 +300,7 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
               <button
                 onClick={handleSaveSchedule}
                 disabled={savingSchedule}
-                className="inline-flex items-center gap-2 rounded-lg bg-[#002a5c] px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#003d82] disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-lg bg-aerojet-blue px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-[#003d82] disabled:opacity-50"
               >
                 {savingSchedule && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 Save Schedule
@@ -332,7 +332,7 @@ export default function BackupManager({ adminEmail }: { adminEmail?: string }) {
           <button
             onClick={() => handleDownload('json')}
             disabled={downloading !== null}
-            className="inline-flex items-center gap-2 rounded-lg bg-[#002a5c] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#003d82] disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#003d82] disabled:opacity-50"
           >
             {downloading === 'json' ? (
               <Loader2 className="h-4 w-4 animate-spin" />

@@ -1,25 +1,31 @@
 import crypto from 'crypto'
 
 const ALGORITHM = 'aes-256-gcm'
+const SALT_LENGTH = 16
 
-function getKey(): Buffer {
-  const secret = process.env.NEXTAUTH_SECRET || 'fallback-secret-key-change-me'
-  return crypto.scryptSync(secret, 'salt', 32)
+function getKey(salt: Buffer): Buffer {
+  const secret = process.env.NEXTAUTH_SECRET
+  if (!secret) {
+    throw new Error('NEXTAUTH_SECRET is required for encryption operations')
+  }
+  return crypto.scryptSync(secret, salt, 32)
 }
 
 export function encrypt(text: string): string {
-  const key = getKey()
+  const salt = crypto.randomBytes(SALT_LENGTH)
+  const key = getKey(salt)
   const iv = crypto.randomBytes(16)
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv)
   let encrypted = cipher.update(text, 'utf8', 'hex')
   encrypted += cipher.final('hex')
   const authTag = cipher.getAuthTag().toString('hex')
-  return `${iv.toString('hex')}:${authTag}:${encrypted}`
+  return `${salt.toString('hex')}:${iv.toString('hex')}:${authTag}:${encrypted}`
 }
 
 export function decrypt(encryptedText: string): string {
-  const key = getKey()
-  const [ivHex, authTagHex, encrypted] = encryptedText.split(':')
+  const [saltHex, ivHex, authTagHex, encrypted] = encryptedText.split(':')
+  const salt = Buffer.from(saltHex, 'hex')
+  const key = getKey(salt)
   const iv = Buffer.from(ivHex, 'hex')
   const authTag = Buffer.from(authTagHex, 'hex')
   const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)

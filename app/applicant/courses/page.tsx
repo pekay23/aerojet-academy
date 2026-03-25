@@ -72,13 +72,13 @@ export default async function CoursesPage({
       {/* Dynamic Header */}
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1.5">
-          <div className="inline-flex items-center gap-2 rounded-full bg-[#002a5c]/5 px-3 py-1 dark:bg-blue-500/10">
-            <Globe className="h-3.5 w-3.5 text-[#4c9ded]" />
-            <span className="text-[10px] font-black tracking-widest text-[#002a5c] uppercase dark:text-blue-400">
+          <div className="inline-flex items-center gap-2 rounded-full bg-aerojet-blue/5 px-3 py-1 dark:bg-blue-500/10">
+            <Globe className="h-3.5 w-3.5 text-aerojet-sky" />
+            <span className="text-[10px] font-black tracking-widest text-aerojet-blue uppercase dark:text-blue-400">
               EASA Part-66 Certified
             </span>
           </div>
-          <h1 className="text-3xl font-black tracking-tight text-[#002a5c] uppercase sm:text-4xl dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue uppercase sm:text-4xl dark:text-white">
             Course Catalogue
           </h1>
           <p className="max-w-xl text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -189,7 +189,7 @@ async function CourseList({
       {Object.entries(grouped).map(([cat, items]) => (
         <div key={cat} className="space-y-8">
           <div className="flex items-center gap-4">
-            <h2 className="text-[10px] font-black tracking-[0.3em] text-blue-500 uppercase dark:text-[#4c9ded]">
+            <h2 className="text-[10px] font-black tracking-[0.3em] text-blue-500 uppercase dark:text-aerojet-sky">
               {categoryNames[cat] || cat.replace(/_/g, ' ')}
             </h2>
             <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800/50" />
@@ -199,7 +199,7 @@ async function CourseList({
             {items.map((course) => (
               <div
                 key={course.id}
-                className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#4c9ded]/30 hover:shadow-xl hover:shadow-[#002a5c]/5 dark:border-slate-800 dark:bg-slate-900"
+                className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-aerojet-sky/30 hover:shadow-xl hover:shadow-aerojet-blue/5 dark:border-slate-800 dark:bg-slate-900"
               >
                 <TrackedImpression courseId={course.id} />
                 {/* Accent line */}
@@ -213,12 +213,12 @@ async function CourseList({
 
                 <div className="flex flex-1 flex-col p-7">
                   <div className="mb-4 flex items-start justify-between">
-                    <span className="rounded-lg bg-slate-50 px-2.5 py-1 font-mono text-[10px] font-black tracking-widest text-[#4c9ded] uppercase transition-colors group-hover:bg-[#4c9ded]/10 dark:bg-slate-800">
+                    <span className="rounded-lg bg-slate-50 px-2.5 py-1 font-mono text-[10px] font-black tracking-widest text-aerojet-sky uppercase transition-colors group-hover:bg-aerojet-sky/10 dark:bg-slate-800">
                       {course.code}
                     </span>
                   </div>
 
-                  <h3 className="text-xl leading-tight font-black text-[#002a5c] transition-colors group-hover:text-[#4c9ded] dark:text-white dark:group-hover:text-blue-400">
+                  <h3 className="text-xl leading-tight font-black text-aerojet-blue transition-colors group-hover:text-aerojet-sky dark:text-white dark:group-hover:text-blue-400">
                     {course.name}
                   </h3>
 
@@ -231,7 +231,7 @@ async function CourseList({
                   <div className="mt-6 flex flex-wrap gap-4 text-[11px] font-bold text-slate-400">
                     {course.duration && (
                       <div className="flex items-center gap-1.5 rounded-lg border border-slate-50 bg-slate-50/50 px-2 py-1 dark:border-slate-800 dark:bg-slate-800/30">
-                        <Clock className="h-3.5 w-3.5 text-[#4c9ded]" />
+                        <Clock className="h-3.5 w-3.5 text-aerojet-sky" />
                         <span className="text-slate-600 dark:text-slate-300">
                           {course.duration.toLocaleString()} Hours
                         </span>
@@ -248,7 +248,7 @@ async function CourseList({
                       <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                         {enrollmentType === 'EXAM_ONLY' ? 'Exam Fees (Pool)' : 'Tuition'}
                       </p>
-                      <p className="truncate text-2xl font-black text-[#002a5c] dark:text-white">
+                      <p className="truncate text-2xl font-black text-aerojet-blue dark:text-white">
                         {course.currency}{' '}
                         {enrollmentType === 'EXAM_ONLY'
                           ? '300'
@@ -259,7 +259,7 @@ async function CourseList({
                       <TrackedCourseLink
                         courseId={course.id}
                         href={`/applicant/courses/${course.id}`}
-                        className="inline-flex h-11 items-center justify-center rounded-xl bg-[#002a5c] px-6 text-xs font-black tracking-widest text-white uppercase ring-offset-white transition-all hover:bg-[#003875] hover:shadow-lg active:scale-95 sm:px-8 dark:bg-blue-600 dark:hover:bg-blue-500"
+                        className="inline-flex h-11 items-center justify-center rounded-xl bg-aerojet-blue px-6 text-xs font-black tracking-widest text-white uppercase ring-offset-white transition-all hover:bg-[#003875] hover:shadow-lg active:scale-95 sm:px-8 dark:bg-blue-600 dark:hover:bg-blue-500"
                       >
                         {enrollmentType === 'EXAM_ONLY' ? 'Book Exam' : 'Enroll'}
                       </TrackedCourseLink>

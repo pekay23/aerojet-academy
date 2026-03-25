@@ -114,17 +114,15 @@ export function calculateAvailableBalance(
  * Validate email format
  */
 export function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
+  return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}$/.test(email)
 }
 
 /**
- * Validate phone number (Ghana format)
+ * Validate phone number (international format)
  */
 export function isValidPhone(phone: string): boolean {
-  // Accepts: +233XXXXXXXXX, 0XXXXXXXXX, or XXXXXXXXXX
-  const phoneRegex = /^(\+233|0)?[2-5]\d{8}$/
-  return phoneRegex.test(phone.replace(/\s/g, ''))
+  const cleaned = phone.replace(/[\s\-()]/g, '')
+  return /^\+?[0-9]{7,15}$/.test(cleaned)
 }
 
 /**

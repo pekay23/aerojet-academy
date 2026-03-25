@@ -4,6 +4,7 @@ export const APP_DOMAIN = 'aerojet-academy.com'
 export const APP_EMAIL = 'info@aerojet-academy.com'
 export const APP_ADMIN_EMAIL = 'admin@aerojet-academy.com'
 
+/** Default/fallback currency. Prefer reading from wallet.currency or system setting. */
 export const CURRENCY = 'EUR'
 export const EXAM_FEE = 300
 export const MIN_WALLET_TOPUP = 50

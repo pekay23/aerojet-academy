@@ -39,7 +39,7 @@ export default async function EditExamPoolPage({ params }: PageProps) {
       <div className="mb-6">
         <Link
           href={`/staff/exams/pools/${pool.id}`}
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-[#002a5c]"
+          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 dark:text-slate-400 hover:text-aerojet-blue"
         >
           <ChevronLeft className="h-4 w-4" />
           Back to Pool: {pool.name}
@@ -47,7 +47,7 @@ export default async function EditExamPoolPage({ params }: PageProps) {
       </div>
 
       <div className="mb-8">
-        <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">Edit Exam Booking</h1>
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">Edit Exam Booking</h1>
         <p className="text-slate-500 dark:text-slate-400">Update details for {pool.name}</p>
       </div>
 

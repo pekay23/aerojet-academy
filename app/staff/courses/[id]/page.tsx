@@ -81,7 +81,7 @@ export default async function CourseDetailsPage({ params }: Props) {
       <div className="mb-6">
         <Link
           href="/staff/courses"
-          className="mb-4 inline-flex items-center text-sm font-bold text-slate-400 transition-colors hover:text-[#002a5c]"
+          className="mb-4 inline-flex items-center text-sm font-bold text-slate-400 transition-colors hover:text-aerojet-blue"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Back to Courses
         </Link>
@@ -105,7 +105,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   </span>
                 )}
               </div>
-              <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+              <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
                 {serializedCourse.name}
               </h1>
               {serializedCourse.subtitle && (
@@ -153,21 +153,21 @@ export default async function CourseDetailsPage({ params }: Props) {
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Price</p>
                 <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
-                  <DollarSign className="h-4 w-4 text-[#4c9ded]" />
+                  <DollarSign className="h-4 w-4 text-aerojet-sky" />
                   {serializedCourse.currency} {serializedCourse.price}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Duration</p>
                 <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
-                  <Clock className="h-4 w-4 text-[#4c9ded]" />
+                  <Clock className="h-4 w-4 text-aerojet-sky" />
                   {serializedCourse.duration ? `${serializedCourse.duration} Hours` : 'N/A'}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Study Hours</p>
                 <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
-                  <Hourglass className="h-4 w-4 text-[#4c9ded]" />
+                  <Hourglass className="h-4 w-4 text-aerojet-sky" />
                   {serializedCourse.estimatedStudyHoursMin && serializedCourse.estimatedStudyHoursMax
                     ? `${serializedCourse.estimatedStudyHoursMin}–${serializedCourse.estimatedStudyHoursMax} hrs`
                     : 'N/A'}
@@ -176,14 +176,14 @@ export default async function CourseDetailsPage({ params }: Props) {
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Category</p>
                 <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
-                  <GraduationCap className="h-4 w-4 text-[#4c9ded]" />
+                  <GraduationCap className="h-4 w-4 text-aerojet-sky" />
                   {serializedCourse.category?.name || 'Standard'}
                 </div>
               </div>
               <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
                 <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase">Prerequisites</p>
                 <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
-                  <CheckCircle2 className="h-4 w-4 text-[#4c9ded]" />
+                  <CheckCircle2 className="h-4 w-4 text-aerojet-sky" />
                   {serializedCourse.requiresPrerequisite
                     ? serializedCourse.prerequisites.join(', ')
                     : 'None'}
@@ -194,7 +194,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   Applicable Categories
                 </p>
                 <div className="flex items-center gap-2 font-black text-slate-700 dark:text-slate-200">
-                  <Shield className="h-4 w-4 text-[#4c9ded]" />
+                  <Shield className="h-4 w-4 text-aerojet-sky" />
                   {serializedCourse.applicableCategories?.length > 0
                     ? serializedCourse.applicableCategories.join(', ')
                     : 'All'}
@@ -228,7 +228,7 @@ export default async function CourseDetailsPage({ params }: Props) {
               {serializedCourse.classes.length === 0 ? (
                 <p className="text-sm text-slate-400 italic">No classes currently scheduled.</p>
               ) : (
-                serializedCourse.classes.map((cls) => (
+                serializedCourse.classes.map((cls: any) => (
                   <Link
                     key={cls.id}
                     href={`/staff/classes/${cls.id}`}

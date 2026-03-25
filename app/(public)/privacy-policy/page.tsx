@@ -9,12 +9,12 @@ export default function PrivacyPolicyPage() {
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="bg-white p-6 sm:p-14 rounded-2xl sm:rounded-3xl shadow-xl border border-slate-100">
           <div className="mb-10 border-b border-slate-100 pb-6">
-            <span className="bg-blue-50 text-[#4c9ded] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 inline-block">Legal Policy</span>
-            <h1 className="text-3xl sm:text-4xl font-black text-[#002a5c] dark:text-white uppercase tracking-tight">Website Privacy Policy</h1>
+            <span className="bg-blue-50 text-aerojet-sky px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 inline-block">Legal Policy</span>
+            <h1 className="text-3xl sm:text-4xl font-black text-aerojet-blue dark:text-white uppercase tracking-tight">Website Privacy Policy</h1>
             <p className="text-slate-400 mt-3 text-sm italic">Last Updated: February 2026</p>
           </div>
 
-          <div className="prose prose-slate max-w-none prose-headings:text-[#002a5c] prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-a:text-[#4c9ded] prose-a:font-bold prose-a:no-underline hover:prose-a:underline">
+          <div className="prose prose-slate max-w-none prose-headings:text-aerojet-blue prose-headings:font-black prose-headings:uppercase prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-a:text-aerojet-sky prose-a:font-bold prose-a:no-underline hover:prose-a:underline">
             <p className="text-lg">This privacy policy will help you understand how <strong>Aerojet Aviation</strong> uses and protects the data you provide when you visit <Link href="/">www.aerojet-academy.com</Link>.</p>
 
             <h3>What User Data We Collect</h3>
@@ -39,9 +39,9 @@ export default function PrivacyPolicyPage() {
             <p>Our website contains links to other websites. Visiting those websites is not governed by this privacy policy agreement.</p>
 
             <div className="bg-slate-50 p-6 rounded-xl border border-slate-100 mt-10 not-prose">
-              <h3 className="text-lg font-black text-[#002a5c] uppercase tracking-tight mb-3">Contact Us</h3>
+              <h3 className="text-lg font-black text-aerojet-blue uppercase tracking-tight mb-3">Contact Us</h3>
               <p className="text-slate-600 text-sm mb-3">Questions about this policy?</p>
-              <p className="text-sm">Email: <a href="mailto:info@aerojet-academy.com" className="text-[#4c9ded] font-bold">info@aerojet-academy.com</a></p>
+              <p className="text-sm">Email: <a href="mailto:info@aerojet-academy.com" className="text-aerojet-sky font-bold">info@aerojet-academy.com</a></p>
             </div>
           </div>
         </div>

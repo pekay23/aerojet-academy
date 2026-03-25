@@ -16,12 +16,17 @@ import { CheckCircle2 } from 'lucide-react'
 import prisma from '@/lib/prisma/client'
 
 async function getRegistrationFee() {
-  const settings = await prisma.systemSetting.findMany({
-    where: { key: { in: ['registration_fee', 'registration_currency'] } },
-  })
-  const fee = settings.find((s) => s.key === 'registration_fee')?.value || '350'
-  const currency = settings.find((s) => s.key === 'registration_currency')?.value || 'GHS'
-  return { fee, currency }
+  try {
+    const settings = await prisma.systemSetting.findMany({
+      where: { key: { in: ['registration_fee', 'registration_currency'] } },
+    })
+    const fee = settings.find((s) => s.key === 'registration_fee')?.value || '350'
+    const currency = settings.find((s) => s.key === 'registration_currency')?.value || 'GHS'
+    return { fee, currency }
+  } catch (error) {
+    console.error('Failed to fetch registration fee, using defaults:', error)
+    return { fee: '350', currency: 'GHS' }
+  }
 }
 
 export default async function Home() {
@@ -38,12 +43,12 @@ export default async function Home() {
         <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-2 lg:gap-24">
           <SectionReveal>
             <div className="relative">
-              <span className="mb-4 block text-sm font-black tracking-[0.3em] text-[#4c9ded] uppercase">
+              <span className="mb-4 block text-sm font-black tracking-[0.3em] text-aerojet-sky uppercase">
                 Who We Are
               </span>
-              <h2 className="mb-8 text-4xl leading-[1.05] font-black tracking-tight text-[#002a5c] uppercase sm:text-5xl lg:text-6xl">
+              <h2 className="mb-8 text-4xl leading-[1.05] font-black tracking-tight text-aerojet-blue uppercase sm:text-5xl lg:text-6xl">
                 Building the Future of <br className="hidden sm:block" />
-                <span className="text-[#4c9ded]">African Aviation</span>
+                <span className="text-aerojet-sky">African Aviation</span>
               </h2>
 
               <div className="space-y-6 text-lg leading-relaxed text-slate-600/90">
@@ -62,7 +67,7 @@ export default async function Home() {
               </div>
 
               <div className="mt-12 space-y-4 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-                <p className="text-xs font-black tracking-widest text-[#002a5c]/50 uppercase">
+                <p className="text-xs font-black tracking-widest text-aerojet-blue/50 uppercase">
                   Our Training Includes:
                 </p>
                 <ul className="grid gap-4 sm:grid-cols-2">
@@ -84,7 +89,7 @@ export default async function Home() {
             </div>
           </SectionReveal>
           <SectionReveal delay={0.2} className="relative">
-            <div className="absolute -bottom-10 -left-10 z-0 h-72 w-72 rounded-3xl border-8 border-white bg-[#002a5c] shadow-2xl" />
+            <div className="absolute -bottom-10 -left-10 z-0 h-72 w-72 rounded-3xl border-8 border-white bg-aerojet-blue shadow-2xl" />
             <div className="relative z-10 overflow-hidden rounded-3xl shadow-2xl">
               <Image
                 src="/images/home/al4.webp"
@@ -114,12 +119,12 @@ export default async function Home() {
           <div className="mb-20 grid items-end gap-12 lg:grid-cols-2 lg:gap-24">
             <SectionReveal>
               <div>
-                <span className="mb-4 block text-sm font-black tracking-[0.3em] text-[#4c9ded] uppercase">
+                <span className="mb-4 block text-sm font-black tracking-[0.3em] text-aerojet-sky uppercase">
                   Our Programmes
                 </span>
-                <h2 className="mb-8 text-4xl font-black tracking-tight text-[#002a5c] uppercase sm:text-5xl lg:text-6xl">
+                <h2 className="mb-8 text-4xl font-black tracking-tight text-aerojet-blue uppercase sm:text-5xl lg:text-6xl">
                   Choose Your <br className="hidden sm:block" />
-                  <span className="text-[#4c9ded]">Pathway</span>
+                  <span className="text-aerojet-sky">Pathway</span>
                 </h2>
                 <p className="max-w-xl text-lg leading-relaxed text-slate-600">
                   Whether you're starting fresh or are an experienced professional, we have a
@@ -132,7 +137,7 @@ export default async function Home() {
             <SectionReveal delay={0.1} className="flex justify-start lg:justify-end">
               <Link
                 href="/courses"
-                className="group flex h-16 items-center gap-4 rounded-full bg-[#002a5c] px-10 text-xs font-black tracking-[0.2em] text-white uppercase transition-all hover:bg-[#4c9ded] hover:shadow-xl"
+                className="group flex h-16 items-center gap-4 rounded-full bg-aerojet-blue px-10 text-xs font-black tracking-[0.2em] text-white uppercase transition-all hover:bg-aerojet-sky hover:shadow-xl"
               >
                 View All Programmes
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />

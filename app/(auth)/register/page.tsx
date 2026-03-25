@@ -23,7 +23,7 @@ export default async function RegisterPage({
   return (
     <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-2xl">
       {/* Blue Header */}
-      <div className="bg-[#002a5c] p-8 text-center text-white">
+      <div className="bg-aerojet-blue p-8 text-center text-white">
         <h2 className="text-3xl font-black tracking-tight uppercase">
           {showPaymentDetails
             ? 'Registration Complete'
@@ -80,7 +80,7 @@ export default async function RegisterPage({
             <div className="mb-8">
               <p className="text-sm text-slate-500">
                 Register to begin your application. A one-time fee of{' '}
-                <strong className="text-[#002a5c]">
+                <strong className="text-aerojet-blue">
                   {config.currency} {config.fee}
                 </strong>{' '}
                 applies.
@@ -91,7 +91,7 @@ export default async function RegisterPage({
 
             <div className="mt-6 border-t border-gray-100 pt-4 text-center text-sm text-gray-500">
               Already have an account?{' '}
-              <Link href="/login" className="font-bold text-[#4c9ded] hover:underline">
+              <Link href="/login" className="font-bold text-aerojet-sky hover:underline">
                 Sign in
               </Link>
             </div>

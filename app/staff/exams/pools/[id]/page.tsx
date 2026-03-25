@@ -40,7 +40,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
       <div className="mb-6">
         <Link
           href={`/staff/exams/events/${pool.eventId}`}
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#002a5c] dark:text-slate-400"
+          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-aerojet-blue dark:text-slate-400"
         >
           <ChevronLeft className="h-4 w-4" />
           Back to Event: {pool.event.name}
@@ -50,7 +50,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <div className="mb-2 flex items-center gap-3">
-            <h1 className="text-3xl font-black tracking-tight text-[#002a5c] dark:text-white">
+            <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
               {pool.name}
             </h1>
             <PoolStatusBadge status={pool.status} />
@@ -76,7 +76,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
           </Link>
           <Link
             href={`/staff/exams/pools/${pool.id}/add-candidate`}
-            className="flex items-center gap-2 rounded-xl bg-[#002a5c] px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#002a5c]/90"
+            className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
           >
             <UserPlus className="h-4 w-4" />
             Add Candidate
@@ -117,7 +117,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                   <tr key={member.id} className="group hover:bg-slate-50 dark:bg-slate-800/50">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-[#002a5c]">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue">
                           {member.user.profile?.firstName?.charAt(0)}
                           {member.user.profile?.lastName?.charAt(0)}
                         </div>
@@ -133,7 +133,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
-                        <BookOpen className="h-4 w-4 text-[#002a5c]" />
+                        <BookOpen className="h-4 w-4 text-aerojet-blue" />
                         <span className="font-medium text-slate-700">
                           {member.examComponent?.course?.code || 'N/A'}
                         </span>

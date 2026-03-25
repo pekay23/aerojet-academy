@@ -12,7 +12,7 @@ async function getRecentArticles() {
 }
 
 export default async function LatestNews() {
-  let articles = []
+  let articles: Awaited<ReturnType<typeof getRecentArticles>> = []
   let errorMsg = null
 
   try {

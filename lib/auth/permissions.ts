@@ -42,3 +42,59 @@ export function canViewReports(role: string): boolean {
 export function canGoNoGo(role: string): boolean {
   return isAdmin(role)
 }
+
+// ---------------------------------------------------------------------------
+// GRANULAR PERMISSION SYSTEM (DB-backed via StaffProfile.permissions)
+// ---------------------------------------------------------------------------
+
+import prisma from '@/lib/prisma/client'
+import { getAuthSession } from './auth-options'
+
+export const PERMISSIONS = {
+  APPROVE_PAYMENTS: 'APPROVE_PAYMENTS',
+  MANAGE_USERS: 'MANAGE_USERS',
+  MANAGE_ROLES: 'MANAGE_ROLES',
+  MANAGE_EXAMS: 'MANAGE_EXAMS',
+  MANAGE_ENROLLMENTS: 'MANAGE_ENROLLMENTS',
+  VIEW_AUDIT_LOGS: 'VIEW_AUDIT_LOGS',
+  MANAGE_SETTINGS: 'MANAGE_SETTINGS',
+} as const
+
+export type Permission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS]
+
+export async function getStaffPermissions(userId: string): Promise<Permission[]> {
+  const staffProfile = await prisma.staffProfile.findUnique({
+    where: { userId },
+    select: { permissions: true },
+  })
+  if (!staffProfile?.permissions) return []
+  const perms = staffProfile.permissions as unknown
+  return Array.isArray(perms) ? (perms as Permission[]) : []
+}
+
+export async function hasPermission(userId: string, role: string, permission: Permission): Promise<boolean> {
+  if (role === 'ADMIN' || role === 'SUPER_ADMIN') return true
+  const permissions = await getStaffPermissions(userId)
+  return permissions.includes(permission)
+}
+
+/**
+ * Require a specific permission for the current session user.
+ * ADMIN/SUPER_ADMIN bypass all checks. STAFF needs explicit permission.
+ */
+export async function requirePermission(permission: Permission): Promise<{ id: string; role: string }> {
+  const session = await getAuthSession()
+  if (!session) throw new Error('Unauthorized')
+
+  const user = session.user as any
+  if (!['STAFF', 'ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
+    throw new Error('Staff access required')
+  }
+
+  const allowed = await hasPermission(user.id, user.role, permission)
+  if (!allowed) {
+    throw new Error(`Permission denied: ${permission}`)
+  }
+
+  return { id: user.id, role: user.role }
+}

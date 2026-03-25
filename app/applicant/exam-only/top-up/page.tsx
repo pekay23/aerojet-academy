@@ -147,12 +147,12 @@ export default async function ExamOnlyTopUpPage({
         <div>
           <Link
             href="/applicant/exam-only"
-            className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-[#002a5c]"
+            className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-aerojet-blue"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Link>
-          <h1 className="text-2xl font-black tracking-tight text-[#002a5c] sm:text-3xl dark:text-white">
+          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
             Top Up Wallet
           </h1>
           <p className="mt-1 text-slate-500 dark:text-slate-400">Add funds to book exam seats</p>
@@ -161,7 +161,7 @@ export default async function ExamOnlyTopUpPage({
 
       {/* Wallet Balance Card */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-lg dark:border-slate-700">
-        <div className="bg-linear-to-r from-[#002a5c] to-[#4c9ded] px-6 py-5">
+        <div className="bg-linear-to-r from-aerojet-blue to-aerojet-sky px-6 py-5">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur">
               <Wallet className="h-7 w-7 text-white" />

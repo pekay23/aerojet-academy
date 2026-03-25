@@ -53,7 +53,7 @@ export default function EasaPart66Page() {
               </h2>
               <div className="mx-auto mt-8 max-w-3xl">
                 <p className="text-lg leading-relaxed text-slate-600 mb-4">
-                  An <strong className="text-[#002a5c]">Aircraft Maintenance Licence (AML)</strong> issued in accordance with EASA Part-66 is
+                  An <strong className="text-aerojet-blue">Aircraft Maintenance Licence (AML)</strong> issued in accordance with EASA Part-66 is
                   the primary qualification required for individuals to certify maintenance work on
                   aircraft. It is the international benchmark for quality and safety, demonstrating
                   that a technician has met the high standards of knowledge and experience required

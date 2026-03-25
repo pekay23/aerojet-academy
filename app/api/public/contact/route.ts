@@ -5,6 +5,16 @@ import { sendContactEnquiryConfirmation } from '@/lib/email/service'
 import { checkRateLimit, getClientIp } from '@/lib/auth/helpers'
 import { apiTooManyRequests } from '@/lib/api/response'
 
+/** Escape HTML special characters to prevent XSS in email templates */
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+}
+
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 const contactFormSchema = z.object({
@@ -80,11 +90,11 @@ export async function POST(req: NextRequest) {
       html: `
         <div style="font-family: sans-serif; max-width: 600px;">
           <h2>New Contact Enquiry</h2>
-          <p><strong>From:</strong> ${name} (${email})</p>
-          <p><strong>Phone:</strong> ${phone || 'Not provided'}</p>
-          <p><strong>Subject:</strong> ${subject}</p>
+          <p><strong>From:</strong> ${escapeHtml(name)} (${escapeHtml(email)})</p>
+          <p><strong>Phone:</strong> ${escapeHtml(phone || 'Not provided')}</p>
+          <p><strong>Subject:</strong> ${escapeHtml(subject)}</p>
           <div style="background: #f8fafc; padding: 20px; border-radius: 8px;">
-            <p style="margin: 0; white-space: pre-wrap;">${message}</p>
+            <p style="margin: 0; white-space: pre-wrap;">${escapeHtml(message)}</p>
           </div>
         </div>
       `,

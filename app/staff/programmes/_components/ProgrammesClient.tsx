@@ -200,7 +200,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
     <div className="mx-auto max-w-5xl">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-[#002a5c] dark:text-white">
+          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Full-Time Programmes
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400">

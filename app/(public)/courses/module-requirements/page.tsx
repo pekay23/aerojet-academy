@@ -47,13 +47,13 @@ export default function ModuleRequirementsPage() {
         <SectionReveal>
           <section>
             <div className="text-center mb-14">
-              <h2 className="text-3xl font-black text-[#002a5c] uppercase tracking-tight mb-3">Licence Pathways</h2>
+              <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-3">Licence Pathways</h2>
               <p className="text-slate-500 max-w-2xl mx-auto">Identify which modules you need based on your target license category.</p>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {pathways.map((p) => (
-                <div key={p.name} className="bg-white border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-sm hover:border-[#4c9ded] transition-all group">
-                  <h3 className="text-2xl font-black text-[#002a5c] group-hover:text-[#4c9ded] transition-colors">{p.name}</h3>
+                <div key={p.name} className="bg-white border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-sm hover:border-aerojet-sky transition-all group">
+                  <h3 className="text-2xl font-black text-aerojet-blue group-hover:text-aerojet-sky transition-colors">{p.name}</h3>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{p.title}</p>
                   <div className="pt-4 border-t border-slate-100">
                     <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Required Modules:</p>
@@ -69,7 +69,7 @@ export default function ModuleRequirementsPage() {
         <SectionReveal>
           <section>
             <div className="text-center mb-14">
-              <h2 className="text-3xl font-black text-[#002a5c] uppercase tracking-tight mb-3">Complete Syllabus</h2>
+              <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-3">Complete Syllabus</h2>
               <p className="text-slate-500 max-w-2xl mx-auto">17 modules covering the full spectrum of aircraft maintenance knowledge.</p>
             </div>
             <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
@@ -85,10 +85,10 @@ export default function ModuleRequirementsPage() {
                   <tbody className="divide-y divide-slate-50">
                     {modules.map((mod) => (
                       <tr key={mod.id} className="hover:bg-slate-50/50 transition-colors">
-                        <td className="px-6 py-4 font-black text-[#4c9ded] text-base">{mod.id}</td>
+                        <td className="px-6 py-4 font-black text-aerojet-sky text-base">{mod.id}</td>
                         <td className="px-6 py-4 font-bold text-slate-700">{mod.title}</td>
                         <td className="px-6 py-4 text-right">
-                          <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full border ${mod.cat === "Core" ? "text-slate-400 border-slate-200" : "text-[#002a5c] border-blue-100 bg-blue-50"}`}>
+                          <span className={`text-[9px] font-black uppercase px-2.5 py-1 rounded-full border ${mod.cat === "Core" ? "text-slate-400 border-slate-200" : "text-aerojet-blue border-blue-100 bg-blue-50"}`}>
                             {mod.cat}
                           </span>
                         </td>
@@ -106,7 +106,7 @@ export default function ModuleRequirementsPage() {
           <section className="bg-slate-900 rounded-2xl sm:rounded-3xl p-8 sm:p-12 text-center text-white shadow-2xl">
             <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight mb-4">Ready to Begin Your Modules?</h2>
             <p className="text-slate-400 mb-8 max-w-xl mx-auto">Register today to access learning materials, book tuition, and reserve exam seats.</p>
-            <Link href="/register" className="inline-block bg-[#4c9ded] text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white hover:text-[#002a5c] transition-all active:scale-[0.98]">
+            <Link href="/register" className="inline-block bg-aerojet-sky text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-white hover:text-aerojet-blue transition-all active:scale-[0.98]">
               Start Registration
             </Link>
           </section>

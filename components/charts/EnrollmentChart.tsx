@@ -1,6 +1,7 @@
 'use client'
 
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 interface EnrollmentChartProps {
@@ -44,7 +45,7 @@ export function EnrollmentChart({ data, title = 'Enrollment by Course' }: Enroll
                 boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
               }}
               itemStyle={{ color: '#1E293B', fontWeight: 600 }}
-              formatter={(value: number) => [value, 'Students']}
+              formatter={((value: any) => [value, 'Students']) as any}
               labelStyle={{ color: '#64748B', marginBottom: '0.25rem' }}
             />
             <Bar dataKey="count" fill="#2563EB" radius={[4, 4, 0, 0]} barSize={40} />
