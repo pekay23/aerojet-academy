@@ -238,7 +238,7 @@ export default function ReconciliationQueue() {
                     <td className="px-6 py-5">
                       <div className="flex items-center gap-2 text-xs font-bold text-slate-600 dark:text-slate-400">
                         <Calendar className="h-3 w-3" />
-                        {format(new Date(p.approvedAt), 'MMM d, yyyy')}
+                        {p.approvedAt ? format(new Date(p.approvedAt), 'MMM d, yyyy') : '—'}
                       </div>
                       {p.proofUrl && (
                         <a

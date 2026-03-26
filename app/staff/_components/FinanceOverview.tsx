@@ -113,16 +113,8 @@ export default function FinanceOverview({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
-            Finance
-          </h1>
-          <p className="mt-1 text-sm text-slate-400">
-            Revenue separation: Registration (GHS) vs Training (EUR)
-          </p>
-        </div>
+      {/* Refresh */}
+      <div className="flex justify-end">
         <button
           onClick={fetchData}
           className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"

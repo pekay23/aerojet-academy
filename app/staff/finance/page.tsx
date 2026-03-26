@@ -21,7 +21,7 @@ import { format } from 'date-fns'
 import Link from 'next/link'
 import SearchInput from '@/components/SearchInput'
 import { getCurrencySymbol } from '@/lib/currency'
-import { TopupActions } from './wallet-topups/_components/TopupActions'
+
 import {
   DollarSign,
   TrendingUp,
