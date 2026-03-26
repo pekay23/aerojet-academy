@@ -280,6 +280,8 @@ export async function updateExamBooking(
     score?: number
     result?: string
     status?: any
+    attemptType?: string
+    isResit?: boolean
   }
 ) {
   try {
@@ -292,10 +294,17 @@ export async function updateExamBooking(
       if (course) resultData.moduleCode = course.code.toUpperCase()
     }
 
-    // Derive result from score if score is provided
+    // Derive result from score if score is provided and no explicit result override
     if (data.score !== undefined) {
       resultData.percentage = data.score
-      resultData.result = data.score >= 75 ? 'pass' : 'fail'
+      if (!data.result) {
+        resultData.result = data.score >= 75 ? 'pass' : 'fail'
+      }
+    }
+
+    // Derive isResit from attemptType
+    if (data.attemptType) {
+      resultData.isResit = data.attemptType.startsWith('RESIT')
     }
 
     await prisma.examBooking.update({
