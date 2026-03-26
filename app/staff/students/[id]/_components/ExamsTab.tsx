@@ -58,6 +58,8 @@ export default function ExamsTab({
     result?: string
     examDate?: string
     moduleCode?: string
+    attemptType?: string
+    bookingType?: string
   }>({})
   const [quickAddModule, setQuickAddModule] = useState<any>(null)
   const [sortBy, setSortBy] = useState<'moduleCode' | 'examDate' | 'score' | 'result'>('examDate')
@@ -76,6 +78,7 @@ export default function ExamsTab({
         examName:
           b.exam?.name || b.course?.name || b.exam?.examComponent?.course?.name || 'Manual Record',
         examDate: b.examDate,
+        courseId: b.course?.id || null,
         score: b.score != null ? Number(b.score) : null,
         percentage: b.percentage != null ? Number(b.percentage) : null,
         result: b.result,
@@ -209,6 +212,8 @@ export default function ExamsTab({
         result: editData.result,
         examDate: editData.examDate ? new Date(editData.examDate) : undefined,
         moduleCode: editData.moduleCode || undefined,
+        attemptType: editData.attemptType || undefined,
+        bookingType: editData.bookingType || undefined,
       })
       if (res.error) {
         toast.error(res.error)
@@ -290,6 +295,17 @@ export default function ExamsTab({
   }
 
   const walletBalance = Number(student.wallet?.availableBalance ?? 0)
+
+  // Build a map of moduleCode → courseId from examComponents for linking
+  const courseLookup = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const ec of examComponents) {
+      if (ec.course?.code && ec.course?.id) {
+        map.set(ec.course.code.toUpperCase(), ec.course.id)
+      }
+    }
+    return map
+  }, [examComponents])
 
   // Get list of modules that already have records
   const existingModuleCodes = new Set(
@@ -549,23 +565,46 @@ export default function ExamsTab({
                           </option>
                         ))}
                       </select>
-                    ) : (
-                      <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
-                        {record.moduleCode}
-                      </span>
-                    )}
+                    ) : (() => {
+                      const cid = record.courseId || courseLookup.get(record.moduleCode?.toUpperCase() || '')
+                      return cid ? (
+                        <a
+                          href={`/staff/courses/${cid}`}
+                          className="font-mono font-bold text-aerojet-blue hover:underline dark:text-aerojet-sky"
+                        >
+                          {record.moduleCode}
+                        </a>
+                      ) : (
+                        <span className="font-mono font-bold text-slate-800 dark:text-slate-200">
+                          {record.moduleCode}
+                        </span>
+                      )
+                    })()}
                   </td>
-                  <td className="max-w-[200px] truncate px-4 py-3 text-xs text-slate-500">
-                    <div>
-                      <span className="font-medium">{record.examName}</span>
-                      {record.eventName && (
-                        <span className="ml-1 text-slate-400">({record.eventName})</span>
-                      )}
-                    </div>
-                    {record.attemptType && (
-                      <span className="text-[10px] text-slate-400">
-                        {record.attemptType.replace(/_/g, ' ')}
-                      </span>
+                  <td className="max-w-[200px] px-4 py-3 text-xs text-slate-500">
+                    {editingId === record.id ? (
+                      <select
+                        value={editData.attemptType ?? record.attemptType ?? 'FIRST'}
+                        onChange={(e) => setEditData((d) => ({ ...d, attemptType: e.target.value }))}
+                        className="w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                      >
+                        <option value="FIRST">First Attempt</option>
+                        <option value="RESIT_1">Resit 1</option>
+                        <option value="RESIT_2">Resit 2</option>
+                        <option value="RESIT_3">Resit 3</option>
+                      </select>
+                    ) : (
+                      <div>
+                        <span className="truncate font-medium">{record.examName}</span>
+                        {record.eventName && (
+                          <span className="ml-1 text-slate-400">({record.eventName})</span>
+                        )}
+                        {record.attemptType && record.attemptType !== 'FIRST' && (
+                          <div className="mt-0.5 text-[10px] text-slate-400">
+                            {record.attemptType.replace(/_/g, ' ')}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-500">
@@ -628,11 +667,22 @@ export default function ExamsTab({
                     )}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    {record.bookingType && (
+                    {editingId === record.id ? (
+                      <select
+                        value={editData.bookingType ?? record.bookingType ?? 'INDIVIDUAL'}
+                        onChange={(e) => setEditData((d) => ({ ...d, bookingType: e.target.value }))}
+                        className="w-28 rounded border border-slate-200 px-2 py-1 text-xs"
+                      >
+                        <option value="INDIVIDUAL">Individual</option>
+                        <option value="MANUAL">Manual Record</option>
+                        <option value="TWIN_PACK">Twin Pack</option>
+                        <option value="FOUR_PACK">Four Pack</option>
+                      </select>
+                    ) : record.bookingType ? (
                       <span className="rounded bg-slate-100 px-1.5 py-0.5 text-[9px] font-bold text-slate-500 dark:bg-slate-800">
                         {record.bookingType.replace(/_/g, ' ')}
                       </span>
-                    )}
+                    ) : null}
                   </td>
                   <td className="px-4 py-3 text-center">
                     <span
@@ -676,11 +726,14 @@ export default function ExamsTab({
                               onClick={() => {
                                 setEditingId(record.id)
                                 setEditData({
-                                  score: record.score,
+                                  score: record.score ?? undefined,
                                   moduleCode: record.moduleCode,
                                   examDate: record.examDate
                                     ? new Date(record.examDate).toISOString().split('T')[0]
                                     : '',
+                                  result: record.result || undefined,
+                                  attemptType: record.attemptType || 'FIRST',
+                                  bookingType: record.bookingType || 'INDIVIDUAL',
                                 })
                               }}
                               className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600"
