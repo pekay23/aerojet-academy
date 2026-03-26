@@ -79,7 +79,7 @@ export async function GET(req: NextRequest) {
       where: { status: { in: ['APPROVED', 'REJECTED', 'PENDING'] } },
       include: {
         user: {
-          include: { profile: { select: { firstName: true, lastName: true } } },
+          include: { profile: { select: { firstName: true, middleName: true, lastName: true } } },
         },
       },
       orderBy: { createdAt: 'desc' },
