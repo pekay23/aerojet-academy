@@ -95,10 +95,10 @@ export type RouteHandler = (
 ) => Promise<NextResponse>
 
 export function withErrorHandler(handler: RouteHandler) {
-  return async (req: NextRequest, ctx?: { params: Promise<Record<string, string>> }) => {
+  return async (req: NextRequest, ctx: any) => {
     try {
       // In Next.js 15, we need to await params if it's a promise
-      const params = await ctx?.params
+      const params = ctx?.params ? await ctx.params : undefined
       // Pass the resolved params to the handler
       return await handler(req, ctx ? { ...ctx, params: params || {} } : undefined)
     } catch (error: unknown) {

@@ -16,10 +16,6 @@ const envSchema = z.object({
   UPLOADTHING_SECRET: z.string().min(1),
   UPLOADTHING_APP_ID: z.string().min(1),
 
-  // CMS
-  NEXT_PUBLIC_SANITY_PROJECT_ID: z.string().min(1),
-  NEXT_PUBLIC_SANITY_DATASET: z.string().min(1).default('production'),
-
   // Supabase (Optional - for backup/replica)
   NEXT_PUBLIC_SUPABASE_URL: z.string().url().optional(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
@@ -56,8 +52,6 @@ const processEnv = {
   RESEND_API_KEY: process.env.RESEND_API_KEY,
   UPLOADTHING_SECRET: process.env.UPLOADTHING_SECRET,
   UPLOADTHING_APP_ID: process.env.UPLOADTHING_APP_ID,
-  NEXT_PUBLIC_SANITY_PROJECT_ID: process.env.NEXT_PUBLIC_SANITY_PROJECT_ID,
-  NEXT_PUBLIC_SANITY_DATASET: process.env.NEXT_PUBLIC_SANITY_DATASET,
   NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
