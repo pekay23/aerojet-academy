@@ -177,23 +177,23 @@ export default function StudentDetailPanel({
     result: r.passed ? 'PASS' : 'FAIL',
   })) || []
 
-  // Only include exam bookings that have a completed result — case-insensitive
+  // Include exam bookings that have a completed result OR a score (graded but result not yet written)
   const completedExamBookings = currentStudent.examBookings
-    ?.filter((r: any) => isCompletedResult(r.result))
+    ?.filter((r: any) => isCompletedResult(r.result) || r.score != null)
     .map((r: any) => ({
       id: r.id,
       type: 'MANUAL',
       moduleCode: r.moduleCode || '—',
       examName: r.exam?.name || 'Manual Record',
       date: r.examDate || r.bookedAt,
-      score: r.score ? Number(r.score) : null,
+      score: r.score != null ? Number(r.score) : null,
       passed: r.result?.toLowerCase() === 'pass',
-      result: r.result?.toUpperCase(),
+      result: r.result?.toUpperCase() || (r.score != null ? 'SCORED' : null),
     })) || []
 
-  // Upcoming/pending exams (no completed result yet)
+  // Upcoming/pending exams — no result AND no score yet
   const upcomingExams = currentStudent.examBookings
-    ?.filter((r: any) => !isCompletedResult(r.result))
+    ?.filter((r: any) => !isCompletedResult(r.result) && r.score == null)
     .map((r: any) => ({
       id: r.id,
       type: r.exam?.name ? 'BOOKED' : 'MANUAL',
@@ -523,7 +523,7 @@ function ExamTabContent({
   const filteredHistory = allExamHistory.filter((h) => {
     if (filter === 'ALL') return true
     if (filter === 'PASSED') return h.passed
-    if (filter === 'FAILED') return !h.passed && h.result !== 'ABSENT'
+    if (filter === 'FAILED') return !h.passed && h.result !== 'ABSENT' && h.result !== 'SCORED'
     return false
   })
 
