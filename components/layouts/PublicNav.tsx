@@ -161,6 +161,7 @@ export default function PublicNav() {
               alt="Aerojet Logo"
               width={150}
               height={38}
+              style={{ height: 'auto' }}
               priority
             />
           </Link>
