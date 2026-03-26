@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ChevronDown, ChevronUp, CheckCircle, AlertTriangle, XCircle, BookOpen, FileText } from 'lucide-react'
+import { ChevronDown, ChevronUp, CheckCircle, AlertTriangle, XCircle, BookOpen, FileText, ClipboardList } from 'lucide-react'
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -36,6 +36,7 @@ interface StudentProfileData {
   currentYearNumber: number
   currentSemesterNumber: number
   programmeChoice: string | null
+  enrollmentType: string | null
 }
 
 interface Props {
@@ -47,6 +48,16 @@ interface Props {
 // ---------------------------------------------------------------------------
 // HELPERS
 // ---------------------------------------------------------------------------
+
+/** Pathways that don't use academic year / semester enrollments */
+const EXAM_PATHWAY_TYPES = ['EXAM_ONLY', 'MODULAR']
+
+function isExamPathway(profile: StudentProfileData): boolean {
+  return (
+    EXAM_PATHWAY_TYPES.includes(profile.programmeChoice ?? '') ||
+    EXAM_PATHWAY_TYPES.includes(profile.enrollmentType ?? '')
+  )
+}
 
 interface SemesterGroup {
   key: string
@@ -113,7 +124,147 @@ function getCompletenessStatus(group: SemesterGroup): 'complete' | 'partial' | '
 }
 
 // ---------------------------------------------------------------------------
-// COMPONENT
+// SUB-COMPONENT: Exam-Only / Modular flat exam history
+// ---------------------------------------------------------------------------
+
+function ExamOnlyHistory({
+  examBookings,
+  studentProfile,
+}: {
+  examBookings: ExamBookingData[]
+  studentProfile: StudentProfileData
+}) {
+  const passed = examBookings.filter((b) => b.result?.toLowerCase() === 'pass').length
+  const failed = examBookings.filter((b) => b.result?.toLowerCase() === 'fail').length
+  const pending = examBookings.filter((b) => !b.result).length
+
+  const fundingColors: Record<string, string> = {
+    SCHOLARSHIP: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+    SPONSORED: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+    SELF_FUNDED: 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400',
+  }
+
+  const pathwayLabel =
+    studentProfile.programmeChoice === 'EXAM_ONLY' ||
+    studentProfile.enrollmentType === 'EXAM_ONLY'
+      ? 'Exam-Only Pathway'
+      : 'Modular Pathway'
+
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+      {/* Header */}
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
+          <ClipboardList className="h-4 w-4" /> Exam History
+        </h2>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[10px] font-black uppercase text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+            {pathwayLabel}
+          </span>
+          <span className={`rounded-full px-2.5 py-1 text-[10px] font-black uppercase ${fundingColors[studentProfile.fundingSource] || fundingColors.SELF_FUNDED}`}>
+            {studentProfile.fundingSource.replace('_', ' ')}
+          </span>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="mb-5 grid grid-cols-3 gap-3">
+        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
+          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{passed}</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase">Passed</p>
+        </div>
+        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
+          <p className="text-2xl font-black text-red-500 dark:text-red-400">{failed}</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase">Failed</p>
+        </div>
+        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
+          <p className="text-2xl font-black text-slate-400 dark:text-slate-500">{pending}</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase">Pending</p>
+        </div>
+      </div>
+
+      {/* Exam List */}
+      {examBookings.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center dark:border-slate-700 dark:bg-slate-800/30">
+          <ClipboardList className="mx-auto mb-2 h-8 w-8 text-slate-300 dark:text-slate-600" />
+          <p className="text-sm font-semibold text-slate-500">No exam records yet</p>
+          <p className="mt-1 text-xs text-slate-400">
+            Exam bookings will appear here as the student registers for exams.
+          </p>
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-slate-100 dark:border-slate-800">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-100 bg-slate-50 text-left dark:border-slate-700 dark:bg-slate-800/40">
+                <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Module</th>
+                <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Date</th>
+                <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Result</th>
+                <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Score</th>
+                <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Attempt</th>
+              </tr>
+            </thead>
+            <tbody>
+              {examBookings.map((booking) => {
+                const resultLower = booking.result?.toLowerCase()
+                return (
+                  <tr key={booking.id} className="border-b border-slate-50 last:border-0 dark:border-slate-800">
+                    <td className="px-4 py-2 font-mono text-xs font-bold text-slate-700 dark:text-slate-300">
+                      {booking.moduleCode || '—'}
+                    </td>
+                    <td className="px-4 py-2 text-xs text-slate-500 dark:text-slate-400">
+                      {booking.examDate
+                        ? new Date(booking.examDate).toLocaleDateString('en-GB', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric',
+                          })
+                        : '—'}
+                    </td>
+                    <td className="px-4 py-2">
+                      {booking.result ? (
+                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                          resultLower === 'pass'
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                            : resultLower === 'fail'
+                              ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+                              : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                        }`}>
+                          {booking.result.toUpperCase()}
+                        </span>
+                      ) : (
+                        <span className="text-xs italic text-slate-400">Pending</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-2 font-mono text-xs text-slate-600 dark:text-slate-300">
+                      {booking.percentage != null ? `${booking.percentage}%` : '—'}
+                    </td>
+                    <td className="px-4 py-2 text-xs text-slate-500">
+                      {booking.attemptType?.replace('_', ' ') || '—'}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Quick Actions */}
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Link
+          href="/staff/exams?tab=records"
+          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:bg-white hover:shadow-sm dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
+        >
+          <FileText className="h-3 w-3" /> Add Exam Record
+        </Link>
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// MAIN COMPONENT
 // ---------------------------------------------------------------------------
 
 export default function AcademicHistorySection({ enrollments, examBookings, studentProfile }: Props) {
@@ -121,6 +272,12 @@ export default function AcademicHistorySection({ enrollments, examBookings, stud
 
   if (!studentProfile) return null
 
+  // Exam-only / Modular students: show flat exam history, no semester grouping
+  if (isExamPathway(studentProfile)) {
+    return <ExamOnlyHistory examBookings={examBookings} studentProfile={studentProfile} />
+  }
+
+  // Full-time / Short-course: semester-grouped academic history
   const semesters = groupBySemester(enrollments, examBookings)
 
   // Count unmatched exam bookings (not linked to any enrollment)
@@ -323,7 +480,7 @@ export default function AcademicHistorySection({ enrollments, examBookings, stud
         </div>
       )}
 
-      {/* Unmatched Exam Records */}
+      {/* Unmatched Exam Records — only shown for full-time if they somehow exist */}
       {unmatchedExams.length > 0 && (
         <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
           <p className="mb-2 text-xs font-bold text-amber-700 dark:text-amber-400">

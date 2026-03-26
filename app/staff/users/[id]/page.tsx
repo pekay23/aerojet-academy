@@ -365,6 +365,7 @@ export default async function UserProfilePage({ params }: Props) {
                 currentYearNumber: user.studentProfile.currentYearNumber,
                 currentSemesterNumber: user.studentProfile.currentSemesterNumber,
                 programmeChoice: user.studentProfile.programmeChoice,
+                enrollmentType: user.studentProfile.enrollmentType,
               } : null}
             />
           )}
