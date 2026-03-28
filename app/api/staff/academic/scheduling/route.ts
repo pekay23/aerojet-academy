@@ -52,9 +52,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // If no termId provided, create the term from pathwayId/yearNumber/semesterNumber
   if (!resolvedTermId) {
     if (!pathwayId || yearNumber == null || semesterNumber == null) {
-      return apiError(
-        'Either termId or pathwayId + yearNumber + semesterNumber is required'
-      )
+      return apiError('Either termId or pathwayId + yearNumber + semesterNumber is required')
     }
 
     // Check pathway exists
@@ -113,12 +111,21 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     },
   })
 
+  // Resolve term label for audit log
+  const term = await prisma.academicTerm.findUnique({
+    where: { id: resolvedTermId },
+    select: { yearNumber: true, semesterNumber: true, pathway: { select: { name: true } } },
+  })
+  const termLabel = term
+    ? `${term.pathway.name} - Year ${term.yearNumber} Semester ${term.semesterNumber}`
+    : resolvedTermId
+
   await createAuditLog({
     action: AuditAction.CREATE,
     entity: 'TermCourseAssignment',
     entityId: assignment.id,
     userId: staff.id,
-    description: `Assigned course ${course.code} to term ${resolvedTermId}`,
+    description: `Assigned course ${course.code} to term ${termLabel}`,
     details: { termId: resolvedTermId, courseId, courseCode: course.code },
   })
 
@@ -148,13 +155,22 @@ export const DELETE = withErrorHandler(async (req: NextRequest) => {
     }
   }
 
-  let assignment
+  let assignment: {
+    id: string
+    termId: string
+    courseId: string
+    course: { id: string; code: string; name: string }
+    term: { yearNumber: number; semesterNumber: number; pathway: { name: string } } | null
+  } | null
 
   if (assignmentId) {
     assignment = await prisma.termCourseAssignment.findUnique({
       where: { id: assignmentId },
       include: {
         course: { select: { id: true, code: true, name: true } },
+        term: {
+          select: { yearNumber: true, semesterNumber: true, pathway: { select: { name: true } } },
+        },
       },
     })
   } else if (termId && courseId) {
@@ -162,6 +178,9 @@ export const DELETE = withErrorHandler(async (req: NextRequest) => {
       where: { termId_courseId: { termId, courseId } },
       include: {
         course: { select: { id: true, code: true, name: true } },
+        term: {
+          select: { yearNumber: true, semesterNumber: true, pathway: { select: { name: true } } },
+        },
       },
     })
   } else {
@@ -181,7 +200,7 @@ export const DELETE = withErrorHandler(async (req: NextRequest) => {
     entity: 'TermCourseAssignment',
     entityId: assignment.id,
     userId: staff.id,
-    description: `Removed course ${assignment.course.code} from term ${assignment.termId}`,
+    description: `Removed course ${assignment.course.code} from term ${assignment.term ? `${assignment.term.pathway.name} - Year ${assignment.term.yearNumber} Semester ${assignment.term.semesterNumber}` : assignment.termId}`,
     details: {
       termId: assignment.termId,
       courseId: assignment.courseId,

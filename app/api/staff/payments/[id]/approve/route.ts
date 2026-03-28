@@ -320,6 +320,7 @@ export const POST = withErrorHandler(
         entity: 'Payment',
         entityId: id,
         userId: staff.id,
+        description: `Approved payment of ${payment.currency || 'EUR'} ${payment.amount} for ${payment.user.profile ? `${payment.user.profile.firstName} (${payment.user.email})` : payment.userId} - ${payment.referenceType || 'Payment'}`,
         details: {
           targetUserId: payment.userId,
           amount: payment.amount,
@@ -369,6 +370,7 @@ export const POST = withErrorHandler(
         entity: 'Payment',
         entityId: id,
         userId: staff.id,
+        description: `Rejected payment of ${payment.currency || 'EUR'} ${payment.amount} for ${payment.user.profile ? `${payment.user.profile.firstName} (${payment.user.email})` : payment.userId} - Reason: ${reason}`,
         details: { targetUserId: payment.userId, reason },
       })
 

@@ -65,7 +65,7 @@ export async function confirmPoolInternal(poolId: string, tx: any) {
       action: 'POOL_CONFIRM',
       entity: 'ExamPool',
       entityId: poolId,
-      description: `Pool ${poolId} (Event ${pool?.eventId}) has been confirmed and seats locked.`,
+      description: `Pool "${pool?.name}" has been confirmed and seats locked.`,
     },
     tx
   )
@@ -150,7 +150,7 @@ export async function failPool(poolId: string, txClient?: Prisma.TransactionClie
         action: 'POOL_FAIL',
         entity: 'ExamPool',
         entityId: poolId,
-        description: `Pool ${poolId} has failed Go/No-Go criteria. All funds released.`,
+        description: `Pool "${pool.name}" has failed Go/No-Go criteria. All funds released.`,
       },
       tx
     )

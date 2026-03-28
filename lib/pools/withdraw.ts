@@ -131,7 +131,7 @@ export async function withdrawFromPool(poolId: string, userId: string): Promise<
           action: 'POOL_WITHDRAWAL',
           entity: 'ExamPool',
           entityId: poolId,
-          description: `User ${userId} withdrew from pool ${poolId}. Seat freed for waitlist.`,
+          description: `User ${userId} withdrew from pool "${pool.name}". Seat freed for waitlist.`,
         })
 
         // Phase 9: Auto-promote from waitlist if pool was full or has space
