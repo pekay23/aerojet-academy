@@ -24,7 +24,7 @@ export const PATCH = withErrorHandler(
     // Find student profile to verify note belongs to this student
     const student = await prisma.user.findUnique({
       where: { id },
-      include: { studentProfile: true },
+      include: { studentProfile: true, profile: true },
     })
 
     if (!student || !student.studentProfile) {
@@ -57,12 +57,16 @@ export const PATCH = withErrorHandler(
       },
     })
 
+    const studentName = student.profile
+      ? `${student.profile.firstName} ${student.profile.lastName}`
+      : student.email
+
     await createAuditLog({
       action: AuditAction.UPDATE,
       entity: 'AdminNote',
       entityId: noteId,
       userId: staff.id,
-      description: `Updated admin note for student ${id}`,
+      description: `Updated admin note for student ${studentName}`,
       changes: {
         studentUserId: id,
         noteId,
@@ -95,7 +99,7 @@ export const DELETE = withErrorHandler(
     // Find student profile to verify note belongs to this student
     const student = await prisma.user.findUnique({
       where: { id },
-      include: { studentProfile: true },
+      include: { studentProfile: true, profile: true },
     })
 
     if (!student || !student.studentProfile) {
@@ -120,12 +124,16 @@ export const DELETE = withErrorHandler(
       data: softDeleteData(),
     })
 
+    const studentName = student.profile
+      ? `${student.profile.firstName} ${student.profile.lastName}`
+      : student.email
+
     await createAuditLog({
       action: AuditAction.DELETE,
       entity: 'AdminNote',
       entityId: noteId,
       userId: staff.id,
-      description: `Deleted admin note for student ${id}`,
+      description: `Deleted admin note for student ${studentName}`,
       changes: {
         studentUserId: id,
         noteId,

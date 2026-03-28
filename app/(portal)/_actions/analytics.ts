@@ -11,13 +11,18 @@ export async function recordCourseEngagement(courseId: string, action: string) {
     const session = await getAuthSession()
     if (!session) return { success: false, error: 'Unauthorized' }
 
+    const course = await prisma.course.findUnique({
+      where: { id: courseId },
+      select: { name: true },
+    })
+
     await prisma.auditLog.create({
       data: {
         userId: session.user.id,
         action: `COURSE_${action.toUpperCase()}`,
         entity: 'Course',
         entityId: courseId,
-        description: `User ${session.user.role} performed ${action} on course ${courseId}`,
+        description: `User ${session.user.role} performed ${action} on course ${course?.name ?? courseId}`,
       },
     })
 

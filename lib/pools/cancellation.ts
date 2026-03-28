@@ -38,7 +38,9 @@ export async function cancelBooking(
         const booking = await tx.examBooking.findUnique({
           where: { id: bookingId },
           include: {
-            user: { select: { id: true, profile: { select: { firstName: true, lastName: true } } } },
+            user: {
+              select: { id: true, profile: { select: { firstName: true, lastName: true } } },
+            },
             examComponent: { select: { course: { select: { code: true, name: true } } } },
             event: { select: { name: true } },
           },
@@ -50,8 +52,7 @@ export async function cancelBooking(
 
         const userId = booking.userId
         const amount = Number(booking.amountPaid)
-        const moduleLabel =
-          booking.examComponent?.course?.code || booking.moduleCode || 'Exam'
+        const moduleLabel = booking.examComponent?.course?.code || booking.moduleCode || 'Exam'
         const studentName =
           `${booking.user.profile?.firstName || ''} ${booking.user.profile?.lastName || ''}`.trim() ||
           'Student'
@@ -137,9 +138,10 @@ export async function cancelBooking(
           data: {
             userId,
             title: 'Booking Cancelled',
-            message: totalRefund > 0
-              ? `Your booking for ${moduleLabel} has been cancelled. €${totalRefund.toFixed(2)} has been credited to your wallet.`
-              : `Your booking for ${moduleLabel} has been cancelled.`,
+            message:
+              totalRefund > 0
+                ? `Your booking for ${moduleLabel} has been cancelled. €${totalRefund.toFixed(2)} has been credited to your wallet.`
+                : `Your booking for ${moduleLabel} has been cancelled.`,
             type: 'PAYMENT_UPDATE',
             linkUrl: '/student/wallet',
             linkText: 'View Wallet',
@@ -172,7 +174,7 @@ export async function cancelBooking(
             entity: 'ExamBooking',
             entityId: bookingId,
             userId: cancelledBy,
-            description: `Booking ${bookingId} cancelled. Refund: €${totalRefund.toFixed(2)} (${refundType}). Reason: ${reason || 'User requested'}`,
+            description: `Booking cancelled for ${studentName} - ${moduleLabel}${booking.event ? ` (${booking.event.name})` : ''}. Refund: €${totalRefund.toFixed(2)} (${refundType}). Reason: ${reason || 'User requested'}`,
           },
           tx
         )

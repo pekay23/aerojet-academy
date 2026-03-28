@@ -66,7 +66,7 @@ export const POST = withErrorHandler(
     // Find student profile
     const student = await prisma.user.findUnique({
       where: { id },
-      include: { studentProfile: true },
+      include: { studentProfile: true, profile: true },
     })
 
     if (!student || !student.studentProfile) {
@@ -89,12 +89,16 @@ export const POST = withErrorHandler(
       },
     })
 
+    const studentName = student.profile
+      ? `${student.profile.firstName} ${student.profile.lastName}`
+      : student.email
+
     await createAuditLog({
       action: AuditAction.CREATE,
       entity: 'AdminNote',
       entityId: note.id,
       userId: staff.id,
-      description: `Created admin note for student ${id}`,
+      description: `Created admin note for student ${studentName}`,
       changes: {
         studentUserId: id,
         studentProfileId: student.studentProfile.id,
