@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import prisma from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { generatePoolRosterCSV } from '@/lib/compliance/reports'
 import { logAuditEvent } from '@/lib/audit/logger'
@@ -16,6 +17,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ poolId: 
       return NextResponse.json({ error: 'Missing poolId' }, { status: 400 })
     }
 
+    const pool = await prisma.examPool.findUnique({
+      where: { id: poolId },
+      select: { name: true },
+    })
+
     const csvContent = await generatePoolRosterCSV(poolId)
 
     // Log the audit event
@@ -24,7 +30,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ poolId: 
       action: 'REPORT_DOWNLOAD',
       entity: 'ExamPool',
       entityId: poolId,
-      description: `Staff downloaded exam roster for pool ${poolId}`,
+      description: `Staff downloaded exam roster for pool "${pool?.name ?? poolId}"`,
     })
 
     // Return the CSV as a downloadable file
