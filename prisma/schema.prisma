@@ -24,6 +24,7 @@ model User {
   programmeChoice            ProgrammeChoice?
   selectedLicenseCategories  String[]             @default([])
   isAmbassador               Boolean              @default(false)
+  marketingOptOut        Boolean              @default(false)
   referralCode          String?              @unique
   successfulReferrals   Int                  @default(0)
   mustChangePassword    Boolean              @default(false)

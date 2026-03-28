@@ -195,8 +195,8 @@ export const wrapEmail = async (title: string, bodyContent: string) => {
                   <a href="${baseUrl}/login" style="color: ${COLORS.sky} !important;">Portal</a>
                 </div>
                 <div class="copyright" style="color: #94a3b8 !important; opacity: 1 !important;">&copy; ${new Date().getFullYear()} Aerojet Aviation. All rights reserved.</div>
-                <div style="margin-top: 8px; font-size: 11px; color: #94a3b8;">
-                  <a href="${baseUrl}/unsubscribe" style="color: #94a3b8; text-decoration: underline;">Unsubscribe</a> from marketing emails.
+                <div style="margin-top: 8px; font-size: 11px; color: #94a3b8; text-align: center;">
+                  <a href="${baseUrl}/unsubscribe${recipientEmail ? `?email=${encodeURIComponent(recipientEmail)}` : ''}" style="color: #94a3b8; text-decoration: underline;">Unsubscribe</a> from marketing emails.
                 </div>
               </td>
             </tr>
@@ -313,7 +313,11 @@ export async function renderRegistrationEmail(firstName: string, registrationCod
       uploadUrl: `${baseUrl}/upload-proof?code=${registrationCode}`,
     })
 
-    return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+    return await wrapEmail(
+      replacePlaceholders(template.subject, { firstName }),
+      body,
+      recipientEmail
+    )
   } catch (error) {
     console.error('[Email] Failed to render registration email:', error)
     throw error
@@ -326,7 +330,7 @@ export async function sendRegistrationEmail(
   registrationCode: string
 ) {
   // Subject placeholder replacement is handled inside renderRegistrationEmail
-  const html = await renderRegistrationEmail(firstName, registrationCode)
+  const html = await renderRegistrationEmail(firstName, registrationCode, email)
 
   return sendEmail({
     to: email,
@@ -378,7 +382,7 @@ export async function renderEmailVerificationEmail(firstName: string, verifyToke
     verifyUrl: `${baseUrl}/verify-email?token=${verifyToken}&type=registration`,
   })
 
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendEmailVerificationEmail(
@@ -386,7 +390,7 @@ export async function sendEmailVerificationEmail(
   firstName: string,
   verifyToken: string
 ) {
-  const html = await renderEmailVerificationEmail(firstName, verifyToken)
+  const html = await renderEmailVerificationEmail(firstName, verifyToken, email)
 
   return sendEmail({
     to: email,
@@ -445,7 +449,7 @@ export async function renderActivationEmail(
     loginUrl: `${baseUrl}/verify-email?token=${verifyToken}`,
   })
 
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendActivationEmail(
@@ -455,7 +459,13 @@ export async function sendActivationEmail(
   tempPassword: string,
   verifyToken: string
 ) {
-  const html = await renderActivationEmail(firstName, academyEmail, tempPassword, verifyToken)
+  const html = await renderActivationEmail(
+    firstName,
+    academyEmail,
+    tempPassword,
+    verifyToken,
+    email
+  )
 
   return sendEmail({
     to: email,
@@ -504,7 +514,7 @@ export async function renderStudentPromotionEmail(firstName: string, studentId: 
     loginUrl: `${baseUrl}/login`,
   })
 
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendStudentPromotionEmail(
@@ -512,7 +522,7 @@ export async function sendStudentPromotionEmail(
   firstName: string,
   studentId: string
 ) {
-  const html = await renderStudentPromotionEmail(firstName, studentId)
+  const html = await renderStudentPromotionEmail(firstName, studentId, email)
 
   return sendEmail({
     to: email,
@@ -559,7 +569,7 @@ export async function renderPoolConfirmedEmail(
     currency: '€',
   })
 
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendPoolConfirmedEmail(
@@ -570,7 +580,7 @@ export async function sendPoolConfirmedEmail(
   examDate: string,
   amount: number
 ) {
-  const html = await renderPoolConfirmedEmail(firstName, poolName, module, examDate, amount)
+  const html = await renderPoolConfirmedEmail(firstName, poolName, module, examDate, amount, email)
 
   return sendEmail({
     to: email,
@@ -610,11 +620,11 @@ export async function renderPasswordResetEmail(firstName: string, resetToken: st
     resetUrl: `${baseUrl}/reset-password?token=${resetToken}`,
   })
 
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendPasswordResetEmail(email: string, firstName: string, resetToken: string) {
-  const html = await renderPasswordResetEmail(firstName, resetToken)
+  const html = await renderPasswordResetEmail(firstName, resetToken, email)
 
   return sendEmail({
     to: email,
@@ -654,7 +664,7 @@ export async function renderPaymentApprovedEmail(
     amount: amount.toLocaleString(),
   })
 
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendPaymentApprovedEmail(
@@ -663,7 +673,7 @@ export async function sendPaymentApprovedEmail(
   paymentType: string,
   amount: number
 ) {
-  const html = await renderPaymentApprovedEmail(firstName, paymentType, amount)
+  const html = await renderPaymentApprovedEmail(firstName, paymentType, amount, email)
 
   return sendEmail({
     to: email,
@@ -722,7 +732,7 @@ export async function renderSeatReservationConfirmedEmail(
     portalUrl: `${baseUrl}/applicant/dashboard`,
   })
 
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendSeatReservationConfirmedEmail(
@@ -732,7 +742,13 @@ export async function sendSeatReservationConfirmedEmail(
   amount: number,
   currency: string
 ) {
-  const html = await renderSeatReservationConfirmedEmail(firstName, programmeName, amount, currency)
+  const html = await renderSeatReservationConfirmedEmail(
+    firstName,
+    programmeName,
+    amount,
+    currency,
+    email
+  )
 
   return sendEmail({
     to: email,
@@ -777,7 +793,7 @@ export async function renderPaymentRejectedEmail(
     loginUrl: `${baseUrl}/login`,
   })
 
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendPaymentRejectedEmail(
@@ -786,7 +802,7 @@ export async function sendPaymentRejectedEmail(
   paymentType: string,
   reason: string
 ) {
-  const html = await renderPaymentRejectedEmail(firstName, paymentType, reason)
+  const html = await renderPaymentRejectedEmail(firstName, paymentType, reason, email)
 
   return sendEmail({
     to: email,
@@ -818,7 +834,7 @@ export async function renderPoolFailedEmail(firstName: string, poolName: string,
   })
 
   const body = replacePlaceholders(template.body, { firstName, poolName, examDate })
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendPoolFailedEmail(
@@ -827,7 +843,7 @@ export async function sendPoolFailedEmail(
   poolName: string,
   examDate: string
 ) {
-  const html = await renderPoolFailedEmail(firstName, poolName, examDate)
+  const html = await renderPoolFailedEmail(firstName, poolName, examDate, email)
   return sendEmail({
     to: email,
     subject: `Aerojet Aviation - Exam Booking Cancelled: ${poolName}`,
@@ -864,7 +880,7 @@ export async function renderPoolApproachingConfirmationEmail(
   })
 
   const body = replacePlaceholders(template.body, { firstName, poolName, examDate, module })
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendPoolApproachingConfirmationEmail(
@@ -874,7 +890,22 @@ export async function sendPoolApproachingConfirmationEmail(
   examDate: string,
   module: string
 ) {
-  const html = await renderPoolApproachingConfirmationEmail(firstName, poolName, examDate, module)
+  const optedOut = await prisma.user.findFirst({
+    where: {
+      marketingOptOut: true,
+      OR: [{ email }, { academyEmail: email }, { personalEmail: email }],
+    },
+    select: { id: true },
+  })
+  if (optedOut) return false
+
+  const html = await renderPoolApproachingConfirmationEmail(
+    firstName,
+    poolName,
+    examDate,
+    module,
+    email
+  )
   return sendEmail({
     to: email,
     subject: `Aerojet Aviation - Pool Almost Confirmed: ${poolName}`,
@@ -894,11 +925,11 @@ export async function renderEventGoEmail(firstName: string, eventName: string) {
   `
   const template = await getTemplate('event-go', { subject: defaultSubject, body: defaultBody })
   const body = replacePlaceholders(template.body, { firstName, eventName })
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendEventGoEmail(email: string, firstName: string, eventName: string) {
-  const html = await renderEventGoEmail(firstName, eventName)
+  const html = await renderEventGoEmail(firstName, eventName, email)
   return sendEmail({
     to: email,
     subject: `Aerojet Aviation - Exam Event Confirmed: ${eventName}`,
@@ -945,7 +976,8 @@ export async function renderPaymentDeadlineEmail(
 
   return await wrapEmail(
     replacePlaceholders(template.subject, { firstName, daysRemaining: daysRemaining.toString() }),
-    body
+    body,
+    recipientEmail
   )
 }
 
@@ -957,12 +989,22 @@ export async function sendPaymentDeadlineEmail(
   daysRemaining: number,
   balance: number
 ) {
+  const optedOut = await prisma.user.findFirst({
+    where: {
+      marketingOptOut: true,
+      OR: [{ email }, { academyEmail: email }, { personalEmail: email }],
+    },
+    select: { id: true },
+  })
+  if (optedOut) return false
+
   const html = await renderPaymentDeadlineEmail(
     firstName,
     moduleName,
     eventName,
     daysRemaining,
-    balance
+    balance,
+    email
   )
   return sendEmail({
     to: email,
@@ -979,11 +1021,11 @@ export async function renderEventNoGoEmail(firstName: string, eventName: string)
   `
   const template = await getTemplate('event-nogo', { subject: defaultSubject, body: defaultBody })
   const body = replacePlaceholders(template.body, { firstName, eventName })
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendEventNoGoEmail(email: string, firstName: string, eventName: string) {
-  const html = await renderEventNoGoEmail(firstName, eventName)
+  const html = await renderEventNoGoEmail(firstName, eventName, email)
   return sendEmail({ to: email, subject: `Exam Event Cancelled: ${eventName}`, html })
 }
 
@@ -1009,7 +1051,7 @@ export async function renderEventPostponedEmail(
     body: defaultBody,
   })
   const body = replacePlaceholders(template.body, { firstName, eventName, newDate, newEndDate })
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendEventPostponedEmail(
@@ -1019,7 +1061,7 @@ export async function sendEventPostponedEmail(
   newDate: string,
   newEndDate: string
 ) {
-  const html = await renderEventPostponedEmail(firstName, eventName, newDate, newEndDate)
+  const html = await renderEventPostponedEmail(firstName, eventName, newDate, newEndDate, email)
   return sendEmail({ to: email, subject: `Exam Event Postponed: ${eventName}`, html })
 }
 
@@ -1051,12 +1093,13 @@ export async function renderContactEnquiryConfirmation(name: string, subject: st
 
   return await wrapEmail(
     replacePlaceholders(template.subject, { firstName: name.split(' ')[0] }),
-    body
+    body,
+    recipientEmail
   )
 }
 
 export async function sendContactEnquiryConfirmation(email: string, name: string, subject: string) {
-  const html = await renderContactEnquiryConfirmation(name, subject)
+  const html = await renderContactEnquiryConfirmation(name, subject, email)
 
   return sendEmail({
     to: email,
@@ -1129,7 +1172,7 @@ export async function renderMilestoneReminderEmail(
     portalUrl: `${baseUrl}/student/wallet?tab=payments`,
   })
 
-  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  return await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, recipientEmail)
 }
 
 export async function sendMilestoneReminderEmail(
@@ -1140,12 +1183,22 @@ export async function sendMilestoneReminderEmail(
   daysUntil: number,
   programmeName: string
 ) {
+  const optedOut = await prisma.user.findFirst({
+    where: {
+      marketingOptOut: true,
+      OR: [{ email }, { academyEmail: email }, { personalEmail: email }],
+    },
+    select: { id: true },
+  })
+  if (optedOut) return false
+
   const html = await renderMilestoneReminderEmail(
     firstName,
     milestoneType,
     amount,
     daysUntil,
-    programmeName
+    programmeName,
+    email
   )
 
   return sendEmail({
@@ -1180,7 +1233,7 @@ export async function sendWaitlistPromotionEmail(
     body: defaultBody,
   })
   const body = replacePlaceholders(template.body, { firstName, poolName, examDate, module })
-  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, email)
   return sendEmail({
     to: email,
     subject: `Aerojet Aviation - Waitlist Promotion: ${poolName}`,
@@ -1215,7 +1268,7 @@ export async function sendWithdrawalConfirmationEmail(
     poolName,
     refundAmount: refundAmount.toFixed(2),
   })
-  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, email)
   return sendEmail({
     to: email,
     subject: `Aerojet Aviation - Withdrawal Confirmed: ${poolName}`,
@@ -1254,7 +1307,7 @@ export async function sendBundlePurchaseEmail(
     seats: seats.toString(),
     amountPaid: amountPaid.toFixed(2),
   })
-  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, email)
   return sendEmail({
     to: email,
     subject: `Aerojet Aviation - Bundle Purchased: ${bundleType}`,
@@ -1289,7 +1342,7 @@ export async function sendAmbassadorPromotionEmail(
     firstName,
     bonusAmount: bonusAmount.toFixed(2),
   })
-  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body)
+  const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, email)
   return sendEmail({
     to: email,
     subject: `Aerojet Aviation - Ambassador Status Achieved!`,
