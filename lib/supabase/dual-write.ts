@@ -104,7 +104,6 @@ async function getSupabasePrismaClient() {
     max: 5,
   })
 
-  // @ts-expect-error - Prisma PG adapter type mismatch with pg driver
   const adapter = new PrismaPg(pool)
   return new PrismaClient({ adapter })
 }
