@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { Loader2, MailOff, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react'
+import { Loader2, MailX, CheckCircle2, AlertCircle, ArrowLeft } from 'lucide-react'
 
 export default function UnsubscribePage() {
   const searchParams = useSearchParams()
@@ -120,7 +120,7 @@ export default function UnsubscribePage() {
   return (
     <div className="text-center">
       <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
-        <MailOff className="h-8 w-8 text-slate-500" />
+        <MailX className="h-8 w-8 text-slate-500" />
       </div>
       <h2 className="text-aerojet-blue mb-3 text-2xl font-black tracking-tight uppercase">
         Unsubscribe

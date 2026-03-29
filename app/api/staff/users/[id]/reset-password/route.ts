@@ -44,7 +44,8 @@ export const POST = withErrorHandler(
       <div class="btn-container">
         <a href="${process.env.NEXTAUTH_URL}/login" class="btn">Log In Now</a>
       </div>
-    `
+    `,
+    user.personalEmail || user.email
     )
 
     await sendEmail({
