@@ -112,6 +112,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           If you did not expect this email, please contact the Aerojet Academy administration.
         </div>
         `,
+        sendToEmail
       )
 
       await sendEmail({
