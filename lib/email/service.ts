@@ -140,7 +140,7 @@ async function getCachedBaseUrl(): Promise<string> {
   return url
 }
 
-export const wrapEmail = async (title: string, bodyContent: string) => {
+export const wrapEmail = async (title: string, bodyContent: string, recipientEmail?: string) => {
   const baseUrl = await getCachedBaseUrl()
   const logoDarkOnWhite = `${baseUrl}/images/logos/AATA_logo_hor_onWhite.png`
   const logoWhiteOnDark = `${baseUrl}/images/logos/ATA_logo_hor_onDark.png`
@@ -211,7 +211,11 @@ export const wrapEmail = async (title: string, bodyContent: string) => {
 // REGISTRATION
 // ---------------------------------------------------------------------------
 
-export async function renderRegistrationEmail(firstName: string, registrationCode: string) {
+export async function renderRegistrationEmail(
+  firstName: string,
+  registrationCode: string,
+  recipientEmail?: string
+) {
   const finance = await getFinanceConfig()
   const config = await getRegistrationConfig()
 
@@ -343,7 +347,11 @@ export async function sendRegistrationEmail(
 // EMAIL VERIFICATION (on registration, before approval)
 // ---------------------------------------------------------------------------
 
-export async function renderEmailVerificationEmail(firstName: string, verifyToken: string) {
+export async function renderEmailVerificationEmail(
+  firstName: string,
+  verifyToken: string,
+  recipientEmail?: string
+) {
   const defaultSubject = 'Verify Your Email — Aerojet Aviation'
   const defaultBody = `
     <p class="text">Hi {{firstName}},</p>
@@ -407,7 +415,8 @@ export async function renderActivationEmail(
   firstName: string,
   academyEmail: string,
   tempPassword: string,
-  verifyToken: string
+  verifyToken: string,
+  recipientEmail?: string
 ) {
   const defaultSubject = 'Account Activated, {{firstName}}!'
   const defaultBody = `
@@ -478,7 +487,11 @@ export async function sendActivationEmail(
 // STUDENT PROMOTION
 // ---------------------------------------------------------------------------
 
-export async function renderStudentPromotionEmail(firstName: string, studentId: string) {
+export async function renderStudentPromotionEmail(
+  firstName: string,
+  studentId: string,
+  recipientEmail?: string
+) {
   const defaultSubject = 'Congratulations, {{firstName}}!'
   const defaultBody = `
     <p class="text">Your course enrollment has been approved. You are now a Student at Aerojet Aviation Training Academy.</p>
@@ -540,7 +553,8 @@ export async function renderPoolConfirmedEmail(
   poolName: string,
   module: string,
   examDate: string,
-  amount: number
+  amount: number,
+  recipientEmail?: string
 ) {
   const defaultSubject = 'Exam Booking Confirmed!'
   const defaultBody = `
@@ -593,7 +607,11 @@ export async function sendPoolConfirmedEmail(
 // PASSWORD RESET
 // ---------------------------------------------------------------------------
 
-export async function renderPasswordResetEmail(firstName: string, resetToken: string) {
+export async function renderPasswordResetEmail(
+  firstName: string,
+  resetToken: string,
+  recipientEmail?: string
+) {
   const defaultSubject = 'Password Reset Request'
   const defaultBody = `
     <p class="text">Hi {{firstName}}, we received a request to reset your password.</p>
@@ -640,7 +658,8 @@ export async function sendPasswordResetEmail(email: string, firstName: string, r
 export async function renderPaymentApprovedEmail(
   firstName: string,
   paymentType: string,
-  amount: number
+  amount: number,
+  recipientEmail?: string
 ) {
   const defaultSubject = 'Payment Approved'
   const defaultBody = `
@@ -686,7 +705,8 @@ export async function renderSeatReservationConfirmedEmail(
   firstName: string,
   programmeName: string,
   amount: number,
-  currency: string
+  currency: string,
+  recipientEmail?: string
 ) {
   const defaultSubject = 'Seat Reservation Confirmed - Welcome to Aerojet Academy!'
   const defaultBody = `
@@ -760,7 +780,8 @@ export async function sendSeatReservationConfirmedEmail(
 export async function renderPaymentRejectedEmail(
   firstName: string,
   paymentType: string,
-  reason: string
+  reason: string,
+  recipientEmail?: string
 ) {
   const defaultSubject = 'Payment Not Approved'
   const defaultBody = `
@@ -815,7 +836,12 @@ export async function sendPaymentRejectedEmail(
 // POOL FAILED
 // ---------------------------------------------------------------------------
 
-export async function renderPoolFailedEmail(firstName: string, poolName: string, examDate: string) {
+export async function renderPoolFailedEmail(
+  firstName: string,
+  poolName: string,
+  examDate: string,
+  recipientEmail?: string
+) {
   const defaultSubject = 'Exam Booking Did Not Reach Minimum'
   const defaultBody = `
     <p class="text">Hi {{firstName}}, we regret to inform you that your exam booking did not reach the minimum candidates.</p>
@@ -859,7 +885,8 @@ export async function renderPoolApproachingConfirmationEmail(
   firstName: string,
   poolName: string,
   examDate: string,
-  module: string
+  module: string,
+  recipientEmail?: string
 ) {
   const defaultSubject = 'Your Exam Booking is Almost Full!'
   const defaultBody = `
@@ -917,7 +944,11 @@ export async function sendPoolApproachingConfirmationEmail(
 // EVENT GO / NO-GO OUTCOMES
 // ---------------------------------------------------------------------------
 
-export async function renderEventGoEmail(firstName: string, eventName: string) {
+export async function renderEventGoEmail(
+  firstName: string,
+  eventName: string,
+  recipientEmail?: string
+) {
   const defaultSubject = 'Exam Event Confirmed (GO)'
   const defaultBody = `
     <p class="text">Hi {{firstName}}, the upcoming exam event <strong>{{eventName}}</strong> has been officially confirmed!</p>
@@ -946,7 +977,8 @@ export async function renderPaymentDeadlineEmail(
   moduleName: string,
   eventName: string,
   daysRemaining: number,
-  balance: number
+  balance: number,
+  recipientEmail?: string
 ) {
   const defaultSubject = `Payment Reminder: ${daysRemaining} Days Left`
   const defaultBody = `
@@ -1013,7 +1045,11 @@ export async function sendPaymentDeadlineEmail(
   })
 }
 
-export async function renderEventNoGoEmail(firstName: string, eventName: string) {
+export async function renderEventNoGoEmail(
+  firstName: string,
+  eventName: string,
+  recipientEmail?: string
+) {
   const defaultSubject = 'Exam Event Cancelled (NO-GO)'
   const defaultBody = `
     <p class="text">Hi {{firstName}}, we regret to inform you that the exam event <strong>{{eventName}}</strong> has been cancelled.</p>
@@ -1033,7 +1069,8 @@ export async function renderEventPostponedEmail(
   firstName: string,
   eventName: string,
   newDate: string,
-  newEndDate: string
+  newEndDate: string,
+  recipientEmail?: string
 ) {
   const defaultSubject = 'Exam Event Postponed'
   const defaultBody = `
@@ -1069,7 +1106,11 @@ export async function sendEventPostponedEmail(
 // CONTACT ENQUIRY
 // ---------------------------------------------------------------------------
 
-export async function renderContactEnquiryConfirmation(name: string, subject: string) {
+export async function renderContactEnquiryConfirmation(
+  name: string,
+  subject: string,
+  recipientEmail?: string
+) {
   const defaultSubject = 'We received your enquiry'
   const defaultBody = `
     <p class="text">Hi {{firstName}},</p>
@@ -1117,7 +1158,8 @@ export async function renderMilestoneReminderEmail(
   milestoneType: string,
   amount: number,
   daysUntil: number,
-  programmeName: string
+  programmeName: string,
+  recipientEmail?: string
 ) {
   const urgencyClass = daysUntil <= 3 ? 'danger' : daysUntil <= 7 ? 'warning' : 'info'
   const urgencyText = daysUntil <= 3 ? 'URGENT' : daysUntil <= 7 ? 'Important' : 'Reminder'
