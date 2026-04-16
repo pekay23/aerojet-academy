@@ -513,7 +513,7 @@ function renderSidebarContent({
                 alt="Aerojet Academy"
                 width={32}
                 height={32}
-                className="object-contain"
+                className="h-auto object-contain"
               />
             ) : (
               <Image
@@ -521,8 +521,7 @@ function renderSidebarContent({
                 alt="Aerojet Academy"
                 width={130}
                 height={32}
-                className="object-contain"
-                style={{ height: 'auto' }}
+                className="h-auto object-contain"
               />
             )}
           </Link>

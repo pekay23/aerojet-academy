@@ -5,7 +5,7 @@
   "type": "module",
   "description": "Aerojet Aviation Training Academy - Complete Portal System",
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

@@ -1,9 +1,10 @@
 import { getBaseUrl } from '@/lib/utils/url'
 
-const appUrl = getBaseUrl()
-const currentYear = new Date().getFullYear()
+const baseLayout = async (content: string, title?: string) => {
+  const appUrl = await getBaseUrl()
+  const currentYear = new Date().getFullYear()
 
-const baseLayout = (content: string, title?: string) => `
+  return `
 <!DOCTYPE html>
 <html>
 <head>
@@ -69,8 +70,8 @@ const baseLayout = (content: string, title?: string) => `
 </body>
 </html>`
 
-export function welcomeEmail(name: string, registrationCode: string) {
-  return baseLayout(
+export async function welcomeEmail(name: string, registrationCode: string) {
+  return await baseLayout(
     `
     <h2 style="color:#0f172a;">Welcome to Aerojet Academy, ${name}!</h2>
     <p>Thank you for registering. Your registration code is:</p>
@@ -84,8 +85,8 @@ export function welcomeEmail(name: string, registrationCode: string) {
   )
 }
 
-export function activationEmail(name: string, academyEmail: string, tempPassword: string) {
-  return baseLayout(
+export async function activationEmail(name: string, academyEmail: string, tempPassword: string) {
+  return await baseLayout(
     `
     <h2 style="color:#0f172a;">Account Activated!</h2>
     <p>Dear ${name},</p>
@@ -100,8 +101,8 @@ export function activationEmail(name: string, academyEmail: string, tempPassword
   )
 }
 
-export function passwordResetEmail(name: string, resetLink: string) {
-  return baseLayout(
+export async function passwordResetEmail(name: string, resetLink: string) {
+  return await baseLayout(
     `
     <h2 style="color:#0f172a;">Password Reset</h2>
     <p>Dear ${name},</p>
@@ -116,8 +117,8 @@ export function passwordResetEmail(name: string, resetLink: string) {
   )
 }
 
-export function paymentApprovedEmail(name: string, amount: string, reference: string) {
-  return baseLayout(
+export async function paymentApprovedEmail(name: string, amount: string, reference: string) {
+  return await baseLayout(
     `
     <h2 style="color:#0f172a;">Payment Approved</h2>
     <p>Dear ${name},</p>
@@ -130,8 +131,8 @@ export function paymentApprovedEmail(name: string, amount: string, reference: st
   )
 }
 
-export function promotionToStudentEmail(name: string, studentId: string, academyEmail: string) {
-  return baseLayout(
+export async function promotionToStudentEmail(name: string, studentId: string, academyEmail: string) {
+  return await baseLayout(
     `
     <h2 style="color:#0f172a;">Congratulations, ${name}!</h2>
     <p>You have been promoted to a full student at Aerojet Academy.</p>
@@ -144,7 +145,7 @@ export function promotionToStudentEmail(name: string, studentId: string, academy
   )
 }
 
-export function poolConfirmedEmail(
+export async function poolConfirmedEmail(
   name: string,
   poolName: string,
   examDate: string,
@@ -152,7 +153,7 @@ export function poolConfirmedEmail(
   capturedAmount?: string
 ) {
   const amountText = capturedAmount || 'your reserved funds'
-  return baseLayout(
+  return await baseLayout(
     `
     <h2 style="color:#0f172a;">Exam Booking Confirmed!</h2>
     <p>Dear ${name},</p>
@@ -168,9 +169,9 @@ export function poolConfirmedEmail(
   )
 }
 
-export function poolFailedEmail(name: string, poolName: string, examDate: string, releasedAmount?: string) {
+export async function poolFailedEmail(name: string, poolName: string, examDate: string, releasedAmount?: string) {
   const amountText = releasedAmount || 'your reserved funds'
-  return baseLayout(
+  return await baseLayout(
     `
     <h2 style="color:#dc2626;">Exam Booking Did Not Reach Minimum</h2>
     <p>Dear ${name},</p>
@@ -185,13 +186,13 @@ export function poolFailedEmail(name: string, poolName: string, examDate: string
   )
 }
 
-export function examReminderEmail(
+export async function examReminderEmail(
   name: string,
   poolName: string,
   examDate: string,
   daysUntil: number
 ) {
-  return baseLayout(
+  return await baseLayout(
     `
     <h2 style="color:#0f172a;">Exam Reminder</h2>
     <p>Dear ${name},</p>
@@ -206,8 +207,8 @@ export function examReminderEmail(
   )
 }
 
-export function contactFormEmail(name: string, email: string, subject: string, message: string) {
-  return baseLayout(
+export async function contactFormEmail(name: string, email: string, subject: string, message: string) {
+  return await baseLayout(
     `
     <h2 style="color:#0f172a;">New Contact Form Submission</h2>
     <div style="background:#f1f5f9;padding:16px;border-radius:8px;margin:16px 0;">

@@ -162,7 +162,7 @@ export default function PublicNav() {
               alt="Aerojet Logo"
               width={150}
               height={38}
-              style={{ width: 'auto', height: 'auto' }}
+              className="h-auto w-auto"
               priority
             />
           </Link>
@@ -186,7 +186,7 @@ export default function PublicNav() {
                       <NavigationMenuItem key={item.label} value={item.label}>
                         <NavigationMenuTrigger
                           onClick={() => setAccordionValue(undefined)}
-                          className={`relative px-4 py-2 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${linkColorClasses} hover:${activeLinkColorClasses} bg-transparent transition-none!`}
+                          className={`relative flex h-10 items-center px-4 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${linkColorClasses} hover:${activeLinkColorClasses} bg-transparent transition-none! translate-y-[1px]`}
                         >
                           {item.label}
                         </NavigationMenuTrigger>
@@ -235,7 +235,7 @@ export default function PublicNav() {
                       <NavigationMenuItem key={item.label} value={item.label}>
                         <Link
                           href={item.href || '#'}
-                          className={`relative px-4 py-2 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${
+                          className={`relative flex h-10 items-center px-4 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${
                             pathname === item.href ? activeLinkColorClasses : linkColorClasses
                           } hover:${activeLinkColorClasses}`}
                         >

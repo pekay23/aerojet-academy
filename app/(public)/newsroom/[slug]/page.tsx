@@ -134,7 +134,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
       </div>
 
       {/* Article Content Area */}
-      <div className="mx-auto max-w-4xl px-6 py-20">
+      <div className="mx-auto max-w-4xl px-6 py-20 relative">
         <article>
           <div
             className="prose prose-slate prose-lg prose-headings:text-aerojet-blue prose-headings:font-black prose-headings:tracking-tight prose-p:text-slate-600 prose-p:leading-relaxed prose-strong:text-aerojet-blue prose-a:text-aerojet-sky prose-a:font-bold prose-a:no-underline hover:prose-a:underline dark:prose-invert max-w-none"
@@ -163,7 +163,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
                 Share Article
               </span>
               <ShareButtons
-                url={`${getBaseUrl()}/newsroom/${article.slug}`}
+                url={`${await getBaseUrl()}/newsroom/${article.slug}`}
                 title={article.title}
               />
             </div>
