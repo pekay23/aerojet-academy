@@ -88,7 +88,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
 
         {/* Hero Content Overlay */}
         <div className="absolute inset-0 flex items-end pb-12 sm:pb-20">
-          <div className="mx-auto w-full max-w-7xl px-6">
+          <div className="mx-auto w-full px-6">
             <div className="max-w-4xl pt-32 sm:pt-48">
               <h1 className="mb-8 text-4xl leading-[1.05] font-black tracking-tighter text-white sm:text-6xl md:text-7xl">
                 {article.title}

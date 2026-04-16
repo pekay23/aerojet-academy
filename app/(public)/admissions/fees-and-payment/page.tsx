@@ -2,19 +2,11 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Hero from '../../_components/Hero'
 import SectionReveal from '../../_components/SectionReveal'
-import prisma from '@/lib/prisma/client'
+import { getRegistrationFeeInfo } from '@/lib/system-settings'
 import { getCurrencySymbol } from '@/lib/currency'
 
 export const metadata: Metadata = { title: 'Fees & Payment | Aerojet Academy' }
 
-async function getRegistrationFee() {
-  const settings = await prisma.systemSetting.findMany({
-    where: { key: { in: ['registration_fee', 'registration_currency'] } },
-  })
-  const fee = settings.find((s) => s.key === 'registration_fee')?.value || '350'
-  const currency = settings.find((s) => s.key === 'registration_currency')?.value || 'GHS'
-  return { fee, currency, symbol: getCurrencySymbol(currency) }
-}
 
 const milestones = [
   {
@@ -46,10 +38,11 @@ const milestones = [
 ]
 
 export default async function FeesPage() {
-  const { fee, currency, symbol } = await getRegistrationFee()
+  const { fee, currency } = await getRegistrationFeeInfo()
+  const symbol = getCurrencySymbol(currency)
 
   return (
-    <div className="bg-slate-50">
+    <div className="relative bg-slate-50">
       <Hero
         title="Fees & Payment Rules"
         subtitle="Structured payment milestones for Aerojet Academy training programmes."
@@ -160,6 +153,50 @@ export default async function FeesPage() {
                 </li>
               ))}
             </ul>
+          </section>
+        </SectionReveal>
+
+        {/* Realistic Journey */}
+        <SectionReveal>
+          <section className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:rounded-3xl sm:p-12">
+            <h2 className="mb-8 text-2xl font-black uppercase tracking-tight text-aerojet-blue">
+              A Realistic Outlook on Your Certification Journey
+            </h2>
+            <p className="mb-8 leading-relaxed text-slate-600">
+              Becoming a fully licensed EASA-certified Aircraft Maintenance Engineer is a rewarding
+              but demanding path that requires strong dedication and sustained motivation. We
+              believe in transparency to help you plan your career effectively.
+            </p>
+            <div className="grid gap-10 md:grid-cols-2">
+              <div>
+                <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-aerojet-blue">
+                  The Practical Timeline
+                </h3>
+                <p className="text-sm leading-relaxed text-slate-500">
+                  In practice, many candidates complete this journey in{' '}
+                  <span className="font-bold text-slate-700">4 to 6 years</span>. While we provide
+                  the structured EASA training baseline, maintenance organizations often require
+                  workplace experience beyond the two years of practical training. Depending on your
+                  background, pathway, and exam pace, securing logbook sign-offs can extend the
+                  process—up to <span className="font-bold text-slate-700">10 years</span> in some
+                  cases—influenced by your available time, placement availability, and finances.
+                </p>
+              </div>
+              <div>
+                <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-aerojet-blue">
+                  Total Investment Planning
+                </h3>
+                <p className="text-sm leading-relaxed text-slate-500">
+                  Candidates should plan realistically for the entire process. When accounting for
+                  training, examinations, and the mandatory work experience/logbook requirements,
+                  the{' '}
+                  <span className="font-bold text-slate-700">
+                    total investment typically falls within USD 20,000 to USD 80,000
+                  </span>
+                  , depending on your chosen route and rate of progress.
+                </p>
+              </div>
+            </div>
           </section>
         </SectionReveal>
 

@@ -13,7 +13,7 @@ const stats = [
 export default function TrustStrip() {
   return (
     <section className="relative z-20 -mt-12 px-4 sm:px-6">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

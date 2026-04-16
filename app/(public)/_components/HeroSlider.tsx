@@ -122,7 +122,8 @@ export default function HeroSlider() {
         </div>
       </div>
 
-      {/* Pause/Play button (WCAG 2.2.2) */}
+      {/* Pause/Play button (WCAG 2.2.2) - HIDDEN per user request */}
+      {/* 
       <button
         onClick={() => setPaused((p) => !p)}
         className="absolute bottom-6 right-6 z-30 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-colors hover:bg-black/60 focus:outline-none focus:ring-2 focus:ring-white/50"
@@ -130,6 +131,7 @@ export default function HeroSlider() {
       >
         {paused ? <Play className="h-4 w-4" /> : <Pause className="h-4 w-4" />}
       </button>
+      */}
     </section>
   )
 }

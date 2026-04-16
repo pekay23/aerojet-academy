@@ -4,25 +4,15 @@ import Hero from '../_components/Hero'
 import SectionReveal from '../_components/SectionReveal'
 import EnrollmentSteps from '../_components/EnrollmentSteps'
 import { ArrowRight, CheckCircle2, BookOpen, GraduationCap, HelpCircle } from 'lucide-react'
-import prisma from '@/lib/prisma/client'
+import { getRegistrationFeeInfo } from '@/lib/system-settings'
 
 export const metadata: Metadata = { title: 'Admissions | Aerojet Academy' }
 
-async function getRegistrationFee() {
-  const settings = await prisma.systemSetting.findMany({
-    where: { key: { in: ['registration_fee', 'registration_currency'] } },
-  })
-  const fee = settings.find((s) => s.key === 'registration_fee')?.value || '350'
-  const currency = settings.find((s) => s.key === 'registration_currency')?.value || 'GHS'
-  return { fee, currency }
-}
-
 export default async function AdmissionsPage() {
-  const { fee, currency } = await getRegistrationFee()
+  const { fee, currency } = await getRegistrationFeeInfo()
 
   return (
-    // FIX: Changed main background to white to allow gradient sections to stand out
-    <div className="bg-white">
+    <div className="relative bg-white">
       <Hero
         title="Admissions"
         subtitle="Your journey to a global aviation career starts with a simple first step."

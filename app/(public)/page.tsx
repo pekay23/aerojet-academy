@@ -40,7 +40,7 @@ export default async function Home() {
       {/* ===== START: REPLACEMENT "WHO WE ARE" SECTION ===== */}
       <section className="relative overflow-hidden bg-slate-50 px-6 py-24 sm:py-32">
         <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-blue-100/50 blur-3xl" />
-        <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-2 lg:gap-24">
+        <div className="mx-auto grid w-full items-center gap-16 lg:grid-cols-2 lg:gap-24">
           <SectionReveal>
             <div className="relative">
               <span className="mb-4 block text-sm font-black tracking-[0.3em] text-aerojet-sky uppercase">
@@ -115,7 +115,7 @@ export default async function Home() {
 
       {/* ===== START: REPLACEMENT "PROGRAMS" SECTION ===== */}
       <section className="bg-white px-6 py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto w-full">
           <div className="mb-20 grid items-end gap-12 lg:grid-cols-2 lg:gap-24">
             <SectionReveal>
               <div>

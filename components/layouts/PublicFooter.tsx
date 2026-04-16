@@ -60,7 +60,7 @@ const companyLinks = [
 export default function PublicFooter() {
   return (
     <footer className="bg-aerojet-blue text-white">
-      <div className="container mx-auto max-w-7xl px-6 py-10">
+      <div className="container mx-auto w-full px-6 py-10">
         <div className="grid grid-cols-1 gap-12 md:grid-cols-4 lg:grid-cols-5">
           {/* Column 1: Logo */}
           <div className="col-span-1 lg:col-span-1">
@@ -70,7 +70,7 @@ export default function PublicFooter() {
                 alt="Aerojet Footer Logo"
                 width={160}
                 height={40}
-                style={{ height: 'auto' }}
+                style={{ width: 'auto', height: 'auto' }}
                 className="mb-4"
               />
             </Link>

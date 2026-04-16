@@ -16,16 +16,16 @@ export default function TrainingPathways() {
       
       {/* --- The Gradient Blobs --- */}
       <div 
-        className="absolute top-0 left-0 w-[40rem] h-[40rem] bg-public-secondary rounded-full opacity-10 blur-3xl -translate-x-1/2 -translate-y-1/2"
+        className="absolute top-0 left-0 w-160 h-160 bg-public-secondary rounded-full opacity-10 blur-3xl -translate-x-1/2 -translate-y-1/2"
         aria-hidden="true"
       />
       <div 
-        className="absolute bottom-0 right-0 w-[40rem] h-[40rem] bg-white rounded-full opacity-20 blur-3xl translate-x-1/2 translate-y-1/2"
+        className="absolute bottom-0 right-0 w-160 h-160 bg-white rounded-full opacity-20 blur-3xl translate-x-1/2 translate-y-1/2"
         aria-hidden="true"
       />
 
       {/* --- Main Content Container --- */}
-      <div className="container mx-auto max-w-6xl px-6 relative z-10">
+      <div className="container mx-auto w-full px-6 relative z-10">
         <SectionReveal>
           <div className="text-center mb-16">
             <span className="text-public-secondary font-bold text-xs uppercase tracking-[0.2em] mb-3 block">Your Journey</span>
