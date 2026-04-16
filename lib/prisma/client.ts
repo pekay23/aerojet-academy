@@ -7,9 +7,11 @@ import ws from 'ws'
 const connectionString = env.DATABASE_URL
 const isDev = env.NODE_ENV === 'development'
 
-if (isDev) {
-  const maskedUrl = connectionString.replace(/:([^:@]+)@/, ':****@')
-  console.log('Prisma connecting to:', maskedUrl)
+const logPrismaConnect = () => {
+  if (isDev) {
+    const maskedUrl = connectionString.replace(/:([^:@]+)@/, ':****@')
+    console.log('Prisma connecting to:', maskedUrl)
+  }
 }
 
 // In Node.js, Neon Serverless requires the ws package
@@ -92,6 +94,7 @@ const createPrismaClient = () => {
     console.warn('PRISMA CLIENT INITIALIZED WITH UNDEFINED CONNECTION STRING')
   }
 
+  logPrismaConnect()
   return new PrismaClient({
     adapter: createAdapter(),
     log: isDev ? ['query', 'error', 'warn'] : ['error'],

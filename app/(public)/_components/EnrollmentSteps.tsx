@@ -36,7 +36,7 @@ export default function EnrollmentSteps({ fee = '350', currency = 'GHS' }: Enrol
 
   return (
     <section className="px-6 py-20 sm:py-28">
-      <div className="mx-auto max-w-5xl">
+      <div className="mx-auto w-full">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

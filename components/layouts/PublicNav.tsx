@@ -101,6 +101,7 @@ export default function PublicNav() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [accordionValue, setAccordionValue] = useState<string | undefined>('item-1')
+  const [navValue, setNavValue] = useState<string | undefined>(undefined)
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -150,7 +151,7 @@ export default function PublicNav() {
   return (
     <>
       <header className={headerClasses}>
-        <div className="container mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
           <Link href="/" className="shrink-0">
             <Image
               src={
@@ -161,18 +162,28 @@ export default function PublicNav() {
               alt="Aerojet Logo"
               width={150}
               height={38}
-              style={{ height: 'auto' }}
+              style={{ width: 'auto', height: 'auto' }}
               priority
             />
           </Link>
 
           <div className="hidden flex-1 items-center justify-center lg:flex">
             {mounted && (
-              <NavigationMenu delayDuration={300}>
+              <NavigationMenu
+                delayDuration={300}
+                value={navValue}
+                onValueChange={(val) => {
+                  // Prevent closing on mouse leave if an accordion item is expanded (interacted with)
+                  if (val === undefined && accordionValue !== undefined) {
+                    return
+                  }
+                  setNavValue(val)
+                }}
+              >
                 <NavigationMenuList>
                   {navLinks.map((item) =>
                     item.isDropdown ? (
-                      <NavigationMenuItem key={item.label}>
+                      <NavigationMenuItem key={item.label} value={item.label}>
                         <NavigationMenuTrigger
                           onClick={() => setAccordionValue(undefined)}
                           className={`relative px-4 py-2 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${linkColorClasses} hover:${activeLinkColorClasses} bg-transparent transition-none!`}
@@ -221,7 +232,7 @@ export default function PublicNav() {
                         </NavigationMenuContent>
                       </NavigationMenuItem>
                     ) : (
-                      <NavigationMenuItem key={item.label}>
+                      <NavigationMenuItem key={item.label} value={item.label}>
                         <Link
                           href={item.href || '#'}
                           className={`relative px-4 py-2 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${

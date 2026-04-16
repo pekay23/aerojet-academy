@@ -6,7 +6,7 @@ export default function UnderstandingLicensing() {
   return (
     <SectionReveal>
       <section className="bg-slate-50 py-20 sm:py-28">
-        <div className="container mx-auto max-w-6xl px-6">
+        <div className="container mx-auto w-full px-6">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-black text-public-primary uppercase tracking-tight mb-4">Understanding EASA Licensing</h2>
             <div className="w-20 h-1.5 bg-public-secondary mx-auto rounded-full mb-8"></div>

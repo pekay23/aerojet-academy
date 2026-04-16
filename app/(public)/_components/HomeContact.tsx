@@ -8,7 +8,7 @@ export default function HomeContact() {
   return (
     <SectionReveal>
       <section className="bg-public-dark px-6 py-24">
-        <div className="bg-public-secondary relative mx-auto flex max-w-5xl flex-col items-center justify-between gap-10 overflow-hidden rounded-4xl p-8 text-white shadow-2xl sm:rounded-[3rem] md:p-16 lg:flex-row">
+        <div className="bg-public-secondary relative mx-auto flex w-full flex-col items-center justify-between gap-10 overflow-hidden rounded-4xl p-8 text-white shadow-2xl sm:rounded-[3rem] md:p-16 lg:flex-row">
           {/* Decorative Background Icon */}
           <div className="absolute -right-10 -bottom-10 opacity-10" aria-hidden="true">
             <svg className="h-64 w-64" fill="currentColor" viewBox="0 0 24 24">
