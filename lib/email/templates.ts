@@ -69,6 +69,7 @@ const baseLayout = async (content: string, title?: string) => {
   </table>
 </body>
 </html>`
+}
 
 export async function welcomeEmail(name: string, registrationCode: string) {
   return await baseLayout(
