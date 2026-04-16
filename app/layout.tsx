@@ -98,6 +98,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body
         className={`${inter.variable} ${outfit.variable} font-sans antialiased`}
+        suppressHydrationWarning
       >
         <a
           href="#main-content"

@@ -38,7 +38,7 @@ export default async function LatestNews() {
 
   return (
     <section className="bg-slate-50 py-20 sm:py-28 dark:bg-slate-900/10">
-      <div className="container mx-auto max-w-6xl px-6">
+      <div className="container mx-auto w-full px-6">
         <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
           <div>
             <span className="text-public-secondary mb-2 block text-xs font-bold tracking-[0.2em] uppercase">

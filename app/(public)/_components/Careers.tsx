@@ -16,7 +16,7 @@ const careerPoints = [
 export default function Careers() {
   return (
     <section className="bg-slate-50 px-6 py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto w-full">
         <div className="grid grid-cols-1 items-center gap-16 lg:grid-cols-2 lg:gap-24">
           <SectionReveal className="order-2 lg:order-1">
             <div className="relative">
