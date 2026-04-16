@@ -28,7 +28,7 @@ export default function Careers() {
                   width={800}
                   height={1000}
                   sizes="(max-width: 1024px) 100vw, 50vw"
-                  className="h-full w-full object-cover transition-transform duration-700 hover:scale-105"
+                  className="h-auto w-full object-cover transition-transform duration-700 hover:scale-105"
                 />
               </div>
             </div>

@@ -36,7 +36,7 @@ export async function approveApplicant(
     sendEmail({
       to: user.email,
       subject: 'Aerojet Academy - Account Activated',
-      html: activationEmail(firstName, academyEmail, tempPassword),
+      html: await activationEmail(firstName, academyEmail, tempPassword),
     }).catch(() => {})
 
     return { success: true, data: { academyEmail, tempPassword } }
@@ -85,7 +85,7 @@ export async function approvePayment(
     sendEmail({
       to: payment.user.academyEmail || payment.user.email,
       subject: 'Payment Approved',
-      html: paymentApprovedEmail(name, `€${payment.amount}`, payment.referenceCode || ''),
+      html: await paymentApprovedEmail(name, `€${payment.amount}`, payment.referenceCode || ''),
     }).catch(() => {})
 
     return { success: true }

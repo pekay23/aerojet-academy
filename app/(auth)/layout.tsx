@@ -16,12 +16,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="relative z-10">
             <Link href="/" className="mb-20 flex items-center gap-3">
               <Image
-                src="/images/logos/ATA_logo_hor_onDark.webp"
-                alt="Aerojet Academy"
                 width={160}
                 height={40}
-                className="object-contain"
-                style={{ height: 'auto' }}
+                className="h-auto object-contain"
               />
             </Link>
             <h1 className="max-w-md text-4xl leading-[1.05] font-black tracking-tight text-white uppercase xl:text-5xl">
@@ -59,11 +56,9 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           <div className="flex items-center justify-between border-b border-slate-100 bg-white p-4 lg:hidden">
             <Link href="/">
               <Image
-                src="/images/logos/AATA_logo_hor_onWhite.webp"
-                alt="Aerojet Academy"
                 width={120}
                 height={30}
-                className="object-contain"
+                className="h-auto object-contain"
               />
             </Link>
             <Link

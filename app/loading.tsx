@@ -17,8 +17,8 @@ export default function GlobalLoading() {
             src="/images/logos/AATA_logo_hor_onWhite.webp"
             alt="Aerojet"
             width={80}
-            height={80}
-            className="h-20 w-20 animate-pulse object-contain transition-all duration-700"
+            height={20}
+            className="h-auto w-20 animate-pulse object-contain transition-all duration-700"
           />
         </div>
       </div>

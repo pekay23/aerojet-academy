@@ -40,7 +40,7 @@ export default async function Home() {
       {/* ===== START: REPLACEMENT "WHO WE ARE" SECTION ===== */}
       <section className="relative overflow-hidden bg-slate-50 px-6 py-24 sm:py-32">
         <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-blue-100/50 blur-3xl" />
-        <div className="mx-auto grid w-full items-center gap-16 lg:grid-cols-2 lg:gap-24">
+        <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-2 lg:gap-24">
           <SectionReveal>
             <div className="relative">
               <span className="mb-4 block text-sm font-black tracking-[0.3em] text-aerojet-sky uppercase">
@@ -97,7 +97,7 @@ export default async function Home() {
                 width={800}
                 height={1000}
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="h-full w-full object-cover transition-transform duration-700 hover:scale-110"
+                className="h-auto w-full object-cover transition-transform duration-700 hover:scale-110"
               />
             </div>
             <div className="bg-public-secondary absolute -right-6 bottom-12 z-20 flex flex-col items-center justify-center rounded-2xl p-6 text-white shadow-xl">
@@ -115,14 +115,14 @@ export default async function Home() {
 
       {/* ===== START: REPLACEMENT "PROGRAMS" SECTION ===== */}
       <section className="bg-white px-6 py-24 sm:py-32">
-        <div className="mx-auto w-full">
-          <div className="mb-20 grid items-end gap-12 lg:grid-cols-2 lg:gap-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-16 grid items-end gap-8 lg:grid-cols-[1fr_auto] lg:gap-16">
             <SectionReveal>
               <div>
                 <span className="mb-4 block text-sm font-black tracking-[0.3em] text-aerojet-sky uppercase">
                   Our Programmes
                 </span>
-                <h2 className="mb-8 text-4xl font-black tracking-tight text-aerojet-blue uppercase sm:text-5xl lg:text-6xl">
+                <h2 className="mb-6 text-4xl font-black tracking-tight text-aerojet-blue uppercase sm:text-5xl lg:text-6xl">
                   Choose Your <br className="hidden sm:block" />
                   <span className="text-aerojet-sky">Pathway</span>
                 </h2>
@@ -134,7 +134,7 @@ export default async function Home() {
               </div>
             </SectionReveal>
 
-            <SectionReveal delay={0.1} className="flex justify-start lg:justify-end">
+            <SectionReveal delay={0.1}>
               <Link
                 href="/courses"
                 className="group flex h-16 items-center gap-4 rounded-full bg-aerojet-blue px-10 text-xs font-black tracking-[0.2em] text-white uppercase transition-all hover:bg-aerojet-sky hover:shadow-xl"
