@@ -186,7 +186,7 @@ export default function PublicNav() {
                       <NavigationMenuItem key={item.label} value={item.label}>
                         <NavigationMenuTrigger
                           onClick={() => setAccordionValue(undefined)}
-                          className={`relative flex h-10 items-center px-4 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${linkColorClasses} hover:${activeLinkColorClasses} bg-transparent transition-none! translate-y-[1px]`}
+                          className={`relative flex h-10 items-center px-4 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${linkColorClasses} hover:${activeLinkColorClasses} bg-transparent transition-none! translate-y-px`}
                         >
                           {item.label}
                         </NavigationMenuTrigger>
