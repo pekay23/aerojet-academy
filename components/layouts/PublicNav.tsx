@@ -151,8 +151,8 @@ export default function PublicNav() {
   return (
     <>
       <header className={headerClasses}>
-        <div className="mx-auto flex h-16 w-full items-center justify-between px-4 sm:px-6 lg:px-8">
-          <Link href="/" className="shrink-0">
+        <div className="mx-auto flex h-16 w-full items-center justify-between px-6 sm:px-10 lg:px-16">
+          <Link href="/" className="shrink-0 flex items-center py-2">
             <Image
               src={
                 scrolled || mobileOpen || forceSolid
