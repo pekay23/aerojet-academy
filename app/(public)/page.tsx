@@ -102,7 +102,7 @@ export default async function Home() {
             </div>
             <div className="bg-public-secondary absolute -right-6 bottom-12 z-20 flex flex-col items-center justify-center rounded-2xl p-6 text-white shadow-xl">
               <span className="text-3xl font-black">100%</span>
-              <span className="text-[10px] font-black tracking-widest uppercase">
+              <span className="text-xs font-black tracking-widest uppercase">
                 EASA Standards
               </span>
             </div>

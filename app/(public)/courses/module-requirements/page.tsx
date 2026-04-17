@@ -41,7 +41,7 @@ export default function ModuleRequirementsPage() {
     <div className="bg-slate-50">
       <Hero title="Module Requirements" subtitle="The EASA Part-66 knowledge syllabus for B1 and B2 certification." backgroundImage="/images/hero/module-requirements.webp" />
 
-      <div className="max-w-6xl mx-auto px-6 py-20 space-y-24">
+      <div className="max-w-7xl mx-auto px-6 py-20 space-y-24">
 
         {/* Pathways */}
         <SectionReveal>
@@ -54,9 +54,9 @@ export default function ModuleRequirementsPage() {
               {pathways.map((p) => (
                 <div key={p.name} className="bg-white border border-slate-200 p-6 sm:p-8 rounded-2xl shadow-sm hover:border-aerojet-sky transition-all group">
                   <h3 className="text-2xl font-black text-aerojet-blue group-hover:text-aerojet-sky transition-colors">{p.name}</h3>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">{p.title}</p>
+                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">{p.title}</p>
                   <div className="pt-4 border-t border-slate-100">
-                    <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Required Modules:</p>
+                    <p className="text-xs font-black text-slate-400 uppercase mb-1">Required Modules:</p>
                     <p className="font-mono text-sm text-slate-700 font-bold">{p.required}</p>
                   </div>
                 </div>
@@ -75,7 +75,7 @@ export default function ModuleRequirementsPage() {
             <div className="bg-white rounded-2xl sm:rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm min-w-[500px]">
-                  <thead className="bg-slate-900 text-white font-black uppercase text-[10px] tracking-[0.15em]">
+                  <thead className="bg-slate-900 text-white font-black uppercase text-xs tracking-[0.15em]">
                     <tr>
                       <th className="px-6 py-5">Code</th>
                       <th className="px-6 py-5">Subject Matter</th>

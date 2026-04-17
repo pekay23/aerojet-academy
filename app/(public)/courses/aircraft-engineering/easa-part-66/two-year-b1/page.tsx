@@ -18,14 +18,14 @@ export default function TwoYearPage() {
         backgroundImage="/images/hero/fulltime-2year-b1.webp"
       />
 
-      <div className="mx-auto max-w-5xl space-y-20 px-6 py-20">
+      <div className="mx-auto max-w-7xl space-y-24 px-6 py-20">
         <SectionReveal>
           <section>
             <div className="mb-6 flex flex-wrap gap-3">
-              <span className="rounded-full bg-green-600 px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase">
+              <span className="rounded-full bg-green-600 px-4 py-2 text-xs font-black tracking-widest text-white uppercase">
                 Accelerated
               </span>
-              <span className="rounded-full bg-blue-100 px-4 py-2 text-[10px] font-black tracking-widest text-aerojet-blue uppercase">
+              <span className="rounded-full bg-blue-100 px-4 py-2 text-xs font-black tracking-widest text-aerojet-blue uppercase">
                 B1.1 License
               </span>
             </div>

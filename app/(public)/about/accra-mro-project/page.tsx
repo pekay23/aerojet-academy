@@ -14,7 +14,7 @@ export default function MROPage() {
         backgroundImage="/images/hero/hanger.webp"
       />
 
-      <div className="mx-auto max-w-4xl space-y-12 px-6 py-20">
+      <div className="mx-auto max-w-7xl space-y-12 px-6 py-20">
         <SectionReveal>
           <section>
             <div className="mb-5 h-1.5 w-14 rounded-full bg-aerojet-sky" />
@@ -37,19 +37,19 @@ export default function MROPage() {
         <SectionReveal>
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:p-8">
-              <h3 className="mb-3 text-sm font-black uppercase tracking-widest text-aerojet-blue">
+              <h3 className="mb-3 text-base font-black uppercase tracking-widest text-aerojet-blue">
                 Local Capacity
               </h3>
-              <p className="text-sm leading-relaxed text-slate-600">
+              <p className="text-base leading-relaxed text-slate-600">
                 By building a world-class facility in Accra, we are solving the critical gap in
                 local maintenance infrastructure.
               </p>
             </div>
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:p-8">
-              <h3 className="mb-3 text-sm font-black uppercase tracking-widest text-aerojet-blue">
+              <h3 className="mb-3 text-base font-black uppercase tracking-widest text-aerojet-blue">
                 Economic Impact
               </h3>
-              <p className="text-sm leading-relaxed text-slate-600">
+              <p className="text-base leading-relaxed text-slate-600">
                 The project is expected to create hundreds of direct high-skilled jobs and thousands
                 of indirect opportunities.
               </p>
@@ -67,7 +67,7 @@ export default function MROPage() {
             </p>
             <Link
               href="/about"
-              className="inline-block rounded-xl bg-white px-8 py-3 text-[10px] font-black uppercase tracking-[0.2em] text-aerojet-blue transition-all hover:bg-aerojet-sky hover:text-white"
+              className="inline-block rounded-xl bg-white px-8 py-3 text-sm font-black uppercase tracking-[0.2em] text-aerojet-blue transition-all hover:bg-aerojet-sky hover:text-white"
             >
               Learn More About the Academy
             </Link>
