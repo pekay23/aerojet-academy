@@ -100,10 +100,11 @@ export default function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+          <label htmlFor="firstName" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
             First Name
           </label>
           <input
+            id="firstName"
             required
             type="text"
             placeholder="John"
@@ -113,10 +114,11 @@ export default function ContactForm() {
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+          <label htmlFor="lastName" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
             Last Name
           </label>
           <input
+            id="lastName"
             required
             type="text"
             placeholder="Doe"
@@ -128,10 +130,11 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+        <label htmlFor="email" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
           Email Address
         </label>
         <input
+          id="email"
           required
           type="email"
           placeholder="john@example.com"
@@ -142,10 +145,11 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+        <label htmlFor="phone" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
           Phone Number <span className="font-normal text-slate-400 normal-case">(optional)</span>
         </label>
         <input
+          id="phone"
           type="tel"
           placeholder="+233 XX XXX XXXX"
           className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
@@ -159,11 +163,12 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+        <label htmlFor="subject" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
           Subject
         </label>
         <div className="relative">
           <select
+            id="subject"
             required
             value={data.subject}
             onChange={(e) => setData({ ...data, subject: e.target.value })}
@@ -194,10 +199,11 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
+        <label htmlFor="message" className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
           Message
         </label>
         <textarea
+          id="message"
           required
           minLength={10}
           rows={5}
@@ -208,16 +214,19 @@ export default function ContactForm() {
         />
       </div>
 
-      {/* Honeypot field for bots */}
-      <input
-        type="text"
-        name="confirm_email"
-        className="sr-only"
-        autoComplete="off"
-        tabIndex={-1}
-        value={data.confirm_email}
-        onChange={(e) => setData({ ...data, confirm_email: e.target.value })}
-      />
+      {/* Honeypot field for bots - Wrapped and labeled to satisfy accessibility scanners and silence console logs */}
+      <div style={{ display: 'none' }} aria-hidden="true">
+        <label htmlFor="confirm_email">Do not fill this field</label>
+        <input
+          id="confirm_email"
+          type="text"
+          name="confirm_email"
+          autoComplete="off"
+          tabIndex={-1}
+          value={data.confirm_email}
+          onChange={(e) => setData({ ...data, confirm_email: e.target.value })}
+        />
+      </div>
 
       <button
         type="submit"
