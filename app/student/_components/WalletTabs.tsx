@@ -36,7 +36,7 @@ export default function WalletTabs({ children, enrollmentType }: { children: Rea
       </div>
 
       {/* Tab Bar */}
-      <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="tablist" aria-label="Wallet sections">
+      <div className="relative flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="tablist" aria-label="Wallet sections">
         {tabs.map((t) => {
           const Icon = t.icon
           const isActive = currentTab === t.key

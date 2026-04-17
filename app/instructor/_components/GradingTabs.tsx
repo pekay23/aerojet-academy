@@ -30,7 +30,7 @@ export default function GradingTabs({ children }: { children: React.ReactNode })
       </div>
 
       {/* Tab Bar */}
-      <div className="flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+      <div className="relative flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
         {TABS.map((t) => {
           const Icon = t.icon
           const isActive = currentTab === t.key

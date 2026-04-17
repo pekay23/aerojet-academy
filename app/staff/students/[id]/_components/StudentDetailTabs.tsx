@@ -65,7 +65,7 @@ export default function StudentDetailTabs({
     <div className="-mx-4 md:-mx-6 lg:-mx-8">
       {/* Tab Navigation */}
       <div className="mb-6 overflow-hidden border-x-0 border-t-0 border-slate-100 bg-white px-4 md:px-6 dark:border-slate-800 dark:bg-slate-900 md:border-x md:border-t">
-        <div className="flex gap-0 border-b border-slate-100 dark:border-slate-800">
+        <div className="relative flex gap-0 border-b border-slate-100 dark:border-slate-800">
           {TABS.map((tab) => {
             const Icon = tab.icon
             const isActive = activeTab === tab.key

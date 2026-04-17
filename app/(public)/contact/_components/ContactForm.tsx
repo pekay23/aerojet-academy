@@ -100,27 +100,27 @@ export default function ContactForm() {
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="mb-1.5 block text-xs font-bold tracking-widest text-slate-700 uppercase">
+          <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
             First Name
           </label>
           <input
             required
             type="text"
             placeholder="John"
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
             value={data.firstName}
             onChange={(e) => setData({ ...data, firstName: e.target.value })}
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-xs font-bold tracking-widest text-slate-700 uppercase">
+          <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
             Last Name
           </label>
           <input
             required
             type="text"
             placeholder="Doe"
-            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
             value={data.lastName}
             onChange={(e) => setData({ ...data, lastName: e.target.value })}
           />
@@ -128,27 +128,27 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-bold tracking-widest text-slate-700 uppercase">
+        <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
           Email Address
         </label>
         <input
           required
           type="email"
           placeholder="john@example.com"
-          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
           value={data.email}
           onChange={(e) => setData({ ...data, email: e.target.value })}
         />
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-bold tracking-widest text-slate-700 uppercase">
+        <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
           Phone Number <span className="font-normal text-slate-400 normal-case">(optional)</span>
         </label>
         <input
           type="tel"
           placeholder="+233 XX XXX XXXX"
-          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+          className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
           value={data.phone}
           onChange={(e) => {
             // strip out any characters that are not numbers, spaces, or valid symbols
@@ -159,7 +159,7 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-bold tracking-widest text-slate-700 uppercase">
+        <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
           Subject
         </label>
         <div className="relative">
@@ -167,7 +167,7 @@ export default function ContactForm() {
             required
             value={data.subject}
             onChange={(e) => setData({ ...data, subject: e.target.value })}
-            className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+            className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
           >
             <option value="" disabled>
               Select a subject...
@@ -194,7 +194,7 @@ export default function ContactForm() {
       </div>
 
       <div>
-        <label className="mb-1.5 block text-xs font-bold tracking-widest text-slate-700 uppercase">
+        <label className="mb-1.5 block text-sm font-bold tracking-widest text-slate-700 uppercase">
           Message
         </label>
         <textarea
@@ -202,7 +202,7 @@ export default function ContactForm() {
           minLength={10}
           rows={5}
           placeholder="Tell us about your enquiry..."
-          className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
+          className="w-full resize-none rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-base text-slate-900 transition-all outline-none placeholder:text-slate-400 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky"
           value={data.message}
           onChange={(e) => setData({ ...data, message: e.target.value })}
         />

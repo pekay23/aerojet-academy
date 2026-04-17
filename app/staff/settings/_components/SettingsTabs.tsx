@@ -45,7 +45,7 @@ export default function SettingsTabs({ children }: { children: React.ReactNode }
       </div>
 
       {/* Tab Bar */}
-      <div className="flex flex-wrap gap-1 rounded-2xl bg-slate-100 p-1.5 shadow-inner ring-1 ring-black/5 dark:bg-slate-800/80 dark:ring-white/5">
+      <div className="relative flex flex-wrap gap-1 rounded-2xl bg-slate-100 p-1.5 shadow-inner ring-1 ring-black/5 dark:bg-slate-800/80 dark:ring-white/5">
         {TABS.map((t) => {
           const Icon = t.icon
           const isActive = currentTab === t.key
