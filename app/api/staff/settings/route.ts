@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       updates.map(({ key, value, type }) =>
         prisma.systemSetting.upsert({
           where: { key },
-          update: { value, updatedBy: (session.user as any).id },
+          update: { value, updatedBy: session.user.id },
           create: { key, value, type },
         })
       )
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
     await createAuditLog({
       action: AuditAction.SYSTEM_UPDATE,
       entity: 'SystemSetting',
-      userId: (staff as any).id,
+      userId: staff.id,
       details: { updates },
     })
 

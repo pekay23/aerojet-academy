@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     })
 
     await createAuditLog({
-      action: 'SYSTEM_UPDATE' as any,
+      action: 'SYSTEM_UPDATE',
       entity: 'academic_years',
       entityId: academicYear.id,
       userId: staff.id,

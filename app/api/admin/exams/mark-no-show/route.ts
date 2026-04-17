@@ -6,7 +6,7 @@ import { createAuditLog } from '@/lib/audit/logger'
 export async function POST(req: NextRequest) {
   try {
     const session = await getAuthSession()
-    if (!session || (session.user as any).role !== 'ADMIN') {
+    if (!session || session.user.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'Unauthorized or insufficient permissions' },
         { status: 403 }
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
         action: 'UPDATE',
         entity: 'PoolMembership',
         entityId: membershipId,
-        userId: (session.user as any).id,
+        userId: session.user.id,
         details: {
           previousStatus: membership.status,
           newStatus: 'NO_SHOW',
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         action: 'UPDATE',
         entity: 'ExamBooking',
         entityId: bookingId,
-        userId: (session.user as any).id,
+        userId: session.user.id,
         details: {
           previousStatus: booking.status,
           newStatus: 'NO_SHOW',

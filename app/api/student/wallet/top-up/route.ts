@@ -10,7 +10,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const user = await requireStudent()
   const body = await req.json()
   const validation = validateBody(walletTopUpSchema, body)
-  if (!validation.success) return apiError((validation as any).error)
+  if (!validation.success) return apiError(validation.error)
 
   const { amount, proofUrl, notes } = validation.data
   const reference = `WTU-${crypto.randomBytes(4).toString('hex').toUpperCase()}`

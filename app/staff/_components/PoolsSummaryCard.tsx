@@ -9,7 +9,7 @@ interface PoolSummary {
   name: string
   currentMemberCount: number
   maxCandidates: number
-  examDate: Date
+  examDate: Date | string
   status: string
   event: {
     name: string

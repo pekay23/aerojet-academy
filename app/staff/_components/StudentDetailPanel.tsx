@@ -20,6 +20,7 @@ import {
 import UserActionsMenu from './UserActionsMenu'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import ManualWalletAdjustmentDialog from '../users/[id]/_components/ManualWalletAdjustmentDialog'
+import { UserStatus, EnrollmentStatus, PaymentStatus } from '@/types/enums'
 
 interface Student {
   id: string
@@ -82,10 +83,10 @@ interface Student {
 }
 
 const STATUS_STYLE: Record<string, string> = {
-  ACTIVE: 'bg-emerald-100 text-emerald-700',
-  SUSPENDED: 'bg-amber-100 text-amber-700',
-  ARCHIVED: 'bg-slate-100 text-slate-500',
-  PENDING: 'bg-blue-100 text-blue-700',
+  [UserStatus.ACTIVE]: 'bg-emerald-100 text-emerald-700',
+  [UserStatus.SUSPENDED]: 'bg-amber-100 text-amber-700',
+  [UserStatus.ARCHIVED]: 'bg-slate-100 text-slate-500',
+  [UserStatus.PENDING]: 'bg-blue-100 text-blue-700',
 }
 
 const TABS = ['Overview', 'Enrollments', 'Exams'] as const
@@ -480,9 +481,9 @@ export default function StudentDetailPanel({
                         </div>
                         <span
                           className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
-                            e.status === 'ACTIVE'
+                            e.status === EnrollmentStatus.ACTIVE
                               ? 'bg-emerald-100 text-emerald-700'
-                              : e.status === 'COMPLETED'
+                              : e.status === EnrollmentStatus.GRADUATED
                                 ? 'bg-blue-100 text-blue-700'
                                 : 'bg-slate-100 text-slate-500'
                           }`}
@@ -580,15 +581,15 @@ function ExamTabContent({
                 </div>
                 <div className="flex flex-col items-end gap-1">
                   <span className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                    exam.paymentStatus === 'APPROVED' || exam.paymentStatus === 'COMPLETED'
+                    exam.paymentStatus === PaymentStatus.APPROVED || exam.paymentStatus === PaymentStatus.COMPLETED
                       ? 'bg-blue-100 text-blue-700'
-                      : exam.paymentStatus === 'REJECTED'
+                      : exam.paymentStatus === PaymentStatus.REJECTED
                         ? 'bg-red-100 text-red-700'
                         : 'bg-amber-100 text-amber-700'
                   }`}>
-                    {exam.paymentStatus === 'APPROVED' || exam.paymentStatus === 'COMPLETED'
+                    {exam.paymentStatus === PaymentStatus.APPROVED || exam.paymentStatus === PaymentStatus.COMPLETED
                       ? 'UPCOMING'
-                      : exam.paymentStatus === 'REJECTED'
+                      : exam.paymentStatus === PaymentStatus.REJECTED
                         ? 'REJECTED'
                         : 'PAYMENT PENDING'}
                   </span>

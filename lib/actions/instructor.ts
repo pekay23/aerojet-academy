@@ -566,8 +566,13 @@ export async function getInstructorProfile() {
   })
 
   if (!profile) throw new Error('Instructor not found')
+  if (!profile.profile) throw new Error('User profile missing')
+  if (!profile.instructorProfile) throw new Error('Instructor details missing')
 
-  return serializePrisma(profile)
+  return serializePrisma(profile as Omit<typeof profile, 'profile' | 'instructorProfile'> & {
+    profile: NonNullable<typeof profile.profile>;
+    instructorProfile: NonNullable<typeof profile.instructorProfile>;
+  })
 }
 
 export async function updateInstructorProfile(data: any) {

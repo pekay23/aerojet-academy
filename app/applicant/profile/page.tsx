@@ -11,7 +11,7 @@ export default async function ProfilePage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const userId = (session.user as any).id
+  const userId = session.user.id
 
   const [user, profile] = await Promise.all([
     prisma.user.findUnique({

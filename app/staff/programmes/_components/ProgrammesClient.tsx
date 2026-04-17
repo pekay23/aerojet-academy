@@ -20,7 +20,7 @@ import {
   Calendar,
 } from 'lucide-react'
 
-interface ProgrammeSemester {
+export interface ProgrammeSemester {
   name: string
   startDate: string
   endDate: string

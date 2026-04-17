@@ -12,7 +12,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   const body = await req.json()
   const validation = validateBody(changePasswordSchema, body)
-  if (!validation.success) return apiError((validation as any).error)
+  if (!validation.success) return apiError(validation.error)
 
   const { currentPassword, newPassword } = validation.data
 

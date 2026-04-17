@@ -35,7 +35,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const staff = await requireStaff()
   const body = await req.json()
   const validation = validateBody(createClassSchema, body)
-  if (!validation.success) return apiError((validation as any).error)
+  if (!validation.success) return apiError(validation.error)
 
   // Check for duplicate class name in course
   const existingClass = await prisma.class.findFirst({
@@ -49,7 +49,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Class with this name already exists for this course', 409)
   }
 
-  const cls = await prisma.class.create({ data: validation.data as any })
+  const cls = await prisma.class.create({ data: validation.data })
   await createAuditLog({
     action: AuditAction.CREATE,
     entity: 'Class',

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import TablePagination from '../../_components/TablePagination'
 import { format } from 'date-fns'
 import {
@@ -23,7 +23,7 @@ type AuditLog = {
   entity: string | null
   entityId: string | null
   description: string | null
-  createdAt: Date
+  createdAt: string | Date
   ipAddress: string | null
   user: {
     email: string
@@ -165,17 +165,47 @@ LogRow.displayName = 'LogRow'
 
 interface AuditLogTableProps {
   logs: AuditLog[]
+  total: number
   entityLabels: Record<string, string>
   query?: string
 }
 
-export default function AuditLogTable({ logs, entityLabels, query }: AuditLogTableProps) {
+export default function AuditLogTable({ logs: initialLogs, total: initialTotal, entityLabels, query }: AuditLogTableProps) {
+  const [logs, setLogs] = useState<AuditLog[]>(initialLogs)
+  const [total, setTotal] = useState(initialTotal)
+  const [loading, setLoading] = useState(false)
   const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null)
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
 
-  const total = logs.length
-  const paged = logs.slice((page - 1) * perPage, page * perPage)
+  // paged is now the raw logs array since the server handles slicing
+  const paged = logs
+
+  const fetchLogs = async () => {
+    setLoading(true)
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: perPage.toString(),
+        // Add current table filters here if any
+      })
+      const res = await fetch(`/api/staff/audit-logs?${params}`)
+      const data = await res.json()
+      setLogs(data.data ?? [])
+      setTotal(data.total ?? 0)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Effect to handle page changes
+  useEffect(() => {
+    // Skip first fetch if it's the initial page and we have initial logs
+    const isInitial = page === 1 && perPage === 25
+    if (!isInitial) {
+      fetchLogs()
+    }
+  }, [page, perPage])
 
   function actionStyle(act: string) {
     if (
@@ -253,7 +283,15 @@ export default function AuditLogTable({ logs, entityLabels, query }: AuditLogTab
 
           {/* List Body */}
           <tbody className="divide-y divide-slate-100 dark:divide-white/5">
-            {logs.length === 0 ? (
+            {loading ? (
+              Array.from({ length: 10 }).map((_, i) => (
+                <tr key={i} className="animate-pulse">
+                  <td className="px-6 py-5" colSpan={5}>
+                    <div className="h-4 w-full rounded bg-slate-100 dark:bg-slate-800" />
+                  </td>
+                </tr>
+              ))
+            ) : logs.length === 0 ? (
               <tr>
                 <td colSpan={5}>
                   <div className="flex flex-col items-center justify-center p-16 text-center">

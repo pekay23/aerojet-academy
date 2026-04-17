@@ -130,7 +130,7 @@ export default async function ApplicantDashboardPage() {
   const registrationFeeSetting = await getSystemSetting('registration_fee', '350')
   const registrationCurrencySetting = await getSystemSetting('registration_currency', 'EUR')
 
-  const userId = (session.user as any).id
+  const userId = session.user.id
 
   const applicant = await prisma.user.findUnique({
     where: { id: userId },

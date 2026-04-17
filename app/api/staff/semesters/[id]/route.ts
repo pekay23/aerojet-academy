@@ -54,7 +54,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     })
 
     await createAuditLog({
-      action: 'SYSTEM_UPDATE' as any,
+      action: 'SYSTEM_UPDATE',
       entity: 'semesters',
       entityId: id,
       userId: staff.id,
@@ -94,7 +94,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     await prisma.semester.delete({ where: { id } })
 
     await createAuditLog({
-      action: 'SYSTEM_UPDATE' as any,
+      action: 'SYSTEM_UPDATE',
       entity: 'semesters',
       entityId: id,
       userId: staff.id,

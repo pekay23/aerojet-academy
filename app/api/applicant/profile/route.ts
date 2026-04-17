@@ -14,11 +14,11 @@ export const PATCH = withErrorHandler(async (req: NextRequest) => {
   const user = await requireApplicant()
   const body = await req.json()
   const validation = validateBody(updateProfileSchema, body)
-  if (!validation.success) return apiError((validation as any).error)
+  if (!validation.success) return apiError(validation.error)
   const profile = await prisma.profile.upsert({
     where: { userId: user.id },
-    update: validation.data as any,
-    create: { userId: user.id, firstName: 'Unknown', lastName: 'Unknown', ...validation.data as any },
+    update: validation.data,
+    create: { userId: user.id, firstName: 'Unknown', lastName: 'Unknown', ...validation.data },
   })
   return apiSuccess(profile)
 })

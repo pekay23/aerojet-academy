@@ -23,10 +23,16 @@ export const POST = withErrorHandler(
     const body = await req.json()
     const data = { ...body, eventId: ctx?.params?.id }
     const validation = validateBody(createExamPoolSchema, data)
-    if (!validation.success) return apiError((validation as any).error)
+    if (!validation.success) return apiError(validation.error)
 
     const pool = await prisma.examPool.create({
-      data: { ...validation.data, status: 'OPEN' } as any,
+      data: {
+        ...validation.data,
+        status: 'OPEN',
+        examDate: new Date(validation.data.examDate),
+        examStartTime: new Date(validation.data.examStartTime),
+        examEndTime: new Date(validation.data.examEndTime),
+      },
     })
     await createAuditLog({
       action: AuditAction.CREATE,

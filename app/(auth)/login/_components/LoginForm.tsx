@@ -36,7 +36,7 @@ export default function LoginForm() {
 
       // Get session to read role and redirect accordingly
       const session = await getSession()
-      const role = (session?.user as any)?.role
+      const role = session?.user?.role
 
       const redirectMap: Record<string, string> = {
         SUPER_ADMIN: '/staff',
@@ -49,7 +49,7 @@ export default function LoginForm() {
 
       // Use window.location for full page navigation after auth
       // router.push + router.refresh causes a race condition on mobile
-      window.location.href = redirectMap[role] ?? '/login'
+      window.location.href = redirectMap[role || ''] ?? '/login'
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.')
     } finally {

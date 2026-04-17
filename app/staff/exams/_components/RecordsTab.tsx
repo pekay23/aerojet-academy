@@ -348,7 +348,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
-                        {[s.firstName, (s as any).middleName, s.lastName].filter(Boolean).join(' ')}
+                        {[s.firstName, s.middleName, s.lastName].filter(Boolean).join(' ')}
                       </p>
                       <p className="truncate text-xs text-slate-500">
                         {s.email}
@@ -377,7 +377,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 Selected:{' '}
                 {[
                   selectedStudent.firstName,
-                  (selectedStudent as any).middleName,
+                  selectedStudent.middleName,
                   selectedStudent.lastName,
                 ]
                   .filter(Boolean)

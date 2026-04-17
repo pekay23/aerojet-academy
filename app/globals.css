@@ -97,4 +97,15 @@
   .prose blockquote {
     @apply border-l-4 border-aerojet-sky bg-slate-50 py-2 pl-6 font-medium text-slate-700 italic dark:bg-slate-800/50 dark:text-slate-300;
   }
+
+  /* Audio Element Styling within Prose & Editor */
+  .prose audio, .ProseMirror audio {
+    @apply w-full rounded-xl my-6 block border border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-900;
+  }
+
+  /* Tiptap Placeholder Styling */
+  .ProseMirror p.is-editor-empty:first-child::before {
+    content: attr(data-placeholder);
+    @apply float-left h-0 pointer-events-none text-slate-400;
+  }
 }

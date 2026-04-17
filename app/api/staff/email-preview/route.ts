@@ -6,7 +6,7 @@ export async function GET(req: NextRequest) {
   const session = await getAuthSession()
   if (
     !session ||
-    ((session.user as any).role !== 'ADMIN' && (session.user as any).role !== 'STAFF')
+    (session.user.role !== 'ADMIN' && session.user.role !== 'STAFF')
   ) {
     return new NextResponse('Unauthorized', { status: 401 })
   }

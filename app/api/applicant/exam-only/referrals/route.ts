@@ -13,7 +13,7 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const stats = await getReferralStats(userId)
 
     return NextResponse.json(stats)
@@ -30,7 +30,7 @@ export async function POST() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const code = await getOrCreateReferralCode(userId)
 
     return NextResponse.json({ referralCode: code })

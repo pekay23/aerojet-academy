@@ -112,10 +112,15 @@ export const updateUserSchema = z.object({
   phone: z.string().optional(),
   role: z.enum(['ADMIN', 'STAFF', 'INSTRUCTOR', 'APPLICANT', 'STUDENT']).optional(),
   status: z.enum(['PENDING', 'ACTIVE', 'SUSPENDED', 'ARCHIVED', 'DELETED']).optional(),
+  programmeChoice: z.enum(['FULL_TIME_4YEAR', 'FULL_TIME_2YEAR', 'MILITARY_1YEAR', 'MODULAR', 'EXAM_ONLY']).optional(),
+  selectedLicenseCategories: z.array(z.string()).optional(),
   studentId: z.string().optional(),
   employeeId: z.string().optional(),
   nationality: z.string().optional(),
   dateOfBirth: z.string().optional(), // ISO date string
+  gender: z.string().optional(),
+  alternatePhone: z.string().optional(),
+  postalCode: z.string().optional(),
   profilePhotoUrl: z.string().url().optional().or(z.literal('')),
 })
 
@@ -140,6 +145,7 @@ export const createCourseSchema = z.object({
   estimatedStudyHoursMin: z.coerce.number().int().positive().optional().nullable(),
   estimatedStudyHoursMax: z.coerce.number().int().positive().optional().nullable(),
   applicableCategories: z.array(z.string()).optional(),
+  hasCombinedExam: z.boolean().default(false),
   syllabusUrl: z.string().optional(),
   materialsUrl: z.string().optional(),
 })
@@ -157,6 +163,9 @@ export const createClassSchema = z.object({
   schedule: z.any().optional(),
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
+  description: z.string().optional(),
+  academicYearId: z.string().optional(),
+  semesterId: z.string().optional(),
   maxStudents: z.number().int().positive().default(28),
 })
 
@@ -177,6 +186,11 @@ export const createExamEventSchema = z.object({
   paymentDeadline: z.string().refine((val) => !isNaN(Date.parse(val)), 'Invalid payment deadline'),
   minRevenueTarget: z.coerce.number().positive().default(25000.0),
   minRevenueCurrency: z.enum(['USD', 'EUR', 'GHS']).default('EUR'),
+  location: z.string().optional(),
+  resitFee: z.coerce.number().positive().default(480.0),
+  resitFeeCurrency: z.enum(['USD', 'EUR', 'GHS']).default('EUR'),
+  lateBookingSurcharge: z.coerce.number().nonnegative().default(50.0),
+  lateBookingDays: z.coerce.number().int().nonnegative().default(14),
 })
 
 export const updateExamEventSchema = createExamEventSchema.partial()
@@ -192,6 +206,11 @@ export const createExamPoolSchema = z.object({
   moduleDiversityCap: z.number().int().positive().default(4),
   seatPrice: z.number().positive().default(300),
   allowedModules: z.array(z.string()).min(1).max(4),
+  poolType: z.enum(['STANDARD', 'AUTO', 'GROUP_CHARTER']).default('STANDARD'),
+  dayNumber: z.number().int().min(1).default(1),
+  poolLabel: z.string().optional(),
+  isAutoPool: z.boolean().default(false),
+  venue: z.string().optional(),
   notes: z.string().optional(),
 })
 
@@ -286,6 +305,9 @@ export const enterGradeSchema = z.object({
       userId: z.string().cuid(),
       score: z.number().min(0),
       maxScore: z.number().positive(),
+      mcqScore: z.number().min(0).optional(),
+      essay1Score: z.number().min(0).optional(),
+      essay2Score: z.number().min(0).optional(),
       feedback: z.string().optional(),
     })
   ),
@@ -319,6 +341,26 @@ export const contactSchema = z.object({
   subject: z.string().min(2),
   message: z.string().min(10),
 })
+
+// ===========================================================================
+// NEWS ARTICLE SCHEMAS
+// ===========================================================================
+
+export const newsArticleSchema = z.object({
+  title: z.string().min(3).max(200),
+  slug: z.string().min(3).max(200),
+  excerpt: z.string().max(500).optional().nullable(),
+  content: z.string().min(10),
+  coverImage: z.string().url().optional().nullable(),
+  status: z.enum(['DRAFT', 'PUBLISHED', 'ARCHIVED']).default('DRAFT'),
+  authorId: z.string().cuid(),
+  customAuthorName: z.string().optional().nullable(),
+  tags: z.array(z.string()).default([]),
+  publishedAt: z.string().datetime().optional().nullable(),
+  customPublishedAt: z.string().datetime().optional().nullable(),
+})
+
+export const updateNewsArticleSchema = newsArticleSchema.partial()
 
 // ===========================================================================
 // SETTINGS SCHEMA

@@ -116,7 +116,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         userName={userName}
         userRole={userRole}
         userImage={user.image ?? undefined}
-        studyPathway={studentProfile?.pathwayRel?.code || (studentProfile?.enrollmentType as any)}
+        studyPathway={studentProfile?.pathwayRel?.code || studentProfile?.enrollmentType}
         notificationCount={unreadNotifications}
         messageCount={unreadMessages}
         paymentAccessLevel={paymentAccessLevel}

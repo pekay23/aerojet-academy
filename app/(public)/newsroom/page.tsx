@@ -35,7 +35,7 @@ export default async function NewsroomPage(props: {
   ])
 
   return (
-    <div className="bg-slate-50 min-h-screen">
+    <div className="relative bg-slate-50 min-h-screen">
       <Hero
         title="News & Updates"
         subtitle="Stay informed about our latest intakes, partnerships, and facility milestones."

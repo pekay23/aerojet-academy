@@ -3,8 +3,8 @@ export interface StudentProfile {
   userId: string
   studentId: string
   enrollmentType?: string | null
-  enrollmentDate?: Date | string | null
-  expectedGraduationDate?: Date | string | null
+  enrollmentDate?: string | null
+  expectedGraduationDate?: string | null
 }
 
 export interface Grade {
@@ -18,14 +18,14 @@ export interface Grade {
   passed: boolean
   remarks?: string | null
   gradedBy?: string | null
-  createdAt: Date | string
+  createdAt: string
 }
 
 export interface AttendanceRecord {
   id: string
   classId: string
   userId: string
-  date: Date | string
+  date: string
   present: boolean
   notes?: string | null
 }

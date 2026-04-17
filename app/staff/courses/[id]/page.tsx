@@ -72,8 +72,8 @@ export default async function CourseDetailsPage({ params }: Props) {
   })
 
   // Serialize Prisma data for Client Components
-  const serializedCourse = serializePrisma(course) as any
-  const serializedCategories = serializePrisma(categories) as any
+  const serializedCourse = serializePrisma(course)
+  const serializedCategories = serializePrisma(categories)
 
   return (
     <div className="mx-auto max-w-6xl">

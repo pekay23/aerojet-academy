@@ -66,6 +66,9 @@ export const PATCH = withErrorHandler(
       employeeId,
       nationality,
       dateOfBirth,
+      gender,
+      alternatePhone,
+      postalCode,
       profilePhotoUrl,
       ...userData
     } = validation.data
@@ -92,6 +95,9 @@ export const PATCH = withErrorHandler(
       phone ||
       nationality ||
       dateOfBirth ||
+      gender ||
+      alternatePhone ||
+      postalCode ||
       profilePhotoUrl !== undefined
     ) {
       await prisma.profile.upsert({
@@ -103,6 +109,9 @@ export const PATCH = withErrorHandler(
           ...(phone && { phone }),
           ...(nationality && { nationality }),
           ...(dateOfBirth && { dateOfBirth: new Date(dateOfBirth) }),
+          ...(gender && { gender }),
+          ...(alternatePhone && { alternatePhone }),
+          ...(postalCode && { postalCode }),
           ...(profilePhotoUrl !== undefined && { profilePhotoUrl }),
         },
         create: {
@@ -113,6 +122,9 @@ export const PATCH = withErrorHandler(
           phone,
           nationality,
           dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : undefined,
+          gender,
+          alternatePhone,
+          postalCode,
           profilePhotoUrl,
         },
       })

@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma/client'
 
 export async function POST(req: NextRequest) {
   const session = await getAuthSession()
-  if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
+  if (!session || !['ADMIN', 'STAFF'].includes(session.user.role)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -30,13 +30,13 @@ export async function POST(req: NextRequest) {
 
   await prisma.systemSetting.upsert({
     where: { key: 'welcome_messages' },
-    update: { value: JSON.stringify(cleanMessages), updatedBy: (session.user as any).id },
+    update: { value: JSON.stringify(cleanMessages), updatedBy: session.user.id },
     create: {
       key: 'welcome_messages',
       value: JSON.stringify(cleanMessages),
       type: 'JSON',
       description: 'Rotating welcome messages shown on portal dashboards (categorised by role)',
-      updatedBy: (session.user as any).id,
+      updatedBy: session.user.id,
     },
   })
 

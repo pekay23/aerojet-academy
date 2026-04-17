@@ -16,36 +16,16 @@ import {
   ArrowUp,
   ArrowDown,
 } from 'lucide-react'
+import { DbCourse, DbCourseCategory } from '@/types/database'
 import CourseActionsMenu from '../../_components/CourseActionsMenu'
 
-type Course = {
-  id: string
-  code: string
-  name: string
-  subtitle?: string | null
-  price: string | number
-  currency: string
-  isActive: boolean
-  moduleType: string | null
-  duration: number | null
-  applicableCategories?: string[]
-}
-
-type Category = {
-  id: string
-  name: string
-  description: string | null
-  courses: Course[]
-  _count: { courses: number }
-}
-
 interface Props {
-  categories: Category[]
+  categories: DbCourseCategory[]
 }
 
 // EASA category IDs/names that should be pinned on top by default.
 // We detect EASA by checking if the name contains "EASA" or "MODULE".
-function isEasaCategory(cat: Category) {
+function isEasaCategory(cat: DbCourseCategory) {
   const n = cat.name.toUpperCase()
   return n.includes('EASA') || n.includes('MODULE')
 }

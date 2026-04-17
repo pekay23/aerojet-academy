@@ -2,7 +2,9 @@ import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
+import { serializePrisma } from '@/lib/utils/serialization'
 import { getSystemSetting } from '@/lib/settings'
+import { PaymentStatus, TransactionType } from '@/types/enums'
 import FinanceTabs from '../_components/FinanceTabs'
 import FinanceOverview from '../_components/FinanceOverview'
 import ReconciliationQueue from '../_components/ReconciliationQueue'
@@ -53,7 +55,7 @@ async function getOverviewChartData() {
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
   const payments = await prisma.payment.findMany({
-    where: { status: 'APPROVED', approvedAt: { gte: sixMonthsAgo } },
+    where: { status: PaymentStatus.APPROVED, approvedAt: { gte: sixMonthsAgo } },
     select: { amount: true, approvedAt: true },
   })
 
@@ -74,19 +76,22 @@ async function getOverviewChartData() {
 
 async function getWalletTopupsData() {
   const pendingRequests = await prisma.payment.findMany({
-    where: { referenceType: 'WALLET_TOPUP', status: 'PENDING' },
+    where: { referenceType: 'WALLET_TOPUP', status: PaymentStatus.PENDING },
     include: { user: { include: { profile: true } } },
     orderBy: { createdAt: 'desc' },
   })
 
   const topupHistory = await prisma.walletTransaction.findMany({
-    where: { type: 'TOP_UP' },
+    where: { type: TransactionType.TOP_UP },
     orderBy: { createdAt: 'desc' },
     include: { wallet: { include: { user: { include: { profile: true } } } } },
     take: 50,
   })
 
-  return { pendingRequests, topupHistory }
+  return {
+    pendingRequests: serializePrisma(pendingRequests),
+    topupHistory: serializePrisma(topupHistory),
+  }
 }
 
 async function getTransactionsData(query?: string) {
@@ -112,17 +117,8 @@ async function getTransactionsData(query?: string) {
     take: 100,
   })
 
-  const serialized = transactions.map((tx) => ({
-    ...tx,
-    amount: Number(tx.amount),
-    balanceBefore: tx.balanceBefore ? Number(tx.balanceBefore) : null,
-    balanceAfter: tx.balanceAfter ? Number(tx.balanceAfter) : null,
-    reservedBefore: tx.reservedBefore ? Number(tx.reservedBefore) : null,
-    reservedAfter: tx.reservedAfter ? Number(tx.reservedAfter) : null,
-    availableBefore: tx.availableBefore ? Number(tx.availableBefore) : null,
-    availableAfter: tx.availableAfter ? Number(tx.availableAfter) : null,
-  }))
-
+  const serialized = serializePrisma(transactions)
+  
   const paymentIds = serialized
     .filter((tx) => tx.referenceType === 'PAYMENT_ID' && tx.referenceId)
     .map((tx) => tx.referenceId!)
@@ -137,13 +133,16 @@ async function getTransactionsData(query?: string) {
     },
   })
 
+  // Serialize related payments to ensure Decimal fields like originalAmount are numbers
+  const serializedPayments = serializePrisma(relatedPayments)
+
   const paymentDataMap = new Map(
-    relatedPayments.map((p) => [
+    serializedPayments.map((p) => [
       p.id,
       {
         reconciled: p.reconciled,
         originalCurrency: p.paymentCurrency,
-        originalAmount: p.originalAmount ? Number(p.originalAmount) : null,
+        originalAmount: p.originalAmount,
       },
     ])
   )
@@ -174,7 +173,7 @@ export default async function FinancePage({
   const tab = VALID_TABS.includes(params.tab ?? '') ? params.tab! : 'overview'
 
   const pendingTopupCount = await prisma.payment.count({
-    where: { referenceType: 'WALLET_TOPUP', status: 'PENDING' },
+    where: { referenceType: 'WALLET_TOPUP', status: PaymentStatus.PENDING },
   })
 
   return (
@@ -206,7 +205,7 @@ async function WalletTopupsTab() {
           Awaiting Verification ({pendingRequests.length})
         </h2>
 
-        <PendingTopupsTable requests={pendingRequests as any} />
+        <PendingTopupsTable requests={pendingRequests} />
       </div>
 
       <div className="space-y-4">
@@ -283,14 +282,14 @@ async function TransactionsTab({ query }: { query?: string }) {
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'TOP_UP':
-      case 'REFUND':
-      case 'RELEASE':
+      case TransactionType.TOP_UP:
+      case TransactionType.REFUND:
+      case TransactionType.RELEASE:
         return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
-      case 'CAPTURE':
-      case 'PAYMENT':
+      case TransactionType.CAPTURE:
+      case TransactionType.PAYMENT:
         return 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
-      case 'RESERVE':
+      case TransactionType.RESERVE:
         return 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
       default:
         return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
@@ -374,12 +373,20 @@ async function TransactionsTab({ query }: { query?: string }) {
                       <div className="flex flex-col">
                         <span
                           className={`text-sm font-black ${
-                            ['TOP_UP', 'REFUND', 'RELEASE'].includes(tx.type)
+                            [TransactionType.TOP_UP, TransactionType.REFUND, TransactionType.RELEASE].includes(
+                              tx.type as TransactionType
+                            )
                               ? 'text-emerald-600 dark:text-emerald-400'
                               : 'text-slate-900 dark:text-slate-100'
                           }`}
                         >
-                          {['TOP_UP', 'REFUND', 'RELEASE'].includes(tx.type) ? '+' : '-'}
+                          {[
+                            TransactionType.TOP_UP,
+                            TransactionType.REFUND,
+                            TransactionType.RELEASE,
+                          ].includes(tx.type as TransactionType)
+                            ? '+'
+                            : '-'}
                           {symbol}
                           {tx.amount.toFixed(2)}
                         </span>
@@ -569,20 +576,20 @@ async function ReportsTab() {
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        {status.status === 'APPROVED' && (
+                        {status.status === PaymentStatus.APPROVED && (
                           <CheckCircle className="h-4 w-4 text-emerald-500" />
                         )}
-                        {status.status === 'PENDING' && (
+                        {status.status === PaymentStatus.PENDING && (
                           <Clock className="h-4 w-4 text-amber-500" />
                         )}
-                        {status.status === 'REJECTED' && (
+                        {status.status === PaymentStatus.REJECTED && (
                           <XCircle className="h-4 w-4 text-red-500" />
                         )}
-                        {status.status === 'FAILED' && <XCircle className="h-4 w-4 text-red-500" />}
-                        {status.status === 'PROCESSING' && (
+                        {status.status === PaymentStatus.FAILED && <XCircle className="h-4 w-4 text-red-500" />}
+                        {status.status === PaymentStatus.PROCESSING && (
                           <AlertCircle className="h-4 w-4 text-blue-500" />
                         )}
-                        {status.status === 'COMPLETED' && (
+                        {status.status === PaymentStatus.COMPLETED && (
                           <CheckCircle className="h-4 w-4 text-emerald-500" />
                         )}
                         <span className="text-sm font-medium">{status.status}</span>
@@ -593,11 +600,11 @@ async function ReportsTab() {
                       <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                         <div
                           className={`h-full rounded-full ${
-                            status.status === 'APPROVED'
+                            status.status === PaymentStatus.APPROVED
                               ? 'bg-emerald-500'
-                              : status.status === 'PENDING'
+                              : status.status === PaymentStatus.PENDING
                                 ? 'bg-amber-500'
-                                : status.status === 'REJECTED' || status.status === 'FAILED'
+                                : status.status === PaymentStatus.REJECTED || status.status === PaymentStatus.FAILED
                                   ? 'bg-red-500'
                                   : 'bg-blue-500'
                           }`}

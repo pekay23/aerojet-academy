@@ -9,12 +9,12 @@ export const dynamic = 'force-dynamic'
 
 async function PendingTab() {
   const queue = await getGradingQueue()
-  return <GradingQueueView initialQueue={queue as any} />
+  return <GradingQueueView initialQueue={queue} />
 }
 
 async function HistoryTab() {
   const history = await getGradingHistory()
-  return <GradingHistoryView initialHistory={history as any} />
+  return <GradingHistoryView initialHistory={history} />
 }
 
 export default async function GradingPage({

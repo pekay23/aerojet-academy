@@ -13,7 +13,7 @@ export const PUT = withErrorHandler(
     const body = await req.json()
     const validation = validateBody(updateExamEventSchema, body)
 
-    if (validation.success === false) return apiError((validation as any).error)
+    if (validation.success === false) return apiError(validation.error)
 
     const existingEvent = await prisma.examEvent.findUnique({
       where: { id },
@@ -25,7 +25,7 @@ export const PUT = withErrorHandler(
 
     const updatedEvent = await prisma.examEvent.update({
       where: { id },
-      data: validation.data as any,
+      data: validation.data,
     })
 
     await createAuditLog({
