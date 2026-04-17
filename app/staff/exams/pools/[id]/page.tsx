@@ -39,11 +39,11 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
     <div className="mx-auto max-w-7xl">
       <div className="mb-6">
         <Link
-          href={`/staff/exams/events/${pool.eventId}`}
+          href={pool.eventId ? `/staff/exams/events/${pool.eventId}` : '/staff/exams'}
           className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-aerojet-blue dark:text-slate-400"
         >
           <ChevronLeft className="h-4 w-4" />
-          Back to Event: {pool.event.name}
+          Back to Event: {pool.event?.name || 'Details'}
         </Link>
       </div>
 
@@ -58,7 +58,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
           <div className="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4 text-slate-400" />
-              Exam Date: {format(pool.examDate, 'EEEE, MMM d, yyyy')}
+              Exam Date: {pool.examDate ? format(new Date(pool.examDate), 'EEEE, MMM d, yyyy') : 'No Date Set'}
             </div>
             <div className="flex items-center gap-1.5">
               <Users className="h-4 w-4 text-slate-400" />
@@ -118,15 +118,17 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue">
-                          {member.user.profile?.firstName?.charAt(0)}
-                          {member.user.profile?.lastName?.charAt(0)}
+                          {member.user?.profile?.firstName?.charAt(0) || 'U'}
+                          {member.user?.profile?.lastName?.charAt(0) || ''}
                         </div>
                         <div>
                           <div className="font-bold text-slate-900 dark:text-slate-100">
-                            {member.user.profile?.firstName} {member.user.profile?.lastName}
+                            {(member.user?.profile?.firstName || member.user?.profile?.lastName)
+                              ? `${member.user.profile.firstName || ''} ${member.user.profile.lastName || ''}`
+                              : member.user?.email || 'Unknown User'}
                           </div>
                           <div className="text-xs text-slate-500 dark:text-slate-400">
-                            ID: {member.user.studentProfile?.studentId || 'N/A'}
+                            ID: {member.user?.studentProfile?.studentId || 'N/A'}
                           </div>
                         </div>
                       </div>
@@ -158,7 +160,11 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                     <td className="px-6 py-4 text-right">
                       <MemberActions
                         membershipId={member.id}
-                        memberName={`${member.user.profile?.firstName || ''} ${member.user.profile?.lastName || ''}`}
+                        memberName={
+                          (member.user?.profile?.firstName || member.user?.profile?.lastName)
+                            ? `${member.user.profile.firstName || ''} ${member.user.profile.lastName || ''}`
+                            : member.user?.email || 'Unknown User'
+                        }
                         status={member.status}
                         poolId={pool.id}
                       />
