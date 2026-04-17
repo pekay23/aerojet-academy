@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogFooter,
@@ -75,6 +76,9 @@ export default function ChangeRoleDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Change User Role</DialogTitle>
+          <DialogDescription className="sr-only">
+            Select a new administrative or student role for this user.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-6 py-4">
           <div className="flex items-center gap-4 rounded-xl bg-amber-50 p-4 text-amber-800 dark:bg-amber-900/20 dark:text-amber-400">

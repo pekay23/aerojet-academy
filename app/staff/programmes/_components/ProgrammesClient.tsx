@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -216,6 +217,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
           <DialogContent className="sm:max-w-[480px]">
             <DialogHeader>
               <DialogTitle>Create Programme</DialogTitle>
+              <DialogDescription className="sr-only">
+                Enter the details for a new full-time training programme.
+              </DialogDescription>
             </DialogHeader>
             <div className="mt-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
@@ -311,7 +315,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                           {prog.code}
                         </span>
                         {!prog.isActive && (
-                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                          <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-500">
                             Inactive
                           </span>
                         )}
@@ -392,7 +396,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  className="h-6 px-2 text-[10px]"
+                                  className="h-6 px-2 text-xs"
                                   onClick={(e) => {
                                     e.stopPropagation()
                                     openEditYear(prog.id, y)
@@ -434,6 +438,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
             <DialogTitle>
               {editingYearId ? 'Edit Programme Year' : 'Add Programme Year'}
             </DialogTitle>
+            <DialogDescription className="sr-only">
+              Configure the schedule and fees for a specific year of the programme.
+            </DialogDescription>
           </DialogHeader>
           <div className="mt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
@@ -490,7 +497,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                   variant="ghost"
                   size="sm"
                   onClick={handleAddSemester}
-                  className="h-6 px-2 text-[10px]"
+                  className="h-6 px-2 text-xs"
                 >
                   + Add Semester
                 </Button>
@@ -509,14 +516,14 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                       />
                       <button
                         onClick={() => handleRemoveSemester(idx)}
-                        className="text-[10px] text-red-500 hover:text-red-600"
+                        className="text-xs text-red-500 hover:text-red-600"
                       >
                         Remove
                       </button>
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-[10px] text-slate-500">Start</label>
+                        <label className="text-xs text-slate-500">Start</label>
                         <input
                           type="date"
                           value={sem.startDate ? sem.startDate.split('T')[0] : ''}
@@ -525,7 +532,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                         />
                       </div>
                       <div>
-                        <label className="text-[10px] text-slate-500">End</label>
+                        <label className="text-xs text-slate-500">End</label>
                         <input
                           type="date"
                           value={sem.endDate ? sem.endDate.split('T')[0] : ''}
