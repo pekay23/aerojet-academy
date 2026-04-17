@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -96,6 +97,9 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Edit Personal Information</DialogTitle>
+          <DialogDescription className="sr-only">
+            Update the user's name, contact information, and other personal details.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
@@ -138,7 +142,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
               value={formData.email}
               onChange={handleChange}
             />
-            <p className="text-[10px] text-slate-400">
+            <p className="text-xs text-slate-400">
               Used for signing in and academy correspondence
             </p>
           </div>
@@ -152,7 +156,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
               value={formData.personalEmail}
               onChange={handleChange}
             />
-            <p className="text-[10px] text-slate-400">Original email for external communication</p>
+            <p className="text-xs text-slate-400">Original email for external communication</p>
           </div>
 
           <div className="grid gap-2">

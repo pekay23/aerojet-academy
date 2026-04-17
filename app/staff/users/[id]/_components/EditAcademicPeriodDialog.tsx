@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -123,6 +124,9 @@ export default function EditAcademicPeriodDialog({
             <GraduationCap className="h-5 w-5 text-aerojet-sky" />
             Edit Academic Period
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Select the current academic year and semester for this student.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="mt-4 space-y-4">
@@ -196,7 +200,7 @@ export default function EditAcademicPeriodDialog({
           {/* Current Assignment Summary */}
           {(currentAcademicYearName || currentSemesterName) && (
             <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/40">
-              <p className="mb-1 text-[10px] font-bold tracking-wider text-slate-400 uppercase">
+              <p className="mb-1 text-xs font-bold tracking-wider text-slate-400 uppercase">
                 Current Assignment
               </p>
               <p className="text-sm font-medium text-slate-600 dark:text-slate-300">

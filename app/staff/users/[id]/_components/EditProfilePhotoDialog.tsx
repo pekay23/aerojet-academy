@@ -9,6 +9,7 @@ import { UploadButton } from '@/lib/uploads/uploadthing'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -61,6 +62,9 @@ export default function EditProfilePhotoDialog({
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Update Profile Photo</DialogTitle>
+          <DialogDescription className="sr-only">
+            Upload or change the user's profile picture.
+          </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col items-center justify-center space-y-6 py-6">
           <div className="relative h-32 w-32 overflow-hidden rounded-full border-4 border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-900">

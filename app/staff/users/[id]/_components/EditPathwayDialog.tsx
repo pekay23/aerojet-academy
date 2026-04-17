@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -69,6 +70,9 @@ export default function EditPathwayDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{isLocked ? 'Override Study Pathway' : 'Assign Study Pathway'}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Update the student's study pathway and provide a reason for the change.
+          </DialogDescription>
         </DialogHeader>
 
         <div className="mt-4 space-y-4">

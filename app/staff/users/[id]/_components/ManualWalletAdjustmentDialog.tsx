@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -131,6 +132,9 @@ export default function ManualWalletAdjustmentDialog({
             <Wallet className="h-5 w-5 text-aerojet-blue" />
             Adjust Wallet: {userName}
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Manual override for student wallet balance. Credit, debit, or set balance.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
@@ -246,11 +250,11 @@ export default function ManualWalletAdjustmentDialog({
                 }}
                 appearance={{
                   button: 'ut-ready:bg-slate-100 ut-ready:text-slate-600 ut-ready:border ut-ready:border-slate-200 ut-ready:rounded-xl ut-ready:text-xs ut-ready:font-bold ut-uploading:bg-slate-50 ut-uploading:text-slate-400',
-                  allowedContent: 'text-[10px] text-slate-400',
+                  allowedContent: 'text-xs text-slate-400',
                 }}
               />
             )}
-            <p className="text-[10px] text-slate-400">
+            <p className="text-xs text-slate-400">
               Attach receipt, bank statement, or payment proof. Can also be added later.
             </p>
           </div>
