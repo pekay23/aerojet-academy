@@ -92,33 +92,40 @@ export async function getPoolWithDetails(
   poolId: string,
   options?: { includeAllStatuses?: boolean }
 ): Promise<PoolWithDetails | null> {
+  if (!poolId || typeof poolId !== 'string') return null
+
   const membershipsFilter: Prisma.PoolMembershipWhereInput = options?.includeAllStatuses
     ? {}
     : { status: { in: ['RESERVED', 'CONFIRMED'] } }
 
-  return prisma.examPool.findUnique({
-    where: { id: poolId },
-    include: {
-      event: true,
-      memberships: {
-        where: membershipsFilter,
-        include: {
-          user: {
-            include: {
-              profile: true,
-              studentProfile: true,
+  try {
+    return await prisma.examPool.findUnique({
+      where: { id: poolId },
+      include: {
+        event: true,
+        memberships: {
+          where: membershipsFilter,
+          include: {
+            user: {
+              include: {
+                profile: true,
+                studentProfile: true,
+              },
+            },
+            examComponent: {
+              include: {
+                course: true,
+              },
             },
           },
-          examComponent: {
-            include: {
-              course: true,
-            },
-          },
+          orderBy: { createdAt: 'asc' },
         },
-        orderBy: { createdAt: 'asc' },
       },
-    },
-  })
+    })
+  } catch (error) {
+    console.error(`[getPoolWithDetails] Error fetching pool ${poolId}:`, error)
+    return null
+  }
 }
 
 // ---------------------------------------------------------------------------
