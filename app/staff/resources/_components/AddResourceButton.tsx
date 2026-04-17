@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -30,6 +31,9 @@ export default function AddResourceButton() {
           <DialogTitle className="text-xl font-black text-slate-900 dark:text-slate-100">
             Add New Resource
           </DialogTitle>
+          <DialogDescription className="sr-only">
+            Upload and configure a new training resource.
+          </DialogDescription>
         </DialogHeader>
         <ResourceForm
           onSuccess={() => {

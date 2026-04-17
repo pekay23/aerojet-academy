@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -93,6 +94,9 @@ export default function CreateUserDialog() {
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Create New User</DialogTitle>
+          <DialogDescription className="sr-only">
+            Fill in the details below to create a new user account.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-2 gap-4">

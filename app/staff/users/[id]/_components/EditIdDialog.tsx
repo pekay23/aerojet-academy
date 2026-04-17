@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -68,6 +69,9 @@ export default function EditIdDialog({ userId, currentId, type, label }: EditIdD
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit {label}</DialogTitle>
+          <DialogDescription className="sr-only">
+            Update the {label} for this user account.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
