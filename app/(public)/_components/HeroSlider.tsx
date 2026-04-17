@@ -68,12 +68,13 @@ export default function HeroSlider() {
           src={slide.src}
           alt="Aerojet Academy background"
           fill // Use `fill` to cover the container
-          quality={90}
+          quality={80} // Reduced for better LCP
           sizes="100vw"
           className={`object-cover transition-opacity duration-1000 ${index === currentSlide ? 'opacity-100' : 'opacity-0'}`}
           priority={index === 0}
         />
       ))}
+
 
       {/* Dark Overlay using modern Tailwind syntax */}
       <div className="absolute inset-0 z-10 bg-linear-to-b from-black/20 via-black/60 to-black/80" />
@@ -81,7 +82,7 @@ export default function HeroSlider() {
       {/* Content Area - Centered */}
       <div className="relative z-20 w-full px-6 py-20 text-center md:container md:mx-auto">
         <div className="mx-auto max-w-5xl pt-16">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={currentSlide}
               initial={{ opacity: 0, y: 30 }}

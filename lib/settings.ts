@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma/client'
+import { unstable_cache } from 'next/cache'
 
 export async function getSystemSetting(key: string, defaultValue: string = ''): Promise<string> {
   const setting = await prisma.systemSetting.findUnique({
@@ -8,15 +9,18 @@ export async function getSystemSetting(key: string, defaultValue: string = ''): 
 }
 
 export async function getSystemSettings(keys: string[]): Promise<Map<string, string>> {
-  const settings = await prisma.systemSetting.findMany({
-    where: {
-      key: { in: keys },
+  return unstable_cache(
+    async () => {
+      const settings = await prisma.systemSetting.findMany({
+        where: { key: { in: keys } },
+      })
+      const map = new Map<string, string>()
+      settings.forEach((s) => map.set(s.key, s.value))
+      return Array.from(map.entries()) // Cache returns serializable data
     },
-  })
-
-  const map = new Map<string, string>()
-  settings.forEach((s) => map.set(s.key, s.value))
-  return map
+    [`settings-${keys.sort().join('-')}`],
+    { revalidate: 300, tags: ['settings'] }
+  )().then((entries) => new Map(entries))
 }
 
 export async function getRegistrationConfig() {

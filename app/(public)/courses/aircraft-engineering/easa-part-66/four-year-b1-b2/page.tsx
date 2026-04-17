@@ -30,7 +30,8 @@ export default function FourYearPage() {
 
       <div className="mx-auto max-w-7xl space-y-24 px-6 py-20">
         {/* Intro */}
-        <SectionReveal>
+        <SectionReveal skipInitial>
+
           <section className="max-w-4xl">
             <div className="mb-6 flex flex-wrap gap-3">
               <span className="rounded-full bg-aerojet-blue px-4 py-2 text-xs font-black tracking-widest text-white uppercase">

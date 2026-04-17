@@ -34,9 +34,11 @@ export default function PageHero({ title, subtitle, backgroundImage }: PageHeroP
           alt={title}
           fill
           priority
+          quality={80}
           sizes="100vw"
           className="object-cover"
         />
+
         {/* Dark overlay for text readability */}
         <div className="absolute inset-0 bg-black/60" />
       </motion.div>
@@ -47,7 +49,7 @@ export default function PageHero({ title, subtitle, backgroundImage }: PageHeroP
         className="relative z-10 flex h-full flex-col items-center justify-center px-6 text-center"
       >
         <motion.h1
-          initial={{ opacity: 0, y: 30 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className="max-w-7xl text-4xl leading-[0.95] font-black tracking-tight text-white uppercase sm:text-5xl md:text-6xl"
@@ -55,7 +57,7 @@ export default function PageHero({ title, subtitle, backgroundImage }: PageHeroP
           {title}
         </motion.h1>
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
           className="mt-5 max-w-2xl text-base leading-relaxed font-medium text-blue-100/80 sm:text-lg"
@@ -63,6 +65,7 @@ export default function PageHero({ title, subtitle, backgroundImage }: PageHeroP
           {subtitle}
         </motion.p>
       </motion.div>
+
 
       {/* Bottom fade to white for a smooth transition to page content */}
       <div className="absolute right-0 bottom-0 left-0 z-10 h-24 bg-linear-to-t from-white to-transparent" />

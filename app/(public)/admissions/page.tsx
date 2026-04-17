@@ -34,8 +34,9 @@ export default async function AdmissionsPage() {
         {/* Why Choose Us Section */}
         <section className="relative z-10 px-6 py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <SectionReveal>
+            <SectionReveal skipInitial>
               <h2 className="text-public-primary mb-6 text-3xl font-black tracking-tight uppercase">
+
                 Why Choose Aerojet?
               </h2>
               <p className="text-lg leading-relaxed text-slate-600">
