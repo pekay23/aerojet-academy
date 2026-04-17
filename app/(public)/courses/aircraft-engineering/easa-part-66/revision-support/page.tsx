@@ -13,17 +13,17 @@ export default function RevisionSupportPage() {
     <div className="bg-white">
       <Hero title="Revision Support" subtitle="Intensive 8-week tuition blocks with mock examinations." backgroundImage="/images/hero/lecture.webp"/>
 
-      <div className="max-w-5xl mx-auto px-6 py-20 space-y-20">
+      <div className="max-w-7xl mx-auto px-6 py-20 space-y-20">
 
         <SectionReveal>
           <div className="grid md:grid-cols-2 gap-10 items-start">
             <div>
-              <span className="text-aerojet-sky font-bold text-xs uppercase tracking-[0.2em] mb-3 block">Group Learning</span>
+              <span className="text-aerojet-sky font-bold text-sm uppercase tracking-[0.2em] mb-3 block">Group Learning</span>
               <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-6">8-Week Revision Series</h2>
               <p className="text-slate-600 leading-relaxed mb-4">
                 Our Revision Support clinics provide focused preparation before EASA examinations. Each series is an 8-session intensive covering core syllabus topics with mock exams at Weeks 4 and 8.
               </p>
-              <div className="space-y-3 text-sm text-slate-700">
+              <div className="space-y-4 text-base text-slate-700">
                 {[
                   { label: "Schedule", value: "2:00 PM – 5:00 PM, Monday–Friday" },
                   { label: "Price", value: "Available in the portal" },
@@ -34,8 +34,8 @@ export default function RevisionSupportPage() {
                 ))}
               </div>
               <div className="mt-6 p-4 bg-orange-50 border-l-4 border-orange-400 rounded-r-lg">
-                <p className="text-xs font-bold text-orange-800 uppercase tracking-widest mb-1">Individual Student?</p>
-                <p className="text-xs text-orange-700">Please view our <Link href="/courses/aircraft-engineering/easa-part-66/modular-training" className="underline font-bold">Modular Training Programme</Link> which allows individuals to book tuition per module.</p>
+                <p className="text-sm font-bold text-orange-800 uppercase tracking-widest mb-1">Individual Student?</p>
+                <p className="text-sm text-orange-700">Please view our <Link href="/courses/aircraft-engineering/easa-part-66/modular-training" className="underline font-bold">Modular Training Programme</Link> which allows individuals to book tuition per module.</p>
               </div>
             </div>
 
@@ -61,8 +61,8 @@ export default function RevisionSupportPage() {
         <SectionReveal>
           <div className="text-center">
             <h2 className="text-2xl font-black text-aerojet-blue uppercase tracking-tight mb-4">Corporate & Group Enquiry</h2>
-            <p className="text-slate-500 mb-8 max-w-md mx-auto text-sm">Representing an organisation? Contact us to discuss scheduling a dedicated revision block for your team.</p>
-            <Link href="/contact" className="inline-block bg-aerojet-blue text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-aerojet-sky transition-colors">
+            <p className="text-slate-500 mb-8 max-w-md mx-auto text-base">Representing an organisation? Contact us to discuss scheduling a dedicated revision block for your team.</p>
+            <Link href="/contact" className="inline-block bg-aerojet-blue text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-aerojet-sky transition-colors">
               Contact Admissions
             </Link>
           </div>

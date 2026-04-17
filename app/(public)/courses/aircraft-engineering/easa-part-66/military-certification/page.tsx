@@ -18,15 +18,15 @@ export default function MilitaryCertPage() {
         subtitle="1-Year fast-track for experienced personnel — theory & exams only."
         backgroundImage="/images/hero/military-certification.webp"
       />
-      <div className="mx-auto max-w-6xl space-y-20 px-6 py-20">
+      <div className="mx-auto max-w-7xl space-y-20 px-6 py-20">
         <SectionReveal>
           <section className="grid items-start gap-10 lg:grid-cols-2">
             <div>
               <div className="mb-6 flex flex-wrap gap-3">
-                <span className="rounded-full bg-aerojet-sky px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase">
+                <span className="rounded-full bg-aerojet-sky px-4 py-2 text-xs font-black tracking-widest text-white uppercase">
                   Fast-Track
                 </span>
-                <span className="rounded-full bg-orange-100 px-4 py-2 text-[10px] font-black tracking-widest text-orange-700 uppercase">
+                <span className="rounded-full bg-orange-100 px-4 py-2 text-xs font-black tracking-widest text-orange-700 uppercase">
                   Theory Only
                 </span>
               </div>

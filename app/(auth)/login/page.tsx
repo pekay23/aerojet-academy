@@ -9,13 +9,13 @@ export default function LoginPage() {
     <div>
       <div className="mb-8">
         <h2 className="text-2xl sm:text-3xl font-black text-aerojet-blue uppercase tracking-tight">Welcome Back</h2>
-        <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Sign in to your portal account.</p>
+        <p className="text-base text-slate-500 dark:text-slate-400 mt-2">Sign in to your portal account.</p>
       </div>
 
       <LoginForm />
 
       <div className="mt-8 text-center">
-        <p className="text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-base text-slate-500 dark:text-slate-400">
           Don't have an account?{" "}
           <Link href="/register" className="font-bold text-aerojet-sky hover:underline">
             Register here
@@ -24,7 +24,7 @@ export default function LoginPage() {
       </div>
 
       <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
-        <p className="text-[10px] text-slate-400 text-center uppercase tracking-widest">
+        <p className="text-xs text-slate-400 text-center uppercase tracking-widest">
           Secure login powered by Aerojet Academy Portal
         </p>
       </div>

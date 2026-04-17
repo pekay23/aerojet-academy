@@ -49,7 +49,7 @@ export default async function AdmissionsPage() {
 
         {/* Nav Cards Section */}
         <section className="relative z-10 px-6 pb-20">
-          <div className="mx-auto grid max-w-5xl gap-6 sm:grid-cols-3">
+          <div className="mx-auto grid max-w-7xl gap-6 sm:grid-cols-3">
             {[
               {
                 icon: CheckCircle2,

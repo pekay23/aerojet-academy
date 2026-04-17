@@ -23,7 +23,7 @@ export default function CoursesPage() {
 
       {/* Intro Section (As you liked) */}
       <section className="px-6 py-20 sm:py-28">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-7xl">
           <SectionReveal>
             <span className="text-public-secondary mb-3 block text-xs font-bold tracking-[0.2em] uppercase">
               EASA Certified
@@ -85,7 +85,7 @@ export default function CoursesPage() {
 
       {/* Comparison Table Section */}
       <section className="bg-slate-50 px-6 py-16 sm:py-20">
-        <div className="mx-auto max-w-5xl">
+        <div className="mx-auto max-w-7xl">
           <SectionReveal>
             <div className="mb-12 text-center">
               <h2 className="text-public-primary mb-4 text-3xl font-black tracking-tight uppercase sm:text-4xl">
@@ -107,11 +107,11 @@ export default function CoursesPage() {
       {/* Prerequisites Section */}
       <SectionReveal>
         <section className="bg-public-primary px-6 py-16 sm:py-20">
-          <div className="mx-auto max-w-5xl text-center">
+          <div className="mx-auto max-w-7xl text-center">
             <h2 className="mb-10 text-2xl font-black tracking-tight text-white uppercase sm:text-3xl">
               Prerequisites
             </h2>
-            <div className="grid gap-6 text-left sm:grid-cols-3 sm:gap-8">
+            <div className="grid gap-6 text-left sm:grid-cols-3 sm:gap-12">
               {[
                 {
                   icon: GraduationCap,

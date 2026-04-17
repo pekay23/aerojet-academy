@@ -22,7 +22,7 @@ export default async function TermsPage() {
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-xl sm:rounded-3xl sm:p-14">
           <div className="mb-10 border-b border-slate-100 pb-6">
-            <span className="mb-4 inline-block rounded-full bg-blue-50 px-3 py-1 text-[10px] font-black tracking-widest text-aerojet-sky uppercase">
+            <span className="mb-4 inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-black tracking-widest text-aerojet-sky uppercase">
               Legal Policy
             </span>
             <h1 className="text-3xl leading-tight font-black tracking-tight text-aerojet-blue uppercase sm:text-4xl dark:text-white">
@@ -111,7 +111,7 @@ export default async function TermsPage() {
                 </Link>
                 <Link
                   href="/register"
-                  className="rounded-xl bg-aerojet-sky px-6 py-3 text-[10px] font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-blue"
+                  className="rounded-xl bg-aerojet-sky px-6 py-3 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-blue"
                 >
                   Start Registration
                 </Link>

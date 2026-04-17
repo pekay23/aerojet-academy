@@ -89,12 +89,12 @@ export default async function NewsroomArticlePage({ params }: Props) {
         {/* Hero Content Overlay */}
         <div className="absolute inset-0 flex items-end pb-12 sm:pb-20">
           <div className="mx-auto w-full px-6">
-            <div className="max-w-4xl pt-32 sm:pt-48">
+            <div className="max-w-7xl pt-32 sm:pt-48">
               <h1 className="mb-8 text-4xl leading-[1.05] font-black tracking-tighter text-white sm:text-6xl md:text-7xl">
                 {article.title}
               </h1>
 
-              <div className="flex flex-wrap items-center gap-6 text-[11px] font-bold tracking-widest text-slate-200 uppercase">
+              <div className="flex flex-wrap items-center gap-6 text-xs font-bold tracking-widest text-slate-200 uppercase">
                 <div className="flex items-center gap-2.5">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10 backdrop-blur-md">
                     <UserIcon className="h-3.5 w-3.5 text-aerojet-sky" />
@@ -150,7 +150,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
                 article.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase transition-all hover:border-aerojet-sky hover:bg-white hover:text-aerojet-blue dark:border-slate-800 dark:bg-slate-900"
+                    className="rounded-xl border border-slate-100 bg-slate-50 px-4 py-2 text-xs font-black tracking-widest text-slate-400 uppercase transition-all hover:border-aerojet-sky hover:bg-white hover:text-aerojet-blue dark:border-slate-800 dark:bg-slate-900"
                   >
                     #{tag}
                   </span>
@@ -159,7 +159,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
 
             {/* Share Buttons */}
             <div className="flex items-center gap-4">
-              <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              <span className="text-xs font-black tracking-widest text-slate-400 uppercase">
                 Share Article
               </span>
               <ShareButtons

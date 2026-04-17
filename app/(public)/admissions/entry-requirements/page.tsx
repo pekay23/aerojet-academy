@@ -14,7 +14,7 @@ export default function EntryRequirementsPage() {
         backgroundImage="/images/hero/entry1.webp"
       />
 
-      <div className="mx-auto max-w-5xl space-y-16 px-6 py-20">
+      <div className="mx-auto max-w-7xl space-y-16 px-6 py-20">
         <SectionReveal>
           <section>
             <h2 className="mb-8 text-2xl font-black uppercase tracking-tight text-aerojet-blue">
@@ -44,7 +44,7 @@ export default function EntryRequirementsPage() {
                   className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
                 >
                   <h3 className="mb-2 font-bold text-slate-800">{item.title}</h3>
-                  <p className="text-sm leading-relaxed text-slate-500">{item.desc}</p>
+                  <p className="text-base leading-relaxed text-slate-500">{item.desc}</p>
                 </div>
               ))}
             </div>

@@ -13,7 +13,7 @@ export default function AboutPage() {
         subtitle="Building the future of African aviation, one certified technician at a time."
         backgroundImage="/images/hero/students.webp"
       />
-      <div className="mx-auto max-w-6xl px-6 py-20">
+      <div className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-14 lg:grid-cols-3">
           <div className="space-y-12 lg:col-span-2">
             <SectionReveal>
@@ -54,27 +54,27 @@ export default function AboutPage() {
           <SectionReveal delay={0.15}>
             <aside>
               <div className="sticky top-28 rounded-2xl border border-slate-200 bg-slate-50 p-6 shadow-sm sm:rounded-3xl sm:p-8">
-                <h3 className="mb-6 border-b border-slate-200 pb-4 text-sm font-black uppercase tracking-widest text-aerojet-blue">
+                <h3 className="mb-6 border-b border-slate-200 pb-4 text-base font-black uppercase tracking-widest text-aerojet-blue">
                   Academy Highlights
                 </h3>
-                <ul className="space-y-5">
+                <ul className="space-y-6">
                   {[
                     'Training aligned to strict EASA Part-66 standards.',
                     'Inaugural cohort of students already in training.',
                     'Strategically located at the Accra Technical Training Centre (ATTC).',
                   ].map((text) => (
                     <li key={text} className="flex items-start gap-3">
-                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-aerojet-sky text-[10px] font-bold text-white">
+                      <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-aerojet-sky text-xs font-bold text-white">
                         ✓
                       </span>
-                      <p className="text-sm text-slate-700">{text}</p>
+                      <p className="text-base text-slate-700">{text}</p>
                     </li>
                   ))}
                 </ul>
                 <div className="mt-8 border-t border-slate-200 pt-6">
                   <Link
                     href="/courses"
-                    className="block rounded-xl bg-aerojet-blue py-4 text-center text-[10px] font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-aerojet-sky"
+                    className="block rounded-xl bg-aerojet-blue py-4 text-center text-sm font-black uppercase tracking-widest text-white shadow-lg transition-all hover:bg-aerojet-sky"
                   >
                     Explore Programmes
                   </Link>

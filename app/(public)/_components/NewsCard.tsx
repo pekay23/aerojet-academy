@@ -50,7 +50,7 @@ export default function NewsCard({
         </div>
 
         <div className="flex grow flex-col p-6 sm:p-9">
-          <div className="mb-4 flex items-center gap-3 text-[10px] font-black tracking-[0.25em] text-aerojet-sky uppercase">
+          <div className="mb-4 flex items-center gap-3 text-xs font-black tracking-[0.25em] text-aerojet-sky uppercase">
             <span>{date}</span>
             {readTime && (
               <>
@@ -74,14 +74,14 @@ export default function NewsCard({
               {tags.map((tag) => (
                 <span
                   key={tag}
-                  className="rounded-full bg-slate-50 px-2 py-0.5 text-[9px] font-bold tracking-wider text-slate-500 uppercase dark:bg-slate-900/50"
+                  className="rounded-full bg-slate-50 px-2 py-0.5 text-[11px] font-bold tracking-wider text-slate-500 uppercase dark:bg-slate-900/50"
                 >
                   #{tag}
                 </span>
               ))}
             </div>
           )}
-          <div className="text-public-secondary mt-auto flex items-center pt-4 text-[10px] font-black tracking-[0.2em] uppercase">
+          <div className="text-public-secondary mt-auto flex items-center pt-4 text-xs font-black tracking-[0.2em] uppercase">
             Read Full Story
             <ArrowRight className="ml-2 h-3.5 w-3.5 transform transition-transform group-hover:translate-x-2" />
           </div>

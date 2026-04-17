@@ -272,7 +272,7 @@ export default function PublicNav() {
             </Link>
             <Link
               href="/register"
-              className="bg-public-secondary hover:bg-public-primary hidden h-11 items-center rounded-xl px-5 py-2.5 text-[10px] font-black tracking-widest text-white uppercase transition-all sm:inline-flex"
+              className="bg-public-secondary hover:bg-public-primary hidden h-11 items-center rounded-xl px-5 py-2.5 text-xs font-black tracking-widest text-white uppercase transition-all sm:inline-flex"
             >
               Register
             </Link>

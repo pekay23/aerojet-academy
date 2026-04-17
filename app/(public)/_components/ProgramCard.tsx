@@ -59,7 +59,7 @@ export default function ProgramCard({
       >
         {badge && (
           <span
-            className={`absolute top-4 right-4 ${badgeColor} rounded-full px-2.5 py-1 text-[9px] font-black tracking-widest text-white uppercase`}
+            className={`absolute top-4 right-4 ${badgeColor} rounded-full px-2.5 py-1 text-xs font-black tracking-widest text-white uppercase`}
           >
             {badge}
           </span>
@@ -76,8 +76,8 @@ export default function ProgramCard({
         <h3 className="group-hover:text-public-primary mb-2 text-lg font-bold text-slate-900 transition-colors sm:text-xl">
           {title}
         </h3>
-        <p className="mb-6 line-clamp-3 text-sm leading-relaxed text-slate-600">{description}</p>
-        <span className="text-public-secondary inline-flex items-center gap-2 text-xs font-black tracking-widest uppercase transition-all duration-300 group-hover:gap-3">
+        <p className="mb-6 line-clamp-3 text-base leading-relaxed text-slate-600">{description}</p>
+        <span className="text-public-secondary inline-flex items-center gap-2 text-sm font-black tracking-widest uppercase transition-all duration-300 group-hover:gap-3">
           Learn More <ArrowRight className="h-4 w-4" aria-hidden="true" />
         </span>
       </Link>

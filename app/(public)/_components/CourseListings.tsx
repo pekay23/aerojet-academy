@@ -54,7 +54,7 @@ export default function CourseListings() {
       type="single"
       collapsible
       defaultValue="aircraft-engineering"
-      className="mx-auto w-full max-w-4xl"
+      className="mx-auto w-full max-w-7xl"
     >
       {courseData.map((category) => (
         <AccordionItem value={category.value} key={category.value}>

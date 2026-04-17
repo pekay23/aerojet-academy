@@ -22,7 +22,7 @@ export default function Credibility() {
     <section className="bg-slate-50 py-20 sm:py-24">
       <SectionReveal>
         <div className="container mx-auto px-6 text-center">
-          <h3 className="mb-12 text-[10px] font-black tracking-[0.3em] text-slate-500 uppercase">
+          <h3 className="mb-12 text-xs font-black tracking-[0.3em] text-slate-500 uppercase">
             Partners & Certification Standards
           </h3>
           <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8 md:gap-x-20">

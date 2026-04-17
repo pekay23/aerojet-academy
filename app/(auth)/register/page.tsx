@@ -47,7 +47,7 @@ export default async function RegisterPage({
               <Mail className="h-10 w-10 text-blue-500" />
             </div>
             <h3 className="mb-3 text-xl font-bold text-slate-800">Verify Your Email Address</h3>
-            <p className="mb-6 text-sm text-slate-500">
+            <p className="mb-6 text-base text-slate-500">
               We have sent a verification link to your email. Please check your inbox (and spam/junk
               folder) and click the link to complete your registration and receive payment details.
             </p>
@@ -55,9 +55,9 @@ export default async function RegisterPage({
             <div className="rounded-xl border border-blue-100 bg-blue-50 p-4 text-left">
               <div className="mb-2 flex items-center gap-2">
                 <Clock className="h-4 w-4 text-blue-600" />
-                <span className="text-xs font-bold text-blue-700 uppercase">What happens next</span>
+                <span className="text-sm font-bold text-blue-700 uppercase">What happens next</span>
               </div>
-              <ol className="ml-5 list-decimal space-y-1 text-sm text-blue-800">
+              <ol className="ml-5 list-decimal space-y-1 text-base text-blue-800">
                 <li>Check your email and click the verification link.</li>
                 <li>Upon verification, you'll get bank transfer details.</li>
                 <li>Upload your payment receipt to complete your registration.</li>
@@ -78,7 +78,7 @@ export default async function RegisterPage({
         ) : (
           <>
             <div className="mb-8">
-              <p className="text-sm text-slate-500">
+              <p className="text-base text-slate-500">
                 Register to begin your application. A one-time fee of{' '}
                 <strong className="text-aerojet-blue">
                   {config.currency} {config.fee}
@@ -89,7 +89,7 @@ export default async function RegisterPage({
 
             <RegistrationForm currency={config.currency} fee={config.fee} />
 
-            <div className="mt-6 border-t border-gray-100 pt-4 text-center text-sm text-gray-500">
+            <div className="mt-6 border-t border-gray-100 pt-4 text-center text-base text-gray-500">
               Already have an account?{' '}
               <Link href="/login" className="font-bold text-aerojet-sky hover:underline">
                 Sign in

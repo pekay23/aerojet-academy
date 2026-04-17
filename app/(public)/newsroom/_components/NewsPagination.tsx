@@ -61,7 +61,7 @@ export default function NewsPagination({ total, page, limit }: NewsPaginationPro
   return (
     <div className="mt-16 flex flex-col items-center justify-between gap-8 border-t border-slate-100 pt-10 sm:flex-row">
       <div className="flex items-center gap-4">
-        <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">Per Page</span>
+        <span className="text-xs font-black tracking-widest text-slate-400 uppercase">Per Page</span>
         <Select value={limit.toString()} onValueChange={handleLimitChange}>
           <SelectTrigger className="h-10 w-[80px] rounded-xl border-slate-200 bg-white text-xs font-bold ring-offset-white focus:ring-aerojet-blue/20">
             <SelectValue placeholder={limit.toString()} />
@@ -138,7 +138,7 @@ export default function NewsPagination({ total, page, limit }: NewsPaginationPro
       </div>
 
       <div className="hidden lg:block">
-        <p className="text-[10px] font-black tracking-[0.3em] text-slate-400 uppercase">
+        <p className="text-xs font-black tracking-[0.3em] text-slate-400 uppercase">
           {total} Total Articles
         </p>
       </div>

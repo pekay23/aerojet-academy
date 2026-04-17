@@ -30,7 +30,7 @@ export default function TrustStrip() {
               <div className="text-public-primary text-lg font-black tracking-tight sm:text-2xl">
                 {stat.value}
               </div>
-              <div className="mt-1 text-[10px] font-bold tracking-widest text-slate-500 uppercase sm:text-xs">
+              <div className="mt-1 text-xs font-bold tracking-widest text-slate-500 uppercase">
                 {stat.label}
               </div>
             </div>
