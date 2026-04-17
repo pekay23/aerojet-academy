@@ -7,7 +7,6 @@ import { Color } from '@tiptap/extension-color'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { FontFamily } from '@tiptap/extension-font-family'
 import { TextAlign } from '@tiptap/extension-text-align'
-import { Link } from '@tiptap/extension-link'
 import { Image } from '@tiptap/extension-image'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import {
@@ -41,6 +40,15 @@ import {
 import { UploadButton } from '@/lib/uploads/uploadthing'
 import toast from 'react-hot-toast'
 import { useEffect, useState } from 'react'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 const Audio = Node.create({
   name: 'audio',
@@ -140,17 +148,40 @@ export default function NewsMarkdownEditor({
   >(null)
   const [mode, setMode] = useState<'WRITE' | 'SPLIT'>('WRITE')
 
+  // URL Inclusion Modal State
+  const [isUrlModalOpen, setIsUrlModalOpen] = useState(false)
+  const [pendingMediaType, setPendingMediaType] = useState<'IMAGE' | 'AUDIO' | null>(null)
+  const [mediaUrl, setMediaUrl] = useState('')
+
+  const handleUrlInsert = () => {
+    if (!mediaUrl || !editor) return
+
+    if (pendingMediaType === 'IMAGE') {
+      editor.chain().focus().setImage({ src: mediaUrl }).run()
+      toast.success('Image inserted!')
+    } else if (pendingMediaType === 'AUDIO') {
+      editor.chain().focus().setAudio({ src: mediaUrl }).run()
+      toast.success('Audio inserted!')
+    }
+
+    setMediaUrl('')
+    setIsUrlModalOpen(false)
+    setPendingMediaType(null)
+    setActiveMediaTab(null)
+  }
+
   const editor = useEditor({
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        link: {
+          openOnClick: false,
+        },
+      }),
       TextStyle,
       Color,
       FontFamily,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
-      }),
-      Link.configure({
-        openOnClick: false,
       }),
       Image.configure({
         allowBase64: true,
@@ -512,12 +543,8 @@ export default function NewsMarkdownEditor({
           </div>
           <button
             onClick={() => {
-              const url = window.prompt('Enter Image URL')
-              if (url) {
-                editor.chain().focus().setImage({ src: url }).run()
-                toast.success(`Image inserted!`)
-                setActiveMediaTab(null)
-              }
+              setPendingMediaType('IMAGE')
+              setIsUrlModalOpen(true)
             }}
             className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600"
           >
@@ -568,12 +595,8 @@ export default function NewsMarkdownEditor({
           </div>
           <button
             onClick={() => {
-              const url = window.prompt('Enter Audio URL (mp3, wav, etc.)')
-              if (url) {
-                editor.chain().focus().setAudio({ src: url }).run()
-                toast.success(`Audio inserted!`)
-                setActiveMediaTab(null)
-              }
+              setPendingMediaType('AUDIO')
+              setIsUrlModalOpen(true)
             }}
             className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:border-slate-600"
           >
@@ -602,26 +625,57 @@ export default function NewsMarkdownEditor({
         </div>
       </div>
 
-      <style jsx global>{`
-        .ProseMirror p.is-editor-empty:first-child::before {
-          content: attr(data-placeholder);
-          float: left;
-          color: #adb5bd;
-          pointer-events: none;
-          height: 0;
-        }
-        .ProseMirror audio {
-          width: 100%;
-          border-radius: 0.75rem;
-          margin: 1rem 0;
-        }
-        .prose audio {
-          width: 100%;
-          border-radius: 0.75rem;
-          margin: 1.5rem 0;
-          display: block;
-        }
-      `}</style>
+      {/* URL Inclusion Modal */}
+      <Dialog open={isUrlModalOpen} onOpenChange={setIsUrlModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-sm font-black tracking-widest uppercase">
+              Insert {pendingMediaType === 'IMAGE' ? 'Image' : 'Audio'} via URL
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center space-x-2 py-4">
+            <div className="grid flex-1 gap-2">
+              <Input
+                id="media-url"
+                placeholder={
+                  pendingMediaType === 'IMAGE' ? 'https://example.com/image.jpg' : 'https://example.com/audio.mp3'
+                }
+                value={mediaUrl}
+                onChange={(e) => setMediaUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleUrlInsert()
+                  }
+                }}
+                className="h-10 text-xs font-medium"
+              />
+            </div>
+          </div>
+          <DialogFooter className="sm:justify-start">
+            <Button
+              type="button"
+              variant="default"
+              onClick={handleUrlInsert}
+              disabled={!mediaUrl}
+              className="bg-aerojet-blue text-[10px] font-black tracking-widest uppercase"
+            >
+              Insert Media
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setIsUrlModalOpen(false)
+                setMediaUrl('')
+              }}
+              className="text-[10px] font-black tracking-widest uppercase"
+            >
+              Cancel
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   )
 }

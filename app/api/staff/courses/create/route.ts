@@ -12,7 +12,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const validation = validateBody(createCourseSchema, body)
 
   if (validation.success === false) {
-    return apiError((validation as any).error)
+    return apiError(validation.error)
   }
 
   const {
@@ -52,7 +52,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     entity: 'Course',
     entityId: course.id,
     userId: staff.id,
-    details: validation.data as any,
+    details: validation.data,
   })
 
   return apiCreated(course)

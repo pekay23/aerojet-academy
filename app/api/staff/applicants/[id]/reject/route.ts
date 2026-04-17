@@ -11,7 +11,7 @@ export async function POST(
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const actorId = (session.user as any).id
+  const actorId = session.user.id
   const { reason } = await req.json()
 
   if (!reason?.trim()) {

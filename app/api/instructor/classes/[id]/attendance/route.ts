@@ -49,15 +49,16 @@ export const POST = withErrorHandler(
 
     const body = await req.json()
     const validation = validateBody(takeAttendanceSchema, body)
-    if (!validation.success) return apiError((validation as any).error)
+    if (!validation.success) return apiError(validation.error)
 
-    const { records, date } = validation.data as any
+    const { records, date } = validation.data
     const attendanceDate = date ? new Date(date) : new Date()
 
     // Upsert attendance records
     const results = await Promise.all(
-      records.map((record: { userId: string; status: string; notes?: string }) =>
-        prisma.attendanceRecord.upsert({
+      records.map((record: { userId: string; present: boolean; lateMinutes: number; notes?: string }) => {
+        const studentStatus = record.present ? 'PRESENT' : (record.lateMinutes > 0 ? 'LATE' : 'ABSENT')
+        return prisma.attendanceRecord.upsert({
           where: {
             classId_userId_date: {
               classId,
@@ -66,7 +67,8 @@ export const POST = withErrorHandler(
             },
           },
           update: {
-            status: record.status,
+            status: studentStatus,
+            minutesLate: record.lateMinutes,
             notes: record.notes || null,
             recordedBy: user.id,
           },
@@ -74,12 +76,13 @@ export const POST = withErrorHandler(
             classId,
             userId: record.userId,
             date: attendanceDate,
-            status: record.status,
+            status: studentStatus,
+            minutesLate: record.lateMinutes,
             notes: record.notes || null,
             recordedBy: user.id,
           },
         })
-      )
+      })
     )
 
     await createAuditLog({

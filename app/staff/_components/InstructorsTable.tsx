@@ -38,6 +38,7 @@ interface Instructor {
 
 export default function InstructorsTable() {
   const [instructors, setInstructors] = useState<Instructor[]>([])
+  const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [selectedIds, setSelectedIds] = useState<string[]>([])
@@ -48,13 +49,23 @@ export default function InstructorsTable() {
   const fetchInstructors = useCallback(async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({ role: 'INSTRUCTOR', ...(search && { search }) })
+      const params = new URLSearchParams({
+        role: 'INSTRUCTOR',
+        search,
+        page: page.toString(),
+        limit: perPage.toString(),
+      })
       const res = await fetch(`/api/staff/users?${params}`)
       const data = await res.json()
       setInstructors(data.users ?? [])
+      setTotal(data.total ?? 0)
     } finally {
       setLoading(false)
     }
+  }, [search, page, perPage])
+
+  useEffect(() => {
+    setPage(1)
   }, [search])
 
   useEffect(() => {
@@ -190,19 +201,16 @@ export default function InstructorsTable() {
                 <th className="w-12 px-6 py-4">
                   <button
                     onClick={() => {
-                      const paged = instructors.slice((page - 1) * perPage, page * perPage)
-                      if (selectedIds.length === paged.length && paged.length > 0) {
+                      if (selectedIds.length === instructors.length && instructors.length > 0) {
                         setSelectedIds([])
                       } else {
-                        setSelectedIds(paged.map((i) => i.id))
+                        setSelectedIds(instructors.map((i) => i.id))
                       }
                     }}
                     className="hover:text-aerojet-blue text-slate-400 transition-colors"
                     aria-label="Select all instructors"
                   >
-                    {selectedIds.length ===
-                      instructors.slice((page - 1) * perPage, page * perPage).length &&
-                    instructors.slice((page - 1) * perPage, page * perPage).length > 0 ? (
+                    {selectedIds.length === instructors.length && instructors.length > 0 ? (
                       <CheckSquare className="text-aerojet-blue h-4 w-4" />
                     ) : (
                       <Square className="h-4 w-4" />
@@ -245,7 +253,7 @@ export default function InstructorsTable() {
                   </td>
                 </tr>
               ) : (
-                instructors.slice((page - 1) * perPage, page * perPage).map((instructor) => (
+                instructors.map((instructor) => (
                   <tr
                     key={instructor.id}
                     onClick={() => router.push(`/staff/users/${instructor.id}`)}
@@ -323,7 +331,7 @@ export default function InstructorsTable() {
         <TablePagination
           page={page}
           perPage={perPage}
-          total={instructors.length}
+          total={total}
           onPageChange={setPage}
           onPerPageChange={setPerPage}
         />

@@ -1,4 +1,5 @@
 // Standard API response types
+import { DbUser, DbProfile, DbCourse, DbClass, DbEnrollment } from './database'
 
 export interface ApiResponse<T = unknown> {
   success: boolean
@@ -52,33 +53,11 @@ export interface InstructorDashboardData {
 }
 
 // Entity types (safe, no password)
-export interface UserSafe {
-  id: string
-  email: string
-  academyEmail?: string | null
-  role: string
-  status: string
-  registrationCode?: string | null
-  studentId?: string | null
-  mustChangePassword: boolean
-  createdAt: string
-  lastLoginAt?: string | null
+export interface UserSafe extends Omit<DbUser, 'password'> {
   profile?: ProfileInfo | null
 }
 
-export interface ProfileInfo {
-  id: string
-  firstName: string
-  lastName: string
-  middleName?: string | null
-  phone?: string | null
-  dateOfBirth?: string | null
-  nationality?: string | null
-  address?: string | null
-  city?: string | null
-  country?: string | null
-  photoUrl?: string | null
-}
+export interface ProfileInfo extends DbProfile {}
 
 export interface WalletInfo {
   id: string
@@ -90,18 +69,8 @@ export interface WalletInfo {
   updatedAt: string
 }
 
-export interface EnrollmentWithCourse {
-  id: string
-  userId: string
-  courseId: string
-  status: string
-  enrolledAt?: string | null
-  completedAt?: string | null
-  course: {
-    code: string
-    name: string
-    hours?: number | null
-  }
+export interface EnrollmentWithCourse extends DbEnrollment {
+  course: Pick<DbCourse, 'code' | 'name' | 'duration'>
   grades?: GradeInfo[]
 }
 
@@ -147,16 +116,8 @@ export interface ExamBookingWithDetails {
   }
 }
 
-export interface ClassWithDetails {
-  id: string
-  courseId: string
-  instructorId: string
-  topic?: string | null
-  date: string
-  startTime: string
-  endTime: string
-  location?: string | null
-  course: { code: string; name: string }
+export interface ClassWithDetails extends DbClass {
+  course: Pick<DbCourse, 'code' | 'name'>
 }
 
 export interface AuditLogEntry {

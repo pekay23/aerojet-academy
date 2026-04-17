@@ -18,12 +18,12 @@ export const ourFileRouter = {
 
         if (session) {
           console.log('Session ID:', session.user?.id)
-          console.log('Session Role:', (session.user as any)?.role)
+          console.log('Session Role:', session.user?.role)
         }
 
         // For payment proof, we allow anonymous uploads if the user is not logged in.
         // The security check is handled in the subsequent record creation step.
-        const userId = (session?.user as any)?.id || 'anonymous_applicant'
+        const userId = session?.user?.id || 'anonymous_applicant'
         const metadata = { userId }
 
         console.log('Returning metadata for paymentProof:', metadata)
@@ -56,7 +56,7 @@ export const ourFileRouter = {
   newsCoverImage: f({ image: { maxFileSize: '4MB', maxFileCount: 1 } })
     .middleware(async ({ req }) => {
       const session = await getAuthSession()
-      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes((session.user as any).role)) {
+      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
       }
       return { userId: session.user.id }
@@ -74,7 +74,7 @@ export const ourFileRouter = {
   })
     .middleware(async ({ req }) => {
       const session = await getAuthSession()
-      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes((session.user as any).role)) {
+      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
       }
       return { userId: session.user.id }
@@ -87,7 +87,7 @@ export const ourFileRouter = {
   newsImage: f({ blob: { maxFileSize: '4MB', maxFileCount: 1 } })
     .middleware(async ({ req }) => {
       const session = await getAuthSession()
-      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes((session.user as any).role)) {
+      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
       }
       return { userId: session.user.id }
@@ -100,7 +100,7 @@ export const ourFileRouter = {
   newsAudio: f({ blob: { maxFileSize: '32MB', maxFileCount: 1 } })
     .middleware(async ({ req }) => {
       const session = await getAuthSession()
-      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes((session.user as any).role)) {
+      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
         throw new UploadThingError('Unauthorized')
       }
       return { userId: session.user.id }

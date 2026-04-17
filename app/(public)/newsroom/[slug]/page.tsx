@@ -60,7 +60,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
   const readTime = calculateReadTime(article.content)
   const authorName =
     article.customAuthorName ||
-    (article.author.profile
+    (article.author?.profile
       ? `${article.author.profile.firstName} ${article.author.profile.lastName}`
       : 'Aerojet Academy')
 
@@ -183,6 +183,7 @@ export default async function NewsroomArticlePage({ params }: Props) {
           </div>
         </article>
       </div>
+
     </div>
   )
 }

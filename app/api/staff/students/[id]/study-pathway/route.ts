@@ -69,7 +69,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     await triggerAutoEnrollmentIfRequired(studentProfileId!)
 
     await createAuditLog({
-      action: 'USER_UPDATE' as any,
+      action: 'USER_UPDATE',
       entity: 'student_profiles',
       entityId: id,
       userId: staff.id,

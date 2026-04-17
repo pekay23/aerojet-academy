@@ -25,7 +25,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const validation = validateBody(registerSchema, body)
 
   if (!validation.success) {
-    return apiError((validation as any).error)
+    return apiError(validation.error)
   }
 
   const {
@@ -40,7 +40,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     selectedProgramme,
     licenseCategories,
     referralCode,
-  } = validation.data as any
+  } = validation.data
 
   // Check if email already exists (case-insensitive check on both primary and personal emails)
   const existing = await prisma.user.findFirst({

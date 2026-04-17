@@ -1,23 +1,25 @@
+import { TransactionType } from './enums'
+
 export interface Wallet {
   id: string
   userId: string
   balance: number
   reservedBalance: number
   currency: string
-  createdAt: Date | string
-  updatedAt: Date | string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface WalletTransaction {
   id: string
   walletId: string
-  type: 'TOP_UP' | 'RESERVE' | 'PAYMENT' | 'RELEASE' | 'REFUND' | 'ADJUSTMENT'
+  type: TransactionType
   amount: number
   description?: string | null
   reference?: string | null
   balanceBefore: number
   balanceAfter: number
-  createdAt: Date | string
+  createdAt: string
 }
 
-export type TransactionType = 'TOP_UP' | 'RESERVE' | 'PAYMENT' | 'RELEASE' | 'REFUND' | 'ADJUSTMENT'
+export type { TransactionType }

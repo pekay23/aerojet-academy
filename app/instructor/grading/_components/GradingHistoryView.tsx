@@ -37,12 +37,12 @@ interface GradedItem {
   assessmentType: string
   score: any
   comments?: string | null
-  updatedAt: Date
+  updatedAt: string
   user: {
     profile: {
       firstName: string
       lastName: string
-    }
+    } | null
   }
   enrollment: {
     course: {
@@ -69,7 +69,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
     return initialHistory.filter((item) => {
       const lowerQuery = searchQuery.toLowerCase()
       const studentName =
-        `${item.user.profile.firstName} ${item.user.profile.lastName}`.toLowerCase()
+        `${item.user.profile?.firstName} ${item.user.profile?.lastName}`.toLowerCase()
       return (
         studentName.includes(lowerQuery) ||
         item.assessmentName.toLowerCase().includes(lowerQuery) ||
@@ -98,7 +98,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
         score: scoreNum,
         comments,
       })
-      toast.success(`Grade updated for ${selectedGrade.user.profile.firstName}`)
+      toast.success(`Grade updated for ${selectedGrade.user.profile?.firstName || 'Student'}`)
       setSelectedGrade(null)
     } catch (error) {
       toast.error('Failed to update grade. Please try again.')
@@ -172,7 +172,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
                         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                           <div className="space-y-1">
                             <h3 className="line-clamp-1 text-lg font-black text-slate-900 dark:text-white">
-                              {item.user.profile.firstName} {item.user.profile.lastName}
+                              {item.user.profile?.firstName} {item.user.profile?.lastName}
                             </h3>
                             <div className="flex items-center gap-4 text-xs font-bold text-slate-400">
                               <div className="flex items-center gap-1.5">
@@ -230,7 +230,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
               <DialogDescription className="text-slate-400">
                 Adjusting results for{' '}
                 <span className="font-bold text-white">
-                  {selectedGrade?.user.profile.firstName} {selectedGrade?.user.profile.lastName}
+                  {selectedGrade?.user.profile?.firstName} {selectedGrade?.user.profile?.lastName}
                 </span>
               </DialogDescription>
             </DialogHeader>

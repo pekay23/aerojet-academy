@@ -3,24 +3,25 @@ import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { ScrollText, User, Tag, Clock } from 'lucide-react'
+import { serializePrisma } from '@/lib/utils/serialization'
 import AuditLogTable from './_components/AuditLogTable'
+import { queryAuditLogs } from '@/lib/audit/logger'
 
-export default async function AuditLogsPage() {
+export default async function AuditLogsPage(req: {
+  searchParams: { page?: string }
+}) {
   const session = await getAuthSession()
   if (!session || (session.user.role !== 'STAFF' && session.user.role !== 'ADMIN')) {
     redirect('/login')
   }
 
-  const logs = await prisma.auditLog.findMany({
-    take: 100, // Show a bit more logs
-    orderBy: { createdAt: 'desc' },
-    include: {
-      user: {
-        include: {
-          profile: true,
-        },
-      },
-    },
+  const searchParams = req.searchParams || {}
+  const page = parseInt(searchParams.page as string) || 1
+  const limit = 25
+
+  const { logs, total } = await queryAuditLogs({
+    limit,
+    offset: (page - 1) * limit,
   })
 
   // Pre-fetch entity labels
@@ -165,7 +166,7 @@ export default async function AuditLogsPage() {
         </p>
       </div>
 
-      <AuditLogTable logs={logs as any} entityLabels={entityLabels} />
+      <AuditLogTable logs={serializePrisma(logs)} total={total} entityLabels={entityLabels} />
     </div>
   )
 }

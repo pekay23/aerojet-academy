@@ -24,7 +24,7 @@ export default async function Page() {
   if (!session) redirect('/login')
 
   const instructorData = await getInstructorDashboardData()
-  const firstName = (session.user as any).name?.split(' ')[0]
+  const firstName = session.user.name?.split(' ')[0]
 
   return (
     <div className="space-y-6">

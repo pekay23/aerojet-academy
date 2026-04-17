@@ -30,7 +30,7 @@ export default async function PathwayPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const userId = (session.user as any).id
+  const userId = session.user.id
 
   const applicant = await prisma.user.findUnique({
     where: { id: userId },

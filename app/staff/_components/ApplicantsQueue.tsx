@@ -68,15 +68,17 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
 
-  const paged = applicants.slice((page - 1) * perPage, page * perPage)
+  // paged is now the raw applicants array since the server handles slicing
+  const paged = applicants
 
   const fetchApplicants = useCallback(async () => {
     setLoading(true)
     try {
       const params = new URLSearchParams({
         status: tab,
-        ...(search && { search }),
-        limit: '50', // Increase limit for queue
+        search,
+        page: page.toString(),
+        limit: perPage.toString(),
       })
       const res = await fetch(`/api/staff/applicants?${params}`)
       const data = await res.json()
@@ -88,6 +90,10 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
     } finally {
       setLoading(false)
     }
+  }, [tab, search, page, perPage])
+
+  useEffect(() => {
+    setPage(1)
   }, [tab, search])
 
   useEffect(() => {

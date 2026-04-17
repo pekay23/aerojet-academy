@@ -11,7 +11,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const session = await getAuthSession()
   if (!session) return apiError('Unauthorized', 401)
 
-  const userId = (session.user as any).id
+  const userId = session.user.id
 
   let body: any
   try {

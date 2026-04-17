@@ -13,6 +13,7 @@ import {
 import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import * as Dialog from '@radix-ui/react-dialog'
+import { PaymentStatus } from '@/types/enums'
 
 interface FileUpload {
   id: string
@@ -39,20 +40,20 @@ interface Payment {
 }
 
 const TABS = [
-  { key: 'PENDING', label: 'Pending', color: 'text-amber-600' },
-  { key: 'APPROVED', label: 'Approved', color: 'text-emerald-600' },
-  { key: 'REJECTED', label: 'Rejected', color: 'text-red-600' },
+  { key: PaymentStatus.PENDING, label: 'Pending', color: 'text-amber-600' },
+  { key: PaymentStatus.APPROVED, label: 'Approved', color: 'text-emerald-600' },
+  { key: PaymentStatus.REJECTED, label: 'Rejected', color: 'text-red-600' },
 ]
 
 const STATUS_STYLE: Record<string, string> = {
-  PENDING: 'bg-amber-100 text-amber-700',
-  APPROVED: 'bg-emerald-100 text-emerald-700',
-  REJECTED: 'bg-red-100 text-red-600',
+  [PaymentStatus.PENDING]: 'bg-amber-100 text-amber-700',
+  [PaymentStatus.APPROVED]: 'bg-emerald-100 text-emerald-700',
+  [PaymentStatus.REJECTED]: 'bg-red-100 text-red-600',
 }
 
 export default function PaymentsQueue({
   initialPendingCount,
-  initialTab = 'PENDING',
+  initialTab = PaymentStatus.PENDING,
 }: {
   initialPendingCount: number
   initialTab?: string
@@ -309,7 +310,7 @@ export default function PaymentsQueue({
                           )}
                         </td>
                         <td className="px-5 py-3.5">
-                          {tab === 'PENDING' ? (
+                          {tab === PaymentStatus.PENDING ? (
                             <div className="flex items-center gap-1.5">
                               <button
                                 onClick={() => handleApprove(p.id)}
@@ -479,7 +480,7 @@ export default function PaymentsQueue({
                   )}
 
                   {/* Actions (Pending tab) */}
-                  {tab === 'PENDING' && (
+                  {tab === PaymentStatus.PENDING && (
                     <div className="flex gap-2 pt-1">
                       <button
                         onClick={() => handleApprove(p.id)}

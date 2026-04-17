@@ -12,6 +12,7 @@ import { bookStandaloneExam, bookResitExam } from '@/lib/enrollment/exams'
 import prisma from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { UserStatus, UserRole, EnrollmentStatus, PoolStatus, MembershipStatus, PaymentStatus } from '@/types/enums'
 import { requireAuth, requireStudent } from '@/lib/auth/helpers'
 import { hash, compare } from 'bcryptjs'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
@@ -27,7 +28,7 @@ export async function enrollInCourse(courseId: string) {
     select: { registrationPaid: true, status: true },
   })
 
-  if (!dbUser || dbUser.status !== 'ACTIVE') {
+  if (!dbUser || dbUser.status !== UserStatus.ACTIVE) {
     return { error: 'Your account is not active. Please contact support.' }
   }
 
@@ -60,7 +61,7 @@ export async function enrollInCourse(courseId: string) {
     where: {
       userId: user.id,
       courseId: courseId,
-      status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED', 'PENDING', 'SUSPENDED'] },
+      status: { in: [EnrollmentStatus.ACTIVE, EnrollmentStatus.ENROLLED, EnrollmentStatus.APPROVED, EnrollmentStatus.PENDING, EnrollmentStatus.SUSPENDED] },
     },
   })
 
@@ -76,7 +77,7 @@ export async function enrollInCourse(courseId: string) {
     let isMandatoryFT = false
     if (isFullTime) {
       const ftEnrollment = await prisma.fullTimeEnrollment.findFirst({
-        where: { studentId: user.id, status: 'ACTIVE' },
+        where: { studentId: user.id, status: EnrollmentStatus.ACTIVE },
         include: {
           programmeYear: {
             include: { courses: { select: { id: true } } },
@@ -126,7 +127,7 @@ export async function enrollInCourse(courseId: string) {
           data: {
             userId: user.id,
             courseId: courseId,
-            status: 'ACTIVE', // Auto-approved because paid in full
+            status: EnrollmentStatus.ACTIVE, // Auto-approved because paid in full
             enrolledAt: new Date(),
             approvedAt: new Date(),
             amountPaid: coursePrice,
@@ -135,14 +136,14 @@ export async function enrollInCourse(courseId: string) {
 
         // Upgrade APPLICANT to STUDENT if needed
         const authUser = await tx.user.findUnique({ where: { id: user.id } })
-        if (authUser?.role === 'APPLICANT') {
+        if (authUser?.role === UserRole.APPLICANT) {
           await tx.user.update({
             where: { id: user.id },
-            data: { role: 'STUDENT' },
+            data: { role: UserRole.STUDENT },
           })
           await tx.studentProfile.update({
             where: { userId: user.id },
-            data: { enrollmentStatus: 'ENROLLED' },
+            data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
           })
         }
 
@@ -164,7 +165,7 @@ export async function enrollInCourse(courseId: string) {
         data: {
           userId: user.id,
           courseId: courseId,
-          status: 'ACTIVE', // Mandatory courses are auto-active
+          status: EnrollmentStatus.ACTIVE, // Mandatory courses are auto-active
           enrolledAt: new Date(),
           approvedAt: new Date(),
         },
@@ -214,7 +215,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     include: {
       event: true,
       memberships: {
-        where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
+        where: { status: { in: [MembershipStatus.RESERVED, MembershipStatus.CONFIRMED] } },
         select: {
           examComponentId: true,
           examComponent: { select: { course: { select: { code: true } } } },
@@ -224,7 +225,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
   })
 
   if (!pool) return { error: 'Exam booking not found.' }
-  if (!['OPEN', 'NEAR_FULL'].includes(pool.status)) {
+  if (![PoolStatus.OPEN, PoolStatus.NEAR_FULL].includes(pool.status as any)) {
     return { error: 'This exam booking is no longer accepting new members.' }
   }
 
@@ -233,7 +234,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     where: {
       userId: user.id,
       pool: { eventId: pool.eventId },
-      status: { in: ['RESERVED', 'CONFIRMED'] },
+      status: { in: [MembershipStatus.RESERVED, MembershipStatus.CONFIRMED] },
     },
   })
   if (eventMemberships >= 4) {
@@ -276,7 +277,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
       userId: user.id,
       pool: { eventId: pool.eventId },
       examComponent: { code: moduleCode },
-      status: { in: ['RESERVED', 'CONFIRMED'] },
+      status: { in: [MembershipStatus.RESERVED, MembershipStatus.CONFIRMED] },
     },
   })
   if (moduleInEvent) {
@@ -320,7 +321,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
         data: {
           userId: user.id,
           poolId: pool.id,
-          status: 'RESERVED',
+          status: MembershipStatus.RESERVED,
           examComponentId: examComponent.id,
           amountReserved: seatPrice,
         },
@@ -333,21 +334,21 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
         data: {
           currentMemberCount: { increment: 1 },
           status:
-            newCount >= pool.maxCandidates ? 'CONFIRMED' : newCount >= 23 ? 'NEAR_FULL' : 'OPEN',
+            newCount >= pool.maxCandidates ? PoolStatus.CONFIRMED : newCount >= 23 ? PoolStatus.NEAR_FULL : PoolStatus.OPEN,
         },
       })
 
       // Role Upgrade: APPLICANT → STUDENT
-      if (user.role === 'APPLICANT') {
+      if (user.role === UserRole.APPLICANT) {
         await tx.user.update({
           where: { id: user.id },
-          data: { role: 'STUDENT' },
+          data: { role: UserRole.STUDENT },
         })
         const sp = await tx.studentProfile.findUnique({ where: { userId: user.id } })
         if (sp) {
           await tx.studentProfile.update({
             where: { userId: user.id },
-            data: { enrollmentStatus: 'ENROLLED' },
+            data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
           })
         }
       }
@@ -414,7 +415,7 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
       where: {
         userId: user.id,
         pool: { eventId },
-        status: { in: ['RESERVED', 'CONFIRMED'] },
+        status: { in: [MembershipStatus.RESERVED, MembershipStatus.CONFIRMED] },
       },
     })
     if (eventMemberships >= 4) {
@@ -429,7 +430,7 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
         userId: user.id,
         pool: { eventId },
         examComponent: { code: moduleCode },
-        status: { in: ['RESERVED', 'CONFIRMED'] },
+        status: { in: [MembershipStatus.RESERVED, MembershipStatus.CONFIRMED] },
       },
     })
     if (moduleInEvent) {
@@ -471,7 +472,7 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
           examEndTime: endTime,
           seatPrice,
           allowedModules: isGroup ? moduleCode.split(',') : [moduleCode],
-          status: isGroup ? 'CONFIRMED' : 'OPEN',
+          status: isGroup ? PoolStatus.CONFIRMED : PoolStatus.OPEN,
           currentMemberCount: isGroup ? seats || 1 : 1,
           maxCandidates: isGroup ? seats || 28 : 28,
           createdBy: user.id,
@@ -499,23 +500,23 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
         data: {
           userId: user.id,
           poolId: newPool.id,
-          status: 'RESERVED',
+          status: MembershipStatus.RESERVED,
           examComponentId: primaryExamComponentId,
           amountReserved: seatPrice,
         },
       })
 
       // D. Role Upgrade: APPLICANT → STUDENT
-      if (user.role === 'APPLICANT') {
+      if (user.role === UserRole.APPLICANT) {
         await tx.user.update({
           where: { id: user.id },
-          data: { role: 'STUDENT' },
+          data: { role: UserRole.STUDENT },
         })
         const studentProfile = await tx.studentProfile.findUnique({ where: { userId: user.id } })
         if (studentProfile) {
           await tx.studentProfile.update({
             where: { userId: user.id },
-            data: { enrollmentStatus: 'ENROLLED' },
+            data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
           })
         }
       }
@@ -618,12 +619,12 @@ export async function payPendingExamBooking(bookingId: string) {
     })
 
     if (!booking) return { error: 'Booking not found.' }
-    if (booking.status !== 'PENDING') return { error: 'This booking is not pending payment.' }
+    if (booking.status !== PaymentStatus.PENDING) return { error: 'This booking is not pending payment.' }
 
     // If it's part of a group, we pay for the entire group
     const groupBookings = booking.bookingGroupRef
       ? await prisma.examBooking.findMany({
-          where: { bookingGroupRef: booking.bookingGroupRef, userId: user.id, status: 'PENDING' },
+          where: { bookingGroupRef: booking.bookingGroupRef, userId: user.id, status: PaymentStatus.PENDING },
         })
       : [booking]
 
@@ -649,7 +650,7 @@ export async function payPendingExamBooking(bookingId: string) {
 
       await tx.examBooking.updateMany({
         where: { id: { in: groupBookings.map((b) => b.id) } },
-        data: { status: 'APPROVED' },
+        data: { status: PaymentStatus.APPROVED },
       })
 
       await tx.notification.create({
@@ -763,8 +764,8 @@ export async function getAvailableRecipients() {
   // 1. Fetch Admins
   const admins = await prisma.user.findMany({
     where: {
-      role: { in: ['ADMIN', 'STAFF'] },
-      status: 'ACTIVE',
+      role: { in: [UserRole.ADMIN, UserRole.STAFF] },
+      status: UserStatus.ACTIVE,
     },
     select: {
       id: true,
@@ -784,7 +785,7 @@ export async function getAvailableRecipients() {
   const enrollments = await prisma.enrollment.findMany({
     where: {
       userId: session.user.id,
-      status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED', 'COMPLETED'] },
+      status: { in: [EnrollmentStatus.ACTIVE, EnrollmentStatus.ENROLLED, EnrollmentStatus.APPROVED, EnrollmentStatus.GRADUATED] },
     },
     include: {
       course: {

@@ -13,7 +13,7 @@ export async function DELETE(
       return Response.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const { id: paymentId } = await params
 
     const payment = await prisma.payment.findUnique({

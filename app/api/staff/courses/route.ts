@@ -48,12 +48,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const staff = await requireStaff()
   const body = await req.json()
   const validation = validateBody(createCourseSchema, body)
-  if (validation.success === false) return apiError((validation as any).error)
+  if (validation.success === false) return apiError(validation.error)
 
   const existing = await prisma.course.findUnique({ where: { code: validation.data.code } })
   if (existing) return apiError('Course code already exists', 409)
 
-  const course = await prisma.course.create({ data: validation.data as any })
+  const course = await prisma.course.create({ data: validation.data })
 
   await createAuditLog({
     action: AuditAction.CREATE,

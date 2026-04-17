@@ -88,7 +88,7 @@ export default function RegistrationForm({
       phoneCountryCode: '+233',
       phone: '',
       dateOfBirth: '',
-      selectedProgramme: undefined as any, // Will require selection
+      selectedProgramme: undefined, // Will require selection
     },
     mode: 'onTouched', // Validate on touch for immediate feedback
   })

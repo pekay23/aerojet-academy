@@ -1,6 +1,7 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
+import { serializePrisma } from '@/lib/utils/serialization'
 import EnrollmentsTable from './_components/EnrollmentsTable'
 import SearchInput from '@/components/SearchInput'
 import { Metadata } from 'next'
@@ -47,19 +48,7 @@ export default async function EnrollmentsPage({
     take: 100,
   })
 
-  // Manual Serialization to avoid Decimal errors
-  const serializedEnrollments = enrollments.map((enrollment) => ({
-    ...enrollment,
-    amountPaid: enrollment.amountPaid ? Number(enrollment.amountPaid) : null,
-    user: {
-      ...enrollment.user,
-      registrationFee: Number(enrollment.user.registrationFee),
-    },
-    course: {
-      ...enrollment.course,
-      price: Number(enrollment.course.price),
-    },
-  }))
+  const serializedEnrollments = serializePrisma(enrollments)
 
   return (
     <div className="space-y-6">

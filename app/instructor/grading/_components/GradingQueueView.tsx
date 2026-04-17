@@ -36,12 +36,12 @@ interface PendingGrade {
   id: string
   assessmentName: string
   assessmentType: string
-  assessmentDate: Date
+  assessmentDate: string
   user: {
     profile: {
       firstName: string
       lastName: string
-    }
+    } | null
   }
   enrollment: {
     course: {
@@ -68,7 +68,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
     return initialQueue.filter((item) => {
       const lowerQuery = searchQuery.toLowerCase()
       const studentName =
-        `${item.user.profile.firstName} ${item.user.profile.lastName}`.toLowerCase()
+        `${item.user.profile?.firstName} ${item.user.profile?.lastName}`.toLowerCase()
       return (
         studentName.includes(lowerQuery) ||
         item.assessmentName.toLowerCase().includes(lowerQuery) ||
@@ -97,7 +97,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
         score: scoreNum,
         comments,
       })
-      toast.success(`Grade submitted for ${selectedGrade.user.profile.firstName}`)
+      toast.success(`Grade submitted for ${selectedGrade.user.profile?.firstName || 'Student'}`)
       setSelectedGrade(null)
       setScore('')
       setComments('')
@@ -178,7 +178,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
                               <div className="flex items-center gap-1.5">
                                 <UserIcon className="h-3.5 w-3.5" />
                                 <span>
-                                  {item.user.profile.firstName} {item.user.profile.lastName}
+                                  {item.user.profile?.firstName} {item.user.profile?.lastName}
                                 </span>
                               </div>
                               <div className="flex items-center gap-1.5">
@@ -235,7 +235,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
               <DialogDescription className="text-blue-100/70">
                 Grading submission for{' '}
                 <span className="font-bold text-white">
-                  {selectedGrade?.user.profile.firstName} {selectedGrade?.user.profile.lastName}
+                  {selectedGrade?.user.profile?.firstName} {selectedGrade?.user.profile?.lastName}
                 </span>
               </DialogDescription>
             </DialogHeader>

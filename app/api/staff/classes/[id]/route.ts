@@ -26,15 +26,15 @@ export const PATCH = withErrorHandler(
     const staff = await requireStaff()
     const body = await req.json()
     const validation = validateBody(updateClassSchema, body)
-    if (!validation.success) return apiError((validation as any).error)
+    if (!validation.success) return apiError(validation.error)
     const id = ctx?.params?.id
-    const updated = await prisma.class.update({ where: { id }, data: validation.data as any })
+    const updated = await prisma.class.update({ where: { id }, data: validation.data })
     await createAuditLog({
       action: AuditAction.UPDATE,
       entity: 'Class',
       entityId: id!,
       userId: staff.id,
-      details: validation.data as any,
+      details: validation.data,
     })
     return apiSuccess(updated)
   }

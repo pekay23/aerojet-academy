@@ -15,7 +15,7 @@ export const POST = withErrorHandler(
 
     const body = await req.json()
     const validation = validateBody(joinPoolSchema, body)
-    if (!validation.success) return apiError((validation as any).error)
+    if (!validation.success) return apiError(validation.error)
 
     // Find the exam component for the selected module
     const examComponent = await prisma.examComponent.findFirst({

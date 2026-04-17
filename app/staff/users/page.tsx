@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import PeopleTabs from '../_components/PeopleTabs'
+import { UserRole, UserStatus } from '@/types/enums'
 
 export const metadata: Metadata = { title: 'People | Staff Portal' }
 
@@ -26,13 +27,13 @@ export default async function PeoplePage({
     studentArchived,
   ] = await Promise.all([
     prisma.user.count(),
-    prisma.user.count({ where: { role: 'APPLICANT', status: 'PENDING' } }),
-    prisma.user.count({ where: { role: 'APPLICANT', status: 'PENDING', registrationPaid: false } }),
-    prisma.user.count({ where: { role: 'APPLICANT', status: 'PENDING', registrationPaid: true } }),
-    prisma.user.count({ where: { role: 'STUDENT' } }),
-    prisma.user.count({ where: { role: 'STUDENT', status: 'ACTIVE' } }),
-    prisma.user.count({ where: { role: 'STUDENT', status: 'SUSPENDED' } }),
-    prisma.user.count({ where: { role: 'STUDENT', status: 'ARCHIVED' } }),
+    prisma.user.count({ where: { role: UserRole.APPLICANT, status: UserStatus.PENDING } }),
+    prisma.user.count({ where: { role: UserRole.APPLICANT, status: UserStatus.PENDING, registrationPaid: false } }),
+    prisma.user.count({ where: { role: UserRole.APPLICANT, status: UserStatus.PENDING, registrationPaid: true } }),
+    prisma.user.count({ where: { role: UserRole.STUDENT } }),
+    prisma.user.count({ where: { role: UserRole.STUDENT, status: UserStatus.ACTIVE } }),
+    prisma.user.count({ where: { role: UserRole.STUDENT, status: UserStatus.SUSPENDED } }),
+    prisma.user.count({ where: { role: UserRole.STUDENT, status: UserStatus.ARCHIVED } }),
   ])
 
   return (

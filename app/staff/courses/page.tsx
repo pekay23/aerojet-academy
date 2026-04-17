@@ -31,7 +31,7 @@ export default async function CoursesPage() {
     return serializePrisma({
       ...cat,
       courses: sortedCourses,
-    }) as any
+    })
   })
 
   return <CoursesClient categories={serialized} />

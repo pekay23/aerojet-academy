@@ -4,7 +4,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession()
-  if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
+  if (!session || !['ADMIN', 'STAFF'].includes(session.user.role)) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const session = await getAuthSession()
-  if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
+  if (!session || !['ADMIN', 'STAFF'].includes(session.user.role)) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   const session = await getAuthSession()
-  if (!session || !['ADMIN', 'STAFF'].includes((session.user as any).role)) {
+  if (!session || !['ADMIN', 'STAFF'].includes(session.user.role)) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 

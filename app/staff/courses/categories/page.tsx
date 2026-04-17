@@ -24,15 +24,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 
-interface CourseCategory {
-  id: string
-  name: string
-  description: string | null
-  _count?: { courses: number }
-}
+import { DbCourseCategory } from '@/types/database'
 
 export default function CourseCategoriesPage() {
-  const [categories, setCategories] = useState<CourseCategory[]>([])
+  const [categories, setCategories] = useState<DbCourseCategory[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -42,12 +37,12 @@ export default function CourseCategoriesPage() {
   const [newDescription, setNewDescription] = useState('')
 
   // Edit state
-  const [editTarget, setEditTarget] = useState<CourseCategory | null>(null)
+  const [editTarget, setEditTarget] = useState<DbCourseCategory | null>(null)
   const [editName, setEditName] = useState('')
   const [editDescription, setEditDescription] = useState('')
 
   // Delete state
-  const [deleteTarget, setDeleteTarget] = useState<CourseCategory | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<DbCourseCategory | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
   const fetchCategories = async () => {
@@ -99,7 +94,7 @@ export default function CourseCategoriesPage() {
   }
 
   // ── EDIT ──────────────────────────────────────────────────────────────────
-  const openEdit = (cat: CourseCategory) => {
+  const openEdit = (cat: DbCourseCategory) => {
     setEditTarget(cat)
     setEditName(cat.name.replace(/_/g, ' '))
     setEditDescription(cat.description ?? '')
