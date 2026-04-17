@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const { poolId, moduleCode } = await request.json()
 
     if (!poolId || !moduleCode) {

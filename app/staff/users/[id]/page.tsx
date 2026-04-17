@@ -1,6 +1,7 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
+import { serializePrisma } from '@/lib/utils/serialization'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, Mail, Phone, Globe, Calendar, User as UserIcon, Shield } from 'lucide-react'
@@ -13,6 +14,8 @@ import EditAcademicPeriodDialog from './_components/EditAcademicPeriodDialog'
 import OjtSection from './_components/OjtSection'
 import AcademicHistorySection from './_components/AcademicHistorySection'
 import { Metadata } from 'next'
+import { PathwayCode } from './_components/EditPathwayDialog'
+import { UserStatus, UserRole, EnrollmentStatus } from '@/types/enums'
 
 export const metadata: Metadata = { title: 'User Details | Staff Portal' }
 
@@ -26,7 +29,7 @@ export default async function UserProfilePage({ params }: Props) {
 
   const { id } = await params
 
-  const user = await prisma.user.findUnique({
+  const userRaw = await prisma.user.findUnique({
     where: { id },
     include: {
       profile: true,
@@ -64,11 +67,12 @@ export default async function UserProfilePage({ params }: Props) {
     },
   })
 
-  if (!user) notFound()
+  if (!userRaw) notFound()
+  const user = serializePrisma(userRaw)
 
   // Fetch OJT data for students with full-time enrollments
-  const ftEnrollments =
-    user.role === 'STUDENT'
+  const ftEnrollmentsRaw =
+    user.role === UserRole.STUDENT
       ? await prisma.fullTimeEnrollment.findMany({
           where: { studentId: user.id },
           include: {
@@ -78,16 +82,12 @@ export default async function UserProfilePage({ params }: Props) {
         })
       : []
 
+  const ftEnrollments = serializePrisma(ftEnrollmentsRaw)
+
   const ojtData = ftEnrollments.map((e) => ({
     id: e.id,
     programme: e.programme,
-    ojtPeriods: e.ojtPeriods.map((o) => ({
-      ...o,
-      startDate: o.startDate.toISOString(),
-      endDate: o.endDate?.toISOString() ?? null,
-      createdAt: o.createdAt.toISOString(),
-      updatedAt: o.updatedAt.toISOString(),
-    })),
+    ojtPeriods: e.ojtPeriods,
   }))
 
   const profile = user.profile
@@ -100,21 +100,20 @@ export default async function UserProfilePage({ params }: Props) {
     : user.email[0].toUpperCase()
 
   const statusColors: Record<string, string> = {
-    ACTIVE: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
-    PENDING: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
-    SUSPENDED: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
-    DEFERRED: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400',
-    ARCHIVED: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400',
-    DEACTIVATED: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400',
+    [UserStatus.ACTIVE]: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+    [UserStatus.PENDING]: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+    [UserStatus.SUSPENDED]: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+    [UserStatus.ARCHIVED]: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400',
+    [UserStatus.DEACTIVATED]: 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400',
   }
 
   const roleColors: Record<string, string> = {
-    SUPER_ADMIN: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
-    ADMIN: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
-    STAFF: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
-    INSTRUCTOR: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
-    STUDENT: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
-    APPLICANT: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
+    [UserRole.SUPER_ADMIN]: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+    [UserRole.ADMIN]: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400',
+    [UserRole.STAFF]: 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400',
+    [UserRole.INSTRUCTOR]: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400',
+    [UserRole.STUDENT]: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400',
+    [UserRole.APPLICANT]: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400',
   }
 
   return (
@@ -165,7 +164,7 @@ export default async function UserProfilePage({ params }: Props) {
                 <span className="ml-1 font-mono text-xs text-slate-400 dark:text-slate-500">
                   {user.studentProfile?.studentId ? (
                     <>ID: {user.studentProfile.studentId}</>
-                  ) : user.role === 'APPLICANT' && user.registrationCode ? (
+                  ) : user.role === UserRole.APPLICANT && user.registrationCode ? (
                     <>Reg Code: {user.registrationCode}</>
                   ) : user.instructorProfile?.employeeId ? (
                     <>ID: {user.instructorProfile.employeeId}</>
@@ -266,7 +265,7 @@ export default async function UserProfilePage({ params }: Props) {
           </div>
 
           {/* Role Specific Details */}
-          {['STUDENT', 'APPLICANT'].includes(user.role) && (
+          {[UserRole.STUDENT, UserRole.APPLICANT].includes(user.role as any) && (
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
               <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
                 <UserIcon className="h-4 w-4" /> Student Profile
@@ -295,7 +294,7 @@ export default async function UserProfilePage({ params }: Props) {
                     Enrollment Status
                   </p>
                   <p className="font-bold text-slate-700 dark:text-slate-300">
-                    {user.studentProfile?.enrollmentStatus || 'PENDING'}
+                    {user.studentProfile?.enrollmentStatus || EnrollmentStatus.PENDING}
                   </p>
                 </div>
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
@@ -308,7 +307,7 @@ export default async function UserProfilePage({ params }: Props) {
                     </p>
                     <EditPathwayDialog
                       userId={user.id}
-                      currentPathway={(user.studentProfile?.pathwayRel?.code as any) || null}
+                      currentPathway={(user.studentProfile?.pathwayRel?.code as PathwayCode) || null}
                       isLocked={user.studentProfile?.studyPathwayLocked || false}
                     />
                   </div>
@@ -337,12 +336,12 @@ export default async function UserProfilePage({ params }: Props) {
           )}
 
           {/* Academic History for Students */}
-          {['STUDENT', 'APPLICANT'].includes(user.role) && (
+          {[UserRole.STUDENT, UserRole.APPLICANT].includes(user.role as any) && (
             <AcademicHistorySection
               enrollments={(user.enrollments || []).map((e) => ({
                 id: e.id,
                 status: e.status,
-                completedAt: e.completedAt?.toISOString() ?? null,
+                completedAt: e.completedAt ?? null,
                 course: e.course,
                 academicYear: e.academicYear,
                 semester: e.semester,
@@ -351,11 +350,11 @@ export default async function UserProfilePage({ params }: Props) {
                 id: b.id,
                 moduleCode: b.moduleCode,
                 result: b.result,
-                score: b.score != null ? Number(b.score) : null,
-                percentage: b.percentage != null ? Number(b.percentage) : null,
+                score: b.score,
+                percentage: b.percentage,
                 attemptType: b.attemptType,
                 sourceNotes: b.sourceNotes,
-                examDate: b.examDate?.toISOString() ?? null,
+                examDate: b.examDate,
                 status: b.status,
               }))}
               studentProfile={user.studentProfile ? {
@@ -371,11 +370,11 @@ export default async function UserProfilePage({ params }: Props) {
           )}
 
           {/* OJT Section for Full-Time Students */}
-          {user.role === 'STUDENT' && ojtData.length > 0 && (
+          {user.role === UserRole.STUDENT && ojtData.length > 0 && (
             <OjtSection userId={user.id} enrollments={ojtData} />
           )}
 
-          {user.role === 'INSTRUCTOR' && user.instructorProfile && (
+          {user.role === UserRole.INSTRUCTOR && user.instructorProfile && (
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
               <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
                 <UserIcon className="h-4 w-4" /> Instructor Details

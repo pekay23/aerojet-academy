@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog'
 import { Edit2, Loader2, AlertTriangle } from 'lucide-react'
 
-type PathwayCode = 'FULL_TIME_4Y' | 'FULL_TIME_2Y' | 'MILITARY_1Y' | 'MODULAR' | 'EXAM_ONLY' | null
+export type PathwayCode = 'FULL_TIME_4Y' | 'FULL_TIME_2Y' | 'MILITARY_1Y' | 'MODULAR' | 'EXAM_ONLY' | null
 
 export default function EditPathwayDialog({
   userId,

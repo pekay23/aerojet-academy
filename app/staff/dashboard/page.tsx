@@ -1,11 +1,13 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
+import { serializePrisma } from '@/lib/utils/serialization'
 import { getSystemSetting } from '@/lib/settings'
 import RevenueChart from '../_components/RevenueChart'
 import PaymentApprovalCard from '../_components/PaymentApprovalCard'
 import GoNoGoMeter from '../_components/GoNoGoMeter'
 import PoolsSummaryCard from '../_components/PoolsSummaryCard'
+import { UserStatus, UserRole, PaymentStatus, PoolStatus } from '@/types/enums'
 import {
   Users,
   UserCheck,
@@ -28,18 +30,18 @@ async function getDashboardData() {
   const [
     userStatusCounts,
     pendingPayments,
-    recentPendingPayments,
-    activePool,
-    openPools,
+    recentPendingPaymentsRaw,
+    activePoolRaw,
+    openPoolsRaw,
     approvedPayments,
   ] = await Promise.all([
     prisma.user.groupBy({
       by: ['role', 'status'],
       _count: { _all: true },
     }),
-    prisma.payment.count({ where: { status: 'PENDING' } }),
+    prisma.payment.count({ where: { status: PaymentStatus.PENDING } }),
     prisma.payment.findMany({
-      where: { status: 'PENDING' },
+      where: { status: PaymentStatus.PENDING },
       include: {
         user: {
           select: {
@@ -55,19 +57,19 @@ async function getDashboardData() {
       take: 4,
     }),
     prisma.examPool.findFirst({
-      where: { status: { in: ['OPEN', 'NEAR_FULL'] } },
+      where: { status: { in: [PoolStatus.OPEN, PoolStatus.NEAR_FULL] } },
       include: { event: true },
       orderBy: { examDate: 'asc' },
     }),
     prisma.examPool.findMany({
-      where: { status: { in: ['OPEN', 'NEAR_FULL'] } },
+      where: { status: { in: [PoolStatus.OPEN, PoolStatus.NEAR_FULL] } },
       include: { event: { select: { name: true } } },
       orderBy: { examDate: 'asc' },
       take: 5,
     }),
     prisma.payment.findMany({
       where: {
-        status: 'APPROVED',
+        status: PaymentStatus.APPROVED,
         approvedAt: { gte: sixMonthsAgo },
       },
       select: { amount: true, approvedAt: true, referenceType: true },
@@ -116,13 +118,13 @@ async function getDashboardData() {
   }))
 
   const totalActiveUsers = userStatusCounts
-    .filter((u) => u.status === 'ACTIVE')
+    .filter((u) => u.status === UserStatus.ACTIVE)
     .reduce((acc, curr) => acc + curr._count._all, 0)
   const pendingApplicants = userStatusCounts
-    .filter((u) => u.role === 'APPLICANT' && u.status === 'PENDING')
+    .filter((u) => u.role === UserRole.APPLICANT && u.status === UserStatus.PENDING)
     .reduce((acc, curr) => acc + curr._count._all, 0)
   const activeStudents = userStatusCounts
-    .filter((u) => u.role === 'STUDENT' && u.status === 'ACTIVE')
+    .filter((u) => u.role === UserRole.STUDENT && u.status === UserStatus.ACTIVE)
     .reduce((acc, curr) => acc + curr._count._all, 0)
 
   return {
@@ -130,17 +132,9 @@ async function getDashboardData() {
     pendingApplicants,
     activeStudents,
     pendingPayments,
-    recentPendingPayments,
-    activePool: activePool
-      ? {
-          ...activePool,
-          seatPrice: Number(activePool.seatPrice),
-        }
-      : null,
-    openPools: openPools.map((p) => ({
-      ...p,
-      seatPrice: Number(p.seatPrice),
-    })),
+    recentPendingPayments: serializePrisma(recentPendingPaymentsRaw),
+    activePool: serializePrisma(activePoolRaw),
+    openPools: serializePrisma(openPoolsRaw),
     revenueData,
     currency,
     currSymbol,
@@ -184,7 +178,7 @@ export default async function StaffDashboardPage() {
       color: 'text-red-600 dark:text-red-400',
       bg: 'bg-red-50 dark:bg-red-900/20',
       alert: data.pendingPayments > 0,
-      href: '/staff/payments?tab=PENDING',
+      href: `/staff/payments?tab=${PaymentStatus.PENDING}`,
     },
   ]
 
@@ -258,7 +252,7 @@ export default async function StaffDashboardPage() {
             <GoNoGoMeter
               poolName={`${data.activePool.event?.name} — ${data.activePool.name}`}
               currentRevenue={
-                data.activePool.currentMemberCount * Number(data.activePool.seatPrice)
+                data.activePool.currentMemberCount * data.activePool.seatPrice
               }
               targetRevenue={Number(data.activePool.event?.minRevenueTarget ?? 25000)}
               confirmedSeats={data.activePool.currentMemberCount}
@@ -285,25 +279,17 @@ export default async function StaffDashboardPage() {
               Pending Payment Approvals
             </h2>
             <a
-              href="/staff/payments?tab=PENDING"
+              href={`/staff/payments?tab=${PaymentStatus.PENDING}`}
               className="text-aerojet-sky text-xs font-bold hover:underline"
             >
               View all ({data.pendingPayments})
             </a>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {data.recentPendingPayments.map((payment) => (
+            {data.recentPendingPayments.map((payment: any) => (
               <PaymentApprovalCard
                 key={payment.id}
-                payment={{
-                  ...payment,
-                  amount: Number(payment.amount),
-                  user: {
-                    id: payment.user.id,
-                    email: payment.user.email,
-                    profile: payment.user.profile ?? null,
-                  },
-                }}
+                payment={payment}
               />
             ))}
           </div>

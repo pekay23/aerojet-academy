@@ -506,6 +506,7 @@ model ExamPool {
   allowedModules     String[]
   seatPrice          Decimal          @default(300.00) @db.Decimal(10, 2)
   notes              String?
+  venue              String?
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
   confirmedAt        DateTime?
@@ -1245,12 +1246,16 @@ enum UserRole {
   INSTRUCTOR
   STAFF
   ADMIN
+  SUPER_ADMIN
 }
 
 enum UserStatus {
   PENDING
+  PAYMENT_PENDING
+  PAYMENT_REJECTED
   ACTIVE
   SUSPENDED
+  DEACTIVATED
   ARCHIVED
   DELETED
 }
@@ -1271,6 +1276,8 @@ enum ProgrammeChoice {
 }
 
 enum EnrollmentStatus {
+  PENDING
+  REJECTED
   ENROLLED
   ACTIVE
   APPROVED
@@ -1291,6 +1298,7 @@ enum PaymentStatus {
   PENDING
   APPROVED
   REJECTED
+  CANCELLED
   PROCESSING
   COMPLETED
   FAILED

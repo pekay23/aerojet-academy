@@ -11,7 +11,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const { bundleType, examComponentIds } = await request.json()
 
     if (!bundleType || !['TWO_SEAT', 'FOUR_SEAT'].includes(bundleType)) {
@@ -149,7 +149,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = (session.user as any).id
+    const userId = session.user.id
     const bundles = await getUserBundles(userId)
 
     return NextResponse.json({ bundles })

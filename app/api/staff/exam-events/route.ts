@@ -37,7 +37,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const staff = await requireStaff()
   const body = await req.json()
   const validation = validateBody(createExamEventSchema, body)
-  if (validation.success === false) return apiError((validation as any).error)
+  if (validation.success === false) return apiError(validation.error)
 
   // Check for duplicate event name
   const existingEvent = await prisma.examEvent.findFirst({
@@ -50,7 +50,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Exam event with this name already exists', 409)
   }
 
-  const event = await prisma.examEvent.create({ data: validation.data as any })
+  const event = await prisma.examEvent.create({
+    data: {
+      ...validation.data,
+      startDate: new Date(validation.data.startDate),
+      endDate: new Date(validation.data.endDate),
+      paymentDeadline: new Date(validation.data.paymentDeadline),
+      joinDeadline: validation.data.joinDeadline ? new Date(validation.data.joinDeadline) : null,
+    },
+  })
 
   // Auto-create 4 standard pools (A-D) for the new exam event
   await createStandardPools(event.id)

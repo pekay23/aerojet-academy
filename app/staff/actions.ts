@@ -3,6 +3,7 @@
 import { getAuthSession, requireStaff } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
+import { UserStatus, UserRole, PaymentStatus } from '@/types/enums'
 
 /**
  * Fetches all users that staff can message: Students, Instructors, other Staff/Admins.
@@ -14,7 +15,7 @@ export async function getStaffRecipients() {
 
   const users = await prisma.user.findMany({
     where: {
-      status: 'ACTIVE',
+      status: UserStatus.ACTIVE,
       id: { not: user.id }, // Exclude self
     },
     select: {
@@ -235,7 +236,7 @@ export async function bulkArchiveUsers(userIds: string[]) {
 
     await prisma.user.updateMany({
       where: { id: { in: userIds } },
-      data: { status: 'ARCHIVED' as any },
+      data: { status: UserStatus.ARCHIVED as any },
     })
 
     revalidatePath('/staff/users')
@@ -378,7 +379,7 @@ export async function createExamRecord(data: {
         // Attach the full fee to the first booking in the group if it's a bundle
         // or just to the single individual booking.
         const amountPaid = i === 0 && isFutureBooking ? totalFee : 0
-        const status = isFutureBooking ? 'PENDING' : 'COMPLETED'
+        const status = isFutureBooking ? PaymentStatus.PENDING : PaymentStatus.COMPLETED
 
         const booking = await tx.examBooking.create({
           data: {
@@ -442,7 +443,7 @@ export async function searchStudents(query: string) {
 
     const users = await prisma.user.findMany({
       where: {
-        role: { in: ['STUDENT', 'APPLICANT'] },
+        role: { in: [UserRole.STUDENT, UserRole.APPLICANT] },
         OR: [
           { email: { contains: query, mode: 'insensitive' } },
           { profile: { firstName: { contains: query, mode: 'insensitive' } } },

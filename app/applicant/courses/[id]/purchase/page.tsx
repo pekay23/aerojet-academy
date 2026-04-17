@@ -19,7 +19,7 @@ export default async function PurchasePage({ params }: Props) {
   if (!session) redirect('/login')
 
   const { id } = await params
-  const userId = (session.user as any).id
+  const userId = session.user.id
 
   const [course, enrollment, paymentMethods] = await Promise.all([
     prisma.course.findUnique({

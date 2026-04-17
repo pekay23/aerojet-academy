@@ -2,6 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { Metadata } from 'next'
+import { ProgrammeSemester } from './_components/ProgrammesClient'
 import ProgrammesClient from './_components/ProgrammesClient'
 
 export const metadata: Metadata = { title: 'Programmes | Staff Portal' }
@@ -29,7 +30,7 @@ export default async function ProgrammesPage() {
       yearFeeAmount: y.yearFeeAmount?.toString() ?? null,
       seatConfirmationFee: y.seatConfirmationFee.toString(),
       firstPaymentAmount: y.firstPaymentAmount.toString(),
-      semesters: Array.isArray(y.semesters) ? (y.semesters as any) : [],
+      semesters: (Array.isArray(y.semesters) ? y.semesters : []) as unknown as ProgrammeSemester[],
       createdAt: y.createdAt.toISOString(),
     })),
     createdAt: p.createdAt.toISOString(),

@@ -18,15 +18,30 @@ import {
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
+import { EnrollmentStatus } from '@/types/enums'
 import { Enrollment, Course, User, Profile } from '@prisma/client'
 
-type EnrollmentWithDetails = Omit<Enrollment, 'amountPaid'> & {
+type EnrollmentWithDetails = {
+  id: string
+  status: string
   amountPaid: number | null
-  user: Omit<User, 'registrationFee'> & {
+  enrolledAt: Date | string
+  createdAt: Date | string
+  updatedAt: Date | string
+  user: {
+    id: string
+    email: string
     registrationFee: number
-    profile: Profile | null
+    profile: {
+      firstName: string
+      middleName: string | null
+      lastName: string
+    } | null
   }
-  course: Omit<Course, 'price'> & {
+  course: {
+    id: string
+    code: string | null
+    name: string
     price: number
   }
 }
@@ -46,18 +61,18 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'APPROVED':
-      case 'ACTIVE':
-      case 'COMPLETED':
-      case 'ENROLLED':
+      case EnrollmentStatus.APPROVED:
+      case EnrollmentStatus.ACTIVE:
+      case EnrollmentStatus.GRADUATED:
+      case EnrollmentStatus.ENROLLED:
         return 'bg-emerald-100 text-emerald-700 hover:bg-emerald-100'
-      case 'PENDING':
+      case EnrollmentStatus.DEFERRED:
         return 'bg-amber-100 text-amber-700 hover:bg-amber-100'
-      case 'REJECTED':
-      case 'WITHDRAWN':
-      case 'CANCELLED':
-      case 'SUSPENDED':
-      case 'EXPELLED':
+      case 'REJECTED': // Note: REJECTED not in EnrollmentStatus enum, using literal or checking schema
+      case EnrollmentStatus.WITHDRAWN:
+      case 'CANCELLED': // Note: CANCELLED not in EnrollmentStatus enum, using literal or checking schema
+      case EnrollmentStatus.SUSPENDED:
+      case EnrollmentStatus.EXPELLED:
         return 'bg-red-100 text-red-700 hover:bg-red-100'
       default:
         return 'bg-slate-100 text-slate-700 hover:bg-slate-100'
@@ -90,7 +105,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
               confirmTitle: 'Approve Enrollments',
               confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected enrollments?`,
               onClick: async (ids) => {
-                const res = await bulkUpdateEnrollmentStatus(ids, 'APPROVED')
+                const res = await bulkUpdateEnrollmentStatus(ids, EnrollmentStatus.APPROVED)
                 if (res.success) {
                   toast.success(`Approved ${ids.length} enrollments`)
                   router.refresh()
@@ -104,7 +119,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
               confirmTitle: 'Cancel Enrollments',
               confirmMessage: `Are you sure you want to cancel ${selectedIds.length} selected enrollments?`,
               onClick: async (ids) => {
-                const res = await bulkUpdateEnrollmentStatus(ids, 'CANCELLED')
+                const res = await bulkUpdateEnrollmentStatus(ids, 'CANCELLED' as any)
                 if (res.success) {
                   toast.success(`Cancelled ${ids.length} enrollments`)
                   router.refresh()

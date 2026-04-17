@@ -87,12 +87,18 @@ export default function StudentsTable({
   const [perPage, setPerPage] = useState(25)
   const [viewCurrency, setViewCurrency] = useState('EUR')
 
-  const paged = students.slice((page - 1) * perPage, page * perPage)
+  // paged is now the raw students array since the server handles slicing
+  const paged = students
 
   const fetchStudents = useCallback(async () => {
     setLoading(true)
     try {
-      const params = new URLSearchParams({ status: filter, ...(search && { search }) })
+      const params = new URLSearchParams({
+        status: filter,
+        search,
+        page: page.toString(),
+        limit: perPage.toString(),
+      })
       const res = await fetch(`/api/staff/students?${params}`)
       const data = await res.json()
       setStudents(data.students ?? [])
@@ -100,6 +106,10 @@ export default function StudentsTable({
     } finally {
       setLoading(false)
     }
+  }, [filter, search, page, perPage])
+
+  useEffect(() => {
+    setPage(1)
   }, [filter, search])
 
   useEffect(() => {

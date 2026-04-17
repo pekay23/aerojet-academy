@@ -60,7 +60,7 @@ export default async function EditClassPage({ params }: Props) {
         <EditClassForm
           initialData={cls}
           courses={serializedCourses}
-          instructors={instructors as any}
+          instructors={instructors}
         />
       </div>
     </div>

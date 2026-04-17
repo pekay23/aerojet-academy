@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 import { payPendingExamBooking } from '@/app/student/actions'
+import { PaymentStatus } from '@/types/enums'
 
 interface BookingRecord {
   id: string
@@ -98,14 +99,14 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                 <td className="px-6 py-4">
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-bold uppercase ${
-                      booking.status === 'APPROVED' || booking.status === 'COMPLETED'
+                      booking.status === PaymentStatus.APPROVED || booking.status === PaymentStatus.COMPLETED
                         ? 'bg-emerald-50 text-emerald-700'
-                        : booking.status === 'CANCELLED' || booking.status === 'REJECTED'
+                        : booking.status === PaymentStatus.CANCELLED || booking.status === PaymentStatus.REJECTED
                           ? 'bg-red-50 text-red-700'
                           : 'bg-amber-50 text-amber-700'
                     }`}
                   >
-                    {booking.status === 'APPROVED' || booking.status === 'COMPLETED' ? (
+                    {(booking.status === PaymentStatus.APPROVED || booking.status === PaymentStatus.COMPLETED) ? (
                       <CreditCard className="h-3 w-3" aria-hidden="true" />
                     ) : (
                       <Clock className="h-3 w-3" aria-hidden="true" />
@@ -126,7 +127,7 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
                         <>€0.00</>
                       )}
                     </p>
-                    {booking.status === 'PENDING' && (
+                    {booking.status === PaymentStatus.PENDING && (
                       <button
                         onClick={() => handlePay(booking.id)}
                         disabled={isPaying === booking.id}

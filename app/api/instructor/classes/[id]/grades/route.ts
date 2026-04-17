@@ -54,43 +54,46 @@ export const POST = withErrorHandler(
 
     const body = await req.json()
     const validation = validateBody(enterGradeSchema, body)
-    if (!validation.success) return apiError((validation as any).error)
+    if (!validation.success) return apiError(validation.error)
 
-    const { grades } = validation.data as any
+    const { grades, type, title } = validation.data
 
     const results = await Promise.all(
       grades.map(
         async (g: {
           userId: string
-          enrollmentId: string
           score: number
           maxScore: number
-          assessmentType: string
-          assessmentName: string
-          notes?: string
+          mcqScore?: number
+          essay1Score?: number
+          essay2Score?: number
+          feedback?: string
         }) => {
-          // Verify enrollment exists
-          const enrollment = await prisma.enrollment.findUnique({
-            where: { id: g.enrollmentId },
+          // Verify enrollment exists for user
+          const enrollment = await prisma.enrollment.findFirst({
+            where: { userId: g.userId, courseId: classItem.courseId },
           })
-          if (!enrollment || enrollment.courseId !== classItem.courseId) {
-            throw new Error(`Invalid enrollment ${g.enrollmentId}`)
+          if (!enrollment) {
+            throw new Error(`Enrollment not found for student ${g.userId}`)
           }
 
           const percentage = g.maxScore > 0 ? (g.score / g.maxScore) * 100 : 0
 
           return prisma.grade.create({
             data: {
-              enrollmentId: g.enrollmentId,
+              enrollmentId: enrollment.id,
               userId: g.userId,
               score: g.score,
               maxScore: g.maxScore,
-              assessmentType: g.assessmentType || 'ASSIGNMENT',
-              assessmentName: g.assessmentName || 'Assessment',
+              assessmentType: type || 'ASSIGNMENT',
+              assessmentName: title || 'Assessment',
               percentage,
               assessmentDate: new Date(),
               gradedBy: user.id,
-              comments: g.notes || null,
+              comments: g.feedback || null,
+              mcqScore: g.mcqScore !== undefined ? g.mcqScore : null,
+              essay1Score: g.essay1Score !== undefined ? g.essay1Score : null,
+              essay2Score: g.essay2Score !== undefined ? g.essay2Score : null,
             },
           })
         }

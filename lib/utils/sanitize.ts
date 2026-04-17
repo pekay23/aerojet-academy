@@ -17,6 +17,7 @@ export function sanitizeHtml(html: string): string {
       'div', 'span', 'sub', 'sup',
       'figure', 'figcaption',
       'video', 'source', 'iframe',
+      'audio',
     ],
     ALLOWED_ATTR: [
       'href', 'target', 'rel', 'src', 'alt', 'title', 'width', 'height',

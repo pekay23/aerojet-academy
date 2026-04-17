@@ -1,14 +1,16 @@
+import { PoolStatus, MembershipStatus } from './enums'
+
 export interface ExamPool {
   id: string
   eventId: string
   name: string
-  examDate: Date | string
-  status: 'DRAFT' | 'OPEN' | 'NEAR_FULL' | 'CONFIRMED' | 'LOCKED' | 'COMPLETED' | 'FAILED' | 'CANCELLED'
+  examDate: string
+  status: PoolStatus
   minCandidates: number
   maxCandidates: number
   currentMemberCount: number
   moduleDiversityCap: number
-  createdAt: Date | string
+  createdAt: string
 }
 
 export interface PoolMembership {
@@ -16,11 +18,10 @@ export interface PoolMembership {
   poolId: string
   userId: string
   selectedModule: string
-  status: 'RESERVED' | 'CONFIRMED' | 'CANCELLED' | 'REFUNDED'
+  status: MembershipStatus
   amountReserved: number
   amountPaid: number
-  createdAt: Date | string
+  createdAt: string
 }
 
-export type PoolStatus = ExamPool['status']
-export type MembershipStatus = PoolMembership['status']
+export type { PoolStatus, MembershipStatus }

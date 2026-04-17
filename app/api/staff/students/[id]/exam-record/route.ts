@@ -61,7 +61,7 @@ export const POST = withErrorHandler(
           examDate: examDate ? new Date(examDate) : null,
           amountPaid: 0,
           status: 'COMPLETED',
-          bookingType: bookingType as any,
+          bookingType: bookingType,
           attemptType: attemptType || 'FIRST',
           result,
           score: entry.score,

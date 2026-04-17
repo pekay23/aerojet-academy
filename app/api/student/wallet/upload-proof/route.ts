@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     }
 
     await createAuditLog({
-      action: 'SYSTEM_UPDATE' as any,
+      action: 'SYSTEM_UPDATE',
       entity: 'payments',
       entityId: payment.id,
       userId,

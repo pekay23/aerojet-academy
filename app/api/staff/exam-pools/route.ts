@@ -10,7 +10,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const body = await req.json()
   const validation = validateBody(createExamPoolSchema, body)
 
-  if (validation.success === false) return apiError((validation as any).error)
+  if (validation.success === false) return apiError(validation.error)
 
   // Verify event exists
   const event = await prisma.examEvent.findUnique({
@@ -34,7 +34,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   const pool = await prisma.examPool.create({
-    data: validation.data as any,
+    data: {
+      ...validation.data,
+      examDate: new Date(validation.data.examDate),
+      examStartTime: new Date(validation.data.examStartTime),
+      examEndTime: new Date(validation.data.examEndTime),
+    },
   })
 
   await createAuditLog({

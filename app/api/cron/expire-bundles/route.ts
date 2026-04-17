@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       }
 
       await createAuditLog({
-        action: 'SYSTEM_UPDATE' as any,
+        action: 'SYSTEM_UPDATE',
         entity: 'ExamBundle',
         entityId: 'cron',
         description: `Expired ${result.count} bundle(s) past validity date`,

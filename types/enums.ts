@@ -1,10 +1,15 @@
+/**
+ * Centralized enum definitions to ensure consistency across the application.
+ * These strictly mirror the Prisma schema enums.
+ */
+
 export enum UserRole {
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  ADMIN = 'ADMIN',
-  STAFF = 'STAFF',
-  INSTRUCTOR = 'INSTRUCTOR',
   APPLICANT = 'APPLICANT',
   STUDENT = 'STUDENT',
+  INSTRUCTOR = 'INSTRUCTOR',
+  STAFF = 'STAFF',
+  ADMIN = 'ADMIN',
+  SUPER_ADMIN = 'SUPER_ADMIN',
 }
 
 export enum UserStatus {
@@ -14,37 +19,157 @@ export enum UserStatus {
   ACTIVE = 'ACTIVE',
   SUSPENDED = 'SUSPENDED',
   DEACTIVATED = 'DEACTIVATED',
+  ARCHIVED = 'ARCHIVED',
+  DELETED = 'DELETED',
 }
 
-export enum PaymentType {
-  REGISTRATION_FEE = 'REGISTRATION_FEE',
-  COURSE_FEE = 'COURSE_FEE',
-  EXAM_FEE = 'EXAM_FEE',
-  WALLET_TOP_UP = 'WALLET_TOP_UP',
+export enum EnrollmentType {
+  FULL_TIME = 'FULL_TIME',
+  MODULAR = 'MODULAR',
+  EXAM_ONLY = 'EXAM_ONLY',
+  SHORT_COURSE = 'SHORT_COURSE',
+}
+
+export enum ProgrammeChoice {
+  FULL_TIME_4YEAR = 'FULL_TIME_4YEAR',
+  FULL_TIME_2YEAR = 'FULL_TIME_2YEAR',
+  MILITARY_1YEAR = 'MILITARY_1YEAR',
+  MODULAR = 'MODULAR',
+  EXAM_ONLY = 'EXAM_ONLY',
+}
+
+export enum EnrollmentStatus {
+  PENDING = 'PENDING',
+  REJECTED = 'REJECTED',
+  ENROLLED = 'ENROLLED',
+  ACTIVE = 'ACTIVE',
+  APPROVED = 'APPROVED',
+  GRADUATED = 'GRADUATED',
+  DEFERRED = 'DEFERRED',
+  SUSPENDED = 'SUSPENDED',
+  WITHDRAWN = 'WITHDRAWN',
+  EXPELLED = 'EXPELLED',
+}
+
+export enum FundingSource {
+  SELF_FUNDED = 'SELF_FUNDED',
+  SCHOLARSHIP = 'SCHOLARSHIP',
+  SPONSORED = 'SPONSORED',
 }
 
 export enum PaymentStatus {
   PENDING = 'PENDING',
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
+  CANCELLED = 'CANCELLED',
+  PROCESSING = 'PROCESSING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+  NO_SHOW = 'NO_SHOW',
+}
+
+export enum PoolStatus {
+  DRAFT = 'DRAFT',
+  OPEN = 'OPEN',
+  NEAR_FULL = 'NEAR_FULL',
+  CONFIRMED = 'CONFIRMED',
+  LOCKED = 'LOCKED',
+  FAILED = 'FAILED',
+  MERGED = 'MERGED',
+  COMPLETED = 'COMPLETED',
+  REDISTRIBUTING = 'REDISTRIBUTING',
+}
+
+export enum MembershipStatus {
+  RESERVED = 'RESERVED',
+  CONFIRMED = 'CONFIRMED',
+  CANCELLED = 'CANCELLED',
+  FAILED = 'FAILED',
+  ROLLED = 'ROLLED',
+  COMPLETED = 'COMPLETED',
+  NO_SHOW = 'NO_SHOW',
+}
+
+export enum TransactionType {
+  TOP_UP = 'TOP_UP',
+  RESERVE = 'RESERVE',
+  CAPTURE = 'CAPTURE',
+  RELEASE = 'RELEASE',
+  CREDIT = 'CREDIT',
+  DEBIT = 'DEBIT',
+  REFUND = 'REFUND',
+  PAYMENT = 'PAYMENT',
+  ADJUSTMENT = 'ADJUSTMENT',
 }
 
 export enum NotificationType {
-  REGISTRATION = 'REGISTRATION',
-  PAYMENT = 'PAYMENT',
-  ENROLLMENT = 'ENROLLMENT',
-  POOL_JOIN = 'POOL_JOIN',
-  POOL_CONFIRMED = 'POOL_CONFIRMED',
-  POOL_FAILED = 'POOL_FAILED',
+  INFO = 'INFO',
+  SUCCESS = 'SUCCESS',
+  WARNING = 'WARNING',
+  ERROR = 'ERROR',
+  POOL_UPDATE = 'POOL_UPDATE',
+  PAYMENT_UPDATE = 'PAYMENT_UPDATE',
   EXAM_REMINDER = 'EXAM_REMINDER',
-  GRADE = 'GRADE',
-  SYSTEM = 'SYSTEM',
+  WALLET_ADJUSTMENT = 'WALLET_ADJUSTMENT',
+}
+
+export enum CourseModuleType {
+  CORE = 'CORE',
+  SPECIALIST = 'SPECIALIST',
+  AVIONICS = 'AVIONICS',
+}
+
+export enum NewsArticleStatus {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+  ARCHIVED = 'ARCHIVED',
+}
+
+export enum ExamComponentType {
+  MCQ = 'MCQ',
+  ESSAY = 'ESSAY',
 }
 
 export const MODULE_LIST = [
-  'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M7A', 'M7B',
-  'M8', 'M9', 'M9A', 'M10', 'M11', 'M11A', 'M11B', 'M11C',
-  'M12', 'M13', 'M14', 'M15', 'M16', 'M17', 'M17A',
-] as const
+  'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10',
+  'M11A', 'M11B', 'M11C', 'M12', 'M13', 'M14', 'M15', 'M16', 'M17'
+]
 
-export type ModuleName = typeof MODULE_LIST[number]
+export enum EventStatus {
+  DRAFT = 'DRAFT',
+  OPEN = 'OPEN',
+  CONFIRMED = 'CONFIRMED',
+  POSTPONED = 'POSTPONED',
+  CANCELLED = 'CANCELLED',
+  COMPLETED = 'COMPLETED',
+}
+
+export enum EventOverrideStatus {
+  NONE = 'NONE',
+  FORCE_GO = 'FORCE_GO',
+  FORCE_NO_GO = 'FORCE_NO_GO',
+}
+
+export enum PoolType {
+  STANDARD = 'STANDARD',
+  AUTO = 'AUTO',
+  GROUP_CHARTER = 'GROUP_CHARTER',
+}
+
+export enum TimeSlot {
+  MORNING = 'MORNING',
+  AFTERNOON = 'AFTERNOON',
+}
+
+export enum BookingType {
+  INDIVIDUAL = 'INDIVIDUAL',
+  POOL = 'POOL',
+  BUNDLE = 'BUNDLE',
+  TWIN_PACK = 'TWIN_PACK',
+  FOUR_PACK = 'FOUR_PACK',
+  GROUP_CHARTER = 'GROUP_CHARTER',
+  MODULAR = 'MODULAR',
+  FULL_TIME = 'FULL_TIME',
+  COMPLIMENTARY = 'COMPLIMENTARY',
+  RESIT = 'RESIT',
+}

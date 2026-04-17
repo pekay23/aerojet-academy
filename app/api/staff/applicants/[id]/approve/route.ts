@@ -29,7 +29,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { id } = await params
-  const actorId = (session.user as any).id
+  const actorId = session.user.id
 
   const user = await prisma.user.findUnique({
     where: { id },

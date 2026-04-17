@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { bulkUpdateExamBookingStatus, updateExamBooking } from '../actions'
 import { toast } from 'sonner'
+import { PaymentStatus } from '@/types/enums'
 import Modal from '../../../components/shared/Modal'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
@@ -90,7 +91,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
               confirmTitle: 'Approve Bookings',
               confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected bookings?`,
               onClick: async (ids) => {
-                const res = await bulkUpdateExamBookingStatus(ids, 'APPROVED')
+                const res = await bulkUpdateExamBookingStatus(ids, PaymentStatus.APPROVED)
                 if (res.success) {
                   toast.success(`Approved ${ids.length} bookings`)
                   router.refresh()
@@ -104,7 +105,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
               confirmTitle: 'Reject Bookings',
               confirmMessage: `Are you sure you want to reject ${selectedIds.length} selected bookings?`,
               onClick: async (ids) => {
-                const res = await bulkUpdateExamBookingStatus(ids, 'REJECTED')
+                const res = await bulkUpdateExamBookingStatus(ids, PaymentStatus.REJECTED)
                 if (res.success) {
                   toast.success(`Rejected ${ids.length} bookings`)
                   router.refresh()
@@ -240,9 +241,9 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
-                          booking.status === 'APPROVED' || booking.status === 'COMPLETED'
+                          booking.status === PaymentStatus.APPROVED || booking.status === PaymentStatus.COMPLETED
                             ? 'bg-green-100 text-green-700'
-                            : booking.status === 'PENDING'
+                            : booking.status === PaymentStatus.PENDING
                               ? 'bg-amber-100 text-amber-700'
                               : 'bg-red-100 text-red-700'
                         }`}

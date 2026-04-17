@@ -23,7 +23,7 @@ export const PATCH = withErrorHandler(
     const body = await req.json()
     const validation = validateBody(updateExamPoolSchema, body)
 
-    if (!validation.success) return apiError((validation as any).error)
+    if (!validation.success) return apiError(validation.error)
 
     const existingPool = await prisma.examPool.findUnique({
       where: { id },
@@ -50,7 +50,7 @@ export const PATCH = withErrorHandler(
 
     const updatedPool = await prisma.examPool.update({
       where: { id },
-      data: validation.data as any,
+      data: validation.data,
     })
 
     await createAuditLog({

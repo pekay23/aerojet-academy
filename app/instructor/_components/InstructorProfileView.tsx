@@ -35,29 +35,29 @@ interface ProfileData {
   academyEmail: string | null
   profile: {
     firstName: string
-    middleName?: string
+    middleName?: string | null
     lastName: string
-    dateOfBirth?: Date
-    gender?: string
-    nationality?: string
-    phone?: string
-    alternatePhone?: string
-    address?: string
-    city?: string
-    state?: string
-    country?: string
-    postalCode?: string
-    emergencyContactName?: string
-    emergencyContactPhone?: string
-    emergencyContactRelation?: string
-    profilePhotoUrl?: string
+    dateOfBirth?: string | null
+    gender?: string | null
+    nationality?: string | null
+    phone?: string | null
+    alternatePhone?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    postalCode?: string | null
+    emergencyContactName?: string | null
+    emergencyContactPhone?: string | null
+    emergencyContactRelation?: string | null
+    profilePhotoUrl?: string | null
   }
   instructorProfile: {
     employeeId: string
-    department?: string
-    specialization?: string
-    qualifications?: string
-    hireDate?: Date
+    department?: string | null
+    specialization?: string | null
+    qualifications?: string | null
+    hireDate?: string | null
     modulesQualified: string[]
     classesInstructed: any[]
   }

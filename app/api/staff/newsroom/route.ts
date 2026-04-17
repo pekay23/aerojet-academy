@@ -3,13 +3,14 @@ import { revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma/client'
 import { apiSuccess, apiError } from '@/lib/api/response'
 import { getAuthSession } from '@/lib/auth/auth-options'
+import { NewsArticleStatus } from '@prisma/client'
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getAuthSession()
     if (
       !session ||
-      ((session.user as any)?.role !== 'STAFF' && (session.user as any)?.role !== 'ADMIN')
+      (session.user?.role !== 'STAFF' && session.user?.role !== 'ADMIN')
     ) {
       return apiError('Unauthorized', 401)
     }
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
     const status = searchParams.get('status')
 
     const articles = await prisma.newsArticle.findMany({
-      where: status ? { status: status as any } : undefined,
+      where: status ? { status: status as NewsArticleStatus } : undefined,
       orderBy: { createdAt: 'desc' },
       include: {
         author: {
@@ -39,7 +40,7 @@ export async function POST(req: NextRequest) {
     const session = await getAuthSession()
     if (
       !session ||
-      ((session.user as any)?.role !== 'STAFF' && (session.user as any)?.role !== 'ADMIN')
+      (session.user?.role !== 'STAFF' && session.user?.role !== 'ADMIN')
     ) {
       return apiError('Unauthorized', 401)
     }
@@ -77,7 +78,7 @@ export async function POST(req: NextRequest) {
         status: status || 'DRAFT',
         customAuthorName,
         tags: tags || [],
-        authorId: (session.user as any)?.id,
+        authorId: session.user?.id,
         publishedAt: customPublishedAt
           ? new Date(customPublishedAt)
           : publishedAt

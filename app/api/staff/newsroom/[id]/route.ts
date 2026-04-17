@@ -22,7 +22,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     const session = await getAuthSession()
     if (
       !session ||
-      ((session.user as any)?.role !== 'STAFF' && (session.user as any)?.role !== 'ADMIN')
+      (session.user?.role !== 'STAFF' && session.user?.role !== 'ADMIN')
     ) {
       return apiError('Unauthorized', 401)
     }
@@ -93,7 +93,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const session = await getAuthSession()
     if (
       !session ||
-      ((session.user as any)?.role !== 'STAFF' && (session.user as any)?.role !== 'ADMIN')
+      (session.user?.role !== 'STAFF' && session.user?.role !== 'ADMIN')
     ) {
       return apiError('Unauthorized', 401)
     }

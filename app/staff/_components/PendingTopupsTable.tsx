@@ -7,6 +7,7 @@ import { CheckSquare, Square, CheckCircle2, XCircle, ExternalLink, Clock } from 
 import { bulkUpdatePaymentStatus } from '../actions'
 import { toast } from 'sonner'
 import Link from 'next/link'
+import { PaymentStatus } from '@/types/enums'
 
 import {
   Table,
@@ -25,7 +26,7 @@ interface PendingTopup {
   currency: string
   paymentCurrency: string | null
   originalAmount: any | null
-  createdAt: Date
+  createdAt: string | Date
   proofUrl: string | null
   user: {
     email: string
@@ -72,7 +73,7 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
               confirmTitle: 'Approve Top-ups',
               confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected top-up requests?`,
               onClick: async (ids) => {
-                const res = await bulkUpdatePaymentStatus(ids, 'APPROVED')
+                const res = await bulkUpdatePaymentStatus(ids, PaymentStatus.APPROVED)
                 if (res.success) {
                   toast.success(`Approved ${ids.length} top-ups`)
                   router.refresh()
@@ -86,7 +87,7 @@ export default function PendingTopupsTable({ requests }: PendingTopupsTableProps
               confirmTitle: 'Reject Top-ups',
               confirmMessage: `Are you sure you want to reject ${selectedIds.length} selected top-up requests?`,
               onClick: async (ids) => {
-                const res = await bulkUpdatePaymentStatus(ids, 'REJECTED')
+                const res = await bulkUpdatePaymentStatus(ids, PaymentStatus.REJECTED)
                 if (res.success) {
                   toast.success(`Rejected ${ids.length} top-ups`)
                   router.refresh()

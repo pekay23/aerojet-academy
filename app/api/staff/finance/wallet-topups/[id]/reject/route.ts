@@ -35,7 +35,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     })
 
     await createAuditLog({
-      action: 'SYSTEM_UPDATE' as any,
+      action: 'SYSTEM_UPDATE',
       entity: 'payments',
       entityId: id,
       userId: staff.id,
