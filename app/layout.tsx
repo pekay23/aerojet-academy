@@ -25,6 +25,16 @@ export const viewport = {
 }
 
 export const metadata: Metadata = {
+  icons: {
+    icon: [
+      { url: '/favicon.ico' },
+      { url: '/favicon-32x32.webp', sizes: '32x32', type: 'image/webp' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.webp' },
+    ],
+  },
+  manifest: '/manifest.json',
   metadataBase: new URL('https://aerojet-academy.com'),
   title: {
     default: 'Aerojet Aviation Training Academy | EASA Part-66 Training',
@@ -91,8 +101,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#002a5c" />
-        <link rel="manifest" href="/site.webmanifest" />
         <link rel="preconnect" href="https://gx1g03nvpo.ufs.sh" />
         <link rel="preconnect" href="https://utfs.io" />
       </head>

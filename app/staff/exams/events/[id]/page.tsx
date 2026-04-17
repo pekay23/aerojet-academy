@@ -46,6 +46,13 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
 
   if (!event) notFound()
 
+  // Serialize pools safely (Next.js cannot serialize Prisma.Decimal to Client Components)
+  const serializablePools = JSON.parse(JSON.stringify(event.pools, (key, value) => {
+    return typeof value === 'object' && value?.constructor?.name === 'Decimal' 
+      ? Number(value) 
+      : value
+  }))
+
   const evaluation = await evaluateGoNoGo(id).catch(() => null)
   const hasAutoPool = event.pools.some((p) => p.isAutoPool && p.poolType === 'AUTO' && p.status === 'OPEN')
 
@@ -226,7 +233,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                 </p>
               )}
             </div>
-            <PoolList pools={event.pools} />
+            <PoolList pools={serializablePools} />
           </div>
         </div>
       </div>
