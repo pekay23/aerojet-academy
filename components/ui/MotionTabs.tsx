@@ -29,7 +29,7 @@ export default function MotionTabs({
   return (
     <div
       className={cn(
-        'flex items-center gap-1 rounded-full p-1',
+        'relative flex items-center gap-1 rounded-full p-1',
         'bg-slate-100/50 dark:bg-white/5',
         containerClassName
       )}

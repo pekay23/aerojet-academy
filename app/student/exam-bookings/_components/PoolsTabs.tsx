@@ -33,7 +33,7 @@ export default function PoolsTabs({ children }: { children: React.ReactNode }) {
       </div>
 
       {/* ── Navigation Tab Bar ── */}
-      <div className="flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="tablist">
+      <div className="relative flex flex-wrap gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="tablist">
         {ALL_TABS.map((t) => {
           const Icon = t.icon
           const isActive = currentTab === t.key
