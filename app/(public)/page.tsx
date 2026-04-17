@@ -13,24 +13,12 @@ import LatestNews from './_components/LatestNews'
 import Credibility from './_components/Credibility'
 import HomeContact from './_components/HomeContact'
 import { CheckCircle2 } from 'lucide-react'
-import prisma from '@/lib/prisma/client'
+import { getRegistrationFeeInfo } from '@/lib/system-settings'
 
-async function getRegistrationFee() {
-  try {
-    const settings = await prisma.systemSetting.findMany({
-      where: { key: { in: ['registration_fee', 'registration_currency'] } },
-    })
-    const fee = settings.find((s) => s.key === 'registration_fee')?.value || '350'
-    const currency = settings.find((s) => s.key === 'registration_currency')?.value || 'GHS'
-    return { fee, currency }
-  } catch (error) {
-    console.error('Failed to fetch registration fee, using defaults:', error)
-    return { fee: '350', currency: 'GHS' }
-  }
-}
+// Removed local getRegistrationFee in favor of lib/system-settings helper
 
 export default async function Home() {
-  const { fee, currency } = await getRegistrationFee()
+  const { fee, currency } = await getRegistrationFeeInfo()
 
   return (
     <div className="bg-white">
@@ -41,7 +29,7 @@ export default async function Home() {
       <section className="relative overflow-hidden bg-slate-50 px-6 py-24 sm:py-32">
         <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-blue-100/50 blur-3xl" />
         <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-2 lg:gap-24">
-          <SectionReveal>
+          <SectionReveal skipInitial>
             <div className="relative">
               <span className="mb-4 block text-sm font-black tracking-[0.3em] text-aerojet-sky uppercase">
                 Who We Are

@@ -1,10 +1,17 @@
 import prisma from '@/lib/prisma/client'
+import { unstable_cache } from 'next/cache'
 
 export async function getActivePaymentMethods() {
-  return prisma.paymentMethod.findMany({
-    where: { isActive: true },
-    orderBy: { sortOrder: 'asc' },
-  })
+  return unstable_cache(
+    async () => {
+      return prisma.paymentMethod.findMany({
+        where: { isActive: true },
+        orderBy: { sortOrder: 'asc' },
+      })
+    },
+    ['active-payment-methods'],
+    { revalidate: 300, tags: ['payment-methods'] }
+  )()
 }
 
 export async function getPaymentMethodsByType(type: string) {

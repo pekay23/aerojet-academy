@@ -1,5 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { Mail, ArrowRight, Clock } from 'lucide-react'
 import RegistrationForm from './_components/RegistrationForm'
 import PaymentInstructions from './_components/PaymentInstructions'
@@ -13,6 +14,20 @@ export default async function RegisterPage({
 }: {
   searchParams: Promise<{ success?: string; code?: string }>
 }) {
+  return (
+    <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-2xl">
+      <Suspense fallback={<RegisterSkeleton />}>
+        <RegisterContent searchParams={searchParams} />
+      </Suspense>
+    </div>
+  )
+}
+
+async function RegisterContent({
+  searchParams,
+}: {
+  searchParams: Promise<{ success?: string; code?: string }>
+}) {
   const params = await searchParams
   const isSuccess = params.success === 'true'
   const hasCode = !!params.code
@@ -21,7 +36,7 @@ export default async function RegisterPage({
   const paymentMethods = await getActivePaymentMethods()
 
   return (
-    <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-2xl">
+    <>
       {/* Blue Header */}
       <div className="bg-aerojet-blue p-8 text-center text-white">
         <h2 className="text-3xl font-black tracking-tight uppercase">
@@ -97,6 +112,19 @@ export default async function RegisterPage({
             </div>
           </>
         )}
+      </div>
+    </>
+  )
+}
+
+function RegisterSkeleton() {
+  return (
+    <div className="animate-pulse">
+      <div className="h-32 bg-slate-100" />
+      <div className="p-8 md:p-10">
+        <div className="mb-4 h-6 w-1/2 bg-slate-50" />
+        <div className="mb-6 h-10 w-full bg-slate-50" />
+        <div className="h-48 w-full bg-slate-50" />
       </div>
     </div>
   )

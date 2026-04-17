@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn, getSession } from 'next-auth/react'
 import Link from 'next/link'
@@ -11,13 +11,14 @@ export default function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
+    startTransition(() => {
+      setError('')
+    })
 
     try {
       const result = await signIn('credentials', {
@@ -51,9 +52,9 @@ export default function LoginForm() {
       // router.push + router.refresh causes a race condition on mobile
       window.location.href = redirectMap[role || ''] ?? '/login'
     } catch (err: any) {
-      setError(err.message || 'Something went wrong. Please try again.')
-    } finally {
-      setLoading(false)
+      startTransition(() => {
+        setError(err.message || 'Something went wrong. Please try again.')
+      })
     }
   }
 
@@ -129,10 +130,10 @@ export default function LoginForm() {
       {/* Submit */}
       <button
         type="submit"
-        disabled={loading}
+        disabled={isPending}
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-4 text-xs font-black tracking-widest text-white uppercase shadow-lg transition-all hover:bg-aerojet-sky disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {loading ? (
+        {isPending ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" /> Signing In...
           </>
