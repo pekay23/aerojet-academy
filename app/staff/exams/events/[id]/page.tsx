@@ -84,12 +84,12 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
           <div className="flex flex-wrap gap-4 text-sm text-slate-500 dark:text-slate-400">
             <div className="flex items-center gap-1.5">
               <Calendar className="h-4 w-4 text-slate-400" />
-              {format(event.startDate, 'EEEE, MMM d, yyyy')}
+              {event.startDate ? format(new Date(event.startDate), 'EEEE, MMM d, yyyy') : 'No Start Date'}
             </div>
 
             <div className="flex items-center gap-1.5">
               <Clock className="h-4 w-4 text-slate-400" />
-              Start: {format(event.startDate, 'h:mm a')}
+              Start: {event.startDate ? format(new Date(event.startDate), 'h:mm a') : 'TBD'}
             </div>
           </div>
         </div>
@@ -142,7 +142,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                     Total Candidates
                   </span>
                   <span className="font-bold text-slate-900 dark:text-slate-100">
-                    {event.pools.reduce((acc, p) => acc + p.currentMemberCount, 0)}
+                    {event.pools?.reduce((acc, p) => acc + (p.currentMemberCount || 0), 0) || 0}
                   </span>
                 </div>
               </div>
@@ -218,11 +218,11 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
               <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Exam Bookings</h2>
               {event.pools.length > 0 && (
                 <p className="text-xs text-slate-500">
-                  {event.pools.length} pool{event.pools.length !== 1 ? 's' : ''}
+                  {event.pools?.length || 0} pool{event.pools?.length !== 1 ? 's' : ''}
                   {' · '}
-                  {event.pools.reduce((a, p) => a + p.currentMemberCount, 0)} candidates
+                  {event.pools?.reduce((a, p) => a + (p.currentMemberCount || 0), 0) || 0} candidates
                   {' · '}
-                  {event.pools.filter((p) => p.currentMemberCount >= p.maxCandidates).length} full
+                  {event.pools?.filter((p) => (p.currentMemberCount || 0) >= (p.maxCandidates || 0)).length || 0} full
                 </p>
               )}
             </div>

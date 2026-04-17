@@ -25,7 +25,7 @@ export default function PoolList({ pools }: { pools: Pool[] }) {
   const [search, setSearch] = useState('')
 
   const filtered = pools.filter((p) =>
-    p.name.toLowerCase().includes(search.toLowerCase())
+    (p.name || '').toLowerCase().includes(search.toLowerCase())
   )
 
   return (
