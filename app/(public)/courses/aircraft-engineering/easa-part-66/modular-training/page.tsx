@@ -103,7 +103,7 @@ export default function ModularTrainingPage() {
         subtitle="Study at your own pace — book individual EASA B1 or B2 modules to fit your schedule."
         backgroundImage="/images/hero/modular.webp"
       />
-      <div className="mx-auto max-w-6xl space-y-24 px-6 py-20">
+      <div className="mx-auto max-w-7xl space-y-24 px-6 py-20">
         {/* Intro + Who Is It For */}
         <div className="grid gap-10 lg:grid-cols-3">
           <div className="space-y-10 lg:col-span-2">
@@ -191,7 +191,7 @@ export default function ModularTrainingPage() {
           <SectionReveal delay={0.2}>
             <div className="space-y-6">
               <div className="bg-public-primary rounded-2xl p-6 text-white shadow-xl sm:rounded-3xl sm:p-8">
-                <span className="text-[10px] font-black tracking-widest text-blue-200 uppercase">
+                <span className="text-xs font-black tracking-widest text-blue-200 uppercase">
                   Portal Access
                 </span>
                 <div className="mt-2 text-3xl font-black">Lifetime</div>

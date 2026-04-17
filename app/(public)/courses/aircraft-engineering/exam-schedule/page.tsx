@@ -31,7 +31,7 @@ export default function ExamSchedulePage() {
         backgroundImage="/images/hero/examsschedule.webp" // Make sure this image path is correct
       />
       <div className="container mx-auto px-6 py-20 sm:py-28">
-        <div className="max-w-4xl mx-auto space-y-16">
+        <div className="mx-auto max-w-7xl space-y-12 px-6 py-20">
           
           <SectionReveal>
             <div className="bg-public-primary text-white p-8 rounded-3xl shadow-lg border-l-8 border-public-secondary">
@@ -40,7 +40,7 @@ export default function ExamSchedulePage() {
                     <h2 className="text-xl font-black uppercase tracking-tight text-white">Important Booking Policy</h2>
                 </div>
                 <ul className="space-y-2 text-sm text-slate-300 list-disc pl-5">
-                    <li>Exam seats must be <strong>paid in full</strong> by the Payment Deadline (T-21).</li>
+                    <li className="text-base text-slate-300">Exam seats must be <strong>paid in full</strong> by the Payment Deadline (T-21).</li>
                     <li>Windows are confirmed only if minimum numbers (60 seats) are met by the deadline.</li>
                     <li>Unconfirmed windows roll forward to the next date.</li>
                 </ul>
@@ -101,7 +101,7 @@ export default function ExamSchedulePage() {
             </section>
           </SectionReveal>
 
-          <div className="text-center pt-8">
+            <div className="mx-auto max-w-7xl space-y-16">
               <Link href="/login" className="inline-block bg-public-secondary text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-public-primary transition-all shadow-lg">
                   Book Exam Seats in Portal
               </Link>

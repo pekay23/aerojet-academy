@@ -9,7 +9,7 @@ export default function PrivacyPolicyPage() {
       <div className="max-w-4xl mx-auto px-6 py-12">
         <div className="bg-white p-6 sm:p-14 rounded-2xl sm:rounded-3xl shadow-xl border border-slate-100">
           <div className="mb-10 border-b border-slate-100 pb-6">
-            <span className="bg-blue-50 text-aerojet-sky px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest mb-4 inline-block">Legal Policy</span>
+            <span className="bg-blue-50 text-aerojet-sky px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest mb-4 inline-block">Legal Policy</span>
             <h1 className="text-3xl sm:text-4xl font-black text-aerojet-blue dark:text-white uppercase tracking-tight">Website Privacy Policy</h1>
             <p className="text-slate-400 mt-3 text-sm italic">Last Updated: February 2026</p>
           </div>

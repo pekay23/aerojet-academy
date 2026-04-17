@@ -48,12 +48,12 @@ export default async function FeesPage() {
         subtitle="Structured payment milestones for Aerojet Academy training programmes."
         backgroundImage="/images/hero/feespayment.webp"
       />{' '}
-      <div className="mx-auto max-w-5xl space-y-16 px-6 py-20">
+      <div className="mx-auto max-w-7xl space-y-16 px-6 py-20">
         {/* Registration Fee */}
         <SectionReveal>
           <section className="flex flex-col items-center gap-8 rounded-2xl border border-slate-100 bg-white p-6 shadow-xl sm:rounded-3xl sm:p-10 md:flex-row">
             <div className="flex-1">
-              <div className="mb-3 inline-block rounded-full bg-blue-50 px-3 py-1 text-[10px] font-black tracking-widest text-aerojet-sky uppercase">
+              <div className="mb-3 inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-black tracking-widest text-aerojet-sky uppercase">
                 Step 01
               </div>
               <h2 className="mb-4 text-2xl font-black tracking-tight text-aerojet-blue uppercase sm:text-3xl">
@@ -66,14 +66,14 @@ export default async function FeesPage() {
               </p>
             </div>
             <div className="w-full shrink-0 rounded-2xl bg-slate-900 p-6 text-center text-white shadow-2xl sm:p-8 md:w-auto">
-              <span className="mb-2 block text-[10px] font-bold tracking-[0.2em] text-aerojet-sky uppercase">
+              <span className="mb-2 block text-xs font-bold tracking-[0.2em] text-aerojet-sky uppercase">
                 Pre-Application
               </span>
               <span className="mb-1 block text-4xl font-black">
                 {symbol}
                 {fee}
               </span>
-              <span className="text-[10px] font-medium text-slate-400 uppercase">
+              <span className="text-xs font-medium text-slate-400 uppercase">
                 Non-Refundable
               </span>
             </div>
@@ -89,7 +89,7 @@ export default async function FeesPage() {
             <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[600px] text-left text-sm">
-                  <thead className="border-b border-slate-100 bg-slate-50 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  <thead className="border-b border-slate-100 bg-slate-50 text-xs font-black tracking-widest text-slate-400 uppercase">
                     <tr>
                       <th className="p-5">Option</th>
                       <th className="p-5">Programme</th>
@@ -111,7 +111,7 @@ export default async function FeesPage() {
               </div>
             </div>
             <div className="mt-5 rounded-xl border border-blue-100/50 bg-blue-50/50 p-4 text-center">
-              <p className="text-[10px] font-black tracking-widest text-slate-500 uppercase">
+              <p className="text-xs font-black tracking-widest text-slate-500 uppercase">
                 Detailed tuition and exam pricing is visible in the Student Portal after
                 registration.
               </p>
@@ -141,7 +141,7 @@ export default async function FeesPage() {
                 },
               ].map((rule) => (
                 <li key={rule.title} className="flex items-start gap-4">
-                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-50 text-[10px] font-black text-red-600">
+                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-50 text-xs font-black text-red-600">
                     !
                   </div>
                   <div>

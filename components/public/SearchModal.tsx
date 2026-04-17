@@ -258,10 +258,10 @@ export default function SearchModal() {
                             >
                               <CategoryIcon className={`h-3.5 w-3.5 ${colors.text}`} />
                             </div>
-                            <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
+                            <span className="text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
                               {category}
                             </span>
-                            <span className="text-[10px] font-bold text-slate-300 dark:text-slate-600">
+                            <span className="text-xs font-bold text-slate-300 dark:text-slate-600">
                               {items.length}
                             </span>
                           </div>
@@ -312,7 +312,7 @@ export default function SearchModal() {
 
               {/* Footer */}
               <div className="flex items-center justify-between border-t border-slate-100 px-6 py-3 dark:border-slate-800">
-                <div className="flex items-center gap-4 text-[10px] text-slate-400">
+                <div className="flex items-center gap-4 text-xs text-slate-400">
                   <span className="flex items-center gap-1.5">
                     <kbd className="rounded-md border border-slate-200 bg-slate-50 px-1.5 py-0.5 font-mono text-[9px] dark:border-slate-700 dark:bg-slate-800">
                       ↑↓
@@ -332,7 +332,7 @@ export default function SearchModal() {
                     Close
                   </span>
                 </div>
-                <span className="text-[10px] font-black tracking-widest text-slate-300 uppercase dark:text-slate-600">
+                <span className="text-xs font-black tracking-widest text-slate-300 uppercase dark:text-slate-600">
                   Aerojet Search
                 </span>
               </div>

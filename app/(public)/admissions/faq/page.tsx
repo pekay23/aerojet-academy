@@ -56,7 +56,7 @@ export default function FAQPage() {
     <div className="bg-slate-50">
       <Hero title="Frequently Asked Questions" subtitle="Answers to common questions about admissions, training, and careers." backgroundImage="/images/hero/faq.webp"/>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-20 space-y-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 space-y-10">
         {FAQS.map((category, idx) => (
           <SectionReveal key={idx} delay={idx * 0.05}>
             <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100">
@@ -70,7 +70,7 @@ export default function FAQPage() {
                       <span>{item.q}</span>
                       <span className="text-aerojet-sky text-xl leading-none shrink-0 group-open:rotate-45 transition-transform duration-200">+</span>
                     </summary>
-                    <p className="text-slate-600 leading-relaxed pb-2 pl-0 text-sm mt-1">{item.a}</p>
+                    <p className="text-slate-600 leading-relaxed pb-2 pl-0 text-base mt-1">{item.a}</p>
                   </details>
                 ))}
               </div>

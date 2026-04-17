@@ -28,15 +28,15 @@ export default function FourYearPage() {
         backgroundImage="/images/hero/fulltime-b1-b2.webp"
       />
 
-      <div className="mx-auto max-w-6xl space-y-24 px-6 py-20">
+      <div className="mx-auto max-w-7xl space-y-24 px-6 py-20">
         {/* Intro */}
         <SectionReveal>
           <section className="max-w-4xl">
             <div className="mb-6 flex flex-wrap gap-3">
-              <span className="rounded-full bg-aerojet-blue px-4 py-2 text-[10px] font-black tracking-widest text-white uppercase">
+              <span className="rounded-full bg-aerojet-blue px-4 py-2 text-xs font-black tracking-widest text-white uppercase">
                 Full-Time Training
               </span>
-              <span className="rounded-full bg-blue-100 px-4 py-2 text-[10px] font-black tracking-widest text-aerojet-blue uppercase">
+              <span className="rounded-full bg-blue-100 px-4 py-2 text-xs font-black tracking-widest text-aerojet-blue uppercase">
                 B1.1 & B2 License
               </span>
             </div>

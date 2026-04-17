@@ -30,7 +30,7 @@ export default function ExamOnlyPage() {
         backgroundImage="/images/hero/examonly.webp"
       />
 
-      <div className="mx-auto max-w-6xl space-y-20 px-6 py-20">
+      <div className="mx-auto max-w-7xl space-y-20 px-6 py-20">
         {/* Notice */}
         <SectionReveal>
           <div className="rounded-r-xl border-l-4 border-orange-500 bg-orange-50 p-5">
