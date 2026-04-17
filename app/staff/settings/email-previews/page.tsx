@@ -332,7 +332,7 @@ export default function EmailPreviewsPage() {
               Templates
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1 p-2">
+          <CardContent className="relative space-y-1 p-2">
             {allTemplates.map((tmpl) => (
               <button
                 key={tmpl.id}

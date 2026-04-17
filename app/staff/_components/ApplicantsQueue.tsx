@@ -270,7 +270,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
           {/* Toolbar */}
           <div className="flex flex-col items-start justify-between gap-3 border-b border-slate-100 px-6 py-4 sm:flex-row sm:items-center dark:border-slate-800">
             {/* Tabs */}
-            <div className="flex gap-1 rounded-2xl bg-slate-100 p-1.5 shadow-inner ring-1 ring-black/5 dark:bg-slate-800/80 dark:ring-white/5">
+            <div className="relative flex gap-1 rounded-2xl bg-slate-100 p-1.5 shadow-inner ring-1 ring-black/5 dark:bg-slate-800/80 dark:ring-white/5">
               {TABS.map((t) => (
                 <button
                   key={t.key}

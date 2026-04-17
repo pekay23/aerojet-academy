@@ -160,8 +160,8 @@ export default function PublicNav() {
                   : '/images/logos/ATA_logo_hor_onDark.webp'
               }
               alt="Aerojet Logo"
-              width={150}
-              height={38}
+              width={130}
+              height={33}
               className="h-auto w-auto"
               priority
             />

@@ -279,7 +279,7 @@ export default function StudentDetailPanel({
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-6 border-b border-slate-100 dark:border-slate-800">
+        <div className="relative flex gap-6 border-b border-slate-100 dark:border-slate-800">
           {TABS.map((t) => (
             <button
               key={t}

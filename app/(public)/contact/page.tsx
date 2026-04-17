@@ -10,12 +10,12 @@ export default function ContactPage() {
     <div className="bg-slate-50">
       <Hero title="Contact Us" subtitle="Reach out to our admissions team for enquiries about EASA programmes." backgroundImage="/images/hero/contact-hero.webp"/>
 
-      <div className="max-w-5xl mx-auto px-6 py-16 -mt-20 relative z-20">
+      <div className="max-w-7xl mx-auto px-6 py-16 -mt-20 relative z-20">
         <SectionReveal>
           <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden grid lg:grid-cols-5 border border-slate-100">
             {/* Info Side */}
             <div className="lg:col-span-2 bg-aerojet-blue p-8 sm:p-10 text-white">
-              <h2 className="text-xl font-black uppercase tracking-widest mb-8 border-b border-white/10 pb-4">Get in Touch</h2>
+              <h2 className="text-2xl font-black uppercase tracking-widest mb-8 border-b border-white/10 pb-4">Get in Touch</h2>
               <div className="space-y-7">
                 {[
                   { emoji: "📍", label: "Campus Location", value: "ATTC Small Engines Department,\nKokomlemle, Accra, Ghana" },
@@ -25,8 +25,8 @@ export default function ContactPage() {
                   <div key={item.label} className="flex items-start gap-3">
                     <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center shrink-0">{item.emoji}</div>
                     <div>
-                      <h3 className="font-bold text-aerojet-sky text-xs uppercase tracking-widest mb-1">{item.label}</h3>
-                      <p className="text-sm text-slate-300 whitespace-pre-line">{item.value}</p>
+                      <h3 className="font-bold text-aerojet-sky text-sm uppercase tracking-widest mb-1">{item.label}</h3>
+                      <p className="text-base text-slate-300 whitespace-pre-line leading-relaxed">{item.value}</p>
                     </div>
                   </div>
                 ))}
@@ -41,8 +41,8 @@ export default function ContactPage() {
 
             {/* Form Side */}
             <div className="lg:col-span-3 p-8 sm:p-10">
-              <h2 className="text-2xl font-black text-aerojet-blue uppercase tracking-tight mb-2">Send us a Message</h2>
-              <p className="text-slate-500 mb-8 text-sm">Fill out the form below and we will get back to you via email.</p>
+              <h2 className="text-3xl font-black text-aerojet-blue uppercase tracking-tight mb-2">Send us a Message</h2>
+              <p className="text-slate-500 mb-8 text-base">Fill out the form below and we will get back to you via email.</p>
               <ContactForm />
             </div>
           </div>
