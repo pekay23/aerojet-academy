@@ -23,11 +23,6 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <div className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
-        <p className="text-xs text-slate-400 text-center uppercase tracking-widest">
-          Secure login powered by Aerojet Academy Portal
-        </p>
-      </div>
     </div>
   );
 }
