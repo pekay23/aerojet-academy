@@ -14,7 +14,6 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.ufs.sh' },
     ],
   },
-  serverExternalPackages: ['isomorphic-dompurify', 'jsdom'],
   allowedDevOrigins: ['192.168.8.173'],
   experimental: {
     serverActions: {

@@ -47,11 +47,16 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
   if (!event) notFound()
 
   // Serialize pools safely (Next.js cannot serialize Prisma.Decimal to Client Components)
-  const serializablePools = JSON.parse(JSON.stringify(event.pools, (key, value) => {
-    return typeof value === 'object' && value?.constructor?.name === 'Decimal' 
-      ? Number(value) 
-      : value
-  }))
+  // Use a minification-safe check for Decimal types
+  const serializablePools = JSON.parse(
+    JSON.stringify(event.pools, (_key, value) => {
+      // Check for Prisma.Decimal or any object that looks like one (minification safe)
+      if (value && typeof value === 'object' && ('d' in value && 's' in value && 'e' in value)) {
+        return Number(value)
+      }
+      return value
+    })
+  )
 
   const evaluation = await evaluateGoNoGo(id).catch(() => null)
   const hasAutoPool = event.pools.some((p) => p.isAutoPool && p.poolType === 'AUTO' && p.status === 'OPEN')
