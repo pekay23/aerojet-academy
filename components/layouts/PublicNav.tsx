@@ -163,6 +163,7 @@ export default function PublicNav() {
               width={130}
               height={33}
               className="h-8 w-auto object-contain"
+              style={{ width: 'auto', height: 'auto' }}
               priority
             />
           </Link>

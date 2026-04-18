@@ -212,6 +212,8 @@ export default function RegistrationForm({
                   <Input
                     type="email"
                     {...field}
+                    autoCapitalize="none"
+                    autoCorrect="off"
                     className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 focus:ring-2"
                   />
                 </FormControl>

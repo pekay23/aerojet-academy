@@ -62,9 +62,9 @@ export const authOptions: NextAuthOptions = {
         const user = await prisma.user.findFirst({
           where: {
             OR: [
-              { email: credentials.email },
-              { academyEmail: credentials.email },
-              { personalEmail: credentials.email },
+              { email: { equals: credentials.email, mode: 'insensitive' } },
+              { academyEmail: { equals: credentials.email, mode: 'insensitive' } },
+              { personalEmail: { equals: credentials.email, mode: 'insensitive' } },
             ],
           },
           include: {
