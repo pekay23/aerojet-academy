@@ -6,6 +6,7 @@ import { CheckCircle2, Wallet, AlertTriangle, Info } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { getCurrencySymbol } from '@/lib/currency'
+import { convertCurrency } from '@/lib/currency-api'
 import PayRegistrationFeeButton from './_components/PayRegistrationFeeButton'
 
 export const metadata: Metadata = {
@@ -38,10 +39,24 @@ export default async function RegistrationFeePage() {
   if (!user) redirect('/login')
 
   const fee = Number(user.registrationFee)
-  const currency = user.registrationCurrency
-  const symbol = getCurrencySymbol(currency)
-  const available = wallet ? Number(wallet.availableBalance) : 0
-  const canPay = available >= fee
+  const feeCurrency = user.registrationCurrency || 'EUR'
+  const symbol = getCurrencySymbol(feeCurrency)
+  
+  const walletBalance = wallet ? Number(wallet.availableBalance) : 0
+  const walletCurrency = wallet?.currency || 'EUR'
+  const walletSymbol = getCurrencySymbol(walletCurrency)
+
+  // Determine if student has enough funds, considering currency conversion
+  let availableInFeeCurrency = walletBalance
+  let conversionRate = 1
+
+  if (wallet && walletCurrency !== feeCurrency) {
+    const conversion = await convertCurrency(walletBalance, walletCurrency, feeCurrency)
+    availableInFeeCurrency = conversion.convertedAmount
+    conversionRate = conversion.rate
+  }
+
+  const canPay = availableInFeeCurrency >= fee
 
   // Already paid — success state
   if (user.registrationPaid) {
@@ -54,7 +69,7 @@ export default async function RegistrationFeePage() {
             Registration Fee Paid
           </h2>
           <p className="mb-1 text-sm text-emerald-700 dark:text-emerald-300">
-            Amount: {symbol}{fee.toFixed(2)} {currency}
+            Amount: {symbol}{fee.toFixed(2)} {feeCurrency}
           </p>
           {user.paymentApprovedAt && (
             <p className="text-sm text-emerald-600 dark:text-emerald-400">
@@ -93,7 +108,7 @@ export default async function RegistrationFeePage() {
           <div>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Amount Due</p>
             <p className="text-2xl font-black text-aerojet-blue dark:text-white">
-              {symbol}{fee.toFixed(2)} <span className="text-sm font-medium text-slate-400">{currency}</span>
+              {symbol}{fee.toFixed(2)} <span className="text-sm font-medium text-slate-400">{feeCurrency}</span>
             </p>
           </div>
         </div>
@@ -113,18 +128,23 @@ export default async function RegistrationFeePage() {
               Wallet Balance (Available)
             </p>
             <p className="text-xl font-black text-slate-800 dark:text-white">
-              {symbol}{available.toFixed(2)}{' '}
+              {walletSymbol}{walletBalance.toFixed(2)}{' '}
               <span className="text-sm font-medium text-slate-400">
-                {wallet?.currency ?? 'EUR'}
+                {walletCurrency}
               </span>
             </p>
+            {walletCurrency !== feeCurrency && (
+              <p className="mt-1 text-xs font-medium text-slate-500">
+                ≈ {symbol}{availableInFeeCurrency.toFixed(2)} {feeCurrency}
+              </p>
+            )}
           </div>
         </div>
       </div>
 
       {/* Action area */}
       {canPay ? (
-        <PayRegistrationFeeButton fee={fee} symbol={symbol} currency={currency} />
+        <PayRegistrationFeeButton fee={fee} symbol={symbol} currency={feeCurrency} />
       ) : (
         <div className="space-y-4">
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-center dark:border-amber-800/50 dark:bg-amber-900/10">
@@ -133,7 +153,7 @@ export default async function RegistrationFeePage() {
               Insufficient Funds
             </h3>
             <p className="mb-4 text-sm text-amber-700 dark:text-amber-300">
-              You need {symbol}{(fee - available).toFixed(2)} more to pay the registration fee.
+              You need {symbol}{(fee - availableInFeeCurrency).toFixed(2)} more to pay the registration fee.
             </p>
             <Link
               href="/student/wallet?action=topup"

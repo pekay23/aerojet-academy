@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import TablePagination from '@/components/shared/TablePagination'
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
 
 interface Grade {
   id: string
@@ -72,7 +73,13 @@ export default function GradesTable({ grades }: { grades: Grade[] }) {
                       <div className="flex items-center gap-2">
                         <div className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100">
                           <div
-                            className={`h-full rounded-full ${Number(grade.percentage) >= 75 ? 'bg-green-500' : Number(grade.percentage) >= 50 ? 'bg-amber-500' : 'bg-red-500'}`}
+                            className={`h-full rounded-full ${
+                              Number(grade.percentage) >= ACADEMIC_RULES.GRADE_THRESHOLD_PASS
+                                ? 'bg-green-500'
+                                : Number(grade.percentage) >= ACADEMIC_RULES.GRADE_THRESHOLD_WARNING
+                                  ? 'bg-amber-500'
+                                  : 'bg-red-500'
+                            }`}
                             style={{ width: `${grade.percentage}%` }}
                           />
                         </div>

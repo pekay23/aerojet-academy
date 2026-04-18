@@ -82,7 +82,7 @@ export default async function StaffMessagesPage() {
   const totalUnread = threads.reduce((sum, t) => sum + t.unreadCount, 0)
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-8">
+    <div className="mx-auto max-w-[1920px] space-y-8">
       <AutoRefresh intervalMs={20000} />
 
       {/* Header */}

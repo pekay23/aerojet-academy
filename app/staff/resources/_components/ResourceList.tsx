@@ -124,6 +124,16 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
                           STU
                         </Badge>
                       )}
+                      {resource.courses?.length > 0 && (
+                        <Badge variant="outline" className="h-5 px-1.5 text-[9px] tracking-tighter font-mono">
+                          {resource.courses.length} MOD
+                        </Badge>
+                      )}
+                      {resource.pathways?.length > 0 && (
+                        <Badge variant="outline" className="h-5 px-1.5 text-[9px] tracking-tighter">
+                          {resource.pathways.length} PTH
+                        </Badge>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">

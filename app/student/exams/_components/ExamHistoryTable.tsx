@@ -9,10 +9,10 @@ interface HistoryRecord {
   moduleCode: string
   moduleName: string
   date: Date
-  passed: boolean | null
-  score?: number
-  percentage?: number
-  grade?: string
+  passed?: boolean | null
+  score?: number | null
+  percentage?: number | null
+  grade?: string | null
 }
 
 interface ExamHistoryTableProps {
