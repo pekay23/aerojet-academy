@@ -30,7 +30,10 @@ export default function RevisionSupportPage() {
                   { label: "Modules", value: "M2, M3, M4, M5, M8 (others on demand)" },
                   { label: "Mock Exams", value: "Week 4 (mid-point) and Week 8 (final)" },
                 ].map((item) => (
-                  <div key={item.label} className="flex gap-2"><strong className="text-slate-900 min-w-[90px]">{item.label}:</strong> {item.value}</div>
+                  <div key={item.label} className="grid grid-cols-[100px_1fr] gap-x-2 items-baseline border-b border-slate-100 pb-2 last:border-0 last:pb-0">
+                    <span className="font-bold text-aerojet-blue">{item.label}</span>
+                    <span className="text-slate-600">{item.value}</span>
+                  </div>
                 ))}
               </div>
               <div className="mt-6 p-4 bg-orange-50 border-l-4 border-orange-400 rounded-r-lg">

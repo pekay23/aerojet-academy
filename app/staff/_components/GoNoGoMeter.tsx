@@ -40,17 +40,19 @@ export default function GoNoGoMeter({
   return (
     <div className={`rounded-2xl border p-5 ${statusBg}`}>
       {/* Header */}
-      <div className="mb-4 flex items-start justify-between">
+      <div className="mb-4 grid grid-cols-[1fr_auto] items-start gap-4">
         <div>
           <p className="text-[10px] font-black tracking-widest text-slate-500 uppercase dark:text-slate-400">
             Go / No-Go Meter
           </p>
           {poolName && (
-            <h3 className="mt-0.5 text-sm font-black text-slate-800 dark:text-white">{poolName}</h3>
+            <h3 className="mt-0.5 text-sm font-black leading-tight text-slate-800 dark:text-white">
+              {poolName}
+            </h3>
           )}
         </div>
         <div
-          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black ${
+          className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-black ${
             isGo ? 'bg-emerald-500 text-white' : 'bg-red-500 text-white'
           }`}
         >

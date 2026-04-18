@@ -9,8 +9,8 @@ import {
   Users,
   AlertCircle,
   BookOpen,
-  Euro,
 } from 'lucide-react'
+import ModuleGrid from '@/app/(public)/_components/ModuleGrid'
 
 export const metadata: Metadata = {
   title: 'Modular Training Program | Aerojet Academy',
@@ -18,82 +18,45 @@ export const metadata: Metadata = {
     'Flexible EASA Part-66 modular training — study at your own pace with expert tuition support.',
 }
 
-// Data arrays with 'price' property removed
+// Data arrays with 'hours' mapped to 'info'
 const coreModules = [
-  { code: 'M1', name: 'Mathematics', hours: 20 },
-  { code: 'M2', name: 'Physics', hours: 20 },
-  { code: 'M3', name: 'Basic Electricals', hours: 24 },
-  { code: 'M4', name: 'Basic Electronics', hours: 20 },
-  { code: 'M5', name: 'Digital Techniques', hours: 24 },
-  { code: 'M6', name: 'Materials & Hardware', hours: 25 },
-  { code: 'M7', name: 'Maintenance Practices (MCQ)', hours: 15 },
-  { code: 'M8', name: 'Basic Aerodynamics', hours: 15 },
-  { code: 'M9', name: 'Human Factors', hours: 15 },
-  { code: 'M10', name: 'Aviation Legislation (MCQ)', hours: 15 },
+  { code: 'M1', name: 'Mathematics', info: '20 Tuition Hours' },
+  { code: 'M2', name: 'Physics', info: '20 Tuition Hours' },
+  { code: 'M3', name: 'Basic Electricals', info: '24 Tuition Hours' },
+  { code: 'M4', name: 'Basic Electronics', info: '20 Tuition Hours' },
+  { code: 'M5', name: 'Digital Techniques', info: '24 Tuition Hours' },
+  { code: 'M6', name: 'Materials & Hardware', info: '25 Tuition Hours' },
+  { code: 'M7', name: 'Maintenance Practices (MCQ)', info: '15 Tuition Hours' },
+  { code: 'M8', name: 'Basic Aerodynamics', info: '15 Tuition Hours' },
+  { code: 'M9', name: 'Human Factors', info: '15 Tuition Hours' },
+  { code: 'M10', name: 'Aviation Legislation (MCQ)', info: '15 Tuition Hours' },
 ]
 
 const specialistModules = [
   {
     code: 'M11',
     name: 'Turbine Aeroplane Aerodynamics & Systems/Structures',
-    hours: 25,
+    info: '25 Tuition Hours',
   },
-  { code: 'M15', name: 'Turbine Engines', hours: 25 },
-  { code: 'M17', name: 'Propellers', hours: 15 },
+  { code: 'M15', name: 'Turbine Engines', info: '25 Tuition Hours' },
+  { code: 'M17', name: 'Propellers', info: '15 Tuition Hours' },
   {
     code: 'M12',
     name: 'Helicopter Aerodynamics, Structures & Systems',
-    hours: 25,
+    info: '25 Tuition Hours',
   },
-  { code: 'M16', name: 'Piston Engine', hours: 25 },
+  { code: 'M16', name: 'Piston Engine', info: '25 Tuition Hours' },
 ]
 
 const avionicsModules = [
   {
     code: 'M13',
     name: 'Aircraft Aerodynamics, Structures & Systems (Avionics)',
-    hours: 25,
+    info: '25 Tuition Hours',
   },
-  { code: 'M14', name: 'Propulsion', hours: 15 },
+  { code: 'M14', name: 'Propulsion', info: '15 Tuition Hours' },
 ]
 
-// Table component with the 'Price' column removed
-function ModuleTable({
-  modules,
-  headerColor,
-}: {
-  modules: { code: string; name: string; hours: number }[]
-  headerColor: string
-}) {
-  return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm sm:rounded-2xl">
-      <table className="w-full min-w-[500px]">
-        <thead>
-          <tr className={headerColor}>
-            <th className="px-5 py-3.5 text-left text-xs font-bold tracking-wider text-white uppercase">
-              Code
-            </th>
-            <th className="px-5 py-3.5 text-left text-xs font-bold tracking-wider text-white uppercase">
-              Module
-            </th>
-            <th className="px-5 py-3.5 text-right text-xs font-bold tracking-wider text-white uppercase">
-              Tuition Hours
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {modules.map((m, i) => (
-            <tr key={m.code} className={i % 2 === 0 ? 'bg-slate-50/50' : ''}>
-              <td className="text-public-secondary px-5 py-3.5 text-sm font-bold">{m.code}</td>
-              <td className="px-5 py-3.5 text-sm text-slate-700">{m.name}</td>
-              <td className="px-5 py-3.5 text-right text-sm text-slate-500">{m.hours}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
 
 export default function ModularTrainingPage() {
   return (
@@ -230,20 +193,20 @@ export default function ModularTrainingPage() {
           </SectionReveal>
         </div>
 
-        {/* Module Tables */}
+        {/* Module Grids */}
         <SectionReveal>
-          <section className="space-y-12">
+          <section className="space-y-16">
             <div>
-              <h3 className="text-public-primary mb-6 text-2xl font-bold">Core Modules</h3>
-              <ModuleTable modules={coreModules} headerColor="bg-public-primary" />
+              <h3 className="mb-6 text-2xl font-bold text-aerojet-blue">Core Modules</h3>
+              <ModuleGrid modules={coreModules} />
             </div>
             <div>
-              <h3 className="text-public-primary mb-6 text-2xl font-bold">Specialist Modules</h3>
-              <ModuleTable modules={specialistModules} headerColor="bg-green-700" />
+              <h3 className="mb-6 text-2xl font-bold text-aerojet-blue">Specialist Modules</h3>
+              <ModuleGrid modules={specialistModules} />
             </div>
             <div>
-              <h3 className="text-public-primary mb-6 text-2xl font-bold">Avionics Modules</h3>
-              <ModuleTable modules={avionicsModules} headerColor="bg-purple-700" />
+              <h3 className="mb-6 text-2xl font-bold text-aerojet-blue">Avionics Modules</h3>
+              <ModuleGrid modules={avionicsModules} />
             </div>
             <div className="mt-4 text-center text-sm text-slate-500">
               <p>

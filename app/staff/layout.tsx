@@ -72,7 +72,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
         }}
       />
 
-      <main id="main-content" className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+      <main id="main-content" className="pt-16 lg:pt-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
         <StaffTopBar
           initialCounts={{
             applicants: pendingApplicantsCount,

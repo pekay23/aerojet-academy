@@ -61,7 +61,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         hasPathway={hasPathway}
         isExamOnly={isExamOnly}
       />
-      <main id="main-content" className="min-h-screen min-w-0 flex-1 overflow-x-hidden">
+      <main id="main-content" className="relative pt-16 lg:pt-0 min-h-screen min-w-0 flex-1 overflow-x-hidden">
         <div className="mx-auto max-w-7xl p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
           <PortalHeader>
             <BreadcrumbNav />
