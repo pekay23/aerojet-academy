@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Shield, ArrowUp, ArrowDown, ArrowUpDown } from 'lucide-react'
+import { compareNatural } from '@/lib/utils/natural-sort'
 
 interface Course {
   id: string
@@ -54,15 +55,7 @@ export default function LicenseRequirementsClient({
       let comparison = 0
 
       if (sortBy === 'code') {
-        // Natural sort for codes like M1, M2... M10, M11
-        const aMatch = a.code.match(/M(\d+)/)
-        const bMatch = b.code.match(/M(\d+)/)
-
-        if (aMatch && bMatch) {
-          comparison = parseInt(aMatch[1], 10) - parseInt(bMatch[1], 10)
-        } else {
-          comparison = a.code.localeCompare(b.code)
-        }
+        comparison = compareNatural(a.code, b.code)
       } else {
         // Sort by license category requirement (true/false)
         const aRequired = requiredSet.has(`${sortBy}:${a.id}`) ? 1 : 0
@@ -72,13 +65,7 @@ export default function LicenseRequirementsClient({
 
         // Secondary sort by code if requirements are equal
         if (comparison === 0) {
-          const aMatch = a.code.match(/M(\d+)/)
-          const bMatch = b.code.match(/M(\d+)/)
-          if (aMatch && bMatch) {
-            comparison = parseInt(aMatch[1], 10) - parseInt(bMatch[1], 10)
-          } else {
-            comparison = a.code.localeCompare(b.code)
-          }
+          comparison = compareNatural(a.code, b.code)
         }
       }
 

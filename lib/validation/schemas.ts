@@ -129,7 +129,11 @@ export const updateUserSchema = z.object({
 // ===========================================================================
 
 export const createCourseSchema = z.object({
-  code: z.string().min(1).max(20),
+  code: z
+    .string()
+    .min(1)
+    .max(20)
+    .transform((val) => val.replace(/\s+/g, '')),
   name: z.string().min(2).max(200),
   description: z.string().optional(),
   subtitle: z.string().optional(),
