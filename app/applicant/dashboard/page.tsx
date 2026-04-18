@@ -66,19 +66,19 @@ const statusConfig: Record<
     description: 'Please upload your registration payment proof to proceed.',
   },
   payment_submitted: {
-    label: 'Payment Submitted',
+    label: 'Payment Under Review',
     color: 'text-purple-600 dark:text-purple-400',
     bg: 'bg-purple-50 border-purple-200 dark:bg-purple-900/10 dark:border-purple-800',
-    icon: AlertCircle,
-    description: 'Your payment proof has been submitted. Our team is reviewing it.',
+    icon: Clock,
+    description: 'Your payment proof has been submitted. Our team is verifying it.',
   },
   under_review: {
-    label: 'Under Review',
-    color: 'text-purple-600 dark:text-purple-400',
-    bg: 'bg-purple-50 border-purple-200 dark:bg-purple-900/10 dark:border-purple-800',
-    icon: AlertCircle,
+    label: 'Registration Verified',
+    color: 'text-emerald-600 dark:text-emerald-400',
+    bg: 'bg-emerald-50 border-emerald-200 dark:bg-emerald-900/10 dark:border-emerald-800',
+    icon: ShieldCheck,
     description:
-      'Your application and payment are being reviewed by our admissions team. We will notify you soon.',
+      'Your registration fee is verified. Your application is now undergoing final admissions review.',
   },
   registration_approved: {
     label: 'Registration Approved',
@@ -118,7 +118,7 @@ function deriveStatus(user: {
   // ACTIVE applicant = registration fee approved, needs pathway payment
   if (user.status === 'ACTIVE' && user.role === 'APPLICANT') return 'registration_approved'
   if (!user.emailVerified) return 'email_unverified'
-  if (user.registrationPaid) return 'under_review'
+  if (user.status === 'UNDER_REVIEW' || user.registrationPaid) return 'under_review'
   if (user.paymentProofUrl) return 'payment_submitted'
   return 'payment_pending'
 }

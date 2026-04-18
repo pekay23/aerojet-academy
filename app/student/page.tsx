@@ -21,6 +21,8 @@ import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
+import { serializeExamBooking, serializePaymentMilestone, serializeEnrollment } from '@/lib/student/serialization'
+import { SerializedPaymentMilestone } from '@/lib/student/types'
 
 export const metadata: Metadata = {
   title: 'Dashboard | Student Portal',
@@ -153,14 +155,19 @@ export default async function StudentDashboard() {
 
   // Full-Time: fetch milestones if enrollment exists (depends on ftEnrollment)
   const ftEnrollment = ftEnrollmentRaw
-  let ftMilestones: any[] = []
+  let ftMilestones: SerializedPaymentMilestone[] = []
   if (ftEnrollment) {
-    ftMilestones = await prisma.paymentMilestone.findMany({
+    const rawMilestones = await prisma.paymentMilestone.findMany({
       where: { enrollmentId: ftEnrollment.id, status: { in: ['DUE', 'OVERDUE'] } },
       orderBy: { dueDate: 'asc' },
       take: 2,
     })
+    ftMilestones = rawMilestones.map(serializePaymentMilestone)
   }
+
+  const serializedUpcomingExams = upcomingExams.map(serializeExamBooking)
+  const serializedFlexEnrollments = flexEnrollments.map(serializeEnrollment)
+  const serializedGenericEnrollments = genericEnrollments.map(serializeEnrollment)
 
   const dashboardResult = latestResultRecord
     ? {
@@ -278,7 +285,7 @@ export default async function StudentDashboard() {
                           {m.milestoneType.replace('_', ' ')}
                         </span>
                         <CurrencyDisplay
-                          amount={Number(m.amountDue)}
+                          amount={m.amountDue}
                           baseCurrency={wallet?.currency || 'EUR'}
                           clickToToggle={true}
                           size="sm"
@@ -341,9 +348,9 @@ export default async function StudentDashboard() {
             </Link>
           </div>
           <div className="p-4 sm:p-6">
-            {flexEnrollments.length > 0 ? (
+            {serializedFlexEnrollments.length > 0 ? (
               <div className="space-y-4">
-                {flexEnrollments.map((enrollment) => (
+                {serializedFlexEnrollments.map((enrollment) => (
                   <div
                     key={enrollment.id}
                     className="flex items-center justify-between rounded-xl border border-slate-100 p-4 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50"
@@ -383,7 +390,7 @@ export default async function StudentDashboard() {
                   Standalone Courses
                 </p>
                 <div className="space-y-3">
-                  {genericEnrollments.map((gen) => (
+                  {serializedGenericEnrollments.map((gen) => (
                     <div key={gen.id} className="flex w-full items-center justify-between">
                       <span className="text-sm font-semibold">{gen.course.name}</span>
                       <span className="text-xs text-slate-500">{gen.status}</span>
@@ -438,22 +445,6 @@ export default async function StudentDashboard() {
       </div>
     </div>
   )
-
-  // 3. Labels & Mapping
-  const PATHWAY_LABELS: Record<string, string> = {
-    B1_MECHANICAL: 'B1',
-    B2_AVIONICS: 'B2',
-    B1_B2_DUAL: 'B1 & B2',
-  }
-
-  const LICENSE_LABELS: Record<string, string> = {
-    B1_1_AEROPLANES_TURBINE: 'B1.1 Aeroplanes Turbine',
-    B1_2_AEROPLANES_PISTON: 'B1.2 Aeroplanes Piston',
-    B1_3_HELICOPTERS_TURBINE: 'B1.3 Helicopters Turbine',
-    B1_4_HELICOPTERS_PISTON: 'B1.4 Helicopters Piston',
-    B2_AVIONICS: 'B2 Avionics',
-    B3_PISTON_AEROPLANE: 'B3 Piston Aeroplane',
-  }
 
   const licenseList = profile.licenseTargets.map((t) => t.licenseCategory.code).join(' & ')
 
@@ -550,16 +541,16 @@ export default async function StudentDashboard() {
             <div className="p-4 sm:p-6">
               {upcomingExams.length > 0 ? (
                 <div className="space-y-4">
-                  {upcomingExams.map((exam) => (
+                  {serializedUpcomingExams.map((exam) => (
                     <div
                       key={exam.id}
                       className="flex items-center gap-3 rounded-xl border border-slate-100 p-3 sm:gap-4 sm:p-4 dark:border-slate-800"
                     >
                       <div className="flex h-12 w-12 flex-col items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:text-slate-400">
                         <span className="text-xs font-bold uppercase">
-                          {exam.examDate?.toLocaleString('default', { month: 'short' })}
+                          {new Date(exam.examDate).toLocaleString('default', { month: 'short' })}
                         </span>
-                        <span className="text-lg font-black">{exam.examDate?.getDate()}</span>
+                        <span className="text-lg font-black">{new Date(exam.examDate).getDate()}</span>
                       </div>
                       <div className="flex-1">
                         <h3 className="font-bold text-slate-900 dark:text-slate-100">

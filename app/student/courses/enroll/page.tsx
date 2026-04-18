@@ -42,11 +42,20 @@ export default async function EnrollPage({
     }),
     prisma.enrollment.findMany({
       where: { userId: session.user.id },
-      select: { courseId: true, status: true },
+      select: { id: true, courseId: true, status: true },
     }),
   ])
 
-  const enrolledCourseIds = new Set(userEnrollments.map((e) => e.courseId))
+  const activeEnrollments = new Map(
+    userEnrollments
+      .filter((e) => ['ACTIVE', 'APPROVED', 'COMPLETED'].includes(e.status))
+      .map((e) => [e.courseId, e.id])
+  )
+  const pendingEnrollments = new Set(
+    userEnrollments
+      .filter((e) => ['PENDING', 'DRAFT'].includes(e.status))
+      .map((e) => e.courseId)
+  )
 
   // 2. Fetch all unique course categories
   const allCategories = await prisma.courseCategory.findMany({
@@ -138,7 +147,9 @@ export default async function EnrollPage({
 
               <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
                 {items.map((course) => {
-                  const isEnrolled = enrolledCourseIds.has(course.id)
+                  const enrollmentId = activeEnrollments.get(course.id)
+                  const isPending = pendingEnrollments.has(course.id)
+                  const isEnrolled = !!enrollmentId
 
                   return (
                     <div
@@ -165,6 +176,16 @@ export default async function EnrollPage({
                               </span>
                               <span className="text-[10px] font-black tracking-widest text-emerald-600 uppercase">
                                 Active
+                              </span>
+                            </div>
+                          )}
+                          {isPending && !isEnrolled && (
+                            <div className="flex items-center gap-2 rounded-full bg-amber-50 px-3 py-1 dark:bg-amber-900/20">
+                              <span className="relative flex h-2 w-2">
+                                <span className="relative inline-flex h-2 w-2 rounded-full bg-amber-500"></span>
+                              </span>
+                              <span className="text-[10px] font-black tracking-widest text-amber-600 uppercase">
+                                Pending
                               </span>
                             </div>
                           )}
@@ -208,13 +229,17 @@ export default async function EnrollPage({
                             {isEnrolled ? (
                               <TrackedCourseLink
                                 courseId={course.id}
-                                href={`/student/courses/${course.id}`}
+                                href={`/student/courses/${enrollmentId}`}
                                 className="group/btn relative inline-flex h-14 items-center justify-center overflow-hidden rounded-2xl bg-emerald-500 px-8 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-emerald-600 hover:shadow-lg hover:shadow-emerald-500/20 active:scale-95"
                               >
                                 <span className="relative z-10 flex items-center gap-2">
                                   Enter <span className="transition-transform group-hover/btn:translate-x-1">→</span>
                                 </span>
                               </TrackedCourseLink>
+                            ) : isPending ? (
+                              <div className="flex h-14 items-center justify-center rounded-2xl border border-slate-100 bg-slate-50 px-8 text-xs font-black tracking-widest text-slate-400 uppercase dark:border-slate-800 dark:bg-slate-900/50">
+                                Processing...
+                              </div>
                             ) : (
                               <EnrollButton
                                 courseId={course.id}

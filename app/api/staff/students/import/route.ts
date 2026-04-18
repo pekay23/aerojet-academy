@@ -653,7 +653,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             })
             if (!course) continue
 
-            const enrollmentStatus = sem.status === 'COMPLETED' ? 'COMPLETED' : (sem.status || 'ACTIVE')
+            const isCompleted = sem.status === 'COMPLETED'
+            const enrollmentStatus: EnrollmentStatus = isCompleted 
+              ? EnrollmentStatus.ENROLLED 
+              : (sem.status as EnrollmentStatus || EnrollmentStatus.ACTIVE)
 
             // Use createMany-style idempotency: check first
             const existingEnrollment = await prisma.enrollment.findFirst({
@@ -674,7 +677,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
                   status: enrollmentStatus,
                   amountPaid: 0, // Scholarship — no payment
                   enrolledAt: academicYear.startDate,
-                  completedAt: enrollmentStatus === 'COMPLETED' ? semester.endDate : null,
+                  completedAt: isCompleted ? semester.endDate : null,
                 },
               })
             }

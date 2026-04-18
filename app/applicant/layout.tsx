@@ -62,7 +62,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         isExamOnly={isExamOnly}
       />
       <main id="main-content" className="relative pt-16 lg:pt-0 min-h-screen min-w-0 flex-1 overflow-x-hidden">
-        <div className="mx-auto max-w-[1600px] p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
+        <div className="mx-auto max-w-[1920px] p-4 pt-16 sm:p-8 lg:p-10 lg:pt-10">
           <PortalHeader>
             <BreadcrumbNav />
           </PortalHeader>

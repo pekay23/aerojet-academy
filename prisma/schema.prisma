@@ -247,6 +247,7 @@ model StudyPathwayModel {
   includesOjt            Boolean          @default(false)
   academicTerms          AcademicTerm[]
   profiles               StudentProfile[]
+  resources              GeneralResource[]
 
   @@map("study_pathways_relational")
 }
@@ -338,6 +339,7 @@ model Course {
   termAssignments      TermCourseAssignment[]
   programmeYears       ProgrammeYear[]            @relation("CourseToProgrammeYear")
   examBookings         ExamBooking[]
+  resources            GeneralResource[] @relation("CourseToResource")
 
   @@index([code])
   @@index([categoryId])
@@ -349,7 +351,7 @@ model Enrollment {
   id              String        @id @default(cuid())
   userId          String
   courseId        String
-  status          String        @default("PENDING")
+  status          EnrollmentStatus @default(PENDING)
   academicYearId  String?
   semesterId      String?
   enrolledAt      DateTime      @default(now())
@@ -951,17 +953,19 @@ model NewsArticle {
 }
 
 model GeneralResource {
-  id                String   @id @default(cuid())
+  id                String              @id @default(cuid())
   name              String
   description       String?
   url               String
   type              String
   category          String
-  showToInstructors Boolean  @default(true)
-  showToStaff       Boolean  @default(true)
-  showToStudents    Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  showToInstructors Boolean             @default(true)
+  showToStaff       Boolean             @default(true)
+  showToStudents    Boolean             @default(false)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  courses           Course[]            @relation("CourseToResource")
+  pathways          StudyPathwayModel[]
 
   @@index([category])
   @@index([showToInstructors])
@@ -1123,7 +1127,7 @@ model ModularEnrollment {
   id                String             @id @default(cuid())
   studentId         String
   packageId         String
-  status            String             @default("DRAFT")
+  status            EnrollmentStatus @default(DRAFT)
   amountPaid        Decimal            @db.Decimal(10, 2)
   walletTxnId       String?
   validFrom         DateTime?
@@ -1276,6 +1280,7 @@ enum ProgrammeChoice {
 }
 
 enum EnrollmentStatus {
+  DRAFT
   PENDING
   REJECTED
   ENROLLED
