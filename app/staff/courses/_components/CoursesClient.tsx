@@ -153,7 +153,7 @@ export default function CoursesClient({ categories }: Props) {
   const pinnedCategories = categories.filter((c) => pinnedIds.has(c.id))
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto max-w-[1600px] space-y-6">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
