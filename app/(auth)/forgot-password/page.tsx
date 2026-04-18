@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
       const res = await fetch('/api/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
       })
 
       if (!res.ok) {
@@ -92,6 +92,9 @@ export default function ForgotPasswordPage() {
               placeholder="you@example.com"
               required
               autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck="false"
               className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>

@@ -11,6 +11,7 @@ export default function NotFound() {
           width={180}
           height={40}
           className="h-auto w-auto"
+          style={{ width: 'auto', height: 'auto' }}
           priority
         />
       </Link>
