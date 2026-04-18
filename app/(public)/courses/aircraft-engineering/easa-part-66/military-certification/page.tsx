@@ -3,12 +3,29 @@ import Link from 'next/link'
 import Hero from '../../../../_components/Hero'
 import SectionReveal from '../../../../_components/SectionReveal'
 import { CheckCircle2, Clock, AlertCircle, Shield } from 'lucide-react'
+import ModuleGrid from '@/app/(public)/_components/ModuleGrid'
 
 export const metadata: Metadata = {
   title: 'Military / Industry Certification (1 Year) | Aerojet Academy',
   description:
     'Fast-track EASA Part-66 certification for military personnel and experienced technicians.',
 }
+
+const militaryModules = [
+  { code: 'M1', name: 'Mathematics' },
+  { code: 'M2', name: 'Physics' },
+  { code: 'M3', name: 'Electrical Fundamentals' },
+  { code: 'M4', name: 'Electronic Fundamentals' },
+  { code: 'M5', name: 'Digital Techniques / Avionics' },
+  { code: 'M6', name: 'Materials & Hardware' },
+  { code: 'M7A', name: 'Maintenance Practices' },
+  { code: 'M8', name: 'Basic Aerodynamics' },
+  { code: 'M9A', name: 'Human Factors' },
+  { code: 'M10', name: 'Aviation Legislation' },
+  { code: 'M11A', name: 'Turbine Aeroplane Aerodynamics, Structures & Systems' },
+  { code: 'M15', name: 'Gas Turbine Engine' },
+  { code: 'M17A', name: 'Propeller' },
+]
 
 export default function MilitaryCertPage() {
   return (
@@ -58,10 +75,10 @@ export default function MilitaryCertPage() {
                 ].map((item) => (
                   <li
                     key={item.label}
-                    className="flex justify-between border-b border-white/10 pb-3 text-sm"
+                    className="grid grid-cols-[120px_1fr] gap-4 border-b border-white/10 pb-3 last:border-0"
                   >
-                    <span className="text-blue-100">{item.label}</span>
-                    <span className="font-bold text-white">{item.value}</span>
+                    <span className="text-xs font-bold text-blue-200 uppercase tracking-wider">{item.label}</span>
+                    <span className="text-sm font-medium text-white">{item.value}</span>
                   </li>
                 ))}
               </ul>
@@ -93,6 +110,19 @@ export default function MilitaryCertPage() {
                 </div>
               ))}
             </div>
+          </section>
+        </SectionReveal>
+
+        <SectionReveal>
+          <section>
+            <h3 className="mb-6 text-2xl font-black tracking-tight text-aerojet-blue uppercase">
+              Required EASA Modules
+            </h3>
+            <p className="mb-8 text-slate-600">
+              This fast-track program focuses on these core EASA B1.1 modules, preparing you for
+              the rigorous theoretical examinations.
+            </p>
+            <ModuleGrid modules={militaryModules} />
           </section>
         </SectionReveal>
 

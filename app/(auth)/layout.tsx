@@ -54,7 +54,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         {/* Right form panel */}
-        <div className="flex min-h-screen flex-1 flex-col bg-slate-50">
+        <div className="relative flex min-h-screen flex-1 flex-col bg-slate-50">
           {/* Mobile header */}
           <div className="flex items-center justify-between border-b border-slate-100 bg-white p-4 lg:hidden">
             <Link href="/">

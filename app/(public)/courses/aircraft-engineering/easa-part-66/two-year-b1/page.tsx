@@ -3,11 +3,28 @@ import Link from 'next/link'
 import Hero from '../../../../_components/Hero'
 import SectionReveal from '../../../../_components/SectionReveal'
 import { CheckCircle2, Clock, BookOpen, Zap } from 'lucide-react'
+import ModuleGrid from '@/app/(public)/_components/ModuleGrid'
 
 export const metadata: Metadata = {
   title: '2-Year Full-Time Program (B1.1) | Aerojet Academy',
   description: 'Accelerated 2-year EASA Part-66 B1.1 Mechanical training program.',
 }
+
+const twoYearModules = [
+  { code: 'M1', name: 'Mathematics' },
+  { code: 'M2', name: 'Physics' },
+  { code: 'M3', name: 'Basic Electricals' },
+  { code: 'M4', name: 'Basic Electronics' },
+  { code: 'M5', name: 'Digital Techniques' },
+  { code: 'M6', name: 'Materials & Hardware' },
+  { code: 'M7', name: 'Maintenance Practices' },
+  { code: 'M8', name: 'Basic Aerodynamics' },
+  { code: 'M9', name: 'Human Factors' },
+  { code: 'M10', name: 'Aviation Legislation' },
+  { code: 'M11', name: 'Turbine Aeroplane Aerodynamics & Systems' },
+  { code: 'M15', name: 'Turbine Engines' },
+  { code: 'M17', name: 'Propellers' },
+]
 
 export default function TwoYearPage() {
   return (
@@ -77,17 +94,17 @@ export default function TwoYearPage() {
               {[
                 { label: 'Duration', value: '2 years' },
                 { label: 'Schedule', value: '08:00 – 15:00, Mon–Fri' },
-                { label: 'Category', value: 'B1.1 — Aeroplanes Turbine Mechanical' },
+                { label: 'Category', value: 'B1.1 — Aeroplane Turbine Mechanical' },
                 { label: 'Pass Mark', value: '75% per module' },
                 { label: 'Attendance', value: '90%+ required' },
                 { label: 'Certification', value: 'EASA Part-66 B1.1' },
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="flex items-center justify-between border-b border-white/10 pb-3"
+                  className="grid grid-cols-[120px_1fr] gap-4 border-b border-white/10 pb-3 last:border-0"
                 >
-                  <span className="text-sm text-blue-100">{item.label}</span>
-                  <span className="text-sm font-bold text-white">{item.value}</span>
+                  <span className="text-xs font-bold text-blue-200 uppercase tracking-wider">{item.label}</span>
+                  <span className="text-sm font-medium text-white">{item.value}</span>
                 </div>
               ))}
             </div>
@@ -97,30 +114,7 @@ export default function TwoYearPage() {
         <SectionReveal>
           <section>
             <h3 className="mb-5 text-xl font-bold text-aerojet-blue">Required Modules</h3>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {[
-                'M1',
-                'M2',
-                'M3',
-                'M4',
-                'M5',
-                'M6',
-                'M7',
-                'M8',
-                'M9',
-                'M10',
-                'M11',
-                'M15',
-                'M17',
-              ].map((m) => (
-                <div
-                  key={m}
-                  className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center"
-                >
-                  <span className="font-black text-aerojet-sky">{m}</span>
-                </div>
-              ))}
-            </div>
+            <ModuleGrid modules={twoYearModules} />
             <p className="mt-4 text-xs text-slate-500">
               <Link
                 href="/courses/module-requirements"

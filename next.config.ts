@@ -3,7 +3,7 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   images: {
     formats: ['image/avif', 'image/webp'],
-    qualities: [75, 90],
+    qualities: [75, 80, 90],
     minimumCacheTTL: 60,
     remotePatterns: [
       { protocol: 'https', hostname: 'utfs.io' },
@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.ufs.sh' },
     ],
   },
+  allowedDevOrigins: ['192.168.8.173'],
   experimental: {
     serverActions: {
       bodySizeLimit: '4mb',

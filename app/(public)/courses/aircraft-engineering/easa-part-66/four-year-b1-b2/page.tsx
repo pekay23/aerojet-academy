@@ -12,12 +12,31 @@ import {
   ShieldCheck,
   GraduationCap,
 } from 'lucide-react'
+import ModuleGrid from '@/app/(public)/_components/ModuleGrid'
 
 export const metadata: Metadata = {
   title: '4-Year Full-Time Program (B1.1 & B2) | Aerojet Academy',
   description:
     'Comprehensive 4-year EASA Part-66 training with guaranteed job placement upon completion.',
 }
+
+const b1b2Modules = [
+  { code: 'M1', name: 'Mathematics' },
+  { code: 'M2', name: 'Physics' },
+  { code: 'M3', name: 'Electrical Fundamentals' },
+  { code: 'M4', name: 'Electronic Fundamentals' },
+  { code: 'M5', name: 'Digital Techniques / Avionics' },
+  { code: 'M6', name: 'Materials & Hardware' },
+  { code: 'M7A', name: 'Maintenance Practices' },
+  { code: 'M8', name: 'Basic Aerodynamics' },
+  { code: 'M9A', name: 'Human Factors' },
+  { code: 'M10', name: 'Aviation Legislation' },
+  { code: 'M11A', name: 'Turbine Aeroplane Aerodynamics, Structures & Systems' },
+  { code: 'M13', name: 'Aircraft Aerodynamics, Structures & Systems (Avionics)' },
+  { code: 'M14', name: 'Propulsion' },
+  { code: 'M15', name: 'Gas Turbine Engine' },
+  { code: 'M17A', name: 'Propeller' },
+]
 
 export default function FourYearPage() {
   return (
@@ -117,11 +136,12 @@ export default function FourYearPage() {
                   { label: 'Attendance', value: 'More than 90% required' },
                   { label: 'Hands-on Training', value: 'Over 2,000 hours required' },
                 ].map((item) => (
-                  <li key={item.label} className="flex items-start gap-3 text-sm">
+                  <li key={item.label} className="flex items-start gap-4 text-sm">
                     <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-aerojet-sky" />
-                    <span className="text-slate-700">
-                      <strong className="text-slate-900">{item.label}:</strong> {item.value}
-                    </span>
+                    <div className="grid grid-cols-[100px_1fr] gap-2">
+                      <span className="font-bold text-aerojet-blue">{item.label}</span>
+                      <span className="text-slate-700">{item.value}</span>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -154,6 +174,20 @@ export default function FourYearPage() {
             </div>
           </SectionReveal>
         </div>
+
+        {/* Technical Modules Breakdown */}
+        <SectionReveal>
+          <section>
+            <h3 className="mb-6 text-2xl font-black tracking-tight text-aerojet-blue uppercase">
+              Technical Modules Breakdown
+            </h3>
+            <p className="mb-8 text-slate-600">
+              The 4-year program covers all modules required for both B1.1 (Mechanical) and B2 (Avionics)
+              EASA categories, providing you with a dual-scope capability that is highly valued in the industry.
+            </p>
+            <ModuleGrid modules={b1b2Modules} />
+          </section>
+        </SectionReveal>
 
         {/* What's Provided */}
         <SectionReveal>
