@@ -17,6 +17,7 @@ import {
   ArrowDown,
 } from 'lucide-react'
 import { DbCourse, DbCourseCategory } from '@/types/database'
+import { compareNatural } from '@/lib/utils/natural-sort'
 import CourseActionsMenu from '../../_components/CourseActionsMenu'
 
 interface Props {
@@ -139,9 +140,8 @@ export default function CoursesClient({ categories }: Props) {
           const valA = String(a[sortKey] || '')
           const valB = String(b[sortKey] || '')
 
-          return sortDirection === 'asc'
-            ? valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' })
-            : valB.localeCompare(valA, undefined, { numeric: true, sensitivity: 'base' })
+          const result = compareNatural(valA, valB)
+          return sortDirection === 'asc' ? result : -result
         })
 
         return { ...cat, courses: sorted }

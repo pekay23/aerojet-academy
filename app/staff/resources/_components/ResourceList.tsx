@@ -171,7 +171,7 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
       </div>
 
       <Dialog open={!!editingResource} onOpenChange={() => setEditingResource(null)}>
-        <DialogContent className="rounded-3xl sm:max-w-[500px]">
+        <DialogContent className="rounded-3xl lg:max-w-[1100px] sm:max-w-[600px] overflow-hidden p-8">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-slate-900 dark:text-slate-100">
               Edit Resource
