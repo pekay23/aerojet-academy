@@ -35,7 +35,7 @@ export default async function StudentResourcesPage() {
     }
 
     return (
-      <div className="mx-auto max-w-7xl space-y-8">
+      <div className="mx-auto max-w-[1600px] space-y-8">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
             Resources
@@ -57,7 +57,7 @@ export default async function StudentResourcesPage() {
   const resources = await getStudentResources()
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto max-w-[1600px] space-y-8">
       <div>
         <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           Resources

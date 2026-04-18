@@ -48,7 +48,7 @@ export default async function ClassesPage() {
   })
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="mx-auto max-w-[1600px]">
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">

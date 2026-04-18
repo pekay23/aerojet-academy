@@ -104,7 +104,7 @@ async function EnrollmentTab() {
   const data = await getEnrollmentTrends()
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto max-w-[1600px] space-y-8">
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 dark:bg-blue-900/20">
           <TrendingUp className="h-7 w-7" />
@@ -187,7 +187,7 @@ async function RevenueTab() {
   const currency = await getSystemSetting('course_currency', 'EUR')
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto max-w-[1600px] space-y-8">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 dark:bg-amber-900/20">
@@ -296,7 +296,7 @@ async function PoolsTab() {
   const { pools, chartData } = await getPoolAnalytics()
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto max-w-[1600px] space-y-8">
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20">
           <Calendar className="h-7 w-7" />
@@ -417,7 +417,7 @@ async function AttendanceTab() {
   const { records, chartData } = await getAttendanceReport()
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto max-w-[1600px] space-y-8">
       <div className="flex items-center gap-4">
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20">
           <Calendar className="h-7 w-7" />
@@ -523,7 +523,7 @@ export default async function ReportsPage({
   const { tab = 'overview' } = await searchParams
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto max-w-[1600px] space-y-8">
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-white">
           Analytics Dashboard

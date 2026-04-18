@@ -123,7 +123,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       />
       <main id="main-content" className="relative pt-16 lg:pt-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
         <div className="sticky top-0 z-30 border-b border-slate-100 bg-slate-50/80 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-900/80">
-          <div className="mx-auto max-w-7xl px-4 py-3 sm:px-8 lg:px-8">
+          <div className="mx-auto max-w-[1600px] px-4 py-3 sm:px-8 lg:px-8">
             <PortalHeader
               actions={<StudentTopbarActions />}
             >
@@ -133,7 +133,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         </div>
         {!dbUser.registrationPaid && (
           <div className="border-b border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-800 dark:bg-amber-900/20">
-            <div className="mx-auto flex max-w-7xl items-center gap-3">
+            <div className="mx-auto flex max-w-[1600px] items-center gap-3">
               <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
               <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
                 Registration fee unpaid.{' '}
@@ -145,7 +145,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
             </div>
           </div>
         )}
-        <div className="mx-auto max-w-7xl p-4 sm:p-8 lg:px-8 lg:py-6">
+        <div className="mx-auto max-w-[1600px] p-4 sm:p-8 lg:px-8 lg:py-6">
           {hasPathway ? (
             <div className="payment-info" data-payment-info={JSON.stringify(paymentInfo)}>
               {children}

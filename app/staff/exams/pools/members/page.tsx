@@ -76,7 +76,7 @@ export default async function PoolMembersReportPage({
     .filter((event) => event.pools.length > 0)
 
   return (
-    <div className="mx-auto max-w-7xl space-y-8">
+    <div className="mx-auto max-w-[1600px] space-y-8">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <Link
