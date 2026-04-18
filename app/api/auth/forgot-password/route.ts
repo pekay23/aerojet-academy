@@ -21,7 +21,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   // Find user by either personal email or academy email
   const user = await prisma.user.findFirst({
     where: {
-      OR: [{ email }, { academyEmail: email }],
+      OR: [
+        { email: { equals: email, mode: 'insensitive' } },
+        { academyEmail: { equals: email, mode: 'insensitive' } },
+      ],
     },
     include: {
       profile: true,

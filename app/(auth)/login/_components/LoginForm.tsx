@@ -23,7 +23,7 @@ export default function LoginForm() {
     try {
       const result = await signIn('credentials', {
         redirect: false,
-        email,
+        email: email.trim().toLowerCase(),
         password,
       })
 
@@ -84,6 +84,9 @@ export default function LoginForm() {
             placeholder="you@example.com"
             required
             autoComplete="email"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck="false"
             className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
           />
         </div>

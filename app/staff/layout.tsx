@@ -44,19 +44,12 @@ export default async function StaffLayout({ children }: { children: React.ReactN
 
   const welcomeMessages = await getWelcomeMessages(prisma, userRole)
 
-  const [
-    pendingApplicantsCount,
-    pendingEnrollmentsCount,
-    pendingPaymentsCount,
-    unreadMessagesCount,
-    unreadNotificationsCount,
-  ] = await Promise.all([
-    prisma.user.count({ where: { role: 'APPLICANT', status: 'PENDING' } }),
-    prisma.enrollment.count({ where: { status: 'PENDING' } }),
-    prisma.payment.count({ where: { status: 'PENDING' } }),
-    prisma.message.count({ where: { recipientId: user.id, isRead: false } }),
-    prisma.notification.count({ where: { userId: user.id, isRead: false } }),
-  ])
+  // Counts are now handled client-side in components to improve SSR performance
+  const pendingApplicantsCount = 0
+  const pendingEnrollmentsCount = 0
+  const pendingPaymentsCount = 0
+  const unreadMessagesCount = 0
+  const unreadNotificationsCount = 0
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">

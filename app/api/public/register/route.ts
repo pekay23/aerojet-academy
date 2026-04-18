@@ -41,13 +41,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     licenseCategories,
     referralCode,
   } = validation.data
+  const normalizedEmail = email.trim().toLowerCase()
 
   // Check if email already exists (case-insensitive check on both primary and personal emails)
   const existing = await prisma.user.findFirst({
     where: {
       OR: [
-        { email: { equals: email, mode: 'insensitive' } },
-        { personalEmail: { equals: email, mode: 'insensitive' } },
+        { email: { equals: normalizedEmail, mode: 'insensitive' } },
+        { personalEmail: { equals: normalizedEmail, mode: 'insensitive' } },
       ],
     },
   })
@@ -66,8 +67,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const user = await prisma.$transaction(async (tx) => {
     const newUser = await tx.user.create({
       data: {
-        email,
-        personalEmail: email,
+        email: normalizedEmail,
+        personalEmail: normalizedEmail,
         registrationCode,
         registrationFee: config.fee,
         registrationCurrency: config.currency,
@@ -103,7 +104,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Send verification email (wait for it to finish so serverless functions don't kill the request)
-  await sendEmailVerificationEmail(email, firstName, verifyToken)
+  await sendEmailVerificationEmail(normalizedEmail, firstName, verifyToken)
 
   // Audit log
   await createAuditLog({
@@ -111,7 +112,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     entity: 'User',
     entityId: user.id,
     userId: user.id,
-    details: { email },
+    details: { email: normalizedEmail },
     ipAddress: ip,
   })
 
