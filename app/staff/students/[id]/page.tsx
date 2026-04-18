@@ -7,6 +7,7 @@ import { Metadata } from 'next'
 import StudentDetailTabs from './_components/StudentDetailTabs'
 import EditProfileDialog from '@/app/staff/users/[id]/_components/EditProfileDialog'
 import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
+import { compareNatural } from '@/lib/utils/natural-sort'
 
 export const metadata: Metadata = { title: 'Student Details | Staff Portal' }
 
@@ -133,14 +134,7 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
       seenCourse.add(courseId)
       return true
     })
-    .sort((a, b) => {
-      // Extract numeric suffix from module code (e.g., "M01" -> 1, "M12" -> 12)
-      const numA = parseInt((a.code || '').replace(/\D/g, '') || '0', 10)
-      const numB = parseInt((b.code || '').replace(/\D/g, '') || '0', 10)
-      // If both have numbers, sort numerically; otherwise alphabetically
-      if (numA && numB) return numA - numB
-      return (a.code || '').localeCompare(b.code || '')
-    })
+    .sort((a, b) => compareNatural(a.code || '', b.code || ''))
 
   // Serialize data for client components
   const serializedStudent = JSON.parse(
