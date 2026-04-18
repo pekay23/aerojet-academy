@@ -39,7 +39,7 @@ export default async function InstructorLayout({ children }: { children: React.R
         userImage={user.image ?? undefined}
         pendingCount={pendingCount}
       />
-      <main id="main-content" className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+      <main id="main-content" className="relative pt-16 lg:pt-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
         <div className="sticky top-0 z-30 border-b border-slate-100 bg-slate-50/80 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-900/80">
           <div className="mx-auto max-w-7xl px-4 py-3 sm:px-8 lg:px-8">
             <PortalHeader>

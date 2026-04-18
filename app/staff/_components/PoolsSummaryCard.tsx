@@ -45,7 +45,7 @@ export default function PoolsSummaryCard({ pools }: Props) {
             const percentage = Math.round((pool.currentMemberCount / pool.maxCandidates) * 100)
             return (
               <div key={pool.id} className="group relative">
-                <div className="mb-2 flex items-center justify-between">
+                <div className="mb-2 grid grid-cols-[1fr_auto] items-center gap-4">
                   <div className="min-w-0">
                     <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">
                       {pool.name}
