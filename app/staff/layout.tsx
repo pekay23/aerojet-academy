@@ -84,7 +84,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           welcomeMessages={welcomeMessages}
           userName={firstName}
         />
-        <div className="mx-auto max-w-[1600px] p-4 sm:p-8 lg:px-8 lg:py-6">
+        <div className="mx-auto max-w-[1920px] p-4 sm:p-8 lg:px-8 lg:py-6">
           {children}
         </div>
       </main>

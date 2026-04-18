@@ -1,4 +1,6 @@
 import prisma from '@/lib/prisma/client'
+import { subDays, startOfMonth, startOfYear } from 'date-fns'
+import { EnrollmentStatus } from '@prisma/client'
 
 export async function getEnrollmentTrends() {
   const enrollmentsByCourse = await prisma.enrollment.groupBy({
@@ -192,7 +194,7 @@ export async function getRevenueByProgrammeType() {
 
   // Modular enrollments
   const modularEnrollments = await prisma.modularEnrollment.findMany({
-    where: { status: { in: ['CONFIRMED', 'ACTIVE', 'COMPLETED'] } },
+    where: { status: { in: [EnrollmentStatus.APPROVED, EnrollmentStatus.ACTIVE, EnrollmentStatus.GRADUATED] } },
   })
   const modularRevenue = modularEnrollments.reduce((sum, e) => sum + Number(e.amountPaid || 0), 0)
 
@@ -359,4 +361,58 @@ export async function getPaymentStatusBreakdown() {
     amount: Number(s._sum.amount || 0),
     percentage: total > 0 ? Math.round((Number(s._sum.amount || 0) / total) * 100) : 0,
   }))
+}
+
+export async function getCriticalAlerts() {
+  const now = new Date()
+  const threeDaysFromNow = subDays(now, -3) // Actually 3 days in future
+  const twoDaysAgo = subDays(now, 2)
+
+  const [lowFillPools, stalePayments] = await Promise.all([
+    prisma.examPool.findMany({
+      where: {
+        status: 'OPEN',
+        event: {
+          joinDeadline: { lte: threeDaysFromNow, gte: now },
+        },
+      },
+      include: { event: true },
+    }),
+    prisma.payment.findMany({
+      where: {
+        status: 'PENDING',
+        createdAt: { lt: twoDaysAgo },
+      },
+      include: { user: { include: { profile: true } } },
+    }),
+  ])
+
+  const alerts = []
+
+  // Filter pools with < 50% fill rate
+  for (const pool of lowFillPools) {
+    const fillRate = (pool.currentMemberCount / pool.maxCandidates) * 100
+    if (fillRate < 50) {
+      alerts.push({
+        id: `pool-${pool.id}`,
+        type: 'CRITICAL',
+        category: 'Exam Pool',
+        message: `Pool "${pool.name}" is only ${Math.round(fillRate)}% full with deadline approaching.`,
+        date: pool.event?.joinDeadline,
+      })
+    }
+  }
+
+  // Stale payments
+  for (const payment of stalePayments) {
+    alerts.push({
+      id: `payment-${payment.id}`,
+      type: 'WARNING',
+      category: 'Finance',
+      message: `Payment from ${payment.user.profile?.firstName || 'User'} is stale (> 48h).`,
+      date: payment.createdAt,
+    })
+  }
+
+  return alerts.sort((a, b) => (a.date && b.date ? a.date.getTime() - b.date.getTime() : 0))
 }

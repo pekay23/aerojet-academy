@@ -1,5 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { EnrollmentStatus } from '@prisma/client'
 import { NextResponse } from 'next/server'
 
 /**
@@ -70,7 +71,7 @@ export async function POST(req: Request) {
         records.push({
           userId,
           courseId,
-          status: 'ACTIVE',
+          status: EnrollmentStatus.ACTIVE,
           academicYearId: academicYearId || null,
           semesterId: semesterId || null,
           approvedAt: new Date(),

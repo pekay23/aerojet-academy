@@ -5,6 +5,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 import ResitBooking from './ResitBooking'
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
 
 /* ── Helper: fetch common booking data ── */
 async function getBookingData(userId: string) {
@@ -152,7 +153,17 @@ export default async function ResitBookingTab() {
     .filter((r) => r.remaining > 0 && r.bookingGroupRef)
 
   // Deduplicate and map failed exams by Module Code to handle legacy migrated data
-  const failedMap = new Map<string, any>()
+  const failedMap = new Map<string, {
+    examId: string
+    examName: string
+    moduleCode: string
+    moduleName: string
+    score: number
+    passingScore: number
+    examDate: string
+    eventName: string | null
+    examComponentId: string | null
+  }>()
 
   failedResults.forEach((r) => {
     const code = r.exam.examComponent?.course?.code || '—'
@@ -163,7 +174,7 @@ export default async function ResitBookingTab() {
         moduleCode: code,
         moduleName: r.exam.examComponent?.course?.name || '—',
         score: Number(r.score),
-        passingScore: Number(r.exam.passingScore || 75),
+        passingScore: Number(r.exam.passingScore || ACADEMIC_RULES.EASA_PASS_MARK),
         examDate: r.exam.examDate.toISOString(),
         eventName: r.exam.event?.name || null,
         // Keep component ID for booking logic if needed
@@ -181,7 +192,7 @@ export default async function ResitBookingTab() {
         moduleCode: code,
         moduleName: b.exam?.examComponent?.course?.name || '—',
         score: b.score ? Number(b.score) : 0,
-        passingScore: 75,
+        passingScore: ACADEMIC_RULES.EASA_PASS_MARK,
         examDate: (b.examDate || b.bookedAt).toISOString(),
         eventName: b.exam?.event?.name || null,
         examComponentId: b.examComponentId,

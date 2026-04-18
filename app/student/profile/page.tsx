@@ -6,6 +6,7 @@ import prisma from '@/lib/prisma/client'
 import ProfileForm from './_components/ProfileForm'
 import ProfileTabs from './_components/ProfileTabs'
 import ChangePasswordForm from '@/components/shared/ChangePasswordForm'
+import { serializeUserProfile } from '@/lib/student/serialization'
 
 export const metadata: Metadata = {
   title: 'My Profile | Student Portal',
@@ -33,7 +34,7 @@ async function InfoTab() {
 
   if (!user) redirect('/login')
 
-  const serializedUser = JSON.parse(JSON.stringify(user))
+  const serializedUser = serializeUserProfile(user)
 
   return <ProfileForm user={serializedUser} />
 }
@@ -51,7 +52,7 @@ async function SettingsTab() {
 
   if (!user) redirect('/login')
 
-  const serializedSettings = JSON.parse(JSON.stringify(user.settings || {}))
+  const serializedSettings = user.settings || {}
 
   return <SettingsForm initialSettings={serializedSettings} />
 }

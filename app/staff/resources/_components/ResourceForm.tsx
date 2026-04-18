@@ -25,8 +25,12 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
-import { upsertResource } from '@/lib/actions/resources'
+import { upsertResource, getResourceLinkingOptions } from '@/lib/actions/resources'
 import { toast } from '@/hooks/use-toast'
+import { Checkbox } from '@/components/ui/checkbox'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Badge } from '@/components/ui/badge'
+import { Search } from 'lucide-react'
 
 const resourceSchema = z.object({
   id: z.string().optional(),
@@ -38,6 +42,8 @@ const resourceSchema = z.object({
   showToInstructors: z.boolean(),
   showToStaff: z.boolean(),
   showToStudents: z.boolean(),
+  courseIds: z.array(z.string()),
+  pathwayIds: z.array(z.string()),
 })
 
 type ResourceFormValues = z.infer<typeof resourceSchema>
@@ -48,17 +54,30 @@ interface ResourceFormProps {
 }
 
 export default function ResourceForm({ initialData, onSuccess }: ResourceFormProps) {
+  const [options, setOptions] = React.useState<{ courses: any[]; pathways: any[] }>({
+    courses: [],
+    pathways: [],
+  })
+  const [courseSearch, setCourseSearch] = React.useState('')
+
+  React.useEffect(() => {
+    getResourceLinkingOptions().then(setOptions)
+  }, [])
+
   const form = useForm<ResourceFormValues>({
     resolver: zodResolver(resourceSchema),
-    defaultValues: initialData || {
-      name: '',
-      description: '',
-      url: '',
-      type: 'PDF',
-      category: 'INSTITUTIONAL',
-      showToInstructors: true,
-      showToStaff: true,
-      showToStudents: false,
+    defaultValues: {
+      id: initialData?.id,
+      name: initialData?.name || '',
+      description: initialData?.description || '',
+      url: initialData?.url || '',
+      type: initialData?.type || 'PDF',
+      category: initialData?.category || 'INSTITUTIONAL',
+      showToInstructors: initialData?.showToInstructors ?? true,
+      showToStaff: initialData?.showToStaff ?? true,
+      showToStudents: initialData?.showToStudents ?? false,
+      courseIds: initialData?.courses?.map((c: any) => c.id) || [],
+      pathwayIds: initialData?.pathways?.map((p: any) => p.id) || [],
     },
   })
 
@@ -214,6 +233,129 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
               </FormItem>
             )}
           />
+
+          {form.watch('showToStudents') && (
+            <div className="mt-4 space-y-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <FormField
+                control={form.control}
+                name="courseIds"
+                render={() => (
+                  <FormItem>
+                    <div className="mb-4">
+                      <FormLabel className="text-base">Target Modules</FormLabel>
+                      <FormDescription>
+                        Select modules that should have access to this resource. Leave empty for global student access.
+                      </FormDescription>
+                    </div>
+                    <div className="relative mb-2">
+                      <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                      <Input
+                        placeholder="Search modules..."
+                        className="pl-9"
+                        value={courseSearch}
+                        onChange={(e) => setCourseSearch(e.target.value)}
+                      />
+                    </div>
+                    <ScrollArea className="h-[200px] rounded-md border p-4">
+                      <div className="space-y-2">
+                        {options.courses
+                          .filter(course => 
+                            course.code.toLowerCase().includes(courseSearch.toLowerCase()) || 
+                            course.name.toLowerCase().includes(courseSearch.toLowerCase())
+                          )
+                          .map((course) => (
+                          <FormField
+                            key={course.id}
+                            control={form.control}
+                            name="courseIds"
+                            render={({ field }) => {
+                              return (
+                                <FormItem
+                                  key={course.id}
+                                  className="flex flex-row items-start space-x-3 space-y-0"
+                                >
+                                  <FormControl>
+                                    <Checkbox
+                                      checked={field.value?.includes(course.id)}
+                                      onCheckedChange={(checked) => {
+                                        return checked
+                                          ? field.onChange([...field.value, course.id])
+                                          : field.onChange(
+                                              field.value?.filter(
+                                                (value) => value !== course.id
+                                              )
+                                            )
+                                      }}
+                                    />
+                                  </FormControl>
+                                  <FormLabel className="font-normal cursor-pointer">
+                                    <Badge variant="outline" className="mr-2 font-mono">{course.code}</Badge>
+                                    {course.name}
+                                  </FormLabel>
+                                </FormItem>
+                              )
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </ScrollArea>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="pathwayIds"
+                render={() => (
+                  <FormItem>
+                    <div className="mb-4">
+                      <FormLabel className="text-base">Target Pathways</FormLabel>
+                      <FormDescription>
+                        Restrict visibility to specific study pathways.
+                      </FormDescription>
+                    </div>
+                    <div className="space-y-2 rounded-md border p-4">
+                      {options.pathways.map((pathway) => (
+                        <FormField
+                          key={pathway.id}
+                          control={form.control}
+                          name="pathwayIds"
+                          render={({ field }) => {
+                            return (
+                              <FormItem
+                                key={pathway.id}
+                                className="flex flex-row items-start space-x-3 space-y-0"
+                              >
+                                <FormControl>
+                                  <Checkbox
+                                    checked={field.value?.includes(pathway.id)}
+                                    onCheckedChange={(checked) => {
+                                      return checked
+                                        ? field.onChange([...field.value, pathway.id])
+                                        : field.onChange(
+                                            field.value?.filter(
+                                              (value) => value !== pathway.id
+                                            )
+                                          )
+                                    }}
+                                  />
+                                </FormControl>
+                                <FormLabel className="font-normal cursor-pointer">
+                                  {pathway.name}
+                                </FormLabel>
+                              </FormItem>
+                            )
+                          }}
+                        />
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          )}
         </div>
 
         <div className="flex justify-end gap-3">

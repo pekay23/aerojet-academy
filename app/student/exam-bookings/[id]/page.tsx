@@ -58,6 +58,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const booking = await prisma.examBooking.findUnique({
     where: { id: bookingId },
     include: {
+      exam: { select: { passingScore: true } },
       examComponent: { include: { course: true } },
       event: true,
       walletTransaction: true,
@@ -87,8 +88,9 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     booking.course?.name ||
     ''
 
+  const passingThreshold = Number(booking.exam?.passingScore || 75)
   const pct = booking.percentage ? Number(booking.percentage) : null
-  const passing = pct !== null && pct >= 75
+  const passing = pct !== null && pct >= passingThreshold
   const resultNorm = booking.result?.toLowerCase() ?? ''
 
   return (

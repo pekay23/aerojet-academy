@@ -24,6 +24,7 @@ import AvailablePoolsTab from './_components/AvailablePoolsTab'
 import MyBookingsTab from './_components/MyBookingsTab'
 import BookingActionTab from './_components/BookingActionTab'
 import ResitBookingTab from './_components/ResitBookingTab'
+import { UnifiedExamRecord } from '@/lib/student/types'
 
 export const metadata: Metadata = {
   title: 'My Exams | Student Portal',
@@ -108,13 +109,13 @@ export default async function ExamsPage({
   }
 
   // Formal and migrated historical records logic, only computed if Records tab is active
-  let allHistory: any[] = []
-  let failedAttempts: any[] = []
+  let allHistory: UnifiedExamRecord[] = []
+  let failedAttempts: UnifiedExamRecord[] = []
   
   if (tab === 'records' && results && bookings) {
     const formalResults = results.map((r) => ({
       id: r.id,
-      type: 'ORIGINAL',
+      type: 'ORIGINAL' as const,
       moduleCode: r.exam.examComponent?.course?.code || '—',
       moduleName: r.exam.examComponent?.course?.name || r.exam.name,
       date: r.exam.examDate,
@@ -125,24 +126,25 @@ export default async function ExamsPage({
       grade: r.grade,
     }))
 
-    const historicalResults = bookings
-      .filter((b: any) => {
+    const historicalResults: UnifiedExamRecord[] = bookings
+      .filter((b) => {
         const r = b.result?.toLowerCase()
         return r === 'pass' || r === 'fail' || (b.score !== null && b.score !== undefined)
       })
-      .filter((b: any) => {
+      .filter((b) => {
         // Deduplicate: if there is a formal result for the same module on the same date, skip the booking
-        const bCode = b.moduleCode || b.exam?.examComponent?.course?.code
-        const bDate = (b.examDate || b.bookedAt).getTime()
+        const bCode = b.moduleCode || b.exam?.examComponent?.course?.code || b.examComponent?.course?.code
+        const bDate = (b.examDate || b.bookedAt || new Date()).getTime()
         return !formalResults.some((f) => f.moduleCode === bCode && f.date.getTime() === bDate)
       })
-      .map((b: any) => {
-        const score = b.score !== null && b.score !== undefined ? Number(b.score) : undefined
+      .map((b): UnifiedExamRecord => {
+        const score = b.score !== null && b.score !== undefined ? Number(b.score) : null
         const resultStr = b.result?.toLowerCase()
+        const passingThreshold = Number(b.exam?.passingScore || 75)
         
         let passed: boolean | null = null
-        if (score !== undefined) {
-          passed = score >= 75
+        if (score !== null) {
+          passed = score >= passingThreshold
         } else if (resultStr === 'pass') {
           passed = true
         } else if (resultStr === 'fail') {
@@ -151,10 +153,10 @@ export default async function ExamsPage({
 
         return {
           id: b.id,
-          type: 'HISTORICAL',
+          type: 'HISTORICAL' as const,
           moduleCode: b.moduleCode || b.exam?.examComponent?.course?.code || b.examComponent?.course?.code || '—',
           moduleName: b.examComponent?.course?.name || b.exam?.examComponent?.course?.name || 'Historical Exam',
-          date: b.examDate || b.bookedAt,
+          date: b.examDate || b.bookedAt || new Date(),
           passed,
           score,
           percentage: score,

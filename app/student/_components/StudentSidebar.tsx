@@ -69,8 +69,8 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
     if (hasFullAccess) {
       baseLinks.push(
         { label: 'Exams', href: '/student/exams', icon: ClipboardCheck },
-        { label: 'Grades', href: '/student/grades', icon: CalendarCheck },
-        { label: 'Attendance', href: '/student/attendance', icon: CalendarCheck },
+        { label: 'Grades', href: '/student/grades', icon: Award },
+        { label: 'Attendance', href: '/student/attendance', icon: FileCheck },
         { label: 'Certificates', href: '/student/certificates', icon: Award }
       )
     }
