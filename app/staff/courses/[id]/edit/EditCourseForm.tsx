@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { MultiSelect, type Option } from '@/components/ui/multi-select'
 import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -37,7 +38,7 @@ const courseFormSchema = z.object({
   description: z.string().optional().nullable(),
   categoryId: z.string().min(1, 'Category is required'),
   applicableCategories: z.array(z.string()).default([]),
-  moduleType: z.enum(['CORE', 'SPECIALIST', 'AVIONICS']).default('CORE'),
+  moduleType: z.enum(['CORE', 'SPECIALIST', 'AVIONICS']).optional().nullable(),
   duration: z.coerce.number().int().positive().optional().nullable(),
   price: z.coerce.number().positive(),
   isActive: z.boolean().default(true),
@@ -57,20 +58,33 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
+  const [licenseCategories, setLicenseCategories] = useState<Option[]>([])
 
   useEffect(() => {
-    async function fetchCategories() {
+    async function fetchData() {
       try {
-        const response = await fetch('/api/staff/course-categories')
-        const data = await response.json()
-        if (data.success) {
-          setCategories(data.data)
+        const [catsRes, licensesRes] = await Promise.all([
+          fetch('/api/staff/course-categories'),
+          fetch('/api/staff/license-categories')
+        ])
+        
+        const catsData = await catsRes.json()
+        const licensesData = await licensesRes.json()
+
+        if (catsData.success) {
+          setCategories(catsData.data)
+        }
+        if (licensesData.success) {
+          setLicenseCategories(licensesData.data.map((l: any) => ({
+            label: `${l.code} - ${l.name}`,
+            value: l.code
+          })))
         }
       } catch (error) {
-        console.error('Failed to fetch categories:', error)
+        console.error('Failed to fetch data:', error)
       }
     }
-    fetchCategories()
+    fetchData()
   }, [])
 
   const form = useForm<CourseFormValues>({
@@ -249,13 +263,13 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
           />
         )}
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
           <FormField
             control={form.control}
             name="categoryId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="course-category">Category</FormLabel>
+                <FormLabel htmlFor="course-category">Course Category</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger id="course-category">
@@ -279,42 +293,15 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
             name="applicableCategories"
             render={({ field }) => (
               <FormItem>
-                <FormLabel htmlFor="course-app-categories">Applicable Categories (Multi-select via comma)</FormLabel>
+                <FormLabel htmlFor="course-app-categories">Applicable License Categories</FormLabel>
                 <FormControl>
-                  <Input
-                    id="course-app-categories"
-                    placeholder="e.g., A, B1, B2"
-                    autoComplete="off"
-                    {...field}
-                    value={Array.isArray(field.value) ? field.value.join(', ') : ''}
-                    onChange={(e) => {
-                      const val = e.target.value.split(',').map(v => v.trim()).filter(Boolean);
-                      field.onChange(val);
-                    }}
+                  <MultiSelect
+                    options={licenseCategories}
+                    selected={field.value}
+                    onChange={field.onChange}
+                    placeholder="Select license categories..."
                   />
                 </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="moduleType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel htmlFor="course-module-type">Module Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value || 'CORE'}>
-                  <FormControl>
-                    <SelectTrigger id="course-module-type">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="CORE">Core</SelectItem>
-                    <SelectItem value="SPECIALIST">Specialist</SelectItem>
-                    <SelectItem value="AVIONICS">Avionics</SelectItem>
-                  </SelectContent>
-                </Select>
                 <FormMessage />
               </FormItem>
             )}
