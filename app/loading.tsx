@@ -15,11 +15,11 @@ export default function GlobalLoading() {
         <div className="relative flex h-32 w-32 items-center justify-center rounded-full border border-slate-100 bg-white shadow-xl">
           <Image
             src="/images/logos/AATA_logo_hor_onWhite.webp"
-            alt="Aerojet"
+            alt="Aerojet Logo"
             width={80}
             height={20}
-            className="w-20 animate-pulse object-contain transition-all duration-700"
-            style={{ height: 'auto' }}
+            className="animate-pulse object-contain transition-all duration-700"
+            style={{ width: '80px', height: 'auto' }}
           />
         </div>
       </div>

@@ -10,8 +10,8 @@ export default function NotFound() {
           alt="Aerojet Academy"
           width={180}
           height={40}
-          className="h-auto w-auto"
-          style={{ width: 'auto', height: 'auto' }}
+          className="object-contain"
+          style={{ width: '180px', height: 'auto' }}
           priority
         />
       </Link>
