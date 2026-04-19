@@ -155,7 +155,10 @@ export default function ManualWalletAdjustmentDialog({
               Operation Type
             </Label>
             <Select value={action} onValueChange={(val: any) => setAction(val)}>
-              <SelectTrigger className="w-full rounded-xl border-slate-200 bg-white focus:ring-aerojet-blue dark:border-slate-800 dark:bg-slate-950">
+              <SelectTrigger
+                id="action"
+                className="w-full rounded-xl border-slate-200 bg-white focus:ring-aerojet-blue dark:border-slate-800 dark:bg-slate-950"
+              >
                 <SelectValue placeholder="Select action" />
               </SelectTrigger>
               <SelectContent>
@@ -176,6 +179,7 @@ export default function ManualWalletAdjustmentDialog({
             </Label>
             <Input
               id="amount"
+              name="amount"
               type="number"
               step="0.01"
               placeholder={isSetBalance ? 'Enter new balance' : '0.00'}
@@ -196,6 +200,7 @@ export default function ManualWalletAdjustmentDialog({
             </Label>
             <Textarea
               id="description"
+              name="description"
               placeholder="e.g. Cash payment received, Refund for course cancellation, Correction of previous error."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -213,6 +218,7 @@ export default function ManualWalletAdjustmentDialog({
             </Label>
             <Input
               id="reference"
+              name="reference"
               placeholder="e.g. Receipt #, Bank Tx ID"
               value={reference}
               onChange={(e) => setReference(e.target.value)}

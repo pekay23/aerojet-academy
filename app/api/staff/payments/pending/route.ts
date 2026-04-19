@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiPaginated, withErrorHandler } from '@/lib/api/response'
 import { parsePagination } from '@/lib/api/response'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 // GET /api/staff/payments/pending
 export const GET = withErrorHandler(async (req: NextRequest) => {
@@ -25,6 +26,6 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     prisma.payment.count({ where }),
   ])
 
-  return apiPaginated(payments, total, page, limit)
+  return apiPaginated(serializePrisma(payments), total, page, limit)
 })
 

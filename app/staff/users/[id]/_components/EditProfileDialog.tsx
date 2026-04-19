@@ -110,6 +110,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
+                autoComplete="given-name"
               />
             </div>
             <div className="grid gap-2">
@@ -120,6 +121,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
                 placeholder="Optional"
                 value={formData.middleName}
                 onChange={handleChange}
+                autoComplete="additional-name"
               />
             </div>
             <div className="grid gap-2">
@@ -129,6 +131,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
+                autoComplete="family-name"
               />
             </div>
           </div>
@@ -141,6 +144,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
               type="email"
               value={formData.email}
               onChange={handleChange}
+              autoComplete="email"
             />
             <p className="text-xs text-slate-400">
               Used for signing in and academy correspondence
@@ -155,6 +159,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
               type="email"
               value={formData.personalEmail}
               onChange={handleChange}
+              autoComplete="email"
             />
             <p className="text-xs text-slate-400">Original email for external communication</p>
           </div>
@@ -167,6 +172,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
               type="tel"
               value={formData.phone}
               onChange={handleChange}
+              autoComplete="tel"
             />
           </div>
 
@@ -178,6 +184,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
                 name="nationality"
                 value={formData.nationality}
                 onChange={handleChange}
+                autoComplete="country-name"
               />
             </div>
             <div className="grid gap-2">
@@ -188,6 +195,7 @@ export default function EditProfileDialog({ userId, initialData }: EditProfileDi
                 type="date"
                 value={formData.dateOfBirth}
                 onChange={handleChange}
+                autoComplete="bday"
               />
             </div>
           </div>

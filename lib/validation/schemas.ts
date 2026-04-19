@@ -138,7 +138,7 @@ export const createCourseSchema = z.object({
   description: z.string().optional(),
   subtitle: z.string().optional(),
   categoryId: z.string().min(1, 'Category is required'),
-  moduleType: z.enum(['CORE', 'SPECIALIST', 'AVIONICS']).optional(),
+  moduleType: z.enum(['CORE', 'SPECIALIST', 'AVIONICS']).optional().nullable(),
   duration: z.coerce.number().int().positive().optional(),
   price: z.coerce.number().positive(),
   currency: z.string().default('EUR'),

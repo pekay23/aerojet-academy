@@ -57,8 +57,14 @@ export default function InstructorsTable() {
       })
       const res = await fetch(`/api/staff/users?${params}`)
       const data = await res.json()
-      setInstructors(data.users ?? [])
-      setTotal(data.total ?? 0)
+      
+      if (data.success) {
+        setInstructors(data.data ?? [])
+        setTotal(data.meta?.total ?? 0)
+      } else {
+        setInstructors([])
+        setTotal(0)
+      }
     } finally {
       setLoading(false)
     }
@@ -83,10 +89,13 @@ export default function InstructorsTable() {
           <div className="relative w-full sm:w-60">
             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
+              id="instructors-search"
+              name="instructors-search"
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search instructors..."
+              autoComplete="off"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 focus:ring-aerojet-sky dark:border-slate-700 dark:bg-slate-800/50"
             />
           </div>

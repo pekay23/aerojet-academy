@@ -149,6 +149,11 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
             <TableRow>
               <TableHead className="w-12 px-6">
                 <button
+                  id="select-all-enrollments"
+                  name="select-all-enrollments"
+                  role="checkbox"
+                  aria-checked={selectedIds.length === paged.length && paged.length > 0}
+                  aria-label="Select all enrollments on this page"
                   onClick={toggleAll}
                   className="hover:text-aerojet-blue text-slate-400 transition-colors"
                 >
@@ -184,6 +189,11 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
                 >
                   <TableCell className="px-6">
                     <button
+                      id={`select-enrollment-${enrollment.id}`}
+                      name={`select-enrollment-${enrollment.id}`}
+                      role="checkbox"
+                      aria-checked={selectedIds.includes(enrollment.id)}
+                      aria-label={`Select enrollment for ${enrollment.user.email}`}
                       onClick={() => toggleOne(enrollment.id)}
                       className="hover:text-aerojet-blue text-slate-300 transition-colors"
                     >

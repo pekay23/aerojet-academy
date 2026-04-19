@@ -5,6 +5,7 @@ import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/r
 import { topUpWallet, adjustWallet, setWalletBalance, getOrCreateWallet } from '@/lib/wallet/operations'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { TransactionType } from '@prisma/client'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 // GET /api/staff/students/[id]/wallet — View student wallet with full history
 export const GET = withErrorHandler(
@@ -89,7 +90,7 @@ export const GET = withErrorHandler(
       proofUrl: proofMap[t.id] || null,
     }))
 
-    return apiSuccess({
+    return apiSuccess(serializePrisma({
       wallet: {
         id: wallet.id,
         userId: wallet.userId,
@@ -108,7 +109,7 @@ export const GET = withErrorHandler(
       } : null,
       transactions: enrichedTransactions,
       meta: { total, limit, offset },
-    })
+    }))
   }
 )
 
@@ -270,7 +271,7 @@ export const POST = withErrorHandler(
       },
     })
 
-    return apiSuccess({
+    return apiSuccess(serializePrisma({
       message: operationDescription,
       wallet: {
         id: wallet.id,
@@ -279,6 +280,6 @@ export const POST = withErrorHandler(
         availableBalance: wallet.availableBalance,
         currency: wallet.currency,
       },
-    })
+    }))
   }
 )

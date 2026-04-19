@@ -75,7 +75,8 @@ model User {
   @@index([email])
   @@index([academyEmail])
   @@index([registrationCode])
-  @@index([role, status])
+  @@index([role, status, deletedAt])
+  @@index([deletedAt])
   @@index([createdAt])
   @@map("users")
 }
@@ -774,7 +775,8 @@ model Payment {
   user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
-  @@index([status])
+  @@index([status, deletedAt])
+  @@index([deletedAt])
   @@index([approvedAt])
   @@index([referenceCode])
   @@index([referenceType, referenceId])
@@ -820,7 +822,7 @@ model Notification {
   sender    User?            @relation("SentNotifications", fields: [sentBy], references: [id])
   user      User             @relation("ReceivedNotifications", fields: [userId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
+  @@index([userId, isRead])
   @@index([isRead])
   @@index([type])
   @@index([createdAt(sort: Desc)])
@@ -844,7 +846,7 @@ model Message {
   sender      User      @relation("SentMessages", fields: [senderId], references: [id])
 
   @@index([senderId])
-  @@index([recipientId])
+  @@index([recipientId, isRead])
   @@index([isRead])
   @@index([threadId])
   @@index([createdAt(sort: Desc)])

@@ -143,8 +143,10 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <Input
+                id="candidate-search"
                 placeholder="Search by name or email..."
                 className="pl-10"
+                autoComplete="off"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -187,10 +189,10 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
           name="selectedModule"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Module</FormLabel>
+              <FormLabel htmlFor="candidate-module">Module</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
-                  <SelectTrigger>
+                  <SelectTrigger id="candidate-module">
                     <SelectValue placeholder="Select a module" />
                   </SelectTrigger>
                 </FormControl>

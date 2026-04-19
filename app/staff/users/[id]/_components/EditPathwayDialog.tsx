@@ -88,13 +88,16 @@ export default function EditPathwayDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+            <label htmlFor="pathway-select" className="text-sm font-bold text-slate-700 dark:text-slate-300">
               Select Pathway
             </label>
             <select
+              id="pathway-select"
+              name="pathway"
               value={pathway || ''}
               onChange={(e) => setPathway(e.target.value as PathwayCode)}
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+              autoComplete="off"
             >
               <option value="" disabled>
                 Select Pathway
@@ -108,16 +111,19 @@ export default function EditPathwayDialog({
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-bold text-slate-700 dark:text-slate-300">
+            <label htmlFor="pathway-reason" className="text-sm font-bold text-slate-700 dark:text-slate-300">
               Reason for Change
             </label>
             <textarea
+              id="pathway-reason"
+              name="reason"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="e.g. Student requested migration from Modular to Full-Time"
               required
               rows={3}
               className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+              autoComplete="off"
             />
           </div>
 

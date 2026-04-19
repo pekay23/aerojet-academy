@@ -101,8 +101,14 @@ export default function StudentsTable({
       })
       const res = await fetch(`/api/staff/students?${params}`)
       const data = await res.json()
-      setStudents(data.students ?? [])
-      setTotal(data.total ?? 0)
+      
+      if (data.success) {
+        setStudents(data.data ?? [])
+        setTotal(data.meta?.total ?? 0)
+      } else {
+        setStudents([])
+        setTotal(0)
+      }
     } finally {
       setLoading(false)
     }
@@ -128,10 +134,7 @@ export default function StudentsTable({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
-            Students
-          </h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="text-sm text-slate-400">
             {initialCounts.all ?? total} registered students
           </p>
         </div>
@@ -266,21 +269,23 @@ export default function StudentsTable({
 
       {/* Split Panel */}
       <div
-        className="flex overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
-        style={{ minHeight: '50vh' }}
+        className="flex h-[calc(100vh-300px)] min-h-[500px] overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
       >
         {/* Left: List */}
-        <div className="flex w-full shrink-0 flex-col border-r border-slate-100 lg:w-80 xl:w-96 dark:border-slate-800">
+        <div className="flex w-full shrink-0 flex-col border-r border-slate-100 lg:w-[380px] xl:w-[420px] dark:border-slate-800">
           {/* Search + Filters */}
           <div className="space-y-3 border-b border-slate-100 p-4 dark:border-slate-800">
             <div className="relative">
               <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
+                id="students-search"
+                name="students-search"
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search name, ID, email..."
                 className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
+                autoComplete="off"
               />
             </div>
             <div

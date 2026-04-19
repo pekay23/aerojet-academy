@@ -334,7 +334,7 @@ export default async function CourseDetailsPage({ params }: Props) {
 
               <div className="border-t border-slate-50 pt-5">
                 <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">
-                  {isExamOnly ? 'Exam Fees (Pool)' : 'Investment'}
+                  {isExamOnly ? 'Exam Fees (Pool)' : 'Price'}
                 </p>
                 <div className="mt-1 flex items-baseline gap-1">
                   <span className="text-xl font-black text-aerojet-blue dark:text-blue-400">

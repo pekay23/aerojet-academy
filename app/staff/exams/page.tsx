@@ -5,6 +5,7 @@ import StaffExamsTabs from '../_components/StaffExamsTabs'
 import ExamBookingsTable from '../_components/ExamBookingsTable'
 import RecordsTab from './_components/RecordsTab'
 import { getAvailableModules } from '../actions'
+import { serializePrisma } from '@/lib/utils/serialization'
 import Link from 'next/link'
 import SearchInput from '@/components/SearchInput'
 import { format } from 'date-fns'
@@ -76,7 +77,7 @@ export default async function StaffExamsPage({
 
 /* ─── Events Tab ─── */
 async function EventsTab({ query }: { query?: string }) {
-  const events = await prisma.examEvent.findMany({
+  const eventsRaw = await prisma.examEvent.findMany({
     where: query
       ? { name: { contains: query, mode: 'insensitive' } }
       : undefined,
@@ -87,11 +88,13 @@ async function EventsTab({ query }: { query?: string }) {
     orderBy: { startDate: 'desc' },
   })
 
+  const events = serializePrisma(eventsRaw)
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="w-full max-w-sm">
-          <SearchInput placeholder="Search events..." />
+          <SearchInput id="exams-events-search" placeholder="Search events..." />
         </div>
         <Link
           href="/staff/exams/events/create"
@@ -152,22 +155,22 @@ async function EventsTab({ query }: { query?: string }) {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${
                             event.status === 'OPEN'
-                              ? 'bg-green-100 text-green-700'
+                              ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                               : event.status === 'CONFIRMED'
-                                ? 'bg-blue-100 text-blue-700'
+                                ? 'bg-blue-50 text-blue-600 border border-blue-100'
                                 : event.status === 'DRAFT'
-                                  ? 'bg-slate-100 text-slate-600'
-                                  : 'bg-red-100 text-red-700'
+                                  ? 'bg-slate-50 text-slate-500 border border-slate-100'
+                                  : 'bg-red-50 text-red-600 border border-red-100'
                           }`}
                         >
                           {event.status}
                         </span>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5 font-medium text-slate-700">
-                          <Clock className="h-3.5 w-3.5 text-slate-400" />
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+                          <Calendar className="h-3.5 w-3.5 text-aerojet-blue" />
                           {format(event.startDate, 'MMM d')} –{' '}
                           {format(event.endDate, 'MMM d, yyyy')}
                         </div>
@@ -181,9 +184,8 @@ async function EventsTab({ query }: { query?: string }) {
                       <td className="px-6 py-4 text-right">
                         <Link
                           href={`/staff/exams/events/${event.id}`}
-                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:bg-white hover:shadow-sm dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600"
+                          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-600 shadow-sm transition-all hover:border-aerojet-blue/30 hover:bg-aerojet-blue/5 hover:text-aerojet-blue dark:border-slate-800 dark:bg-slate-900 dark:hover:border-aerojet-blue/50"
                         >
-                          <FileCheck className="h-3.5 w-3.5" />
                           Manage
                         </Link>
                       </td>
@@ -226,20 +228,13 @@ async function BookingsTab({ query }: { query?: string }) {
     orderBy: { createdAt: 'desc' },
   })
 
-  const serialized = bookings.map((b) => ({
-    ...b,
-    amountPaid: b.amountPaid != null ? Number(b.amountPaid) : null,
-    score: b.score != null ? Number(b.score) : null,
-    maxScore: b.maxScore != null ? Number(b.maxScore) : null,
-    percentage: b.percentage != null ? Number(b.percentage) : null,
-    refundAmount: b.refundAmount != null ? Number(b.refundAmount) : null,
-  }))
+  const serialized = serializePrisma(bookings)
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-end">
         <div className="w-full max-w-sm">
-          <SearchInput placeholder="Search students, modules, or events..." />
+          <SearchInput id="exams-bookings-search" placeholder="Search students, modules, or events..." />
         </div>
       </div>
 
@@ -266,7 +261,7 @@ async function ResultsTab({ query }: { query?: string }) {
         },
       },
       orderBy: { createdAt: 'desc' },
-    }),
+    }).then(res => serializePrisma(res)),
     prisma.examBooking.findMany({
       where: {
         status: 'COMPLETED' as const,
@@ -289,7 +284,7 @@ async function ResultsTab({ query }: { query?: string }) {
         },
       },
       orderBy: { examDate: 'desc' },
-    }),
+    }).then(res => serializePrisma(res)),
   ])
 
   // Unify results
@@ -322,7 +317,7 @@ async function ResultsTab({ query }: { query?: string }) {
     <div className="space-y-6">
       <div className="flex items-center justify-end">
         <div className="w-full max-w-sm">
-          <SearchInput placeholder="Search students, exams, or modules..." />
+          <SearchInput id="exams-results-search" placeholder="Search students, exams, or modules..." />
         </div>
       </div>
 
@@ -333,11 +328,11 @@ async function ResultsTab({ query }: { query?: string }) {
               <tr>
                 <th className="px-6 py-4">Student</th>
                 <th className="px-6 py-4">Module / Exam</th>
-                <th className="px-6 py-4 text-center">Date</th>
+                <th className="px-6 py-4 text-center">Dates</th>
                 <th className="px-6 py-4 text-center">Score</th>
                 <th className="px-6 py-4 text-center">Type</th>
                 <th className="px-6 py-4">Result</th>
-                <th className="px-6 py-4 text-right">Certificate</th>
+                <th className="px-6 py-4 text-right"></th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -388,9 +383,11 @@ async function ResultsTab({ query }: { query?: string }) {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      <div className="flex items-center justify-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                        <Calendar className="h-3 w-3" />
-                        {result.date ? format(new Date(result.date), 'MMM d, yyyy') : '—'}
+                      <div className="flex flex-col items-center justify-center gap-0.5">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+                          <Calendar className="h-3 w-3 text-aerojet-blue" />
+                          {result.date ? format(new Date(result.date), 'MMM d, yyyy') : '—'}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-center">
@@ -424,12 +421,12 @@ async function ResultsTab({ query }: { query?: string }) {
                           href={result.certificateUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-blue transition-all duration-150 ease-out hover:bg-aerojet-blue/8 hover:shadow-sm"
+                          className="inline-flex items-center rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-aerojet-blue shadow-sm transition-all hover:border-aerojet-blue/30 hover:bg-aerojet-blue/5 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-aerojet-blue/50"
                         >
-                          View
+                          Certificate
                         </a>
                       ) : (
-                        <span className="text-xs text-slate-400">Not available</span>
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">N/A</span>
                       )}
                     </td>
                   </tr>
@@ -465,28 +462,7 @@ async function RecordsTabServer({ query }: { query?: string }) {
     getAvailableModules(),
   ])
 
-  const serialized = records.map((recordRaw) => {
-    const r: any = recordRaw
-    return {
-      id: r.id,
-      courseId: r.courseId,
-      bookingType: r.bookingType,
-      moduleCode: r.moduleCode,
-      examDate: r.examDate,
-      bookedAt: r.bookedAt,
-      status: r.status,
-      result: r.result,
-      score: r.score ? Number(r.score) : null,
-      percentage: r.percentage ? Number(r.percentage) : null,
-      attemptType: r.attemptType,
-      sourceNotes: r.sourceNotes,
-      user: {
-        email: r.user.email,
-        profile: r.user.profile,
-        studentProfile: r.user.studentProfile,
-      },
-    }
-  })
+  const serialized = serializePrisma(records)
 
   return <RecordsTab records={serialized} modules={modules} />
 }

@@ -37,8 +37,8 @@ const courseFormSchema = z.object({
   }),
   description: z.string().optional(),
   categoryId: z.string().min(1, 'Category is required'),
-  licenseCategory: z.string().nullable().optional(),
-  pathway: z.enum(['B1_MECHANICAL', 'B2_AVIONICS', 'B1_B2_DUAL']).default('B1_B2_DUAL'),
+  applicableCategories: z.array(z.string()).default([]),
+  moduleType: z.enum(['CORE', 'SPECIALIST', 'AVIONICS']).default('CORE'),
   duration: z.coerce.number().int().positive().optional(),
   price: z.coerce.number().positive(),
   isActive: z.boolean().default(true),
@@ -52,7 +52,8 @@ type CourseFormValues = z.infer<typeof courseFormSchema>
 
 const defaultValues: Partial<CourseFormValues> = {
   price: 1000,
-  pathway: 'B1_B2_DUAL',
+  moduleType: 'CORE',
+  applicableCategories: [],
 }
 
 export default function CreateCoursePage() {
@@ -86,7 +87,6 @@ export default function CreateCoursePage() {
       // Process prerequisites into array
       const data = {
         ...values,
-        licenseCategory: values.licenseCategory === 'none' ? null : values.licenseCategory,
         prerequisites: values.prerequisites
           ? values.prerequisites
               .split(',')
@@ -130,7 +130,7 @@ export default function CreateCoursePage() {
         </Link>
       </div>
 
-      <div className="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <div className="p-6">
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -140,9 +140,9 @@ export default function CreateCoursePage() {
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Course Code</FormLabel>
+                      <FormLabel htmlFor="course-code">Course Code</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., M1" {...field} />
+                        <Input id="course-code" placeholder="e.g., M1" autoComplete="off" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -153,9 +153,9 @@ export default function CreateCoursePage() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Course Name</FormLabel>
+                      <FormLabel htmlFor="course-name">Course Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Mathematics" {...field} />
+                        <Input id="course-name" placeholder="e.g., Mathematics" autoComplete="off" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -168,9 +168,9 @@ export default function CreateCoursePage() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel htmlFor="course-description">Description</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="A brief description of the course" {...field} />
+                      <Textarea id="course-description" placeholder="A brief description of the course" autoComplete="off" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -182,7 +182,7 @@ export default function CreateCoursePage() {
                   control={form.control}
                   name="isActive"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-xl border p-4 shadow-sm">
+                    <FormItem className="flex flex-row items-center justify-between rounded-xl border border-slate-200 p-4 shadow-sm dark:border-slate-700">
                       <div className="space-y-0.5">
                         <FormLabel>Is Active</FormLabel>
                         <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -199,7 +199,7 @@ export default function CreateCoursePage() {
                   control={form.control}
                   name="requiresPrerequisite"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-xl border p-4 shadow-sm">
+                    <FormItem className="flex flex-row items-center justify-between rounded-xl border border-slate-200 p-4 shadow-sm dark:border-slate-700">
                       <div className="space-y-0.5">
                         <FormLabel>Requires Prerequisite</FormLabel>
                         <div className="text-xs text-slate-500 dark:text-slate-400">
@@ -220,9 +220,9 @@ export default function CreateCoursePage() {
                   name="prerequisites"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Prerequisites (Course Codes)</FormLabel>
+                      <FormLabel htmlFor="course-prerequisites">Prerequisites (Course Codes)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., M1, M2 (comma separated)" {...field} />
+                        <Input id="course-prerequisites" placeholder="e.g., M1, M2 (comma separated)" autoComplete="off" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -236,10 +236,10 @@ export default function CreateCoursePage() {
                   name="categoryId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Category</FormLabel>
+                      <FormLabel htmlFor="course-category">Category</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
+                          <SelectTrigger id="course-category">
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                         </FormControl>
@@ -257,57 +257,43 @@ export default function CreateCoursePage() {
                 />
                 <FormField
                   control={form.control}
-                  name="licenseCategory"
+                  name="applicableCategories"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>EASA License Category (Optional)</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value || undefined}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="None" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">None</SelectItem>
-                          <SelectItem value="B1_1_AEROPLANES_TURBINE">
-                            B1.1 Aeroplanes Turbine
-                          </SelectItem>
-                          <SelectItem value="B1_2_AEROPLANES_PISTON">
-                            B1.2 Aeroplanes Piston
-                          </SelectItem>
-                          <SelectItem value="B1_3_HELICOPTERS_TURBINE">
-                            B1.3 Helicopters Turbine
-                          </SelectItem>
-                          <SelectItem value="B1_4_HELICOPTERS_PISTON">
-                            B1.4 Helicopters Piston
-                          </SelectItem>
-                          <SelectItem value="B2_AVIONICS">B2 Avionics</SelectItem>
-                          <SelectItem value="B3_PISTON_AEROPLANES">B3 Piston Aeroplanes</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <FormLabel htmlFor="course-app-categories">Applicable Categories (Multi-select via comma)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          id="course-app-categories"
+                          placeholder="e.g., A, B1, B2" 
+                          autoComplete="off"
+                          {...field} 
+                          value={Array.isArray(field.value) ? field.value.join(', ') : ''}
+                          onChange={(e) => {
+                            const val = e.target.value.split(',').map(v => v.trim()).filter(Boolean);
+                            field.onChange(val);
+                          }}
+                        />
+                      </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control}
-                  name="pathway"
+                  name="moduleType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Study Pathway</FormLabel>
+                      <FormLabel htmlFor="course-module-type">Module Type</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select pathway" />
+                          <SelectTrigger id="course-module-type">
+                            <SelectValue placeholder="Select type" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="B1_MECHANICAL">B1 Mechanical</SelectItem>
-                          <SelectItem value="B2_AVIONICS">B2 Avionics</SelectItem>
-                          <SelectItem value="B1_B2_DUAL">B1/B2 Dual</SelectItem>
+                          <SelectItem value="CORE">Core</SelectItem>
+                          <SelectItem value="SPECIALIST">Specialist</SelectItem>
+                          <SelectItem value="AVIONICS">Avionics</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -322,9 +308,9 @@ export default function CreateCoursePage() {
                   name="duration"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Duration (hours)</FormLabel>
+                      <FormLabel htmlFor="course-duration">Duration (hours)</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="e.g., 100" {...field} />
+                        <Input id="course-duration" type="number" placeholder="e.g., 100" autoComplete="off" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -335,12 +321,12 @@ export default function CreateCoursePage() {
                   name="price"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Price</FormLabel>
+                      <FormLabel htmlFor="course-price">Price</FormLabel>
                       <div className="mb-2 text-xs text-slate-500 italic dark:text-slate-400">
                         Currency is set in system settings.
                       </div>
                       <FormControl>
-                        <Input type="number" step="0.01" {...field} />
+                        <Input id="course-price" type="number" step="0.01" autoComplete="off" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -354,10 +340,12 @@ export default function CreateCoursePage() {
                   name="syllabusUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Syllabus URL</FormLabel>
+                      <FormLabel htmlFor="course-syllabus">Syllabus URL</FormLabel>
                       <FormControl>
                         <Input
+                          id="course-syllabus"
                           placeholder="https://example.com/syllabus.pdf"
+                          autoComplete="off"
                           {...field}
                           value={field.value || ''}
                         />
@@ -371,10 +359,12 @@ export default function CreateCoursePage() {
                   name="materialsUrl"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Materials URL</FormLabel>
+                      <FormLabel htmlFor="course-materials">Materials URL</FormLabel>
                       <FormControl>
                         <Input
+                          id="course-materials"
                           placeholder="https://example.com/materials.zip"
+                          autoComplete="off"
                           {...field}
                           value={field.value || ''}
                         />

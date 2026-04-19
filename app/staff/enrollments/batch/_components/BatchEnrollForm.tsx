@@ -151,16 +151,22 @@ export default function BatchEnrollForm({
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+            <label
+              htmlFor="batch-academic-year"
+              className="mb-1 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+            >
               Academic Year
             </label>
             <select
+              id="batch-academic-year"
+              name="batch-academic-year"
               value={selectedYearId}
               onChange={(e) => {
                 setSelectedYearId(e.target.value)
                 setSelectedSemesterId('')
               }}
               className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              autoComplete="off"
             >
               <option value="">All / None</option>
               {academicYears.map((y) => (
@@ -172,14 +178,20 @@ export default function BatchEnrollForm({
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400">
+            <label
+              htmlFor="batch-semester"
+              className="mb-1 block text-xs font-bold text-slate-500 uppercase dark:text-slate-400"
+            >
               Semester
             </label>
             <select
+              id="batch-semester"
+              name="batch-semester"
               value={selectedSemesterId}
               onChange={(e) => setSelectedSemesterId(e.target.value)}
               disabled={!selectedYearId}
               className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 transition-colors focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              autoComplete="off"
             >
               <option value="">All / None</option>
               {semesters.map((s) => (
@@ -226,6 +238,11 @@ export default function BatchEnrollForm({
                   return (
                     <button
                       key={student.id}
+                      id={`select-student-${student.id}`}
+                      name={`select-student-${student.id}`}
+                      role="checkbox"
+                      aria-checked={isSelected}
+                      aria-label={`Select student ${student.name}`}
                       onClick={() => toggleStudent(student.id)}
                       className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                         isSelected
@@ -296,6 +313,11 @@ export default function BatchEnrollForm({
                     return (
                       <button
                         key={course.id}
+                        id={`select-course-${course.id}`}
+                        name={`select-course-${course.id}`}
+                        role="checkbox"
+                        aria-checked={isSelected}
+                        aria-label={`Select course ${course.code}`}
                         onClick={() => toggleCourse(course.id)}
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                           isSelected
@@ -336,6 +358,11 @@ export default function BatchEnrollForm({
                     return (
                       <button
                         key={course.id}
+                        id={`select-course-${course.id}`}
+                        name={`select-course-${course.id}`}
+                        role="checkbox"
+                        aria-checked={isSelected}
+                        aria-label={`Select course ${course.code}`}
                         onClick={() => toggleCourse(course.id)}
                         className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left transition-all ${
                           isSelected
