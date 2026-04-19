@@ -58,7 +58,7 @@ export default async function EnrollmentsPage({
           <p className="text-slate-500 dark:text-slate-400">Manage student course enrollments</p>
         </div>
         <div className="w-72">
-          <SearchInput placeholder="Search student or course..." />
+          <SearchInput id="enrollments-search" placeholder="Search student or course..." />
         </div>
       </div>
 

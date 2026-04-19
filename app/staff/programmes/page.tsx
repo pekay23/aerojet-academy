@@ -2,6 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { Metadata } from 'next'
+import { serializePrisma } from '@/lib/utils/serialization'
 import { ProgrammeSemester } from './_components/ProgrammesClient'
 import ProgrammesClient from './_components/ProgrammesClient'
 
@@ -21,20 +22,12 @@ export default async function ProgrammesPage() {
     orderBy: { code: 'asc' },
   })
 
-  // Serialize Decimals
-  const serialized = programmes.map((p) => ({
+  const serialized = serializePrisma(programmes).map((p: any) => ({
     ...p,
-    totalFee: p.totalFee.toString(),
-    programmeYears: p.programmeYears.map((y) => ({
+    programmeYears: p.programmeYears.map((y: any) => ({
       ...y,
-      yearFeeAmount: y.yearFeeAmount?.toString() ?? null,
-      seatConfirmationFee: y.seatConfirmationFee.toString(),
-      firstPaymentAmount: y.firstPaymentAmount.toString(),
       semesters: (Array.isArray(y.semesters) ? y.semesters : []) as unknown as ProgrammeSemester[],
-      createdAt: y.createdAt.toISOString(),
     })),
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
   }))
 
   return <ProgrammesClient programmes={serialized} />

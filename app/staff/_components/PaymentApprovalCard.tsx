@@ -22,7 +22,7 @@ interface PaymentApprovalCardProps {
     referenceCode?: string | null
     referenceType?: string | null
     proofUrl?: string | null
-    createdAt: Date | string
+    createdAt: string
     user: {
       id: string
       email: string
@@ -122,7 +122,7 @@ export default function PaymentApprovalCard({
             Amount
           </p>
           <p className="text-base font-black text-aerojet-blue dark:text-blue-400">
-            {payment.currency ?? 'GHS'} {Number(payment.amount).toFixed(2)}
+            {payment.currency ?? 'GHS'} {payment.amount.toFixed(2)}
           </p>
         </div>
         <div>

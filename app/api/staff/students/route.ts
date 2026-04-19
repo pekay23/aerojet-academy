@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { apiPaginated } from '@/lib/api/response'
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession()
@@ -14,7 +15,9 @@ export async function GET(req: NextRequest) {
 
   const where: any = { role: 'STUDENT' }
 
-  if (status === 'active') where.status = 'ACTIVE'
+  if (status === 'all') {
+    where.status = { notIn: ['ARCHIVED', 'DELETED'] }
+  } else if (status === 'active') where.status = 'ACTIVE'
   else if (status === 'suspended') where.status = 'SUSPENDED'
   else if (status === 'archived') where.status = 'ARCHIVED'
 
@@ -46,5 +49,5 @@ export async function GET(req: NextRequest) {
     prisma.user.count({ where }),
   ])
 
-  return NextResponse.json({ students, total, page, limit })
+  return apiPaginated(students, total, page, limit)
 }

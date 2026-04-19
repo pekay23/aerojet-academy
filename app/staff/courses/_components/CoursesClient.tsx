@@ -188,6 +188,8 @@ export default function CoursesClient({ categories }: Props) {
         <div className="relative flex-1">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
+            id="course-search"
+            name="search"
             type="text"
             placeholder="Search by code or name…"
             value={search}
@@ -200,6 +202,8 @@ export default function CoursesClient({ categories }: Props) {
         <div className="flex items-center gap-2">
           <SlidersHorizontal className="h-4 w-4 text-slate-400" />
           <select
+            id="category-filter"
+            name="category"
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
             className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 outline-none focus:border-aerojet-sky dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
@@ -400,7 +404,7 @@ export default function CoursesClient({ categories }: Props) {
                           onClick={() => toggleSort('price')}
                         >
                           <div className="flex items-center justify-end gap-1.5">
-                            Investment
+                            Price
                             {sortKey === 'price' ? (
                               sortDirection === 'asc' ? (
                                 <ArrowUp className="h-3 w-3" />
@@ -492,7 +496,7 @@ export default function CoursesClient({ categories }: Props) {
                               </span>
                             </td>
 
-                            {/* Investment / Price */}
+                            {/* Price */}
                             <td className="px-6 py-4 text-right font-bold text-slate-700 dark:text-slate-300">
                               {course.currency} {Number(course.price).toLocaleString()}
                             </td>

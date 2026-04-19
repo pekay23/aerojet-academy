@@ -14,6 +14,7 @@ import {
   User,
   FilePlus2,
   AlertCircle,
+  Calendar,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
@@ -44,8 +45,8 @@ interface ExamRecord {
   courseId: string | null
   bookingType: string
   moduleCode: string | null
-  examDate: Date | null
-  bookedAt: Date
+  examDate: string | Date | null
+  bookedAt: string | Date
   status: string
   result: string | null
   score: any
@@ -310,12 +311,17 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
         <form onSubmit={handleSubmit} className="space-y-5">
           {/* Student Search */}
           <div className="relative">
-            <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
+            <label 
+              htmlFor="form-student-search"
+              className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase"
+            >
               Student <span className="text-red-500">*</span>
             </label>
             <div className="relative">
               <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
+                id="form-student-search"
+                name="studentQuery"
                 type="text"
                 value={studentQuery}
                 onChange={(e) => {
@@ -323,6 +329,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                   if (selectedStudent) setSelectedStudent(null)
                 }}
                 placeholder="Search by name, email, or student ID..."
+                autoComplete="off"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               />
               {isSearching && (
@@ -389,13 +396,19 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
+              <label 
+                htmlFor="form-booking-type"
+                className="mb-1.5 block text-[10px] font-black tracking-widest text-slate-500 uppercase"
+              >
                 Booking Type <span className="text-red-500">*</span>
               </label>
               <select
+                id="form-booking-type"
+                name="bookingType"
                 value={bookingType}
                 onChange={(e) => setBookingType(e.target.value as any)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                autoComplete="off"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               >
                 {BOOKING_TYPES.map((t) => (
                   <option key={t.value} value={t.value}>
@@ -405,14 +418,20 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               </select>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
+              <label 
+                htmlFor="form-exam-date"
+                className="mb-1.5 block text-[10px] font-black tracking-widest text-slate-500 uppercase"
+              >
                 Exam Date <span className="text-red-500">*</span>
               </label>
               <input
+                id="form-exam-date"
+                name="examDate"
                 type="date"
                 value={examDate}
                 onChange={(e) => setExamDate(e.target.value)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
+                autoComplete="off"
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
                 required
               />
             </div>
@@ -421,13 +440,18 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
           <div className={`grid gap-4 ${bookingType === 'INDIVIDUAL' ? '' : 'sm:grid-cols-2'}`}>
             {moduleSelections.map((selection, idx) => (
               <div key={idx} className="relative">
-                <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
+                <label 
+                  htmlFor={`form-module-query-${idx}`}
+                  className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase"
+                >
                   {bookingType === 'INDIVIDUAL' ? 'Module' : `Module ${idx + 1}`}{' '}
                   <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <input
+                    id={`form-module-query-${idx}`}
+                    name={`moduleQuery_${idx}`}
                     type="text"
                     value={selection.query}
                     onChange={(e) => {
@@ -443,6 +467,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                         updateModuleSelection(idx, { showDropdown: true })
                     }}
                     placeholder="Search module code..."
+                    autoComplete="off"
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm font-bold uppercase transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
@@ -486,12 +511,17 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
           {/* Attempt Type + Score + Notes */}
           <div className="grid gap-4 sm:grid-cols-3">
             <div>
-              <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
+              <label 
+                htmlFor="form-attempt-type"
+                className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase"
+              >
                 Attempt Type
               </label>
               <select
+                id="form-attempt-type"
                 value={attemptType}
                 onChange={(e) => setAttemptType(e.target.value)}
+                autoComplete="off"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               >
                 {ATTEMPT_TYPES.map((t) => (
@@ -502,10 +532,14 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               </select>
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
+              <label 
+                htmlFor="form-score"
+                className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase"
+              >
                 Score (%)
               </label>
               <input
+                id="form-score"
                 type="number"
                 value={score}
                 onChange={(e) => setScore(e.target.value)}
@@ -513,18 +547,24 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 min="0"
                 max="100"
                 step="0.01"
+                autoComplete="off"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               />
             </div>
             <div>
-              <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">
+              <label 
+                htmlFor="form-notes"
+                className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase"
+              >
                 Notes
               </label>
               <input
+                id="form-notes"
                 type="text"
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Optional notes"
+                autoComplete="off"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               />
             </div>
@@ -563,6 +603,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               value={tableFilter}
               onChange={(e) => setTableFilter(e.target.value)}
               placeholder="Filter records..."
+              autoComplete="off"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-10 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
             />
           </div>
@@ -586,7 +627,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                     onSort={requestSort}
                   />
                   <SortHeader
-                    label="Date"
+                    label="Dates"
                     sortKey="examDate"
                     currentSort={sortConfig}
                     onSort={requestSort}
@@ -600,7 +641,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                     onSort={requestSort}
                     align="right"
                   />
-                  <th className="px-6 py-4 text-right">Actions</th>
+                  <th className="px-6 py-4 text-right"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -662,6 +703,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                                   }}
                                   onFocus={() => setShowEditCourseDropdown(true)}
                                   placeholder="Search course..."
+                                  autoComplete="off"
                                   className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-aerojet-blue focus:outline-hidden"
                                 />
                                 {showEditCourseDropdown && (
@@ -704,6 +746,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                                 value={editModuleCode}
                                 onChange={(e) => setEditModuleCode(e.target.value.toUpperCase())}
                                 placeholder="Module code"
+                                autoComplete="off"
                                 className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold uppercase focus:border-aerojet-blue focus:outline-hidden"
                               />
                             </div>
@@ -720,14 +763,22 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                               type="date"
                               value={editDate}
                               onChange={(e) => setEditDate(e.target.value)}
+                              autoComplete="off"
                               className="rounded-lg border border-slate-200 px-2 py-1 text-sm focus:border-aerojet-blue focus:outline-hidden"
                             />
                           ) : (
-                            <span className="text-slate-600 dark:text-slate-400">
-                              {record.examDate
-                                ? format(new Date(record.examDate), 'MMM d, yyyy')
-                                : '—'}
-                            </span>
+                            <div className="flex flex-col gap-0.5">
+                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+                                <Calendar className="h-3 w-3 text-aerojet-blue" />
+                                <span className="text-[10px] text-slate-400 uppercase mr-1">Exam:</span>
+                                {record.examDate ? format(new Date(record.examDate), 'MMM d, yyyy') : '—'}
+                              </div>
+                              <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                                <Clock className="h-2.5 w-2.5" />
+                                <span className="text-slate-400 uppercase">Entered:</span>
+                                {format(new Date(record.bookedAt), 'MMM d, yyyy')}
+                              </div>
+                            </div>
                           )}
                         </td>
                         {/* Attempt */}
@@ -783,6 +834,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                               max="100"
                               step="0.01"
                               placeholder="—"
+                              autoComplete="off"
                               className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-right text-sm focus:border-aerojet-blue focus:outline-hidden"
                             />
                           ) : scoreNum !== null ? (

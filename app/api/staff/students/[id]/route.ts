@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiNotFound, apiError, withErrorHandler } from '@/lib/api/response'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 // GET /api/staff/students/[id]
 // Comprehensive student detail — used by StudentDetailPanel (quick preview)
@@ -119,9 +120,10 @@ export const GET = withErrorHandler(
     }
 
     const { password, ...safe } = student
-    return apiSuccess({
+
+    return apiSuccess(serializePrisma({
       ...safe,
       fullTimeEnrollments: fullTimeData,
-    })
+    }))
   }
 )

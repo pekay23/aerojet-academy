@@ -30,10 +30,7 @@ const editExamPoolSchema = createExamPoolSchema.omit({ eventId: true })
 type ExamPoolFormValues = z.infer<typeof editExamPoolSchema>
 
 interface EditExamPoolFormProps {
-  pool: Omit<ExamPool, 'seatPrice'> & {
-    seatPrice: number | any
-    event: Omit<ExamEvent, 'minRevenueTarget'> & { minRevenueTarget: number | any }
-  }
+  pool: any
 }
 
 const EASA_MODULES = EASA_MODULE_CODES
@@ -107,9 +104,14 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Booking Name</FormLabel>
+              <FormLabel htmlFor="pool-name">Booking Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Morning Session A" {...field} />
+                <Input
+                  id="pool-name"
+                  placeholder="e.g., Morning Session A"
+                  autoComplete="off"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -122,9 +124,14 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
             name="examDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Exam Date (Reference)</FormLabel>
+                <FormLabel htmlFor="pool-exam-date">Exam Date (Reference)</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    id="pool-exam-date"
+                    type="datetime-local"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -135,9 +142,14 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
             name="examStartTime"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Start Time</FormLabel>
+                <FormLabel htmlFor="pool-start">Start Time</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    id="pool-start"
+                    type="datetime-local"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -148,9 +160,14 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
             name="examEndTime"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>End Time</FormLabel>
+                <FormLabel htmlFor="pool-end">End Time</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input
+                    id="pool-end"
+                    type="datetime-local"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -164,12 +181,14 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
             name="minCandidates"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Min Candidates</FormLabel>
+                <FormLabel htmlFor="pool-min-candidates">Min Candidates</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Users className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
+                      id="pool-min-candidates"
                       type="number"
+                      autoComplete="off"
                       className="pl-10"
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
@@ -185,12 +204,14 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
             name="maxCandidates"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Max Candidates</FormLabel>
+                <FormLabel htmlFor="pool-max-candidates">Max Candidates</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Users className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
+                      id="pool-max-candidates"
                       type="number"
+                      autoComplete="off"
                       className="pl-10"
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
@@ -206,12 +227,14 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
             name="moduleDiversityCap"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Module Diversity Cap</FormLabel>
+                <FormLabel htmlFor="pool-diversity-cap">Module Diversity Cap</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Layers className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                     <Input
+                      id="pool-diversity-cap"
                       type="number"
+                      autoComplete="off"
                       className="pl-10"
                       {...field}
                       onChange={(e) => field.onChange(Number(e.target.value))}
@@ -230,12 +253,14 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
           name="seatPrice"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Seat Price</FormLabel>
+              <FormLabel htmlFor="pool-seat-price">Seat Price</FormLabel>
               <FormControl>
                 <div className="relative">
                   <DollarSign className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <Input
+                    id="pool-seat-price"
                     type="number"
+                    autoComplete="off"
                     className="pl-10"
                     placeholder="300.00"
                     {...field}
@@ -273,6 +298,7 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
                         >
                           <FormControl>
                             <Checkbox
+                              id={`module-${moduleCode}`}
                               checked={field.value?.includes(moduleCode)}
                               onCheckedChange={(checked) => {
                                 return checked
@@ -283,7 +309,7 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
                               }}
                             />
                           </FormControl>
-                          <FormLabel className="font-normal">{moduleCode}</FormLabel>
+                          <FormLabel htmlFor={`module-${moduleCode}`} className="font-normal">{moduleCode}</FormLabel>
                         </FormItem>
                       )
                     }}
@@ -300,9 +326,14 @@ export default function EditExamPoolForm({ pool }: EditExamPoolFormProps) {
           name="notes"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Notes (Optional)</FormLabel>
+              <FormLabel htmlFor="pool-notes">Notes (Optional)</FormLabel>
               <FormControl>
-                <Textarea placeholder="Any additional notes for this pool..." {...field} />
+                <Textarea
+                  id="pool-notes"
+                  placeholder="Any additional notes for this pool..."
+                  autoComplete="off"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

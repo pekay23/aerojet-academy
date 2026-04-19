@@ -4,6 +4,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 import { validateBody, createCourseSchema } from '@/lib/validation/schemas'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const staff = await requireStaff()
@@ -26,6 +27,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     isActive,
     requiresPrerequisite,
     prerequisites,
+    subtitle,
+    topics,
+    estimatedStudyHoursMin,
+    estimatedStudyHoursMax,
+    applicableCategories,
+    hasCombinedExam,
     syllabusUrl,
     materialsUrl,
   } = validation.data
@@ -42,6 +49,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       isActive,
       requiresPrerequisite,
       prerequisites: prerequisites || [],
+      subtitle,
+      topics: topics || [],
+      estimatedStudyHoursMin,
+      estimatedStudyHoursMax,
+      applicableCategories: applicableCategories || [],
+      hasCombinedExam,
       syllabusUrl,
       materialsUrl,
     },
@@ -55,5 +68,5 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     details: validation.data,
   })
 
-  return apiCreated(course)
+  return apiCreated(serializePrisma(course))
 })

@@ -2,6 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { Metadata } from 'next'
+import { serializePrisma } from '@/lib/utils/serialization'
 import EditExamEventForm from './_components/EditExamEventForm'
 
 interface PageProps {
@@ -25,12 +26,8 @@ export default async function EditExamEventPage({ params }: PageProps) {
 
   if (!event) notFound()
 
-  // Serialize decimals
-  const serializedEvent = {
-    ...event,
-    minRevenueTarget: Number(event.minRevenueTarget),
-    minRevenueCurrency: event.minRevenueCurrency || 'EUR',
-  }
+  // Serialize Prisma objects (Decimal/Date) for Client Component
+  const serializedEvent = serializePrisma(event)
 
   if (!event) notFound()
 

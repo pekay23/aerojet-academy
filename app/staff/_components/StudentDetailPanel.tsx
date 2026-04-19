@@ -210,7 +210,9 @@ export default function StudentDetailPanel({
 
   return (
     <div
-      className="hidden flex-1 flex-col overflow-y-auto bg-slate-50 lg:flex dark:bg-slate-800/50"
+      className={`fixed inset-0 z-50 flex flex-1 flex-col overflow-y-auto bg-white dark:bg-slate-900 lg:static lg:z-0 lg:flex lg:bg-slate-50 dark:lg:bg-slate-800/50 ${
+        student ? 'flex' : 'hidden'
+      }`}
       style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(0,0,0,0.08) transparent' }}
     >
       {/* Profile Header */}

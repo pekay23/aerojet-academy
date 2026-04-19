@@ -7,6 +7,7 @@ import RevenueChart from '../_components/RevenueChart'
 import PaymentApprovalCard from '../_components/PaymentApprovalCard'
 import GoNoGoMeter from '../_components/GoNoGoMeter'
 import PoolsSummaryCard from '../_components/PoolsSummaryCard'
+import TargetRevenueEditor from '../_components/TargetRevenueEditor'
 import { UserStatus, UserRole, PaymentStatus, PoolStatus } from '@/types/enums'
 import {
   Users,
@@ -19,11 +20,15 @@ import {
 } from 'lucide-react'
 
 async function getDashboardData() {
-  // Build last 6 months date range
   const now = new Date()
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
-  const currency = await getSystemSetting('course_currency', 'EUR')
+  const [currency, targetVal] = await Promise.all([
+    getSystemSetting('course_currency', 'EUR'),
+    getSystemSetting('target_monthly_revenue', '50000'),
+  ])
+  const targetMonthlyRevenue = Number(targetVal)
+
   const { getCurrencySymbol } = await import('@/lib/currency')
   const currSymbol = getCurrencySymbol(currency)
 
@@ -34,6 +39,7 @@ async function getDashboardData() {
     activePoolRaw,
     openPoolsRaw,
     approvedPayments,
+    walletRevTransactions,
   ] = await Promise.all([
     prisma.user.groupBy({
       by: ['role', 'status'],
@@ -67,65 +73,53 @@ async function getDashboardData() {
       orderBy: { examDate: 'asc' },
       take: 5,
     }),
+    // WALLET_TOP_UP payments (Direct cash inflow from bank/card)
     prisma.payment.findMany({
       where: {
         status: PaymentStatus.APPROVED,
         approvedAt: { gte: sixMonthsAgo },
+        referenceType: 'WALLET_TOP_UP',
       },
-      select: { amount: true, approvedAt: true, referenceType: true },
+      select: { amount: true, approvedAt: true },
     }),
   ])
 
   const monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
   ]
-  const revenueByMonth: Record<string, { reg: number; course: number }> = {}
+  const revenueByMonth: Record<string, { total: number }> = {}
 
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
     const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
-    revenueByMonth[key] = { reg: 0, course: 0 }
+    revenueByMonth[key] = { total: 0 }
   }
 
-  for (const payment of approvedPayments) {
-    if (!payment.approvedAt) continue
-    const d = new Date(payment.approvedAt)
+  // Process Approved Top-up Payments
+  for (const p of approvedPayments) {
+    if (!p.approvedAt) continue
+    const d = new Date(p.approvedAt)
     const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
     if (key in revenueByMonth) {
-      if (payment.referenceType === 'REGISTRATION') {
-        revenueByMonth[key].reg += Number(payment.amount)
-      } else {
-        revenueByMonth[key].course += Number(payment.amount)
-      }
+      revenueByMonth[key].total += Number(p.amount)
     }
   }
 
   const revenueData = Object.entries(revenueByMonth).map(([fullKey, val]) => ({
     month: fullKey.split(' ')[0],
-    revenue: val.course, // Main revenue line showing Course (EUR)
-    regRevenue: val.reg, // Secondary data
+    revenue: val.total,
+    target: targetMonthlyRevenue,
   }))
 
   const totalActiveUsers = userStatusCounts
     .filter((u) => u.status === UserStatus.ACTIVE)
-    .reduce((acc, curr) => acc + curr._count._all, 0)
+    .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
   const pendingApplicants = userStatusCounts
     .filter((u) => u.role === UserRole.APPLICANT && u.status === UserStatus.PENDING)
-    .reduce((acc, curr) => acc + curr._count._all, 0)
+    .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
   const activeStudents = userStatusCounts
     .filter((u) => u.role === UserRole.STUDENT && u.status === UserStatus.ACTIVE)
-    .reduce((acc, curr) => acc + curr._count._all, 0)
+    .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
 
   return {
     totalUsers: totalActiveUsers,
@@ -136,6 +130,7 @@ async function getDashboardData() {
     activePool: serializePrisma(activePoolRaw),
     openPools: serializePrisma(openPoolsRaw),
     revenueData,
+    targetMonthlyRevenue,
     currency,
     currSymbol,
   }
@@ -223,15 +218,21 @@ export default async function StaffDashboardPage() {
         {/* Revenue Chart */}
         <div className="min-w-0 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm lg:col-span-2 dark:border-slate-800 dark:bg-slate-900/50">
           <div className="mb-6 flex items-center justify-between">
-            <div>
+            <div className="min-w-0">
               <h2 className="text-sm font-black tracking-tight text-slate-800 uppercase dark:text-white">
                 Course Revenue Overview
               </h2>
-              <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
-                Approved training payments ({data.currency}) — last 6 months
-              </p>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+                <p className="text-xs text-slate-400 dark:text-slate-500">
+                  Approved training payments ({data.currency}) — last 6 months
+                </p>
+                <TargetRevenueEditor
+                  initialAmount={data.targetMonthlyRevenue}
+                  currency={data.currSymbol}
+                />
+              </div>
             </div>
-            <TrendingUp className="text-aerojet-sky h-5 w-5" />
+            <TrendingUp className="text-aerojet-sky h-5 w-5 shrink-0" />
           </div>
           {hasRevenue ? (
             <RevenueChart data={data.revenueData} currency={data.currSymbol} />

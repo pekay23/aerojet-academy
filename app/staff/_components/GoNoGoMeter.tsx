@@ -7,7 +7,7 @@ interface GoNoGoMeterProps {
   targetRevenue: number
   confirmedSeats: number
   totalSeats: number
-  paymentDeadline: Date | string
+  paymentDeadline: string
   poolName?: string
 }
 

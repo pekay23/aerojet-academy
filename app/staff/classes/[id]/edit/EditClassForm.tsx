@@ -99,9 +99,14 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Class Name</FormLabel>
+                <FormLabel htmlFor="edit-class-name">Class Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Evening Batch A" {...field} />
+                  <Input
+                    id="edit-class-name"
+                    placeholder="e.g., Evening Batch A"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -113,10 +118,10 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
             name="courseId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Course</FormLabel>
+                <FormLabel htmlFor="edit-class-course">Course</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger id="edit-class-course">
                       <SelectValue placeholder="Select a course" />
                     </SelectTrigger>
                   </FormControl>
@@ -138,10 +143,10 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
             name="instructorId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Instructor (Optional)</FormLabel>
+                <FormLabel htmlFor="edit-class-instructor">Instructor (Optional)</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger id="edit-class-instructor">
                       <SelectValue placeholder="Select an instructor" />
                     </SelectTrigger>
                   </FormControl>
@@ -164,9 +169,14 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
             name="startDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Start Date</FormLabel>
+                <FormLabel htmlFor="edit-class-start">Start Date</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    id="edit-class-start"
+                    type="date"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -178,9 +188,14 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
             name="endDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>End Date</FormLabel>
+                <FormLabel htmlFor="edit-class-end">End Date</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    id="edit-class-end"
+                    type="date"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -192,10 +207,12 @@ export default function EditClassForm({ initialData, courses, instructors }: Edi
             name="maxStudents"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Max Students</FormLabel>
+                <FormLabel htmlFor="edit-class-max">Max Students</FormLabel>
                 <FormControl>
                   <Input
+                    id="edit-class-max"
                     type="number"
+                    autoComplete="off"
                     {...field}
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
                   />

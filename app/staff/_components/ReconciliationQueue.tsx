@@ -25,10 +25,10 @@ interface Payment {
   originalAmount?: number | null
   paymentMethod: string
   referenceType: string
-  referenceCode: string
-  proofUrl: string
+  referenceCode: string | null
+  proofUrl: string | null
   createdAt: string
-  approvedAt: string
+  approvedAt: string | null
   user: {
     email: string
     profile?: { firstName: string; lastName: string } | null
@@ -48,7 +48,8 @@ export default function ReconciliationQueue() {
       const res = await fetch('/api/staff/finance/reconcile/pending')
       if (!res.ok) throw new Error()
       const data = await res.json()
-      setPayments(data.payments || [])
+      // Fix: access data.data.payments because of apiSuccess envelope
+      setPayments(data.data?.payments || [])
     } catch {
       toast.error('Failed to load pending payments')
     } finally {
@@ -74,7 +75,8 @@ export default function ReconciliationQueue() {
       if (!res.ok) throw new Error()
 
       const data = await res.json()
-      toast.success(data.message)
+      // Fix: access data.data.message
+      toast.success(data.data?.message || 'Reconciled successfully')
       setPayments((prev) => prev.filter((p) => !selectedIds.includes(p.id)))
       setSelectedIds([])
     } catch {
@@ -141,12 +143,18 @@ export default function ReconciliationQueue() {
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex border-b border-slate-100 p-4 dark:border-slate-800">
           <div className="relative flex-1">
+            <label htmlFor="reconcile-search" className="sr-only">
+              Search by user, email, or reference
+            </label>
             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
+              id="reconcile-search"
+              name="reconcile-search"
               type="text"
               placeholder="Search user, email or reference..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
+              autoComplete="off"
               className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-xs outline-none focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800"
             />
           </div>
@@ -157,7 +165,12 @@ export default function ReconciliationQueue() {
             <thead>
               <tr className="bg-slate-50 dark:bg-slate-800/50">
                 <th className="w-12 px-6 py-4">
+                  <label htmlFor="select-all-reconcile" className="sr-only">
+                    Select all for reconciliation
+                  </label>
                   <input
+                    id="select-all-reconcile"
+                    name="select-all-reconcile"
                     type="checkbox"
                     checked={
                       selectedIds.length === filteredPayments.length && filteredPayments.length > 0
@@ -205,7 +218,12 @@ export default function ReconciliationQueue() {
                     className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
                   >
                     <td className="px-6 py-5">
+                      <label htmlFor={`select-payment-${p.id}`} className="sr-only">
+                        Select payment for reconciliation
+                      </label>
                       <input
+                        id={`select-payment-${p.id}`}
+                        name={`select-payment-${p.id}`}
                         type="checkbox"
                         checked={selectedIds.includes(p.id)}
                         onChange={() => toggleSelect(p.id)}
@@ -222,7 +240,7 @@ export default function ReconciliationQueue() {
                     </td>
                     <td className="px-6 py-5">
                       <div className="text-aerojet-blue text-sm font-black dark:text-blue-400">
-                        {p.paymentCurrency || p.currency} {Number(p.originalAmount || p.amount).toFixed(2)}
+                        {p.paymentCurrency || p.currency} {Number(p.originalAmount ?? p.amount).toFixed(2)}
                       </div>
                       {(p.paymentCurrency || p.currency) !== 'EUR' && (
                         <div className="text-[10px] font-medium text-slate-400">

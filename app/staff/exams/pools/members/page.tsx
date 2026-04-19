@@ -95,7 +95,7 @@ export default async function PoolMembersReportPage({
           </p>
         </div>
         <div className="w-full max-w-sm">
-          <SearchInput placeholder="Search students by name, email, or ID..." />
+          <SearchInput id="pool-members-search" placeholder="Search students by name, email, or ID..." />
         </div>
       </div>
 

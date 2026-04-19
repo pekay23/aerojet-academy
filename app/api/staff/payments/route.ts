@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { getAuthSession } from '@/lib/auth/helpers'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession()
@@ -47,9 +48,6 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     total: count,
-    payments: payments.map((p) => ({
-      ...p,
-      amount: Number(p.amount),
-    })),
+    payments: serializePrisma(payments),
   })
 }

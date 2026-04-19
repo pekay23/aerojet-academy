@@ -524,6 +524,7 @@ function renderSidebarContent({
                 height={32}
                 className="h-auto w-auto object-contain"
                 style={{ width: 'auto', height: 'auto' }}
+                priority
               />
             )}
           </Link>

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { serializePrisma } from '@/lib/utils/serialization'
 import BatchEnrollForm from './_components/BatchEnrollForm'
 
 export const metadata: Metadata = { title: 'Batch Enroll | Staff Portal' }
@@ -51,30 +52,36 @@ export default async function BatchEnrollPage() {
     }),
   ])
 
-  const serializedStudents = students.map((s) => ({
-    id: s.id,
-    name: s.profile ? `${s.profile.firstName} ${s.profile.lastName}` : s.email,
-    studentId: s.studentProfile?.studentId || 'N/A',
-    email: s.email,
-    academicYearId: s.studentProfile?.academicYearId || null,
-    semesterId: s.studentProfile?.semesterId || null,
-  }))
-
-  const serializedCourses = courses.map((c) => ({
-    id: c.id,
-    code: c.code,
-    name: c.name,
-    category: c.categoryId,
-  }))
-
-  const serializedYears = academicYears.map((y) => ({
-    id: y.id,
-    name: y.name,
-    semesters: y.semesters.map((s) => ({
+  const serializedStudents = serializePrisma(
+    students.map((s) => ({
       id: s.id,
-      name: s.name,
-    })),
-  }))
+      name: s.profile ? `${s.profile.firstName} ${s.profile.lastName}` : s.email,
+      studentId: s.studentProfile?.studentId || 'N/A',
+      email: s.email,
+      academicYearId: s.studentProfile?.academicYearId || null,
+      semesterId: s.studentProfile?.semesterId || null,
+    }))
+  )
+
+  const serializedCourses = serializePrisma(
+    courses.map((c) => ({
+      id: c.id,
+      code: c.code,
+      name: c.name,
+      category: c.categoryId,
+    }))
+  )
+
+  const serializedYears = serializePrisma(
+    academicYears.map((y) => ({
+      id: y.id,
+      name: y.name,
+      semesters: y.semesters.map((s) => ({
+        id: s.id,
+        name: s.name,
+      })),
+    }))
+  )
 
   return (
     <div className="space-y-6">

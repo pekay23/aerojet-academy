@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession()
@@ -102,6 +103,6 @@ export async function GET(req: NextRequest) {
     lastMonthCourse: Number(lastMonthCourse._sum.amount ?? 0),
     pendingCount,
     pendingTotal: Number(pendingTotal._sum.amount ?? 0),
-    recentTransactions,
+    recentTransactions: serializePrisma(recentTransactions),
   })
 }

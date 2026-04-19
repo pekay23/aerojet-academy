@@ -35,9 +35,21 @@ const formSchema = createClassSchema.extend({
 
 type FormValues = z.infer<typeof formSchema>
 
+interface InstructorItem {
+  id: string
+  user: {
+    id: string
+    email: string
+    profile: {
+      firstName: string
+      lastName: string
+    } | null
+  }
+}
+
 interface CreateClassFormProps {
   courses: { id: string; name: string; code: string }[]
-  instructors: any[]
+  instructors: InstructorItem[]
 }
 
 export default function CreateClassForm({ courses, instructors }: CreateClassFormProps) {
@@ -99,9 +111,14 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Class Name</FormLabel>
+                <FormLabel htmlFor="class-name">Class Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Evening Batch A" {...field} />
+                  <Input
+                    id="class-name"
+                    placeholder="e.g., Evening Batch A"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -113,10 +130,10 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
             name="courseId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Course</FormLabel>
+                <FormLabel htmlFor="class-course">Course</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger id="class-course">
                       <SelectValue placeholder="Select a course" />
                     </SelectTrigger>
                   </FormControl>
@@ -138,10 +155,10 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
             name="instructorId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Instructor (Optional)</FormLabel>
+                <FormLabel htmlFor="class-instructor">Instructor (Optional)</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger id="class-instructor">
                       <SelectValue placeholder="Select an instructor" />
                     </SelectTrigger>
                   </FormControl>
@@ -149,7 +166,9 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
                     <SelectItem value="none">Unassigned</SelectItem>
                     {instructors.map((inst) => (
                       <SelectItem key={inst.id} value={inst.id}>
-                        {inst.user.profile.firstName} {inst.user.profile.lastName}
+                        {inst.user.profile
+                          ? `${inst.user.profile.firstName} ${inst.user.profile.lastName}`
+                          : inst.user.email}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -164,9 +183,14 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
             name="startDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Start Date</FormLabel>
+                <FormLabel htmlFor="class-start">Start Date</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    id="class-start"
+                    type="date"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -178,9 +202,14 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
             name="endDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>End Date</FormLabel>
+                <FormLabel htmlFor="class-end">End Date</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input
+                    id="class-end"
+                    type="date"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -192,10 +221,12 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
             name="maxStudents"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Max Students</FormLabel>
+                <FormLabel htmlFor="class-max">Max Students</FormLabel>
                 <FormControl>
                   <Input
+                    id="class-max"
                     type="number"
+                    autoComplete="off"
                     {...field}
                     onChange={(e) => field.onChange(parseInt(e.target.value))}
                   />

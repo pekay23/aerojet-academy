@@ -36,8 +36,8 @@ const courseFormSchema = z.object({
   }),
   description: z.string().optional().nullable(),
   categoryId: z.string().min(1, 'Category is required'),
-  licenseCategory: z.string().nullable().optional(),
-  pathway: z.enum(['B1_MECHANICAL', 'B2_AVIONICS', 'B1_B2_DUAL']).default('B1_B2_DUAL'),
+  applicableCategories: z.array(z.string()).default([]),
+  moduleType: z.enum(['CORE', 'SPECIALIST', 'AVIONICS']).default('CORE'),
   duration: z.coerce.number().int().positive().optional().nullable(),
   price: z.coerce.number().positive(),
   isActive: z.boolean().default(true),
@@ -80,8 +80,8 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
       name: initialData.name || '',
       description: initialData.description || '',
       categoryId: initialData.categoryId || '',
-      licenseCategory: initialData.licenseCategory || 'none',
-      pathway: initialData.pathway || 'B1_B2_DUAL',
+      applicableCategories: initialData.applicableCategories || [],
+      moduleType: initialData.moduleType || 'CORE',
       duration: initialData.duration || undefined,
       price: Number(initialData.price) || 0,
       isActive: initialData.isActive ?? true,
@@ -98,7 +98,6 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
     try {
       const data = {
         ...values,
-        licenseCategory: values.licenseCategory === 'none' ? null : values.licenseCategory,
         prerequisites: values.prerequisites
           ? values.prerequisites
               .split(',')
@@ -139,9 +138,14 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
             name="code"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Course Code</FormLabel>
+                <FormLabel htmlFor="course-code">Course Code</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., M1" {...field} />
+                  <Input
+                    id="course-code"
+                    placeholder="e.g., M1"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -152,9 +156,14 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Course Name</FormLabel>
+                <FormLabel htmlFor="course-name">Course Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., Mathematics" {...field} />
+                  <Input
+                    id="course-name"
+                    placeholder="e.g., Mathematics"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -167,10 +176,12 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel htmlFor="course-description">Description</FormLabel>
               <FormControl>
                 <Textarea
+                  id="course-description"
                   placeholder="A brief description of the course"
+                  autoComplete="off"
                   {...field}
                   value={field.value || ''}
                 />
@@ -223,9 +234,14 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
             name="prerequisites"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Prerequisites (Course Codes)</FormLabel>
+                <FormLabel htmlFor="course-prerequisites">Prerequisites (Course Codes)</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g., M1, M2 (comma separated)" {...field} />
+                  <Input
+                    id="course-prerequisites"
+                    placeholder="e.g., M1, M2 (comma separated)"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -239,10 +255,10 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
             name="categoryId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category</FormLabel>
+                <FormLabel htmlFor="course-category">Category</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger id="course-category">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                   </FormControl>
@@ -260,48 +276,43 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
           />
           <FormField
             control={form.control}
-            name="licenseCategory"
+            name="applicableCategories"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>EASA License Category (Optional)</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value || 'none'}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="None" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="none">None</SelectItem>
-                    <SelectItem value="B1_1_AEROPLANES_TURBINE">B1.1 Aeroplanes Turbine</SelectItem>
-                    <SelectItem value="B1_2_AEROPLANES_PISTON">B1.2 Aeroplanes Piston</SelectItem>
-                    <SelectItem value="B1_3_HELICOPTERS_TURBINE">
-                      B1.3 Helicopters Turbine
-                    </SelectItem>
-                    <SelectItem value="B1_4_HELICOPTERS_PISTON">B1.4 Helicopters Piston</SelectItem>
-                    <SelectItem value="B2_AVIONICS">B2 Avionics</SelectItem>
-                    <SelectItem value="B3_PISTON_AEROPLANES">B3 Piston Aeroplanes</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel htmlFor="course-app-categories">Applicable Categories (Multi-select via comma)</FormLabel>
+                <FormControl>
+                  <Input
+                    id="course-app-categories"
+                    placeholder="e.g., A, B1, B2"
+                    autoComplete="off"
+                    {...field}
+                    value={Array.isArray(field.value) ? field.value.join(', ') : ''}
+                    onChange={(e) => {
+                      const val = e.target.value.split(',').map(v => v.trim()).filter(Boolean);
+                      field.onChange(val);
+                    }}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
           <FormField
             control={form.control}
-            name="pathway"
+            name="moduleType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Study Pathway</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormLabel htmlFor="course-module-type">Module Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value || 'CORE'}>
                   <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select pathway" />
+                    <SelectTrigger id="course-module-type">
+                      <SelectValue placeholder="Select type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="B1_MECHANICAL">B1 Mechanical</SelectItem>
-                    <SelectItem value="B2_AVIONICS">B2 Avionics</SelectItem>
-                    <SelectItem value="B1_B2_DUAL">B1/B2 Dual</SelectItem>
+                    <SelectItem value="CORE">Core</SelectItem>
+                    <SelectItem value="SPECIALIST">Specialist</SelectItem>
+                    <SelectItem value="AVIONICS">Avionics</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -316,11 +327,13 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
             name="duration"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Duration (hours)</FormLabel>
+                <FormLabel htmlFor="course-duration">Duration (hours)</FormLabel>
                 <FormControl>
                   <Input
+                    id="course-duration"
                     type="number"
                     placeholder="e.g., 100"
+                    autoComplete="off"
                     {...field}
                     value={field.value || ''}
                   />
@@ -334,9 +347,15 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price ({initialData.currency || 'EUR'})</FormLabel>
+                <FormLabel htmlFor="course-price">Price ({initialData.currency || 'EUR'})</FormLabel>
                 <FormControl>
-                  <Input type="number" step="0.01" {...field} />
+                  <Input
+                    id="course-price"
+                    type="number"
+                    step="0.01"
+                    autoComplete="off"
+                    {...field}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -350,10 +369,12 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
             name="syllabusUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Syllabus URL</FormLabel>
+                <FormLabel htmlFor="course-syllabus">Syllabus URL</FormLabel>
                 <FormControl>
                   <Input
+                    id="course-syllabus"
                     placeholder="https://example.com/syllabus.pdf"
+                    autoComplete="off"
                     {...field}
                     value={field.value || ''}
                   />
@@ -367,10 +388,12 @@ export default function EditCourseForm({ initialData }: EditCourseFormProps) {
             name="materialsUrl"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Materials URL</FormLabel>
+                <FormLabel htmlFor="course-materials">Materials URL</FormLabel>
                 <FormControl>
                   <Input
+                    id="course-materials"
                     placeholder="https://example.com/materials.zip"
+                    autoComplete="off"
                     {...field}
                     value={field.value || ''}
                   />

@@ -93,8 +93,14 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
       })
       const res = await fetch(`/api/staff/users?${params}`)
       const data = await res.json()
-      setUsers(data.users ?? [])
-      setTotal(data.total ?? 0)
+      
+      if (data.success) {
+        setUsers(data.data ?? [])
+        setTotal(data.meta?.total ?? 0)
+      } else {
+        setUsers([])
+        setTotal(0)
+      }
     } finally {
       setLoading(false)
     }
@@ -245,10 +251,13 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
         <div className="flex items-center gap-2">
           {/* Status filter */}
           <select
+            id="users-status-filter"
+            name="users-status-filter"
             value={status}
             onChange={(e) => setStatus(e.target.value)}
             aria-label="Filter by status"
             className="focus:ring-aerojet-sky rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+            autoComplete="off"
           >
             {STATUS_FILTERS.map((s) => (
               <option key={s} value={s}>
@@ -259,10 +268,13 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
 
           {/* Role filter */}
           <select
+            id="users-role-filter"
+            name="users-role-filter"
             value={role}
             onChange={(e) => setRole(e.target.value)}
             aria-label="Filter by role"
             className="focus:ring-aerojet-sky rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+            autoComplete="off"
           >
             {ROLE_FILTERS.map((r) => (
               <option key={r} value={r}>
@@ -276,11 +288,14 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
         <div className="relative w-64">
           <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
+            id="users-search"
+            name="users-search"
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search user..."
             className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-xs outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
+            autoComplete="off"
           />
         </div>
       </div>

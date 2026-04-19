@@ -24,7 +24,8 @@ export default function GlobalError({
           alt="Aerojet Academy"
           width={180}
           height={40}
-          className="h-auto w-auto opacity-50 grayscale"
+          className="opacity-50 grayscale"
+          style={{ height: 'auto' }}
         />
       </Link>
 

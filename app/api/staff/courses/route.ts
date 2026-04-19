@@ -11,6 +11,7 @@ import {
 import { parsePagination, parseSearch } from '@/lib/api/response'
 import { createCourseSchema, validateBody } from '@/lib/validation/schemas'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 // GET /api/staff/courses
 export const GET = withErrorHandler(async (req: NextRequest) => {
@@ -21,7 +22,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const categoryFilter = searchParams.get('category')
 
   const where: any = {}
-  if (categoryFilter) where.category = categoryFilter
+  if (categoryFilter) where.categoryId = categoryFilter
   if (search) {
     where.OR = [
       { code: { contains: search, mode: 'insensitive' } },
@@ -40,7 +41,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     prisma.course.count({ where }),
   ])
 
-  return apiPaginated(courses, total, page, limit)
+  return apiPaginated(serializePrisma(courses), total, page, limit)
 })
 
 // POST /api/staff/courses
@@ -53,16 +54,24 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const existing = await prisma.course.findUnique({ where: { code: validation.data.code } })
   if (existing) return apiError('Course code already exists', 409)
 
-  const course = await prisma.course.create({ data: validation.data })
+  const course = await prisma.course.create({ 
+    data: {
+      ...validation.data,
+      moduleType: validation.data.moduleType ?? null,
+      prerequisites: validation.data.prerequisites || [],
+      topics: validation.data.topics || [],
+      applicableCategories: validation.data.applicableCategories || [],
+    }
+  })
 
   await createAuditLog({
     action: AuditAction.CREATE,
     entity: 'Course',
     entityId: course.id,
     userId: staff.id,
-    details: { code: course.code, name: course.name },
+    details: validation.data,
   })
 
-  return apiCreated(course)
+  return apiCreated(serializePrisma(course))
 })
 

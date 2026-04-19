@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 import { z } from 'zod'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 const categorySchema = z.object({
   name: z.string().min(2).max(100),
@@ -20,21 +21,22 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   const { name, description } = validated.data
+  const normalizedName = name.trim().toUpperCase().replace(/\s+/g, '_')
 
   const existing = await prisma.courseCategory.findUnique({
-    where: { name },
+    where: { name: normalizedName },
   })
 
   if (existing) {
-    return apiError('Category already exists')
+    return apiError('Category already exists (normalized)')
   }
 
   const category = await prisma.courseCategory.create({
     data: {
-      name: name.toUpperCase().replace(/\s+/g, '_'),
+      name: normalizedName,
       description,
     },
   })
 
-  return apiCreated(category)
+  return apiCreated(serializePrisma(category))
 })

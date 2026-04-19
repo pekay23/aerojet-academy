@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, withErrorHandler } from '@/lib/api/response'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireStaff()
@@ -23,5 +24,5 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     },
   })
 
-  return apiSuccess({ payments })
+  return apiSuccess({ payments: serializePrisma(payments) })
 })

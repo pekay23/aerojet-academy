@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import EditCourseForm from './EditCourseForm'
 import { Metadata } from 'next'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 export const metadata: Metadata = { title: 'Edit Course | Staff Portal' }
 
@@ -20,11 +21,8 @@ export default async function EditCoursePage({ params }: Props) {
 
   if (!course) notFound()
 
-  // Convert Decimal to number for serialization
-  const serializedCourse = {
-    ...course,
-    price: Number(course.price),
-  }
+  // Serialize Prisma objects (Decimal/Date) for Client Component
+  const serializedCourse = serializePrisma(course)
 
   return (
     <div className="mx-auto max-w-2xl">
