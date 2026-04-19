@@ -39,7 +39,6 @@ async function getDashboardData() {
     activePoolRaw,
     openPoolsRaw,
     approvedPayments,
-    walletRevTransactions,
   ] = await Promise.all([
     prisma.user.groupBy({
       by: ['role', 'status'],
