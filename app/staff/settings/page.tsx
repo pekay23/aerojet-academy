@@ -19,18 +19,18 @@ export const dynamic = 'force-dynamic'
 
 const GENERAL_FIELDS = [
   { key: 'academy_name', label: 'Academy Name', description: 'The official name of the aviation academy', type: 'STRING' as const, default: 'Aerojet Aviation Academy' },
-  { key: 'academy_email', label: 'Contact Email', description: 'Main contact email address', type: 'STRING' as const, default: 'info@aerojet.aviation' },
-  { key: 'academy_phone', label: 'Contact Phone', description: 'Main contact phone number', type: 'STRING' as const, default: '' },
-  { key: 'academy_address', label: 'Address', description: 'Physical address of the academy', type: 'STRING' as const, default: '' },
-  { key: 'registration_fee', label: 'Registration Fee', description: 'Default registration fee for new applicants', type: 'NUMBER' as const, default: '500' },
-  { key: 'registration_open', label: 'Accept New Registrations', description: 'Allow new applicants to register on the platform', type: 'BOOLEAN' as const, default: 'true' },
+  { key: 'academy_email', label: 'Contact Email', description: 'Main contact email address for general enquiries', type: 'STRING' as const, default: 'info@aerojet.aviation' },
+  { key: 'academy_phone', label: 'Contact Phone', description: 'Main contact phone number for the academy', type: 'STRING' as const, default: '' },
+  { key: 'academy_address', label: 'Address', description: 'Physical location of the aviation academy', type: 'STRING' as const, default: '' },
+  { key: 'registration_open', label: 'Accept New Registrations', description: 'Enable or disable the public registration form', type: 'BOOLEAN' as const, default: 'true' },
 ]
 
 const FINANCE_FIELDS = [
+  { key: 'registration_fee', label: 'Registration Fee', description: 'Standard fee for initial registration', type: 'NUMBER' as const, default: '500' },
   { key: 'registration_currency', label: 'Registration Currency', description: 'Currency used for registration fees', type: 'SELECT' as const, default: 'EUR', options: ['EUR', 'GHS', 'USD'] },
-  { key: 'course_currency', label: 'Course Currency', description: 'Currency used for course-related fees', type: 'SELECT' as const, default: 'EUR', options: ['EUR', 'GHS', 'USD'] },
-  { key: 'exchange_rate_eur_ghs', label: 'Manual Rate: EUR to GHS', description: 'Set a fixed rate for Cedis. Leave empty to use automated bank rate.', type: 'NUMBER' as const, default: '' },
-  { key: 'exchange_rate_eur_usd', label: 'Manual Rate: EUR to USD', description: 'Set a fixed rate for Dollars. Leave empty to use automated bank rate.', type: 'NUMBER' as const, default: '' },
+  { key: 'course_currency', label: 'Course Currency', description: 'Default currency for course tuition and modules', type: 'SELECT' as const, default: 'EUR', options: ['EUR', 'GHS', 'USD'] },
+  { key: 'exchange_rate_eur_ghs', label: 'Manual Rate: EUR to GHS', description: 'Fixed exchange rate for Cedis. Leave empty for automated bank rate.', type: 'NUMBER' as const, default: '' },
+  { key: 'exchange_rate_eur_usd', label: 'Manual Rate: EUR to USD', description: 'Fixed exchange rate for Dollars. Leave empty for automated bank rate.', type: 'NUMBER' as const, default: '' },
 ]
 
 const NOTIFICATION_FIELDS = [
@@ -57,7 +57,7 @@ export default async function SettingsPage({
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <SettingsTabs>
         {/* ── General Tab ── */}
         {tab === 'general' && (
