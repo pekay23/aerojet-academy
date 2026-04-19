@@ -31,9 +31,11 @@ import { ExamEvent } from '@prisma/client'
 import { format } from 'date-fns'
 
 interface EditExamEventFormProps {
-  event: Omit<ExamEvent, 'minRevenueTarget' | 'minRevenueCurrency' | 'startDate' | 'endDate' | 'paymentDeadline' | 'joinDeadline' | 'createdAt' | 'updatedAt' | 'deletedAt'> & {
+  event: Omit<ExamEvent, 'minRevenueTarget' | 'resitFee' | 'lateBookingSurcharge' | 'startDate' | 'endDate' | 'paymentDeadline' | 'joinDeadline' | 'createdAt' | 'updatedAt' | 'deletedAt'> & {
     minRevenueTarget: number
     minRevenueCurrency?: string
+    resitFee: number
+    lateBookingSurcharge: number
     startDate: string | Date
     endDate: string | Date
     paymentDeadline: string | Date
