@@ -26,6 +26,14 @@ export async function GET() {
 
     return NextResponse.json({ 
       rates, 
+      external: {
+        GHS: eurRates['ghs'] || 0,
+        USD: eurRates['usd'] || 0,
+      },
+      manual: {
+        GHS: manualGhsVal,
+        USD: manualUsdVal,
+      },
       sources, 
       base: 'EUR', 
       timestamp: Date.now() 

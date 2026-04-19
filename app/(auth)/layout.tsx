@@ -21,7 +21,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 width={160}
                 height={40}
                 className="object-contain"
-                style={{ height: 'auto' }}
+                style={{ width: '160px', height: 'auto' }}
                 priority
               />
             </Link>
@@ -65,7 +65,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 width={120}
                 height={30}
                 className="object-contain"
-                style={{ height: 'auto' }}
+                style={{ width: '120px', height: 'auto' }}
                 priority
               />
             </Link>
