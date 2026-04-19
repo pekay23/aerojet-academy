@@ -31,9 +31,16 @@ import { ExamEvent } from '@prisma/client'
 import { format } from 'date-fns'
 
 interface EditExamEventFormProps {
-  event: Omit<ExamEvent, 'minRevenueTarget' | 'minRevenueCurrency'> & {
-    minRevenueTarget: number | any
+  event: Omit<ExamEvent, 'minRevenueTarget' | 'minRevenueCurrency' | 'startDate' | 'endDate' | 'paymentDeadline' | 'joinDeadline' | 'createdAt' | 'updatedAt' | 'deletedAt'> & {
+    minRevenueTarget: number
     minRevenueCurrency?: string
+    startDate: string | Date
+    endDate: string | Date
+    paymentDeadline: string | Date
+    joinDeadline?: string | Date | null
+    createdAt: string | Date
+    updatedAt: string | Date
+    deletedAt?: string | Date | null
   }
 }
 
@@ -44,9 +51,14 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
   const [isLoading, setIsLoading] = useState(false)
 
   // Format dates for datetime-local input (YYYY-MM-DDTHH:mm)
-  const formatDateForInput = (date: Date | null) => {
+  const formatDateForInput = (date: Date | string | null | undefined) => {
     if (!date) return ''
-    return format(new Date(date), "yyyy-MM-dd'T'HH:mm")
+    try {
+      return format(new Date(date), "yyyy-MM-dd'T'HH:mm")
+    } catch (e) {
+      console.error('Invalid date for input:', date)
+      return ''
+    }
   }
 
   const form = useForm<any>({
@@ -105,9 +117,9 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Event Name</FormLabel>
+              <FormLabel htmlFor="form-name">Event Name</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Spring 2026 EASA Exams" {...field} />
+                <Input id="form-name" placeholder="e.g., Spring 2026 EASA Exams" autoComplete="off" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -120,9 +132,9 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             name="startDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Start Date & Time</FormLabel>
+                <FormLabel htmlFor="form-start">Start Date & Time</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input id="form-start" type="datetime-local" autoComplete="off" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -133,9 +145,9 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             name="endDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>End Date & Time</FormLabel>
+                <FormLabel htmlFor="form-end">End Date & Time</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input id="form-end" type="datetime-local" autoComplete="off" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -149,9 +161,9 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             name="paymentDeadline"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Payment Deadline (Go/No-Go)</FormLabel>
+                <FormLabel htmlFor="form-payment">Payment Deadline (Go/No-Go)</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} />
+                  <Input id="form-payment" type="datetime-local" autoComplete="off" {...field} />
                 </FormControl>
                 <FormDescription>
                   Deadline for generating invoice and confirming the event.
@@ -165,9 +177,9 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             name="joinDeadline"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Join Deadline</FormLabel>
+                <FormLabel htmlFor="form-join">Join Deadline</FormLabel>
                 <FormControl>
-                  <Input type="datetime-local" {...field} value={field.value || ''} />
+                  <Input id="form-join" type="datetime-local" autoComplete="off" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormDescription>Last date for students to join (optional).</FormDescription>
                 <FormMessage />
@@ -182,11 +194,11 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             name="minRevenueTarget"
             render={({ field }) => (
               <FormItem className="md:col-span-2">
-                <FormLabel>Minimum Revenue Target</FormLabel>
+                <FormLabel htmlFor="form-revenue">Minimum Revenue Target</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <DollarSign className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <Input type="number" className="pl-10" placeholder="25000.00" {...field} />
+                    <Input id="form-revenue" type="number" autoComplete="off" className="pl-10" placeholder="25000.00" {...field} />
                   </div>
                 </FormControl>
                 <FormDescription>Target revenue for Go/No-Go decision.</FormDescription>
@@ -199,10 +211,10 @@ export default function EditExamEventForm({ event }: EditExamEventFormProps) {
             name="minRevenueCurrency"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Currency</FormLabel>
+                <FormLabel htmlFor="form-currency">Currency</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger id="form-currency">
                       <SelectValue placeholder="Select currency" />
                     </SelectTrigger>
                   </FormControl>

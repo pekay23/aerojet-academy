@@ -32,13 +32,20 @@ export default function StaffExamsTabs({ children }: { children: React.ReactNode
       </div>
 
       {/* Tab Bar */}
-      <div className="relative flex gap-1 rounded-2xl bg-slate-100 p-1.5 shadow-inner ring-1 ring-black/5 dark:bg-slate-800/80 dark:ring-white/5">
+      <div 
+        role="tablist"
+        aria-label="Exam management tabs"
+        className="relative flex gap-1 rounded-2xl bg-slate-100 p-1.5 shadow-inner ring-1 ring-black/5 dark:bg-slate-800/80 dark:ring-white/5"
+      >
         {TABS.map((t) => {
           const Icon = t.icon
           const isActive = currentTab === t.key
           return (
             <button
               key={t.key}
+              role="tab"
+              aria-selected={isActive}
+              aria-controls={`${t.key}-tab-panel`}
               onClick={() => setTab(t.key)}
               className={`relative flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-colors duration-150 ${
                 isActive

@@ -82,10 +82,16 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
       })
       const res = await fetch(`/api/staff/applicants?${params}`)
       const data = await res.json()
-      setApplicants(data.applicants ?? [])
-      setTotal(data.total ?? 0)
-      if (data.counts) {
-        setCounts(data.counts)
+      
+      if (data.success) {
+        setApplicants(data.data ?? [])
+        setTotal(data.meta?.total ?? 0)
+        if (data.meta?.counts) {
+          setCounts(data.meta.counts)
+        }
+      } else {
+        setApplicants([])
+        setTotal(0)
       }
     } finally {
       setLoading(false)
@@ -154,10 +160,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase dark:text-white">
-              Applicant Queue
-            </h1>
-            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Review and approve new applicant registrations
             </p>
           </div>
@@ -305,11 +308,14 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
             <div className="relative w-full sm:w-64">
               <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
+                id="applicants-search"
+                name="applicants-search"
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search applicant..."
                 className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-9 text-sm outline-none focus:ring-2 dark:border-slate-700 dark:bg-slate-800/50"
+                autoComplete="off"
               />
             </div>
           </div>

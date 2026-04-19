@@ -78,9 +78,11 @@ export default function EditIdDialog({ userId, currentId, type, label }: EditIdD
             <Label htmlFor="id-value">New {label}</Label>
             <Input
               id="id-value"
+              name="id-value"
               value={value}
               onChange={(e) => setValue(e.target.value)}
               placeholder={`Enter new ${label}`}
+              autoComplete="off"
             />
           </div>
         </div>

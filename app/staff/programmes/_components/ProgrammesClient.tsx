@@ -224,51 +224,66 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
             <div className="mt-4 space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-600">Code</label>
+                  <label htmlFor="prog-code" className="mb-1 block text-xs font-bold text-slate-600">Code</label>
                   <input
+                    id="prog-code"
+                    name="code"
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     placeholder="FT_4Y_B1B2"
+                    autoComplete="off"
                     className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-600">
+                  <label htmlFor="prog-duration" className="mb-1 block text-xs font-bold text-slate-600">
                     Duration (years)
                   </label>
                   <input
+                    id="prog-duration"
+                    name="durationYears"
                     type="number"
                     value={durationYears}
                     onChange={(e) => setDurationYears(e.target.value)}
+                    autoComplete="off"
                     className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Name</label>
+                <label htmlFor="prog-name" className="mb-1 block text-xs font-bold text-slate-600">Name</label>
                 <input
+                  id="prog-name"
+                  name="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Full-Time 4-Year B1+B2"
+                  autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Total Fee</label>
+                <label htmlFor="prog-fee" className="mb-1 block text-xs font-bold text-slate-600">Total Fee</label>
                 <input
+                  id="prog-fee"
+                  name="totalFee"
                   type="number"
                   value={totalFee}
                   onChange={(e) => setTotalFee(e.target.value)}
                   placeholder="32000"
+                  autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Description</label>
+                <label htmlFor="prog-desc" className="mb-1 block text-xs font-bold text-slate-600">Description</label>
                 <textarea
+                  id="prog-desc"
+                  name="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
+                  autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
@@ -299,7 +314,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
             return (
               <div
                 key={prog.id}
-                className="rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900"
               >
                 <button
                   onClick={() => setExpandedId(isExpanded ? null : prog.id)}
@@ -338,7 +353,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                 </button>
 
                 {isExpanded && (
-                  <div className="border-t border-slate-100 px-6 pt-4 pb-6 dark:border-slate-800">
+                  <div className="border-t border-slate-200 px-6 pt-4 pb-6 dark:border-slate-700">
                     {prog.description && (
                       <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
                         {prog.description}
@@ -368,7 +383,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                         {prog.programmeYears.map((y) => (
                           <div
                             key={y.id}
-                            className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50"
+                            className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50"
                           >
                             <div className="flex items-center gap-3">
                               <Calendar className="h-4 w-4 text-blue-500" />
@@ -445,46 +460,58 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
           <div className="mt-4 space-y-3">
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Year Number</label>
+                <label htmlFor="year-num" className="mb-1 block text-xs font-bold text-slate-600">Year Number</label>
                 <input
+                  id="year-num"
+                  name="yearNumber"
                   type="number"
                   value={yearNumber}
                   onChange={(e) => setYearNumber(e.target.value)}
                   disabled={!!editingYearId}
+                  autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">
+                <label htmlFor="year-fee" className="mb-1 block text-xs font-bold text-slate-600">
                   Year Fee (optional)
                 </label>
                 <input
+                  id="year-fee"
+                  name="yearFee"
                   type="number"
                   value={yearFee}
                   onChange={(e) => setYearFee(e.target.value)}
                   placeholder="Auto from total"
+                  autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">
+                <label htmlFor="year-seat" className="mb-1 block text-xs font-bold text-slate-600">
                   Seat Confirmation Fee
                 </label>
                 <input
+                  id="year-seat"
+                  name="seatFee"
                   type="number"
                   value={seatFee}
-                  onChange={(e) => setSeatFee(e.target.value)}
+                  onChange={(e) => setYearFee(e.target.value)}
+                  autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">First Payment</label>
+                <label htmlFor="year-1st" className="mb-1 block text-xs font-bold text-slate-600">First Payment</label>
                 <input
+                  id="year-1st"
+                  name="firstPayment"
                   type="number"
                   value={firstPayment}
                   onChange={(e) => setFirstPayment(e.target.value)}
+                  autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
@@ -492,7 +519,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
 
             <div className="pt-2">
               <div className="mb-2 flex items-center justify-between">
-                <label className="block text-xs font-bold text-slate-600">Semesters</label>
+                <label htmlFor="sem-name-0" className="block text-xs font-bold text-slate-600">Semesters</label>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -510,6 +537,9 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                   >
                     <div className="mb-2 flex items-center justify-between">
                       <input
+                        id={`sem-name-${idx}`}
+                        name={`semester-name-${idx}`}
+                        autoComplete="off"
                         className="w-32 border-b border-dashed border-slate-300 bg-transparent text-xs font-bold outline-none"
                         value={sem.name}
                         onChange={(e) => handleSemesterChange(idx, 'name', e.target.value)}
@@ -523,20 +553,26 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                     </div>
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="text-xs text-slate-500">Start</label>
+                        <label htmlFor={`sem-start-${idx}`} className="text-xs text-slate-500">Start</label>
                         <input
+                          id={`sem-start-${idx}`}
+                          name={`semester-start-${idx}`}
                           type="date"
                           value={sem.startDate ? sem.startDate.split('T')[0] : ''}
                           onChange={(e) => handleSemesterChange(idx, 'startDate', e.target.value)}
+                          autoComplete="off"
                           className="w-full rounded-md border px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-800"
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-slate-500">End</label>
+                        <label htmlFor={`sem-end-${idx}`} className="text-xs text-slate-500">End</label>
                         <input
+                          id={`sem-end-${idx}`}
+                          name={`semester-end-${idx}`}
                           type="date"
                           value={sem.endDate ? sem.endDate.split('T')[0] : ''}
                           onChange={(e) => handleSemesterChange(idx, 'endDate', e.target.value)}
+                          autoComplete="off"
                           className="w-full rounded-md border px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-800"
                         />
                       </div>

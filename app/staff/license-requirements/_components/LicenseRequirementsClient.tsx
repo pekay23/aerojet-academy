@@ -138,10 +138,10 @@ export default function LicenseRequirementsClient({
         </p>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-900">
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-slate-100 dark:border-slate-800">
+            <tr className="border-b border-slate-200/60 dark:border-slate-700/60">
               <th
                 className="group sticky left-0 z-10 cursor-pointer bg-white px-4 py-3 text-left text-xs font-black tracking-widest text-slate-400 uppercase transition-all duration-150 ease-out hover:bg-white hover:text-slate-600 hover:shadow-sm dark:bg-slate-900 dark:hover:bg-slate-800/60"
                 onClick={() => handleSort('code')}
@@ -163,7 +163,7 @@ export default function LicenseRequirementsClient({
             {sortedCourses.map((course) => (
               <tr
                 key={course.id}
-                className="border-b border-slate-50 transition-all duration-150 ease-out hover:bg-white/80 dark:border-slate-800/50 dark:hover:bg-slate-800/40"
+                className="border-b border-slate-200/30 transition-all duration-150 ease-out hover:bg-white/80 dark:border-slate-700/30 dark:hover:bg-slate-800/40"
               >
                 <td className="sticky left-0 z-10 bg-white px-4 py-2 dark:bg-slate-900">
                   <span className="mr-2 font-mono text-xs font-bold text-slate-400">

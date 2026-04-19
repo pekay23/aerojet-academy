@@ -105,6 +105,7 @@ export default function CreateUserDialog() {
               <Input
                 id="firstName"
                 name="firstName"
+                autoComplete="given-name"
                 placeholder="John"
                 value={formData.firstName}
                 onChange={handleChange}
@@ -115,6 +116,7 @@ export default function CreateUserDialog() {
               <Input
                 id="lastName"
                 name="lastName"
+                autoComplete="family-name"
                 placeholder="Doe"
                 value={formData.lastName}
                 onChange={handleChange}
@@ -128,6 +130,7 @@ export default function CreateUserDialog() {
               id="email"
               name="email"
               type="email"
+              autoComplete="email"
               placeholder="john.doe@example.com"
               value={formData.email}
               onChange={handleChange}
@@ -140,6 +143,7 @@ export default function CreateUserDialog() {
               id="phone"
               name="phone"
               type="tel"
+              autoComplete="tel"
               placeholder="+1 234 567 890"
               value={formData.phone}
               onChange={handleChange}
@@ -149,7 +153,7 @@ export default function CreateUserDialog() {
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
               <Label htmlFor="role">User Role *</Label>
-              <Select value={formData.role} onValueChange={handleRoleChange}>
+              <Select name="role" value={formData.role} onValueChange={handleRoleChange}>
                 <SelectTrigger id="role">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
@@ -168,6 +172,7 @@ export default function CreateUserDialog() {
                 id="password"
                 name="password"
                 type="password"
+                autoComplete="new-password"
                 placeholder="Temporary password"
                 value={formData.password}
                 onChange={handleChange}

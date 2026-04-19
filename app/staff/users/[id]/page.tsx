@@ -117,7 +117,7 @@ export default async function UserProfilePage({ params }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-7xl">
       {/* Header */}
       <div className="mb-6">
         <Link

@@ -1,76 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { getAuthSession } from '@/lib/auth/helpers'
+import { badgeCountsCache } from './cache'
 
 export async function GET(req: NextRequest) {
   try {
     const session = await getAuthSession()
-    if (!session?.user?.id) {
+    if (!session?.user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const userId = session.user.id
     const role = session.user.role
 
-    // Initialize counts with zeros
-    const counts: Record<string, number> = {
-      notifications: 0,
-      messages: 0,
+    // Try user cache first
+    const cachedUser = badgeCountsCache.getUser(userId, 'badges')
+    if (cachedUser) return NextResponse.json(cachedUser)
+
+    const counts: any = {
+      pendingApplicants: 0,
+      pendingEnrollments: 0,
+      pendingPayments: 0,
+      unreadMessages: 0,
+      unreadNotifications: 0,
     }
 
-    try {
-      // Basic counts for all authenticated users
-      const [unreadNotifications, unreadMessages] = await Promise.all([
-        prisma.notification.count({
-          where: { userId, isRead: false },
-        }),
-        prisma.message.count({
-          where: { recipientId: userId, isRead: false },
-        }),
-      ])
-      counts.notifications = unreadNotifications
-      counts.messages = unreadMessages
-    } catch (baseError) {
-      console.error('Error fetching base badge counts:', baseError)
-    }
-
-    // Staff/Admin-specific counts
+    // Role-based counts
     if (['SUPER_ADMIN', 'ADMIN', 'STAFF'].includes(role)) {
-      try {
-        const [pendingApplicants, pendingEnrollments, pendingPayments] = await Promise.all([
+      const globalCache = badgeCountsCache.getGlobal('staff_badges')
+      if (globalCache) {
+        Object.assign(counts, globalCache)
+      } else {
+        const [applicants, enrollments, payments] = await Promise.allSettled([
           prisma.user.count({ where: { role: 'APPLICANT', status: 'PENDING' } }),
           prisma.enrollment.count({ where: { status: 'PENDING' } }),
           prisma.payment.count({ where: { status: 'PENDING' } }),
         ])
-        counts.applicants = pendingApplicants
-        counts.enrollments = pendingEnrollments
-        counts.payments = pendingPayments
-      } catch (staffError) {
-        console.error('Error fetching staff badge counts:', staffError)
+
+        counts.pendingApplicants = applicants.status === 'fulfilled' ? applicants.value : 0
+        counts.pendingEnrollments = enrollments.status === 'fulfilled' ? enrollments.value : 0
+        counts.pendingPayments = payments.status === 'fulfilled' ? payments.value : 0
+
+        badgeCountsCache.setGlobal('staff_badges', {
+          pendingApplicants: counts.pendingApplicants,
+          pendingEnrollments: counts.pendingEnrollments,
+          pendingPayments: counts.pendingPayments,
+        })
       }
     }
 
-    // Instructor-specific counts
-    if (['INSTRUCTOR', 'ADMIN', 'SUPER_ADMIN'].includes(role)) {
-      try {
-        const pendingGradingCount = await prisma.grade.count({
-          where: {
-            gradedBy: userId,
-            score: 0,
-          },
-        })
-        counts.pendingGrading = pendingGradingCount
-      } catch (instructorError) {
-        console.error('Error fetching instructor badge counts:', instructorError)
-      }
-    }
+    // User-specific counts
+    const [messages, notifications] = await Promise.allSettled([
+      prisma.message.count({ where: { recipientId: userId, isRead: false } }),
+      prisma.notification.count({ where: { userId, isRead: false } }),
+    ])
+
+    counts.unreadMessages = messages.status === 'fulfilled' ? messages.value : 0
+    counts.unreadNotifications = notifications.status === 'fulfilled' ? notifications.value : 0
+
+    // Save to user cache
+    badgeCountsCache.setUser(userId, 'badges', counts)
 
     return NextResponse.json(counts)
   } catch (error) {
-    console.error('Badge counts critical failure:', error)
+    console.error('Error fetching staff badge counts:', error)
     return NextResponse.json({
-      notifications: 0,
-      messages: 0,
-    }, { status: 200 }) // Return 200 to prevent global UI crashes if possible
+      pendingApplicants: 0,
+      pendingEnrollments: 0,
+      pendingPayments: 0,
+      unreadMessages: 0,
+      unreadNotifications: 0,
+      error: 'Partial failure fetching counts',
+    })
   }
 }

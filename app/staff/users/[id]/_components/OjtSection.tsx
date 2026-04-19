@@ -131,8 +131,10 @@ export default function OjtSection({
             </DialogHeader>
             <div className="mt-4 space-y-3">
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Enrollment</label>
+                <label htmlFor="ojt-enrollment" className="mb-1 block text-xs font-bold text-slate-600">Enrollment</label>
                 <select
+                  id="ojt-enrollment"
+                  name="enrollmentId"
                   value={enrollmentId}
                   onChange={(e) => setEnrollmentId(e.target.value)}
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
@@ -146,56 +148,74 @@ export default function OjtSection({
                 </select>
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Company Name</label>
+                <label htmlFor="ojt-company-name" className="mb-1 block text-xs font-bold text-slate-600">Company Name</label>
                 <input
+                  id="ojt-company-name"
+                  name="companyName"
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   placeholder="e.g. Lufthansa Technik"
+                  autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
               <div>
-                <label className="mb-1 block text-xs font-bold text-slate-600">Company Address</label>
+                <label htmlFor="ojt-company-address" className="mb-1 block text-xs font-bold text-slate-600">Company Address</label>
                 <input
+                  id="ojt-company-address"
+                  name="companyAddress"
                   value={companyAddress}
                   onChange={(e) => setCompanyAddress(e.target.value)}
+                  autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-600">Supervisor Name</label>
+                  <label htmlFor="ojt-sup-name" className="mb-1 block text-xs font-bold text-slate-600">Supervisor Name</label>
                   <input
+                    id="ojt-sup-name"
+                    name="supervisorName"
                     value={supervisorName}
                     onChange={(e) => setSupervisorName(e.target.value)}
+                    autoComplete="off"
                     className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-600">Supervisor Email</label>
+                  <label htmlFor="ojt-sup-email" className="mb-1 block text-xs font-bold text-slate-600">Supervisor Email</label>
                   <input
+                    id="ojt-sup-email"
+                    name="supervisorEmail"
                     value={supervisorEmail}
                     onChange={(e) => setSupervisorEmail(e.target.value)}
+                    autoComplete="off"
                     className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-600">Start Date</label>
+                   <label htmlFor="ojt-start-date" className="mb-1 block text-xs font-bold text-slate-600">Start Date</label>
                   <input
+                    id="ojt-start-date"
+                    name="startDate"
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
+                    autoComplete="off"
                     className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-bold text-slate-600">Hours Required</label>
+                  <label htmlFor="ojt-hours-req" className="mb-1 block text-xs font-bold text-slate-600">Hours Required</label>
                   <input
+                    id="ojt-hours-req"
+                    name="hoursRequired"
                     type="number"
                     value={hoursRequired}
                     onChange={(e) => setHoursRequired(e.target.value)}
+                    autoComplete="off"
                     className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                   />
                 </div>
@@ -246,6 +266,9 @@ export default function OjtSection({
                       {ojt.status}
                     </span>
                     <select
+                      id={`ojt-status-${ojt.id}`}
+                      name="status"
+                      aria-label="Update OJT status"
                       value={ojt.status}
                       onChange={(e) => handleStatusUpdate(ojt.id, e.target.value)}
                       className="rounded border border-slate-200 bg-white px-1 py-0.5 text-[10px] dark:border-slate-700 dark:bg-slate-800"

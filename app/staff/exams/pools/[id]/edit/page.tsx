@@ -5,6 +5,7 @@ import { ChevronLeft } from 'lucide-react'
 import { getPoolWithDetails } from '@/lib/pools/operations'
 import { Metadata } from 'next'
 import EditExamPoolForm from './_components/EditExamPoolForm'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -25,14 +26,7 @@ export default async function EditExamPoolPage({ params }: PageProps) {
   if (!pool) notFound()
 
   // Serialize Decimals for client component
-  const serializedPool = {
-    ...pool,
-    seatPrice: Number(pool.seatPrice),
-    event: {
-      ...pool.event,
-      minRevenueTarget: Number(pool.event.minRevenueTarget),
-    },
-  }
+  const serializedPool = serializePrisma(pool)
 
   return (
     <div className="mx-auto max-w-3xl">

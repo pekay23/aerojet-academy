@@ -1,6 +1,7 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
+import { serializePrisma } from '@/lib/utils/serialization'
 import CreateClassForm from './CreateClassForm'
 import { Metadata } from 'next'
 
@@ -46,8 +47,11 @@ export default async function CreateClassPage() {
         <p className="text-slate-500 dark:text-slate-400">Create a new class instance for a course.</p>
       </div>
 
-      <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sm">
-        <CreateClassForm courses={courses} instructors={instructors} />
+      <div className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 p-6 shadow-sm">
+        <CreateClassForm
+          courses={serializePrisma(courses)}
+          instructors={serializePrisma(instructors)}
+        />
       </div>
     </div>
   )

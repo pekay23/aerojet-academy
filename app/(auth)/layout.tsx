@@ -20,7 +20,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 alt="Aerojet Academy"
                 width={160}
                 height={40}
-                className="h-auto object-contain"
+                className="object-contain"
+                style={{ height: 'auto' }}
                 priority
               />
             </Link>
@@ -63,7 +64,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                 alt="Aerojet Academy"
                 width={120}
                 height={30}
-                className="h-auto object-contain"
+                className="object-contain"
+                style={{ height: 'auto' }}
                 priority
               />
             </Link>

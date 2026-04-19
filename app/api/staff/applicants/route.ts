@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { apiPaginated, withErrorHandler } from '@/lib/api/response'
 
-export async function GET(req: NextRequest) {
+export const GET = withErrorHandler(async (req: NextRequest) => {
   const session = await getAuthSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
@@ -31,6 +32,7 @@ export async function GET(req: NextRequest) {
     where.registrationPaid = true
     where.status = 'PENDING'
   } else {
+    // Show all PENDING except ARCHIVED/DELETED (effectively mostly PENDING anyway)
     where.status = 'PENDING'
   }
 
@@ -60,15 +62,11 @@ export async function GET(req: NextRequest) {
       }),
     ])
 
-  return NextResponse.json({
-    applicants,
-    total,
-    page,
-    limit,
+  return apiPaginated(applicants, total, page, limit, {
     counts: {
       all: allCount,
       pending_payment: pendingPaymentCount,
       pending_approval: pendingApprovalCount,
     },
   })
-}
+})

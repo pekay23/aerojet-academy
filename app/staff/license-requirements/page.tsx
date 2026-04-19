@@ -2,6 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { Metadata } from 'next'
+import { serializePrisma } from '@/lib/utils/serialization'
 import LicenseRequirementsClient from './_components/LicenseRequirementsClient'
 
 export const metadata: Metadata = { title: 'License Module Requirements | Staff Portal' }
@@ -32,8 +33,8 @@ export default async function LicenseRequirementsPage() {
 
   return (
     <LicenseRequirementsClient
-      licenseCategories={licenseCategories}
-      courses={courses}
+      licenseCategories={serializePrisma(licenseCategories)}
+      courses={serializePrisma(courses)}
       defaultSortBy={defaultSortBy}
       defaultSortOrder={defaultSortOrder}
     />

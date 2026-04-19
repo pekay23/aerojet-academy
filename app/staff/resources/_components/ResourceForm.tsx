@@ -110,9 +110,15 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold uppercase text-slate-600">Resource Name</FormLabel>
+                      <FormLabel htmlFor="res-name" className="text-xs font-bold uppercase text-slate-600">Resource Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Instructor Handbook" className="rounded-xl border-slate-200" {...field} />
+                        <Input
+                          id="res-name"
+                          placeholder="e.g. Instructor Handbook"
+                          autoComplete="off"
+                          className="rounded-xl border-slate-200"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -125,10 +131,10 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                     name="type"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-bold uppercase text-slate-600">File Type</FormLabel>
+                        <FormLabel htmlFor="res-type" className="text-xs font-bold uppercase text-slate-600">File Type</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="rounded-xl border-slate-200">
+                            <SelectTrigger id="res-type" className="rounded-xl border-slate-200">
                               <SelectValue placeholder="Select type" />
                             </SelectTrigger>
                           </FormControl>
@@ -150,10 +156,10 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                     name="category"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-bold uppercase text-slate-600">Category</FormLabel>
+                        <FormLabel htmlFor="res-cat" className="text-xs font-bold uppercase text-slate-600">Category</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
-                            <SelectTrigger className="rounded-xl border-slate-200">
+                            <SelectTrigger id="res-cat" className="rounded-xl border-slate-200">
                               <SelectValue placeholder="Select category" />
                             </SelectTrigger>
                           </FormControl>
@@ -175,9 +181,15 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                   name="url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold uppercase text-slate-600">URL or Path</FormLabel>
+                      <FormLabel htmlFor="res-url" className="text-xs font-bold uppercase text-slate-600">URL or Path</FormLabel>
                       <FormControl>
-                        <Input placeholder="/documents/file.pdf or https://..." className="rounded-xl border-slate-200 font-mono text-xs" {...field} />
+                        <Input
+                          id="res-url"
+                          placeholder="/documents/file.pdf or https://..."
+                          autoComplete="off"
+                          className="rounded-xl border-slate-200 font-mono text-xs"
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription className="text-[10px]">Relative path from public/ or a full URL.</FormDescription>
                       <FormMessage />
@@ -190,9 +202,15 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                   name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-xs font-bold uppercase text-slate-600">Description (Optional)</FormLabel>
+                      <FormLabel htmlFor="res-desc" className="text-xs font-bold uppercase text-slate-600">Description (Optional)</FormLabel>
                       <FormControl>
-                        <Textarea placeholder="What is this resource for?" className="min-h-[100px] resize-none rounded-xl border-slate-200" {...field} />
+                        <Textarea
+                          id="res-desc"
+                          placeholder="What is this resource for?"
+                          autoComplete="off"
+                          className="min-h-[100px] resize-none rounded-xl border-slate-200"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -206,47 +224,47 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                 </h4>
 
                 <div className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="showToInstructors"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between space-y-0">
-                        <FormLabel className="text-sm font-semibold text-slate-700 dark:text-slate-300">Show to Instructors</FormLabel>
-                        <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="showToInstructors"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between space-y-0">
+                          <FormLabel htmlFor="res-vis-instructors" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Show to Instructors</FormLabel>
+                          <FormControl>
+                            <Switch id="res-vis-instructors" checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="showToStaff"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between space-y-0">
-                        <FormLabel className="text-sm font-semibold text-slate-700 dark:text-slate-300">Show to Staff</FormLabel>
-                        <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="showToStaff"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between space-y-0">
+                          <FormLabel htmlFor="res-vis-staff" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Show to Staff</FormLabel>
+                          <FormControl>
+                            <Switch id="res-vis-staff" checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
 
-                  <FormField
-                    control={form.control}
-                    name="showToStudents"
-                    render={({ field }) => (
-                      <FormItem className="flex items-center justify-between space-y-0">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-sm font-semibold text-slate-700 dark:text-slate-300">Show to Students</FormLabel>
-                          <p className="text-[10px] text-slate-400">Enable to configure specific access below</p>
-                        </div>
-                        <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
+                    <FormField
+                      control={form.control}
+                      name="showToStudents"
+                      render={({ field }) => (
+                        <FormItem className="flex items-center justify-between space-y-0">
+                          <div className="space-y-0.5">
+                            <FormLabel htmlFor="res-vis-students" className="text-sm font-semibold text-slate-700 dark:text-slate-300">Show to Students</FormLabel>
+                            <p className="text-[10px] text-slate-400">Enable to configure specific access below</p>
+                          </div>
+                          <FormControl>
+                            <Switch id="res-vis-students" checked={field.value} onCheckedChange={field.onChange} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
                 </div>
               </div>
             </div>
@@ -275,7 +293,7 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                   render={() => (
                     <FormItem className="space-y-4">
                       <div className="flex flex-col gap-1.5">
-                        <FormLabel className="text-xs font-bold uppercase text-slate-600">Specific Modules</FormLabel>
+                        <FormLabel htmlFor="res-course-search" className="text-xs font-bold uppercase text-slate-600">Specific Modules</FormLabel>
                         <FormDescription className="text-[10px]">
                           Restrict to students enrolled in these modules. Leave empty for access to ALL enrolled students.
                         </FormDescription>
@@ -284,7 +302,10 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                         <Input
+                          id="res-course-search"
+                          name="courseSearch"
                           placeholder="Search module code or name..."
+                          autoComplete="off"
                           className="pl-9 rounded-xl border-slate-200"
                           value={courseSearch}
                           onChange={(e) => setCourseSearch(e.target.value)}

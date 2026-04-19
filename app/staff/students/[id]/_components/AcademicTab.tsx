@@ -54,7 +54,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
               return (
                 <div
                   key={enrollment.id}
-                  className="rounded-xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900"
+                  className="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
                 >
                   <button
                     onClick={() => setExpandedEnrollment(isExpanded ? null : enrollment.id)}
@@ -98,7 +98,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                   </button>
 
                   {isExpanded && (
-                    <div className="border-t border-slate-100 px-4 pt-2 pb-4 dark:border-slate-800">
+                    <div className="border-t border-slate-200 px-4 pt-2 pb-4 dark:border-slate-700">
                       <div className="mb-3 flex items-center gap-4 text-xs text-slate-400">
                         <span>
                           Enrolled:{' '}
@@ -128,7 +128,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                           <div className="overflow-x-auto">
                             <table className="w-full text-xs">
                               <thead>
-                                <tr className="border-b border-slate-100 text-slate-400 dark:border-slate-800">
+                                <tr className="border-b border-slate-200 text-slate-400 dark:border-slate-700">
                                   <th className="pb-2 text-left font-black">Assessment</th>
                                   <th className="pb-2 text-center font-black">Score</th>
                                   <th className="pb-2 text-center font-black">%</th>
@@ -136,7 +136,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                                   <th className="pb-2 text-right font-black">Date</th>
                                 </tr>
                               </thead>
-                              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                                 {grades.map((grade: any) => (
                                   <tr key={grade.id}>
                                     <td className="py-2">
@@ -189,7 +189,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
       {/* Attendance */}
       <Section title="Attendance" icon={Calendar}>
         <div className="mb-4 grid grid-cols-4 gap-3">
-          <div className="rounded-xl border border-slate-100 bg-white p-3 text-center dark:border-slate-800 dark:bg-slate-900">
+          <div className="rounded-xl border border-slate-200 bg-white p-3 text-center dark:border-slate-700 dark:bg-slate-900">
             <p className="text-lg font-black text-slate-700 dark:text-slate-200">
               {attendanceStats.total}
             </p>
@@ -214,17 +214,17 @@ export default function AcademicTab({ student, onRefresh }: Props) {
         {attendanceRecords.length === 0 ? (
           <EmptyState message="No attendance records" />
         ) : (
-          <div className="max-h-64 overflow-y-auto rounded-xl border border-slate-100 dark:border-slate-800">
+          <div className="max-h-64 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700">
             <table className="w-full text-xs">
               <thead className="sticky top-0 bg-slate-50 dark:bg-slate-900">
-                <tr className="border-b border-slate-100 dark:border-slate-800">
+                <tr className="border-b border-slate-200 dark:border-slate-700">
                   <th className="px-4 py-2 text-left font-black text-slate-400">Date</th>
                   <th className="px-4 py-2 text-left font-black text-slate-400">Course</th>
                   <th className="px-4 py-2 text-center font-black text-slate-400">Status</th>
                   <th className="px-4 py-2 text-right font-black text-slate-400">Minutes Late</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                 {attendanceRecords.slice(0, 20).map((record: any) => (
                   <tr key={record.id}>
                     <td className="px-4 py-2 text-slate-500">
@@ -263,9 +263,9 @@ export default function AcademicTab({ student, onRefresh }: Props) {
             {fullTimeEnrollments.map((fte: any) => (
               <div
                 key={fte.id}
-                className="rounded-xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900"
+                className="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
               >
-                <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3 dark:border-slate-800">
+                <div className="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-slate-700">
                   <div>
                     <p className="font-bold text-slate-800 dark:text-slate-200">
                       {fte.programme?.name || 'Full-Time Programme'}
@@ -287,7 +287,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                     {fte.ojtPeriods.map((ojt: any) => (
                       <div
                         key={ojt.id}
-                        className="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50"
+                        className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50"
                       >
                         <div className="flex items-center justify-between">
                           <div>

@@ -8,6 +8,14 @@ export async function getSystemSetting(key: string, defaultValue: string = ''): 
   return setting?.value ?? defaultValue
 }
 
+export async function updateSystemSetting(key: string, value: string): Promise<void> {
+  await prisma.systemSetting.upsert({
+    where: { key },
+    update: { value },
+    create: { key, value },
+  })
+}
+
 export async function getSystemSettings(keys: string[]): Promise<Map<string, string>> {
   return unstable_cache(
     async () => {

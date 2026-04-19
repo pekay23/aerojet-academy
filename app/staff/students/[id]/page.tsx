@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma/client'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Metadata } from 'next'
+import { serializePrisma } from '@/lib/utils/serialization'
 import StudentDetailTabs from './_components/StudentDetailTabs'
 import EditProfileDialog from '@/app/staff/users/[id]/_components/EditProfileDialog'
 import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
@@ -137,25 +138,19 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
     .sort((a, b) => compareNatural(a.code || '', b.code || ''))
 
   // Serialize data for client components
-  const serializedStudent = JSON.parse(
-    JSON.stringify({
-      ...student,
-      password: undefined,
-      walletTransactions,
-      fullTimeEnrollments,
-      modularEnrollments,
-      examResults: student.examResults.map((r: any) => ({
-        ...r,
-        score: Number(r.score),
-        percentage: Number(r.percentage),
-      })),
-      examBookings: student.examBookings.map((b: any) => ({
-        ...b,
-        score: b.score != null ? Number(b.score) : null,
-        percentage: b.percentage != null ? Number(b.percentage) : null,
-      })),
-    })
-  )
+  const serializedStudent = serializePrisma({
+    ...student,
+    password: undefined,
+    walletTransactions,
+    fullTimeEnrollments,
+    modularEnrollments,
+  })
+
+  const serializedExamComponents = serializePrisma(examComponents)
+  const serializedUpcomingEvents = serializePrisma(upcomingEvents)
+  const serializedAcademicYears = serializePrisma(academicYears)
+  const serializedSemesters = serializePrisma(semesters)
+  const serializedStudyPathways = serializePrisma(studyPathways)
 
   const fullName = student.profile
     ? [student.profile.firstName, student.profile.middleName, student.profile.lastName]
@@ -254,11 +249,11 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
       {/* Tabs (client component) */}
       <StudentDetailTabs
         student={serializedStudent}
-        examComponents={JSON.parse(JSON.stringify(examComponents))}
-        upcomingEvents={JSON.parse(JSON.stringify(upcomingEvents))}
-        academicYears={JSON.parse(JSON.stringify(academicYears))}
-        semesters={JSON.parse(JSON.stringify(semesters))}
-        studyPathways={JSON.parse(JSON.stringify(studyPathways))}
+        examComponents={serializedExamComponents}
+        upcomingEvents={serializedUpcomingEvents}
+        academicYears={serializedAcademicYears}
+        semesters={serializedSemesters}
+        studyPathways={serializedStudyPathways}
         initialTab={tab || 'profile'}
         staffId={session.user.id}
         staffRole={session.user.role}

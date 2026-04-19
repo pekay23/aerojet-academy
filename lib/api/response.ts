@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 // ---------------------------------------------------------------------------
 // STANDARD RESPONSE TYPES
@@ -22,7 +23,7 @@ interface ApiResponse<T = unknown> {
 // ---------------------------------------------------------------------------
 
 export function apiSuccess<T>(data: T, status: number = 200): NextResponse {
-  return NextResponse.json({ success: true, data } as ApiResponse<T>, { status })
+  return NextResponse.json({ success: true, data: serializePrisma(data) } as ApiResponse<T>, { status })
 }
 
 export function apiCreated<T>(data: T): NextResponse {
@@ -37,16 +38,18 @@ export function apiPaginated<T>(
   data: T[],
   total: number,
   page: number,
-  limit: number
+  limit: number,
+  extraMeta?: Record<string, any>
 ): NextResponse {
   return NextResponse.json({
     success: true,
-    data,
+    data: serializePrisma(data),
     meta: {
       page,
       limit,
       total,
       totalPages: Math.ceil(total / limit),
+      ...extraMeta,
     },
   } as ApiResponse<T[]>)
 }

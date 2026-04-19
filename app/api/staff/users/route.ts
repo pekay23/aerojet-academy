@@ -1,10 +1,11 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { apiPaginated, apiUnauthorized } from '@/lib/api/response'
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession()
-  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!session) return apiUnauthorized()
 
   const { searchParams } = new URL(req.url)
   const role = searchParams.get('role') || 'all'
@@ -15,7 +16,12 @@ export async function GET(req: NextRequest) {
 
   const where: any = {}
   if (role !== 'all') where.role = role
-  if (status !== 'all') where.status = status
+  
+  if (status === 'all') {
+    where.status = { notIn: ['ARCHIVED', 'DELETED'] }
+  } else {
+    where.status = status
+  }
   if (search) {
     where.OR = [
       { email: { contains: search, mode: 'insensitive' } },
@@ -24,7 +30,7 @@ export async function GET(req: NextRequest) {
     ]
   }
 
-  const [users, total] = await Promise.all([
+  const [users, total, allCount, applicantCount, studentCount, instructorCount] = await Promise.all([
     prisma.user.findMany({
       where,
       select: {
@@ -51,7 +57,11 @@ export async function GET(req: NextRequest) {
       take: limit,
     }),
     prisma.user.count({ where }),
+    prisma.user.count(),
+    prisma.user.count({ where: { role: 'APPLICANT' } }),
+    prisma.user.count({ where: { role: 'STUDENT' } }),
+    prisma.user.count({ where: { role: 'INSTRUCTOR' } }),
   ])
 
-  return NextResponse.json({ users, total, page, limit })
+  return apiPaginated(users, total, page, limit)
 }

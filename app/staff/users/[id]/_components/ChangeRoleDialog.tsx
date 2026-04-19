@@ -91,7 +91,7 @@ export default function ChangeRoleDialog({
 
           <div className="grid gap-2">
             <Label htmlFor="role">New Role</Label>
-            <Select value={newRole} onValueChange={setNewRole}>
+            <Select value={newRole} onValueChange={setNewRole} name="role" autoComplete="off">
               <SelectTrigger id="role" className="w-full">
                 <SelectValue placeholder="Select a role" />
               </SelectTrigger>

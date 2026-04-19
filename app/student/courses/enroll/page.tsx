@@ -215,7 +215,7 @@ export default async function EnrollPage({
                         <div className="mt-10 flex items-center justify-between gap-6 border-t border-slate-50 pt-8 dark:border-slate-800/50">
                           <div className="space-y-1">
                             <p className="text-[10px] font-black tracking-[0.2em] text-slate-400 uppercase">
-                              Investment
+                              Price
                             </p>
                             <div className="flex items-baseline gap-1">
                               <span className="text-sm font-bold text-blue-600">{course.currency}</span>

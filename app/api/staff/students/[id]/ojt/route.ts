@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 // GET /api/staff/students/[id]/ojt — List OJT periods for a student
 export const GET = withErrorHandler(
@@ -19,7 +20,7 @@ export const GET = withErrorHandler(
       },
     })
 
-    return apiSuccess(enrollments)
+    return apiSuccess(serializePrisma(enrollments))
   }
 )
 
@@ -63,7 +64,7 @@ export const POST = withErrorHandler(
       details: { studentUserId: userId, companyName },
     })
 
-    return apiCreated(ojt)
+    return apiCreated(serializePrisma(ojt))
   }
 )
 
@@ -97,6 +98,6 @@ export const PATCH = withErrorHandler(
       details: body,
     })
 
-    return apiSuccess(updated)
+    return apiSuccess(serializePrisma(updated))
   }
 )

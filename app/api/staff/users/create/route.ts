@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { getAuthSession, hashPassword } from '@/lib/auth/helpers'
 import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import prisma from '@/lib/prisma/client'
+import { serializePrisma } from '@/lib/utils/serialization'
 import { UserRole, EnrollmentType } from '@prisma/client'
 
 // Schema for user creation
@@ -132,7 +133,7 @@ export async function POST(req: NextRequest) {
     // Return user without password
     const { password: _, ...userWithoutPassword } = newUser
 
-    return NextResponse.json(userWithoutPassword, { status: 201 })
+    return NextResponse.json(serializePrisma(userWithoutPassword), { status: 201 })
   } catch (error) {
     console.error('Error creating user:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

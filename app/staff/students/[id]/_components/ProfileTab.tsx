@@ -16,10 +16,25 @@ import EditAcademicPeriodDialog from '@/app/staff/users/[id]/_components/EditAca
 import UserActionsMenu from '@/app/staff/_components/UserActionsMenu'
 
 interface Props {
-  student: any
-  academicYears: any[]
-  semesters: any[]
-  studyPathways: any[]
+  student: {
+    id: string
+    email: string
+    personalEmail?: string | null
+    academyEmail?: string | null
+    status: string
+    emailVerified: string | Date | null
+    createdAt: string | Date
+    lastLoginAt?: string | Date | null
+    registrationPaid: boolean
+    isAmbassador: boolean
+    referralCode?: string | null
+    programmeChoice?: string | null
+    profile: any
+    studentProfile: any
+  }
+  academicYears: { id: string; name: string }[]
+  semesters: { id: string; name: string }[]
+  studyPathways: { id: string; name: string; code: string }[]
   onRefresh: () => void
 }
 
@@ -282,7 +297,7 @@ function Section({
 }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
-      <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-2 dark:border-slate-700">
+      <div className="mb-4 flex items-center justify-between border-b border-slate-200/60 pb-2 dark:border-slate-700/60">
         <h3 className="text-xs font-black tracking-widest text-slate-400 uppercase">{title}</h3>
         {action && (
           <div className="rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 dark:border-slate-700 dark:bg-slate-800">
@@ -297,7 +312,7 @@ function Section({
 
 function Field({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
+    <div className="rounded-xl border border-slate-200/60 bg-white px-4 py-3 dark:border-slate-700/50 dark:bg-slate-900">
       <p className="mb-1 flex items-center gap-1.5 text-[10px] font-black tracking-widest text-slate-400 uppercase">
         <Icon className="h-3 w-3" /> {label}
       </p>

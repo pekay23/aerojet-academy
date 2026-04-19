@@ -490,3 +490,19 @@ export async function getAvailableModules() {
     return []
   }
 }
+
+/**
+ * Updates the target monthly revenue setting.
+ */
+export async function updateRevenueTarget(amount: number) {
+  try {
+    await requireStaff()
+    const { updateSystemSetting } = await import('@/lib/settings')
+    await updateSystemSetting('target_monthly_revenue', amount.toString())
+    revalidatePath('/staff/dashboard')
+    return { success: true }
+  } catch (error) {
+    console.error('Update revenue target error:', error)
+    return { error: 'Failed to update target.' }
+  }
+}

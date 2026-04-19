@@ -12,6 +12,8 @@ import {
   Calendar,
   CreditCard,
   Edit,
+  Clock,
+  Trophy,
 } from 'lucide-react'
 import { bulkUpdateExamBookingStatus, updateExamBooking } from '../actions'
 import { toast } from 'sonner'
@@ -22,21 +24,23 @@ import { useSort, SortHeader } from '@/lib/hooks/useSort'
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
 
+
 interface ExamBookingWithDetails {
   id: string
   status: any
   bookingType: string
   amountPaid: any
-  bookedAt: Date
+  bookedAt: string | Date
   moduleCode: string | null
   user: {
     email: string
     profile: { firstName: string; middleName?: string | null; lastName: string } | null
+    registrationFee?: number | string | any
   }
-  event: { name: string; startDate: Date } | null
+  event: { name: string; startDate: string | Date } | null
   exam: {
     name: string
-    examDate: Date
+    examDate: string | Date
     examComponent: { course: { code: string } } | null
   } | null
   score?: any
@@ -150,7 +154,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                   currentSort={sortConfig}
                   onSort={requestSort}
                 />
-                <th className="px-6 py-4">Payment Status</th>
+                <th className="px-6 py-4">Status</th>
                 <SortHeader
                   label="Amount"
                   sortKey="amountPaid"
@@ -158,7 +162,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                   onSort={requestSort}
                 />
                 <SortHeader
-                  label="Booked On"
+                  label="Dates"
                   sortKey="bookedAt"
                   currentSort={sortConfig}
                   onSort={requestSort}
@@ -240,24 +244,32 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${
                           booking.status === PaymentStatus.APPROVED || booking.status === PaymentStatus.COMPLETED
-                            ? 'bg-green-100 text-green-700'
+                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                             : booking.status === PaymentStatus.PENDING
-                              ? 'bg-amber-100 text-amber-700'
-                              : 'bg-red-100 text-red-700'
+                              ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                              : 'bg-red-50 text-red-600 border border-red-100'
                         }`}
                       >
                         {booking.status}
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1 font-medium text-slate-700">
-                          <CreditCard className="h-3 w-3 text-slate-400" />
-                          {Number(booking.amountPaid).toFixed(2)}
+                      <div className="font-bold text-slate-700 dark:text-slate-300">
+                        €{Number(booking.amountPaid).toFixed(2)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col gap-0.5">
+                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+                           <Calendar className="h-3 w-3 text-aerojet-blue" />
+                           <span className="text-[10px] text-slate-400 uppercase mr-1">Exam:</span>
+                           {format(new Date(booking.exam?.examDate || booking.bookedAt), 'MMM d, yyyy')}
                         </div>
-                        <div className="text-[10px] text-slate-400">
+                        <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                          <Clock className="h-2.5 w-2.5" />
+                          <span className="text-slate-400 uppercase">Booked:</span>
                           {format(new Date(booking.bookedAt), 'MMM d, yyyy')}
                         </div>
                       </div>
@@ -266,6 +278,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                       <button
                         onClick={() => setEditingBooking(booking)}
                         className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-aerojet-blue"
+                        title="Edit booking details"
                       >
                         <Edit className="h-4 w-4" />
                       </button>
@@ -289,7 +302,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
         <Modal
           isOpen={!!editingBooking}
           onClose={() => setEditingBooking(null)}
-          title="Edit Historical Record"
+          title="Edit Booking Entry"
           size="md"
         >
           <form
@@ -297,7 +310,8 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
               e.preventDefault()
               setIsUpdating(true)
               const formData = new FormData(e.currentTarget)
-              const score = formData.get('score') ? Number(formData.get('score')) : undefined
+              const scoreInput = formData.get('score')
+              const score = scoreInput && scoreInput !== '' ? Number(scoreInput) : undefined
 
               const res = await updateExamBooking(editingBooking.id, {
                 moduleCode: formData.get('moduleCode') as string,
@@ -309,71 +323,95 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
 
               setIsUpdating(false)
               if (res.success) {
-                toast.success('Record updated successfully')
+                toast.success('Record updated')
                 setEditingBooking(null)
                 router.refresh()
               } else {
-                toast.error(res.error || 'Failed to update record')
+                toast.error(res.error || 'Failed to update')
               }
             }}
-            className="space-y-4"
+            className="space-y-6 p-1"
           >
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 uppercase">Module Code</label>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label 
+                  htmlFor="modal-module-code" 
+                  className="text-[10px] font-black uppercase tracking-widest text-slate-500"
+                >
+                  Module Code
+                </label>
                 <input
+                  id="modal-module-code"
                   name="moduleCode"
                   defaultValue={editingBooking.moduleCode || ''}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-aerojet-blue focus:outline-hidden"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold uppercase transition focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 outline-hidden"
+                  autoComplete="off"
                   required
                 />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-500 uppercase">Exam Date</label>
-                <input
-                  name="examDate"
-                  type="date"
-                  defaultValue={
-                    editingBooking.exam
-                      ? format(new Date(editingBooking.exam.examDate), 'yyyy-MM-dd')
-                      : ''
-                  }
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-aerojet-blue focus:outline-hidden"
-                />
+              <div className="space-y-2">
+                <label 
+                  htmlFor="modal-exam-date" 
+                  className="text-[10px] font-black uppercase tracking-widest text-slate-500"
+                >
+                  Exam Date (Session)
+                </label>
+                  <input
+                    id="modal-exam-date"
+                    name="examDate"
+                    type="date"
+                    autoComplete="off"
+                    defaultValue={
+                      editingBooking.exam?.examDate
+                        ? format(new Date(editingBooking.exam.examDate), 'yyyy-MM-dd')
+                        : ''
+                    }
+                    className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm transition focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 outline-hidden"
+                  />
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase">Exam Score (%)</label>
-              <input
-                name="score"
-                type="number"
-                step="0.01"
-                min="0"
-                max="100"
-                defaultValue={editingBooking.score ? Number(editingBooking.score) : ''}
-                placeholder="Leave blank if not yet graded"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-aerojet-blue focus:outline-hidden"
-              />
-              <p className="text-[10px] text-slate-400 italic">
-                Scores &ge; 75% will be marked as PASS automatically.
+            <div className="space-y-2">
+              <label 
+                htmlFor="modal-score" 
+                className="text-[10px] font-black uppercase tracking-widest text-slate-500"
+              >
+                Grade / Score (%)
+              </label>
+              <div className="relative">
+                <Trophy className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-300" />
+                <input
+                  id="modal-score"
+                  name="score"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="100"
+                  defaultValue={editingBooking.score ? Number(editingBooking.score) : ''}
+                  placeholder="Enter percentage score..."
+                  className="w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 py-2.5 text-sm font-bold transition focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 outline-hidden"
+                  autoComplete="off"
+                />
+              </div>
+              <p className="text-[10px] leading-relaxed text-slate-400 italic">
+                Updating the score will automatically recalculate the PASSED/FAILED result based on the 75% threshold.
               </p>
             </div>
 
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setEditingBooking(null)}
-                className="rounded-xl px-4 py-2 text-sm font-bold text-slate-500 hover:bg-slate-100"
+                className="rounded-xl px-6 py-2.5 text-sm font-black text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isUpdating}
-                className="bg-aerojet-blue rounded-xl px-4 py-2 text-sm font-bold text-white hover:opacity-90 disabled:opacity-50"
+                className="bg-aerojet-blue min-w-[140px] rounded-xl px-6 py-2.5 text-sm font-black uppercase tracking-wider text-white shadow-lg shadow-aerojet-blue/20 transition hover:bg-aerojet-blue/90 disabled:opacity-50"
               >
-                {isUpdating ? 'Saving...' : 'Save Changes'}
+                {isUpdating ? 'Saving...' : 'Update Entry'}
               </button>
             </div>
           </form>

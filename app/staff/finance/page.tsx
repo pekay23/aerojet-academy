@@ -300,7 +300,7 @@ async function TransactionsTab({ query }: { query?: string }) {
     <div className="space-y-6">
       <div className="flex items-center justify-end">
         <div className="w-72">
-          <SearchInput placeholder="Search user or reference..." />
+          <SearchInput id="finance-transactions-search" placeholder="Search user or reference..." />
         </div>
       </div>
 
