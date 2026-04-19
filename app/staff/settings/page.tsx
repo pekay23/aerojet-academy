@@ -11,6 +11,7 @@ import { getWelcomeMessagesGrouped } from '@/lib/welcome-messages'
 import EmailPreviewsPage from './email-previews/page'
 import AcademicCalendarManager from './academic-calendar/_components/AcademicCalendarManager'
 import BackupManager from './_components/BackupManager'
+import ExchangeRateDisplay from './_components/ExchangeRateDisplay'
 
 export const metadata: Metadata = { title: 'Settings | Staff Portal' }
 export const dynamic = 'force-dynamic'
@@ -67,6 +68,7 @@ export default async function SettingsPage({
         {/* ── Finance Tab ── */}
         {tab === 'finance' && (
           <div className="space-y-8">
+            <ExchangeRateDisplay />
             <SettingsForm fields={FINANCE_FIELDS} values={values} groupLabel="Currency settings" />
             <PaymentMethodsManager />
           </div>
