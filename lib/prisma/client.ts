@@ -80,8 +80,8 @@ function softDeleteExtension() {
 // ---------------------------------------------------------------------------
 
 const globalForPrisma = globalThis as unknown as {
-  prisma_aja: PrismaClient
-  prisma_aja_ext: ReturnType<typeof createExtendedClient>
+  prisma_aja_v3: PrismaClient
+  prisma_aja_ext_v3: ReturnType<typeof createExtendedClient>
 }
 
 const createAdapter = () => {
@@ -101,11 +101,11 @@ const createPrismaClient = () => {
   })
 }
 
-import { rlsExtension } from './rls'
+import { rlsExtension } from './rls-optimized'
 
 const createExtendedClient = () => {
-  const base = globalForPrisma.prisma_aja ?? createPrismaClient()
-  if (env.NODE_ENV !== 'production') globalForPrisma.prisma_aja = base
+  const base = globalForPrisma.prisma_aja_v3 ?? createPrismaClient()
+  if (env.NODE_ENV !== 'production') globalForPrisma.prisma_aja_v3 = base
   
   return base
     .$extends(softDeleteExtension())
@@ -113,8 +113,8 @@ const createExtendedClient = () => {
 }
 
 /** Prisma client with automatic soft-delete filtering on reads. */
-const extendedClient = globalForPrisma.prisma_aja_ext ?? createExtendedClient()
-if (env.NODE_ENV !== 'production') globalForPrisma.prisma_aja_ext = extendedClient
+const extendedClient = globalForPrisma.prisma_aja_ext_v3 ?? createExtendedClient()
+if (env.NODE_ENV !== 'production') globalForPrisma.prisma_aja_ext_v3 = extendedClient
 
 // Cast to PrismaClient for type compatibility — the extension only adds runtime
 // behaviour (injecting deletedAt:null into where clauses) without changing the API shape.
@@ -122,7 +122,7 @@ export const prisma = extendedClient as unknown as PrismaClient
 
 /** Unfiltered client — use for admin queries, crons, or when you need deleted rows. */
 export const prismaUnfiltered: PrismaClient =
-  globalForPrisma.prisma_aja ?? createPrismaClient()
-if (env.NODE_ENV !== 'production') globalForPrisma.prisma_aja = prismaUnfiltered as PrismaClient
+  globalForPrisma.prisma_aja_v3 ?? createPrismaClient()
+if (env.NODE_ENV !== 'production') globalForPrisma.prisma_aja_v3 = prismaUnfiltered as PrismaClient
 
 export default prisma
