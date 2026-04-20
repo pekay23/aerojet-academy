@@ -1,4 +1,4 @@
-import { getAuthSession } from '@/lib/auth/helpers'
+import { getCachedSession } from '@/lib/auth/session-context'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import StaffSidebar from './_components/StaffSidebar'
@@ -6,7 +6,7 @@ import StaffTopBar from './_components/StaffTopBar'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 
 export default async function StaffLayout({ children }: { children: React.ReactNode }) {
-  const session = await getAuthSession()
+  const session = await getCachedSession()
 
   if (!session) redirect('/login')
 
