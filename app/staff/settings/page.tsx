@@ -28,7 +28,7 @@ const GENERAL_FIELDS = [
 
 const FINANCE_FIELDS = [
   { key: 'registration_fee', label: 'Registration Fee', description: 'Standard fee for initial registration', type: 'NUMBER' as const, default: '500' },
-  { key: 'registration_currency', label: 'Registration Currency', description: 'Currency used for registration fees', type: 'SELECT' as const, default: 'EUR', options: ['EUR', 'GHS', 'USD'] },
+  { key: 'registration_currency', label: 'Registration Currency', description: 'Currency used for registration fees', type: 'SELECT' as const, default: 'GHS', options: ['EUR', 'GHS', 'USD'] },
   { key: 'course_currency', label: 'Course Currency', description: 'Default currency for course tuition and modules', type: 'SELECT' as const, default: 'EUR', options: ['EUR', 'GHS', 'USD'] },
   { key: 'exchange_rate_eur_ghs', label: 'Manual Rate: EUR to GHS', description: 'Fixed exchange rate for Cedis. Leave empty for automated bank rate.', type: 'NUMBER' as const, default: '' },
   { key: 'exchange_rate_eur_usd', label: 'Manual Rate: EUR to USD', description: 'Fixed exchange rate for Dollars. Leave empty for automated bank rate.', type: 'NUMBER' as const, default: '' },
@@ -58,7 +58,7 @@ export default async function SettingsPage({
   }
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-[1800px] px-4 py-8 sm:px-6 lg:px-8">
       <SettingsTabs>
         {/* ── General Tab ── */}
         {tab === 'general' && (

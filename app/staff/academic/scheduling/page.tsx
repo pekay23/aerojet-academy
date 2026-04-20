@@ -225,7 +225,7 @@ export default function AcademicSchedulingPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6 px-4 py-8 md:space-y-8 md:px-8">
+    <div className="mx-auto max-w-[1800px] space-y-6 px-4 py-8 md:space-y-8 md:px-8">
       {/* Header */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-3">
@@ -446,7 +446,7 @@ export default function AcademicSchedulingPage() {
                                   <Loader2 className="h-4 w-4 animate-spin text-aerojet-sky" />
                                 ) : isAssigned ? (
                                   <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-500 text-white shadow-sm transition-transform active:scale-125">
-                                    <Check className="h-3.5 w-3.5 stroke-[3]" />
+                                    <Check className="h-3.5 w-3.5 stroke-3" />
                                   </div>
                                 ) : (
                                   <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-slate-100 text-slate-200 dark:border-slate-800 dark:text-slate-700">

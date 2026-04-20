@@ -14,48 +14,45 @@ export default function LoginForm() {
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    startTransition(() => {
+    
+    startTransition(async () => {
       setError('')
-    })
+      try {
+        const result = await signIn('credentials', {
+          redirect: false,
+          email: email.trim().toLowerCase(),
+          password,
+        })
 
-    try {
-      const result = await signIn('credentials', {
-        redirect: false,
-        email: email.trim().toLowerCase(),
-        password,
-      })
+        if (!result) {
+          throw new Error('Something went wrong. Please try again.')
+        }
 
-      if (!result) {
-        throw new Error('Something went wrong. Please try again.')
-      }
+        if (result.error) {
+          throw new Error('Invalid email or password.')
+        }
 
-      if (result.error) {
-        throw new Error('Invalid email or password.')
-      }
+        // Get session to read role and redirect accordingly
+        const session = await getSession()
+        const role = session?.user?.role
 
-      // Get session to read role and redirect accordingly
-      const session = await getSession()
-      const role = session?.user?.role
+        const redirectMap: Record<string, string> = {
+          SUPER_ADMIN: '/staff',
+          ADMIN: '/staff',
+          STAFF: '/staff',
+          INSTRUCTOR: '/instructor',
+          STUDENT: '/student',
+          APPLICANT: '/applicant',
+        }
 
-      const redirectMap: Record<string, string> = {
-        SUPER_ADMIN: '/staff',
-        ADMIN: '/staff',
-        STAFF: '/staff',
-        INSTRUCTOR: '/instructor',
-        STUDENT: '/student',
-        APPLICANT: '/applicant',
-      }
-
-      // Use window.location for full page navigation after auth
-      // router.push + router.refresh causes a race condition on mobile
-      window.location.href = redirectMap[role || ''] ?? '/login'
-    } catch (err: any) {
-      startTransition(() => {
+        // Use window.location for full page navigation after auth
+        window.location.href = redirectMap[role || ''] ?? '/login'
+      } catch (err: any) {
         setError(err.message || 'Something went wrong. Please try again.')
-      })
-    }
+      }
+    })
   }
 
   return (

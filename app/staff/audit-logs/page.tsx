@@ -156,7 +156,7 @@ export default async function AuditLogsPage(req: {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-[1800px] space-y-6">
       <div>
         <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           System Audit Logs

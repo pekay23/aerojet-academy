@@ -4,6 +4,8 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { chargeWallet } from '@/lib/wallet/operations'
 import { logAuditEvent, AuditAction } from '@/lib/audit/logger'
+import { convertCurrency } from '@/lib/currency-api'
+import { getCurrencySymbol } from '@/lib/currency'
 
 // ---------------------------------------------------------------------------
 // GET — Registration fee status
@@ -17,7 +19,6 @@ export const GET = withErrorHandler(async (_req: NextRequest) => {
     where: { id: session.user.id },
     select: {
       registrationFee: true,
-      registrationCurrency: true,
       registrationPaid: true,
       paymentApprovedAt: true,
     },
@@ -32,7 +33,7 @@ export const GET = withErrorHandler(async (_req: NextRequest) => {
 
   return apiSuccess({
     registrationFee: Number(user.registrationFee),
-    registrationCurrency: user.registrationCurrency,
+    registrationCurrency: 'GHS', // Enforce GHS for display
     registrationPaid: user.registrationPaid,
     paymentApprovedAt: user.paymentApprovedAt,
     walletBalance: wallet ? Number(wallet.availableBalance) : 0,
@@ -58,7 +59,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     }),
     prisma.wallet.findUnique({
       where: { userId },
-      select: { availableBalance: true },
+      select: { availableBalance: true, currency: true },
     }),
   ])
 
@@ -68,16 +69,22 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Registration fee has already been paid', 409)
   }
 
-  const fee = Number(user.registrationFee)
-
   if (!wallet) {
     return apiError('Wallet not found. Please contact support.', 404)
   }
 
+  // --- Currency Configuration ---
+  const feeGhs = Number(user.registrationFee)
+  const walletCurrency = wallet.currency || 'EUR'
+  const walletSymbol = getCurrencySymbol(walletCurrency)
+  
+  // Convert fee (GHS) to wallet currency
+  const { convertedAmount: amountToDeduct } = await convertCurrency(feeGhs, 'GHS', walletCurrency)
+
   const available = Number(wallet.availableBalance)
-  if (available < fee) {
+  if (available < amountToDeduct) {
     return apiError(
-      `Insufficient wallet balance. Available: \u20AC${available.toFixed(2)}, Required: \u20AC${fee.toFixed(2)}`,
+      `Insufficient wallet balance. Available: ${walletSymbol}${available.toFixed(2)}, Required: ${walletSymbol}${amountToDeduct.toFixed(2)} (Equivalent of GH₵${feeGhs.toFixed(2)})`,
       400
     )
   }
@@ -88,8 +95,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     await chargeWallet(
       tx,
       userId,
-      fee,
-      'Registration Fee Payment',
+      amountToDeduct,
+      `Registration Fee Payment (GH₵${feeGhs.toFixed(2)})`,
       userId,
       'REGISTRATION_FEE'
     )
@@ -104,14 +111,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     })
   })
 
-  // Audit log (outside transaction so it doesn't block)
+  // Audit log (outside transaction)
   await logAuditEvent({
     userId,
     action: AuditAction.PAYMENT_APPROVE,
     entity: 'User',
     entityId: userId,
-    description: `Student paid registration fee of \u20AC${fee.toFixed(2)} from wallet`,
-    changes: { registrationPaid: true, amount: fee },
+    description: `Student paid registration fee of GH₵${feeGhs.toFixed(2)} using ${walletSymbol}${amountToDeduct.toFixed(2)} from wallet`,
+    changes: { registrationPaid: true, amount: feeGhs, deduction: amountToDeduct, currency: walletCurrency },
   })
 
   return apiSuccess({ message: 'Registration fee paid successfully' })

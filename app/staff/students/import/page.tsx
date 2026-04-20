@@ -380,7 +380,7 @@ export default function ImportStudentsPage() {
 
   // ---- RENDER ----
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-[1800px]">
       <div className="mb-6">
         <Link
           href="/staff/users?tab=students"

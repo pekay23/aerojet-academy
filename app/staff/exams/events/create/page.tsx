@@ -78,7 +78,7 @@ export default function CreateExamEventPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-[1800px] px-4 sm:px-6 lg:px-8">
       {/* Header Section */}
       <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1">
@@ -86,7 +86,7 @@ export default function CreateExamEventPage() {
             <span className="h-1 w-6 bg-aerojet-blue rounded-full" />
             Exam Management
           </div>
-          <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-4xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Create Exam Event
           </h1>
           <p className="text-lg text-slate-500 dark:text-slate-400">
