@@ -34,11 +34,26 @@ async function syncVercel() {
 
     console.log(`\nProcessing [${key}]...`)
     
+    // 1. Exhaustive Clean (Loop until all instances are gone)
+    let deletedCount = 0
+    let stillDeleting = true
+    while (stillDeleting) {
+      try {
+        execSync(`vercel env rm ${key} --yes`, { stdio: 'ignore' })
+        deletedCount++
+      } catch (err) {
+        // When it fails, it means there are no more instances left
+        stillDeleting = false
+      }
+    }
+    console.log(`  ✅ Instances removed: ${deletedCount}`)
+
+    // 2. Fresh Global Sync with --force to ensure overrides
     const targets = ['production', 'preview', 'development']
     for (const target of targets) {
       try {
-        process.stdout.write(`  Syncing [${key}] to ${target}... `)
-        // Use the exact command that was manually verified
+        process.stdout.write(`  Syncing to ${target}... `)
+        // Use individual add with force
         const command = `vercel env add ${key} ${target} --value "${value.replace(/"/g, '\\"')}" --yes --force`
         execSync(command, { stdio: 'ignore' })
         console.log(`✅`)
