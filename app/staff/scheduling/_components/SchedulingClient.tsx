@@ -66,7 +66,7 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-8">
+    <div className="mx-auto max-w-[1800px] space-y-8">
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}

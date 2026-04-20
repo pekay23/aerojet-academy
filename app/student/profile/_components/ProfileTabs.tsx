@@ -20,7 +20,7 @@ export default function ProfileTabs({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
+    <div className="mx-auto max-w-7xl space-y-6">
       <div>
         <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           My Profile

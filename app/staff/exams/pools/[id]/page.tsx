@@ -36,7 +36,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
   if (!pool) notFound()
 
   return (
-    <div className="mx-auto max-w-[1600px]">
+    <div className="mx-auto max-w-[1800px]">
       <div className="mb-6">
         <Link
           href={pool.eventId ? `/staff/exams/events/${pool.eventId}` : '/staff/exams'}

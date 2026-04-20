@@ -635,7 +635,7 @@ export default async function WalletPage({
 
       {/* ── Top Up Tab ── */}
       {tab === 'top-up' && (
-        <div className="mx-auto max-w-2xl space-y-6">
+        <div className="mx-auto max-w-7xl space-y-6">
           {actionParam && requiredAmount > 0 && walletBalance.available < requiredAmount && (
             <div className="rounded-2xl border border-blue-200 bg-blue-50 p-6 dark:border-blue-800/50 dark:bg-blue-900/20">
               <div className="flex items-start gap-4">

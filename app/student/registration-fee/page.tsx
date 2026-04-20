@@ -39,8 +39,8 @@ export default async function RegistrationFeePage() {
   if (!user) redirect('/login')
 
   const fee = Number(user.registrationFee)
-  const feeCurrency = user.registrationCurrency || 'EUR'
-  const symbol = getCurrencySymbol(feeCurrency)
+  const feeCurrency = 'GHS'
+  const symbol = 'GH₵'
   
   const walletBalance = wallet ? Number(wallet.availableBalance) : 0
   const walletCurrency = wallet?.currency || 'EUR'

@@ -26,7 +26,7 @@ export default async function ProfilePage() {
   if (!user) redirect('/login')
 
   return (
-    <div className="max-w-3xl space-y-8">
+    <div className="max-w-7xl space-y-8">
       <div>
         <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white sm:text-3xl">
           My Profile

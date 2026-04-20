@@ -51,7 +51,7 @@ export default async function PaymentPage() {
   const registrationCurrency = globalSettings.registration_currency || 'EUR'
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       <div>
         <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white sm:text-3xl">
           Upload Payment Proof

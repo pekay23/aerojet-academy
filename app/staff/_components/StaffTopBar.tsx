@@ -102,9 +102,12 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
   const [welcomeMsg, setWelcomeMsg] = useState<string | null>(null)
 
   useEffect(() => {
+    // Generate the random message only on the client after mount
     if (welcomeMessages?.length) {
       const idx = Math.floor(Math.random() * welcomeMessages.length)
       setWelcomeMsg(welcomeMessages[idx] ?? welcomeMessages[0])
+    } else {
+      setWelcomeMsg('Welcome back')
     }
   }, [welcomeMessages])
 

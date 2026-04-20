@@ -59,7 +59,7 @@ async function SettingsTab() {
 
 function PasswordTab() {
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       <div className="rounded-3xl border border-slate-100 bg-white p-8 shadow-sm sm:p-10 dark:border-slate-800 dark:bg-slate-900">
         <ChangePasswordForm apiEndpoint="/api/student/profile/change-password" />
       </div>
