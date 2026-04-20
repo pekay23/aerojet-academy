@@ -1,4 +1,4 @@
-import { env } from '@/lib/env'
+xesimport { env } from '@/lib/env'
 import { Prisma, PrismaClient } from '@prisma/client'
 import { neonConfig } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
@@ -109,7 +109,7 @@ const createExtendedClient = () => {
   
   return base
     .$extends(softDeleteExtension())
-    .$extends(rlsExtension())
+    .$extends(rlsExtension)
 }
 
 /** Prisma client with automatic soft-delete filtering on reads. */
