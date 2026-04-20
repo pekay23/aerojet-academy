@@ -1,4 +1,4 @@
-xesimport { env } from '@/lib/env'
+import { env } from '@/lib/env'
 import { Prisma, PrismaClient } from '@prisma/client'
 import { neonConfig } from '@neondatabase/serverless'
 import { PrismaNeon } from '@prisma/adapter-neon'
