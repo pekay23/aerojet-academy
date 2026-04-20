@@ -13,15 +13,20 @@ export function rlsExtension() {
     query: {
       $allModels: {
         async $allOperations({ model, operation, args, query }) {
-          // Skip for models that don't need RLS or during unauthenticated flows 
-          // where the policy allows public access (like login).
-          
+          // 1. Bypass during production build (prerendering)
+          // During 'next build', there is no user session and we should allow 
+          // the system to fetch public/static data.
+          if (process.env.NEXT_PHASE === 'phase-production-build') {
+            return query(args);
+          }
+
           let session;
           try {
-             // getAuthSession relies on headers()/cookies() and can only be called in request context
+             // Dynamic import to avoid ESM interop issues in non-Next.js environments (like tsx)
+             const { getAuthSession } = await import('@/lib/auth/helpers');
              session = await getAuthSession();
           } catch (e) {
-            // Not in a request context (e.g., build time, cron, or some background tasks)
+            // Not in a request context (e.g., build time fallback, cron, or background tasks)
             return query(args);
           }
 
@@ -36,15 +41,9 @@ export function rlsExtension() {
 
           // To use RLS policies that rely on session variables, we must use a transaction.
           // SET LOCAL ensures the variable is cleared when the transaction ends (or connection returns to pool).
-          // We use the 'prisma' instance from the context if available, or the query context.
+          // We use the 'client' instance from the context if available.
           
-          // Note: Using a transaction for every query adds a slight overhead (one extra roundtrip for SET LOCAL).
-          // However, it is the most reliable way to enforce RLS with Prisma.
-          
-          // We cast to any to access $transaction on the query target if needed, 
-          // but Prisma extensions usually provide a way to handle this.
-          
-          return (Prisma as any).$transaction(async (tx: any) => {
+          return (Prisma.getExtensionContext(this) as any).$transaction(async (tx: any) => {
             await tx.$executeRawUnsafe(`SELECT set_config('aerojet.user_id', '${userId}', true)`);
             if (userRole) {
               await tx.$executeRawUnsafe(`SELECT set_config('aerojet.user_role', '${userRole}', true)`);
