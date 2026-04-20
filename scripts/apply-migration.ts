@@ -9,7 +9,12 @@
 import { neon } from '@neondatabase/serverless'
 import 'dotenv/config'
 
-const sql = neon('postgresql://neondb_owner:npg_XiRQ0B2IEVzC@ep-wandering-wave-ahyik1io.c-3.us-east-1.aws.neon.tech/neondb?sslmode=require')
+const connectionString = process.env.DIRECT_URL || process.env.DATABASE_URL
+if (!connectionString) {
+  console.error('❌ DIRECT_URL or DATABASE_URL not found in environment')
+  process.exit(1)
+}
+const sql = neon(connectionString)
 
 const migrations = [
   // 1. Add DEFERRED to EnrollmentStatus enum
