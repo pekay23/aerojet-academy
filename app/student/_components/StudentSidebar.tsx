@@ -126,9 +126,7 @@ export default function StudentSidebar({
       userName={userName}
       userRole={userRole}
       userImage={userImage}
-      userMenuItems={[
-        { label: 'Settings', href: '/student/profile?tab=settings', icon: Settings },
-      ]}
+      userMenuItems={[]}
     />
   )
 }

@@ -91,7 +91,7 @@ export default async function PathwayPage() {
 
     if (seatPaid) {
       return (
-        <div className="max-w-4xl space-y-6">
+        <div className="max-w-7xl space-y-6">
           <div>
             <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
               Enrollment Progress
@@ -280,7 +280,7 @@ export default async function PathwayPage() {
   }
 
   return (
-    <div className="max-w-4xl space-y-6">
+    <div className="max-w-7xl space-y-6">
       <div>
         <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           Complete Your Enrollment

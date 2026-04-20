@@ -198,7 +198,7 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
   }
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-[1800px]">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">

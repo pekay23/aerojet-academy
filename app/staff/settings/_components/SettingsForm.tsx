@@ -56,16 +56,16 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-1">
-      <div className="divide-y divide-slate-100/60 overflow-hidden rounded-2xl border border-slate-200/60 bg-white/70 shadow-sm dark:divide-white/5 dark:border-white/5 dark:bg-[#111827]/60">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {fields.map((field) => {
           const currentValue = values[field.key] ?? field.default
           return (
             <div
               key={field.key}
-              className="group flex flex-col justify-between gap-4 px-6 py-5 transition-all duration-150 ease-out hover:bg-white/80 md:flex-row md:items-center dark:hover:bg-slate-800/40"
+              className="group flex flex-col justify-between gap-4 rounded-2xl border border-slate-200/60 bg-white/70 p-6 shadow-sm transition-all duration-150 ease-out hover:bg-white/80 dark:border-white/5 dark:bg-[#111827]/60 dark:hover:bg-slate-800/40"
             >
-              <div className="max-w-xl flex-1">
+              <div className="flex-1">
                 <label
                   htmlFor={field.key}
                   className="block text-sm font-bold text-slate-900 dark:text-slate-100"
@@ -76,9 +76,9 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                   {field.description}
                 </p>
               </div>
-              <div className="w-full shrink-0 md:w-72">
+              <div className="mt-2 w-full shrink-0">
                 {field.type === 'BOOLEAN' ? (
-                  <div className="flex items-center justify-end gap-3">
+                  <div className="flex items-center gap-3">
                     <input type="hidden" name={`${field.key}__type`} value="BOOLEAN" />
                     <div className="relative inline-flex items-center">
                       <input
@@ -93,6 +93,9 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                         className="peer h-7 w-12 cursor-pointer rounded-full bg-slate-200 shadow-inner transition-colors peer-checked:bg-aerojet-blue peer-focus:ring-4 peer-focus:ring-aerojet-blue/20 peer-focus:outline-none after:absolute after:top-[4px] after:left-[4px] after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600"
                       />
                     </div>
+                    <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                      {currentValue === 'true' ? 'Enabled' : 'Disabled'}
+                    </span>
                   </div>
                 ) : field.type === 'SELECT' && field.options ? (
                   <div>
@@ -101,7 +104,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                       id={field.key}
                       name={field.key}
                       defaultValue={currentValue}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm transition-all focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-900 shadow-sm transition-all focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
                     >
                       {field.options.map((opt) => (
                         <option key={opt} value={opt}>
@@ -118,7 +121,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                       name={field.key}
                       type={field.type === 'NUMBER' ? 'number' : 'text'}
                       defaultValue={currentValue}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
+                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-900 shadow-sm transition-all placeholder:text-slate-400 focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 focus:outline-none dark:border-white/10 dark:bg-black/20 dark:text-white"
                     />
                   </div>
                 )}
@@ -128,7 +131,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
         })}
       </div>
 
-      <div className="flex justify-end pt-4">
+      <div className="flex justify-end pt-2">
         <button
           type="submit"
           disabled={saving}

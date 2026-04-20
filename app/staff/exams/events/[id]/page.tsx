@@ -62,7 +62,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
   const hasAutoPool = event.pools.some((p) => p.isAutoPool && p.poolType === 'AUTO' && p.status === 'OPEN')
 
   return (
-    <div className="mx-auto max-w-[1600px]">
+    <div className="mx-auto max-w-[1800px]">
       <div className="mb-6">
         <Link
           href="/staff/exams/events"

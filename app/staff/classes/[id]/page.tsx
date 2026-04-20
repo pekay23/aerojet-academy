@@ -52,7 +52,7 @@ export default async function ClassDetailsPage({ params }: Props) {
     : 'Unassigned'
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto max-w-[1800px]">
       {/* Header */}
       <div className="mb-6">
         <Link

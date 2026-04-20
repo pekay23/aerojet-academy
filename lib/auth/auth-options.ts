@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { verifyPassword } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 import { UserStatus } from '@prisma/client'

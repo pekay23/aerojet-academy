@@ -101,10 +101,15 @@ const createPrismaClient = () => {
   })
 }
 
+import { rlsExtension } from './rls'
+
 const createExtendedClient = () => {
   const base = globalForPrisma.prisma_aja ?? createPrismaClient()
   if (env.NODE_ENV !== 'production') globalForPrisma.prisma_aja = base
-  return base.$extends(softDeleteExtension())
+  
+  return base
+    .$extends(softDeleteExtension())
+    .$extends(rlsExtension())
 }
 
 /** Prisma client with automatic soft-delete filtering on reads. */

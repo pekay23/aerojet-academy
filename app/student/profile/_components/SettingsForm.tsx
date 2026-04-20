@@ -36,7 +36,7 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
   }
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="max-w-4xl space-y-6">
       {/* Notifications Section */}
       <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
         <h3 className="mb-6 flex items-center gap-2 border-b border-slate-50 pb-4 text-lg font-black text-aerojet-blue dark:border-slate-800 dark:text-white">

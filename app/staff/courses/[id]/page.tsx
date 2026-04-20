@@ -76,7 +76,7 @@ export default async function CourseDetailsPage({ params }: Props) {
   const serializedCategories = serializePrisma(categories)
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-[1800px]">
       {/* Header */}
       <div className="mb-6">
         <Link

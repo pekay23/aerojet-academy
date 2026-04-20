@@ -145,7 +145,7 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-6">
+    <div className="mx-auto max-w-[1800px] space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Link
