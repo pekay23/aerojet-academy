@@ -1,0 +1,119 @@
+﻿app/api/admin/migrate-candidates/route.ts(218,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/applicant/courses/[id]/enroll/route.ts(22,38): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/applicant/courses/[id]/purchase/route.ts(26,53): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/applicant/exam-only/book-exam/route.ts(73,16): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/applicant/pay-milestone/route.ts(50,51): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/applicant/pay-milestone/route.ts(73,8): error TS7006: Parameter 'm' implicitly has an 'any' type.
+app/api/me/study-pathway/route.ts(41,38): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/public/register/route.ts(67,49): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/public/submit-payment-proof/route.ts(34,36): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/applicants/[id]/approve/route.ts(61,36): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/courses/[id]/exam-components/[componentId]/route.ts(89,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/courses/[id]/exam-components/[componentId]/route.ts(141,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/courses/[id]/exam-components/transfer/route.ts(53,53): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/courses/[id]/route.ts(116,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/courses/[id]/route.ts(122,16): error TS7006: Parameter 'c' implicitly has an 'any' type.
+app/api/staff/enrollments/[id]/approve/route.ts(30,38): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/exam-pools/[id]/members/[memberId]/route.ts(23,14): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/exam-pools/[id]/members/[memberId]/route.ts(78,40): error TS2345: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.
+  Type 'undefined' is not assignable to type 'string'.
+app/api/staff/finance/reconcile/route.ts(22,51): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/finance/wallet-topups/[id]/approve/route.ts(56,38): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/payments/[id]/approve/route.ts(74,42): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/payments/[id]/approve/route.ts(187,50): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/students/[id]/book-exam/route.ts(93,53): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/students/[id]/study-pathway/route.ts(40,38): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/students/[id]/wallet/route.ts(157,51): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/students/[id]/wallet/route.ts(168,51): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/students/[id]/wallet/route.ts(180,51): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/students/[id]/wallet/route.ts(192,51): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/students/[id]/wallet/route.ts(206,51): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/students/import/route.ts(251,55): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/students/import/route.ts(318,42): error TS7006: Parameter 'lc' implicitly has an 'any' type.
+app/api/staff/students/import/route.ts(442,42): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/users/[id]/role/route.ts(52,58): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/users/create/route.ts(48,54): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/staff/wallet-topups/[id]/approve/route.ts(33,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/student/milestones/pay/route.ts(50,36): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/student/registration-fee/route.ts(93,36): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/api/webhooks/stripe/route.ts(70,44): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/staff/actions.ts(359,54): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(28,43): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(36,46): error TS7006: Parameter 's' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(42,42): error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
+app/staff/dashboard/page.tsx(124,16): error TS7006: Parameter 'u' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(125,16): error TS7006: Parameter 'acc' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(125,21): error TS7006: Parameter 'curr' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(127,16): error TS7006: Parameter 'u' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(128,16): error TS7006: Parameter 'acc' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(128,21): error TS7006: Parameter 'curr' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(130,16): error TS7006: Parameter 'u' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(131,16): error TS7006: Parameter 'acc' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(131,21): error TS7006: Parameter 'curr' implicitly has an 'any' type.
+app/staff/dashboard/page.tsx(193,45): error TS7006: Parameter 'd' implicitly has an 'any' type.
+app/student/actions.ts(114,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/student/actions.ts(302,38): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/student/actions.ts(460,51): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+app/student/actions.ts(641,38): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/enrollment/combined-exam.ts(77,37): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/enrollment/engine.ts(134,36): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/enrollment/exams.ts(71,37): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/enrollment/exams.ts(150,37): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/enrollment/full-time.ts(126,61): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/enrollment/full-time.ts(160,8): error TS7006: Parameter 'm' implicitly has an 'any' type.
+lib/enrollment/full-time.ts(209,36): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/enrollment/modular.ts(27,37): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/enrollment/modular.ts(77,26): error TS7006: Parameter 'exam' implicitly has an 'any' type.
+lib/enrollment/pathway.ts(157,36): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/enrollment/pathway.ts(188,40): error TS7006: Parameter 'lc' implicitly has an 'any' type.
+lib/enrollment/tuition-cron.ts(29,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/enrollment/tuition.ts(33,37): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/events/go-no-go.ts(160,51): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/events/go-no-go.ts(260,37): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/events/go-no-go.ts(349,12): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/events/go-no-go.ts(373,55): error TS7006: Parameter 'm' implicitly has an 'any' type.
+lib/events/go-no-go.ts(374,52): error TS7006: Parameter 'm' implicitly has an 'any' type.
+lib/pools/auto-pool.ts(75,7): error TS2345: Argument of type 'TransactionClient' is not assignable to parameter of type 'TxClient'.
+  Types of property 'class' are incompatible.
+    Type 'ClassDelegate<DefaultArgs, PrismaClientOptions>' is not assignable to type 'DynamicModelExtensionThis<TypeMap<InternalArgs & { result: {}; model: {}; query: {}; client: { $transaction: () => <T>(this: T, args: any, options?: any) => Promise<any>; }; }, {}>, "Class", { ...; }>'.
+      Type 'ClassDelegate<DefaultArgs, PrismaClientOptions>' is not assignable to type '{ findUnique: <A extends ClassFindUniqueArgs<InternalArgs & { result: {}; model: {}; query: {}; client: { $transaction: () => <T>(this: T, args: any, options?: any) => Promise<any>; }; }>>(args: Exact<...>) => DynamicModelExtensionFluentApi<...> & PrismaPromise<...>; ... 15 more ...; count: <A extends ClassCountArgs...'.
+        The types returned by 'findUnique(...)' are incompatible between these types.
+          Type 'Prisma__ClassClient<{ name: string; id: string; createdAt: Date; updatedAt: Date; description: string | null; courseId: string; academicYearId: string | null; semesterId: string | null; startDate: Date; ... 4 more ...; currentStudents: number; } | null, null, DefaultArgs, PrismaClientOptions>' is not assignable to type 'DynamicModelExtensionFluentApi<TypeMap<InternalArgs & { result: {}; model: {}; query: {}; client: { $transaction: () => <T>(this: T, args: any, options?: any) => Promise<any>; }; }, {}>, "Class", "findUnique", null> & PrismaPromise<...>'.
+            Type 'Prisma__ClassClient<{ name: string; id: string; createdAt: Date; updatedAt: Date; description: string | null; courseId: string; academicYearId: string | null; semesterId: string | null; startDate: Date; ... 4 more ...; currentStudents: number; } | null, null, DefaultArgs, PrismaClientOptions>' is not assignable to type 'DynamicModelExtensionFluentApi<TypeMap<InternalArgs & { result: {}; model: {}; query: {}; client: { $transaction: () => <T>(this: T, args: any, options?: any) => Promise<any>; }; }, {}>, "Class", "findUnique", null>'.
+              Types of property 'attendanceRecords' are incompatible.
+                Type '<T extends Class$attendanceRecordsArgs<DefaultArgs> = {}>(args?: Subset<T, Class$attendanceRecordsArgs<DefaultArgs>> | undefined) => PrismaPromise<...>' is not assignable to type '<A>(args?: Exact<A, boolean | Class$attendanceRecordsArgs<InternalArgs & { result: {}; model: {}; query: {}; client: { $transaction: () => <T>(this: T, args: any, options?: any) => Promise<any>; }; }> | undefined> | undefined) => PrismaPromise<...> & DynamicModelExtensionFluentApi<...>'.
+                  Types of parameters 'args' and 'args' are incompatible.
+                    Type 'Exact<A, boolean | Class$attendanceRecordsArgs<InternalArgs & { result: {}; model: {}; query: {}; client: { $transaction: () => <T>(this: T, args: any, options?: any) => Promise<any>; }; }> | undefined> | undefined' is not assignable to type 'Subset<Class$attendanceRecordsArgs<DefaultArgs>, Class$attendanceRecordsArgs<DefaultArgs>> | undefined'.
+                      Type 'A extends Narrowable ? A : never' is not assignable to type 'Subset<Class$attendanceRecordsArgs<DefaultArgs>, Class$attendanceRecordsArgs<DefaultArgs>> | undefined'.
+                        Type 'Narrowable & A' is not assignable to type 'Subset<Class$attendanceRecordsArgs<DefaultArgs>, Class$attendanceRecordsArgs<DefaultArgs>> | undefined'.
+                          Type 'string & A' is not assignable to type 'Subset<Class$attendanceRecordsArgs<DefaultArgs>, Class$attendanceRecordsArgs<DefaultArgs>> | undefined'.
+                            Type 'string & A' has no properties in common with type 'Subset<Class$attendanceRecordsArgs<DefaultArgs>, Class$attendanceRecordsArgs<DefaultArgs>>'.
+                              Type 'A extends Narrowable ? A : never' is not assignable to type 'Subset<Class$attendanceRecordsArgs<DefaultArgs>, Class$attendanceRecordsArgs<DefaultArgs>>'.
+                                Type 'Narrowable & A' is not assignable to type 'Subset<Class$attendanceRecordsArgs<DefaultArgs>, Class$attendanceRecordsArgs<DefaultArgs>>'.
+                                  Type 'string & A' has no properties in common with type 'Subset<Class$attendanceRecordsArgs<DefaultArgs>, Class$attendanceRecordsArgs<DefaultArgs>>'.
+lib/pools/auto-pool.ts(134,12): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/pools/auto-pool.ts(201,23): error TS7006: Parameter 'm' implicitly has an 'any' type.
+lib/pools/auto-pool.ts(255,53): error TS7006: Parameter 'p' implicitly has an 'any' type.
+lib/pools/bundles.ts(64,14): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/pools/cancellation.ts(36,14): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/pools/group-booking.ts(49,12): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/pools/join.ts(30,14): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/pools/operations.ts(50,12): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/pools/standard-pools.ts(56,36): error TS2349: This expression is not callable.
+  Each member of the union type '(<T extends ExamEventFindUniqueOrThrowArgs>(args: SelectSubset<T, ExamEventFindUniqueOrThrowArgs<DefaultArgs>>) => Prisma__ExamEventClient<...>) | (<A extends ExamEventFindUniqueOrThrowArgs<...>>(args: Exact<...>) => DynamicModelExtensionFluentApi<...> & PrismaPromise<...>)' has signatures, but none of those signatures are compatible with each other.
+lib/pools/standard-pools.ts(62,34): error TS2321: Excessive stack depth comparing types 'ExamPoolFindManyArgs<InternalArgs & { result: {}; model: {}; query: {}; client: { $transaction: () => <T>(this: T, args: any, options?: any) => Promise<any>; }; }>' and 'ExamPoolFindManyArgs<DefaultArgs>'.
+lib/pools/standard-pools.ts(62,46): error TS2349: This expression is not callable.
+  Each member of the union type '(<T extends ExamPoolFindManyArgs>(args?: SelectSubset<T, ExamPoolFindManyArgs<DefaultArgs>> | undefined) => PrismaPromise<GetFindResult<$ExamPoolPayload<DefaultArgs>, T, PrismaClientOptions>[]>) | (<A extends ExamPoolFindManyArgs<...>>(args?: Exact<...> | undefined) => PrismaPromise<...>)' has signatures, but none of those signatures are compatible with each other.
+lib/pools/standard-pools.ts(66,56): error TS7006: Parameter 'p' implicitly has an 'any' type.
+lib/pools/standard-pools.ts(77,26): error TS2349: This expression is not callable.
+  Each member of the union type '(<T extends ExamPoolCreateArgs>(args: SelectSubset<T, ExamPoolCreateArgs<DefaultArgs>>) => Prisma__ExamPoolClient<GetFindResult<$ExamPoolPayload<DefaultArgs>, T, PrismaClientOptions>, never, DefaultArgs, PrismaClientOptions>) | (<A extends ExamPoolCreateArgs<...>>(args: Exact<...>) => DynamicModelExtensionFluentApi<...' has signatures, but none of those signatures are compatible with each other.
+lib/pools/standard-pools.ts(119,36): error TS2349: This expression is not callable.
+  Each member of the union type '(<T extends ExamEventFindUniqueOrThrowArgs>(args: SelectSubset<T, ExamEventFindUniqueOrThrowArgs<DefaultArgs>>) => Prisma__ExamEventClient<...>) | (<A extends ExamEventFindUniqueOrThrowArgs<...>>(args: Exact<...>) => DynamicModelExtensionFluentApi<...> & PrismaPromise<...>)' has signatures, but none of those signatures are compatible with each other.
+lib/pools/standard-pools.ts(126,22): error TS2349: This expression is not callable.
+  Each member of the union type '(<T extends ExamPoolCreateArgs>(args: SelectSubset<T, ExamPoolCreateArgs<DefaultArgs>>) => Prisma__ExamPoolClient<GetFindResult<$ExamPoolPayload<DefaultArgs>, T, PrismaClientOptions>, never, DefaultArgs, PrismaClientOptions>) | (<A extends ExamPoolCreateArgs<...>>(args: Exact<...>) => DynamicModelExtensionFluentApi<...' has signatures, but none of those signatures are compatible with each other.
+lib/pools/withdraw.ts(34,14): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/pools/withdraw.ts(36,30): error TS2347: Untyped function calls may not accept type arguments.
+lib/referral/operations.ts(90,12): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/staff/approvals.ts(72,40): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+lib/users/eviction.ts(12,12): error TS7006: Parameter 'tx' implicitly has an 'any' type.
+scripts/migrate-exam-candidates.ts(689,36): error TS7006: Parameter 'tx' implicitly has an 'any' type.

@@ -1,9 +1,8 @@
-import { getAuthSession } from '@/lib/auth/helpers'
+import { getCachedSession } from '@/lib/auth/session-context'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import PeopleTabs from '../_components/PeopleTabs'
-import { UserRole, UserStatus } from '@/types/enums'
 
 export const metadata: Metadata = { title: 'People | Staff Portal' }
 
@@ -13,43 +12,49 @@ export default async function PeoplePage({
   searchParams: Promise<{ tab?: string }>
 }) {
   const { tab } = await searchParams
-  const session = await getAuthSession()
+  const session = await getCachedSession()
   if (!session) redirect('/login')
 
-  const [
-    total,
-    applicantAll,
-    applicantPendingPayment,
-    applicantPendingApproval,
-    studentAll,
-    studentActive,
-    studentSuspended,
-    studentArchived,
-  ] = await Promise.all([
-    prisma.user.count(),
-    prisma.user.count({ where: { role: UserRole.APPLICANT, status: UserStatus.PENDING } }),
-    prisma.user.count({ where: { role: UserRole.APPLICANT, status: UserStatus.PENDING, registrationPaid: false } }),
-    prisma.user.count({ where: { role: UserRole.APPLICANT, status: UserStatus.PENDING, registrationPaid: true } }),
-    prisma.user.count({ where: { role: UserRole.STUDENT } }),
-    prisma.user.count({ where: { role: UserRole.STUDENT, status: UserStatus.ACTIVE } }),
-    prisma.user.count({ where: { role: UserRole.STUDENT, status: UserStatus.SUSPENDED } }),
-    prisma.user.count({ where: { role: UserRole.STUDENT, status: UserStatus.ARCHIVED } }),
-  ])
+  // Optimize: Use unfiltered client for global counts to bypass RLS overhead
+  const queryResult: any[] = await prisma.$queryRaw`
+    SELECT
+      COUNT(*)::int as "total",
+      COUNT(*) FILTER (WHERE "role"::text = 'APPLICANT' AND "status"::text = 'PENDING')::int as "applicantAll",
+      COUNT(*) FILTER (WHERE "role"::text = 'APPLICANT' AND "status"::text = 'PENDING' AND "registrationPaid" = false)::int as "applicantPendingPayment",
+      COUNT(*) FILTER (WHERE "role"::text = 'APPLICANT' AND "status"::text = 'PENDING' AND "registrationPaid" = true)::int as "applicantPendingApproval",
+      COUNT(*) FILTER (WHERE "role"::text = 'STUDENT')::int as "studentAll",
+      COUNT(*) FILTER (WHERE "role"::text = 'STUDENT' AND "status"::text = 'ACTIVE')::int as "studentActive",
+      COUNT(*) FILTER (WHERE "role"::text = 'STUDENT' AND "status"::text = 'SUSPENDED')::int as "studentSuspended",
+      COUNT(*) FILTER (WHERE "role"::text = 'STUDENT' AND "status"::text = 'ARCHIVED')::int as "studentArchived"
+    FROM "users"
+    WHERE "deletedAt" IS NULL
+  `
+
+  const counts = queryResult[0] || { 
+    total: 0, 
+    applicantAll: 0, 
+    applicantPendingPayment: 0, 
+    applicantPendingApproval: 0,
+    studentAll: 0,
+    studentActive: 0,
+    studentSuspended: 0,
+    studentArchived: 0
+  }
 
   return (
     <PeopleTabs
       initialTab={tab}
-      initialTotal={total}
+      initialTotal={counts.total}
       applicantCounts={{
-        all: applicantAll,
-        pending_payment: applicantPendingPayment,
-        pending_approval: applicantPendingApproval,
+        all: counts.applicantAll,
+        pending_payment: counts.applicantPendingPayment,
+        pending_approval: counts.applicantPendingApproval,
       }}
       studentCounts={{
-        all: studentAll,
-        active: studentActive,
-        suspended: studentSuspended,
-        archived: studentArchived,
+        all: counts.studentAll,
+        active: counts.studentActive,
+        suspended: counts.studentSuspended,
+        archived: counts.studentArchived,
       }}
     />
   )

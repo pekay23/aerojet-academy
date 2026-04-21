@@ -23,116 +23,130 @@ async function getDashboardData() {
   const now = new Date()
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
-  const [currency, targetVal] = await Promise.all([
-    getSystemSetting('course_currency', 'EUR'),
-    getSystemSetting('target_monthly_revenue', '50000'),
-  ])
-  const targetMonthlyRevenue = Number(targetVal)
+  // Optimization: Consolidate ALL dashboard lookups into a single transaction 
+  // to reduce connection pool pressure and set RLS context exactly once.
+  return await prisma.$transaction(async (tx) => {
+    // 1. Fetch settings using the transactional client for maximum efficiency
+    const settings = await tx.systemSetting.findMany({
+      where: {
+        key: { in: ['course_currency', 'target_monthly_revenue'] }
+      }
+    })
 
-  const { getCurrencySymbol } = await import('@/lib/currency')
-  const currSymbol = getCurrencySymbol(currency)
+    const settingsMap = new Map(settings.map(s => [s.key, s.value]))
+    const currency = settingsMap.get('course_currency') || 'EUR'
+    const targetVal = settingsMap.get('target_monthly_revenue') || '50000'
+    const targetMonthlyRevenue = Number(targetVal)
 
-  const [
-    userStatusCounts,
-    pendingPayments,
-    recentPendingPaymentsRaw,
-    activePoolRaw,
-    openPoolsRaw,
-    approvedPayments,
-  ] = await Promise.all([
-    prisma.user.groupBy({
-      by: ['role', 'status'],
-      _count: { _all: true },
-    }),
-    prisma.payment.count({ where: { status: PaymentStatus.PENDING } }),
-    prisma.payment.findMany({
-      where: { status: PaymentStatus.PENDING },
-      include: {
-        user: {
-          select: {
-            id: true,
-            email: true,
-            academyEmail: true,
-            role: true,
-            profile: { select: { firstName: true, lastName: true } },
+    const { getCurrencySymbol } = await import('@/lib/currency')
+    const currSymbol = getCurrencySymbol(currency)
+
+    // 2. Fetch all stats and recent data in parallel on the SINGLE transaction connection
+    const [
+      userStatusCounts,
+      pendingPayments,
+      recentPendingPaymentsRaw,
+      activePoolRaw,
+      openPoolsRaw,
+      approvedPayments,
+    ] = await Promise.all([
+      tx.user.groupBy({
+        by: ['role', 'status'],
+        _count: { _all: true },
+      }),
+      tx.payment.count({ where: { status: PaymentStatus.PENDING } }),
+      tx.payment.findMany({
+        where: { status: PaymentStatus.PENDING },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              academyEmail: true,
+              role: true,
+              profile: { select: { firstName: true, lastName: true } },
+            },
           },
         },
-      },
-      orderBy: { createdAt: 'desc' },
-      take: 4,
-    }),
-    prisma.examPool.findFirst({
-      where: { status: { in: [PoolStatus.OPEN, PoolStatus.NEAR_FULL] } },
-      include: { event: true },
-      orderBy: { examDate: 'asc' },
-    }),
-    prisma.examPool.findMany({
-      where: { status: { in: [PoolStatus.OPEN, PoolStatus.NEAR_FULL] } },
-      include: { event: { select: { name: true } } },
-      orderBy: { examDate: 'asc' },
-      take: 5,
-    }),
-    // WALLET_TOP_UP payments (Direct cash inflow from bank/card)
-    prisma.payment.findMany({
-      where: {
-        status: PaymentStatus.APPROVED,
-        approvedAt: { gte: sixMonthsAgo },
-        referenceType: 'WALLET_TOP_UP',
-      },
-      select: { amount: true, approvedAt: true },
-    }),
-  ])
+        orderBy: { createdAt: 'desc' },
+        take: 4,
+      }),
+      tx.examPool.findFirst({
+        where: { status: { in: [PoolStatus.OPEN, PoolStatus.NEAR_FULL] } },
+        include: { event: true },
+        orderBy: { examDate: 'asc' },
+      }),
+      tx.examPool.findMany({
+        where: { status: { in: [PoolStatus.OPEN, PoolStatus.NEAR_FULL] } },
+        include: { event: { select: { name: true } } },
+        orderBy: { examDate: 'asc' },
+        take: 5,
+      }),
+      // WALLET_TOP_UP payments (Direct cash inflow from bank/card)
+      tx.payment.findMany({
+        where: {
+          status: PaymentStatus.APPROVED,
+          approvedAt: { gte: sixMonthsAgo },
+          referenceType: 'WALLET_TOP_UP',
+        },
+        select: { amount: true, approvedAt: true },
+      }),
+    ])
 
-  const monthNames = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-  ]
-  const revenueByMonth: Record<string, { total: number }> = {}
+    const monthNames = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ]
+    const revenueByMonth: Record<string, { total: number }> = {}
 
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
-    revenueByMonth[key] = { total: 0 }
-  }
-
-  // Process Approved Top-up Payments
-  for (const p of approvedPayments) {
-    if (!p.approvedAt) continue
-    const d = new Date(p.approvedAt)
-    const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
-    if (key in revenueByMonth) {
-      revenueByMonth[key].total += Number(p.amount)
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
+      revenueByMonth[key] = { total: 0 }
     }
-  }
 
-  const revenueData = Object.entries(revenueByMonth).map(([fullKey, val]) => ({
-    month: fullKey.split(' ')[0],
-    revenue: val.total,
-    target: targetMonthlyRevenue,
-  }))
+    // Process Approved Top-up Payments
+    for (const p of approvedPayments) {
+      if (!p.approvedAt) continue
+      const d = new Date(p.approvedAt)
+      const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
+      if (key in revenueByMonth) {
+        revenueByMonth[key].total += Number(p.amount)
+      }
+    }
 
-  const totalActiveUsers = userStatusCounts
-    .filter((u) => u.status === UserStatus.ACTIVE)
-    .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
-  const pendingApplicants = userStatusCounts
-    .filter((u) => u.role === UserRole.APPLICANT && u.status === UserStatus.PENDING)
-    .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
-  const activeStudents = userStatusCounts
-    .filter((u) => u.role === UserRole.STUDENT && u.status === UserStatus.ACTIVE)
-    .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
+    const revenueData = Object.entries(revenueByMonth).map(([fullKey, val]) => ({
+      month: fullKey.split(' ')[0],
+      revenue: val.total,
+      target: targetMonthlyRevenue,
+    }))
 
-  return {
-    totalUsers: totalActiveUsers,
-    pendingApplicants,
-    activeStudents,
-    pendingPayments,
-    recentPendingPayments: serializePrisma(recentPendingPaymentsRaw),
-    activePool: serializePrisma(activePoolRaw),
-    openPools: serializePrisma(openPoolsRaw),
-    revenueData,
-    targetMonthlyRevenue,
-    currency,
-    currSymbol,
-  }
+    const totalActiveUsers = userStatusCounts
+      .filter((u) => u.status === UserStatus.ACTIVE)
+      .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
+    const pendingApplicants = userStatusCounts
+      .filter((u) => u.role === UserRole.APPLICANT && u.status === UserStatus.PENDING)
+      .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
+    const activeStudents = userStatusCounts
+      .filter((u) => u.role === UserRole.STUDENT && u.status === UserStatus.ACTIVE)
+      .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
+
+    return {
+      totalUsers: totalActiveUsers,
+      pendingApplicants,
+      activeStudents,
+      pendingPayments,
+      recentPendingPayments: serializePrisma(recentPendingPaymentsRaw),
+      activePool: serializePrisma(activePoolRaw),
+      openPools: serializePrisma(openPoolsRaw),
+      revenueData,
+      targetMonthlyRevenue,
+      currency,
+      currSymbol,
+    }
+  }, {
+    maxWait: 30000,
+    timeout: 90000
+  })
 }
 
 export default async function StaffDashboardPage() {

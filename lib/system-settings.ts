@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { cache } from 'react'
 import { unstable_cache } from 'next/cache'
 
