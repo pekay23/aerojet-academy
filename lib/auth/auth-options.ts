@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
 import type { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
+import { prismaBase as prisma } from '@/lib/prisma/db-base'
 import { verifyPassword } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 import { UserStatus } from '@prisma/client'
@@ -16,6 +16,8 @@ export const authOptions: NextAuthOptions = {
         token: { label: 'Token', type: 'text' }, // Added for auto-login
       },
       async authorize(credentials) {
+        console.log('[AUTH_DEBUG] Authorizing request for:', credentials?.email || 'Token Login')
+        try {
         // Handling Auto-Login via Verification Token
         if (credentials?.token) {
           const user = await prisma.user.findUnique({
@@ -54,7 +56,6 @@ export const authOptions: NextAuthOptions = {
           }
         }
 
-        // Normal Email/Password Login
         if (!credentials?.email || !credentials?.password) {
           throw new Error('Email and password are required')
         }
@@ -95,7 +96,9 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Verify password
+        console.log('[AUTH_DEBUG] Verifying password...')
         const isValid = await verifyPassword(credentials.password, user.password)
+        console.log('[AUTH_DEBUG] Password check result:', isValid)
 
         if (!isValid) {
           const attempts = user.loginAttempts + 1
@@ -131,6 +134,7 @@ export const authOptions: NextAuthOptions = {
           userId: user.id,
           description: `User logged in: ${user.email}`,
         })
+        console.log('[AUTH_DEBUG] Login successful for:', user.id)
 
         const name = user.profile
           ? `${user.profile.firstName} ${user.profile.lastName}`
@@ -144,7 +148,11 @@ export const authOptions: NextAuthOptions = {
           status: user.status,
           mustChangePassword: user.mustChangePassword && !user.passwordChanged,
         }
-      },
+      } catch (error: any) {
+        console.error('[AUTH_DEBUG_ERROR]', error)
+        throw error
+      }
+    },
     }),
   ],
 
