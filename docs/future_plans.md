@@ -23,3 +23,8 @@ This document outlines the strategic roadmap for enhancing the Class Management 
 - **Weekly Schedule UI**: Replace JSON configuration with a visual calendar/grid picker for daily instruction hours.
 - **Conflict Detection**: Prevent overlapping instructor or room usage across different classes.
 - **Holiday/Break Exclusion**: Automatically exclude academy holidays from the session count.
+
+## 📈 5. Advanced Analytics
+- **Predictive Analytics**: Forecasting revenue based on historical exam enrollment trends.
+- **Automated Reporting**: Scheduled PDF reports for board members (Revenue, Enrollment, Attendance).
+- **Performance Benchmarking**: Comparing current month performance against previous years automatically in the UI.

@@ -4,17 +4,25 @@ EASA Part-66 Aviation Maintenance Training Portal — a multi-portal web applica
 
 ## Portals
 
-- **Public Website** — Course info, admissions, contact
 - **Staff/Admin** — User management, approvals, finance, reports
 - **Applicant** — Registration, course purchase, payment upload
 - **Student** — Dashboard, wallet, exam pools, grades, certificates
 - **Instructor** — Classes, attendance, grading, schedule
 
+## 📂 Documentation
+For a detailed guide on the project's architecture, database, and recent implementations, please refer to the **[Developer Handover Guide](./docs/HANDOVER.md)**.
+
+### Key Resources:
+- **[Database & RLS Detail](./docs/DATABASE_DETAIL.md)**
+- **[Architecture & Problem Solving](./docs/ARCHITECTURE_STRATEGIES.md)**
+- **[Known Issues & Bugs](./docs/KNOWN_ISSUES.md)**
+- **[Future Roadmap](./docs/future_plans.md)**
+
 ## Tech Stack
 
 - **Framework:** Next.js 15 (App Router)
 - **Language:** TypeScript
-- **Database:** PostgreSQL (Neon) + Prisma ORM
+- **Database:** PostgreSQL (**Neon** - Primary, **Supabase** - Redundant Backup) + Prisma ORM
 - **Auth:** NextAuth.js v4
 - **UI:** Tailwind CSS + shadcn/ui + Radix
 - **Email:** Resend
