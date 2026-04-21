@@ -17,7 +17,7 @@ export function AttendanceChart({ data, title = 'Attendance Overview' }: Attenda
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={300} minWidth={1} minHeight={1}>
           <PieChart>
             <Pie
               data={data}

@@ -18,8 +18,8 @@ export default function GlobalLoading() {
             alt="Aerojet Logo"
             width={80}
             height={20}
-            className="animate-pulse object-contain transition-all duration-700"
-            style={{ width: '80px', height: 'auto' }}
+            style={{ width: 'auto', height: 'auto' }}
+            className="h-5 w-auto animate-pulse object-contain transition-all duration-700"
           />
         </div>
       </div>

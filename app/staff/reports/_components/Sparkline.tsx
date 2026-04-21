@@ -17,7 +17,7 @@ export function Sparkline({ data, color = '#3b82f6' }: SparklineProps) {
 
   return (
     <div className="h-10 w-24">
-      <ResponsiveContainer width="100%" height="100%">
+      <ResponsiveContainer width="100%" height="100%" minWidth={1} minHeight={1}>
         <AreaChart data={chartData}>
           <defs>
             <linearGradient id={`grad-${color}`} x1="0" y1="0" x2="0" y2="1">

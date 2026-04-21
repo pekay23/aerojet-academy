@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { unstable_cache } from 'next/cache'
 
 export async function getSystemSetting(key: string, defaultValue: string = ''): Promise<string> {

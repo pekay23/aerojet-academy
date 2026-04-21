@@ -21,7 +21,7 @@ export function PoolFillChart({ data, title = 'Pool Capacity Utilization' }: Poo
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ResponsiveContainer width="100%" height={350}>
+        <ResponsiveContainer width="100%" height={350} minWidth={1} minHeight={1}>
           <BarChart
             data={data}
             layout="vertical"

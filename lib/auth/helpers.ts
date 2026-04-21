@@ -1,7 +1,7 @@
 import { getAuthSession } from '@/lib/auth/auth-options'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
-import prisma from '@/lib/prisma/client'
+import { prismaBase as prisma } from '@/lib/prisma/db-base'
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 
@@ -91,7 +91,15 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  return bcrypt.compare(password, hashedPassword)
+  console.log('[AUTH_DEBUG] verifyPassword called')
+  try {
+    const result = await bcrypt.compare(password, hashedPassword)
+    console.log('[AUTH_DEBUG] bcrypt.compare result:', result)
+    return result
+  } catch (err) {
+    console.error('[AUTH_DEBUG] verifyPassword ERROR:', err)
+    return false
+  }
 }
 
 export function generateTempPassword(): string {

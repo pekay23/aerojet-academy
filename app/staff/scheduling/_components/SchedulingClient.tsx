@@ -105,7 +105,6 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
           ))}
         </TabsList>
 
-        <AnimatePresence mode="wait">
           {pathways.map((pathway) => (
             <TabsContent key={pathway.id} value={pathway.id}>
               <motion.div
@@ -243,7 +242,6 @@ export default function SchedulingClient({ pathways, courses }: SchedulingClient
               </motion.div>
             </TabsContent>
           ))}
-        </AnimatePresence>
       </Tabs>
     </div>
   )
