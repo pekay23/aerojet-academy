@@ -81,16 +81,16 @@ export default function ExamsTab({
         courseId: b.course?.id || null,
         score: b.score != null ? Number(b.score) : null,
         percentage: b.percentage != null ? Number(b.percentage) : null,
-        result: b.result,
+        result: (b.result?.toUpperCase().includes('MIGRATE') || b.result?.toUpperCase().includes('HISTORICAL')) ? null : b.result,
         passed: b.result?.toLowerCase() === 'pass',
         status:
-          (b.result != null && b.result !== '') ||
+          (b.result != null && b.result !== '' && !b.result.toUpperCase().includes('MIGRATE')) ||
           (b.score != null && b.examDate && new Date(b.examDate) < new Date())
             ? 'COMPLETED'
             : b.status,
         bookingType: b.bookingType,
-        attemptType: b.attemptType,
-        isResit: b.isResit,
+        attemptType: (b.attemptType?.toUpperCase().includes('MIGRATE') || b.attemptType?.toUpperCase().includes('HISTORICAL')) ? null : b.attemptType,
+        isResit: b.isResit || (b.attemptType?.toUpperCase().startsWith('RESIT') ?? false),
         eventName: b.event?.name,
         sourceNotes: b.sourceNotes,
         bookedAt: b.bookedAt,
@@ -100,27 +100,62 @@ export default function ExamsTab({
 
     // From examResults (formal results)
     for (const r of student.examResults || []) {
+      const rModuleCode = r.moduleCode || r.exam?.examComponent?.course?.code || '—'
       const existingBooking = records.find(
         (rec) =>
           rec.source === 'booking' &&
-          rec.moduleCode === (r.exam?.examComponent?.course?.code || '') &&
-          rec.score === Number(r.score)
+          rec.moduleCode === rModuleCode
       )
-      if (!existingBooking) {
+      
+      if (existingBooking) {
+        // Consolidate: Merge the score from ExamResult into the booking
+        existingBooking.score = Number(r.score)
+        existingBooking.percentage = Number(r.percentage)
+        existingBooking.passed = r.passed
+        existingBooking.result = r.passed ? 'pass' : 'fail'
+        existingBooking.status = 'COMPLETED'
+        existingBooking.hasResult = true
+        existingBooking.resultId = r.id
+        // Treat "migrated" or "historical" results as pending for UI display purposes
+        if (existingBooking.result?.toUpperCase().includes('MIGRATE') || 
+            existingBooking.result?.toUpperCase().includes('HISTORICAL')) {
+          existingBooking.result = null
+        }
+
+        const rType = r.attemptType?.toUpperCase() || ''
+        const bType = existingBooking.attemptType?.toUpperCase() || ''
+        
+        const isPlaceholder = (s: string) => 
+          s.includes('MIGRATE') || s.includes('HISTORICAL') || s === '—'
+        
+        if (rType && !isPlaceholder(rType)) {
+          existingBooking.attemptType = r.attemptType
+          existingBooking.isResit = r.attemptType.startsWith('RESIT')
+        } else if (!bType || isPlaceholder(bType)) {
+           if (rType && !isPlaceholder(rType)) {
+             existingBooking.attemptType = r.attemptType
+             existingBooking.isResit = r.attemptType.startsWith('RESIT')
+           } else if (r.attemptType) {
+             // Fallback to result's attempt type even if it's a placeholder, 
+             // but only if booking has nothing better
+             existingBooking.attemptType = r.attemptType
+           }
+        }
+      } else {
         records.push({
           id: `result_${r.id}`,
           source: 'result',
-          moduleCode: r.exam?.examComponent?.course?.code || '—',
-          examName: r.exam?.name || '—',
-          examDate: r.exam?.examDate,
+          moduleCode: rModuleCode,
+          examName: r.exam?.name || 'Manual Result',
+          examDate: r.exam?.examDate || r.createdAt,
           score: Number(r.score),
           percentage: Number(r.percentage),
           result: r.passed ? 'pass' : 'fail',
           passed: r.passed,
           status: 'COMPLETED',
           bookingType: null,
-          attemptType: null,
-          isResit: false,
+          attemptType: (r.attemptType?.toUpperCase().includes('MIGRATE') || r.attemptType?.toUpperCase().includes('HISTORICAL')) ? null : r.attemptType,
+          isResit: r.attemptType ? r.attemptType.toUpperCase().startsWith('RESIT') : false,
           eventName: null,
           sourceNotes: null,
           bookedAt: r.createdAt,
@@ -205,15 +240,16 @@ export default function ExamsTab({
   )
 
   // Handle inline edit save
-  const handleSaveEdit = async (recordId: string) => {
+  const handleSaveEdit = async (record: any) => {
     try {
-      const res = await updateExamBooking(recordId, {
+      const res = await updateExamBooking(record.id, {
         score: editData.score,
         result: editData.result,
         examDate: editData.examDate ? new Date(editData.examDate) : undefined,
         moduleCode: editData.moduleCode || undefined,
         attemptType: editData.attemptType || undefined,
         bookingType: editData.bookingType || undefined,
+        resultIdToSync: record.resultId || undefined,
       })
       if (res.error) {
         toast.error(res.error)
@@ -502,6 +538,9 @@ export default function ExamsTab({
                 <th className="px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Exam / Event
                 </th>
+                <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  Attempt
+                </th>
                 <th
                   className="cursor-pointer px-4 py-3 text-left text-[10px] font-black tracking-widest text-slate-400 uppercase hover:text-aerojet-blue"
                   onClick={() => handleSort('examDate')}
@@ -536,7 +575,7 @@ export default function ExamsTab({
                   </span>
                 </th>
                 <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Type
+                  Booking
                 </th>
                 <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Status
@@ -583,10 +622,24 @@ export default function ExamsTab({
                   </td>
                   <td className="max-w-[200px] px-4 py-3 text-xs text-slate-500">
                     {editingId === record.id ? (
+                      <span className="italic text-slate-400">Editing...</span>
+                    ) : (
+                      <div className="flex flex-col">
+                        <span className="truncate font-medium text-slate-800 dark:text-slate-200">
+                          {record.examName}
+                        </span>
+                        {record.eventName && (
+                          <span className="text-[10px] text-slate-400">Event: {record.eventName}</span>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    {editingId === record.id ? (
                       <select
                         value={editData.attemptType ?? record.attemptType ?? 'FIRST'}
                         onChange={(e) => setEditData((d) => ({ ...d, attemptType: e.target.value }))}
-                        className="w-full rounded border border-slate-200 px-2 py-1 text-xs"
+                        className="w-28 rounded border border-slate-200 px-2 py-1 text-xs"
                       >
                         <option value="FIRST">First Attempt</option>
                         <option value="RESIT_1">Resit 1</option>
@@ -594,17 +647,13 @@ export default function ExamsTab({
                         <option value="RESIT_3">Resit 3</option>
                       </select>
                     ) : (
-                      <div>
-                        <span className="truncate font-medium">{record.examName}</span>
-                        {record.eventName && (
-                          <span className="ml-1 text-slate-400">({record.eventName})</span>
-                        )}
-                        {record.attemptType && record.attemptType !== 'FIRST' && (
-                          <div className="mt-0.5 text-[10px] text-slate-400">
-                            {record.attemptType.replace(/_/g, ' ')}
-                          </div>
-                        )}
-                      </div>
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                        record.attemptType === 'FIRST' || !record.attemptType
+                          ? 'bg-slate-100 text-slate-500'
+                          : 'bg-amber-100 text-amber-700'
+                      }`}>
+                        {(record.attemptType || 'FIRST').replace(/_/g, ' ')}
+                      </span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-xs text-slate-500">
@@ -705,7 +754,7 @@ export default function ExamsTab({
                         {editingId === record.id ? (
                           <>
                             <button
-                              onClick={() => handleSaveEdit(record.id)}
+                              onClick={() => handleSaveEdit(record)}
                               className="rounded bg-emerald-500 px-2 py-1 text-[10px] font-bold text-white transition-colors hover:bg-emerald-600"
                             >
                               Save

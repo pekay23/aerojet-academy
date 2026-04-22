@@ -55,19 +55,8 @@ async function getBookingData(userId: string) {
     include: { exam: { include: { examComponent: true } } },
   })
   
-  // Also check migrated historical failures
-  const historicalBookings = await prisma.examBooking.findMany({
-    where: { userId },
-    select: { examComponentId: true, result: true, attemptType: true },
-  })
-  
   const eligibleIds = new Set<string>()
-  failedResults.forEach((r) => { if (r.exam.examComponentId) eligibleIds.add(r.exam.examComponentId) })
-  historicalBookings.forEach((b) => {
-    if (b.result?.toLowerCase() === 'fail' && b.examComponentId) {
-      eligibleIds.add(b.examComponentId)
-    }
-  })
+  failedResults.forEach((r) => { if (r.exam?.examComponentId) eligibleIds.add(r.exam.examComponentId) })
 
   // Determine which components the user has "active" memberships for
   const activeMemberships = await prisma.poolMembership.findMany({
@@ -89,30 +78,17 @@ export default async function ResitBookingTab() {
 
   const { wallet, pricing, balance, currency, currencySymbol, openEvents } = await getBookingData(session.user.id)
 
-  const [failedResults, historicalBookings] = await Promise.all([
-    prisma.examResult.findMany({
-      where: { userId: session.user.id, passed: false },
-      include: {
-        exam: {
-          include: {
-            examComponent: { include: { course: true } },
-            event: true,
-          },
+  const failedResults = await prisma.examResult.findMany({
+    where: { userId: session.user.id, passed: false },
+    include: {
+      exam: {
+        include: {
+          examComponent: { include: { course: true } },
+          event: true,
         },
       },
-    }),
-    prisma.examBooking.findMany({
-      where: { userId: session.user.id, result: { not: null } },
-      include: {
-        exam: {
-          include: {
-            examComponent: { include: { course: true } },
-            event: true,
-          },
-        },
-      },
-    }),
-  ])
+    },
+  })
 
   // Aggregate free resits from bundles
   const bookingsWithCredits = await prisma.examBooking.findMany({
@@ -166,36 +142,19 @@ export default async function ResitBookingTab() {
   }>()
 
   failedResults.forEach((r) => {
-    const code = r.exam.examComponent?.course?.code || '—'
+    const code = r.moduleCode || r.exam?.examComponent?.course?.code || '—'
     if (code !== '—') {
       failedMap.set(code, {
-        examId: r.exam.id,
-        examName: r.exam.name,
+        examId: r.examId || r.id,
+        examName: r.exam?.name || 'Historical Exam',
         moduleCode: code,
-        moduleName: r.exam.examComponent?.course?.name || '—',
-        score: Number(r.score),
-        passingScore: Number(r.exam.passingScore || ACADEMIC_RULES.EASA_PASS_MARK),
-        examDate: r.exam.examDate.toISOString(),
-        eventName: r.exam.event?.name || null,
+        moduleName: r.exam?.examComponent?.course?.name || '—',
+        score: r.score ? Number(r.score) : 0,
+        passingScore: r.exam?.passingScore ? Number(r.exam.passingScore) : ACADEMIC_RULES.EASA_PASS_MARK,
+        examDate: (r.exam?.examDate || r.createdAt).toISOString(),
+        eventName: r.exam?.event?.name || null,
         // Keep component ID for booking logic if needed
-        examComponentId: r.exam.examComponentId,
-      })
-    }
-  })
-
-  historicalBookings.forEach((b) => {
-    const code = b.moduleCode || b.exam?.examComponent?.course?.code || '—'
-    if (b.result?.toLowerCase() === 'fail' && code !== '—' && !failedMap.has(code)) {
-      failedMap.set(code, {
-        examId: b.examId || b.id, // Fallback to booking ID if migrated without exam
-        examName: b.exam?.name || 'Historical Exam',
-        moduleCode: code,
-        moduleName: b.exam?.examComponent?.course?.name || '—',
-        score: b.score ? Number(b.score) : 0,
-        passingScore: ACADEMIC_RULES.EASA_PASS_MARK,
-        examDate: (b.examDate || b.bookedAt).toISOString(),
-        eventName: b.exam?.event?.name || null,
-        examComponentId: b.examComponentId,
+        examComponentId: r.exam?.examComponentId || null,
       })
     }
   })

@@ -109,6 +109,22 @@ export const ourFileRouter = {
       console.log('News Audio Upload complete for userId:', metadata.userId)
       return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl }
     }),
+  resourceFile: f({
+    pdf: { maxFileSize: '32MB', maxFileCount: 1 },
+    image: { maxFileSize: '16MB', maxFileCount: 1 },
+    blob: { maxFileSize: '32MB', maxFileCount: 1 },
+  })
+    .middleware(async ({ req }) => {
+      const session = await getAuthSession()
+      if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
+        throw new UploadThingError('Unauthorized')
+      }
+      return { userId: session.user.id }
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log('Resource file uploaded by:', metadata.userId, 'url:', file.ufsUrl)
+      return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl, fileName: file.name }
+    }),
 } satisfies FileRouter
 
 export type OurFileRouter = typeof ourFileRouter

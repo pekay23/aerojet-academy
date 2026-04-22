@@ -245,73 +245,35 @@ async function BookingsTab({ query }: { query?: string }) {
 
 /* ─── Results Tab ─── */
 async function ResultsTab({ query }: { query?: string }) {
-  const [formalResults, manualResults] = await Promise.all([
-    prisma.examResult.findMany({
-      where: query
-        ? {
-            OR: [userSearchFilter(query), examComponentCodeFilter(query)],
-          }
-        : undefined,
-      include: {
-        user: { include: { profile: { select: { firstName: true, lastName: true } } } },
-        exam: {
-          include: {
-            examComponent: { include: { course: { select: { name: true, code: true } } } },
-          },
+  const formalResults = await prisma.examResult.findMany({
+    where: query
+      ? {
+          OR: [userSearchFilter(query), examComponentCodeFilter(query)],
+        }
+      : undefined,
+    include: {
+      user: { include: { profile: { select: { firstName: true, lastName: true } } } },
+      exam: {
+        include: {
+          examComponent: { include: { course: { select: { name: true, code: true } } } },
         },
       },
-      orderBy: { createdAt: 'desc' },
-    }).then(res => serializePrisma(res)),
-    prisma.examBooking.findMany({
-      where: {
-        status: 'COMPLETED' as const,
-        ...(query
-          ? {
-              OR: [
-                userSearchFilter(query),
-                { moduleCode: { contains: query, mode: 'insensitive' } },
-                examComponentCodeFilter(query),
-              ],
-            }
-          : {}),
-      },
-      include: {
-        user: { include: { profile: { select: { firstName: true, lastName: true } } } },
-        exam: {
-          include: {
-            examComponent: { include: { course: { select: { name: true, code: true } } } },
-          },
-        },
-      },
-      orderBy: { examDate: 'desc' },
-    }).then(res => serializePrisma(res)),
-  ])
+    },
+    orderBy: { createdAt: 'desc' },
+  }).then(res => serializePrisma(res))
 
   // Unify results
-  const allResults = [
-    ...formalResults.map((r) => ({
-      id: r.id,
-      type: 'FORMAL' as const,
-      user: r.user,
-      moduleCode: r.exam.examComponent?.course?.code || '—',
-      examName: r.exam.name,
-      date: r.exam.examDate,
-      score: Number(r.score),
-      passed: r.passed,
-      certificateUrl: r.certificateUrl,
-    })),
-    ...manualResults.map((r) => ({
-      id: r.id,
-      type: 'MANUAL' as const,
-      user: r.user,
-      moduleCode: r.moduleCode || '—',
-      examName: r.exam?.name || 'Manual Record',
-      date: r.examDate || r.bookedAt,
-      score: r.score ? Number(r.score) : null,
-      passed: r.result?.toLowerCase() === 'pass',
-      certificateUrl: null,
-    })),
-  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const allResults = formalResults.map((r) => ({
+    id: r.id,
+    type: 'FORMAL' as const,
+    user: r.user,
+    moduleCode: r.moduleCode || r.exam?.examComponent?.course?.code || '—',
+    examName: r.exam?.name || 'Manual Result',
+    date: r.exam?.examDate || r.createdAt,
+    score: r.score ? Number(r.score) : null,
+    passed: r.passed,
+    certificateUrl: r.certificateUrl,
+  })).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   return (
     <div className="space-y-6">
@@ -443,7 +405,7 @@ async function ResultsTab({ query }: { query?: string }) {
 /* ─── Records Tab (Server Component Wrapper) ─── */
 async function RecordsTabServer({ query }: { query?: string }) {
   const [records, modules] = await Promise.all([
-    prisma.examBooking.findMany({
+    prisma.examResult.findMany({
       where: query
         ? {
             OR: [userSearchFilter(query), { moduleCode: { contains: query, mode: 'insensitive' } }],

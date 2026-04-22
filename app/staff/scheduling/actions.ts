@@ -32,12 +32,13 @@ export async function toggleCourseAssignment(termId: string, courseId: string, a
 }
 
 /**
- * Creates a new academic term for a pathway.
+ * Creates a new academic term for a pathway, optionally scoped to a license category.
  */
 export async function createAcademicTerm(
   pathwayId: string,
   yearNumber: number,
-  semesterNumber: number
+  semesterNumber: number,
+  licenseCategoryId?: string | null
 ) {
   try {
     await requireStaff()
@@ -47,6 +48,7 @@ export async function createAcademicTerm(
         pathwayId,
         yearNumber,
         semesterNumber,
+        licenseCategoryId: licenseCategoryId || null,
       },
     })
 
@@ -55,5 +57,43 @@ export async function createAcademicTerm(
   } catch (error) {
     console.error('Create academic term error:', error)
     return { error: 'Failed to create term.' }
+  }
+}
+
+/**
+ * Ensures all required academic terms exist for a given pathway + license category combination.
+ * Creates any missing terms based on the programme's year configuration.
+ * Returns the term IDs created or found.
+ */
+export async function ensureTermsForPathwayLicense(
+  pathwayId: string,
+  licenseCategoryId: string,
+  totalYears: number,
+  semestersPerYear: number = 2
+) {
+  try {
+    await requireStaff()
+
+    const terms = []
+    for (let year = 1; year <= totalYears; year++) {
+      for (let sem = 1; sem <= semestersPerYear; sem++) {
+        // Try to find existing term
+        let term = await prisma.academicTerm.findFirst({
+          where: { pathwayId, yearNumber: year, semesterNumber: sem, licenseCategoryId },
+        })
+        if (!term) {
+          term = await prisma.academicTerm.create({
+            data: { pathwayId, yearNumber: year, semesterNumber: sem, licenseCategoryId },
+          })
+        }
+        terms.push(term)
+      }
+    }
+
+    revalidatePath('/staff/scheduling')
+    return { success: true, terms }
+  } catch (error) {
+    console.error('Ensure terms error:', error)
+    return { error: 'Failed to ensure terms.' }
   }
 }

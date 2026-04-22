@@ -3,16 +3,18 @@
 import { useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { User, ClipboardCheck, Wallet, BookOpen, FileText } from 'lucide-react'
+import { User, ClipboardCheck, Wallet, BookOpen, FileText, Route } from 'lucide-react'
 
 import ProfileTab from './ProfileTab'
 import ExamsTab from './ExamsTab'
 import WalletTab from './WalletTab'
 import AcademicTab from './AcademicTab'
 import AdminNotesTab from './AdminNotesTab'
+import JourneyTab from './JourneyTab'
 
 const TABS = [
   { key: 'profile', label: 'Profile', icon: User },
+  { key: 'journey', label: 'Journey', icon: Route },
   { key: 'exams', label: 'Exams', icon: ClipboardCheck },
   { key: 'wallet', label: 'Wallet', icon: Wallet },
   { key: 'academic', label: 'Academic', icon: BookOpen },
@@ -104,6 +106,7 @@ export default function StudentDetailTabs({
               onRefresh={handleRefresh}
             />
           )}
+          {activeTab === 'journey' && <JourneyTab student={student} />}
           {activeTab === 'exams' && (
             <ExamsTab
               student={student}
