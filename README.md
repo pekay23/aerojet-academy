@@ -34,23 +34,23 @@ For a detailed guide on the project's architecture, database, and recent impleme
 
 ```bash
 # Install dependencies
-npm install
+bun install
 
 # Set up environment
 cp .env.example .env.local
 # Edit .env.local with your credentials
 
 # Generate Prisma client
-npm run db:generate
+bun run db:generate
 
 # Push schema to database
-npm run db:push
+bun run db:push
 
 # Seed database
-npm run db:seed
+bun run db:seed
 
 # Start dev server
-npm run dev
+bun dev
 ```
 
 ## Key Business Flows
