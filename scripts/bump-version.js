@@ -27,8 +27,9 @@ function bumpVersion() {
     }
 
     // 3. Increment version
-    // --no-git-tag-version: Updates package.json but does NOT create a Git tag/commit
-    execSync(`npm version ${bumpType} --no-git-tag-version`, { stdio: 'inherit' })
+    // We use 'bun x version-bump' or manually update to avoid 'npm' dependency
+    // For simplicity and robustness, we'll use bun x to run a versioning tool
+    execSync(`bun x version-bump ${bumpType} --no-git-tag`, { stdio: 'inherit' })
 
     // 3. Get new version after bump
     const newPkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
