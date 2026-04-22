@@ -57,7 +57,7 @@ The project uses **Husky** and a custom script (`scripts/bump-version.js`) to au
 
 ### Database Migrations
 1. Modify `prisma/schema.prisma`.
-2. Run `npx prisma migrate dev --name <description>`.
+2. Run `bun x prisma migrate dev --name <description>`.
 3. **Important**: If you hit RLS issues during migrations, ensure the `shadow database` has the appropriate permissions or is temporarily disabled for the migration user.
 
 ### Adding New Reports

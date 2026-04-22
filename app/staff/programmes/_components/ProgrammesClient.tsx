@@ -380,62 +380,83 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                       </p>
                     ) : (
                       <div className="space-y-2">
-                        {prog.programmeYears.map((y) => (
-                          <div
-                            key={y.id}
-                            className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50"
-                          >
-                            <div className="flex items-center gap-3">
-                              <Calendar className="h-4 w-4 text-blue-500" />
-                              <div>
-                                <p className="font-bold text-slate-700 dark:text-slate-200">
-                                  Year {y.yearNumber}
-                                </p>
-                                <p className="text-xs text-slate-500">
-                                  {y.semesters && y.semesters.length > 0
-                                    ? y.semesters.map((sem, i) => (
-                                        <span key={i}>
-                                          {sem.name}:{' '}
-                                          {sem.startDate
-                                            ? new Date(sem.startDate).toLocaleDateString()
-                                            : ''}
-                                          {i < y.semesters.length - 1 ? ' · ' : ''}
-                                        </span>
-                                      ))
-                                    : 'No semesters defined'}
-                                </p>
+                        {prog.programmeYears.map((y) => {
+                          const effectiveYearFee = y.yearFeeAmount
+                            ? Number(y.yearFeeAmount)
+                            : Number(prog.totalFee) / prog.durationYears
+                          
+                          const hasSeatFee = y.yearNumber === 1
+                          const seatFee = hasSeatFee ? Number(y.seatConfirmationFee) : 0
+                          const firstPayment = hasSeatFee ? Number(y.firstPaymentAmount) : (effectiveYearFee * 0.5)
+                          const remaining = Math.max(0, effectiveYearFee - seatFee - firstPayment)
+
+                          const seatPct = Math.round((seatFee / effectiveYearFee) * 100) || 0
+                          const firstPct = Math.round((firstPayment / effectiveYearFee) * 100) || 0
+                          const remainingPct = Math.round((remaining / effectiveYearFee) * 100) || 0
+
+                          return (
+                            <div
+                              key={y.id}
+                              className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-800/50"
+                            >
+                              <div className="flex items-center gap-3">
+                                <Calendar className="h-4 w-4 text-blue-500" />
+                                <div>
+                                  <p className="font-bold text-slate-700 dark:text-slate-200">
+                                    Year {y.yearNumber}
+                                  </p>
+                                  <p className="text-xs text-slate-500">
+                                    {y.semesters && y.semesters.length > 0
+                                      ? y.semesters.map((sem, i) => (
+                                          <span key={i}>
+                                            {sem.name}:{' '}
+                                            {sem.startDate
+                                              ? new Date(sem.startDate).toLocaleDateString()
+                                              : ''}
+                                            {i < y.semesters.length - 1 ? ' · ' : ''}
+                                          </span>
+                                        ))
+                                      : 'No semesters defined'}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex flex-col items-end gap-2 text-right text-xs text-slate-500">
+                                <div className="flex gap-2">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-6 px-2 text-xs"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      openEditYear(prog.id, y)
+                                    }}
+                                  >
+                                    Edit Year
+                                  </Button>
+                                </div>
+                                <div>
+                                  <p className="font-bold text-slate-700 dark:text-slate-300">
+                                    Fee: {prog.currency}{' '}
+                                    {y.yearFeeAmount
+                                      ? Number(y.yearFeeAmount).toLocaleString()
+                                      : 'Auto'}
+                                  </p>
+                                  {hasSeatFee && (
+                                    <p className="mt-0.5">
+                                      Seat ({seatPct}%): {prog.currency} {seatFee.toLocaleString()}
+                                    </p>
+                                  )}
+                                  <p className={!hasSeatFee ? "mt-0.5" : ""}>
+                                    Sem 1 ({firstPct}%): {prog.currency} {firstPayment.toLocaleString()}
+                                  </p>
+                                  <p>
+                                    Sem 2 ({remainingPct}%): {prog.currency} {remaining.toLocaleString()}
+                                  </p>
+                                </div>
                               </div>
                             </div>
-                            <div className="flex flex-col items-end gap-2 text-right text-xs text-slate-500">
-                              <div className="flex gap-2">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-6 px-2 text-xs"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    openEditYear(prog.id, y)
-                                  }}
-                                >
-                                  Edit Year
-                                </Button>
-                              </div>
-                              <div>
-                                <p>
-                                  Fee: {prog.currency}{' '}
-                                  {y.yearFeeAmount
-                                    ? Number(y.yearFeeAmount).toLocaleString()
-                                    : 'Auto'}
-                                </p>
-                                <p>
-                                  Seat: {prog.currency}{' '}
-                                  {Number(y.seatConfirmationFee).toLocaleString()} &middot; 1st:{' '}
-                                  {prog.currency} {Number(y.firstPaymentAmount).toLocaleString()}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
+                          )
+                        })}
                       </div>
                     )}
                   </div>
@@ -488,29 +509,34 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className={`grid ${Number(yearNumber) === 1 ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
+              {Number(yearNumber) === 1 && (
+                <div>
+                  <label htmlFor="year-seat" className="mb-1 block text-xs font-bold text-slate-600">
+                    Seat Confirmation Fee
+                  </label>
+                  <input
+                    id="year-seat"
+                    name="seatFee"
+                    type="number"
+                    value={seatFee}
+                    onChange={(e) => setSeatFee(e.target.value)}
+                    autoComplete="off"
+                    className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                  />
+                </div>
+              )}
               <div>
-                <label htmlFor="year-seat" className="mb-1 block text-xs font-bold text-slate-600">
-                  Seat Confirmation Fee
+                <label htmlFor="year-1st" className="mb-1 block text-xs font-bold text-slate-600">
+                  {Number(yearNumber) === 1 ? 'First Payment' : 'Sem 1 Payment'}
                 </label>
-                <input
-                  id="year-seat"
-                  name="seatFee"
-                  type="number"
-                  value={seatFee}
-                  onChange={(e) => setYearFee(e.target.value)}
-                  autoComplete="off"
-                  className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
-                />
-              </div>
-              <div>
-                <label htmlFor="year-1st" className="mb-1 block text-xs font-bold text-slate-600">First Payment</label>
                 <input
                   id="year-1st"
                   name="firstPayment"
                   type="number"
                   value={firstPayment}
                   onChange={(e) => setFirstPayment(e.target.value)}
+                  placeholder={Number(yearNumber) > 1 ? 'Auto (50%)' : ''}
                   autoComplete="off"
                   className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                 />
