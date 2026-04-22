@@ -71,6 +71,23 @@ export const POST = withErrorHandler(
         },
       })
       createdBookings.push(booking)
+
+      // Also create a formal ExamResult if a score was provided
+      if (entry.score !== undefined && entry.score !== null) {
+        await prisma.examResult.create({
+          data: {
+            userId: studentId,
+            moduleCode: finalModuleCode,
+            score: entry.score,
+            maxScore: 100,
+            percentage,
+            passed: entry.score >= 75,
+            grade: entry.score >= 90 ? 'A' : entry.score >= 80 ? 'B' : entry.score >= 75 ? 'C' : 'F',
+            attemptType: attemptType || 'FIRST',
+            sourceNotes: notes || 'Manually added by staff',
+          },
+        })
+      }
     }
 
     // Create notification for student

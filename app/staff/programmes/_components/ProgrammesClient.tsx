@@ -58,6 +58,11 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
+  // Edit programme form state
+  const [editOpen, setEditOpen] = useState(false)
+  const [editingProgrammeId, setEditingProgrammeId] = useState<string | null>(null)
+  const [isActive, setIsActive] = useState(true)
+
   // Create programme form
   const [code, setCode] = useState('')
   const [name, setName] = useState('')
@@ -93,6 +98,46 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to create')
       setCreateOpen(false)
+      setCode('')
+      setName('')
+      setTotalFee('')
+      setDescription('')
+      router.refresh()
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const openEditProgramme = (programme: Programme) => {
+    setEditingProgrammeId(programme.id)
+    setCode(programme.code)
+    setName(programme.name)
+    setDurationYears(String(programme.durationYears))
+    setTotalFee(programme.totalFee)
+    setDescription(programme.description || '')
+    setIsActive(programme.isActive)
+    setError('')
+    setEditOpen(true)
+  }
+
+  const handleEditProgramme = async () => {
+    if (!name || !totalFee) {
+      setError('Name and total fee are required')
+      return
+    }
+    setLoading(true)
+    setError('')
+    try {
+      const res = await fetch(`/api/staff/programmes/${editingProgrammeId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, totalFee, description, isActive }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to update')
+      setEditOpen(false)
       setCode('')
       setName('')
       setTotalFee('')
@@ -354,11 +399,21 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
 
                 {isExpanded && (
                   <div className="border-t border-slate-200 px-6 pt-4 pb-6 dark:border-slate-700">
-                    {prog.description && (
-                      <p className="mb-4 text-sm text-slate-600 dark:text-slate-400">
-                        {prog.description}
-                      </p>
-                    )}
+                    <div className="mb-4 flex items-start justify-between gap-4">
+                      {prog.description ? (
+                        <p className="text-sm text-slate-600 dark:text-slate-400">
+                          {prog.description}
+                        </p>
+                      ) : <div />}
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        onClick={() => openEditProgramme(prog)}
+                        className="shrink-0"
+                      >
+                        Edit Details
+                      </Button>
+                    </div>
 
                     <div className="mb-3 flex items-center justify-between">
                       <h3 className="text-xs font-black tracking-widest text-slate-400 uppercase">
@@ -621,6 +676,93 @@ export default function ProgrammesClient({ programmes }: { programmes: Programme
               ) : (
                 'Add Year'
               )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Programme Dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Edit Programme Details</DialogTitle>
+            <DialogDescription className="sr-only">
+              Edit details for an existing full-time training programme.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="mb-1 block text-xs font-bold text-slate-600">Code (Cannot be changed)</label>
+                <input
+                  value={code}
+                  disabled
+                  className="w-full rounded-md border px-3 py-2 text-sm opacity-50 dark:border-slate-700 dark:bg-slate-800"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-bold text-slate-600">
+                  Duration (Cannot be changed)
+                </label>
+                <input
+                  value={durationYears}
+                  disabled
+                  className="w-full rounded-md border px-3 py-2 text-sm opacity-50 dark:border-slate-700 dark:bg-slate-800"
+                />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="edit-prog-name" className="mb-1 block text-xs font-bold text-slate-600">Name</label>
+              <input
+                id="edit-prog-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                autoComplete="off"
+                className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-prog-fee" className="mb-1 block text-xs font-bold text-slate-600">Total Fee</label>
+              <input
+                id="edit-prog-fee"
+                type="number"
+                value={totalFee}
+                onChange={(e) => setTotalFee(e.target.value)}
+                autoComplete="off"
+                className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+              />
+            </div>
+            <div>
+              <label htmlFor="edit-prog-desc" className="mb-1 block text-xs font-bold text-slate-600">Description</label>
+              <textarea
+                id="edit-prog-desc"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={2}
+                autoComplete="off"
+                className="w-full rounded-md border px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+              />
+            </div>
+            <div className="flex items-center gap-2 pt-2">
+              <input
+                id="edit-prog-active"
+                type="checkbox"
+                checked={isActive}
+                onChange={(e) => setIsActive(e.target.checked)}
+                className="h-4 w-4 rounded border-slate-300 text-aerojet-blue focus:ring-aerojet-blue"
+              />
+              <label htmlFor="edit-prog-active" className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                Is Active
+              </label>
+            </div>
+            {error && <p className="text-sm text-red-600">{error}</p>}
+          </div>
+          <div className="mt-4 flex justify-end gap-3">
+            <Button variant="outline" onClick={() => setEditOpen(false)} disabled={loading}>
+              Cancel
+            </Button>
+            <Button onClick={handleEditProgramme} disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save Changes'}
             </Button>
           </div>
         </DialogContent>

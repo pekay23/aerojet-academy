@@ -4,7 +4,7 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
-import { Loader2, Search, Info } from 'lucide-react'
+import { Loader2, Search, Info, Upload, Link2, CheckCircle2, X, FileText, Image, File } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -30,6 +30,7 @@ import { toast } from '@/hooks/use-toast'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Badge } from '@/components/ui/badge'
+import { UploadButton } from '@/lib/uploads/uploadthing'
 
 const resourceSchema = z.object({
   id: z.string().optional(),
@@ -52,12 +53,28 @@ interface ResourceFormProps {
   onSuccess: () => void
 }
 
+function getFileIcon(type: string) {
+  if (type === 'IMG') return <Image className="h-4 w-4" />
+  if (type === 'PDF') return <FileText className="h-4 w-4" />
+  return <File className="h-4 w-4" />
+}
+
 export default function ResourceForm({ initialData, onSuccess }: ResourceFormProps) {
   const [options, setOptions] = React.useState<{ courses: any[]; pathways: any[] }>({
     courses: [],
     pathways: [],
   })
   const [courseSearch, setCourseSearch] = React.useState('')
+  // 'upload' | 'url' — which source mode is active
+  const [sourceMode, setSourceMode] = React.useState<'upload' | 'url'>(
+    initialData?.url ? 'url' : 'upload'
+  )
+  // Track the uploaded file metadata so we can show a preview
+  const [uploadedFile, setUploadedFile] = React.useState<{
+    url: string
+    name: string
+  } | null>(null)
+  const [isUploading, setIsUploading] = React.useState(false)
 
   React.useEffect(() => {
     getResourceLinkingOptions().then(setOptions)
@@ -82,6 +99,8 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
 
   const isLoading = form.formState.isSubmitting
   const showToStudents = form.watch('showToStudents')
+  const currentUrl = form.watch('url')
+  const currentType = form.watch('type')
 
   async function onSubmit(values: ResourceFormValues) {
     try {
@@ -91,6 +110,11 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
     } catch (error) {
       toast.error('Something went wrong')
     }
+  }
+
+  function clearUpload() {
+    setUploadedFile(null)
+    form.setValue('url', '')
   }
 
   return (
@@ -176,23 +200,147 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                   />
                 </div>
 
+                {/* ── File Source: Upload or URL ── */}
                 <FormField
                   control={form.control}
                   name="url"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel htmlFor="res-url" className="text-xs font-bold uppercase text-slate-600">URL or Path</FormLabel>
-                      <FormControl>
-                        <Input
-                          id="res-url"
-                          placeholder="/documents/file.pdf or https://..."
-                          autoComplete="off"
-                          className="rounded-xl border-slate-200 font-mono text-xs"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormDescription className="text-[10px]">Relative path from public/ or a full URL.</FormDescription>
-                      <FormMessage />
+                      <div className="flex items-center justify-between mb-2">
+                        <FormLabel className="text-xs font-bold uppercase text-slate-600">
+                          File Source
+                        </FormLabel>
+                        {/* Tab toggle */}
+                        <div className="flex rounded-xl border border-slate-200 bg-slate-50 p-0.5 dark:border-slate-700 dark:bg-slate-800">
+                          <button
+                            type="button"
+                            onClick={() => setSourceMode('upload')}
+                            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-widest uppercase transition-all ${
+                              sourceMode === 'upload'
+                                ? 'bg-white text-aerojet-blue shadow-sm dark:bg-slate-900 dark:text-aerojet-sky'
+                                : 'text-slate-400 hover:text-slate-600'
+                            }`}
+                          >
+                            <Upload className="h-3 w-3" />
+                            Upload
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSourceMode('url')}
+                            className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-widest uppercase transition-all ${
+                              sourceMode === 'url'
+                                ? 'bg-white text-aerojet-blue shadow-sm dark:bg-slate-900 dark:text-aerojet-sky'
+                                : 'text-slate-400 hover:text-slate-600'
+                            }`}
+                          >
+                            <Link2 className="h-3 w-3" />
+                            URL / Path
+                          </button>
+                        </div>
+                      </div>
+
+                      {sourceMode === 'upload' ? (
+                        <div>
+                          {uploadedFile || currentUrl ? (
+                            /* Uploaded file preview */
+                            <div className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50/60 px-4 py-3 dark:border-emerald-800 dark:bg-emerald-900/20">
+                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-800/60">
+                                {getFileIcon(currentType)}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-xs font-bold text-emerald-800 dark:text-emerald-300">
+                                  {uploadedFile?.name || 'Uploaded file'}
+                                </p>
+                                <p className="truncate text-[10px] font-mono text-emerald-600/70 dark:text-emerald-400/70">
+                                  {uploadedFile?.url || currentUrl}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1.5">
+                                <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                                <button
+                                  type="button"
+                                  onClick={clearUpload}
+                                  className="rounded-lg p-1 text-emerald-400 transition-colors hover:bg-emerald-100 hover:text-red-500 dark:hover:bg-emerald-800"
+                                  title="Remove file"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            /* UploadThing dropzone area */
+                            <div className="rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/50 p-4 dark:border-slate-700 dark:bg-slate-900/30">
+                              <div className="mb-3 text-center">
+                                <Upload className="mx-auto mb-1.5 h-7 w-7 text-slate-300" />
+                                <p className="text-[11px] font-bold text-slate-500">
+                                  PDF, DOCX, ZIP, images — up to 32 MB
+                                </p>
+                              </div>
+                              <UploadButton
+                                endpoint="resourceFile"
+                                appearance={{
+                                  button:
+                                    'w-full rounded-xl bg-aerojet-blue px-4 py-2.5 text-xs font-black text-white shadow-sm transition-all hover:bg-aerojet-blue/90 ut-uploading:opacity-60 ut-uploading:cursor-not-allowed',
+                                  allowedContent: 'hidden',
+                                }}
+                                content={{
+                                  button({ ready, isUploading }) {
+                                    if (isUploading) return (
+                                      <span className="flex items-center gap-2">
+                                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                        Uploading…
+                                      </span>
+                                    )
+                                    return ready ? (
+                                      <span className="flex items-center gap-2">
+                                        <Upload className="h-3.5 w-3.5" />
+                                        Choose File to Upload
+                                      </span>
+                                    ) : 'Preparing…'
+                                  },
+                                }}
+                                onUploadBegin={() => setIsUploading(true)}
+                                onClientUploadComplete={(res) => {
+                                  setIsUploading(false)
+                                  if (res && res[0]) {
+                                    const file = res[0]
+                                    const url = (file as any).ufsUrl || (file as any).url
+                                    const name = (file as any).name || 'Uploaded file'
+                                    setUploadedFile({ url, name })
+                                    field.onChange(url)
+                                    // Auto-set name if empty
+                                    if (!form.getValues('name')) {
+                                      form.setValue('name', name.replace(/\.[^.]+$/, ''))
+                                    }
+                                    toast.success('File uploaded successfully')
+                                  }
+                                }}
+                                onUploadError={(err) => {
+                                  setIsUploading(false)
+                                  toast.error(`Upload failed: ${err.message}`)
+                                }}
+                              />
+                            </div>
+                          )}
+                          <FormMessage />
+                        </div>
+                      ) : (
+                        /* URL / Path input */
+                        <FormControl>
+                          <div>
+                            <Input
+                              id="res-url"
+                              placeholder="/documents/file.pdf or https://..."
+                              autoComplete="off"
+                              className="rounded-xl border-slate-200 font-mono text-xs"
+                              {...field}
+                            />
+                            <p className="mt-1.5 text-[10px] text-slate-400">
+                              Relative path from <code className="rounded bg-slate-100 px-1 py-0.5 dark:bg-slate-800">public/</code> or a full https:// URL.
+                            </p>
+                          </div>
+                        </FormControl>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -276,7 +424,7 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
                   <div className="rounded-2xl bg-white/80 p-6 shadow-xl backdrop-blur-sm dark:bg-slate-950/80">
                     <Info className="mx-auto mb-3 h-8 w-8 text-aerojet-sky opacity-50" />
                     <p className="text-xs font-bold text-slate-500 uppercase tracking-widest leading-relaxed">
-                      Enable "Show to Students" <br />to configure target modules <br />and pathways
+                      Enable &quot;Show to Students&quot; <br />to configure target modules <br />and pathways
                     </p>
                   </div>
                 </div>
@@ -427,7 +575,7 @@ export default function ResourceForm({ initialData, onSuccess }: ResourceFormPro
           <Button 
             type="submit" 
             className="rounded-xl bg-aerojet-blue px-8 py-6 text-base font-black text-white shadow-xl transition-all hover:bg-aerojet-blue/90 hover:shadow-2xl active:scale-95 disabled:opacity-50" 
-            disabled={isLoading}
+            disabled={isLoading || isUploading}
           >
             {isLoading ? (
               <Loader2 className="h-5 w-5 animate-spin" />

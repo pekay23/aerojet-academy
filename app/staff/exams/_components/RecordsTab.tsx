@@ -42,17 +42,19 @@ interface ModuleOption {
 
 interface ExamRecord {
   id: string
-  courseId: string | null
-  bookingType: string
+  examId: string | null
   moduleCode: string | null
-  examDate: string | Date | null
-  bookedAt: string | Date
-  status: string
-  result: string | null
   score: any
+  maxScore: any
   percentage: any
+  passed: boolean
+  grade: string | null
   attemptType: string | null
   sourceNotes: string | null
+  migrationRef: string | null
+  certificateUrl: string | null
+  createdAt: string | Date
+  updatedAt: string | Date
   user: {
     email: string
     profile: { firstName: string; middleName?: string | null; lastName: string } | null
@@ -247,14 +249,14 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
 
   const startEdit = (record: ExamRecord) => {
     setEditingId(record.id)
-    setEditCourseId(record.courseId || null)
-    setEditBookingType(record.bookingType || 'INDIVIDUAL')
+    setEditCourseId(record.examId || null)
+    setEditBookingType('INDIVIDUAL')
     setEditModuleCode(record.moduleCode || '')
     setEditScore(record.score ? Number(record.score).toString() : '')
-    setEditDate(record.examDate ? format(record.examDate, 'yyyy-MM-dd') : '')
+    setEditDate(record.createdAt ? format(record.createdAt, 'yyyy-MM-dd') : '')
     // Pre-fill course query with current module code so admin can see what's linked
-    const linkedCourse = modules.find((m) => m.id === record.courseId)
-    setEditCourseQuery(linkedCourse ? `${linkedCourse.code} — ${linkedCourse.name}` : '')
+    const linkedCourse = modules.find((m) => m.id === record.examId)
+    setEditCourseQuery(linkedCourse ? `${linkedCourse.code} — ${linkedCourse.name}` : record.moduleCode || '')
     setShowEditCourseDropdown(false)
   }
 
@@ -657,7 +659,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                   filteredRecords.map((record) => {
                     const isEditing = editingId === record.id
                     const scoreNum = record.score ? Number(record.score) : null
-                    const passed = scoreNum !== null ? scoreNum >= 75 : record.result !== 'fail'
+                    const passed = record.passed
 
                     return (
                       <tr
@@ -770,13 +772,13 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                             <div className="flex flex-col gap-0.5">
                               <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
                                 <Calendar className="h-3 w-3 text-aerojet-blue" />
-                                <span className="text-[10px] text-slate-400 uppercase mr-1">Exam:</span>
-                                {record.examDate ? format(new Date(record.examDate), 'MMM d, yyyy') : '—'}
+                                <span className="text-[10px] text-slate-400 uppercase mr-1">Created:</span>
+                                {record.createdAt ? format(new Date(record.createdAt), 'MMM d, yyyy') : '—'}
                               </div>
                               <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
                                 <Clock className="h-2.5 w-2.5" />
-                                <span className="text-slate-400 uppercase">Entered:</span>
-                                {format(new Date(record.bookedAt), 'MMM d, yyyy')}
+                                <span className="text-slate-400 uppercase">Updated:</span>
+                                {format(new Date(record.updatedAt), 'MMM d, yyyy')}
                               </div>
                             </div>
                           )}
@@ -811,9 +813,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                             {passed ? (
                               <>
                                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                                <span className="text-xs font-bold text-emerald-600">
-                                  {scoreNum !== null ? 'PASS' : 'AWAITING'}
-                                </span>
+                                <span className="text-xs font-bold text-emerald-600">PASS</span>
                               </>
                             ) : (
                               <>

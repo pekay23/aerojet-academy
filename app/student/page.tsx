@@ -84,7 +84,6 @@ export default async function StudentDashboard() {
     currentPoolsCount,
     poolMemberships,
     latestResultRecord,
-    latestMigratedRecord,
   ] = await Promise.all([
     // Common: Upcoming exams
     prisma.examBooking.findMany({
@@ -146,11 +145,6 @@ export default async function StudentDashboard() {
       include: { exam: { include: { examComponent: { include: { course: true } } } } },
       orderBy: { createdAt: 'desc' },
     }),
-    // Latest migrated booking result
-    prisma.examBooking.findFirst({
-      where: { userId, result: { in: ['pass', 'fail'] } },
-      orderBy: { examDate: 'desc' },
-    }),
   ])
 
   // Full-Time: fetch milestones if enrollment exists (depends on ftEnrollment)
@@ -171,17 +165,11 @@ export default async function StudentDashboard() {
 
   const dashboardResult = latestResultRecord
     ? {
-        module: latestResultRecord.exam.examComponent?.course?.code || '—',
+        module: latestResultRecord.moduleCode || latestResultRecord.exam?.examComponent?.course?.code || '—',
         passed: latestResultRecord.passed,
         status: `${Number(latestResultRecord.percentage)}%`,
       }
-    : latestMigratedRecord
-      ? {
-          module: latestMigratedRecord.moduleCode || '—',
-          passed: latestMigratedRecord.result === 'pass',
-          status: latestMigratedRecord.result?.toUpperCase() || '—',
-        }
-      : null
+    : null
 
   const renderActiveAcademicBlock = () => {
     if (isExamOnly) {

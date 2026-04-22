@@ -61,8 +61,6 @@ export function serializeExamBooking(booking: ExamBookingWithRelations): Seriali
   return {
     ...booking,
     examDate: (booking.examDate || booking.createdAt).toISOString(),
-    score: booking.score !== null ? Number(booking.score) : null,
-    percentage: booking.percentage !== null ? Number(booking.percentage) : null,
     exam: {
       id: booking.exam?.id || 'historical',
       name: booking.exam?.name || 'Exam Record',

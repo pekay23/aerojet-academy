@@ -11,6 +11,7 @@ import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfi
 import { compareNatural } from '@/lib/utils/natural-sort'
 
 export const metadata: Metadata = { title: 'Student Details | Staff Portal' }
+export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ id: string }>
@@ -57,6 +58,7 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
         orderBy: { createdAt: 'desc' },
       },
       examBookings: {
+        where: { deletedAt: null },
         include: {
           exam: {
             include: {
@@ -69,6 +71,9 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
         orderBy: { examDate: 'desc' },
       },
       examBundles: {
+        orderBy: { createdAt: 'desc' },
+      },
+      payments: {
         orderBy: { createdAt: 'desc' },
       },
       attendanceRecords: {
@@ -137,11 +142,42 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
     })
     .sort((a, b) => compareNatural(a.code || '', b.code || ''))
 
+  // Resolve staff names for transactions and payments
+  const staffIds = new Set<string>()
+  walletTransactions.forEach((t) => t.createdBy && staffIds.add(t.createdBy))
+  student.payments?.forEach((p) => p.approvedBy && staffIds.add(p.approvedBy))
+
+  const staffUsers =
+    staffIds.size > 0
+      ? await prisma.user.findMany({
+          where: { id: { in: Array.from(staffIds) } },
+          select: { id: true, profile: { select: { firstName: true, lastName: true } } },
+        })
+      : []
+
+  const staffMap = Object.fromEntries(
+    staffUsers.map((u) => [
+      u.id,
+      u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : 'Staff',
+    ])
+  )
+
+  const enrichedWalletTransactions = walletTransactions.map((t) => ({
+    ...t,
+    staffName: t.createdBy ? staffMap[t.createdBy] : null,
+  }))
+
+  const enrichedPayments = student.payments?.map((p) => ({
+    ...p,
+    staffName: p.approvedBy ? staffMap[p.approvedBy] : null,
+  })) || []
+
   // Serialize data for client components
   const serializedStudent = serializePrisma({
     ...student,
     password: undefined,
-    walletTransactions,
+    walletTransactions: enrichedWalletTransactions,
+    payments: enrichedPayments,
     fullTimeEnrollments,
     modularEnrollments,
   })
