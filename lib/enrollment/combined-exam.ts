@@ -138,8 +138,14 @@ export async function evaluateCombinedResult(combinedGroupRef: string) {
     throw new Error('Combined group is missing MCQ or Essay booking.')
   }
 
-  const mcqPercentage = mcqBooking.percentage != null ? Number(mcqBooking.percentage) : null
-  const essayPercentage = essayBooking.percentage != null ? Number(essayBooking.percentage) : null
+  // Read percentage from the unified ExamResult model
+  const [mcqResult, essayResult] = await Promise.all([
+    prisma.examResult.findFirst({ where: { examId: mcqBooking.examId ?? undefined }, orderBy: { createdAt: 'desc' } }),
+    prisma.examResult.findFirst({ where: { examId: essayBooking.examId ?? undefined }, orderBy: { createdAt: 'desc' } }),
+  ])
+
+  const mcqPercentage = mcqResult?.percentage != null ? Number(mcqResult.percentage) : null
+  const essayPercentage = essayResult?.percentage != null ? Number(essayResult.percentage) : null
 
   // Both must have results to evaluate
   if (mcqPercentage == null || essayPercentage == null) {

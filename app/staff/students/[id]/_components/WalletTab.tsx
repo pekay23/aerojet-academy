@@ -368,8 +368,7 @@ function TransactionRow({
           <div>{txn.description || '—'}</div>
           {txn.referenceType && (
             <div className="text-[10px] text-slate-400">
-              Ref: {txn.referenceType}
-              {txn.referenceId && ` (${txn.referenceId.slice(0, 8)}...)`}
+              Ref: {txn.referenceType.replace(/_/g, ' ')}
             </div>
           )}
         </td>
@@ -471,13 +470,11 @@ function TransactionRow({
                   </div>
                 </div>
 
-                {/* Reference */}
                 {txn.referenceType && (
                   <div className="text-xs">
                     <span className="font-bold text-slate-500">Reference:</span>{' '}
                     <span className="font-mono text-slate-400">
-                      {txn.referenceType}
-                      {txn.referenceId && ` · ${txn.referenceId}`}
+                      {txn.referenceType.replace(/_/g, ' ')}
                     </span>
                   </div>
                 )}

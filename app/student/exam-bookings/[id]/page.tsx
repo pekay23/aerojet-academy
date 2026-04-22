@@ -88,10 +88,6 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
     booking.course?.name ||
     ''
 
-  const passingThreshold = Number(booking.exam?.passingScore || 75)
-  const pct = booking.percentage ? Number(booking.percentage) : null
-  const passing = pct !== null && pct >= passingThreshold
-  const resultNorm = booking.result?.toLowerCase() ?? ''
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
@@ -291,85 +287,6 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         </div>
       )}
 
-      {/* Result Section */}
-      {(booking.result || booking.score !== null) && (
-        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
-          <h2 className="mb-6 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
-            <FileBarChart2 className="h-3.5 w-3.5" />
-            Result
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-3">
-            {booking.score !== null && (
-              <div>
-                <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Score</p>
-                <p className="mt-1 text-xl font-black tabular-nums text-slate-900 dark:text-slate-100">
-                  {Number(booking.score)}
-                  {booking.maxScore !== null && (
-                    <span className="text-sm font-bold text-slate-400">
-                      {' '}
-                      / {Number(booking.maxScore)}
-                    </span>
-                  )}
-                </p>
-              </div>
-            )}
-            {pct !== null && (
-              <div>
-                <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
-                  Percentage
-                </p>
-                <p
-                  className={`mt-1 text-xl font-black tabular-nums ${
-                    passing
-                      ? 'text-emerald-600 dark:text-emerald-400'
-                      : 'text-red-600 dark:text-red-400'
-                  }`}
-                >
-                  {pct.toFixed(1)}%
-                </p>
-              </div>
-            )}
-            <div>
-              <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Outcome</p>
-              <div className="mt-1">
-                {booking.result ? (
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-black tracking-widest uppercase ${
-                      resultNorm === 'pass' || passing
-                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
-                        : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
-                    }`}
-                  >
-                    {resultNorm === 'pass' || passing ? (
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                    ) : (
-                      <XCircle className="h-3.5 w-3.5" />
-                    )}
-                    {booking.result || (passing ? 'Pass' : 'Fail')}
-                  </span>
-                ) : pct !== null ? (
-                  <span
-                    className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-black tracking-widest uppercase ${
-                      passing
-                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400'
-                        : 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-400'
-                    }`}
-                  >
-                    {passing ? (
-                      <CheckCircle2 className="h-3.5 w-3.5" />
-                    ) : (
-                      <XCircle className="h-3.5 w-3.5" />
-                    )}
-                    {passing ? 'Pass' : 'Fail'}
-                  </span>
-                ) : (
-                  <span className="text-sm font-medium text-slate-400 italic">Awaiting result</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Booked At footer */}
       <div className="text-center text-xs font-medium text-slate-400">

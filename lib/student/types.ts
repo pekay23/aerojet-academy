@@ -18,7 +18,7 @@ export interface SerializedEnrollment extends Omit<Enrollment, 'createdAt' | 'up
   completedAt?: string | null
 }
 
-export interface SerializedExamBooking extends Omit<ExamBooking, 'createdAt' | 'updatedAt' | 'examDate' | 'score' | 'percentage'> {
+export interface SerializedExamBooking extends Omit<ExamBooking, 'createdAt' | 'updatedAt' | 'examDate'> {
   exam: {
     id: string
     name: string
@@ -34,9 +34,8 @@ export interface SerializedExamBooking extends Omit<ExamBooking, 'createdAt' | '
     location: string
   } | null
   examDate: string
-  score?: number | null
-  percentage?: number | null
 }
+
 
 export interface SerializedPaymentMilestone extends Omit<PaymentMilestone, 'dueDate' | 'paidAt' | 'amountDue' | 'percentOfYearFee'> {
   amountDue: number

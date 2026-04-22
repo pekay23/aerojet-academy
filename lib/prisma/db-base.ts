@@ -37,4 +37,6 @@ export const prismaBase =
 
 if (process.env.NODE_ENV !== 'production') globalForPrismaBase.prismaBase = prismaBase
 
+// Trigger hot reload after schema pushBase
+
 export default prismaBase

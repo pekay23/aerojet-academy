@@ -268,11 +268,10 @@ export async function bulkBypassPasswordChange(userIds: string[]) {
   }
 }
 /**
- * Updates an individual exam booking (used for historical record corrections).
- * Fixed invalid 'passed' field error.
+ * Updates an exam record (can be an ExamBooking or ExamResult ID).
  */
 export async function updateExamBooking(
-  bookingId: string,
+  recordId: string,
   data: {
     courseId?: string
     bookingType?: string
@@ -283,48 +282,149 @@ export async function updateExamBooking(
     status?: any
     attemptType?: string
     isResit?: boolean
+    resultIdToSync?: string
   }
 ) {
   try {
     await requireStaff()
 
-    const resultData: any = { ...data }
+    const isResultId = recordId.startsWith('result_')
+    const actualId = isResultId ? recordId.replace('result_', '') : recordId
 
+    let moduleCode = data.moduleCode
     if (data.courseId) {
       const course = await prisma.course.findUnique({ where: { id: data.courseId } })
-      if (course) resultData.moduleCode = course.code.toUpperCase()
+      if (course) moduleCode = course.code.toUpperCase()
     }
 
-    // Derive result from score if score is provided and no explicit result override
-    if (data.score !== undefined) {
-      resultData.percentage = data.score
-      if (!data.result) {
-        resultData.result = data.score >= 75 ? 'pass' : 'fail'
-      }
+    const score = data.score !== undefined && data.score !== null ? data.score : undefined
+    const percentage = score !== undefined ? score : undefined
+    const passed = score !== undefined ? score >= 75 : undefined
+    const grade = score !== undefined
+      ? score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 75 ? 'C' : 'F'
+      : undefined
+
+    if (isResultId) {
+      // Pure ExamResult update - No transaction needed for single operation
+      await prisma.examResult.update({
+        where: { id: actualId },
+        data: {
+          ...(moduleCode ? { moduleCode } : {}),
+          ...(score !== undefined ? { score, maxScore: 100, percentage, passed, grade } : {}),
+          ...(data.attemptType ? { attemptType: data.attemptType } : {}),
+        },
+      })
+    } else {
+      // For Booking updates which might sync to Result, use a transaction with higher timeout
+      // Determine isResit based on attemptType if not explicitly provided
+      const isResit = data.isResit !== undefined 
+        ? data.isResit 
+        : (data.attemptType ? data.attemptType.startsWith('RESIT') : undefined)
+
+      await prisma.$transaction(async (tx) => {
+        // It's a booking ID. Update booking first.
+        const booking = await tx.examBooking.findUnique({ where: { id: actualId } })
+        if (!booking) throw new Error('Booking not found')
+
+        const finalModule = moduleCode || booking.moduleCode || ''
+        
+        await tx.examBooking.update({
+          where: { id: actualId },
+          data: {
+            ...(moduleCode ? { moduleCode } : {}),
+            ...(data.examDate ? { examDate: data.examDate } : {}),
+            ...(data.attemptType ? { attemptType: data.attemptType } : {}),
+            ...(isResit !== undefined ? { isResit } : {}),
+            ...(data.bookingType ? { bookingType: data.bookingType === 'MANUAL' ? 'INDIVIDUAL' : data.bookingType as any } : {}),
+            // If the existing result is "migrated" but we have a score, or we're explicitly setting a score, fix it
+            ...((score !== undefined || (booking.result?.toUpperCase().includes('MIGRATE') && booking.score != null)) ? { 
+              score: score ?? Number(booking.score),
+              percentage: score ?? Number(booking.score),
+              result: (score ?? Number(booking.score)) >= 75 ? 'pass' : 'fail',
+              status: 'COMPLETED'
+            } : {}),
+          },
+        })
+
+        // If score or attemptType is provided, sync to ExamResult
+        if (score !== undefined || data.attemptType !== undefined) {
+          if (data.resultIdToSync) {
+             // We know exactly which ExamResult belongs to this booking
+             await tx.examResult.update({
+               where: { id: data.resultIdToSync },
+               data: { 
+                 score, 
+                 maxScore: 100, 
+                 percentage, 
+                 passed, 
+                 grade, 
+                 attemptType: data.attemptType || booking.attemptType,
+                 moduleCode: finalModule
+               },
+             })
+          } else {
+            // Look for existing ExamResult for this user and module
+            const existingResult = await tx.examResult.findFirst({
+              where: {
+                userId: booking.userId,
+                moduleCode: finalModule,
+              },
+              orderBy: { createdAt: 'desc' }
+            })
+
+            if (existingResult) {
+              await tx.examResult.update({
+                where: { id: existingResult.id },
+                data: { score, maxScore: 100, percentage, passed, grade, attemptType: data.attemptType || booking.attemptType },
+              })
+            } else {
+              await tx.examResult.create({
+                data: {
+                  userId: booking.userId,
+                  moduleCode: finalModule,
+                  score,
+                  maxScore: 100,
+                  percentage,
+                  passed: passed as boolean,
+                  grade,
+                  attemptType: data.attemptType || booking.attemptType,
+                  sourceNotes: 'Auto-created from booking update',
+                },
+              })
+            }
+          }
+        }
+      }, {
+        timeout: 30000 // Increase timeout to 30s to handle slow DB connections (P2028 fix)
+      })
     }
 
-    // Derive isResit from attemptType
-    if (data.attemptType) {
-      resultData.isResit = data.attemptType.startsWith('RESIT')
+    // Get userId for revalidation
+    let targetUserId = ''
+    if (isResultId) {
+      const res = await prisma.examResult.findUnique({ where: { id: actualId }, select: { userId: true } })
+      targetUserId = res?.userId || ''
+    } else {
+      const b = await prisma.examBooking.findUnique({ where: { id: actualId }, select: { userId: true } })
+      targetUserId = b?.userId || ''
     }
-
-    await prisma.examBooking.update({
-      where: { id: bookingId },
-      data: resultData,
-    })
 
     revalidatePath('/staff/exams')
     revalidatePath('/student/exams')
+    if (targetUserId) {
+      revalidatePath(`/staff/students/${targetUserId}`)
+    }
+    
     return { success: true }
   } catch (error) {
-    console.error('Update exam booking error:', error)
-    return { error: 'Failed to update booking.' }
+    console.error('Update exam result error:', error)
+    return { error: 'Failed to update record.' }
   }
 }
 
 /**
- * Creates one or more exam records (booking) for a student.
- * Supports INDIVIDUAL, TWIN_PACK, and FOUR_PACK booking types.
+ * Creates one or more ExamResult records for a student.
+ * Also creates a companion ExamBooking for payment/status tracking.
  */
 export async function createExamRecord(data: {
   userId: string
@@ -346,7 +446,6 @@ export async function createExamRecord(data: {
     const user = await prisma.user.findUnique({ where: { id: userId } })
     if (!user) return { error: 'Student not found.' }
 
-    // Pricing mapping
     const pricingMap = {
       INDIVIDUAL: pricingConfig.individualExamFee,
       TWIN_PACK: pricingConfig.twoSeatBundle,
@@ -357,7 +456,7 @@ export async function createExamRecord(data: {
     const bookingGroupRef = entries.length > 1 ? `STAFF_BUNDLE_${Date.now()}` : undefined
 
     const results = await prisma.$transaction(async (tx) => {
-      const createdBookings = []
+      const created = []
 
       for (let i = 0; i < entries.length; i++) {
         const entry = entries[i]
@@ -367,20 +466,12 @@ export async function createExamRecord(data: {
           if (course) finalModuleCode = course.code.toUpperCase()
         }
 
-        // Derive result from score if provided
-        let result: string | undefined
-        let percentage: number | undefined
-        if (entry.score !== undefined && entry.score !== null) {
-          percentage = entry.score
-          result = entry.score >= 75 ? 'pass' : 'fail'
-        }
-
-        const isFutureBooking = entry.score === undefined || entry.score === null
-        // Attach the full fee to the first booking in the group if it's a bundle
-        // or just to the single individual booking.
+        const hasScore = entry.score !== undefined && entry.score !== null
+        const isFutureBooking = !hasScore
         const amountPaid = i === 0 && isFutureBooking ? totalFee : 0
         const status = isFutureBooking ? PaymentStatus.PENDING : PaymentStatus.COMPLETED
 
+        // Create the booking (pure ledger — no result fields)
         const booking = await tx.examBooking.create({
           data: {
             userId,
@@ -391,21 +482,39 @@ export async function createExamRecord(data: {
             status: status as any,
             bookingType: bookingType as any,
             attemptType: attemptType || 'FIRST',
-            result,
-            score: entry.score !== undefined ? entry.score : undefined,
-            percentage: percentage !== undefined ? percentage : undefined,
-            sourceNotes: notes || 'Manually added by staff',
             bookingGroupRef,
           },
         })
-        createdBookings.push(booking)
+
+        // If a score was provided, create an ExamResult with correct passed
+        if (hasScore) {
+          const score = Number(entry.score)
+          const passed = score >= 75
+          const grade = score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 75 ? 'C' : 'F'
+          await tx.examResult.create({
+            data: {
+              userId,
+              moduleCode: finalModuleCode,
+              score,
+              maxScore: 100,
+              percentage: score,
+              passed,
+              grade,
+              attemptType: attemptType || 'FIRST',
+              sourceNotes: notes || 'Manually added by staff',
+            },
+          })
+        }
+
+        created.push(booking)
       }
-      return createdBookings
+      return created
     })
 
     revalidatePath('/staff/exams')
     revalidatePath('/student/exams')
     revalidatePath('/student')
+    revalidatePath(`/staff/students/${data.userId}`)
     return { success: true, count: results.length }
   } catch (error) {
     console.error('Create exam record error:', error)
@@ -414,20 +523,20 @@ export async function createExamRecord(data: {
 }
 
 /**
- * Deletes an exam booking record.
+ * Deletes an ExamResult record (Records tab).
  */
-export async function deleteExamRecord(bookingId: string) {
+export async function deleteExamRecord(resultId: string) {
   try {
     await requireStaff()
 
-    await prisma.examBooking.delete({ where: { id: bookingId } })
+    await prisma.examResult.delete({ where: { id: resultId } })
 
     revalidatePath('/staff/exams')
     revalidatePath('/student/exams')
     revalidatePath('/student')
     return { success: true }
   } catch (error) {
-    console.error('Delete exam record error:', error)
+    console.error('Delete exam result error:', error)
     return { error: 'Failed to delete record.' }
   }
 }

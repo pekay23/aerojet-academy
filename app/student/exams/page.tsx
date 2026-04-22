@@ -112,60 +112,20 @@ export default async function ExamsPage({
   let allHistory: UnifiedExamRecord[] = []
   let failedAttempts: UnifiedExamRecord[] = []
   
-  if (tab === 'records' && results && bookings) {
-    const formalResults = results.map((r) => ({
+  if (tab === 'records' && results) {
+    allHistory = results.map((r) => ({
       id: r.id,
       type: 'ORIGINAL' as const,
-      moduleCode: r.exam.examComponent?.course?.code || '—',
-      moduleName: r.exam.examComponent?.course?.name || r.exam.name,
-      date: r.exam.examDate,
+      moduleCode: r.moduleCode || r.exam?.examComponent?.course?.code || '—',
+      moduleName: r.exam?.examComponent?.course?.name || r.exam?.name || 'Manual Result',
+      date: r.exam?.examDate || r.createdAt,
       passed: r.passed,
-      score: Number(r.score),
-      maxScore: Number(r.maxScore),
-      percentage: Number(r.percentage),
+      score: r.score ? Number(r.score) : null,
+      maxScore: r.maxScore ? Number(r.maxScore) : null,
+      percentage: r.percentage ? Number(r.percentage) : null,
       grade: r.grade,
+      attemptType: r.attemptType,
     }))
-
-    const historicalResults: UnifiedExamRecord[] = bookings
-      .filter((b) => {
-        const r = b.result?.toLowerCase()
-        return r === 'pass' || r === 'fail' || (b.score !== null && b.score !== undefined)
-      })
-      .filter((b) => {
-        // Deduplicate: if there is a formal result for the same module on the same date, skip the booking
-        const bCode = b.moduleCode || b.exam?.examComponent?.course?.code || b.examComponent?.course?.code
-        const bDate = (b.examDate || b.bookedAt || new Date()).getTime()
-        return !formalResults.some((f) => f.moduleCode === bCode && f.date.getTime() === bDate)
-      })
-      .map((b): UnifiedExamRecord => {
-        const score = b.score !== null && b.score !== undefined ? Number(b.score) : null
-        const resultStr = b.result?.toLowerCase()
-        const passingThreshold = Number(b.exam?.passingScore || 75)
-        
-        let passed: boolean | null = null
-        if (score !== null) {
-          passed = score >= passingThreshold
-        } else if (resultStr === 'pass') {
-          passed = true
-        } else if (resultStr === 'fail') {
-          passed = false
-        }
-
-        return {
-          id: b.id,
-          type: 'HISTORICAL' as const,
-          moduleCode: b.moduleCode || b.exam?.examComponent?.course?.code || b.examComponent?.course?.code || '—',
-          moduleName: b.examComponent?.course?.name || b.exam?.examComponent?.course?.name || 'Historical Exam',
-          date: b.examDate || b.bookedAt || new Date(),
-          passed,
-          score,
-          percentage: score,
-          grade: b.result?.toUpperCase(),
-          attemptType: b.attemptType,
-        }
-      })
-
-    allHistory = [...formalResults, ...historicalResults]
     failedAttempts = allHistory.filter((r) => r.passed === false)
   }
 

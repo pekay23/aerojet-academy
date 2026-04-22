@@ -403,7 +403,7 @@ async function TransactionsTab({ query }: { query?: string }) {
                       <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-2">
                           <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                            {tx.referenceType || '—'}
+                            {tx.referenceType ? tx.referenceType.replace(/_/g, ' ') : '—'}
                           </span>
                           {isReconciled ? (
                             <span className="flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
@@ -415,11 +415,6 @@ async function TransactionsTab({ query }: { query?: string }) {
                             </span>
                           ) : null}
                         </div>
-                        {tx.referenceId && (
-                          <span className="font-mono text-[10px] text-slate-400">
-                            {tx.referenceId}
-                          </span>
-                        )}
                       </div>
                     </TableCell>
                     <TableCell className="px-6 py-5 text-xs text-slate-500">
