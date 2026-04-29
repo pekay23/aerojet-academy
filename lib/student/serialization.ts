@@ -33,7 +33,15 @@ type UserWithProfile = Prisma.UserGetPayload<{
     email: true,
     role: true,
     profile: true,
-    studentProfile: true,
+    studentProfile: {
+      include: {
+        pathwayRel: {
+          select: {
+            name: true,
+          }
+        }
+      }
+    },
     settings: true,
   }
 }>
@@ -101,6 +109,7 @@ export function serializeUserProfile(user: UserWithProfile): SerializedUserProfi
     } : null,
     studentProfile: user.studentProfile ? {
       ...(user.studentProfile as any),
+      pathwayName: user.studentProfile.pathwayRel?.name || null,
       enrollmentDate: (user.studentProfile as any).enrollmentDate?.toISOString() || null,
       createdAt: undefined,
       updatedAt: undefined,

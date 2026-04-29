@@ -6,14 +6,7 @@ import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { revalidatePath } from 'next/cache'
 import { calculateLetterGrade, isPassing } from '@/lib/utils/grading'
-
-async function getInstructorId(userId: string) {
-  const profile = await prisma.instructorProfile.findUnique({
-    where: { userId },
-  })
-  if (!profile) throw new Error('Instructor profile not found')
-  return profile.id
-}
+import { getInstructorProfileIdOrThrow } from '@/lib/instructor/profile'
 
 export async function getInstructorDashboardData() {
   const session = await getAuthSession()
@@ -21,7 +14,7 @@ export async function getInstructorDashboardData() {
     throw new Error('Unauthorized')
   }
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
   const now = new Date()
 
   // 1. Fetch Today's Classes
@@ -136,7 +129,7 @@ export async function getInstructorSchedule(startDate?: Date, endDate?: Date) {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return null
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
   const now = new Date()
   const rangeStart = startDate || startOfWeek(now, { weekStartsOn: 1 })
   const rangeEnd = endDate || endOfWeek(now, { weekStartsOn: 1 })
@@ -174,7 +167,7 @@ export async function submitGrade(data: { gradeId: string; score: number; commen
     throw new Error('Unauthorized')
   }
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   const updatedGrade = await prisma.grade.update({
     where: { id: data.gradeId },
@@ -197,7 +190,7 @@ export async function getPendingGradingCount() {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return 0
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   return await prisma.grade.count({
     where: {
@@ -211,7 +204,7 @@ export async function getGradingQueue() {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return []
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   return serializePrisma(
     await prisma.grade.findMany({
@@ -237,7 +230,7 @@ export async function getGradingHistory() {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return []
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   return serializePrisma(
     await prisma.grade.findMany({
@@ -264,7 +257,7 @@ export async function getMyClasses() {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return []
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   return serializePrisma(
     await prisma.class.findMany({
@@ -285,7 +278,7 @@ export async function getClassAttendance(classId: string, date?: Date) {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return null
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
   const classData = await prisma.class.findUnique({
     where: { id: classId, instructorId },
     include: {
@@ -333,7 +326,7 @@ export async function recordAttendance(data: {
     throw new Error('Unauthorized')
   }
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   return serializePrisma(
     await prisma.attendanceRecord.upsert({
@@ -391,7 +384,7 @@ export async function getInstructorResources() {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return null
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   // 1. Fetch assigned courses (Dynamic Academic Resources)
   const assignedCourses = await prisma.course.findMany({
@@ -457,7 +450,7 @@ export async function getInstructorStudents() {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return []
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   const enrollments = await prisma.enrollment.findMany({
     where: {
@@ -509,7 +502,7 @@ export async function getStudentDetails(userId: string) {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return null
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   const student = await prisma.user.findUnique({
     where: { id: userId },
@@ -628,7 +621,7 @@ export async function createInternalGrade(data: {
     throw new Error('Unauthorized')
   }
 
-  const instructorId = await getInstructorId(session.user.id)
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
 
   const percentage = (data.score / data.maxScore) * 100
   const letterGrade = calculateLetterGrade(percentage)

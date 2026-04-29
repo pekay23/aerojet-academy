@@ -8,11 +8,13 @@ interface HistoryRecord {
   type: string
   moduleCode: string
   moduleName: string
-  date: Date
+  date: Date | string
+  attendanceStatus?: string | null
   passed?: boolean | null
   score?: number | null
   percentage?: number | null
   grade?: string | null
+  result?: string | null
 }
 
 interface ExamHistoryTableProps {
@@ -41,6 +43,7 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
                 currentSort={sortConfig}
                 onSort={requestSort}
               />
+              <th scope="col" className="px-6 py-4">Attendance</th>
               <th scope="col" className="px-6 py-4">Result</th>
               <SortHeader
                 label="Details"
@@ -80,23 +83,46 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
                   {h.date ? new Date(h.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No date available'}
                 </td>
                 <td className="px-6 py-4">
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${
+                      h.attendanceStatus === 'PRESENT'
+                        ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'
+                        : h.attendanceStatus === 'ABSENT'
+                          ? 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'
+                          : h.attendanceStatus === 'EXCUSED'
+                            ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400'
+                            : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                    }`}
+                  >
+                    {h.attendanceStatus || '—'}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
-                    {h.passed === true ? (
-                      <>
-                        <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-hidden="true" />
-                        <span className="font-bold text-emerald-600">
-                          {h.score !== undefined ? 'PASS' : 'PASS/EXEMPT'}
-                        </span>
-                      </>
-                    ) : h.passed === false ? (
-                      <>
-                        <XCircle className="h-4 w-4 text-red-500" aria-hidden="true" />
-                        <span className="font-bold text-red-600">FAIL</span>
-                      </>
+                    {h.result && !['pass', 'fail', 'PASS', 'FAIL'].includes(h.result) ? (
+                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                        {h.result}
+                      </span>
                     ) : (
                       <>
-                        <AlertCircle className="h-4 w-4 text-slate-400" aria-hidden="true" />
-                        <span className="font-bold text-slate-500">PENDING</span>
+                        {h.passed === true ? (
+                          <>
+                            <CheckCircle2 className="h-4 w-4 text-emerald-500" aria-hidden="true" />
+                            <span className="font-bold text-emerald-600">
+                              {h.score !== undefined && h.score !== null ? 'PASS' : 'PASS/EXEMPT'}
+                            </span>
+                          </>
+                        ) : h.passed === false ? (
+                          <>
+                            <XCircle className="h-4 w-4 text-red-500" aria-hidden="true" />
+                            <span className="font-bold text-red-600">FAIL</span>
+                          </>
+                        ) : (
+                          <>
+                            <AlertCircle className="h-4 w-4 text-slate-400" aria-hidden="true" />
+                            <span className="font-bold text-slate-500">PENDING</span>
+                          </>
+                        )}
                       </>
                     )}
                   </div>
@@ -116,7 +142,7 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
             ))}
             {items.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-6 py-12 text-center text-slate-400 italic">
+                <td colSpan={6} className="px-6 py-12 text-center text-slate-400 italic">
                   No historical data found.
                 </td>
               </tr>

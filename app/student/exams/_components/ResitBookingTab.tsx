@@ -78,17 +78,26 @@ export default async function ResitBookingTab() {
 
   const { wallet, pricing, balance, currency, currencySymbol, openEvents } = await getBookingData(session.user.id)
 
-  const failedResults = await prisma.examResult.findMany({
-    where: { userId: session.user.id, passed: false },
-    include: {
-      exam: {
-        include: {
-          examComponent: { include: { course: true } },
-          event: true,
+  const [failedResults, failedBookings] = await Promise.all([
+    prisma.examResult.findMany({
+      where: { userId: session.user.id, passed: false },
+      include: {
+        exam: {
+          include: {
+            examComponent: { include: { course: true } },
+            event: true,
+          },
         },
       },
-    },
-  })
+    }),
+    prisma.examBooking.findMany({
+      where: { userId: session.user.id, result: { equals: 'fail', mode: 'insensitive' } },
+      include: {
+        course: true,
+        exam: { include: { examComponent: { include: { course: true } }, event: true } },
+      }
+    })
+  ])
 
   // Aggregate free resits from bundles
   const bookingsWithCredits = await prisma.examBooking.findMany({
@@ -153,8 +162,25 @@ export default async function ResitBookingTab() {
         passingScore: r.exam?.passingScore ? Number(r.exam.passingScore) : ACADEMIC_RULES.EASA_PASS_MARK,
         examDate: (r.exam?.examDate || r.createdAt).toISOString(),
         eventName: r.exam?.event?.name || null,
-        // Keep component ID for booking logic if needed
         examComponentId: r.exam?.examComponentId || null,
+      })
+    }
+  })
+
+  failedBookings.forEach((b) => {
+    const code = b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—'
+    // Only add if not already in map (preferring formal result data if both exist)
+    if (code !== '—' && !failedMap.has(code)) {
+      failedMap.set(code, {
+        examId: b.examId || b.id,
+        examName: b.exam?.name || b.course?.name || 'Historical Booking',
+        moduleCode: code,
+        moduleName: b.course?.name || b.exam?.examComponent?.course?.name || '—',
+        score: b.score ? Number(b.score) : 0,
+        passingScore: ACADEMIC_RULES.EASA_PASS_MARK,
+        examDate: (b.examDate || b.createdAt).toISOString(),
+        eventName: b.exam?.event?.name || null,
+        examComponentId: b.exam?.examComponentId || b.course?.id || null,
       })
     }
   })

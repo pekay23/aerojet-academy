@@ -18,7 +18,6 @@ import {
   Sun,
   Moon,
   Monitor,
-  Settings,
 } from 'lucide-react'
 import { ElementType } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -43,6 +42,12 @@ export type SidebarLinkHeader = {
 }
 
 export type SidebarLink = SidebarLinkItem | SidebarLinkHeader
+
+function buildHref(basePath: string, href: string) {
+  if (!basePath) return href
+  if (href === basePath || href.startsWith(`${basePath}/`)) return href
+  return `${basePath}${href}`
+}
 
 interface DashboardSidebarProps {
   links: SidebarLink[]
@@ -296,6 +301,7 @@ function UserMenu({
   userRole,
   portalColor,
   basePath,
+  userMenuItems,
   theme,
   setTheme,
 }: {
@@ -305,6 +311,7 @@ function UserMenu({
   userRole?: string
   portalColor: string
   basePath: string
+  userMenuItems?: SidebarLinkItem[]
   theme: string | undefined
   setTheme: (t: string) => void
 }) {
@@ -357,11 +364,21 @@ function UserMenu({
             className="absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-2xl border border-white/15 bg-sidebar/95 shadow-2xl backdrop-blur-xl"
           >
             <div className="p-1.5">
-              {/* Settings */}
-              <Link href={`${basePath}/settings`} onClick={() => setOpen(false)} className={menuLink}>
-                <Settings className="h-4 w-4 text-sidebar-foreground/40" />
-                {!collapsed && 'Settings'}
-              </Link>
+              {userMenuItems?.map((item) => {
+                const Icon = item.icon
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={buildHref(basePath, item.href)}
+                    onClick={() => setOpen(false)}
+                    className={menuLink}
+                  >
+                    {Icon ? <Icon className="h-4 w-4 text-sidebar-foreground/40" /> : null}
+                    {!collapsed && item.label}
+                  </Link>
+                )
+              })}
 
               {/* Homepage */}
               <Link href="/" onClick={() => setOpen(false)} className={menuLink}>
@@ -624,6 +641,7 @@ function renderSidebarContent({
           userRole={userRole}
           portalColor={portalColor}
           basePath={basePath}
+          userMenuItems={userMenuItems}
           theme={theme}
           setTheme={setTheme}
         />

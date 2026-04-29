@@ -12,8 +12,8 @@
  * - POSTPONE: Event rescheduled, pool memberships auto-rolled
  */
 
-import prisma from '@/lib/prisma/client'
-import { Prisma } from '@prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import { Prisma, PoolStatus } from '@prisma/client'
 import { failPool, confirmPoolInternal } from '@/lib/pools/confirm'
 import { sendEmail } from '@/lib/email'
 import { sendEventGoEmail, sendEventNoGoEmail, sendEventPostponedEmail } from '@/lib/email/service'
@@ -45,8 +45,12 @@ export interface GoNoGoEvaluation {
 /**
  * Evaluate Go/No-Go for an event without executing it.
  */
-export async function evaluateGoNoGo(eventId: string): Promise<GoNoGoEvaluation> {
-  const event = await prisma.examEvent.findUnique({
+export async function evaluateGoNoGo(
+  eventId: string,
+  options?: { unfiltered?: boolean }
+): Promise<GoNoGoEvaluation> {
+  const db = options?.unfiltered ? prismaUnfiltered : prisma
+  const event = await db.examEvent.findUnique({
     where: { id: eventId },
     include: {
       pools: {

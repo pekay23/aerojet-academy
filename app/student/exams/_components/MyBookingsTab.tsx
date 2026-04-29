@@ -26,23 +26,11 @@ export default async function MyBookingsTab() {
   const activeCount = memberships.filter((m) => ['RESERVED', 'CONFIRMED'].includes(m.status)).length
   const totalReserved = memberships.filter((m) => m.status === 'RESERVED').reduce((sum, m) => sum + Number(m.amountReserved || 0), 0)
 
-  // Determine actual display status (handling past unwritten exams)
-  const today = new Date()
-  const displayMemberships = memberships.map((m) => {
-    let visualStatus = m.status
-    const isPast = new Date(m.pool.examDate) < today
-
-    // Phase 12 logic: If it's a past exam, still RESERVED or CONFIRMED, 
-    // but no grade was entered/it didn't happen, we visually collapse it to CANCELLED.
-    if (isPast && (m.status === 'RESERVED' || m.status === 'CONFIRMED')) {
-       visualStatus = 'CANCELLED'
-    }
-
-    return {
-      ...m,
-      visualStatus,
-    }
-  })
+  const displayMemberships = memberships.map((m) => ({
+    ...m,
+    visualStatus: m.status,
+    isPast: new Date(m.pool.examDate) < new Date(),
+  }))
 
   return (
     <div className="space-y-8">

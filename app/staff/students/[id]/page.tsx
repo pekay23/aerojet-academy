@@ -60,6 +60,7 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
       examBookings: {
         where: { deletedAt: null },
         include: {
+          examAttendance: true,
           exam: {
             include: {
               examComponent: { include: { course: { select: { name: true, code: true } } } },

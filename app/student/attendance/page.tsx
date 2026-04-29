@@ -4,7 +4,12 @@ import { Calendar, CheckCircle2, XCircle, Clock, AlertCircle } from 'lucide-reac
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
-import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from '@/lib/access-control'
+import {
+  canAccessFeature,
+  getEnrollmentMilestoneStatus,
+  getStudentPaymentAccessLevel,
+  getStudentStatus,
+} from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 import AttendanceTable from './_components/AttendanceTable'
 
@@ -21,12 +26,13 @@ export default async function AttendancePage() {
   const hasAccess = await canAccessFeature(session.user.id, 'classes')
 
   if (isFullTime && !hasAccess) {
-    const [milestoneStatus, wallet] = await Promise.all([
+    const [milestoneStatus, wallet, accessLevel] = await Promise.all([
       getEnrollmentMilestoneStatus(session.user.id),
       prisma.wallet.findUnique({
         where: { userId: session.user.id },
         select: { availableBalance: true, reservedBalance: true, currency: true },
       }),
+      getStudentPaymentAccessLevel(session.user.id),
     ])
 
     const walletBalance = {
@@ -47,7 +53,7 @@ export default async function AttendancePage() {
         </div>
 
         <PaymentRequiredBanner
-          accessLevel="SEAT_ONLY"
+          accessLevel={accessLevel}
           milestoneStatus={milestoneStatus}
           walletBalance={walletBalance}
         />

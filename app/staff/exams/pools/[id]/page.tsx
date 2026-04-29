@@ -23,7 +23,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const pool = await getPoolWithDetails(id, { includeAllStatuses: true })
+  const pool = await getPoolWithDetails(id, { includeAllStatuses: true, unfiltered: true })
   return { title: `Pool: ${pool?.name || 'Details'} | Staff Portal` }
 }
 
@@ -32,7 +32,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
   if (!session) redirect('/login')
 
   const { id } = await params
-  const pool = await getPoolWithDetails(id, { includeAllStatuses: true })
+  const pool = await getPoolWithDetails(id, { includeAllStatuses: true, unfiltered: true })
   if (!pool) notFound()
 
   return (
@@ -94,7 +94,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
               <tr>
                 <th className="px-6 py-4">Student</th>
                 <th className="px-6 py-4">Module</th>
-
+                <th className="px-6 py-4">Attendance</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -103,7 +103,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
               {pool.memberships.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={4}
+                    colSpan={5}
                     className="px-6 py-12 text-center text-slate-500 dark:text-slate-400"
                   >
                     <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
@@ -142,6 +142,21 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                       </div>
                     </td>
 
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
+                          member.examAttendance?.status === 'PRESENT'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : member.examAttendance?.status === 'ABSENT'
+                              ? 'bg-red-100 text-red-700'
+                              : member.examAttendance?.status === 'EXCUSED'
+                                ? 'bg-blue-100 text-blue-700'
+                                : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {member.examAttendance?.status || 'UNMARKED'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4">
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase ${

@@ -11,6 +11,7 @@ import StudentTopbarActions from './_components/StudentTopbarActions'
 import ForcePasswordChange from '../applicant/_components/ForcePasswordChange'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 import { getStudentPaymentAccessLevel, getEnrollmentMilestoneStatus } from '@/lib/access-control'
+import { resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
@@ -26,6 +27,25 @@ export default async function StudentLayout({ children }: { children: React.Reac
       mustChangePassword: true,
       registrationPaid: true,
       profile: { select: { firstName: true, middleName: true, lastName: true } },
+      studentProfile: {
+        select: {
+          pathwayId: true,
+          pathwayRel: { select: { code: true, name: true } },
+          enrollmentType: true,
+        },
+      },
+      wallet: {
+        select: { availableBalance: true, reservedBalance: true, currency: true },
+      },
+      fullTimeEnrollments: {
+        take: 1,
+        include: {
+          programme: true,
+          milestones: {
+            orderBy: [{ yearNumber: 'asc' }, { dueDate: 'asc' }],
+          },
+        },
+      },
     },
   })
 
@@ -46,6 +66,18 @@ export default async function StudentLayout({ children }: { children: React.Reac
     )
   }
 
+  // Pre-processed data for helpers
+  const studentProfile = dbUser.studentProfile
+  const effectivePathwayCode = resolveEffectivePathwayCode({
+    pathwayCode: studentProfile?.pathwayRel?.code,
+    enrollmentType: studentProfile?.enrollmentType,
+  })
+  const ftEnrollment = dbUser.fullTimeEnrollments?.[0] || null
+  const preFetchedData = {
+    profile: studentProfile,
+    enrollment: ftEnrollment,
+  }
+
   const userName = dbUser?.profile
     ? [dbUser.profile.firstName, dbUser.profile.middleName, dbUser.profile.lastName]
         .filter(Boolean)
@@ -53,43 +85,23 @@ export default async function StudentLayout({ children }: { children: React.Reac
     : (user.name || user.email || '')
   const userRole = user.role
 
-  const [
-    unreadNotifications,
-    unreadMessages,
-    studentProfile,
-    paymentAccessLevel,
-    milestoneStatus,
-    wallet,
-    welcomeMessages,
-  ] = await Promise.all([
-    prisma.notification.count({
-      where: { userId: user.id, isRead: false },
-    }),
-    prisma.message.count({
-      where: { recipientId: user.id, isRead: false },
-    }),
-    prisma.studentProfile.findUnique({
-      where: { userId: user.id },
-      select: {
-        pathwayId: true,
-        pathwayRel: { select: { code: true, name: true } },
-        enrollmentType: true,
-      },
-    }),
-    getStudentPaymentAccessLevel(user.id),
-    getEnrollmentMilestoneStatus(user.id),
-    prisma.wallet.findUnique({
-      where: { userId: user.id },
-      select: { availableBalance: true, reservedBalance: true, currency: true },
-    }),
-    getWelcomeMessages(prisma, session.user.role),
-  ])
+  const unreadNotifications = await prisma.notification.count({
+    where: { userId: user.id, isRead: false },
+  })
+  const unreadMessages = await prisma.message.count({
+    where: { recipientId: user.id, isRead: false },
+  })
+  const paymentAccessLevel = await getStudentPaymentAccessLevel(user.id, preFetchedData)
+  const milestoneStatus = await getEnrollmentMilestoneStatus(user.id, preFetchedData)
+  const welcomeMessages = await getWelcomeMessages(prisma, session.user.role)
 
-  const hasPathway = !!studentProfile?.pathwayId || !!studentProfile?.enrollmentType
+  const wallet = dbUser.wallet
+
+  const hasPathway = !!studentProfile?.pathwayId || !!effectivePathwayCode
 
   const milestoneStatusJson = {
     ...milestoneStatus,
-    milestones: milestoneStatus.milestones.map((m) => ({
+    milestones: milestoneStatus.milestones.map((m: any) => ({
       ...m,
       dueDate: m.dueDate.toISOString(),
       paidAt: m.paidAt?.toISOString() ?? null,
@@ -116,7 +128,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
         userName={userName}
         userRole={userRole}
         userImage={user.image ?? undefined}
-        studyPathway={studentProfile?.pathwayRel?.code || studentProfile?.enrollmentType}
+        studyPathway={effectivePathwayCode}
         notificationCount={unreadNotifications}
         messageCount={unreadMessages}
         paymentAccessLevel={paymentAccessLevel}

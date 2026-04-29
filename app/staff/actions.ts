@@ -1,9 +1,10 @@
 'use server'
 
+
 import { getAuthSession, requireStaff } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prisma, prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
-import { UserStatus, UserRole, PaymentStatus } from '@/types/enums'
+import { BookingType, EnrollmentStatus, ExamCategory, PaymentStatus, UserStatus, UserRole } from '@prisma/client'
 
 /**
  * Fetches all users that staff can message: Students, Instructors, other Staff/Admins.
@@ -96,7 +97,7 @@ export async function markMessageAsRead(messageId: string) {
 /**
  * Bulk updates the status of multiple users.
  */
-export async function bulkUpdateUserStatus(userIds: string[], status: string) {
+export async function bulkUpdateUserStatus(userIds: string[], status: UserStatus) {
   try {
     await requireStaff()
 
@@ -106,7 +107,7 @@ export async function bulkUpdateUserStatus(userIds: string[], status: string) {
 
     await prisma.user.updateMany({
       where: { id: { in: userIds } },
-      data: { status: status as any },
+      data: { status },
     })
 
     revalidatePath('/staff/users')
@@ -144,14 +145,14 @@ export async function bulkDeleteUsers(userIds: string[]) {
 /**
  * Bulk updates the status of multiple enrollments.
  */
-export async function bulkUpdateEnrollmentStatus(enrollmentIds: string[], status: string) {
+export async function bulkUpdateEnrollmentStatus(enrollmentIds: string[], status: EnrollmentStatus) {
   try {
     await requireStaff()
     if (!enrollmentIds.length || !status) return { error: 'Invalid parameters.' }
 
     await prisma.enrollment.updateMany({
       where: { id: { in: enrollmentIds } },
-      data: { status: status as any },
+      data: { status },
     })
 
     revalidatePath('/staff/enrollments')
@@ -185,18 +186,19 @@ export async function bulkDeleteEnrollments(enrollmentIds: string[]) {
 /**
  * Bulk updates the status of multiple exam bookings.
  */
-export async function bulkUpdateExamBookingStatus(bookingIds: string[], status: any) {
+export async function bulkUpdateExamBookingStatus(bookingIds: string[], status: PaymentStatus) {
   try {
     await requireStaff()
     if (!bookingIds.length || !status) return { error: 'Invalid parameters.' }
 
-    await prisma.examBooking.updateMany({
+    await prismaUnfiltered.examBooking.updateMany({
       where: { id: { in: bookingIds } },
       data: { status },
     })
 
-    revalidatePath('/staff/exams')
-    revalidatePath('/student')
+    revalidatePath('/staff/exams', 'page')
+    revalidatePath('/student/exams', 'page')
+    revalidatePath('/staff/reports', 'page')
     return { success: true }
   } catch (error) {
     console.error('Bulk update exam booking status error:', error)
@@ -207,7 +209,7 @@ export async function bulkUpdateExamBookingStatus(bookingIds: string[], status: 
 /**
  * Bulk updates the status of multiple payments/top-ups.
  */
-export async function bulkUpdatePaymentStatus(paymentIds: string[], status: any) {
+export async function bulkUpdatePaymentStatus(paymentIds: string[], status: PaymentStatus) {
   try {
     await requireStaff()
     if (!paymentIds.length || !status) return { error: 'Invalid parameters.' }
@@ -236,7 +238,7 @@ export async function bulkArchiveUsers(userIds: string[]) {
 
     await prisma.user.updateMany({
       where: { id: { in: userIds } },
-      data: { status: UserStatus.ARCHIVED as any },
+      data: { status: UserStatus.ARCHIVED },
     })
 
     revalidatePath('/staff/users')
@@ -279,24 +281,21 @@ export async function updateExamBooking(
     examDate?: Date
     score?: number
     result?: string
-    status?: any
+    status?: PaymentStatus
     attemptType?: string
     isResit?: boolean
+    isMigrated?: boolean
+    migrationRef?: string
     resultIdToSync?: string
+    examCategory?: 'INTERNAL' | 'OFFICIAL_EASA'
   }
 ) {
   try {
     await requireStaff()
-
+    const actualId = recordId.replace('result_', '')
     const isResultId = recordId.startsWith('result_')
-    const actualId = isResultId ? recordId.replace('result_', '') : recordId
 
-    let moduleCode = data.moduleCode
-    if (data.courseId) {
-      const course = await prisma.course.findUnique({ where: { id: data.courseId } })
-      if (course) moduleCode = course.code.toUpperCase()
-    }
-
+    const moduleCode = data.moduleCode?.toUpperCase()
     const score = data.score !== undefined && data.score !== null ? data.score : undefined
     const percentage = score !== undefined ? score : undefined
     const passed = score !== undefined ? score >= 75 : undefined
@@ -305,15 +304,42 @@ export async function updateExamBooking(
       : undefined
 
     if (isResultId) {
-      // Pure ExamResult update - No transaction needed for single operation
-      await prisma.examResult.update({
+      // Pure ExamResult update
+      await prismaUnfiltered.examResult.update({
         where: { id: actualId },
         data: {
           ...(moduleCode ? { moduleCode } : {}),
           ...(score !== undefined ? { score, maxScore: 100, percentage, passed, grade } : {}),
           ...(data.attemptType ? { attemptType: data.attemptType } : {}),
+          ...(data.examCategory ? { examCategory: data.examCategory } : {}),
+          ...(data.isMigrated !== undefined ? { 
+            migrationRef: data.isMigrated ? (data.migrationRef || 'MANUAL_CORRECTION') : null 
+          } : {}),
         },
       })
+
+      // Sync attemptType and examCategory back to the booking(s)
+      const res = await prismaUnfiltered.examResult.findUnique({
+        where: { id: actualId },
+        select: { userId: true, moduleCode: true }
+      })
+      if (res && res.moduleCode) {
+        const normModule = res.moduleCode.trim()
+        const updateRes = await prismaUnfiltered.examBooking.updateMany({
+          where: { 
+            userId: res.userId, 
+            OR: [
+              { moduleCode: { equals: normModule, mode: 'insensitive' } },
+              { moduleCode: { contains: normModule, mode: 'insensitive' } }
+            ]
+          },
+          data: { 
+            ...(data.attemptType ? { attemptType: data.attemptType } : {}),
+            ...(data.examCategory ? { examCategory: data.examCategory } : {}),
+            ...(data.bookingType ? { bookingType: data.bookingType as BookingType } : {}),
+          },
+        })
+      }
     } else {
       // For Booking updates which might sync to Result, use a transaction with higher timeout
       // Determine isResit based on attemptType if not explicitly provided
@@ -321,7 +347,7 @@ export async function updateExamBooking(
         ? data.isResit 
         : (data.attemptType ? data.attemptType.startsWith('RESIT') : undefined)
 
-      await prisma.$transaction(async (tx) => {
+      await prismaUnfiltered.$transaction(async (tx) => {
         // It's a booking ID. Update booking first.
         const booking = await tx.examBooking.findUnique({ where: { id: actualId } })
         if (!booking) throw new Error('Booking not found')
@@ -334,32 +360,38 @@ export async function updateExamBooking(
             ...(moduleCode ? { moduleCode } : {}),
             ...(data.examDate ? { examDate: data.examDate } : {}),
             ...(data.attemptType ? { attemptType: data.attemptType } : {}),
+            ...(data.examCategory ? { examCategory: data.examCategory as ExamCategory } : {}),
             ...(isResit !== undefined ? { isResit } : {}),
-            ...(data.bookingType ? { bookingType: data.bookingType === 'MANUAL' ? 'INDIVIDUAL' : data.bookingType as any } : {}),
-            // If the existing result is "migrated" but we have a score, or we're explicitly setting a score, fix it
-            ...((score !== undefined || (booking.result?.toUpperCase().includes('MIGRATE') && booking.score != null)) ? { 
-              score: score ?? Number(booking.score),
-              percentage: score ?? Number(booking.score),
-              result: (score ?? Number(booking.score)) >= 75 ? 'pass' : 'fail',
-              status: 'COMPLETED'
+            ...(data.bookingType ? { bookingType: data.bookingType as BookingType } : {}),
+            // If formalizing (setting attemptType, score, or category), set result based on score
+            // Guard: skip this when explicitly setting isMigrated to avoid collision
+            ...(!data.isMigrated && (score !== undefined || data.attemptType || data.examCategory || (booking.result?.toUpperCase().includes('MIGRATE') && booking.score != null)) ? { 
+              score: score ?? (booking.score != null ? Number(booking.score) : undefined),
+              percentage: score ?? (booking.score != null ? Number(booking.score) : undefined),
+              result: (score ?? (booking.score != null ? Number(booking.score) : 0)) >= 75 ? 'pass' : 'fail',
+              status: PaymentStatus.APPROVED
+            } : {}),
+            // isMigrated takes final priority over the formalization result
+            ...(data.isMigrated !== undefined ? { 
+              result: data.isMigrated ? 'MIGRATED' : (booking.result === 'MIGRATED' ? 'pass' : booking.result)
             } : {}),
           },
         })
 
         // If score or attemptType is provided, sync to ExamResult
-        if (score !== undefined || data.attemptType !== undefined) {
+        if (score !== undefined || data.attemptType !== undefined || data.examCategory !== undefined) {
           if (data.resultIdToSync) {
              // We know exactly which ExamResult belongs to this booking
              await tx.examResult.update({
                where: { id: data.resultIdToSync },
                data: { 
-                 score, 
-                 maxScore: 100, 
-                 percentage, 
-                 passed, 
-                 grade, 
-                 attemptType: data.attemptType || booking.attemptType,
-                 moduleCode: finalModule
+                  ...(score !== undefined ? { score, maxScore: 100, percentage, passed, grade } : {}),
+                  attemptType: data.attemptType || booking.attemptType,
+                  examCategory: (data.examCategory as ExamCategory) || booking.examCategory,
+                 moduleCode: finalModule,
+                 migrationRef: data.isMigrated !== undefined 
+                    ? (data.isMigrated ? (data.migrationRef || 'MANUAL_CORRECTION') : null)
+                    : undefined
                },
              })
           } else {
@@ -375,19 +407,28 @@ export async function updateExamBooking(
             if (existingResult) {
               await tx.examResult.update({
                 where: { id: existingResult.id },
-                data: { score, maxScore: 100, percentage, passed, grade, attemptType: data.attemptType || booking.attemptType },
+                data: { 
+                  ...(score !== undefined ? { score, maxScore: 100, percentage, passed, grade } : {}),
+                  attemptType: data.attemptType || booking.attemptType,
+                  examCategory: (data.examCategory as ExamCategory) || booking.examCategory,
+                  migrationRef: data.isMigrated !== undefined 
+                    ? (data.isMigrated ? (data.migrationRef || 'MANUAL_CORRECTION') : null)
+                    : undefined
+                },
               })
             } else {
               await tx.examResult.create({
                 data: {
                   userId: booking.userId,
                   moduleCode: finalModule,
-                  score,
-                  maxScore: 100,
-                  percentage,
-                  passed: passed as boolean,
-                  grade,
-                  attemptType: data.attemptType || booking.attemptType,
+                    score: score ?? 0,
+                    maxScore: 100,
+                    percentage: score ?? 0,
+                    passed: (score ?? 0) >= 75,
+                    grade: grade || 'F',
+                    attemptType: data.attemptType || booking.attemptType,
+                    examCategory: (data.examCategory as ExamCategory) || booking.examCategory,
+                    migrationRef: data.isMigrated ? (data.migrationRef || 'MANUAL_CORRECTION') : undefined,
                   sourceNotes: 'Auto-created from booking update',
                 },
               })
@@ -399,13 +440,13 @@ export async function updateExamBooking(
       })
     }
 
-    // Get userId for revalidation
+    // Get userId for revalidation - Use unfiltered to bypass RLS for lookup
     let targetUserId = ''
     if (isResultId) {
-      const res = await prisma.examResult.findUnique({ where: { id: actualId }, select: { userId: true } })
+      const res = await prismaUnfiltered.examResult.findUnique({ where: { id: actualId }, select: { userId: true } })
       targetUserId = res?.userId || ''
     } else {
-      const b = await prisma.examBooking.findUnique({ where: { id: actualId }, select: { userId: true } })
+      const b = await prismaUnfiltered.examBooking.findUnique({ where: { id: actualId }, select: { userId: true } })
       targetUserId = b?.userId || ''
     }
 
@@ -431,91 +472,148 @@ export async function createExamRecord(data: {
   bookingType: 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK'
   examDate: string
   attemptType?: string
+  examCategory?: 'INTERNAL' | 'OFFICIAL_EASA'
   notes?: string
-  entries: { courseId?: string; moduleCode: string; score?: number }[]
+  isPending?: boolean
+  entries: { 
+    courseId?: string; 
+    examComponentId?: string; 
+    moduleCode: string; 
+    score?: number;
+    resultOverride?: string;
+  }[]
 }) {
   try {
-    await requireStaff()
-
-    const { getExamPricingConfig } = await import('@/lib/pools/pricing-config')
-    const pricingConfig = await getExamPricingConfig()
-
-    const { userId, bookingType, examDate, attemptType, notes, entries } = data
+    const staff = await requireStaff()
+    const { userId, bookingType, examDate, attemptType, examCategory, notes, entries, isPending } = data
 
     // Verify user exists
-    const user = await prisma.user.findUnique({ where: { id: userId } })
+    const user = await prismaUnfiltered.user.findUnique({ where: { id: userId } })
     if (!user) return { error: 'Student not found.' }
 
-    const pricingMap = {
-      INDIVIDUAL: pricingConfig.individualExamFee,
-      TWIN_PACK: pricingConfig.twoSeatBundle,
-      FOUR_PACK: pricingConfig.fourSeatBundle,
-    }
+    const bookingGroupRef = entries.length > 1 ? `STAFF_MANUAL_${Date.now()}` : undefined
 
-    const totalFee = Number((pricingMap as any)[bookingType] || pricingConfig.individualExamFee)
-    const bookingGroupRef = entries.length > 1 ? `STAFF_BUNDLE_${Date.now()}` : undefined
-
-    const results = await prisma.$transaction(async (tx) => {
-      const created = []
-
-      for (let i = 0; i < entries.length; i++) {
-        const entry = entries[i]
-        let finalModuleCode = entry.moduleCode.toUpperCase()
-        if (entry.courseId) {
+    await prismaUnfiltered.$transaction(async (tx) => {
+      for (const entry of entries) {
+        let finalModuleCode = entry.moduleCode.toUpperCase().trim()
+        if (entry.courseId && !entry.moduleCode) {
           const course = await tx.course.findUnique({ where: { id: entry.courseId } })
-          if (course) finalModuleCode = course.code.toUpperCase()
+          if (course) finalModuleCode = course.code.toUpperCase().trim()
         }
 
-        const hasScore = entry.score !== undefined && entry.score !== null
-        const isFutureBooking = !hasScore
-        const amountPaid = i === 0 && isFutureBooking ? totalFee : 0
-        const status = isFutureBooking ? PaymentStatus.PENDING : PaymentStatus.COMPLETED
+        const targetAttemptType = attemptType || 'FIRST'
+        
+        // Resolve result + status
+        let result: string | undefined
+        let percentage: number | undefined
 
-        // Create the booking (pure ledger — no result fields)
-        const booking = await tx.examBooking.create({
-          data: {
+        if (isPending) {
+          result = undefined
+          percentage = undefined
+        } else if (entry.resultOverride && entry.resultOverride !== 'auto') {
+          result = entry.resultOverride
+          if (entry.score !== undefined) percentage = entry.score
+        } else if (entry.score !== undefined) {
+          percentage = entry.score
+          result = entry.score >= 75 ? 'pass' : 'fail'
+        }
+
+        const bookingStatus = isPending ? PaymentStatus.PENDING : PaymentStatus.APPROVED
+
+        // UPSERT Booking
+        const existingBooking = await tx.examBooking.findFirst({
+          where: {
             userId,
-            courseId: entry.courseId,
             moduleCode: finalModuleCode,
-            examDate: new Date(examDate),
-            amountPaid,
-            status: status as any,
-            bookingType: bookingType as any,
-            attemptType: attemptType || 'FIRST',
-            bookingGroupRef,
-          },
+            attemptType: targetAttemptType,
+            deletedAt: null,
+          }
         })
 
-        // If a score was provided, create an ExamResult with correct passed
-        if (hasScore) {
-          const score = Number(entry.score)
-          const passed = score >= 75
-          const grade = score >= 90 ? 'A' : score >= 80 ? 'B' : score >= 75 ? 'C' : 'F'
-          await tx.examResult.create({
+        if (existingBooking) {
+          await tx.examBooking.update({
+            where: { id: existingBooking.id },
+            data: {
+              courseId: entry.courseId || existingBooking.courseId,
+              examComponentId: entry.examComponentId || existingBooking.examComponentId,
+              examDate: new Date(examDate),
+              status: bookingStatus,
+              result,
+              score: entry.score ?? existingBooking.score,
+              percentage: percentage ?? existingBooking.percentage,
+              examCategory: examCategory || existingBooking.examCategory,
+              bookingGroupRef: bookingGroupRef || existingBooking.bookingGroupRef,
+            }
+          })
+        } else {
+          await tx.examBooking.create({
             data: {
               userId,
+              courseId: entry.courseId,
+              examComponentId: entry.examComponentId,
               moduleCode: finalModuleCode,
-              score,
-              maxScore: 100,
-              percentage: score,
-              passed,
-              grade,
-              attemptType: attemptType || 'FIRST',
-              sourceNotes: notes || 'Manually added by staff',
-            },
+              examDate: new Date(examDate),
+              amountPaid: 0,
+              status: bookingStatus,
+              bookingType,
+              attemptType: targetAttemptType,
+              result,
+              score: entry.score,
+              percentage,
+              examCategory: examCategory || 'OFFICIAL_EASA',
+              bookingGroupRef,
+            }
           })
         }
 
-        created.push(booking)
+        // UPSERT Result
+        if (result && ['pass', 'fail'].includes(result)) {
+          const scoreVal = entry.score ?? (result === 'pass' ? 75 : 0)
+          const grade = (percentage ?? 0) >= 90 ? 'A' : (percentage ?? 0) >= 80 ? 'B' : (percentage ?? 0) >= 75 ? 'C' : 'F'
+          
+          const existingResult = await tx.examResult.findFirst({
+            where: { userId, moduleCode: finalModuleCode, attemptType: targetAttemptType }
+          })
+
+          if (existingResult) {
+            await tx.examResult.update({
+              where: { id: existingResult.id },
+              data: {
+                score: scoreVal,
+                percentage,
+                passed: result === 'pass',
+                grade,
+                examCategory: examCategory || 'OFFICIAL_EASA',
+                sourceNotes: notes || 'Manually updated by staff',
+              }
+            })
+          } else {
+            await tx.examResult.create({
+              data: {
+                userId,
+                moduleCode: finalModuleCode,
+                score: scoreVal,
+                maxScore: 100,
+                percentage,
+                passed: result === 'pass',
+                grade,
+                attemptType: targetAttemptType,
+                examCategory: examCategory || 'OFFICIAL_EASA',
+                sourceNotes: notes || 'Manually added by staff',
+              }
+            })
+          }
+        }
       }
-      return created
     })
 
     revalidatePath('/staff/exams')
     revalidatePath('/student/exams')
-    revalidatePath('/student')
-    revalidatePath(`/staff/students/${data.userId}`)
-    return { success: true, count: results.length }
+    revalidatePath(`/staff/students/${userId}`)
+    revalidatePath(`/staff/users/${userId}`)
+    revalidatePath('/staff/reports')
+
+    return { success: true }
   } catch (error) {
     console.error('Create exam record error:', error)
     return { error: 'Failed to create record.' }
@@ -525,15 +623,21 @@ export async function createExamRecord(data: {
 /**
  * Deletes an ExamResult record (Records tab).
  */
-export async function deleteExamRecord(resultId: string) {
+export async function deleteExamRecord(id: string) {
   try {
     await requireStaff()
 
-    await prisma.examResult.delete({ where: { id: resultId } })
+    const actualId = id.replace('result_', '')
+    const isResultId = id.startsWith('result_')
 
-    revalidatePath('/staff/exams')
-    revalidatePath('/student/exams')
-    revalidatePath('/student')
+    if (isResultId) {
+      await prismaUnfiltered.examResult.delete({ where: { id: actualId } })
+    } else {
+      await prismaUnfiltered.examBooking.delete({ where: { id: actualId } })
+    }
+
+    revalidatePath('/staff/exams', 'page')
+    revalidatePath('/staff/reports', 'page')
     return { success: true }
   } catch (error) {
     console.error('Delete exam result error:', error)
@@ -588,12 +692,41 @@ export async function searchStudents(query: string) {
 export async function getAvailableModules() {
   try {
     await requireStaff()
-    const modules = await prisma.course.findMany({
-      where: { isActive: true },
+    const courses = await prismaUnfiltered.course.findMany({
       select: { id: true, code: true, name: true },
       orderBy: { code: 'asc' },
     })
-    return modules
+    const components = await prismaUnfiltered.examComponent.findMany({
+      select: { 
+        id: true, 
+        code: true, 
+        name: true, 
+        type: true,
+        courseId: true,
+        course: { select: { code: true, name: true } }
+      },
+      orderBy: { code: 'asc' },
+    })
+    
+    const courseOptions = courses.map(c => ({
+      id: c.id, // Using course ID here
+      courseId: c.id,
+      code: c.code,
+      name: `${c.code}: ${c.name} (General)`,
+      moduleCode: c.code,
+      isComponent: false
+    }))
+
+    const componentOptions = components.map(c => ({
+      id: c.id, // Using component ID here
+      courseId: c.courseId,
+      code: c.code,
+      name: `${c.course.code}: ${c.name} (${c.type})`,
+      moduleCode: c.course.code,
+      isComponent: true
+    }))
+    
+    return [...courseOptions, ...componentOptions].sort((a, b) => a.code.localeCompare(b.code))
   } catch (error) {
     console.error('Get available modules error:', error)
     return []
@@ -613,5 +746,98 @@ export async function updateRevenueTarget(amount: number) {
   } catch (error) {
     console.error('Update revenue target error:', error)
     return { error: 'Failed to update target.' }
+  }
+}
+
+/**
+ * Bulk updates the exam category for multiple records.
+ */
+export async function bulkUpdateExamCategory(ids: string[], category: 'INTERNAL' | 'OFFICIAL_EASA') {
+
+  try {
+    await requireStaff()
+
+    if (!ids || ids.length === 0) {
+
+      return { error: 'No records selected' }
+    }
+
+    // Strip UI prefixes like 'result_'
+    const cleanIds = ids.map(id => id.replace('result_', ''))
+
+
+    // 1. Find all affected bookings and results
+    const affectedBookings = await prismaUnfiltered.examBooking.findMany({
+      where: { id: { in: cleanIds } },
+      select: { id: true, userId: true, moduleCode: true }
+    })
+
+    const affectedResults = await prismaUnfiltered.examResult.findMany({
+      where: { id: { in: cleanIds } },
+      select: { id: true, userId: true, moduleCode: true }
+    })
+
+
+
+    // 2. Build a comprehensive list of all linked IDs
+    const bookingIds = new Set(affectedBookings.map(b => b.id))
+    const resultIds = new Set(affectedResults.map(r => r.id))
+
+    // Collect all unique user/module pairs
+    const pairs = new Set<string>()
+    affectedBookings.forEach(b => {
+      if (b.userId && b.moduleCode) pairs.add(`${b.userId}:${b.moduleCode.toUpperCase()}`)
+    })
+    affectedResults.forEach(r => {
+      if (r.userId && r.moduleCode) pairs.add(`${r.userId}:${r.moduleCode.toUpperCase()}`)
+    })
+
+
+
+    // 3. Find all related records
+    for (const pair of Array.from(pairs)) {
+      const [uId, mCode] = pair.split(':')
+      
+      const relatedBookings = await prismaUnfiltered.examBooking.findMany({
+        where: { 
+          userId: uId, 
+          moduleCode: { equals: mCode, mode: 'insensitive' } 
+        },
+        select: { id: true }
+      })
+      relatedBookings.forEach(b => bookingIds.add(b.id))
+
+      const relatedResults = await prismaUnfiltered.examResult.findMany({
+        where: { 
+          userId: uId, 
+          moduleCode: { equals: mCode, mode: 'insensitive' } 
+        },
+        select: { id: true }
+      })
+      relatedResults.forEach(r => resultIds.add(r.id))
+    }
+
+
+
+    // 4. Apply the update
+    const [bookingCount, resultCount] = await prismaUnfiltered.$transaction([
+      prismaUnfiltered.examBooking.updateMany({
+        where: { id: { in: Array.from(bookingIds) } },
+        data: { examCategory: category },
+      }),
+      prismaUnfiltered.examResult.updateMany({
+        where: { id: { in: Array.from(resultIds) } },
+        data: { examCategory: category },
+      }),
+    ])
+
+
+
+    revalidatePath('/staff/exams', 'page')
+    revalidatePath('/staff/reports', 'page')
+    return { success: true }
+  } catch (error) {
+    console.error('[bulkUpdateExamCategory] Exception:', error)
+    return { error: 'Failed to update records.' }
   }
 }

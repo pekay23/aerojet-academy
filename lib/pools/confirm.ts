@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client'
 import { format } from 'date-fns'
 import { sendPoolConfirmedEmail, sendPoolFailedEmail } from '@/lib/email/service'
 import { logAuditEvent } from '../audit/logger'
+import { captureFunds, releaseFunds } from '@/lib/wallet/operations'
 
 export async function confirmPoolInternal(poolId: string, tx: any) {
   const memberships = await tx.poolMembership.findMany({
@@ -18,33 +19,34 @@ export async function confirmPoolInternal(poolId: string, tx: any) {
   for (const m of memberships) {
     const captureAmount = Number(m.amountReserved) || Number(pool?.seatPrice) || 300
 
-    // Capture funds: deduct from balance, release from reserved
-    await tx.wallet.update({
-      where: { userId: m.userId },
-      data: {
-        balance: { decrement: captureAmount },
-        reservedBalance: { decrement: captureAmount },
-      },
-    })
-
-    const wallet = await tx.wallet.findUnique({ where: { userId: m.userId } })
-    await tx.walletTransaction.create({
-      data: {
-        walletId: wallet!.id,
-        type: 'CAPTURE',
-        amount: captureAmount,
-        description: `Exam fee captured: ${pool?.name}`,
-        referenceId: `CAPTURE-${poolId.substring(0, 8)}`,
-        referenceType: 'POOL_CAPTURE',
-        balanceBefore: Number(wallet!.balance) + captureAmount,
-        balanceAfter: Number(wallet!.balance),
-      },
-    })
+    await captureFunds(
+      tx,
+      m.userId,
+      captureAmount,
+      `Exam fee captured: ${pool?.name}`,
+      m.bookingId || poolId,
+      m.bookingId ? 'EXAM_BOOKING' : 'POOL_CAPTURE'
+    )
 
     await tx.poolMembership.update({
       where: { id: m.id },
-      data: { status: 'CONFIRMED', amountPaid: captureAmount },
+      data: {
+        status: 'CONFIRMED',
+        amountPaid: captureAmount,
+        confirmedAt: new Date(),
+        paidAt: new Date(),
+      },
     })
+
+    if (m.bookingId) {
+      await tx.examBooking.update({
+        where: { id: m.bookingId },
+        data: {
+          status: 'APPROVED',
+          amountPaid: captureAmount,
+        },
+      })
+    }
   }
 
   // Set pool status — CONFIRMED if under max, LOCKED if at capacity
@@ -117,30 +119,28 @@ export async function failPool(poolId: string, txClient?: Prisma.TransactionClie
     for (const m of memberships) {
       const releaseAmount = Number(m.amountReserved) || Number(pool.seatPrice) || 300
 
-      // Release reserved funds back to available balance
-      await tx.wallet.update({
-        where: { userId: m.userId },
-        data: {
-          reservedBalance: { decrement: releaseAmount },
-          availableBalance: { increment: releaseAmount },
-        },
-      })
-
-      const wallet = await tx.wallet.findUnique({ where: { userId: m.userId } })
-      await tx.walletTransaction.create({
-        data: {
-          walletId: wallet!.id,
-          type: 'RELEASE',
-          amount: releaseAmount,
-          description: `Pool failed - funds released: ${pool.name}`,
-          referenceId: `RELEASE-${poolId.substring(0, 8)}`,
-          referenceType: 'POOL_RELEASE',
-          balanceBefore: Number(wallet!.balance),
-          balanceAfter: Number(wallet!.balance),
-        },
-      })
+      await releaseFunds(
+        tx,
+        m.userId,
+        releaseAmount,
+        `Pool failed - funds released: ${pool.name}`,
+        m.bookingId || poolId,
+        m.bookingId ? 'EXAM_BOOKING' : 'POOL_RELEASE'
+      )
 
       await tx.poolMembership.update({ where: { id: m.id }, data: { status: 'CANCELLED' } })
+
+      if (m.bookingId) {
+        await tx.examBooking.update({
+          where: { id: m.bookingId },
+          data: {
+            status: 'FAILED',
+            refundAmount: releaseAmount,
+            cancellationReason: 'Pool failed Go/No-Go criteria',
+            cancelledAt: new Date(),
+          },
+        })
+      }
     }
 
     await tx.examPool.update({ where: { id: poolId }, data: { status: 'FAILED' } })

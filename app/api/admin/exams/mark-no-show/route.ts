@@ -1,17 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
-import { getAuthSession } from '@/lib/auth/helpers'
+import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
+import { revalidatePath } from 'next/cache'
+import { ExamAttendanceStatus } from '@prisma/client'
+import { markExamAttendance } from '@/lib/exams/attendance'
 
 export async function POST(req: NextRequest) {
   try {
-    const session = await getAuthSession()
-    if (!session || session.user.role !== 'ADMIN') {
-      return NextResponse.json(
-        { error: 'Unauthorized or insufficient permissions' },
-        { status: 403 }
-      )
-    }
+    const staff = await requireStaff()
 
     const { membershipId, bookingId } = await req.json()
 
@@ -22,50 +18,31 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    if (membershipId) {
-      const membership = await prisma.poolMembership.findUnique({ where: { id: membershipId } })
-      if (!membership)
-        return NextResponse.json({ error: 'Pool membership not found' }, { status: 404 })
+    const result = await markExamAttendance({
+      membershipId,
+      bookingId,
+      status: ExamAttendanceStatus.ABSENT,
+      notes: 'Marked as no-show by staff',
+      recordedBy: staff.id,
+    })
 
-      await prisma.poolMembership.update({
-        where: { id: membershipId },
-        data: { status: 'NO_SHOW' },
-      })
+    await createAuditLog({
+      action: 'UPDATE',
+      entity: 'ExamAttendance',
+      entityId: result.attendance.id,
+      userId: staff.id,
+      details: {
+        bookingId: result.bookingId,
+        membershipId: result.membershipId,
+        status: 'ABSENT',
+        reason: 'Staff marked as NO-SHOW',
+      },
+    })
 
-      await createAuditLog({
-        action: 'UPDATE',
-        entity: 'PoolMembership',
-        entityId: membershipId,
-        userId: session.user.id,
-        details: {
-          previousStatus: membership.status,
-          newStatus: 'NO_SHOW',
-          reason: 'Admin marked as NO-SHOW',
-        },
-      })
-    }
-
-    if (bookingId) {
-      const booking = await prisma.examBooking.findUnique({ where: { id: bookingId } })
-      if (!booking) return NextResponse.json({ error: 'Exam booking not found' }, { status: 404 })
-
-      await prisma.examBooking.update({
-        where: { id: bookingId },
-        data: { status: 'NO_SHOW' },
-      })
-
-      await createAuditLog({
-        action: 'UPDATE',
-        entity: 'ExamBooking',
-        entityId: bookingId,
-        userId: session.user.id,
-        details: {
-          previousStatus: booking.status,
-          newStatus: 'NO_SHOW',
-          reason: 'Admin marked as NO-SHOW',
-        },
-      })
-    }
+    revalidatePath('/staff/exams')
+    revalidatePath('/student/exams')
+    if (result.poolId) revalidatePath(`/staff/exams/pools/${result.poolId}`)
+    if (result.userId) revalidatePath(`/staff/students/${result.userId}`)
 
     return NextResponse.json({ success: true, message: 'Successfully marked as NO_SHOW' })
   } catch (error: any) {
