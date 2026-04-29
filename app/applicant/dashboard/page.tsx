@@ -19,6 +19,7 @@ import { getSystemSetting } from '@/lib/settings'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import RegistrationFeeDisplay from './_components/RegistrationFeeDisplay'
+import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 
 export const metadata: Metadata = { title: 'Dashboard | Applicant Portal' }
 export const dynamic = 'force-dynamic'
@@ -145,6 +146,12 @@ export default async function ApplicantDashboardPage() {
       registrationCurrency: true,
       programmeChoice: true,
       createdAt: true,
+      studentProfile: {
+        select: {
+          enrollmentType: true,
+          pathwayRel: { select: { code: true } },
+        },
+      },
       profile: { select: { firstName: true, lastName: true } },
     },
   })
@@ -156,8 +163,14 @@ export default async function ApplicantDashboardPage() {
     redirect('/student')
   }
 
+  const effectiveEnrollmentType = resolveEffectiveEnrollmentType({
+    pathwayCode: applicant.studentProfile?.pathwayRel?.code,
+    enrollmentType: applicant.studentProfile?.enrollmentType,
+    programmeChoice: applicant.programmeChoice,
+  })
+
   // If EXAM_ONLY pathway and registration is approved, redirect to exam-only dashboard
-  if (applicant.programmeChoice === 'EXAM_ONLY' && applicant.status === 'ACTIVE') {
+  if (effectiveEnrollmentType === 'EXAM_ONLY' && applicant.status === 'ACTIVE') {
     redirect('/applicant/exam-only/dashboard')
   }
 
@@ -173,8 +186,8 @@ export default async function ApplicantDashboardPage() {
     return choice.replace('_', ' ')
   }
 
-  const getActionLink = (choice: string | null) => {
-    switch (choice) {
+  const getActionLink = (studyMode: string | null, choice: string | null) => {
+    switch (studyMode) {
       case 'EXAM_ONLY':
         return { href: '/applicant/exam-bookings', label: 'Browse Exams', icon: FileCheck }
       case 'MODULAR':
@@ -185,11 +198,13 @@ export default async function ApplicantDashboardPage() {
         }
       default:
         // Full time / Military
-        return { href: '/applicant/pathway', label: 'Complete Enrollment', icon: ArrowRight }
+        return choice
+          ? { href: '/applicant/pathway', label: 'Complete Enrollment', icon: ArrowRight }
+          : { href: '/applicant/application/status', label: 'Review Application', icon: ClipboardList }
     }
   }
 
-  const actionInfo = getActionLink(applicant.programmeChoice)
+  const actionInfo = getActionLink(effectiveEnrollmentType, applicant.programmeChoice)
 
   const isEmailVerified = !!applicant.emailVerified
   const isRegApproved = appStatus === 'registration_approved' || appStatus === 'approved'

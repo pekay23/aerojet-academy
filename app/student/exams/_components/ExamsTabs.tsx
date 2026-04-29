@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 
 interface Props {
   isFullTime?: boolean
+  canBookExams?: boolean
   children: React.ReactNode
 }
 
@@ -23,13 +24,18 @@ const FULL_TIME_TABS = [
   { key: 'records', label: 'Exam Records', shortLabel: 'Records', icon: History },
 ] as const
 
-export default function ExamsTabs({ isFullTime, children }: Props) {
+const HISTORY_ONLY_TABS = [
+  { key: 'bookings', label: 'My Bookings', shortLabel: 'My Bookings', icon: FileCheck },
+  { key: 'records', label: 'Exam Records', shortLabel: 'Records', icon: History },
+] as const
+
+export default function ExamsTabs({ isFullTime, canBookExams = false, children }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentTab = searchParams.get('tab') || 'available'
 
   // For full-time students, only show records tab - admin books exams for them
-  const TABS = isFullTime ? FULL_TIME_TABS : ALL_TABS
+  const TABS = isFullTime ? FULL_TIME_TABS : canBookExams ? ALL_TABS : HISTORY_ONLY_TABS
 
   const setTab = (tab: string) => {
     router.push(`/student/exams?tab=${tab}`, { scroll: false })

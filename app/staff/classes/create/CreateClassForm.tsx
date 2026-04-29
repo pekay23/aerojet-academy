@@ -31,6 +31,9 @@ import { createClassSchema } from '@/lib/validation/schemas'
 const formSchema = createClassSchema.extend({
   startDate: z.string().min(1, 'Start date is required'),
   endDate: z.string().min(1, 'End date is required'),
+  recurrenceType: z.enum(['NONE', 'DAILY', 'WEEKLY', 'MONTHLY', 'CUSTOM']).default('NONE'),
+  recurrenceDays: z.string().optional(),
+  recurrenceUntil: z.string().optional().nullable(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -65,8 +68,13 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
       startDate: '',
       endDate: '',
       maxStudents: 28,
+      recurrenceType: 'NONE',
+      recurrenceDays: '',
+      recurrenceUntil: '',
     },
   })
+
+  const recurrenceType = form.watch('recurrenceType')
 
   async function onSubmit(values: FormValues) {
     setIsLoading(true)
@@ -77,6 +85,7 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
         instructorId: values.instructorId === 'none' ? undefined : values.instructorId,
         startDate: new Date(values.startDate).toISOString(),
         endDate: new Date(values.endDate).toISOString(),
+        recurrenceUntil: values.recurrenceUntil ? new Date(values.recurrenceUntil).toISOString() : undefined,
       }
 
       const response = await fetch('/api/staff/classes', {
@@ -235,6 +244,74 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
               </FormItem>
             )}
           />
+
+          <FormField
+            control={form.control}
+            name="recurrenceType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor="class-recurrence">Recurrence</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger id="class-recurrence">
+                      <SelectValue placeholder="Select recurrence" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="NONE">Does not repeat</SelectItem>
+                    <SelectItem value="DAILY">Every day</SelectItem>
+                    <SelectItem value="WEEKLY">Every week</SelectItem>
+                    <SelectItem value="MONTHLY">Every month</SelectItem>
+                    <SelectItem value="CUSTOM">Custom days...</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {recurrenceType === 'CUSTOM' && (
+            <FormField
+              control={form.control}
+              name="recurrenceDays"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="class-recurrence-days">Repeat on Days (0-6, comma separated)</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="class-recurrence-days"
+                      placeholder="e.g., 1,3,5 for Mon,Wed,Fri"
+                      autoComplete="off"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
+
+          {recurrenceType !== 'NONE' && (
+            <FormField
+              control={form.control}
+              name="recurrenceUntil"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel htmlFor="class-recurrence-until">Repeat Until</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="class-recurrence-until"
+                      type="date"
+                      autoComplete="off"
+                      value={field.value || ''}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          )}
         </div>
 
         <div className="flex justify-end gap-4">

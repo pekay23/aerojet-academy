@@ -15,7 +15,7 @@ import {
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
-import { canAccessClasses } from '@/lib/enrollment/pathway'
+import { canAccessClasses, resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -61,7 +61,11 @@ export default async function CourseDetailsPage({
         select: {
           wallet: true,
           studentProfile: {
-            select: { enrollmentType: true },
+            select: {
+              enrollmentType: true,
+              programmeChoice: true,
+              pathwayRel: { select: { code: true } },
+            },
           },
         },
       },
@@ -74,7 +78,12 @@ export default async function CourseDetailsPage({
 
   const { course } = enrollment
   const isPaid = ['ACTIVE', 'APPROVED'].includes(enrollment.status)
-  const enrollmentType = enrollment.user.studentProfile?.enrollmentType || 'MODULAR'
+  const enrollmentType =
+    resolveEffectiveEnrollmentType({
+      pathwayCode: enrollment.user.studentProfile?.pathwayRel?.code,
+      enrollmentType: enrollment.user.studentProfile?.enrollmentType,
+      programmeChoice: enrollment.user.studentProfile?.programmeChoice,
+    }) || 'MODULAR'
   const allowClasses = canAccessClasses(enrollmentType)
 
   return (

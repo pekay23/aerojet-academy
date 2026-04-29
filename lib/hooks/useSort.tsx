@@ -18,18 +18,24 @@ export function useSort<T>(items: T[], initialSort?: SortConfig) {
     if (!sortConfig || !sortConfig.order) return items
 
     return [...items].sort((a: any, b: any) => {
-      let aValue = a[sortConfig.key]
-      let bValue = b[sortConfig.key]
+      const getNestedValue = (obj: any, path: string) => {
+        return path.split('.').reduce((acc, part) => acc && acc[part], obj)
+      }
+
+      let aValue = getNestedValue(a, sortConfig.key)
+      let bValue = getNestedValue(b, sortConfig.key)
 
       // Handle nulls
       if (aValue === null || aValue === undefined) return 1
       if (bValue === null || bValue === undefined) return -1
 
       // Handle dates
-      if (aValue instanceof Date && bValue instanceof Date) {
-        return sortConfig.order === 'asc'
-          ? aValue.getTime() - bValue.getTime()
-          : bValue.getTime() - aValue.getTime()
+      if ((aValue instanceof Date || !isNaN(Date.parse(aValue))) && 
+          (bValue instanceof Date || !isNaN(Date.parse(bValue))) &&
+          typeof aValue !== 'number' && typeof bValue !== 'number') {
+        const dateA = new Date(aValue).getTime()
+        const dateB = new Date(bValue).getTime()
+        return sortConfig.order === 'asc' ? dateA - dateB : dateB - dateA
       }
 
       // Handle strings

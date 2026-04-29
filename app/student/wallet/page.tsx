@@ -29,6 +29,7 @@ import { getActivePaymentMethods } from '@/lib/payment-methods'
 import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import { getCurrencySymbol } from '@/lib/currency'
+import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 
 export const metadata: Metadata = {
   title: 'Wallet | Student Portal',
@@ -51,7 +52,12 @@ export default async function WalletPage({
     prisma.wallet.findUnique({ where: { userId: user.id } }),
     prisma.studentProfile.findUnique({
       where: { userId: user.id },
-      include: { pathwayRel: true }
+      select: {
+        studentId: true,
+        enrollmentType: true,
+        programmeChoice: true,
+        pathwayRel: true,
+      },
     }),
     prisma.payment.findMany({
       where: { userId: user.id, referenceType: 'WALLET_TOPUP', status: 'PENDING' },
@@ -87,6 +93,13 @@ export default async function WalletPage({
 
   const currencySymbol = getCurrencySymbol(walletBalance.currency)
   const hasPendingTopups = pendingTopups.length > 0
+  const effectiveEnrollmentType = resolveEffectiveEnrollmentType({
+    pathwayCode: studentProfile?.pathwayRel?.code,
+    enrollmentType: studentProfile?.enrollmentType,
+    programmeChoice: studentProfile?.programmeChoice,
+  })
+  const isExamOnly = effectiveEnrollmentType === 'EXAM_ONLY'
+  const isFullTime = effectiveEnrollmentType === 'FULL_TIME'
 
   // Fetch payment methods for top-up tab
   const activePaymentMethods = (tab === 'top-up' || tab === 'payments') ? await getActivePaymentMethods() : []
@@ -188,7 +201,7 @@ export default async function WalletPage({
   const isCredit = (type: string) => ['TOP_UP', 'RELEASE', 'REFUND', 'ADJUSTMENT'].includes(type)
 
   return (
-    <WalletTabs enrollmentType={studentProfile?.enrollmentType}>
+    <WalletTabs studyMode={effectiveEnrollmentType}>
       {/* ── Overview Tab ── */}
       {tab === 'overview' && (
         <div className="space-y-6">
@@ -344,7 +357,7 @@ export default async function WalletPage({
           </div>
 
           {/* Payment Milestones for Full-Time Students */}
-          {ftEnrollment && ftEnrollment.milestones.length > 0 && studentProfile?.enrollmentType !== 'EXAM_ONLY' && studentProfile?.enrollmentType !== 'MODULAR' && (
+          {ftEnrollment && ftEnrollment.milestones.length > 0 && isFullTime && (
             <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm sm:p-6 dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 sm:h-10 sm:w-10 dark:bg-indigo-900/30 dark:text-indigo-400">
@@ -470,9 +483,9 @@ export default async function WalletPage({
               </div>
             </div>
 
-            {!ftEnrollment || studentProfile?.enrollmentType === 'EXAM_ONLY' ? (
+            {!ftEnrollment || !isFullTime ? (
               <div className="space-y-6 rounded-2xl border border-slate-100 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900/50">
-                {studentProfile?.enrollmentType === 'EXAM_ONLY' ? (
+                {isExamOnly ? (
                   <div className="mx-auto max-w-md">
                     <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/20">
                       <Target className="h-8 w-8 text-blue-500" />
@@ -517,19 +530,20 @@ export default async function WalletPage({
                     </div>
                     <h3 className="text-xl font-black text-slate-900 dark:text-white">Enrollment Not Found</h3>
                     <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-                      Your full-time enrollment record has not been created yet. This usually happens if you haven't selected a programme or if your seat confirmation is still pending.
+                      Your full-time enrollment record has not been created yet. This usually means
+                      your programme activation is still being configured by the academy team.
                     </p>
                     <div className="mt-8 grid gap-3 sm:grid-cols-2">
                       <Link
-                        href="/applicant/pathway"
+                        href="/student"
                         className="flex flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-slate-50 p-4 transition-all hover:border-blue-200 hover:bg-blue-50/50 dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-blue-900/30"
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30">
                           <PlusCircle className="h-5 w-5 text-blue-600" />
                         </div>
                         <div className="text-center">
-                          <span className="block text-xs font-black tracking-widest text-slate-900 uppercase dark:text-white">Choose Programme</span>
-                          <span className="text-[10px] text-slate-500">Pick your study path</span>
+                          <span className="block text-xs font-black tracking-widest text-slate-900 uppercase dark:text-white">Return to Portal</span>
+                          <span className="text-[10px] text-slate-500">Check your student dashboard</span>
                         </div>
                       </Link>
                       

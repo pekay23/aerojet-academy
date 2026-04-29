@@ -5,6 +5,7 @@ import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import PortalHeader from '@/components/layouts/PortalHeader'
 import prisma from '@/lib/prisma/client'
 import ForcePasswordChange from './_components/ForcePasswordChange'
+import { resolveEffectiveEnrollmentType, resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
 
 export default async function ApplicantLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
@@ -38,7 +39,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
 
   const studentProfile = await prisma.studentProfile.findUnique({
     where: { userId: user.id },
-    select: { pathwayId: true },
+    select: { pathwayId: true, enrollmentType: true, pathwayRel: { select: { code: true } } },
   })
 
   const hasFullTimeEnrollment = await prisma.fullTimeEnrollment.findFirst({
@@ -46,8 +47,19 @@ export default async function ApplicantLayout({ children }: { children: React.Re
     select: { id: true },
   })
 
-  const hasPathway = !!studentProfile?.pathwayId || !!hasFullTimeEnrollment
-  const isExamOnly = dbUser?.programmeChoice === 'EXAM_ONLY'
+  const effectivePathwayCode = resolveEffectivePathwayCode({
+    pathwayCode: studentProfile?.pathwayRel?.code,
+    enrollmentType: studentProfile?.enrollmentType,
+    programmeChoice: dbUser.programmeChoice,
+  })
+  const effectiveEnrollmentType = resolveEffectiveEnrollmentType({
+    pathwayCode: studentProfile?.pathwayRel?.code,
+    enrollmentType: studentProfile?.enrollmentType,
+    programmeChoice: dbUser.programmeChoice,
+  })
+
+  const hasPathway = !!effectivePathwayCode || !!studentProfile?.pathwayId || !!hasFullTimeEnrollment
+  const isExamOnly = effectiveEnrollmentType === 'EXAM_ONLY'
 
   const userName = profile ? `${profile.firstName} ${profile.lastName}` : (user.email ?? '')
   const userRole = 'Applicant'

@@ -10,6 +10,7 @@ import {
 } from '@/lib/api/response'
 import { enterGradeSchema, validateBody } from '@/lib/validation/schemas'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 import { UserRole } from '@prisma/client'
 
 export const GET = withErrorHandler(
@@ -17,12 +18,17 @@ export const GET = withErrorHandler(
     const user = await requireAuth()
     if (user.role !== UserRole.INSTRUCTOR) return apiForbidden('Instructor access required')
 
+    const instructorProfile = await getInstructorProfileByUserId(user.id)
+    if (!instructorProfile) return apiForbidden('Instructor profile not found')
+
     const classItem = await prisma.class.findUnique({
       where: { id: ctx?.params?.id },
       include: { course: true },
     })
     if (!classItem) return apiNotFound('Class not found')
-    if (classItem.instructorId !== user.id) return apiForbidden('Not assigned to this class')
+    if (classItem.instructorId !== instructorProfile.id) {
+      return apiForbidden('Not assigned to this class')
+    }
 
     // Get enrollments and their grades for this course
     const enrollments = await prisma.enrollment.findMany({
@@ -42,6 +48,9 @@ export const POST = withErrorHandler(
     const user = await requireAuth()
     if (user.role !== UserRole.INSTRUCTOR) return apiForbidden('Instructor access required')
 
+    const instructorProfile = await getInstructorProfileByUserId(user.id)
+    if (!instructorProfile) return apiForbidden('Instructor profile not found')
+
     const classId = ctx?.params?.id
     if (!classId) return apiError('Class ID required')
 
@@ -50,7 +59,9 @@ export const POST = withErrorHandler(
       include: { course: true },
     })
     if (!classItem) return apiNotFound('Class not found')
-    if (classItem.instructorId !== user.id) return apiForbidden('Not assigned to this class')
+    if (classItem.instructorId !== instructorProfile.id) {
+      return apiForbidden('Not assigned to this class')
+    }
 
     const body = await req.json()
     const validation = validateBody(enterGradeSchema, body)
@@ -89,7 +100,7 @@ export const POST = withErrorHandler(
               assessmentName: title || 'Assessment',
               percentage,
               assessmentDate: new Date(),
-              gradedBy: user.id,
+              gradedBy: instructorProfile.id,
               comments: g.feedback || null,
               mcqScore: g.mcqScore !== undefined ? g.mcqScore : null,
               essay1Score: g.essay1Score !== undefined ? g.essay1Score : null,

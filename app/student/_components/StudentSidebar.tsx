@@ -13,7 +13,6 @@ import {
   User,
   Mail,
   ScrollText,
-  CreditCard,
   Settings,
 } from 'lucide-react'
 import type { PaymentAccessLevel } from '@/lib/access-control'
@@ -21,9 +20,13 @@ import type { SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
 import { useBadgeCounts } from '@/hooks/useBadgeCounts'
 
 function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAccessLevel) {
-  const isFullTime = ['FULL_TIME', 'FULL_TIME_4Y', 'FULL_TIME_2Y', 'MILITARY_1Y'].includes(
-    studyPathway || ''
-  )
+  const isFullTime = [
+    'FULL_TIME',
+    'FULL_TIME_4Y',
+    'FULL_TIME_2Y',
+    'MILITARY_2Y',
+    'MILITARY_1Y',
+  ].includes(studyPathway || '')
   const isExamOnly = studyPathway === 'EXAM_ONLY'
   const isRestricted = paymentAccessLevel === 'RESTRICTED' || paymentAccessLevel === 'SEAT_ONLY'
   const hasFullAccess = paymentAccessLevel === 'FULL_ACCESS'
@@ -126,7 +129,10 @@ export default function StudentSidebar({
       userName={userName}
       userRole={userRole}
       userImage={userImage}
-      userMenuItems={[]}
+      userMenuItems={[
+        { label: 'Profile', href: '/student/profile', icon: User },
+        { label: 'Settings', href: '/student/profile/settings', icon: Settings },
+      ]}
     />
   )
 }

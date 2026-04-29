@@ -20,7 +20,12 @@ if (!connectionString) {
 
 // Helper to create the standard PG adapter
 const createAdapter = () => {
-  const pool = new Pool({ connectionString })
+  const pool = new Pool({
+    connectionString,
+    max: 50, // Match the connection_limit in .env
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
+  })
   return new PrismaPg(pool)
 }
 

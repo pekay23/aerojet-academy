@@ -171,6 +171,9 @@ export const createClassSchema = z.object({
   academicYearId: z.string().optional(),
   semesterId: z.string().optional(),
   maxStudents: z.number().int().positive().default(28),
+  recurrenceType: z.enum(['NONE', 'DAILY', 'WEEKLY', 'MONTHLY', 'CUSTOM']).default('NONE'),
+  recurrenceDays: z.string().optional(),
+  recurrenceUntil: z.string().datetime().optional().nullable(),
 })
 
 export const updateClassSchema = createClassSchema.partial()

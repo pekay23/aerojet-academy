@@ -51,7 +51,8 @@ export default async function UserProfilePage({ params }: Props) {
         orderBy: { createdAt: 'asc' },
       },
       examBookings: {
-        orderBy: { createdAt: 'asc' },
+        where: { deletedAt: null },
+        orderBy: { examDate: 'asc' },
         select: {
           id: true,
           moduleCode: true,
@@ -59,9 +60,10 @@ export default async function UserProfilePage({ params }: Props) {
           score: true,
           percentage: true,
           attemptType: true,
-          sourceNotes: true,
           examDate: true,
           status: true,
+          examCategory: true,
+          examAttendance: { select: { status: true } },
         },
       },
     },
@@ -89,6 +91,13 @@ export default async function UserProfilePage({ params }: Props) {
     programme: e.programme,
     ojtPeriods: e.ojtPeriods,
   }))
+
+  const examComponentsRaw = await prisma.examComponent.findMany({
+    include: {
+      course: { select: { id: true, name: true, code: true } },
+    },
+  })
+  const examComponents = serializePrisma(examComponentsRaw)
 
   const profile = user.profile
   const fullName = profile
@@ -338,6 +347,9 @@ export default async function UserProfilePage({ params }: Props) {
           {/* Academic History for Students */}
           {[UserRole.STUDENT, UserRole.APPLICANT].includes(user.role as any) && (
             <AcademicHistorySection
+              studentId={user.id}
+              studentName={fullName}
+              examComponents={examComponents}
               enrollments={(user.enrollments || []).map((e) => ({
                 id: e.id,
                 status: e.status,
@@ -353,9 +365,9 @@ export default async function UserProfilePage({ params }: Props) {
                 score: b.score,
                 percentage: b.percentage,
                 attemptType: b.attemptType,
-                sourceNotes: b.sourceNotes,
                 examDate: b.examDate,
                 status: b.status,
+                examCategory: b.examCategory,
               }))}
               studentProfile={user.studentProfile ? {
                 studentId: user.studentProfile.studentId,

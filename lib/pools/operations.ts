@@ -10,7 +10,7 @@
 
 import { Prisma, PoolStatus } from '@prisma/client'
 import { AuditAction } from '@/lib/audit/logger'
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
 import { POOL_NEAR_FULL_THRESHOLD } from './types'
 
@@ -23,6 +23,7 @@ export type PoolWithDetails = Prisma.ExamPoolGetPayload<{
     event: true
     memberships: {
       include: {
+        examAttendance: true
         user: {
           include: {
             profile: true
@@ -90,7 +91,7 @@ export { confirmPoolInternal, failPool } from './confirm'
 
 export async function getPoolWithDetails(
   poolId: string,
-  options?: { includeAllStatuses?: boolean }
+  options?: { includeAllStatuses?: boolean; unfiltered?: boolean }
 ): Promise<PoolWithDetails | null> {
   if (!poolId || typeof poolId !== 'string') return null
 
@@ -98,14 +99,17 @@ export async function getPoolWithDetails(
     ? {}
     : { status: { in: ['RESERVED', 'CONFIRMED'] } }
 
+  const db = options?.unfiltered ? prismaUnfiltered : prisma
+
   try {
-    return await prisma.examPool.findUnique({
+    return await db.examPool.findUnique({
       where: { id: poolId },
       include: {
         event: true,
         memberships: {
           where: membershipsFilter,
           include: {
+            examAttendance: true,
             user: {
               include: {
                 profile: true,
@@ -132,8 +136,9 @@ export async function getPoolWithDetails(
 // GET AVAILABLE POOLS
 // ---------------------------------------------------------------------------
 
-export async function getAvailablePools() {
-  return prisma.examPool.findMany({
+export async function getAvailablePools(options?: { unfiltered?: boolean }) {
+  const db = options?.unfiltered ? prismaUnfiltered : prisma
+  return db.examPool.findMany({
     where: {
       status: { in: [PoolStatus.OPEN, PoolStatus.NEAR_FULL] },
       examDate: { gt: new Date() },

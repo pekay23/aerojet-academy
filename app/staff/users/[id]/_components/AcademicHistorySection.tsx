@@ -1,8 +1,11 @@
 'use client'
+/** Student Academic History Section with Modular/Exam-Only support */
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronDown, ChevronUp, CheckCircle, AlertTriangle, XCircle, BookOpen, FileText, ClipboardList } from 'lucide-react'
+import AddExamRecordDialog from '../../../students/[id]/_components/AddExamRecordDialog'
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -24,9 +27,9 @@ interface ExamBookingData {
   score: number | null
   percentage: number | null
   attemptType: string | null
-  sourceNotes: string | null
   examDate: string | null
   status: string
+  examCategory?: string | null
 }
 
 interface StudentProfileData {
@@ -40,6 +43,9 @@ interface StudentProfileData {
 }
 
 interface Props {
+  studentId: string
+  studentName: string
+  examComponents: any[]
   enrollments: EnrollmentData[]
   examBookings: ExamBookingData[]
   studentProfile: StudentProfileData | null
@@ -130,10 +136,17 @@ function getCompletenessStatus(group: SemesterGroup): 'complete' | 'partial' | '
 function ExamOnlyHistory({
   examBookings,
   studentProfile,
+  studentId,
+  studentName,
+  examComponents,
 }: {
   examBookings: ExamBookingData[]
   studentProfile: StudentProfileData
+  studentId: string
+  studentName: string
+  examComponents: any[]
 }) {
+  const router = useRouter()
   const passed = examBookings.filter((b) => b.result?.toLowerCase() === 'pass').length
   const failed = examBookings.filter((b) => b.result?.toLowerCase() === 'fail').length
   const pending = examBookings.filter((b) => !b.result).length
@@ -199,6 +212,7 @@ function ExamOnlyHistory({
               <tr className="border-b border-slate-100 bg-slate-50 text-left dark:border-slate-700 dark:bg-slate-800/40">
                 <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Module</th>
                 <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Date</th>
+                <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Category</th>
                 <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Result</th>
                 <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Score</th>
                 <th className="px-4 py-2 text-[10px] font-bold text-slate-400 uppercase">Attempt</th>
@@ -207,6 +221,7 @@ function ExamOnlyHistory({
             <tbody>
               {examBookings.map((booking) => {
                 const resultLower = booking.result?.toLowerCase()
+                const isPending = !booking.result || booking.status === 'PENDING'
                 return (
                   <tr key={booking.id} className="border-b border-slate-50 last:border-0 dark:border-slate-800">
                     <td className="px-4 py-2 font-mono text-xs font-bold text-slate-700 dark:text-slate-300">
@@ -219,10 +234,21 @@ function ExamOnlyHistory({
                             month: 'short',
                             year: 'numeric',
                           })
-                        : '—'}
+                        : <span className="italic text-slate-300">TBD</span>}
                     </td>
                     <td className="px-4 py-2">
-                      {booking.result ? (
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                        booking.examCategory === 'OFFICIAL_EASA'
+                          ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400'
+                          : 'bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-400'
+                      }`}>
+                        {booking.examCategory === 'OFFICIAL_EASA' ? 'EASA' : 'Internal'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2">
+                      {isPending ? (
+                        <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-bold text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">PENDING</span>
+                      ) : (
                         <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
                           resultLower === 'pass'
                             ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
@@ -230,17 +256,15 @@ function ExamOnlyHistory({
                               ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
                               : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                         }`}>
-                          {booking.result.toUpperCase()}
+                          {booking.result!.toUpperCase()}
                         </span>
-                      ) : (
-                        <span className="text-xs italic text-slate-400">Pending</span>
                       )}
                     </td>
                     <td className="px-4 py-2 font-mono text-xs text-slate-600 dark:text-slate-300">
                       {booking.percentage != null ? `${booking.percentage}%` : '—'}
                     </td>
                     <td className="px-4 py-2 text-xs text-slate-500">
-                      {booking.attemptType?.replace('_', ' ') || '—'}
+                      {booking.attemptType === 'MIGRATED' ? '—' : (booking.attemptType?.replace('_', ' ') || '—')}
                     </td>
                   </tr>
                 )
@@ -252,12 +276,12 @@ function ExamOnlyHistory({
 
       {/* Quick Actions */}
       <div className="mt-4 flex flex-wrap gap-2">
-        <Link
-          href="/staff/exams?tab=records"
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:bg-white hover:shadow-sm dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
-        >
-          <FileText className="h-3 w-3" /> Add Exam Record
-        </Link>
+        <AddExamRecordDialog
+          studentId={studentId}
+          studentName={studentName}
+          examComponents={examComponents}
+          onSuccess={() => router.refresh()}
+        />
       </div>
     </div>
   )
@@ -267,14 +291,23 @@ function ExamOnlyHistory({
 // MAIN COMPONENT
 // ---------------------------------------------------------------------------
 
-export default function AcademicHistorySection({ enrollments, examBookings, studentProfile }: Props) {
+export default function AcademicHistorySection({ studentId, studentName, examComponents, enrollments, examBookings, studentProfile }: Props) {
+  const router = useRouter()
   const [expandedSemester, setExpandedSemester] = useState<string | null>(null)
 
   if (!studentProfile) return null
 
   // Exam-only / Modular students: show flat exam history, no semester grouping
   if (isExamPathway(studentProfile)) {
-    return <ExamOnlyHistory examBookings={examBookings} studentProfile={studentProfile} />
+    return (
+      <ExamOnlyHistory 
+        examBookings={examBookings} 
+        studentProfile={studentProfile} 
+        studentId={studentId}
+        studentName={studentName}
+        examComponents={examComponents}
+      />
+    )
   }
 
   // Full-time / Short-course: semester-grouped academic history
@@ -480,33 +513,50 @@ export default function AcademicHistorySection({ enrollments, examBookings, stud
         </div>
       )}
 
-      {/* Unmatched Exam Records — only shown for full-time if they somehow exist */}
+      {/* Standalone Exams */}
       {unmatchedExams.length > 0 && (
-        <div className="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-900/20">
-          <p className="mb-2 text-xs font-bold text-amber-700 dark:text-amber-400">
-            {unmatchedExams.length} exam record(s) not linked to any course enrollment:
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {unmatchedExams.map((exam) => (
-              <span
-                key={exam.id}
-                className="rounded-full border border-amber-300 bg-white px-2 py-0.5 text-[10px] font-mono font-bold text-amber-700 dark:border-amber-700 dark:bg-amber-900/30 dark:text-amber-300"
-              >
-                {exam.moduleCode} ({exam.result || 'pending'})
-              </span>
-            ))}
+        <div className="mt-6">
+          <h3 className="mb-3 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
+            <BookOpen className="h-4 w-4" /> Standalone Exams
+          </h3>
+          <div className="rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+            <p className="mb-4 text-xs text-slate-500 dark:text-slate-400">
+              The following exams were taken independently or transferred, and are not linked to a specific semester enrollment.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {unmatchedExams.map((exam) => {
+                const isPass = exam.result?.toLowerCase() === 'pass'
+                const isFail = exam.result?.toLowerCase() === 'fail'
+                const statusColor = isPass
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-900/20 dark:text-emerald-400'
+                  : isFail
+                  ? 'border-red-200 bg-red-50 text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400'
+                  : 'border-slate-200 bg-slate-50 text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300'
+
+                return (
+                  <span
+                    key={exam.id}
+                    className={`rounded-full border px-3 py-1 text-xs font-bold ${statusColor}`}
+                  >
+                    <span className="font-mono">{exam.moduleCode}</span>
+                    <span className="mx-1.5 opacity-50">•</span>
+                    <span className="uppercase">{exam.result || 'Pending'}</span>
+                  </span>
+                )
+              })}
+            </div>
           </div>
         </div>
       )}
 
       {/* Quick Actions */}
       <div className="mt-4 flex flex-wrap gap-2">
-        <Link
-          href="/staff/exams?tab=records"
-          className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:bg-white hover:shadow-sm dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"
-        >
-          <FileText className="h-3 w-3" /> Add Exam Record
-        </Link>
+        <AddExamRecordDialog
+          studentId={studentId}
+          studentName={studentName}
+          examComponents={examComponents}
+          onSuccess={() => router.refresh()}
+        />
         <Link
           href="/staff/enrollments/batch"
           className="inline-flex items-center gap-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:bg-white hover:shadow-sm dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800/60"

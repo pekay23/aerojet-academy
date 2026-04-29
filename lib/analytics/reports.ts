@@ -416,3 +416,215 @@ export async function getCriticalAlerts() {
 
   return alerts.sort((a, b) => (a.date && b.date ? a.date.getTime() - b.date.getTime() : 0))
 }
+
+// ============================================================================
+// EXAM ANALYTICS
+// ============================================================================
+
+export async function getExamAnalytics() {
+  // Fetch both bookings and results for comprehensive data
+  const [allBookings, allResults] = await Promise.all([
+    prisma.examBooking.findMany({
+      where: { deletedAt: null },
+      select: {
+        id: true,
+        result: true,
+        attemptType: true,
+        examCategory: true,
+        status: true,
+        moduleCode: true,
+        score: true,
+        percentage: true,
+        examDate: true,
+        createdAt: true,
+      },
+    }),
+    prisma.examResult.findMany({
+      select: {
+        id: true,
+        passed: true,
+        attemptType: true,
+        examCategory: true,
+        moduleCode: true,
+        score: true,
+        percentage: true,
+        createdAt: true,
+      },
+    }),
+  ])
+
+  const totalBookings = allBookings.length
+  const totalResults = allResults.length
+
+  // === Core Stats from bookings ===
+  const stats = {
+    total: totalBookings,
+    passed: 0,
+    failed: 0,
+    awaitingGrading: 0,
+    easa: { total: 0, passed: 0, failed: 0 },
+    internal: { total: 0, passed: 0, failed: 0 },
+    attempts: {
+      FIRST: 0,
+      RESIT_1: 0,
+      RESIT_2: 0,
+      RESIT_3: 0,
+    },
+  }
+
+  // === First-attempt vs Resit pass rates ===
+  let firstAttemptPass = 0
+  let firstAttemptTotal = 0
+  let resitPass = 0
+  let resitTotal = 0
+
+  // === Per-module breakdown ===
+  const moduleMap = new Map<
+    string,
+    { total: number; passed: number; failed: number; scores: number[] }
+  >()
+
+  // === Score distribution buckets ===
+  const scoreDistribution = {
+    '0-25': 0,
+    '26-50': 0,
+    '51-74': 0,
+    '75-100': 0,
+  }
+
+  // === Monthly exam volume (last 12 months) ===
+  const now = new Date()
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+  const monthlyVolume: Record<string, { month: string; exams: number; passes: number; fails: number }> = {}
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
+    monthlyVolume[key] = { month: key, exams: 0, passes: 0, fails: 0 }
+  }
+
+  allBookings.forEach((exam) => {
+    const res = exam.result?.toLowerCase()
+    const isEasa = exam.examCategory === 'OFFICIAL_EASA'
+    const moduleCode = (exam.moduleCode || 'UNKNOWN').toUpperCase()
+    const attempt = (exam.attemptType || 'FIRST') as keyof typeof stats.attempts
+    const isFirst = attempt === 'FIRST'
+    const hasPassed = res === 'pass'
+    const hasFailed = res === 'fail'
+
+    // Global metrics
+    if (hasPassed) stats.passed++
+    else if (hasFailed) stats.failed++
+    else if (exam.status === 'COMPLETED') stats.awaitingGrading++
+
+    // Category metrics
+    const cat = isEasa ? stats.easa : stats.internal
+    cat.total++
+    if (hasPassed) cat.passed++
+    else if (hasFailed) cat.failed++
+
+    // Attempts
+    if (stats.attempts[attempt] !== undefined) {
+      stats.attempts[attempt]++
+    } else {
+      stats.attempts.RESIT_3++ // Fallback for unknown attempt types
+    }
+
+    // First-attempt vs resit pass rates
+    if (hasPassed || hasFailed) {
+      if (isFirst) {
+        firstAttemptTotal++
+        if (hasPassed) firstAttemptPass++
+      } else {
+        resitTotal++
+        if (hasPassed) resitPass++
+      }
+    }
+
+    // Per-module breakdown
+    if (!moduleMap.has(moduleCode)) {
+      moduleMap.set(moduleCode, { total: 0, passed: 0, failed: 0, scores: [] })
+    }
+    const mod = moduleMap.get(moduleCode)!
+    mod.total++
+    if (hasPassed) mod.passed++
+    if (hasFailed) mod.failed++
+
+    // Score distribution
+    const scoreVal = exam.score != null ? Number(exam.score) : (exam.percentage != null ? Number(exam.percentage) : null)
+    if (scoreVal !== null) {
+      mod.scores.push(scoreVal)
+      if (scoreVal <= 25) scoreDistribution['0-25']++
+      else if (scoreVal <= 50) scoreDistribution['26-50']++
+      else if (scoreVal <= 74) scoreDistribution['51-74']++
+      else scoreDistribution['75-100']++
+    }
+
+    // Monthly volume
+    const examMonth = exam.examDate ? new Date(exam.examDate) : new Date(exam.createdAt)
+    const monthKey = `${monthNames[examMonth.getMonth()]} ${examMonth.getFullYear()}`
+    if (monthlyVolume[monthKey]) {
+      monthlyVolume[monthKey].exams++
+      if (hasPassed) monthlyVolume[monthKey].passes++
+      if (hasFailed) monthlyVolume[monthKey].fails++
+    }
+  })
+
+  // Also fold in ExamResult data for score distributions where bookings have no scores
+  allResults.forEach((r) => {
+    const scoreVal = r.score != null ? Number(r.score) : (r.percentage != null ? Number(r.percentage) : null)
+    const moduleCode = (r.moduleCode || 'UNKNOWN').toUpperCase()
+    if (scoreVal !== null && !moduleMap.get(moduleCode)?.scores.includes(scoreVal)) {
+      if (scoreVal <= 25) scoreDistribution['0-25']++
+      else if (scoreVal <= 50) scoreDistribution['26-50']++
+      else if (scoreVal <= 74) scoreDistribution['51-74']++
+      else scoreDistribution['75-100']++
+    }
+  })
+
+  // Build per-module stats sorted by pass rate (ascending = hardest first)
+  const moduleStats = Array.from(moduleMap.entries())
+    .filter(([_, m]) => m.total >= 1)
+    .map(([code, m]) => {
+      const avgScore =
+        m.scores.length > 0
+          ? Math.round(m.scores.reduce((a, b) => a + b, 0) / m.scores.length)
+          : null
+      return {
+        moduleCode: code,
+        total: m.total,
+        passed: m.passed,
+        failed: m.failed,
+        passRate: m.total > 0 ? Math.round((m.passed / m.total) * 100) : 0,
+        avgScore,
+      }
+    })
+    .sort((a, b) => a.passRate - b.passRate)
+
+  const hardestModules = moduleStats.slice(0, 8)
+  const easiestModules = [...moduleStats].sort((a, b) => b.passRate - a.passRate).slice(0, 8)
+
+  return {
+    ...stats,
+    passPercentage: totalBookings > 0 ? Math.round((stats.passed / totalBookings) * 100) : 0,
+    failPercentage: totalBookings > 0 ? Math.round((stats.failed / totalBookings) * 100) : 0,
+    easaPassRate: stats.easa.total > 0 ? Math.round((stats.easa.passed / stats.easa.total) * 100) : 0,
+    internalPassRate: stats.internal.total > 0 ? Math.round((stats.internal.passed / stats.internal.total) * 100) : 0,
+    // New enhanced data
+    firstAttemptPassRate: firstAttemptTotal > 0 ? Math.round((firstAttemptPass / firstAttemptTotal) * 100) : 0,
+    firstAttemptTotal,
+    firstAttemptPass,
+    resitPassRate: resitTotal > 0 ? Math.round((resitPass / resitTotal) * 100) : 0,
+    resitTotal,
+    resitPass,
+    // Resit specific pass rates
+    resit1PassRate: stats.attempts.RESIT_1 > 0 ? Math.round((allBookings.filter(b => b.attemptType === 'RESIT_1' && b.result?.toLowerCase() === 'pass').length / stats.attempts.RESIT_1) * 100) : 0,
+    resit2PassRate: stats.attempts.RESIT_2 > 0 ? Math.round((allBookings.filter(b => b.attemptType === 'RESIT_2' && b.result?.toLowerCase() === 'pass').length / stats.attempts.RESIT_2) * 100) : 0,
+    resit3PassRate: stats.attempts.RESIT_3 > 0 ? Math.round((allBookings.filter(b => b.attemptType === 'RESIT_3' && b.result?.toLowerCase() === 'pass').length / stats.attempts.RESIT_3) * 100) : 0,
+    scoreDistribution,
+    monthlyTrend: Object.values(monthlyVolume),
+    hardestModules,
+    easiestModules,
+    totalResults,
+  }
+}
+

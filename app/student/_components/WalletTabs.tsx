@@ -11,14 +11,19 @@ const ALL_TABS = [
   { key: 'transactions', label: 'Transactions', icon: History },
 ] as const
 
-export default function WalletTabs({ children, enrollmentType }: { children: React.ReactNode; enrollmentType?: string | null }) {
+export default function WalletTabs({
+  children,
+  studyMode,
+}: {
+  children: React.ReactNode
+  studyMode?: string | null
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentTab = searchParams.get('tab') || 'overview'
 
-  // Hide Payments tab for MODULAR and EXAM_ONLY students
-  const hideMilestones = enrollmentType === 'EXAM_ONLY' || enrollmentType === 'MODULAR'
-  const tabs = hideMilestones ? ALL_TABS.filter((t) => t.key !== 'payments') : ALL_TABS
+  const showPaymentsTab = studyMode === 'FULL_TIME'
+  const tabs = showPaymentsTab ? ALL_TABS : ALL_TABS.filter((t) => t.key !== 'payments')
 
   const setTab = (tab: string) => {
     router.push(`/student/wallet?tab=${tab}`, { scroll: false })

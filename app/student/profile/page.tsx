@@ -27,7 +27,13 @@ async function InfoTab() {
       email: true,
       role: true,
       profile: true,
-      studentProfile: true,
+      studentProfile: {
+        include: {
+          pathwayRel: {
+            select: { name: true },
+          },
+        },
+      },
       settings: true,
     },
   })

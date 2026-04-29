@@ -7,7 +7,16 @@ import { revalidatePath } from 'next/cache'
 /**
  * POST /api/staff/students/[id]/exam-record
  *
- * Add a historical exam record for a student (past exam with score/result).
+ * Add or update a historical exam record for a student.
+ * Supports:
+ *   - resultOverride: explicitly set pass/fail/deferred/absent
+ *   - isPending: mark as pending (no result yet)
+ *   - score: numeric score; auto-derives result if resultOverride is 'auto'
+ *
+ * UPSERT BEHAVIOUR:
+ *   If a booking already exists for the same (userId, moduleCode, attemptType),
+ *   we UPDATE it rather than reject with a 400. This prevents staff from being
+ *   stuck when re-entering data for the same attempt.
  */
 export const POST = withErrorHandler(
   async (req: NextRequest, context?: { params: Record<string, string> }) => {
@@ -16,12 +25,27 @@ export const POST = withErrorHandler(
     if (!studentId) return apiError('Student ID required')
 
     const body = await req.json()
-    const { bookingType, examDate, attemptType, notes, entries } = body as {
-      bookingType: 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK'
-      examDate: string
+    const {
+      bookingType,
+      examDate,
+      attemptType,
+      examCategory,
+      notes,
+      entries,
+      isPending,
+    } = body as {
+      bookingType?: 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK'
+      examDate?: string | null
       attemptType?: string
+      examCategory?: 'INTERNAL' | 'OFFICIAL_EASA'
       notes?: string
-      entries: { courseId?: string; moduleCode: string; score?: number }[]
+      isPending?: boolean
+      entries: {
+        courseId?: string
+        moduleCode: string
+        score?: number
+        resultOverride?: string
+      }[]
     }
 
     if (!entries || entries.length === 0) {
@@ -29,73 +53,159 @@ export const POST = withErrorHandler(
     }
 
     // Verify student exists
-    const student = await prisma.user.findUnique({
-      where: { id: studentId, role: 'STUDENT' },
-    })
+    const student = await prisma.user.findUnique({ where: { id: studentId } })
     if (!student) return apiError('Student not found')
 
-    // Process each entry
-    const createdBookings = []
+    const createdBookings: { id: string; isNew: boolean }[] = []
     const bookingGroupRef = entries.length > 1 ? `MANUAL_${Date.now()}` : undefined
 
     for (const entry of entries) {
-      let finalModuleCode = entry.moduleCode.toUpperCase()
+      // Resolve final module code
+      let finalModuleCode = (entry.moduleCode || '').toUpperCase().trim()
       if (entry.courseId) {
         const course = await prisma.course.findUnique({ where: { id: entry.courseId } })
-        if (course) finalModuleCode = course.code.toUpperCase()
+        if (course) finalModuleCode = course.code.toUpperCase().trim()
       }
+      if (!finalModuleCode) return apiError('Module code is required')
 
-      // Derive result from score if provided
+      const targetAttemptType = attemptType || 'FIRST'
+
+      // -----------------------------------------------------------------------
+      // Resolve result + percentage
+      // -----------------------------------------------------------------------
       let result: string | undefined
       let percentage: number | undefined
-      if (entry.score !== undefined && entry.score !== null) {
+
+      if (isPending) {
+        result = undefined
+        percentage = undefined
+      } else if (entry.resultOverride && entry.resultOverride !== 'auto') {
+        result = entry.resultOverride  // 'pass' | 'fail' | 'deferred' | 'absent'
+        if (entry.score !== undefined && entry.score !== null) percentage = entry.score
+      } else if (entry.score !== undefined && entry.score !== null) {
         percentage = entry.score
         result = entry.score >= 75 ? 'pass' : 'fail'
       }
 
-      const booking = await prisma.examBooking.create({
-        data: {
+      const bookingStatus = isPending ? 'PENDING' : 'APPROVED'
+
+      // -----------------------------------------------------------------------
+      // UPSERT: update existing booking for same (userId, moduleCode, attemptType)
+      // or create a new one.
+      // -----------------------------------------------------------------------
+      const existing = await prisma.examBooking.findFirst({
+        where: {
           userId: studentId,
-          courseId: entry.courseId,
           moduleCode: finalModuleCode,
-          examDate: examDate ? new Date(examDate) : null,
-          amountPaid: 0,
-          status: 'COMPLETED',
-          bookingType: bookingType,
-          attemptType: attemptType || 'FIRST',
-          result,
-          score: entry.score,
-          percentage,
-          sourceNotes: notes || 'Manually added by staff',
-          bookingGroupRef,
+          attemptType: targetAttemptType,
+          deletedAt: null,
         },
       })
-      createdBookings.push(booking)
 
-      // Also create a formal ExamResult if a score was provided
-      if (entry.score !== undefined && entry.score !== null) {
-        await prisma.examResult.create({
+      let bookingId: string
+      let isNew: boolean
+
+      if (existing) {
+        // Update the existing record
+        await prisma.examBooking.update({
+          where: { id: existing.id },
           data: {
-            userId: studentId,
-            moduleCode: finalModuleCode,
-            score: entry.score,
-            maxScore: 100,
-            percentage,
-            passed: entry.score >= 75,
-            grade: entry.score >= 90 ? 'A' : entry.score >= 80 ? 'B' : entry.score >= 75 ? 'C' : 'F',
-            attemptType: attemptType || 'FIRST',
-            sourceNotes: notes || 'Manually added by staff',
+            courseId: entry.courseId ?? existing.courseId,
+            examDate: examDate !== undefined ? (examDate ? new Date(examDate) : null) : existing.examDate,
+            result,
+            score: entry.score ?? existing.score,
+            percentage: percentage ?? existing.percentage,
+            status: bookingStatus,
+            examCategory: examCategory || existing.examCategory || 'OFFICIAL_EASA',
+            bookingGroupRef: bookingGroupRef ?? existing.bookingGroupRef,
           },
         })
+        bookingId = existing.id
+        isNew = false
+      } else {
+        // Create a new record
+        const created = await prisma.examBooking.create({
+          data: {
+            userId: studentId,
+            courseId: entry.courseId,
+            moduleCode: finalModuleCode,
+            examDate: examDate ? new Date(examDate) : null,
+            amountPaid: 0,
+            status: bookingStatus,
+            bookingType: bookingType || 'INDIVIDUAL',
+            attemptType: targetAttemptType,
+            result,
+            score: entry.score,
+            percentage,
+            examCategory: examCategory || 'OFFICIAL_EASA',
+            bookingGroupRef,
+          },
+        })
+        bookingId = created.id
+        isNew = true
+      }
+
+      createdBookings.push({ id: bookingId, isNew })
+
+      // -----------------------------------------------------------------------
+      // ExamResult — upsert if we have a conclusive pass/fail
+      // -----------------------------------------------------------------------
+      if (result && ['pass', 'fail'].includes(result)) {
+        const scoreVal = entry.score ?? (result === 'pass' ? 75 : 0)
+        const grade =
+          (percentage ?? 0) >= 90 ? 'A'
+          : (percentage ?? 0) >= 80 ? 'B'
+          : (percentage ?? 0) >= 75 ? 'C'
+          : 'F'
+
+        const existingResult = await prisma.examResult.findFirst({
+          where: {
+            userId: studentId,
+            moduleCode: finalModuleCode,
+            attemptType: targetAttemptType,
+          },
+        })
+
+        if (existingResult) {
+          await prisma.examResult.update({
+            where: { id: existingResult.id },
+            data: {
+              score: scoreVal,
+              percentage,
+              passed: result === 'pass',
+              grade,
+              examCategory: examCategory || 'OFFICIAL_EASA',
+              sourceNotes: notes || 'Manually updated by staff',
+            },
+          })
+        } else {
+          await prisma.examResult.create({
+            data: {
+              userId: studentId,
+              moduleCode: finalModuleCode,
+              score: scoreVal,
+              maxScore: 100,
+              percentage,
+              passed: result === 'pass',
+              grade,
+              attemptType: targetAttemptType,
+              examCategory: examCategory || 'OFFICIAL_EASA',
+              sourceNotes: notes || 'Manually added by staff',
+            },
+          })
+        }
       }
     }
 
-    // Create notification for student
+    // Notification
+    const moduleCodes = entries.map((e) => e.moduleCode?.toUpperCase()).filter(Boolean)
     await prisma.notification.create({
       data: {
         userId: studentId,
-        title: 'Exam Record Added',
-        message: `An admin has added exam record(s) for ${entries.map((e) => e.moduleCode).join(', ')}.`,
+        title: isPending ? 'Exam Record Created' : 'Exam Record Updated',
+        message: isPending
+          ? `A pending exam record has been created for: ${moduleCodes.join(', ')}.`
+          : `Your exam record(s) for ${moduleCodes.join(', ')} have been updated by staff.`,
         type: 'INFO',
         sentBy: staff.id,
         linkUrl: '/student/exams',
@@ -103,16 +213,22 @@ export const POST = withErrorHandler(
       },
     })
 
-    // Revalidate paths
+    // Revalidate
     revalidatePath('/student')
     revalidatePath('/student/exams')
     revalidatePath('/student/notifications')
     revalidatePath('/staff/exams')
     revalidatePath(`/staff/students/${studentId}`)
+    revalidatePath(`/staff/users/${studentId}`)
+
+    const newCount = createdBookings.filter((b) => b.isNew).length
+    const updatedCount = createdBookings.filter((b) => !b.isNew).length
 
     return apiSuccess({
       success: true,
       count: createdBookings.length,
+      created: newCount,
+      updated: updatedCount,
       bookingIds: createdBookings.map((b) => b.id),
     })
   }

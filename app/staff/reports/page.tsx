@@ -14,11 +14,13 @@ import {
   getAttendanceReport,
   getCriticalAlerts,
   getFinanceReportSummary,
+  getExamAnalytics,
 } from '@/lib/analytics/reports'
 import { EnrollmentChart } from '@/components/charts/EnrollmentChart'
 import { RevenueChart } from '@/components/charts/RevenueChart'
 import { PoolFillChart } from '@/components/charts/PoolFillChart'
 import { AttendanceChart } from '@/components/charts/AttendanceChart'
+import { ExamTrendChart, ScoreDistributionChart } from '@/components/charts/ExamCharts'
 import ReportsTabs from '../_components/ReportsTabs'
 import { PeriodFilter } from './_components/PeriodFilter'
 import { Sparkline } from './_components/Sparkline'
@@ -791,6 +793,296 @@ async function AttendanceTab() {
   )
 }
 
+/* ────────────────────────────── Exams Tab ────────────────────────────── */
+
+async function ExamsTab() {
+  const analytics = await getExamAnalytics()
+
+  const scoreChartData = [
+    { range: '0–25%', count: analytics.scoreDistribution['0-25'], color: '#EF4444' },
+    { range: '26–50%', count: analytics.scoreDistribution['26-50'], color: '#F59E0B' },
+    { range: '51–74%', count: analytics.scoreDistribution['51-74'], color: '#3B82F6' },
+    { range: '75–100%', count: analytics.scoreDistribution['75-100'], color: '#10B981' },
+  ]
+
+  return (
+    <div className="mx-auto max-w-[1920px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex items-center gap-4">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-fuchsia-50 text-fuchsia-600 dark:bg-fuchsia-900/20">
+          <Award className="h-7 w-7" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">
+            Exam Analytics
+          </h2>
+          <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
+            <Sparkles className="h-3.5 w-3.5 text-aerojet-sky" />
+            Pass rates, attempt breakdowns, score distributions, and module performance.
+          </p>
+        </div>
+      </div>
+
+      {/* Top-line KPI Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <MetricCard
+          title="Overall Pass Rate"
+          value={`${analytics.passPercentage}%`}
+          icon={TrendingUp}
+          color="bg-emerald-50 text-emerald-600"
+          label={`${analytics.passed} passes / ${analytics.total} total`}
+        />
+        <MetricCard
+          title="1st Attempt Pass Rate"
+          value={`${analytics.firstAttemptPassRate}%`}
+          icon={Award}
+          color="bg-blue-50 text-blue-600"
+          label={`${analytics.firstAttemptPass} of ${analytics.firstAttemptTotal} first attempts`}
+        />
+        <MetricCard
+          title="Resit Pass Rate"
+          value={`${analytics.resitPassRate}%`}
+          icon={Calendar}
+          color="bg-amber-50 text-amber-600"
+          label={`${analytics.resitPass} of ${analytics.resitTotal} resit attempts`}
+        />
+        <MetricCard
+          title="Awaiting Grading"
+          value={analytics.awaitingGrading}
+          icon={Zap}
+          color="bg-purple-50 text-purple-600"
+          label="Exams without results"
+        />
+      </div>
+
+      {/* Pass / Fail / Category Breakdown */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Pass vs Fail Donut */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-white">Pass vs Fail</h3>
+          <div className="mt-4 grid grid-cols-2 gap-4">
+            <div className="rounded-2xl bg-emerald-50 p-4 dark:bg-emerald-900/10">
+              <p className="text-3xl font-black text-emerald-600">{analytics.passed}</p>
+              <p className="mt-1 text-xs font-bold text-emerald-400 uppercase">Passed</p>
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                <div className="h-full bg-emerald-500" style={{ width: `${analytics.passPercentage}%` }} />
+              </div>
+              <p className="mt-1 text-[10px] font-bold text-emerald-500">{analytics.passPercentage}%</p>
+            </div>
+            <div className="rounded-2xl bg-red-50 p-4 dark:bg-red-900/10">
+              <p className="text-3xl font-black text-red-600">{analytics.failed}</p>
+              <p className="mt-1 text-xs font-bold text-red-400 uppercase">Failed</p>
+              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-red-100 dark:bg-red-900/30">
+                <div className="h-full bg-red-500" style={{ width: `${analytics.failPercentage}%` }} />
+              </div>
+              <p className="mt-1 text-[10px] font-bold text-red-500">{analytics.failPercentage}%</p>
+            </div>
+          </div>
+        </div>
+
+        {/* EASA vs Internal */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-white">By Category</h3>
+          <div className="mt-4 space-y-3">
+            <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-800/30">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-aerojet-blue uppercase dark:text-white">EASA Official</span>
+                <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-black text-blue-600">{analytics.easaPassRate}% pass</span>
+              </div>
+              <div className="mt-2 flex gap-4 text-xs text-slate-500">
+                <span><strong className="text-emerald-600">{analytics.easa.passed}</strong> pass</span>
+                <span><strong className="text-red-500">{analytics.easa.failed}</strong> fail</span>
+                <span><strong className="text-slate-600">{analytics.easa.total}</strong> total</span>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-slate-100 bg-slate-50/50 p-3 dark:border-slate-800 dark:bg-slate-800/30">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-black text-aerojet-blue uppercase dark:text-white">Academy Internal</span>
+                <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-black text-indigo-600">{analytics.internalPassRate}% pass</span>
+              </div>
+              <div className="mt-2 flex gap-4 text-xs text-slate-500">
+                <span><strong className="text-emerald-600">{analytics.internal.passed}</strong> pass</span>
+                <span><strong className="text-red-500">{analytics.internal.failed}</strong> fail</span>
+                <span><strong className="text-slate-600">{analytics.internal.total}</strong> total</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Attempt Breakdown */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-white">Attempt Distribution</h3>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-blue-50 p-3 dark:bg-blue-900/10">
+              <div className="flex items-center justify-between">
+                <p className="text-2xl font-black text-blue-600">{analytics.attempts.FIRST}</p>
+                <span className="text-[10px] font-black text-blue-400 bg-blue-100/50 dark:bg-blue-800/30 px-1.5 py-0.5 rounded-full">{analytics.firstAttemptPassRate}% Pass</span>
+              </div>
+              <p className="text-[10px] font-bold text-blue-400 uppercase tracking-widest mt-1">1st Attempt</p>
+            </div>
+            <div className="rounded-2xl bg-amber-50 p-3 dark:bg-amber-900/10">
+              <div className="flex items-center justify-between">
+                <p className="text-2xl font-black text-amber-600">{analytics.attempts.RESIT_1}</p>
+                <span className="text-[10px] font-black text-amber-400 bg-amber-100/50 dark:bg-amber-800/30 px-1.5 py-0.5 rounded-full">{analytics.resit1PassRate}% Pass</span>
+              </div>
+              <p className="text-[10px] font-bold text-amber-400 uppercase tracking-widest mt-1">1st Resit</p>
+            </div>
+            <div className="rounded-2xl bg-orange-50 p-3 dark:bg-orange-900/10">
+              <div className="flex items-center justify-between">
+                <p className="text-2xl font-black text-orange-600">{analytics.attempts.RESIT_2}</p>
+                <span className="text-[10px] font-black text-orange-400 bg-orange-100/50 dark:bg-orange-800/30 px-1.5 py-0.5 rounded-full">{analytics.resit2PassRate}% Pass</span>
+              </div>
+              <p className="text-[10px] font-bold text-orange-400 uppercase tracking-widest mt-1">2nd Resit</p>
+            </div>
+            <div className="rounded-2xl bg-red-50 p-3 dark:bg-red-900/10">
+              <div className="flex items-center justify-between">
+                <p className="text-2xl font-black text-red-600">{analytics.attempts.RESIT_3}</p>
+                <span className="text-[10px] font-black text-red-400 bg-red-100/50 dark:bg-red-800/30 px-1.5 py-0.5 rounded-full">{analytics.resit3PassRate}% Pass</span>
+              </div>
+              <p className="text-[10px] font-bold text-red-400 uppercase tracking-widest mt-1">3rd+ Resit</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Monthly Trend */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="mb-4">
+            <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-white">
+              Monthly Volume (12 Months)
+            </h3>
+            <p className="text-xs font-medium text-slate-400">Exam bookings with pass/fail overlay</p>
+          </div>
+          <ExamTrendChart data={analytics.monthlyTrend} />
+        </div>
+
+        {/* Score Distribution */}
+        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="mb-4">
+            <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-white">
+              Score Distribution
+            </h3>
+            <p className="text-xs font-medium text-slate-400">Spread of exam scores across ranges</p>
+          </div>
+          <ScoreDistributionChart data={scoreChartData} />
+        </div>
+      </div>
+
+      {/* Module Performance Tables */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        {/* Hardest Modules */}
+        <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="border-b border-slate-100 bg-red-50/30 px-6 py-4 dark:border-slate-800 dark:bg-red-900/5">
+            <h3 className="text-sm font-black tracking-widest text-red-600 uppercase dark:text-red-400">
+              Hardest Modules
+            </h3>
+            <p className="text-xs font-medium text-red-400/60">Lowest pass rates</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50/50 text-[10px] font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/20">
+                <tr>
+                  <th className="px-5 py-3">Module</th>
+                  <th className="px-5 py-3 text-center">Total</th>
+                  <th className="px-5 py-3 text-center">Pass</th>
+                  <th className="px-5 py-3 text-center">Fail</th>
+                  <th className="px-5 py-3 text-right">Rate</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {analytics.hardestModules.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-8 text-center text-xs text-slate-400 italic">
+                      No module data available
+                    </td>
+                  </tr>
+                ) : (
+                  analytics.hardestModules.map((m) => (
+                    <tr key={m.moduleCode} className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                      <td className="px-5 py-3">
+                        <span className="rounded-lg bg-slate-100 px-2 py-0.5 font-mono text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                          {m.moduleCode}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-center font-bold text-slate-700 dark:text-slate-300">{m.total}</td>
+                      <td className="px-5 py-3 text-center font-bold text-emerald-600">{m.passed}</td>
+                      <td className="px-5 py-3 text-center font-bold text-red-500">{m.failed}</td>
+                      <td className="px-5 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <div className="h-1.5 w-12 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                            <div className={`h-full ${m.passRate < 50 ? 'bg-red-500' : m.passRate < 75 ? 'bg-amber-500' : 'bg-emerald-500'}`} style={{ width: `${m.passRate}%` }} />
+                          </div>
+                          <span className={`text-xs font-black ${m.passRate < 50 ? 'text-red-600' : m.passRate < 75 ? 'text-amber-600' : 'text-emerald-600'}`}>
+                            {m.passRate}%
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Easiest Modules */}
+        <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="border-b border-slate-100 bg-emerald-50/30 px-6 py-4 dark:border-slate-800 dark:bg-emerald-900/5">
+            <h3 className="text-sm font-black tracking-widest text-emerald-600 uppercase dark:text-emerald-400">
+              Top Performing Modules
+            </h3>
+            <p className="text-xs font-medium text-emerald-400/60">Highest pass rates</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-slate-50/50 text-[10px] font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/20">
+                <tr>
+                  <th className="px-5 py-3">Module</th>
+                  <th className="px-5 py-3 text-center">Total</th>
+                  <th className="px-5 py-3 text-center">Pass</th>
+                  <th className="px-5 py-3 text-center">Avg Score</th>
+                  <th className="px-5 py-3 text-right">Rate</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {analytics.easiestModules.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-5 py-8 text-center text-xs text-slate-400 italic">
+                      No module data available
+                    </td>
+                  </tr>
+                ) : (
+                  analytics.easiestModules.map((m) => (
+                    <tr key={m.moduleCode} className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30">
+                      <td className="px-5 py-3">
+                        <span className="rounded-lg bg-slate-100 px-2 py-0.5 font-mono text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                          {m.moduleCode}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-center font-bold text-slate-700 dark:text-slate-300">{m.total}</td>
+                      <td className="px-5 py-3 text-center font-bold text-emerald-600">{m.passed}</td>
+                      <td className="px-5 py-3 text-center font-bold text-blue-600">{m.avgScore != null ? `${m.avgScore}%` : '—'}</td>
+                      <td className="px-5 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <div className="h-1.5 w-12 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                            <div className="h-full bg-emerald-500" style={{ width: `${m.passRate}%` }} />
+                          </div>
+                          <span className="text-xs font-black text-emerald-600">{m.passRate}%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ────────────────────────────── Main Page ────────────────────────────── */
 
 export default async function ReportsPage({
@@ -826,6 +1118,7 @@ export default async function ReportsPage({
           {tab === 'revenue' && <RevenueTab />}
           {tab === 'pools' && <PoolsTab />}
           {tab === 'attendance' && <AttendanceTab />}
+          {tab === 'exams' && <ExamsTab />}
         </div>
       </ReportsTabs>
     </div>

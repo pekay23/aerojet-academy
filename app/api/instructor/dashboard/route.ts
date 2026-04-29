@@ -3,18 +3,19 @@ import prisma from '@/lib/prisma/client'
 import { requireAuth } from '@/lib/auth/helpers'
 import { apiSuccess, apiForbidden, withErrorHandler } from '@/lib/api/response'
 import { UserRole } from '@prisma/client'
+import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const user = await requireAuth()
   if (user.role !== UserRole.INSTRUCTOR) return apiForbidden('Instructor access required')
 
-  const instructorProfile = await prisma.instructorProfile.findUnique({
-    where: { userId: user.id },
-  })
+  const instructorProfile = await getInstructorProfileByUserId(user.id)
+  if (!instructorProfile) return apiForbidden('Instructor profile not found')
+  const instructorId = instructorProfile.id
 
   const [classes, upcomingClasses, totalStudents] = await Promise.all([
     prisma.class.findMany({
-      where: { instructorId: user.id },
+      where: { instructorId },
       include: {
         course: { select: { code: true, name: true } },
         _count: { select: { attendanceRecords: true } },
@@ -22,20 +23,20 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       orderBy: { startDate: 'desc' },
     }),
     prisma.class.findMany({
-      where: { instructorId: user.id, startDate: { gte: new Date() } },
+      where: { instructorId, startDate: { gte: new Date() } },
       include: { course: { select: { code: true, name: true } } },
       orderBy: { startDate: 'asc' },
       take: 10,
     }),
     prisma.attendanceRecord.findMany({
-      where: { class: { instructorId: user.id } },
+      where: { class: { instructorId } },
       select: { userId: true },
       distinct: ['userId'],
     }),
   ])
 
   const recentAttendance = await prisma.attendanceRecord.findMany({
-    where: { class: { instructorId: user.id } },
+    where: { class: { instructorId } },
     orderBy: { date: 'desc' },
     take: 100,
   })
