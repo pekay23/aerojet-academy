@@ -6,12 +6,11 @@ import {
   Users,
   Calendar,
   BookOpen,
-  Trophy,
-  MoreVertical,
   UserPlus,
   Settings,
+  Clock3,
 } from 'lucide-react'
-import { getPoolWithDetails, type PoolWithDetails } from '@/lib/pools/operations'
+import { getPoolWithDetails } from '@/lib/pools/operations'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
 import PoolStatusBadge from '../../../_components/PoolStatusBadge'
@@ -95,6 +94,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                 <th className="px-6 py-4">Student</th>
                 <th className="px-6 py-4">Module</th>
                 <th className="px-6 py-4">Attendance</th>
+                <th className="px-6 py-4">Assigned Sitting</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
@@ -103,7 +103,7 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
               {pool.memberships.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={6}
                     className="px-6 py-12 text-center text-slate-500 dark:text-slate-400"
                   >
                     <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-800/50">
@@ -143,19 +143,50 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                     </td>
 
                     <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
-                          member.examAttendance?.status === 'PRESENT'
-                            ? 'bg-emerald-100 text-emerald-700'
-                            : member.examAttendance?.status === 'ABSENT'
-                              ? 'bg-red-100 text-red-700'
-                              : member.examAttendance?.status === 'EXCUSED'
-                                ? 'bg-blue-100 text-blue-700'
-                                : 'bg-slate-100 text-slate-500'
-                        }`}
-                      >
-                        {member.examAttendance?.status || 'UNMARKED'}
-                      </span>
+                      {(() => {
+                        const activeAssignment = member.booking?.sittingAssignments?.[0] || null
+                        const attendanceStatus =
+                          member.examAttendance?.status || activeAssignment?.attendanceStatus || null
+
+                        return (
+                          <span
+                            className={`inline-flex items-center rounded-full px-2 py-1 text-[10px] font-bold uppercase ${
+                              attendanceStatus === 'PRESENT'
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : attendanceStatus === 'ABSENT'
+                                  ? 'bg-red-100 text-red-700'
+                                  : attendanceStatus === 'EXCUSED'
+                                    ? 'bg-blue-100 text-blue-700'
+                                    : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            {attendanceStatus || 'UNMARKED'}
+                          </span>
+                        )
+                      })()}
+                    </td>
+                    <td className="px-6 py-4">
+                      {(() => {
+                        const activeAssignment = member.booking?.sittingAssignments?.[0] || null
+                        const sitting = member.examAttendance?.sitting || activeAssignment?.sitting || null
+
+                        return sitting ? (
+                          <Link
+                            href={`/staff/exams/events/${pool.eventId}#sitting-${sitting.id}`}
+                            className="block text-xs text-slate-600 transition-colors hover:text-aerojet-blue dark:text-slate-400 dark:hover:text-blue-400"
+                          >
+                            <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-300">
+                              <Clock3 className="h-3.5 w-3.5 text-slate-400" />
+                              Day {sitting.dayNumber} {sitting.sessionType}
+                            </div>
+                            <div className="mt-1">
+                              {format(new Date(sitting.startTime), 'dd MMM yyyy, h:mm a')}
+                            </div>
+                          </Link>
+                        ) : (
+                          <span className="text-xs text-slate-400">Pool time only</span>
+                        )
+                      })()}
                     </td>
                     <td className="px-6 py-4">
                       <span
@@ -173,16 +204,25 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <MemberActions
-                        membershipId={member.id}
-                        memberName={
-                          (member.user?.profile?.firstName || member.user?.profile?.lastName)
-                            ? `${member.user.profile.firstName || ''} ${member.user.profile.lastName || ''}`
-                            : member.user?.email || 'Unknown User'
-                        }
-                        status={member.status}
-                        poolId={pool.id}
-                      />
+                      {(() => {
+                        const activeAssignment = member.booking?.sittingAssignments?.[0] || null
+                        const sitting = member.examAttendance?.sitting || activeAssignment?.sitting || null
+
+                        return (
+                          <MemberActions
+                            membershipId={member.id}
+                            bookingId={member.bookingId}
+                            sittingId={sitting?.id || null}
+                            memberName={
+                              (member.user?.profile?.firstName || member.user?.profile?.lastName)
+                                ? `${member.user.profile.firstName || ''} ${member.user.profile.lastName || ''}`
+                                : member.user?.email || 'Unknown User'
+                            }
+                            status={member.status}
+                            poolId={pool.id}
+                          />
+                        )
+                      })()}
                     </td>
                   </tr>
                 ))

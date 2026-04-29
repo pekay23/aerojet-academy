@@ -9,11 +9,11 @@ export async function POST(req: NextRequest) {
   try {
     const staff = await requireStaff()
 
-    const { membershipId, bookingId } = await req.json()
+    const { membershipId, bookingId, sittingId } = await req.json()
 
-    if (!membershipId && !bookingId) {
+    if (!membershipId && !bookingId && !sittingId) {
       return NextResponse.json(
-        { error: 'Must provide either membershipId or bookingId' },
+        { error: 'Must provide either membershipId, bookingId, or sittingId' },
         { status: 400 }
       )
     }
@@ -21,6 +21,7 @@ export async function POST(req: NextRequest) {
     const result = await markExamAttendance({
       membershipId,
       bookingId,
+      sittingId,
       status: ExamAttendanceStatus.ABSENT,
       notes: 'Marked as no-show by staff',
       recordedBy: staff.id,
@@ -34,6 +35,7 @@ export async function POST(req: NextRequest) {
       details: {
         bookingId: result.bookingId,
         membershipId: result.membershipId,
+        sittingId: result.sittingId,
         status: 'ABSENT',
         reason: 'Staff marked as NO-SHOW',
       },
@@ -42,6 +44,7 @@ export async function POST(req: NextRequest) {
     revalidatePath('/staff/exams')
     revalidatePath('/student/exams')
     if (result.poolId) revalidatePath(`/staff/exams/pools/${result.poolId}`)
+    if (result.eventId) revalidatePath(`/staff/exams/events/${result.eventId}`)
     if (result.userId) revalidatePath(`/staff/students/${result.userId}`)
 
     return NextResponse.json({ success: true, message: 'Successfully marked as NO_SHOW' })

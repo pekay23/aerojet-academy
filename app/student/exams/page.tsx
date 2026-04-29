@@ -23,6 +23,7 @@ import {
   getStudentStatus,
 } from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
+import { deriveBookingDisplayResult } from '@/lib/exams/fulfillment'
 
 // The newly extracted tabs
 import AvailablePoolsTab from './_components/AvailablePoolsTab'
@@ -89,7 +90,12 @@ export default async function ExamsPage({
           include: {
             exam: { include: { examComponent: { include: { course: true } } } },
             examComponent: { include: { course: true } },
-            examAttendance: true,
+            examAttendance: { include: { sitting: true } },
+            sittingAssignments: {
+              where: { status: { in: ['ASSIGNED', 'CONFIRMED', 'ATTENDED', 'ABSENT', 'EXCUSED'] } },
+              include: { sitting: true },
+              orderBy: { assignedAt: 'desc' },
+            },
             course: true,
             event: true,
           },
@@ -106,6 +112,7 @@ export default async function ExamsPage({
           where: { userId: session.user.id },
           include: {
             booking: true,
+            sitting: true,
             examComponent: { include: { course: true } },
           },
           orderBy: { attendanceDate: 'desc' },
@@ -160,7 +167,8 @@ export default async function ExamsPage({
     bookings.forEach((b) => {
       const moduleCode = b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—'
       const attemptKey = `${moduleCode}_${b.attemptType || 'FIRST'}`
-      const attendanceStatus = b.examAttendance?.status || null
+      const activeAssignment = b.sittingAssignments?.[0] || null
+      const attendanceStatus = b.examAttendance?.status || activeAssignment?.attendanceStatus || null
 
       // Skip if we already have a formal result for this attempt
       if (seenModuleAttempts.has(attemptKey)) return
@@ -171,13 +179,22 @@ export default async function ExamsPage({
         type: b.bookingType === 'MANUAL' ? 'MANUAL' : 'BOOKING',
         moduleCode,
         moduleName: b.course?.name || b.exam?.name || b.exam?.examComponent?.course?.name || 'Exam Booking',
-        date: b.examDate || b.bookedAt,
+        date: activeAssignment?.sitting?.startTime || b.examAttendance?.sitting?.startTime || b.examDate || b.bookedAt,
+        sittingLabel: activeAssignment?.sitting
+          ? `Day ${activeAssignment.sitting.dayNumber} ${activeAssignment.sitting.sessionType}`
+          : null,
         attendanceStatus,
         passed: b.result?.toLowerCase() === 'pass' ? true : (b.result?.toLowerCase() === 'fail' ? false : null),
         score: b.score ? Number(b.score) : null,
         percentage: b.percentage ? Number(b.percentage) : null,
         attemptType: b.attemptType,
-        result: b.result,
+        result: deriveBookingDisplayResult({
+          result: b.result,
+          demandStatus: b.demandStatus,
+          executedAt: b.executedAt,
+          rolloverToEventId: b.rolloverToEventId,
+          status: b.status,
+        }),
       })
     })
 
@@ -196,7 +213,10 @@ export default async function ExamsPage({
           attendance.examComponent?.course?.name ||
           attendance.booking?.moduleCode ||
           'Exam Attendance',
-        date: attendance.attendanceDate,
+        date: attendance.sitting?.startTime || attendance.attendanceDate,
+        sittingLabel: attendance.sitting
+          ? `Day ${attendance.sitting.dayNumber} ${attendance.sitting.sessionType}`
+          : null,
         attendanceStatus: attendance.status,
         passed: null,
         score: null,

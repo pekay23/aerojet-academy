@@ -13,7 +13,11 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
 import { evaluateGoNoGo } from '@/lib/events/go-no-go'
+import { getEventDemandSnapshot } from '@/lib/exams/demand'
 import EventOverrideControls from './EventOverrideControls'
+import GenerateSittingsButton from './GenerateSittingsButton'
+import SchedulingWarningsPanel from './SchedulingWarningsPanel'
+import ResitBackfillPanel from './ResitBackfillPanel'
 import RedistributePoolButton from './RedistributePoolButton'
 import PoolList from './PoolList'
 
@@ -41,6 +45,13 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
         },
         orderBy: { name: 'asc' },
       },
+      sittings: {
+        include: {
+          examComponent: { include: { course: true } },
+          _count: { select: { assignments: true } },
+        },
+        orderBy: [{ dayNumber: 'asc' }, { sessionType: 'asc' }, { startTime: 'asc' }],
+      },
     },
   })
 
@@ -59,6 +70,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
   )
 
   const evaluation = await evaluateGoNoGo(id, { unfiltered: true }).catch(() => null)
+  const demandSnapshot = await getEventDemandSnapshot(id)
   const hasAutoPool = event.pools.some((p) => p.isAutoPool && p.poolType === 'AUTO' && p.status === 'OPEN')
 
   return (
@@ -109,6 +121,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
           {hasAutoPool && (
             <RedistributePoolButton eventId={event.id} />
           )}
+          <GenerateSittingsButton eventId={event.id} />
           <Link
             href={`/staff/exams/events/${event.id}/edit`}
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"
@@ -157,9 +170,160 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                     {event.pools?.reduce((acc, p) => acc + (p.currentMemberCount || 0), 0) || 0}
                   </span>
                 </div>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-sm text-slate-500 dark:text-slate-400">
+                    Scheduled Sittings
+                  </span>
+                  <span className="font-bold text-slate-900 dark:text-slate-100">
+                    {event.sittings.length}
+                  </span>
+                </div>
+                {demandSnapshot && (
+                  <>
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className="text-sm text-slate-500 dark:text-slate-400">
+                        Total Demand
+                      </span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100">
+                        {demandSnapshot.totals.bookingCount}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className="text-sm text-slate-500 dark:text-slate-400">
+                        Guaranteed Seats
+                      </span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100">
+                        {demandSnapshot.totals.guaranteedCount}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between">
+                      <span className="text-sm text-slate-500 dark:text-slate-400">
+                        Paid Seat Volume
+                      </span>
+                      <span className="font-bold text-slate-900 dark:text-slate-100">
+                        {demandSnapshot.totals.paidSeatCount}
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
+
+          {demandSnapshot && (
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="mb-4 text-lg font-bold text-slate-900 dark:text-slate-100">
+                Demand Breakdown
+              </h2>
+              <div className="space-y-4">
+                <div>
+                  <div className="mb-2 text-xs font-bold tracking-widest text-slate-400 uppercase">
+                    Booking Types
+                  </div>
+                  <div className="space-y-2">
+                    {demandSnapshot.byBookingType.length === 0 ? (
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        No booking demand captured yet.
+                      </p>
+                    ) : (
+                      demandSnapshot.byBookingType.map((row) => (
+                        <div key={row.bookingType} className="flex items-center justify-between text-sm">
+                          <span className="text-slate-500 dark:text-slate-400">
+                            {row.bookingType.replaceAll('_', ' ')}
+                          </span>
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
+                            {row.count}
+                            <span className="ml-2 text-xs font-medium text-slate-400">
+                              {row.guaranteedCount} guaranteed
+                            </span>
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-50 pt-4">
+                  <div className="mb-2 text-xs font-bold tracking-widest text-slate-400 uppercase">
+                    Modules
+                  </div>
+                  <div className="space-y-2">
+                    {demandSnapshot.modules.length === 0 ? (
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
+                        No module demand captured yet.
+                      </p>
+                    ) : (
+                      demandSnapshot.modules.slice(0, 8).map((module) => (
+                        <div key={module.moduleCode} className="flex items-center justify-between text-sm">
+                          <span className="text-slate-500 dark:text-slate-400">{module.moduleCode}</span>
+                          <span className="font-bold text-slate-900 dark:text-slate-100">
+                            {module.bookingCount}
+                            <span className="ml-2 text-xs font-medium text-slate-400">
+                              {module.guaranteedCount} guaranteed
+                            </span>
+                          </span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  {demandSnapshot.modules.length > 8 && (
+                    <p className="mt-3 text-xs text-slate-400">
+                      Showing the first 8 modules here. A dedicated demand board will expose the full distribution later in the refactor.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {event.sittings.length > 0 && (
+            <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <h2 className="mb-4 text-lg font-bold text-slate-900 dark:text-slate-100">
+                Scheduled Sittings
+              </h2>
+              <div className="space-y-3">
+                {event.sittings.slice(0, 8).map((sitting) => (
+                  <div
+                    key={sitting.id}
+                    id={`sitting-${sitting.id}`}
+                    className="rounded-xl border border-slate-100 p-3 dark:border-slate-800"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                          {sitting.examComponent.course?.code || sitting.examComponent.code}
+                        </div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400">
+                          Day {sitting.dayNumber} · {sitting.sessionType} · {format(new Date(sitting.startTime), 'dd MMM yyyy, h:mm a')}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                          {sitting._count.assignments}/{sitting.capacity}
+                        </div>
+                        <div className="text-[11px] text-slate-400">
+                          {sitting.status}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {event.sittings.length > 8 && (
+                  <p className="text-xs text-slate-400">
+                    Showing the first 8 sittings on this page.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {event.sittings.length > 0 && (
+            <SchedulingWarningsPanel eventId={event.id} />
+          )}
+
+          {event.sittings.length > 0 && (
+            <ResitBackfillPanel eventId={event.id} />
+          )}
 
           {evaluation && (
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -198,6 +362,8 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                     className={`rounded-lg p-3 text-sm font-medium ${
                       evaluation.decision === 'GO'
                         ? 'border border-green-200 bg-green-50 text-green-700'
+                        : evaluation.decision === 'GO_WITH_UNDERFILLED_SITTINGS'
+                          ? 'border border-blue-200 bg-blue-50 text-blue-700'
                         : evaluation.decision === 'NO_GO'
                           ? 'border border-red-200 bg-red-50 text-red-700'
                           : 'border border-amber-200 bg-amber-50 text-amber-700'
@@ -205,6 +371,8 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                   >
                     {evaluation.decision === 'GO'
                       ? 'Ready for confirmation'
+                      : evaluation.decision === 'GO_WITH_UNDERFILLED_SITTINGS'
+                        ? 'Event viable with underfilled pools'
                       : evaluation.decision === 'NO_GO'
                         ? 'Cancellation criteria met'
                         : 'Needs manual review'}
@@ -232,11 +400,15 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                 <p className="text-xs text-slate-500">
                   {event.pools?.length || 0} pool{event.pools?.length !== 1 ? 's' : ''}
                   {' · '}
-                  {event.pools?.reduce((a, p) => a + (p.currentMemberCount || 0), 0) || 0} candidates
+                  {event.pools?.reduce((a, p) => a + (p.currentMemberCount || 0), 0) || 0} in pools
+                  {demandSnapshot ? ` · ${demandSnapshot.totals.bookingCount} total demand` : ''}
                   {' · '}
                   {event.pools?.filter((p) => (p.currentMemberCount || 0) >= (p.maxCandidates || 0)).length || 0} full
                 </p>
               )}
+            </div>
+            <div className="p-6 pb-0">
+              <ResitBackfillPanel eventId={event.id} />
             </div>
             <PoolList pools={serializablePools} />
           </div>

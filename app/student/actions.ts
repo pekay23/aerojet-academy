@@ -9,7 +9,7 @@ import {
   getPoolWithDetails,
   getAvailablePools,
 } from '@/lib/pools/operations'
-import { bookStandaloneExam, bookResitExam } from '@/lib/enrollment/exams'
+import { bookStandaloneExam, bookResitExam, placeExamBookingInStandardPool } from '@/lib/enrollment/exams'
 import prisma from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -20,7 +20,6 @@ import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 import { studentCreatePoolSchema, CreatePoolInput, validateBody } from '@/lib/validation/schemas'
 import { assertExamOnlyPathway } from '@/lib/pools/access-control'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
-import { addToAutoPool } from '@/lib/pools/auto-pool'
 import { chargeWallet } from '@/lib/wallet/operations'
 
 export async function enrollInCourse(courseId: string) {
@@ -259,11 +258,11 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     }
   }
 
+  // 2. Module Diversity Cap — max 4 unique modules per pool
   if (pool.currentMemberCount >= pool.maxCandidates) {
     return { error: 'This exam booking is full.' }
   }
 
-  // 2. Module Diversity Cap — max 4 unique modules per pool
   const existingModules = pool.memberships.map((m) => m.examComponent?.course?.code).filter(Boolean)
   const uniqueModules = new Set(existingModules)
   const isNewModule = !uniqueModules.has(moduleCode)
@@ -1037,6 +1036,8 @@ export async function bookStandaloneExamAction(params: {
 }
 
 export async function bookBundleExamsAction(params: { moduleCodes: string[]; eventId: string }) {
+  return bookBundleExamsAtomicAction(params)
+
   try {
     const user = await requireStudent()
     await assertExamOnlyPathway(user.id)
@@ -1129,54 +1130,33 @@ export async function bookBundleExamsAtomicAction(params: {
         const validUntil = new Date()
         validUntil.setFullYear(validUntil.getFullYear() + 1)
 
-        await tx.examBundle.create({
+        const bundle = await tx.examBundle.create({
           data: {
             userId: user.id,
             bundleType: bookingType === 'TWIN_PACK' ? 'TWO_SEAT' : 'FOUR_SEAT',
             totalSeats: moduleCodes.length,
-            usedSeats: moduleCodes.length,
-            status: 'EXHAUSTED',
+            usedSeats: 0,
+            status: 'ACTIVE',
             amountPaid: bundlePrice,
             freeModuleChanges: bookingType === 'FOUR_PACK' ? 1 : 0,
             validUntil,
           },
         })
 
-        const existingCount = await tx.poolMembership.count({
-          where: {
-            userId: user.id,
-            pool: { eventId },
-            status: { in: ['RESERVED', 'CONFIRMED'] },
-          },
-        })
-        if (existingCount + components.length > 4) {
-          throw new Error('This bundle would exceed the 4-seat limit for a single exam event.')
-        }
-
         for (const component of components) {
-          const duplicate = await tx.poolMembership.findFirst({
-            where: {
-              userId: user.id,
-              pool: { eventId },
-              examComponentId: component.id,
-              status: { in: ['RESERVED', 'CONFIRMED'] },
-            },
-          })
-          if (duplicate) {
-            throw new Error(
-              `You are already booked for module ${component.course.code} in this event.`
-            )
-          }
-
-          await addToAutoPool({
+          const result = await placeExamBookingInStandardPool(tx, {
             userId: user.id,
             eventId,
-            bookingType,
             examComponentId: component.id,
             moduleCode: component.course.code,
-            amount: 0,
-            tx,
+            bookingType,
+            reserveAmount: 0,
+            bundleId: bundle.id,
           })
+
+          if (!result.success) {
+            throw new Error(result.error || `Failed to place module ${component.course.code}.`)
+          }
         }
       },
       {

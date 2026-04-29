@@ -97,41 +97,37 @@ export const POST = withErrorHandler(
       if (paymentMethod === 'AUTO_DEBIT') {
         const wallet = await tx.wallet.findUnique({ where: { userId: studentId } })
         if (!wallet) {
-          throw new Error('Student wallet not found. Cannot auto-debit.')
+          throw new Error(
+            'Student wallet not found. Please ensure the student has a wallet before booking. You may need to credit their wallet first via the Wallet tab.'
+          )
         }
 
         const available = Number(wallet.availableBalance)
         if (available < totalPrice) {
           throw new Error(
-            `Insufficient wallet balance. Need €${totalPrice}, available €${available.toFixed(2)}.`
+            `Insufficient wallet balance. Need €${totalPrice.toFixed(2)}, available €${available.toFixed(2)}. ` +
+            `Please adjust the student's wallet balance first (Student Profile → Wallet tab → Manual Adjustment), then try booking again.`
           )
         }
 
-        // Create wallet transaction
-        const txn = await tx.walletTransaction.create({
-          data: {
-            walletId: wallet.id,
-            type: 'DEBIT',
-            amount: totalPrice,
-            balanceBefore: wallet.balance,
-            balanceAfter: Number(wallet.balance) - totalPrice,
-            availableBefore: wallet.availableBalance,
-            availableAfter: Number(wallet.availableBalance) - totalPrice,
-            referenceType: 'EXAM_BOOKING',
-            description: `Admin booked ${bookingType.replace(/_/g, ' ')} exam(s): ${components.map((c) => c.code).join(', ')}`,
-            createdBy: staff.id,
-          },
-        })
-        walletTxnId = txn.id
+        // Use standard chargeWallet() for proper audit trail
+        const { chargeWallet } = await import('@/lib/wallet/operations')
+        await chargeWallet(
+          tx,
+          studentId,
+          totalPrice,
+          `Admin booked ${bookingType.replace(/_/g, ' ')} exam(s): ${components.map((c) => c.code).join(', ')}`,
+          `ADMIN_BOOKING_${Date.now()}`,
+          'EXAM_BOOKING'
+        )
 
-        // Update wallet balance
-        await tx.wallet.update({
-          where: { userId: studentId },
-          data: {
-            balance: { decrement: totalPrice },
-            availableBalance: { decrement: totalPrice },
-          },
+        // Retrieve the wallet transaction ID for linking to bookings
+        const latestTxn = await tx.walletTransaction.findFirst({
+          where: { wallet: { userId: studentId }, referenceType: 'EXAM_BOOKING' },
+          orderBy: { createdAt: 'desc' },
+          select: { id: true },
         })
+        walletTxnId = latestTxn?.id ?? null
       }
 
       // Create exam bookings
@@ -155,7 +151,7 @@ export const POST = withErrorHandler(
             bookingType: bookingType,
             attemptType: attemptType || (bookingType === 'RESIT' ? 'RESIT_1' : 'FIRST'),
             isResit: bookingType === 'RESIT',
-            sourceNotes: notes || `Booked by admin (${staff.email || staff.id})`,
+
             bookingGroupRef,
             walletTxnId: isFirst ? walletTxnId : undefined,
           },

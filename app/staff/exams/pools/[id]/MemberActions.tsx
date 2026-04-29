@@ -12,6 +12,8 @@ import {
 
 interface MemberActionsProps {
   membershipId: string
+  bookingId?: string | null
+  sittingId?: string | null
   memberName: string
   status: string
   poolId: string
@@ -19,6 +21,8 @@ interface MemberActionsProps {
 
 export default function MemberActions({
   membershipId,
+  bookingId,
+  sittingId,
   memberName,
   status,
   poolId,
@@ -64,7 +68,7 @@ export default function MemberActions({
       const res = await fetch('/api/staff/exam-attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ membershipId, status: 'ABSENT' }),
+        body: JSON.stringify({ membershipId, bookingId, sittingId, status: 'ABSENT' }),
       })
       if (!res.ok) {
         const data = await res.json()
@@ -85,7 +89,7 @@ export default function MemberActions({
       const res = await fetch('/api/staff/exam-attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ membershipId, status: 'PRESENT' }),
+        body: JSON.stringify({ membershipId, bookingId, sittingId, status: 'PRESENT' }),
       })
       if (!res.ok) {
         const data = await res.json()
@@ -106,7 +110,7 @@ export default function MemberActions({
       const res = await fetch('/api/staff/exam-attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ membershipId, status: 'EXCUSED' }),
+        body: JSON.stringify({ membershipId, bookingId, sittingId, status: 'EXCUSED' }),
       })
       if (!res.ok) {
         const data = await res.json()

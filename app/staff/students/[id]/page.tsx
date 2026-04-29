@@ -27,7 +27,7 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
 
   // Fetch comprehensive student data
   const student = await prisma.user.findUnique({
-    where: { id, role: 'STUDENT' },
+    where: { id, role: { in: ['STUDENT', 'APPLICANT'] } },
     include: {
       profile: true,
       studentProfile: {
@@ -61,6 +61,11 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
         where: { deletedAt: null },
         include: {
           examAttendance: true,
+          sittingAssignments: {
+            where: { status: { in: ['ASSIGNED', 'CONFIRMED', 'ATTENDED', 'ABSENT', 'EXCUSED'] } },
+            include: { sitting: true },
+            orderBy: { assignedAt: 'desc' },
+          },
           exam: {
             include: {
               examComponent: { include: { course: { select: { name: true, code: true } } } },

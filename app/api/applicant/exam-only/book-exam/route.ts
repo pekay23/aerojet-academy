@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
-import { Prisma } from '@prisma/client'
 import { joinPool } from '@/lib/pools/join'
-import { chargeWallet } from '@/lib/wallet/operations'
+import { bookStandaloneExam } from '@/lib/enrollment/exams'
 import { promoteApplicantToStudent } from '@/lib/enrollment/pathway'
 
 export async function POST(request: Request) {
@@ -69,65 +68,38 @@ export async function POST(request: Request) {
     // INDIVIDUAL BOOKING (€520 — guaranteed seat, atomic transaction)
     // ====================================================================
     if (isIndividual) {
-      const booking = await prisma.$transaction(
-        async (tx) => {
-          // 1. Consume bundle seat or charge wallet atomically
-          if (activeBundle) {
-            await tx.examBundle.update({
-              where: { id: activeBundle.id },
-              data: { usedSeats: { increment: 1 } },
-            })
-          } else {
-            await chargeWallet(
-              tx,
-              userId,
-              depositAmount,
-              `Individual Exam Payment: ${examComponent.course.code} - ${examComponent.name}`,
-              examComponentId,
-              'EXAM_BOOKING'
-            )
-          }
+      let examEvent = await prisma.examEvent.findFirst({
+        where: { status: { in: ['OPEN', 'DRAFT'] } },
+        orderBy: { startDate: 'asc' },
+      })
 
-          // 2. Find or create exam event
-          let examEvent = await tx.examEvent.findFirst({
-            where: { status: { in: ['OPEN', 'DRAFT'] } },
-            orderBy: { startDate: 'asc' },
-          })
+      if (!examEvent) {
+        const futureDate = new Date()
+        futureDate.setMonth(futureDate.getMonth() + 3)
+        examEvent = await prisma.examEvent.create({
+          data: {
+            name: `Exam Event ${futureDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
+            startDate: futureDate,
+            endDate: new Date(futureDate.getTime() + 2 * 24 * 60 * 60 * 1000),
+            paymentDeadline: new Date(futureDate.getTime() - 21 * 24 * 60 * 60 * 1000),
+            status: 'OPEN',
+          },
+        })
+      }
 
-          if (!examEvent) {
-            const futureDate = new Date()
-            futureDate.setMonth(futureDate.getMonth() + 3)
-            examEvent = await tx.examEvent.create({
-              data: {
-                name: `Exam Event ${futureDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`,
-                startDate: futureDate,
-                endDate: new Date(futureDate.getTime() + 2 * 24 * 60 * 60 * 1000),
-                paymentDeadline: new Date(futureDate.getTime() - 21 * 24 * 60 * 60 * 1000),
-                status: 'OPEN',
-              },
-            })
-          }
+      const bookingResult = await bookStandaloneExam(userId, {
+        moduleCode: examComponent.course.code,
+        eventId: examEvent.id,
+      })
 
-          // 3. Create booking record
-          const newBooking = await tx.examBooking.create({
-            data: {
-              userId,
-              examComponentId,
-              eventId: examEvent.id,
-              bookingType: 'INDIVIDUAL',
-              moduleCode: examComponent.course.code,
-              amountPaid: depositAmount,
-              status: 'PENDING',
-              examDate: examEvent.startDate,
-            },
-          })
+      const booking = await prisma.examBooking.findUnique({
+        where: { id: bookingResult.bookingId },
+      })
 
-          return newBooking
-        },
-        { isolationLevel: Prisma.TransactionIsolationLevel.Serializable }
-      )
+      if (!booking) {
+        return NextResponse.json({ error: 'Booking record was not created' }, { status: 500 })
+      }
 
-      // Promote to student (outside main tx for non-blocking)
       let promotedToStudent = false
       const existingExams = await prisma.examBooking.count({ where: { userId } })
       if (existingExams === 1) {
@@ -155,9 +127,10 @@ export async function POST(request: Request) {
         booking: {
           id: booking.id,
           type: 'INDIVIDUAL',
-          amountPaid: depositAmount,
+          amountPaid: Number(booking.amountPaid),
           status: booking.status,
         },
+        usedBundle: bookingResult.usedBundle,
       })
     }
 
@@ -260,7 +233,9 @@ export async function POST(request: Request) {
       }
     }
 
-    const updatedPool = await prisma.examPool.findUnique({ where: { id: pool.id } })
+    const assignedPoolId = joinResult.pool?.id || pool.id
+    const assignedPoolName = joinResult.pool?.name || pool.name
+    const updatedPool = await prisma.examPool.findUnique({ where: { id: assignedPoolId } })
 
     return NextResponse.json({
       success: true,
@@ -274,8 +249,8 @@ export async function POST(request: Request) {
           : `Joined booking (${pool.name}) with ${updatedPool?.currentMemberCount || 1}/28 candidates`,
       promotedToStudent,
       pool: {
-        id: pool.id,
-        name: pool.name,
+        id: assignedPoolId,
+        name: assignedPoolName,
         memberCount: updatedPool?.currentMemberCount || 1,
         status: updatedPool?.status,
       },
