@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { MoreVertical, UserMinus, XCircle } from 'lucide-react'
+import { AlertCircle, CheckCircle2, MoreVertical, UserMinus, XCircle } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import {
   DropdownMenu,
@@ -61,14 +61,56 @@ export default function MemberActions({
     if (!confirm(`Mark ${memberName} as NO_SHOW?`)) return
     setLoading(true)
     try {
-      const res = await fetch('/api/admin/exams/mark-no-show', {
+      const res = await fetch('/api/staff/exam-attendance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ membershipId }),
+        body: JSON.stringify({ membershipId, status: 'ABSENT' }),
       })
       if (!res.ok) {
         const data = await res.json()
-        alert(data.error || 'Failed to mark no-show')
+        alert(data.error || 'Failed to mark absent')
+      } else {
+        router.refresh()
+      }
+    } catch {
+      alert('Network error')
+    }
+    setLoading(false)
+  }
+
+  async function handlePresent() {
+    if (!confirm(`Mark ${memberName} as PRESENT?`)) return
+    setLoading(true)
+    try {
+      const res = await fetch('/api/staff/exam-attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ membershipId, status: 'PRESENT' }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        alert(data.error || 'Failed to mark present')
+      } else {
+        router.refresh()
+      }
+    } catch {
+      alert('Network error')
+    }
+    setLoading(false)
+  }
+
+  async function handleExcused() {
+    if (!confirm(`Mark ${memberName} as EXCUSED?`)) return
+    setLoading(true)
+    try {
+      const res = await fetch('/api/staff/exam-attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ membershipId, status: 'EXCUSED' }),
+      })
+      if (!res.ok) {
+        const data = await res.json()
+        alert(data.error || 'Failed to mark excused')
       } else {
         router.refresh()
       }
@@ -79,9 +121,9 @@ export default function MemberActions({
   }
 
   const canRemove = ['RESERVED', 'CONFIRMED'].includes(status)
-  const canMarkNoShow = status === 'CONFIRMED'
+  const canMarkAttendance = ['CONFIRMED', 'NO_SHOW'].includes(status)
 
-  if (!canRemove && !canMarkNoShow) return null
+  if (!canRemove && !canMarkAttendance) return null
 
   return (
     <DropdownMenu>
@@ -107,14 +149,34 @@ export default function MemberActions({
             Remove from Pool
           </DropdownMenuItem>
         )}
-        {canMarkNoShow && (
+        {canMarkAttendance && (
+          <DropdownMenuItem
+            onClick={handlePresent}
+            disabled={loading}
+            className="flex cursor-pointer items-center gap-2 text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700 focus:bg-emerald-50 focus:text-emerald-700 dark:hover:bg-emerald-900/20 dark:focus:bg-emerald-900/20"
+          >
+            <CheckCircle2 className="h-4 w-4" />
+            Mark Present
+          </DropdownMenuItem>
+        )}
+        {canMarkAttendance && (
           <DropdownMenuItem
             onClick={handleNoShow}
             disabled={loading}
             className="flex cursor-pointer items-center gap-2 text-amber-600 hover:bg-amber-50 hover:text-amber-700 focus:bg-amber-50 focus:text-amber-700 dark:hover:bg-amber-900/20 dark:focus:bg-amber-900/20"
           >
             <XCircle className="h-4 w-4" />
-            Mark No-Show
+            Mark Absent
+          </DropdownMenuItem>
+        )}
+        {canMarkAttendance && (
+          <DropdownMenuItem
+            onClick={handleExcused}
+            disabled={loading}
+            className="flex cursor-pointer items-center gap-2 text-blue-600 hover:bg-blue-50 hover:text-blue-700 focus:bg-blue-50 focus:text-blue-700 dark:hover:bg-blue-900/20 dark:focus:bg-blue-900/20"
+          >
+            <AlertCircle className="h-4 w-4" />
+            Mark Excused
           </DropdownMenuItem>
         )}
       </DropdownMenuContent>

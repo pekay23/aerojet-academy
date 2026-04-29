@@ -45,6 +45,7 @@ model User {
   auditLogs                 AuditLog[]
   bookingEntitlements       BookingEntitlement[]
   enrollments               Enrollment[]
+  examAttendances           ExamAttendance[]
   examBookings              ExamBooking[]
   examBundles               ExamBundle[]
   examExemptions            ExamExemption[]
@@ -67,6 +68,7 @@ model User {
   referralsReceived         Referral[]           @relation("ReferralsReceived")
   referralsMade             Referral[]           @relation("ReferralsMade")
   staffProfile              StaffProfile?
+  studentCalendarEvents     StudentCalendarEvent[]
   studentProfile            StudentProfile?
   tuitionBookings           TuitionBooking[]
   createdTuitionRuns        TuitionRun[]         @relation("CreatedTuitionRuns")
@@ -305,6 +307,7 @@ model ExamComponent {
   questionCount   Int?
   bookings        ExamBooking[]
   course          Course            @relation(fields: [courseId], references: [id])
+  examAttendances ExamAttendance[]
   exams           Exam[]
   poolMemberships PoolMembership[]
   waitlist        PoolWaitlist[]
@@ -394,11 +397,15 @@ model Class {
   startDate         DateTime
   endDate           DateTime
   schedule          Json?
+  recurrenceType    RecurrenceType     @default(NONE)
+  recurrenceDays    String? // For CUSTOM: comma-separated days "0,1,2,3,4,5,6" (Sun-Sat)
+  recurrenceUntil   DateTime?
   maxStudents       Int                @default(28)
   currentStudents   Int                @default(0)
   createdAt         DateTime           @default(now())
   updatedAt         DateTime           @updatedAt
   attendanceRecords AttendanceRecord[]
+  examAttendances   ExamAttendance[]
   academicYear      AcademicYear?      @relation(fields: [academicYearId], references: [id])
   course            Course             @relation(fields: [courseId], references: [id])
   instructor        InstructorProfile? @relation(fields: [instructorId], references: [id])
@@ -480,6 +487,7 @@ model ExamEvent {
   updatedAt            DateTime            @updatedAt
   createdBy            String?
   deletedAt            DateTime?
+  examAttendances      ExamAttendance[]
   examBookings         ExamBooking[]
   pools                ExamPool[]
   exams                Exam[]
@@ -549,6 +557,7 @@ model PoolMembership {
   sourceAutoPoolId String?
   deletedAt        DateTime?
   booking          ExamBooking?     @relation(fields: [bookingId], references: [id])
+  examAttendance   ExamAttendance?
   examComponent    ExamComponent?   @relation(fields: [examComponentId], references: [id])
   pool             ExamPool         @relation(fields: [poolId], references: [id], onDelete: Cascade)
   user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -643,6 +652,7 @@ model Exam {
   passingScore    Decimal       @db.Decimal(5, 2)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+  attendances     ExamAttendance[]
   bookings        ExamBooking[]
   results         ExamResult[]
   event           ExamEvent?    @relation(fields: [eventId], references: [id])
@@ -684,10 +694,12 @@ model ExamBooking {
   result             String?
   score              Decimal?           @db.Decimal(5, 2)
   percentage         Decimal?           @db.Decimal(5, 2)
+  examCategory       ExamCategory       @default(OFFICIAL_EASA)
   course             Course?            @relation(fields: [courseId], references: [id])
   event              ExamEvent?         @relation(fields: [eventId], references: [id])
   examComponent      ExamComponent?     @relation(fields: [examComponentId], references: [id])
   exam               Exam?              @relation(fields: [examId], references: [id])
+  examAttendance     ExamAttendance?
   user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   walletTransaction  WalletTransaction? @relation(fields: [walletTxnId], references: [id])
   poolMemberships    PoolMembership[]
@@ -703,6 +715,39 @@ model ExamBooking {
   @@index([combinedGroupRef])
   @@index([deletedAt])
   @@map("exam_bookings")
+}
+
+model ExamAttendance {
+  id              String               @id @default(cuid())
+  userId          String
+  bookingId       String?              @unique
+  membershipId    String?              @unique
+  eventId         String?
+  examId          String?
+  examComponentId String?
+  classId         String?
+  attendanceDate  DateTime
+  status          ExamAttendanceStatus @default(PRESENT)
+  notes           String?
+  recordedBy      String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  booking         ExamBooking?         @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+  membership      PoolMembership?      @relation(fields: [membershipId], references: [id], onDelete: SetNull)
+  event           ExamEvent?           @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  exam            Exam?                @relation(fields: [examId], references: [id], onDelete: SetNull)
+  examComponent   ExamComponent?       @relation(fields: [examComponentId], references: [id], onDelete: SetNull)
+  class           Class?               @relation(fields: [classId], references: [id], onDelete: SetNull)
+  user            User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([eventId])
+  @@index([examId])
+  @@index([examComponentId])
+  @@index([classId])
+  @@index([attendanceDate])
+  @@index([status])
+  @@map("exam_attendance")
 }
 
 model BookingEntitlement {
@@ -739,6 +784,7 @@ model ExamResult {
   attemptType       String?
   migrationRef      String?
   moduleCode        String?
+  examCategory      ExamCategory      @default(OFFICIAL_EASA)
   sourceNotes       String?
   exam              Exam?     @relation(fields: [examId], references: [id], onDelete: Cascade)
   user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1365,6 +1411,12 @@ enum MembershipStatus {
   NO_SHOW
 }
 
+enum ExamAttendanceStatus {
+  PRESENT
+  ABSENT
+  EXCUSED
+}
+
 enum TransactionType {
   TOP_UP
   RESERVE
@@ -1417,4 +1469,38 @@ enum NewsArticleStatus {
 enum ExamComponentType {
   MCQ
   ESSAY
+}
+
+enum ExamCategory {
+  INTERNAL
+  OFFICIAL_EASA
+}
+
+enum RecurrenceType {
+  NONE
+  DAILY
+  WEEKLY
+  MONTHLY
+  CUSTOM
+}
+
+model StudentCalendarEvent {
+  id              String         @id @default(cuid())
+  userId          String
+  title           String
+  description     String?
+  startDate       DateTime
+  endDate         DateTime?
+  color           String?        @default("#3b82f6")
+  recurrenceType  RecurrenceType @default(NONE)
+  recurrenceDays  String? // For CUSTOM: comma-separated days "0,1,2,3,4,5,6" (Sun-Sat)
+  recurrenceUntil DateTime?
+  isSystemEvent   Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([startDate])
+  @@map("student_calendar_events")
 }

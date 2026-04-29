@@ -16,7 +16,12 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import ExamsTabs from './_components/ExamsTabs'
 import ExamHistoryTable from './_components/ExamHistoryTable'
-import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from '@/lib/access-control'
+import {
+  canAccessFeature,
+  getEnrollmentMilestoneStatus,
+  getStudentPaymentAccessLevel,
+  getStudentStatus,
+} from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
 // The newly extracted tabs
@@ -41,18 +46,19 @@ export default async function ExamsPage({
   const tab = tabParam || 'available'
 
   const session = await getAuthSession()
-  if (!session) return null
+  if (!session) redirect('/login')
 
   const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'exams')
 
   if (isFullTime && !hasAccess) {
-    const [milestoneStatus, wallet] = await Promise.all([
+    const [milestoneStatus, wallet, accessLevel] = await Promise.all([
       getEnrollmentMilestoneStatus(session.user.id),
       prisma.wallet.findUnique({
         where: { userId: session.user.id },
         select: { availableBalance: true, reservedBalance: true, currency: true },
       }),
+      getStudentPaymentAccessLevel(session.user.id),
     ])
 
     const walletBalance = {
@@ -65,7 +71,7 @@ export default async function ExamsPage({
       <div className="space-y-8">
 
         <PaymentRequiredBanner
-          accessLevel="SEAT_ONLY"
+          accessLevel={accessLevel}
           milestoneStatus={milestoneStatus}
           walletBalance={walletBalance}
         />
@@ -74,15 +80,17 @@ export default async function ExamsPage({
   }
 
   // Common data for Records tab
-  let bookings, results, studentProfile
+  let bookings, results, examAttendances, studentProfile
   if (tab === 'records') {
     try {
-      ;[bookings, results, studentProfile] = await Promise.all([
+      ;[bookings, results, examAttendances, studentProfile] = await Promise.all([
         prisma.examBooking.findMany({
           where: { userId: session.user.id },
           include: {
             exam: { include: { examComponent: { include: { course: true } } } },
             examComponent: { include: { course: true } },
+            examAttendance: true,
+            course: true,
             event: true,
           },
           orderBy: { examDate: 'desc' },
@@ -93,6 +101,14 @@ export default async function ExamsPage({
             exam: { include: { examComponent: { include: { course: true } } } },
           },
           orderBy: { createdAt: 'desc' },
+        }),
+        prisma.examAttendance.findMany({
+          where: { userId: session.user.id },
+          include: {
+            booking: true,
+            examComponent: { include: { course: true } },
+          },
+          orderBy: { attendanceDate: 'desc' },
         }),
         prisma.studentProfile.findUnique({
           where: { userId: session.user.id },
@@ -112,30 +128,104 @@ export default async function ExamsPage({
   let allHistory: UnifiedExamRecord[] = []
   let failedAttempts: UnifiedExamRecord[] = []
   
-  if (tab === 'records' && results) {
-    allHistory = results.map((r) => ({
-      id: r.id,
-      type: 'ORIGINAL' as const,
-      moduleCode: r.moduleCode || r.exam?.examComponent?.course?.code || '—',
-      moduleName: r.exam?.examComponent?.course?.name || r.exam?.name || 'Manual Result',
-      date: r.exam?.examDate || r.createdAt,
-      passed: r.passed,
-      score: r.score ? Number(r.score) : null,
-      maxScore: r.maxScore ? Number(r.maxScore) : null,
-      percentage: r.percentage ? Number(r.percentage) : null,
-      grade: r.grade,
-      attemptType: r.attemptType,
-    }))
+  if (tab === 'records' && results && bookings && examAttendances) {
+    const records: UnifiedExamRecord[] = []
+    const seenModuleAttempts = new Set<string>()
+    const seenAttendanceIds = new Set<string>()
+
+    // 1. Process formal results first
+    results.forEach((r) => {
+      const moduleCode = r.moduleCode || r.exam?.examComponent?.course?.code || '—'
+      const attemptKey = `${moduleCode}_${r.attemptType || 'FIRST'}`
+      
+      records.push({
+        id: r.id,
+        type: (r.migrationRef || r.sourceNotes?.includes('migrated')) ? 'HISTORICAL' : 'ORIGINAL',
+        moduleCode,
+        moduleName: r.exam?.examComponent?.course?.name || r.exam?.name || 'Manual Result',
+        date: r.exam?.examDate || r.createdAt,
+        attendanceStatus: null,
+        passed: r.passed,
+        score: r.score ? Number(r.score) : null,
+        maxScore: r.maxScore ? Number(r.maxScore) : null,
+        percentage: r.percentage ? Number(r.percentage) : null,
+        grade: r.grade,
+        attemptType: r.attemptType,
+        result: r.passed ? 'PASS' : 'FAIL',
+      })
+      seenModuleAttempts.add(attemptKey)
+    })
+
+    // 2. Process bookings that don't have a formal result yet
+    bookings.forEach((b) => {
+      const moduleCode = b.moduleCode || b.course?.code || b.exam?.examComponent?.course?.code || '—'
+      const attemptKey = `${moduleCode}_${b.attemptType || 'FIRST'}`
+      const attendanceStatus = b.examAttendance?.status || null
+
+      // Skip if we already have a formal result for this attempt
+      if (seenModuleAttempts.has(attemptKey)) return
+      if (b.examAttendance?.id) seenAttendanceIds.add(b.examAttendance.id)
+
+      records.push({
+        id: b.id,
+        type: b.bookingType === 'MANUAL' ? 'MANUAL' : 'BOOKING',
+        moduleCode,
+        moduleName: b.course?.name || b.exam?.name || b.exam?.examComponent?.course?.name || 'Exam Booking',
+        date: b.examDate || b.bookedAt,
+        attendanceStatus,
+        passed: b.result?.toLowerCase() === 'pass' ? true : (b.result?.toLowerCase() === 'fail' ? false : null),
+        score: b.score ? Number(b.score) : null,
+        percentage: b.percentage ? Number(b.percentage) : null,
+        attemptType: b.attemptType,
+        result: b.result,
+      })
+    })
+
+    examAttendances.forEach((attendance) => {
+      if (seenAttendanceIds.has(attendance.id)) return
+
+      records.push({
+        id: `attendance_${attendance.id}`,
+        type: 'ATTENDANCE',
+        moduleCode:
+          attendance.booking?.moduleCode ||
+          attendance.examComponent?.course?.code ||
+          attendance.examComponent?.code ||
+          'â€”',
+        moduleName:
+          attendance.examComponent?.course?.name ||
+          attendance.booking?.moduleCode ||
+          'Exam Attendance',
+        date: attendance.attendanceDate,
+        attendanceStatus: attendance.status,
+        passed: null,
+        score: null,
+        percentage: null,
+        result: attendance.status,
+      })
+    })
+
+    allHistory = records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     failedAttempts = allHistory.filter((r) => r.passed === false)
   }
 
   // For full-time students, redirect to records tab if trying to access booking tabs
   const isFullTimeStudent = isFullTime
-  const validTabs = isFullTimeStudent ? ['records', 'bookings'] : ['available', 'individual', 'group', 'resit', 'bookings', 'records']
-  const effectiveTab = validTabs.includes(tab) ? tab : (isFullTimeStudent ? 'records' : 'available')
+  const validTabs = isFullTimeStudent
+    ? ['records']
+    : isExamOnly
+      ? ['available', 'individual', 'group', 'resit', 'bookings', 'records']
+      : ['bookings', 'records']
+  const effectiveTab = validTabs.includes(tab)
+    ? tab
+    : isFullTimeStudent
+      ? 'records'
+      : isExamOnly
+        ? 'available'
+        : 'records'
 
   return (
-    <ExamsTabs isFullTime={isFullTimeStudent}>
+    <ExamsTabs isFullTime={isFullTimeStudent} canBookExams={isExamOnly}>
       {effectiveTab === 'available' && <AvailablePoolsTab />}
 
       {effectiveTab === 'individual' && <BookingActionTab type="individual" />}

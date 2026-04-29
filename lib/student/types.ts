@@ -87,6 +87,7 @@ export interface SerializedUserProfile {
   studentProfile?: {
     studentId?: string | null
     enrollmentType?: string | null
+    pathwayName?: string | null
     enrollmentDate?: string | null
   } | null
   settings?: any
@@ -94,14 +95,16 @@ export interface SerializedUserProfile {
 
 export interface UnifiedExamRecord {
   id: string
-  type: 'ORIGINAL' | 'HISTORICAL'
+  type: 'ORIGINAL' | 'HISTORICAL' | 'BOOKING' | 'MANUAL' | string
   moduleCode: string
   moduleName: string
-  date: Date
+  date: Date | string
+  attendanceStatus?: string | null
   passed?: boolean | null
   score?: number | null
   maxScore?: number | null
   percentage?: number | null
   grade?: string | null
   attemptType?: string | null
+  result?: string | null
 }

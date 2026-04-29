@@ -68,6 +68,7 @@ export async function addToAutoPool(params: {
   const { userId, eventId, bookingType, examComponentId, moduleCode, amount, isResit, tx } = params
 
   const autoPool = await getOrCreateAutoPool(eventId, tx)
+  const bookingStatus = amount > 0 ? 'PENDING' : 'APPROVED'
 
   // Reserve wallet funds if amount > 0
   if (amount > 0) {
@@ -90,7 +91,7 @@ export async function addToAutoPool(params: {
       moduleCode,
       bookingType,
       amountPaid: amount,
-      status: 'PENDING',
+      status: bookingStatus,
       isResit: isResit ?? false,
       autoPoolId: autoPool.id,
     },

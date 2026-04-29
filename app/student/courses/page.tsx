@@ -14,7 +14,12 @@ import { Suspense } from 'react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
-import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from '@/lib/access-control'
+import {
+  canAccessFeature,
+  getEnrollmentMilestoneStatus,
+  getStudentPaymentAccessLevel,
+  getStudentStatus,
+} from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
 export const metadata: Metadata = {
@@ -30,12 +35,13 @@ export default async function CoursesPage() {
   const hasAccess = await canAccessFeature(session.user.id, 'courses')
 
   if (isFullTime && !hasAccess) {
-    const [milestoneStatus, wallet] = await Promise.all([
+    const [milestoneStatus, wallet, accessLevel] = await Promise.all([
       getEnrollmentMilestoneStatus(session.user.id),
       prisma.wallet.findUnique({
         where: { userId: session.user.id },
         select: { availableBalance: true, reservedBalance: true, currency: true },
       }),
+      getStudentPaymentAccessLevel(session.user.id),
     ])
 
     const walletBalance = {
@@ -56,7 +62,7 @@ export default async function CoursesPage() {
         </div>
 
         <PaymentRequiredBanner
-          accessLevel="SEAT_ONLY"
+          accessLevel={accessLevel}
           milestoneStatus={milestoneStatus}
           walletBalance={walletBalance}
         />
@@ -75,7 +81,7 @@ export default async function CoursesPage() {
             Manage your active and upcoming courses.
           </p>
         </div>
-        {!isFullTime && (
+        {!isFullTime && !isExamOnly && (
           <Link
             href="/student/courses/enroll"
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-aerojet-blue/90 hover:shadow-lg active:scale-95"
@@ -87,7 +93,7 @@ export default async function CoursesPage() {
       </div>
 
       <Suspense fallback={<CoursesSkeleton />}>
-        <CourseList userId={session.user.id} />
+        <CourseList userId={session.user.id} canEnroll={!isFullTime && !isExamOnly} />
       </Suspense>
     </div>
   )
@@ -103,7 +109,7 @@ function CoursesSkeleton() {
   )
 }
 
-async function CourseList({ userId }: { userId: string }) {
+async function CourseList({ userId, canEnroll }: { userId: string; canEnroll: boolean }) {
   const enrollments = await prisma.enrollment.findMany({
     where: { userId },
     include: {
@@ -130,14 +136,16 @@ async function CourseList({ userId }: { userId: string }) {
           You haven&apos;t enrolled in any courses yet. Browse our available courses to get started
           with your training.
         </p>
-        <div className="mt-8">
-          <Link
-            href="/student/courses/enroll"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-slate-800 active:scale-95"
-          >
-            Browse Course Catalog
-          </Link>
-        </div>
+        {canEnroll && (
+          <div className="mt-8">
+            <Link
+              href="/student/courses/enroll"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-slate-800 active:scale-95"
+            >
+              Browse Course Catalog
+            </Link>
+          </div>
+        )}
       </div>
     )
   }

@@ -2,11 +2,13 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect, notFound } from 'next/navigation'
 import { ArrowLeft, Info } from 'lucide-react'
+
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
-import { getActivePaymentMethods } from '@/lib/payment-methods'
 import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
 import CoursePaymentUploadForm from '../../_components/CoursePaymentUploadForm'
+import { getActivePaymentMethods } from '@/lib/payment-methods'
+import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
+import prisma from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Purchase Course | Applicant Portal' }
 
@@ -34,21 +36,27 @@ export default async function PurchasePage({ params }: Props) {
 
   if (!course) notFound()
 
-  // Fetch user's profile and license targets to show their "entered" category
-  const studentProfile = await prisma.studentProfile.findUnique({
-    where: { userId },
-    include: {
-      licenseTargets: {
-        include: { licenseCategory: true },
+  const applicantState = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      programmeChoice: true,
+      studentProfile: {
+        select: {
+          enrollmentType: true,
+          pathwayRel: { select: { code: true } },
+          licenseTargets: {
+            include: { licenseCategory: true },
+          },
+        },
       },
     },
   })
 
+  const studentProfile = applicantState?.studentProfile
   const targetLicenseCodes = studentProfile?.licenseTargets
     .map((lt) => lt.licenseCategory.code)
     .join(', ')
 
-  // Check if this course is specifically required for their license
   const isRequiredForTarget = await prisma.licenseModuleRequirement.findFirst({
     where: {
       courseId: id,
@@ -58,20 +66,31 @@ export default async function PurchasePage({ params }: Props) {
     },
   })
 
-  const isExamOnly = studentProfile?.enrollmentType === 'EXAM_ONLY'
-  const examPrice = 300
+  const effectiveEnrollmentType = resolveEffectiveEnrollmentType({
+    pathwayCode: studentProfile?.pathwayRel?.code,
+    enrollmentType: studentProfile?.enrollmentType,
+    programmeChoice: applicantState?.programmeChoice,
+  })
+  const isExamOnly = effectiveEnrollmentType === 'EXAM_ONLY'
 
-  // Fetch wallet balance if exam only
-  let balance = 0
+  const examComponents = isExamOnly
+    ? await prisma.examComponent.findMany({
+        where: { courseId: id },
+        select: { poolPrice: true },
+      })
+    : []
+  const examPrice =
+    examComponents.length > 0
+      ? Math.min(...examComponents.map((component) => Number(component.poolPrice || 300)))
+      : 300
+
   if (isExamOnly) {
     const wallet = await prisma.wallet.findUnique({
       where: { userId },
-      select: { balance: true },
+      select: { availableBalance: true },
     })
-    balance = Number(wallet?.balance || 0)
 
-    // If they landed here without enough money, send them back to top up
-    if (balance < examPrice) {
+    if (Number(wallet?.availableBalance || 0) < examPrice) {
       redirect('/applicant/wallet-top-up')
     }
   }
@@ -119,11 +138,10 @@ export default async function PurchasePage({ params }: Props) {
         </div>
       ) : (
         <div className="grid gap-6">
-          {/* Total Amount */}
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div className="mb-4 flex items-center justify-between">
               <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                {isExamOnly ? 'Exam Fee (Pool)' : 'Total Amount'}
+                {isExamOnly ? 'Pool seat from' : 'Total Amount'}
               </span>
               <span className="font-mono text-lg font-black text-aerojet-blue dark:text-blue-400">
                 {course.currency}{' '}
@@ -142,7 +160,6 @@ export default async function PurchasePage({ params }: Props) {
             </div>
           </div>
 
-          {/* Upload Card */}
           <CoursePaymentUploadForm courseId={id} courseName={course.name} />
         </div>
       )}

@@ -1,10 +1,13 @@
 import { Metadata } from 'next'
-import { EnrollmentType } from '@prisma/client'
 import { redirect } from 'next/navigation'
-import { Clock, Users, Globe, BookOpen, CheckCircle2, Lock } from 'lucide-react'
+import { Clock, Globe, BookOpen, CheckCircle2, Lock } from 'lucide-react'
 import { Suspense } from 'react'
 
+import { CourseCategoryFilter } from '@/components/CourseCategoryFilter'
+import TrackedCourseLink from '@/components/shared/TrackedCourseLink'
+import TrackedImpression from '@/components/shared/TrackedImpression'
 import { getAuthSession } from '@/lib/auth/helpers'
+import { getCatalogVisibility, resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 import prisma from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Browse Courses | Applicant Portal' }
@@ -19,11 +22,6 @@ const categoryColor: Record<string, string> = {
   REVISION: 'bg-slate-50 text-slate-700 border-slate-200',
 }
 
-import { CourseCategoryFilter } from '@/components/CourseCategoryFilter'
-import TrackedCourseLink from '@/components/shared/TrackedCourseLink'
-import TrackedImpression from '@/components/shared/TrackedImpression'
-import { getCatalogVisibility } from '@/lib/enrollment/pathway'
-
 export default async function CoursesPage({
   searchParams,
 }: {
@@ -33,43 +31,34 @@ export default async function CoursesPage({
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const studentProfile = await prisma.studentProfile.findUnique({
-    where: { userId: session.user.id },
-    select: { enrollmentType: true },
+  const portalState = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      programmeChoice: true,
+      studentProfile: {
+        select: {
+          enrollmentType: true,
+          pathwayRel: { select: { code: true } },
+        },
+      },
+    },
+  })
+
+  const effectiveEnrollmentType = resolveEffectiveEnrollmentType({
+    pathwayCode: portalState?.studentProfile?.pathwayRel?.code,
+    enrollmentType: portalState?.studentProfile?.enrollmentType,
+    programmeChoice: portalState?.programmeChoice,
   })
 
   const canEnroll = session.user.status === 'ACTIVE'
-  const visibility = getCatalogVisibility(studentProfile?.enrollmentType || null)
+  const visibility = getCatalogVisibility(effectiveEnrollmentType)
 
-  // Fetch categories for filter and grouping
   const allCategories = await prisma.courseCategory.findMany({
     orderBy: { name: 'asc' },
   })
 
-  // Group by ID for efficient name lookup
-  const categoryMap = allCategories.reduce(
-    (acc, cat) => {
-      acc[cat.id] = cat.name
-      return acc
-    },
-    {} as Record<string, string>
-  )
-
-  // Handle legacy category aliases (e.g., ?category=MODULAR)
-  // Maps legacy string IDs to database cuid() IDs if a match is found
-  let activeCategoryId = category
-  if (category && !categoryMap[category]) {
-    const matchedCat = allCategories.find(
-      (c) => c.name.toLowerCase() === category.toLowerCase() || c.id === category
-    )
-    if (matchedCat) {
-      activeCategoryId = matchedCat.id
-    }
-  }
-
   return (
     <div className="space-y-10">
-      {/* Dynamic Header */}
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1.5">
           <div className="inline-flex items-center gap-2 rounded-full bg-aerojet-blue/5 px-3 py-1 dark:bg-blue-500/10">
@@ -82,13 +71,13 @@ export default async function CoursesPage({
             Course Catalogue
           </h1>
           <p className="max-w-xl text-sm font-medium text-slate-500 dark:text-slate-400">
-            Select from our industry-leading intensive aviation training programmes designed to
-            build the next generation of aircraft maintenance engineers.
+            Explore current aviation modules, review real pricing, and follow the route that fits
+            your study pathway.
           </p>
         </div>
 
         <div className="shrink-0">
-          <CourseCategoryFilter categories={allCategories} currentCategory={activeCategoryId} />
+          <CourseCategoryFilter categories={allCategories} currentCategory={category} />
         </div>
       </div>
 
@@ -103,7 +92,7 @@ export default async function CoursesPage({
             </p>
             <p className="mt-1 text-xs leading-relaxed font-medium text-orange-700/80 dark:text-orange-500/60">
               Your account is currently in the verification phase. Once your registration payment is
-              confirmed, you will gain full access to enroll in these modules.
+              confirmed, you will gain full access to proceed with the correct enrollment route.
             </p>
           </div>
         </div>
@@ -113,10 +102,9 @@ export default async function CoursesPage({
 
       <Suspense fallback={<CoursesSkeleton />}>
         <CourseList
-          category={activeCategoryId}
+          category={category}
           canEnroll={canEnroll}
-          enrollmentType={studentProfile?.enrollmentType || null}
-          categoryNames={categoryMap}
+          enrollmentType={effectiveEnrollmentType}
           visibility={visibility}
         />
       </Suspense>
@@ -138,21 +126,25 @@ async function CourseList({
   category,
   canEnroll,
   enrollmentType,
-  categoryNames,
   visibility,
 }: {
   category?: string
   canEnroll: boolean
-  enrollmentType: EnrollmentType | null
-  categoryNames: Record<string, string>
+  enrollmentType: string | null
   visibility: ReturnType<typeof getCatalogVisibility>
 }) {
   const coursesRaw = await prisma.course.findMany({
     where: {
       isActive: true,
-      ...(category ? { categoryId: category } : {}),
-      // Apply visibility filters if needed in the future
+      ...(category ? { category: { name: category } } : {}),
     },
+    include: {
+      category: true,
+      examComponents: {
+        select: { poolPrice: true },
+      },
+    },
+    orderBy: [{ category: { name: 'asc' } }, { code: 'asc' }],
   })
 
   const courses = coursesRaw.sort((a, b) =>
@@ -173,16 +165,18 @@ async function CourseList({
     )
   }
 
-  // Group by category for visual hierarchy
   const grouped = courses.reduce(
-    (acc, c) => {
-      const cat = c.categoryId || 'GENERAL'
+    (acc, course) => {
+      const cat = course.category?.name || 'GENERAL'
       if (!acc[cat]) acc[cat] = []
-      acc[cat].push(c)
+      acc[cat].push(course)
       return acc
     },
     {} as Record<string, typeof courses>
   )
+
+  const isExamOnly = enrollmentType === 'EXAM_ONLY'
+  const isDirectPurchasePath = visibility.canPurchaseEasaModules || isExamOnly
 
   return (
     <div className="space-y-16">
@@ -190,88 +184,114 @@ async function CourseList({
         <div key={cat} className="space-y-8">
           <div className="flex items-center gap-4">
             <h2 className="text-[10px] font-black tracking-[0.3em] text-blue-500 uppercase dark:text-aerojet-sky">
-              {categoryNames[cat] || cat.replace(/_/g, ' ')}
+              {cat.replace(/_/g, ' ')}
             </h2>
             <div className="h-px flex-1 bg-slate-100 dark:bg-slate-800/50" />
           </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {items.map((course) => (
-              <div
-                key={course.id}
-                className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-aerojet-sky/30 hover:shadow-xl hover:shadow-aerojet-blue/5 dark:border-slate-800 dark:bg-slate-900"
-              >
-                <TrackedImpression courseId={course.id} />
-                {/* Accent line */}
+            {items.map((course) => {
+              const poolPrices = course.examComponents
+                .map((component) => Number(component.poolPrice || 0))
+                .filter((price) => price > 0)
+              const displayPrice = isExamOnly
+                ? poolPrices.length > 0
+                  ? Math.min(...poolPrices)
+                  : null
+                : Number(course.price)
+              const ctaHref = isDirectPurchasePath ? `/applicant/courses/${course.id}` : '/applicant/pathway'
+              const ctaLabel = isExamOnly
+                ? displayPrice
+                  ? 'Book Exam'
+                  : 'View Module'
+                : isDirectPurchasePath
+                  ? 'Enroll'
+                  : 'Programme Route'
+
+              return (
                 <div
-                  className={`absolute top-0 left-0 h-1 w-full transition-all group-hover:h-1.5 ${
-                    categoryColor[course.categoryId || '']
-                      ?.split(' ')[2]
-                      ?.replace('border-', 'bg-') || 'bg-slate-200 dark:bg-slate-800'
-                  }`}
-                />
+                  key={course.id}
+                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-aerojet-sky/30 hover:shadow-xl hover:shadow-aerojet-blue/5 dark:border-slate-800 dark:bg-slate-900"
+                >
+                  <TrackedImpression courseId={course.id} />
+                  <div
+                    className={`absolute top-0 left-0 h-1 w-full transition-all group-hover:h-1.5 ${
+                      categoryColor[cat]?.split(' ')[2]?.replace('border-', 'bg-') || 'bg-slate-200'
+                    }`}
+                  />
 
-                <div className="flex flex-1 flex-col p-7">
-                  <div className="mb-4 flex items-start justify-between">
-                    <span className="rounded-lg bg-slate-50 px-2.5 py-1 font-mono text-[10px] font-black tracking-widest text-aerojet-sky uppercase transition-colors group-hover:bg-aerojet-sky/10 dark:bg-slate-800">
-                      {course.code}
-                    </span>
-                  </div>
-
-                  <h3 className="text-xl leading-tight font-black text-aerojet-blue transition-colors group-hover:text-aerojet-sky dark:text-white dark:group-hover:text-blue-400">
-                    {course.name}
-                  </h3>
-
-                  {course.description && (
-                    <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                      {course.description}
-                    </p>
-                  )}
-
-                  <div className="mt-6 flex flex-wrap gap-4 text-[11px] font-bold text-slate-400">
-                    {course.duration && (
-                      <div className="flex items-center gap-1.5 rounded-lg border border-slate-50 bg-slate-50/50 px-2 py-1 dark:border-slate-800 dark:bg-slate-800/30">
-                        <Clock className="h-3.5 w-3.5 text-aerojet-sky" />
-                        <span className="text-slate-600 dark:text-slate-300">
-                          {course.duration.toLocaleString()} Hours
-                        </span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1.5 rounded-lg border border-slate-50 bg-slate-50/50 px-2 py-1 dark:border-slate-800 dark:bg-slate-800/30">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                      <span className="text-slate-600 dark:text-slate-300">Certified</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-8 flex items-center justify-between gap-4 border-t border-slate-50 pt-6 dark:border-slate-800/50">
-                    <div className="min-w-0">
-                      <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                        {enrollmentType === 'EXAM_ONLY' ? 'Exam Fees (Pool)' : 'Tuition'}
-                      </p>
-                      <p className="truncate text-2xl font-black text-aerojet-blue dark:text-white">
-                        {course.currency}{' '}
-                        {enrollmentType === 'EXAM_ONLY'
-                          ? '300'
-                          : Number(course.price).toLocaleString()}
-                      </p>
-                    </div>
-                    {canEnroll ? (
-                      <TrackedCourseLink
-                        courseId={course.id}
-                        href={`/applicant/courses/${course.id}`}
-                        className="inline-flex h-11 items-center justify-center rounded-xl bg-aerojet-blue px-6 text-xs font-black tracking-widest text-white uppercase ring-offset-white transition-all hover:bg-[#003875] hover:shadow-lg active:scale-95 sm:px-8 dark:bg-blue-600 dark:hover:bg-blue-500"
-                      >
-                        {enrollmentType === 'EXAM_ONLY' ? 'Book Exam' : 'Enroll'}
-                      </TrackedCourseLink>
-                    ) : (
-                      <span className="inline-flex h-11 cursor-not-allowed items-center justify-center rounded-xl bg-slate-50 px-6 text-xs font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/50">
-                        Locked
+                  <div className="flex flex-1 flex-col p-7">
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <span className="rounded-lg bg-slate-50 px-2.5 py-1 font-mono text-[10px] font-black tracking-widest text-aerojet-sky uppercase transition-colors group-hover:bg-aerojet-sky/10 dark:bg-slate-800">
+                        {course.code}
                       </span>
+                      <span
+                        className={`rounded-full border px-2.5 py-1 text-[10px] font-black tracking-wide uppercase ${
+                          categoryColor[cat] || 'bg-slate-50 text-slate-700 border-slate-200'
+                        }`}
+                      >
+                        {cat.replace(/_/g, ' ')}
+                      </span>
+                    </div>
+
+                    <h3 className="text-xl leading-tight font-black text-aerojet-blue transition-colors group-hover:text-aerojet-sky dark:text-white dark:group-hover:text-blue-400">
+                      {course.name}
+                    </h3>
+
+                    {course.description && (
+                      <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                        {course.description}
+                      </p>
                     )}
+
+                    <div className="mt-6 flex flex-wrap gap-4 text-[11px] font-bold text-slate-400">
+                      {course.duration && (
+                        <div className="flex items-center gap-1.5 rounded-lg border border-slate-50 bg-slate-50/50 px-2 py-1 dark:border-slate-800 dark:bg-slate-800/30">
+                          <Clock className="h-3.5 w-3.5 text-aerojet-sky" />
+                          <span className="text-slate-600 dark:text-slate-300">
+                            {course.duration.toLocaleString()} Hours
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1.5 rounded-lg border border-slate-50 bg-slate-50/50 px-2 py-1 dark:border-slate-800 dark:bg-slate-800/30">
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                        <span className="text-slate-600 dark:text-slate-300">Certified</span>
+                      </div>
+                    </div>
+
+                    <div className="mt-8 flex items-center justify-between gap-4 border-t border-slate-50 pt-6 dark:border-slate-800/50">
+                      <div className="min-w-0">
+                        <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                          {isExamOnly
+                            ? 'Pool seat from'
+                            : isDirectPurchasePath
+                              ? 'Tuition'
+                              : 'Programme access'}
+                        </p>
+                        <p className="truncate text-2xl font-black text-aerojet-blue dark:text-white">
+                          {displayPrice !== null
+                            ? `${course.currency} ${displayPrice.toLocaleString()}`
+                            : 'By module'}
+                        </p>
+                      </div>
+                      {canEnroll ? (
+                        <TrackedCourseLink
+                          courseId={course.id}
+                          href={ctaHref}
+                          className="inline-flex h-11 items-center justify-center rounded-xl bg-aerojet-blue px-6 text-xs font-black tracking-widest text-white uppercase ring-offset-white transition-all hover:bg-[#003875] hover:shadow-lg active:scale-95 sm:px-8 dark:bg-blue-600 dark:hover:bg-blue-500"
+                        >
+                          {ctaLabel}
+                        </TrackedCourseLink>
+                      ) : (
+                        <span className="inline-flex h-11 cursor-not-allowed items-center justify-center rounded-xl bg-slate-50 px-6 text-xs font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/50">
+                          Locked
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       ))}

@@ -37,6 +37,99 @@ export function resolveEnrollmentType(programme: ProgrammeChoice): EnrollmentTyp
   }
 }
 
+function normalizeEnrollmentType(
+  enrollmentType: EnrollmentType | string | null | undefined
+): EnrollmentType | null {
+  switch (enrollmentType) {
+    case 'FULL_TIME':
+    case 'MODULAR':
+    case 'EXAM_ONLY':
+    case 'SHORT_COURSE':
+      return enrollmentType
+    default:
+      return null
+  }
+}
+
+function mapPathwayCodeToEnrollmentType(
+  pathwayCode: string | null | undefined
+): EnrollmentType | null {
+  switch (pathwayCode) {
+    case 'FULL_TIME':
+    case 'FULL_TIME_4Y':
+    case 'FULL_TIME_2Y':
+    case 'MILITARY_1Y':
+    case 'MILITARY_2Y':
+      return 'FULL_TIME'
+    case 'MODULAR':
+      return 'MODULAR'
+    case 'EXAM_ONLY':
+      return 'EXAM_ONLY'
+    case 'SHORT_COURSE':
+      return 'SHORT_COURSE'
+    default:
+      return null
+  }
+}
+
+function resolveEnrollmentTypeFromChoice(
+  programmeChoice: ProgrammeChoice | string | null | undefined
+): EnrollmentType | null {
+  switch (programmeChoice) {
+    case 'FULL_TIME_4YEAR':
+    case 'FULL_TIME_2YEAR':
+    case 'MILITARY_1YEAR':
+      return 'FULL_TIME'
+    case 'MODULAR':
+      return 'MODULAR'
+    case 'EXAM_ONLY':
+      return 'EXAM_ONLY'
+    default:
+      return null
+  }
+}
+
+function normalizePathwayCodeFromEnrollmentType(
+  enrollmentType: EnrollmentType | string | null | undefined
+): string | null {
+  switch (enrollmentType) {
+    case 'FULL_TIME':
+      return 'FULL_TIME'
+    case 'MODULAR':
+      return 'MODULAR'
+    case 'EXAM_ONLY':
+      return 'EXAM_ONLY'
+    case 'SHORT_COURSE':
+      return 'SHORT_COURSE'
+    default:
+      return null
+  }
+}
+
+export function resolveEffectivePathwayCode(input: {
+  pathwayCode?: string | null
+  programmeChoice?: ProgrammeChoice | string | null
+  enrollmentType?: EnrollmentType | string | null
+}): string | null {
+  return (
+    input.pathwayCode ||
+    (input.programmeChoice ? mapProgrammeChoiceToPathwayCode(input.programmeChoice) : null) ||
+    normalizePathwayCodeFromEnrollmentType(input.enrollmentType)
+  )
+}
+
+export function resolveEffectiveEnrollmentType(input: {
+  pathwayCode?: string | null
+  programmeChoice?: ProgrammeChoice | string | null
+  enrollmentType?: EnrollmentType | string | null
+}): EnrollmentType | null {
+  return (
+    mapPathwayCodeToEnrollmentType(input.pathwayCode) ||
+    resolveEnrollmentTypeFromChoice(input.programmeChoice) ||
+    normalizeEnrollmentType(input.enrollmentType)
+  )
+}
+
 /**
  * Defines what a student can see in the catalog based on their enrollment type.
  */

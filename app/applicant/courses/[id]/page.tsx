@@ -12,7 +12,9 @@ import {
   CheckCircle2,
   ChevronRight,
 } from 'lucide-react'
+
 import { getAuthSession } from '@/lib/auth/helpers'
+import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 import prisma from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Course Details | Applicant Portal' }
@@ -43,37 +45,50 @@ export default async function CourseDetailsPage({ params }: Props) {
 
   if (!course) notFound()
 
-  // Fetch user's profile and license targets to show their "entered" category
-  const studentProfile = await prisma.studentProfile.findUnique({
-    where: { userId },
-    include: {
-      licenseTargets: {
-        include: { licenseCategory: true },
+  const applicantState = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      programmeChoice: true,
+      studentProfile: {
+        select: {
+          enrollmentType: true,
+          pathwayRel: { select: { code: true } },
+          licenseTargets: {
+            include: { licenseCategory: true },
+          },
+        },
       },
     },
   })
 
-  const isExamOnly = studentProfile?.enrollmentType === 'EXAM_ONLY'
+  const studentProfile = applicantState?.studentProfile
+  const effectiveEnrollmentType = resolveEffectiveEnrollmentType({
+    pathwayCode: studentProfile?.pathwayRel?.code,
+    enrollmentType: studentProfile?.enrollmentType,
+    programmeChoice: applicantState?.programmeChoice,
+  })
+  const isExamOnly = effectiveEnrollmentType === 'EXAM_ONLY'
 
-  // Fetch individual exam components for this course
   const examComponents = await prisma.examComponent.findMany({
     where: { courseId: id },
     orderBy: { code: 'asc' },
   })
 
-  // Fetch wallet balance
   const wallet = await prisma.wallet.findUnique({
     where: { userId },
-    select: { balance: true },
+    select: { availableBalance: true },
   })
-  const balance = Number(wallet?.balance || 0)
-  const canAffordPool = balance >= 300
+  const balance = Number(wallet?.availableBalance || 0)
+  const lowestPoolPrice =
+    examComponents.length > 0
+      ? Math.min(...examComponents.map((component) => Number(component.poolPrice || 300)))
+      : 300
+  const canAffordPool = balance >= lowestPoolPrice
 
   const targetLicenseCodes = studentProfile?.licenseTargets
     .map((lt) => lt.licenseCategory.code)
     .join(', ')
 
-  // Check if this course is specifically required for their license
   const isRequiredForTarget = await prisma.licenseModuleRequirement.findFirst({
     where: {
       courseId: id,
@@ -85,7 +100,6 @@ export default async function CourseDetailsPage({ params }: Props) {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8">
-      {/* Header & Back Action */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Link
@@ -115,9 +129,7 @@ export default async function CourseDetailsPage({ params }: Props) {
             <div className="flex flex-col items-end gap-2">
               <Link
                 href={
-                  canAffordPool
-                    ? `/applicant/courses/${id}/purchase`
-                    : '/applicant/wallet-top-up'
+                  canAffordPool ? `/applicant/courses/${id}/purchase` : '/applicant/wallet-top-up'
                 }
                 className={`inline-flex items-center justify-center rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-lg transition-all active:scale-95 ${
                   canAffordPool
@@ -130,7 +142,7 @@ export default async function CourseDetailsPage({ params }: Props) {
               </Link>
               {!canAffordPool && (
                 <p className="animate-pulse text-[10px] font-bold text-orange-600">
-                  Insufficient Balance: €{balance.toLocaleString()}
+                  Insufficient Balance: EUR {balance.toLocaleString()}
                 </p>
               )}
             </div>
@@ -147,9 +159,7 @@ export default async function CourseDetailsPage({ params }: Props) {
       </div>
 
       <div className="grid gap-8 lg:grid-cols-3">
-        {/* Main Content */}
         <div className="space-y-8 lg:col-span-2">
-          {/* Description Card */}
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <h2 className="mb-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
               About this course
@@ -161,7 +171,6 @@ export default async function CourseDetailsPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Resources & Content */}
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-aerojet-sky">
@@ -220,7 +229,6 @@ export default async function CourseDetailsPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Prerequisites */}
           {course.requiresPrerequisite && (
             <div className="rounded-2xl border border-blue-50 bg-blue-50/20 p-6">
               <div className="mb-4 flex items-center gap-2">
@@ -247,7 +255,6 @@ export default async function CourseDetailsPage({ params }: Props) {
             </div>
           )}
 
-          {/* Exam Components for Exam-Only */}
           {isExamOnly && examComponents.length > 0 && (
             <div className="rounded-2xl border border-teal-100 bg-teal-50/20 p-6 dark:border-teal-900/30 dark:bg-teal-900/10">
               <div className="mb-4 flex items-center gap-2">
@@ -275,13 +282,13 @@ export default async function CourseDetailsPage({ params }: Props) {
                       <div>
                         <p className="text-[9px] font-bold text-slate-400 uppercase">Pool Price</p>
                         <p className="text-sm font-black text-teal-600">
-                          €{Number(comp.poolPrice).toLocaleString()}
+                          EUR {Number(comp.poolPrice).toLocaleString()}
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="text-[9px] font-bold text-slate-400 uppercase">Individual</p>
                         <p className="text-sm font-black text-aerojet-blue dark:text-blue-400">
-                          €{Number(comp.individualPrice).toLocaleString()}
+                          EUR {Number(comp.individualPrice).toLocaleString()}
                         </p>
                       </div>
                     </div>
@@ -292,7 +299,6 @@ export default async function CourseDetailsPage({ params }: Props) {
           )}
         </div>
 
-        {/* Sidebar Info */}
         <div className="space-y-6">
           <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <h2 className="mb-6 text-[10px] font-black tracking-widest text-slate-400 uppercase">
@@ -334,16 +340,19 @@ export default async function CourseDetailsPage({ params }: Props) {
 
               <div className="border-t border-slate-50 pt-5">
                 <p className="text-[10px] font-bold tracking-wide text-slate-400 uppercase">
-                  {isExamOnly ? 'Exam Fees (Pool)' : 'Price'}
+                  {isExamOnly ? 'Pool seat from' : 'Price'}
                 </p>
                 <div className="mt-1 flex items-baseline gap-1">
                   <span className="text-xl font-black text-aerojet-blue dark:text-blue-400">
-                    {course.currency} {isExamOnly ? '300' : Number(course.price).toLocaleString()}
+                    {course.currency}{' '}
+                    {isExamOnly
+                      ? lowestPoolPrice.toLocaleString()
+                      : Number(course.price).toLocaleString()}
                   </span>
                 </div>
                 <p className="mt-2 text-[10px] text-slate-400 italic">
                   {isExamOnly
-                    ? 'Standard price for pooling. Individual exam seats vary.'
+                    ? 'Shown from the live exam component pool pricing for this module.'
                     : 'Price inclusive of training materials and exam fees.'}
                 </p>
               </div>

@@ -1,21 +1,28 @@
 import { Prisma } from '@prisma/client'
+import { AsyncLocalStorage } from 'async_hooks'
 
-/**
- * Prisma Extension for PostgreSQL Row Level Security.
- *
- * HOW IT WORKS:
- * - Every query is wrapped in a transaction that:
- *   1. SET LOCAL ROLE app_user  (switches from owner → non-owner so RLS applies)
- *   2. SET aerojet.user_id      (identifies the current user for policies)
- *   3. SET aerojet.user_role    (identifies the role for admin bypass policies)
- *   4. Runs the original query
- * - After the transaction, the role reverts to the owner automatically.
- * - prismaBase (used for auth) does NOT use this extension, so it operates
- *   as the table owner and bypasses RLS naturally.
- *
- * MODELS WITHOUT RLS (reference/lookup data) still go through this extension
- * but the SET LOCAL ROLE is harmless — those tables have no RLS policies.
- */
+const rlsBypassStorage = new AsyncLocalStorage<boolean>()
+
+function stripInternalPrismaArgs<T>(value: T): T {
+  if (Array.isArray(value)) {
+    return value.map((item) => stripInternalPrismaArgs(item)) as T
+  }
+
+  if (
+    value &&
+    typeof value === 'object' &&
+    !(value instanceof Date) &&
+    !(value instanceof Uint8Array)
+  ) {
+    const entries = Object.entries(value as Record<string, unknown>)
+      .filter(([key]) => !key.startsWith('__'))
+      .map(([key, nestedValue]) => [key, stripInternalPrismaArgs(nestedValue)])
+
+    return Object.fromEntries(entries) as T
+  }
+
+  return value
+}
 
 async function getSession() {
   if (process.env.NEXT_PHASE === 'phase-production-build') return null
@@ -24,95 +31,161 @@ async function getSession() {
     const { getCachedSession } = await import('@/lib/auth/session-context')
     const session = await getCachedSession()
     if (!session && process.env.NODE_ENV === 'development') {
-      console.warn('[RLS] No active session — guest access.')
+      console.warn('[RLS] No active session - guest access.')
     }
     return session
   } catch {
-    // Outside request context (startup, CLI, seed)
     return null
   }
 }
 
-export const rlsExtension = (baseClient: any) => Prisma.defineExtension({
-  name: 'rlsExtensionHardened',
+async function applyRlsContext(
+  client: { $executeRaw: (...args: any[]) => Promise<unknown> },
+  userId: string,
+  userRole?: string
+) {
+  await client.$executeRaw(Prisma.sql`SET LOCAL ROLE app_user`)
+  await client.$executeRaw(
+    Prisma.sql`SELECT set_config('aerojet.user_id', ${userId}, true)`
+  )
 
-  // Override $transaction to inject RLS context
-  client: {
-    async $transaction<T>(this: T, args: any, options?: any) {
-      const session = await getSession()
-      const userId = session?.user?.id
-      const userRole = (session as any)?.user?.role
+  if (userRole) {
+    await client.$executeRaw(
+      Prisma.sql`SELECT set_config('aerojet.user_role', ${userRole}, true)`
+    )
+  }
+}
 
-      // No session → run transaction as owner (bypasses RLS)
-      if (!userId) return (baseClient as any).$transaction(args, options)
+export const rlsExtension = (baseClient: any) =>
+  Prisma.defineExtension({
+    name: 'rlsExtensionHardened',
 
-      if (typeof args === 'function') {
-        // Interactive transaction
-        const originalBlock = args
-        return (baseClient as any).$transaction(async (tx: any) => {
-          await tx.$executeRawUnsafe(`SET LOCAL ROLE app_user`)
-          await tx.$executeRaw`SELECT set_config('aerojet.user_id', ${userId}, true)`
-          if (userRole) {
-            await tx.$executeRaw`SELECT set_config('aerojet.user_role', ${userRole}, true)`
-          }
-          return originalBlock(tx)
-        }, options)
-      }
-
-      // Batch transaction — prepend config queries
-      const configQueries = [
-        (baseClient as any).$executeRawUnsafe(`SET LOCAL ROLE app_user`),
-        (baseClient as any).$executeRaw`SELECT set_config('aerojet.user_id', ${userId}, true)`,
-        ...(userRole
-          ? [(baseClient as any).$executeRaw`SELECT set_config('aerojet.user_role', ${userRole}, true)`]
-          : []),
-      ]
-      return (baseClient as any).$transaction([...configQueries, ...args], options)
-    },
-  },
-
-  query: {
-    $allModels: {
-      async $allOperations({ model, operation, args, query }) {
-        // Skip during build
-        if (process.env.NEXT_PHASE === 'phase-production-build') return query(args)
-
+    client: {
+      async $transaction<T>(this: T, args: any, options?: any) {
         const session = await getSession()
         const userId = session?.user?.id
+        const userRole = (session as any)?.user?.role
 
-        // No session → run as owner (bypasses RLS)
-        if (!userId) return query(args)
+        if (!userId) return (baseClient as any).$transaction(args, options)
+
+        if (typeof args === 'function') {
+          const originalBlock = args
+          return (baseClient as any).$transaction(async (tx: any) => {
+            await applyRlsContext(tx, userId, userRole)
+            return originalBlock(tx)
+          }, options)
+        }
+
+        const rlsSetupQueries = [
+          (baseClient as any).$executeRaw(Prisma.sql`SET LOCAL ROLE app_user`),
+          (baseClient as any).$executeRaw(
+            Prisma.sql`SELECT set_config('aerojet.user_id', ${userId}, true)`
+          ),
+          ...(userRole
+            ? [
+                (baseClient as any).$executeRaw(
+                  Prisma.sql`SELECT set_config('aerojet.user_role', ${userRole}, true)`
+                ),
+              ]
+            : []),
+        ]
+
+        return (baseClient as any).$transaction([...rlsSetupQueries, ...args], options)
+      },
+    },
+
+    query: {
+      $allModels: {
+        async $allOperations({ model, operation, args, query }) {
+          const sanitizedArgs = stripInternalPrismaArgs(args)
+
+          const rlsModels = new Set([
+            'User',
+            'Profile',
+            'StudentProfile',
+            'StaffProfile',
+            'InstructorProfile',
+            'Wallet',
+            'WalletTransaction',
+            'Payment',
+            'Invoice',
+            'PaymentMilestone',
+            'Enrollment',
+            'FullTimeEnrollment',
+            'ModularEnrollment',
+            'TuitionBooking',
+            'Grade',
+            'AttendanceRecord',
+            'ExamBooking',
+            'ExamResult',
+            'ExamBundle',
+            'PoolMembership',
+            'PoolWaitlist',
+            'BookingEntitlement',
+            'ExamExemption',
+            'Notification',
+            'Message',
+            'FileUpload',
+            'Referral',
+            'AdminNote',
+            'StudentLicenseTarget',
+            'AuditLog',
+          ])
+
+          if (process.env.NEXT_PHASE === 'phase-production-build' || !rlsModels.has(model)) {
+            return query(sanitizedArgs)
+          }
+
+          const session = await getSession()
+          const userId = session?.user?.id
+          if (!userId) return query(sanitizedArgs)
+
+          const userRole = (session as any)?.user?.role
+          if (userRole && ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(userRole)) {
+            return query(sanitizedArgs)
+          }
+
+          if (rlsBypassStorage.getStore() === true) {
+            return query(sanitizedArgs)
+          }
+
+          const modelKey = model.charAt(0).toLowerCase() + model.slice(1)
+
+          return rlsBypassStorage.run(true, () =>
+            baseClient.$transaction(
+              async (tx: any) => {
+                await applyRlsContext(tx, userId, userRole)
+                return tx[modelKey][operation](sanitizedArgs)
+              },
+              {
+                maxWait: 30000,
+                timeout: 60000,
+              }
+            )
+          )
+        },
+      },
+      async $queryRaw({ args, query }) {
+        const sanitizedArgs = stripInternalPrismaArgs(args)
+
+        const session = await getSession()
+        if (!session?.user?.id) return query(sanitizedArgs)
 
         const userRole = (session as any)?.user?.role
+        if (userRole && ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(userRole)) {
+          return query(sanitizedArgs)
+        }
 
         return baseClient.$transaction(
           async (tx: any) => {
-            await tx.$executeRawUnsafe(`SET LOCAL ROLE app_user`)
-            await tx.$executeRaw`SELECT set_config('aerojet.user_id', ${userId}, true)`
-            if (userRole) {
-              await tx.$executeRaw`SELECT set_config('aerojet.user_role', ${userRole}, true)`
-            }
-            const modelKey = model![0].toLowerCase() + model!.slice(1)
-            return tx[modelKey][operation](args)
+            await applyRlsContext(tx, session.user.id, userRole)
+            return query(sanitizedArgs)
           },
-          { maxWait: 15000, timeout: 30000 }
+          {
+            maxWait: 30000,
+            timeout: 60000,
+          }
         )
       },
     },
-    async $queryRaw({ args, query }) {
-      const session = await getSession()
-      if (!session?.user?.id) return query(args)
-
-      return baseClient.$transaction(
-        async (tx: any) => {
-          await tx.$executeRawUnsafe(`SET LOCAL ROLE app_user`)
-          await tx.$executeRaw`SELECT set_config('aerojet.user_id', ${session.user.id}, true)`
-          const role = (session as any)?.user?.role
-          if (role) await tx.$executeRaw`SELECT set_config('aerojet.user_role', ${role}, true)`
-          return tx.$queryRaw(args)
-        },
-        { maxWait: 15000, timeout: 30000 }
-      )
-    },
-  },
-})
+  })

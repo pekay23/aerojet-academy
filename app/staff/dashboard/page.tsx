@@ -144,8 +144,8 @@ async function getDashboardData() {
       currSymbol,
     }
   }, {
-    maxWait: 30000,
-    timeout: 90000
+    maxWait: 15000,
+    timeout: 20000
   })
 }
 

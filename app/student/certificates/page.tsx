@@ -4,7 +4,12 @@ import { Award, Download, Calendar, ExternalLink, AlertCircle } from 'lucide-rea
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
-import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from '@/lib/access-control'
+import {
+  canAccessFeature,
+  getEnrollmentMilestoneStatus,
+  getStudentPaymentAccessLevel,
+  getStudentStatus,
+} from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 
 export const metadata: Metadata = {
@@ -20,12 +25,13 @@ export default async function CertificatesPage() {
   const hasAccess = await canAccessFeature(session.user.id, 'courses')
 
   if (isFullTime && !hasAccess) {
-    const [milestoneStatus, wallet] = await Promise.all([
+    const [milestoneStatus, wallet, accessLevel] = await Promise.all([
       getEnrollmentMilestoneStatus(session.user.id),
       prisma.wallet.findUnique({
         where: { userId: session.user.id },
         select: { availableBalance: true, reservedBalance: true, currency: true },
       }),
+      getStudentPaymentAccessLevel(session.user.id),
     ])
 
     const walletBalance = {
@@ -46,7 +52,7 @@ export default async function CertificatesPage() {
         </div>
 
         <PaymentRequiredBanner
-          accessLevel="SEAT_ONLY"
+          accessLevel={accessLevel}
           milestoneStatus={milestoneStatus}
           walletBalance={walletBalance}
         />

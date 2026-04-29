@@ -1,4 +1,5 @@
 'use client'
+/** Exam Records Dashboard with Pagination and Inline Editing */
 
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
@@ -15,13 +16,18 @@ import {
   FilePlus2,
   AlertCircle,
   Calendar,
+  Award,
+  BookOpen,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import {
-  createExamRecord,
-  deleteExamRecord,
   updateExamBooking,
   searchStudents,
+  bulkUpdateExamCategory,
+  createExamRecord,
+  deleteExamRecord,
 } from '../../actions'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
@@ -36,25 +42,33 @@ interface StudentOption {
 
 interface ModuleOption {
   id: string
+  courseId: string
   code: string
   name: string
+  moduleCode: string
 }
 
 interface ExamRecord {
   id: string
-  examId: string | null
+  examId?: string | null
   moduleCode: string | null
   score: any
-  maxScore: any
-  percentage: any
+  maxScore?: any
+  percentage?: any
   passed: boolean
-  grade: string | null
+  grade?: string | null
   attemptType: string | null
-  sourceNotes: string | null
-  migrationRef: string | null
-  certificateUrl: string | null
+  bookingType?: string | null
+  source: 'booking' | 'result'
+  sourceNotes?: string | null
+  migrationRef?: string | null
+  isMigrated?: boolean
+  certificateUrl?: string | null
+  examCategory?: 'INTERNAL' | 'OFFICIAL_EASA' | string
+  examDate?: string | Date | null
+  result?: string | null
   createdAt: string | Date
-  updatedAt: string | Date
+  updatedAt?: string | Date
   user: {
     email: string
     profile: { firstName: string; middleName?: string | null; lastName: string } | null
@@ -87,7 +101,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
     requestSort,
     sortConfig,
   } = useSort(records, {
-    key: 'bookedAt',
+    key: 'createdAt',
     order: 'desc',
   })
 
@@ -95,11 +109,13 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
   const [studentQuery, setStudentQuery] = useState('')
   const [studentResults, setStudentResults] = useState<StudentOption[]>([])
   const [selectedStudent, setSelectedStudent] = useState<StudentOption | null>(null)
-  const [moduleCode, setModuleCode] = useState('')
   const [examDate, setExamDate] = useState('')
   const [score, setScore] = useState('')
   const [attemptType, setAttemptType] = useState('FIRST')
+  const [examCategory, setExamCategory] = useState('OFFICIAL_EASA')
   const [notes, setNotes] = useState('')
+  const [resultOverride, setResultOverride] = useState('auto')
+  const [isPending, setIsPending] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
   const [showDropdown, setShowDropdown] = useState(false)
@@ -116,15 +132,33 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editCourseId, setEditCourseId] = useState<string | null>(null)
   const [editBookingType, setEditBookingType] = useState('INDIVIDUAL')
+  const [editAttemptType, setEditAttemptType] = useState('FIRST')
+  const [editCategory, setEditCategory] = useState('OFFICIAL_EASA')
   const [editModuleCode, setEditModuleCode] = useState('')
   const [editScore, setEditScore] = useState('')
   const [editDate, setEditDate] = useState('')
+  const [editIsMigrated, setEditIsMigrated] = useState(false)
+  const [editShowDropdown, setEditShowDropdown] = useState(false)
   const [editCourseQuery, setEditCourseQuery] = useState('')
   const [showEditCourseDropdown, setShowEditCourseDropdown] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
 
   // Search filter
   const [tableFilter, setTableFilter] = useState('')
+  const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'OFFICIAL_EASA' | 'INTERNAL'>('ALL')
+  const [selectedIds, setSelectedIds] = useState<string[]>([])
+  const [isBulkUpdating, setIsBulkUpdating] = useState(false)
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize, setPageSize] = useState(50)
+  
+  // Reset pagination when filters change
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [tableFilter, categoryFilter])
+
+
 
   // Debounced student search
   useEffect(() => {
@@ -189,7 +223,10 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
     setExamDate('')
     setScore('')
     setAttemptType('FIRST')
+    setExamCategory('OFFICIAL_EASA')
     setNotes('')
+    setResultOverride('auto')
+    setIsPending(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -199,7 +236,6 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
       return
     }
 
-    // Validate all module selections
     const invalid = moduleSelections.some((m) => !m.query.trim())
     if (invalid) {
       toast.error('Please fill in all module selections')
@@ -212,28 +248,34 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
     }
 
     setIsSubmitting(true)
-    const res = await createExamRecord({
-      userId: selectedStudent.id,
-      bookingType,
-      examDate,
-      attemptType,
-      notes: notes.trim() || undefined,
-      entries: moduleSelections.map((m) => ({
-        courseId: m.selected?.id,
-        moduleCode: m.selected?.code || m.query.trim(),
-        score: score ? Number(score) : undefined,
-      })),
-    })
+    try {
+      const res = await createExamRecord({
+        userId: selectedStudent.id,
+        bookingType,
+        examDate,
+        attemptType,
+        examCategory: examCategory as 'INTERNAL' | 'OFFICIAL_EASA',
+        notes: notes.trim() || undefined,
+        isPending,
+        entries: moduleSelections.map((sel) => ({
+          courseId: sel.selected?.courseId,
+          examComponentId: (sel.selected as any)?.isComponent ? sel.selected?.id : undefined,
+          moduleCode: sel.selected?.moduleCode || sel.query,
+          score: score ? parseFloat(score) : undefined,
+          resultOverride: resultOverride === 'auto' ? undefined : resultOverride,
+        })),
+      })
 
-    setIsSubmitting(true)
-    if (res.success) {
-      toast.success(`Added ${bookingType === 'INDIVIDUAL' ? 'exam record' : 'bundle'} successfully`)
-      resetForm()
-      router.refresh()
-    } else {
-      toast.error(res.error || 'Failed to add record')
+      if (res.success) {
+        toast.success(`Added ${bookingType === 'INDIVIDUAL' ? 'exam record' : 'bundle'} successfully`)
+        resetForm()
+        router.refresh()
+      } else {
+        toast.error(res.error || 'Failed to add record')
+      }
+    } finally {
+      setIsSubmitting(false)
     }
-    setIsSubmitting(false)
   }
 
   const handleDelete = async (id: string) => {
@@ -250,11 +292,13 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
   const startEdit = (record: ExamRecord) => {
     setEditingId(record.id)
     setEditCourseId(record.examId || null)
-    setEditBookingType('INDIVIDUAL')
+    setEditBookingType(record.bookingType || 'INDIVIDUAL')
+    setEditAttemptType(record.attemptType || 'FIRST')
+    setEditCategory(record.examCategory || 'OFFICIAL_EASA')
     setEditModuleCode(record.moduleCode || '')
     setEditScore(record.score ? Number(record.score).toString() : '')
-    setEditDate(record.createdAt ? format(record.createdAt, 'yyyy-MM-dd') : '')
-    // Pre-fill course query with current module code so admin can see what's linked
+    setEditDate(record.examDate ? format(new Date(record.examDate), 'yyyy-MM-dd') : '')
+    setEditIsMigrated(!!record.isMigrated)
     const linkedCourse = modules.find((m) => m.id === record.examId)
     setEditCourseQuery(linkedCourse ? `${linkedCourse.code} — ${linkedCourse.name}` : record.moduleCode || '')
     setShowEditCourseDropdown(false)
@@ -270,6 +314,9 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
       examDate: editDate ? new Date(editDate) : undefined,
       score: editScore ? Number(editScore) : undefined,
       bookingType: editBookingType as any,
+      attemptType: editAttemptType,
+      examCategory: editCategory as any,
+      isMigrated: editIsMigrated,
     })
 
     setIsUpdating(false)
@@ -282,17 +329,66 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
     }
   }
 
-  // Filter records by table search
-  const filteredRecords = tableFilter
-    ? sortedRecords.filter(
-        (r) =>
-          r.moduleCode?.toLowerCase().includes(tableFilter.toLowerCase()) ||
-          r.user.email.toLowerCase().includes(tableFilter.toLowerCase()) ||
-          r.user.profile?.firstName?.toLowerCase().includes(tableFilter.toLowerCase()) ||
-          r.user.profile?.lastName?.toLowerCase().includes(tableFilter.toLowerCase()) ||
-          r.user.studentProfile?.studentId?.toLowerCase().includes(tableFilter.toLowerCase())
-      )
-    : sortedRecords
+  const handleBulkUpdate = async (category: 'INTERNAL' | 'OFFICIAL_EASA') => {
+
+    if (selectedIds.length === 0) {
+      toast.error('No records selected')
+      return
+    }
+    setIsBulkUpdating(true)
+    try {
+      const res = await bulkUpdateExamCategory(selectedIds, category)
+
+      if (res.success) {
+        toast.success(`Successfully updated ${selectedIds.length} records`)
+        setSelectedIds([])
+        router.refresh()
+      } else {
+        toast.error(res.error || 'Failed to update records')
+      }
+    } catch (err) {
+      console.error('Bulk update exception:', err)
+      toast.error('A client-side error occurred')
+    } finally {
+      setIsBulkUpdating(false)
+    }
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredRecords.length) {
+      setSelectedIds([])
+    } else {
+      setSelectedIds(filteredRecords.map((r) => r.id))
+    }
+  }
+
+  const toggleSelectRecord = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    )
+  }
+
+  const filteredRecords = sortedRecords.filter((r) => {
+    const matchesSearch = tableFilter
+      ? r.moduleCode?.toLowerCase().includes(tableFilter.toLowerCase()) ||
+        r.user.email.toLowerCase().includes(tableFilter.toLowerCase()) ||
+        (r.user.profile?.firstName + ' ' + r.user.profile?.lastName)
+          .toLowerCase()
+          .includes(tableFilter.toLowerCase())
+      : true
+    
+    const matchesCategory = categoryFilter === 'ALL' || r.examCategory === categoryFilter
+    
+    return matchesSearch && matchesCategory
+  })
+
+  // Pagination logic
+  const totalItems = filteredRecords.length
+  const totalPages = Math.ceil(totalItems / pageSize)
+  const paginatedRecords = filteredRecords.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  )
 
   return (
     <div className="space-y-8">
@@ -311,7 +407,6 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
-          {/* Student Search */}
           <div className="relative">
             <label 
               htmlFor="form-student-search"
@@ -323,7 +418,6 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 id="form-student-search"
-                name="studentQuery"
                 type="text"
                 value={studentQuery}
                 onChange={(e) => {
@@ -341,7 +435,6 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               )}
             </div>
 
-            {/* Dropdown */}
             {showDropdown && studentResults.length > 0 && (
               <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
                 {studentResults.map((s) => (
@@ -370,28 +463,10 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                 ))}
               </div>
             )}
-
-            {showDropdown &&
-              studentResults.length === 0 &&
-              studentQuery.length >= 2 &&
-              !isSearching && (
-                <div className="absolute z-20 mt-1 w-full rounded-xl border border-slate-200 bg-white p-4 text-center text-sm text-slate-500 shadow-lg dark:border-slate-700 dark:bg-slate-900">
-                  No students found for &quot;{studentQuery}&quot;
-                </div>
-              )}
-
             {selectedStudent && (
               <div className="mt-2 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs font-medium text-emerald-700">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                Selected:{' '}
-                {[
-                  selectedStudent.firstName,
-                  selectedStudent.middleName,
-                  selectedStudent.lastName,
-                ]
-                  .filter(Boolean)
-                  .join(' ')}{' '}
-                ({selectedStudent.email})
+                Selected: {[selectedStudent.firstName, selectedStudent.middleName, selectedStudent.lastName].filter(Boolean).join(' ')} ({selectedStudent.email})
               </div>
             )}
           </div>
@@ -406,16 +481,12 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               </label>
               <select
                 id="form-booking-type"
-                name="bookingType"
                 value={bookingType}
                 onChange={(e) => setBookingType(e.target.value as any)}
-                autoComplete="off"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               >
                 {BOOKING_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
+                  <option key={t.value} value={t.value}>{t.label}</option>
                 ))}
               </select>
             </div>
@@ -428,11 +499,9 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               </label>
               <input
                 id="form-exam-date"
-                name="examDate"
                 type="date"
                 value={examDate}
                 onChange={(e) => setExamDate(e.target.value)}
-                autoComplete="off"
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
                 required
               />
@@ -446,145 +515,125 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                   htmlFor={`form-module-query-${idx}`}
                   className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase"
                 >
-                  {bookingType === 'INDIVIDUAL' ? 'Module' : `Module ${idx + 1}`}{' '}
-                  <span className="text-red-500">*</span>
+                  {bookingType === 'INDIVIDUAL' ? 'Module' : `Module ${idx + 1}`} <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
                   <input
                     id={`form-module-query-${idx}`}
-                    name={`moduleQuery_${idx}`}
                     type="text"
                     value={selection.query}
+                    autoComplete="off"
                     onChange={(e) => {
                       const q = e.target.value
-                      updateModuleSelection(idx, {
-                        query: q,
-                        selected: null,
-                        showDropdown: q.length > 0,
-                      })
+                      updateModuleSelection(idx, { query: q, selected: null, showDropdown: q.length > 0 })
                     }}
-                    onFocus={() => {
-                      if (selection.query.length > 0)
-                        updateModuleSelection(idx, { showDropdown: true })
+                    onFocus={() => { if (selection.query.length > 0) updateModuleSelection(idx, { showDropdown: true }) }}
+                    onBlur={() => {
+                      // Small timeout to allow clicking the suggestion
+                      setTimeout(() => updateModuleSelection(idx, { showDropdown: false }), 200)
                     }}
                     placeholder="Search module code..."
-                    autoComplete="off"
                     className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pr-4 pl-10 text-sm font-bold uppercase transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
                   />
-                </div>
-
-                {selection.showDropdown && (
-                  <div className="absolute z-20 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
-                    {modules
-                      .filter(
-                        (m) =>
-                          m.code.toLowerCase().includes(selection.query.toLowerCase()) ||
+                  {selection.showDropdown && (
+                    <div className="absolute top-full left-0 z-50 mt-1 max-h-48 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                      {modules
+                        .filter((m) => 
+                          m.code.toLowerCase().includes(selection.query.toLowerCase()) || 
                           m.name.toLowerCase().includes(selection.query.toLowerCase())
-                      )
-                      .slice(0, 10)
-                      .map((m) => (
-                        <button
-                          key={m.id}
-                          type="button"
-                          onClick={() => {
-                            updateModuleSelection(idx, {
-                              query: m.code,
-                              selected: m,
-                              showDropdown: false,
-                            })
-                          }}
-                          className="flex w-full items-center gap-3 px-4 py-3 text-left transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
-                        >
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-sm font-bold text-slate-900 dark:text-white">
-                              {m.code}
-                            </p>
-                            <p className="truncate text-xs text-slate-500">{m.name}</p>
-                          </div>
-                        </button>
-                      ))}
-                  </div>
-                )}
+                        )
+                        .map((m) => (
+                          <button
+                            key={m.id}
+                            type="button"
+                            onClick={() => {
+                              updateModuleSelection(idx, { query: m.moduleCode, selected: m, showDropdown: false })
+                            }}
+                            className="flex w-full items-center gap-3 px-4 py-3 text-left transition-all hover:bg-slate-50 dark:hover:bg-slate-800"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-bold text-slate-900 dark:text-white">{m.name}</p>
+                              <p className="text-[10px] text-slate-500 uppercase tracking-tighter">Code: {m.code}</p>
+                            </div>
+                          </button>
+                        ))}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
 
-          {/* Attempt Type + Score + Notes */}
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-4">
             <div>
-              <label 
-                htmlFor="form-attempt-type"
-                className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase"
-              >
-                Attempt Type
-              </label>
-              <select
-                id="form-attempt-type"
-                value={attemptType}
-                onChange={(e) => setAttemptType(e.target.value)}
-                autoComplete="off"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
-              >
-                {ATTEMPT_TYPES.map((t) => (
-                  <option key={t.value} value={t.value}>
-                    {t.label}
-                  </option>
-                ))}
+              <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">Attempt Type</label>
+              <select value={attemptType} onChange={(e) => setAttemptType(e.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800">
+                {ATTEMPT_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>
             <div>
-              <label 
-                htmlFor="form-score"
-                className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase"
-              >
-                Score (%)
-              </label>
-              <input
-                id="form-score"
-                type="number"
-                value={score}
-                onChange={(e) => setScore(e.target.value)}
-                placeholder="—"
-                min="0"
-                max="100"
-                step="0.01"
-                autoComplete="off"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
-              />
+              <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">Category</label>
+              <select value={examCategory} onChange={(e) => setExamCategory(e.target.value)} className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800">
+                <option value="OFFICIAL_EASA">Official EASA</option>
+                <option value="INTERNAL">Internal Academy</option>
+              </select>
             </div>
             <div>
-              <label 
-                htmlFor="form-notes"
-                className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase"
+              <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">Score (%)</label>
+              <input type="number" value={score} onChange={(e) => setScore(e.target.value)} placeholder="—" min="0" max="100" step="0.01" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800" />
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-bold tracking-wide text-slate-500 uppercase">Notes</label>
+              <input type="text" value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Optional notes" className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800" />
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400">
+                <Clock className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-bold text-slate-900 dark:text-white">Pending Record</p>
+                <p className="text-[10px] text-slate-500">Wait for result entry</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsPending(!isPending)}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-hidden ${
+                  isPending ? 'bg-amber-500' : 'bg-slate-200 dark:bg-slate-700'
+                }`}
               >
-                Notes
-              </label>
-              <input
-                id="form-notes"
-                type="text"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Optional notes"
-                autoComplete="off"
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
-              />
+                <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out ${isPending ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </div>
+
+            <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+                <Award className="h-5 w-5" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs font-bold text-slate-900 dark:text-white">Result Override</p>
+                <select 
+                  disabled={isPending}
+                  value={resultOverride} 
+                  onChange={(e) => setResultOverride(e.target.value)}
+                  className="mt-1 w-full bg-transparent text-[10px] font-bold text-slate-500 focus:outline-hidden disabled:opacity-50"
+                >
+                  <option value="auto">Auto (from score)</option>
+                  <option value="pass">Manual Pass</option>
+                  <option value="fail">Manual Fail</option>
+                  <option value="deferred">Deferred</option>
+                  <option value="absent">Absent</option>
+                </select>
+              </div>
             </div>
           </div>
 
           <div className="flex justify-end gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
-            <button
-              type="button"
-              onClick={resetForm}
-              className="rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 transition-colors hover:bg-slate-100"
-            >
-              Clear
-            </button>
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90 disabled:opacity-50"
-            >
+            <button type="button" onClick={resetForm} className="rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 hover:bg-slate-100 transition-colors">Clear</button>
+            <button type="submit" disabled={isSubmitting} className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90 disabled:opacity-50">
               <Plus className="h-4 w-4" />
               {isSubmitting ? 'Adding...' : 'Add Record'}
             </button>
@@ -594,18 +643,48 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
 
       {/* ── Records Table ── */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-black text-slate-900 dark:text-white">
-            All Exam Records ({records.length})
-          </h2>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2 rounded-xl bg-slate-100 p-1 dark:bg-slate-800">
+            <button
+              onClick={() => setCategoryFilter('ALL')}
+              className={`rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${
+                categoryFilter === 'ALL'
+                  ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-700 dark:text-white'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+              }`}
+            >
+              All
+            </button>
+            <button
+              onClick={() => setCategoryFilter('OFFICIAL_EASA')}
+              className={`flex items-center gap-2 rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${
+                categoryFilter === 'OFFICIAL_EASA'
+                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-200 dark:shadow-none'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+              }`}
+            >
+              <Award className="h-3.5 w-3.5" />
+              Official EASA
+            </button>
+            <button
+              onClick={() => setCategoryFilter('INTERNAL')}
+              className={`flex items-center gap-2 rounded-lg px-4 py-1.5 text-xs font-bold transition-all ${
+                categoryFilter === 'INTERNAL'
+                  ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200 dark:shadow-none'
+                  : 'text-slate-500 hover:text-slate-700 dark:text-slate-400'
+              }`}
+            >
+              <BookOpen className="h-3.5 w-3.5" />
+              Internal Academy
+            </button>
+          </div>
           <div className="relative w-full max-w-xs">
             <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
             <input
               type="text"
               value={tableFilter}
               onChange={(e) => setTableFilter(e.target.value)}
-              placeholder="Filter records..."
-              autoComplete="off"
+              placeholder="Filter by student or module..."
               className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2 pr-4 pl-10 text-sm transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
             />
           </div>
@@ -616,271 +695,198 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
             <table className="w-full text-left text-sm">
               <thead className="bg-slate-50 text-xs font-bold text-slate-500 uppercase dark:bg-slate-800/50 dark:text-slate-400">
                 <tr>
-                  <SortHeader
-                    label="Student"
-                    sortKey="user.email"
-                    currentSort={sortConfig}
-                    onSort={requestSort}
-                  />
-                  <SortHeader
-                    label="Module"
-                    sortKey="moduleCode"
-                    currentSort={sortConfig}
-                    onSort={requestSort}
-                  />
-                  <SortHeader
-                    label="Dates"
-                    sortKey="examDate"
-                    currentSort={sortConfig}
-                    onSort={requestSort}
-                  />
+                  <th className="w-10 px-6 py-4">
+                    <input type="checkbox" checked={filteredRecords.length > 0 && selectedIds.length === filteredRecords.length} onChange={toggleSelectAll} className="h-4 w-4 rounded border-slate-300 text-aerojet-blue" />
+                  </th>
+                  <SortHeader label="Student" sortKey="user.email" currentSort={sortConfig} onSort={requestSort} />
+                  <SortHeader label="Module" sortKey="moduleCode" currentSort={sortConfig} onSort={requestSort} />
+                  <SortHeader label="Dates" sortKey="examDate" currentSort={sortConfig} onSort={requestSort} />
+                  <th className="px-6 py-4">Category</th>
+                  <th className="px-6 py-4">Type</th>
                   <th className="px-6 py-4">Attempt</th>
+                  <th className="px-6 py-4">Migrated</th>
                   <th className="px-6 py-4">Result</th>
-                  <SortHeader
-                    label="Score"
-                    sortKey="score"
-                    currentSort={sortConfig}
-                    onSort={requestSort}
-                    align="right"
-                  />
-                  <th className="px-6 py-4 text-right"></th>
+                  <SortHeader label="Score" sortKey="score" currentSort={sortConfig} onSort={requestSort} align="right" />
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {filteredRecords.length === 0 ? (
+                {paginatedRecords.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-slate-500 italic">
-                      {tableFilter
-                        ? 'No records match your filter.'
-                        : 'No exam records yet. Add one above.'}
-                    </td>
+                    <td colSpan={11} className="px-6 py-12 text-center text-slate-500 italic">No records match.</td>
                   </tr>
                 ) : (
-                  filteredRecords.map((record) => {
+                  paginatedRecords.map((record) => {
                     const isEditing = editingId === record.id
-                    const scoreNum = record.score ? Number(record.score) : null
-                    const passed = record.passed
+                    const scoreNum = isEditing ? (editScore ? Number(editScore) : null) : (record.score ? Number(record.score) : null)
+                    const passed = isEditing ? (scoreNum !== null ? scoreNum >= 75 : record.passed) : record.passed
 
                     return (
-                      <tr
-                        key={record.id}
-                        className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
-                      >
-                        {/* Student */}
+                      <tr key={record.id} className={`group border-b border-slate-50 transition-all hover:bg-slate-50/50 ${isEditing ? 'bg-aerojet-blue/5 shadow-inner' : ''}`}>
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-xs font-bold text-aerojet-blue">
-                              {record.user.profile?.firstName?.charAt(0)}
-                              {record.user.profile?.lastName?.charAt(0)}
-                            </div>
-                            <div>
-                              <p className="font-bold text-slate-900 dark:text-white">
-                                {[
-                                  record.user.profile?.firstName,
-                                  record.user.profile?.middleName,
-                                  record.user.profile?.lastName,
-                                ]
-                                  .filter(Boolean)
-                                  .join(' ')}
-                              </p>
-                              <p className="text-[10px] text-slate-500">{record.user.email}</p>
-                            </div>
-                          </div>
+                          <input type="checkbox" checked={selectedIds.includes(record.id)} onChange={() => toggleSelectRecord(record.id)} className="h-4 w-4 rounded border-slate-300 text-aerojet-blue" />
                         </td>
-                        {/* Module */}
+                        <td className="px-6 py-4">
+                           <p className="font-bold text-slate-900 dark:text-white">{[record.user.profile?.firstName, record.user.profile?.lastName].filter(Boolean).join(' ')}</p>
+                           <p className="text-[10px] text-slate-500">{record.user.email}</p>
+                        </td>
                         <td className="px-6 py-4">
                           {isEditing ? (
-                            <div className="space-y-1.5" style={{ minWidth: 200 }}>
-                              {/* Course dropdown */}
-                              <div className="relative">
-                                <input
-                                  value={editCourseQuery}
-                                  onChange={(e) => {
-                                    setEditCourseQuery(e.target.value)
-                                    setShowEditCourseDropdown(true)
-                                    if (!e.target.value) {
-                                      setEditCourseId(null)
-                                      setEditModuleCode('')
-                                    }
-                                  }}
-                                  onFocus={() => setShowEditCourseDropdown(true)}
-                                  placeholder="Search course..."
-                                  autoComplete="off"
-                                  className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-aerojet-blue focus:outline-hidden"
-                                />
-                                {showEditCourseDropdown && (
-                                  <div className="absolute z-30 mt-0.5 max-h-40 w-56 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900">
-                                    {modules
-                                      .filter(
-                                        (m) =>
-                                          m.code.toLowerCase().includes(editCourseQuery.toLowerCase()) ||
-                                          m.name.toLowerCase().includes(editCourseQuery.toLowerCase())
-                                      )
-                                      .slice(0, 10)
-                                      .map((m) => (
-                                        <button
-                                          key={m.id}
-                                          type="button"
-                                          onClick={() => {
-                                            setEditCourseId(m.id)
-                                            setEditModuleCode(m.code.toUpperCase())
-                                            setEditCourseQuery(`${m.code} — ${m.name}`)
-                                            setShowEditCourseDropdown(false)
-                                          }}
-                                          className="flex w-full flex-col px-3 py-2 text-left transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
-                                        >
-                                          <span className="text-xs font-bold text-slate-900 dark:text-white">{m.code}</span>
-                                          <span className="truncate text-[10px] text-slate-500">{m.name}</span>
-                                        </button>
-                                      ))}
-                                    {modules.filter(
-                                      (m) =>
-                                        m.code.toLowerCase().includes(editCourseQuery.toLowerCase()) ||
-                                        m.name.toLowerCase().includes(editCourseQuery.toLowerCase())
-                                    ).length === 0 && (
-                                      <div className="px-3 py-2 text-[10px] text-slate-400">No courses found</div>
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-                              {/* Manual module code override */}
-                              <input
-                                value={editModuleCode}
-                                onChange={(e) => setEditModuleCode(e.target.value.toUpperCase())}
-                                placeholder="Module code"
+                            <div className="relative">
+                              <input 
+                                type="text" 
+                                value={editModuleCode} 
                                 autoComplete="off"
-                                className="w-full rounded-lg border border-slate-200 px-2 py-1 text-xs font-bold uppercase focus:border-aerojet-blue focus:outline-hidden"
+                                onChange={(e) => {
+                                  const q = e.target.value.toUpperCase()
+                                  setEditModuleCode(q)
+                                  setEditShowDropdown(q.length > 0)
+                                }}
+                                onFocus={() => { if (editModuleCode.length > 0) setEditShowDropdown(true) }}
+                                onBlur={() => setTimeout(() => setEditShowDropdown(false), 200)}
+                                className="w-24 rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold uppercase focus:border-aerojet-blue focus:outline-hidden"
                               />
+                              {editShowDropdown && (
+                                <div className="absolute top-full left-0 z-50 mt-1 max-h-48 w-64 overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                                  {modules
+                                    .filter((m) => 
+                                      m.code.toLowerCase().includes(editModuleCode.toLowerCase()) || 
+                                      m.name.toLowerCase().includes(editModuleCode.toLowerCase())
+                                    )
+                                    .slice(0, 10)
+                                    .map((m) => (
+                                      <button
+                                        key={m.id}
+                                        type="button"
+                                        onClick={() => {
+                                          setEditModuleCode(m.moduleCode)
+                                          setEditShowDropdown(false)
+                                        }}
+                                        className="flex w-full items-center gap-3 px-3 py-2 text-left transition-all hover:bg-slate-50 dark:hover:bg-slate-800"
+                                      >
+                                        <div className="min-w-0 flex-1">
+                                          <p className="truncate text-xs font-bold text-slate-900 dark:text-white">{m.name}</p>
+                                          <p className="text-[10px] text-slate-500 uppercase">Code: {m.code}</p>
+                                        </div>
+                                      </button>
+                                    ))}
+                                </div>
+                              )}
                             </div>
                           ) : (
-                            <span className="font-bold text-slate-900 uppercase dark:text-white">
-                              {record.moduleCode || '—'}
-                            </span>
+                            <span className="font-bold uppercase text-slate-700">{record.moduleCode}</span>
                           )}
                         </td>
-                        {/* Date */}
-                        <td className="px-6 py-4">
+                        <td className="px-6 py-4 text-xs font-bold text-slate-900">
                           {isEditing ? (
-                            <input
-                              type="date"
-                              value={editDate}
+                            <input 
+                              type="date" 
+                              value={editDate} 
                               onChange={(e) => setEditDate(e.target.value)}
-                              autoComplete="off"
-                              className="rounded-lg border border-slate-200 px-2 py-1 text-sm focus:border-aerojet-blue focus:outline-hidden"
+                              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:border-aerojet-blue focus:outline-hidden"
                             />
                           ) : (
-                            <div className="flex flex-col gap-0.5">
-                              <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                                <Calendar className="h-3 w-3 text-aerojet-blue" />
-                                <span className="text-[10px] text-slate-400 uppercase mr-1">Created:</span>
-                                {record.createdAt ? format(new Date(record.createdAt), 'MMM d, yyyy') : '—'}
-                              </div>
-                              <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                                <Clock className="h-2.5 w-2.5" />
-                                <span className="text-slate-400 uppercase">Updated:</span>
-                                {format(new Date(record.updatedAt), 'MMM d, yyyy')}
-                              </div>
-                            </div>
+                            record.examDate ? format(new Date(record.examDate), 'MMM d, yyyy') : '—'
                           )}
                         </td>
-                        {/* Attempt */}
                         <td className="px-6 py-4">
                           {isEditing ? (
-                            <select
-                              value={editBookingType}
-                              onChange={(e) => setEditBookingType(e.target.value)}
-                              className="rounded-lg border border-slate-200 px-2 py-1 text-xs focus:border-aerojet-blue focus:outline-hidden"
+                            <select 
+                              value={editCategory} 
+                              onChange={(e) => setEditCategory(e.target.value as any)}
+                              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:border-aerojet-blue focus:outline-hidden"
                             >
-                              {BOOKING_TYPES.map((t) => (
-                                <option key={t.value} value={t.value}>{t.value}</option>
-                              ))}
+                              <option value="OFFICIAL_EASA">EASA</option>
+                              <option value="INTERNAL">Internal</option>
                             </select>
                           ) : (
-                            <span
-                              className={`rounded-md px-2 py-0.5 text-[9px] font-bold uppercase ${
-                                record.attemptType?.startsWith('RESIT')
-                                  ? 'bg-amber-50 text-amber-600'
-                                  : 'bg-blue-50 text-blue-600'
-                              }`}
+                            <div className={`flex items-center gap-1.5 rounded-lg border px-2 py-1 text-[10px] font-bold uppercase transition-all ${record.examCategory === 'INTERNAL' ? 'border-indigo-100 bg-indigo-50/50 text-indigo-600' : 'border-blue-100 bg-blue-50/50 text-blue-600'}`}>
+                              {record.examCategory === 'INTERNAL' ? <><BookOpen className="h-3 w-3" /><span>Internal</span></> : <><Award className="h-3 w-3" /><span>Official EASA</span></>}
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-xs text-slate-500">
+                          {isEditing ? (
+                            <select 
+                              value={editBookingType} 
+                              onChange={(e) => setEditBookingType(e.target.value as any)}
+                              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:border-aerojet-blue focus:outline-hidden"
                             >
-                              {record.attemptType || 'FIRST'}
+                              <option value="INDIVIDUAL">IND</option>
+                              <option value="TWIN_PACK">TWIN</option>
+                              <option value="FOUR_PACK">4-PK</option>
+                            </select>
+                          ) : (
+                            record.bookingType
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {isEditing ? (
+                            <select 
+                              value={editAttemptType} 
+                              onChange={(e) => setEditAttemptType(e.target.value)}
+                              className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:border-aerojet-blue focus:outline-hidden"
+                            >
+                              {ATTEMPT_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                            </select>
+                          ) : (
+                            <span className="rounded-md bg-slate-100 px-2 py-0.5 text-[9px] font-bold uppercase">
+                              {record.attemptType === 'MIGRATED' ? '—' : (record.attemptType || '—')}
                             </span>
                           )}
                         </td>
-                        {/* Result */}
                         <td className="px-6 py-4">
-                          <div className="flex items-center gap-1.5">
-                            {passed ? (
-                              <>
-                                <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                                <span className="text-xs font-bold text-emerald-600">PASS</span>
-                              </>
-                            ) : (
-                              <>
-                                <XCircle className="h-3.5 w-3.5 text-red-500" />
-                                <span className="text-xs font-bold text-red-600">FAIL</span>
-                              </>
-                            )}
-                          </div>
-                        </td>
-                        {/* Score */}
-                        <td className="px-6 py-4 text-right">
                           {isEditing ? (
-                            <input
-                              type="number"
-                              value={editScore}
-                              onChange={(e) => setEditScore(e.target.value)}
-                              min="0"
-                              max="100"
-                              step="0.01"
-                              placeholder="—"
-                              autoComplete="off"
-                              className="w-20 rounded-lg border border-slate-200 px-2 py-1 text-right text-sm focus:border-aerojet-blue focus:outline-hidden"
-                            />
-                          ) : scoreNum !== null ? (
-                            <span className="font-bold text-slate-900 dark:text-white">
-                              {scoreNum.toFixed(0)}%
+                            <div className="flex items-center gap-2">
+                              <input 
+                                type="checkbox" 
+                                checked={editIsMigrated}
+                                onChange={(e) => setEditIsMigrated(e.target.checked)}
+                                className="h-4 w-4 rounded border-slate-300 text-aerojet-blue"
+                              />
+                              <span className="text-[10px] font-bold text-slate-500 uppercase">Yes</span>
+                            </div>
+                          ) : (
+                            record.isMigrated ? (
+                              <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[9px] font-black uppercase text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">Migrated</span>
+                            ) : (
+                              <span className="text-[10px] font-bold text-slate-300 uppercase">—</span>
+                            )
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          {record.result && !['pass', 'fail', 'PASS', 'FAIL'].includes(record.result) ? (
+                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                              {record.result}
                             </span>
                           ) : (
-                            <span className="text-[10px] font-medium tracking-tight text-slate-400 uppercase italic">
-                              Record Pending
-                            </span>
+                            passed ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <XCircle className="h-4 w-4 text-red-500" />
                           )}
                         </td>
-                        {/* Actions */}
+                        <td className="px-6 py-4 text-right font-bold">
+                          {isEditing ? (
+                            <input 
+                              type="number" 
+                              value={editScore} 
+                              onChange={(e) => setEditScore(e.target.value)}
+                              className="w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-right text-xs font-bold focus:border-aerojet-blue focus:outline-hidden"
+                            />
+                          ) : (
+                            scoreNum !== null ? `${scoreNum.toFixed(0)}%` : '—'
+                          )}
+                        </td>
                         <td className="px-6 py-4 text-right">
                           {isEditing ? (
                             <div className="flex items-center justify-end gap-2">
-                              <button
-                                onClick={() => setEditingId(null)}
-                                className="rounded-lg px-3 py-1.5 text-xs font-bold text-slate-500 hover:bg-slate-100"
-                              >
-                                Cancel
-                              </button>
-                              <button
-                                onClick={handleUpdate}
-                                disabled={isUpdating}
-                                className="rounded-lg bg-aerojet-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50"
-                              >
-                                {isUpdating ? 'Saving...' : 'Save'}
+                              <button onClick={() => setEditingId(null)} className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100"><XCircle className="h-4 w-4" /></button>
+                              <button onClick={handleUpdate} disabled={isUpdating} className="rounded-lg bg-emerald-500 p-1.5 text-white hover:bg-emerald-600 disabled:opacity-50">
+                                {isUpdating ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <CheckCircle2 className="h-4 w-4" />}
                               </button>
                             </div>
                           ) : (
                             <div className="flex items-center justify-end gap-1">
-                              <button
-                                onClick={() => startEdit(record)}
-                                className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-aerojet-blue"
-                                title="Edit"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(record.id)}
-                                className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                                title="Delete"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
+                              <button onClick={() => startEdit(record)} className="p-2 text-slate-400 hover:text-aerojet-blue transition-colors"><Edit className="h-4 w-4" /></button>
+                              <button onClick={() => handleDelete(record.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors"><Trash2 className="h-4 w-4" /></button>
                             </div>
                           )}
                         </td>
@@ -891,8 +897,117 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               </tbody>
             </table>
           </div>
+
+          {/* ── Pagination Controls ── */}
+          <div className="flex flex-col items-center justify-between gap-4 border-t border-slate-100 bg-slate-50/50 px-6 py-4 sm:flex-row dark:border-slate-800 dark:bg-slate-800/20">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-500 uppercase">Rows:</span>
+                <select 
+                  value={pageSize} 
+                  onChange={(e) => {
+                    setPageSize(Number(e.target.value))
+                    setCurrentPage(1)
+                  }}
+                  className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-xs font-bold focus:border-aerojet-blue focus:outline-hidden"
+                >
+                  {[25, 50, 100, 250, 500].map(size => (
+                    <option key={size} value={size}>{size}</option>
+                  ))}
+                </select>
+              </div>
+              <p className="text-xs text-slate-500">
+                Showing <span className="font-bold text-slate-900 dark:text-white">{(currentPage - 1) * pageSize + 1}</span> to <span className="font-bold text-slate-900 dark:text-white">{Math.min(currentPage * pageSize, totalItems)}</span> of <span className="font-bold text-slate-900 dark:text-white">{totalItems}</span>
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum = i + 1
+                  if (totalPages > 5 && currentPage > 3) {
+                    pageNum = currentPage - 3 + i + 1
+                    if (pageNum > totalPages) pageNum = totalPages - (4 - i)
+                  }
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={`h-8 min-w-[32px] rounded-lg border px-2 text-xs font-bold transition-all ${
+                        currentPage === pageNum
+                          ? 'border-aerojet-blue bg-aerojet-blue text-white shadow-md'
+                          : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400'
+                      }`}
+                    >
+                      {pageNum}
+                    </button>
+                  )
+                })}
+              </div>
+
+              <button 
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages || totalPages === 0}
+                className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-30 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+
+              <div className="ml-2 flex items-center gap-2">
+                <span className="text-xs text-slate-500 uppercase">Go:</span>
+                <input 
+                  type="number"
+                  min="1"
+                  max={totalPages}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const val = Number((e.target as HTMLInputElement).value)
+                      if (val >= 1 && val <= totalPages) setCurrentPage(val)
+                    }
+                  }}
+                  placeholder={`1-${totalPages}`}
+                  className="w-16 rounded-lg border border-slate-200 bg-white px-2 py-1 text-center text-xs font-bold focus:border-aerojet-blue focus:outline-hidden"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
+
+      {selectedIds.length > 0 && (
+        <div className="fixed bottom-8 left-1/2 z-50 flex -translate-x-1/2 items-center gap-8 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl transition-all animate-in fade-in zoom-in-95 slide-in-from-bottom-8 dark:border-slate-700 dark:bg-slate-900">
+          <div className="flex items-center gap-4 pl-4 pr-6 border-r border-slate-100 dark:border-slate-800">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-aerojet-blue font-black text-white shadow-lg">
+              {selectedIds.length}
+            </div>
+            <div>
+              <p className="text-sm font-black text-slate-900 dark:text-white leading-none">Records</p>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Selected</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-3">
+            <button onClick={() => handleBulkUpdate('OFFICIAL_EASA')} className="flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-xs font-black text-white shadow-lg transition-all hover:bg-blue-700">
+              <Award className="h-4 w-4" /> Link to Official EASA
+            </button>
+            <button onClick={() => handleBulkUpdate('INTERNAL')} className="flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-2.5 text-xs font-black text-white shadow-lg transition-all hover:bg-indigo-700">
+              <BookOpen className="h-4 w-4" /> Link to Internal
+            </button>
+          </div>
+
+          <button onClick={() => setSelectedIds([])} className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }

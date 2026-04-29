@@ -182,7 +182,7 @@ export default async function Page() {
             instructorData.recentNotices.map((notice) => (
               <Link
                 key={notice.id}
-                href={`/news/${notice.slug}`}
+                href={`/newsroom/${notice.slug}`}
                 className="block border-l-4 border-blue-400 py-1 pl-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
               >
                 <p className="text-sm font-bold text-slate-800 dark:text-slate-200">

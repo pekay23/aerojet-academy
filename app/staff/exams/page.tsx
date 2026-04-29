@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import StaffExamsTabs from '../_components/StaffExamsTabs'
 import ExamBookingsTable from '../_components/ExamBookingsTable'
 import RecordsTab from './_components/RecordsTab'
@@ -12,17 +12,42 @@ import { format } from 'date-fns'
 import {
   Plus,
   Calendar,
-  FileCheck,
-  Clock,
-  ClipboardList,
-  CreditCard,
   Trophy,
   BookOpen,
+  AlertCircle,
 } from 'lucide-react'
 
 import { Metadata } from 'next'
+import { BookingType, ExamCategory } from '@prisma/client'
 
-export const metadata: Metadata = { title: 'Exams | Staff Portal' }
+interface ExamRecord {
+  id: string
+  examId?: string | null
+  userId: string
+  moduleCode: string | null
+  score: number | null
+  maxScore?: number | null
+  percentage?: number | null
+  passed: boolean
+  grade?: string | null
+  attemptType: string | null
+  bookingType: BookingType | string | null
+  source: 'booking' | 'result'
+  sourceNotes?: string | null
+  examCategory: ExamCategory | string
+  isMigrated: boolean
+  migrationRef?: string | null
+  certificateUrl?: string | null
+  examDate?: Date | string | null
+  result?: string | null
+  createdAt: Date | string
+  updatedAt?: Date | string
+  user: {
+    email: string
+    profile: { firstName: string; middleName?: string | null; lastName: string } | null
+    studentProfile: { studentId: string } | null
+  }
+}
 export const dynamic = 'force-dynamic'
 
 /** Reusable Prisma search filter for exam component code (searches both component code and parent course code) */
@@ -77,7 +102,7 @@ export default async function StaffExamsPage({
 
 /* ─── Events Tab ─── */
 async function EventsTab({ query }: { query?: string }) {
-  const eventsRaw = await prisma.examEvent.findMany({
+  const eventsRaw = await prismaUnfiltered.examEvent.findMany({
     where: query
       ? { name: { contains: query, mode: 'insensitive' } }
       : undefined,
@@ -203,7 +228,7 @@ async function EventsTab({ query }: { query?: string }) {
 
 /* ─── Bookings Tab ─── */
 async function BookingsTab({ query }: { query?: string }) {
-  const bookings = await prisma.examBooking.findMany({
+  const bookings = await prismaUnfiltered.examBooking.findMany({
     where: query
       ? {
           OR: [
@@ -226,6 +251,7 @@ async function BookingsTab({ query }: { query?: string }) {
       },
     },
     orderBy: { createdAt: 'desc' },
+    take: 500,
   })
 
   const serialized = serializePrisma(bookings)
@@ -245,10 +271,14 @@ async function BookingsTab({ query }: { query?: string }) {
 
 /* ─── Results Tab ─── */
 async function ResultsTab({ query }: { query?: string }) {
-  const formalResults = await prisma.examResult.findMany({
+  const formalResults = await prismaUnfiltered.examResult.findMany({
     where: query
       ? {
-          OR: [userSearchFilter(query), examComponentCodeFilter(query)],
+          OR: [
+            userSearchFilter(query),
+            examComponentCodeFilter(query),
+            { moduleCode: { contains: query, mode: 'insensitive' } },
+          ],
         }
       : undefined,
     include: {
@@ -260,6 +290,7 @@ async function ResultsTab({ query }: { query?: string }) {
       },
     },
     orderBy: { createdAt: 'desc' },
+    take: 500, // Important: Add limit to prevent connection starvation
   }).then(res => serializePrisma(res))
 
   // Unify results
@@ -404,11 +435,35 @@ async function ResultsTab({ query }: { query?: string }) {
 
 /* ─── Records Tab (Server Component Wrapper) ─── */
 async function RecordsTabServer({ query }: { query?: string }) {
-  const [records, modules] = await Promise.all([
-    prisma.examResult.findMany({
+  try {
+    const [bookingsRaw, resultsRaw, modules] = await Promise.all([
+    prismaUnfiltered.examBooking.findMany({
       where: query
         ? {
-            OR: [userSearchFilter(query), { moduleCode: { contains: query, mode: 'insensitive' } }],
+            OR: [
+              userSearchFilter(query),
+              { moduleCode: { contains: query, mode: 'insensitive' } },
+            ],
+          }
+        : undefined,
+      include: {
+        examAttendance: true,
+        user: {
+          include: {
+            profile: { select: { firstName: true, middleName: true, lastName: true } },
+            studentProfile: { select: { studentId: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+    prismaUnfiltered.examResult.findMany({
+      where: query
+        ? {
+            OR: [
+              userSearchFilter(query),
+              { moduleCode: { contains: query, mode: 'insensitive' } },
+            ],
           }
         : undefined,
       include: {
@@ -424,7 +479,98 @@ async function RecordsTabServer({ query }: { query?: string }) {
     getAvailableModules(),
   ])
 
-  const serialized = serializePrisma(records)
+  // Unify bookings and results
+  const unifiedRecords: ExamRecord[] = []
+
+  // 1. Add all bookings
+  for (const b of bookingsRaw) {
+    unifiedRecords.push({
+      ...b,
+      source: 'booking',
+      id: b.id,
+      score: b.score != null ? Number(b.score) : null,
+      passed: b.result?.toLowerCase() === 'pass',
+      isMigrated: b.result?.toUpperCase() === 'MIGRATED',
+      migrationRef: null, // ExamBooking has no migrationRef field
+      examCategory: b.examCategory as ExamCategory,
+    } as ExamRecord)
+  }
+
+  // 2. Merge results into bookings or add as standalone
+  for (const r of resultsRaw) {
+    const rModule = (r.moduleCode || '').toUpperCase()
+    // Try to find a booking for this user and module that doesn't have a formal result ID linked yet
+    // Heuristic: Match by User + Module + AttemptType + Month (to prevent merging different attempts)
+    const rDate = r.createdAt ? new Date(r.createdAt) : new Date()
+    const existingIndex = unifiedRecords.findIndex(
+      (rec) => {
+        if (rec.source !== 'booking' || rec.userId !== r.userId || (rec.moduleCode?.toUpperCase() || '') !== rModule) return false
+        
+        // If attempt types are specified and different, don't merge
+        if (rec.attemptType && r.attemptType && rec.attemptType !== r.attemptType) return false
+        
+        // If dates are specified and different by more than 30 days, don't merge
+
+        
+        return true
+      }
+    )
+
+    if (existingIndex !== -1) {
+      // Merge: Preference to formal result data
+      unifiedRecords[existingIndex] = {
+        ...unifiedRecords[existingIndex],
+        id: `result_${r.id}`, // Use result_ prefix so updateExamBooking knows to target Result table
+        score: r.score != null ? Number(r.score) : unifiedRecords[existingIndex].score,
+        passed: r.passed,
+        source: 'result', // Mark as result-backed
+        examCategory: r.examCategory || unifiedRecords[existingIndex].examCategory,
+        attemptType: r.attemptType || unifiedRecords[existingIndex].attemptType,
+        isMigrated: !!r.migrationRef || !!unifiedRecords[existingIndex].migrationRef,
+        migrationRef: r.migrationRef || unifiedRecords[existingIndex].migrationRef,
+      }
+    } else {
+      // Standalone result - Try to find any booking for this user/module to get correct bookingType
+      const matchingBooking = bookingsRaw.find((b) => {
+        if (b.userId !== r.userId) return false
+        const bModule = (b.moduleCode || '').trim().toUpperCase()
+        const rModuleNorm = rModule.trim()
+        if (!rModuleNorm) return false // Don't match if module is missing
+        return bModule === rModuleNorm || bModule.includes(rModuleNorm) || rModuleNorm.includes(bModule)
+      })
+      
+      unifiedRecords.push({
+        ...r,
+        id: `result_${r.id}`,
+        source: 'result',
+        score: r.score != null ? Number(r.score) : null,
+        bookingType: matchingBooking?.bookingType || 'INDIVIDUAL', 
+        isMigrated: !!r.migrationRef,
+        migrationRef: r.migrationRef,
+        examCategory: r.examCategory || matchingBooking?.examCategory || 'OFFICIAL_EASA',
+      } as ExamRecord)
+    }
+  }
+
+  // Final sort and serialization
+  const finalRecords = unifiedRecords.sort((a, b) => {
+    const dateA = new Date(a.examDate || a.createdAt).getTime()
+    const dateB = new Date(b.examDate || b.createdAt).getTime()
+    if (dateB !== dateA) return dateB - dateA
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  }).slice(0, 2000) // High limit for pagination
+
+  const serialized = serializePrisma(finalRecords)
 
   return <RecordsTab records={serialized} modules={modules} />
+  } catch (error) {
+    console.error('[RecordsTabServer] Error:', error)
+    return (
+      <div className="rounded-2xl border-2 border-dashed border-slate-200 p-12 text-center dark:border-slate-800">
+        <AlertCircle className="mx-auto mb-4 h-12 w-12 text-amber-500" />
+        <h3 className="text-lg font-black text-slate-900 dark:text-white">Data temporarily unavailable</h3>
+        <p className="mt-2 text-sm text-slate-500">The database connection timed out. Please refresh the page in a few moments.</p>
+      </div>
+    )
+  }
 }

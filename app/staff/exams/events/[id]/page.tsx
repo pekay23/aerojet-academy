@@ -9,7 +9,7 @@ import {
   Plus,
   Settings,
 } from 'lucide-react'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
 import { evaluateGoNoGo } from '@/lib/events/go-no-go'
@@ -23,7 +23,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const event = await prisma.examEvent.findUnique({ where: { id } })
+  const event = await prismaUnfiltered.examEvent.findUnique({ where: { id } })
   return { title: `${event?.name || 'Event Details'} | Staff Portal` }
 }
 
@@ -32,7 +32,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
   if (!session) redirect('/login')
 
   const { id } = await params
-  const event = await prisma.examEvent.findUnique({
+  const event = await prismaUnfiltered.examEvent.findUnique({
     where: { id },
     include: {
       pools: {
@@ -58,7 +58,7 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
     })
   )
 
-  const evaluation = await evaluateGoNoGo(id).catch(() => null)
+  const evaluation = await evaluateGoNoGo(id, { unfiltered: true }).catch(() => null)
   const hasAutoPool = event.pools.some((p) => p.isAutoPool && p.poolType === 'AUTO' && p.status === 'OPEN')
 
   return (

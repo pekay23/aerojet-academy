@@ -35,6 +35,7 @@ interface ProfileUser {
   studentProfile?: {
     studentId?: string | null
     enrollmentType?: string | null
+    pathwayName?: string | null
     enrollmentDate?: Date | string | null
   } | null
 }
@@ -253,7 +254,9 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                 Current Program
               </p>
               <p className="text-xs font-bold tracking-wider text-slate-900 uppercase dark:text-white">
-                {user.studentProfile?.enrollmentType?.replace('_', ' ') || 'Modular Training'}
+                {user.studentProfile?.pathwayName ||
+                  user.studentProfile?.enrollmentType?.replace('_', ' ') ||
+                  'Modular Training'}
               </p>
             </div>
             <div>

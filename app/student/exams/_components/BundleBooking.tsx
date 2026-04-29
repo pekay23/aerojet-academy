@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { bookBundleExamsAction } from '@/app/student/actions'
+import { bookBundleExamsAtomicAction } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight, BookOpen, Wallet, Calendar, X, Package, Info } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
@@ -71,7 +71,7 @@ export default function BundleBooking({
 
     startTransition(async () => {
       try {
-        const res = await bookBundleExamsAction({
+        const res = await bookBundleExamsAtomicAction({
           moduleCodes: selectedModules,
           eventId: selectedEventId,
         })

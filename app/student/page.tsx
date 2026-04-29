@@ -35,23 +35,31 @@ export default async function StudentDashboard() {
 
   const userId = session.user.id
 
-  // 1. Fetch Profile & Shared Data
-  const [profile, wallet, welcomeMessages, userRecord] = await Promise.all([
-    prisma.studentProfile.findUnique({
-      where: { userId },
-      include: {
-        pathwayRel: true,
-        licenseTargets: {
-          include: { licenseCategory: true },
+  // 1. Fetch Profile, Wallet, and User status in a single query to reduce transaction overhead
+  const [userData, welcomeMessages] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        mustChangePassword: true,
+        wallet: true,
+        studentProfile: {
+          include: {
+            pathwayRel: true,
+            licenseTargets: {
+              include: { licenseCategory: true },
+            },
+            academicYear: true,
+            semester: true,
+          },
         },
-        academicYear: true,
-        semester: true,
       },
     }),
-    prisma.wallet.findUnique({ where: { userId } }),
     getWelcomeMessages(prisma, session.user.role),
-    prisma.user.findUnique({ where: { id: userId }, select: { mustChangePassword: true } }),
   ])
+
+  const profile = userData?.studentProfile
+  const wallet = userData?.wallet
+  const userRecord = { mustChangePassword: userData?.mustChangePassword }
 
   if (userRecord?.mustChangePassword) {
     redirect('/student/profile/change-password')
@@ -74,78 +82,68 @@ export default async function StudentDashboard() {
   const { isFullTime, isExamOnly, isModular: isFlexible, enrollmentType, pathwayCode } = await getStudentStatus(userId)
   const activePathway = profile.pathwayRel
 
-  // 2b. Parallel data fetching — all independent queries run concurrently
-  const [
-    upcomingExams,
-    ftEnrollmentRaw,
-    flexEnrollments,
-    genericEnrollments,
-    ftCourseEnrollmentCount,
-    currentPoolsCount,
-    poolMemberships,
-    latestResultRecord,
-  ] = await Promise.all([
-    // Common: Upcoming exams
-    prisma.examBooking.findMany({
-      where: {
-        userId,
-        status: { in: ['APPROVED', 'PENDING'] },
-        examDate: { gte: new Date() },
-      },
-      include: { exam: { include: { examComponent: { include: { course: true } } } }, event: true },
-      orderBy: { examDate: 'asc' },
-      take: 3,
+  // 2b. Parallel data fetching — consolidated to reduce transaction count
+  const [activityData, ftEnrollmentRaw] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        examBookings: {
+          where: {
+            status: { in: ['APPROVED', 'PENDING'] },
+            examDate: { gte: new Date() },
+          },
+          include: { exam: { include: { examComponent: { include: { course: true } } } }, event: true },
+          orderBy: { examDate: 'asc' },
+          take: 3,
+        },
+        enrollments: {
+          where: { status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
+          include: { course: true },
+          take: 6, // Combined for flexible and general
+        },
+        poolMemberships: {
+          where: { 
+            status: { in: ['RESERVED', 'CONFIRMED'] },
+            pool: { isAutoPool: false }
+          },
+          include: { pool: true },
+          take: 3,
+        },
+        examResults: {
+          include: { exam: { include: { examComponent: { include: { course: true } } } } },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+        _count: {
+          select: {
+            enrollments: {
+              where: { status: { in: ['ACTIVE', 'APPROVED'] } },
+            },
+            poolMemberships: {
+              where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
+            },
+          }
+        }
+      }
     }),
-    // Full-Time enrollment
+    // Full-Time enrollment remains separate as it's a different model
     isFullTime
       ? prisma.fullTimeEnrollment.findFirst({
           where: { studentId: userId },
           include: { programme: true },
         })
       : Promise.resolve(null),
-    // Flexible (Modular) course enrollments
-    isFlexible
-      ? prisma.enrollment.findMany({
-          where: { userId, status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
-          include: { course: true },
-          take: 3,
-        })
-      : Promise.resolve([]),
-    // General course enrollments (non-full-time)
-    !isFullTime && !isExamOnly
-      ? prisma.enrollment.findMany({
-          where: { userId, status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
-          include: { course: true },
-          take: 3,
-        })
-      : Promise.resolve([]),
-    // Full-time course enrollment count
-    isFullTime
-      ? prisma.enrollment.count({
-          where: { userId, status: { in: ['ACTIVE', 'APPROVED'] } },
-        })
-      : Promise.resolve(0),
-    // Pool memberships count
-    prisma.poolMembership.count({
-      where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
-    }),
-    // Pool memberships list
-    prisma.poolMembership.findMany({
-      where: { 
-        userId, 
-        status: { in: ['RESERVED', 'CONFIRMED'] },
-        pool: { isAutoPool: false } // Only show standard/group pools on dashboard
-      },
-      include: { pool: true },
-      take: 3,
-    }),
-    // Latest exam result
-    prisma.examResult.findFirst({
-      where: { userId },
-      include: { exam: { include: { examComponent: { include: { course: true } } } } },
-      orderBy: { createdAt: 'desc' },
-    }),
   ])
+
+  const upcomingExams = activityData?.examBookings || []
+  const poolMemberships = activityData?.poolMemberships || []
+  const currentPoolsCount = activityData?._count?.poolMemberships || 0
+  const ftCourseEnrollmentCount = activityData?._count?.enrollments || 0
+  const latestResultRecord = activityData?.examResults?.[0] || null
+
+  // Split enrollments back for the existing UI logic
+  const flexEnrollments = isFlexible ? (activityData?.enrollments?.slice(0, 3) || []) : []
+  const genericEnrollments = (!isFullTime && !isExamOnly) ? (activityData?.enrollments?.slice(0, 3) || []) : []
 
   // Full-Time: fetch milestones if enrollment exists (depends on ftEnrollment)
   const ftEnrollment = ftEnrollmentRaw

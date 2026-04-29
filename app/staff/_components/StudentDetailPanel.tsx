@@ -170,12 +170,14 @@ export default function StudentDetailPanel({
   const completedExamResults = currentStudent.examResults?.map((r: any) => ({
     id: r.id,
     type: 'FORMAL',
-    moduleCode: r.exam.examComponent?.course?.code || '—',
-    examName: r.exam.name,
-    date: r.exam.examDate,
+    moduleCode: r.moduleCode || r.exam?.examComponent?.course?.code || '—',
+    examName: r.exam?.name || 'Unknown Exam',
+    date: r.exam?.examDate,
     score: Number(r.score),
     passed: r.passed,
     result: r.passed ? 'PASS' : 'FAIL',
+    examCategory: r.examCategory,
+    attemptType: r.attemptType,
   })) || []
 
   // Include exam bookings that have a completed result OR a score (graded but result not yet written)
@@ -190,6 +192,8 @@ export default function StudentDetailPanel({
       score: r.score != null ? Number(r.score) : null,
       passed: r.result?.toLowerCase() === 'pass',
       result: r.result?.toUpperCase() || (r.score != null ? 'SCORED' : null),
+      examCategory: r.examCategory,
+      attemptType: r.attemptType,
     })) || []
 
   // Upcoming/pending exams — no result AND no score yet
@@ -199,14 +203,65 @@ export default function StudentDetailPanel({
       id: r.id,
       type: r.exam?.name ? 'BOOKED' : 'MANUAL',
       moduleCode: r.moduleCode || '—',
-      examName: r.exam?.name || 'Exam Booking',
+      examName: r.exam?.name || 'Upcoming Exam',
       date: r.examDate || r.bookedAt,
-      paymentStatus: r.status,
+      status: r.status,
+      examCategory: r.examCategory,
+      attemptType: r.attemptType,
     })) || []
 
-  const allExamHistory = [...completedExamResults, ...completedExamBookings].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-  )
+  // Merge and consolidate results with bookings
+  const consolidatedHistory: any[] = []
+
+  // Add all bookings first
+  const allBookings = [...completedExamBookings, ...upcomingExams]
+  allBookings.forEach(b => {
+    consolidatedHistory.push({
+      ...b,
+      source: 'booking'
+    })
+  })
+
+  // Add results, but try to merge into existing bookings first
+  completedExamResults.forEach((r: any) => {
+    const existing = consolidatedHistory.find(
+      (b) => b.moduleCode?.toUpperCase() === r.moduleCode?.toUpperCase() && b.id === r.bookingId 
+    ) || consolidatedHistory.find(
+      (b) => b.moduleCode?.toUpperCase() === r.moduleCode?.toUpperCase() && 
+             ((b.attemptType || 'FIRST') === (r.attemptType || 'FIRST'))
+    )
+
+    if (existing) {
+      // Merge
+      existing.type = 'FORMAL'
+      existing.score = r.score
+      existing.passed = r.passed
+      existing.result = r.result
+      existing.examCategory = r.examCategory || existing.examCategory
+      existing.isConsolidated = true
+    } else {
+      consolidatedHistory.push({
+        ...r,
+        source: 'result'
+      })
+    }
+  })
+
+  const allExamHistory = consolidatedHistory
+    .filter(h => h.passed !== undefined || h.score !== null || h.result) // Only completed for history
+    .sort((a, b) => {
+      const da = a.date ? new Date(a.date).getTime() : 0
+      const db = b.date ? new Date(b.date).getTime() : 0
+      return db - da
+    })
+
+  const upcomingExamsList = consolidatedHistory
+    .filter(h => h.passed === undefined && h.score === null && !h.result)
+    .sort((a, b) => {
+      const da = a.date ? new Date(a.date).getTime() : 0
+      const db = b.date ? new Date(b.date).getTime() : 0
+      return da - db
+    })
 
   return (
     <div
@@ -501,7 +556,7 @@ export default function StudentDetailPanel({
 
             {tab === 'Exams' && (
               <ExamTabContent
-                upcomingExams={upcomingExams}
+                upcomingExams={upcomingExamsList}
                 allExamHistory={allExamHistory}
               />
             )}
@@ -576,7 +631,18 @@ function ExamTabContent({
                       {exam.type}
                     </span>
                   </div>
-                  <p className="truncate text-xs text-slate-500">{exam.examName}</p>
+                  <div className="flex items-center gap-1.5 truncate text-xs text-slate-500">
+                    <span>{exam.examName}</span>
+                    {exam.examCategory && (
+                      <span className={`shrink-0 rounded-full px-1 py-0.5 text-[8px] font-bold ${
+                        exam.examCategory === 'INTERNAL' 
+                          ? 'bg-amber-100/50 text-amber-700' 
+                          : 'bg-blue-100/50 text-blue-700'
+                      }`}>
+                        {exam.examCategory === 'INTERNAL' ? 'INT' : 'EASA'}
+                      </span>
+                    )}
+                  </div>
                   <p className="mt-0.5 text-[10px] text-slate-400">
                     {exam.date ? new Date(exam.date).toLocaleDateString() : '—'}
                   </p>
@@ -629,7 +695,18 @@ function ExamTabContent({
                         {h.type}
                       </span>
                     </div>
-                    <p className="truncate text-xs text-slate-500">{h.examName}</p>
+                    <div className="flex items-center gap-1.5 truncate text-xs text-slate-500">
+                      <span>{h.examName}</span>
+                      {h.examCategory && (
+                        <span className={`shrink-0 rounded-full px-1 py-0.5 text-[8px] font-bold ${
+                          h.examCategory === 'INTERNAL' 
+                            ? 'bg-amber-100/50 text-amber-700' 
+                            : 'bg-blue-100/50 text-blue-700'
+                        }`}>
+                          {h.examCategory === 'INTERNAL' ? 'INT' : 'EASA'}
+                        </span>
+                      )}
+                    </div>
                     <p className="mt-0.5 text-[10px] text-slate-400">
                       {h.date ? new Date(h.date).toLocaleDateString() : '—'}
                     </p>

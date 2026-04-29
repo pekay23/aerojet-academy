@@ -26,7 +26,9 @@ const EXAM_FILTERS = [
   { key: 'all', label: 'All' },
   { key: 'passed', label: 'Passed' },
   { key: 'failed', label: 'Failed' },
-  { key: 'resit', label: 'Resit' },
+  { key: 'resit', label: 'Resits' },
+  { key: 'internal', label: 'Internal' },
+  { key: 'official', label: 'Official EASA' },
   { key: 'upcoming', label: 'Upcoming' },
   { key: 'completed', label: 'Completed' },
 ] as const
@@ -60,6 +62,7 @@ export default function ExamsTab({
     moduleCode?: string
     attemptType?: string
     bookingType?: string
+    examCategory?: string
   }>({})
   const [quickAddModule, setQuickAddModule] = useState<any>(null)
   const [sortBy, setSortBy] = useState<'moduleCode' | 'examDate' | 'score' | 'result'>('examDate')
@@ -92,9 +95,10 @@ export default function ExamsTab({
         attemptType: (b.attemptType?.toUpperCase().includes('MIGRATE') || b.attemptType?.toUpperCase().includes('HISTORICAL')) ? null : b.attemptType,
         isResit: b.isResit || (b.attemptType?.toUpperCase().startsWith('RESIT') ?? false),
         eventName: b.event?.name,
-        sourceNotes: b.sourceNotes,
         bookedAt: b.bookedAt,
         amountPaid: Number(b.amountPaid || 0),
+        examCategory: b.examCategory,
+        attendanceStatus: b.examAttendance?.status || null,
       })
     }
 
@@ -104,7 +108,8 @@ export default function ExamsTab({
       const existingBooking = records.find(
         (rec) =>
           rec.source === 'booking' &&
-          rec.moduleCode === rModuleCode
+          rec.moduleCode?.toUpperCase() === rModuleCode.toUpperCase() &&
+          ((rec.attemptType || 'FIRST') === (r.attemptType || 'FIRST'))
       )
       
       if (existingBooking) {
@@ -116,6 +121,8 @@ export default function ExamsTab({
         existingBooking.status = 'COMPLETED'
         existingBooking.hasResult = true
         existingBooking.resultId = r.id
+        existingBooking.sourceNotes = r.sourceNotes
+        existingBooking.examCategory = r.examCategory || existingBooking.examCategory
         // Treat "migrated" or "historical" results as pending for UI display purposes
         if (existingBooking.result?.toUpperCase().includes('MIGRATE') || 
             existingBooking.result?.toUpperCase().includes('HISTORICAL')) {
@@ -157,10 +164,12 @@ export default function ExamsTab({
           attemptType: (r.attemptType?.toUpperCase().includes('MIGRATE') || r.attemptType?.toUpperCase().includes('HISTORICAL')) ? null : r.attemptType,
           isResit: r.attemptType ? r.attemptType.toUpperCase().startsWith('RESIT') : false,
           eventName: null,
-          sourceNotes: null,
+          sourceNotes: r.sourceNotes,
           bookedAt: r.createdAt,
           certificateUrl: r.certificateUrl,
           amountPaid: 0,
+          examCategory: r.examCategory,
+          attendanceStatus: null,
         })
       }
     }
@@ -193,6 +202,10 @@ export default function ExamsTab({
       )
     } else if (filter === 'completed') {
       filtered = filtered.filter((r) => r.status === 'COMPLETED')
+    } else if (filter === 'internal') {
+      filtered = filtered.filter((r) => r.examCategory === 'INTERNAL')
+    } else if (filter === 'official') {
+      filtered = filtered.filter((r) => r.examCategory === 'OFFICIAL_EASA' || !r.examCategory)
     }
 
     if (search) {
@@ -235,6 +248,8 @@ export default function ExamsTab({
         (r) => r.examDate && new Date(r.examDate) > new Date() && r.status !== 'COMPLETED'
       ).length,
       completed: allExamRecords.filter((r) => r.status === 'COMPLETED').length,
+      internal: allExamRecords.filter((r) => r.examCategory === 'INTERNAL').length,
+      official: allExamRecords.filter((r) => r.examCategory === 'OFFICIAL_EASA' || !r.examCategory).length,
     }),
     [allExamRecords]
   )
@@ -249,6 +264,7 @@ export default function ExamsTab({
         moduleCode: editData.moduleCode || undefined,
         attemptType: editData.attemptType || undefined,
         bookingType: editData.bookingType || undefined,
+        examCategory: editData.examCategory as any || undefined,
         resultIdToSync: record.resultId || undefined,
       })
       if (res.error) {
@@ -539,6 +555,9 @@ export default function ExamsTab({
                   Exam / Event
                 </th>
                 <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  Category
+                </th>
+                <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   Attempt
                 </th>
                 <th
@@ -621,17 +640,33 @@ export default function ExamsTab({
                     })()}
                   </td>
                   <td className="max-w-[200px] px-4 py-3 text-xs text-slate-500">
+                    <div className="flex flex-col">
+                      <span className="truncate font-medium text-slate-800 dark:text-slate-200">
+                        {record.examName}
+                      </span>
+                      {record.eventName && (
+                        <span className="text-[10px] text-slate-400">Event: {record.eventName}</span>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-center">
                     {editingId === record.id ? (
-                      <span className="italic text-slate-400">Editing...</span>
+                      <select
+                        value={editData.examCategory ?? record.examCategory ?? 'OFFICIAL_EASA'}
+                        onChange={(e) => setEditData((d) => ({ ...d, examCategory: e.target.value }))}
+                        className="w-24 rounded border border-slate-200 px-1 py-0.5 text-[10px]"
+                      >
+                        <option value="OFFICIAL_EASA">OFFICIAL EASA</option>
+                        <option value="INTERNAL">INTERNAL</option>
+                      </select>
                     ) : (
-                      <div className="flex flex-col">
-                        <span className="truncate font-medium text-slate-800 dark:text-slate-200">
-                          {record.examName}
-                        </span>
-                        {record.eventName && (
-                          <span className="text-[10px] text-slate-400">Event: {record.eventName}</span>
-                        )}
-                      </div>
+                      <span className={`inline-flex rounded-full px-2 py-0.5 text-[9px] font-bold ${
+                        record.examCategory === 'INTERNAL' 
+                          ? 'bg-amber-100 text-amber-700' 
+                          : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {record.examCategory === 'INTERNAL' ? 'INTERNAL' : 'OFFICIAL EASA'}
+                      </span>
                     )}
                   </td>
                   <td className="px-4 py-3 text-center">
@@ -706,7 +741,9 @@ export default function ExamsTab({
                         className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
                           record.result?.toLowerCase() === 'pass'
                             ? 'bg-emerald-100 text-emerald-700'
-                            : 'bg-red-100 text-red-700'
+                            : record.result?.toLowerCase() === 'fail'
+                              ? 'bg-red-100 text-red-700'
+                              : 'bg-slate-100 text-slate-600'
                         }`}
                       >
                         {record.result}
@@ -734,19 +771,34 @@ export default function ExamsTab({
                     ) : null}
                   </td>
                   <td className="px-4 py-3 text-center">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                        record.status === 'COMPLETED'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : record.status === 'PENDING'
-                            ? 'bg-amber-100 text-amber-700'
-                            : record.status === 'FAILED' || record.status === 'NO_SHOW'
-                              ? 'bg-red-100 text-red-700'
-                              : 'bg-slate-100 text-slate-500'
-                      }`}
-                    >
-                      {record.status}
-                    </span>
+                    <div className="flex flex-col items-center gap-1">
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
+                          record.status === 'COMPLETED'
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : record.status === 'PENDING'
+                              ? 'bg-amber-100 text-amber-700'
+                              : record.status === 'FAILED' || record.status === 'NO_SHOW'
+                                ? 'bg-red-100 text-red-700'
+                                : 'bg-slate-100 text-slate-500'
+                        }`}
+                      >
+                        {record.status}
+                      </span>
+                      {record.attendanceStatus && (
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
+                            record.attendanceStatus === 'PRESENT'
+                              ? 'bg-emerald-50 text-emerald-600'
+                              : record.attendanceStatus === 'ABSENT'
+                                ? 'bg-red-50 text-red-600'
+                                : 'bg-blue-50 text-blue-600'
+                          }`}
+                        >
+                          {record.attendanceStatus}
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-right">
                     {record.source === 'booking' && (
@@ -783,6 +835,7 @@ export default function ExamsTab({
                                   result: record.result || undefined,
                                   attemptType: record.attemptType || 'FIRST',
                                   bookingType: record.bookingType || 'INDIVIDUAL',
+                                  examCategory: record.examCategory || 'OFFICIAL_EASA',
                                 })
                               }}
                               className="rounded p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-blue-600"
