@@ -23,7 +23,20 @@ export type PoolWithDetails = Prisma.ExamPoolGetPayload<{
     event: true
     memberships: {
       include: {
-        examAttendance: true
+        examAttendance: {
+          include: {
+            sitting: true
+          }
+        }
+        booking: {
+          include: {
+            sittingAssignments: {
+              include: {
+                sitting: true
+              }
+            }
+          }
+        }
         user: {
           include: {
             profile: true
@@ -109,7 +122,22 @@ export async function getPoolWithDetails(
         memberships: {
           where: membershipsFilter,
           include: {
-            examAttendance: true,
+            examAttendance: {
+              include: {
+                sitting: true,
+              },
+            },
+            booking: {
+              include: {
+                sittingAssignments: {
+                  where: { status: { in: ['ASSIGNED', 'CONFIRMED', 'ATTENDED', 'ABSENT', 'EXCUSED'] } },
+                  include: {
+                    sitting: true,
+                  },
+                  orderBy: { assignedAt: 'desc' },
+                },
+              },
+            },
             user: {
               include: {
                 profile: true,

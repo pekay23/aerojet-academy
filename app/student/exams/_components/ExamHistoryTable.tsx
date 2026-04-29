@@ -9,6 +9,7 @@ interface HistoryRecord {
   moduleCode: string
   moduleName: string
   date: Date | string
+  sittingLabel?: string | null
   attendanceStatus?: string | null
   passed?: boolean | null
   score?: number | null
@@ -80,7 +81,16 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
-                  {h.date ? new Date(h.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No date available'}
+                  <div>
+                    <div>
+                      {h.date ? new Date(h.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No date available'}
+                    </div>
+                    {h.sittingLabel && (
+                      <div className="text-[10px] uppercase text-slate-400">
+                        {h.sittingLabel}
+                      </div>
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4">
                   <span

@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const membershipId = typeof body.membershipId === 'string' ? body.membershipId : undefined
     const bookingId = typeof body.bookingId === 'string' ? body.bookingId : undefined
+    const sittingId = typeof body.sittingId === 'string' ? body.sittingId : undefined
     const notes = typeof body.notes === 'string' ? body.notes : undefined
     const status = body.status as ExamAttendanceStatus
 
@@ -21,6 +22,7 @@ export async function POST(req: NextRequest) {
     const result = await markExamAttendance({
       membershipId,
       bookingId,
+      sittingId,
       status,
       notes,
       recordedBy: staff.id,
@@ -34,6 +36,7 @@ export async function POST(req: NextRequest) {
       details: {
         bookingId: result.bookingId,
         membershipId: result.membershipId,
+        sittingId: result.sittingId,
         status,
       },
     })
@@ -41,6 +44,7 @@ export async function POST(req: NextRequest) {
     revalidatePath('/staff/exams')
     revalidatePath('/student/exams')
     if (result.poolId) revalidatePath(`/staff/exams/pools/${result.poolId}`)
+    if (result.eventId) revalidatePath(`/staff/exams/events/${result.eventId}`)
     if (result.userId) {
       revalidatePath(`/staff/students/${result.userId}`)
       revalidatePath(`/staff/users/${result.userId}`)

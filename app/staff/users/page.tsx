@@ -1,6 +1,6 @@
 import { getCachedSession } from '@/lib/auth/session-context'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import PeopleTabs from '../_components/PeopleTabs'
 
@@ -15,8 +15,8 @@ export default async function PeoplePage({
   const session = await getCachedSession()
   if (!session) redirect('/login')
 
-  // Optimize: Use unfiltered client for global counts to bypass RLS overhead
-  const queryResult: any[] = await prisma.$queryRaw`
+  // Optimize: Use unfiltered base client for global counts (staff-only page, bypasses RLS + extension overhead)
+  const queryResult: any[] = await prismaUnfiltered.$queryRaw`
     SELECT
       COUNT(*)::int as "total",
       COUNT(*) FILTER (WHERE "role"::text = 'APPLICANT' AND "status"::text = 'PENDING')::int as "applicantAll",

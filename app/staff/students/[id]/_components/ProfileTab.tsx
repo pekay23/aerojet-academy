@@ -54,6 +54,56 @@ export default function ProfileTab({
 
   return (
     <div className="space-y-8">
+      {/* Registration Fee Status Banner */}
+      <div
+        className={`flex items-center gap-4 rounded-2xl border p-5 shadow-sm ${
+          student.registrationPaid
+            ? 'border-emerald-200 bg-linear-to-r from-emerald-50 to-emerald-100/50 dark:border-emerald-900/40 dark:from-emerald-950/30 dark:to-emerald-900/20'
+            : 'border-amber-200 bg-linear-to-r from-amber-50 to-amber-100/50 dark:border-amber-900/40 dark:from-amber-950/30 dark:to-amber-900/20'
+        }`}
+      >
+        <div
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${
+            student.registrationPaid
+              ? 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'
+              : 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400'
+          }`}
+        >
+          {student.registrationPaid ? (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+          )}
+        </div>
+        <div className="flex-1">
+          <p className={`text-sm font-black ${
+            student.registrationPaid
+              ? 'text-emerald-800 dark:text-emerald-300'
+              : 'text-amber-800 dark:text-amber-300'
+          }`}>
+            {student.registrationPaid ? 'Registration Fee Paid' : 'Registration Fee Outstanding'}
+          </p>
+          <p className={`mt-0.5 text-xs ${
+            student.registrationPaid
+              ? 'text-emerald-600/70 dark:text-emerald-400/60'
+              : 'text-amber-600/70 dark:text-amber-400/60'
+          }`}>
+            {student.registrationPaid
+              ? 'This student has completed registration payment and is fully onboarded.'
+              : 'This student has not yet completed their registration fee payment.'}
+          </p>
+        </div>
+        <span
+          className={`shrink-0 rounded-full px-3 py-1 text-[10px] font-black uppercase ${
+            student.registrationPaid
+              ? 'bg-emerald-500/10 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400'
+              : 'bg-amber-500/10 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400'
+          }`}
+        >
+          {student.registrationPaid ? 'Paid' : 'Unpaid'}
+        </span>
+      </div>
+
       {/* Personal Information */}
       <Section
         title="Personal Information"

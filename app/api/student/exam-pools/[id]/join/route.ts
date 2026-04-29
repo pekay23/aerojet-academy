@@ -30,6 +30,7 @@ export const POST = withErrorHandler(
       poolId,
       userId: user.id,
       examComponentId: examComponent.id,
+      moduleCode: validation.data.selectedModule,
     })
 
     if (!result.success) {

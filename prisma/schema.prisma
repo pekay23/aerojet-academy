@@ -50,6 +50,8 @@ model User {
   examBundles               ExamBundle[]
   examExemptions            ExamExemption[]
   examResults               ExamResult[]
+  examSittingAssignments    ExamSittingAssignment[]
+  examinerProfile           Examiner?
   fileUploads               FileUpload[]
   fullTimeEnrollments       FullTimeEnrollment[]
   grades                    Grade[]
@@ -309,6 +311,7 @@ model ExamComponent {
   course          Course            @relation(fields: [courseId], references: [id])
   examAttendances ExamAttendance[]
   exams           Exam[]
+  sittings        ExamSitting[]
   poolMemberships PoolMembership[]
   waitlist        PoolWaitlist[]
 
@@ -481,6 +484,11 @@ model ExamEvent {
   resitFeeCurrency     String              @default("EUR")
   lateBookingSurcharge Decimal             @default(50.00) @db.Decimal(10, 2)
   lateBookingDays      Int                 @default(14)
+  minCandidateTarget   Int?
+  minSeatVolumeTarget  Int?
+  viabilityMode        EventViabilityMode  @default(HYBRID)
+  isExaminerConfirmed  Boolean             @default(false)
+  confirmedExaminerCount Int               @default(0)
   status               EventStatus         @default(DRAFT)
   overrideStatus       EventOverrideStatus @default(NONE)
   createdAt            DateTime            @default(now())
@@ -489,6 +497,7 @@ model ExamEvent {
   deletedAt            DateTime?
   examAttendances      ExamAttendance[]
   examBookings         ExamBooking[]
+  sittings             ExamSitting[]
   pools                ExamPool[]
   exams                Exam[]
 
@@ -521,6 +530,10 @@ model ExamPool {
   createdBy          String?
   dayNumber          Int              @default(1)
   isAutoPool         Boolean          @default(false)
+  isPublicVisible    Boolean          @default(true)
+  totalDemandSeats   Int              @default(0)
+  guaranteedSeats    Int              @default(0)
+  poolNumber         Int?
   poolLabel          String?
   poolType           PoolType         @default(STANDARD)
   redistributedAt    DateTime?
@@ -672,16 +685,23 @@ model ExamBooking {
   bookingType        BookingType        @default(INDIVIDUAL)
   moduleCode         String?
   amountPaid         Decimal            @db.Decimal(10, 2)
+  guaranteeType      BookingGuaranteeType @default(INDIVIDUAL_GUARANTEED)
+  demandStatus       BookingDemandStatus @default(DEMAND_CAPTURED)
   status             PaymentStatus      @default(PENDING)
   walletTxnId        String?
   bookedAt           DateTime           @default(now())
   examDate           DateTime?
+  preferredSessionType SessionType?
+  guaranteedSeat     Boolean            @default(false)
+  executedAt         DateTime?
   createdAt          DateTime           @default(now())
   updatedAt          DateTime           @updatedAt
   attemptType        String?
   bookingGroupRef    String?
   courseId           String?
   autoPoolId         String?
+  rolloverFromBookingId String?
+  rolloverToEventId  String?
   cancellationReason String?
   cancelledAt        DateTime?
   cancelledBy        String?
@@ -700,6 +720,7 @@ model ExamBooking {
   examComponent      ExamComponent?     @relation(fields: [examComponentId], references: [id])
   exam               Exam?              @relation(fields: [examId], references: [id])
   examAttendance     ExamAttendance?
+  sittingAssignments ExamSittingAssignment[]
   user               User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   walletTransaction  WalletTransaction? @relation(fields: [walletTxnId], references: [id])
   poolMemberships    PoolMembership[]
@@ -722,6 +743,7 @@ model ExamAttendance {
   userId          String
   bookingId       String?              @unique
   membershipId    String?              @unique
+  sittingId       String?
   eventId         String?
   examId          String?
   examComponentId String?
@@ -734,6 +756,7 @@ model ExamAttendance {
   updatedAt       DateTime             @updatedAt
   booking         ExamBooking?         @relation(fields: [bookingId], references: [id], onDelete: SetNull)
   membership      PoolMembership?      @relation(fields: [membershipId], references: [id], onDelete: SetNull)
+  sitting         ExamSitting?         @relation(fields: [sittingId], references: [id], onDelete: SetNull)
   event           ExamEvent?           @relation(fields: [eventId], references: [id], onDelete: SetNull)
   exam            Exam?                @relation(fields: [examId], references: [id], onDelete: SetNull)
   examComponent   ExamComponent?       @relation(fields: [examComponentId], references: [id], onDelete: SetNull)
@@ -745,9 +768,79 @@ model ExamAttendance {
   @@index([examId])
   @@index([examComponentId])
   @@index([classId])
+  @@index([sittingId])
   @@index([attendanceDate])
   @@index([status])
   @@map("exam_attendance")
+}
+
+model Examiner {
+  id                  String        @id @default(cuid())
+  userId              String        @unique
+  isActive            Boolean       @default(true)
+  maxParallelSittings Int           @default(1)
+  notes               String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  sittings            ExamSitting[]
+  user                User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([isActive])
+  @@map("examiners")
+}
+
+model ExamSitting {
+  id              String                  @id @default(cuid())
+  eventId         String
+  examinerId      String?
+  examComponentId String
+  dayNumber       Int
+  sessionType     SessionType
+  startTime       DateTime
+  endTime         DateTime
+  capacity        Int                     @default(28)
+  reservedSeats   Int                     @default(0)
+  confirmedSeats  Int                     @default(0)
+  status          SittingStatus           @default(DRAFT)
+  venue           String?
+  notes           String?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  assignments     ExamSittingAssignment[]
+  attendances     ExamAttendance[]
+  event           ExamEvent               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  examiner        Examiner?               @relation(fields: [examinerId], references: [id], onDelete: SetNull)
+  examComponent   ExamComponent           @relation(fields: [examComponentId], references: [id])
+
+  @@index([eventId])
+  @@index([examinerId])
+  @@index([examComponentId])
+  @@index([dayNumber, sessionType])
+  @@index([status])
+  @@map("exam_sittings")
+}
+
+model ExamSittingAssignment {
+  id               String                   @id @default(cuid())
+  sittingId        String
+  bookingId        String
+  userId           String
+  status           SittingAssignmentStatus  @default(ASSIGNED)
+  attendanceStatus ExamAttendanceStatus?
+  assignedAt       DateTime                 @default(now())
+  assignedBy       String?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
+  booking          ExamBooking              @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  sitting          ExamSitting              @relation(fields: [sittingId], references: [id], onDelete: Cascade)
+  user             User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([bookingId, sittingId])
+  @@index([sittingId])
+  @@index([bookingId])
+  @@index([userId])
+  @@index([status])
+  @@map("exam_sitting_assignments")
 }
 
 model BookingEntitlement {
@@ -1378,6 +1471,13 @@ enum EventOverrideStatus {
   FORCE_NO_GO
 }
 
+enum EventViabilityMode {
+  CANDIDATE_COUNT
+  SEAT_VOLUME
+  REVENUE
+  HYBRID
+}
+
 enum PoolStatus {
   DRAFT
   OPEN
@@ -1401,6 +1501,12 @@ enum TimeSlot {
   AFTERNOON
 }
 
+enum SessionType {
+  MORNING
+  AFTERNOON
+  EVENING
+}
+
 enum MembershipStatus {
   RESERVED
   CONFIRMED
@@ -1415,6 +1521,26 @@ enum ExamAttendanceStatus {
   PRESENT
   ABSENT
   EXCUSED
+}
+
+enum SittingStatus {
+  DRAFT
+  OPEN
+  SCHEDULED
+  CONFIRMED
+  COMPLETED
+  POSTPONED
+  CANCELLED
+}
+
+enum SittingAssignmentStatus {
+  ASSIGNED
+  CONFIRMED
+  ATTENDED
+  ABSENT
+  EXCUSED
+  ROLLED_FORWARD
+  CANCELLED
 }
 
 enum TransactionType {
@@ -1452,6 +1578,23 @@ enum BookingType {
   FOUR_PACK
   RESIT
   MANUAL
+}
+
+enum BookingGuaranteeType {
+  POOL_FLEX
+  INDIVIDUAL_GUARANTEED
+  COMPANY_GUARANTEED
+  BUNDLE_GUARANTEED
+}
+
+enum BookingDemandStatus {
+  DEMAND_CAPTURED
+  POOLED
+  SCHEDULED
+  EXECUTED
+  ROLLED_FORWARD
+  POSTPONED
+  CANCELLED
 }
 
 enum CourseModuleType {

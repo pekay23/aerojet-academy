@@ -11,7 +11,7 @@
 import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { getExamPricingConfig } from './pricing-config'
-import { addToAutoPool } from './auto-pool'
+import { placeExamBookingInStandardPool } from '@/lib/enrollment/exams'
 
 export interface BundlePurchaseResult {
   success: boolean
@@ -106,40 +106,31 @@ export async function purchaseBundle(
             userId,
             bundleType,
             totalSeats: seats,
-            usedSeats: seats,
-            status: 'EXHAUSTED',
+            usedSeats: 0,
+            status: 'ACTIVE',
             amountPaid: price,
             freeModuleChanges: freeChanges,
             validUntil,
           },
         })
 
-        // Route each module through auto-pool (cost = 0 since bundle covers it)
+        // Route each module through shared standard-pool assignment (cost = 0 since bundle covers it)
         for (const comp of components) {
           const courseCode = comp.course.code
 
-          // Duplicate check
-          const duplicate = await tx.poolMembership.findFirst({
-            where: {
-              userId,
-              pool: { eventId: activeEvent.id },
-              examComponentId: comp.id,
-              status: { in: ['RESERVED', 'CONFIRMED'] },
-            },
-          })
-          if (duplicate) {
-            throw new Error(`You are already booked for module ${courseCode}.`)
-          }
-
-          await addToAutoPool({
+          const result = await placeExamBookingInStandardPool(tx, {
             userId,
             eventId: activeEvent.id,
-            bookingType: bundleBookingType,
             examComponentId: comp.id,
             moduleCode: courseCode,
-            amount: 0, // Bundle covers the cost
-            tx,
+            bookingType: bundleBookingType,
+            reserveAmount: 0,
+            bundleId: bundle.id,
           })
+
+          if (!result.success) {
+            throw new Error(result.error || `Failed to place module ${courseCode}.`)
+          }
         }
 
         return { success: true, bundleId: bundle.id }
