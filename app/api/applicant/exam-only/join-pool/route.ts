@@ -56,6 +56,7 @@ export async function POST(request: Request) {
       poolId,
       userId,
       examComponentId: examComponent.id,
+      moduleCode,
     })
 
     if (!result.success) {
@@ -100,6 +101,7 @@ export async function POST(request: Request) {
           ? 'Successfully joined booking — booking has been confirmed!'
           : 'Successfully joined booking',
       promotedToStudent,
+      pool: result.pool,
     })
   } catch (error) {
     console.error('Error joining pool:', error)

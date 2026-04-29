@@ -1,3 +1,5 @@
+import type { BookingType } from '@prisma/client'
+
 export interface PoolJoinInput {
   poolId: string
   userId: string
@@ -5,12 +7,17 @@ export interface PoolJoinInput {
   moduleCode?: string
   eventId?: string
   amountPaid?: number
+  reserveAmount?: number
+  bookingType?: BookingType
+  bundleId?: string | null
+  isResit?: boolean
 }
 
 export interface PoolJoinResult {
   success: boolean
   membership?: any
   booking?: any
+  pool?: any
   error?: string
   autoConfirmed?: boolean
   triggeredNearFull?: boolean

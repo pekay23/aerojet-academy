@@ -1,16 +1,55 @@
+import { Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
+import { resolveStandardPoolForJoin } from '@/lib/pools/assignment'
+import { joinPoolInternal } from '@/lib/pools/join'
 import { getSystemSetting } from '@/lib/settings'
-import { addToAutoPool } from '@/lib/pools/auto-pool'
 
 /** Resolve an ExamComponent by its unique code. Accepts an optional transaction client. */
 export async function findExamComponentByCode(code: string, tx: typeof prisma = prisma) {
   return tx.examComponent.findFirst({ where: { code }, include: { course: true } })
 }
 
+export async function placeExamBookingInStandardPool(
+  tx: Prisma.TransactionClient,
+  params: {
+    userId: string
+    eventId: string
+    examComponentId: string
+    moduleCode: string
+    bookingType: 'INDIVIDUAL' | 'RESIT' | 'TWIN_PACK' | 'FOUR_PACK'
+    reserveAmount: number
+    bundleId?: string | null
+    isResit?: boolean
+  }
+) {
+  const resolvedPool = await resolveStandardPoolForJoin(tx, {
+    eventId: params.eventId,
+    moduleCode: params.moduleCode,
+  })
+
+  const result = await joinPoolInternal(tx, {
+    poolId: resolvedPool.id,
+    userId: params.userId,
+    examComponentId: params.examComponentId,
+    eventId: params.eventId,
+    moduleCode: params.moduleCode,
+    bookingType: params.bookingType,
+    reserveAmount: params.reserveAmount,
+    amountPaid: params.reserveAmount,
+    bundleId: params.bundleId,
+    isResit: params.isResit,
+  })
+
+  if (!result.success || !result.booking || !result.membership) {
+    throw new Error(result.error || 'Failed to place exam booking into a standard pool.')
+  }
+
+  return result
+}
+
 /**
  * Books a standalone exam for an EXAM_ONLY student.
- * Routes through the auto-pool system — student is placed in a holding pool
- * and redistributed into standard pools at booking deadline.
+ * Routes directly through the shared standard-pool assignment layer.
  */
 export async function bookStandaloneExam(
   userId: string,
@@ -48,78 +87,44 @@ export async function bookStandaloneExam(
   if (!targetEventId) throw new Error('No exam event associated with this booking.')
   if (!examComponentId) throw new Error('Exam component could not be resolved.')
 
-  // Pricing
   const settingPrice = await getSystemSetting('individual_exam_fee', '520')
   const individualPrice = Number(settingPrice)
-
-  // Bundle check
   const bundles = await prisma.examBundle.findMany({
-    where: { userId, status: 'ACTIVE' },
-    orderBy: { createdAt: 'asc' },
+    where: {
+      userId,
+      status: 'ACTIVE',
+      validUntil: { gt: new Date() },
+    },
+    orderBy: { validUntil: 'asc' },
   })
-  const activeBundle = bundles.find((b) => b.usedSeats < b.totalSeats) || null
+  const activeBundle = bundles.find((bundle) => bundle.usedSeats < bundle.totalSeats) || null
   const amountToCharge = activeBundle ? 0 : individualPrice
 
-  // Balance check (before transaction)
   if (amountToCharge > 0) {
     const wallet = await prisma.wallet.findUnique({ where: { userId } })
     if (!wallet || Number(wallet.availableBalance) < amountToCharge) {
-      throw new Error(`Insufficient wallet balance. This exam costs €${amountToCharge.toFixed(2)}.`)
+      throw new Error(`Insufficient wallet balance. This exam costs EUR ${amountToCharge.toFixed(2)}.`)
     }
   }
 
   return prisma.$transaction(async (tx) => {
-    // Use bundle seat if available
-    if (activeBundle) {
-      await tx.examBundle.update({
-        where: { id: activeBundle.id },
-        data: { usedSeats: { increment: 1 } },
-      })
-    }
-
-    // Duplicate check
-    const duplicate = await tx.poolMembership.findFirst({
-      where: {
-        userId,
-        pool: { eventId: targetEventId },
-        examComponentId,
-        status: { in: ['RESERVED', 'CONFIRMED'] },
-      },
-    })
-    if (duplicate) {
-      throw new Error(`You are already booked for module ${courseCode} in this exam event.`)
-    }
-
-    // Event limit check
-    const userPools = await tx.poolMembership.count({
-      where: {
-        userId,
-        pool: { eventId: targetEventId },
-        status: { in: ['RESERVED', 'CONFIRMED'] },
-      },
-    })
-    if (userPools >= 4) {
-      throw new Error('You can join at most 4 pools in a single exam event.')
-    }
-
-    // Route through auto-pool
-    const result = await addToAutoPool({
+    const result = await placeExamBookingInStandardPool(tx, {
       userId,
       eventId: targetEventId,
-      bookingType: 'INDIVIDUAL',
       examComponentId,
       moduleCode: courseCode!,
-      amount: amountToCharge,
-      tx,
+      bookingType: 'INDIVIDUAL',
+      reserveAmount: amountToCharge,
+      bundleId: activeBundle?.id || null,
     })
 
-    return { usedBundle: !!activeBundle, poolId: result.autoPool.id, bookingId: result.booking.id }
+    return { usedBundle: !!activeBundle, poolId: result.pool!.id, bookingId: result.booking.id }
   })
 }
 
 /**
  * Books a resit exam for a specific module into an upcoming event.
- * Routes through auto-pool — seat is assigned at booking deadline.
+ * Routes directly through the shared standard-pool assignment layer.
  */
 export async function bookResitExam(userId: string, moduleCode: string, eventId: string) {
   const [comp, event] = await Promise.all([
@@ -133,7 +138,6 @@ export async function bookResitExam(userId: string, moduleCode: string, eventId:
   if (!comp) throw new Error(`Exam component for module ${moduleCode} not found`)
   if (!event) throw new Error('Exam event not found')
 
-  // Get resit fee from event or system setting
   let resitFee = 480
   if (event.resitFee) {
     resitFee = Number(event.resitFee)
@@ -144,35 +148,20 @@ export async function bookResitExam(userId: string, moduleCode: string, eventId:
 
   const wallet = await prisma.wallet.findUnique({ where: { userId } })
   if (!wallet || Number(wallet.availableBalance) < resitFee) {
-    throw new Error(`Insufficient funds for resit. Cost: €${resitFee.toFixed(2)}`)
+    throw new Error(`Insufficient funds for resit. Cost: EUR ${resitFee.toFixed(2)}`)
   }
 
   return prisma.$transaction(async (tx) => {
-    // Duplicate check
-    const duplicate = await tx.poolMembership.findFirst({
-      where: {
-        userId,
-        pool: { eventId },
-        examComponentId: comp.id,
-        status: { in: ['RESERVED', 'CONFIRMED'] },
-      },
-    })
-    if (duplicate) {
-      throw new Error(`You already have a booking for ${moduleCode} in this event.`)
-    }
-
-    // Route through auto-pool with resit type
-    const result = await addToAutoPool({
+    const result = await placeExamBookingInStandardPool(tx, {
       userId,
       eventId,
-      bookingType: 'RESIT',
       examComponentId: comp.id,
       moduleCode: comp.course.code,
-      amount: resitFee,
+      bookingType: 'RESIT',
+      reserveAmount: resitFee,
       isResit: true,
-      tx,
     })
 
-    return { bookingId: result.booking.id, poolId: result.autoPool.id }
+    return { bookingId: result.booking.id, poolId: result.pool!.id }
   })
 }

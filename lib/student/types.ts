@@ -99,6 +99,7 @@ export interface UnifiedExamRecord {
   moduleCode: string
   moduleName: string
   date: Date | string
+  sittingLabel?: string | null
   attendanceStatus?: string | null
   passed?: boolean | null
   score?: number | null

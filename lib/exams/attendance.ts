@@ -5,17 +5,34 @@ import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 export async function markExamAttendance(params: {
   membershipId?: string
   bookingId?: string
+  sittingId?: string
   status: ExamAttendanceStatus
   notes?: string | null
   recordedBy: string
 }) {
-  const { membershipId, bookingId, status, notes, recordedBy } = params
+  const { membershipId, bookingId, sittingId, status, notes, recordedBy } = params
 
-  if (!membershipId && !bookingId) {
-    throw new Error('Must provide either membershipId or bookingId')
+  if (!membershipId && !bookingId && !sittingId) {
+    throw new Error('Must provide a membership, booking, or sitting reference')
   }
 
   return prisma.$transaction(async (tx) => {
+    const sitting = sittingId
+      ? await tx.examSitting.findUnique({
+          where: { id: sittingId },
+          select: {
+            id: true,
+            eventId: true,
+            examComponentId: true,
+            startTime: true,
+          },
+        })
+      : null
+
+    if (sittingId && !sitting) {
+      throw new Error('Exam sitting not found')
+    }
+
     const membership = membershipId
       ? await tx.poolMembership.findUnique({
           where: { id: membershipId },
@@ -30,7 +47,23 @@ export async function markExamAttendance(params: {
       throw new Error('Pool membership not found')
     }
 
-    const resolvedBookingId = bookingId || membership?.bookingId || undefined
+    const sittingAssignment = sittingId
+      ? await tx.examSittingAssignment.findFirst({
+          where: {
+            sittingId,
+            ...(bookingId ? { bookingId } : {}),
+            status: { in: ['ASSIGNED', 'CONFIRMED', 'ATTENDED', 'ABSENT', 'EXCUSED'] },
+          },
+          select: {
+            id: true,
+            bookingId: true,
+            userId: true,
+          },
+          orderBy: { assignedAt: 'desc' },
+        })
+      : null
+
+    const resolvedBookingId = bookingId || sittingAssignment?.bookingId || membership?.bookingId || undefined
     const booking = resolvedBookingId
       ? await tx.examBooking.findUnique({
           where: { id: resolvedBookingId },
@@ -55,12 +88,12 @@ export async function markExamAttendance(params: {
       throw new Error('Exam booking not found')
     }
 
-    const userId = booking?.userId || membership?.userId
+    const userId = booking?.userId || membership?.userId || sittingAssignment?.userId
     if (!userId) {
       throw new Error('Unable to resolve exam-attendance student')
     }
 
-    const attendanceDate = booking?.examDate || membership?.pool.examDate || new Date()
+    const attendanceDate = sitting?.startTime || booking?.examDate || membership?.pool.examDate || new Date()
     const normalizedNotes = notes?.trim() || null
     const courseId =
       booking?.courseId ||
@@ -113,9 +146,10 @@ export async function markExamAttendance(params: {
       userId,
       bookingId: booking?.id || null,
       membershipId: membership?.id || null,
-      eventId: booking?.eventId || membership?.pool.eventId || null,
+      sittingId: sitting?.id || null,
+      eventId: sitting?.eventId || booking?.eventId || membership?.pool.eventId || null,
       examId: booking?.examId || null,
-      examComponentId: booking?.examComponentId || membership?.examComponentId || null,
+      examComponentId: sitting?.examComponentId || booking?.examComponentId || membership?.examComponentId || null,
       classId,
       attendanceDate,
       status,
@@ -139,33 +173,69 @@ export async function markExamAttendance(params: {
     if (booking?.id) {
       if (status === ExamAttendanceStatus.PRESENT) {
         const currentResult = booking.result?.toUpperCase()
-        if ((currentResult === 'ABSENT' || currentResult === 'EXCUSED') && booking.score == null) {
-          await tx.examBooking.update({
-            where: { id: booking.id },
-            data: {
-              status: booking.status === 'NO_SHOW' ? 'APPROVED' : booking.status,
-              result: null,
-              cancellationReason: null,
-              cancelledAt: null,
-              cancelledBy: null,
-            },
-          })
-        }
-      } else {
         await tx.examBooking.update({
           where: { id: booking.id },
           data: {
-            status: status === ExamAttendanceStatus.ABSENT ? 'NO_SHOW' : booking.status,
-            result: status,
-            cancellationReason:
-              status === ExamAttendanceStatus.ABSENT
-                ? 'Marked absent for exam attendance'
-                : 'Marked excused for exam attendance',
+            status: booking.status === 'NO_SHOW' ? 'APPROVED' : booking.status,
+            demandStatus: 'EXECUTED',
+            executedAt: attendanceDate,
+            // Clear any stale absence/excusal fields if re-marking present
+            ...(currentResult === 'ABSENT' || currentResult === 'EXCUSED'
+              ? {
+                  result: null,
+                  cancellationReason: null,
+                  cancelledAt: null,
+                  cancelledBy: null,
+                }
+              : {}),
+          },
+        })
+      } else if (status === ExamAttendanceStatus.ABSENT) {
+        // Absent: seat is consumed but not passed — mark as no-show
+        await tx.examBooking.update({
+          where: { id: booking.id },
+          data: {
+            status: 'NO_SHOW',
+            result: 'ABSENT',
+            cancellationReason: 'Marked absent for exam attendance',
             cancelledAt: new Date(),
             cancelledBy: recordedBy,
           },
         })
+      } else {
+        // EXCUSED: the candidate did not sit but their paid guarantee is STILL OWED.
+        // Do NOT mark as EXECUTED, do NOT set cancellation fields.
+        // The booking stays SCHEDULED — fulfillment remains pending.
+        await tx.examBooking.update({
+          where: { id: booking.id },
+          data: {
+            result: 'EXCUSED',
+            // Ensure any stale cancellation stamps are cleared
+            cancellationReason: null,
+            cancelledAt: null,
+            cancelledBy: null,
+          },
+        })
       }
+    }
+
+    if (booking?.id && (sitting?.id || sittingAssignment?.id)) {
+      await tx.examSittingAssignment.updateMany({
+        where: {
+          bookingId: booking.id,
+          ...(sitting?.id ? { sittingId: sitting.id } : {}),
+          status: { in: ['ASSIGNED', 'CONFIRMED', 'ATTENDED', 'ABSENT', 'EXCUSED'] },
+        },
+        data: {
+          attendanceStatus: status,
+          status:
+            status === ExamAttendanceStatus.PRESENT
+              ? 'ATTENDED'
+              : status === ExamAttendanceStatus.ABSENT
+                ? 'ABSENT'
+                : 'EXCUSED',
+        },
+      })
     }
 
     if (membership?.id) {
@@ -188,6 +258,8 @@ export async function markExamAttendance(params: {
       attendance,
       bookingId: booking?.id || null,
       membershipId: membership?.id || null,
+      sittingId: sitting?.id || null,
+      eventId: sitting?.eventId || booking?.eventId || membership?.pool.eventId || null,
       userId,
       poolId: membership?.poolId || null,
     }

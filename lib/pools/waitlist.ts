@@ -56,11 +56,17 @@ export async function promoteNextFromWaitlist(poolId: string, tx: any): Promise<
 
   if (!next) return null
 
+  const examComponent = await tx.examComponent.findUnique({
+    where: { id: next.examComponentId },
+    select: { course: { select: { code: true } } },
+  })
+
   // Attempt to join the pool using the internal function
   const result = await joinPoolInternal(tx, {
     poolId,
     userId: next.userId,
     examComponentId: next.examComponentId,
+    moduleCode: examComponent?.course?.code,
   })
 
   if (result.success) {

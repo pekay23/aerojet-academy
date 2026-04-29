@@ -21,6 +21,7 @@ import { toast } from 'sonner'
 import { updateExamBooking, deleteExamRecord } from '@/app/staff/actions'
 import BookExamForStudentDialog from './BookExamForStudentDialog'
 import AddExamRecordDialog from './AddExamRecordDialog'
+import { deriveBookingDisplayResult } from '@/lib/exams/fulfillment'
 
 const EXAM_FILTERS = [
   { key: 'all', label: 'All' },
@@ -84,7 +85,15 @@ export default function ExamsTab({
         courseId: b.course?.id || null,
         score: b.score != null ? Number(b.score) : null,
         percentage: b.percentage != null ? Number(b.percentage) : null,
-        result: (b.result?.toUpperCase().includes('MIGRATE') || b.result?.toUpperCase().includes('HISTORICAL')) ? null : b.result,
+        result: (b.result?.toUpperCase().includes('MIGRATE') || b.result?.toUpperCase().includes('HISTORICAL'))
+          ? null
+          : deriveBookingDisplayResult({
+              result: b.result,
+              demandStatus: b.demandStatus,
+              executedAt: b.executedAt,
+              rolloverToEventId: b.rolloverToEventId,
+              status: b.status,
+            }),
         passed: b.result?.toLowerCase() === 'pass',
         status:
           (b.result != null && b.result !== '' && !b.result.toUpperCase().includes('MIGRATE')) ||
@@ -98,7 +107,10 @@ export default function ExamsTab({
         bookedAt: b.bookedAt,
         amountPaid: Number(b.amountPaid || 0),
         examCategory: b.examCategory,
-        attendanceStatus: b.examAttendance?.status || null,
+        attendanceStatus: b.examAttendance?.status || b.sittingAssignments?.[0]?.attendanceStatus || null,
+        sittingLabel: b.sittingAssignments?.[0]?.sitting
+          ? `Day ${b.sittingAssignments[0].sitting.dayNumber} ${b.sittingAssignments[0].sitting.sessionType}`
+          : null,
       })
     }
 
@@ -646,6 +658,9 @@ export default function ExamsTab({
                       </span>
                       {record.eventName && (
                         <span className="text-[10px] text-slate-400">Event: {record.eventName}</span>
+                      )}
+                      {record.sittingLabel && (
+                        <span className="text-[10px] text-slate-400">Sitting: {record.sittingLabel}</span>
                       )}
                     </div>
                   </td>
