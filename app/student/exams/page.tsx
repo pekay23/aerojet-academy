@@ -44,7 +44,7 @@ export default async function ExamsPage({
   searchParams: Promise<{ tab?: string }>
 }) {
   const { tab: tabParam } = await searchParams
-  const tab = tabParam || 'available'
+  const tab = tabParam || 'records'
 
   const session = await getAuthSession()
   if (!session) redirect('/login')
@@ -241,7 +241,7 @@ export default async function ExamsPage({
     : isFullTimeStudent
       ? 'records'
       : isExamOnly
-        ? 'available'
+        ? 'records'
         : 'records'
 
   return (

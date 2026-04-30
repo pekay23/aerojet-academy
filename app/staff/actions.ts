@@ -434,6 +434,25 @@ export async function updateExamBooking(
               })
             }
           }
+          
+          if (score !== undefined) {
+            // Default attendance to PRESENT since there is an exam record score
+            await tx.examAttendance.upsert({
+              where: { bookingId: actualId },
+              update: { status: 'PRESENT' },
+              create: {
+                userId: booking.userId,
+                bookingId: actualId,
+                status: 'PRESENT',
+                attendanceDate: booking.examDate || new Date(),
+                recordedBy: 'system',
+                eventId: booking.eventId,
+                examId: booking.examId,
+                examComponentId: booking.examComponentId,
+                classId: booking.courseId ? undefined : undefined, // skip complex class resolution here
+              }
+            })
+          }
         }
       }, {
         timeout: 30000 // Increase timeout to 30s to handle slow DB connections (P2028 fix)
@@ -530,6 +549,8 @@ export async function createExamRecord(data: {
           }
         })
 
+        let finalBookingId = existingBooking?.id
+
         if (existingBooking) {
           await tx.examBooking.update({
             where: { id: existingBooking.id },
@@ -546,7 +567,7 @@ export async function createExamRecord(data: {
             }
           })
         } else {
-          await tx.examBooking.create({
+          const newBooking = await tx.examBooking.create({
             data: {
               userId,
               courseId: entry.courseId,
@@ -562,6 +583,21 @@ export async function createExamRecord(data: {
               percentage,
               examCategory: examCategory || 'OFFICIAL_EASA',
               bookingGroupRef,
+            }
+          })
+          finalBookingId = newBooking.id
+        }
+
+        if (entry.score !== undefined && finalBookingId) {
+          await tx.examAttendance.upsert({
+            where: { bookingId: finalBookingId },
+            update: { status: 'PRESENT' },
+            create: {
+              userId,
+              bookingId: finalBookingId,
+              status: 'PRESENT',
+              attendanceDate: new Date(examDate),
+              recordedBy: staff.id,
             }
           })
         }

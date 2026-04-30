@@ -18,15 +18,16 @@ import prisma from '@/lib/prisma/client'
 import { canAccessClasses, resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 
 interface PageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = await params
-  const enrollment = await prisma.enrollment.findUnique({
-    where: { id },
-    include: { course: true },
-  })
+  const { slug } = await params
+  const session = await getAuthSession()
+  if (!session) return { title: 'Course Details' }
+
+  const enrollments = await prisma.enrollment.findMany({ where: { userId: session.user.id }, include: { course: true } });
+  const enrollment = enrollments.find(e => e.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') === slug);
   return { title: enrollment ? `${enrollment.course.name} | Student Portal` : 'Course Details' }
 }
 
@@ -34,16 +35,15 @@ export default async function CourseDetailsPage({
   params,
   searchParams,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
   searchParams: Promise<{ error?: string }>
 }) {
-  const { id } = await params
+  const { slug } = await params
   const { error } = await searchParams
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const enrollment = await prisma.enrollment.findUnique({
-    where: { id },
+  const allEnrollments = await prisma.enrollment.findMany({ where: { userId: session.user.id },
     include: {
       course: {
         include: {
@@ -71,6 +71,8 @@ export default async function CourseDetailsPage({
       },
     },
   })
+
+  const enrollment = allEnrollments.find(e => e.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') === slug);
 
   if (!enrollment || enrollment.userId !== session.user.id) {
     notFound()
@@ -196,7 +198,7 @@ export default async function CourseDetailsPage({
                 {course.materialsUrl ? (
                   isPaid ? (
                     <Link
-                      href={`/student/courses/${enrollment.id}/materials`}
+                      href={`/student/courses/${slug}/materials`}
                       className="mt-4 inline-flex items-center text-xs font-black tracking-widest text-aerojet-blue uppercase hover:underline dark:text-aerojet-sky"
                     >
                       View Materials Dashboard
@@ -262,7 +264,7 @@ export default async function CourseDetailsPage({
           </div>
 
           <div className="rounded-2xl bg-slate-900 p-6 text-white shadow-xl shadow-slate-200">
-            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-white dark:bg-slate-900/10">
+            <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-slate-900 dark:bg-slate-800 dark:text-white">
               <HelpCircle className="h-5 w-5" />
             </div>
             <h3 className="mb-2 text-lg font-black italic">Need Help?</h3>

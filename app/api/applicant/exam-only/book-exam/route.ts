@@ -159,10 +159,11 @@ export async function POST(request: Request) {
       })
     }
 
-    // Find available pool or create new one
+    // Find an existing STANDARD pool for this event, or create the standard set
     let pool = await prisma.examPool.findFirst({
       where: {
         eventId: examEvent.id,
+        poolType: 'STANDARD',
         status: { in: ['OPEN', 'NEAR_FULL', 'DRAFT'] },
         currentMemberCount: { lt: 28 },
       },
@@ -170,42 +171,25 @@ export async function POST(request: Request) {
     })
 
     if (!pool) {
-      const poolDate = examEvent.startDate || new Date()
-      const startTime = new Date(poolDate)
-      startTime.setHours(9, 0, 0, 0)
-      const endTime = new Date(poolDate)
-      endTime.setHours(12, 0, 0, 0)
-
-      pool = await prisma.examPool.create({
-        data: {
-          eventId: examEvent.id,
-          name: `Pool ${new Date().getTime().toString().slice(-4)}`,
-          examDate: poolDate,
-          examStartTime: startTime,
-          examEndTime: endTime,
-          status: 'OPEN',
-          seatPrice: 300,
-          allowedModules: [moduleCode],
-          preSeedModules: [moduleCode],
-        },
-      })
+      const { createStandardPools } = await import('@/lib/pools/standard-pools')
+      const created = await createStandardPools(examEvent.id)
+      pool = created[0] ?? null
     }
 
-    // Check for existing membership in this pool
-    const existingMembership = await prisma.poolMembership.findFirst({
-      where: { poolId: pool.id, userId },
-    })
-    if (existingMembership) {
-      return NextResponse.json({ error: 'You are already a member of this pool' }, { status: 400 })
+    if (!pool) {
+      return NextResponse.json({ error: 'No available exam pool for this event' }, { status: 500 })
     }
 
-    // Use the atomic joinPool function
+    // Delegate entirely to the canonical joinPool path.
+    // joinPoolInternal handles duplicate detection, time-conflict checks,
+    // and resolveStandardPoolForJoin to pick the optimal pool for the module.
     const joinResult = await joinPool({
       poolId: pool.id,
       userId,
       examComponentId,
       eventId: examEvent.id,
       moduleCode,
+      reserveAmount: poolPrice,
       amountPaid: poolPrice,
     })
 

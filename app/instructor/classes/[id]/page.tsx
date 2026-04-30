@@ -30,8 +30,17 @@ export default async function Page({
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') redirect('/login')
 
+  
+  function slugify(text: string) {
+    return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+  }
+
+  const allClasses = await prisma.class.findMany({ select: { id: true, name: true } });
+  const matchedClass = allClasses.find(c => slugify(c.name) === id);
+  const targetId = matchedClass ? matchedClass.id : id;
+
   const classData = await prisma.class.findUnique({
-    where: { id },
+    where: { id: targetId },
     include: {
       course: {
         include: {

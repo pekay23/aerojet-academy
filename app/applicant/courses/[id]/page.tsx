@@ -30,15 +30,24 @@ export default async function CourseDetailsPage({ params }: Props) {
   const { id } = await params
   const userId = session.user.id
 
+  
+  function slugify(text: string) {
+    return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+  }
+
+  const allCourses = await prisma.course.findMany({ select: { id: true, name: true, code: true } });
+  const matchedCourse = allCourses.find(c => slugify(c.name) === id || slugify(c.code) === id);
+  const targetId = matchedCourse ? matchedCourse.id : id;
+
   const [course, enrollment] = await Promise.all([
     prisma.course.findUnique({
-      where: { id },
+      where: { id: targetId },
       include: { category: true },
     }),
     prisma.enrollment.findFirst({
       where: {
         userId,
-        courseId: id,
+        courseId: targetId,
       },
     }),
   ])
@@ -70,7 +79,7 @@ export default async function CourseDetailsPage({ params }: Props) {
   const isExamOnly = effectiveEnrollmentType === 'EXAM_ONLY'
 
   const examComponents = await prisma.examComponent.findMany({
-    where: { courseId: id },
+    where: { courseId: targetId },
     orderBy: { code: 'asc' },
   })
 
@@ -91,7 +100,7 @@ export default async function CourseDetailsPage({ params }: Props) {
 
   const isRequiredForTarget = await prisma.licenseModuleRequirement.findFirst({
     where: {
-      courseId: id,
+      courseId: targetId,
       licenseCategory: {
         code: { in: studentProfile?.licenseTargets.map((lt) => lt.licenseCategory.code) || [] },
       },
@@ -129,7 +138,7 @@ export default async function CourseDetailsPage({ params }: Props) {
             <div className="flex flex-col items-end gap-2">
               <Link
                 href={
-                  canAffordPool ? `/applicant/courses/${id}/purchase` : '/applicant/wallet-top-up'
+                  canAffordPool ? `/applicant/courses/${targetId}/purchase` : '/applicant/wallet-top-up'
                 }
                 className={`inline-flex items-center justify-center rounded-xl px-6 py-2.5 text-sm font-bold text-white shadow-lg transition-all active:scale-95 ${
                   canAffordPool
@@ -148,7 +157,7 @@ export default async function CourseDetailsPage({ params }: Props) {
             </div>
           ) : (
             <Link
-              href={`/applicant/courses/${id}/purchase`}
+              href={`/applicant/courses/${targetId}/purchase`}
               className="inline-flex items-center justify-center rounded-xl bg-aerojet-blue px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-900/10 transition-all hover:bg-[#003875] active:scale-95"
             >
               Enroll Now
@@ -362,7 +371,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                   href={
                     isExamOnly && !canAffordPool
                       ? '/applicant/wallet-top-up'
-                      : `/applicant/courses/${id}/purchase`
+                      : `/applicant/courses/${targetId}/purchase`
                   }
                   className={`mt-6 flex w-full items-center justify-center rounded-xl py-3 text-sm font-black text-white shadow-lg transition-all active:scale-[0.98] ${
                     isExamOnly && !canAffordPool

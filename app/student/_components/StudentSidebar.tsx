@@ -39,7 +39,7 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
   if (isExamOnly) {
     baseLinks.push(
       { label: 'Wallet', href: '/student/wallet', icon: Wallet },
-      { label: 'Exams', href: '/student/exams', icon: ClipboardCheck }
+      { label: 'Exams', href: '/student/exams?tab=records', icon: ClipboardCheck }
     )
   } else {
     if (isFullTime && isRestricted) {
@@ -71,7 +71,7 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
 
     if (hasFullAccess) {
       baseLinks.push(
-        { label: 'Exams', href: '/student/exams', icon: ClipboardCheck },
+        { label: 'Exams', href: '/student/exams?tab=records', icon: ClipboardCheck },
         { label: 'Grades', href: '/student/grades', icon: Award },
         { label: 'Attendance', href: '/student/attendance', icon: FileCheck },
         { label: 'Certificates', href: '/student/certificates', icon: Award }

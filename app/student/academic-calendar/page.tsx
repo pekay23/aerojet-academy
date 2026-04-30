@@ -22,6 +22,9 @@ export default async function StudentAcademicCalendarPage() {
     examBookings,
     semesters,
     enrollments,
+    studentProfile,
+    adminEvents,
+    sittingAssignments,
   ] = await Promise.all([
     // 1. Student's personal calendar events
     prisma.studentCalendarEvent.findMany({
@@ -45,40 +48,56 @@ export default async function StudentAcademicCalendarPage() {
     prisma.semester.findMany({
       where: { isActive: true },
       orderBy: { startDate: 'asc' },
-      select: {
-        id: true,
-        name: true,
-        startDate: true,
-        endDate: true,
-      },
+      select: { id: true, name: true, startDate: true, endDate: true },
     }),
 
     // 4. Student's class schedules via enrollments
     prisma.enrollment.findMany({
-      where: {
-        userId,
-        status: { in: ['ACTIVE', 'APPROVED', 'ENROLLED'] },
-      },
+      where: { userId, status: { in: ['ACTIVE', 'APPROVED', 'ENROLLED'] } },
       include: {
         course: {
           include: {
             classes: {
-              select: {
-                id: true,
-                name: true,
-                startDate: true,
-                endDate: true,
-                schedule: true,
-                recurrenceType: true,
-                recurrenceDays: true,
-                recurrenceUntil: true,
-              },
+              select: { id: true, name: true, startDate: true, endDate: true, schedule: true, recurrenceType: true, recurrenceDays: true, recurrenceUntil: true },
             },
           },
         },
       },
     }),
+    
+    // 4.5. Student profile to get enrollment type
+    prisma.studentProfile.findUnique({
+      where: { userId },
+      select: { enrollmentType: true, pathwayId: true },
+    }),
+
+    // 5. Admin events visible to all or students or specific user
+    prisma.adminCalendarEvent.findMany({
+      where: { 
+        deletedAt: null, 
+        OR: [
+          { visibleTo: { in: ['ALL', 'STUDENTS', 'EXAM_ONLY', 'MODULAR', 'FULL_TIME'] } },
+          { visibleTo: 'SPECIFIC_USER', targetUserId: userId },
+        ]
+      },
+      orderBy: { startDate: 'asc' },
+    }),
+
+    // 6. ExamSitting assignments for this student
+    prisma.examSittingAssignment.findMany({
+      where: { userId, status: { not: 'CANCELLED' } },
+      include: {
+        sitting: {
+          include: {
+            event: { select: { name: true } },
+            examComponent: { select: { code: true, name: true } },
+          },
+        },
+      },
+    }),
   ])
+
+  const enrollmentType = studentProfile?.enrollmentType || 'UNKNOWN';
 
   // Merge all events into a unified CalendarEvent[] format
   const calendarEvents: CalendarEvent[] = [];
@@ -100,6 +119,8 @@ export default async function StudentAcademicCalendarPage() {
       isSystemEvent: evt.isSystemEvent,
     })
   });
+
+
 
   // Exam bookings (read-only)
   examBookings.forEach((exam) => {
@@ -142,7 +163,7 @@ export default async function StudentAcademicCalendarPage() {
   });
 
   // Class schedules (read-only)
-  (enrollments as any[]).forEach((enrollment: any) => {
+  ;(enrollments as any[]).forEach((enrollment: any) => {
     enrollment.course?.classes?.forEach((cls: any) => {
       if (cls.startDate) {
         calendarEvents.push({
@@ -159,8 +180,49 @@ export default async function StudentAcademicCalendarPage() {
           recurrenceUntil: cls.recurrenceUntil ? new Date(cls.recurrenceUntil).toISOString() : null,
         })
       }
-    });
-  });
+    })
+  })
+
+  // Admin-created events visible to students (read-only)
+  ;(adminEvents as any[]).forEach((evt: any) => {
+    // Filter by enrollment type
+    if (evt.visibleTo === 'EXAM_ONLY' && enrollmentType !== 'EXAM_ONLY') return;
+    if (evt.visibleTo === 'MODULAR' && enrollmentType !== 'MODULAR') return;
+    if (evt.visibleTo === 'FULL_TIME' && enrollmentType !== 'FULL_TIME') return;
+    if (evt.visibleTo === 'SPECIFIC_USER' && evt.targetUserId !== userId) return;
+
+    calendarEvents.push({
+      id: `admin-${evt.id}`,
+      title: evt.title,
+      description: evt.description,
+      startDate: evt.startDate.toISOString(),
+      endDate: evt.endDate?.toISOString() || null,
+      color: evt.color || '#8b5cf6',
+      source: 'semester', // reuse 'semester' source type for green colour in student grid
+      editable: false,
+      recurrenceType: evt.recurrenceType,
+      recurrenceDays: evt.recurrenceDays,
+      recurrenceUntil: evt.recurrenceUntil?.toISOString() || null,
+      isSystemEvent: true,
+    })
+  })
+
+  // Exam sitting assignments for this student (read-only)
+  ;(sittingAssignments as any[]).forEach((assignment: any) => {
+    const sitting = assignment.sitting
+    if (sitting?.startTime) {
+      calendarEvents.push({
+        id: `sitting-${assignment.id}`,
+        title: `Exam Sitting: ${sitting.examComponent?.code || 'Module'}`,
+        description: `${sitting.event?.name || ''} — ${sitting.sessionType || ''} session`,
+        startDate: sitting.startTime.toISOString(),
+        endDate: sitting.endTime?.toISOString() || null,
+        color: '#e11d48',
+        source: 'exam',
+        editable: false,
+      })
+    }
+  })
 
   // Sort all events by date
   calendarEvents.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())

@@ -36,6 +36,11 @@ interface Instructor {
   instructorProfile: { employeeId: string | null; specialization: string | null } | null
 }
 
+
+function slugify(text: string) {
+  return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+}
+
 export default function InstructorsTable() {
   const [instructors, setInstructors] = useState<Instructor[]>([])
   const [total, setTotal] = useState(0)
@@ -325,7 +330,7 @@ export default function InstructorsTable() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <Link
-                        href={`/staff/users/${instructor.id}`}
+                        href={`/staff/users/${slugify(instructor.profile ? `${instructor.profile.firstName} ${instructor.profile.lastName}` : instructor.email.split('@')[0])}`}
                         className="inline-flex items-center rounded-md px-1.5 py-0.5 text-xs font-bold text-aerojet-blue transition-all duration-150 ease-out hover:bg-aerojet-blue/8 hover:shadow-sm dark:text-aerojet-sky"
                       >
                         View

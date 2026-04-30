@@ -71,6 +71,8 @@ model User {
   referralsMade             Referral[]           @relation("ReferralsMade")
   staffProfile              StaffProfile?
   studentCalendarEvents     StudentCalendarEvent[]
+  adminCalendarEventsCreated AdminCalendarEvent[] @relation("AdminCalendarEventCreator")
+  adminCalendarEventsTargeted AdminCalendarEvent[] @relation("AdminCalendarEventTarget")
   studentProfile            StudentProfile?
   tuitionBookings           TuitionBooking[]
   createdTuitionRuns        TuitionRun[]         @relation("CreatedTuitionRuns")
@@ -411,8 +413,9 @@ model Class {
   examAttendances   ExamAttendance[]
   academicYear      AcademicYear?      @relation(fields: [academicYearId], references: [id])
   course            Course             @relation(fields: [courseId], references: [id])
-  instructor        InstructorProfile? @relation(fields: [instructorId], references: [id])
-  semester          Semester?          @relation(fields: [semesterId], references: [id])
+  instructor           InstructorProfile?   @relation(fields: [instructorId], references: [id])
+  semester             Semester?            @relation(fields: [semesterId], references: [id])
+  adminCalendarEvents  AdminCalendarEvent[]
 
   @@index([courseId])
   @@index([instructorId])
@@ -500,6 +503,7 @@ model ExamEvent {
   sittings             ExamSitting[]
   pools                ExamPool[]
   exams                Exam[]
+  adminCalendarEvents  AdminCalendarEvent[]
 
   @@index([status])
   @@index([startDate, endDate])
@@ -1627,6 +1631,16 @@ enum RecurrenceType {
   CUSTOM
 }
 
+enum CalendarAudience {
+  ALL
+  STUDENTS
+  INSTRUCTORS
+  EXAM_ONLY
+  MODULAR
+  FULL_TIME
+  SPECIFIC_USER
+}
+
 model StudentCalendarEvent {
   id              String         @id @default(cuid())
   userId          String
@@ -1639,11 +1653,46 @@ model StudentCalendarEvent {
   recurrenceDays  String? // For CUSTOM: comma-separated days "0,1,2,3,4,5,6" (Sun-Sat)
   recurrenceUntil DateTime?
   isSystemEvent   Boolean        @default(false)
+  adminEventId    String?        // FK to AdminCalendarEvent if created by admin
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+  adminEvent      AdminCalendarEvent? @relation(fields: [adminEventId], references: [id], onDelete: SetNull)
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([startDate])
+  @@index([adminEventId])
   @@map("student_calendar_events")
 }
+
+model AdminCalendarEvent {
+  id              String            @id @default(cuid())
+  title           String
+  description     String?
+  startDate       DateTime
+  endDate         DateTime?
+  color           String?           @default("#3b82f6")
+  recurrenceType  RecurrenceType    @default(NONE)
+  recurrenceDays  String?
+  recurrenceUntil DateTime?
+  visibleTo       CalendarAudience  @default(ALL)
+  classId         String?           // Optional: linked to a specific Class
+  examEventId     String?           // Optional: linked to an ExamEvent
+  targetUserId    String?           // Optional: linked to a specific user
+  createdBy       String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  deletedAt       DateTime?
+  creator         User              @relation("AdminCalendarEventCreator", fields: [createdBy], references: [id])
+  targetUser      User?             @relation("AdminCalendarEventTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+  class           Class?            @relation(fields: [classId], references: [id], onDelete: SetNull)
+  examEvent       ExamEvent?        @relation(fields: [examEventId], references: [id], onDelete: SetNull)
+  studentEvents   StudentCalendarEvent[]
+
+  @@index([createdBy])
+  @@index([startDate])
+  @@index([visibleTo])
+  @@index([deletedAt])
+  @@map("admin_calendar_events")
+}
+

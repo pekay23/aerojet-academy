@@ -124,7 +124,6 @@ export async function enrollInCourse(courseId: string) {
       }
 
       // We need to capture the funds directly and auto-enroll
-      const { chargeWallet } = await import('@/lib/wallet/operations')
 
       await prisma.$transaction(async (tx) => {
         // Direct charge
@@ -224,27 +223,24 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     return { error: err instanceof Error ? err.message : 'Access denied.' }
   }
 
-  // 1. Get Pool Details & Check availability
+  // 1. Get Pool Details & validate status
   const pool = await prisma.examPool.findUnique({
     where: { id: poolId },
-    include: {
-      event: true,
-      memberships: {
-        where: { status: { in: [MembershipStatus.RESERVED, MembershipStatus.CONFIRMED] } },
-        select: {
-          examComponentId: true,
-          examComponent: { select: { course: { select: { code: true } } } },
-        },
-      },
+    select: {
+      id: true,
+      name: true,
+      eventId: true,
+      seatPrice: true,
+      status: true,
     },
   })
 
   if (!pool) return { error: 'Exam booking not found.' }
-  if (![PoolStatus.OPEN, PoolStatus.NEAR_FULL].includes(pool.status as any)) {
+  if (!([PoolStatus.OPEN, PoolStatus.NEAR_FULL] as string[]).includes(pool.status)) {
     return { error: 'This exam booking is no longer accepting new members.' }
   }
 
-  // 1.5 Global Event Cap — max 4 pools per event for a student
+  // 2. Event Cap — max 4 pools per event (joinPoolInternal only enforces a global cap)
   const eventMemberships = await prisma.poolMembership.count({
     where: {
       userId: user.id,
@@ -258,183 +254,78 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     }
   }
 
-  // 2. Module Diversity Cap — max 4 unique modules per pool
-  if (pool.currentMemberCount >= pool.maxCandidates) {
-    return { error: 'This exam booking is full.' }
-  }
-
-  const existingModules = pool.memberships.map((m) => m.examComponent?.course?.code).filter(Boolean)
-  const uniqueModules = new Set(existingModules)
-  const isNewModule = !uniqueModules.has(moduleCode)
-  if (isNewModule && uniqueModules.size >= 4) {
-    return {
-      error: `This pool already has 4 different modules (${Array.from(uniqueModules).join(', ')}). You can only join for one of these existing modules.`,
-    }
-  }
-
-  // 3. Check if already a member
-  const existingMembership = await prisma.poolMembership.findUnique({
-    where: {
-      poolId_userId: {
-        userId: user.id,
-        poolId: pool.id,
-      },
-    },
+  // 3. Find exam component
+  const examComponent = await prisma.examComponent.findFirst({
+    where: { code: moduleCode },
+    select: { id: true },
   })
-
-  if (existingMembership) {
-    return { error: 'You have already joined this exam booking.' }
+  if (!examComponent) {
+    return { error: `No exam component found for module ${moduleCode}.` }
   }
 
-  // 3.5 Duplicate Module Check per Event
-  const moduleInEvent = await prisma.poolMembership.findFirst({
-    where: {
-      userId: user.id,
-      pool: { eventId: pool.eventId },
-      examComponent: { code: moduleCode },
-      status: { in: [MembershipStatus.RESERVED, MembershipStatus.CONFIRMED] },
-    },
-  })
-  if (moduleInEvent) {
-    return { error: `You are already booked for Module ${moduleCode} in this exam event.` }
-  }
-
-  // 4. Time Conflict Check — handled by shared logic in joinPoolInternal
-  // We remove the old hard-coded day check to allow same-day bookings if times don't overlap.
-
-  // 5. Check Wallet Balance
-  const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
+  // 4. Wallet fast-fail (for UX; joinPool enforces atomically too)
   const seatPrice = Number(pool.seatPrice)
-
+  const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
   if (!wallet || Number(wallet.availableBalance) < seatPrice) {
     return {
       error: 'Insufficient wallet balance. Please top up your wallet and try again.',
     }
   }
 
-  try {
-    // 6. Perform atomic transaction
-    await prisma.$transaction(async (tx) => {
-      const { reserveFunds } = await import('@/lib/wallet/operations')
-      const { confirmPoolInternal } = await import('@/lib/pools/confirm')
+  // 5. Delegate to the canonical joinPool (Phase 3 path):
+  //    - resolveStandardPoolForJoin picks the optimal pool for the module
+  //    - sets demandStatus='POOLED', guaranteeType='POOL_FLEX', guaranteedSeat=false
+  //    - runs time-conflict detection
+  //    - auto-confirms when threshold is met
+  const joinResult = await joinPool({
+    poolId,
+    userId: user.id,
+    examComponentId: examComponent.id,
+    eventId: pool.eventId,
+    moduleCode,
+    bookingType: 'POOL',
+    reserveAmount: seatPrice,
+    amountPaid: seatPrice,
+  })
 
-      const livePool = await tx.examPool.findUnique({
-        where: { id: pool.id },
-        select: {
-          id: true,
-          name: true,
-          eventId: true,
-          examDate: true,
-          currentMemberCount: true,
-          maxCandidates: true,
-          status: true,
-        },
-      })
-      if (!livePool) throw new Error('Exam booking not found.')
-      if (livePool.currentMemberCount >= livePool.maxCandidates) {
-        throw new Error('This exam booking is full.')
-      }
-
-      // Reserve funds in wallet
-      await reserveFunds(
-        tx,
-        user.id,
-        seatPrice,
-        `Seat reservation for ${pool.name} — Module ${moduleCode}`,
-        pool.id,
-        'POOL_ID'
-      )
-
-      const examComponent = await tx.examComponent.findFirst({
-        where: { code: moduleCode },
-      })
-      if (!examComponent) throw new Error(`No exam component found for module ${moduleCode}`)
-
-      const booking = await tx.examBooking.create({
-        data: {
-          userId: user.id,
-          eventId: livePool.eventId,
-          examComponentId: examComponent.id,
-          bookingType: 'POOL',
-          moduleCode,
-          examDate: livePool.examDate,
-          amountPaid: seatPrice,
-          status: PaymentStatus.PENDING,
-        },
-      })
-
-      await tx.poolMembership.create({
-        data: {
-          userId: user.id,
-          poolId: pool.id,
-          bookingId: booking.id,
-          status: MembershipStatus.RESERVED,
-          examComponentId: examComponent.id,
-          amountReserved: seatPrice,
-        },
-      })
-
-      // Update Pool Count and Status
-      const newCount = livePool.currentMemberCount + 1
-      await tx.examPool.update({
-        where: { id: pool.id },
-        data: {
-          currentMemberCount: { increment: 1 },
-          status:
-            newCount >= livePool.maxCandidates
-              ? PoolStatus.CONFIRMED
-              : newCount >= 23
-                ? PoolStatus.NEAR_FULL
-                : PoolStatus.OPEN,
-        },
-      })
-
-      if (
-        newCount >= 25 &&
-        ![PoolStatus.CONFIRMED, PoolStatus.LOCKED].includes(livePool.status as PoolStatus)
-      ) {
-        await confirmPoolInternal(pool.id, tx)
-      }
-
-      // Role Upgrade: APPLICANT → STUDENT
-      if (user.role === UserRole.APPLICANT) {
-        await tx.user.update({
-          where: { id: user.id },
-          data: { role: UserRole.STUDENT },
-        })
-        const sp = await tx.studentProfile.findUnique({ where: { userId: user.id } })
-        if (sp) {
-          await tx.studentProfile.update({
-            where: { userId: user.id },
-            data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
-          })
-        }
-      }
-
-      await tx.notification.create({
-        data: {
-          userId: user.id,
-          title: 'Exam Booking Joined Successfully',
-          message: `You have successfully secured a seat in ${pool.name} for module ${moduleCode}.`,
-          type: 'SUCCESS',
-          linkUrl: '/student/exam-bookings/my-bookings',
-          linkText: 'View Bookings',
-        },
-      })
-    }, {
-      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
-      timeout: 20000,
-    })
-
-    revalidatePath('/student/exam-bookings')
-    revalidatePath('/student/exam-bookings/my-bookings')
-    revalidatePath('/student/wallet')
-    revalidatePath('/student')
-    return { success: true }
-  } catch (error) {
-    console.error('Join Pool Error:', error instanceof Error ? error.message : 'Unknown error')
-    return { error: 'Failed to join exam booking. Please try again.' }
+  if (!joinResult.success) {
+    return { error: joinResult.error }
   }
+
+  // 6. Role upgrade: APPLICANT → STUDENT (portal-specific concern)
+  if (user.role === UserRole.APPLICANT) {
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: user.id },
+        data: { role: UserRole.STUDENT },
+      })
+      const sp = await tx.studentProfile.findUnique({ where: { userId: user.id } })
+      if (sp) {
+        await tx.studentProfile.update({
+          where: { userId: user.id },
+          data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
+        })
+      }
+    })
+  }
+
+  // 7. In-app notification
+  await prisma.notification.create({
+    data: {
+      userId: user.id,
+      title: 'Exam Booking Joined Successfully',
+      message: `You have successfully secured a seat in ${pool.name} for module ${moduleCode}.`,
+      type: 'SUCCESS',
+      linkUrl: '/student/exam-bookings/my-bookings',
+      linkText: 'View Bookings',
+    },
+  })
+
+  revalidatePath('/student/exam-bookings')
+  revalidatePath('/student/exam-bookings/my-bookings')
+  revalidatePath('/student/wallet')
+  revalidatePath('/student')
+  return { success: true }
 }
 
 export async function createStudentPoolAction(input: CreatePoolInput) {
@@ -713,7 +604,6 @@ export async function payPendingExamBooking(bookingId: string) {
       return { error: 'Insufficient funds in wallet. Please top up.' }
     }
 
-    const { chargeWallet } = await import('@/lib/wallet/operations')
 
     await prisma.$transaction(async (tx) => {
       await chargeWallet(
@@ -806,7 +696,19 @@ export async function updateEmailNotifications(enabled: boolean) {
   }
 }
 
-export async function updateUserSettings(settings: any) {
+interface UserSettings {
+  notifications?: {
+    email?: boolean;
+    sms?: boolean;
+    push?: boolean;
+  };
+  appearance?: {
+    theme?: 'light' | 'dark' | 'system';
+  };
+  [key: string]: any;
+}
+
+export async function updateUserSettings(settings: UserSettings) {
   const user = await requireStudent()
 
   try {
@@ -1262,7 +1164,7 @@ export async function cancelMyBookingAction(bookingId: string, reason?: string) 
       refundAmount: result.refundAmount,
       refundType: result.refundType,
     }
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('cancelMyBookingAction error:', error instanceof Error ? error.message : 'Unknown error')
     return { error: 'Failed to cancel booking. Please try again.' }
   }
@@ -1291,7 +1193,7 @@ export async function createGroupBookingAction(params: {
     revalidatePath('/student/wallet')
     revalidatePath('/student')
     return { success: true, poolId: result.pool.id, bookingId: result.booking.id }
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('createGroupBookingAction error:', error instanceof Error ? error.message : 'Unknown error')
     return { error: error instanceof Error ? error.message : 'Failed to create group booking.' }
   }
