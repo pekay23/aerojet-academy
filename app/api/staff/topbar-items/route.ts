@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 
 const STAFF_ROLES = ['SUPER_ADMIN', 'ADMIN', 'STAFF']
 
@@ -15,7 +15,7 @@ export async function GET() {
 
     const [notifications, messages, recentApplicants, recentPayments, recentEnrollments] =
       await Promise.all([
-        prisma.notification.findMany({
+        prismaUnfiltered.notification.findMany({
           where: { userId },
           orderBy: { createdAt: 'desc' },
           take: 5,
@@ -29,7 +29,7 @@ export async function GET() {
             linkUrl: true,
           },
         }),
-        prisma.message.findMany({
+        prismaUnfiltered.message.findMany({
           where: { recipientId: userId },
           orderBy: { createdAt: 'desc' },
           take: 5,
@@ -47,7 +47,7 @@ export async function GET() {
             },
           },
         }),
-        prisma.user.findMany({
+        prismaUnfiltered.user.findMany({
           where: { role: 'APPLICANT', status: 'PENDING' },
           orderBy: { createdAt: 'desc' },
           take: 3,
@@ -58,7 +58,7 @@ export async function GET() {
             profile: { select: { firstName: true, lastName: true } },
           },
         }),
-        prisma.payment.findMany({
+        prismaUnfiltered.payment.findMany({
           where: { status: 'PENDING' },
           orderBy: { createdAt: 'desc' },
           take: 3,
@@ -75,7 +75,7 @@ export async function GET() {
             },
           },
         }),
-        prisma.enrollment.findMany({
+        prismaUnfiltered.enrollment.findMany({
           where: { status: 'PENDING' },
           orderBy: { createdAt: 'desc' },
           take: 3,

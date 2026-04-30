@@ -35,22 +35,27 @@ export default async function AdmissionsPage() {
         <section className="relative z-10 px-6 py-20">
           <div className="mx-auto max-w-3xl text-center">
             <SectionReveal skipInitial>
-              <h2 className="text-public-primary mb-6 text-3xl font-black tracking-tight uppercase">
-
+              <h2 className="text-public-primary mb-8 text-3xl font-black tracking-tight uppercase md:text-4xl">
                 Why Choose Aerojet?
               </h2>
-              <p className="text-lg leading-relaxed text-slate-600">
+              <p className="text-xl leading-relaxed text-slate-600">
                 We don't just teach theory; we build careers. Our admissions process is designed to
                 identify and cultivate the most dedicated future engineers. Whether you are a fresh
                 graduate or a professional upskilling, we have a pathway for you.
               </p>
+              <Link
+                href="/courses/aircraft-engineering/easa-part-66"
+                className="mt-6 inline-flex items-center gap-1 font-bold text-public-secondary hover:underline"
+              >
+                Learn more about the EASA Certification standard →
+              </Link>
             </SectionReveal>
           </div>
         </section>
 
         {/* Nav Cards Section */}
         <section className="relative z-10 px-6 pb-20">
-          <div className="mx-auto grid max-w-7xl gap-6 sm:grid-cols-3">
+          <div className="mx-auto grid max-w-7xl gap-8 sm:grid-cols-3">
             {[
               {
                 icon: CheckCircle2,
@@ -77,17 +82,17 @@ export default async function AdmissionsPage() {
               <SectionReveal key={title} delay={i * 0.08}>
                 <Link
                   href={href}
-                  className="group hover:border-public-primary flex h-full flex-col rounded-2xl border border-white/20 bg-white/60 p-6 shadow-sm backdrop-blur-md transition-all hover:shadow-xl sm:rounded-3xl sm:p-8"
+                  className="group hover:border-public-primary flex h-full flex-col rounded-3xl border border-white/20 bg-white/60 p-8 shadow-sm backdrop-blur-md transition-all hover:shadow-xl sm:p-10"
                 >
                   <div
-                    className={`h-12 w-12 bg-${color === 'blue' ? 'blue' : color === 'green' ? 'green' : 'purple'}-100 group-hover:bg-public-primary mb-5 flex items-center justify-center rounded-xl transition-colors`}
+                    className={`h-16 w-16 bg-${color === 'blue' ? 'blue' : color === 'green' ? 'green' : 'purple'}-100 group-hover:bg-public-primary mb-6 flex items-center justify-center rounded-2xl transition-colors`}
                   >
-                    <Icon className="text-public-primary h-6 w-6 transition-colors group-hover:text-white" />
+                    <Icon className="text-public-primary h-8 w-8 transition-colors group-hover:text-white" />
                   </div>
-                  <h3 className="mb-2 text-lg font-bold text-slate-900">{title}</h3>
-                  <p className="mb-6 grow text-sm text-slate-500">{desc}</p>
-                  <span className="text-public-secondary flex items-center gap-2 text-xs font-black tracking-widest uppercase">
-                    View <ArrowRight className="h-4 w-4" />
+                  <h3 className="mb-3 text-xl font-bold text-slate-900">{title}</h3>
+                  <p className="mb-8 grow text-base text-slate-500">{desc}</p>
+                  <span className="text-public-secondary flex items-center gap-2 text-sm font-black tracking-widest uppercase">
+                    View <ArrowRight className="h-5 w-5" />
                   </span>
                 </Link>
               </SectionReveal>
@@ -102,17 +107,17 @@ export default async function AdmissionsPage() {
       {/* CTA */}
       <SectionReveal>
         {/* FIX: Changed background from public-primary to public-dark */}
-        <section className="bg-public-dark px-6 py-16">
+        <section className="bg-public-dark px-6 py-20 sm:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="mb-4 text-2xl font-black tracking-tight text-white uppercase">
+            <h2 className="mb-5 text-3xl font-black tracking-tight text-white uppercase md:text-4xl">
               Ready to Commit?
             </h2>
-            <p className="mb-8 text-blue-100/80">
+            <p className="mb-10 text-lg text-blue-100/80">
               Applications are currently open for the 2026/2027 Academic Year. Slots are limited.
             </p>
             <Link
               href="/register"
-              className="text-public-primary inline-block rounded-xl bg-white px-10 py-4 text-xs font-black tracking-widest uppercase transition-all hover:bg-slate-200"
+              className="text-public-primary inline-block rounded-xl bg-white px-12 py-5 text-sm font-black tracking-widest uppercase transition-all hover:bg-slate-200"
             >
               Start Registration Now
             </Link>

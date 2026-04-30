@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { getSystemSetting } from '@/lib/settings'
 import RevenueChart from '../_components/RevenueChart'
@@ -25,7 +25,7 @@ async function getDashboardData() {
 
   // Optimization: Consolidate ALL dashboard lookups into a single transaction 
   // to reduce connection pool pressure and set RLS context exactly once.
-  return await prisma.$transaction(async (tx) => {
+  return await prismaUnfiltered.$transaction(async (tx) => {
     // 1. Fetch settings using the transactional client for maximum efficiency
     const settings = await tx.systemSetting.findMany({
       where: {

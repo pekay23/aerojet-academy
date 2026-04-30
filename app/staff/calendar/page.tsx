@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import StaffCalendarGrid from './_components/StaffCalendarGrid'
 import { subMonths, addMonths, startOfMonth, endOfMonth } from 'date-fns'
@@ -26,10 +26,10 @@ export default async function StaffCalendarPage({
   const rangeStart = subMonths(startOfMonth(currentDate), 1)
   const rangeEnd = addMonths(endOfMonth(currentDate), 1)
 
-  // Fetch all event types in parallel
+  // Fetch all event types in parallel (using prismaUnfiltered to bypass RLS overhead for Staff)
   const [classes, examEvents, adminEvents] = await Promise.all([
     // Class sessions
-    prisma.class.findMany({
+    prismaUnfiltered.class.findMany({
       where: {
         startDate: { lte: rangeEnd },
         endDate: { gte: rangeStart },
@@ -46,7 +46,7 @@ export default async function StaffCalendarPage({
     }),
 
     // Exam events
-    prisma.examEvent.findMany({
+    prismaUnfiltered.examEvent.findMany({
       where: {
         deletedAt: null,
         startDate: { lte: rangeEnd },
@@ -56,7 +56,7 @@ export default async function StaffCalendarPage({
     }),
 
     // Admin-created calendar events
-    prisma.adminCalendarEvent.findMany({
+    prismaUnfiltered.adminCalendarEvent.findMany({
       where: {
         deletedAt: null,
         startDate: { lte: rangeEnd },

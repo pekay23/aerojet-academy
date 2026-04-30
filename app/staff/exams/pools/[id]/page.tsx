@@ -1,5 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
 import {
   ChevronLeft,
@@ -22,7 +23,10 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const pool = await getPoolWithDetails(id, { includeAllStatuses: true, unfiltered: true })
+  const pool = await prismaUnfiltered.examPool.findUnique({
+    where: { id },
+    select: { name: true }
+  })
   return { title: `Pool: ${pool?.name || 'Details'} | Staff Portal` }
 }
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { badgeCountsCache } from './cache'
 
@@ -32,9 +32,9 @@ export async function GET(req: NextRequest) {
         Object.assign(counts, globalCache)
       } else {
         const [applicants, enrollments, payments] = await Promise.allSettled([
-          prisma.user.count({ where: { role: 'APPLICANT', status: 'PENDING' } }),
-          prisma.enrollment.count({ where: { status: 'PENDING' } }),
-          prisma.payment.count({ where: { status: 'PENDING' } }),
+          prismaUnfiltered.user.count({ where: { role: 'APPLICANT', status: 'PENDING' } }),
+          prismaUnfiltered.enrollment.count({ where: { status: 'PENDING' } }),
+          prismaUnfiltered.payment.count({ where: { status: 'PENDING' } }),
         ])
 
         counts.pendingApplicants = applicants.status === 'fulfilled' ? applicants.value : 0
@@ -51,8 +51,8 @@ export async function GET(req: NextRequest) {
 
     // User-specific counts
     const [messages, notifications] = await Promise.allSettled([
-      prisma.message.count({ where: { recipientId: userId, isRead: false } }),
-      prisma.notification.count({ where: { userId, isRead: false } }),
+      prismaUnfiltered.message.count({ where: { recipientId: userId, isRead: false } }),
+      prismaUnfiltered.notification.count({ where: { userId, isRead: false } }),
     ])
 
     counts.unreadMessages = messages.status === 'fulfilled' ? messages.value : 0

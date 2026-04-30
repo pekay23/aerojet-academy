@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { bookStandaloneExamAction } from '@/app/student/actions'
 import { toast } from 'sonner'
-import { Loader2, ArrowRight, BookOpen, Wallet, Calendar, X } from 'lucide-react'
+import { Loader2, ArrowRight, BookOpen, Wallet, Calendar, X, AlertCircle } from 'lucide-react'
 import { getCurrencySymbol } from '@/lib/currency'
 
 interface ExamWithCourse {
@@ -29,7 +29,7 @@ interface ExamEvent {
 }
 
 interface StandaloneBookingProps {
-  price: number
+  pricing: { individualExamFee: number; lateBookingDays: number; lateBookingSurcharge: number }
   currency: string
   availableBalance: number
   upcomingExams: ExamWithCourse[]
@@ -39,7 +39,7 @@ interface StandaloneBookingProps {
 }
 
 export default function StandaloneBooking({
-  price,
+  pricing,
   currency,
   availableBalance,
   upcomingExams,
@@ -54,7 +54,28 @@ export default function StandaloneBooking({
   const [isPending, startTransition] = useTransition()
 
   const currencySymbol = getCurrencySymbol(currency)
-  const canAfford = availableBalance >= price
+
+  // Calculate dynamic surcharge based on selection
+  let surcharge = 0
+  let targetDate: Date | null = null
+
+  if (selectedExamId) {
+    const exam = upcomingExams.find(e => e.id === selectedExamId)
+    if (exam) targetDate = new Date(exam.examDate)
+  } else if (selectedModuleCode && selectedEventId) {
+    const event = events.find(e => e.id === selectedEventId)
+    if (event) targetDate = new Date(event.startDate)
+  }
+
+  if (targetDate) {
+    const daysUntilExam = Math.ceil((targetDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+    if (daysUntilExam <= pricing.lateBookingDays && daysUntilExam > 0) {
+      surcharge = pricing.lateBookingSurcharge
+    }
+  }
+
+  const finalPrice = pricing.individualExamFee + surcharge
+  const canAfford = availableBalance >= finalPrice
 
   const handleConfirm = () => {
     // Priority 1: Specific Scheduled Exam
@@ -79,7 +100,7 @@ export default function StandaloneBooking({
             toast.success('Exam booked successfully!  seat deducted from your bundle.')
           } else {
             toast.success(
-              `Exam booked successfully! ${currencySymbol}${price.toFixed(2)} charged from your wallet.`
+              `Exam booked successfully! ${currencySymbol}${finalPrice.toFixed(2)} charged from your wallet.`
             )
           }
           setOpen(false)
@@ -148,10 +169,19 @@ export default function StandaloneBooking({
                   <p className="text-xs font-bold tracking-widest text-slate-500 uppercase">Fee</p>
                   <p className="text-base font-black text-blue-700 dark:text-blue-400">
                     {currencySymbol}
-                    {price.toFixed(2)}
+                    {finalPrice.toFixed(2)}
                   </p>
                 </div>
               </div>
+
+              {surcharge > 0 && (
+                <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3.5 text-xs text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400 font-bold uppercase tracking-wide">
+                  <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
+                  <span>
+                    A late booking surcharge of {currencySymbol}{surcharge} has been applied because this exam is within {pricing.lateBookingDays} days.
+                  </span>
+                </div>
+              )}
 
               {/* Scheduled Exams Dropdown (Primary) */}
               {upcomingExams.length > 0 && (

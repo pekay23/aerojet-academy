@@ -31,7 +31,7 @@ export async function purchaseBundle(
 
   const seats = bundleType === 'TWO_SEAT' ? 2 : 4
   const price = bundleType === 'TWO_SEAT' ? pricing.twoSeatBundle : pricing.fourSeatBundle
-  const freeChanges = bundleType === 'FOUR_SEAT' ? 1 : 0
+  const freeChanges = bundleType === 'FOUR_SEAT' ? 2 : 1
 
   if (!examComponentIds || examComponentIds.length !== seats) {
     return { success: false, error: `Must provide exactly ${seats} modules.` }

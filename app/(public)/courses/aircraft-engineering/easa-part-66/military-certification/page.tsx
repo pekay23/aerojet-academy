@@ -39,23 +39,23 @@ export default function MilitaryCertPage() {
         <SectionReveal>
           <section className="grid items-start gap-10 lg:grid-cols-2">
             <div>
-              <div className="mb-6 flex flex-wrap gap-3">
-                <span className="rounded-full bg-aerojet-sky px-4 py-2 text-xs font-black tracking-widest text-white uppercase">
+              <div className="mb-8 flex flex-wrap gap-4">
+                <span className="rounded-full bg-aerojet-sky px-5 py-2.5 text-sm font-black tracking-widest text-white uppercase">
                   Fast-Track
                 </span>
-                <span className="rounded-full bg-orange-100 px-4 py-2 text-xs font-black tracking-widest text-orange-700 uppercase">
+                <span className="rounded-full bg-orange-100 px-5 py-2.5 text-sm font-black tracking-widest text-orange-700 uppercase">
                   Theory Only
                 </span>
               </div>
-              <h2 className="mb-6 text-3xl font-black tracking-tight text-aerojet-blue uppercase">
+              <h2 className="mb-8 text-3xl font-black tracking-tight text-aerojet-blue uppercase md:text-4xl">
                 Certify Your Experience
               </h2>
-              <p className="mb-4 text-lg leading-relaxed text-slate-700">
+              <p className="mb-6 text-xl leading-relaxed text-slate-700">
                 Designed specifically for military personnel or technicians with{' '}
                 <strong>5+ years of verifiable aircraft maintenance experience</strong> who lack
                 EASA certification.
               </p>
-              <p className="leading-relaxed text-slate-600">
+              <p className="leading-relaxed text-lg text-slate-600">
                 This fast-track course is a strictly theoretical intensive program aimed at
                 preparing students to pass all their EASA exams. It allows experienced technicians
                 to certify their skills without repeating practical training they have already
@@ -63,10 +63,10 @@ export default function MilitaryCertPage() {
               </p>
             </div>
 
-            <div className="rounded-2xl bg-aerojet-blue p-6 text-white sm:rounded-3xl sm:p-8">
-              <Shield className="mb-4 h-10 w-10 text-aerojet-sky" />
-              <h3 className="mb-4 text-lg font-bold">Program Details</h3>
-              <ul className="space-y-4">
+            <div className="rounded-3xl bg-aerojet-blue p-8 text-white sm:p-10">
+              <Shield className="mb-5 h-10 w-10 text-aerojet-sky" />
+              <h3 className="mb-6 text-xl font-bold">Program Details</h3>
+              <ul className="space-y-5">
                 {[
                   { label: 'Duration', value: '12 Months' },
                   { label: 'Schedule', value: '16:00 – 19:00 Mon–Fri' },
@@ -75,16 +75,16 @@ export default function MilitaryCertPage() {
                 ].map((item) => (
                   <li
                     key={item.label}
-                    className="grid grid-cols-[120px_1fr] gap-4 border-b border-white/10 pb-3 last:border-0"
+                    className="grid grid-cols-[130px_1fr] gap-5 border-b border-white/10 pb-4 last:border-0"
                   >
-                    <span className="text-xs font-bold text-blue-200 uppercase tracking-wider">{item.label}</span>
-                    <span className="text-sm font-medium text-white">{item.value}</span>
+                    <span className="text-sm font-bold text-blue-200 uppercase tracking-wider">{item.label}</span>
+                    <span className="text-base font-medium text-white">{item.value}</span>
                   </li>
                 ))}
               </ul>
               <Link
                 href="/register"
-                className="mt-8 block w-full rounded-xl bg-aerojet-sky py-4 text-center text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-white hover:text-aerojet-blue"
+                className="mt-10 block w-full rounded-xl bg-aerojet-sky py-5 text-center text-sm font-bold tracking-widest text-white uppercase transition-all hover:bg-white hover:text-aerojet-blue"
               >
                 Apply for Fast-Track
               </Link>
@@ -93,9 +93,9 @@ export default function MilitaryCertPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <section className="rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:rounded-3xl sm:p-10">
-            <h3 className="mb-6 text-xl font-bold text-aerojet-blue">What's Included</h3>
-            <div className="grid gap-4 sm:grid-cols-2">
+          <section className="rounded-3xl border border-slate-100 bg-slate-50 p-8 sm:p-12">
+            <h3 className="mb-8 text-2xl font-bold text-aerojet-blue">What's Included</h3>
+            <div className="grid gap-5 sm:grid-cols-2">
               {[
                 'All B1.1 theory modules & EASA examinations',
                 'Guidance on EASA Part 66 License application process',
@@ -104,8 +104,8 @@ export default function MilitaryCertPage() {
                 'Tuition and examination fees included',
                 'Special subsidized pricing for military personnel',
               ].map((item) => (
-                <div key={item} className="flex items-start gap-3 text-sm text-slate-700">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-aerojet-sky" />
+                <div key={item} className="flex items-start gap-4 text-base text-slate-700">
+                  <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-aerojet-sky" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -114,24 +114,26 @@ export default function MilitaryCertPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <section>
-            <h3 className="mb-6 text-2xl font-black tracking-tight text-aerojet-blue uppercase">
-              Required EASA Modules
-            </h3>
-            <p className="mb-8 text-slate-600">
-              This fast-track program focuses on these core EASA B1.1 modules, preparing you for
-              the rigorous theoretical examinations.
-            </p>
+          <section className="space-y-12">
+            <div>
+              <h3 className="mb-6 text-3xl font-black tracking-tight text-aerojet-blue uppercase">
+                Required EASA Modules
+              </h3>
+              <p className="text-lg text-slate-600">
+                This fast-track program focuses on these core EASA B1.1 modules, preparing you for
+                the rigorous theoretical examinations.
+              </p>
+            </div>
             <ModuleGrid modules={militaryModules} />
           </section>
         </SectionReveal>
 
         <SectionReveal>
-          <div className="flex items-start gap-4 rounded-xl border border-orange-200 bg-orange-50 p-5">
-            <AlertCircle className="mt-0.5 h-6 w-6 shrink-0 text-orange-600" />
+          <div className="flex items-start gap-5 rounded-2xl border border-orange-200 bg-orange-50 p-6 sm:p-8">
+            <AlertCircle className="mt-0.5 h-8 w-8 shrink-0 text-orange-600" />
             <div>
-              <strong className="mb-1 block text-orange-900">Important Note</strong>
-              <p className="text-sm leading-relaxed text-orange-800">
+              <strong className="mb-2 block text-lg text-orange-900">Important Note</strong>
+              <p className="text-base leading-relaxed text-orange-800">
                 This program is <strong>strictly theoretical</strong> — it does not include
                 hand-skills training or practical maintenance experience. Candidates must have
                 existing verifiable experience to qualify.
@@ -141,24 +143,24 @@ export default function MilitaryCertPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <div className="rounded-2xl bg-linear-to-r from-aerojet-blue to-aerojet-sky p-8 text-center text-white sm:rounded-3xl sm:p-12">
-            <h2 className="mb-4 text-2xl font-black tracking-tight uppercase">
+          <div className="rounded-3xl bg-linear-to-r from-aerojet-blue to-aerojet-sky p-10 text-center text-white sm:p-16">
+            <h2 className="mb-5 text-3xl font-black tracking-tight uppercase md:text-4xl">
               Questions About Eligibility?
             </h2>
-            <p className="mx-auto mb-8 max-w-xl text-blue-100/80">
+            <p className="mx-auto mb-10 max-w-2xl text-lg text-blue-100/80 leading-relaxed">
               Contact our admissions team to verify your experience qualifies for the fast-track
               program.
             </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <div className="flex flex-col justify-center gap-5 sm:flex-row">
               <Link
                 href="/register"
-                className="inline-block rounded-xl bg-white px-8 py-4 text-xs font-black tracking-widest text-aerojet-blue uppercase transition-all hover:bg-blue-50"
+                className="inline-block rounded-xl bg-white px-10 py-5 text-sm font-black tracking-widest text-aerojet-blue uppercase transition-all hover:bg-blue-50"
               >
                 Register Now
               </Link>
               <Link
                 href="/contact"
-                className="inline-block rounded-xl border border-white/20 bg-white/10 px-8 py-4 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-white/20"
+                className="inline-block rounded-xl border border-white/20 bg-white/10 px-10 py-5 text-sm font-black tracking-widest text-white uppercase transition-all hover:bg-white/20"
               >
                 Contact Admissions
               </Link>

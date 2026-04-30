@@ -56,21 +56,23 @@ export default function FAQPage() {
     <div className="bg-slate-50">
       <Hero title="Frequently Asked Questions" subtitle="Answers to common questions about admissions, training, and careers." backgroundImage="/images/hero/faq.webp"/>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-20 space-y-10">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-24 space-y-12">
         {FAQS.map((category, idx) => (
           <SectionReveal key={idx} delay={idx * 0.05}>
-            <div className="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-sm border border-slate-100">
-              <h2 className="text-xl font-black text-aerojet-blue uppercase tracking-tight mb-6 border-b border-slate-100 pb-4">
+            <div className="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-slate-100">
+              <h2 className="text-2xl font-black text-aerojet-blue uppercase tracking-tight mb-8 border-b border-slate-100 pb-5 text-left">
                 {category.category}
               </h2>
               <div className="space-y-6">
                 {category.items.map((item, i) => (
                   <details key={i} className="group">
-                    <summary className="cursor-pointer font-bold text-slate-800 hover:text-aerojet-sky transition-colors py-2 text-base flex items-start justify-between gap-4 list-none">
-                      <span>{item.q}</span>
-                      <span className="text-aerojet-sky text-xl leading-none shrink-0 group-open:rotate-45 transition-transform duration-200">+</span>
+                    <summary className="cursor-pointer font-bold text-slate-800 hover:text-aerojet-sky transition-colors py-3 text-lg flex items-start justify-between gap-6 list-none w-full">
+                      <span className="flex-1 text-left">{item.q}</span>
+                      <span className="text-aerojet-sky text-2xl leading-none shrink-0 group-open:rotate-45 transition-transform duration-200 mt-0.5">+</span>
                     </summary>
-                    <p className="text-slate-600 leading-relaxed pb-2 pl-0 text-base mt-1">{item.a}</p>
+                    <p className="text-slate-600 leading-relaxed pb-4 pl-4 sm:pl-8 text-lg mt-2 text-left border-l-2 border-slate-100 ml-2 sm:ml-4">
+                      {item.a}
+                    </p>
                   </details>
                 ))}
               </div>
@@ -79,10 +81,10 @@ export default function FAQPage() {
         ))}
 
         <SectionReveal>
-          <div className="text-center mt-8">
-            <h3 className="text-lg font-bold text-aerojet-blue mb-3">Still have questions?</h3>
-            <p className="text-slate-500 mb-6 text-sm">Can't find the answer you're looking for? Chat to our friendly team.</p>
-            <Link href="/contact" className="inline-block bg-aerojet-blue text-white px-8 py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-aerojet-sky transition-all">
+          <div className="text-center mt-12 mb-10">
+            <h3 className="text-2xl font-bold text-aerojet-blue mb-4">Still have questions?</h3>
+            <p className="text-slate-500 mb-8 text-lg">Can't find the answer you're looking for? Chat to our friendly team.</p>
+            <Link href="/contact" className="inline-block bg-aerojet-blue text-white px-12 py-5 rounded-xl font-bold uppercase tracking-widest text-sm hover:bg-aerojet-sky transition-all">
               Contact Support
             </Link>
           </div>

@@ -32,7 +32,7 @@ export default function ModuleGrid({
   const gridCols = `grid grid-cols-${columns.mobile} sm:grid-cols-${columns.tablet} md:grid-cols-${columns.desktop}`
 
   return (
-    <div className={`${gridCols} gap-3`}>
+    <div className={`${gridCols} gap-4 sm:gap-5`}>
       {modules.map((m) => {
         const isActive = activeModule === m.code
 
@@ -47,7 +47,7 @@ export default function ModuleGrid({
               onClick={() => handleToggle(m.code)}
               layout
               className={`
-                flex w-full flex-col items-center justify-center overflow-hidden rounded-xl border transition-all duration-300
+                flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl border transition-all duration-300
                 ${
                   isActive
                     ? 'border-aerojet-sky bg-white shadow-lg ring-1 ring-aerojet-sky/20'
@@ -57,9 +57,9 @@ export default function ModuleGrid({
             >
               <motion.div 
                 layout 
-                className={`py-3 ${isActive ? 'pb-1' : ''}`}
+                className={`py-4 sm:py-5 ${isActive ? 'pb-2 sm:pb-2' : ''}`}
               >
-                <span className={`text-base font-black transition-colors ${isActive ? 'text-aerojet-sky' : 'text-slate-400'}`}>
+                <span className={`text-lg sm:text-xl font-black transition-colors ${isActive ? 'text-aerojet-sky' : 'text-slate-400'}`}>
                   {m.code}
                 </span>
               </motion.div>
@@ -71,13 +71,13 @@ export default function ModuleGrid({
                     animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.2, ease: 'easeOut' }}
-                    className="overflow-hidden px-4 pb-4 text-center"
+                    className="overflow-hidden px-5 pb-5 text-center"
                   >
-                    <p className="text-[10px] font-bold leading-tight text-slate-600 uppercase tracking-tight">
+                    <p className="text-xs sm:text-sm font-bold leading-tight text-slate-600 uppercase tracking-tight">
                       {m.name}
                     </p>
                     {m.info && (
-                      <p className="mt-1 text-[9px] font-medium text-slate-400">
+                      <p className="mt-1.5 text-[10px] sm:text-xs font-medium text-slate-400">
                         {m.info}
                       </p>
                     )}

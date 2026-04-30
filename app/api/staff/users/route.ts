@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 import { apiPaginated, apiUnauthorized } from '@/lib/api/response'
 
 export async function GET(req: NextRequest) {
@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
   }
 
   const [users, total, allCount, applicantCount, studentCount, instructorCount] = await Promise.all([
-    prisma.user.findMany({
+    prismaUnfiltered.user.findMany({
       where,
       select: {
         id: true,
@@ -56,11 +56,11 @@ export async function GET(req: NextRequest) {
       skip: (page - 1) * limit,
       take: limit,
     }),
-    prisma.user.count({ where }),
-    prisma.user.count(),
-    prisma.user.count({ where: { role: 'APPLICANT' } }),
-    prisma.user.count({ where: { role: 'STUDENT' } }),
-    prisma.user.count({ where: { role: 'INSTRUCTOR' } }),
+    prismaUnfiltered.user.count({ where }),
+    prismaUnfiltered.user.count(),
+    prismaUnfiltered.user.count({ where: { role: 'APPLICANT' } }),
+    prismaUnfiltered.user.count({ where: { role: 'STUDENT' } }),
+    prismaUnfiltered.user.count({ where: { role: 'INSTRUCTOR' } }),
   ])
 
   return apiPaginated(users, total, page, limit)

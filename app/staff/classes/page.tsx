@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Calendar, Users, MoreVertical, BookOpen } from 'lucide-react'
 import ClassActionsMenu from '../_components/ClassActionsMenu'
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
 
@@ -13,7 +13,7 @@ export default async function ClassesPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const classes = await prisma.class.findMany({
+  const classes = await prismaUnfiltered.class.findMany({
     select: {
       id: true,
       name: true,
