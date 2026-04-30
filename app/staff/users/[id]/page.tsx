@@ -29,8 +29,25 @@ export default async function UserProfilePage({ params }: Props) {
 
   const { id } = await params
 
+  
+  function slugify(text: string) {
+    return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+  }
+
+  // Find user by slug first
+  const allUsers = await prisma.user.findMany({
+    select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } }
+  });
+
+  const matchedUser = allUsers.find(u => {
+    const name = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email.split('@')[0];
+    return slugify(name) === id;
+  });
+
+  const targetId = matchedUser ? matchedUser.id : id;
+
   const userRaw = await prisma.user.findUnique({
-    where: { id },
+    where: { id: targetId },
     include: {
       profile: true,
       studentProfile: {

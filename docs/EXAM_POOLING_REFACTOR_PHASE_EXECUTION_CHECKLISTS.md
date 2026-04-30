@@ -899,9 +899,9 @@ Finalize the transition away from pool time as a source of truth and remove or i
 
 ### Retire obsolete logic
 
-- [ ] Remove old pool-centric assumptions from cron — partially done: cron now uses event-level viability, but still references pool dates for redistribution timing
-- [ ] Remove duplicate assignment logic — deferred until all applicant/student paths confirmed migrated
-- [ ] Remove dead compatibility code once all routes have migrated — deferred until production validation
+- [x] Remove old pool-centric assumptions from cron — fully done: auto-pool redistribution removed.
+- [x] Remove duplicate assignment logic — obsolete auto-pool code deleted.
+- [x] Remove dead compatibility code once all routes have migrated — obsolete API routes and UI buttons deleted.
 
 ## Validation Gates
 

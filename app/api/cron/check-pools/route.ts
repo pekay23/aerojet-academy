@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma/client'
-import { redistributeAutoPool } from '@/lib/pools/auto-pool'
 import { createAuditLog } from '@/lib/audit/logger'
 import { evaluateGoNoGo, executeGo, executeNoGo } from '@/lib/events/go-no-go'
 import { env } from '@/lib/env'
@@ -18,29 +17,6 @@ export async function GET(req: NextRequest) {
 
   try {
     const now = new Date()
-
-    // Step 0: Redistribute auto pools for events at or past payment deadline
-    const eventsAtDeadline = await prisma.examEvent.findMany({
-      where: {
-        paymentDeadline: { lte: now },
-        status: { in: ['OPEN', 'CONFIRMED'] },
-        pools: {
-          some: { poolType: 'AUTO', isAutoPool: true, status: { in: ['OPEN', 'DRAFT'] } },
-        },
-      },
-      select: { id: true, name: true },
-    })
-
-    const redistributionResults = { events: 0, redistributed: 0, errors: [] as string[] }
-    for (const event of eventsAtDeadline) {
-      try {
-        const result = await redistributeAutoPool(event.id)
-        redistributionResults.events++
-        redistributionResults.redistributed += result.redistributed
-      } catch (err: any) {
-        redistributionResults.errors.push(`Event ${event.id}: ${err.message}`)
-      }
-    }
 
     // Evaluate events at or past the payment deadline using the new event-level viability rules.
     const eventsToEvaluate = await prisma.examEvent.findMany({
@@ -68,15 +44,12 @@ export async function GET(req: NextRequest) {
           if (event.status !== 'CONFIRMED') {
             await executeGo(event.id, 'SYSTEM')
             results.confirmedEvents++
+            // Count pools now LOCKED as a result of this executeGo call
+            const lockedCount = await prisma.examPool.count({
+              where: { eventId: event.id, status: 'LOCKED' },
+            })
+            results.confirmedPools += lockedCount
           }
-
-          const confirmablePools = await prisma.examPool.count({
-            where: {
-              eventId: event.id,
-              status: 'LOCKED',
-            },
-          })
-          results.confirmedPools += confirmablePools
         } else if (evaluation.decision === 'NO_GO') {
           await executeNoGo(event.id, 'SYSTEM')
           results.cancelledEvents++
@@ -102,7 +75,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       success: true,
       message: 'Pool check completed',
-      results: { ...results, redistribution: redistributionResults },
+      results: { ...results },
       timestamp: now.toISOString(),
     })
   } catch (error: any) {

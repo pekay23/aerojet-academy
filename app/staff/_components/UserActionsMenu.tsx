@@ -36,6 +36,11 @@ interface UserActionsMenuProps {
   onActionComplete?: () => void
 }
 
+
+function slugify(text: string) {
+  return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+}
+
 export default function UserActionsMenu({
   userId,
   userStatus,
@@ -80,7 +85,7 @@ export default function UserActionsMenu({
         {
           label: 'View Profile',
           icon: Eye,
-          href: `/staff/users/${userId}`,
+          href: `/staff/users/${slugify(userName) || userId}`,
           variant: 'default',
         },
         {
@@ -100,7 +105,7 @@ export default function UserActionsMenu({
         {
           label: 'View Profile',
           icon: Eye,
-          href: `/staff/users/${userId}`,
+          href: `/staff/users/${slugify(userName) || userId}`,
           variant: 'default',
         },
         {

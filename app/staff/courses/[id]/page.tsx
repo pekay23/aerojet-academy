@@ -14,12 +14,16 @@ import {
   Tag,
   Hourglass,
   Shield,
+  XCircle,
+  Eye,
+  Settings,
 } from 'lucide-react'
 import CourseActionsMenu from '../../_components/CourseActionsMenu'
 import ExamComponentsSection from './_components/ExamComponentsSection'
 import CourseInfoEditDialog from './_components/CourseInfoEditDialog'
 import { Metadata } from 'next'
 import { serializePrisma } from '@/lib/utils/serialization'
+import { slugify } from '@/lib/utils'
 
 export const metadata: Metadata = { title: 'Course Details | Staff Portal' }
 
@@ -231,7 +235,7 @@ export default async function CourseDetailsPage({ params }: Props) {
                 serializedCourse.classes.map((cls: any) => (
                   <Link
                     key={cls.id}
-                    href={`/staff/classes/${cls.id}`}
+                    href={`/staff/classes/${slugify(cls.name)}`}
                     className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-4 transition-colors hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/50"
                   >
                     <div>

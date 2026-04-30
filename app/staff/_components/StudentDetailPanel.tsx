@@ -100,6 +100,11 @@ interface Props {
   onCurrencyChange?: (currency: string) => void
 }
 
+
+function slugify(text: string) {
+  return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+}
+
 export default function StudentDetailPanel({
   student: initialStudent,
   onClose,
@@ -319,7 +324,7 @@ export default function StudentDetailPanel({
               onActionComplete={onActionComplete}
             />
             <a
-              href={`/staff/students/${currentStudent.id}`}
+              href={`/staff/students/${slugify(currentStudent.profile ? `${currentStudent.profile.firstName} ${currentStudent.profile.lastName}` : currentStudent.email.split('@')[0])}`}
               className="flex h-8 items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black tracking-widest text-slate-500 uppercase shadow-sm transition-all hover:border-aerojet-sky hover:text-aerojet-sky dark:border-slate-700 dark:bg-slate-800"
               title="Open Full Profile"
             >

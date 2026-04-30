@@ -215,3 +215,15 @@ export function toTitleCase(str: string): string {
     .map((word) => capitalize(word))
     .join(' ')
 }
+
+/**
+ * Create a slug from a string
+ */
+export function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/[^\w\-]+/g, '')
+    .replace(/\-\-+/g, '-');
+}

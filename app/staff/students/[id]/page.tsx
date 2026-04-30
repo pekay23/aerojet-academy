@@ -25,9 +25,27 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
   const { id } = await params
   const { tab } = await searchParams
 
+  
+  function slugify(text: string) {
+    return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+  }
+
+  // Find user by slug first
+  const allUsers = await prisma.user.findMany({
+    where: { role: { in: ['STUDENT', 'APPLICANT'] } },
+    select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } }
+  });
+
+  const matchedUser = allUsers.find(u => {
+    const name = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email.split('@')[0];
+    return slugify(name) === id;
+  });
+
+  const targetId = matchedUser ? matchedUser.id : id;
+
   // Fetch comprehensive student data
   const student = await prisma.user.findUnique({
-    where: { id, role: { in: ['STUDENT', 'APPLICANT'] } },
+    where: { id: targetId, role: { in: ['STUDENT', 'APPLICANT'] } },
     include: {
       profile: true,
       studentProfile: {
@@ -105,7 +123,7 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
 
   // Fetch full-time enrollment / OJT data
   const fullTimeEnrollments = await prisma.fullTimeEnrollment.findMany({
-    where: { studentId: id },
+    where: { studentId: targetId },
     include: {
       programme: { select: { code: true, name: true } },
       ojtPeriods: { orderBy: { startDate: 'desc' } },
@@ -115,7 +133,7 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
 
   // Fetch modular enrollments
   const modularEnrollments = await prisma.modularEnrollment.findMany({
-    where: { studentId: id },
+    where: { studentId: targetId },
     include: {
       package: { select: { id: true, name: true } },
     },

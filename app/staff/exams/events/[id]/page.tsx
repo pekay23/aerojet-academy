@@ -18,7 +18,6 @@ import EventOverrideControls from './EventOverrideControls'
 import GenerateSittingsButton from './GenerateSittingsButton'
 import SchedulingWarningsPanel from './SchedulingWarningsPanel'
 import ResitBackfillPanel from './ResitBackfillPanel'
-import RedistributePoolButton from './RedistributePoolButton'
 import PoolList from './PoolList'
 
 interface PageProps {
@@ -71,7 +70,6 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
 
   const evaluation = await evaluateGoNoGo(id, { unfiltered: true }).catch(() => null)
   const demandSnapshot = await getEventDemandSnapshot(id)
-  const hasAutoPool = event.pools.some((p) => p.isAutoPool && p.poolType === 'AUTO' && p.status === 'OPEN')
 
   return (
     <div className="mx-auto max-w-[1800px]">
@@ -118,9 +116,6 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
           </div>
         </div>
         <div className="flex flex-wrap gap-3">
-          {hasAutoPool && (
-            <RedistributePoolButton eventId={event.id} />
-          )}
           <GenerateSittingsButton eventId={event.id} />
           <Link
             href={`/staff/exams/events/${event.id}/edit`}

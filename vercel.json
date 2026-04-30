@@ -23,6 +23,14 @@
     {
       "path": "/api/cron/backup",
       "schedule": "0 4 * * *"
+    },
+    {
+      "path": "/api/cron/cleanup-audit-logs",
+      "schedule": "0 0 1 * *"
+    },
+    {
+      "path": "/api/cron/expire-bundles",
+      "schedule": "0 0 * * *"
     }
   ]
 }

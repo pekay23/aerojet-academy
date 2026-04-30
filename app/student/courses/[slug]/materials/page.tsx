@@ -17,25 +17,25 @@ import prisma from '@/lib/prisma/client'
 import { canAccessClasses, resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 
 interface PageProps {
-  params: Promise<{ id: string }>
+  params: Promise<{ slug: string }>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { id } = await params
-  const enrollment = await prisma.enrollment.findUnique({
-    where: { id },
-    include: { course: true },
-  })
+  const { slug } = await params
+  const session = await getAuthSession()
+  if (!session) return { title: 'Course Materials' }
+
+  const enrollments = await prisma.enrollment.findMany({ where: { userId: session.user.id }, include: { course: true } });
+  const enrollment = enrollments.find(e => e.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') === slug);
   return { title: enrollment ? `Resources: ${enrollment.course.name}` : 'Course Materials' }
 }
 
 export default async function MaterialsPage({ params }: PageProps) {
-  const { id } = await params
+  const { slug } = await params
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const enrollment = await prisma.enrollment.findUnique({
-    where: { id },
+  const allEnrollments = await prisma.enrollment.findMany({ where: { userId: session.user.id },
     include: {
       course: true,
       user: {
@@ -52,6 +52,8 @@ export default async function MaterialsPage({ params }: PageProps) {
     },
   })
 
+  const enrollment = allEnrollments.find(e => e.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') === slug);
+
   if (!enrollment || enrollment.userId !== session.user.id) {
     notFound()
   }
@@ -61,7 +63,7 @@ export default async function MaterialsPage({ params }: PageProps) {
 
   if (!isPaid) {
     // If accessed via direct URL, redirect back to course details with a message
-    redirect(`/student/courses/${id}?error=payment_required`)
+    redirect(`/student/courses/${slug}?error=payment_required`)
   }
 
   const { course } = enrollment
@@ -78,7 +80,7 @@ export default async function MaterialsPage({ params }: PageProps) {
       {/* Header */}
       <div className="space-y-4">
         <Link
-          href={`/student/courses/${id}`}
+          href={`/student/courses/${slug}`}
           className="group inline-flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-blue dark:hover:text-blue-400"
         >
           <ArrowLeft className="h-4 w-4" />

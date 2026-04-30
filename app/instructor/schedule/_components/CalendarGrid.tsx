@@ -13,12 +13,19 @@ import {
   endOfMonth,
   eachDayOfInterval,
   getDay,
+  getHours,
+  getMinutes
 } from 'date-fns'
 import {
   ChevronLeft,
   ChevronRight,
   Calendar as CalendarIcon,
   Clock,
+  Filter,
+  Plus,
+  BookOpen,
+  GraduationCap,
+  CalendarDays
 } from 'lucide-react'
 import SessionDetails from './SessionDetails'
 import { cn } from '@/lib/utils'
@@ -38,55 +45,8 @@ export default function CalendarGrid({ schedule, initialDate }: CalendarGridProp
   const startOfRange = startOfWeek(currentDate, { weekStartsOn: 1 })
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(startOfRange, i))
 
-  const timeSlots = Array.from({ length: 10 }, (_, i) => 8 + i)
+  const timeSlots = Array.from({ length: 24 }, (_, i) => i)
   const hourHeight = 96
-
-  const getEventPosition = (startDate: Date, endDate: Date) => {
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-    const startHour = start.getHours() + start.getMinutes() / 60
-    const offsetHours = startHour - 8
-    const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60)
-    return { top: offsetHours * hourHeight, height: durationHours * hourHeight }
-  }
-
-  const getCategoryColor = (category: string | null) => {
-    const colors: Record<string, string> = {
-      CORE: 'border-blue-500 bg-blue-50/50 dark:bg-blue-900/20',
-      SPECIALIST: 'border-purple-500 bg-purple-50/50 dark:bg-purple-900/20',
-      AVIONICS: 'border-orange-500 bg-orange-50/50 dark:bg-orange-900/20',
-    }
-    return colors[category || ''] || 'border-slate-400 bg-slate-50/50 dark:bg-slate-800/20'
-  }
-
-  const getCategoryDotColor = (category: string | null) => {
-    const colors: Record<string, string> = {
-      CORE: 'bg-blue-500',
-      SPECIALIST: 'bg-purple-500',
-      AVIONICS: 'bg-orange-500',
-    }
-    return colors[category || ''] || 'bg-slate-400'
-  }
-
-  // Navigation handlers
-  const navigatePrev = () => {
-    if (viewMode === 'Day') setCurrentDate(addDays(currentDate, -1))
-    else if (viewMode === 'Week') setCurrentDate(addDays(currentDate, -7))
-    else setCurrentDate(subMonths(currentDate, 1))
-  }
-
-  const navigateNext = () => {
-    if (viewMode === 'Day') setCurrentDate(addDays(currentDate, 1))
-    else if (viewMode === 'Week') setCurrentDate(addDays(currentDate, 7))
-    else setCurrentDate(addMonths(currentDate, 1))
-  }
-
-  const headerLabel = useMemo(() => {
-    if (viewMode === 'Day') return format(currentDate, 'EEEE, MMMM d, yyyy')
-    if (viewMode === 'Week')
-      return `${format(startOfRange, 'MMM d')} – ${format(addDays(startOfRange, 6), 'MMM d, yyyy')}`
-    return format(currentDate, 'MMMM yyyy')
-  }, [viewMode, currentDate, startOfRange])
 
   // Month view: calendar grid days
   const monthDays = useMemo(() => {
@@ -112,288 +72,268 @@ export default function CalendarGrid({ schedule, initialDate }: CalendarGridProp
     [schedule, currentDate]
   )
 
-  const renderEventCard = (cls: any, height: number) => (
-    <div className="flex h-full flex-col justify-between">
-      <div>
-        <div className="mb-1.5 flex items-center gap-1.5">
-          <span className="rounded-md bg-white px-1.5 py-0.5 text-[9px] font-black text-slate-600 uppercase shadow-sm dark:bg-slate-800 dark:text-slate-300">
-            {cls.course.code}
-          </span>
-        </div>
-        <h4 className="text-[11px] leading-tight font-black text-slate-800 dark:text-slate-100">
-          {cls.course.name}
-        </h4>
-        <div className="mt-2 flex items-center gap-1 text-slate-500 dark:text-slate-400">
-          <Clock className="h-3 w-3" />
-          <span className="text-[10px] font-medium tracking-tight">
-            {format(new Date(cls.startDate), 'HH:mm')} – {format(new Date(cls.endDate), 'HH:mm')}
-          </span>
-        </div>
-      </div>
-      {height > 150 && (
-        <div className="animate-in fade-in slide-in-from-bottom-2 mt-auto hidden duration-300 group-hover:block">
-          <button className="w-full rounded-lg bg-blue-600 py-1.5 text-[9px] font-black tracking-widest text-white uppercase shadow-sm transition-all hover:bg-blue-700">
-            Open Session
-          </button>
-        </div>
-      )}
-    </div>
-  )
+  const navigatePrev = () => {
+    if (viewMode === 'Day') setCurrentDate(addDays(currentDate, -1))
+    else if (viewMode === 'Week') setCurrentDate(addDays(currentDate, -7))
+    else setCurrentDate(subMonths(currentDate, 1))
+  }
+
+  const navigateNext = () => {
+    if (viewMode === 'Day') setCurrentDate(addDays(currentDate, 1))
+    else if (viewMode === 'Week') setCurrentDate(addDays(currentDate, 7))
+    else setCurrentDate(addMonths(currentDate, 1))
+  }
+
+  const headerLabel = useMemo(() => {
+    if (viewMode === 'Day') return format(currentDate, 'EEEE, MMMM d, yyyy')
+    if (viewMode === 'Week')
+      return `${format(startOfRange, 'MMM d')} – ${format(addDays(startOfRange, 6), 'MMM d, yyyy')}`
+    return format(currentDate, 'MMMM yyyy')
+  }, [viewMode, currentDate, startOfRange])
+
+  const getEventPosition = (startDate: string | Date, endDate: string | Date) => {
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+    const startHour = start.getHours() + start.getMinutes() / 60
+    const durationHours = (end.getTime() - start.getTime()) / (1000 * 60 * 60)
+    return { top: startHour * hourHeight, height: Math.max(durationHours * hourHeight, 24) }
+  }
+
+  const getEventStyles = (category: string | null) => {
+    if (category === 'CORE') return 'bg-[#EBF1FF] text-[#4A72E8] border-l-4 border-[#4A72E8]'
+    if (category === 'SPECIALIST') return 'bg-[#F3E8FF] text-[#9333EA] border-l-4 border-[#9333EA]'
+    if (category === 'AVIONICS') return 'bg-[#FFF0E6] text-[#E0662A] border-l-4 border-[#E0662A]'
+    return 'bg-[#F8FAFC] text-[#475569] border-l-4 border-[#94A3B8]'
+  }
+
+  const getEventIcon = (category: string | null) => {
+    return <BookOpen className="h-4 w-4" />
+  }
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      {/* Calendar Header */}
-      <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/30 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/20">
+    <div className="flex flex-col gap-6 h-full overflow-y-auto pr-2 pb-6">
+      {/* Premium Header */}
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 rounded-2xl bg-white p-4 shadow-sm border border-slate-100 dark:bg-slate-900 dark:border-slate-800 shrink-0">
         <div className="flex items-center gap-4">
-          <div className="flex items-center rounded-xl border border-slate-100 bg-white p-1 shadow-sm dark:border-slate-700 dark:bg-slate-800">
-            <button
-              onClick={navigatePrev}
-              className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <div className="flex items-center gap-2 px-3">
-              <CalendarIcon className="h-4 w-4 text-blue-500" />
-              <span className="text-sm font-bold tracking-tight text-slate-700 uppercase dark:text-slate-200">
-                {headerLabel}
-              </span>
-            </div>
-            <button
-              onClick={navigateNext}
-              className="rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
+          <div className="flex items-center gap-2 font-black text-xl text-slate-900 dark:text-white cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-2 rounded-xl" onClick={() => setCurrentDate(new Date())}>
+            {headerLabel}
           </div>
-          <button
-            onClick={() => setCurrentDate(new Date())}
-            className="rounded-lg border border-slate-200 px-3 py-1.5 text-[10px] font-black tracking-widest text-slate-500 uppercase transition-colors hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
-          >
-            Today
-          </button>
+          <div className="hidden md:flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{schedule.length} Sessions</span>
+          </div>
         </div>
 
-        <div className="flex gap-1 rounded-xl border border-slate-200 bg-slate-100 p-1 dark:border-slate-700 dark:bg-slate-800">
-          {(['Day', 'Week', 'Month'] as ViewMode[]).map((view) => (
-            <button
-              key={view}
-              onClick={() => setViewMode(view)}
-              className={cn(
-                'rounded-lg px-4 py-1.5 text-[10px] font-black tracking-widest uppercase transition-all',
-                viewMode === view
-                  ? 'bg-white text-blue-600 shadow-sm dark:bg-slate-700'
-                  : 'text-slate-400 hover:text-slate-600'
-              )}
-            >
-              {view}
-            </button>
-          ))}
+        <div className="flex gap-2">
+          <button className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm">
+            <Filter className="h-4 w-4" />
+            Filter
+          </button>
+          
+          <div className="flex items-center rounded-full border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+             {(['Day', 'Week', 'Month'] as ViewMode[]).map((view, i) => (
+               <button 
+                 key={view} 
+                 onClick={() => setViewMode(view)} 
+                 className={cn(
+                   "px-5 py-2.5 text-sm font-bold transition-colors", 
+                   i === 0 && "rounded-l-full",
+                   i === 2 && "rounded-r-full border-l border-slate-200 dark:border-slate-700",
+                   i === 1 && "border-l border-slate-200 dark:border-slate-700",
+                   viewMode === view ? 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                 )}>
+                 {view}
+               </button>
+             ))}
+          </div>
+
+          <button className="flex items-center gap-2 rounded-full bg-[#FF4F33] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#E6462D] transition-colors shadow-md shadow-[#FF4F33]/20">
+            New Session <Plus className="h-4 w-4" />
+          </button>
         </div>
       </div>
 
-      {/* ─── WEEK VIEW ─── */}
       {viewMode === 'Week' && (
-        <div className="relative flex flex-1 flex-col overflow-hidden">
-          <div className="grid grid-cols-8 border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/10">
-            <div className="border-r border-slate-100 p-4 dark:border-slate-800" />
-            {weekDays.map((day) => {
-              const isToday = isSameDay(day, new Date())
-              return (
-                <div
-                  key={day.toString()}
-                  className={cn(
-                    'border-r border-slate-100 p-4 text-center last:border-r-0 dark:border-slate-800',
-                    isToday && 'relative bg-blue-50/30 dark:bg-blue-900/10'
-                  )}
-                >
-                  {isToday && <div className="absolute top-0 left-0 h-1 w-full bg-blue-500" />}
-                  <span className={cn('mb-1 block text-[10px] font-black tracking-widest uppercase', isToday ? 'text-blue-500' : 'text-slate-400')}>
-                    {format(day, 'EEE')}
-                  </span>
-                  <span className={cn('block text-xl font-black tracking-tight', isToday ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200')}>
-                    {format(day, 'd')}
-                  </span>
-                </div>
-              )
-            })}
-          </div>
-
-          <div className="relative flex-1 overflow-y-auto scroll-smooth bg-slate-50/20 dark:bg-slate-900/20">
-            <div className="grid min-h-full grid-cols-8">
-              <div className="col-span-1 border-r border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/30">
-                {timeSlots.map((hour) => (
-                  <div key={hour} className="flex h-24 items-center justify-center border-b border-slate-100/50 text-[10px] font-black text-slate-400 dark:border-slate-800/50">
-                    {hour.toString().padStart(2, '0')}:00
-                  </div>
-                ))}
-              </div>
-
-              <div className="relative col-span-7 grid grid-cols-7">
-                <div className="pointer-events-none absolute inset-0 flex flex-col">
-                  {timeSlots.map((hour) => (
-                    <div key={hour} className="h-24 w-full border-b border-dashed border-slate-200/60 dark:border-slate-800/60" />
-                  ))}
-                </div>
-                <div className="pointer-events-none absolute inset-0 flex">
-                  {Array.from({ length: 7 }).map((_, i) => (
-                    <div key={i} className="h-full w-1/7 border-r border-slate-100 last:border-r-0 dark:border-slate-800" />
-                  ))}
-                </div>
-
-                {schedule.map((cls) => {
-                  const dayIndex = weekDays.findIndex((d) => isSameDay(d, new Date(cls.startDate)))
-                  if (dayIndex === -1) return null
-                  const { top, height } = getEventPosition(cls.startDate, cls.endDate)
+        <div className="flex flex-col bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden dark:bg-slate-900 dark:border-slate-800 min-h-0 shrink-0">
+           {/* Week Header */}
+           <div className="grid grid-cols-[80px_1fr] border-b border-slate-100 dark:border-slate-800 shrink-0">
+             <div className="flex items-center justify-center gap-2 p-2 border-r border-slate-100 dark:border-slate-800">
+                <button onClick={navigatePrev} className="p-1 hover:bg-slate-100 rounded-full dark:hover:bg-slate-800"><ChevronLeft className="h-4 w-4 text-slate-400"/></button>
+                <button onClick={navigateNext} className="p-1 hover:bg-slate-100 rounded-full dark:hover:bg-slate-800"><ChevronRight className="h-4 w-4 text-slate-400"/></button>
+             </div>
+             <div className="grid grid-cols-7">
+               {weekDays.map(day => {
+                  const isToday = isSameDay(day, new Date())
                   return (
-                    <div
-                      key={cls.id}
-                      className="group relative cursor-pointer"
-                      style={{ gridColumnStart: dayIndex + 1, gridColumnEnd: dayIndex + 2 }}
-                      onClick={() => setSelectedSession(cls)}
-                    >
-                      <div
-                        className={cn('absolute right-1 left-1 z-10 overflow-hidden rounded-xl border-l-4 p-3 shadow-sm transition-all duration-300 hover:shadow-md', getCategoryColor(cls.course.category))}
-                        style={{ top: `${top}px`, height: `${height}px` }}
-                      >
-                        {renderEventCard(cls, height)}
-                      </div>
+                    <div key={day.toISOString()} className={cn("p-4 text-center border-r border-slate-100 dark:border-slate-800 last:border-r-0", isToday && "bg-[#F8FBFF] dark:bg-blue-900/10 relative")}>
+                      {isToday && <div className="absolute top-0 left-0 w-full h-1 bg-[#4A72E8]"></div>}
+                      <span className={cn("text-sm font-bold", isToday ? "text-[#4A72E8]" : "text-slate-900 dark:text-white")}>{format(day, 'EEE, dd')}</span>
                     </div>
                   )
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── DAY VIEW ─── */}
-      {viewMode === 'Day' && (
-        <div className="relative flex flex-1 flex-col overflow-hidden">
-          <div className="grid grid-cols-2 border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/10">
-            <div className="border-r border-slate-100 p-4 dark:border-slate-800" />
-            <div className={cn('p-4 text-center', isSameDay(currentDate, new Date()) && 'relative bg-blue-50/30 dark:bg-blue-900/10')}>
-              {isSameDay(currentDate, new Date()) && <div className="absolute top-0 left-0 h-1 w-full bg-blue-500" />}
-              <span className={cn('mb-1 block text-[10px] font-black tracking-widest uppercase', isSameDay(currentDate, new Date()) ? 'text-blue-500' : 'text-slate-400')}>
-                {format(currentDate, 'EEEE')}
-              </span>
-              <span className={cn('block text-xl font-black tracking-tight', isSameDay(currentDate, new Date()) ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-200')}>
-                {format(currentDate, 'MMMM d')}
-              </span>
-            </div>
-          </div>
-
-          <div className="relative flex-1 overflow-y-auto scroll-smooth bg-slate-50/20 dark:bg-slate-900/20">
-            <div className="grid min-h-full grid-cols-2">
-              <div className="col-span-1 border-r border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/30">
-                {timeSlots.map((hour) => (
-                  <div key={hour} className="flex h-24 items-center justify-center border-b border-slate-100/50 text-[10px] font-black text-slate-400 dark:border-slate-800/50">
-                    {hour.toString().padStart(2, '0')}:00
-                  </div>
-                ))}
-              </div>
-
-              <div className="relative col-span-1">
-                <div className="pointer-events-none absolute inset-0 flex flex-col">
-                  {timeSlots.map((hour) => (
-                    <div key={hour} className="h-24 w-full border-b border-dashed border-slate-200/60 dark:border-slate-800/60" />
-                  ))}
-                </div>
-
-                {daySessions.map((cls) => {
-                  const { top, height } = getEventPosition(cls.startDate, cls.endDate)
-                  return (
-                    <div
-                      key={cls.id}
-                      className="group absolute right-2 left-2 z-10 cursor-pointer"
-                      onClick={() => setSelectedSession(cls)}
-                    >
-                      <div
-                        className={cn('overflow-hidden rounded-xl border-l-4 p-4 shadow-sm transition-all duration-300 hover:shadow-md', getCategoryColor(cls.course.category))}
-                        style={{ top: `${top}px`, height: `${height}px`, position: 'absolute', left: 0, right: 0 }}
-                      >
-                        {renderEventCard(cls, height)}
+               })}
+             </div>
+           </div>
+           
+           {/* Week Grid */}
+           <div className="flex h-[600px] overflow-y-auto">
+              <div className="grid grid-cols-[80px_1fr] w-full relative">
+                 {/* Times */}
+                 <div className="border-r border-slate-100 dark:border-slate-800">
+                    {timeSlots.map(hour => (
+                      <div key={hour} className="h-[96px] relative">
+                         <span className="absolute -top-3 left-0 w-full text-center text-xs font-medium text-slate-400">
+                           {hour === 0 ? '12 am' : hour < 12 ? `${hour} am` : hour === 12 ? '12 pm' : `${hour-12} pm`}
+                         </span>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ─── MONTH VIEW ─── */}
-      {viewMode === 'Month' && (
-        <div className="flex-1 overflow-y-auto">
-          {/* Day names header */}
-          <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-800/10">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-              <div key={day} className="border-r border-slate-100 p-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase last:border-r-0 dark:border-slate-800">
-                {day}
-              </div>
-            ))}
-          </div>
-
-          {/* Calendar grid */}
-          <div className="grid grid-cols-7">
-            {monthDays.map((day, idx) => {
-              const isCurrentMonth = isSameMonth(day, currentDate)
-              const isToday = isSameDay(day, new Date())
-              const dayEvents = schedule.filter((cls) => isSameDay(new Date(cls.startDate), day))
-
-              return (
-                <div
-                  key={idx}
-                  className={cn(
-                    'min-h-[100px] border-r border-b border-slate-100 p-2 transition-colors last:border-r-0 dark:border-slate-800',
-                    !isCurrentMonth && 'bg-slate-50/50 dark:bg-slate-900/50',
-                    isToday && 'bg-blue-50/30 dark:bg-blue-900/10'
-                  )}
-                  onClick={() => {
-                    if (dayEvents.length > 0) {
-                      setCurrentDate(day)
-                      setViewMode('Day')
-                    }
-                  }}
-                >
-                  <span
-                    className={cn(
-                      'mb-1 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold',
-                      isToday && 'bg-blue-500 text-white',
-                      !isToday && isCurrentMonth && 'text-slate-700 dark:text-slate-200',
-                      !isCurrentMonth && 'text-slate-300 dark:text-slate-600'
-                    )}
-                  >
-                    {format(day, 'd')}
-                  </span>
-                  <div className="space-y-1">
-                    {dayEvents.slice(0, 3).map((cls) => (
-                      <button
-                        key={cls.id}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setSelectedSession(cls)
-                        }}
-                        className={cn(
-                          'flex w-full items-center gap-1 rounded-md px-1.5 py-0.5 text-left transition-colors hover:bg-slate-100 dark:hover:bg-slate-800',
-                        )}
-                      >
-                        <span className={cn('h-1.5 w-1.5 shrink-0 rounded-full', getCategoryDotColor(cls.course.category))} />
-                        <span className="truncate text-[10px] font-bold text-slate-700 dark:text-slate-300">
-                          {format(new Date(cls.startDate), 'HH:mm')} {cls.course.code}
-                        </span>
-                      </button>
                     ))}
-                    {dayEvents.length > 3 && (
-                      <span className="block text-[9px] font-bold text-slate-400">
-                        +{dayEvents.length - 3} more
+                 </div>
+                 
+                 {/* Grid Lines & Events */}
+                 <div className="grid grid-cols-7 relative">
+                    {/* Horizontal Lines */}
+                    <div className="absolute inset-0 pointer-events-none flex flex-col">
+                      {timeSlots.map(hour => (
+                        <div key={hour} className="h-[96px] border-b border-slate-100 dark:border-slate-800"></div>
+                      ))}
+                    </div>
+                    {/* Vertical Lines */}
+                    {weekDays.map((day, i) => (
+                      <div key={i} className="border-r border-slate-100 dark:border-slate-800 last:border-r-0 h-[2400px]"></div>
+                    ))}
+                    
+                    {/* Events */}
+                    {schedule.map(cls => {
+                       const dayIndex = weekDays.findIndex((d) => isSameDay(d, new Date(cls.startDate)))
+                       if (dayIndex === -1) return null
+                       const { top, height } = getEventPosition(cls.startDate, cls.endDate)
+                       return (
+                         <div
+                           key={cls.id}
+                           onClick={() => setSelectedSession(cls)}
+                           className="absolute left-1 right-1 cursor-pointer transition-transform hover:scale-[1.01] hover:z-10"
+                           style={{
+                             top: `${top}px`,
+                             height: `${height - 4}px`,
+                             gridColumnStart: dayIndex + 1,
+                             gridColumnEnd: dayIndex + 2
+                           }}
+                         >
+                            <div className={cn("w-full h-full rounded-xl p-3 flex flex-col overflow-hidden shadow-sm relative", getEventStyles(cls.course.category))}>
+                               <div className="mb-1 bg-white/30 w-fit p-1.5 rounded-lg text-current backdrop-blur-sm">
+                                 {getEventIcon(cls.course.category)}
+                               </div>
+                               <span className="font-bold text-xs truncate leading-tight mt-1">{cls.course.name}</span>
+                               <span className="text-[10px] font-medium opacity-80 truncate">
+                                 {format(new Date(cls.startDate), 'hh:mm a')} - {format(new Date(cls.endDate), 'hh:mm a')}
+                               </span>
+                            </div>
+                         </div>
+                       )
+                    })}
+                 </div>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {viewMode === 'Day' && (
+        <div className="flex flex-col bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden dark:bg-slate-900 dark:border-slate-800 min-h-0 shrink-0">
+           {/* Day Header */}
+           <div className="grid grid-cols-[80px_1fr] border-b border-slate-100 dark:border-slate-800 shrink-0">
+             <div className="flex items-center justify-center gap-2 p-2 border-r border-slate-100 dark:border-slate-800">
+                <button onClick={navigatePrev} className="p-1 hover:bg-slate-100 rounded-full dark:hover:bg-slate-800"><ChevronLeft className="h-4 w-4 text-slate-400"/></button>
+                <button onClick={navigateNext} className="p-1 hover:bg-slate-100 rounded-full dark:hover:bg-slate-800"><ChevronRight className="h-4 w-4 text-slate-400"/></button>
+             </div>
+             <div className={cn("p-4 text-center relative", isSameDay(currentDate, new Date()) && "bg-[#F8FBFF] dark:bg-blue-900/10")}>
+                {isSameDay(currentDate, new Date()) && <div className="absolute top-0 left-0 w-full h-1 bg-[#4A72E8]"></div>}
+                <span className={cn("text-sm font-bold", isSameDay(currentDate, new Date()) ? "text-[#4A72E8]" : "text-slate-900 dark:text-white")}>{format(currentDate, 'EEEE, dd MMMM')}</span>
+             </div>
+           </div>
+           
+           {/* Day Grid */}
+           <div className="flex h-[600px] overflow-y-auto">
+              <div className="grid grid-cols-[80px_1fr] w-full relative">
+                 {/* Times */}
+                 <div className="border-r border-slate-100 dark:border-slate-800">
+                    {timeSlots.map(hour => (
+                      <div key={hour} className="h-[96px] relative">
+                         <span className="absolute -top-3 left-0 w-full text-center text-xs font-medium text-slate-400">
+                           {hour === 0 ? '12 am' : hour < 12 ? `${hour} am` : hour === 12 ? '12 pm' : `${hour-12} pm`}
+                         </span>
+                      </div>
+                    ))}
+                 </div>
+                 
+                 {/* Grid Lines & Events */}
+                 <div className="relative">
+                    <div className="absolute inset-0 pointer-events-none flex flex-col">
+                      {timeSlots.map(hour => (
+                        <div key={hour} className="h-[96px] border-b border-slate-100 dark:border-slate-800"></div>
+                      ))}
+                    </div>
+                    
+                    {daySessions.map(cls => {
+                       const { top, height } = getEventPosition(cls.startDate, cls.endDate)
+                       return (
+                         <div
+                           key={cls.id}
+                           onClick={() => setSelectedSession(cls)}
+                           className="absolute left-4 right-4 cursor-pointer transition-transform hover:scale-[1.01] hover:z-10"
+                           style={{
+                             top: `${top}px`,
+                             height: `${height - 4}px`
+                           }}
+                         >
+                            <div className={cn("w-full h-full rounded-xl p-4 flex flex-col overflow-hidden shadow-sm relative", getEventStyles(cls.course.category))}>
+                               <div className="mb-2 bg-white/30 w-fit p-2 rounded-lg text-current backdrop-blur-sm">
+                                 {getEventIcon(cls.course.category)}
+                               </div>
+                               <span className="font-bold text-sm truncate leading-tight mt-1">{cls.course.name}</span>
+                               <span className="text-xs font-medium opacity-80 truncate">
+                                 {format(new Date(cls.startDate), 'hh:mm a')} - {format(new Date(cls.endDate), 'hh:mm a')}
+                               </span>
+                            </div>
+                         </div>
+                       )
+                    })}
+                 </div>
+              </div>
+           </div>
+        </div>
+      )}
+
+      {viewMode === 'Month' && (
+        <div className="flex flex-col bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden dark:bg-slate-900 dark:border-slate-800 shrink-0">
+           <div className="grid grid-cols-7 border-b border-slate-100 bg-[#F8FBFF] dark:bg-blue-900/10 dark:border-slate-800">
+              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
+                 <div key={d} className="p-4 text-center text-sm font-bold text-slate-700 dark:text-slate-300 border-r border-slate-100 dark:border-slate-800 last:border-r-0">{d}</div>
+              ))}
+           </div>
+           <div className="grid grid-cols-7">
+              {monthDays.map((day, idx) => {
+                 const isCurrentMonth = isSameMonth(day, currentDate)
+                 const isToday = isSameDay(day, new Date())
+                 const dayEvents = schedule.filter((cls) => isSameDay(new Date(cls.startDate), day))
+                 
+                 return (
+                    <div key={idx} onClick={() => { setCurrentDate(day); setViewMode('Day') }} className={cn("min-h-[120px] p-2 border-r border-b border-slate-100 dark:border-slate-800 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors relative", !isCurrentMonth && "bg-slate-50/50 dark:bg-slate-900/50", isToday && "bg-[#F8FBFF] dark:bg-blue-900/10")}>
+                      {isToday && <div className="absolute top-0 left-0 w-full h-1 bg-[#4A72E8]"></div>}
+                      <span className={cn("inline-flex w-7 h-7 items-center justify-center rounded-full text-sm font-bold mb-2", isToday ? "bg-[#4A72E8] text-white" : !isCurrentMonth ? "text-slate-400" : "text-slate-900 dark:text-white")}>
+                         {format(day, 'd')}
                       </span>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
+                      <div className="space-y-1.5">
+                         {dayEvents.slice(0, 3).map(cls => (
+                            <div key={cls.id} onClick={(e) => { e.stopPropagation(); setSelectedSession(cls) }} className={cn("px-2 py-1 rounded-md text-xs font-bold truncate", getEventStyles(cls.course.category))}>
+                               {cls.course.code}
+                            </div>
+                         ))}
+                         {dayEvents.length > 3 && (
+                            <div className="text-xs font-bold text-slate-400 pl-1">+{dayEvents.length - 3} more</div>
+                         )}
+                      </div>
+                    </div>
+                 )
+              })}
+           </div>
         </div>
       )}
 
@@ -405,3 +345,4 @@ export default function CalendarGrid({ schedule, initialDate }: CalendarGridProp
     </div>
   )
 }
+

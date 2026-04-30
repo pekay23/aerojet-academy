@@ -155,7 +155,7 @@ async function CourseList({ userId, canEnroll }: { userId: string; canEnroll: bo
       {enrollments.map((enrollment) => (
         <Link
           key={enrollment.id}
-          href={`/student/courses/${enrollment.id}`}
+          href={`/student/courses/${enrollment.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-')}`}
           className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
         >
           {/* Header */}
