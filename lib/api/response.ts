@@ -104,7 +104,7 @@ export function withErrorHandler(handler: RouteHandler) {
       const params = ctx?.params ? await ctx.params : undefined
       // Pass the resolved params to the handler
       return await handler(req, ctx ? { ...ctx, params: params || {} } : undefined)
-    } catch (error: unknown) {
+    } catch (error: any) {
       console.error('API Error:', error)
 
       if (error instanceof Error) {

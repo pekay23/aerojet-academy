@@ -84,7 +84,7 @@ async function exportAllFromNeon(): Promise<BackupData> {
       // @ts-expect-error - dynamic model access
       const records = await prisma[model].findMany();
       backup[model] = records;
-    } catch (err: unknown) {
+    } catch (err: any) {
       const error = err as Error;
       console.warn(`[SupabaseBackup] Skipping model "${model}": ${error.message}`);
       backup[model] = [];

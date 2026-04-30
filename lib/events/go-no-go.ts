@@ -37,13 +37,17 @@ export async function executeGo(eventId: string, adminId: string) {
       data: { status: 'CONFIRMED' },
     })
 
-    const confirmablePools = await tx.examPool.findMany({
+    // Fetch candidate pools then filter by each pool's own minCandidates threshold
+    const candidatePools = await tx.examPool.findMany({
       where: {
         eventId,
         status: { in: ['OPEN', 'NEAR_FULL'] },
-        currentMemberCount: { gte: 25 },
       },
+      select: { id: true, minCandidates: true, currentMemberCount: true },
     })
+    const confirmablePools = candidatePools.filter(
+      (p) => p.currentMemberCount >= (p.minCandidates ?? 25)
+    )
 
     for (const pool of confirmablePools) {
       await confirmPoolInternal(pool.id, tx)

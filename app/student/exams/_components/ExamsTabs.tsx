@@ -11,12 +11,12 @@ interface Props {
 }
 
 const ALL_TABS = [
-  { key: 'available', label: 'Join Pools', shortLabel: 'Pools', icon: Users },
+  { key: 'records', label: 'Exam Records', shortLabel: 'Records', icon: History },
   { key: 'bookings', label: 'My Bookings', shortLabel: 'My Bookings', icon: FileCheck },
+  { key: 'available', label: 'Join Pools', shortLabel: 'Pools', icon: Users },
   { key: 'individual', label: 'Individual', shortLabel: 'Individual', icon: User },
   { key: 'group', label: 'Group', shortLabel: 'Group', icon: Layers },
   { key: 'resit', label: 'Resit', shortLabel: 'Resit', icon: RefreshCcw },
-  { key: 'records', label: 'Exam Records', shortLabel: 'Records', icon: History },
 ] as const
 
 // Full-time students can only view their exam records - admin books exams for them
@@ -25,14 +25,14 @@ const FULL_TIME_TABS = [
 ] as const
 
 const HISTORY_ONLY_TABS = [
-  { key: 'bookings', label: 'My Bookings', shortLabel: 'My Bookings', icon: FileCheck },
   { key: 'records', label: 'Exam Records', shortLabel: 'Records', icon: History },
+  { key: 'bookings', label: 'My Bookings', shortLabel: 'My Bookings', icon: FileCheck },
 ] as const
 
 export default function ExamsTabs({ isFullTime, canBookExams = false, children }: Props) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const currentTab = searchParams.get('tab') || 'available'
+  const currentTab = searchParams.get('tab') || 'records'
 
   // For full-time students, only show records tab - admin books exams for them
   const TABS = isFullTime ? FULL_TIME_TABS : canBookExams ? ALL_TABS : HISTORY_ONLY_TABS

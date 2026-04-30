@@ -188,7 +188,7 @@ export async function cancelBooking(
     )
 
     return result
-  } catch (err: unknown) {
+  } catch (err: any) {
     console.error('[BOOKING CANCEL ERROR]', err instanceof Error ? err.message : 'Unknown error')
     return {
       success: false,

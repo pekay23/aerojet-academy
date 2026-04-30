@@ -16,7 +16,7 @@ export const authOptions: NextAuthOptions = {
         token: { label: 'Token', type: 'text' }, // Added for auto-login
       },
       async authorize(credentials) {
-        console.log('[AUTH_DEBUG] Authorizing request for:', credentials?.email || 'Token Login')
+
         try {
         // Handling Auto-Login via Verification Token
         if (credentials?.token) {
@@ -96,9 +96,9 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Verify password
-        console.log('[AUTH_DEBUG] Verifying password...')
+
         const isValid = await verifyPassword(credentials.password, user.password)
-        console.log('[AUTH_DEBUG] Password check result:', isValid)
+
 
         if (!isValid) {
           const attempts = user.loginAttempts + 1
@@ -134,7 +134,7 @@ export const authOptions: NextAuthOptions = {
           userId: user.id,
           description: `User logged in: ${user.email}`,
         })
-        console.log('[AUTH_DEBUG] Login successful for:', user.id)
+
 
         const name = user.profile
           ? `${user.profile.firstName} ${user.profile.lastName}`
@@ -149,7 +149,7 @@ export const authOptions: NextAuthOptions = {
           mustChangePassword: user.mustChangePassword && !user.passwordChanged,
         }
       } catch (error: any) {
-        console.error('[AUTH_DEBUG_ERROR]', error)
+
         throw error
       }
     },
@@ -174,9 +174,9 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user, trigger }) {
       if (user) {
         token.id = user.id
-        token.role = (user as any).role
-        token.status = (user as any).status
-        token.mustChangePassword = (user as any).mustChangePassword
+        token.role = user.role
+        token.status = user.status
+        token.mustChangePassword = user.mustChangePassword
         token.issuedAt = Date.now()
       }
 
@@ -211,10 +211,10 @@ export const authOptions: NextAuthOptions = {
 
     async session({ session, token }) {
       if (session.user) {
-        ;(session.user as any).id = token.id
-        ;(session.user as any).role = token.role
-        ;(session.user as any).status = token.status
-        ;(session.user as any).mustChangePassword = token.mustChangePassword
+        session.user.id = token.id as string
+        session.user.role = token.role as string
+        session.user.status = token.status as string
+        session.user.mustChangePassword = token.mustChangePassword as boolean
       }
       return session
     },

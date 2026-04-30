@@ -497,7 +497,7 @@ export default async function WalletPage({
                     </p>
                     <div className="mt-6 flex flex-wrap justify-center gap-3">
                       <Link
-                        href="/student/exams"
+                        href="/student/exams?tab=records"
                         className="rounded-xl bg-aerojet-blue px-6 py-2.5 text-xs font-bold tracking-widest text-white uppercase transition-all hover:bg-[#003875]"
                       >
                         Browse Exams

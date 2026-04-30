@@ -2,6 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AlertTriangle } from 'lucide-react'
 import StudentSidebar from './_components/StudentSidebar'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
@@ -85,15 +86,16 @@ export default async function StudentLayout({ children }: { children: React.Reac
     : (user.name || user.email || '')
   const userRole = user.role
 
-  const unreadNotifications = await prisma.notification.count({
-    where: { userId: user.id, isRead: false },
-  })
-  const unreadMessages = await prisma.message.count({
-    where: { recipientId: user.id, isRead: false },
-  })
-  const paymentAccessLevel = await getStudentPaymentAccessLevel(user.id, preFetchedData)
-  const milestoneStatus = await getEnrollmentMilestoneStatus(user.id, preFetchedData)
-  const welcomeMessages = await getWelcomeMessages(prisma, session.user.role)
+  // Use prismaUnfiltered for simple badge counts — these are non-sensitive UI counters
+  // that don't require RLS wrapping, and batching them prevents concurrent pg transactions.
+  const [unreadNotifications, unreadMessages, paymentAccessLevel, milestoneStatus, welcomeMessages] =
+    await Promise.all([
+      prismaUnfiltered.notification.count({ where: { userId: user.id, isRead: false } }),
+      prismaUnfiltered.message.count({ where: { recipientId: user.id, isRead: false } }),
+      getStudentPaymentAccessLevel(user.id, preFetchedData),
+      getEnrollmentMilestoneStatus(user.id, preFetchedData),
+      getWelcomeMessages(prismaUnfiltered, session.user.role),
+    ])
 
   const wallet = dbUser.wallet
 

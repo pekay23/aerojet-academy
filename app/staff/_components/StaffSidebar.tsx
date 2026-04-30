@@ -19,6 +19,7 @@ import {
   UserCog,
   Mail,
   Calendar,
+  CalendarDays,
   Shield,
   Briefcase,
 } from 'lucide-react'
@@ -85,6 +86,7 @@ export default function StaffSidebar({ userName, userRole, userImage, counts: in
     { label: 'License Requirements', href: '/license-requirements', icon: Shield },
     { label: 'Classes', href: '/classes', icon: School },
     { label: 'Scheduling', href: '/scheduling', icon: Calendar },
+    { label: 'Calendar', href: '/calendar', icon: CalendarDays },
     { label: 'Resources', href: '/resources', icon: ScrollText },
     {
       label: 'Exams',

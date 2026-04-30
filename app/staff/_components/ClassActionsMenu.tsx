@@ -19,6 +19,11 @@ interface ClassActionsMenuProps {
   onActionComplete?: () => void
 }
 
+
+function slugify(text: string) {
+  return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+}
+
 export default function ClassActionsMenu({
   classId,
   className,
@@ -56,12 +61,12 @@ export default function ClassActionsMenu({
     {
       label: 'View Class',
       icon: Eye,
-      href: `/staff/classes/${classId}`,
+      href: `/staff/classes/${slugify(className) || classId}`,
     },
     {
       label: 'Edit Class',
       icon: Pencil,
-      href: `/staff/classes/${classId}/edit`,
+      href: `/staff/classes/${slugify(className) || classId}/edit`,
     },
   ]
 

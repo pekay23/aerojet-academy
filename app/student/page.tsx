@@ -200,7 +200,7 @@ export default async function StudentDashboard() {
                   </p>
                 </div>
                 <Link
-                  href="/student/exams"
+                  href="/student/exams?tab=records"
                   className="group rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:border-blue-100 hover:bg-blue-50/50 dark:border-slate-800 dark:bg-slate-900/50"
                 >
                   <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-all group-hover:bg-emerald-600 group-hover:text-white dark:bg-emerald-500/10 dark:text-emerald-400">
@@ -518,7 +518,7 @@ export default async function StudentDashboard() {
                 Upcoming Individual Bookings
               </h2>
               <Link
-                href="/student/exams"
+                href="/student/exams?tab=records"
                 className="text-xs font-bold text-blue-600 hover:underline"
               >
                 View Schedule

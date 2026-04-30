@@ -94,7 +94,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       {/* Header */}
       <div>
         <Link
-          href="/student/exams"
+          href="/student/exams?tab=records"
           className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-sky"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
