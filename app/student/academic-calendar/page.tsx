@@ -2,6 +2,8 @@ import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
+import { getStudentStatus } from '@/lib/access-control'
 import { Calendar as CalendarIcon, Sparkles } from 'lucide-react'
 import CalendarGrid, { type CalendarEvent } from './_components/CalendarGrid'
 
@@ -16,13 +18,18 @@ export default async function StudentAcademicCalendarPage() {
 
   const userId = session.user.id
 
-  // Fetch all data sources in parallel
+  // getStudentStatus is React.cache'd — no extra DB query if layout already resolved it
+  const { enrollmentType: resolvedEnrollmentType } = await getStudentStatus(userId)
+
+  // Fetch all data sources in parallel.
+  // • prismaUnfiltered used for non-sensitive, non-user-specific reads (semester, adminCalendarEvent)
+  //   to avoid unnecessary RLS transaction overhead.
+  // • studentProfile re-fetch removed — getStudentStatus (above) already handles enrollment type.
   const [
     personalEvents,
     examBookings,
     semesters,
     enrollments,
-    studentProfile,
     adminEvents,
     sittingAssignments,
   ] = await Promise.all([
@@ -44,8 +51,8 @@ export default async function StudentAcademicCalendarPage() {
       },
     }),
 
-    // 3. Active semesters
-    prisma.semester.findMany({
+    // 3. Active semesters — non-user-specific, safe to bypass RLS
+    prismaUnfiltered.semester.findMany({
       where: { isActive: true },
       orderBy: { startDate: 'asc' },
       select: { id: true, name: true, startDate: true, endDate: true },
@@ -64,17 +71,11 @@ export default async function StudentAcademicCalendarPage() {
         },
       },
     }),
-    
-    // 4.5. Student profile to get enrollment type
-    prisma.studentProfile.findUnique({
-      where: { userId },
-      select: { enrollmentType: true, pathwayId: true },
-    }),
 
-    // 5. Admin events visible to all or students or specific user
-    prisma.adminCalendarEvent.findMany({
-      where: { 
-        deletedAt: null, 
+    // 5. Admin events — non-user-specific content, safe to bypass RLS
+    prismaUnfiltered.adminCalendarEvent.findMany({
+      where: {
+        deletedAt: null,
         OR: [
           { visibleTo: { in: ['ALL', 'STUDENTS', 'EXAM_ONLY', 'MODULAR', 'FULL_TIME'] } },
           { visibleTo: 'SPECIFIC_USER', targetUserId: userId },
@@ -97,7 +98,7 @@ export default async function StudentAcademicCalendarPage() {
     }),
   ])
 
-  const enrollmentType = studentProfile?.enrollmentType || 'UNKNOWN';
+  const enrollmentType = resolvedEnrollmentType || 'UNKNOWN';
 
   // Merge all events into a unified CalendarEvent[] format
   const calendarEvents: CalendarEvent[] = [];

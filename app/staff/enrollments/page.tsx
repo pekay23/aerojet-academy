@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import EnrollmentsTable from './_components/EnrollmentsTable'
 import SearchInput from '@/components/SearchInput'
@@ -18,7 +18,7 @@ export default async function EnrollmentsPage({
 
   const { query } = await searchParams
 
-  const enrollments = await prisma.enrollment.findMany({
+  const enrollments = await prismaUnfiltered.enrollment.findMany({
     where: query
       ? {
           OR: [

@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import prisma from '@/lib/prisma/client'
 import { resolveEffectiveEnrollmentType, resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
 
@@ -59,12 +60,18 @@ export async function getStudentPaymentAccessLevel(
   return 'FULL_ACCESS'
 }
 
-export async function getStudentStatus(userId: string, preFetchedProfile?: any) {
+/**
+ * Request-scoped student status resolver.
+ * Wrapped in React.cache() so it is called at most ONCE per request,
+ * even if multiple pages/components call it in parallel. This eliminates
+ * the 3–5 redundant studentProfile DB queries per page load.
+ */
+export const getStudentStatus = cache(async (userId: string, preFetchedProfile?: any) => {
   const profile = preFetchedProfile || await prisma.studentProfile.findUnique({
     where: { userId },
-    select: { 
+    select: {
       enrollmentType: true,
-      pathwayRel: { select: { code: true } }
+      pathwayRel: { select: { code: true } },
     },
   })
 
@@ -84,7 +91,7 @@ export async function getStudentStatus(userId: string, preFetchedProfile?: any) 
     pathwayCode,
     effectiveCode,
   }
-}
+})
 
 export async function canAccessFeature(userId: string, feature: FeatureType): Promise<boolean> {
   const accessLevel = await getStudentPaymentAccessLevel(userId)

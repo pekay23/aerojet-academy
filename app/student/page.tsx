@@ -126,11 +126,18 @@ export default async function StudentDashboard() {
         }
       }
     }),
-    // Full-Time enrollment remains separate as it's a different model
+    // Full-Time enrollment: include milestones here to avoid a sequential follow-up query
     isFullTime
       ? prisma.fullTimeEnrollment.findFirst({
           where: { studentId: userId },
-          include: { programme: true },
+          include: {
+            programme: true,
+            milestones: {
+              where: { status: { in: ['DUE', 'OVERDUE'] } },
+              orderBy: { dueDate: 'asc' },
+              take: 2,
+            },
+          },
         })
       : Promise.resolve(null),
   ])
@@ -145,17 +152,11 @@ export default async function StudentDashboard() {
   const flexEnrollments = isFlexible ? (activityData?.enrollments?.slice(0, 3) || []) : []
   const genericEnrollments = (!isFullTime && !isExamOnly) ? (activityData?.enrollments?.slice(0, 3) || []) : []
 
-  // Full-Time: fetch milestones if enrollment exists (depends on ftEnrollment)
+  // Full-Time: milestones are now included in the parallel fetch above — no sequential query needed
   const ftEnrollment = ftEnrollmentRaw
-  let ftMilestones: SerializedPaymentMilestone[] = []
-  if (ftEnrollment) {
-    const rawMilestones = await prisma.paymentMilestone.findMany({
-      where: { enrollmentId: ftEnrollment.id, status: { in: ['DUE', 'OVERDUE'] } },
-      orderBy: { dueDate: 'asc' },
-      take: 2,
-    })
-    ftMilestones = rawMilestones.map(serializePaymentMilestone)
-  }
+  const ftMilestones: SerializedPaymentMilestone[] = (ftEnrollment as any)?.milestones
+    ? (ftEnrollment as any).milestones.map(serializePaymentMilestone)
+    : []
 
   const serializedUpcomingExams = upcomingExams.map(serializeExamBooking)
   const serializedFlexEnrollments = flexEnrollments.map(serializeEnrollment)

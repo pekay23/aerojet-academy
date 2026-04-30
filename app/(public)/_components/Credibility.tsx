@@ -37,7 +37,8 @@ export default function Credibility() {
                   width={partner.width}
                   height={partner.height}
                   sizes="(max-width: 768px) 120px, 150px"
-                  className="h-auto object-contain"
+                  style={{ width: 'auto', height: 'auto' }}
+                  className="h-auto w-auto object-contain"
                 />
               </div>
             ))}

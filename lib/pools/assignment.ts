@@ -114,7 +114,7 @@ export async function resolveStandardPoolForJoin(
       eventId,
       poolType: 'STANDARD',
       isAutoPool: false,
-      status: { in: ['OPEN', 'NEAR_FULL', 'DRAFT'] },
+      status: { in: ['OPEN', 'NEAR_FULL', 'DRAFT', 'CONFIRMED'] },
     },
     select: {
       id: true,

@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import prisma from '@/lib/prisma/client'
 import { getCurrencySymbol } from '@/lib/currency'
+import TMinusTooltip from '@/components/shared/TMinusTooltip'
 
 export const metadata: Metadata = { title: 'Application Terms | Aerojet Academy' }
 
@@ -58,9 +59,9 @@ export default async function TermsPage() {
               {
                 title: '3. Examination Policies',
                 items: [
-                  'Exam windows are confirmed 21 days prior (Go/No-Go at T-21).',
+                  <>Exam windows are confirmed 21 days prior (Go/No-Go at <TMinusTooltip days={21} />).</>,
                   'If cancelled, all bookings roll to next available window at no extra cost.',
-                  'Late bookings (within T-14) incur a surcharge.',
+                  <>Late bookings (within <TMinusTooltip days={14} />) incur a surcharge.</>,
                   'No-shows forfeit their fees.',
                 ],
               },

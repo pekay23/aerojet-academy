@@ -14,13 +14,13 @@ export default function EntryRequirementsPage() {
         backgroundImage="/images/hero/entry1.webp"
       />
 
-      <div className="mx-auto max-w-7xl space-y-16 px-6 py-20">
+      <div className="mx-auto max-w-7xl space-y-24 px-6 py-20">
         <SectionReveal>
           <section>
-            <h2 className="mb-8 text-2xl font-black uppercase tracking-tight text-aerojet-blue">
+            <h2 className="mb-10 text-3xl font-black uppercase tracking-tight text-aerojet-blue">
               Full-Time & Modular Courses
             </h2>
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-8 sm:grid-cols-2">
               {[
                 {
                   title: 'Age Requirement',
@@ -41,10 +41,10 @@ export default function EntryRequirementsPage() {
               ].map((item) => (
                 <div
                   key={item.title}
-                  className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8"
+                  className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm sm:p-10"
                 >
-                  <h3 className="mb-2 font-bold text-slate-800">{item.title}</h3>
-                  <p className="text-base leading-relaxed text-slate-500">{item.desc}</p>
+                  <h3 className="mb-3 text-xl font-bold text-slate-800">{item.title}</h3>
+                  <p className="text-lg leading-relaxed text-slate-500">{item.desc}</p>
                 </div>
               ))}
             </div>
@@ -52,26 +52,26 @@ export default function EntryRequirementsPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <section className="rounded-2xl bg-aerojet-blue p-8 text-white shadow-xl sm:rounded-3xl sm:p-12">
-            <h2 className="mb-8 text-2xl font-black uppercase tracking-tight">
+          <section className="rounded-3xl bg-aerojet-blue p-10 text-white shadow-xl sm:p-16">
+            <h2 className="mb-10 text-3xl font-black uppercase tracking-tight">
               Modular & Exam-Only Candidates
             </h2>
-            <div className="grid gap-8 sm:grid-cols-2">
+            <div className="grid gap-10 sm:grid-cols-2">
               <div>
-                <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-aerojet-sky">
+                <h4 className="mb-3 text-sm font-bold uppercase tracking-widest text-aerojet-sky">
                   Professional Standing
                 </h4>
-                <p className="text-sm leading-relaxed text-blue-100">
+                <p className="text-base sm:text-lg leading-relaxed text-blue-100">
                   Self-study and modular candidates are expected to have a foundational
                   understanding of aviation maintenance or be working under an existing MRO
                   framework.
                 </p>
               </div>
               <div>
-                <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-aerojet-sky">
+                <h4 className="mb-3 text-sm font-bold uppercase tracking-widest text-aerojet-sky">
                   Identification
                 </h4>
-                <p className="text-sm leading-relaxed text-blue-100">
+                <p className="text-base sm:text-lg leading-relaxed text-blue-100">
                   A valid Passport or National ID is mandatory for all examination bookings to
                   comply with EASA invigilation standards.
                 </p>
@@ -81,24 +81,24 @@ export default function EntryRequirementsPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm sm:rounded-3xl sm:p-12">
-            <h2 className="mb-4 text-2xl font-black uppercase tracking-tight text-aerojet-blue">
+          <div className="rounded-3xl border border-slate-200 bg-white p-10 text-center shadow-sm sm:p-16">
+            <h2 className="mb-5 text-3xl font-black uppercase tracking-tight text-aerojet-blue">
               Unsure of your eligibility?
             </h2>
-            <p className="mx-auto mb-8 max-w-xl text-slate-500">
+            <p className="mx-auto mb-10 max-w-xl text-lg text-slate-500">
               Our admissions team can provide a preliminary review of your transcripts or
               professional experience.
             </p>
-            <div className="flex flex-col justify-center gap-4 sm:flex-row">
+            <div className="flex flex-col justify-center gap-4 sm:flex-row sm:gap-6">
               <Link
                 href="/contact"
-                className="rounded-xl bg-aerojet-sky px-8 py-4 text-xs font-black uppercase tracking-widest text-white transition-all hover:bg-aerojet-blue"
+                className="rounded-xl bg-aerojet-sky px-10 py-5 text-sm font-black uppercase tracking-widest text-white transition-all hover:bg-aerojet-blue"
               >
                 Contact Admissions
               </Link>
               <Link
                 href="/admissions/fees-and-payment"
-                className="rounded-xl bg-slate-100 px-8 py-4 text-xs font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-slate-200"
+                className="rounded-xl bg-slate-100 px-10 py-5 text-sm font-black uppercase tracking-widest text-slate-600 transition-all hover:bg-slate-200"
               >
                 View Fees
               </Link>

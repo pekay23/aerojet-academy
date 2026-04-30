@@ -11,6 +11,7 @@ import {
   Award,
   Bell,
   User,
+  Users,
   Mail,
   ScrollText,
   Settings,
@@ -131,7 +132,8 @@ export default function StudentSidebar({
       userImage={userImage}
       userMenuItems={[
         { label: 'Profile', href: '/student/profile', icon: User },
-        { label: 'Settings', href: '/student/profile/settings', icon: Settings },
+        { label: 'Ambassador', href: '/student/ambassador', icon: Users },
+        { label: 'Settings', href: '/student/profile?tab=settings', icon: Settings },
       ]}
     />
   )

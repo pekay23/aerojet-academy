@@ -1,15 +1,20 @@
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
-import { prisma } from '@/lib/prisma/client'
+import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
+import { unstable_cache } from 'next/cache'
 import NewsCard from './NewsCard'
 
-async function getRecentArticles() {
-  return await prisma.newsArticle.findMany({
-    where: { status: 'PUBLISHED' },
-    orderBy: { publishedAt: 'desc' },
-    take: 3,
-  })
-}
+const getRecentArticles = unstable_cache(
+  async () => {
+    return await prisma.newsArticle.findMany({
+      where: { status: 'PUBLISHED' },
+      orderBy: { publishedAt: 'desc' },
+      take: 3,
+    })
+  },
+  ['latest-news-homepage'],
+  { revalidate: 3600, tags: ['news'] }
+)
 
 export default async function LatestNews() {
   let articles: Awaited<ReturnType<typeof getRecentArticles>> = []

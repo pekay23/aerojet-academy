@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 import PaymentsQueue from '../_components/PaymentsQueue'
 import { Metadata } from 'next'
 
@@ -15,7 +15,7 @@ export default async function PaymentsPage({
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const pendingCount = await prisma.payment.count({ where: { status: 'PENDING' } })
+  const pendingCount = await prismaUnfiltered.payment.count({ where: { status: 'PENDING' } })
   const initialTab = ['PENDING', 'APPROVED', 'REJECTED'].includes(tabParam?.toUpperCase() ?? '')
     ? tabParam!.toUpperCase()
     : 'PENDING'
