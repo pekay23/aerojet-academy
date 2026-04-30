@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import CoursesClient from './_components/CoursesClient'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -11,7 +11,7 @@ export default async function CoursesPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const categories = await prisma.courseCategory.findMany({
+  const categories = await prismaUnfiltered.courseCategory.findMany({
     include: {
       courses: {
         orderBy: { code: 'asc' },

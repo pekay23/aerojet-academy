@@ -50,10 +50,11 @@ export async function recordReferral(
 ): Promise<{ success: boolean; error?: string }> {
   const referrer = await prisma.user.findFirst({
     where: { referralCode: referralCode },
-    select: { id: true },
+    select: { id: true, role: true },
   })
 
   if (!referrer) return { success: false, error: 'Invalid referral code' }
+  if (referrer.role !== 'STUDENT') return { success: false, error: 'Only students can be referrers' }
   if (referrer.id === refereeId) return { success: false, error: 'Cannot refer yourself' }
 
   // Check if already referred

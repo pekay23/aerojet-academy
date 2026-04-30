@@ -3,6 +3,7 @@
  * Stored in SystemSetting under key `welcome_messages` as a JSON object.
  */
 import { cache } from 'react'
+import { unstable_cache } from 'next/cache'
 
 export const DEFAULT_ROLE_WELCOME_MESSAGES: Record<string, string[]> = {
   STUDENT: [
@@ -68,29 +69,39 @@ export const getWelcomeMessages = cache(
     },
     role: string = 'STUDENT'
   ): Promise<string[]> => {
-    const setting = await prismaClient.systemSetting.findUnique({
-      where: { key: 'welcome_messages' },
-    })
+    // We use unstable_cache for cross-request caching (5 mins) to avoid
+    // hitting the DB on every single layout load.
+    const getCachedMessages = unstable_cache(
+      async () => {
+        const setting = await prismaClient.systemSetting.findUnique({
+          where: { key: 'welcome_messages' },
+        })
 
-    const defaults =
-      DEFAULT_ROLE_WELCOME_MESSAGES[role] || DEFAULT_ROLE_WELCOME_MESSAGES.STUDENT
+        const defaults =
+          DEFAULT_ROLE_WELCOME_MESSAGES[role] || DEFAULT_ROLE_WELCOME_MESSAGES.STUDENT
 
-    if (!setting) return defaults
+        if (!setting) return defaults
 
-    try {
-      const parsed = JSON.parse(setting.value)
-      if (Array.isArray(parsed)) {
-        return parsed.length > 0 ? parsed : defaults
-      }
+        try {
+          const parsed = JSON.parse(setting.value)
+          if (Array.isArray(parsed)) {
+            return parsed.length > 0 ? parsed : defaults
+          }
 
-      if (typeof parsed === 'object' && parsed !== null) {
-        const roleMessages = parsed[role]
-        if (Array.isArray(roleMessages) && roleMessages.length > 0) return roleMessages
+          if (typeof parsed === 'object' && parsed !== null) {
+            const roleMessages = parsed[role]
+            if (Array.isArray(roleMessages) && roleMessages.length > 0) return roleMessages
+            return defaults
+          }
+        } catch {}
+
         return defaults
-      }
-    } catch {}
+      },
+      [`welcome_messages_${role}`],
+      { revalidate: 300 } // 5 minutes
+    )
 
-    return defaults
+    return getCachedMessages()
   }
 )
 

@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma/client'
-import { BookingType, Prisma } from '@prisma/client'
+import { BookingType, Prisma, MembershipStatus, PoolStatus } from '@prisma/client'
 import {
   POOL_MIN_CANDIDATES,
   POOL_NEAR_FULL_THRESHOLD,
@@ -137,7 +137,7 @@ export async function joinPoolInternal(
     resolvedPool.id
   )
   if (!pool) return { success: false, error: 'Pool not found' }
-  if (!['OPEN', 'NEAR_FULL', 'DRAFT'].includes(pool.status)) {
+  if (!['OPEN', 'NEAR_FULL', 'DRAFT', 'CONFIRMED'].includes(pool.status)) {
     return { success: false, error: 'Pool is not open' }
   }
   if (pool.currentMemberCount >= POOL_MAX_CANDIDATES) {
@@ -239,6 +239,9 @@ export async function joinPoolInternal(
     }
   }
 
+  // If the pool is already CONFIRMED (candidates 26-28), capture funds immediately
+  const isJoiningConfirmedPool = pool.status === 'CONFIRMED'
+
   let feeToReserve = typeof input.reserveAmount === 'number' ? input.reserveAmount : 0
   if (typeof input.reserveAmount !== 'number') {
     const { calculatePoolSeatPrice } = await import('./pricing')
@@ -252,7 +255,9 @@ export async function joinPoolInternal(
     feeToReserve = 0
   }
 
-  if (feeToReserve > 0) {
+  // For non-confirmed pools: reserve funds (held until pool confirms)
+  // For confirmed pools: skip reservation — we capture directly after membership creation
+  if (feeToReserve > 0 && !isJoiningConfirmedPool) {
     await reserveFunds(
       tx,
       userId,
@@ -276,11 +281,32 @@ export async function joinPoolInternal(
         guaranteeType,
         demandStatus: 'POOLED',
         guaranteedSeat,
-        status: feeToReserve > 0 ? 'PENDING' : 'APPROVED',
+        status: isJoiningConfirmedPool ? 'APPROVED' : (feeToReserve > 0 ? 'PENDING' : 'APPROVED'),
         examDate: pool.examDate,
         isResit: input.isResit ?? bookingType === 'RESIT',
       },
     })
+  }
+
+  let membershipStatus: MembershipStatus
+  let membershipAmountPaid: number
+
+  if (isJoiningConfirmedPool && feeToReserve > 0) {
+    // Pool is already confirmed — capture funds right away
+    const { captureFunds } = await import('@/lib/wallet/operations')
+    await captureFunds(
+      tx,
+      userId,
+      feeToReserve,
+      `Exam fee captured: ${pool.name}`,
+      booking?.id || pool.id,
+      booking?.id ? 'EXAM_BOOKING' : 'POOL_CAPTURE'
+    )
+    membershipStatus = 'CONFIRMED'
+    membershipAmountPaid = feeToReserve
+  } else {
+    membershipStatus = feeToReserve > 0 ? 'RESERVED' : 'CONFIRMED'
+    membershipAmountPaid = feeToReserve > 0 ? 0 : input.amountPaid ?? 0
   }
 
   const membership = await tx.poolMembership.create({
@@ -289,19 +315,32 @@ export async function joinPoolInternal(
       userId,
       examComponentId,
       bookingId: booking?.id || null,
-      status: feeToReserve > 0 ? 'RESERVED' : 'CONFIRMED',
-      amountReserved: feeToReserve,
-      amountPaid: feeToReserve > 0 ? 0 : input.amountPaid ?? 0,
+      status: membershipStatus,
+      amountReserved: isJoiningConfirmedPool ? 0 : feeToReserve,
+      amountPaid: membershipAmountPaid,
+      ...(isJoiningConfirmedPool ? { confirmedAt: new Date(), paidAt: new Date() } : {}),
     },
   })
 
   const newCount = pool.currentMemberCount + 1
-  const newStatus =
-    newCount >= POOL_MIN_CANDIDATES
-      ? 'CONFIRMED'
-      : newCount >= POOL_NEAR_FULL_THRESHOLD
-        ? 'NEAR_FULL'
-        : pool.status
+
+  // Determine new pool status:
+  // - Already CONFIRMED and now at max → LOCKED
+  // - Reaching POOL_MIN_CANDIDATES → CONFIRMED (auto-confirm trigger)
+  // - Approaching threshold → NEAR_FULL
+  // - Otherwise keep current status
+  let newStatus: PoolStatus
+  if (isJoiningConfirmedPool && newCount >= POOL_MAX_CANDIDATES) {
+    newStatus = 'LOCKED'
+  } else if (isJoiningConfirmedPool) {
+    newStatus = 'CONFIRMED' // keep it confirmed
+  } else if (newCount >= POOL_MIN_CANDIDATES) {
+    newStatus = 'CONFIRMED'
+  } else if (newCount >= POOL_NEAR_FULL_THRESHOLD) {
+    newStatus = 'NEAR_FULL'
+  } else {
+    newStatus = pool.status
+  }
 
   const allowedModules = pool.allowedModules || []
   const newAllowedModules = input.moduleCode && !allowedModules.includes(input.moduleCode)

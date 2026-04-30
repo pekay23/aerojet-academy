@@ -19,6 +19,8 @@ interface ExamPricing {
   twoSeatBundle: number
   fourSeatBundle: number
   poolExamFee: number
+  lateBookingDays: number
+  lateBookingSurcharge: number
 }
 
 interface WalletInfo {
@@ -89,7 +91,7 @@ export default function QuickBookingActions({
             Book a single seat for any upcoming scheduled exam event.
           </p>
           <StandaloneBooking
-            price={pricing.individualExamFee}
+            pricing={pricing}
             currency={currency}
             availableBalance={balance}
             upcomingExams={upcomingExams}

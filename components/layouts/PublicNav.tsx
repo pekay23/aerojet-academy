@@ -5,7 +5,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Search as SearchIcon } from 'lucide-react'
+import { Menu, X, Search as SearchIcon, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
   Accordion,
@@ -56,6 +56,10 @@ const navLinks: {
         title: 'Aircraft Engineering',
         links: [
           {
+            href: '/courses/aircraft-engineering/easa-part-66',
+            label: 'EASA Part-66 Overview',
+          },
+          {
             href: '/courses/aircraft-engineering/easa-part-66/four-year-b1-b2',
             label: '4-Year Full-Time (B1.1 & B2)',
           },
@@ -100,8 +104,8 @@ export default function PublicNav() {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [accordionValue, setAccordionValue] = useState<string | undefined>('item-1')
-  const [navValue, setNavValue] = useState<string | undefined>(undefined)
+  const [accordionValue, setAccordionValue] = useState<string>('item-1')
+  const [navValue, setNavValue] = useState<string>('')
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -109,6 +113,19 @@ export default function PublicNav() {
     const handleScroll = () => setScrolled(window.scrollY > 20)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      // If clicking outside the header, close the dropdown and reset the accordion
+      if (!target.closest('header')) {
+        setNavValue('')
+        setAccordionValue('')
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   useEffect(() => {
@@ -175,7 +192,7 @@ export default function PublicNav() {
                 value={navValue}
                 onValueChange={(val) => {
                   // Prevent closing on mouse leave if an accordion item is expanded (interacted with)
-                  if (val === undefined && accordionValue !== undefined) {
+                  if (!val && accordionValue) {
                     return
                   }
                   setNavValue(val)
@@ -186,13 +203,21 @@ export default function PublicNav() {
                     item.isDropdown ? (
                       <NavigationMenuItem key={item.label} value={item.label}>
                         <NavigationMenuTrigger
-                          onClick={() => setAccordionValue(undefined)}
+                          onClick={() => setAccordionValue('')}
                           className={`relative flex h-10 items-center px-4 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${linkColorClasses} hover:${activeLinkColorClasses} bg-transparent transition-none! translate-y-px`}
                         >
                           {item.label}
                         </NavigationMenuTrigger>
                         <NavigationMenuContent>
                           <div className="w-[400px] p-4 md:w-[500px]">
+                            <div className="mb-4 border-b border-slate-100 pb-3">
+                              <Link
+                                href="/courses"
+                                className="text-public-secondary hover:text-public-primary flex items-center gap-2 px-3 text-xs font-black tracking-widest uppercase transition-colors"
+                              >
+                                View All Training Programs <ArrowRight className="h-4 w-4" />
+                              </Link>
+                            </div>
                             <Accordion
                               type="single"
                               collapsible
@@ -332,6 +357,13 @@ export default function PublicNav() {
                           {item.label}
                         </AccordionTrigger>
                         <AccordionContent>
+                          <Link
+                            href="/courses"
+                            className="text-public-secondary mb-4 ml-4 flex items-center gap-2 py-2 text-sm font-black tracking-widest uppercase"
+                            onClick={() => setMobileOpen(false)}
+                          >
+                            View All Programs <ArrowRight className="h-4 w-4" />
+                          </Link>
                           {item.groups?.map((group) => (
                             <div
                               key={group.value}

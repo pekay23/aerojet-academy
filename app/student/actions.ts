@@ -1170,6 +1170,75 @@ export async function cancelMyBookingAction(bookingId: string, reason?: string) 
   }
 }
 
+export async function changeModuleBookingAction(bookingId: string, newModuleCode: string) {
+  try {
+    const user = await requireStudent()
+    
+    // Find the booking
+    const booking = await prisma.examBooking.findUnique({
+      where: { id: bookingId },
+      include: {
+        poolMemberships: { include: { pool: { include: { memberships: true } } } },
+      }
+    })
+
+    if (!booking || booking.userId !== user.id) {
+      return { error: 'Booking not found or access denied.' }
+    }
+
+    // Find an active bundle with free changes
+    const bundle = await prisma.examBundle.findFirst({
+      where: {
+        userId: user.id,
+        status: 'ACTIVE',
+      }
+    })
+
+    if (!bundle || bundle.freeModuleChanges <= bundle.usedModuleChanges) {
+      return { error: 'No free module changes available in your bundle.' }
+    }
+
+    const newComponent = await prisma.examComponent.findFirst({
+      where: { course: { code: newModuleCode } },
+    })
+
+    if (!newComponent) {
+      return { error: 'Target module component not found.' }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      // Update booking
+      await tx.examBooking.update({
+        where: { id: bookingId },
+        data: {
+          moduleCode: newModuleCode,
+          examComponentId: newComponent.id,
+        }
+      })
+
+      // Update pool membership if exists
+      if (booking.poolMemberships.length > 0) {
+        await tx.poolMembership.updateMany({
+          where: { bookingId },
+          data: { examComponentId: newComponent.id }
+        })
+      }
+
+      // Consume a free change
+      await tx.examBundle.update({
+        where: { id: bundle.id },
+        data: { usedModuleChanges: { increment: 1 } }
+      })
+    })
+
+    revalidatePath('/student/exam-bookings')
+    revalidatePath('/student/exam-bookings/' + bookingId)
+    return { success: true }
+  } catch (error: any) {
+    return { error: error.message || 'Failed to change module.' }
+  }
+}
+
 export async function createGroupBookingAction(params: {
   eventId: string
   groupName: string
@@ -1196,6 +1265,56 @@ export async function createGroupBookingAction(params: {
   } catch (error: any) {
     console.error('createGroupBookingAction error:', error instanceof Error ? error.message : 'Unknown error')
     return { error: error instanceof Error ? error.message : 'Failed to create group booking.' }
+  }
+}
+
+export async function setReferrerAction(referrerEmail: string) {
+  try {
+    const user = await requireStudent()
+    
+    // Check if already referred
+    const existingReferral = await prisma.referral.findFirst({
+      where: { refereeId: user.id }
+    })
+
+    if (existingReferral) {
+      return { error: 'You have already set a referrer.' }
+    }
+
+    const referrer = await prisma.user.findUnique({
+      where: { email: referrerEmail.toLowerCase().trim() }
+    })
+
+    if (!referrer) {
+      return { error: 'No user found with that email address.' }
+    }
+
+    if (referrer.role !== 'STUDENT') {
+      return { error: 'Only active students can be set as referrers.' }
+    }
+
+    if (referrer.id === user.id) {
+      return { error: 'You cannot refer yourself.' }
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.referral.create({
+        data: {
+          referrerId: referrer.id,
+          refereeId: user.id,
+          status: 'PENDING'
+        }
+      })
+
+      // Optionally increment successful referrals if it counts immediately
+      // But typically it requires some conditions. We'll leave it as PENDING.
+    })
+
+    revalidatePath('/student/ambassador')
+    return { success: true }
+  } catch (error: any) {
+    console.error('setReferrerAction error:', error)
+    return { error: 'Failed to set referrer.' }
   }
 }
 

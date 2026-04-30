@@ -44,15 +44,15 @@ export default function EnrollmentSteps({ fee = '350', currency = 'GHS' }: Enrol
           transition={{ duration: 0.5 }}
           className="mb-16 text-center"
         >
-          <span className="text-public-secondary mb-3 block text-xs font-bold tracking-[0.2em] uppercase">
+          <span className="text-public-secondary mb-4 block text-sm font-bold tracking-[0.25em] uppercase">
             How to Enroll
           </span>
-          <h2 className="text-public-primary text-3xl font-black tracking-tight uppercase sm:text-4xl">
+          <h2 className="text-public-primary text-4xl font-black tracking-tight uppercase md:text-5xl">
             Four Simple Steps
           </h2>
         </motion.div>
 
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((step, i) => (
             <motion.div
               key={i}
@@ -62,12 +62,12 @@ export default function EnrollmentSteps({ fee = '350', currency = 'GHS' }: Enrol
               transition={{ duration: 0.5, delay: i * 0.1 }}
               className="group relative"
             >
-              <div className="hover:border-public-secondary h-full rounded-2xl border border-slate-200 bg-white p-6 transition-all duration-500 hover:shadow-xl sm:p-8">
-                <span className="text-public-secondary group-hover:text-public-primary block text-5xl leading-none font-black transition-colors duration-300 sm:text-6xl">
+              <div className="hover:border-public-secondary h-full rounded-3xl border border-slate-200 bg-white p-8 transition-all duration-500 hover:shadow-xl sm:p-10">
+                <span className="text-public-secondary group-hover:text-public-primary block text-6xl leading-none font-black transition-colors duration-300 sm:text-7xl">
                   {step.num}
                 </span>
-                <h3 className="mt-4 mb-2 text-base font-bold text-slate-900">{step.title}</h3>
-                <p className="text-sm leading-relaxed text-slate-600">{step.desc}</p>
+                <h3 className="mt-5 mb-3 text-xl font-bold text-slate-900">{step.title}</h3>
+                <p className="text-base leading-relaxed text-slate-600">{step.desc}</p>
               </div>
               {/* Connector line on desktop */}
               {i < steps.length - 1 && (

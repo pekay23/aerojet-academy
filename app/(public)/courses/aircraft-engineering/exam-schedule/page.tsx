@@ -1,8 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Info } from 'lucide-react';
 import PageHero from '@/app/(public)/_components/Hero';
 import SectionReveal from '@/app/(public)/_components/SectionReveal';
+import TMinusTooltip from '@/components/shared/TMinusTooltip';
 
 export const metadata: Metadata = {
   title: 'Exam Schedule 2026-2027',
@@ -31,17 +32,19 @@ export default function ExamSchedulePage() {
         backgroundImage="/images/hero/examsschedule.webp" // Make sure this image path is correct
       />
       <div className="container mx-auto px-6 py-20 sm:py-28">
-        <div className="mx-auto max-w-7xl space-y-12 px-6 py-20">
+        <div className="mx-auto max-w-7xl space-y-12 px-6">
           
           <SectionReveal>
-            <div className="bg-public-primary text-white p-8 rounded-3xl shadow-lg border-l-8 border-public-secondary">
+            <div className="mx-auto bg-public-primary text-white p-8 rounded-3xl shadow-lg border-l-8 border-public-secondary max-w-4xl">
                 <div className="flex items-center gap-4 mb-4">
                     <AlertTriangle className="w-8 h-8 text-public-secondary"/>
                     <h2 className="text-xl font-black uppercase tracking-tight text-white">Important Booking Policy</h2>
                 </div>
                 <ul className="space-y-2 text-sm text-slate-300 list-disc pl-5">
-                    <li className="text-base text-slate-300">Exam seats must be <strong>paid in full</strong> by the Payment Deadline (T-21).</li>
-                    <li>Windows are confirmed only if minimum numbers (60 seats) are met by the deadline.</li>
+                    <li className="text-base text-slate-300 flex items-center gap-1.5 flex-wrap">
+                      Exam seats must be <strong>paid in full</strong> by the Payment Deadline <TMinusTooltip days={21} />.
+                    </li>
+                    <li>Pools are confirmed automatically once 25 paid candidates are reached. Up to 3 additional seats may be added to a confirmed pool.</li>
                     <li>Unconfirmed windows roll forward to the next date.</li>
                 </ul>
             </div>
@@ -101,7 +104,7 @@ export default function ExamSchedulePage() {
             </section>
           </SectionReveal>
 
-            <div className="mx-auto max-w-7xl space-y-16">
+            <div className="mx-auto max-w-7xl mt-16 flex justify-center">
               <Link href="/login" className="inline-block bg-public-secondary text-white px-10 py-4 rounded-xl font-black uppercase tracking-widest text-sm hover:bg-public-primary transition-all shadow-lg">
                   Book Exam Seats in Portal
               </Link>

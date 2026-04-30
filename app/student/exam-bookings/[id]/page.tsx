@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import ChangeModuleModal from '../_components/ChangeModuleModal'
 
 export const metadata: Metadata = {
   title: 'Booking Details | Student Portal',
@@ -75,6 +76,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   if (!booking) notFound()
   if (booking.userId !== session.user.id) redirect('/student/exams')
+
+  const bundle = await prisma.examBundle.findFirst({
+    where: { userId: session.user.id, status: 'ACTIVE' }
+  })
+  const hasFreeChanges = bundle ? bundle.freeModuleChanges > bundle.usedModuleChanges : false
 
   const status = statusConfig[booking.status] || statusConfig.PENDING
   const StatusIcon = status.icon
@@ -170,6 +176,13 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
               </p>
               {moduleName && (
                 <p className="text-xs text-slate-400">{moduleName}</p>
+              )}
+              {booking.status !== 'CANCELLED' && booking.status !== 'COMPLETED' && (
+                <ChangeModuleModal 
+                  bookingId={booking.id} 
+                  currentModuleCode={moduleCode} 
+                  hasFreeChanges={hasFreeChanges} 
+                />
               )}
             </div>
           </div>

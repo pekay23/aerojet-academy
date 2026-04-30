@@ -20,16 +20,25 @@ export default function AboutPage() {
               <section>
                 <div className="mb-5 h-1.5 w-14 rounded-full bg-aerojet-sky" />
                 <h2 className="mb-6 text-3xl font-black uppercase tracking-tight text-aerojet-blue">
-                  Our Mission
+                  Our Academy
                 </h2>
-                <p className="mb-4 text-lg leading-relaxed text-slate-600">
-                  Our mission is to provide world-class, EASA-standard technical training and create
-                  career opportunities for aspiring aviation professionals.
-                </p>
-                <p className="leading-relaxed text-slate-500">
-                  We are committed to developing a highly skilled workforce ready to meet the
-                  demands of the growing aviation industry in Ghana and across Africa.
-                </p>
+                <div className="space-y-4 text-lg leading-relaxed text-slate-600">
+                  <p>
+                    Aerojet Aviation Training Academy is Africa's foremost institution and leader in the field of Aviation Training and Engineering.
+                  </p>
+                  <p>
+                    Training Engineers for one of the most demanding professions in the world is a truly important responsibility that we take very seriously. At Aerojet we are extremely committed to educating, mentoring and preparing aircraft engineers to the highest standards, ensuring you have a successful career as an Aircraft Engineer.
+                  </p>
+                  <p>
+                    As direct recipients of trained personnel via Aerojet's Engineering Division, we know what it takes and understand the importance of the knowledge and preparation we give to students that come through our institution.
+                  </p>
+                  <p>
+                    During your training you will gain direct insight into how work is carried out in a live aircraft hangar and become conversant with the required processes employed by Aircraft Maintenance companies to ensure the safe operation of commercial aircraft today.
+                  </p>
+                  <p>
+                    Depending on your chosen program you will be supported by being given the opportunity to train in Aerojet's EASA Part 145 Facility or at one of our partner facilities worldwide to help you gain the best hands-on experience needed to pursue a career in Aircraft Engineering.
+                  </p>
+                </div>
               </section>
             </SectionReveal>
             <SectionReveal delay={0.1}>

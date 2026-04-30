@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { serializePrisma } from '@/lib/utils/serialization'
 
@@ -27,8 +27,8 @@ export async function GET(req: NextRequest) {
   }
 
   const [count, payments] = await Promise.all([
-    prisma.payment.count({ where }),
-    prisma.payment.findMany({
+    prismaUnfiltered.payment.count({ where }),
+    prismaUnfiltered.payment.findMany({
       where,
       include: {
         user: {

@@ -99,13 +99,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="relative">
       <head>
         <link rel="preconnect" href="https://gx1g03nvpo.ufs.sh" />
         <link rel="preconnect" href="https://utfs.io" />
       </head>
       <body
-        className={`${inter.variable} ${outfit.variable} font-sans antialiased`}
+        className={`${inter.variable} ${outfit.variable} font-sans antialiased relative`}
         suppressHydrationWarning
       >
         <div className="relative">

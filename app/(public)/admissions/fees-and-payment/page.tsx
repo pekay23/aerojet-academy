@@ -4,6 +4,7 @@ import Hero from '../../_components/Hero'
 import SectionReveal from '../../_components/SectionReveal'
 import { getRegistrationFeeInfo } from '@/lib/system-settings'
 import { getCurrencySymbol } from '@/lib/currency'
+import TMinusTooltip from '@/components/shared/TMinusTooltip'
 
 export const metadata: Metadata = { title: 'Fees & Payment | Aerojet Academy' }
 
@@ -32,7 +33,7 @@ const milestones = [
     id: 'E',
     name: 'Examination-Only Seat',
     deposit: '50% per Exam',
-    balance: 'Settled by T-14 days',
+    balance: <span className="inline-flex items-center gap-1">Settled by <TMinusTooltip days={14} /> days</span>,
   },
   { id: 'F', name: 'Revision Support', deposit: '100% per Block', balance: 'Paid upfront' },
 ]
@@ -48,32 +49,32 @@ export default async function FeesPage() {
         subtitle="Structured payment milestones for Aerojet Academy training programmes."
         backgroundImage="/images/hero/feespayment.webp"
       />{' '}
-      <div className="mx-auto max-w-7xl space-y-16 px-6 py-20">
+      <div className="mx-auto max-w-7xl space-y-24 px-6 py-20">
         {/* Registration Fee */}
         <SectionReveal>
-          <section className="flex flex-col items-center gap-8 rounded-2xl border border-slate-100 bg-white p-6 shadow-xl sm:rounded-3xl sm:p-10 md:flex-row">
+          <section className="flex flex-col items-center gap-8 rounded-3xl border border-slate-100 bg-white p-8 shadow-xl sm:p-12 md:flex-row">
             <div className="flex-1">
-              <div className="mb-3 inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-black tracking-widest text-aerojet-sky uppercase">
+              <div className="mb-4 inline-block rounded-full bg-blue-50 px-4 py-2 text-sm font-black tracking-widest text-aerojet-sky uppercase">
                 Step 01
               </div>
-              <h2 className="mb-4 text-2xl font-black tracking-tight text-aerojet-blue uppercase sm:text-3xl">
+              <h2 className="mb-6 text-3xl font-black tracking-tight text-aerojet-blue uppercase sm:text-4xl">
                 Mandatory Registration
               </h2>
-              <p className="leading-relaxed text-slate-500">
+              <p className="text-lg leading-relaxed text-slate-500">
                 To initiate your journey, a one-time registration fee is required. This activates
                 your record and unlocks the official application link. This fee covers
                 administrative processing and background verification.
               </p>
             </div>
-            <div className="w-full shrink-0 rounded-2xl bg-slate-900 p-6 text-center text-white shadow-2xl sm:p-8 md:w-auto">
-              <span className="mb-2 block text-xs font-bold tracking-[0.2em] text-aerojet-sky uppercase">
+            <div className="w-full shrink-0 rounded-3xl bg-slate-900 p-8 text-center text-white shadow-2xl sm:p-10 md:w-auto">
+              <span className="mb-3 block text-sm font-bold tracking-[0.2em] text-aerojet-sky uppercase">
                 Pre-Application
               </span>
-              <span className="mb-1 block text-4xl font-black">
+              <span className="mb-2 block text-5xl font-black">
                 {symbol}
                 {fee}
               </span>
-              <span className="text-xs font-medium text-slate-400 uppercase">
+              <span className="text-sm font-medium text-slate-400 uppercase">
                 Non-Refundable
               </span>
             </div>
@@ -83,35 +84,35 @@ export default async function FeesPage() {
         {/* Payment Milestones */}
         <SectionReveal>
           <section>
-            <h3 className="mb-6 text-2xl font-black tracking-tight text-slate-900 uppercase">
+            <h3 className="mb-8 text-3xl font-black tracking-tight text-slate-900 uppercase">
               Payment Milestones
             </h3>
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[600px] text-left text-sm">
-                  <thead className="border-b border-slate-100 bg-slate-50 text-xs font-black tracking-widest text-slate-400 uppercase">
+                <table className="w-full min-w-[600px] text-left">
+                  <thead className="border-b border-slate-100 bg-slate-50 text-sm font-black tracking-widest text-slate-400 uppercase">
                     <tr>
-                      <th className="p-5">Option</th>
-                      <th className="p-5">Programme</th>
-                      <th className="p-5">Initial Confirmation</th>
-                      <th className="p-5">Balance Schedule</th>
+                      <th className="p-6">Option</th>
+                      <th className="p-6">Programme</th>
+                      <th className="p-6">Initial Confirmation</th>
+                      <th className="p-6">Balance Schedule</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
                     {milestones.map((row) => (
                       <tr key={row.id} className="transition-colors hover:bg-slate-50/50">
-                        <td className="p-5 font-black text-aerojet-sky">{row.id}</td>
-                        <td className="p-5 font-bold text-slate-800">{row.name}</td>
-                        <td className="p-5 font-bold text-aerojet-blue">{row.deposit}</td>
-                        <td className="p-5 text-xs font-medium text-slate-500">{row.balance}</td>
+                        <td className="p-6 text-base font-black text-aerojet-sky">{row.id}</td>
+                        <td className="p-6 text-base font-bold text-slate-800">{row.name}</td>
+                        <td className="p-6 text-base font-bold text-aerojet-blue">{row.deposit}</td>
+                        <td className="p-6 text-sm font-medium text-slate-500">{row.balance}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
             </div>
-            <div className="mt-5 rounded-xl border border-blue-100/50 bg-blue-50/50 p-4 text-center">
-              <p className="text-xs font-black tracking-widest text-slate-500 uppercase">
+            <div className="mt-6 rounded-2xl border border-blue-100/50 bg-blue-50/50 p-6 text-center">
+              <p className="text-sm font-black tracking-widest text-slate-500 uppercase">
                 Detailed tuition and exam pricing is visible in the Student Portal after
                 registration.
               </p>
@@ -121,11 +122,11 @@ export default async function FeesPage() {
 
         {/* Refund Rules */}
         <SectionReveal>
-          <section className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:rounded-3xl sm:p-10">
-            <h3 className="mb-6 flex items-center gap-3 text-xl font-black tracking-tight text-aerojet-blue uppercase">
+          <section className="mx-auto max-w-3xl rounded-3xl border border-slate-200 bg-white p-10 shadow-sm sm:p-12">
+            <h3 className="mb-8 flex items-center gap-4 text-2xl font-black tracking-tight text-aerojet-blue uppercase">
               <span className="h-8 w-2 rounded-full bg-red-500" /> Refund & Cancellation Rules
             </h3>
-            <ul className="space-y-5">
+            <ul className="space-y-6">
               {[
                 {
                   title: 'Registration Fees',
@@ -137,18 +138,22 @@ export default async function FeesPage() {
                 },
                 {
                   title: 'Examination Sittings',
-                  desc: 'Confirmed bookings may roll forward to the next window if requested before T-21. No-shows result in total forfeiture.',
+                  desc: (
+                    <>
+                      Confirmed bookings may roll forward to the next window if requested before <TMinusTooltip days={21} />. No-shows result in total forfeiture.
+                    </>
+                  ),
                 },
               ].map((rule) => (
-                <li key={rule.title} className="flex items-start gap-4">
-                  <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-50 text-xs font-black text-red-600">
+                <li key={rule.title} className="flex items-start gap-5">
+                  <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-red-50 text-base font-black text-red-600">
                     !
                   </div>
                   <div>
-                    <p className="mb-1 text-sm font-bold tracking-tight text-slate-700 uppercase">
+                    <p className="mb-2 text-base font-bold tracking-tight text-slate-700 uppercase">
                       {rule.title}
                     </p>
-                    <p className="text-xs leading-relaxed text-slate-500">{rule.desc}</p>
+                    <p className="text-base leading-relaxed text-slate-500">{rule.desc}</p>
                   </div>
                 </li>
               ))}
@@ -158,21 +163,21 @@ export default async function FeesPage() {
 
         {/* Realistic Journey */}
         <SectionReveal>
-          <section className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm sm:rounded-3xl sm:p-12">
-            <h2 className="mb-8 text-2xl font-black uppercase tracking-tight text-aerojet-blue">
+          <section className="rounded-3xl border border-slate-200 bg-white p-10 shadow-sm sm:p-16">
+            <h2 className="mb-8 text-3xl font-black uppercase tracking-tight text-aerojet-blue">
               A Realistic Outlook on Your Certification Journey
             </h2>
-            <p className="mb-8 leading-relaxed text-slate-600">
+            <p className="mb-10 text-lg leading-relaxed text-slate-600">
               Becoming a fully licensed EASA-certified Aircraft Maintenance Engineer is a rewarding
               but demanding path that requires strong dedication and sustained motivation. We
               believe in transparency to help you plan your career effectively.
             </p>
-            <div className="grid gap-10 md:grid-cols-2">
+            <div className="flex flex-col gap-10">
               <div>
-                <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-aerojet-blue">
+                <h3 className="mb-4 text-base font-black uppercase tracking-widest text-aerojet-blue">
                   The Practical Timeline
                 </h3>
-                <p className="text-sm leading-relaxed text-slate-500">
+                <p className="text-base sm:text-lg leading-relaxed text-slate-500">
                   In practice, many candidates complete this journey in{' '}
                   <span className="font-bold text-slate-700">4 to 6 years</span>. While we provide
                   the structured EASA training baseline, maintenance organizations often require
@@ -183,10 +188,10 @@ export default async function FeesPage() {
                 </p>
               </div>
               <div>
-                <h3 className="mb-4 text-sm font-black uppercase tracking-widest text-aerojet-blue">
+                <h3 className="mb-4 text-base font-black uppercase tracking-widest text-aerojet-blue">
                   Total Investment Planning
                 </h3>
-                <p className="text-sm leading-relaxed text-slate-500">
+                <p className="text-base sm:text-lg leading-relaxed text-slate-500">
                   Candidates should plan realistically for the entire process. When accounting for
                   training, examinations, and the mandatory work experience/logbook requirements,
                   the{' '}
@@ -202,16 +207,16 @@ export default async function FeesPage() {
 
         {/* CTA */}
         <SectionReveal>
-          <div className="rounded-2xl bg-aerojet-sky px-8 py-14 text-center shadow-xl sm:rounded-3xl">
-            <h2 className="mb-4 text-2xl font-black tracking-tight text-white uppercase">
+          <div className="rounded-3xl bg-aerojet-sky px-10 py-20 text-center shadow-xl">
+            <h2 className="mb-5 text-3xl font-black tracking-tight text-white uppercase">
               Begin the Process
             </h2>
-            <p className="mx-auto mb-8 max-w-lg text-blue-100">
+            <p className="mx-auto mb-10 max-w-xl text-lg text-blue-100">
               Request your registration invoice to unlock official pricing and gain portal access.
             </p>
             <Link
               href="/register"
-              className="inline-block rounded-xl bg-white px-10 py-4 text-xs font-black tracking-widest text-aerojet-blue uppercase transition-all hover:bg-slate-900 hover:text-white active:scale-[0.98]"
+              className="inline-block rounded-xl bg-white px-12 py-5 text-sm font-black tracking-widest text-aerojet-blue uppercase transition-all hover:bg-slate-900 hover:text-white active:scale-[0.98]"
             >
               Start Registration
             </Link>

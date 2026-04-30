@@ -22,7 +22,7 @@ export default function CoursesPage() {
       />
 
       {/* Intro Section (As you liked) */}
-      <section className="px-6 py-20 sm:py-28">
+      <section className="px-6 pt-20 pb-10 sm:pt-28 sm:pb-14">
         <div className="mx-auto max-w-7xl">
           <SectionReveal>
             <span className="text-public-secondary mb-3 block text-xs font-bold tracking-[0.2em] uppercase">
@@ -37,9 +37,15 @@ export default function CoursesPage() {
               Engineering. Students have the opportunity to work on operational commercial aircraft
               at Aerojet's hangar facility in Ghana or our partner facilities overseas.
             </p>
+            <Link
+              href="/courses/aircraft-engineering/easa-part-66"
+              className="text-public-secondary inline-flex items-center gap-1 text-lg font-bold hover:underline"
+            >
+              Learn more about EASA Part-66 Certification →
+            </Link>
           </SectionReveal>
           <SectionReveal delay={0.1}>
-            <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:p-8">
+            <div className="mt-12 rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:p-8">
               <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-slate-900">
                 <Wrench className="text-public-secondary h-5 w-5" /> What does it involve?
               </h3>
@@ -66,7 +72,7 @@ export default function CoursesPage() {
       </section>
 
       {/* NEW Course Listings Section */}
-      <section className="relative overflow-hidden px-6 py-20 sm:py-28">
+      <section className="relative overflow-hidden px-6 pt-10 pb-20 sm:pt-14 sm:pb-28">
         {/* --- The Gradient Blobs --- */}
         <div
           className="bg-public-secondary absolute top-0 left-0 h-200 w-200anslate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-3xl"

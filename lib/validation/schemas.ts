@@ -42,6 +42,9 @@ export const registerSchema = z
       .max(3, 'You can select up to 3 license categories')
       .optional(),
     referralCode: z.string().max(50).optional(),
+    acknowledgeFeeDeletion: z.boolean().refine((val) => val === true, {
+      message: 'You must acknowledge the registration fee and 7-day deletion policy to proceed.',
+    }),
   })
   .refine(
     (data) => {

@@ -49,6 +49,7 @@ export default async function ExamsPage({
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
+  // getStudentStatus is React.cache'd, so these multiple calls will only result in 1 DB query
   const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'exams')
 

@@ -89,6 +89,7 @@ export default function RegistrationForm({
       phone: '',
       dateOfBirth: '',
       selectedProgramme: undefined, // Will require selection
+      acknowledgeFeeDeletion: false,
     },
     mode: 'onTouched', // Validate on touch for immediate feedback
   })
@@ -451,6 +452,31 @@ export default function RegistrationForm({
             proof of payment immediately after registering.
           </div>
         </div>
+
+        <FormField
+          control={form.control}
+          name="acknowledgeFeeDeletion"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-lg border border-amber-200 bg-amber-50 p-4 shadow-sm">
+              <FormControl>
+                <Checkbox
+                  checked={field.value as boolean}
+                  onCheckedChange={field.onChange}
+                  className="mt-0.5 bg-white data-[state=checked]:bg-amber-600 data-[state=checked]:border-amber-600"
+                />
+              </FormControl>
+              <div className="space-y-1 leading-none">
+                <FormLabel className="text-sm font-semibold text-amber-900">
+                  Mandatory Payment Deadline <span className="text-red-500">*</span>
+                </FormLabel>
+                <p className="text-xs text-amber-700 leading-snug">
+                  I understand that I must transfer the {formatCurrency(fee, currency)} registration fee via bank deposit within 7 days of registering, or my account will be permanently deleted without notice.
+                </p>
+              </div>
+              <FormMessage className="text-xs text-red-600 font-medium" />
+            </FormItem>
+          )}
+        />
 
         <Button
           type="submit"

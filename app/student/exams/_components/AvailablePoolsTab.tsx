@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { FileCheck, Users, Calendar, MapPin, Wallet, Info } from 'lucide-react'
+import { FileCheck, Users, Calendar, MapPin, Wallet, Info, AlertCircle } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
@@ -116,7 +116,15 @@ export default async function AvailablePoolsTab() {
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {pools.map((pool) => {
             const isJoined = joinedPoolIds.has(pool.id)
-            const seatPrice = Number(pool.seatPrice)
+            let surcharge = 0
+            if (pool.event?.startDate) {
+              const daysUntilExam = Math.ceil((pool.event.startDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
+              if (daysUntilExam <= bookingData.pricing.lateBookingDays && daysUntilExam > 0) {
+                surcharge = bookingData.pricing.lateBookingSurcharge
+              }
+            }
+
+            const seatPrice = Number(pool.seatPrice) + surcharge
             const canAfford = balance >= seatPrice
             const isFull = pool.currentMemberCount >= pool.maxCandidates
             const existingModules = [...new Set(pool.memberships.map((m) => m.examComponent?.course?.code).filter((m): m is string => !!m))]
@@ -151,6 +159,12 @@ export default async function AvailablePoolsTab() {
                       <div className="flex flex-wrap gap-1.5">
                         {existingModules.map((m) => (<span key={m} className="bg-aerojet-blue/10 text-aerojet-blue inline-flex rounded-md px-2 py-0.5 text-xs font-bold dark:bg-blue-900/30 dark:text-blue-300">{m}</span>))}
                       </div>
+                    </div>
+                  )}
+                  {surcharge > 0 && (
+                    <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-2.5 text-[10px] text-red-700 dark:border-red-900/50 dark:bg-red-900/20 dark:text-red-400 font-bold uppercase tracking-wide flex items-start gap-1.5">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                      <span>{currencySymbol}{surcharge} Late Booking Surcharge Applied (T-{bookingData.pricing.lateBookingDays})</span>
                     </div>
                   )}
                   <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-4 dark:border-slate-800">

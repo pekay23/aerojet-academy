@@ -16,6 +16,10 @@ const courseData = [
     subTitle: 'EASA Part-66 Certification Programmes',
     programs: [
       {
+        name: 'EASA Part-66 Overview',
+        href: '/courses/aircraft-engineering/easa-part-66',
+      },
+      {
         name: '4-Year Full-Time (B1.1 & B2)',
         href: '/courses/aircraft-engineering/easa-part-66/four-year-b1-b2',
       },
