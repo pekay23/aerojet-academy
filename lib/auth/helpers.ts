@@ -91,13 +91,10 @@ export async function hashPassword(password: string): Promise<string> {
 }
 
 export async function verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
-  console.log('[AUTH_DEBUG] verifyPassword called')
   try {
-    const result = await bcrypt.compare(password, hashedPassword)
-    console.log('[AUTH_DEBUG] bcrypt.compare result:', result)
-    return result
+    return await bcrypt.compare(password, hashedPassword)
   } catch (err) {
-    console.error('[AUTH_DEBUG] verifyPassword ERROR:', err)
+    console.error('[AUTH] verifyPassword error:', err)
     return false
   }
 }
