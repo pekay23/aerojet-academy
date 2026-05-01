@@ -108,7 +108,7 @@ aerojet-academy/
 │   │   └── verify-email/
 │   │       └── page.tsx                       # Email verification (if needed)
 │   │
-│   ├── (staff)/                               # 👔 STAFF/ADMIN PORTAL
+│   ├── staff/                                 # 👔 STAFF/ADMIN PORTAL
 │   │   ├── layout.tsx                         # Staff layout with sidebar
 │   │   ├── page.tsx                           # Staff dashboard
 │   │   ├── loading.tsx
@@ -255,7 +255,7 @@ aerojet-academy/
 │   │       ├── GoNoGoMeter.tsx
 │   │       └── RevenueChart.tsx
 │   │
-│   ├── (applicant)/                           # 📝 APPLICANT PORTAL
+│   ├── applicant/                             # 📝 APPLICANT PORTAL
 │   │   ├── layout.tsx                         # Applicant layout
 │   │   ├── page.tsx                           # Applicant dashboard
 │   │   ├── loading.tsx
@@ -290,7 +290,7 @@ aerojet-academy/
 │   │       ├── CourseCard.tsx
 │   │       └── PaymentUpload.tsx
 │   │
-│   ├── (student)/                             # 🎓 STUDENT PORTAL
+│   ├── student/                               # 🎓 STUDENT PORTAL
 │   │   ├── layout.tsx                         # Student layout with sidebar
 │   │   ├── page.tsx                           # Student dashboard
 │   │   ├── loading.tsx
@@ -360,7 +360,7 @@ aerojet-academy/
 │   │       ├── AttendanceChart.tsx
 │   │       └── UpcomingExamCard.tsx
 │   │
-│   ├── (instructor)/                          # 👨‍🏫 INSTRUCTOR PORTAL
+│   ├── instructor/                            # 👨‍🏫 INSTRUCTOR PORTAL
 │   │   ├── layout.tsx                         # Instructor layout
 │   │   ├── page.tsx                           # Instructor dashboard
 │   │   ├── loading.tsx

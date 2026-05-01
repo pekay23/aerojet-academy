@@ -12,7 +12,8 @@ This document tracks persistent issues and bugs that are not yet fully resolved.
 **Problem**: Initial load of `/staff/reports` is slow (up to 75s in dev).
 - **Cause**: Simultaneous execution of ~20 complex database queries against a remote Supabase instance.
 - **Impact**: Frustrating developer experience and potential production timeouts for large datasets.
-- **Planned Fix**: Implement database indexes on all `status` and `date` columns, and use `redis` or `next/cache` to store pre-aggregated metrics.
+- **Planned Fix**: Implement database indexes on all `status` and `date` columns.
+- **Current Status**: Partially mitigated. Prisma transaction timeouts increased to 30s to handle peak loads. Indices applied to `AuditLog` and `ExamBooking` tables.
 
 ## ✉️ Email Verification Delays
 **Problem**: Some users report delays in receiving the `verifyToken` email.
@@ -26,3 +27,8 @@ This document tracks persistent issues and bugs that are not yet fully resolved.
 ## 🧩 Prisma Enums vs DB Enums
 **Problem**: Occasional mismatches between Prisma-defined enums and existing Supabase DB enums.
 - **Fix Strategy**: Use the `migrate_enums.js` script to manually synchronize enums if `prisma migrate dev` fails.
+
+## 🔗 Database Connection Safety
+**Problem**: Cold starts or high concurrent traffic can lead to Prisma connection timeouts.
+- **Symptoms**: `P2028: Transaction API error: Transaction already closed` or generic timeout errors during payment/booking.
+- **Status**: Mitigated by increasing `$transaction` timeout to 30s and implementing robust error handling in `chargeWallet` and `joinPool` services.
