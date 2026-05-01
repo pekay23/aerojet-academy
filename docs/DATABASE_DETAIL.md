@@ -18,7 +18,7 @@ The schema is built around five core domains:
 
 ### 3. Exam & Evaluation
 - **ExamEvent**: High-level event container (e.g., "June 2024 Session").
-- **ExamPool**: A slot within an event. Managed using a "fill-rate" logic (25-28 candidates) to ensure instructor cost-efficiency.
+- **ExamPool**: A slot within an event. Managed using a "fill-rate" logic with configurable `minCandidates` and `maxCandidates` per-pool (defaulting to 25-28) to ensure instructor cost-efficiency.
 - **PoolMembership**: The join record between a student and a pool.
 
 ### 4. Financial System
@@ -29,6 +29,11 @@ The schema is built around five core domains:
 ### 5. Academic Management
 - **Class**: A specific instance of a course with an instructor and schedule.
 - **AttendanceRecord**: Daily tracking for compliance with EASA training requirements.
+
+### 6. Communication & Calendar
+- **AdminCalendarEvent**: Broadcasted events with audience targeting (`ALL`, `STUDENTS`, `INSTRUCTORS`, `SPECIFIC_USER`, or pathway-specific).
+- **StudentCalendarEvent**: Personalized calendar entries synced from admin broadcasts or personal student schedules.
+- **Message**: Internal staff-to-user messaging system.
 
 ---
 

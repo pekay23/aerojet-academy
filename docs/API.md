@@ -61,3 +61,13 @@ Base URL: `/api`
 - `GET /api/cron/check-pools` — Check/fail expired pools
 - `GET /api/cron/check-events` — Update event statuses
 - `GET /api/cron/send-reminders` — Send exam reminders (T-7, T-1)
+
+## Server Actions (Internal API)
+Primary data mutation path for portal interfaces. Located in `app/(portal)/actions.ts` and domain-specific `actions.ts` files.
+
+### Staff Actions
+- `sendStaffMessage(recipientId, subject, body)` — Send internal message
+- `bulkUpdateUserStatus(userIds, status)` — Batch update user states
+- `updateExamBooking(recordId, data)` — Comprehensive exam/result sync logic
+- `joinPool(poolId)` — Canonical service for adding students to exam pools
+- `chargeWallet(userId, amount, type, ...)` — Atomic financial transaction logic
