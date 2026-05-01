@@ -57,7 +57,7 @@ bun dev
 
 1. **Registration → Activation:** Public register → Upload payment proof → Staff approves → Academy email + temp password issued
 2. **Applicant → Student Promotion:** Purchase course → Staff approves enrollment → Role upgraded, Student ID + Wallet created
-3. **Exam Pool Joining:** Student joins pool (€300 held) → Pool auto-confirms at 25 members → Funds captured → Exam scheduled
+3. **Exam Pool Joining:** Student joins pool (€300 held) → Pool confirms when threshold (typically 25) is reached → Funds captured → Exam scheduled
 4. **Wallet System:** Top-up request → Staff approves → Balance credited → Reserve on pool join → Capture on confirm / Release on fail
 
 ## Project Structure
