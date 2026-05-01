@@ -1,5 +1,5 @@
 import { getStudentResources } from '@/lib/actions/resources'
-import ResourcesView from '@/app/instructor/resources/_components/ResourcesView'
+import StudentResourcesView from './_components/StudentResourcesView'
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
@@ -73,7 +73,7 @@ export default async function StudentResourcesPage() {
         </p>
       </div>
 
-      <ResourcesView initialResources={resources} />
+      <StudentResourcesView initialResources={resources} />
     </div>
   )
 }

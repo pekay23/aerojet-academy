@@ -38,7 +38,7 @@ export default function AddResourceButton() {
         <ResourceForm
           onSuccess={() => {
             setOpen(false)
-            router.refresh()
+            window.location.reload()
           }}
         />
       </DialogContent>

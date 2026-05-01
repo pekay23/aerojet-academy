@@ -109,6 +109,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         paymentApprovedAt: new Date(),
       },
     })
+  }, {
+    timeout: 20000 // Increase timeout to 20s to handle DB latency/cold starts
   })
 
   // Audit log (outside transaction)

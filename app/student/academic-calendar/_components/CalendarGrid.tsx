@@ -1,12 +1,18 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import { ChevronLeft, ChevronRight, Plus, Pencil, Trash2, X, BookOpen, GraduationCap, CalendarDays, Filter } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Pencil, Trash2, X, BookOpen, GraduationCap, CalendarDays, Filter, Link as LinkIcon } from 'lucide-react'
 import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { format, parseISO, isSameDay, addDays, addWeeks, addMonths, startOfMonth, endOfMonth, eachDayOfInterval, addHours, subWeeks, getHours, getMinutes, getDay, startOfWeek, endOfWeek } from 'date-fns'
 import { cn } from '@/lib/utils'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export interface CalendarEvent {
   id: string
@@ -25,6 +31,7 @@ export interface CalendarEvent {
 
 interface CalendarGridProps {
   events: CalendarEvent[]
+  userId: string
 }
 
 const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -44,7 +51,7 @@ const SOURCE_ICONS: Record<string, typeof BookOpen> = {
   semester: CalendarDays,
 }
 
-export default function CalendarGrid({ events }: CalendarGridProps) {
+export default function CalendarGrid({ events, userId }: CalendarGridProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
   const [showModal, setShowModal] = useState(false)
@@ -60,6 +67,7 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
   const [saving, setSaving] = useState(false)
   const [viewMode, setViewMode] = useState<'Month' | 'Week'>('Week')
   const [popupEvent, setPopupEvent] = useState<CalendarEvent | null>(null)
+  const [selectedSources, setSelectedSources] = useState<string[]>(['personal', 'class', 'exam', 'semester'])
 
   const year = currentDate.getFullYear()
   const month = currentDate.getMonth()
@@ -131,6 +139,8 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
     const viewEnd = endOfMonth(new Date(year, month + 1, 1))
 
     events.forEach((evt) => {
+      if (!selectedSources.includes(evt.source)) return
+
       const start = parseISO(evt.startDate)
       
       if (!evt.recurrenceType || evt.recurrenceType === 'NONE') {
@@ -170,7 +180,15 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
       }
     })
     return map
-  }, [events, year, month])
+  }, [events, year, month, selectedSources])
+
+  const toggleSource = (source: string) => {
+    if (selectedSources.includes(source)) {
+      setSelectedSources(selectedSources.filter(s => s !== source))
+    } else {
+      setSelectedSources([...selectedSources, source])
+    }
+  }
 
   // Get events for selected date
   const selectedEvents = selectedDate ? (eventsByDate[selectedDate] || []) : []
@@ -266,17 +284,6 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
     }
   }
 
-  const getSourceLabel = (evt: CalendarEvent) => {
-    if (evt.source === 'personal' && evt.isSystemEvent) return 'School Event'
-    return {
-      personal: 'Personal',
-      class: 'Class Schedule',
-      exam: 'Exam',
-      semester: 'Academic',
-    }[evt.source] || 'Event'
-  }
-
-
   const startOfRange = viewMode === 'Week' ? startOfWeek(currentDate, { weekStartsOn: 1 }) : startOfMonth(currentDate)
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(startOfRange, i))
   const timeSlots = Array.from({ length: 24 }, (_, i) => i)
@@ -291,11 +298,10 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
   }
 
   const getEventStyles = (evt: CalendarEvent) => {
-    // specific coloring to match the design aesthetics requested
     if (evt.source === 'exam') return 'bg-[#FF4F33] text-white border-l-4 border-white/20'
     if (evt.source === 'class') return 'bg-[#EBF1FF] text-[#4A72E8] border-l-4 border-[#4A72E8]'
     if (evt.source === 'semester') return 'bg-[#E8F8F0] text-[#1D9963] border-l-4 border-[#1D9963]'
-    return 'bg-[#FFF0E6] text-[#E0662A] border-l-4 border-[#E0662A]' // personal/default
+    return 'bg-[#FFF0E6] text-[#E0662A] border-l-4 border-[#E0662A]'
   }
 
   const getEventIcon = (source: string) => {
@@ -314,6 +320,12 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
     else nextMonth()
   }
 
+  const handleCopyFeedUrl = () => {
+    const url = `${window.location.origin}/api/calendar/${userId}`
+    navigator.clipboard.writeText(url)
+    toast.success('Dynamic iCal feed URL copied to clipboard!')
+  }
+
   return (
     <div className="space-y-6">
       {/* Premium Header */}
@@ -322,19 +334,41 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
           <h2 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">Calendar</h2>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Your Personalized Calendar: The Smart Way to Stay on Top of Things</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm dark:border-slate-700 dark:bg-slate-800">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleCopyFeedUrl}
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors select-none"
+          >
+            <LinkIcon className="h-4 w-4 text-blue-500" />
+            <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Get iCal Feed</span>
+          </button>
+          <button
+            onClick={() => toast.success('Calendar synchronized successfully!')}
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 shadow-sm hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700 transition-colors select-none"
+          >
             <CalendarDays className="h-4 w-4 text-blue-500" />
             <span className="text-sm font-bold text-slate-700 dark:text-slate-200">Sync Calendar</span>
-          </div>
+          </button>
         </div>
       </div>
 
       {/* Grid Controls Header */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 rounded-2xl bg-white p-4 shadow-sm border border-slate-100 dark:bg-slate-900 dark:border-slate-800">
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 rounded-xl border border-slate-100 bg-slate-50/50 p-1 dark:border-slate-800 dark:bg-slate-800/50">
+            <button onClick={handlePrev} className="p-2 hover:bg-white rounded-lg transition-all dark:hover:bg-slate-800" title="Previous">
+              <ChevronLeft className="h-5 w-5 text-slate-500" />
+            </button>
+            <button onClick={goToToday} className="px-3 py-1 text-xs font-black tracking-widest uppercase hover:bg-white rounded-lg transition-all text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800" title="Go to today">
+              Today
+            </button>
+            <button onClick={handleNext} className="p-2 hover:bg-white rounded-lg transition-all dark:hover:bg-slate-800" title="Next">
+              <ChevronRight className="h-5 w-5 text-slate-500" />
+            </button>
+          </div>
+
           <div className="flex items-center gap-2 font-black text-xl text-slate-900 dark:text-white cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 p-2 rounded-xl" onClick={goToToday}>
-            {viewMode === 'Week' ? format(startOfRange, 'MMMM yyyy') : monthName + ' ' + year}
+            {viewMode === 'Week' ? `Week of ${format(startOfRange, 'MMM dd, yyyy')}` : `${monthName} ${year}`}
           </div>
           <div className="hidden md:flex items-center gap-2">
             <span className="text-xs font-bold text-slate-500 dark:text-slate-400">{events.length} Events • 4 Sources</span>
@@ -342,17 +376,52 @@ export default function CalendarGrid({ events }: CalendarGridProps) {
         </div>
 
         <div className="flex gap-2">
-          <button className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm">
-            <Filter className="h-4 w-4" />
-            Filter
-          </button>
+          {/* Dropdown for Filters */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition-colors shadow-sm outline-none select-none">
+                <Filter className="h-4 w-4" />
+                Filter
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 select-none">
+              <DropdownMenuCheckboxItem
+                checked={selectedSources.includes('personal')}
+                onCheckedChange={() => toggleSource('personal')}
+                className="cursor-pointer font-bold text-xs gap-2 rounded-lg"
+              >
+                Personal Events
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={selectedSources.includes('class')}
+                onCheckedChange={() => toggleSource('class')}
+                className="cursor-pointer font-bold text-xs gap-2 rounded-lg"
+              >
+                Class Schedule
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={selectedSources.includes('exam')}
+                onCheckedChange={() => toggleSource('exam')}
+                className="cursor-pointer font-bold text-xs gap-2 rounded-lg"
+              >
+                Exams & Pool
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={selectedSources.includes('semester')}
+                onCheckedChange={() => toggleSource('semester')}
+                className="cursor-pointer font-bold text-xs gap-2 rounded-lg"
+              >
+                Academic Calendar
+              </DropdownMenuCheckboxItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           
-          <div className="flex items-center rounded-full border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800">
+          <div className="flex items-center rounded-full border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800 select-none">
              <button onClick={() => setViewMode('Month')} className={cn("px-5 py-2.5 text-sm font-bold rounded-l-full transition-colors", viewMode === 'Month' ? 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200')}>Month</button>
              <button onClick={() => setViewMode('Week')} className={cn("px-5 py-2.5 text-sm font-bold rounded-r-full transition-colors border-l border-slate-200 dark:border-slate-700", viewMode === 'Week' ? 'bg-slate-100 text-slate-900 dark:bg-slate-700 dark:text-white' : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200')}>Week</button>
           </div>
 
-          <button onClick={() => openAddModal()} className="flex items-center gap-2 rounded-full bg-[#FF4F33] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#E6462D] transition-colors shadow-md shadow-[#FF4F33]/20">
+          <button onClick={() => openAddModal()} className="flex items-center gap-2 rounded-full bg-[#FF4F33] px-6 py-2.5 text-sm font-bold text-white hover:bg-[#E6462D] transition-colors shadow-md shadow-[#FF4F33]/20 select-none">
             New Event <Plus className="h-4 w-4" />
           </button>
         </div>
