@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useMemo } from 'react'
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { FileText, ExternalLink, Trash2, Edit3, MoreVertical, Globe, Lock } from 'lucide-react'
+import { FileText, ExternalLink, Trash2, Edit3, MoreVertical, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,6 +30,8 @@ interface ResourceListProps {
 export default function ResourceList({ resources: initialResources }: ResourceListProps) {
   const [resources, setResources] = useState(initialResources)
   const [editingResource, setEditingResource] = useState<any>(null)
+  const [sortField, setSortField] = useState<'name' | 'category' | 'type' | 'visibility'>('name')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this resource?')) return
@@ -43,21 +45,96 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
     }
   }
 
+  const toggleSort = (field: 'name' | 'category' | 'type' | 'visibility') => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortField(field)
+      setSortOrder('asc')
+    }
+  }
+
+  const sortedResources = useMemo(() => {
+    return [...resources].sort((a, b) => {
+      let valA = ''
+      let valB = ''
+
+      if (sortField === 'name') {
+        valA = a.name || ''
+        valB = b.name || ''
+      } else if (sortField === 'category') {
+        valA = a.category || ''
+        valB = b.category || ''
+      } else if (sortField === 'type') {
+        valA = a.type || ''
+        valB = b.type || ''
+      } else if (sortField === 'visibility') {
+        valA = (a.showToInstructors ? '1' : '0') + (a.showToStaff ? '1' : '0') + (a.showToStudents ? '1' : '0')
+        valB = (b.showToInstructors ? '1' : '0') + (b.showToStaff ? '1' : '0') + (b.showToStudents ? '1' : '0')
+      }
+
+      const comparison = valA.localeCompare(valB, undefined, { sensitivity: 'base' })
+      return sortOrder === 'asc' ? comparison : -comparison
+    })
+  }, [resources, sortField, sortOrder])
+
   return (
     <>
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900">
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/50 dark:bg-slate-800/50">
-              <TableHead className="text-[10px] font-bold tracking-wider uppercase">
-                Resource
+              <TableHead
+                onClick={() => toggleSort('name')}
+                className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+              >
+                <div className="flex items-center gap-1.5">
+                  Resource
+                  {sortField === 'name' ? (
+                    sortOrder === 'asc' ? <ArrowUp className="h-3 w-3 text-blue-600" /> : <ArrowDown className="h-3 w-3 text-blue-600" />
+                  ) : (
+                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity" />
+                  )}
+                </div>
               </TableHead>
-              <TableHead className="text-[10px] font-bold tracking-wider uppercase">
-                Category
+              <TableHead
+                onClick={() => toggleSort('category')}
+                className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+              >
+                <div className="flex items-center gap-1.5">
+                  Category
+                  {sortField === 'category' ? (
+                    sortOrder === 'asc' ? <ArrowUp className="h-3 w-3 text-blue-600" /> : <ArrowDown className="h-3 w-3 text-blue-600" />
+                  ) : (
+                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity" />
+                  )}
+                </div>
               </TableHead>
-              <TableHead className="text-[10px] font-bold tracking-wider uppercase">Type</TableHead>
-              <TableHead className="text-[10px] font-bold tracking-wider uppercase">
-                Visibility
+              <TableHead
+                onClick={() => toggleSort('type')}
+                className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+              >
+                <div className="flex items-center gap-1.5">
+                  Type
+                  {sortField === 'type' ? (
+                    sortOrder === 'asc' ? <ArrowUp className="h-3 w-3 text-blue-600" /> : <ArrowDown className="h-3 w-3 text-blue-600" />
+                  ) : (
+                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity" />
+                  )}
+                </div>
+              </TableHead>
+              <TableHead
+                onClick={() => toggleSort('visibility')}
+                className="cursor-pointer select-none text-[10px] font-bold tracking-wider uppercase group hover:text-slate-900 dark:hover:text-white"
+              >
+                <div className="flex items-center gap-1.5">
+                  Visibility
+                  {sortField === 'visibility' ? (
+                    sortOrder === 'asc' ? <ArrowUp className="h-3 w-3 text-blue-600" /> : <ArrowDown className="h-3 w-3 text-blue-600" />
+                  ) : (
+                    <ArrowUpDown className="h-3 w-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity" />
+                  )}
+                </div>
               </TableHead>
               <TableHead className="text-right text-[10px] font-bold tracking-wider uppercase">
                 Actions
@@ -65,14 +142,14 @@ export default function ResourceList({ resources: initialResources }: ResourceLi
             </TableRow>
           </TableHeader>
           <TableBody>
-            {resources.length === 0 ? (
+            {sortedResources.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={5} className="py-12 text-center text-slate-500">
                   No general resources found.
                 </TableCell>
               </TableRow>
             ) : (
-              resources.map((resource) => (
+              sortedResources.map((resource) => (
                 <TableRow
                   key={resource.id}
                   className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"

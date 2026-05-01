@@ -22,9 +22,6 @@ export default async function StudentAcademicCalendarPage() {
   const { enrollmentType: resolvedEnrollmentType } = await getStudentStatus(userId)
 
   // Fetch all data sources in parallel.
-  // • prismaUnfiltered used for non-sensitive, non-user-specific reads (semester, adminCalendarEvent)
-  //   to avoid unnecessary RLS transaction overhead.
-  // • studentProfile re-fetch removed — getStudentStatus (above) already handles enrollment type.
   const [
     personalEvents,
     examBookings,
@@ -32,6 +29,9 @@ export default async function StudentAcademicCalendarPage() {
     enrollments,
     adminEvents,
     sittingAssignments,
+    tuitionRuns,
+    examEvents,
+    examPools,
   ] = await Promise.all([
     // 1. Student's personal calendar events
     prisma.studentCalendarEvent.findMany({
@@ -51,7 +51,7 @@ export default async function StudentAcademicCalendarPage() {
       },
     }),
 
-    // 3. Active semesters — non-user-specific, safe to bypass RLS
+    // 3. Active semesters
     prismaUnfiltered.semester.findMany({
       where: { isActive: true },
       orderBy: { startDate: 'asc' },
@@ -72,7 +72,7 @@ export default async function StudentAcademicCalendarPage() {
       },
     }),
 
-    // 5. Admin events — non-user-specific content, safe to bypass RLS
+    // 5. Admin events
     prismaUnfiltered.adminCalendarEvent.findMany({
       where: {
         deletedAt: null,
@@ -96,6 +96,19 @@ export default async function StudentAcademicCalendarPage() {
         },
       },
     }),
+
+    // 7. Revision runs
+    prisma.tuitionRun.findMany({
+      where: { status: { in: ['OPEN', 'SCHEDULED'] } },
+    }),
+
+    // 8. Pool Deadlines & Event dates
+    prismaUnfiltered.examEvent.findMany({
+      where: { deletedAt: null },
+    }),
+
+    // 9. Exam Pools
+    prismaUnfiltered.examPool.findMany({}),
   ])
 
   const enrollmentType = resolvedEnrollmentType || 'UNKNOWN';
@@ -120,8 +133,6 @@ export default async function StudentAcademicCalendarPage() {
       isSystemEvent: evt.isSystemEvent,
     })
   });
-
-
 
   // Exam bookings (read-only)
   examBookings.forEach((exam) => {
@@ -186,7 +197,6 @@ export default async function StudentAcademicCalendarPage() {
 
   // Admin-created events visible to students (read-only)
   ;(adminEvents as any[]).forEach((evt: any) => {
-    // Filter by enrollment type
     if (evt.visibleTo === 'EXAM_ONLY' && enrollmentType !== 'EXAM_ONLY') return;
     if (evt.visibleTo === 'MODULAR' && enrollmentType !== 'MODULAR') return;
     if (evt.visibleTo === 'FULL_TIME' && enrollmentType !== 'FULL_TIME') return;
@@ -199,7 +209,7 @@ export default async function StudentAcademicCalendarPage() {
       startDate: evt.startDate.toISOString(),
       endDate: evt.endDate?.toISOString() || null,
       color: evt.color || '#8b5cf6',
-      source: 'semester', // reuse 'semester' source type for green colour in student grid
+      source: 'semester',
       editable: false,
       recurrenceType: evt.recurrenceType,
       recurrenceDays: evt.recurrenceDays,
@@ -219,6 +229,65 @@ export default async function StudentAcademicCalendarPage() {
         startDate: sitting.startTime.toISOString(),
         endDate: sitting.endTime?.toISOString() || null,
         color: '#e11d48',
+        source: 'exam',
+        editable: false,
+      })
+    }
+  })
+
+  // 7. Revision sessions (TuitionRuns)
+  ;(tuitionRuns as any[]).forEach((run: any) => {
+    calendarEvents.push({
+      id: `revision-${run.id}`,
+      title: `Revision: ${run.title}`,
+      description: run.description || 'Module revision and study support session.',
+      startDate: run.startDatetime.toISOString(),
+      endDate: run.endDatetime?.toISOString() || null,
+      color: '#3b82f6',
+      source: 'class',
+      editable: false,
+    })
+  })
+
+  // 8. ExamEvent deadlines
+  ;(examEvents as any[]).forEach((evt: any) => {
+    if (evt.joinDeadline) {
+      calendarEvents.push({
+        id: `event-join-${evt.id}`,
+        title: `Exam Pool Deadline: ${evt.name}`,
+        description: `Join or apply deadline for this exam event.`,
+        startDate: evt.joinDeadline.toISOString(),
+        endDate: null,
+        color: '#f59e0b',
+        source: 'exam',
+        editable: false,
+      })
+    }
+
+    if (evt.paymentDeadline) {
+      calendarEvents.push({
+        id: `event-pay-${evt.id}`,
+        title: `Exam Payment Deadline: ${evt.name}`,
+        description: `Final day to clear payment for bookings.`,
+        startDate: evt.paymentDeadline.toISOString(),
+        endDate: null,
+        color: '#ef4444',
+        source: 'exam',
+        editable: false,
+      })
+    }
+  })
+
+  // 9. ExamPool dates
+  ;(examPools as any[]).forEach((pool: any) => {
+    if (pool.examDate) {
+      calendarEvents.push({
+        id: `pool-${pool.id}`,
+        title: `Pool Exam Day: ${pool.name}`,
+        description: `Scheduled exam date for this pool`,
+        startDate: pool.examStartTime.toISOString(),
+        endDate: pool.examEndTime?.toISOString() || null,
+        color: '#8b5cf6',
         source: 'exam',
         editable: false,
       })
@@ -253,7 +322,7 @@ export default async function StudentAcademicCalendarPage() {
       </div>
 
       {/* Interactive Calendar */}
-      <CalendarGrid events={calendarEvents} />
+      <CalendarGrid events={calendarEvents} userId={userId} />
     </div>
   )
 }
