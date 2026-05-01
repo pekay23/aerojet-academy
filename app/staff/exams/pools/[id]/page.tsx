@@ -16,6 +16,7 @@ import { format } from 'date-fns'
 import { Metadata } from 'next'
 import PoolStatusBadge from '../../../_components/PoolStatusBadge'
 import MemberActions from './MemberActions'
+import { MergePoolModal } from './MergePoolModal'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -37,6 +38,25 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
   const { id } = await params
   const pool = await getPoolWithDetails(id, { includeAllStatuses: true, unfiltered: true })
   if (!pool) notFound()
+
+  // Fetch sibling pools in the same event for merge selection
+  const siblingPools = pool.eventId
+    ? await prismaUnfiltered.examPool.findMany({
+        where: {
+          eventId: pool.eventId,
+          id: { not: pool.id },
+          status: { in: ['OPEN', 'NEAR_FULL', 'DRAFT'] },
+        },
+        select: {
+          id: true,
+          name: true,
+          currentMemberCount: true,
+          maxCandidates: true,
+          status: true,
+          allowedModules: true,
+        },
+      })
+    : []
 
   return (
     <div className="mx-auto max-w-[1800px]">
@@ -70,6 +90,24 @@ export default async function ExamPoolDetailPage({ params }: PageProps) {
           </div>
         </div>
         <div className="flex gap-3">
+          <MergePoolModal
+            currentPool={{
+              id: pool.id,
+              name: pool.name,
+              currentMemberCount: pool.currentMemberCount,
+              maxCandidates: pool.maxCandidates,
+              status: pool.status,
+              allowedModules: pool.allowedModules,
+            }}
+            eventPools={siblingPools.map(p => ({
+              id: p.id,
+              name: p.name,
+              currentMemberCount: p.currentMemberCount,
+              maxCandidates: p.maxCandidates,
+              status: p.status,
+              allowedModules: p.allowedModules,
+            }))}
+          />
           <Link
             href={`/staff/exams/pools/${pool.id}/edit`}
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"

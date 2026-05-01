@@ -8,8 +8,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { CalendarRange, Sparkles, X, ChevronRight } from 'lucide-react'
+import { CalendarRange, Sparkles, X, ChevronRight, Download } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export function PeriodFilter() {
   const router = useRouter()
@@ -115,6 +121,27 @@ export function PeriodFilter() {
           </SelectContent>
         </Select>
       </div>
+
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="flex h-10 items-center justify-center gap-2 rounded-xl bg-slate-100 px-4 text-xs font-black text-slate-600 transition-colors hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700">
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">Export</span>
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48 rounded-xl">
+          <DropdownMenuItem onClick={() => window.location.href = '/api/staff/export?type=students'}>
+            Export Students CSV
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => window.location.href = '/api/staff/export?type=pools'}>
+            Export Exam Pools CSV
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => window.location.href = '/api/staff/export?type=finances'}>
+            Export Financials CSV
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+
     </div>
   )
 }
