@@ -172,6 +172,9 @@ export async function enrollInCourse(courseId: string) {
             linkText: 'View Courses',
           },
         })
+      }, {
+        maxWait: 15000,
+        timeout: 30000,
       })
     } else {
       // Mandatory FULL_TIME course

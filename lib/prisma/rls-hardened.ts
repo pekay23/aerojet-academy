@@ -44,14 +44,17 @@ async function applyRlsContext(
   userId: string,
   userRole?: string
 ) {
+  // Combine into a single transaction-local setup to prevent pg concurrent query warnings
+  // and reduce round-trips.
   await client.$executeRaw(Prisma.sql`SET LOCAL ROLE app_user`)
-  await client.$executeRaw(
-    Prisma.sql`SELECT set_config('aerojet.user_id', ${userId}, true)`
-  )
-
+  
   if (userRole) {
     await client.$executeRaw(
-      Prisma.sql`SELECT set_config('aerojet.user_role', ${userRole}, true)`
+      Prisma.sql`SELECT set_config('aerojet.user_id', ${userId}, true), set_config('aerojet.user_role', ${userRole}, true)`
+    )
+  } else {
+    await client.$executeRaw(
+      Prisma.sql`SELECT set_config('aerojet.user_id', ${userId}, true)`
     )
   }
 }
@@ -76,21 +79,16 @@ export const rlsExtension = (baseClient: any) =>
           }, options)
         }
 
-        const rlsSetupQueries = [
-          (baseClient as any).$executeRaw(Prisma.sql`SET LOCAL ROLE app_user`),
-          (baseClient as any).$executeRaw(
-            Prisma.sql`SELECT set_config('aerojet.user_id', ${userId}, true)`
-          ),
-          ...(userRole
-            ? [
-                (baseClient as any).$executeRaw(
-                  Prisma.sql`SELECT set_config('aerojet.user_role', ${userRole}, true)`
-                ),
-              ]
-            : []),
-        ]
-
-        return (baseClient as any).$transaction([...rlsSetupQueries, ...args], options)
+        // For array-based transactions, we must wrap them in a callback-based transaction
+        // to ensure RLS context is applied to the same connection before any other queries run.
+        return (baseClient as any).$transaction(async (tx: any) => {
+          await applyRlsContext(tx, userId, userRole)
+          const results = []
+          for (const query of args) {
+            results.push(await (tx as any)[query.model][query.operation](query.args))
+          }
+          return results
+        }, options)
       },
     },
 

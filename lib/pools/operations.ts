@@ -207,3 +207,5 @@ export async function decrementPoolMemberCount(poolId: string, tx: Prisma.Transa
     data: { currentMemberCount: newCount, status: newStatus },
   })
 }
+
+export { canMergePools, mergePools } from './merge'

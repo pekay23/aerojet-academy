@@ -16,6 +16,13 @@ const connectionString = process.env.DATABASE_URL
 
 if (!connectionString) {
   console.error('[DB_BASE] CRITICAL: DATABASE_URL is missing from environment.')
+} else if (isDev) {
+  try {
+    const host = new URL(connectionString.replace('postgresql://', 'http://')).hostname
+    console.log(`[DB_BASE] Initializing connection pool to: ${host}`)
+  } catch (e) {
+    console.log('[DB_BASE] Initializing connection pool with provided string.')
+  }
 }
 
 // Helper to create the standard PG adapter
@@ -23,8 +30,9 @@ const createAdapter = () => {
   const pool = new Pool({
     connectionString,
     max: 50, // Match the connection_limit in .env
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 10000,
+    connectionTimeoutMillis: 30000,
+    idleTimeoutMillis: 10000,
+    allowExitOnIdle: true,
   })
   return new PrismaPg(pool)
 }

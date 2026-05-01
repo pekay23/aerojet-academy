@@ -26,7 +26,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!session) return { title: 'Course Materials' }
 
   const enrollments = await prisma.enrollment.findMany({ where: { userId: session.user.id }, include: { course: true } });
-  const enrollment = enrollments.find(e => e.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') === slug);
+  const enrollment = enrollments.find(e => 
+    e.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') === slug ||
+    e.id === slug || e.courseId === slug
+  );
   return { title: enrollment ? `Resources: ${enrollment.course.name}` : 'Course Materials' }
 }
 
@@ -52,7 +55,10 @@ export default async function MaterialsPage({ params }: PageProps) {
     },
   })
 
-  const enrollment = allEnrollments.find(e => e.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') === slug);
+  const enrollment = allEnrollments.find(e => 
+    e.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') === slug ||
+    e.id === slug || e.courseId === slug
+  );
 
   if (!enrollment || enrollment.userId !== session.user.id) {
     notFound()

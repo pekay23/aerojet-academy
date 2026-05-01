@@ -1,35 +1,54 @@
-import { NextRequest } from 'next/server'
-import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
-import { mergePools } from '@/lib/events/go-no-go'
-import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth/auth-options'
+import { canMergePools, mergePools } from '@/lib/pools/operations'
 
-/**
- * POST — Merge a source pool into a target pool.
- * Used when a pool is below threshold and needs to be combined.
- */
-export const POST = withErrorHandler(
-  async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
-    const admin = await requireStaff()
-    if (admin.role !== 'ADMIN' && admin.role !== 'SUPER_ADMIN') {
-      return apiError('Unauthorized — admin access required', 403)
+export async function POST(request: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'STAFF')) {
+      return new NextResponse('Unauthorized', { status: 403 })
     }
 
-    const { sourcePoolId, targetPoolId } = await req.json()
-    if (!sourcePoolId || !targetPoolId) {
-      return apiError('sourcePoolId and targetPoolId are required')
+    const body = await request.json()
+    const { poolAId, poolBId } = body
+
+    if (!poolAId || !poolBId) {
+      return NextResponse.json({ error: 'Both poolAId and poolBId are required' }, { status: 400 })
     }
 
-    const result = await mergePools(sourcePoolId, targetPoolId, admin.id)
-
-    await createAuditLog({
-      action: AuditAction.UPDATE,
-      entity: 'ExamPool',
-      entityId: targetPoolId,
-      userId: admin.id,
-      details: { mergedFrom: sourcePoolId, movedMembers: result.movedMembers },
-    })
-
-    return apiSuccess(result)
+    const result = await mergePools(poolAId, poolBId, session.user.id)
+    return NextResponse.json(result)
+  } catch (error: any) {
+    console.error('[POOL_MERGE]', error)
+    return NextResponse.json(
+      { error: error.message || 'Failed to merge pools' },
+      { status: 400 }
+    )
   }
-)
+}
+
+export async function PUT(request: Request) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'STAFF')) {
+      return new NextResponse('Unauthorized', { status: 403 })
+    }
+
+    const body = await request.json()
+    const { poolAId, poolBId } = body
+
+    if (!poolAId || !poolBId) {
+      return NextResponse.json({ error: 'Both poolAId and poolBId are required' }, { status: 400 })
+    }
+
+    const result = await canMergePools(poolAId, poolBId)
+    return NextResponse.json(result)
+  } catch (error: any) {
+    console.error('[POOL_MERGE_VALIDATE]', error)
+    return NextResponse.json(
+      { error: error.message || 'Failed to validate merge' },
+      { status: 400 }
+    )
+  }
+}

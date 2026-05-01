@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import {
   Search,
   Users,
@@ -123,6 +124,13 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
         <p className="text-sm text-slate-400">{total.toLocaleString()} total users</p>
         <div className="flex gap-2">
           <CreateUserDialog />
+          <Link
+            href="/staff/students/import"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"
+          >
+            <Users className="h-3.5 w-3.5 text-blue-600" />
+            Import Students
+          </Link>
           <button
             onClick={fetchUsers}
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"

@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import Link from 'next/link'
 import {
   Search,
+  Users,
   GraduationCap,
   RefreshCw,
   CheckSquare,
@@ -145,6 +147,14 @@ export default function StudentsTable({
           >
             <RefreshCw className="h-3.5 w-3.5" />
           </button>
+
+          <Link
+            href="/staff/students/import"
+            className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"
+          >
+            <Users className="h-3.5 w-3.5 text-blue-600" />
+            Import Students
+          </Link>
 
           <CurrencyToggle value={viewCurrency} onChange={setViewCurrency} size="sm" />
 
