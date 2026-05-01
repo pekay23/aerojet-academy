@@ -8,14 +8,14 @@ import AuditLogTable from './_components/AuditLogTable'
 import { queryAuditLogs } from '@/lib/audit/logger'
 
 export default async function AuditLogsPage(req: {
-  searchParams: { page?: string }
+  searchParams: Promise<{ page?: string }>
 }) {
   const session = await getAuthSession()
   if (!session || (session.user.role !== 'STAFF' && session.user.role !== 'ADMIN')) {
     redirect('/login')
   }
 
-  const searchParams = req.searchParams || {}
+  const searchParams = (await req.searchParams) || {}
   const page = parseInt(searchParams.page as string) || 1
   const limit = 25
 

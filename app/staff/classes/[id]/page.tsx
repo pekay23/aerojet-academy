@@ -28,8 +28,20 @@ export default async function ClassDetailsPage({ params }: Props) {
 
   const { id } = await params
 
+  function slugify(text: string) {
+    return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+  }
+
+  // Fallback: If id is a slug, find the class by name
+  let targetId = id
+  if (id.length < 20) {
+    const allBasicClasses = await prisma.class.findMany({ select: { id: true, name: true } })
+    const matchedClass = allBasicClasses.find(c => slugify(c.name) === id)
+    if (matchedClass) targetId = matchedClass.id
+  }
+
   const cls = await prisma.class.findUnique({
-    where: { id },
+    where: { id: targetId },
     include: {
       course: true,
       semester: true,

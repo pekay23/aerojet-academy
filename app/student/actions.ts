@@ -309,6 +309,8 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
           data: { enrollmentStatus: EnrollmentStatus.ENROLLED },
         })
       }
+    }, {
+      timeout: 20000
     })
   }
 
@@ -505,6 +507,8 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
       })
 
       return newPool
+    }, {
+      timeout: 30000
     })
 
     revalidatePath('/student/exam-bookings')
@@ -633,6 +637,8 @@ export async function payPendingExamBooking(bookingId: string) {
           linkText: 'View My Exams',
         },
       })
+    }, {
+      timeout: 20000
     })
 
     revalidatePath('/student/exams')
