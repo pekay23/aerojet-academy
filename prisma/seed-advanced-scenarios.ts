@@ -50,7 +50,10 @@ async function main() {
   console.log('✅ Examiner created.')
 
   // 3. Exam Sittings & Assignments
-  const bookings = await prisma.examBooking.findMany({ take: 5 })
+  const bookings = await prisma.examBooking.findMany({ 
+    where: { examComponentId: { not: null } },
+    take: 5 
+  })
   if (bookings.length > 0) {
     const event = await prisma.examEvent.findFirst()
     if (event) {
@@ -63,7 +66,7 @@ async function main() {
         sitting = await prisma.examSitting.create({
           data: {
             eventId: event.id,
-            examComponentId: bookings[0].examComponentId,
+            examComponentId: bookings[0].examComponentId!,
             dayNumber: 1,
             sessionType: 'MORNING',
             startTime: new Date('2026-06-15T09:00:00Z'),
