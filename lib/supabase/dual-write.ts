@@ -78,7 +78,11 @@ type ModelKey = (typeof MODELS)[number]
  * Get Supabase Prisma client for backup operations
  * This creates a secondary Prisma client connected to Supabase
  */
-async function getSupabasePrismaClient() {
+let cachedSupabasePrisma: any = null
+
+export async function getSupabasePrismaClient() {
+  if (cachedSupabasePrisma) return cachedSupabasePrisma
+
   const supabaseUrl = process.env.SUPABASE_DATABASE_URL
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -105,8 +109,10 @@ async function getSupabasePrismaClient() {
   })
 
   const adapter = new PrismaPg(pool)
-  return new PrismaClient({ adapter })
+  cachedSupabasePrisma = new PrismaClient({ adapter })
+  return cachedSupabasePrisma
 }
+
 
 /**
  * Transform data for Supabase (handle BigInt, Date, etc.)

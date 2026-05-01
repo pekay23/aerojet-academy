@@ -4,6 +4,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import StaffExamsTabs from '../_components/StaffExamsTabs'
 import ExamBookingsTable from '../_components/ExamBookingsTable'
 import RecordsTab from './_components/RecordsTab'
+import { GroupCharterModal } from './_components/GroupCharterModal'
 import { getAvailableModules } from '../actions'
 import { serializePrisma } from '@/lib/utils/serialization'
 import Link from 'next/link'
@@ -117,19 +118,38 @@ async function EventsTab({ query }: { query?: string }) {
 
   const events = serializePrisma(eventsRaw)
 
+  // Fetch open events and modules for Group Charter modal
+  const [charterEvents, charterModules] = await Promise.all([
+    prismaUnfiltered.examEvent.findMany({
+      where: { status: { in: ['OPEN', 'DRAFT'] } },
+      select: { id: true, name: true },
+      orderBy: { startDate: 'asc' },
+    }),
+    prismaUnfiltered.examComponent.findMany({
+      select: { id: true, code: true, name: true },
+      orderBy: { code: 'asc' },
+    }),
+  ])
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="w-full max-w-sm">
           <SearchInput id="exams-events-search" placeholder="Search events..." />
         </div>
-        <Link
-          href="/staff/exams/events/create"
-          className="flex shrink-0 items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
-        >
-          <Plus className="h-4 w-4" />
-          Create Event
-        </Link>
+        <div className="flex gap-3">
+          <GroupCharterModal
+            events={charterEvents}
+            modules={charterModules}
+          />
+          <Link
+            href="/staff/exams/events/create"
+            className="flex shrink-0 items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90"
+          >
+            <Plus className="h-4 w-4" />
+            Create Event
+          </Link>
+        </div>
       </div>
 
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">

@@ -15,6 +15,7 @@ import {
   Mail,
   ScrollText,
   Settings,
+  GraduationCap,
 } from 'lucide-react'
 import type { PaymentAccessLevel } from '@/lib/access-control'
 import type { SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
@@ -73,6 +74,7 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
     if (hasFullAccess) {
       baseLinks.push(
         { label: 'Exams', href: '/student/exams?tab=records', icon: ClipboardCheck },
+        { label: 'Revision Support', href: '/student/courses/revision', icon: GraduationCap },
         { label: 'Grades', href: '/student/grades', icon: Award },
         { label: 'Attendance', href: '/student/attendance', icon: FileCheck },
         { label: 'Certificates', href: '/student/certificates', icon: Award }

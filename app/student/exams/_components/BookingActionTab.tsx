@@ -125,7 +125,7 @@ export default async function BookingActionTab({ type }: { type: 'group' | 'indi
               </div>
               <p className="mb-6 flex-1 text-sm text-slate-500">Book a single exam seat and join the auto-pool.</p>
               <StandaloneBooking
-                price={pricing.individualExamFee}
+                pricing={pricing}
                 currency={currency}
                 availableBalance={balance}
                 upcomingExams={upcomingExams}

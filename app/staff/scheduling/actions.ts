@@ -97,3 +97,95 @@ export async function ensureTermsForPathwayLicense(
     return { error: 'Failed to ensure terms.' }
   }
 }
+
+/**
+ * Creates a new Revision Support tuition run.
+ */
+export async function createTuitionRun(data: {
+  title: string
+  moduleTag?: string
+  description?: string
+  startDatetime: Date
+  endDatetime: Date
+  capacity: number
+  minClassSize: number
+  price: number
+}) {
+  try {
+    const session = await requireStaff()
+
+    const run = await prisma.tuitionRun.create({
+      data: {
+        ...data,
+        price: data.price,
+        createdById: session.id,
+      },
+    })
+
+    revalidatePath('/staff/revision-runs')
+    revalidatePath('/student/courses/revision')
+    return { success: true, run }
+  } catch (error) {
+    console.error('Create tuition run error:', error)
+    return { error: 'Failed to create revision run.' }
+  }
+}
+
+/**
+ * Updates an existing Revision Support tuition run.
+ */
+export async function updateTuitionRun(runId: string, data: {
+  title: string
+  moduleTag?: string
+  description?: string
+  startDatetime: Date
+  endDatetime: Date
+  capacity: number
+  minClassSize: number
+  price: number
+  status: string
+}) {
+  try {
+    await requireStaff()
+
+    const run = await prisma.tuitionRun.update({
+      where: { id: runId },
+      data: {
+        ...data,
+        price: data.price,
+      },
+    })
+
+    revalidatePath('/staff/revision-runs')
+    revalidatePath('/student/courses/revision')
+    return { success: true, run }
+  } catch (error) {
+    console.error('Update tuition run error:', error)
+    return { error: 'Failed to update revision run.' }
+  }
+}
+
+/**
+ * Deletes a Revision Support tuition run.
+ */
+export async function deleteTuitionRun(runId: string) {
+  try {
+    await requireStaff()
+
+    // Also delete any existing bookings for the run if cascading isn't handled
+    await prisma.tuitionBooking.deleteMany({
+      where: { tuitionRunId: runId },
+    })
+
+    await prisma.tuitionRun.delete({
+      where: { id: runId },
+    })
+
+    revalidatePath('/staff/revision-runs')
+    revalidatePath('/student/courses/revision')
+    return { success: true }
+  } catch (error) {
+    console.error('Delete tuition run error:', error)
+    return { error: 'Failed to delete revision run.' }
+  }
+}
