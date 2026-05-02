@@ -22,8 +22,9 @@ The schema is built around five core domains:
 - **PoolMembership**: The join record between a student and a pool.
 
 ### 4. Financial System
-- **Wallet**: A virtual balance for each student.
-- **WalletTransaction**: Immutable ledger of all movements. Includes `RESERVE` (for pending exam joins) and `RELEASE`/`PAYMENT`.
+- **Wallet**: A virtual balance for each student. Total Balance = Available + Reserved.
+- **WalletTransaction**: Immutable ledger of all movements. Includes `RESERVE` (for pending exam joins) and `DEBIT`/`PAYMENT`.
+  - **Integrity Rule**: No booking or pool membership can exist without corresponding funds being either `RESERVED` (for flexible pools) or `DEBITED` (for fixed bookings).
 - **Payment**: Tracks external proof-of-payments (manual bank transfers) which are later reconciled by Staff.
 
 ### 5. Academic Management

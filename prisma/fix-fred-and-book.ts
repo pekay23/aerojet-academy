@@ -14,6 +14,7 @@ async function main() {
   })
 
   if (!user || !user.wallet) return
+  const walletId = user.wallet.id
 
   await prisma.$transaction(async (tx) => {
     // 1. Delete mock memberships
@@ -21,12 +22,12 @@ async function main() {
 
     // 2. Delete mock reserve transactions
     await tx.walletTransaction.deleteMany({ 
-        where: { walletId: user.wallet.id, type: 'RESERVE' } 
+        where: { walletId, type: 'RESERVE' } 
     })
 
     // 3. Reset wallet to historical state (€670 available)
     await tx.wallet.update({
-      where: { id: user.wallet.id },
+      where: { id: walletId },
       data: { 
         balance: 670,
         availableBalance: 670,
@@ -38,7 +39,7 @@ async function main() {
     const groupRef = `BOOKING_FUNDED_FIXED_${Date.now()}`
     
     await tx.wallet.update({
-      where: { id: user.wallet.id },
+      where: { id: walletId },
       data: { 
         availableBalance: { decrement: cost },
         balance: { decrement: cost }
@@ -47,7 +48,7 @@ async function main() {
 
     await tx.walletTransaction.create({
       data: {
-        walletId: user.wallet.id,
+        walletId,
         type: 'DEBIT',
         amount: cost,
         description: `Payment for TWIN_PACK: ${modules.join(', ')} (Restored from roadmap)`,
