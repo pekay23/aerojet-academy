@@ -12,13 +12,15 @@ import { Pool } from 'pg'
  */
 
 const isDev = process.env.NODE_ENV === 'development'
-const connectionString = process.env.DATABASE_URL
+// Use DIRECT_URL for the pool in development if available, as it's more stable
+// than the pooler endpoint for long-lived dev processes.
+const dbConnectionString = (isDev ? process.env.DIRECT_URL : null) || process.env.DATABASE_URL
 
-if (!connectionString) {
-  console.error('[DB_BASE] CRITICAL: DATABASE_URL is missing from environment.')
+if (!dbConnectionString) {
+  console.error('[DB_BASE] CRITICAL: Database connection string is missing from environment.')
 } else if (isDev) {
   try {
-    const host = new URL(connectionString.replace('postgresql://', 'http://')).hostname
+    const host = new URL(dbConnectionString.replace('postgresql://', 'http://')).hostname
     console.log(`[DB_BASE] Initializing connection pool to: ${host}`)
   } catch (e) {
     console.log('[DB_BASE] Initializing connection pool with provided string.')
@@ -28,12 +30,18 @@ if (!connectionString) {
 // Helper to create the standard PG adapter
 const createAdapter = () => {
   const pool = new Pool({
-    connectionString,
-    max: 50, // Match the connection_limit in .env
-    connectionTimeoutMillis: 30000,
-    idleTimeoutMillis: 10000,
-    allowExitOnIdle: true,
+    connectionString: dbConnectionString,
+    max: 20, // Lowered from 50 to avoid exhausting Neon limits in dev
+    connectionTimeoutMillis: 60000, // Increased to 60s for cold starts
+    idleTimeoutMillis: 30000,
+    allowExitOnIdle: false, // Keep connections alive longer
   })
+
+  // Add error listener to prevent process crashes and provide better debugging
+  pool.on('error', (err) => {
+    console.error('[DB_BASE] Unexpected error on idle client:', err.message)
+  })
+
   return new PrismaPg(pool)
 }
 

@@ -8,6 +8,7 @@ import PaymentApprovalCard from '../_components/PaymentApprovalCard'
 import GoNoGoMeter from '../_components/GoNoGoMeter'
 import PoolsSummaryCard from '../_components/PoolsSummaryCard'
 import TargetRevenueEditor from '../_components/TargetRevenueEditor'
+import ExaminerDashboard from '../_components/ExaminerDashboard'
 import { UserStatus, UserRole, PaymentStatus, PoolStatus } from '@/types/enums'
 import {
   Users,
@@ -153,6 +154,11 @@ export default async function StaffDashboardPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
+  if (session.user.role === 'EXAMINER') {
+    redirect('/examiner')
+  }
+
+  // 2. Standard Staff/Admin logic
   const data = await getDashboardData()
 
   const stats = [

@@ -45,17 +45,20 @@ async function applyRlsContext(
   userRole?: string
 ) {
   // Combine into a single transaction-local setup to prevent pg concurrent query warnings
-  // and reduce round-trips.
-  await client.$executeRaw(Prisma.sql`SET LOCAL ROLE app_user`)
-  
+  // and reduce round-trips. We use a single $executeRaw with multiple set_config calls.
   if (userRole) {
-    await client.$executeRaw(
-      Prisma.sql`SELECT set_config('aerojet.user_id', ${userId}, true), set_config('aerojet.user_role', ${userRole}, true)`
-    )
+    await client.$executeRaw(Prisma.sql`
+      SELECT 
+        set_config('role', 'app_user', true),
+        set_config('aerojet.user_id', ${userId}, true),
+        set_config('aerojet.user_role', ${userRole}, true)
+    `)
   } else {
-    await client.$executeRaw(
-      Prisma.sql`SELECT set_config('aerojet.user_id', ${userId}, true)`
-    )
+    await client.$executeRaw(Prisma.sql`
+      SELECT 
+        set_config('role', 'app_user', true),
+        set_config('aerojet.user_id', ${userId}, true)
+    `)
   }
 }
 
@@ -139,7 +142,7 @@ export const rlsExtension = (baseClient: any) =>
           if (!userId) return query(sanitizedArgs)
 
           const userRole = (session as any)?.user?.role
-          if (userRole && ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(userRole)) {
+          if (userRole && ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER'].includes(userRole)) {
             return query(sanitizedArgs)
           }
 
@@ -170,7 +173,7 @@ export const rlsExtension = (baseClient: any) =>
         if (!session?.user?.id) return query(sanitizedArgs)
 
         const userRole = (session as any)?.user?.role
-        if (userRole && ['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(userRole)) {
+        if (userRole && ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER'].includes(userRole)) {
           return query(sanitizedArgs)
         }
 

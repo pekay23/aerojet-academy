@@ -25,7 +25,8 @@ export default async function PeoplePage({
       COUNT(*) FILTER (WHERE "role"::text = 'STUDENT')::int as "studentAll",
       COUNT(*) FILTER (WHERE "role"::text = 'STUDENT' AND "status"::text = 'ACTIVE')::int as "studentActive",
       COUNT(*) FILTER (WHERE "role"::text = 'STUDENT' AND "status"::text = 'SUSPENDED')::int as "studentSuspended",
-      COUNT(*) FILTER (WHERE "role"::text = 'STUDENT' AND "status"::text = 'ARCHIVED')::int as "studentArchived"
+      COUNT(*) FILTER (WHERE "role"::text = 'STUDENT' AND "status"::text = 'ARCHIVED')::int as "studentArchived",
+      COUNT(*) FILTER (WHERE "role"::text = 'EXAMINER')::int as "examinerAll"
     FROM "users"
     WHERE "deletedAt" IS NULL
   `
@@ -38,7 +39,8 @@ export default async function PeoplePage({
     studentAll: 0,
     studentActive: 0,
     studentSuspended: 0,
-    studentArchived: 0
+    studentArchived: 0,
+    examinerAll: 0
   }
 
   return (
@@ -55,6 +57,9 @@ export default async function PeoplePage({
         active: counts.studentActive,
         suspended: counts.studentSuspended,
         archived: counts.studentArchived,
+      }}
+      examinerCounts={{
+        all: counts.examinerAll,
       }}
     />
   )
