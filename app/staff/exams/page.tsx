@@ -228,26 +228,6 @@ async function EventsTab({ query }: { query?: string }) {
                         <div className="text-xs text-slate-500 dark:text-slate-400">
                           {totalCandidates} / {totalCapacity} Pool Occupancy
                         </div>
-                        {demand && (
-                          <div className="mt-1 space-y-0.5 text-[11px] text-slate-500 dark:text-slate-400">
-                            <div>
-                              Demand: <span className="font-bold text-slate-700 dark:text-slate-200">{demand.totals.bookingCount}</span>
-                              {' · '}Guaranteed:{' '}
-                              <span className="font-bold text-slate-700 dark:text-slate-200">
-                                {demand.totals.guaranteedCount}
-                              </span>
-                            </div>
-                            <div>
-                              Paid seat volume:{' '}
-                              <span className="font-bold text-slate-700 dark:text-slate-200">
-                                {demand.totals.paidSeatCount}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                        {!demand && (
-                          <div className="mt-1 text-[11px] text-slate-400">Demand snapshot unavailable</div>
-                        )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <Link
