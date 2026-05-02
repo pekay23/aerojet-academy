@@ -56,18 +56,19 @@ export async function POST(req: Request) {
         id: { in: courseIds },
         isActive: true,
       },
-      select: { id: true },
+      select: { id: true, price: true },
     })
+
 
     const validCourseIds = courses.map((c) => c.id)
     if (validCourseIds.length === 0) {
       return NextResponse.json({ error: 'No valid active courses found.' }, { status: 400 })
     }
 
-    // Build enrollment records
     const records = []
     for (const userId of validStudentIds) {
       for (const courseId of validCourseIds) {
+        const course = courses.find(c => c.id === courseId)
         records.push({
           userId,
           courseId,
@@ -75,6 +76,7 @@ export async function POST(req: Request) {
           academicYearId: academicYearId || null,
           semesterId: semesterId || null,
           approvedAt: new Date(),
+          amountPaid: course?.price || 0,
         })
       }
     }

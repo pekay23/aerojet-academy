@@ -720,6 +720,9 @@ model ExamBooking {
   score              Decimal?           @db.Decimal(5, 2)
   percentage         Decimal?           @db.Decimal(5, 2)
   examCategory       ExamCategory       @default(OFFICIAL_EASA)
+  migrationRef       String?
+  sourceNotes        String?
+
   course             Course?            @relation(fields: [courseId], references: [id])
   event              ExamEvent?         @relation(fields: [eventId], references: [id])
   examComponent      ExamComponent?     @relation(fields: [examComponentId], references: [id])
@@ -738,6 +741,8 @@ model ExamBooking {
   @@index([examComponentId])
   @@index([moduleCode])
   @@index([autoPoolId])
+  @@index([migrationRef])
+
   @@index([combinedGroupRef])
   @@index([deletedAt])
   @@map("exam_bookings")

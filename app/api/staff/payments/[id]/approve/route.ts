@@ -134,6 +134,23 @@ export const POST = withErrorHandler(
         })
 
         if (programme && programme.programmeYears.length > 0) {
+          const programmeCode = programme.code
+          
+          // Validate pathway restriction
+          const { allowed, error, severity } = await import('@/lib/enrollment/validation').then(v => 
+            v.validateFullTimeProgrammeEnrollment(payment.userId, programmeCode)
+          )
+
+          const force = body.ignorePathwayRestrictions === true
+
+          if (!allowed && !force) {
+            console.error(`Enrollment blocked: ${error}`)
+            return apiError(error || 'Student is not eligible for this programme.', 400, {
+              needsOverride: severity === 'WARNING',
+              warning: error
+            })
+          }
+
           const year1 = programme.programmeYears[0]
 
           // Create FullTimeEnrollment if it doesn't exist yet

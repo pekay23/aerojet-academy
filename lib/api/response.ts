@@ -58,9 +58,10 @@ export function apiPaginated<T>(
 // ERROR RESPONSES
 // ---------------------------------------------------------------------------
 
-export function apiError(error: string, status: number = 400): NextResponse {
-  return NextResponse.json({ success: false, error } as ApiResponse, { status })
+export function apiError(error: string, status: number = 400, data?: Record<string, any>): NextResponse {
+  return NextResponse.json({ success: false, error, ...data } as ApiResponse, { status })
 }
+
 
 export function apiUnauthorized(message: string = 'Authentication required'): NextResponse {
   return apiError(message, 401)
