@@ -1,21 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { Clock, AlertCircle } from 'lucide-react'
+import { Clock, AlertCircle, School, ClipboardCheck } from 'lucide-react'
 import TablePagination from '@/components/shared/TablePagination'
 
 interface AttendanceRecord {
   id: string
+  type: 'CLASS' | 'EXAM'
   status: string
   date: string
   notes: string | null
   minutesLate: number | null
-  class: {
-    name: string
-    course: {
-      code: string
-    }
-  }
+  label: string
+  subLabel: string
 }
 
 export default function AttendanceTable({ records }: { records: AttendanceRecord[] }) {
@@ -28,7 +25,7 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
       <div className="border-b border-slate-100 bg-slate-50 px-6 py-4 dark:border-slate-800 dark:bg-slate-800/50">
-        <h2 className="font-bold text-slate-900 dark:text-slate-100">Attendance History</h2>
+        <h2 className="font-bold text-slate-900 dark:text-slate-100">Historical Attendance Registry</h2>
       </div>
 
       {paged.length > 0 ? (
@@ -36,44 +33,59 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm" aria-label="Attendance records">
               <thead>
-                <tr className="border-b border-slate-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
+                <tr className="border-b border-slate-100 text-[10px] font-black tracking-widest text-slate-400 uppercase dark:border-slate-800">
+                  <th scope="col" className="px-6 py-4">Type</th>
                   <th scope="col" className="px-6 py-4">Date</th>
-                  <th scope="col" className="px-6 py-4">Class / Module</th>
+                  <th scope="col" className="px-6 py-4">Activity / Module</th>
                   <th scope="col" className="px-6 py-4">Status</th>
                   <th scope="col" className="px-6 py-4">Notes</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                 {paged.map((record) => (
                   <tr
                     key={record.id}
-                    className="transition-colors hover:bg-slate-50 dark:bg-slate-800/50"
+                    className="transition-colors hover:bg-slate-50 dark:hover:bg-white/5"
                   >
+                    <td className="px-6 py-4">
+                      <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${
+                        record.type === 'CLASS' 
+                          ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400' 
+                          : 'bg-purple-50 text-purple-600 dark:bg-purple-900/20 dark:text-purple-400'
+                      }`}>
+                        {record.type === 'CLASS' ? <School className="h-4 w-4" /> : <ClipboardCheck className="h-4 w-4" />}
+                      </div>
+                    </td>
                     <td className="px-6 py-4 font-medium whitespace-nowrap text-slate-900 dark:text-slate-100">
-                      {new Date(record.date).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
+                      <div className="text-sm">
+                        {new Date(record.date).toLocaleDateString('en-GB', {
+                          day: '2-digit',
+                          month: 'short',
+                          year: 'numeric',
+                        })}
+                      </div>
+                      <div className="text-[10px] text-slate-400 uppercase font-bold">
+                        {new Date(record.date).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="font-bold text-slate-900 dark:text-slate-100">
-                        {record.class.name}
+                      <div className="font-black text-slate-900 dark:text-slate-100">
+                        {record.label}
                       </div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
-                        {record.class.course.code}
+                      <div className="text-xs font-bold text-slate-400 uppercase tracking-tight">
+                        {record.subLabel}
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold ${
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase ${
                           record.status === 'PRESENT'
-                            ? 'bg-green-50 text-green-600'
+                            ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400'
                             : record.status === 'LATE'
-                              ? 'bg-amber-50 text-amber-600'
+                              ? 'bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400'
                               : record.status === 'ABSENT'
-                                ? 'bg-red-50 text-red-600'
-                                : 'bg-slate-100 text-slate-600'
+                                ? 'bg-rose-50 text-rose-600 dark:bg-rose-900/20 dark:text-rose-400'
+                                : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
                         }`}
                       >
                         {record.status === 'LATE' && <Clock className="h-3 w-3" aria-hidden="true" />}
@@ -81,7 +93,7 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
                         {record.minutesLate && ` (${record.minutesLate}m)`}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-slate-500 dark:text-slate-400">
+                    <td className="px-6 py-4 text-xs font-medium text-slate-500 dark:text-slate-400 max-w-[200px] truncate">
                       {record.notes || <span aria-label="No notes">—</span>}
                     </td>
                   </tr>
@@ -98,7 +110,7 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
           </div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">No records found</h3>
           <p className="mx-auto mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">
-            You don&apos;t have any attendance records yet. They will appear here once marked by your instructors.
+            You don&apos;t have any attendance records yet. They will appear here once marked by your instructors or examiners.
           </p>
         </div>
       )}

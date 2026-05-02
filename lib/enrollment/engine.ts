@@ -102,11 +102,13 @@ export async function autoEnrollStudent(studentProfileId: string): Promise<numbe
       })
 
       if (!existing) {
+        const course = requiredModules.find(m => m.id === assignment.courseId);
         await prisma.enrollment.create({
           data: {
             userId: profile.userId,
             courseId: assignment.courseId,
             status: 'ENROLLED',
+            amountPaid: course?.price || 0,
             academicYearId,
             semesterId,
           },

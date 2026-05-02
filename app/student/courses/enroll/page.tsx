@@ -107,12 +107,27 @@ export default async function EnrollPage({
     }),
   ])
 
-  const categories = allCategories.map((courseCategory) => ({
+  // Filter restricted courses for Modular students
+  const filteredCourses = allCourses.filter(course => {
+    if (effectiveEnrollmentType === 'MODULAR') {
+      const fullTimeCategories = ['FOUR_YEAR', 'TWO_YEAR', 'MILITARY']
+      if (course.category && fullTimeCategories.includes(course.category.name)) {
+        return false
+      }
+    }
+    return true
+  })
+
+  // Filter categories that have no visible courses left
+  const availableCategoryNames = new Set(filteredCourses.map(c => c.category?.name).filter(Boolean))
+  const categories = allCategories
+    .filter(cat => availableCategoryNames.has(cat.name))
+    .map((courseCategory) => ({
     id: courseCategory.id,
     name: courseCategory.name,
   }))
 
-  const groupedCourses = allCourses.reduce(
+  const groupedCourses = filteredCourses.reduce(
     (acc, course) => {
       const bucket = course.category?.name || 'GENERAL'
       if (!acc[bucket]) acc[bucket] = []
@@ -128,7 +143,7 @@ export default async function EnrollPage({
       <div className="pointer-events-none absolute -top-20 right-0 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
       <div className="pointer-events-none absolute top-52 -left-10 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
 
-      <div className="relative overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white/85 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/80 sm:p-8">
+      <div className="relative overflow-hidden rounded-4xl border border-slate-200/70 bg-white/85 p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/80 sm:p-8">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(14,165,233,0.10),transparent_30%),radial-gradient(circle_at_left,rgba(16,185,129,0.10),transparent_28%)]" />
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-4">
@@ -175,7 +190,7 @@ export default async function EnrollPage({
       </div>
 
       {allCourses.length === 0 ? (
-        <div className="relative flex flex-col items-center justify-center rounded-[2rem] border border-dashed border-slate-300 bg-white/70 px-6 py-24 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900/50">
+        <div className="relative flex flex-col items-center justify-center rounded-4xl border border-dashed border-slate-300 bg-white/70 px-6 py-24 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900/50">
           <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500">
             <BookOpen className="h-8 w-8" />
           </div>
@@ -292,7 +307,7 @@ export default async function EnrollPage({
                                   </span>
                                 </div>
                               </div>
-                              <p className="max-w-[8rem] text-right text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                              <p className="max-w-32 text-right text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
                                 Enroll instantly when your pathway allows direct module purchase.
                               </p>
                             </div>

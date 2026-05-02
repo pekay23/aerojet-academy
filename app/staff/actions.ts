@@ -150,10 +150,30 @@ export async function bulkUpdateEnrollmentStatus(enrollmentIds: string[], status
     await requireStaff()
     if (!enrollmentIds.length || !status) return { error: 'Invalid parameters.' }
 
-    await prisma.enrollment.updateMany({
-      where: { id: { in: enrollmentIds } },
-      data: { status },
-    })
+    if (['APPROVED', 'ACTIVE', 'GRADUATED'].includes(status)) {
+      // Fetch enrollments with course prices to update them individually with the price
+      const enrollments = await prismaUnfiltered.enrollment.findMany({
+        where: { id: { in: enrollmentIds } },
+        include: { course: true }
+      })
+
+      await prismaUnfiltered.$transaction(
+        enrollments.map((e) =>
+          prismaUnfiltered.enrollment.update({
+            where: { id: e.id },
+            data: { 
+              status,
+              amountPaid: e.amountPaid && Number(e.amountPaid) > 0 ? e.amountPaid : e.course.price 
+            },
+          })
+        )
+      )
+    } else {
+      await prisma.enrollment.updateMany({
+        where: { id: { in: enrollmentIds } },
+        data: { status },
+      })
+    }
 
     revalidatePath('/staff/enrollments')
     return { success: true }
@@ -162,6 +182,7 @@ export async function bulkUpdateEnrollmentStatus(enrollmentIds: string[], status
     return { error: 'Failed to update enrollments.' }
   }
 }
+
 
 /**
  * Bulk deletes multiple enrollments.

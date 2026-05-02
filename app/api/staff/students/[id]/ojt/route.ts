@@ -38,6 +38,20 @@ export const POST = withErrorHandler(
       return apiError('Enrollment ID, company name, and start date are required')
     }
 
+    // Validate OJT access for the student
+    const { allowed, error: validationError, severity } = await import('@/lib/enrollment/validation').then(v => 
+      v.validateOjtAccess(userId)
+    )
+
+    const force = body.ignorePathwayRestrictions === true
+
+    if (!allowed && !force) {
+      return apiError(validationError || 'Student is not eligible for OJT.', 400, {
+        needsOverride: severity === 'WARNING',
+        warning: validationError
+      })
+    }
+
     const enrollment = await prisma.fullTimeEnrollment.findUnique({
       where: { id: enrollmentId, studentId: userId },
     })

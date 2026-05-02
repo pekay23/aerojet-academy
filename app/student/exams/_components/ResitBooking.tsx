@@ -222,81 +222,104 @@ function ResitContent({
       </div>
 
       {/* Failed Exams Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {failedExams.map((exam) => {
           const isSelected = selectedExam?.moduleCode === exam.moduleCode
           return (
             <button
               key={exam.moduleCode}
               onClick={() => setSelectedExam(isSelected ? null : exam)}
-              className={`group relative flex flex-col rounded-2xl border-2 p-6 text-left transition-all duration-200 ${
+              className={`group relative flex flex-col overflow-hidden rounded-4xl border-2 p-6 text-left transition-all duration-300 ${
                 isSelected
-                  ? 'border-red-500 bg-red-50/50 shadow-lg shadow-red-500/10 scale-[1.02] dark:border-red-600 dark:bg-red-950/30'
-                  : 'border-slate-100 bg-white hover:border-red-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900'
+                  ? 'border-red-600 bg-red-50/30 shadow-[0_20px_50px_-12px_rgba(220,38,38,0.25)] scale-[1.03] dark:border-red-500 dark:bg-red-950/20'
+                  : 'border-slate-200/60 bg-white hover:border-red-300 hover:shadow-xl hover:shadow-slate-200/50 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-red-900/50'
               }`}
             >
-              {/* Module Badge */}
-              <div className="mb-4 flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-100/50 px-3 py-1.5 text-xs font-black text-red-600 dark:bg-red-900/40 dark:text-red-400">
-                  <BookOpen className="h-4 w-4" />
-                  {exam.moduleCode}
-                </span>
-                <span className="rounded-full bg-red-600 px-2.5 py-1 text-[10px] font-black text-white uppercase tracking-wider">
-                  Failed
-                </span>
-              </div>
+              {/* Vibrant Accent Background (Selected only) */}
+              {isSelected && (
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(220,38,38,0.08),transparent_40%)]" />
+              )}
 
-              {/* Module Name */}
-              <h4 className="mb-3 text-base font-black leading-tight text-slate-900 dark:text-slate-100">
-                {exam.moduleName}
-              </h4>
-
-              {/* Score Section */}
-              <div className="mb-4 flex items-center gap-4">
-                <div className="flex flex-col">
-                  <span className="text-3xl font-black text-red-600 dark:text-red-400">
-                    {exam.score}%
-                  </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Your Score
+              {/* Module Header */}
+              <div className="relative mb-5 flex items-center justify-between">
+                <div className="space-y-1">
+                  <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-black tracking-widest uppercase transition-colors ${
+                    isSelected 
+                      ? 'bg-red-600 text-white' 
+                      : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                  }`}>
+                    <BookOpen className="h-3.5 w-3.5" />
+                    {exam.moduleCode}
                   </span>
                 </div>
-                <div className="h-10 w-px bg-slate-100 dark:bg-slate-800" />
-                <div className="flex flex-col">
-                  <span className="text-xl font-bold text-slate-400">
-                    {exam.passingScore}%
+                {isSelected ? (
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow-md">
+                    <CheckCircle2 className="h-4 w-4" />
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    Passing
+                ) : (
+                  <span className="inline-flex items-center rounded-full bg-rose-100 px-2.5 py-1 text-[10px] font-black tracking-wider text-rose-600 uppercase dark:bg-rose-900/30 dark:text-rose-400">
+                    Needs Resit
                   </span>
-                </div>
-              </div>
-
-              {/* Exam Details */}
-              <div className="mt-auto space-y-2 border-t border-slate-50 pt-4 dark:border-slate-800">
-                <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
-                  <Calendar className="h-3.5 w-3.5 text-slate-400" />
-                  <span>
-                    Last attempt: {new Date(exam.examDate).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </span>
-                </div>
-                {exam.eventName && (
-                  <p className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
-                    {exam.eventName}
-                  </p>
                 )}
               </div>
+              
+              <div className="relative space-y-4">
+                <h4 className={`text-lg font-black leading-tight transition-colors ${
+                  isSelected ? 'text-slate-950 dark:text-white' : 'text-slate-900 dark:text-slate-100'
+                }`}>
+                  {exam.moduleName}
+                </h4>
 
-              {/* Selection indicator - More prominent */}
-              <div className={`absolute -right-2 -top-2 h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white shadow-lg transition-all duration-300 ${
-                isSelected ? 'flex scale-100 opacity-100' : 'scale-0 opacity-0'
-              }`}>
-                <CheckCircle2 className="h-5 w-5" />
+                {/* Score Visualization */}
+                <div className="flex items-end gap-3">
+                  <div className="flex flex-col">
+                    <div className="flex items-baseline gap-1">
+                      <span className={`text-4xl font-black ${isSelected ? 'text-red-600' : 'text-slate-900 dark:text-white'}`}>
+                        {exam.score}
+                      </span>
+                      <span className="text-sm font-black text-slate-400">%</span>
+                    </div>
+                    <span className="text-[10px] font-black tracking-[0.15em] text-slate-400 uppercase">
+                      Previous Score
+                    </span>
+                  </div>
+                  
+                  <div className="mb-2 h-8 w-px bg-slate-100 dark:bg-slate-800" />
+
+                  <div className="flex flex-col pb-0.5">
+                    <span className="text-sm font-black text-slate-400">
+                      Target {exam.passingScore}%
+                    </span>
+                    <div className="mt-1 h-1.5 w-20 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                      <div 
+                        className="h-full bg-red-500" 
+                        style={{ width: `${(exam.score / exam.passingScore) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Meta Details */}
+                <div className="mt-4 space-y-2 border-t border-slate-50 pt-4 dark:border-slate-800">
+                  <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+                    <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                    <span>
+                      Attempted {new Date(exam.examDate).toLocaleDateString(undefined, {
+                        month: 'short',
+                        year: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Interaction Hint */}
+                <div className={`mt-4 flex items-center justify-center rounded-xl border py-2.5 text-[10px] font-black tracking-[0.2em] uppercase transition-all duration-300 ${
+                  isSelected
+                    ? 'border-red-600 bg-red-600 text-white shadow-lg shadow-red-600/20'
+                    : 'border-slate-200 bg-slate-50 text-slate-400 group-hover:border-red-200 group-hover:bg-red-50 group-hover:text-red-600 dark:border-slate-800 dark:bg-slate-950'
+                }`}>
+                  {isSelected ? 'Module Selected' : 'Click to Select Module'}
+                </div>
               </div>
             </button>
           )

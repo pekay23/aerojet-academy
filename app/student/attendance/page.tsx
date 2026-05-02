@@ -14,8 +14,8 @@ import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
 import AttendanceTable from './_components/AttendanceTable'
 
 export const metadata: Metadata = {
-  title: 'Attendance | Student Portal',
-  description: 'Track your class attendance records.',
+  title: 'Attendance Registry | Student Portal',
+  description: 'Track your class and exam attendance records.',
 }
 
 export default async function AttendancePage() {
@@ -45,7 +45,7 @@ export default async function AttendancePage() {
       <div className="space-y-8">
         <div>
           <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
-            Attendance
+            Attendance Registry
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
             Track your class attendance and participation.
@@ -61,49 +61,71 @@ export default async function AttendancePage() {
     )
   }
 
-  const attendanceRecords = await prisma.attendanceRecord.findMany({
-    where: { userId: session.user.id },
-    include: {
-      class: {
-        include: { course: true },
+  const [classAttendance, examAttendance] = await Promise.all([
+    prisma.attendanceRecord.findMany({
+      where: { userId: session.user.id },
+      include: {
+        class: {
+          include: { course: true },
+        },
       },
-    },
-    orderBy: { date: 'desc' },
-    take: 200,
-  })
+      orderBy: { date: 'desc' },
+      take: 200,
+    }),
+    prisma.examAttendance.findMany({
+      where: { userId: session.user.id },
+      include: {
+        examComponent: { include: { course: true } },
+        sitting: true,
+      },
+      orderBy: { attendanceDate: 'desc' },
+      take: 100,
+    }),
+  ])
+
+  // Merge and normalize records
+  const allRecords = [
+    ...classAttendance.map((r) => ({
+      id: r.id,
+      type: 'CLASS' as const,
+      status: r.status,
+      date: r.date.toISOString(),
+      notes: r.notes,
+      minutesLate: r.minutesLate,
+      label: r.class.name,
+      subLabel: r.class.course.code,
+    })),
+    ...examAttendance.map((r) => ({
+      id: `exam_${r.id}`,
+      type: 'EXAM' as const,
+      status: r.status,
+      date: r.attendanceDate.toISOString(),
+      notes: r.notes,
+      minutesLate: null,
+      label: r.examComponent?.course?.name || r.examComponent?.code || 'Official Exam',
+      subLabel: r.examComponent?.course?.code || 'EXAM',
+    })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   const stats = {
-    total: attendanceRecords.length,
-    present: attendanceRecords.filter((r) => r.status === 'PRESENT').length,
-    late: attendanceRecords.filter((r) => r.status === 'LATE').length,
-    absent: attendanceRecords.filter((r) => r.status === 'ABSENT').length,
-    excused: attendanceRecords.filter((r) => r.status === 'EXCUSED').length,
+    total: allRecords.length,
+    present: allRecords.filter((r) => r.status === 'PRESENT').length,
+    late: allRecords.filter((r) => r.status === 'LATE').length,
+    absent: allRecords.filter((r) => r.status === 'ABSENT').length,
+    excused: allRecords.filter((r) => r.status === 'EXCUSED').length,
   }
 
   const attendanceRate =
     stats.total > 0 ? Math.round(((stats.present + stats.late) / stats.total) * 100) : 0
 
-  // Serialize records for client component
-  const serializedRecords = attendanceRecords.map((r) => ({
-    id: r.id,
-    status: r.status,
-    date: r.date.toISOString(),
-    notes: r.notes,
-    minutesLate: r.minutesLate,
-    class: {
-      name: r.class.name,
-      course: { code: r.class.course.code },
-    },
-  }))
-
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
-          Attendance
+          Attendance Registry
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Track your class attendance and punctuality.
+          Comprehensive log of your participation in classes and exam sittings.
         </p>
       </div>
 
@@ -111,7 +133,7 @@ export default async function AttendancePage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {[
           {
-            label: 'Attendance Rate',
+            label: 'Overall Attendance',
             value: `${attendanceRate}%`,
             icon: Calendar,
             color: 'text-blue-600',
@@ -121,11 +143,11 @@ export default async function AttendancePage() {
             label: 'Present',
             value: stats.present,
             icon: CheckCircle2,
-            color: 'text-green-600',
-            bg: 'bg-green-50',
+            color: 'text-emerald-600',
+            bg: 'bg-emerald-50',
           },
           {
-            label: 'Late',
+            label: 'Punctual / Late',
             value: stats.late,
             icon: Clock,
             color: 'text-amber-600',
@@ -135,8 +157,8 @@ export default async function AttendancePage() {
             label: 'Absent',
             value: stats.absent,
             icon: XCircle,
-            color: 'text-red-600',
-            bg: 'bg-red-50',
+            color: 'text-rose-600',
+            bg: 'bg-rose-50',
           },
         ].map((stat) => (
           <div
@@ -150,7 +172,7 @@ export default async function AttendancePage() {
                 <stat.icon className="h-6 w-6" />
               </div>
               <div>
-                <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+                <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
                   {stat.label}
                 </p>
                 <p className="text-xl font-black text-slate-900 dark:text-slate-100">
@@ -162,8 +184,7 @@ export default async function AttendancePage() {
         ))}
       </div>
 
-      <AttendanceTable records={serializedRecords} />
+      <AttendanceTable records={allRecords} />
     </div>
   )
 }
-
