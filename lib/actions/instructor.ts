@@ -69,7 +69,7 @@ export async function getInstructorDashboardData() {
     prisma.newsArticle.findMany({
       where: { status: 'PUBLISHED' },
       orderBy: { publishedAt: 'desc' },
-      take: 4,
+      take: 5,
       select: {
         id: true,
         title: true,
@@ -79,11 +79,12 @@ export async function getInstructorDashboardData() {
     }),
     prisma.examEvent.findMany({
       where: {
-        status: { in: ['OPEN', 'CONFIRMED'] },
-        startDate: { gte: now },
+        status: { in: ['OPEN', 'CONFIRMED', 'DRAFT'] },
+        // Show exams that haven't ended yet
+        endDate: { gte: now },
       },
       orderBy: { startDate: 'asc' },
-      take: 2,
+      take: 5,
       select: {
         id: true,
         name: true,
@@ -93,11 +94,15 @@ export async function getInstructorDashboardData() {
     prisma.adminCalendarEvent.findMany({
       where: {
         visibleTo: { in: ['ALL', 'INSTRUCTORS'] },
-        startDate: { gte: now },
+        // Show events that are upcoming or currently active
+        OR: [
+          { startDate: { gte: now } },
+          { AND: [{ startDate: { lte: now } }, { endDate: { gte: now } }] },
+        ],
         deletedAt: null,
       },
       orderBy: { startDate: 'asc' },
-      take: 2,
+      take: 5,
       select: {
         id: true,
         title: true,

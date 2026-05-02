@@ -675,11 +675,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
                   academicYearId: academicYear.id,
                   semesterId: semester.id,
                   status: enrollmentStatus,
-                  amountPaid: 0, // Scholarship — no payment
+                  amountPaid: course.price, 
                   enrolledAt: academicYear.startDate,
                   completedAt: isCompleted ? semester.endDate : null,
                 },
               })
+
+
             }
           }
         }

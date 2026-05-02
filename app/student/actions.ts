@@ -57,19 +57,20 @@ export async function enrollInCourse(courseId: string) {
   })
   if (!profile) return { error: 'Student profile not found.' }
 
+  const { allowed, error: validationError } = await import('@/lib/enrollment/validation').then(v => 
+    v.validateCourseEnrollment(user.id, courseId)
+  )
+
+  if (!allowed) {
+    return { error: validationError || 'You are not eligible for this course.' }
+  }
+
   const effectiveEnrollmentType =
     resolveEffectiveEnrollmentType({
       pathwayCode: profile.pathwayRel?.code,
       enrollmentType: profile.enrollmentType,
       programmeChoice: profile.programmeChoice,
     }) || 'MODULAR'
-
-  if (effectiveEnrollmentType === 'EXAM_ONLY') {
-    return {
-      error:
-        'Exam-Only students cannot enroll in training modules. Please contact support to change your pathway.',
-    }
-  }
 
   // 4. Check if already enrolled
   const existing = await prisma.enrollment.findFirst({
@@ -185,6 +186,7 @@ export async function enrollInCourse(courseId: string) {
           status: EnrollmentStatus.ACTIVE, // Mandatory courses are auto-active
           enrolledAt: new Date(),
           approvedAt: new Date(),
+          amountPaid: course.price,
         },
       })
 
