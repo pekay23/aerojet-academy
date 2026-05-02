@@ -34,6 +34,7 @@ export interface EventDemandSnapshot {
     guaranteedCount: number
     flexibleCount: number
     paidSeatCount: number
+    candidateCount: number
   }
   byBookingType: Array<{
     bookingType: string
@@ -48,11 +49,12 @@ type DemandEventRecord = {
   id: string
   name: string
   examBookings: Array<{
-    id: string
+    userId: string
     bookingType: BookingType
     guaranteeType: BookingGuaranteeTypeValue | null
     moduleCode: string | null
     status: string
+    bookingGroupRef: string | null
   }>
   pools: Array<{
     id: string
@@ -98,10 +100,12 @@ function isGuaranteed(guaranteeType: BookingGuaranteeTypeValue) {
 function buildDemandSnapshot(event: DemandEventRecord): EventDemandSnapshot {
   const moduleMap = new Map<string, EventDemandModuleSummary>()
   const byBookingTypeMap = new Map<string, { count: number; guaranteedCount: number }>()
+  const processedBundles = new Set<string>()
 
   let guaranteedCount = 0
   let flexibleCount = 0
   let paidSeatCount = 0
+  const uniqueUsers = new Set<string>()
 
   for (const booking of event.examBookings) {
     const resolvedGuarantee = deriveGuaranteeType(booking.bookingType, booking.guaranteeType)
@@ -114,6 +118,8 @@ function buildDemandSnapshot(event: DemandEventRecord): EventDemandSnapshot {
     if (['APPROVED', 'COMPLETED', 'PROCESSING', 'NO_SHOW'].includes(booking.status)) {
       paidSeatCount += 1
     }
+    
+    uniqueUsers.add(booking.userId)
 
     const moduleSummary = moduleMap.get(moduleCode) ?? {
       moduleCode,
@@ -126,13 +132,17 @@ function buildDemandSnapshot(event: DemandEventRecord): EventDemandSnapshot {
     else moduleSummary.flexibleCount += 1
     moduleMap.set(moduleCode, moduleSummary)
 
-    const typeSummary = byBookingTypeMap.get(booking.bookingType) ?? {
-      count: 0,
-      guaranteedCount: 0,
+    const bundleId = booking.bookingGroupRef || `${booking.userId}_${booking.bookingType}`
+    if (!processedBundles.has(bundleId)) {
+      const typeSummary = byBookingTypeMap.get(booking.bookingType) ?? {
+        count: 0,
+        guaranteedCount: 0,
+      }
+      typeSummary.count += 1
+      if (guaranteed) typeSummary.guaranteedCount += 1
+      byBookingTypeMap.set(booking.bookingType, typeSummary)
+      processedBundles.add(bundleId)
     }
-    typeSummary.count += 1
-    if (guaranteed) typeSummary.guaranteedCount += 1
-    byBookingTypeMap.set(booking.bookingType, typeSummary)
   }
 
   const pools: EventDemandPoolSummary[] = event.pools.map((pool) => {
@@ -165,6 +175,7 @@ function buildDemandSnapshot(event: DemandEventRecord): EventDemandSnapshot {
       guaranteedCount,
       flexibleCount,
       paidSeatCount,
+      candidateCount: uniqueUsers.size,
     },
     byBookingType: Array.from(byBookingTypeMap.entries()).map(([bookingType, summary]) => ({
       bookingType,
@@ -188,10 +199,12 @@ export async function getEventDemandSnapshot(eventId: string): Promise<EventDema
         where: { deletedAt: null },
         select: {
           id: true,
+          userId: true,
           bookingType: true,
           guaranteeType: true,
           moduleCode: true,
           status: true,
+          bookingGroupRef: true,
         },
       },
       pools: {
@@ -237,10 +250,12 @@ export async function getEventDemandSnapshots(eventIds: string[]): Promise<Map<s
         where: { deletedAt: null },
         select: {
           id: true,
+          userId: true,
           bookingType: true,
           guaranteeType: true,
           moduleCode: true,
           status: true,
+          bookingGroupRef: true,
         },
       },
       pools: {
