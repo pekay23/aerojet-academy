@@ -10,7 +10,9 @@ import {
   MapPin,
   FileBarChart2,
   History as HistoryIcon,
+  RefreshCcw,
 } from 'lucide-react'
+import Link from 'next/link'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
@@ -209,7 +211,7 @@ export default async function ExamsPage({
           attendance.booking?.moduleCode ||
           attendance.examComponent?.course?.code ||
           attendance.examComponent?.code ||
-          'â€”',
+          '—',
         moduleName:
           attendance.examComponent?.course?.name ||
           attendance.booking?.moduleCode ||
@@ -230,23 +232,21 @@ export default async function ExamsPage({
     failedAttempts = allHistory.filter((r) => r.passed === false)
   }
 
-  // For full-time students, redirect to records tab if trying to access booking tabs
+  // Modular (flexible) and Exam-Only students can book their own exams.
+  // Full-time students have their exams managed by the academy staff.
+  const canBook = isExamOnly || isModular
   const isFullTimeStudent = isFullTime
+  
   const validTabs = isFullTimeStudent
     ? ['records']
-    : isExamOnly
+    : canBook
       ? ['available', 'individual', 'group', 'resit', 'bookings', 'records']
       : ['bookings', 'records']
-  const effectiveTab = validTabs.includes(tab)
-    ? tab
-    : isFullTimeStudent
-      ? 'records'
-      : isExamOnly
-        ? 'records'
-        : 'records'
+      
+  const effectiveTab = validTabs.includes(tab) ? tab : 'records'
 
   return (
-    <ExamsTabs isFullTime={isFullTimeStudent} canBookExams={isExamOnly}>
+    <ExamsTabs isFullTime={isFullTimeStudent} canBookExams={canBook}>
       {effectiveTab === 'available' && <AvailablePoolsTab />}
 
       {effectiveTab === 'individual' && <BookingActionTab type="individual" />}
@@ -342,8 +342,19 @@ export default async function ExamsPage({
                   </h4>
                   <p className="mt-1 text-sm text-red-700 dark:text-red-400/80">
                     You have {failedAttempts.length} module{failedAttempts.length > 1 ? 's' : ''}{' '}
-                    that need to be cleared. Visit the "Resit" tab to schedule a resit session.
+                    that need to be cleared.
                   </p>
+                  {canBook && (
+                    <div className="mt-4">
+                      <Link 
+                        href="/student/exams?tab=resit"
+                        className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white transition-all hover:bg-red-700 active:scale-95"
+                      >
+                        <RefreshCcw className="h-4 w-4" />
+                        Book Resit Now
+                      </Link>
+                    </div>
+                  )}
                   <div className="mt-4 flex flex-wrap gap-2">
                     {Array.from(new Set(failedAttempts.map((f) => f.moduleCode))).map((code) => (
                       <span

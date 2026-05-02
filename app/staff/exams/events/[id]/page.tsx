@@ -1,5 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
+export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 import {

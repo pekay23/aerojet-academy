@@ -1,19 +1,21 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { Users, UserCheck, GraduationCap, UserCog } from 'lucide-react'
+import { Users, UserCheck, GraduationCap, UserCog, ShieldCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Suspense } from 'react'
 import UsersTable from './UsersTable'
 import ApplicantsQueue from './ApplicantsQueue'
 import StudentsTable from './StudentsTable'
 import InstructorsTable from './InstructorsTable'
+import ExaminersTable from './ExaminersTable'
 
 const TABS = [
   { key: 'all', label: 'All Users', icon: Users },
   { key: 'applicants', label: 'Applicants', icon: UserCheck },
   { key: 'students', label: 'Students', icon: GraduationCap },
   { key: 'instructors', label: 'Instructors', icon: UserCog },
+  { key: 'examiners', label: 'Examiners', icon: ShieldCheck },
 ] as const
 
 type TabKey = (typeof TABS)[number]['key']
@@ -23,6 +25,7 @@ interface PeopleTabsProps {
   initialTotal: number
   applicantCounts: { all: number; pending_payment: number; pending_approval: number }
   studentCounts: { all: number; active: number; suspended: number; archived: number }
+  examinerCounts: { all: number }
 }
 
 export default function PeopleTabs({
@@ -30,6 +33,7 @@ export default function PeopleTabs({
   initialTotal,
   applicantCounts,
   studentCounts,
+  examinerCounts,
 }: PeopleTabsProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -56,7 +60,9 @@ export default function PeopleTabs({
           const Icon = t.icon
           const isActive = currentTab === t.key
           const badge =
-            t.key === 'applicants' && applicantCounts.all > 0 ? applicantCounts.all : undefined
+            t.key === 'applicants' && applicantCounts.all > 0 ? applicantCounts.all : 
+            t.key === 'examiners' && examinerCounts.all > 0 ? examinerCounts.all :
+            undefined
 
           return (
             <button
@@ -94,6 +100,7 @@ export default function PeopleTabs({
         {currentTab === 'applicants' && <ApplicantsQueue initialCounts={applicantCounts} />}
         {currentTab === 'students' && <StudentsTable initialCounts={studentCounts} />}
         {currentTab === 'instructors' && <InstructorsTable />}
+        {currentTab === 'examiners' && <ExaminersTable />}
       </div>
     </div>
   )

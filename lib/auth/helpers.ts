@@ -144,7 +144,7 @@ export async function generateAcademyEmail(
 
 export async function requireStaff() {
   const session = await getAuthSession()
-  if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
+  if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER'].includes(session.user.role)) {
     throw new Error('Unauthorized')
   }
   return session.user
@@ -185,6 +185,13 @@ export async function requireAuth() {
 export async function requireApplicant() {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'APPLICANT') {
+    throw new Error('Unauthorized')
+  }
+  return session.user
+}
+export async function requireExaminer() {
+  const session = await getAuthSession()
+  if (!session || session.user.role !== 'EXAMINER') {
     throw new Error('Unauthorized')
   }
   return session.user

@@ -36,7 +36,7 @@ export async function getInstructorDashboardData() {
     },
   })
 
-  // 2. Fetch Active Cohorts (Courses assigned to this instructor)
+  // 2. Fetch Active Cohorts
   const activeCohorts = await prisma.course.findMany({
     where: {
       classes: {
@@ -56,7 +56,7 @@ export async function getInstructorDashboardData() {
   // 3. Stats
   const totalStudents = activeCohorts.reduce((acc, curr) => acc + curr._count.enrollments, 0)
 
-  // 4. Pending Grades
+  // 4. Pending Grades Count
   const pendingGradesCount = await prisma.grade.count({
     where: {
       gradedBy: instructorId,
@@ -64,22 +64,71 @@ export async function getInstructorDashboardData() {
     },
   })
 
-  // 5. Recent Notices
-  const recentNotices = await prisma.newsArticle.findMany({
-    where: {
-      status: 'PUBLISHED',
-    },
-    orderBy: {
-      publishedAt: 'desc',
-    },
-    take: 3,
-    select: {
-      id: true,
-      title: true,
-      publishedAt: true,
-      slug: true,
-    },
-  })
+  // 5. Enriched Unified Notices (News + Events)
+  const [news, upcomingExams, adminEvents] = await Promise.all([
+    prisma.newsArticle.findMany({
+      where: { status: 'PUBLISHED' },
+      orderBy: { publishedAt: 'desc' },
+      take: 4,
+      select: {
+        id: true,
+        title: true,
+        publishedAt: true,
+        slug: true,
+      },
+    }),
+    prisma.examEvent.findMany({
+      where: {
+        status: { in: ['OPEN', 'CONFIRMED'] },
+        startDate: { gte: now },
+      },
+      orderBy: { startDate: 'asc' },
+      take: 2,
+      select: {
+        id: true,
+        name: true,
+        startDate: true,
+      },
+    }),
+    prisma.adminCalendarEvent.findMany({
+      where: {
+        visibleTo: { in: ['ALL', 'INSTRUCTORS'] },
+        startDate: { gte: now },
+        deletedAt: null,
+      },
+      orderBy: { startDate: 'asc' },
+      take: 2,
+      select: {
+        id: true,
+        title: true,
+        startDate: true,
+      },
+    }),
+  ])
+
+  const unifiedNotices = [
+    ...news.map((n) => ({
+      id: n.id,
+      title: n.title,
+      date: n.publishedAt || new Date(),
+      type: 'NEWS',
+      link: `/newsroom/${n.slug}`,
+    })),
+    ...upcomingExams.map((e) => ({
+      id: e.id,
+      title: `Exam Window: ${e.name}`,
+      date: e.startDate,
+      type: 'EXAM',
+      link: `/instructor/schedule?event=${e.id}`,
+    })),
+    ...adminEvents.map((a) => ({
+      id: a.id,
+      title: a.title,
+      date: a.startDate,
+      type: 'EVENT',
+      link: '/instructor/schedule',
+    })),
+  ].sort((a, b) => b.date.getTime() - a.date.getTime())
 
   // 6. Pending Grading Details
   const pendingGradingDetails = await prisma.grade.findMany({
@@ -113,7 +162,7 @@ export async function getInstructorDashboardData() {
     totalStudents,
     pendingGradesCount,
     activeCohorts,
-    recentNotices,
+    recentNotices: unifiedNotices,
     pendingGradingDetails: pendingGradingDetails.map((g) => ({
       id: g.id,
       module: g.enrollment.course.code,

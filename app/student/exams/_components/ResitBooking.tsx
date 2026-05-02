@@ -229,42 +229,53 @@ function ResitContent({
             <button
               key={exam.moduleCode}
               onClick={() => setSelectedExam(isSelected ? null : exam)}
-              className={`group relative flex flex-col rounded-2xl border p-5 text-left transition-all ${
+              className={`group relative flex flex-col rounded-2xl border-2 p-6 text-left transition-all duration-200 ${
                 isSelected
-                  ? 'border-red-300 bg-red-50 shadow-md ring-2 ring-red-500/20 dark:border-red-800 dark:bg-red-900/20'
+                  ? 'border-red-500 bg-red-50/50 shadow-lg shadow-red-500/10 scale-[1.02] dark:border-red-600 dark:bg-red-950/30'
                   : 'border-slate-100 bg-white hover:border-red-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900'
               }`}
             >
               {/* Module Badge */}
-              <div className="mb-3 flex items-center justify-between">
-                <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-50 px-2.5 py-1 text-xs font-bold text-red-600 dark:bg-red-900/30 dark:text-red-400">
-                  <BookOpen className="h-3.5 w-3.5" />
+              <div className="mb-4 flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 rounded-lg bg-red-100/50 px-3 py-1.5 text-xs font-black text-red-600 dark:bg-red-900/40 dark:text-red-400">
+                  <BookOpen className="h-4 w-4" />
                   {exam.moduleCode}
                 </span>
-                <span className="rounded-full bg-red-100 px-2 py-0.5 text-xs font-bold text-red-600 uppercase dark:bg-red-900/30 dark:text-red-400">
+                <span className="rounded-full bg-red-600 px-2.5 py-1 text-[10px] font-black text-white uppercase tracking-wider">
                   Failed
                 </span>
               </div>
 
               {/* Module Name */}
-              <h4 className="mb-2 text-sm font-bold text-slate-900 dark:text-slate-100">
+              <h4 className="mb-3 text-base font-black leading-tight text-slate-900 dark:text-slate-100">
                 {exam.moduleName}
               </h4>
 
-              {/* Score */}
-              <div className="mb-3 flex items-baseline gap-2">
-                <span className="text-2xl font-black text-red-600 dark:text-red-400">
-                  {exam.score}%
-                </span>
-                <span className="text-xs text-slate-400">
-                  / {exam.passingScore}% required
-                </span>
+              {/* Score Section */}
+              <div className="mb-4 flex items-center gap-4">
+                <div className="flex flex-col">
+                  <span className="text-3xl font-black text-red-600 dark:text-red-400">
+                    {exam.score}%
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Your Score
+                  </span>
+                </div>
+                <div className="h-10 w-px bg-slate-100 dark:bg-slate-800" />
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold text-slate-400">
+                    {exam.passingScore}%
+                  </span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                    Passing
+                  </span>
+                </div>
               </div>
 
               {/* Exam Details */}
-              <div className="mt-auto space-y-1.5 border-t border-slate-50 pt-3 dark:border-slate-800">
-                <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                  <Calendar className="h-3 w-3" />
+              <div className="mt-auto space-y-2 border-t border-slate-50 pt-4 dark:border-slate-800">
+                <div className="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+                  <Calendar className="h-3.5 w-3.5 text-slate-400" />
                   <span>
                     Last attempt: {new Date(exam.examDate).toLocaleDateString(undefined, {
                       month: 'short',
@@ -273,15 +284,20 @@ function ResitContent({
                     })}
                   </span>
                 </div>
-                {exam.eventName && <p className="text-xs text-slate-400">{exam.eventName}</p>}
+                {exam.eventName && (
+                  <p className="flex items-center gap-2 text-[11px] font-bold text-slate-400 uppercase tracking-tight">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-300" />
+                    {exam.eventName}
+                  </p>
+                )}
               </div>
 
-              {/* Selection indicator */}
-              {isSelected && (
-                <div className="absolute -right-1.5 -top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-red-600 text-white shadow-sm">
-                  <CheckCircle2 className="h-4 w-4" />
-                </div>
-              )}
+              {/* Selection indicator - More prominent */}
+              <div className={`absolute -right-2 -top-2 h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white shadow-lg transition-all duration-300 ${
+                isSelected ? 'flex scale-100 opacity-100' : 'scale-0 opacity-0'
+              }`}>
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
             </button>
           )
         })}
@@ -289,87 +305,92 @@ function ResitContent({
 
       {/* Action Bar */}
       {selectedExam && (
-        <div className="sticky bottom-4 rounded-2xl border border-slate-100 bg-white/90 p-5 shadow-xl backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/90">
-          <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div className="space-y-4">
+        <div className="sticky bottom-6 z-30 rounded-3xl border border-slate-200 bg-white/80 p-6 shadow-2xl shadow-slate-200/50 backdrop-blur-xl dark:border-slate-700 dark:bg-slate-900/80 dark:shadow-none">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-red-600 text-white shadow-lg shadow-red-600/20">
+                <RefreshCcw className="h-6 w-6" />
+              </div>
               <div>
-                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                  Resit: {selectedExam.moduleCode} — {selectedExam.moduleName}
+                <p className="text-xs font-black uppercase tracking-widest text-red-600 dark:text-red-400">
+                  Ready to Rebook
                 </p>
-                <div className="mt-1 flex items-center gap-3 text-xs text-slate-500">
-                  <span className="flex items-center gap-1">
-                    <Wallet className="h-3.5 w-3.5" />
+                <h4 className="text-lg font-black text-slate-900 dark:text-white">
+                  {selectedExam.moduleCode}: {selectedExam.moduleName}
+                </h4>
+                <div className="mt-1 flex items-center gap-4 text-xs font-bold text-slate-500">
+                  <span className="flex items-center gap-1.5">
+                    <Wallet className="h-3.5 w-3.5 text-slate-400" />
                     {totalFreeResits > 0 ? (
-                      <span className="font-bold text-emerald-600">Free resit credit</span>
+                      <span className="text-emerald-600">Free Credit Available</span>
                     ) : (
                       <span>
                         Cost:{' '}
-                        <span className="font-bold text-slate-900 dark:text-slate-100">
+                        <span className="text-slate-900 dark:text-white">
                           {currencySymbol}
                           {resitPrice.toFixed(2)}
                         </span>
                       </span>
                     )}
                   </span>
+                  <div className="h-3 w-px bg-slate-200 dark:bg-slate-700" />
                   <span>
                     Balance: {currencySymbol}
                     {availableBalance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>
                 </div>
               </div>
+            </div>
 
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
               {/* Event Selector */}
-              <div className="w-full max-w-xs space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-wider text-slate-400">
-                  Target Exam Window
+              <div className="flex flex-col gap-1.5 min-w-[240px]">
+                <label className="text-[10px] font-black uppercase tracking-wider text-slate-400 px-1">
+                  Select Exam Window
                 </label>
                 <select
                   value={selectedEventId}
                   onChange={(e) => setSelectedEventId(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-sm focus:border-red-500 focus:ring-0 dark:border-slate-700 dark:bg-slate-800"
+                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-900 focus:border-red-500 focus:ring-4 focus:ring-red-500/10 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                 >
                   {events.length === 0 ? (
-                    <option value="">No upcoming exam windows</option>
+                    <option value="">No upcoming windows</option>
                   ) : (
                     events.map((ev) => (
                       <option key={ev.id} value={ev.id}>
-                        {ev.name} (
-                        {new Date(ev.startDate).toLocaleDateString(undefined, {
-                          month: 'short',
-                          year: 'numeric',
-                        })}
-                        )
+                        {ev.name} ({new Date(ev.startDate).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })})
                       </option>
                     ))
                   )}
                 </select>
               </div>
-            </div>
 
-            <div className="flex gap-3">
-              <button
-                onClick={() => setSelectedExam(null)}
-                className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={onConfirm}
-                disabled={isPending || (!canAfford && totalFreeResits === 0) || !selectedEventId}
-                className="inline-flex items-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-xs font-bold text-white transition-all hover:bg-red-700 disabled:opacity-50 active:scale-[0.98]"
-              >
-                {isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <RefreshCcw className="h-4 w-4" />
-                )}
-                Book Resit
-              </button>
+              <div className="flex items-center gap-2 pt-5 sm:pt-0">
+                <button
+                  onClick={() => setSelectedExam(null)}
+                  className="h-11 rounded-xl border border-slate-200 bg-white px-6 text-sm font-black text-slate-600 transition-all hover:bg-slate-50 active:scale-95 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={onConfirm}
+                  disabled={isPending || (!canAfford && totalFreeResits === 0) || !selectedEventId}
+                  className="h-11 inline-flex items-center gap-2 rounded-xl bg-red-600 px-8 text-sm font-black text-white shadow-lg shadow-red-600/20 transition-all hover:bg-red-700 disabled:opacity-50 active:scale-95"
+                >
+                  {isPending ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <RefreshCcw className="h-5 w-5" />
+                  )}
+                  Confirm Booking
+                </button>
+              </div>
             </div>
           </div>
           {!canAfford && totalFreeResits === 0 && (
-            <p className="mt-2 text-xs text-red-600 dark:text-red-400">
-              Insufficient funds. Please top up your wallet before booking a resit.
+            <p className="mt-4 flex items-center gap-2 text-xs font-bold text-red-600 dark:text-red-400">
+              <AlertTriangle className="h-4 w-4" />
+              Insufficient funds. Please top up your wallet.
             </p>
           )}
         </div>

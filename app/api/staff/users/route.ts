@@ -50,7 +50,11 @@ export async function GET(req: NextRequest) {
           ? {
               instructorProfile: { select: { employeeId: true, specialization: true } },
             }
-          : {}),
+          : role === 'EXAMINER'
+            ? {
+                examinerProfile: { select: { id: true, isActive: true, maxParallelSittings: true, notes: true } },
+              }
+            : {}),
       },
       orderBy: { createdAt: 'desc' },
       skip: (page - 1) * limit,
