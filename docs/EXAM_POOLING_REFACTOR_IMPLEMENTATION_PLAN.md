@@ -184,7 +184,28 @@ Future support must allow:
 
 The schema and services should be future-ready now even if the initial implementation uses only one examiner.
 
-## Target Architecture
+### 10. Financial and Registration Integrity Rules
+
+To maintain absolute data and financial integrity, the following rules must be enforced during any booking or pool assignment operation:
+
+- **Wallet Pre-check**: No `PoolMembership` or `ExamBooking` can be created or updated without a mandatory verification of the user's wallet balance.
+- **Fund Reservation**: 
+  - If the wallet balance is sufficient (>= exam/module cost), the funds must be moved from `availableBalance` to `reservedBalance`.
+  - The `ExamBooking` status must be set to `APPROVED` and `demandStatus` to `POOLED`.
+  - The `PoolMembership` record must include the `amountReserved`.
+- **Intended Demand Handling**:
+  - If a student has insufficient funds, they **must not** occupy a seat in a pool (`PoolMembership`).
+  - Instead, their interest should be tracked as "Intended Demand" (using `PoolWaitlist` or a non-seating metadata layer) without a financial `ExamBooking` record.
+- **Pathway Enforcement**: 
+  - Specific student groups (e.g., Ghana Airforce officers) must have their `programmeChoice` explicitly set to `EXAM_ONLY` in their `StudentProfile`.
+  - Registration flows must validate this pathway before allowing exam-only bookings.
+- **Atomic Linking**: 
+  - Every pool membership must be explicitly linked to:
+    - a valid `ExamPool`
+    - a specific `ExamComponent` (module)
+    - a confirmed `ExamBooking` (if paid/reserved)
+  - Ghost memberships (unlinked or un-reserved) are strictly prohibited in the live pools.
+
 
 The refactor should separate the domain into four clear layers.
 
