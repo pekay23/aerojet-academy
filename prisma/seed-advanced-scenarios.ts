@@ -51,7 +51,10 @@ async function main() {
 
   // 3. Exam Sittings & Assignments
   const bookings = await prisma.examBooking.findMany({ 
-    where: { examComponentId: { not: null } },
+    where: { 
+      examComponentId: { not: null },
+      user: { email: { startsWith: 'test' } } // Target test students only
+    },
     take: 5 
   })
   if (bookings.length > 0) {
@@ -96,7 +99,12 @@ async function main() {
   }
 
   // 4. Invoices
-  const student = await prisma.user.findFirst({ where: { role: 'STUDENT' } })
+  const student = await prisma.user.findFirst({ 
+    where: { 
+      role: 'STUDENT',
+      email: { startsWith: 'test' } // Avoid historical academy students
+    } 
+  })
   if (student) {
     const invNum = 'INV-REG-TEST-001'
     await prisma.invoice.upsert({
@@ -118,7 +126,10 @@ async function main() {
 
   // 5. Exam Bundles
   const modularStudent = await prisma.user.findFirst({
-    where: { studentProfile: { pathwayRel: { code: 'MODULAR' } } }
+    where: { 
+      studentProfile: { pathwayRel: { code: 'MODULAR' } },
+      email: { startsWith: 'test' }
+    }
   })
   if (modularStudent) {
     await prisma.examBundle.upsert({

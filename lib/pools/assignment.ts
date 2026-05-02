@@ -79,7 +79,7 @@ async function createOverflowPool(
   return tx.examPool.create({
     data: {
       eventId,
-      name: `Pool ${poolLabel} - Day ${dayNumber} ${timeSlot === 'MORNING' ? 'Morning' : 'Afternoon'}`,
+      name: `Pool ${nextIndex + 1}: ${examDate.toISOString().split('T')[0]} ${timeSlot === 'MORNING' ? 'Morning' : 'Afternoon'}`,
       examDate,
       examStartTime: getTimeForSlot(examDate, timeSlot, 'start'),
       examEndTime: getTimeForSlot(examDate, timeSlot, 'end'),

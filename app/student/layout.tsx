@@ -88,14 +88,13 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   // Use prismaUnfiltered for simple badge counts — these are non-sensitive UI counters
   // that don't require RLS wrapping, and batching them prevents concurrent pg transactions.
-  const [unreadNotifications, unreadMessages, paymentAccessLevel, milestoneStatus, welcomeMessages] =
-    await Promise.all([
-      prismaUnfiltered.notification.count({ where: { userId: user.id, isRead: false } }),
-      prismaUnfiltered.message.count({ where: { recipientId: user.id, isRead: false } }),
-      getStudentPaymentAccessLevel(user.id, preFetchedData),
-      getEnrollmentMilestoneStatus(user.id, preFetchedData),
-      getWelcomeMessages(prismaUnfiltered, session.user.role),
-    ])
+  // Sequentialize these queries to prevent pg concurrent query warnings (client.query() deprecated error)
+  // while still maintaining relatively fast load times through caching.
+  const unreadNotifications = await prismaUnfiltered.notification.count({ where: { userId: user.id, isRead: false } })
+  const unreadMessages = await prismaUnfiltered.message.count({ where: { recipientId: user.id, isRead: false } })
+  const paymentAccessLevel = await getStudentPaymentAccessLevel(user.id, preFetchedData)
+  const milestoneStatus = await getEnrollmentMilestoneStatus(user.id, preFetchedData)
+  const welcomeMessages = await getWelcomeMessages(prismaUnfiltered, session.user.role)
 
   const wallet = dbUser.wallet
 

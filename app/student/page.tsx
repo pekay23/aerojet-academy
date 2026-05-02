@@ -36,26 +36,26 @@ export default async function StudentDashboard() {
   const userId = session.user.id
 
   // 1. Fetch Profile, Wallet, and User status in a single query to reduce transaction overhead
-  const [userData, welcomeMessages] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        mustChangePassword: true,
-        wallet: true,
-        studentProfile: {
-          include: {
-            pathwayRel: true,
-            licenseTargets: {
-              include: { licenseCategory: true },
-            },
-            academicYear: true,
-            semester: true,
+  // Sequentialize these queries to prevent pg concurrent query warnings (client.query() deprecated error)
+  const userData = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      mustChangePassword: true,
+      wallet: true,
+      studentProfile: {
+        include: {
+          pathwayRel: true,
+          licenseTargets: {
+            include: { licenseCategory: true },
           },
+          academicYear: true,
+          semester: true,
         },
       },
-    }),
-    getWelcomeMessages(prisma, session.user.role),
-  ])
+    },
+  })
+  
+  const welcomeMessages = await getWelcomeMessages(prisma, session.user.role)
 
   const profile = userData?.studentProfile
   const wallet = userData?.wallet
@@ -83,64 +83,62 @@ export default async function StudentDashboard() {
   const activePathway = profile.pathwayRel
 
   // 2b. Parallel data fetching — consolidated to reduce transaction count
-  const [activityData, ftEnrollmentRaw] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        examBookings: {
-          where: {
-            status: { in: ['APPROVED', 'PENDING'] },
-            examDate: { gte: new Date() },
+  const activityData = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      examBookings: {
+        where: {
+          status: { in: ['APPROVED', 'PENDING'] },
+          examDate: { gte: new Date() },
+        },
+        include: { exam: { include: { examComponent: { include: { course: true } } } }, event: true },
+        orderBy: { examDate: 'asc' },
+        take: 3,
+      },
+      enrollments: {
+        where: { status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
+        include: { course: true },
+        take: 6, // Combined for flexible and general
+      },
+      poolMemberships: {
+        where: { 
+          status: { in: ['RESERVED', 'CONFIRMED'] },
+          pool: { isAutoPool: false }
+        },
+        include: { pool: true },
+        take: 3,
+      },
+      examResults: {
+        include: { exam: { include: { examComponent: { include: { course: true } } } } },
+        orderBy: { createdAt: 'desc' },
+        take: 1,
+      },
+      _count: {
+        select: {
+          enrollments: {
+            where: { status: { in: ['ACTIVE', 'APPROVED'] } },
           },
-          include: { exam: { include: { examComponent: { include: { course: true } } } }, event: true },
-          orderBy: { examDate: 'asc' },
-          take: 3,
-        },
-        enrollments: {
-          where: { status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
-          include: { course: true },
-          take: 6, // Combined for flexible and general
-        },
-        poolMemberships: {
-          where: { 
-            status: { in: ['RESERVED', 'CONFIRMED'] },
-            pool: { isAutoPool: false }
+          poolMemberships: {
+            where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
           },
-          include: { pool: true },
-          take: 3,
-        },
-        examResults: {
-          include: { exam: { include: { examComponent: { include: { course: true } } } } },
-          orderBy: { createdAt: 'desc' },
-          take: 1,
-        },
-        _count: {
-          select: {
-            enrollments: {
-              where: { status: { in: ['ACTIVE', 'APPROVED'] } },
-            },
-            poolMemberships: {
-              where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
-            },
-          }
         }
       }
-    }),
-    // Full-Time enrollment: include milestones here to avoid a sequential follow-up query
-    isFullTime
-      ? prisma.fullTimeEnrollment.findFirst({
-          where: { studentId: userId },
-          include: {
-            programme: true,
-            milestones: {
-              where: { status: { in: ['DUE', 'OVERDUE'] } },
-              orderBy: { dueDate: 'asc' },
-              take: 2,
-            },
+    }
+  })
+
+  const ftEnrollmentRaw = isFullTime
+    ? await prisma.fullTimeEnrollment.findFirst({
+        where: { studentId: userId },
+        include: {
+          programme: true,
+          milestones: {
+            where: { status: { in: ['DUE', 'OVERDUE'] } },
+            orderBy: { dueDate: 'asc' },
+            take: 2,
           },
-        })
-      : Promise.resolve(null),
-  ])
+        },
+      })
+    : null
 
   const upcomingExams = activityData?.examBookings || []
   const poolMemberships = activityData?.poolMemberships || []
