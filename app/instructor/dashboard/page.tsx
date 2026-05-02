@@ -8,6 +8,7 @@ import {
   ArrowRight,
   Clock,
   AlertCircle,
+  Sparkles,
 } from 'lucide-react'
 import WelcomeBanner from '@/components/WelcomeBanner'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
