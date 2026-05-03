@@ -43,6 +43,13 @@ interface ExamBookingWithDetails {
     examDate: string | Date
     examComponent: { course: { code: string } } | null
   } | null
+  poolMemberships?: Array<{
+    status: string
+    pool: {
+      name: string
+      examDate: string | Date
+    }
+  }>
   score?: any
   maxScore?: any
   percentage?: any
@@ -178,113 +185,132 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                   </td>
                 </tr>
               ) : (
-                paged.map((booking) => (
-                  <tr
-                    key={booking.id}
-                    className={`group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${
-                      selectedIds.includes(booking.id) ? 'bg-aerojet-blue/5' : ''
-                    }`}
-                  >
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => toggleOne(booking.id)}
-                        className="hover:text-aerojet-blue text-slate-300 transition-colors"
-                      >
-                        {selectedIds.includes(booking.id) ? (
-                          <CheckSquare className="text-aerojet-blue h-4 w-4" />
+                paged.map((booking) => {
+                  const membership = booking.poolMemberships?.find(m => m.status !== 'CANCELLED') || booking.poolMemberships?.[0]
+                  const poolDate = membership?.pool?.examDate
+                  const poolName = membership?.pool?.name
+                  const examDate = booking.exam?.examDate || poolDate || booking.examDate
+                  
+                  // Determine status - show pool status if available and relevant
+                  const isPooled = !!membership
+                  const displayStatus = (isPooled && membership?.status !== 'RESERVED') ? membership?.status : booking.status
+                  const statusColorClass = 
+                    displayStatus === 'APPROVED' || displayStatus === 'COMPLETED' || displayStatus === 'CONFIRMED'
+                      ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
+                      : displayStatus === 'PENDING' || displayStatus === 'RESERVED'
+                        ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                        : 'bg-red-50 text-red-600 border border-red-100'
+
+                  return (
+                    <tr
+                      key={booking.id}
+                      className={`group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${
+                        selectedIds.includes(booking.id) ? 'bg-aerojet-blue/5' : ''
+                      }`}
+                    >
+                      <td className="px-6 py-4">
+                        <button
+                          onClick={() => toggleOne(booking.id)}
+                          className="hover:text-aerojet-blue text-slate-300 transition-colors"
+                        >
+                          {selectedIds.includes(booking.id) ? (
+                            <CheckSquare className="text-aerojet-blue h-4 w-4" />
+                          ) : (
+                            <Square className="h-4 w-4" />
+                          )}
+                        </button>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue">
+                            {booking.user.profile?.firstName?.charAt(0)}
+                            {booking.user.profile?.lastName?.charAt(0)}
+                          </div>
+                          <div>
+                            <div className="font-bold text-slate-900 dark:text-slate-100">
+                              {[
+                                booking.user.profile?.firstName,
+                                booking.user.profile?.middleName,
+                                booking.user.profile?.lastName,
+                              ]
+                                .filter(Boolean)
+                                .join(' ')}
+                            </div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400">
+                              {booking.user.email}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-slate-900 dark:text-slate-100">
+                            {booking.moduleCode}
+                          </span>
+                          <span className="text-xs text-slate-500 capitalize dark:text-slate-400">
+                            {isPooled ? 'Pooled' : booking.bookingType.replace(/_/g, ' ').toLowerCase()}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {isPooled ? (
+                          <div>
+                            <div className="font-medium text-slate-700">{poolName}</div>
+                            <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                              <Calendar className="h-3 w-3" />
+                              {format(new Date(poolDate!), 'MMM d, yyyy')}
+                            </div>
+                          </div>
+                        ) : booking.event ? (
+                          <div>
+                            <div className="font-medium text-slate-700">{booking.event.name}</div>
+                            <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
+                              <Calendar className="h-3 w-3" />
+                              {format(new Date(booking.event.startDate), 'MMM d, yyyy')}
+                            </div>
+                          </div>
                         ) : (
-                          <Square className="h-4 w-4" />
+                          <span className="text-slate-400 italic">Not scheduled</span>
                         )}
-                      </button>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 font-bold text-aerojet-blue">
-                          {booking.user.profile?.firstName?.charAt(0)}
-                          {booking.user.profile?.lastName?.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="font-bold text-slate-900 dark:text-slate-100">
-                            {[
-                              booking.user.profile?.firstName,
-                              booking.user.profile?.middleName,
-                              booking.user.profile?.lastName,
-                            ]
-                              .filter(Boolean)
-                              .join(' ')}
-                          </div>
-                          <div className="text-xs text-slate-500 dark:text-slate-400">
-                            {booking.user.email}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-slate-900 dark:text-slate-100">
-                          {booking.moduleCode}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${statusColorClass}`}
+                        >
+                          {displayStatus}
                         </span>
-                        <span className="text-xs text-slate-500 capitalize dark:text-slate-400">
-                          {booking.bookingType.replace(/_/g, ' ').toLowerCase()}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      {booking.event ? (
-                        <div>
-                          <div className="font-medium text-slate-700">{booking.event.name}</div>
-                          <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400">
-                            <Calendar className="h-3 w-3" />
-                            {format(new Date(booking.event.startDate), 'MMM d, yyyy')}
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-700 dark:text-slate-300">
+                          €{Number(booking.amountPaid).toFixed(2)}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col gap-0.5">
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
+                             <Calendar className="h-3 w-3 text-aerojet-blue" />
+                             <span className="text-[10px] text-slate-400 uppercase mr-1">Exam:</span>
+                             {examDate ? format(new Date(examDate), 'MMM d, yyyy') : '—'}
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
+                            <Clock className="h-2.5 w-2.5" />
+                            <span className="text-slate-400 uppercase">Booked:</span>
+                            {format(new Date(booking.bookedAt), 'MMM d, yyyy')}
                           </div>
                         </div>
-                      ) : (
-                        <span className="text-slate-400 italic">Not scheduled</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-black uppercase tracking-wide ${
-                          booking.status === PaymentStatus.APPROVED || booking.status === PaymentStatus.COMPLETED
-                            ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
-                            : booking.status === PaymentStatus.PENDING
-                              ? 'bg-amber-50 text-amber-600 border border-amber-100'
-                              : 'bg-red-50 text-red-600 border border-red-100'
-                        }`}
-                      >
-                        {booking.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="font-bold text-slate-700 dark:text-slate-300">
-                        €{Number(booking.amountPaid).toFixed(2)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex flex-col gap-0.5">
-                        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-white">
-                           <Calendar className="h-3 w-3 text-aerojet-blue" />
-                           <span className="text-[10px] text-slate-400 uppercase mr-1">Exam:</span>
-                           {format(new Date(booking.exam?.examDate || booking.bookedAt), 'MMM d, yyyy')}
-                        </div>
-                        <div className="flex items-center gap-1.5 text-[10px] text-slate-500">
-                          <Clock className="h-2.5 w-2.5" />
-                          <span className="text-slate-400 uppercase">Booked:</span>
-                          {format(new Date(booking.bookedAt), 'MMM d, yyyy')}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => setEditingBooking(booking)}
-                        className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-aerojet-blue"
-                        title="Edit booking details"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => setEditingBooking(booking)}
+                          className="rounded-lg p-2 text-slate-400 transition-colors hover:bg-slate-100 hover:text-aerojet-blue"
+                          title="Edit booking details"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })
               )}
             </tbody>
           </table>
