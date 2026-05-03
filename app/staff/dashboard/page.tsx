@@ -47,7 +47,7 @@ async function getDashboardData() {
       userStatusCounts,
       pendingPayments,
       recentPendingPaymentsRaw,
-      activePoolRaw,
+      activeEventRaw,
       openPoolsRaw,
       approvedPayments,
     ] = await Promise.all([
@@ -72,14 +72,48 @@ async function getDashboardData() {
         orderBy: { createdAt: 'desc' },
         take: 4,
       }),
-      tx.examPool.findFirst({
-        where: { status: { in: [PoolStatus.OPEN, PoolStatus.NEAR_FULL] } },
-        include: { event: true },
-        orderBy: { examDate: 'asc' },
+      // Fetch the first upcoming event that isn't finished or cancelled
+      tx.examEvent.findFirst({
+        where: { 
+          status: { in: ['DRAFT', 'OPEN', 'CONFIRMED', 'POSTPONED'] },
+          deletedAt: null,
+          startDate: { gte: now }
+        },
+        include: {
+          pools: {
+            where: { status: { notIn: ['FAILED', 'CANCELLED', 'MERGED', 'COMPLETED'] } },
+            select: {
+              maxCandidates: true,
+              seatPrice: true,
+              _count: {
+                select: { memberships: { where: { status: { in: ['RESERVED', 'CONFIRMED', 'NO_SHOW', 'COMPLETED'] } } } }
+              }
+            }
+          },
+          examBookings: {
+            where: {
+              status: { notIn: ['FAILED', 'REJECTED', 'CANCELLED'] },
+              deletedAt: null,
+            },
+            select: {
+              amountPaid: true,
+            }
+          }
+        },
+        orderBy: { startDate: 'asc' },
       }),
+      // Summary card should include all active pools, including confirmed/locked ones
       tx.examPool.findMany({
-        where: { status: { in: [PoolStatus.OPEN, PoolStatus.NEAR_FULL] } },
-        include: { event: { select: { name: true } } },
+        where: { 
+          status: { in: [PoolStatus.OPEN, PoolStatus.NEAR_FULL, PoolStatus.CONFIRMED, PoolStatus.LOCKED] },
+          examDate: { gte: now }
+        },
+        include: { 
+          event: { select: { name: true } },
+          _count: {
+            select: { memberships: { where: { status: { in: ['RESERVED', 'CONFIRMED', 'NO_SHOW', 'COMPLETED'] } } } }
+          }
+        },
         orderBy: { examDate: 'asc' },
         take: 5,
       }),
@@ -131,14 +165,34 @@ async function getDashboardData() {
       .filter((u) => u.role === UserRole.STUDENT && u.status === UserStatus.ACTIVE)
       .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
 
+    // Aggregate event-level stats for the Go/No-Go meter
+    let eventStats = null
+    if (activeEventRaw) {
+      const totalSeatsFilled = activeEventRaw.pools.reduce((sum, p) => sum + p._count.memberships, 0)
+      const totalCapacity = activeEventRaw.pools.reduce((sum, p) => sum + p.maxCandidates, 0)
+      const totalConfirmedRevenue = activeEventRaw.examBookings.reduce((sum, b) => sum + Number(b.amountPaid || 0), 0)
+      
+      eventStats = {
+        name: activeEventRaw.name,
+        totalSeatsFilled,
+        totalCapacity,
+        totalConfirmedRevenue,
+        targetRevenue: Number(activeEventRaw.minRevenueTarget),
+        paymentDeadline: activeEventRaw.paymentDeadline,
+      }
+    }
+
     return {
       totalUsers: totalActiveUsers,
       pendingApplicants,
       activeStudents,
       pendingPayments,
       recentPendingPayments: serializePrisma(recentPendingPaymentsRaw),
-      activePool: serializePrisma(activePoolRaw),
-      openPools: serializePrisma(openPoolsRaw),
+      activeEvent: serializePrisma(eventStats),
+      openPools: serializePrisma(openPoolsRaw.map(p => ({
+        ...p,
+        currentMemberCount: p._count.memberships
+      }))),
       revenueData,
       targetMonthlyRevenue,
       currency,
@@ -268,16 +322,14 @@ export default async function StaffDashboardPage() {
 
         {/* Go/No-Go Meter + Pools Summary */}
         <div className="flex flex-col gap-4">
-          {data.activePool ? (
+          {data.activeEvent ? (
             <GoNoGoMeter
-              poolName={`${data.activePool.event?.name} — ${data.activePool.name}`}
-              currentRevenue={
-                data.activePool.currentMemberCount * data.activePool.seatPrice
-              }
-              targetRevenue={Number(data.activePool.event?.minRevenueTarget ?? 25000)}
-              confirmedSeats={data.activePool.currentMemberCount}
-              totalSeats={data.activePool.maxCandidates}
-              paymentDeadline={data.activePool.event?.paymentDeadline ?? new Date()}
+              poolName={data.activeEvent.name}
+              currentRevenue={data.activeEvent.totalConfirmedRevenue}
+              targetRevenue={data.activeEvent.targetRevenue}
+              confirmedSeats={data.activeEvent.totalSeatsFilled}
+              totalSeats={data.activeEvent.totalCapacity}
+              paymentDeadline={data.activeEvent.paymentDeadline}
             />
           ) : (
             <div className="flex h-full min-h-[200px] flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center dark:border-slate-700 dark:bg-slate-800/50">
