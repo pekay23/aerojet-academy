@@ -10,7 +10,8 @@ import {
   RefreshCw,
   Wallet,
 } from 'lucide-react'
-import RevenueChart from './RevenueChart'
+import dynamic from 'next/dynamic'
+const RevenueChart = dynamic(() => import('./RevenueChart'), { ssr: false })
 
 interface Transaction {
   id: string

@@ -68,6 +68,11 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
 
+  // Sync counts when parent provides updated values
+  useEffect(() => {
+    if (initialCounts.all > 0) setCounts(initialCounts)
+  }, [initialCounts.all, initialCounts.pending_payment, initialCounts.pending_approval])
+
   // paged is now the raw applicants array since the server handles slicing
   const paged = applicants
 

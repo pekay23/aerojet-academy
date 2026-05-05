@@ -1,5 +1,5 @@
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { EnrollmentStatus } from '@prisma/client'
 import { NextResponse } from 'next/server'
 
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     }
 
     // Validate students exist and are FULL_TIME
-    const students = await prisma.user.findMany({
+    const students = await prismaUnfiltered.user.findMany({
       where: {
         id: { in: studentIds },
         role: 'STUDENT',
@@ -51,7 +51,7 @@ export async function POST(req: Request) {
     }
 
     // Validate courses exist and are active
-    const courses = await prisma.course.findMany({
+    const courses = await prismaUnfiltered.course.findMany({
       where: {
         id: { in: courseIds },
         isActive: true,
@@ -65,10 +65,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'No valid active courses found.' }, { status: 400 })
     }
 
+    const courseMap = new Map(courses.map(c => [c.id, c]))
     const records = []
     for (const userId of validStudentIds) {
       for (const courseId of validCourseIds) {
-        const course = courses.find(c => c.id === courseId)
+        const course = courseMap.get(courseId)
         records.push({
           userId,
           courseId,
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
     }
 
     // Batch insert, skipping duplicates (unique constraint: userId + courseId)
-    const result = await prisma.enrollment.createMany({
+    const result = await prismaUnfiltered.enrollment.createMany({
       data: records,
       skipDuplicates: true,
     })

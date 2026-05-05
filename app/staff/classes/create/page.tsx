@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import CreateClassForm from './CreateClassForm'
 import { Metadata } from 'next'
@@ -16,12 +16,12 @@ export default async function CreateClassPage() {
 
   // Fetch courses and instructors for the form
   const [courses, instructors] = await Promise.all([
-    prisma.course.findMany({
+    prismaUnfiltered.course.findMany({
       where: { isActive: true },
       select: { id: true, name: true, code: true },
       orderBy: { code: 'asc' },
     }),
-    prisma.instructorProfile.findMany({
+    prismaUnfiltered.instructorProfile.findMany({
       select: {
         id: true,
         user: {

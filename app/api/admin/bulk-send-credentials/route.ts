@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireAdmin, hashPassword } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog } from '@/lib/audit/logger'
@@ -54,12 +54,16 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     credentials: { name: string; email: string; academyEmail: string; temporaryPassword: string }[]
   } = { sent: [], failed: [], credentials: [] }
 
+  // Batch-fetch all users upfront instead of N+1 queries in the loop
+  const allUsers = await prismaUnfiltered.user.findMany({
+    where: { id: { in: users.map(u => u.userId) } },
+    include: { profile: true, wallet: true, studentProfile: true },
+  })
+  const userMap = new Map(allUsers.map(u => [u.id, u]))
+
   for (const entry of users) {
     try {
-      const user = await prisma.user.findUnique({
-        where: { id: entry.userId },
-        include: { profile: true, wallet: true, studentProfile: true },
-      })
+      const user = userMap.get(entry.userId)
 
       if (!user) {
         results.failed.push({ userId: entry.userId, error: 'User not found' })
@@ -71,7 +75,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       const hashedPw = await hashPassword(tempPassword)
 
       // Update password and set mustChangePassword
-      await prisma.user.update({
+      await prismaUnfiltered.user.update({
         where: { id: user.id },
         data: {
           password: hashedPw,

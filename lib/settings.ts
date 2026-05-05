@@ -2,10 +2,16 @@ import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { unstable_cache } from 'next/cache'
 
 export async function getSystemSetting(key: string, defaultValue: string = ''): Promise<string> {
-  const setting = await prisma.systemSetting.findUnique({
-    where: { key },
-  })
-  return setting?.value ?? defaultValue
+  return unstable_cache(
+    async () => {
+      const setting = await prisma.systemSetting.findUnique({
+        where: { key },
+      })
+      return setting?.value ?? defaultValue
+    },
+    [`setting-${key}`],
+    { revalidate: 300, tags: ['settings'] }
+  )()
 }
 
 export async function updateSystemSetting(key: string, value: string, type: string = 'STRING'): Promise<void> {

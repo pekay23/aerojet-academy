@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import StaffCalendarGrid from './_components/StaffCalendarGrid'
 import { subMonths, addMonths, startOfMonth, endOfMonth } from 'date-fns'

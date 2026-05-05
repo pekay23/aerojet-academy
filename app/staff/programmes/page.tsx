@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { ProgrammeSemester } from './_components/ProgrammesClient'
@@ -12,7 +12,7 @@ export default async function ProgrammesPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const programmes = await prisma.fullTimeProgramme.findMany({
+  const programmes = await prismaUnfiltered.fullTimeProgramme.findMany({
     include: {
       programmeYears: {
         orderBy: { yearNumber: 'asc' },

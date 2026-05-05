@@ -140,6 +140,15 @@ export default function StudentTopbarActions() {
         </DropdownMenuContent>
       </DropdownMenu>
 
+      <button
+        onClick={() => window.dispatchEvent(new CustomEvent('start-app-tour'))}
+        className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-border/50 bg-background transition-colors hover:bg-accent"
+        aria-label="Help"
+        title="Take a tour"
+      >
+        <Info className="h-4 w-4 text-muted-foreground" />
+      </button>
+
       {/* Messages */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

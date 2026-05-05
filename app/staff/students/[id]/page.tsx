@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Metadata } from 'next'
@@ -9,6 +9,7 @@ import StudentDetailTabs from './_components/StudentDetailTabs'
 import EditProfileDialog from '@/app/staff/users/[id]/_components/EditProfileDialog'
 import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
 import { compareNatural } from '@/lib/utils/natural-sort'
+import { getCachedExamComponents, getCachedAcademicYears, getCachedSemesters } from '@/lib/cached-queries'
 
 export const metadata: Metadata = { title: 'Student Details | Staff Portal' }
 export const dynamic = 'force-dynamic'
@@ -25,26 +26,30 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
   const { id } = await params
   const { tab } = await searchParams
 
-  
-  function slugify(text: string) {
-    return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+  // Resolve slug to user ID via SQL instead of loading all users into memory
+  let targetId = id
+  if (!id.match(/^[0-9a-f-]{36}$|^c[a-z0-9]{24,}$/i)) {
+    const slugMatch = await prismaUnfiltered.$queryRaw<{ id: string }[]>`
+      SELECT u.id FROM "users" u
+      JOIN "profiles" p ON p."userId" = u.id
+      WHERE u."deletedAt" IS NULL
+        AND u."role" IN ('STUDENT', 'APPLICANT')
+        AND lower(
+          regexp_replace(
+            regexp_replace(
+              trim(lower(concat_ws(' ', p."firstName", p."lastName"))),
+              '[^\\w\\s-]', '', 'g'
+            ),
+            '\\s+', '-', 'g'
+          )
+        ) = ${id}
+      LIMIT 1
+    `
+    if (slugMatch.length > 0) targetId = slugMatch[0].id
   }
 
-  // Find user by slug first
-  const allUsers = await prisma.user.findMany({
-    where: { role: { in: ['STUDENT', 'APPLICANT'] } },
-    select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } }
-  });
-
-  const matchedUser = allUsers.find(u => {
-    const name = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email.split('@')[0];
-    return slugify(name) === id;
-  });
-
-  const targetId = matchedUser ? matchedUser.id : id;
-
   // Fetch comprehensive student data
-  const student = await prisma.user.findUnique({
+  const student = await prismaUnfiltered.user.findUnique({
     where: { id: targetId, role: { in: ['STUDENT', 'APPLICANT'] } },
     include: {
       profile: true,
@@ -112,46 +117,38 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
 
   if (!student) notFound()
 
-  // Fetch wallet transactions separately for better control
-  const walletTransactions = student.wallet
-    ? await prisma.walletTransaction.findMany({
-        where: { walletId: student.wallet.id },
-        orderBy: { createdAt: 'desc' },
-        take: 100,
-      })
-    : []
-
-  // Fetch full-time enrollment / OJT data
-  const fullTimeEnrollments = await prisma.fullTimeEnrollment.findMany({
-    where: { studentId: targetId },
-    include: {
-      programme: { select: { code: true, name: true } },
-      ojtPeriods: { orderBy: { startDate: 'desc' } },
-      milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
-    },
-  })
-
-  // Fetch modular enrollments
-  const modularEnrollments = await prisma.modularEnrollment.findMany({
-    where: { studentId: targetId },
-    include: {
-      package: { select: { id: true, name: true } },
-    },
-  })
-
-  // Fetch available exam components and upcoming events for booking dialog
-  const [examComponentsRaw, upcomingEvents, academicYears, semesters, studyPathways] =
+  // Fetch all supplementary data in parallel
+  const [walletTransactions, fullTimeEnrollments, modularEnrollments, examComponentsRaw, upcomingEvents, academicYears, semesters, studyPathways] =
     await Promise.all([
-      prisma.examComponent.findMany({
-        include: { course: { select: { id: true, name: true, code: true } } },
+      student.wallet
+        ? prismaUnfiltered.walletTransaction.findMany({
+            where: { walletId: student.wallet.id },
+            orderBy: { createdAt: 'desc' },
+            take: 100,
+          })
+        : Promise.resolve([]),
+      prismaUnfiltered.fullTimeEnrollment.findMany({
+        where: { studentId: targetId },
+        include: {
+          programme: { select: { code: true, name: true } },
+          ojtPeriods: { orderBy: { startDate: 'desc' } },
+          milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
+        },
       }),
-      prisma.examEvent.findMany({
+      prismaUnfiltered.modularEnrollment.findMany({
+        where: { studentId: targetId },
+        include: {
+          package: { select: { id: true, name: true } },
+        },
+      }),
+      getCachedExamComponents(),
+      prismaUnfiltered.examEvent.findMany({
         where: { status: { in: ['OPEN', 'DRAFT'] }, startDate: { gte: new Date() } },
         orderBy: { startDate: 'asc' },
       }),
-      prisma.academicYear.findMany({ orderBy: { startDate: 'desc' } }),
-      prisma.semester.findMany({ orderBy: { startDate: 'desc' } }),
-      prisma.studyPathwayModel?.findMany?.() ?? [],
+      getCachedAcademicYears(),
+      getCachedSemesters(),
+      prismaUnfiltered.studyPathwayModel?.findMany?.() ?? [],
     ])
 
   // Natural sort by module code (M1, M2, M3... M10, M12 instead of M1, M10, M12)
@@ -173,7 +170,7 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
 
   const staffUsers =
     staffIds.size > 0
-      ? await prisma.user.findMany({
+      ? await prismaUnfiltered.user.findMany({
           where: { id: { in: Array.from(staffIds) } },
           select: { id: true, profile: { select: { firstName: true, lastName: true } } },
         })

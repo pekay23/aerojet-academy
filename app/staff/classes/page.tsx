@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { Plus, Calendar, Users, MoreVertical, BookOpen } from 'lucide-react'
 import ClassActionsMenu from '../_components/ClassActionsMenu'
-import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { Metadata } from 'next'
 

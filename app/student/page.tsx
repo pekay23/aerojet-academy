@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import WelcomeBanner from '@/components/WelcomeBanner'
 import { canAccessFeature, getEnrollmentMilestoneStatus, getStudentStatus } from '@/lib/access-control'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
@@ -35,33 +35,69 @@ export default async function StudentDashboard() {
 
   const userId = session.user.id
 
-  // 1. Fetch Profile, Wallet, and User status in a single query to reduce transaction overhead
-  // Sequentialize these queries to prevent pg concurrent query warnings (client.query() deprecated error)
-  const userData = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      mustChangePassword: true,
-      wallet: true,
-      studentProfile: {
-        include: {
-          pathwayRel: true,
-          licenseTargets: {
-            include: { licenseCategory: true },
+  // Single consolidated query — merges two separate findUnique calls into one
+  const [userData, welcomeMessages] = await Promise.all([
+    prismaUnfiltered.user.findUnique({
+      where: { id: userId },
+      select: {
+        mustChangePassword: true,
+        wallet: true,
+        studentProfile: {
+          include: {
+            pathwayRel: true,
+            licenseTargets: {
+              include: { licenseCategory: true },
+            },
+            academicYear: true,
+            semester: true,
           },
-          academicYear: true,
-          semester: true,
         },
+        examBookings: {
+          where: {
+            status: { in: ['APPROVED', 'PENDING'] },
+            examDate: { gte: new Date() },
+          },
+          include: { exam: { include: { examComponent: { include: { course: true } } } }, event: true },
+          orderBy: { examDate: 'asc' },
+          take: 3,
+        },
+        enrollments: {
+          where: { status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
+          include: { course: true },
+          take: 6,
+        },
+        poolMemberships: {
+          where: {
+            status: { in: ['RESERVED', 'CONFIRMED'] },
+            pool: { isAutoPool: false }
+          },
+          include: { pool: true },
+          take: 3,
+        },
+        examResults: {
+          include: { exam: { include: { examComponent: { include: { course: true } } } } },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+        },
+        _count: {
+          select: {
+            enrollments: {
+              where: { status: { in: ['ACTIVE', 'APPROVED'] } },
+            },
+            poolMemberships: {
+              where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
+            },
+          }
+        }
       },
-    },
-  })
-  
-  const welcomeMessages = await getWelcomeMessages(prisma, session.user.role)
+    }),
+    getWelcomeMessages(prismaUnfiltered, session.user.role),
+  ])
 
   const profile = userData?.studentProfile
   const wallet = userData?.wallet
-  const userRecord = { mustChangePassword: userData?.mustChangePassword }
 
-  if (userRecord?.mustChangePassword) {
+  if (userData?.mustChangePassword) {
     redirect('/student/profile/change-password')
   }
 
@@ -82,52 +118,11 @@ export default async function StudentDashboard() {
   const { isFullTime, isExamOnly, isModular: isFlexible, enrollmentType, pathwayCode } = await getStudentStatus(userId)
   const activePathway = profile.pathwayRel
 
-  // 2b. Parallel data fetching — consolidated to reduce transaction count
-  const activityData = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      examBookings: {
-        where: {
-          status: { in: ['APPROVED', 'PENDING'] },
-          examDate: { gte: new Date() },
-        },
-        include: { exam: { include: { examComponent: { include: { course: true } } } }, event: true },
-        orderBy: { examDate: 'asc' },
-        take: 3,
-      },
-      enrollments: {
-        where: { status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
-        include: { course: true },
-        take: 6, // Combined for flexible and general
-      },
-      poolMemberships: {
-        where: { 
-          status: { in: ['RESERVED', 'CONFIRMED'] },
-          pool: { isAutoPool: false }
-        },
-        include: { pool: true },
-        take: 3,
-      },
-      examResults: {
-        include: { exam: { include: { examComponent: { include: { course: true } } } } },
-        orderBy: { createdAt: 'desc' },
-        take: 1,
-      },
-      _count: {
-        select: {
-          enrollments: {
-            where: { status: { in: ['ACTIVE', 'APPROVED'] } },
-          },
-          poolMemberships: {
-            where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
-          },
-        }
-      }
-    }
-  })
+  // Activity data is already included in the consolidated query above
+  const activityData = userData
 
   const ftEnrollmentRaw = isFullTime
-    ? await prisma.fullTimeEnrollment.findFirst({
+    ? await prismaUnfiltered.fullTimeEnrollment.findFirst({
         where: { studentId: userId },
         include: {
           programme: true,

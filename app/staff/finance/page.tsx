@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { getSystemSetting } from '@/lib/settings'
 import { PaymentStatus, TransactionType } from '@/types/enums'
@@ -54,7 +54,7 @@ async function getOverviewChartData() {
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
-  const payments = await prisma.payment.findMany({
+  const payments = await prismaUnfiltered.payment.findMany({
     where: { status: PaymentStatus.APPROVED, approvedAt: { gte: sixMonthsAgo } },
     select: { amount: true, approvedAt: true },
   })
@@ -75,13 +75,13 @@ async function getOverviewChartData() {
 }
 
 async function getWalletTopupsData() {
-  const pendingRequests = await prisma.payment.findMany({
+  const pendingRequests = await prismaUnfiltered.payment.findMany({
     where: { referenceType: 'WALLET_TOPUP', status: PaymentStatus.PENDING },
     include: { user: { include: { profile: true } } },
     orderBy: { createdAt: 'desc' },
   })
 
-  const topupHistory = await prisma.walletTransaction.findMany({
+  const topupHistory = await prismaUnfiltered.walletTransaction.findMany({
     where: { type: TransactionType.TOP_UP },
     orderBy: { createdAt: 'desc' },
     include: { wallet: { include: { user: { include: { profile: true } } } } },
@@ -98,7 +98,7 @@ async function getTransactionsData(query?: string) {
   const currency = await getSystemSetting('course_currency', 'EUR')
   const symbol = getCurrencySymbol(currency)
 
-  const transactions = await prisma.walletTransaction.findMany({
+  const transactions = await prismaUnfiltered.walletTransaction.findMany({
     where: query
       ? {
           OR: [
@@ -123,7 +123,7 @@ async function getTransactionsData(query?: string) {
     .filter((tx) => tx.referenceType === 'PAYMENT_ID' && tx.referenceId)
     .map((tx) => tx.referenceId!)
 
-  const relatedPayments = await prisma.payment.findMany({
+  const relatedPayments = await prismaUnfiltered.payment.findMany({
     where: { id: { in: paymentIds } },
     select: {
       id: true,
@@ -172,7 +172,7 @@ export default async function FinancePage({
   const params = await searchParams
   const tab = VALID_TABS.includes(params.tab ?? '') ? params.tab! : 'overview'
 
-  const pendingTopupCount = await prisma.payment.count({
+  const pendingTopupCount = await prismaUnfiltered.payment.count({
     where: { referenceType: 'WALLET_TOPUP', status: PaymentStatus.PENDING },
   })
 

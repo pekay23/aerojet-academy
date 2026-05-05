@@ -1,9 +1,9 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { getSystemSetting } from '@/lib/settings'
-import RevenueChart from '../_components/RevenueChart'
+import { DashboardCharts } from '../_components/DashboardCharts'
 import PaymentApprovalCard from '../_components/PaymentApprovalCard'
 import GoNoGoMeter from '../_components/GoNoGoMeter'
 import PoolsSummaryCard from '../_components/PoolsSummaryCard'
@@ -81,7 +81,7 @@ async function getDashboardData() {
         },
         include: {
           pools: {
-            where: { status: { notIn: ['FAILED', 'CANCELLED', 'MERGED', 'COMPLETED'] } },
+            where: { status: { notIn: ['FAILED', 'MERGED', 'COMPLETED'] } },
             select: {
               maxCandidates: true,
               seatPrice: true,
@@ -308,7 +308,7 @@ export default async function StaffDashboardPage() {
             <TrendingUp className="text-aerojet-sky h-5 w-5 shrink-0" />
           </div>
           {hasRevenue ? (
-            <RevenueChart data={data.revenueData} currency={data.currSymbol} />
+            <DashboardCharts data={data.revenueData} currency={data.currSymbol} />
           ) : (
             <div className="flex h-64 flex-col items-center justify-center text-center">
               <TrendingUp className="mb-3 h-10 w-10 text-slate-200" />

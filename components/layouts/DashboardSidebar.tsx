@@ -580,6 +580,7 @@ function renderSidebarContent({
 
       {/* Nav Links */}
       <nav
+        id="sidebar-nav"
         className="flex-1 space-y-0.5 overflow-y-auto px-3 py-4"
         style={{
           scrollbarWidth: 'thin',
@@ -633,7 +634,7 @@ function renderSidebarContent({
       </nav>
 
       {/* Footer — User Dropdown Menu */}
-      <div className="border-sidebar-border border-t px-3 py-4">
+      <div id="sidebar-user-menu" className="border-sidebar-border border-t px-3 py-4">
         <UserMenu
           collapsed={collapsed}
           userImage={userImage}

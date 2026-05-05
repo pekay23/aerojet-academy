@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import CoursesClient from './_components/CoursesClient'
 import { serializePrisma } from '@/lib/utils/serialization'

@@ -23,6 +23,7 @@ import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 import TablePagination from './TablePagination'
 import BulkActionsDropdown from './BulkActionsDropdown'
+import SearchInput from '@/components/SearchInput'
 
 
 interface ExamBookingWithDetails {
@@ -31,6 +32,7 @@ interface ExamBookingWithDetails {
   bookingType: string
   amountPaid: any
   bookedAt: string | Date
+  examDate?: string | Date | null
   moduleCode: string | null
   user: {
     email: string
@@ -89,42 +91,54 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
   }
 
   return (
-    <div className="relative">
-      <div className="mb-3 flex items-center justify-end">
-        <BulkActionsDropdown
-          selectedIds={selectedIds}
-          onClear={() => setSelectedIds([])}
-          actions={[
-            {
-              label: 'Approve',
-              icon: CheckCircle2,
-              variant: 'success',
-              confirmTitle: 'Approve Bookings',
-              confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected bookings?`,
-              onClick: async (ids) => {
-                const res = await bulkUpdateExamBookingStatus(ids, PaymentStatus.APPROVED)
-                if (res.success) {
-                  toast.success(`Approved ${ids.length} bookings`)
-                  router.refresh()
-                } else toast.error(res.error)
+    <div className="relative space-y-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="w-full max-w-sm">
+          <SearchInput id="exams-bookings-search" placeholder="Search students, modules, or events..." />
+        </div>
+        
+        <div className="flex items-center gap-3">
+          {selectedIds.length > 0 && (
+            <div className="flex items-center gap-2 rounded-lg bg-aerojet-blue/5 px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-aerojet-blue animate-in fade-in slide-in-from-right-2">
+              <CheckSquare className="h-3.5 w-3.5" />
+              {selectedIds.length} Selected
+            </div>
+          )}
+          <BulkActionsDropdown
+            selectedIds={selectedIds}
+            onClear={() => setSelectedIds([])}
+            actions={[
+              {
+                label: 'Approve',
+                icon: CheckCircle2,
+                variant: 'success',
+                confirmTitle: 'Approve Bookings',
+                confirmMessage: `Are you sure you want to approve ${selectedIds.length} selected bookings?`,
+                onClick: async (ids) => {
+                  const res = await bulkUpdateExamBookingStatus(ids, PaymentStatus.APPROVED)
+                  if (res.success) {
+                    toast.success(`Approved ${ids.length} bookings`)
+                    router.refresh()
+                  } else toast.error(res.error)
+                },
               },
-            },
-            {
-              label: 'Fail/Reject',
-              icon: XCircle,
-              variant: 'danger',
-              confirmTitle: 'Reject Bookings',
-              confirmMessage: `Are you sure you want to reject ${selectedIds.length} selected bookings?`,
-              onClick: async (ids) => {
-                const res = await bulkUpdateExamBookingStatus(ids, PaymentStatus.REJECTED)
-                if (res.success) {
-                  toast.success(`Rejected ${ids.length} bookings`)
-                  router.refresh()
-                } else toast.error(res.error)
+              {
+                label: 'Fail/Reject',
+                icon: XCircle,
+                variant: 'danger',
+                confirmTitle: 'Reject Bookings',
+                confirmMessage: `Are you sure you want to reject ${selectedIds.length} selected bookings?`,
+                onClick: async (ids) => {
+                  const res = await bulkUpdateExamBookingStatus(ids, PaymentStatus.REJECTED)
+                  if (res.success) {
+                    toast.success(`Rejected ${ids.length} bookings`)
+                    router.refresh()
+                  } else toast.error(res.error)
+                },
               },
-            },
-          ]}
-        />
+            ]}
+          />
+        </div>
       </div>
       <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="overflow-x-auto">

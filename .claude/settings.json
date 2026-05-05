@@ -53,7 +53,12 @@
       "Bash(npx dotenv-cli:*)",
       "Bash(find /c/Projects/aerojet-academy/app/staff -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
       "Bash(find /c/Projects/aerojet-academy/components -type f \\\\\\(-name *.tsx -o -name *.ts \\\\\\))",
-      "WebFetch(domain:motion-tabs.vercel.app)"
+      "WebFetch(domain:motion-tabs.vercel.app)",
+      "Bash(ls c:/Projects/aerojet-academy/fix_*.ts)",
+      "Bash(find c:/Projects/aerojet-academy/app/staff -name \"page.tsx\" -exec dirname {} \\\\;)",
+      "Bash(find c:/Projects/aerojet-academy/app/student -name \"page.tsx\" -exec dirname {} \\\\;)",
+      "Bash(find c:/Projects/aerojet-academy/app/applicant -name \"page.tsx\" -exec dirname {} \\\\;)",
+      "Read(//c/Users/PC/.claude/projects/c--Projects-aerojet-academy/980a6bf0-4041-4f50-8c05-e242d5fc64fe/subagents/**)"
     ],
     "additionalDirectories": [
       "d:\\Projects\\aerojet-academy\\app\\api\\staff\\students\\[id]\\wallet\\[txnId]"

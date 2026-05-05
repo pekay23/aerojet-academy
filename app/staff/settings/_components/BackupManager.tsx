@@ -13,7 +13,7 @@ import {
   Zap,
   CheckCircle2,
 } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 
 type Schedule = 'off' | 'daily' | 'weekly' | 'monthly' | 'custom'
 
