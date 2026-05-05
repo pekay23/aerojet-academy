@@ -91,7 +91,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Check email verification — skip for ADMIN and STAFF roles
-        if (!user.emailVerified && !['ADMIN', 'STAFF'].includes(user.role)) {
+        if (!user.emailVerified && !['SUPER_ADMIN', 'ADMIN', 'STAFF'].includes(user.role)) {
           throw new Error('Please verify your email before logging in.')
         }
 

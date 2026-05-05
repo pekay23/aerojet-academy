@@ -2,6 +2,8 @@ import { requireExaminer } from '@/lib/auth/helpers'
 import ExaminerSidebar from './_components/ExaminerSidebar'
 import { Toaster } from 'sonner'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ExaminerLayout({
   children,
 }: {

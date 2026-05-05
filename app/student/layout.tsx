@@ -14,6 +14,8 @@ import { getStudentPaymentAccessLevel, getEnrollmentMilestoneStatus } from '@/li
 import { resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
 import AppTour from '@/components/Tour/AppTour'
 
+export const dynamic = 'force-dynamic'
+
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
   if (!session) redirect('/login')

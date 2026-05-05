@@ -8,7 +8,6 @@ import TMinusTooltip from '@/components/shared/TMinusTooltip'
 
 export const metadata: Metadata = { title: 'Fees & Payment | Aerojet Academy' }
 
-
 const milestones = [
   {
     id: 'A',

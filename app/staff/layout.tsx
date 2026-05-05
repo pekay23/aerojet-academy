@@ -6,6 +6,8 @@ import StaffTopBar from './_components/StaffTopBar'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 import AppTour from '@/components/Tour/AppTour'
 
+export const dynamic = 'force-dynamic'
+
 export default async function StaffLayout({ children }: { children: React.ReactNode }) {
   const session = await getCachedSession()
 
