@@ -40,6 +40,7 @@ model User {
   settings                  Json?                @default("{}")
   passwordChangedAt         DateTime?
   marketingOptOut           Boolean              @default(false)
+  hasCompletedTour          Boolean              @default(false)
   adminNotesAuthored        AdminNote[]          @relation("AdminNoteAuthor")
   attendanceRecords         AttendanceRecord[]
   auditLogs                 AuditLog[]

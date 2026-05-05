@@ -1,7 +1,8 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
+import { getCachedLicenseCategories, getCachedActiveCourses } from '@/lib/cached-queries'
 import SchedulingClient from './_components/SchedulingClient'
 
 export const metadata: Metadata = {
@@ -14,32 +15,34 @@ export default async function SchedulingPage() {
     redirect('/login')
   }
 
-  // Fetch all full-time pathways (auto-populated as tabs)
-  const pathways = await prisma.studyPathwayModel.findMany({
-    where: {
-      code: { in: ['FULL_TIME_4Y', 'FULL_TIME_2Y', 'MILITARY_1Y'] },
-    },
-    include: {
-      academicTerms: {
-        include: {
-          courseAssignments: true,
-          licenseCategory: true,
-        },
-        orderBy: [{ yearNumber: 'asc' }, { semesterNumber: 'asc' }],
+  // Fetch all data in parallel instead of sequentially
+  const [pathways, programmesRaw, licenseCategories, coursesRaw] = await Promise.all([
+    prismaUnfiltered.studyPathwayModel.findMany({
+      where: {
+        code: { in: ['FULL_TIME_4Y', 'FULL_TIME_2Y', 'MILITARY_1Y'] },
       },
-    },
-    orderBy: { name: 'asc' },
-  })
+      include: {
+        academicTerms: {
+          include: {
+            courseAssignments: true,
+            licenseCategory: true,
+          },
+          orderBy: [{ yearNumber: 'asc' }, { semesterNumber: 'asc' }],
+        },
+      },
+      orderBy: { name: 'asc' },
+    }),
+    prismaUnfiltered.fullTimeProgramme.findMany({
+      where: { isActive: true },
+      include: {
+        programmeYears: { orderBy: { yearNumber: 'asc' } },
+      },
+      orderBy: { name: 'asc' },
+    }),
+    getCachedLicenseCategories(),
+    getCachedActiveCourses(),
+  ])
 
-  // Fetch all full-time programmes (for auto-tab matching)
-  const programmesRaw = await prisma.fullTimeProgramme.findMany({
-    where: { isActive: true },
-    include: {
-      programmeYears: { orderBy: { yearNumber: 'asc' } },
-    },
-    orderBy: { name: 'asc' },
-  })
-  
   const programmes = programmesRaw.map(p => ({
     ...p,
     totalFee: p.totalFee ? Number(p.totalFee) : null,
@@ -51,28 +54,11 @@ export default async function SchedulingPage() {
     }))
   }))
 
-  // Fetch all license categories
-  const licenseCategories = await prisma.licenseCategory.findMany({
-    include: {
-      requirements: { include: { course: { select: { id: true, code: true } } } },
-    },
-    orderBy: { code: 'asc' },
-  })
-
-  // Fetch all available EASA Modules
-  const courses = await prisma.course
-    .findMany({
-      where: { isActive: true },
-      include: { category: true },
-      orderBy: { code: 'asc' },
-    })
-    .then((data) =>
-      data.map((course) => ({
-        ...course,
-        price: Number(course.price),
-        duration: course.duration ?? 0,
-      }))
-    )
+  const courses = coursesRaw.map((course) => ({
+    ...course,
+    price: Number(course.price),
+    duration: course.duration ?? 0,
+  }))
 
   return (
     <div className="px-4 py-8 md:px-8">

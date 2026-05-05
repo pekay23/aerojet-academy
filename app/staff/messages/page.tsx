@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { Mail, Send, Inbox, Sparkles } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getStaffRecipients } from '../actions'
 import StaffNewMessageDialog from './_components/StaffNewMessageDialog'
 import StaffMessageThread from './_components/StaffMessageThread'
@@ -20,7 +20,7 @@ export default async function StaffMessagesPage() {
 
   const [recipients, messages] = await Promise.all([
     getStaffRecipients(),
-    prisma.message.findMany({
+    prismaUnfiltered.message.findMany({
       where: {
         OR: [{ recipientId: userId }, { senderId: userId }],
       },

@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { Plus, Calendar, Users, History, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
@@ -17,7 +17,7 @@ export default async function RevisionRunsPage() {
     redirect('/login')
   }
 
-  const runs = await prisma.tuitionRun.findMany({
+  const runs = await prismaUnfiltered.tuitionRun.findMany({
     include: {
       _count: { select: { bookings: true } },
     },

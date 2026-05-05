@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import CreateExamPoolForm from './_components/CreateExamPoolForm'
 
@@ -10,7 +10,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const event = await prisma.examEvent.findUnique({ where: { id } })
+  const event = await prismaUnfiltered.examEvent.findUnique({ where: { id } })
   return { title: `Create Booking | ${event?.name || 'Event'} | Staff Portal` }
 }
 
@@ -19,7 +19,7 @@ export default async function CreateExamPoolPage({ params }: PageProps) {
   if (!session) redirect('/login')
 
   const { id } = await params
-  const event = await prisma.examEvent.findUnique({
+  const event = await prismaUnfiltered.examEvent.findUnique({
     where: { id },
   })
 

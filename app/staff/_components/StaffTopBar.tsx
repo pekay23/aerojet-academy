@@ -176,6 +176,15 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
       <div className="flex items-center gap-3">
         <LiveClock />
 
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent('start-app-tour'))}
+          className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition-all duration-150 ease-out hover:border-slate-200 hover:bg-white hover:text-slate-600 hover:shadow-sm dark:hover:border-slate-700 dark:hover:bg-slate-800/80 dark:hover:text-slate-300"
+          aria-label="Help"
+          title="Take a tour"
+        >
+          <Info className="h-4 w-4" />
+        </button>
+
         {/* Notifications / Pending Actions */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

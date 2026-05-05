@@ -1,9 +1,9 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Users, UserCheck, GraduationCap, UserCog, ShieldCheck } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { Suspense } from 'react'
 import UsersTable from './UsersTable'
 import ApplicantsQueue from './ApplicantsQueue'
 import StudentsTable from './StudentsTable'
@@ -20,27 +20,64 @@ const TABS = [
 
 type TabKey = (typeof TABS)[number]['key']
 
-interface PeopleTabsProps {
-  initialTab?: string
-  initialTotal: number
-  applicantCounts: { all: number; pending_payment: number; pending_approval: number }
-  studentCounts: { all: number; active: number; suspended: number; archived: number }
-  examinerCounts: { all: number }
+interface Counts {
+  total: number
+  applicantAll: number
+  applicantPendingPayment: number
+  applicantPendingApproval: number
+  studentAll: number
+  studentActive: number
+  studentSuspended: number
+  studentArchived: number
+  examinerAll: number
 }
 
-export default function PeopleTabs({
-  initialTab,
-  initialTotal,
-  applicantCounts,
-  studentCounts,
-  examinerCounts,
-}: PeopleTabsProps) {
+const DEFAULT_COUNTS: Counts = {
+  total: 0,
+  applicantAll: 0,
+  applicantPendingPayment: 0,
+  applicantPendingApproval: 0,
+  studentAll: 0,
+  studentActive: 0,
+  studentSuspended: 0,
+  studentArchived: 0,
+  examinerAll: 0,
+}
+
+interface PeopleTabsProps {
+  initialTab?: string
+}
+
+export default function PeopleTabs({ initialTab }: PeopleTabsProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentTab = (searchParams.get('tab') as TabKey) || initialTab || 'all'
+  const [counts, setCounts] = useState<Counts>(DEFAULT_COUNTS)
+
+  useEffect(() => {
+    fetch('/api/staff/users/counts')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success && data.data) setCounts(data.data)
+      })
+      .catch(() => {})
+  }, [])
 
   const setTab = (tab: string) => {
     router.push(`/staff/users?tab=${tab}`, { scroll: false })
+  }
+
+  const applicantCounts = {
+    all: counts.applicantAll,
+    pending_payment: counts.applicantPendingPayment,
+    pending_approval: counts.applicantPendingApproval,
+  }
+
+  const studentCounts = {
+    all: counts.studentAll,
+    active: counts.studentActive,
+    suspended: counts.studentSuspended,
+    archived: counts.studentArchived,
   }
 
   return (
@@ -60,8 +97,8 @@ export default function PeopleTabs({
           const Icon = t.icon
           const isActive = currentTab === t.key
           const badge =
-            t.key === 'applicants' && applicantCounts.all > 0 ? applicantCounts.all : 
-            t.key === 'examiners' && examinerCounts.all > 0 ? examinerCounts.all :
+            t.key === 'applicants' && counts.applicantAll > 0 ? counts.applicantAll :
+            t.key === 'examiners' && counts.examinerAll > 0 ? counts.examinerAll :
             undefined
 
           return (
@@ -96,7 +133,7 @@ export default function PeopleTabs({
 
       {/* Tab Content */}
       <div>
-        {currentTab === 'all' && <UsersTable initialTotal={initialTotal} />}
+        {currentTab === 'all' && <UsersTable initialTotal={counts.total} />}
         {currentTab === 'applicants' && <ApplicantsQueue initialCounts={applicantCounts} />}
         {currentTab === 'students' && <StudentsTable initialCounts={studentCounts} />}
         {currentTab === 'instructors' && <InstructorsTable />}

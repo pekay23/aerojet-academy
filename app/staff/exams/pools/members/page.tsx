@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
 import { ChevronLeft, Users, BookOpen, Search, Filter, Calendar } from 'lucide-react'
 import SearchInput from '@/components/SearchInput'
@@ -20,7 +20,7 @@ export default async function PoolMembersReportPage({
   const params = await searchParams
   const query = params.query?.toLowerCase()
 
-  const events = await prisma.examEvent.findMany({
+  const events = await prismaUnfiltered.examEvent.findMany({
     where: {
       pools: {
         some: {},

@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import ApplicantSidebar from './_components/ApplicantSidebar'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import PortalHeader from '@/components/layouts/PortalHeader'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import ForcePasswordChange from './_components/ForcePasswordChange'
 import { resolveEffectiveEnrollmentType, resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
 
@@ -14,9 +14,20 @@ export default async function ApplicantLayout({ children }: { children: React.Re
   const user = session.user
   if (!['APPLICANT'].includes(user.role)) redirect('/login')
 
-  const dbUser = await prisma.user.findUnique({
+  // Single consolidated query instead of 4 sequential queries
+  const dbUser = await prismaUnfiltered.user.findUnique({
     where: { id: user.id },
-    select: { status: true, role: true, mustChangePassword: true, programmeChoice: true },
+    select: {
+      status: true,
+      role: true,
+      mustChangePassword: true,
+      programmeChoice: true,
+      profile: { select: { firstName: true, lastName: true } },
+      studentProfile: {
+        select: { pathwayId: true, enrollmentType: true, pathwayRel: { select: { code: true } } },
+      },
+      fullTimeEnrollments: { take: 1, select: { id: true } },
+    },
   })
 
   if (
@@ -32,20 +43,9 @@ export default async function ApplicantLayout({ children }: { children: React.Re
     return <ForcePasswordChange />
   }
 
-  const profile = await prisma.profile.findUnique({
-    where: { userId: user.id },
-    select: { firstName: true, lastName: true },
-  })
-
-  const studentProfile = await prisma.studentProfile.findUnique({
-    where: { userId: user.id },
-    select: { pathwayId: true, enrollmentType: true, pathwayRel: { select: { code: true } } },
-  })
-
-  const hasFullTimeEnrollment = await prisma.fullTimeEnrollment.findFirst({
-    where: { studentId: user.id },
-    select: { id: true },
-  })
+  const profile = dbUser.profile
+  const studentProfile = dbUser.studentProfile
+  const hasFullTimeEnrollment = (dbUser.fullTimeEnrollments?.length ?? 0) > 0 ? { id: dbUser.fullTimeEnrollments[0].id } : null
 
   const effectivePathwayCode = resolveEffectivePathwayCode({
     pathwayCode: studentProfile?.pathwayRel?.code,

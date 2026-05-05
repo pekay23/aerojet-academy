@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { sendEmail } from '@/lib/email/service'
 import { env } from '@/lib/env'
 
@@ -23,25 +23,60 @@ export async function GET(req: NextRequest) {
     const sevenDayEnd = new Date(sevenDaysOut)
     sevenDayEnd.setHours(23, 59, 59, 999)
 
-    const pools7Day = await prisma.examPool.findMany({
-      where: {
-        status: 'CONFIRMED',
-        examDate: { gte: sevenDayStart, lte: sevenDayEnd },
-      },
-      include: {
-        memberships: {
-          where: { status: 'CONFIRMED' },
-          include: {
-            user: { include: { profile: true } },
-            examComponent: { include: { course: { select: { code: true } } } },
-          },
-        },
-        event: { select: { name: true } },
-      },
-    })
+    // T-1 reminders
+    const oneDayOut = new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000)
+    const oneDayStart = new Date(oneDayOut)
+    oneDayStart.setHours(0, 0, 0, 0)
+    const oneDayEnd = new Date(oneDayOut)
+    oneDayEnd.setHours(23, 59, 59, 999)
 
+    // Fetch both pool sets in parallel
+    const [pools7Day, pools1Day] = await Promise.all([
+      prismaUnfiltered.examPool.findMany({
+        where: {
+          status: 'CONFIRMED',
+          examDate: { gte: sevenDayStart, lte: sevenDayEnd },
+        },
+        include: {
+          memberships: {
+            where: { status: 'CONFIRMED' },
+            include: {
+              user: { include: { profile: true } },
+              examComponent: { include: { course: { select: { code: true } } } },
+            },
+          },
+          event: { select: { name: true } },
+        },
+      }),
+      prismaUnfiltered.examPool.findMany({
+        where: {
+          status: 'CONFIRMED',
+          examDate: { gte: oneDayStart, lte: oneDayEnd },
+        },
+        include: {
+          memberships: {
+            where: { status: 'CONFIRMED' },
+            include: {
+              user: { include: { profile: true } },
+              examComponent: { include: { course: { select: { code: true } } } },
+            },
+          },
+          event: { select: { name: true } },
+        },
+      }),
+    ])
+
+    // Collect all notification records and email promises
+    const notificationRecords: {
+      userId: string
+      type: 'EXAM_REMINDER'
+      title: string
+      message: string
+    }[] = []
+
+    // Process T-7 reminders — send emails in parallel per pool
     for (const pool of pools7Day) {
-      for (const membership of pool.memberships) {
+      const emailPromises = pool.memberships.map(async (membership) => {
         try {
           const email = membership.user.personalEmail || membership.user.email
           const name = membership.user.profile?.firstName || 'Student'
@@ -59,48 +94,24 @@ export async function GET(req: NextRequest) {
               <p>Please ensure you are prepared. Good luck!</p>`,
           })
 
-          await prisma.notification.create({
-            data: {
-              userId: membership.userId,
-              type: 'EXAM_REMINDER',
-              title: 'Exam in 7 Days',
-              message: `Your ${moduleLabel} exam is in 7 days on ${pool.examDate.toLocaleDateString()}.`,
-            },
+          notificationRecords.push({
+            userId: membership.userId,
+            type: 'EXAM_REMINDER',
+            title: 'Exam in 7 Days',
+            message: `Your ${moduleLabel} exam is in 7 days on ${pool.examDate.toLocaleDateString()}.`,
           })
 
           results.reminders7Day++
         } catch (err: any) {
           results.errors.push(`7-day reminder ${membership.userId}: ${err.message}`)
         }
-      }
+      })
+      await Promise.all(emailPromises)
     }
 
-    // T-1 reminders
-    const oneDayOut = new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000)
-    const oneDayStart = new Date(oneDayOut)
-    oneDayStart.setHours(0, 0, 0, 0)
-    const oneDayEnd = new Date(oneDayOut)
-    oneDayEnd.setHours(23, 59, 59, 999)
-
-    const pools1Day = await prisma.examPool.findMany({
-      where: {
-        status: 'CONFIRMED',
-        examDate: { gte: oneDayStart, lte: oneDayEnd },
-      },
-      include: {
-        memberships: {
-          where: { status: 'CONFIRMED' },
-          include: {
-            user: { include: { profile: true } },
-            examComponent: { include: { course: { select: { code: true } } } },
-          },
-        },
-        event: { select: { name: true } },
-      },
-    })
-
+    // Process T-1 reminders — send emails in parallel per pool
     for (const pool of pools1Day) {
-      for (const membership of pool.memberships) {
+      const emailPromises = pool.memberships.map(async (membership) => {
         try {
           const email = membership.user.personalEmail || membership.user.email
           const name = membership.user.profile?.firstName || 'Student'
@@ -118,20 +129,26 @@ export async function GET(req: NextRequest) {
               <p>Please bring valid ID. Arrive 30 minutes early. Good luck!</p>`,
           })
 
-          await prisma.notification.create({
-            data: {
-              userId: membership.userId,
-              type: 'EXAM_REMINDER',
-              title: 'Exam Tomorrow!',
-              message: `Your ${moduleLabel} exam is TOMORROW.`,
-            },
+          notificationRecords.push({
+            userId: membership.userId,
+            type: 'EXAM_REMINDER',
+            title: 'Exam Tomorrow!',
+            message: `Your ${moduleLabel} exam is TOMORROW.`,
           })
 
           results.reminders1Day++
         } catch (err: any) {
           results.errors.push(`1-day reminder ${membership.userId}: ${err.message}`)
         }
-      }
+      })
+      await Promise.all(emailPromises)
+    }
+
+    // Batch-insert all notifications in one query instead of N individual creates
+    if (notificationRecords.length > 0) {
+      await prismaUnfiltered.notification.createMany({
+        data: notificationRecords,
+      })
     }
 
     return NextResponse.json({
