@@ -119,12 +119,15 @@ function getCompletenessStatus(group: SemesterGroup): 'complete' | 'partial' | '
   let withResults = 0
   for (const e of group.enrollments) {
     const exams = group.examResults.get(e.course.code) || []
-    if (exams.some((ex) => ex.result === 'pass' || ex.result === 'fail')) {
+    if (exams.some((ex) => ex.result?.toLowerCase() === 'pass' || ex.result?.toLowerCase() === 'fail')) {
       withResults++
+    } else if (exams.length > 0) {
+      // Has exam bookings but no final result yet
+      withResults += 0.5 
     }
   }
 
-  if (withResults === total) return 'complete'
+  if (withResults >= total && withResults % 1 === 0) return 'complete'
   if (withResults > 0) return 'partial'
   return 'empty'
 }
@@ -149,7 +152,8 @@ function ExamOnlyHistory({
   const router = useRouter()
   const passed = examBookings.filter((b) => b.result?.toLowerCase() === 'pass').length
   const failed = examBookings.filter((b) => b.result?.toLowerCase() === 'fail').length
-  const pending = examBookings.filter((b) => !b.result).length
+  const booked = examBookings.filter((b) => b.result && !['pass', 'fail', 'absent'].includes(b.result.toLowerCase())).length
+  const pending = examBookings.filter((b) => !b.result || b.status === 'PENDING').length
 
   const fundingColors: Record<string, string> = {
     SCHOLARSHIP: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
@@ -180,19 +184,22 @@ function ExamOnlyHistory({
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="mb-5 grid grid-cols-3 gap-3">
+      <div className="mb-5 grid grid-cols-4 gap-2">
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
-          <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{passed}</p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Passed</p>
+          <p className="text-xl font-black text-emerald-600 dark:text-emerald-400">{passed}</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase">Passed</p>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
-          <p className="text-2xl font-black text-red-500 dark:text-red-400">{failed}</p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Failed</p>
+          <p className="text-xl font-black text-red-500 dark:text-red-400">{failed}</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase">Failed</p>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
-          <p className="text-2xl font-black text-slate-400 dark:text-slate-500">{pending}</p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Pending</p>
+          <p className="text-xl font-black text-blue-500 dark:text-blue-400">{booked}</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase">Booked</p>
+        </div>
+        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
+          <p className="text-xl font-black text-slate-400 dark:text-slate-500">{pending}</p>
+          <p className="text-[9px] font-bold text-slate-400 uppercase">Pending</p>
         </div>
       </div>
 
@@ -254,7 +261,9 @@ function ExamOnlyHistory({
                             ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                             : resultLower === 'fail'
                               ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                              : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                              : ['booked', 'scheduled', 'attended'].includes(resultLower || '')
+                                ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                                : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                         }`}>
                           {booking.result!.toUpperCase()}
                         </span>
@@ -318,8 +327,9 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
   const unmatchedExams = examBookings.filter((b) => b.moduleCode && !matchedModules.has(b.moduleCode))
 
   const totalCourses = enrollments.length
-  const totalExamsWithResults = examBookings.filter((b) => b.result === 'pass' || b.result === 'fail').length
-  const passedExams = examBookings.filter((b) => b.result === 'pass').length
+  const totalExamsWithResults = examBookings.filter((b) => b.result?.toLowerCase() === 'pass' || b.result?.toLowerCase() === 'fail').length
+  const upcomingExamsCount = examBookings.filter((b) => !b.result || !['pass', 'fail', 'absent'].includes(b.result.toLowerCase())).length
+  const passedExams = examBookings.filter((b) => b.result?.toLowerCase() === 'pass').length
 
   const fundingColors: Record<string, string> = {
     SCHOLARSHIP: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
@@ -366,16 +376,16 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
           <p className="text-[10px] font-bold text-slate-400 uppercase">Semesters</p>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
-          <p className="text-2xl font-black text-aerojet-blue dark:text-white">{totalCourses}</p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Courses</p>
-        </div>
-        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
           <p className="text-2xl font-black text-emerald-600 dark:text-emerald-400">{passedExams}</p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Exams Passed</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase">Passed</p>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
-          <p className="text-2xl font-black text-aerojet-blue dark:text-white">{totalExamsWithResults}</p>
-          <p className="text-[10px] font-bold text-slate-400 uppercase">Total Results</p>
+          <p className="text-2xl font-black text-blue-500 dark:text-blue-400">{upcomingExamsCount}</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase">Upcoming</p>
+        </div>
+        <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-center dark:border-slate-800 dark:bg-slate-800/40">
+          <p className="text-2xl font-black text-slate-400 dark:text-slate-500">{totalExamsWithResults}</p>
+          <p className="text-[10px] font-bold text-slate-400 uppercase">Results</p>
         </div>
       </div>
 
@@ -482,11 +492,13 @@ export default function AcademicHistorySection({ studentId, studentName, examCom
                               <td className="px-4 py-2">
                                 {latestExam ? (
                                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                                    latestExam.result === 'pass'
+                                    latestExam.result?.toLowerCase() === 'pass'
                                       ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-                                      : latestExam.result === 'fail'
+                                      : latestExam.result?.toLowerCase() === 'fail'
                                         ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
-                                        : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
+                                        : ['booked', 'scheduled', 'attended'].includes(latestExam.result?.toLowerCase() || '')
+                                          ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                                          : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
                                   }`}>
                                     {latestExam.result?.toUpperCase() || 'PENDING'}
                                   </span>
