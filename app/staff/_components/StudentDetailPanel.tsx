@@ -45,6 +45,10 @@ interface Student {
     cohort?: string | null
     licenceCategory?: string | null
     enrolledAt?: string | null
+    fundingSource?: string | null
+    academicYear?: { name: string } | null
+    semester?: { name: string } | null
+    pathwayRel?: { name: string; code: string } | null
   } | null
   wallet?: {
     availableBalance: number
@@ -70,6 +74,8 @@ interface Student {
     status: string
     result?: string | null
     score?: number | null
+    examCategory?: string | null
+    attemptType?: string | null
     exam?: {
       name: string
       examComponent?: { course?: { name: string; code: string } }
@@ -210,7 +216,7 @@ export default function StudentDetailPanel({
       moduleCode: r.moduleCode || '—',
       examName: r.exam?.name || 'Upcoming Exam',
       date: r.examDate || r.bookedAt,
-      status: r.status,
+      paymentStatus: r.status,
       examCategory: r.examCategory,
       attemptType: r.attemptType,
     })) || []
@@ -436,6 +442,11 @@ export default function StudentDetailPanel({
                       value={currentStudent.studentProfile?.licenceCategory ?? '—'}
                     />
                     <Field
+                      icon={Globe}
+                      label="Pathway"
+                      value={currentStudent.studentProfile?.pathwayRel?.name ?? '—'}
+                    />
+                    <Field
                       icon={Calendar}
                       label="Enrolled"
                       value={
@@ -456,6 +467,18 @@ export default function StudentDetailPanel({
                       label="Cohort"
                       value={currentStudent.studentProfile?.cohort ?? '—'}
                     />
+                    <Field
+                      icon={Wallet}
+                      label="Funding Source"
+                      value={currentStudent.studentProfile?.fundingSource?.replace(/_/g, ' ') ?? '—'}
+                    />
+                    {currentStudent.studentProfile?.academicYear && (
+                      <Field
+                        icon={Calendar}
+                        label="Academic Period"
+                        value={`${currentStudent.studentProfile.academicYear.name}${currentStudent.studentProfile.semester ? ` / ${currentStudent.studentProfile.semester.name}` : ''}`}
+                      />
+                    )}
                   </Grid2>
                 </Section>
 
@@ -724,7 +747,7 @@ function ExamTabContent({
                       className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
                         h.passed
                           ? 'bg-emerald-100 text-emerald-700'
-                          : h.result === 'ABSENT'
+                          : h.result === 'ABSENT' || h.result === 'SCORED' || h.result === 'PENDING' || h.result === 'BOOKED'
                             ? 'bg-slate-100 text-slate-500'
                             : 'bg-red-100 text-red-700'
                       }`}
