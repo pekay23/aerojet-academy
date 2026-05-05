@@ -12,9 +12,10 @@ import ws from 'ws'
  */
 
 const isDev = process.env.NODE_ENV === 'development'
+const isBuild = process.env.NEXT_PHASE === 'phase-production-build'
 
-// REQUIRED: Configure Neon to use WebSockets in Node.js environments
-if (isDev) {
+// REQUIRED: Configure Neon to use WebSockets in Node.js environments (dev and build)
+if (isDev || isBuild) {
   neonConfig.webSocketConstructor = ws
 }
 
@@ -22,7 +23,14 @@ if (isDev) {
 const connectionString = process.env.DATABASE_URL || process.env.DIRECT_URL
 
 if (!connectionString) {
-  console.error('[DB_BASE] CRITICAL: Database connection string is missing.')
+  console.warn('[DB_BASE] WARNING: Database connection string is missing. Prerendering might fail.')
+} else if (isDev || isBuild) {
+  try {
+    const host = new URL(connectionString.replace('postgresql://', 'http://')).hostname
+    console.log(`[DB_BASE] Initializing Neon adapter for: ${host}`)
+  } catch (e) {
+    console.log('[DB_BASE] Initializing Neon adapter.')
+  }
 }
 
 // Helper to create the Neon Serverless adapter
