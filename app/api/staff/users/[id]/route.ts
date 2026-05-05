@@ -70,6 +70,10 @@ export const PATCH = withErrorHandler(
       alternatePhone,
       postalCode,
       profilePhotoUrl,
+      specialization,
+      qualifications,
+      department,
+      position,
       ...userData
     } = validation.data
 
@@ -143,25 +147,54 @@ export const PATCH = withErrorHandler(
       })
     }
 
-    if (employeeId) {
+    if (employeeId || specialization !== undefined || qualifications !== undefined) {
       if (user.role === 'INSTRUCTOR') {
-        const existing = await prisma.instructorProfile.findUnique({ where: { employeeId } })
+        const existing = employeeId
+          ? await prisma.instructorProfile.findUnique({ where: { employeeId } })
+          : null
         if (existing && existing.userId !== id) {
           return apiError('Employee ID already in use', 409)
         }
-        await prisma.instructorProfile.update({
+        await prisma.instructorProfile.upsert({
           where: { userId: id },
-          data: { employeeId },
+          update: {
+            ...(employeeId && { employeeId }),
+            ...(specialization !== undefined && { specialization }),
+            ...(qualifications !== undefined && { qualifications }),
+            ...(department !== undefined && { department }),
+          },
+          create: {
+            userId: id,
+            employeeId: employeeId || `INST-${id.slice(0, 8)}`,
+            specialization: specialization || '',
+            qualifications: qualifications || '',
+            department: department || '',
+          },
         })
       } else if (['ADMIN', 'STAFF', 'SUPER_ADMIN'].includes(user.role)) {
-        const existing = await prisma.staffProfile.findUnique({ where: { employeeId } })
-        if (existing && existing.userId !== id) {
-          return apiError('Employee ID already in use', 409)
+        const staffData: any = {}
+        if (employeeId) staffData.employeeId = employeeId
+        if (department !== undefined) staffData.department = department
+        if (position !== undefined) staffData.position = position
+
+        if (Object.keys(staffData).length > 0) {
+          const existing = employeeId
+            ? await prisma.staffProfile.findUnique({ where: { employeeId } })
+            : null
+          if (existing && existing.userId !== id) {
+            return apiError('Employee ID already in use', 409)
+          }
+
+          await prisma.staffProfile.upsert({
+            where: { userId: id },
+            update: staffData,
+            create: {
+              userId: id,
+              employeeId: employeeId || `STAFF-${id.slice(0, 8)}`,
+              ...staffData,
+            },
+          })
         }
-        await prisma.staffProfile.update({
-          where: { userId: id },
-          data: { employeeId },
-        })
       }
     }
 

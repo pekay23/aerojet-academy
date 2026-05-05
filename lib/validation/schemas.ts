@@ -125,6 +125,10 @@ export const updateUserSchema = z.object({
   alternatePhone: z.string().optional(),
   postalCode: z.string().optional(),
   profilePhotoUrl: z.string().url().optional().or(z.literal('')),
+  specialization: z.string().optional(),
+  qualifications: z.string().optional(),
+  department: z.string().optional(),
+  position: z.string().optional(),
 })
 
 // ===========================================================================
