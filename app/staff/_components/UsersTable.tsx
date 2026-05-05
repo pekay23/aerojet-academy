@@ -446,7 +446,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                           year: 'numeric',
                         })}
                       </td>
-                      <td className="px-5 py-3.5">
+                      <td className="px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
                         <UserActionsMenu
                           userId={user.id}
                           userStatus={user.status}
