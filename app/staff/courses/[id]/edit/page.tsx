@@ -1,6 +1,6 @@
 import { requireStaff } from '@/lib/auth/helpers'
 import { notFound } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import EditCourseForm from './EditCourseForm'
 import { Metadata } from 'next'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -15,7 +15,7 @@ export default async function EditCoursePage({ params }: Props) {
   await requireStaff()
   const { id } = await params
 
-  const course = await prisma.course.findFirst({
+  const course = await prismaUnfiltered.course.findFirst({
     where: { OR: [{ id }, { code: id }] },
   })
 

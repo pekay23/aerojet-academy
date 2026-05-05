@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
 import {
   ArrowLeft,
@@ -37,7 +37,7 @@ export default async function CourseDetailsPage({ params }: Props) {
 
   const { id } = await params
 
-  const course = await prisma.course.findFirst({
+  const course = await prismaUnfiltered.course.findFirst({
     where: { OR: [{ id }, { code: id }] },
     include: {
       category: true,
@@ -71,7 +71,7 @@ export default async function CourseDetailsPage({ params }: Props) {
 
   if (!course) notFound()
 
-  const categories = await prisma.courseCategory.findMany({
+  const categories = await prismaUnfiltered.courseCategory.findMany({
     orderBy: { name: 'asc' },
   })
 

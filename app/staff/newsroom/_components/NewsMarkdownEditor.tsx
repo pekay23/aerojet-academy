@@ -38,7 +38,7 @@ import {
   MoreHorizontal,
 } from 'lucide-react'
 import { UploadButton } from '@/lib/uploads/uploadthing'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { useEffect, useState } from 'react'
 import {
   Dialog,

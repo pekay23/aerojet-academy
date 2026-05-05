@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { TrendingUp, Users, DollarSign, Calendar, Sparkles, AlertTriangle, ArrowUpRight, ArrowDownRight, Award, Zap } from 'lucide-react'
 import { Metadata } from 'next'
 import { format } from 'date-fns'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
 import { Badge } from '@/components/ui/badge'
 import { getDashboardMetrics, formatCurrency, getTopCourses, getAttendanceRate } from '@/lib/analytics/metrics'
@@ -16,14 +16,17 @@ import {
   getFinanceReportSummary,
   getExamAnalytics,
 } from '@/lib/analytics/reports'
-import { EnrollmentChart } from '@/components/charts/EnrollmentChart'
-import { RevenueChart } from '@/components/charts/RevenueChart'
-import { PoolFillChart } from '@/components/charts/PoolFillChart'
-import { AttendanceChart } from '@/components/charts/AttendanceChart'
-import { ExamTrendChart, ScoreDistributionChart } from '@/components/charts/ExamCharts'
+import { 
+  EnrollmentChart, 
+  RevenueChart, 
+  PoolFillChart, 
+  AttendanceChart, 
+  ExamTrendChart, 
+  ScoreDistributionChart, 
+  Sparkline 
+} from './_components/ReportCharts'
 import ReportsTabs from '../_components/ReportsTabs'
 import { PeriodFilter } from './_components/PeriodFilter'
-import { Sparkline } from './_components/Sparkline'
 
 export const metadata: Metadata = { title: 'Reports | Staff Portal' }
 

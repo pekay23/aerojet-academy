@@ -1,6 +1,6 @@
 import { getAuthSession, requireStaff } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import EditClassForm from './EditClassForm'
 import { Metadata } from 'next'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -22,20 +22,20 @@ export default async function EditClassPage({ params }: Props) {
   // Fallback: If id is a slug, find the class by name
   let targetId = id
   if (id.length < 20) { // CUIDs are usually 25 chars, simple heuristic
-    const allBasicClasses = await prisma.class.findMany({ select: { id: true, name: true } })
+    const allBasicClasses = await prismaUnfiltered.class.findMany({ select: { id: true, name: true } })
     const matchedClass = allBasicClasses.find(c => slugify(c.name) === id)
     if (matchedClass) targetId = matchedClass.id
   }
 
   const [cls, courses, instructors] = await Promise.all([
-    prisma.class.findUnique({
+    prismaUnfiltered.class.findUnique({
       where: { id: targetId },
     }),
-    prisma.course.findMany({
+    prismaUnfiltered.course.findMany({
       where: { isActive: true },
       orderBy: { code: 'asc' },
     }),
-    prisma.instructorProfile.findMany({
+    prismaUnfiltered.instructorProfile.findMany({
       select: {
         id: true,
         user: {

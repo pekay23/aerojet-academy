@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getStudentStatus } from '@/lib/access-control'
-import { parseISO, addHours } from 'date-fns'
+import { addHours } from 'date-fns'
 
 function escapeString(str: string | null | undefined) {
   if (!str) return ''
@@ -37,11 +36,11 @@ export async function GET(
       examEvents,
       examPools,
     ] = await Promise.all([
-      prisma.studentCalendarEvent.findMany({
+      prismaUnfiltered.studentCalendarEvent.findMany({
         where: { userId },
         orderBy: { startDate: 'asc' },
       }),
-      prisma.examBooking.findMany({
+      prismaUnfiltered.examBooking.findMany({
         where: { userId, deletedAt: null },
         select: {
           id: true,
@@ -56,7 +55,7 @@ export async function GET(
         orderBy: { startDate: 'asc' },
         select: { id: true, name: true, startDate: true, endDate: true },
       }),
-      prisma.enrollment.findMany({
+      prismaUnfiltered.enrollment.findMany({
         where: { userId, status: { in: ['ACTIVE', 'APPROVED', 'ENROLLED'] } },
         include: {
           course: {
@@ -87,7 +86,7 @@ export async function GET(
         },
         orderBy: { startDate: 'asc' },
       }),
-      prisma.examSittingAssignment.findMany({
+      prismaUnfiltered.examSittingAssignment.findMany({
         where: { userId, status: { not: 'CANCELLED' } },
         include: {
           sitting: {
@@ -98,13 +97,19 @@ export async function GET(
           },
         },
       }),
-      prisma.tuitionRun.findMany({
+      prismaUnfiltered.tuitionRun.findMany({
         where: { status: { in: ['OPEN', 'SCHEDULED'] } },
       }),
       prismaUnfiltered.examEvent.findMany({
-        where: { deletedAt: null },
+        where: { deletedAt: null, endDate: { gte: new Date() } },
+        select: { id: true, name: true, joinDeadline: true, paymentDeadline: true },
       }),
-      prismaUnfiltered.examPool.findMany({}),
+      prismaUnfiltered.examPool.findMany({
+        where: {
+          memberships: { some: { userId } },
+        },
+        select: { id: true, name: true, examStartTime: true, examEndTime: true },
+      }),
     ])
 
     const enrollmentType = resolvedEnrollmentType || 'UNKNOWN'

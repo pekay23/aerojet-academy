@@ -16,7 +16,7 @@ import {
   Clock,
   User as UserIcon,
 } from 'lucide-react'
-import toast from 'react-hot-toast'
+import { toast } from 'sonner'
 import { UploadButton } from '@/lib/uploads/uploadthing'
 import NewsMarkdownEditor from '../../_components/NewsMarkdownEditor'
 

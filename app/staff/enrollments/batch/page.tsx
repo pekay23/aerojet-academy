@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import BatchEnrollForm from './_components/BatchEnrollForm'
 
@@ -17,7 +17,7 @@ export default async function BatchEnrollPage() {
 
   // Fetch all required data
   const [academicYears, courses, students] = await Promise.all([
-    prisma.academicYear.findMany({
+    prismaUnfiltered.academicYear.findMany({
       where: { isActive: true },
       include: {
         semesters: {
@@ -27,11 +27,11 @@ export default async function BatchEnrollPage() {
       },
       orderBy: { startDate: 'desc' },
     }),
-    prisma.course.findMany({
+    prismaUnfiltered.course.findMany({
       where: { isActive: true },
       orderBy: { code: 'asc' },
     }),
-    prisma.user.findMany({
+    prismaUnfiltered.user.findMany({
       where: {
         role: 'STUDENT',
         status: 'ACTIVE',

@@ -1,7 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import prisma from '@/lib/prisma/client'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AlertTriangle } from 'lucide-react'
 import StudentSidebar from './_components/StudentSidebar'
@@ -13,6 +12,7 @@ import ForcePasswordChange from '../applicant/_components/ForcePasswordChange'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 import { getStudentPaymentAccessLevel, getEnrollmentMilestoneStatus } from '@/lib/access-control'
 import { resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
+import AppTour from '@/components/Tour/AppTour'
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
@@ -20,13 +20,14 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   const user = session.user
 
-  const dbUser = await prisma.user.findUnique({
+  const dbUser = await prismaUnfiltered.user.findUnique({
     where: { id: user.id },
     select: {
       status: true,
       role: true,
       mustChangePassword: true,
       registrationPaid: true,
+      hasCompletedTour: true,
       profile: { select: { firstName: true, middleName: true, lastName: true } },
       studentProfile: {
         select: {
@@ -86,15 +87,15 @@ export default async function StudentLayout({ children }: { children: React.Reac
     : (user.name || user.email || '')
   const userRole = user.role
 
-  // Use prismaUnfiltered for simple badge counts — these are non-sensitive UI counters
-  // that don't require RLS wrapping, and batching them prevents concurrent pg transactions.
-  // Sequentialize these queries to prevent pg concurrent query warnings (client.query() deprecated error)
-  // while still maintaining relatively fast load times through caching.
-  const unreadNotifications = await prismaUnfiltered.notification.count({ where: { userId: user.id, isRead: false } })
-  const unreadMessages = await prismaUnfiltered.message.count({ where: { recipientId: user.id, isRead: false } })
-  const paymentAccessLevel = await getStudentPaymentAccessLevel(user.id, preFetchedData)
-  const milestoneStatus = await getEnrollmentMilestoneStatus(user.id, preFetchedData)
-  const welcomeMessages = await getWelcomeMessages(prismaUnfiltered, session.user.role)
+  // Parallelize all independent queries instead of running sequentially
+  const [unreadNotifications, unreadMessages, paymentAccessLevel, milestoneStatus, welcomeMessages] =
+    await Promise.all([
+      prismaUnfiltered.notification.count({ where: { userId: user.id, isRead: false } }),
+      prismaUnfiltered.message.count({ where: { recipientId: user.id, isRead: false } }),
+      getStudentPaymentAccessLevel(user.id, preFetchedData),
+      getEnrollmentMilestoneStatus(user.id, preFetchedData),
+      getWelcomeMessages(prismaUnfiltered, session.user.role),
+    ])
 
   const wallet = dbUser.wallet
 
@@ -125,6 +126,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+      <AppTour hasCompletedTour={dbUser.hasCompletedTour} userRole={userRole} />
       <StudentSidebar
         userName={userName}
         userRole={userRole}

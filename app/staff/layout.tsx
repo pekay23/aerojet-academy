@@ -1,9 +1,10 @@
 import { getCachedSession } from '@/lib/auth/session-context'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import StaffSidebar from './_components/StaffSidebar'
 import StaffTopBar from './_components/StaffTopBar'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
+import AppTour from '@/components/Tour/AppTour'
 
 export default async function StaffLayout({ children }: { children: React.ReactNode }) {
   const session = await getCachedSession()
@@ -17,14 +18,19 @@ export default async function StaffLayout({ children }: { children: React.ReactN
 
   const user = session.user
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: {
-      status: true,
-      role: true,
-      profile: { select: { firstName: true, middleName: true, lastName: true } },
-    },
-  })
+  // Run both queries in parallel; use prismaUnfiltered to bypass RLS transaction overhead
+  const [dbUser, welcomeMessages] = await Promise.all([
+    prismaUnfiltered.user.findUnique({
+      where: { id: user.id },
+      select: {
+        status: true,
+        role: true,
+        hasCompletedTour: true,
+        profile: { select: { firstName: true, middleName: true, lastName: true } },
+      },
+    }),
+    getWelcomeMessages(prismaUnfiltered, user.role),
+  ])
 
   if (
     !dbUser ||
@@ -42,37 +48,29 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   const firstName = dbUser?.profile?.firstName ?? user.name?.split(' ')[0] ?? 'Admin'
   const userRole = user.role
 
-  const welcomeMessages = await getWelcomeMessages(prisma, userRole)
-
-  // Counts are now handled client-side in components to improve SSR performance
-  const pendingApplicantsCount = 0
-  const pendingEnrollmentsCount = 0
-  const pendingPaymentsCount = 0
-  const unreadMessagesCount = 0
-  const unreadNotificationsCount = 0
-
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+      <AppTour hasCompletedTour={dbUser.hasCompletedTour} userRole={userRole} />
       <StaffSidebar
         userName={fullName}
         userRole={userRole}
         userImage={user.image ?? undefined}
         counts={{
-          applicants: pendingApplicantsCount,
-          enrollments: pendingEnrollmentsCount,
-          payments: pendingPaymentsCount,
-          messages: unreadMessagesCount,
+          applicants: 0,
+          enrollments: 0,
+          payments: 0,
+          messages: 0,
         }}
       />
 
       <main id="main-content" className="pt-16 lg:pt-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
         <StaffTopBar
           initialCounts={{
-            applicants: pendingApplicantsCount,
-            payments: pendingPaymentsCount,
-            enrollments: pendingEnrollmentsCount,
-            messages: unreadMessagesCount,
-            notifications: unreadNotificationsCount,
+            applicants: 0,
+            payments: 0,
+            enrollments: 0,
+            messages: 0,
+            notifications: 0,
           }}
           welcomeMessages={welcomeMessages}
           userName={firstName}

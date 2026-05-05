@@ -1,7 +1,8 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
+import { getCachedExamComponents } from '@/lib/cached-queries'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowLeft, Mail, Phone, Globe, Calendar, User as UserIcon, Shield } from 'lucide-react'
@@ -29,24 +30,29 @@ export default async function UserProfilePage({ params }: Props) {
 
   const { id } = await params
 
-  
-  function slugify(text: string) {
-    return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
+  // Resolve slug to user ID via SQL instead of loading all users into memory
+  let targetId = id
+  // If the id doesn't look like a UUID/CUID, treat it as a slug
+  if (!id.match(/^[0-9a-f-]{36}$|^c[a-z0-9]{24,}$/i)) {
+    const slugMatch = await prismaUnfiltered.$queryRaw<{ id: string }[]>`
+      SELECT u.id FROM "users" u
+      JOIN "profiles" p ON p."userId" = u.id
+      WHERE u."deletedAt" IS NULL
+        AND lower(
+          regexp_replace(
+            regexp_replace(
+              trim(lower(concat_ws(' ', p."firstName", p."lastName"))),
+              '[^\\w\\s-]', '', 'g'
+            ),
+            '\\s+', '-', 'g'
+          )
+        ) = ${id}
+      LIMIT 1
+    `
+    if (slugMatch.length > 0) targetId = slugMatch[0].id
   }
 
-  // Find user by slug first
-  const allUsers = await prisma.user.findMany({
-    select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } }
-  });
-
-  const matchedUser = allUsers.find(u => {
-    const name = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email.split('@')[0];
-    return slugify(name) === id;
-  });
-
-  const targetId = matchedUser ? matchedUser.id : id;
-
-  const userRaw = await prisma.user.findUnique({
+  const userRaw = await prismaUnfiltered.user.findUnique({
     where: { id: targetId },
     include: {
       profile: true,
@@ -89,31 +95,28 @@ export default async function UserProfilePage({ params }: Props) {
   if (!userRaw) notFound()
   const user = serializePrisma(userRaw)
 
-  // Fetch OJT data for students with full-time enrollments
-  const ftEnrollmentsRaw =
+  // Fetch OJT + exam components in parallel (both independent of each other)
+  const [ftEnrollmentsRaw, examComponentsRaw] = await Promise.all([
     user.role === UserRole.STUDENT
-      ? await prisma.fullTimeEnrollment.findMany({
+      ? prismaUnfiltered.fullTimeEnrollment.findMany({
           where: { studentId: user.id },
           include: {
             programme: { select: { code: true, name: true } },
             ojtPeriods: { orderBy: { startDate: 'desc' } },
           },
         })
-      : []
+      : Promise.resolve([]),
+    getCachedExamComponents(),
+  ])
 
   const ftEnrollments = serializePrisma(ftEnrollmentsRaw)
 
-  const ojtData = ftEnrollments.map((e) => ({
+  const ojtData = ftEnrollments.map((e: any) => ({
     id: e.id,
     programme: e.programme,
     ojtPeriods: e.ojtPeriods,
   }))
 
-  const examComponentsRaw = await prisma.examComponent.findMany({
-    include: {
-      course: { select: { id: true, name: true, code: true } },
-    },
-  })
   const examComponents = serializePrisma(examComponentsRaw)
 
   const profile = user.profile

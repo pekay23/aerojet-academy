@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { format } from 'date-fns'
 import { ScrollText, User, Tag, Clock } from 'lucide-react'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -100,60 +100,53 @@ export default async function AuditLogsPage(req: {
     ),
   ] as string[]
 
-  if (userIds.length > 0) {
-    const users = await prisma.user.findMany({
-      where: { id: { in: userIds } },
-      include: { profile: true },
-    })
-    users.forEach(
-      (u) =>
-        (entityLabels[u.id] = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email)
-    )
-  }
-  if (courseIds.length > 0) {
-    const courses = await prisma.course.findMany({ where: { id: { in: courseIds } } })
-    courses.forEach((c) => (entityLabels[c.id] = c.name))
-  }
-  if (examEventIds.length > 0) {
-    const events = await prisma.examEvent.findMany({ where: { id: { in: examEventIds } } })
-    events.forEach((e) => (entityLabels[e.id] = e.name))
-  }
-  if (examPoolIds.length > 0) {
-    const pools = await prisma.examPool.findMany({ where: { id: { in: examPoolIds } } })
-    pools.forEach((p) => (entityLabels[p.id] = p.name))
-  }
-  if (examComponentIds.length > 0) {
-    const comps = await prisma.examComponent.findMany({ where: { id: { in: examComponentIds } } })
-    comps.forEach((c) => (entityLabels[c.id] = c.name))
-  }
-  if (classIds.length > 0) {
-    const classes = await prisma.class.findMany({ where: { id: { in: classIds } } })
-    classes.forEach((c) => (entityLabels[c.id] = c.name))
-  }
-  if (paymentIds.length > 0) {
-    const payments = await prisma.payment.findMany({ where: { id: { in: paymentIds } } })
-    payments.forEach(
-      (p) => (entityLabels[p.id] = p.referenceCode || `Payment #${p.id.substring(0, 6)}`)
-    )
-  }
-  if (studentProfileIds.length > 0) {
-    const profiles = await prisma.studentProfile.findMany({
-      where: { id: { in: studentProfileIds } },
-    })
-    profiles.forEach((p) => (entityLabels[p.id] = `Student ID: ${p.studentId}`))
-  }
-  if (enrollmentIds.length > 0) {
-    const enrollments = await prisma.enrollment.findMany({
-      where: { id: { in: enrollmentIds } },
-      include: { course: true, user: { include: { profile: true } } },
-    })
-    enrollments.forEach((e) => {
-      const name = e.user.profile
-        ? `${e.user.profile.firstName} ${e.user.profile.lastName}`
-        : e.user.email
-      entityLabels[e.id] = `${name} - ${e.course.name}`
-    })
-  }
+  // Fetch all entity labels in parallel instead of sequentially
+  const [users, courses, events, pools, comps, classes, payments, profiles, enrollments] =
+    await Promise.all([
+      userIds.length > 0
+        ? prismaUnfiltered.user.findMany({ where: { id: { in: userIds } }, include: { profile: true } })
+        : Promise.resolve([]),
+      courseIds.length > 0
+        ? prismaUnfiltered.course.findMany({ where: { id: { in: courseIds } } })
+        : Promise.resolve([]),
+      examEventIds.length > 0
+        ? prismaUnfiltered.examEvent.findMany({ where: { id: { in: examEventIds } } })
+        : Promise.resolve([]),
+      examPoolIds.length > 0
+        ? prismaUnfiltered.examPool.findMany({ where: { id: { in: examPoolIds } } })
+        : Promise.resolve([]),
+      examComponentIds.length > 0
+        ? prismaUnfiltered.examComponent.findMany({ where: { id: { in: examComponentIds } } })
+        : Promise.resolve([]),
+      classIds.length > 0
+        ? prismaUnfiltered.class.findMany({ where: { id: { in: classIds } } })
+        : Promise.resolve([]),
+      paymentIds.length > 0
+        ? prismaUnfiltered.payment.findMany({ where: { id: { in: paymentIds } } })
+        : Promise.resolve([]),
+      studentProfileIds.length > 0
+        ? prismaUnfiltered.studentProfile.findMany({ where: { id: { in: studentProfileIds } } })
+        : Promise.resolve([]),
+      enrollmentIds.length > 0
+        ? prismaUnfiltered.enrollment.findMany({
+            where: { id: { in: enrollmentIds } },
+            include: { course: true, user: { include: { profile: true } } },
+          })
+        : Promise.resolve([]),
+    ])
+
+  users.forEach((u: any) => (entityLabels[u.id] = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email))
+  courses.forEach((c: any) => (entityLabels[c.id] = c.name))
+  events.forEach((e: any) => (entityLabels[e.id] = e.name))
+  pools.forEach((p: any) => (entityLabels[p.id] = p.name))
+  comps.forEach((c: any) => (entityLabels[c.id] = c.name))
+  classes.forEach((c: any) => (entityLabels[c.id] = c.name))
+  payments.forEach((p: any) => (entityLabels[p.id] = p.referenceCode || `Payment #${p.id.substring(0, 6)}`))
+  profiles.forEach((p: any) => (entityLabels[p.id] = `Student ID: ${p.studentId}`))
+  enrollments.forEach((e: any) => {
+    const name = e.user.profile ? `${e.user.profile.firstName} ${e.user.profile.lastName}` : e.user.email
+    entityLabels[e.id] = `${name} - ${e.course.name}`
+  })
 
   return (
     <div className="mx-auto max-w-[1800px] space-y-6">

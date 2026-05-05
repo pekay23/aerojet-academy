@@ -1,10 +1,11 @@
 import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   images: {
     formats: ['image/avif', 'image/webp'],
     qualities: [75, 80, 90],
-    minimumCacheTTL: 60,
+    minimumCacheTTL: 3600,
     remotePatterns: [
       { protocol: 'https', hostname: 'utfs.io' },
       { protocol: 'https', hostname: 'uploadthing.com' },

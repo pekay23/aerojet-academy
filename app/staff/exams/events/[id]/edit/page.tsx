@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import { serializePrisma } from '@/lib/utils/serialization'
 import EditExamEventForm from './_components/EditExamEventForm'
@@ -11,7 +11,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params
-  const event = await prisma.examEvent.findUnique({ where: { id } })
+  const event = await prismaUnfiltered.examEvent.findUnique({ where: { id } })
   return { title: `Edit ${event?.name || 'Event'} | Staff Portal` }
 }
 
@@ -20,7 +20,7 @@ export default async function EditExamEventPage({ params }: PageProps) {
   if (!session) redirect('/login')
 
   const { id } = await params
-  const event = await prisma.examEvent.findUnique({
+  const event = await prismaUnfiltered.examEvent.findUnique({
     where: { id },
   })
 
@@ -28,8 +28,6 @@ export default async function EditExamEventPage({ params }: PageProps) {
 
   // Serialize Prisma objects (Decimal/Date) for Client Component
   const serializedEvent = serializePrisma(event)
-
-  if (!event) notFound()
 
   return (
     <div className="mx-auto max-w-3xl">

@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import Link from 'next/link'
 import {
@@ -35,12 +35,12 @@ export default async function ClassDetailsPage({ params }: Props) {
   // Fallback: If id is a slug, find the class by name
   let targetId = id
   if (id.length < 20) {
-    const allBasicClasses = await prisma.class.findMany({ select: { id: true, name: true } })
+    const allBasicClasses = await prismaUnfiltered.class.findMany({ select: { id: true, name: true } })
     const matchedClass = allBasicClasses.find(c => slugify(c.name) === id)
     if (matchedClass) targetId = matchedClass.id
   }
 
-  const cls = await prisma.class.findUnique({
+  const cls = await prismaUnfiltered.class.findUnique({
     where: { id: targetId },
     include: {
       course: true,

@@ -298,12 +298,6 @@ async function BookingsTab({ query }: { query?: string }) {
 
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-end">
-          <div className="w-full max-w-sm">
-            <SearchInput id="exams-bookings-search" placeholder="Search students, modules, or events..." />
-          </div>
-        </div>
-
         <ExamBookingsTable bookings={serialized} />
       </div>
     )

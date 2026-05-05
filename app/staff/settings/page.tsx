@@ -1,6 +1,6 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
 import SettingsTabs from './_components/SettingsTabs'
 import SettingsForm from './_components/SettingsForm'
@@ -51,7 +51,7 @@ export default async function SettingsPage({
   const { tab = 'general' } = await searchParams
 
   // Fetch settings values from DB
-  const existingSettings = await prisma.systemSetting.findMany()
+  const existingSettings = await prismaUnfiltered.systemSetting.findMany()
   const values: Record<string, string> = {}
   for (const s of existingSettings) {
     values[s.key] = s.value
@@ -99,12 +99,12 @@ export default async function SettingsPage({
 }
 
 async function WelcomeMessagesContent() {
-  const welcomeMessages = await getWelcomeMessagesGrouped(prisma)
+  const welcomeMessages = await getWelcomeMessagesGrouped(prismaUnfiltered)
   return <WelcomeMessagesManager initialMessages={welcomeMessages} />
 }
 
 async function CalendarContent() {
-  const academicYears = await prisma.academicYear.findMany({
+  const academicYears = await prismaUnfiltered.academicYear.findMany({
     include: {
       semesters: { orderBy: { startDate: 'asc' } },
       _count: { select: { classes: true } },
