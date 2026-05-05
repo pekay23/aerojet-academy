@@ -30,9 +30,10 @@ const createAdapter = () => {
   if (!connectionString) return undefined
   
   // Use the verified Pool initialization from test-neon.ts
+  // Cast to any to resolve version-specific type mismatches between the driver and adapter
   const pool = new Pool({ connectionString })
   
-  return new PrismaNeon(pool)
+  return new PrismaNeon(pool as any)
 }
 
 const globalForPrismaBase = globalThis as unknown as {
