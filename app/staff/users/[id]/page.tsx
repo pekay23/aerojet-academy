@@ -14,6 +14,8 @@ import EditPathwayDialog from './_components/EditPathwayDialog'
 import EditAcademicPeriodDialog from './_components/EditAcademicPeriodDialog'
 import OjtSection from './_components/OjtSection'
 import AcademicHistorySection from './_components/AcademicHistorySection'
+import EditInstructorProfileDialog from './_components/EditInstructorProfileDialog'
+import EditStaffProfileDialog from './_components/EditStaffProfileDialog'
 import { Metadata } from 'next'
 import { PathwayCode } from './_components/EditPathwayDialog'
 import { UserStatus, UserRole, EnrollmentStatus } from '@/types/enums'
@@ -408,10 +410,28 @@ export default async function UserProfilePage({ params }: Props) {
 
           {user.role === UserRole.INSTRUCTOR && user.instructorProfile && (
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-              <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
-                <UserIcon className="h-4 w-4" /> Instructor Details
-              </h2>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
+                  <UserIcon className="h-4 w-4" /> Instructor Details
+                </h2>
+                <EditInstructorProfileDialog
+                  userId={user.id}
+                  initialData={{
+                    specialization: user.instructorProfile.specialization,
+                    qualifications: user.instructorProfile.qualifications,
+                    department: user.instructorProfile.department,
+                  }}
+                />
+              </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
+                  <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">
+                    Department
+                  </p>
+                  <p className="font-bold text-slate-700 dark:text-slate-300">
+                    {user.instructorProfile.department || 'General'}
+                  </p>
+                </div>
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
                   <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">
                     Employee ID
@@ -452,9 +472,18 @@ export default async function UserProfilePage({ params }: Props) {
 
           {['STAFF', 'ADMIN', 'SUPER_ADMIN'].includes(user.role) && user.staffProfile && (
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
-              <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
-                <UserIcon className="h-4 w-4" /> Staff Details
-              </h2>
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
+                  <UserIcon className="h-4 w-4" /> Staff Details
+                </h2>
+                <EditStaffProfileDialog
+                  userId={user.id}
+                  initialData={{
+                    department: user.staffProfile.department,
+                    position: user.staffProfile.position,
+                  }}
+                />
+              </div>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40">
                   <p className="mb-1 text-[10px] font-bold text-slate-400 uppercase dark:text-slate-500">

@@ -21,7 +21,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import ChangeRoleDialog from '../users/[id]/_components/ChangeRoleDialog'
 
@@ -161,6 +160,7 @@ export default function UserActionsMenu({
         <DropdownMenuTrigger asChild>
           <button
             disabled={!!loading}
+            onClick={(e) => e.stopPropagation()}
             aria-label={`Actions for ${userName}`}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all outline-none hover:bg-slate-100 hover:text-slate-700 focus:ring-2 focus:ring-aerojet-blue focus:ring-offset-2 disabled:opacity-50"
           >
@@ -189,6 +189,7 @@ export default function UserActionsMenu({
                 <DropdownMenuItem key={item.label} asChild className={colorClass}>
                   <Link
                     href={item.href}
+                    onClick={(e) => e.stopPropagation()}
                     className="flex w-full cursor-pointer items-center gap-2.5 px-2 py-2"
                   >
                     <Icon className="h-3.5 w-3.5" />
@@ -202,7 +203,10 @@ export default function UserActionsMenu({
               return (
                 <DropdownMenuItem
                   key={item.label}
-                  onClick={item.onClick}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    item.onClick()
+                  }}
                   className={`${colorClass} flex w-full cursor-pointer items-center gap-2.5 px-2 py-2`}
                 >
                   <Icon className="h-3.5 w-3.5" />
@@ -214,7 +218,10 @@ export default function UserActionsMenu({
             return (
               <DropdownMenuItem
                 key={item.label}
-                onClick={() => handleAction(item.action!, item.label)}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleAction(item.action!, item.label)
+                }}
                 className={`${colorClass} flex w-full cursor-pointer items-center gap-2.5 px-2 py-2`}
               >
                 <Icon className="h-3.5 w-3.5" />
