@@ -6,6 +6,8 @@ import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import PortalHeader from '@/components/layouts/PortalHeader'
 import { getPendingGradingCount } from '@/lib/actions/instructor'
 
+export const dynamic = 'force-dynamic'
+
 export default async function InstructorLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
   if (!session) redirect('/login')

@@ -7,6 +7,8 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import ForcePasswordChange from './_components/ForcePasswordChange'
 import { resolveEffectiveEnrollmentType, resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
 
+export const dynamic = 'force-dynamic'
+
 export default async function ApplicantLayout({ children }: { children: React.ReactNode }) {
   const session = await getAuthSession()
   if (!session) redirect('/login')
