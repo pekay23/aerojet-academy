@@ -1,2 +1,0 @@
-﻿[DB_BASE] Initializing Neon adapter for: ep-wandering-wave-ahyik1io-pooler.c-3.us-east-1.aws.neon.tech
-[DB_BASE] Creating pool with connection string length: 111
