@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -24,8 +24,8 @@ export const POST = withErrorHandler(
 
     // Validate both components exist and belong to the same course
     const [source, target] = await Promise.all([
-      prisma.examComponent.findUnique({ where: { id: sourceComponentId } }),
-      prisma.examComponent.findUnique({ where: { id: targetComponentId } }),
+      prismaUnfiltered.examComponent.findUnique({ where: { id: sourceComponentId } }),
+      prismaUnfiltered.examComponent.findUnique({ where: { id: targetComponentId } }),
     ])
 
     if (!source) return apiNotFound('Source exam component not found')
@@ -50,7 +50,7 @@ export const POST = withErrorHandler(
     }
 
     // Execute transfer in a transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prismaUnfiltered.$transaction(async (tx) => {
       // Update bookings
       const bookingUpdate = await tx.examBooking.updateMany({
         where: bookingWhere,

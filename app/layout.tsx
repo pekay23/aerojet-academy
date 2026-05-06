@@ -26,13 +26,8 @@ export const viewport = {
 
 export const metadata: Metadata = {
   icons: {
-    icon: [
-      { url: '/favicon.ico' },
-      { url: '/favicon-32x32.webp', sizes: '32x32', type: 'image/webp' },
-    ],
-    apple: [
-      { url: '/apple-touch-icon.webp' },
-    ],
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.webp',
   },
   manifest: '/manifest.json',
   metadataBase: new URL('https://aerojet-academy.com'),

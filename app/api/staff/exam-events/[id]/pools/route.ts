@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 import { createExamPoolSchema, validateBody } from '@/lib/validation/schemas'
@@ -8,7 +8,7 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 export const GET = withErrorHandler(
   async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
     await requireStaff()
-    const pools = await prisma.examPool.findMany({
+    const pools = await prismaUnfiltered.examPool.findMany({
       where: { eventId: ctx?.params?.id },
       include: { _count: { select: { memberships: true } } },
       orderBy: { examDate: 'asc' },
@@ -25,7 +25,7 @@ export const POST = withErrorHandler(
     const validation = validateBody(createExamPoolSchema, data)
     if (!validation.success) return apiError(validation.error)
 
-    const pool = await prisma.examPool.create({
+    const pool = await prismaUnfiltered.examPool.create({
       data: {
         ...validation.data,
         status: 'OPEN',

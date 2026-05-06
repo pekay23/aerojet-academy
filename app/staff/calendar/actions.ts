@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { CalendarAudience, RecurrenceType } from '@prisma/client'
 
 export interface AdminEventInput {
@@ -30,7 +30,7 @@ export async function createAdminCalendarEvent(data: AdminEventInput) {
     let resolvedTargetId: string | null = null
 
     if (data.visibleTo === 'SPECIFIC_USER' && data.targetUserId) {
-      const u = await prisma.user.findFirst({
+      const u = await prismaUnfiltered.user.findFirst({
         where: {
           OR: [
             { id: data.targetUserId },
@@ -45,7 +45,7 @@ export async function createAdminCalendarEvent(data: AdminEventInput) {
       return { error: 'Target user is required for specific user visibility' }
     }
 
-    const event = await prisma.adminCalendarEvent.create({
+    const event = await prismaUnfiltered.adminCalendarEvent.create({
       data: {
         title: data.title.trim(),
         description: data.description?.trim() || null,
@@ -77,13 +77,13 @@ export async function updateAdminCalendarEvent(id: string, data: AdminEventInput
   }
 
   try {
-    const existing = await prisma.adminCalendarEvent.findUnique({ where: { id } })
+    const existing = await prismaUnfiltered.adminCalendarEvent.findUnique({ where: { id } })
     if (!existing || existing.deletedAt) return { error: 'Event not found' }
 
     let resolvedTargetId: string | null = existing.targetUserId
 
     if (data.visibleTo === 'SPECIFIC_USER' && data.targetUserId) {
-      const u = await prisma.user.findFirst({
+      const u = await prismaUnfiltered.user.findFirst({
         where: {
           OR: [
             { id: data.targetUserId },
@@ -100,7 +100,7 @@ export async function updateAdminCalendarEvent(id: string, data: AdminEventInput
       resolvedTargetId = null
     }
 
-    const event = await prisma.adminCalendarEvent.update({
+    const event = await prismaUnfiltered.adminCalendarEvent.update({
       where: { id },
       data: {
         title: data.title.trim(),
@@ -132,7 +132,7 @@ export async function deleteAdminCalendarEvent(id: string) {
   }
 
   try {
-    await prisma.adminCalendarEvent.update({
+    await prismaUnfiltered.adminCalendarEvent.update({
       where: { id },
       data: { deletedAt: new Date() },
     })
@@ -149,7 +149,7 @@ export async function getClassesForDropdown() {
   if (!session || !['ADMIN', 'STAFF'].includes(session.user.role)) {
     return []
   }
-  return prisma.class.findMany({
+  return prismaUnfiltered.class.findMany({
     select: { id: true, name: true, course: { select: { code: true } } },
     orderBy: { startDate: 'desc' },
     take: 100,
@@ -161,7 +161,7 @@ export async function getExamEventsForDropdown() {
   if (!session || !['ADMIN', 'STAFF'].includes(session.user.role)) {
     return []
   }
-  return prisma.examEvent.findMany({
+  return prismaUnfiltered.examEvent.findMany({
     where: { deletedAt: null, status: { not: 'CANCELLED' } },
     select: { id: true, name: true, startDate: true },
     orderBy: { startDate: 'desc' },

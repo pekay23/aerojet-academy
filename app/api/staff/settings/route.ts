@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireAdmin, getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler, apiError } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -12,7 +12,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const where: any = {}
   if (group) where.group = group
 
-  const settings = await prisma.systemSetting.findMany({ where, orderBy: { key: 'asc' } })
+  const settings = await prismaUnfiltered.systemSetting.findMany({ where, orderBy: { key: 'asc' } })
   return apiSuccess(settings)
 })
 
@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 
     await Promise.all(
       updates.map(({ key, value, type }) =>
-        prisma.systemSetting.upsert({
+        prismaUnfiltered.systemSetting.upsert({
           where: { key },
           update: { value, updatedBy: session.user.id },
           create: { key, value, type },

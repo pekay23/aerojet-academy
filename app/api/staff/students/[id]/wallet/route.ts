@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { topUpWallet, adjustWallet, setWalletBalance, getOrCreateWallet } from '@/lib/wallet/operations'
@@ -19,7 +19,7 @@ export const GET = withErrorHandler(
     const offset = Math.max(0, parseInt(searchParams.get('offset') || '0'))
     const typeFilter = searchParams.get('type') as TransactionType | null
 
-    const wallet = await prisma.wallet.findUnique({
+    const wallet = await prismaUnfiltered.wallet.findUnique({
       where: { userId: id },
     })
 
@@ -29,17 +29,17 @@ export const GET = withErrorHandler(
     if (typeFilter) where.type = typeFilter
 
     const [transactions, total] = await Promise.all([
-      prisma.walletTransaction.findMany({
+      prismaUnfiltered.walletTransaction.findMany({
         where,
         orderBy: { createdAt: 'desc' },
         take: limit,
         skip: offset,
       }),
-      prisma.walletTransaction.count({ where }),
+      prismaUnfiltered.walletTransaction.count({ where }),
     ])
 
     // Get user info for context
-    const user = await prisma.user.findUnique({
+    const user = await prismaUnfiltered.user.findUnique({
       where: { id },
       select: {
         email: true,
@@ -53,7 +53,7 @@ export const GET = withErrorHandler(
     const staffIds = [...new Set(transactions.filter((t) => t.createdBy).map((t) => t.createdBy!))]
     const staffUsers =
       staffIds.length > 0
-        ? await prisma.user.findMany({
+        ? await prismaUnfiltered.user.findMany({
             where: { id: { in: staffIds } },
             select: { id: true, profile: { select: { firstName: true, lastName: true } } },
           })
@@ -69,7 +69,7 @@ export const GET = withErrorHandler(
     const txnIds = transactions.map((t) => t.id)
     const linkedPayments =
       txnIds.length > 0
-        ? await prisma.payment.findMany({
+        ? await prismaUnfiltered.payment.findMany({
             where: {
               OR: [
                 { referenceId: { in: txnIds } },
@@ -154,7 +154,7 @@ export const POST = withErrorHandler(
         operationDescription = description || `Staff top-up: €${amount}`
         if (notes) operationDescription += ` — ${notes}`
 
-        wallet = await prisma.$transaction(async (tx) => {
+        wallet = await prismaUnfiltered.$transaction(async (tx) => {
           return topUpWallet(tx, id, amount, operationDescription, reference, referenceType || 'staff_topup')
         })
         break
@@ -165,7 +165,7 @@ export const POST = withErrorHandler(
         operationDescription = description || `Staff credit: €${amount}`
         if (notes) operationDescription += ` — ${notes}`
 
-        wallet = await prisma.$transaction(async (tx) => {
+        wallet = await prismaUnfiltered.$transaction(async (tx) => {
           return adjustWallet(tx, id, amount, operationDescription, reference, referenceType || 'staff_credit', staff.id)
         })
         break
@@ -177,7 +177,7 @@ export const POST = withErrorHandler(
         operationDescription = description || `Staff debit: €${amount}`
         if (notes) operationDescription += ` — ${notes}`
 
-        wallet = await prisma.$transaction(async (tx) => {
+        wallet = await prismaUnfiltered.$transaction(async (tx) => {
           return adjustWallet(tx, id, -amount, operationDescription, reference, referenceType || 'staff_debit', staff.id)
         })
         break
@@ -189,7 +189,7 @@ export const POST = withErrorHandler(
         operationDescription = description || `Staff adjustment: €${amount}`
         if (notes) operationDescription += ` — ${notes}`
 
-        wallet = await prisma.$transaction(async (tx) => {
+        wallet = await prismaUnfiltered.$transaction(async (tx) => {
           return adjustWallet(tx, id, amount, operationDescription, reference, referenceType || 'staff_adjustment', staff.id)
         })
         break
@@ -203,7 +203,7 @@ export const POST = withErrorHandler(
         operationDescription = description || `Staff set balance to €${targetBalance}`
         if (notes) operationDescription += ` — ${notes}`
 
-        wallet = await prisma.$transaction(async (tx) => {
+        wallet = await prismaUnfiltered.$transaction(async (tx) => {
           return setWalletBalance(tx, id, targetBalance, operationDescription, reference, referenceType || 'staff_set_balance', staff.id)
         })
         break
@@ -215,7 +215,7 @@ export const POST = withErrorHandler(
 
     // If proof of payment URL was provided, create a payment record
     if (proofUrl) {
-      await prisma.payment.create({
+      await prismaUnfiltered.payment.create({
         data: {
           userId: id,
           amount: Math.abs(amount || targetBalance || 0),
@@ -260,7 +260,7 @@ export const POST = withErrorHandler(
     const actionLabel = actionLabels[action] || 'Update'
     const adjustmentAmount = amount || targetBalance || 0
 
-    await prisma.notification.create({
+    await prismaUnfiltered.notification.create({
       data: {
         userId: id,
         title: `Wallet ${actionLabel}`,

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -15,10 +15,10 @@ export const PATCH = withErrorHandler(
     const body = await req.json()
     const { code, name, type, duration, individualPrice, poolPrice, questionCount, categoryCode } = body
 
-    const component = await prisma.examComponent.findUnique({ where: { id: componentId } })
+    const component = await prismaUnfiltered.examComponent.findUnique({ where: { id: componentId } })
     if (!component) return apiNotFound('Exam component not found')
 
-    const updated = await prisma.examComponent.update({
+    const updated = await prismaUnfiltered.examComponent.update({
       where: { id: componentId },
       data: {
         ...(code !== undefined && { code }),
@@ -53,7 +53,7 @@ export const DELETE = withErrorHandler(
     const componentId = context?.params?.componentId
     if (!componentId) return apiError('Component ID required')
 
-    const component = await prisma.examComponent.findUnique({
+    const component = await prismaUnfiltered.examComponent.findUnique({
       where: { id: componentId },
       include: {
         _count: { select: { exams: true, bookings: true, poolMemberships: true } },
@@ -71,7 +71,7 @@ export const DELETE = withErrorHandler(
       const courseId = context?.params?.id
 
       // Find a suitable replacement component (same course, same type, different ID)
-      const replacement = await prisma.examComponent.findFirst({
+      const replacement = await prismaUnfiltered.examComponent.findFirst({
         where: {
           courseId,
           type: component.type,
@@ -86,7 +86,7 @@ export const DELETE = withErrorHandler(
         )
       }
 
-      await prisma.$transaction(async (tx) => {
+      await prismaUnfiltered.$transaction(async (tx) => {
         // Transfer bookings to replacement
         await tx.examBooking.updateMany({
           where: { examComponentId: componentId },
@@ -138,7 +138,7 @@ export const DELETE = withErrorHandler(
     }
 
     if (hasRelated && force) {
-      await prisma.$transaction(async (tx) => {
+      await prismaUnfiltered.$transaction(async (tx) => {
         // Delete in dependency order
         await tx.poolMembership.updateMany({ where: { examComponentId: componentId }, data: softDeleteData() })
         await tx.examBooking.updateMany({ where: { examComponentId: componentId }, data: softDeleteData() })
@@ -146,7 +146,7 @@ export const DELETE = withErrorHandler(
         await tx.examComponent.delete({ where: { id: componentId } })
       })
     } else {
-      await prisma.examComponent.delete({ where: { id: componentId } })
+      await prismaUnfiltered.examComponent.delete({ where: { id: componentId } })
     }
 
     await createAuditLog({

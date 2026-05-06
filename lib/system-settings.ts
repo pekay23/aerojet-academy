@@ -8,18 +8,25 @@ import { unstable_cache } from 'next/cache'
  * and Next.js `unstable_cache` to persist settings across requests (e.g., for 5 minutes).
  */
 export const getSystemSettings = cache(async (keys: string[]) => {
+  const fetchSettings = async () => {
+    const settings = await prisma.systemSetting.findMany({
+      where: { key: { in: keys } },
+    })
+    
+    // Convert to a record for easier access: { key: value }
+    return settings.reduce((acc, s) => {
+      acc[s.key] = s.value
+      return acc
+    }, {} as Record<string, string>)
+  }
+
+  // Bypass unstable_cache during build or production to avoid isolated context env-stripping bugs
+  if (process.env.NEXT_PHASE === 'phase-production-build' || process.env.NODE_ENV === 'production') {
+    return fetchSettings()
+  }
+
   return unstable_cache(
-    async () => {
-      const settings = await prisma.systemSetting.findMany({
-        where: { key: { in: keys } },
-      })
-      
-      // Convert to a record for easier access: { key: value }
-      return settings.reduce((acc, s) => {
-        acc[s.key] = s.value
-        return acc
-      }, {} as Record<string, string>)
-    },
+    fetchSettings,
     [`system-settings-${keys.sort().join('-')}`],
     {
       revalidate: 300, // Revalidate every 5 minutes

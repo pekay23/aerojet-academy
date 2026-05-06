@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -12,7 +12,7 @@ export const GET = withErrorHandler(
     if (!id) return apiError('Student ID required')
 
     // Find student profile
-    const student = await prisma.user.findUnique({
+    const student = await prismaUnfiltered.user.findUnique({
       where: { id },
       include: { studentProfile: true },
     })
@@ -21,7 +21,7 @@ export const GET = withErrorHandler(
       return apiNotFound('Student profile not found')
     }
 
-    const notes = await prisma.adminNote.findMany({
+    const notes = await prismaUnfiltered.adminNote.findMany({
       where: { studentProfileId: student.studentProfile.id },
       orderBy: { createdAt: 'desc' },
       include: {
@@ -64,7 +64,7 @@ export const POST = withErrorHandler(
     }
 
     // Find student profile
-    const student = await prisma.user.findUnique({
+    const student = await prismaUnfiltered.user.findUnique({
       where: { id },
       include: { studentProfile: true, profile: true },
     })
@@ -73,7 +73,7 @@ export const POST = withErrorHandler(
       return apiNotFound('Student profile not found')
     }
 
-    const note = await prisma.adminNote.create({
+    const note = await prismaUnfiltered.adminNote.create({
       data: {
         studentProfileId: student.studentProfile.id,
         content: content.trim(),

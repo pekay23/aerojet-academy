@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiError, apiSuccess, withErrorHandler } from '@/lib/api/response'
 import { updateExamEventSchema, validateBody } from '@/lib/validation/schemas'
@@ -15,7 +15,7 @@ export const PUT = withErrorHandler(
 
     if (validation.success === false) return apiError(validation.error)
 
-    const existingEvent = await prisma.examEvent.findUnique({
+    const existingEvent = await prismaUnfiltered.examEvent.findUnique({
       where: { id },
     })
 
@@ -23,7 +23,7 @@ export const PUT = withErrorHandler(
       return apiError('Exam event not found', 404)
     }
 
-    const updatedEvent = await prisma.examEvent.update({
+    const updatedEvent = await prismaUnfiltered.examEvent.update({
       where: { id },
       data: validation.data,
     })
@@ -46,7 +46,7 @@ export const DELETE = withErrorHandler(
     const staff = await requireStaff()
     const id = ctx?.params?.id
 
-    const existingEvent = await prisma.examEvent.findUnique({
+    const existingEvent = await prismaUnfiltered.examEvent.findUnique({
       where: { id },
       include: { _count: { select: { pools: true, examBookings: true } } },
     })
@@ -59,7 +59,7 @@ export const DELETE = withErrorHandler(
       return apiError('Cannot delete event with existing pools or bookings', 400)
     }
 
-    await prisma.examEvent.update({
+    await prismaUnfiltered.examEvent.update({
       where: { id },
       data: softDeleteData(),
     })

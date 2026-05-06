@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { evaluateGoNoGo, executeGo, executeNoGo, executePostponement } from '@/lib/events/go-no-go'
@@ -22,7 +22,7 @@ export const POST = withErrorHandler(
       return apiError('Decision must be "go", "no_go", or "postpone"')
     }
 
-    const event = await prisma.examEvent.findUnique({ where: { id } })
+    const event = await prismaUnfiltered.examEvent.findUnique({ where: { id } })
     if (!event) return apiNotFound('Event not found')
 
     let result: any

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 
 export async function GET(req: NextRequest) {
@@ -25,17 +25,17 @@ export async function GET(req: NextRequest) {
   ] = await Promise.all([
     // All-time approved total - Registration (GHS)
     // Sum originalAmount if it's GHS, otherwise sum amount (EUR)
-    prisma.payment.aggregate({
+    prismaUnfiltered.payment.aggregate({
       where: { status: 'APPROVED', referenceType: 'REGISTRATION' },
       _sum: { amount: true, originalAmount: true },
     }),
     // All-time approved total - Course/Exams (EUR)
-    prisma.payment.aggregate({
+    prismaUnfiltered.payment.aggregate({
       where: { status: 'APPROVED', referenceType: { in: ['COURSE', 'EXAM'] } },
       _sum: { amount: true },
     }),
     // This month - Registration
-    prisma.payment.aggregate({
+    prismaUnfiltered.payment.aggregate({
       where: {
         status: 'APPROVED',
         referenceType: 'REGISTRATION',
@@ -44,7 +44,7 @@ export async function GET(req: NextRequest) {
       _sum: { amount: true, originalAmount: true },
     }),
     // This month - Course
-    prisma.payment.aggregate({
+    prismaUnfiltered.payment.aggregate({
       where: {
         status: 'APPROVED',
         referenceType: { in: ['COURSE', 'EXAM'] },
@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
       _sum: { amount: true },
     }),
     // Last month - Registration
-    prisma.payment.aggregate({
+    prismaUnfiltered.payment.aggregate({
       where: {
         status: 'APPROVED',
         referenceType: 'REGISTRATION',
@@ -62,7 +62,7 @@ export async function GET(req: NextRequest) {
       _sum: { amount: true, originalAmount: true },
     }),
     // Last month - Course
-    prisma.payment.aggregate({
+    prismaUnfiltered.payment.aggregate({
       where: {
         status: 'APPROVED',
         referenceType: { in: ['COURSE', 'EXAM'] },
@@ -70,13 +70,13 @@ export async function GET(req: NextRequest) {
       },
       _sum: { amount: true },
     }),
-    prisma.payment.count({ where: { status: 'PENDING' } }),
-    prisma.payment.aggregate({
+    prismaUnfiltered.payment.count({ where: { status: 'PENDING' } }),
+    prismaUnfiltered.payment.aggregate({
       where: { status: 'PENDING' },
       _sum: { amount: true },
     }),
     // Recent transactions
-    prisma.payment.findMany({
+    prismaUnfiltered.payment.findMany({
       where: { status: { in: ['APPROVED', 'REJECTED', 'PENDING'] } },
       include: {
         user: {

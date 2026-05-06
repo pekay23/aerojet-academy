@@ -9,9 +9,10 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     where: { userId: user.id },
     include: {
       course: true,
-      grades: { orderBy: { createdAt: 'desc' } },
+      grades: { orderBy: { createdAt: 'desc' }, take: 10 },
     },
     orderBy: { createdAt: 'desc' },
+    take: 100,
   })
   return apiSuccess(enrollments)
 })

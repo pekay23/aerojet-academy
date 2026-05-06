@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 import { z } from 'zod'
@@ -23,7 +23,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const { name, description } = validated.data
   const normalizedName = name.trim().toUpperCase().replace(/\s+/g, '_')
 
-  const existing = await prisma.courseCategory.findUnique({
+  const existing = await prismaUnfiltered.courseCategory.findUnique({
     where: { name: normalizedName },
   })
 
@@ -31,7 +31,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Category already exists (normalized)')
   }
 
-  const category = await prisma.courseCategory.create({
+  const category = await prismaUnfiltered.courseCategory.create({
     data: {
       name: normalizedName,
       description,

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
@@ -49,7 +49,7 @@ export const POST = withErrorHandler(
       return apiError('Action must be "approve" or "reject"')
     }
 
-    const payment = await prisma.payment.findUnique({
+    const payment = await prismaUnfiltered.payment.findUnique({
       where: { id },
       include: { user: { include: { profile: true } } },
     })
@@ -58,7 +58,7 @@ export const POST = withErrorHandler(
     if (payment.status !== 'PENDING') return apiError(`Payment is already ${payment.status}`)
 
     if (action === 'approve') {
-      await prisma.payment.update({
+      await prismaUnfiltered.payment.update({
         where: { id },
         data: {
           status: PaymentStatus.APPROVED,
@@ -71,7 +71,7 @@ export const POST = withErrorHandler(
       // Handle Wallet Top-up
       if (payment.referenceType === 'WALLET_TOPUP') {
         const topUpReference = payment.referenceCode || `PAY-${payment.id.slice(-6)}`
-        await prisma.$transaction(async (tx) => {
+        await prismaUnfiltered.$transaction(async (tx) => {
           // If Wallet doesn't exist yet (APPLICANT topping up for the first time), create it
           let wallet = await tx.wallet.findUnique({ where: { userId: payment.userId } })
           if (!wallet) {
@@ -98,11 +98,11 @@ export const POST = withErrorHandler(
 
       // Handle Course Enrollment (Modular)
       if (payment.referenceType === 'COURSE' && payment.referenceId) {
-        const courseEnrollment = await prisma.enrollment.findFirst({
+        const courseEnrollment = await prismaUnfiltered.enrollment.findFirst({
           where: { userId: payment.userId, courseId: payment.referenceId },
         })
         if (courseEnrollment) {
-          await prisma.enrollment.update({
+          await prismaUnfiltered.enrollment.update({
             where: { id: courseEnrollment.id },
             data: {
               status: 'ENROLLED',
@@ -128,7 +128,7 @@ export const POST = withErrorHandler(
 
       if (isFTPayment && isFTApplicant) {
         const programmeCode = PROGRAMME_CODE_MAP[payment.user.programmeChoice!]
-        const programme = await prisma.fullTimeProgramme.findUnique({
+        const programme = await prismaUnfiltered.fullTimeProgramme.findUnique({
           where: { code: programmeCode },
           include: { programmeYears: { where: { yearNumber: 1 } } },
         })
@@ -154,12 +154,12 @@ export const POST = withErrorHandler(
           const year1 = programme.programmeYears[0]
 
           // Create FullTimeEnrollment if it doesn't exist yet
-          let enrollment = await prisma.fullTimeEnrollment.findFirst({
+          let enrollment = await prismaUnfiltered.fullTimeEnrollment.findFirst({
             where: { studentId: payment.userId, programmeId: programme.id },
           })
 
           if (!enrollment) {
-            enrollment = await prisma.fullTimeEnrollment.create({
+            enrollment = await prismaUnfiltered.fullTimeEnrollment.create({
               data: {
                 studentId: payment.userId,
                 programmeId: programme.id,
@@ -175,7 +175,7 @@ export const POST = withErrorHandler(
           }
 
           // Mark milestones based on payment type
-          const milestones = await prisma.paymentMilestone.findMany({
+          const milestones = await prismaUnfiltered.paymentMilestone.findMany({
             where: { enrollmentId: enrollment.id, yearNumber: 1 },
             orderBy: { createdAt: 'asc' },
           })
@@ -187,7 +187,7 @@ export const POST = withErrorHandler(
             // Mark SEAT_CONFIRMATION milestone as PAID
             const seatMs = milestones.find((m) => m.milestoneType === 'SEAT_CONFIRMATION')
             if (seatMs && seatMs.status !== 'PAID') {
-              await prisma.paymentMilestone.update({
+              await prismaUnfiltered.paymentMilestone.update({
                 where: { id: seatMs.id },
                 data: { status: 'PAID', paidAt: new Date() },
               })
@@ -201,7 +201,7 @@ export const POST = withErrorHandler(
 
               if (excess > 0) {
                 // Credit excess to wallet for future milestone payments
-                await prisma.$transaction(async (tx) => {
+                await prismaUnfiltered.$transaction(async (tx) => {
                   let wallet = await tx.wallet.findUnique({ where: { userId: payment.userId } })
                   if (!wallet) {
                     wallet = await tx.wallet.create({
@@ -226,7 +226,7 @@ export const POST = withErrorHandler(
             }
 
             // Update enrollment status
-            await prisma.fullTimeEnrollment.update({
+            await prismaUnfiltered.fullTimeEnrollment.update({
               where: { id: enrollment.id },
               data: { status: 'ACTIVE' },
             })
@@ -294,7 +294,7 @@ export const POST = withErrorHandler(
           )
 
           // Update user with credentials and activate
-          await prisma.user.update({
+          await prismaUnfiltered.user.update({
             where: { id: payment.userId },
             data: {
               status: 'ACTIVE',
@@ -346,7 +346,7 @@ export const POST = withErrorHandler(
       })
 
       // Send in-app notification
-      await prisma.notification.create({
+      await prismaUnfiltered.notification.create({
         data: {
           userId: payment.userId,
           title: 'Payment Approved',
@@ -361,7 +361,7 @@ export const POST = withErrorHandler(
     } else {
       if (!reason) return apiError('Rejection reason is required')
 
-      await prisma.payment.update({
+      await prismaUnfiltered.payment.update({
         where: { id },
         data: {
           status: PaymentStatus.REJECTED,
@@ -392,7 +392,7 @@ export const POST = withErrorHandler(
       })
 
       // Send in-app notification
-      await prisma.notification.create({
+      await prismaUnfiltered.notification.create({
         data: {
           userId: payment.userId,
           title: 'Payment Rejected',

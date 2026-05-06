@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiPaginated, withErrorHandler } from '@/lib/api/response'
 import { parsePagination, parseSearch } from '@/lib/api/response'
@@ -24,7 +24,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   }
 
   const [enrollments, total] = await Promise.all([
-    prisma.enrollment.findMany({
+    prismaUnfiltered.enrollment.findMany({
       where,
       include: {
         user: { include: { profile: { select: { firstName: true, lastName: true } }, studentProfile: { select: { studentId: true } } } },
@@ -34,7 +34,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       skip,
       take: limit,
     }),
-    prisma.enrollment.count({ where }),
+    prismaUnfiltered.enrollment.count({ where }),
   ])
 
   return apiPaginated(enrollments, total, page, limit)

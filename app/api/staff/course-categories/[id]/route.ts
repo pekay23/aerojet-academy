@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { z } from 'zod'
@@ -26,13 +26,13 @@ export const PATCH = withErrorHandler(
     // Check name uniqueness if being changed
     if (name) {
       const normalized = name.toUpperCase().replace(/\s+/g, '_')
-      const existing = await prisma.courseCategory.findFirst({
+      const existing = await prismaUnfiltered.courseCategory.findFirst({
         where: { name: normalized, NOT: { id } },
       })
       if (existing) return apiError('A category with this name already exists')
     }
 
-    const category = await prisma.courseCategory.update({
+    const category = await prismaUnfiltered.courseCategory.update({
       where: { id },
       data: {
         ...(name ? { name: name.toUpperCase().replace(/\s+/g, '_') } : {}),
@@ -53,7 +53,7 @@ export const DELETE = withErrorHandler(
     if (!id) return apiError('Missing category ID', 400)
 
     // Block if courses are still assigned
-    const courseCount = await prisma.course.count({ where: { categoryId: id } })
+    const courseCount = await prismaUnfiltered.course.count({ where: { categoryId: id } })
     if (courseCount > 0) {
       return apiError(
         `Cannot delete: ${courseCount} course(s) are still in this category. Reassign them first.`,
@@ -61,7 +61,7 @@ export const DELETE = withErrorHandler(
       )
     }
 
-    await prisma.courseCategory.delete({ where: { id } })
+    await prismaUnfiltered.courseCategory.delete({ where: { id } })
 
     return apiSuccess({ deleted: true })
   }

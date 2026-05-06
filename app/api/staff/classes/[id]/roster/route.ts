@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiNotFound, withErrorHandler } from '@/lib/api/response'
 
 export const GET = withErrorHandler(
   async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
     await requireStaff()
-    const cls = await prisma.class.findUnique({
+    const cls = await prismaUnfiltered.class.findUnique({
       where: { id: ctx?.params?.id },
       include: {
         course: { select: { code: true, name: true } },

@@ -3,7 +3,7 @@
 import { EventOverrideStatus } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { logAuditEvent } from '@/lib/audit/logger'
-import { prisma } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 import { scheduleEventSittings } from '@/lib/exams/scheduler'
 
@@ -11,9 +11,9 @@ export async function setEventOverride(eventId: string, status: EventOverrideSta
   const session = await getAuthSession()
   if (!session) return { success: false, error: 'Unauthorized' }
 
-  const oldEvent = await prisma.examEvent.findUnique({ where: { id: eventId } })
+  const oldEvent = await prismaUnfiltered.examEvent.findUnique({ where: { id: eventId } })
 
-  await prisma.examEvent.update({
+  await prismaUnfiltered.examEvent.update({
     where: { id: eventId },
     data: { overrideStatus: status },
   })

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { topUpWallet } from '@/lib/wallet/operations'
@@ -16,7 +16,7 @@ export const POST = withErrorHandler(
     const body = await req.json()
     const { action, reason } = body
 
-    const payment = await prisma.payment.findUnique({
+    const payment = await prismaUnfiltered.payment.findUnique({
       where: { id },
       include: { user: true },
     })
@@ -25,12 +25,12 @@ export const POST = withErrorHandler(
     if (payment.status !== 'PENDING') return apiError(`Already ${payment.status}`)
 
     if (action === 'approve') {
-      await prisma.payment.update({
+      await prismaUnfiltered.payment.update({
         where: { id },
         data: { status: PaymentStatus.APPROVED, approvedBy: staff.id, approvedAt: new Date() },
       })
 
-      await prisma.$transaction(async (tx) => {
+      await prismaUnfiltered.$transaction(async (tx) => {
         await topUpWallet(
           tx,
           payment.userId,
@@ -66,7 +66,7 @@ export const POST = withErrorHandler(
 
       return apiSuccess({ message: `Top-up of €${payment.amount} approved and credited` })
     } else {
-      await prisma.payment.update({
+      await prismaUnfiltered.payment.update({
         where: { id },
         data: {
           status: PaymentStatus.REJECTED,
@@ -76,7 +76,7 @@ export const POST = withErrorHandler(
         },
       })
 
-      await prisma.notification.create({
+      await prismaUnfiltered.notification.create({
         data: {
           userId: payment.userId,
           title: 'Wallet Top-Up Rejected',

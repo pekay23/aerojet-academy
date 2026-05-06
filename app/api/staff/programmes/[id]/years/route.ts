@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -18,15 +18,15 @@ export const POST = withErrorHandler(
       return apiError('Year number and semesters array are required')
     }
 
-    const programme = await prisma.fullTimeProgramme.findUnique({ where: { id: programmeId } })
+    const programme = await prismaUnfiltered.fullTimeProgramme.findUnique({ where: { id: programmeId } })
     if (!programme) return apiError('Programme not found', 404)
 
-    const existing = await prisma.programmeYear.findUnique({
+    const existing = await prismaUnfiltered.programmeYear.findUnique({
       where: { programmeId_yearNumber: { programmeId, yearNumber: parseInt(yearNumber) } },
     })
     if (existing) return apiError(`Year ${yearNumber} already exists for this programme`)
 
-    const year = await prisma.programmeYear.create({
+    const year = await prismaUnfiltered.programmeYear.create({
       data: {
         programmeId,
         yearNumber: parseInt(yearNumber),
@@ -59,10 +59,10 @@ export const PATCH = withErrorHandler(
 
     if (!yearId) return apiError('Year ID required')
 
-    const year = await prisma.programmeYear.findUnique({ where: { id: yearId } })
+    const year = await prismaUnfiltered.programmeYear.findUnique({ where: { id: yearId } })
     if (!year) return apiError('Programme year not found', 404)
 
-    const updated = await prisma.programmeYear.update({
+    const updated = await prismaUnfiltered.programmeYear.update({
       where: { id: yearId },
       data: {
         ...(yearFeeAmount !== undefined && {

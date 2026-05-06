@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog } from '@/lib/audit/logger'
@@ -15,10 +15,10 @@ export const POST = withErrorHandler(
     const id = context?.params?.id
     if (!id) return apiError('User ID required')
 
-    const user = await prisma.user.findUnique({ where: { id } })
+    const user = await prismaUnfiltered.user.findUnique({ where: { id } })
     if (!user) return apiNotFound('User not found')
 
-    const updated = await prisma.user.update({
+    const updated = await prismaUnfiltered.user.update({
       where: { id },
       data: { status: 'ACTIVE' },
     })

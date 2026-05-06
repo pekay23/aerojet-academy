@@ -8,6 +8,8 @@ import ShareButtons from '../_components/ShareButtons'
 import { getBaseUrl } from '@/lib/utils/url'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 
+export const dynamic = 'force-dynamic'
+
 type Props = { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

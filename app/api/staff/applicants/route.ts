@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { apiPaginated, withErrorHandler } from '@/lib/api/response'
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
@@ -38,7 +38,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   const [applicants, total, allCount, pendingPaymentCount, pendingApprovalCount] =
     await Promise.all([
-      prisma.user.findMany({
+      prismaUnfiltered.user.findMany({
         where,
         include: {
           profile: true,
@@ -52,12 +52,12 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         skip: (page - 1) * limit,
         take: limit,
       }),
-      prisma.user.count({ where }),
-      prisma.user.count({ where: { role: 'APPLICANT', status: 'PENDING' } }),
-      prisma.user.count({
+      prismaUnfiltered.user.count({ where }),
+      prismaUnfiltered.user.count({ where: { role: 'APPLICANT', status: 'PENDING' } }),
+      prismaUnfiltered.user.count({
         where: { role: 'APPLICANT', status: 'PENDING', registrationPaid: false },
       }),
-      prisma.user.count({
+      prismaUnfiltered.user.count({
         where: { role: 'APPLICANT', status: 'PENDING', registrationPaid: true },
       }),
     ])

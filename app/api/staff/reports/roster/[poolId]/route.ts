@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { generatePoolRosterCSV } from '@/lib/compliance/reports'
 import { logAuditEvent } from '@/lib/audit/logger'
@@ -17,7 +17,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ poolId: 
       return NextResponse.json({ error: 'Missing poolId' }, { status: 400 })
     }
 
-    const pool = await prisma.examPool.findUnique({
+    const pool = await prismaUnfiltered.examPool.findUnique({
       where: { id: poolId },
       select: { name: true },
     })

@@ -69,8 +69,10 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
     })
   )
 
-  const evaluation = await evaluateGoNoGo(id, { unfiltered: true }).catch(() => null)
-  const demandSnapshot = await getEventDemandSnapshot(id)
+  const [evaluation, demandSnapshot] = await Promise.all([
+    evaluateGoNoGo(id, { unfiltered: true }).catch(() => null),
+    getEventDemandSnapshot(id),
+  ])
 
   return (
     <div className="flex h-[calc(100vh-80px)] flex-col overflow-hidden">

@@ -1,22 +1,16 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import prisma from '@/lib/prisma/client'
+import { getRegistrationFeeInfo } from '@/lib/system-settings'
 import { getCurrencySymbol } from '@/lib/currency'
 import TMinusTooltip from '@/components/shared/TMinusTooltip'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = { title: 'Application Terms | Aerojet Academy' }
 
-async function getRegistrationFee() {
-  const settings = await prisma.systemSetting.findMany({
-    where: { key: { in: ['registration_fee', 'registration_currency'] } },
-  })
-  const fee = settings.find((s) => s.key === 'registration_fee')?.value || '350'
-  const currency = settings.find((s) => s.key === 'registration_currency')?.value || 'GHS'
-  return { fee, currency, symbol: getCurrencySymbol(currency) }
-}
-
 export default async function TermsPage() {
-  const { fee, symbol } = await getRegistrationFee()
+  const { fee, currency } = await getRegistrationFeeInfo()
+  const symbol = getCurrencySymbol(currency)
 
   return (
     <div className="bg-slate-50 pt-20">

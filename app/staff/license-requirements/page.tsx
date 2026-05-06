@@ -11,21 +11,21 @@ export default async function LicenseRequirementsPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const licenseCategories = await prismaUnfiltered.licenseCategory.findMany({
-    include: {
-      requirements: {
-        include: { course: { select: { id: true, code: true, name: true } } },
+  const [licenseCategories, courses] = await Promise.all([
+    prismaUnfiltered.licenseCategory.findMany({
+      include: {
+        requirements: {
+          include: { course: { select: { id: true, code: true, name: true } } },
+        },
       },
-    },
-    orderBy: { code: 'asc' },
-  })
-
-  // Fetch courses with proper sorting
-  const courses = await prismaUnfiltered.course.findMany({
-    where: { isActive: true },
-    select: { id: true, code: true, name: true },
-    orderBy: { code: 'asc' },
-  })
+      orderBy: { code: 'asc' },
+    }),
+    prismaUnfiltered.course.findMany({
+      where: { isActive: true },
+      select: { id: true, code: true, name: true },
+      orderBy: { code: 'asc' },
+    }),
+  ])
 
   // Default sorting configuration
   const defaultSortBy = 'code' // Options: 'code', 'name', or licenseCategory ID

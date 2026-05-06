@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -22,7 +22,7 @@ export const PATCH = withErrorHandler(
     }
 
     // Find student profile to verify note belongs to this student
-    const student = await prisma.user.findUnique({
+    const student = await prismaUnfiltered.user.findUnique({
       where: { id },
       include: { studentProfile: true, profile: true },
     })
@@ -31,7 +31,7 @@ export const PATCH = withErrorHandler(
       return apiNotFound('Student profile not found')
     }
 
-    const note = await prisma.adminNote.findUnique({
+    const note = await prismaUnfiltered.adminNote.findUnique({
       where: { id: noteId },
     })
 
@@ -44,7 +44,7 @@ export const PATCH = withErrorHandler(
       return apiError('You can only edit your own notes', 403)
     }
 
-    const updatedNote = await prisma.adminNote.update({
+    const updatedNote = await prismaUnfiltered.adminNote.update({
       where: { id: noteId },
       data: { content: content.trim() },
       include: {
@@ -97,7 +97,7 @@ export const DELETE = withErrorHandler(
     if (!noteId) return apiError('Note ID required')
 
     // Find student profile to verify note belongs to this student
-    const student = await prisma.user.findUnique({
+    const student = await prismaUnfiltered.user.findUnique({
       where: { id },
       include: { studentProfile: true, profile: true },
     })
@@ -106,7 +106,7 @@ export const DELETE = withErrorHandler(
       return apiNotFound('Student profile not found')
     }
 
-    const note = await prisma.adminNote.findUnique({
+    const note = await prismaUnfiltered.adminNote.findUnique({
       where: { id: noteId },
     })
 
@@ -119,7 +119,7 @@ export const DELETE = withErrorHandler(
       return apiError('You can only delete your own notes', 403)
     }
 
-    await prisma.adminNote.update({
+    await prismaUnfiltered.adminNote.update({
       where: { id: noteId },
       data: softDeleteData(),
     })
