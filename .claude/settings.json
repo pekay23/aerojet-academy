@@ -61,7 +61,9 @@
       "Read(//c/Users/PC/.claude/projects/c--Projects-aerojet-academy/980a6bf0-4041-4f50-8c05-e242d5fc64fe/subagents/**)",
       "Bash(bun run:*)",
       "Bash(find /c/Projects/aerojet-academy -path \"*/node_modules\" -prune -o -type f \\\\\\( -name \"*.tsx\" -o -name \"*.ts\" \\\\\\) -exec grep -l \"react-hot-toast\" {} \\\\;)",
-      "Bash(timeout 10 bash -c 'for i in {1..5}; do if [ -f \"/c/Projects/aerojet-academy/app/staff/newsroom/page.tsx\" ]; then grep -i \"react-hot-toast\\\\|sonner\" /c/Projects/aerojet-academy/app/staff/newsroom/page.tsx; break; fi; done')"
+      "Bash(timeout 10 bash -c 'for i in {1..5}; do if [ -f \"/c/Projects/aerojet-academy/app/staff/newsroom/page.tsx\" ]; then grep -i \"react-hot-toast\\\\|sonner\" /c/Projects/aerojet-academy/app/staff/newsroom/page.tsx; break; fi; done')",
+      "Bash(ls .env*)",
+      "Bash(npx vercel:*)"
     ],
     "additionalDirectories": [
       "d:\\Projects\\aerojet-academy\\app\\api\\staff\\students\\[id]\\wallet\\[txnId]"
