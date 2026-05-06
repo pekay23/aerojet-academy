@@ -77,10 +77,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-        lexend: ['var(--font-lexend)', 'system-ui', 'sans-serif'],
-        montserrat: ['var(--font-montserrat)', 'sans-serif'],
         outfit: ['var(--font-outfit)', 'sans-serif'],
-        playfair: ['var(--font-playfair)', 'serif'],
         heading: ['var(--font-cal)', 'var(--font-inter)', 'system-ui', 'sans-serif'],
       },
       keyframes: {

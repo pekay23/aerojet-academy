@@ -13,6 +13,7 @@ import { AuditAction } from '@/lib/audit/logger'
 import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
 import { POOL_NEAR_FULL_THRESHOLD } from './types'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 // ---------------------------------------------------------------------------
 // TYPES
@@ -110,7 +111,7 @@ export async function getPoolWithDetails(
 
   const membershipsFilter: Prisma.PoolMembershipWhereInput = options?.includeAllStatuses
     ? {}
-    : { status: { in: ['RESERVED', 'CONFIRMED'] } }
+    : { status: { in: ACTIVE_MEMBERSHIP_STATUSES } }
 
   const db = options?.unfiltered ? prismaUnfiltered : prisma
 
@@ -174,7 +175,7 @@ export async function getAvailablePools(options?: { unfiltered?: boolean }) {
     include: {
       event: { select: { name: true, startDate: true, endDate: true } },
       _count: {
-        select: { memberships: { where: { status: { in: ['RESERVED', 'CONFIRMED'] } } } },
+        select: { memberships: { where: { status: { in: ACTIVE_MEMBERSHIP_STATUSES } } } },
       },
     },
     orderBy: { examDate: 'asc' },

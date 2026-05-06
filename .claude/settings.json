@@ -63,7 +63,17 @@
       "Bash(find /c/Projects/aerojet-academy -path \"*/node_modules\" -prune -o -type f \\\\\\( -name \"*.tsx\" -o -name \"*.ts\" \\\\\\) -exec grep -l \"react-hot-toast\" {} \\\\;)",
       "Bash(timeout 10 bash -c 'for i in {1..5}; do if [ -f \"/c/Projects/aerojet-academy/app/staff/newsroom/page.tsx\" ]; then grep -i \"react-hot-toast\\\\|sonner\" /c/Projects/aerojet-academy/app/staff/newsroom/page.tsx; break; fi; done')",
       "Bash(ls .env*)",
-      "Bash(npx vercel:*)"
+      "Bash(npx vercel:*)",
+      "Bash(find /c/Projects/aerojet-academy -type f \\\\\\( -name \"*.tsx\" -o -name \"*.ts\" \\\\\\) -exec grep -l \"window.print\\\\|print\\(\\)\" {} \\\\;)",
+      "Read(//c/Users/PC/AppData/Local/Temp/claude/c--Projects-aerojet-academy/980a6bf0-4041-4f50-8c05-e242d5fc64fe/tasks/**)",
+      "Bash(grep -v \":0$\")",
+      "Read(//c/Projects/aerojet-academy/**)",
+      "Bash(sort -t: -k2 -nr)",
+      "Bash(find /c/Projects/aerojet-academy/app /c/Projects/aerojet-academy/lib -type f \\\\\\( -name \"*.ts\" -o -name \"*.tsx\" \\\\\\) -exec grep -l \"2fa\\\\|twoFactor\\\\|two-factor\" {} \\\\;)",
+      "Bash(grep -l \"pdf\\\\|PDF\\\\|report\" /c/Projects/aerojet-academy/app/api/cron/*.ts)",
+      "Bash(find /c/Projects/aerojet-academy/app/api/cron -type f -name \"*.ts\" -exec grep -l \"pdf\\\\|PDF\\\\|report\" {} \\\\;)",
+      "Bash(find /c/Projects/aerojet-academy -type f \\\\\\( -name \"*.ts\" -o -name \"*.tsx\" \\\\\\) -exec grep -l \"Invoice\\\\|invoice\" {} \\\\;)",
+      "Read(//c/Users/PC/.claude/projects/c--Projects-aerojet-academy/980a6bf0-4041-4f50-8c05-e242d5fc64fe/tool-results/**)"
     ],
     "additionalDirectories": [
       "d:\\Projects\\aerojet-academy\\app\\api\\staff\\students\\[id]\\wallet\\[txnId]"

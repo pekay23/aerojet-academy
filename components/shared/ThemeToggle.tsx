@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/components/shared/theme-provider'
 import { Monitor, Moon, Sun } from 'lucide-react'
 
 export default function ThemeToggle({ isCollapsed = false }: { isCollapsed?: boolean }) {

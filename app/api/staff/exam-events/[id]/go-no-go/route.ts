@@ -1,16 +1,13 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { requireStaff } from '@/lib/auth/helpers'
+import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { evaluateGoNoGo, executeGo, executeNoGo, executePostponement } from '@/lib/events/go-no-go'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 export const POST = withErrorHandler(
   async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
-    const admin = await requireStaff()
-    if (admin.role !== 'ADMIN' && admin.role !== 'SUPER_ADMIN') {
-      return apiError('Unauthorized', 403)
-    }
+    const admin = await requirePermission(PERMISSIONS.MANAGE_EXAMS)
 
     const id = ctx?.params?.id
     if (!id) return apiError('Event ID required')

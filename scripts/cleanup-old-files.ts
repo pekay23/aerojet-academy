@@ -17,10 +17,11 @@ async function main() {
   })
   console.log(`  Deleted ${deletedNotifs.count} old read notifications`)
 
-  // Clean old audit logs (keep 90 days)
-  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000)
+  // Clean old audit logs only after long-term retention.
+  const auditRetentionDays = 3650
+  const auditCutoff = new Date(Date.now() - auditRetentionDays * 24 * 60 * 60 * 1000)
   const deletedLogs = await prisma.auditLog.deleteMany({
-    where: { createdAt: { lt: ninetyDaysAgo } },
+    where: { createdAt: { lt: auditCutoff } },
   })
   console.log(`  Deleted ${deletedLogs.count} old audit logs`)
 

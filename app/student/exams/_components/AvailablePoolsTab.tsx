@@ -6,6 +6,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 import JoinPoolButton from './JoinPoolButton'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 /* ── Helper: fetch common booking data ── */
 async function getBookingData(userId: string) {
@@ -53,7 +54,7 @@ export default async function AvailablePoolsTab() {
       include: {
         event: true,
         memberships: {
-          where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
+          where: { status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
           select: {
             examComponentId: true,
             examComponent: { select: { course: { select: { code: true } } } },
@@ -64,7 +65,7 @@ export default async function AvailablePoolsTab() {
     }),
     getBookingData(session.user.id),
     prisma.poolMembership.findMany({
-      where: { userId: session.user.id, status: { in: ['RESERVED', 'CONFIRMED'] } },
+      where: { userId: session.user.id, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
       select: { poolId: true },
     }),
   ])

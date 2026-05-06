@@ -578,6 +578,7 @@ export async function scheduleEventSittingsFromDemand(
 export type SchedulingConflictType =
   | 'CANDIDATE_OVERLAP'
   | 'EXAMINER_OVERLAP'
+  | 'VENUE_OVERLAP'
   | 'SPARE_CAPACITY'
   | 'UNSCHEDULED_GUARANTEED'
 
@@ -586,8 +587,14 @@ export interface SchedulingConflict {
   sittingId?: string
   userId?: string
   examinerId?: string
+  venue?: string
   moduleCode?: string
   description: string
+}
+
+function timesOverlap(a: { startTime: Date | null; endTime: Date | null }, b: { startTime: Date | null; endTime: Date | null }): boolean {
+  if (!a.startTime || !a.endTime || !b.startTime || !b.endTime) return false
+  return a.startTime < b.endTime && b.startTime < a.endTime
 }
 
 /**
@@ -606,11 +613,13 @@ export async function detectSchedulingConflicts(eventId: string): Promise<Schedu
     select: {
       id: true,
       examinerId: true,
+      examiner: { select: { maxParallelSittings: true } },
       dayNumber: true,
       sessionType: true,
       startTime: true,
       endTime: true,
       capacity: true,
+      venue: true,
       examComponent: { select: { course: { select: { code: true } } } },
       assignments: {
         where: { status: { in: ['ASSIGNED', 'CONFIRMED'] } },
@@ -619,13 +628,14 @@ export async function detectSchedulingConflicts(eventId: string): Promise<Schedu
     },
   })
 
-  // ── Candidate overlap ──
-  const userSlotMap = new Map<string, Array<{ dayNumber: number; sessionType: string; sittingId: string }>>()
+  // ── Candidate overlap (time-based) ──
+  type SlotInfo = { dayNumber: number; startTime: Date | null; endTime: Date | null; sessionType: string; sittingId: string }
+  const userSlotMap = new Map<string, SlotInfo[]>()
   for (const sitting of sittings) {
     for (const assignment of sitting.assignments) {
       const prior = userSlotMap.get(assignment.userId) ?? []
       const overlap = prior.find(
-        (s) => s.dayNumber === sitting.dayNumber && s.sessionType === sitting.sessionType
+        (s) => s.dayNumber === sitting.dayNumber && (timesOverlap(s, sitting) || s.sessionType === sitting.sessionType)
       )
       if (overlap) {
         conflicts.push({
@@ -635,29 +645,51 @@ export async function detectSchedulingConflicts(eventId: string): Promise<Schedu
           description: `Candidate double-booked on Day ${sitting.dayNumber} ${sitting.sessionType}`,
         })
       }
-      prior.push({ dayNumber: sitting.dayNumber, sessionType: sitting.sessionType, sittingId: sitting.id })
+      prior.push({ dayNumber: sitting.dayNumber, startTime: sitting.startTime, endTime: sitting.endTime, sessionType: sitting.sessionType, sittingId: sitting.id })
       userSlotMap.set(assignment.userId, prior)
     }
   }
 
-  // ── Examiner overlap ──
-  const examinerSlotMap = new Map<string, Array<{ dayNumber: number; sessionType: string; sittingId: string }>>()
+  // ── Examiner overlap (respects maxParallelSittings) ──
+  const examinerSlotMap = new Map<string, SlotInfo[]>()
   for (const sitting of sittings) {
     if (!sitting.examinerId) continue
+    const maxParallel = sitting.examiner?.maxParallelSittings ?? 1
     const prior = examinerSlotMap.get(sitting.examinerId) ?? []
-    const overlap = prior.find(
-      (s) => s.dayNumber === sitting.dayNumber && s.sessionType === sitting.sessionType
+    const overlapping = prior.filter(
+      (s) => s.dayNumber === sitting.dayNumber && (timesOverlap(s, sitting) || s.sessionType === sitting.sessionType)
     )
-    if (overlap) {
+    if (overlapping.length >= maxParallel) {
       conflicts.push({
         type: 'EXAMINER_OVERLAP',
         sittingId: sitting.id,
         examinerId: sitting.examinerId,
-        description: `Examiner double-booked on Day ${sitting.dayNumber} ${sitting.sessionType}`,
+        description: `Examiner exceeds ${maxParallel} parallel sitting(s) on Day ${sitting.dayNumber} ${sitting.sessionType}`,
       })
     }
-    prior.push({ dayNumber: sitting.dayNumber, sessionType: sitting.sessionType, sittingId: sitting.id })
+    prior.push({ dayNumber: sitting.dayNumber, startTime: sitting.startTime, endTime: sitting.endTime, sessionType: sitting.sessionType, sittingId: sitting.id })
     examinerSlotMap.set(sitting.examinerId, prior)
+  }
+
+  // ── Venue overlap (same room, overlapping times) ──
+  const venueSlotMap = new Map<string, Array<SlotInfo & { moduleCode?: string }>>()
+  for (const sitting of sittings) {
+    if (!sitting.venue) continue
+    const venueKey = sitting.venue.trim().toLowerCase()
+    const prior = venueSlotMap.get(venueKey) ?? []
+    const overlap = prior.find(
+      (s) => s.dayNumber === sitting.dayNumber && timesOverlap(s, sitting)
+    )
+    if (overlap) {
+      conflicts.push({
+        type: 'VENUE_OVERLAP',
+        sittingId: sitting.id,
+        venue: sitting.venue,
+        description: `Venue "${sitting.venue}" double-booked on Day ${sitting.dayNumber} (conflicts with sitting ${overlap.sittingId})`,
+      })
+    }
+    prior.push({ dayNumber: sitting.dayNumber, startTime: sitting.startTime, endTime: sitting.endTime, sessionType: sitting.sessionType, sittingId: sitting.id, moduleCode: sitting.examComponent?.course?.code })
+    venueSlotMap.set(venueKey, prior)
   }
 
   // ── Spare capacity ──

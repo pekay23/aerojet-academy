@@ -4,6 +4,7 @@ import { confirmPoolInternal, failPool } from '@/lib/pools/confirm'
 import { sendEventGoEmail, sendEventNoGoEmail, sendEventPostponedEmail } from '@/lib/email/service'
 import { evaluateEventViability, type EventViabilityEvaluation } from '@/lib/exams/viability'
 import { rollForwardGuaranteedBookingsFromCancelledEvent } from '@/lib/exams/rollforward'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 export type GoNoGoEvaluation = EventViabilityEvaluation
 
@@ -205,7 +206,7 @@ export async function executePostponement(
     const uniqueUserIds = new Set<string>()
     for (const pool of event.pools) {
       for (const membership of pool.memberships) {
-        if (['RESERVED', 'CONFIRMED'].includes(membership.status)) {
+        if (ACTIVE_MEMBERSHIP_STATUSES.includes(membership.status)) {
           uniqueUserIds.add(membership.userId)
         }
       }
@@ -254,7 +255,7 @@ export async function mergePools(sourcePoolId: string, targetPoolId: string, adm
     async (tx) => {
       const source = await tx.examPool.findUnique({
         where: { id: sourcePoolId },
-        include: { memberships: { where: { status: { in: ['RESERVED', 'CONFIRMED'] } } } },
+        include: { memberships: { where: { status: { in: ACTIVE_MEMBERSHIP_STATUSES } } } },
       })
       const target = await tx.examPool.findUnique({
         where: { id: targetPoolId },
@@ -270,7 +271,7 @@ export async function mergePools(sourcePoolId: string, targetPoolId: string, adm
       }
 
       const targetMembers = await tx.poolMembership.findMany({
-        where: { poolId: targetPoolId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+        where: { poolId: targetPoolId, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
         select: { userId: true },
       })
       const targetUserIds = new Set(targetMembers.map((member) => member.userId))

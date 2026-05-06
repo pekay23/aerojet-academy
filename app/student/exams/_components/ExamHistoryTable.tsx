@@ -8,7 +8,9 @@ interface HistoryRecord {
   type: string
   moduleCode: string
   moduleName: string
-  date: Date | string
+  date: Date | string | null
+  dateDisplay?: string | null
+  dateDisplayKind?: 'DATE' | 'TBC' | 'TBD'
   sittingLabel?: string | null
   attendanceStatus?: string | null
   passed?: boolean | null
@@ -16,6 +18,22 @@ interface HistoryRecord {
   percentage?: number | null
   grade?: string | null
   result?: string | null
+}
+
+function resultBadgeClass(result?: string | null) {
+  const normalized = result?.toUpperCase()
+  if (normalized === 'PASS') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+  if (normalized === 'FAIL') return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  if (normalized === 'ABSENT') return 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+  if (normalized?.includes('PENDING')) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+  if (normalized?.includes('EXCUSED')) return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+  if (normalized === 'MIGRATED') return 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
+  if (normalized === 'SCHEDULED') return 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400'
+  if (normalized === 'EXECUTED') return 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+  if (normalized === 'POSTPONED') return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+  if (normalized === 'ROLLED FORWARD') return 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
+  if (normalized === 'CANCELLED') return 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+  return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
 }
 
 interface ExamHistoryTableProps {
@@ -83,7 +101,13 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
                 <td className="px-6 py-4 text-slate-600 dark:text-slate-400">
                   <div>
                     <div>
-                      {h.date ? new Date(h.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'No date available'}
+                      {h.dateDisplayKind === 'DATE' && h.date ? (
+                        new Date(h.date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+                      ) : (
+                        <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                          {h.dateDisplay || 'TBD'}
+                        </span>
+                      )}
                     </div>
                     {h.sittingLabel && (
                       <div className="text-[10px] uppercase text-slate-400">
@@ -110,7 +134,7 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
                 <td className="px-6 py-4">
                   <div className="flex items-center gap-2">
                     {h.result && !['pass', 'fail', 'PASS', 'FAIL'].includes(h.result) ? (
-                      <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-black uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${resultBadgeClass(h.result)}`}>
                         {h.result}
                       </span>
                     ) : (
@@ -138,7 +162,7 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
                   </div>
                 </td>
                 <td className="px-6 py-4 text-right">
-                  {h.score !== undefined ? (
+                  {h.score !== undefined && h.score !== null ? (
                     <span className="font-bold text-slate-900 dark:text-white">
                       {Number(h.score).toFixed(0)}%
                     </span>

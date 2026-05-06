@@ -12,16 +12,20 @@ import SearchInput from '@/components/SearchInput'
 import { format } from 'date-fns'
 import { getEventDemandSnapshots } from '@/lib/exams/demand'
 import {
+  deriveBookingDisplayResult,
+  fulfillmentStateLabel,
+  type BookingFulfillmentState,
+} from '@/lib/exams/fulfillment'
+import {
   Plus,
   Calendar,
   Trophy,
   BookOpen,
   AlertCircle,
-  Clock,
 } from 'lucide-react'
 
 import { Metadata } from 'next'
-import { BookingType, ExamCategory, PaymentStatus } from '@prisma/client'
+import { BookingType, ExamCategory } from '@prisma/client'
 
 interface ExamRecord {
   id: string
@@ -31,7 +35,7 @@ interface ExamRecord {
   score: number | null
   maxScore?: number | null
   percentage?: number | null
-  passed: boolean
+  passed: boolean | null
   grade?: string | null
   attemptType: string | null
   bookingType: BookingType | string | null
@@ -42,7 +46,12 @@ interface ExamRecord {
   migrationRef?: string | null
   certificateUrl?: string | null
   examDate?: Date | string | null
+  dateDisplay?: string | null
+  dateDisplayKind?: 'DATE' | 'TBC' | 'TBD'
+  sittingLabel?: string | null
   result?: string | null
+  displayResult?: string | null
+  displayResultKind?: string | null
   createdAt: Date | string
   updatedAt?: Date | string
   user: {
@@ -477,6 +486,25 @@ async function ResultsTab({ query }: { query?: string }) {
 }
 
 /* ─── Records Tab (Server Component Wrapper) ─── */
+const FULFILLMENT_DISPLAY_STATES = new Set([
+  'PENDING_POOL_CONFIRMATION',
+  'PENDING_FULFILLMENT',
+  'EXCUSED_PENDING_REBOOK',
+  'SCHEDULED',
+  'EXECUTED',
+  'ROLLED_FORWARD',
+  'POSTPONED',
+  'CANCELLED',
+])
+
+function formatBookingDisplayResult(value: string | null) {
+  if (!value) return null
+  if (FULFILLMENT_DISPLAY_STATES.has(value)) {
+    return fulfillmentStateLabel(value as BookingFulfillmentState)
+  }
+  return value.toUpperCase()
+}
+
 async function RecordsTabServer({ query }: { query?: string }) {
   try {
     const [bookingsRaw, resultsRaw, modules] = await Promise.all([
@@ -490,7 +518,16 @@ async function RecordsTabServer({ query }: { query?: string }) {
             }
           : undefined,
         include: {
-          examAttendance: true,
+          examAttendance: {
+            include: {
+              sitting: true,
+            },
+          },
+          sittingAssignments: {
+            where: { status: { in: ['ASSIGNED', 'CONFIRMED', 'ATTENDED', 'ABSENT', 'EXCUSED'] } },
+            include: { sitting: true },
+            orderBy: { assignedAt: 'desc' },
+          },
           user: {
             include: {
               profile: { select: { firstName: true, middleName: true, lastName: true } },
@@ -527,15 +564,40 @@ async function RecordsTabServer({ query }: { query?: string }) {
 
     // 1. Add all bookings
     for (const b of bookingsRaw) {
+      const activeAssignment = b.sittingAssignments?.[0] || null
+      const sitting = activeAssignment?.sitting || b.examAttendance?.sitting || null
+      const effectiveExamDate = sitting?.startTime || b.examDate || null
+      const displayResultKind = deriveBookingDisplayResult({
+        result: b.result,
+        demandStatus: b.demandStatus,
+        executedAt: b.executedAt,
+        rolloverToEventId: b.rolloverToEventId,
+        status: b.status,
+      })
+      const hasRealResult = ['pass', 'fail'].includes(b.result?.toLowerCase() || '')
+      const dateDisplayKind = effectiveExamDate
+        ? 'DATE'
+        : (b.eventId || ['POOLED', 'SCHEDULED', 'POSTPONED'].includes(b.demandStatus))
+          ? 'TBC'
+          : 'TBD'
+
       unifiedRecords.push({
         ...b,
         source: 'booking',
         id: b.id,
         score: b.score != null ? Number(b.score) : null,
-        passed: b.result?.toLowerCase() === 'pass',
+        passed: hasRealResult
+          ? b.result?.toLowerCase() === 'pass'
+          : null,
         isMigrated: b.result?.toUpperCase() === 'MIGRATED',
         migrationRef: null, 
         examCategory: b.examCategory as ExamCategory,
+        examDate: effectiveExamDate,
+        dateDisplay: effectiveExamDate ? format(new Date(effectiveExamDate), 'MMM d, yyyy') : dateDisplayKind,
+        dateDisplayKind,
+        sittingLabel: sitting ? `Day ${sitting.dayNumber} ${sitting.sessionType}` : null,
+        displayResult: formatBookingDisplayResult(displayResultKind),
+        displayResultKind,
       } as ExamRecord)
     }
 
@@ -557,6 +619,12 @@ async function RecordsTabServer({ query }: { query?: string }) {
           score: r.score != null ? Number(r.score) : unifiedRecords[existingIndex].score,
           passed: r.passed,
           source: 'result', 
+          result: r.passed ? 'PASS' : 'FAIL',
+          displayResult: r.passed ? 'PASS' : 'FAIL',
+          displayResultKind: r.passed ? 'PASS' : 'FAIL',
+          examDate: unifiedRecords[existingIndex].examDate || r.createdAt,
+          dateDisplayKind: 'DATE',
+          dateDisplay: format(new Date(unifiedRecords[existingIndex].examDate || r.createdAt), 'MMM d, yyyy'),
           examCategory: r.examCategory || unifiedRecords[existingIndex].examCategory,
           attemptType: r.attemptType || unifiedRecords[existingIndex].attemptType,
           isMigrated: !!r.migrationRef || !!unifiedRecords[existingIndex].migrationRef,
@@ -576,6 +644,12 @@ async function RecordsTabServer({ query }: { query?: string }) {
           id: `result_${r.id}`,
           source: 'result',
           score: r.score != null ? Number(r.score) : null,
+          result: r.passed ? 'PASS' : 'FAIL',
+          displayResult: r.passed ? 'PASS' : 'FAIL',
+          displayResultKind: r.passed ? 'PASS' : 'FAIL',
+          examDate: r.createdAt,
+          dateDisplayKind: 'DATE',
+          dateDisplay: format(new Date(r.createdAt), 'MMM d, yyyy'),
           bookingType: matchingBooking?.bookingType || 'INDIVIDUAL', 
           isMigrated: !!r.migrationRef,
           migrationRef: r.migrationRef,

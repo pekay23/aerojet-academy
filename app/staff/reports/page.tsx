@@ -832,7 +832,7 @@ async function ExamsTab() {
           value={`${analytics.passPercentage}%`}
           icon={TrendingUp}
           color="bg-emerald-50 text-emerald-600"
-          label={`${analytics.passed} passes / ${analytics.total} total`}
+          label={`${analytics.passed} passes / ${analytics.total} graded results`}
         />
         <MetricCard
           title="1st Attempt Pass Rate"
@@ -853,7 +853,7 @@ async function ExamsTab() {
           value={analytics.awaitingGrading}
           icon={Zap}
           color="bg-purple-50 text-purple-600"
-          label="Exams without results"
+          label={`${analytics.pendingScheduling} bookings still pending scheduling`}
         />
       </div>
 
@@ -955,7 +955,7 @@ async function ExamsTab() {
             <h3 className="text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-white">
               Monthly Volume (12 Months)
             </h3>
-            <p className="text-xs font-medium text-slate-400">Exam bookings with pass/fail overlay</p>
+            <p className="text-xs font-medium text-slate-400">Booking volume with graded pass/fail overlay</p>
           </div>
           <ExamTrendChart data={analytics.monthlyTrend} />
         </div>

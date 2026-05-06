@@ -167,13 +167,15 @@ export const POST = withErrorHandler(
       }
     })
 
+    const studentName = student.profile ? `${student.profile.firstName} ${student.profile.lastName}` : student.email
+
     // Audit log
     await logAuditEvent({
       userId: staff.id,
       action: 'EXAM_BOOKING_CREATED',
       entity: 'ExamBooking',
       entityId: result.bookingIds[0],
-      description: `Admin booked ${bookingType} exam(s) for student ${studentId}: ${components.map((c) => c.code).join(', ')}. Payment: ${paymentMethod}`,
+      description: `Admin booked ${bookingType} exam(s) for student ${studentName}: ${components.map((c) => c.code).join(', ')}. Payment: ${paymentMethod}`,
     })
 
     // Revalidate paths

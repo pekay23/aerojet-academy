@@ -10,6 +10,7 @@ import { confirmPoolInternal } from './confirm'
 import type { PoolJoinInput, PoolJoinResult } from './types'
 import { resolveStandardPoolForJoin } from './assignment'
 import { reserveFunds } from '@/lib/wallet/operations'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 // Simple string hash to generate two 32-bit integers for PG advisory locks
 function getLockKeys(str: string): [number, number] {
@@ -53,7 +54,7 @@ export async function joinPool(input: PoolJoinInput): Promise<PoolJoinResult> {
 
     if (result.success && result.triggeredNearFull && result.pool?.id) {
       const memberships = await prisma.poolMembership.findMany({
-        where: { poolId: result.pool.id, status: { in: ['RESERVED', 'CONFIRMED'] } },
+        where: { poolId: result.pool.id, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
         include: {
           user: { include: { profile: true } },
           pool: { select: { name: true, examDate: true } },
@@ -145,7 +146,7 @@ export async function joinPoolInternal(
   }
 
   const existingInPool = await tx.poolMembership.findFirst({
-    where: { poolId: pool.id, userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+    where: { poolId: pool.id, userId, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
   })
   if (existingInPool) {
     return {
@@ -157,7 +158,7 @@ export async function joinPoolInternal(
   const totalMyPools = await tx.poolMembership.count({
     where: {
       userId,
-      status: { in: ['RESERVED', 'CONFIRMED'] },
+      status: { in: ACTIVE_MEMBERSHIP_STATUSES },
     },
   })
   if (totalMyPools >= MAX_TOTAL_STUDENT_POOLS) {
@@ -176,7 +177,7 @@ export async function joinPoolInternal(
     const duplicateInEvent = await tx.poolMembership.findFirst({
       where: {
         userId,
-        status: { in: ['RESERVED', 'CONFIRMED'] },
+        status: { in: ACTIVE_MEMBERSHIP_STATUSES },
         pool: { eventId: pool.eventId },
         examComponent: { courseId: component?.courseId },
       },
@@ -195,7 +196,7 @@ export async function joinPoolInternal(
     const conflictingMemberships = await tx.poolMembership.findMany({
       where: {
         userId,
-        status: { in: ['RESERVED', 'CONFIRMED'] },
+        status: { in: ACTIVE_MEMBERSHIP_STATUSES },
         pool: {
           id: { not: pool.id },
           examDate: pool.examDate,

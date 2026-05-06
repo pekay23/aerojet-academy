@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { requireStaff } from '@/lib/auth/helpers'
+import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { createAuditLog } from '@/lib/audit/logger'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const staff = await requireStaff()
+    const staff = await requirePermission(PERMISSIONS.APPROVE_PAYMENTS)
     const { id } = await params
     const { reason } = await req.json()
 

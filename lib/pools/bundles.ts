@@ -70,9 +70,11 @@ export async function purchaseBundle(
         if (available < price) {
           return {
             success: false,
-            error: `Insufficient balance. Need €${price}, have €${available}`,
+            error: `Insufficient balance. Need EUR ${price}, have EUR ${available}`,
           }
         }
+
+        const purchaseRef = `BUNDLE-${userId.slice(-8)}-${Date.now()}`
 
         // Charge wallet for bundle price
         await tx.wallet.update({
@@ -90,6 +92,7 @@ export async function purchaseBundle(
             amount: price,
             description: `${bundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'} Exam Bundle`,
             referenceType: 'BUNDLE_PURCHASE',
+            referenceId: purchaseRef,
             balanceBefore: Number(wallet.balance),
             balanceAfter: Number(wallet.balance) - price,
             availableBefore: available,

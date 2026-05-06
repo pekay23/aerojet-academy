@@ -1,4 +1,4 @@
-import prisma from '@/lib/prisma/client'
+import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 
 export enum AuditAction {
   CREATE = 'CREATE',
@@ -82,14 +82,14 @@ export async function queryAuditLogs(params: {
   }
 
   const [logs, total] = await Promise.all([
-    prisma.auditLog.findMany({
+    prismaUnfiltered.auditLog.findMany({
       where,
       take: params.limit,
       skip: params.offset,
       orderBy: { createdAt: 'desc' },
       include: { user: { include: { profile: true } } },
     }),
-    prisma.auditLog.count({ where }),
+    prismaUnfiltered.auditLog.count({ where }),
   ])
 
   return { logs, total }

@@ -11,6 +11,7 @@ type RawDemandStatus =
   | undefined
 
 export type BookingFulfillmentState =
+  | 'PENDING_POOL_CONFIRMATION'
   | 'PENDING_FULFILLMENT'
   | 'EXCUSED_PENDING_REBOOK'
   | 'SCHEDULED'
@@ -47,6 +48,9 @@ export function deriveBookingFulfillmentState(input: {
     return rolloverToEventId ? 'POSTPONED' : 'PENDING_FULFILLMENT'
   }
   if (demandStatus === 'CANCELLED' || status === 'CANCELLED') return 'CANCELLED'
+  if (demandStatus === 'POOLED' || demandStatus === 'DEMAND_CAPTURED') {
+    return 'PENDING_POOL_CONFIRMATION'
+  }
 
   return null
 }
@@ -71,6 +75,7 @@ export function hasMixedBookingGroupFulfillment(input: Array<{
     if (
       state === 'ROLLED_FORWARD' ||
       state === 'POSTPONED' ||
+      state === 'PENDING_POOL_CONFIRMATION' ||
       state === 'PENDING_FULFILLMENT' ||
       state === 'EXCUSED_PENDING_REBOOK' ||
       state === 'SCHEDULED'
@@ -82,6 +87,9 @@ export function hasMixedBookingGroupFulfillment(input: Array<{
   return hasExecuted && hasOutstanding
 }
 
+/** Non-outcome values stored in `result` that should NOT override fulfillment state */
+const NON_OUTCOME_RESULTS = new Set(['MIGRATED'])
+
 export function deriveBookingDisplayResult(input: {
   result?: string | null
   demandStatus?: RawDemandStatus
@@ -90,17 +98,19 @@ export function deriveBookingDisplayResult(input: {
   status?: string | null
 }) {
   const rawResult = input.result?.trim()
-  // Surface the raw exam result string (PASS, FAIL, ABSENT, EXCUSED…)
-  if (rawResult) return rawResult
+  // Surface real exam outcome strings (PASS, FAIL, ABSENT, EXCUSED…)
+  // but skip metadata-only values like MIGRATED so the fulfillment state shows instead
+  if (rawResult && !NON_OUTCOME_RESULTS.has(rawResult.toUpperCase())) return rawResult
 
   const fulfillment = deriveBookingFulfillmentState(input)
-  if (!fulfillment) return null
+  if (!fulfillment) return rawResult || null
   return fulfillment
 }
 
 /** Human-readable label for display in UI tables */
 export function fulfillmentStateLabel(state: BookingFulfillmentState): string {
   switch (state) {
+    case 'PENDING_POOL_CONFIRMATION': return 'Pending Pool Confirmation'
     case 'EXECUTED': return 'Executed'
     case 'EXCUSED_PENDING_REBOOK': return 'Excused – Pending Rebook'
     case 'SCHEDULED': return 'Scheduled'

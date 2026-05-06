@@ -19,17 +19,12 @@ export default async function StudentAcademicCalendarPage() {
   const [
     personalEvents,
     examBookings,
-    semesters,
     enrollments,
     adminEvents,
     sittingAssignments,
-    tuitionRuns,
-    examEvents,
-    examPools,
   ] = await Promise.all([
     prisma.studentCalendarEvent.findMany({ where: { userId }, orderBy: { startDate: 'asc' } }),
     prisma.examBooking.findMany({ where: { userId, deletedAt: null } }),
-    prismaUnfiltered.semester.findMany({ where: { isActive: true }, orderBy: { startDate: 'asc' } }),
     prisma.enrollment.findMany({
       where: { userId, status: { in: ['ACTIVE', 'APPROVED', 'ENROLLED'] } },
       include: { course: { include: { classes: true } } },
@@ -54,13 +49,11 @@ export default async function StudentAcademicCalendarPage() {
         },
       },
     }),
-    prisma.tuitionRun.findMany({ where: { status: { in: ['OPEN', 'SCHEDULED'] } } }),
-    prismaUnfiltered.examEvent.findMany({ where: { deletedAt: null } }),
-    prismaUnfiltered.examPool.findMany({}),
   ])
 
   const enrollmentType = resolvedEnrollmentType || 'UNKNOWN';
   const events: UnifiedCalendarEvent[] = [];
+  const assignedBookingIds = new Set(sittingAssignments.map((assignment) => assignment.bookingId))
 
   // Personal
   personalEvents.forEach((evt: any) => {
@@ -73,6 +66,7 @@ export default async function StudentAcademicCalendarPage() {
 
   // Exams
   examBookings.forEach((exam) => {
+    if (assignedBookingIds.has(exam.id)) return
     if (exam.examDate) {
       events.push({
         id: `exam-${exam.id}`, dbId: exam.id, title: `Exam: ${exam.moduleCode || 'Module'}`,

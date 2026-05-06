@@ -1,6 +1,6 @@
 'use client'
 
-import { ThemeProvider } from 'next-themes'
+import { ThemeProvider } from '@/components/shared/theme-provider'
 
 export function AuthThemeProvider({ children }: { children: React.ReactNode }) {
   return (

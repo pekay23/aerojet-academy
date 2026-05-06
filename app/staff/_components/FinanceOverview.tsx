@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import {
   TrendingUp,
-  TrendingDown,
   Clock,
   CheckCircle2,
   XCircle,
@@ -11,34 +10,8 @@ import {
   Wallet,
 } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import type { FinanceOverviewData } from '@/lib/finance/overview'
 const RevenueChart = dynamic(() => import('./RevenueChart'), { ssr: false })
-
-interface Transaction {
-  id: string
-  amount: number
-  currency: string
-  status: string
-  paymentMethod: string
-  referenceType?: string | null
-  createdAt: string
-  approvedAt?: string | null
-  user: {
-    email: string
-    profile?: { firstName: string; middleName?: string | null; lastName: string } | null
-  }
-}
-
-interface FinanceData {
-  totalRegistration: number
-  totalCourse: number
-  monthRegistration: number
-  monthCourse: number
-  lastMonthRegistration: number
-  lastMonthCourse: number
-  pendingCount: number
-  pendingTotal: number
-  recentTransactions: Transaction[]
-}
 
 const STATUS_CONFIG: Record<string, { label: string; icon: any; style: string }> = {
   APPROVED: { label: 'Approved', icon: CheckCircle2, style: 'text-emerald-600 bg-emerald-50' },
@@ -48,25 +21,24 @@ const STATUS_CONFIG: Record<string, { label: string; icon: any; style: string }>
 
 export default function FinanceOverview({
   chartData,
+  initialData,
 }: {
   chartData: { month: string; revenue: number }[]
+  initialData: FinanceOverviewData
 }) {
-  const [data, setData] = useState<FinanceData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState<FinanceOverviewData | null>(initialData)
+  const [loading, setLoading] = useState(false)
 
   const fetchData = async () => {
     setLoading(true)
     try {
       const res = await fetch('/api/staff/finance/overview')
+      if (!res.ok) return
       setData(await res.json())
     } finally {
       setLoading(false)
     }
   }
-
-  useEffect(() => {
-    fetchData()
-  }, [])
 
   const regGrowth = data
     ? data.lastMonthRegistration > 0
@@ -82,8 +54,16 @@ export default function FinanceOverview({
 
   const statCards = [
     {
+      label: 'Total Revenue',
+      value: `EUR ${Number(data?.totalRevenue ?? 0).toLocaleString('en-GB', { minimumFractionDigits: 0 })}`,
+      icon: TrendingUp,
+      bg: 'bg-emerald-50',
+      color: 'text-emerald-600',
+      sub: data ? `${data.totalRevenueCount} approved payments` : undefined,
+    },
+    {
       label: 'Registration Revenue',
-      value: `GH₵ ${Number(data?.totalRegistration ?? 0).toLocaleString('en-GH', { minimumFractionDigits: 0 })}`,
+      value: `GHS ${Number(data?.totalRegistration ?? 0).toLocaleString('en-GH', { minimumFractionDigits: 0 })}`,
       icon: Wallet,
       bg: 'bg-blue-50',
       color: 'text-aerojet-sky',
@@ -92,8 +72,8 @@ export default function FinanceOverview({
     },
     {
       label: 'Course Revenue',
-      value: `€ ${Number(data?.totalCourse ?? 0).toLocaleString('en-GB', { minimumFractionDigits: 0 })}`,
-      icon: TrendingUp,
+      value: `EUR ${Number(data?.totalCourse ?? 0).toLocaleString('en-GB', { minimumFractionDigits: 0 })}`,
+      icon: Wallet,
       bg: 'bg-emerald-50',
       color: 'text-emerald-600',
       sub: data
@@ -107,7 +87,7 @@ export default function FinanceOverview({
       icon: Clock,
       bg: 'bg-amber-50',
       color: 'text-amber-600',
-      sub: data ? `Approvals queued` : undefined,
+      sub: data ? `Pending total: EUR ${Number(data.pendingTotal ?? 0).toLocaleString('en-GB', { minimumFractionDigits: 0 })}` : undefined,
       href: '/staff/payments?tab=PENDING',
     },
   ]
@@ -125,7 +105,7 @@ export default function FinanceOverview({
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {statCards.map((s) => {
           const Icon = s.icon
           const card = (
@@ -175,14 +155,14 @@ export default function FinanceOverview({
         <div className="mb-6 flex items-center justify-between">
           <div>
             <h2 className="text-sm font-black tracking-tight text-slate-800 uppercase dark:text-slate-200">
-              Revenue — Last 6 Months
+              Revenue - Last 6 Months
             </h2>
             <p className="mt-0.5 text-xs text-slate-400">Approved payments in EUR</p>
           </div>
           <TrendingUp className="text-aerojet-sky h-5 w-5" />
         </div>
         {chartData.some((d) => d.revenue > 0) ? (
-          <RevenueChart data={chartData} currency="€ " />
+          <RevenueChart data={chartData} currency="EUR " />
         ) : (
           <div className="flex h-48 items-center justify-center">
             <p className="text-sm font-bold text-slate-300">No revenue data yet</p>
@@ -255,7 +235,7 @@ export default function FinanceOverview({
                         <p className="text-xs text-slate-400">{tx.user.email}</p>
                       </td>
                       <td className="px-5 py-3.5 text-xs font-bold text-slate-600 dark:text-slate-400">
-                        {tx.referenceType?.replace(/_/g, ' ') ?? '—'}
+                        {tx.referenceType?.replace(/_/g, ' ') ?? '-'}
                       </td>
                       <td className="text-aerojet-blue dark:text-aerojet-sky px-5 py-3.5 text-sm font-black">
                         {tx.currency}{' '}
@@ -344,7 +324,7 @@ export default function FinanceOverview({
                     <div>
                       <p className="font-bold tracking-wider text-slate-400 uppercase">Type</p>
                       <p className="font-bold text-slate-600 dark:text-slate-400">
-                        {tx.referenceType?.replace(/_/g, ' ') ?? '—'}
+                        {tx.referenceType?.replace(/_/g, ' ') ?? '-'}
                       </p>
                     </div>
                     <div>

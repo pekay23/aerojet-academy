@@ -98,7 +98,9 @@ export interface UnifiedExamRecord {
   type: 'ORIGINAL' | 'HISTORICAL' | 'BOOKING' | 'MANUAL' | string
   moduleCode: string
   moduleName: string
-  date: Date | string
+  date: Date | string | null
+  dateDisplay?: string | null
+  dateDisplayKind?: 'DATE' | 'TBC' | 'TBD'
   sittingLabel?: string | null
   attendanceStatus?: string | null
   passed?: boolean | null

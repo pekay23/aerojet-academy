@@ -26,7 +26,7 @@ export function ExamTrendChart({ data }: ExamTrendChartProps) {
   return (
     <div className="h-[300px] w-full">
       {mounted ? (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <ComposedChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
             <XAxis
@@ -93,7 +93,7 @@ export function ScoreDistributionChart({ data }: ScoreDistributionChartProps) {
   return (
     <div className="h-[260px] w-full">
       {mounted ? (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
           <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
             <XAxis

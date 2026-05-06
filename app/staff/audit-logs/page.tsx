@@ -23,6 +23,8 @@ export default async function AuditLogsPage(req: {
     limit,
     offset: (page - 1) * limit,
   })
+  const firstShown = total === 0 ? 0 : (page - 1) * limit + 1
+  const lastShown = Math.min(page * limit, total)
 
   // Pre-fetch entity labels
   const entityLabels: Record<string, string> = {}
@@ -99,9 +101,25 @@ export default async function AuditLogsPage(req: {
         .filter(Boolean)
     ),
   ] as string[]
+  const examBookingIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'ExamBooking')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const examResultIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'ExamResult')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
 
   // Fetch all entity labels in parallel instead of sequentially
-  const [users, courses, events, pools, comps, classes, payments, profiles, enrollments] =
+  const [users, courses, events, pools, comps, classes, payments, profiles, enrollments, examBookings, examResults] =
     await Promise.all([
       userIds.length > 0
         ? prismaUnfiltered.user.findMany({ where: { id: { in: userIds } }, include: { profile: true } })
@@ -133,6 +151,18 @@ export default async function AuditLogsPage(req: {
             include: { course: true, user: { include: { profile: true } } },
           })
         : Promise.resolve([]),
+      examBookingIds.length > 0
+        ? prismaUnfiltered.examBooking.findMany({
+            where: { id: { in: examBookingIds } },
+            include: { user: { include: { profile: true } } },
+          })
+        : Promise.resolve([]),
+      examResultIds.length > 0
+        ? prismaUnfiltered.examResult.findMany({
+            where: { id: { in: examResultIds } },
+            include: { user: { include: { profile: true } } },
+          })
+        : Promise.resolve([]),
     ])
 
   users.forEach((u: any) => (entityLabels[u.id] = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email))
@@ -145,7 +175,15 @@ export default async function AuditLogsPage(req: {
   profiles.forEach((p: any) => (entityLabels[p.id] = `Student ID: ${p.studentId}`))
   enrollments.forEach((e: any) => {
     const name = e.user.profile ? `${e.user.profile.firstName} ${e.user.profile.lastName}` : e.user.email
-    entityLabels[e.id] = `${name} - ${e.course.name}`
+    entityLabels[e.id] = `${name} — ${e.course.name}`
+  })
+  examBookings.forEach((b: any) => {
+    const name = b.user?.profile ? `${b.user.profile.firstName} ${b.user.profile.lastName}` : (b.user?.email || 'Unknown')
+    entityLabels[b.id] = `${name} — ${b.moduleCode || 'Exam'}`
+  })
+  examResults.forEach((r: any) => {
+    const name = r.user?.profile ? `${r.user.profile.firstName} ${r.user.profile.lastName}` : (r.user?.email || 'Unknown')
+    entityLabels[r.id] = `${name} — ${r.moduleCode || 'Result'}`
   })
 
   return (
@@ -155,7 +193,7 @@ export default async function AuditLogsPage(req: {
           System Audit Logs
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Track all administrative actions, overrides, and critical system changes.
+          Track all administrative actions, overrides, and critical system changes. Showing {firstShown}-{lastShown} of {total} total entries.
         </p>
       </div>
 

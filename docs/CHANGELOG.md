@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.4.0] — 2026-05-06
+
+### Added
+- **Historical Financial Filtering** — Reports tab now includes year/month selectors allowing staff to view revenue data from any historical period, not just the current rolling 12 months
+- **Financial Report Export** — Premium HTML report page at `/api/staff/finance/reports/export` with Print/Save-as-PDF support, styled with Inter font, KPI cards, bar charts, and payment method tables
+- **Paginated Transactions Table** — `GET /api/staff/finance/transactions` API with server-side pagination (`page`, `limit`), sorting (`sortBy`, `sortDir`), and search (`query`). Client component replaces the old 100-row hard limit
+- **Reports API** — `GET /api/staff/finance/reports` with `year`/`month` query params for dynamic data filtering
+- **ExamBooking & ExamResult entity resolution** in audit logs page — shows "Student Name — Module Code" instead of raw CUIDs
+
+### Fixed
+- **EXAMINER role 400 error** — Added `EXAMINER` to the Zod `updateRoleSchema` enum; auto-creates `InstructorProfile` with `EX-` prefix employee IDs
+- **Raw database IDs** — Financial transaction references now display `ENR-XXXX`, `EXM-XXXX`, `PAY-XXXX` instead of raw CUIDs
+- **Raw student IDs in audit logs** — Audit log descriptions now show student full names instead of `cmXXXXXXXXXXXX`
+- **Chart rendering warnings** — Added `minWidth={0} minHeight={0}` to all 8 `ResponsiveContainer` instances, eliminating `width(-1) height(-1)` console warnings during tab switches
+
 ## [1.3.0] — 2026-05-06
 
 ### Security

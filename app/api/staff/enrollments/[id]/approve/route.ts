@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { requireStaff, generateStudentId } from '@/lib/auth/helpers'
+import { generateStudentId } from '@/lib/auth/helpers'
+import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { sendStudentPromotionEmail } from '@/lib/email/service'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -9,7 +10,7 @@ import { UserRole, EnrollmentStatus } from '@prisma/client'
 // POST /api/staff/enrollments/[id]/approve
 export const POST = withErrorHandler(
   async (req: NextRequest, context?: { params: Record<string, string> }) => {
-    const staff = await requireStaff()
+    const staff = await requirePermission(PERMISSIONS.MANAGE_ENROLLMENTS)
     const id = context?.params?.id
     if (!id) return apiError('Enrollment ID required')
 

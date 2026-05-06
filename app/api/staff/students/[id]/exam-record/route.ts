@@ -3,6 +3,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { revalidatePath } from 'next/cache'
+import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 /**
  * POST /api/staff/students/[id]/exam-record
@@ -223,6 +224,25 @@ export const POST = withErrorHandler(
 
     const newCount = createdBookings.filter((b) => b.isNew).length
     const updatedCount = createdBookings.filter((b) => !b.isNew).length
+
+    const studentProfile = await prismaUnfiltered.profile.findUnique({ where: { userId: studentId }, select: { firstName: true, lastName: true } })
+    const studentName = studentProfile ? `${studentProfile.firstName} ${studentProfile.lastName}` : student.email
+
+    await createAuditLog({
+      userId: staff.id,
+      action: newCount > 0 && updatedCount === 0 ? AuditAction.CREATE : AuditAction.UPDATE,
+      entity: 'ExamBooking',
+      entityId: createdBookings[0]?.id,
+      description: `Upserted ${createdBookings.length} exam record(s) for student ${studentName}.`,
+      changes: {
+        studentId,
+        bookingIds: createdBookings.map((b) => b.id),
+        created: newCount,
+        updated: updatedCount,
+        moduleCodes,
+        isPending: Boolean(isPending),
+      },
+    })
 
     return apiSuccess({
       success: true,

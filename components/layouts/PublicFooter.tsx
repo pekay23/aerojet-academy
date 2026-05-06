@@ -70,6 +70,7 @@ export default function PublicFooter() {
                 alt="Aerojet Footer Logo"
                 width={160}
                 height={40}
+                loading="eager"
                 style={{ width: 'auto', height: 'auto' }}
                 className="mb-4 h-auto w-auto"
               />
