@@ -1,35 +1,47 @@
+import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
-import { PrismaNeon } from '@prisma/adapter-neon'
-import { Pool, neonConfig } from '@neondatabase/serverless'
-import ws from 'ws'
-
-const isDev = process.env.NODE_ENV === 'development'
+import { PrismaPg } from '@prisma/adapter-pg'
+import { Pool } from 'pg'
 
 /**
  * DATABASE BASE LAYER (Raw Client)
  *
- * Uses Neon Serverless adapter (WebSocket/HTTP) for all environments.
- * The `ws` package provides WebSocket support in Node.js (dev, build, prod).
- * On Vercel, env vars are injected automatically — no manual dotenv needed.
+ * This client provides raw database access for the Identity (Auth) system.
+ * We use the standard @prisma/adapter-pg here as it is more stable in the
+ * current development environment than the serverless Neon adapter.
  */
 
-// REQUIRED: Configure Neon to use WebSockets in all Node.js environments
-neonConfig.webSocketConstructor = ws
+const isDev = process.env.NODE_ENV === 'development'
+// Use DIRECT_URL for the pool in development if available, as it's more stable
+// than the pooler endpoint for long-lived dev processes.
+const dbConnectionString = (isDev ? process.env.DIRECT_URL : null) || process.env.DATABASE_URL
 
-// Helper to create the Neon Serverless adapter
+if (!dbConnectionString) {
+  console.error('[DB_BASE] CRITICAL: Database connection string is missing from environment.')
+} else if (isDev) {
+  try {
+    const host = new URL(dbConnectionString.replace('postgresql://', 'http://')).hostname
+    console.log(`[DB_BASE] Initializing connection pool to: ${host}`)
+  } catch (e) {
+    console.log('[DB_BASE] Initializing connection pool with provided string.')
+  }
+}
+
+// Helper to create the standard PG adapter
 const createAdapter = () => {
-  const connStr = process.env.DATABASE_URL || process.env.DIRECT_URL
-  if (!connStr) {
-    console.error('[DB_BASE] CRITICAL: DATABASE_URL is missing from environment.')
-    return undefined
-  }
-  if (isDev) {
-    try {
-      const host = new URL(connStr.replace('postgresql://', 'http://')).hostname
-      console.log(`[DB_BASE] Connecting to: ${host}`)
-    } catch { /* ignore */ }
-  }
-  return new PrismaNeon(new Pool({ connectionString: connStr }) as any)
+  const pool = new Pool({
+    connectionString: dbConnectionString,
+    max: 20,
+    connectionTimeoutMillis: 60000,
+    idleTimeoutMillis: 30000,
+    allowExitOnIdle: false,
+  })
+
+  pool.on('error', (err) => {
+    console.error('[DB_BASE] Unexpected error on idle client:', err.message)
+  })
+
+  return new PrismaPg(pool)
 }
 
 const globalForPrismaBase = globalThis as unknown as {
@@ -40,7 +52,7 @@ export const prismaBase =
   globalForPrismaBase.prismaBase ??
   new PrismaClient({
     adapter: createAdapter(),
-    log: ['error'],
+    log: isDev ? ['error', 'warn'] : ['error'],
   })
 
 if (process.env.NODE_ENV !== 'production') globalForPrismaBase.prismaBase = prismaBase
