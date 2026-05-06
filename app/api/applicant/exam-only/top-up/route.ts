@@ -39,35 +39,42 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'No registration code found' }, { status: 400 })
     }
 
-    const existingPayment = await prisma.payment.findFirst({
-      where: {
-        userId,
-        referenceType: 'WALLET_TOPUP',
-        status: 'PENDING',
-      },
+    const payment = await prisma.$transaction(async (tx) => {
+      const existingPayment = await tx.payment.findFirst({
+        where: {
+          userId,
+          referenceType: 'WALLET_TOPUP',
+          status: 'PENDING',
+        },
+      })
+
+      if (existingPayment) {
+        throw new Error('DUPLICATE_PENDING')
+      }
+
+      return tx.payment.create({
+        data: {
+          userId,
+          amount: Number(amount),
+          currency: 'EUR',
+          status: 'PENDING',
+          referenceType: 'WALLET_TOPUP',
+          paymentMethod: paymentMethodName,
+          proofUrl: proofUrl || null,
+          proofUploadedAt: proofUrl ? new Date() : null,
+        },
+      })
+    }, { isolationLevel: 'Serializable' }).catch((err) => {
+      if (err.message === 'DUPLICATE_PENDING') return null
+      throw err
     })
 
-    if (existingPayment) {
+    if (!payment) {
       return NextResponse.json(
-        {
-          error: 'You already have a pending top-up. Please wait for it to be processed.',
-        },
+        { error: 'You already have a pending top-up. Please wait for it to be processed.' },
         { status: 400 }
       )
     }
-
-    const payment = await prisma.payment.create({
-      data: {
-        userId,
-        amount: Number(amount),
-        currency: 'EUR',
-        status: 'PENDING',
-        referenceType: 'WALLET_TOPUP',
-        paymentMethod: paymentMethodName,
-        proofUrl: proofUrl || null,
-        proofUploadedAt: proofUrl ? new Date() : null,
-      },
-    })
 
     return NextResponse.json({
       success: true,

@@ -224,6 +224,48 @@ export function shouldPromoteOnPayment(
  * Promotes an APPLICANT to STUDENT.
  * Creates StudentProfile, updates role, triggers auto-enrollment for FT/Military.
  */
+/**
+ * Check if this is a user's first exam activity and promote them from APPLICANT to STUDENT if so.
+ * Used by exam-only booking routes (book-exam, join-pool, bundles).
+ * Returns whether promotion occurred.
+ */
+export async function promoteIfFirstExamActivity(userId: string): Promise<boolean> {
+  const [user, membershipCount, bookingCount] = await Promise.all([
+    prisma.user.findUnique({ where: { id: userId }, select: { role: true } }),
+    prisma.poolMembership.count({ where: { userId } }),
+    prisma.examBooking.count({ where: { userId } }),
+  ])
+
+  if (!user || user.role !== 'APPLICANT') return false
+  // Promote if this is among their first exam activities
+  if (membershipCount > 1 && bookingCount > 1) return false
+
+  try {
+    await promoteApplicantToStudent(userId, userId)
+    return true
+  } catch (e) {
+    console.error('[PROMOTION] Failed for user', userId, e)
+    return false
+  }
+}
+
+/**
+ * Inline role upgrade within an existing transaction context.
+ * Used by full-time enrollment and tuition booking flows where a full
+ * promoteApplicantToStudent call isn't needed (studentProfile already exists).
+ */
+export async function upgradeRoleInTransaction(
+  tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
+  userId: string
+): Promise<boolean> {
+  const user = await tx.user.findUnique({ where: { id: userId }, select: { role: true } })
+  if (user?.role !== 'APPLICANT') return false
+
+  await tx.user.update({ where: { id: userId }, data: { role: 'STUDENT' } })
+  await tx.studentProfile.update({ where: { userId }, data: { enrollmentStatus: 'ENROLLED' } })
+  return true
+}
+
 export async function promoteApplicantToStudent(
   userId: string,
   actorId: string

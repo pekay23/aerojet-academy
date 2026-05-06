@@ -17,7 +17,8 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { UploadButton } from '@/lib/uploads/uploadthing'
-import NewsMarkdownEditor from '../_components/NewsMarkdownEditor'
+import dynamic from 'next/dynamic'
+const NewsMarkdownEditor = dynamic(() => import('../_components/NewsMarkdownEditor'), { ssr: false })
 
 export default function CreateArticlePage() {
   const router = useRouter()
