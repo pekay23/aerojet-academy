@@ -4,6 +4,8 @@ import NewsCard from '../_components/NewsCard'
 import { prisma } from '@/lib/prisma/client'
 import NewsPagination from './_components/NewsPagination'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = { title: 'Newsroom | Aerojet Academy' }
 
 async function getArticles(skip: number, take: number) {

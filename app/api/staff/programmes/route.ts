@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -8,12 +8,13 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 export const GET = withErrorHandler(async () => {
   await requireStaff()
 
-  const programmes = await prisma.fullTimeProgramme.findMany({
+  const programmes = await prismaUnfiltered.fullTimeProgramme.findMany({
     include: {
       programmeYears: { orderBy: { yearNumber: 'asc' } },
       _count: { select: { enrollments: true } },
     },
     orderBy: { code: 'asc' },
+    take: 200,
   })
 
   return apiSuccess(programmes)
@@ -29,10 +30,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Code, name, duration, and total fee are required')
   }
 
-  const existing = await prisma.fullTimeProgramme.findUnique({ where: { code } })
+  const existing = await prismaUnfiltered.fullTimeProgramme.findUnique({ where: { code } })
   if (existing) return apiError(`Programme with code "${code}" already exists`)
 
-  const programme = await prisma.fullTimeProgramme.create({
+  const programme = await prismaUnfiltered.fullTimeProgramme.create({
     data: {
       code,
       name,

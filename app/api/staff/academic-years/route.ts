@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 
@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
   try {
     const session = await requireStaff()
 
-    const academicYears = await prisma.academicYear.findMany({
+    const academicYears = await prismaUnfiltered.academicYear.findMany({
       include: {
         semesters: {
           orderBy: { startDate: 'asc' },
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Start date must be before end date' }, { status: 400 })
     }
 
-    const existing = await prisma.academicYear.findUnique({ where: { name } })
+    const existing = await prismaUnfiltered.academicYear.findUnique({ where: { name } })
     if (existing) {
       return NextResponse.json(
         { error: 'An Academic Year with this name already exists' },
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const academicYear = await prisma.academicYear.create({
+    const academicYear = await prismaUnfiltered.academicYear.create({
       data: {
         name,
         startDate: start,

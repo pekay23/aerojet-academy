@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth-options'
 
@@ -17,7 +17,7 @@ export async function GET(
     const { id: studentId } = await params
 
     // Find the student
-    const student = await prisma.user.findUnique({
+    const student = await prismaUnfiltered.user.findUnique({
       where: { id: studentId },
       include: {
         wallet: true,
@@ -29,7 +29,7 @@ export async function GET(
     }
 
     // Get wallet transactions
-    const transactions = await prisma.walletTransaction.findMany({
+    const transactions = await prismaUnfiltered.walletTransaction.findMany({
       where: { walletId: student.wallet.id },
       orderBy: { createdAt: 'desc' },
       take: 50,

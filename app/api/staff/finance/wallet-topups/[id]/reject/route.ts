@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: 'Rejection reason is required' }, { status: 400 })
     }
 
-    const payment = await prisma.payment.findUnique({
+    const payment = await prismaUnfiltered.payment.findUnique({
       where: { id },
     })
 
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       )
     }
 
-    await prisma.payment.update({
+    await prismaUnfiltered.payment.update({
       where: { id },
       data: {
         status: 'REJECTED',

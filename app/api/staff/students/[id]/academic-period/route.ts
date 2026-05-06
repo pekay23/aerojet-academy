@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     // Validate semester belongs to the chosen academic year
     if (semesterId && academicYearId) {
-      const semester = await prisma.semester.findUnique({
+      const semester = await prismaUnfiltered.semester.findUnique({
         where: { id: semesterId },
         select: { academicYearId: true },
       })
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       }
     }
 
-    const targetUser = await prisma.user.findUnique({
+    const targetUser = await prismaUnfiltered.user.findUnique({
       where: { id },
       include: { studentProfile: { select: { id: true, academicYearId: true, semesterId: true } } },
     })
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: 'Student profile not found' }, { status: 404 })
     }
 
-    await prisma.studentProfile.update({
+    await prismaUnfiltered.studentProfile.update({
       where: { userId: id },
       data: {
         academicYearId: academicYearId || null,

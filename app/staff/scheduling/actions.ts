@@ -1,7 +1,7 @@
 'use server'
 
 import { requireStaff } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 
 /**
@@ -12,13 +12,13 @@ export async function toggleCourseAssignment(termId: string, courseId: string, a
     await requireStaff()
 
     if (assigned) {
-      await prisma.termCourseAssignment.upsert({
+      await prismaUnfiltered.termCourseAssignment.upsert({
         where: { termId_courseId: { termId, courseId } },
         update: {},
         create: { termId, courseId },
       })
     } else {
-      await prisma.termCourseAssignment.deleteMany({
+      await prismaUnfiltered.termCourseAssignment.deleteMany({
         where: { termId, courseId },
       })
     }
@@ -43,7 +43,7 @@ export async function createAcademicTerm(
   try {
     await requireStaff()
 
-    await prisma.academicTerm.create({
+    await prismaUnfiltered.academicTerm.create({
       data: {
         pathwayId,
         yearNumber,
@@ -78,11 +78,11 @@ export async function ensureTermsForPathwayLicense(
     for (let year = 1; year <= totalYears; year++) {
       for (let sem = 1; sem <= semestersPerYear; sem++) {
         // Try to find existing term
-        let term = await prisma.academicTerm.findFirst({
+        let term = await prismaUnfiltered.academicTerm.findFirst({
           where: { pathwayId, yearNumber: year, semesterNumber: sem, licenseCategoryId },
         })
         if (!term) {
-          term = await prisma.academicTerm.create({
+          term = await prismaUnfiltered.academicTerm.create({
             data: { pathwayId, yearNumber: year, semesterNumber: sem, licenseCategoryId },
           })
         }
@@ -114,7 +114,7 @@ export async function createTuitionRun(data: {
   try {
     const session = await requireStaff()
 
-    const run = await prisma.tuitionRun.create({
+    const run = await prismaUnfiltered.tuitionRun.create({
       data: {
         ...data,
         price: data.price,
@@ -148,7 +148,7 @@ export async function updateTuitionRun(runId: string, data: {
   try {
     await requireStaff()
 
-    const run = await prisma.tuitionRun.update({
+    const run = await prismaUnfiltered.tuitionRun.update({
       where: { id: runId },
       data: {
         ...data,
@@ -173,11 +173,11 @@ export async function deleteTuitionRun(runId: string) {
     await requireStaff()
 
     // Also delete any existing bookings for the run if cascading isn't handled
-    await prisma.tuitionBooking.deleteMany({
+    await prismaUnfiltered.tuitionBooking.deleteMany({
       where: { tuitionRunId: runId },
     })
 
-    await prisma.tuitionRun.delete({
+    await prismaUnfiltered.tuitionRun.delete({
       where: { id: runId },
     })
 

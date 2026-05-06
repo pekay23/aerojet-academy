@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -11,7 +11,7 @@ export const GET = withErrorHandler(
     const id = context?.params?.id
     if (!id) return apiError('Programme ID required')
 
-    const programme = await prisma.fullTimeProgramme.findUnique({
+    const programme = await prismaUnfiltered.fullTimeProgramme.findUnique({
       where: { id },
       include: {
         programmeYears: {
@@ -37,10 +37,10 @@ export const PATCH = withErrorHandler(
     const body = await req.json()
     const { name, totalFee, description, isActive } = body
 
-    const programme = await prisma.fullTimeProgramme.findUnique({ where: { id } })
+    const programme = await prismaUnfiltered.fullTimeProgramme.findUnique({ where: { id } })
     if (!programme) return apiNotFound('Programme not found')
 
-    const updated = await prisma.fullTimeProgramme.update({
+    const updated = await prismaUnfiltered.fullTimeProgramme.update({
       where: { id },
       data: {
         ...(name !== undefined && { name }),

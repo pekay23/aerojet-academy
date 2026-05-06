@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 import { getOrCreateWallet, topUpWallet } from '@/lib/wallet/operations'
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const staff = await requireStaff()
     const { id } = await params
 
-    const payment = await prisma.payment.findUnique({
+    const payment = await prismaUnfiltered.payment.findUnique({
       where: { id },
     })
 
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     // Process atomically
-    await prisma.$transaction(async (tx) => {
+    await prismaUnfiltered.$transaction(async (tx) => {
       // Update payment status
       await tx.payment.update({
         where: { id },

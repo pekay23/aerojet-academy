@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff, hashPassword, generateToken, generateTempPassword } from '@/lib/auth/helpers'
 import { sendActivationEmail, sendStudentPromotionEmail } from '@/lib/email/service'
 import { createAuditLog } from '@/lib/audit/logger'
@@ -16,7 +16,7 @@ export const POST = withErrorHandler(
     const id = context?.params?.id
     if (!id) return apiError('User ID required')
 
-    const user = await prisma.user.findUnique({
+    const user = await prismaUnfiltered.user.findUnique({
       where: { id },
       include: { profile: true, studentProfile: true },
     })
@@ -31,7 +31,7 @@ export const POST = withErrorHandler(
     const verifyTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000)
 
     // 2. Update user in database
-    await prisma.user.update({
+    await prismaUnfiltered.user.update({
       where: { id },
       data: {
         password: hashedPassword,

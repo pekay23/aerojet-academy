@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { createStandardPools } from '@/lib/pools/standard-pools'
@@ -17,7 +17,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   if (statusFilter) where.status = statusFilter
 
   const [events, total] = await Promise.all([
-    prisma.examEvent.findMany({
+    prismaUnfiltered.examEvent.findMany({
       where,
       include: {
         pools: { select: { id: true, name: true, status: true, currentMemberCount: true } },
@@ -27,7 +27,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       skip,
       take: limit,
     }),
-    prisma.examEvent.count({ where }),
+    prismaUnfiltered.examEvent.count({ where }),
   ])
 
   return apiPaginated(events, total, page, limit)
@@ -40,7 +40,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   if (validation.success === false) return apiError(validation.error)
 
   // Check for duplicate event name
-  const existingEvent = await prisma.examEvent.findFirst({
+  const existingEvent = await prismaUnfiltered.examEvent.findFirst({
     where: {
       name: validation.data.name,
     },
@@ -50,7 +50,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Exam event with this name already exists', 409)
   }
 
-  const event = await prisma.examEvent.create({
+  const event = await prismaUnfiltered.examEvent.create({
     data: {
       ...validation.data,
       startDate: new Date(validation.data.startDate),

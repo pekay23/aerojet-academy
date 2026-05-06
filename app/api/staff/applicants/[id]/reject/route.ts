@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
 
 export async function POST(
@@ -18,16 +18,16 @@ export async function POST(
     return NextResponse.json({ error: 'Rejection reason is required' }, { status: 400 })
   }
 
-  const user = await prisma.user.findUnique({ where: { id } })
+  const user = await prismaUnfiltered.user.findUnique({ where: { id } })
   if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 })
 
-  await prisma.user.update({
+  await prismaUnfiltered.user.update({
     where: { id },
     data: { status: 'ARCHIVED' },
   })
 
   // Reject any pending registration payment
-  await prisma.payment.updateMany({
+  await prismaUnfiltered.payment.updateMany({
     where: { userId: id, status: 'PENDING', referenceType: 'REGISTRATION' },
     data: {
       status: 'REJECTED',

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -10,7 +10,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireStaff()
 
   const [pathways, licenseCategories] = await Promise.all([
-    prisma.studyPathwayModel.findMany({
+    prismaUnfiltered.studyPathwayModel.findMany({
       include: {
         academicTerms: {
           orderBy: [{ yearNumber: 'asc' }, { semesterNumber: 'asc' }],
@@ -27,7 +27,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       },
       orderBy: { name: 'asc' },
     }),
-    prisma.licenseCategory.findMany({
+    prismaUnfiltered.licenseCategory.findMany({
       orderBy: { code: 'asc' },
     }),
   ])
@@ -56,7 +56,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     }
 
     // Check pathway exists
-    const pathway = await prisma.studyPathwayModel.findUnique({
+    const pathway = await prismaUnfiltered.studyPathwayModel.findUnique({
       where: { id: pathwayId },
     })
     if (!pathway) {
@@ -64,21 +64,21 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     }
 
     // Find or create the term
-    const existingTerm = await prisma.academicTerm.findFirst({
+    const existingTerm = await prismaUnfiltered.academicTerm.findFirst({
       where: { pathwayId, yearNumber, semesterNumber },
     })
 
     if (existingTerm) {
       resolvedTermId = existingTerm.id
     } else {
-      const newTerm = await prisma.academicTerm.create({
+      const newTerm = await prismaUnfiltered.academicTerm.create({
         data: { pathwayId, yearNumber, semesterNumber },
       })
       resolvedTermId = newTerm.id
     }
   } else {
     // Verify term exists
-    const term = await prisma.academicTerm.findUnique({
+    const term = await prismaUnfiltered.academicTerm.findUnique({
       where: { id: resolvedTermId },
     })
     if (!term) {
@@ -87,7 +87,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Verify course exists
-  const course = await prisma.course.findUnique({
+  const course = await prismaUnfiltered.course.findUnique({
     where: { id: courseId },
   })
   if (!course) {
@@ -95,7 +95,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Upsert: skip if assignment already exists
-  const existing = await prisma.termCourseAssignment.findUnique({
+  const existing = await prismaUnfiltered.termCourseAssignment.findUnique({
     where: { termId_courseId: { termId: resolvedTermId, courseId } },
   })
 
@@ -103,7 +103,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiSuccess(existing)
   }
 
-  const assignment = await prisma.termCourseAssignment.create({
+  const assignment = await prismaUnfiltered.termCourseAssignment.create({
     data: { termId: resolvedTermId, courseId },
     include: {
       course: { select: { id: true, code: true, name: true } },
@@ -112,7 +112,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   })
 
   // Resolve term label for audit log
-  const term = await prisma.academicTerm.findUnique({
+  const term = await prismaUnfiltered.academicTerm.findUnique({
     where: { id: resolvedTermId },
     select: { yearNumber: true, semesterNumber: true, pathway: { select: { name: true } } },
   })
@@ -164,7 +164,7 @@ export const DELETE = withErrorHandler(async (req: NextRequest) => {
   } | null
 
   if (assignmentId) {
-    assignment = await prisma.termCourseAssignment.findUnique({
+    assignment = await prismaUnfiltered.termCourseAssignment.findUnique({
       where: { id: assignmentId },
       include: {
         course: { select: { id: true, code: true, name: true } },
@@ -174,7 +174,7 @@ export const DELETE = withErrorHandler(async (req: NextRequest) => {
       },
     })
   } else if (termId && courseId) {
-    assignment = await prisma.termCourseAssignment.findUnique({
+    assignment = await prismaUnfiltered.termCourseAssignment.findUnique({
       where: { termId_courseId: { termId, courseId } },
       include: {
         course: { select: { id: true, code: true, name: true } },
@@ -191,7 +191,7 @@ export const DELETE = withErrorHandler(async (req: NextRequest) => {
     return apiError('Assignment not found', 404)
   }
 
-  await prisma.termCourseAssignment.delete({
+  await prismaUnfiltered.termCourseAssignment.delete({
     where: { id: assignment.id },
   })
 

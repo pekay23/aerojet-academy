@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { updateClassSchema, validateBody } from '@/lib/validation/schemas'
@@ -8,7 +8,7 @@ import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 export const GET = withErrorHandler(
   async (req: NextRequest, ctx?: { params: Record<string, string> }) => {
     await requireStaff()
-    const cls = await prisma.class.findUnique({
+    const cls = await prismaUnfiltered.class.findUnique({
       where: { id: ctx?.params?.id },
       include: {
         course: true,
@@ -28,7 +28,7 @@ export const PATCH = withErrorHandler(
     const validation = validateBody(updateClassSchema, body)
     if (!validation.success) return apiError(validation.error)
     const id = ctx?.params?.id
-    const updated = await prisma.class.update({ where: { id }, data: validation.data })
+    const updated = await prismaUnfiltered.class.update({ where: { id }, data: validation.data })
     await createAuditLog({
       action: AuditAction.UPDATE,
       entity: 'Class',

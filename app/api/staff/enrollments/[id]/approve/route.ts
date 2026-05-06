@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff, generateStudentId } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { sendStudentPromotionEmail } from '@/lib/email/service'
@@ -13,7 +13,7 @@ export const POST = withErrorHandler(
     const id = context?.params?.id
     if (!id) return apiError('Enrollment ID required')
 
-    const enrollment = await prisma.enrollment.findUnique({
+    const enrollment = await prismaUnfiltered.enrollment.findUnique({
       where: { id },
       include: {
         user: { include: { profile: true, studentProfile: true } },
@@ -27,7 +27,7 @@ export const POST = withErrorHandler(
 
     const user = enrollment.user
 
-    await prisma.$transaction(async (tx) => {
+    await prismaUnfiltered.$transaction(async (tx) => {
       // 1. Approve the enrollment
       await tx.enrollment.update({
         where: { id },

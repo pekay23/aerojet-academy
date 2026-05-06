@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 export async function POST(req: NextRequest) {
   const session = await getAuthSession()
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'At least one message is required' }, { status: 400 })
   }
 
-  await prisma.systemSetting.upsert({
+  await prismaUnfiltered.systemSetting.upsert({
     where: { key: 'welcome_messages' },
     update: { value: JSON.stringify(cleanMessages), updatedBy: session.user.id },
     create: {

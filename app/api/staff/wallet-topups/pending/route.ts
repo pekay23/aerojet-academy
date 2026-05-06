@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiPaginated, withErrorHandler } from '@/lib/api/response'
 import { parsePagination } from '@/lib/api/response'
@@ -13,7 +13,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const where = { type: 'WALLET_TOP_UP' as const, status: 'PENDING' as const }
 
   const [topups, total] = await Promise.all([
-    prisma.payment.findMany({
+    prismaUnfiltered.payment.findMany({
       where,
       include: {
         user: {
@@ -28,7 +28,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       skip,
       take: limit,
     }),
-    prisma.payment.count({ where }),
+    prismaUnfiltered.payment.count({ where }),
   ])
 
   return apiPaginated(topups, total, page, limit)

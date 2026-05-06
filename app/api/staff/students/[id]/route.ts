@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiNotFound, apiError, withErrorHandler } from '@/lib/api/response'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -16,7 +16,7 @@ export const GET = withErrorHandler(
     const { searchParams } = new URL(req.url)
     const full = searchParams.get('full') === '1'
 
-    const student = await prisma.user.findUnique({
+    const student = await prismaUnfiltered.user.findUnique({
       where: { id, role: 'STUDENT' },
       include: {
         profile: true,
@@ -94,7 +94,7 @@ export const GET = withErrorHandler(
     // If full mode, also fetch full-time enrollment / OJT data
     let fullTimeData = null
     if (full) {
-      const ftEnrollments = await prisma.fullTimeEnrollment.findMany({
+      const ftEnrollments = await prismaUnfiltered.fullTimeEnrollment.findMany({
         where: { studentId: id },
         include: {
           programme: { select: { code: true, name: true } },

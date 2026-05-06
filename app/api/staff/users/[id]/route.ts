@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { updateUserSchema, validateBody } from '@/lib/validation/schemas'
@@ -17,7 +17,7 @@ export const GET = withErrorHandler(
     const { id } = context!.params
     if (!id) return apiError('User ID required')
 
-    const user = await prisma.user.findUnique({
+    const user = await prismaUnfiltered.user.findUnique({
       where: { id },
       include: {
         profile: true,
@@ -77,11 +77,11 @@ export const PATCH = withErrorHandler(
       ...userData
     } = validation.data
 
-    const user = await prisma.user.findUnique({ where: { id } })
+    const user = await prismaUnfiltered.user.findUnique({ where: { id } })
     if (!user) return apiNotFound('User not found')
 
     // Update user fields
-    const updated = await prisma.user.update({
+    const updated = await prismaUnfiltered.user.update({
       where: { id },
       data: userData,
     })
@@ -104,7 +104,7 @@ export const PATCH = withErrorHandler(
       postalCode ||
       profilePhotoUrl !== undefined
     ) {
-      await prisma.profile.upsert({
+      await prismaUnfiltered.profile.upsert({
         where: { userId: id },
         update: {
           ...(firstName && { firstName }),
@@ -137,11 +137,11 @@ export const PATCH = withErrorHandler(
     // Handle Custom ID Updates
 
     if (studentId && user.role === 'STUDENT') {
-      const existing = await prisma.studentProfile.findUnique({ where: { studentId } })
+      const existing = await prismaUnfiltered.studentProfile.findUnique({ where: { studentId } })
       if (existing && existing.userId !== id) {
         return apiError('Student ID already in use', 409)
       }
-      await prisma.studentProfile.update({
+      await prismaUnfiltered.studentProfile.update({
         where: { userId: id },
         data: { studentId },
       })
@@ -150,12 +150,12 @@ export const PATCH = withErrorHandler(
     if (employeeId || specialization !== undefined || qualifications !== undefined) {
       if (user.role === 'INSTRUCTOR') {
         const existing = employeeId
-          ? await prisma.instructorProfile.findUnique({ where: { employeeId } })
+          ? await prismaUnfiltered.instructorProfile.findUnique({ where: { employeeId } })
           : null
         if (existing && existing.userId !== id) {
           return apiError('Employee ID already in use', 409)
         }
-        await prisma.instructorProfile.upsert({
+        await prismaUnfiltered.instructorProfile.upsert({
           where: { userId: id },
           update: {
             ...(employeeId && { employeeId }),
@@ -179,13 +179,13 @@ export const PATCH = withErrorHandler(
 
         if (Object.keys(staffData).length > 0) {
           const existing = employeeId
-            ? await prisma.staffProfile.findUnique({ where: { employeeId } })
+            ? await prismaUnfiltered.staffProfile.findUnique({ where: { employeeId } })
             : null
           if (existing && existing.userId !== id) {
             return apiError('Employee ID already in use', 409)
           }
 
-          await prisma.staffProfile.upsert({
+          await prismaUnfiltered.staffProfile.upsert({
             where: { userId: id },
             update: staffData,
             create: {
@@ -222,7 +222,7 @@ export const DELETE = withErrorHandler(
     const { id } = context!.params
     if (!id) return apiError('User ID required')
 
-    const user = await prisma.user.findUnique({ where: { id } })
+    const user = await prismaUnfiltered.user.findUnique({ where: { id } })
     if (!user) return apiNotFound('User not found')
 
     const { searchParams } = new URL(req.url)
@@ -230,7 +230,7 @@ export const DELETE = withErrorHandler(
 
     if (isHardDelete) {
       // Permanent hard delete
-      await prisma.user.delete({ where: { id } })
+      await prismaUnfiltered.user.delete({ where: { id } })
 
       await createAuditLog({
         action: 'DELETE',
@@ -246,7 +246,7 @@ export const DELETE = withErrorHandler(
       return apiSuccess({ message: 'User permanently deleted' })
     } else {
       // Soft delete — archive
-      await prisma.user.update({
+      await prismaUnfiltered.user.update({
         where: { id },
         data: { status: UserStatus.ARCHIVED },
       })

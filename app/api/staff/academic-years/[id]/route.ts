@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 
@@ -24,7 +24,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     // Check unique name constraint ignoring self
-    const existing = await prisma.academicYear.findFirst({
+    const existing = await prismaUnfiltered.academicYear.findFirst({
       where: { name, id: { not: id } },
     })
 
@@ -35,7 +35,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       )
     }
 
-    const academicYear = await prisma.academicYear.update({
+    const academicYear = await prismaUnfiltered.academicYear.update({
       where: { id },
       data: {
         name,
@@ -69,7 +69,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const staff = await requireStaff()
     const { id } = await params
 
-    const academicYear = await prisma.academicYear.findUnique({
+    const academicYear = await prismaUnfiltered.academicYear.findUnique({
       where: { id },
       include: {
         _count: {
@@ -89,7 +89,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       )
     }
 
-    await prisma.academicYear.delete({ where: { id } })
+    await prismaUnfiltered.academicYear.delete({ where: { id } })
 
     await createAuditLog({
       action: 'SYSTEM_UPDATE',

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -8,7 +8,7 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 export const GET = withErrorHandler(async () => {
   await requireStaff()
 
-  const licenseCategories = await prisma.licenseCategory.findMany({
+  const licenseCategories = await prismaUnfiltered.licenseCategory.findMany({
     include: {
       requirements: {
         include: { course: { select: { id: true, code: true, name: true } } },
@@ -17,7 +17,7 @@ export const GET = withErrorHandler(async () => {
     orderBy: { code: 'asc' },
   })
 
-  const courses = await prisma.course.findMany({
+  const courses = await prismaUnfiltered.course.findMany({
     where: { isActive: true },
     select: { id: true, code: true, name: true },
     orderBy: { code: 'asc' },
@@ -37,7 +37,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   if (action === 'add') {
-    await prisma.licenseModuleRequirement.upsert({
+    await prismaUnfiltered.licenseModuleRequirement.upsert({
       where: { licenseCategoryId_courseId: { licenseCategoryId, courseId } },
       update: {},
       create: { licenseCategoryId, courseId },
@@ -51,7 +51,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       details: { licenseCategoryId, courseId },
     })
   } else if (action === 'remove') {
-    await prisma.licenseModuleRequirement.deleteMany({
+    await prismaUnfiltered.licenseModuleRequirement.deleteMany({
       where: { licenseCategoryId, courseId },
     })
 

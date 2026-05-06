@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -12,7 +12,7 @@ export const GET = withErrorHandler(
     const userId = context?.params?.id
     if (!userId) return apiError('Student user ID required')
 
-    const enrollments = await prisma.fullTimeEnrollment.findMany({
+    const enrollments = await prismaUnfiltered.fullTimeEnrollment.findMany({
       where: { studentId: userId },
       include: {
         ojtPeriods: { orderBy: { startDate: 'desc' } },
@@ -52,12 +52,12 @@ export const POST = withErrorHandler(
       })
     }
 
-    const enrollment = await prisma.fullTimeEnrollment.findUnique({
+    const enrollment = await prismaUnfiltered.fullTimeEnrollment.findUnique({
       where: { id: enrollmentId, studentId: userId },
     })
     if (!enrollment) return apiError('Enrollment not found for this student', 404)
 
-    const ojt = await prisma.ojtPeriod.create({
+    const ojt = await prismaUnfiltered.ojtPeriod.create({
       data: {
         enrollmentId,
         companyName,
@@ -91,10 +91,10 @@ export const PATCH = withErrorHandler(
 
     if (!ojtId) return apiError('OJT period ID required')
 
-    const ojt = await prisma.ojtPeriod.findUnique({ where: { id: ojtId } })
+    const ojt = await prismaUnfiltered.ojtPeriod.findUnique({ where: { id: ojtId } })
     if (!ojt) return apiError('OJT period not found', 404)
 
-    const updated = await prisma.ojtPeriod.update({
+    const updated = await prismaUnfiltered.ojtPeriod.update({
       where: { id: ojtId },
       data: {
         ...(status !== undefined && { status }),

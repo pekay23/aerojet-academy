@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 import { createExamPoolSchema, validateBody } from '@/lib/validation/schemas'
@@ -13,7 +13,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   if (validation.success === false) return apiError(validation.error)
 
   // Verify event exists
-  const event = await prisma.examEvent.findUnique({
+  const event = await prismaUnfiltered.examEvent.findUnique({
     where: { id: validation.data.eventId },
   })
 
@@ -22,7 +22,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Check for duplicate pool name in event
-  const existingPool = await prisma.examPool.findFirst({
+  const existingPool = await prismaUnfiltered.examPool.findFirst({
     where: {
       eventId: validation.data.eventId,
       name: validation.data.name,
@@ -33,7 +33,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Exam booking with this name already exists in this event', 409)
   }
 
-  const pool = await prisma.examPool.create({
+  const pool = await prismaUnfiltered.examPool.create({
     data: {
       ...validation.data,
       examDate: new Date(validation.data.examDate),

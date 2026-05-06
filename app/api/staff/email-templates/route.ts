@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 
 export async function GET(req: NextRequest) {
@@ -12,13 +12,13 @@ export async function GET(req: NextRequest) {
   const name = searchParams.get('name')
 
   if (name) {
-    const template = await prisma.emailTemplate.findUnique({
+    const template = await prismaUnfiltered.emailTemplate.findUnique({
       where: { name },
     })
     return NextResponse.json(template)
   }
 
-  const templates = await prisma.emailTemplate.findMany({
+  const templates = await prismaUnfiltered.emailTemplate.findMany({
     orderBy: { updatedAt: 'desc' },
   })
 
@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       return new NextResponse('Name, subject, and body are required', { status: 400 })
     }
 
-    const template = await prisma.emailTemplate.upsert({
+    const template = await prismaUnfiltered.emailTemplate.upsert({
       where: { name },
       update: {
         subject,
@@ -77,7 +77,7 @@ export async function DELETE(req: NextRequest) {
   }
 
   try {
-    await prisma.emailTemplate.delete({
+    await prismaUnfiltered.emailTemplate.delete({
       where: { name },
     })
     return new NextResponse(null, { status: 204 })

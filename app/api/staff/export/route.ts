@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth/auth-options'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 export async function GET(request: Request) {
   try {
@@ -17,7 +17,7 @@ export async function GET(request: Request) {
     let filename = 'export.csv'
 
     if (type === 'students') {
-      const users = await prisma.user.findMany({
+      const users = await prismaUnfiltered.user.findMany({
         where: { role: 'STUDENT' },
         include: { profile: true, studentProfile: true },
       })
@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       filename = 'students_export.csv'
 
     } else if (type === 'pools') {
-      const pools = await prisma.examPool.findMany({
+      const pools = await prismaUnfiltered.examPool.findMany({
         include: { event: true },
       })
       
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
       filename = 'exam_pools_export.csv'
 
     } else if (type === 'finances') {
-       const txs = await prisma.walletTransaction.findMany({
+       const txs = await prismaUnfiltered.walletTransaction.findMany({
          include: { wallet: { include: { user: { include: { profile: true } } } } },
          orderBy: { createdAt: 'desc' }
        })

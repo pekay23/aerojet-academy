@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { UserRole, EnrollmentType } from '@prisma/client'
 import { sendStudentPromotionEmail } from '@/lib/email/service'
 
@@ -29,7 +29,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const { role: newRole } = validation.data
 
-    const user = await prisma.user.findUnique({
+    const user = await prismaUnfiltered.user.findUnique({
       where: { id: userId },
       include: {
         studentProfile: true,
@@ -49,7 +49,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     let generatedStudentId: string | null = null
 
-    const updatedUser = await prisma.$transaction(async (tx) => {
+    const updatedUser = await prismaUnfiltered.$transaction(async (tx) => {
       // Role-specific ID generation with retry loop
       const generateUniqueId = async (prefix: string, type: 'STUDENT' | 'INSTRUCTOR' | 'STAFF') => {
         let isUnique = false

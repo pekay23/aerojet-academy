@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Start date must be before end date' }, { status: 400 })
     }
 
-    const academicYear = await prisma.academicYear.findUnique({
+    const academicYear = await prismaUnfiltered.academicYear.findUnique({
       where: { id: academicYearId },
     })
 
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    const semester = await prisma.semester.create({
+    const semester = await prismaUnfiltered.semester.create({
       data: {
         name,
         academicYearId,

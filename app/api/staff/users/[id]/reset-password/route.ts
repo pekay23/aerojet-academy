@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession, hashPassword } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog } from '@/lib/audit/logger'
@@ -16,14 +16,14 @@ export const POST = withErrorHandler(
     const id = context?.params?.id
     if (!id) return apiError('User ID required')
 
-    const user = await prisma.user.findUnique({ where: { id } })
+    const user = await prismaUnfiltered.user.findUnique({ where: { id } })
     if (!user) return apiNotFound('User not found')
 
     // Generate a random temporary password
     const tempPassword = randomBytes(4).toString('hex') // 8 chars
     const hashedPassword = await hashPassword(tempPassword)
 
-    await prisma.user.update({
+    await prismaUnfiltered.user.update({
       where: { id },
       data: { password: hashedPassword, mustChangePassword: true, passwordChanged: false, passwordChangedAt: new Date() },
     })

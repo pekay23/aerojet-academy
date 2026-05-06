@@ -1,12 +1,12 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 
 // Helper: resolve param that could be a database ID or course code
 async function resolveCourseId(param: string) {
-  const course = await prisma.course.findFirst({
+  const course = await prismaUnfiltered.course.findFirst({
     where: { OR: [{ id: param }, { code: param }] },
     select: { id: true },
   })
@@ -23,7 +23,7 @@ export const GET = withErrorHandler(
     const courseId = await resolveCourseId(param)
     if (!courseId) return apiError('Course not found', 404)
 
-    const components = await prisma.examComponent.findMany({
+    const components = await prismaUnfiltered.examComponent.findMany({
       where: { courseId },
       include: {
         _count: { select: { exams: true, bookings: true } },
@@ -56,10 +56,10 @@ export const POST = withErrorHandler(
       return apiError('Type must be MCQ or ESSAY')
     }
 
-    const existing = await prisma.examComponent.findUnique({ where: { code } })
+    const existing = await prismaUnfiltered.examComponent.findUnique({ where: { code } })
     if (existing) return apiError(`Exam component with code "${code}" already exists`)
 
-    const component = await prisma.examComponent.create({
+    const component = await prismaUnfiltered.examComponent.create({
       data: {
         courseId,
         code,

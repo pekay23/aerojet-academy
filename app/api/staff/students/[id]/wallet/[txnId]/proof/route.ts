@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -19,7 +19,7 @@ export const PUT = withErrorHandler(
     if (!proofUrl) return apiError('proofUrl is required')
 
     // Verify the transaction exists and belongs to the student's wallet
-    const transaction = await prisma.walletTransaction.findUnique({
+    const transaction = await prismaUnfiltered.walletTransaction.findUnique({
       where: { id: txnId },
       include: { wallet: { select: { userId: true, currency: true } } },
     })
@@ -28,7 +28,7 @@ export const PUT = withErrorHandler(
     if (transaction.wallet.userId !== id) return apiError('Transaction does not belong to this student', 403)
 
     // Check if proof already exists for this transaction
-    const existingProof = await prisma.payment.findFirst({
+    const existingProof = await prismaUnfiltered.payment.findFirst({
       where: {
         referenceType: 'wallet_transaction_proof',
         referenceId: txnId,
@@ -37,7 +37,7 @@ export const PUT = withErrorHandler(
 
     if (existingProof) {
       // Update existing proof record
-      await prisma.payment.update({
+      await prismaUnfiltered.payment.update({
         where: { id: existingProof.id },
         data: {
           proofUrl,
@@ -48,7 +48,7 @@ export const PUT = withErrorHandler(
       })
     } else {
       // Create new payment record linking proof to this transaction
-      await prisma.payment.create({
+      await prismaUnfiltered.payment.create({
         data: {
           userId: id,
           amount: Math.abs(Number(transaction.amount)),

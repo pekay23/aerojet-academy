@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -24,7 +24,7 @@ export const PATCH = withErrorHandler(
       return apiError(`Invalid enrollment status: ${enrollmentStatus}`)
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prismaUnfiltered.user.findUnique({
       where: { id },
       include: { studentProfile: true },
     })
@@ -42,12 +42,12 @@ export const PATCH = withErrorHandler(
     }
     const newUserStatus = userStatusMap[enrollmentStatus] || UserStatus.ACTIVE
 
-    await prisma.$transaction([
-      prisma.studentProfile.update({
+    await prismaUnfiltered.$transaction([
+      prismaUnfiltered.studentProfile.update({
         where: { userId: id },
         data: { enrollmentStatus: enrollmentStatus as EnrollmentStatus },
       }),
-      prisma.user.update({
+      prismaUnfiltered.user.update({
         where: { id },
         data: { status: newUserStatus },
       }),

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { getPoolWithDetails } from '@/lib/pools/operations'
@@ -25,7 +25,7 @@ export const PATCH = withErrorHandler(
 
     if (!validation.success) return apiError(validation.error)
 
-    const existingPool = await prisma.examPool.findUnique({
+    const existingPool = await prismaUnfiltered.examPool.findUnique({
       where: { id },
     })
 
@@ -35,7 +35,7 @@ export const PATCH = withErrorHandler(
 
     // Check for unique name within the same event (excluding current pool)
     if (validation.data.name && validation.data.name !== existingPool.name) {
-      const duplicatePool = await prisma.examPool.findFirst({
+      const duplicatePool = await prismaUnfiltered.examPool.findFirst({
         where: {
           eventId: existingPool.eventId,
           name: validation.data.name,
@@ -48,7 +48,7 @@ export const PATCH = withErrorHandler(
       }
     }
 
-    const updatedPool = await prisma.examPool.update({
+    const updatedPool = await prismaUnfiltered.examPool.update({
       where: { id },
       data: validation.data,
     })

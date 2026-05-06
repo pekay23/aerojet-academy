@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
@@ -51,7 +51,7 @@ export const POST = withErrorHandler(
     }
 
     // Verify student exists
-    const student = await prisma.user.findUnique({
+    const student = await prismaUnfiltered.user.findUnique({
       where: { id: studentId, role: 'STUDENT' },
       include: { profile: true },
     })
@@ -68,7 +68,7 @@ export const POST = withErrorHandler(
     const totalPrice = priceMap[bookingType]
 
     // Resolve exam components from IDs (moduleIds are ExamComponent IDs)
-    const components = await prisma.examComponent.findMany({
+    const components = await prismaUnfiltered.examComponent.findMany({
       where: { id: { in: moduleIds } },
       include: { course: true },
     })
@@ -81,7 +81,7 @@ export const POST = withErrorHandler(
 
     // If event specified, try to use event start date
     if (eventId && !resolvedExamDate) {
-      const event = await prisma.examEvent.findUnique({ where: { id: eventId } })
+      const event = await prismaUnfiltered.examEvent.findUnique({ where: { id: eventId } })
       if (event) resolvedExamDate = event.startDate
     }
 
@@ -90,7 +90,7 @@ export const POST = withErrorHandler(
     }
 
     // Perform the booking in a transaction
-    const result = await prisma.$transaction(async (tx) => {
+    const result = await prismaUnfiltered.$transaction(async (tx) => {
       let walletTxnId: string | null = null
 
       // Handle wallet debit if AUTO_DEBIT
