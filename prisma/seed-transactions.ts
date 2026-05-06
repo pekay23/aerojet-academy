@@ -1,4 +1,39 @@
+import { PaymentStatus } from '@prisma/client'
 import { prismaUnfiltered as prisma } from '../lib/prisma/client'
+
+async function createWalletTransactionOnce(args: Parameters<typeof prisma.walletTransaction.create>[0]) {
+  const { data } = args
+  const existing = data.referenceType && data.referenceId
+    ? await prisma.walletTransaction.findFirst({
+        where: {
+          walletId: data.walletId,
+          referenceType: data.referenceType,
+          referenceId: data.referenceId,
+          description: data.description,
+        },
+      })
+    : null
+
+  if (existing) return existing
+  return prisma.walletTransaction.create(args)
+}
+
+async function upsertSeedPayment(data: Parameters<typeof prisma.payment.create>[0]['data'] & { referenceCode: string }) {
+  return prisma.payment.upsert({
+    where: { referenceCode: data.referenceCode },
+    update: {
+      amount: data.amount,
+      currency: data.currency,
+      paymentMethod: data.paymentMethod,
+      status: data.status,
+      referenceType: data.referenceType,
+      referenceId: data.referenceId,
+      approvedAt: data.approvedAt,
+      notes: data.notes,
+    },
+    create: data,
+  })
+}
 
 async function main() {
   console.log('🌱 Seeding full-time enrollments and transaction logs...')
@@ -37,6 +72,19 @@ async function main() {
 
     console.log(`Processing ${user.email} (Pathway: ${pathwayCode})`)
 
+    await upsertSeedPayment({
+      userId: user.id,
+      amount: 150,
+      currency: 'EUR',
+      paymentMethod: 'SEED',
+      status: PaymentStatus.APPROVED,
+      referenceCode: `SEED-REG-${user.id}`,
+      referenceType: 'REGISTRATION',
+      referenceId: user.studentProfile?.id || user.id,
+      approvedAt: new Date('2026-01-10'),
+      notes: 'Seeded registration payment for finance overview testing',
+    })
+
     // A. Full-Time Enrollment Records
     if (pathwayCode?.startsWith('FULL_TIME') || pathwayCode?.startsWith('MILITARY')) {
       const ftEnrollment = await prisma.fullTimeEnrollment.upsert({
@@ -52,8 +100,21 @@ async function main() {
         }
       })
 
+      await upsertSeedPayment({
+        userId: user.id,
+        amount: 1500,
+        currency: 'EUR',
+        paymentMethod: 'SEED',
+        status: PaymentStatus.APPROVED,
+        referenceCode: `SEED-COURSE-${ftEnrollment.id}`,
+        referenceType: 'COURSE',
+        referenceId: ftEnrollment.id,
+        approvedAt: new Date('2026-02-01'),
+        notes: `Seeded course payment for ${ftProgramme.name}`,
+      })
+
       // Create a logical transaction for seat confirmation
-      await prisma.walletTransaction.create({
+      await createWalletTransactionOnce({
         data: {
           walletId: wallet.id,
           type: 'PAYMENT',
@@ -65,30 +126,74 @@ async function main() {
           description: `Seat Confirmation - ${ftProgramme.name}`,
           referenceType: 'FULL_TIME_ENROLLMENT',
           referenceId: ftEnrollment.id,
-          metadata: { note: 'Historical audit record (Balance not deducted)' }
+          metadata: { note: 'Historical audit record (Balance not deducted)', seeded: true }
         }
       })
 
       // Create a milestone
-      await prisma.paymentMilestone.create({
-        data: {
+      const existingMilestone = await prisma.paymentMilestone.findFirst({
+        where: {
           enrollmentId: ftEnrollment.id,
           yearNumber: 1,
           milestoneType: 'SEAT_CONFIRMATION',
-          dueDate: new Date('2026-06-01'),
-          percentOfYearFee: 0,
-          amountDue: 1500,
-          status: 'DUE' // Not released
-        }
+        },
       })
+
+      if (!existingMilestone) {
+        await prisma.paymentMilestone.create({
+          data: {
+            enrollmentId: ftEnrollment.id,
+            yearNumber: 1,
+            milestoneType: 'SEAT_CONFIRMATION',
+            dueDate: new Date('2026-06-01'),
+            percentOfYearFee: 0,
+            amountDue: 1500,
+            status: 'DUE' // Not released
+          }
+        })
+      }
     }
 
     // B. Transaction Records for other pathways (Modular, Exam-Only)
     if (pathwayCode === 'MODULAR' || pathwayCode === 'EXAM_ONLY') {
       const amount = pathwayCode === 'MODULAR' ? 1400 : 520
       const desc = pathwayCode === 'MODULAR' ? 'Module Enrollment Fee (Pending)' : 'Exam Booking Fee (Pending)'
+      const referencedBooking = await prisma.examBooking.findFirst({
+        where: {
+          userId: user.id,
+          deletedAt: null,
+          migrationRef: { startsWith: 'TEST_ACCOUNT_BOOKING_SEED:' },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      const referencedEnrollment = await prisma.enrollment.findFirst({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+      })
+      const referenceType = pathwayCode === 'EXAM_ONLY' ? 'EXAM_BOOKING' : 'MODULAR_ENROLLMENT'
+      const referenceId = pathwayCode === 'EXAM_ONLY'
+        ? referencedBooking?.id
+        : referencedEnrollment?.id
+
+      if (!referenceId) {
+        console.warn(`Skipping pathway transaction for ${user.email}; no ${referenceType} reference exists.`)
+        continue
+      }
+
+      await upsertSeedPayment({
+        userId: user.id,
+        amount,
+        currency: 'EUR',
+        paymentMethod: 'SEED',
+        status: PaymentStatus.APPROVED,
+        referenceCode: `SEED-${pathwayCode}-${referenceId}`,
+        referenceType: pathwayCode === 'EXAM_ONLY' ? 'EXAM' : 'COURSE',
+        referenceId,
+        approvedAt: new Date('2026-03-01'),
+        notes: `Seeded ${pathwayCode === 'EXAM_ONLY' ? 'exam booking' : 'modular course'} payment`,
+      })
       
-      await prisma.walletTransaction.create({
+      await createWalletTransactionOnce({
         data: {
           walletId: wallet.id,
           type: 'RESERVE',
@@ -98,9 +203,12 @@ async function main() {
           availableBefore: wallet.availableBalance,
           availableAfter: wallet.availableBalance,
           description: desc,
+          referenceType,
+          referenceId,
           metadata: { 
             note: 'Audit log only',
-            pathway: pathwayCode
+            pathway: pathwayCode,
+            seeded: true
           }
         }
       })

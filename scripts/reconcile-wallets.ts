@@ -68,6 +68,7 @@ async function reconcileWallets() {
           balanceAfter: isMissingDeposit ? calculatedBalance + amount : calculatedBalance - amount,
           description: 'Historical Data Import (Auto-reconciled)',
           referenceType: 'system_reconciliation',
+          referenceId: `RECONCILE-${wallet.id}`,
           createdBy: null, // System generated
           createdAt: wallet.createdAt, // Backdate to wallet creation
         },

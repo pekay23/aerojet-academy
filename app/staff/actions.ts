@@ -5,6 +5,7 @@ import { getAuthSession, requireStaff } from '@/lib/auth/helpers'
 import { prisma, prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 import { BookingType, EnrollmentStatus, ExamCategory, PaymentStatus, UserStatus, UserRole } from '@prisma/client'
+import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 /**
  * Fetches all users that staff can message: Students, Instructors, other Staff/Admins.
@@ -312,7 +313,7 @@ export async function updateExamBooking(
   }
 ) {
   try {
-    await requireStaff()
+    const staff = await requireStaff()
     const actualId = recordId.replace('result_', '')
     const isResultId = recordId.startsWith('result_')
 
@@ -480,8 +481,9 @@ export async function updateExamBooking(
       })
     }
 
-    // Get userId for revalidation - Use unfiltered to bypass RLS for lookup
+    // Get userId and name for revalidation and audit log
     let targetUserId = ''
+    let targetStudentName = 'unknown'
     if (isResultId) {
       const res = await prismaUnfiltered.examResult.findUnique({ where: { id: actualId }, select: { userId: true } })
       targetUserId = res?.userId || ''
@@ -489,12 +491,35 @@ export async function updateExamBooking(
       const b = await prismaUnfiltered.examBooking.findUnique({ where: { id: actualId }, select: { userId: true } })
       targetUserId = b?.userId || ''
     }
+    if (targetUserId) {
+      const profile = await prismaUnfiltered.profile.findUnique({ where: { userId: targetUserId }, select: { firstName: true, lastName: true } })
+      if (profile) targetStudentName = `${profile.firstName} ${profile.lastName}`
+    }
 
     revalidatePath('/staff/exams')
     revalidatePath('/student/exams')
     if (targetUserId) {
       revalidatePath(`/staff/students/${targetUserId}`)
     }
+
+    await createAuditLog({
+      userId: staff.id,
+      action: AuditAction.UPDATE,
+      entity: isResultId ? 'ExamResult' : 'ExamBooking',
+      entityId: actualId,
+      description: `Updated ${isResultId ? 'exam result' : 'exam booking'} record for student ${targetStudentName}.`,
+      changes: {
+        recordId,
+        targetUserId,
+        fields: Object.keys(data),
+        moduleCode,
+        score,
+        result: data.result,
+        status: data.status,
+        attemptType: data.attemptType,
+        examCategory: data.examCategory,
+      },
+    })
     
     return { success: true }
   } catch (error) {
@@ -532,6 +557,7 @@ export async function createExamRecord(data: {
     if (!user) return { error: 'Student not found.' }
 
     const bookingGroupRef = entries.length > 1 ? `STAFF_MANUAL_${Date.now()}` : undefined
+    const affectedBookingIds: string[] = []
 
     await prismaUnfiltered.$transaction(async (tx) => {
       for (const entry of entries) {
@@ -587,6 +613,7 @@ export async function createExamRecord(data: {
               bookingGroupRef: bookingGroupRef || existingBooking.bookingGroupRef,
             }
           })
+          affectedBookingIds.push(existingBooking.id)
         } else {
           const newBooking = await tx.examBooking.create({
             data: {
@@ -607,6 +634,7 @@ export async function createExamRecord(data: {
             }
           })
           finalBookingId = newBooking.id
+          affectedBookingIds.push(newBooking.id)
         }
 
         if (entry.score !== undefined && finalBookingId) {
@@ -670,6 +698,26 @@ export async function createExamRecord(data: {
     revalidatePath(`/staff/users/${userId}`)
     revalidatePath('/staff/reports')
 
+    const studentProfile = await prismaUnfiltered.profile.findUnique({ where: { userId }, select: { firstName: true, lastName: true } })
+    const studentName = studentProfile ? `${studentProfile.firstName} ${studentProfile.lastName}` : user.email
+
+    await createAuditLog({
+      userId: staff.id,
+      action: AuditAction.CREATE,
+      entity: 'ExamBooking',
+      entityId: affectedBookingIds[0],
+      description: `Created or updated ${affectedBookingIds.length} manual exam record(s) for student ${studentName}.`,
+      changes: {
+        studentId: userId,
+        bookingIds: affectedBookingIds,
+        bookingType,
+        attemptType: attemptType || 'FIRST',
+        examCategory: examCategory || 'OFFICIAL_EASA',
+        isPending: Boolean(isPending),
+        moduleCodes: entries.map((entry) => entry.moduleCode?.toUpperCase().trim()).filter(Boolean),
+      },
+    })
+
     return { success: true }
   } catch (error) {
     console.error('Create exam record error:', error)
@@ -682,10 +730,13 @@ export async function createExamRecord(data: {
  */
 export async function deleteExamRecord(id: string) {
   try {
-    await requireStaff()
+    const staff = await requireStaff()
 
     const actualId = id.replace('result_', '')
     const isResultId = id.startsWith('result_')
+    const existing = isResultId
+      ? await prismaUnfiltered.examResult.findUnique({ where: { id: actualId } })
+      : await prismaUnfiltered.examBooking.findUnique({ where: { id: actualId } })
 
     if (isResultId) {
       await prismaUnfiltered.examResult.delete({ where: { id: actualId } })
@@ -695,6 +746,14 @@ export async function deleteExamRecord(id: string) {
 
     revalidatePath('/staff/exams', 'page')
     revalidatePath('/staff/reports', 'page')
+    await createAuditLog({
+      userId: staff.id,
+      action: AuditAction.DELETE,
+      entity: isResultId ? 'ExamResult' : 'ExamBooking',
+      entityId: actualId,
+      description: `Deleted ${isResultId ? 'exam result' : 'exam booking'} record ${actualId}.`,
+      changes: existing || { id: actualId },
+    })
     return { success: true }
   } catch (error) {
     console.error('Delete exam result error:', error)

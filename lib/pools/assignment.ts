@@ -1,5 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { MODULE_DIVERSITY_CAP, POOL_MAX_CANDIDATES } from './types'
+import { COUNTABLE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 type TxClient = Prisma.TransactionClient
 
@@ -126,7 +127,7 @@ export async function resolveStandardPoolForJoin(
       timeSlot: true,
       createdAt: true,
       memberships: {
-        where: { status: { in: ['RESERVED', 'CONFIRMED', 'NO_SHOW', 'COMPLETED'] } },
+        where: { status: { in: COUNTABLE_MEMBERSHIP_STATUSES } },
         select: {
           examComponent: {
             select: {

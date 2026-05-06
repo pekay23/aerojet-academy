@@ -98,6 +98,7 @@ export default function ChangeRoleDialog({
               <SelectContent>
                 <SelectItem value="STUDENT">Student</SelectItem>
                 <SelectItem value="APPLICANT">Applicant</SelectItem>
+                <SelectItem value="EXAMINER">Examiner</SelectItem>
                 <SelectItem value="INSTRUCTOR">Instructor</SelectItem>
                 <SelectItem value="STAFF">Staff</SelectItem>
                 <SelectItem value="ADMIN">Admin</SelectItem>

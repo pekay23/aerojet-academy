@@ -25,7 +25,11 @@ import {
   getStudentStatus,
 } from '@/lib/access-control'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
-import { deriveBookingDisplayResult } from '@/lib/exams/fulfillment'
+import {
+  deriveBookingDisplayResult,
+  fulfillmentStateLabel,
+  type BookingFulfillmentState,
+} from '@/lib/exams/fulfillment'
 
 // The newly extracted tabs
 import AvailablePoolsTab from './_components/AvailablePoolsTab'
@@ -39,6 +43,25 @@ export const metadata: Metadata = {
   description: 'View your exam bookings, results, and history.',
 }
 export const dynamic = 'force-dynamic'
+
+const FULFILLMENT_DISPLAY_STATES = new Set([
+  'PENDING_POOL_CONFIRMATION',
+  'PENDING_FULFILLMENT',
+  'EXCUSED_PENDING_REBOOK',
+  'SCHEDULED',
+  'EXECUTED',
+  'ROLLED_FORWARD',
+  'POSTPONED',
+  'CANCELLED',
+])
+
+function formatBookingDisplayResult(value: string | null) {
+  if (!value) return null
+  if (FULFILLMENT_DISPLAY_STATES.has(value)) {
+    return fulfillmentStateLabel(value as BookingFulfillmentState)
+  }
+  return value.toUpperCase()
+}
 
 export default async function ExamsPage({
   searchParams,
@@ -136,6 +159,7 @@ export default async function ExamsPage({
 
   // Formal and migrated historical records logic, only computed if Records tab is active
   let allHistory: UnifiedExamRecord[] = []
+  let completedAttempts: UnifiedExamRecord[] = []
   let failedAttempts: UnifiedExamRecord[] = []
   
   if (tab === 'records' && results && bookings && examAttendances) {
@@ -154,6 +178,7 @@ export default async function ExamsPage({
         moduleCode,
         moduleName: r.exam?.examComponent?.course?.name || r.exam?.name || 'Manual Result',
         date: r.exam?.examDate || r.createdAt,
+        dateDisplayKind: 'DATE',
         attendanceStatus: null,
         passed: r.passed,
         score: r.score ? Number(r.score) : null,
@@ -172,6 +197,19 @@ export default async function ExamsPage({
       const attemptKey = `${moduleCode}_${b.attemptType || 'FIRST'}`
       const activeAssignment = b.sittingAssignments?.[0] || null
       const attendanceStatus = b.examAttendance?.status || activeAssignment?.attendanceStatus || null
+      const effectiveExamDate = activeAssignment?.sitting?.startTime || b.examAttendance?.sitting?.startTime || b.examDate || null
+      const dateDisplayKind = effectiveExamDate
+        ? 'DATE'
+        : (b.eventId || ['POOLED', 'SCHEDULED', 'POSTPONED'].includes(b.demandStatus))
+          ? 'TBC'
+          : 'TBD'
+      const displayResult = deriveBookingDisplayResult({
+        result: b.result,
+        demandStatus: b.demandStatus,
+        executedAt: b.executedAt,
+        rolloverToEventId: b.rolloverToEventId,
+        status: b.status,
+      })
 
       // Skip if we already have a formal result for this attempt
       if (seenModuleAttempts.has(attemptKey)) return
@@ -182,7 +220,9 @@ export default async function ExamsPage({
         type: b.bookingType === 'MANUAL' ? 'MANUAL' : 'BOOKING',
         moduleCode,
         moduleName: b.course?.name || b.exam?.name || b.exam?.examComponent?.course?.name || 'Exam Booking',
-        date: activeAssignment?.sitting?.startTime || b.examAttendance?.sitting?.startTime || b.examDate || b.bookedAt,
+        date: effectiveExamDate || b.bookedAt,
+        dateDisplayKind,
+        dateDisplay: effectiveExamDate ? null : dateDisplayKind,
         sittingLabel: activeAssignment?.sitting
           ? `Day ${activeAssignment.sitting.dayNumber} ${activeAssignment.sitting.sessionType}`
           : null,
@@ -191,13 +231,7 @@ export default async function ExamsPage({
         score: b.score ? Number(b.score) : null,
         percentage: b.percentage ? Number(b.percentage) : null,
         attemptType: b.attemptType,
-        result: deriveBookingDisplayResult({
-          result: b.result,
-          demandStatus: b.demandStatus,
-          executedAt: b.executedAt,
-          rolloverToEventId: b.rolloverToEventId,
-          status: b.status,
-        }),
+        result: formatBookingDisplayResult(displayResult),
       })
     })
 
@@ -217,6 +251,7 @@ export default async function ExamsPage({
           attendance.booking?.moduleCode ||
           'Exam Attendance',
         date: attendance.sitting?.startTime || attendance.attendanceDate,
+        dateDisplayKind: 'DATE',
         sittingLabel: attendance.sitting
           ? `Day ${attendance.sitting.dayNumber} ${attendance.sitting.sessionType}`
           : null,
@@ -228,7 +263,12 @@ export default async function ExamsPage({
       })
     })
 
-    allHistory = records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    allHistory = records.sort((a, b) => {
+      const dateA = a.date ? new Date(a.date).getTime() : 0
+      const dateB = b.date ? new Date(b.date).getTime() : 0
+      return dateB - dateA
+    })
+    completedAttempts = allHistory.filter((r) => r.passed === true || r.passed === false)
     failedAttempts = allHistory.filter((r) => r.passed === false)
   }
 
@@ -277,15 +317,15 @@ export default async function ExamsPage({
 
             <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
-                <p className="text-xs font-bold text-slate-400 uppercase">Total Attempts</p>
+                <p className="text-xs font-bold text-slate-400 uppercase">Resulted Attempts</p>
                 <p className="mt-1 text-2xl font-black text-slate-900 dark:text-white">
-                  {allHistory.length}
+                  {completedAttempts.length}
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
                 <p className="text-xs font-bold text-slate-400 uppercase">Total Passed</p>
                 <p className="mt-1 text-2xl font-black text-emerald-600 dark:text-emerald-400">
-                  {allHistory.filter((h) => h.passed).length}
+                  {completedAttempts.filter((h) => h.passed).length}
                 </p>
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
@@ -295,9 +335,9 @@ export default async function ExamsPage({
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
                 <p className="text-xs font-bold text-slate-400 uppercase">Success Rate</p>
                 <p className="mt-1 text-2xl font-black text-aerojet-blue dark:text-blue-400">
-                  {allHistory.length > 0
+                  {completedAttempts.length > 0
                     ? Math.round(
-                        (allHistory.filter((h) => h.passed).length / allHistory.length) * 100
+                        (completedAttempts.filter((h) => h.passed).length / completedAttempts.length) * 100
                       )
                     : 0}
                   %
@@ -325,7 +365,13 @@ export default async function ExamsPage({
                 </p>
               </div>
             ) : (
-              <ExamHistoryTable results={allHistory} />
+              <>
+                <div className="flex flex-wrap gap-3 rounded-xl border border-amber-100 bg-amber-50/50 px-4 py-3 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
+                  <span><strong>TBC</strong>: final sitting/date is still to be confirmed.</span>
+                  <span><strong>TBD</strong>: no exam date has been set yet.</span>
+                </div>
+                <ExamHistoryTable results={allHistory} />
+              </>
             )}
           </div>
 

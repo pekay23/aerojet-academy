@@ -42,6 +42,8 @@ async function main() {
             type: 'DEBIT',
             amount: item.cost,
             description: `Payment for ${item.type}: ${item.modules.join(', ')}`,
+            referenceType: 'SEEDED_EXAM_BOOKING',
+            referenceId: groupRef,
             metadata: { groupRef, packType: item.type }
           }
         })

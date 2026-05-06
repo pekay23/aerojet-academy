@@ -192,7 +192,7 @@ export default function AuditLogTable({ logs: initialLogs, total: initialTotal, 
       const res = await fetch(`/api/staff/audit-logs?${params}`)
       const data = await res.json()
       setLogs(data.data ?? [])
-      setTotal(data.total ?? 0)
+      setTotal(data.meta?.total ?? 0)
     } finally {
       setLoading(false)
     }

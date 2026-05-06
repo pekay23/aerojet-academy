@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma/client'
 import { Prisma, PoolStatus, PaymentStatus } from '@prisma/client'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 /**
  * Sweeps a user's upcoming exams and pool memberships to ensure they do not
@@ -20,7 +21,7 @@ export async function evictInactiveUserFromExams(userId: string, actorId: string
       const futureMemberships = await tx.poolMembership.findMany({
         where: {
           userId,
-          status: { in: ['RESERVED', 'CONFIRMED'] },
+          status: { in: ACTIVE_MEMBERSHIP_STATUSES },
           pool: {
             examDate: { gt: now },
             status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED'] },

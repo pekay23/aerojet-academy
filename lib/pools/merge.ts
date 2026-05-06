@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { MODULE_DIVERSITY_CAP, POOL_MAX_CANDIDATES } from './types'
 import { confirmPoolInternal } from './confirm'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 export interface MergeValidationResult {
   compatible: boolean
@@ -16,13 +17,13 @@ export async function canMergePools(
     prisma.examPool.findUnique({
       where: { id: poolAId },
       include: {
-        memberships: { where: { status: { in: ['RESERVED', 'CONFIRMED'] } } },
+        memberships: { where: { status: { in: ACTIVE_MEMBERSHIP_STATUSES } } },
       },
     }),
     prisma.examPool.findUnique({
       where: { id: poolBId },
       include: {
-        memberships: { where: { status: { in: ['RESERVED', 'CONFIRMED'] } } },
+        memberships: { where: { status: { in: ACTIVE_MEMBERSHIP_STATUSES } } },
       },
     }),
   ])
@@ -119,7 +120,7 @@ export async function mergePools(poolAId: string, poolBId: string, adminId: stri
       const poolB = await tx.examPool.findUniqueOrThrow({
         where: { id: poolBId },
         include: {
-          memberships: { where: { status: { in: ['RESERVED', 'CONFIRMED'] } } },
+          memberships: { where: { status: { in: ACTIVE_MEMBERSHIP_STATUSES } } },
         },
       })
 
@@ -136,7 +137,7 @@ export async function mergePools(poolAId: string, poolBId: string, adminId: stri
 
       // 1. Move memberships from B to A
       await tx.poolMembership.updateMany({
-        where: { poolId: poolB.id, status: { in: ['RESERVED', 'CONFIRMED'] } },
+        where: { poolId: poolB.id, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
         data: { poolId: poolA.id },
       })
 

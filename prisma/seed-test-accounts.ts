@@ -1,5 +1,19 @@
+import { BookingDemandStatus, PaymentStatus } from '@prisma/client'
 import { prismaUnfiltered as prisma } from '../lib/prisma/client'
 import bcrypt from 'bcryptjs'
+
+const bookingScenarios = [
+  { demandStatus: BookingDemandStatus.DEMAND_CAPTURED, status: PaymentStatus.PENDING, daysFromNow: 45 },
+  { demandStatus: BookingDemandStatus.POOLED, status: PaymentStatus.APPROVED, daysFromNow: 35 },
+  { demandStatus: BookingDemandStatus.SCHEDULED, status: PaymentStatus.APPROVED, daysFromNow: 14 },
+  { demandStatus: BookingDemandStatus.EXECUTED, status: PaymentStatus.APPROVED, daysFromNow: -21, score: 82, result: 'pass' },
+]
+
+function addUtcDays(base: Date, days: number) {
+  const date = new Date(base)
+  date.setUTCDate(date.getUTCDate() + days)
+  return date
+}
 
 async function main() {
   console.log('🌱 Seeding 10 test student accounts...')
@@ -80,17 +94,104 @@ async function main() {
       })
     }
 
+    // Add representative exam bookings for portal and finance testing.
+    if (examComponents.length > 0) {
+      const baseDate = new Date(Date.UTC(2026, 4, 6, 9, 0, 0))
+      const componentsForBookings = examComponents.slice(0, Math.min(4, examComponents.length))
+
+      for (let bookingIndex = 0; bookingIndex < componentsForBookings.length; bookingIndex++) {
+        const ec = componentsForBookings[bookingIndex]
+        const scenario = bookingScenarios[(bookingIndex + i) % bookingScenarios.length]
+        const migrationRef = `TEST_ACCOUNT_BOOKING_SEED:${studentId}:${ec.code}:${scenario.demandStatus}`
+        const existingBooking = await prisma.examBooking.findFirst({
+          where: { userId: user.id, migrationRef },
+        })
+
+        if (existingBooking) continue
+
+        const hasScheduledDate =
+          scenario.demandStatus === BookingDemandStatus.SCHEDULED ||
+          scenario.demandStatus === BookingDemandStatus.EXECUTED
+        const examDate = hasScheduledDate ? addUtcDays(baseDate, scenario.daysFromNow) : null
+
+        await prisma.examBooking.create({
+          data: {
+            userId: user.id,
+            examComponentId: ec.id,
+            moduleCode: ec.code,
+            amountPaid: 520,
+            bookingType: 'INDIVIDUAL',
+            demandStatus: scenario.demandStatus,
+            status: scenario.status,
+            bookedAt: addUtcDays(baseDate, -30 + bookingIndex),
+            examDate,
+            attemptType: bookingIndex === 3 ? 'RESIT_1' : 'FIRST',
+            result: scenario.result,
+            score: scenario.score,
+            percentage: scenario.score,
+            examCategory: 'OFFICIAL_EASA',
+            migrationRef,
+            sourceNotes: 'Seeded test account exam booking state',
+            executedAt: scenario.demandStatus === BookingDemandStatus.EXECUTED ? examDate : null,
+          },
+        })
+      }
+
+      const migratedComponent = examComponents[componentsForBookings.length] || examComponents[0]
+      const migratedRef = `TEST_ACCOUNT_BOOKING_SEED:${studentId}:${migratedComponent.code}:MIGRATED`
+      const existingMigrated = await prisma.examBooking.findFirst({
+        where: { userId: user.id, migrationRef: migratedRef },
+      })
+
+      if (!existingMigrated) {
+        const migratedDate = addUtcDays(baseDate, -75)
+        await prisma.examBooking.create({
+          data: {
+            userId: user.id,
+            examComponentId: migratedComponent.id,
+            moduleCode: migratedComponent.code,
+            amountPaid: 0,
+            bookingType: 'MANUAL',
+            demandStatus: BookingDemandStatus.EXECUTED,
+            status: PaymentStatus.APPROVED,
+            bookedAt: addUtcDays(baseDate, -90),
+            examDate: migratedDate,
+            attemptType: 'FIRST',
+            result: 'MIGRATED',
+            examCategory: 'OFFICIAL_EASA',
+            migrationRef: migratedRef,
+            sourceNotes: 'Seeded migrated booking metadata example',
+            executedAt: migratedDate,
+          },
+        })
+      }
+    }
+
     // Add some exam results for graduated or active students
     if ((data.status === 'GRADUATED' || i < 3) && examComponents.length > 0) {
-       for (const ec of examComponents.slice(0, 3)) {
+       for (let examIndex = 0; examIndex < examComponents.slice(0, 3).length; examIndex++) {
+          const ec = examComponents[examIndex]
+          const migrationRef = `TEST_ACCOUNT_SEED:${studentId}:${ec.code}:FIRST`
+          const existingResult = await prisma.examResult.findFirst({
+            where: { userId: user.id, migrationRef },
+          })
+
+          if (existingResult) continue
+
           await prisma.examResult.create({
             data: {
               userId: user.id,
               moduleCode: ec.code,
               score: 85,
+              maxScore: 100,
               percentage: 85,
               passed: true,
-              attemptType: 'FIRST_ATTEMPT',
+              grade: 'PASS',
+              attemptType: 'FIRST',
+              migrationRef,
+              sourceNotes: 'Seeded test account exam history',
+              examCategory: 'OFFICIAL_EASA',
+              createdAt: new Date(Date.UTC(2026, examIndex, 15)),
             }
           })
        }

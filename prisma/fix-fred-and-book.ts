@@ -52,6 +52,8 @@ async function main() {
         type: 'DEBIT',
         amount: cost,
         description: `Payment for TWIN_PACK: ${modules.join(', ')} (Restored from roadmap)`,
+        referenceType: 'SEEDED_EXAM_BOOKING',
+        referenceId: groupRef,
         metadata: { groupRef, packType: 'TWIN_PACK' }
       }
     })

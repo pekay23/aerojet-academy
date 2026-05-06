@@ -5,7 +5,7 @@ import ThemeToggle from '@/components/shared/ThemeToggle'
 import { Bell, Mail, Moon, Sun, Monitor, Loader2, Save } from 'lucide-react'
 import { updateUserSettings } from '@/app/student/actions'
 import { toast } from 'sonner'
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/components/shared/theme-provider'
 
 interface SettingsFormProps {
   initialSettings: any

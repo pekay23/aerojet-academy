@@ -12,6 +12,7 @@ import { Prisma } from '@prisma/client'
 import { releaseFunds, creditToWallet } from '@/lib/wallet/operations'
 import { decrementPoolMemberCount } from './operations'
 import { logAuditEvent } from '@/lib/audit/logger'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 export interface CancellationResult {
   success: boolean
@@ -61,7 +62,7 @@ export async function cancelBooking(
         const memberships = await tx.poolMembership.findMany({
           where: {
             bookingId,
-            status: { in: ['RESERVED', 'CONFIRMED'] },
+            status: { in: ACTIVE_MEMBERSHIP_STATUSES },
           },
         })
 
@@ -72,7 +73,7 @@ export async function cancelBooking(
             where: {
               userId,
               examComponentId: booking.examComponentId,
-              status: { in: ['RESERVED', 'CONFIRMED'] },
+              status: { in: ACTIVE_MEMBERSHIP_STATUSES },
             },
           })
         }

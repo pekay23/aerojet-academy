@@ -1,5 +1,6 @@
 import { BookingType, Prisma } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
+import { COUNTABLE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 type BookingGuaranteeTypeValue =
   | 'POOL_FLEX'
@@ -217,7 +218,7 @@ export async function getEventDemandSnapshot(eventId: string): Promise<EventDema
           guaranteedSeats: true,
           totalDemandSeats: true,
           memberships: {
-            where: { status: { in: ['RESERVED', 'CONFIRMED', 'NO_SHOW', 'COMPLETED'] } },
+            where: { status: { in: COUNTABLE_MEMBERSHIP_STATUSES } },
             select: {
               examComponent: {
                 select: {
@@ -268,7 +269,7 @@ export async function getEventDemandSnapshots(eventIds: string[]): Promise<Map<s
           guaranteedSeats: true,
           totalDemandSeats: true,
           memberships: {
-            where: { status: { in: ['RESERVED', 'CONFIRMED', 'NO_SHOW', 'COMPLETED'] } },
+            where: { status: { in: COUNTABLE_MEMBERSHIP_STATUSES } },
             select: {
               examComponent: {
                 select: {

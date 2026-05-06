@@ -1,3 +1,5 @@
+import type { MembershipStatus, PoolStatus, EventStatus } from '@prisma/client'
+
 export const APP_NAME = 'Aerojet Aviation Training Academy'
 export const APP_SHORT = 'Aerojet Academy'
 export const APP_DOMAIN = 'aerojet-academy.com'
@@ -15,6 +17,20 @@ export const POOL_MAX = 28
 export const POOL_NEAR_FULL = 23
 export const POOL_DEADLINE_DAYS_BEFORE = 21
 export const MODULE_DIVERSITY_CAP = 4
+
+// ── Pool & Membership Status Groups ────────────────────────────────
+/** Memberships that count as actively participating (seat occupied) */
+export const ACTIVE_MEMBERSHIP_STATUSES: MembershipStatus[] = ['RESERVED', 'CONFIRMED']
+/** Memberships that count toward pool occupancy totals */
+export const COUNTABLE_MEMBERSHIP_STATUSES: MembershipStatus[] = ['RESERVED', 'CONFIRMED', 'NO_SHOW', 'COMPLETED']
+/** Pools currently accepting new bookings */
+export const BOOKABLE_POOL_STATUSES: PoolStatus[] = ['OPEN', 'NEAR_FULL']
+/** Pools that are live (not dead/archived) */
+export const LIVE_POOL_STATUSES: PoolStatus[] = ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'LOCKED']
+/** Pool statuses that indicate the pool is terminal / no longer active */
+export const TERMINAL_POOL_STATUSES: PoolStatus[] = ['FAILED', 'MERGED', 'COMPLETED']
+/** Event statuses for upcoming/active events */
+export const UPCOMING_EVENT_STATUSES: EventStatus[] = ['DRAFT', 'OPEN', 'CONFIRMED', 'POSTPONED']
 
 export const PROGRAMMES = [
   { value: 'FOUR_YEAR', label: '4-Year B1/B2 Programme', duration: '4 years' },

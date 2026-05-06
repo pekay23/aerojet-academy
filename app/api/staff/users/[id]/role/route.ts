@@ -1,20 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
-import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { UserRole, EnrollmentType } from '@prisma/client'
 import { sendStudentPromotionEmail } from '@/lib/email/service'
+import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 const updateRoleSchema = z.object({
-  role: z.enum(['APPLICANT', 'STUDENT', 'INSTRUCTOR', 'STAFF', 'ADMIN']),
+  role: z.enum(['APPLICANT', 'STUDENT', 'EXAMINER', 'INSTRUCTOR', 'STAFF', 'ADMIN']),
 })
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getAuthSession()
-    if (!session || !['ADMIN', 'SUPER_ADMIN'].includes(session.user.role)) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const session = await requirePermission(PERMISSIONS.MANAGE_ROLES)
 
     const { id: userId } = await params
     const body = await req.json()
@@ -79,8 +77,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       })
 
       // 2. Ensure the required profile exists for the new role
-      if (newRole === 'INSTRUCTOR' && !user.instructorProfile) {
-        const empId = await generateUniqueId('IN', 'INSTRUCTOR')
+      if ((newRole === 'INSTRUCTOR' || newRole === 'EXAMINER') && !user.instructorProfile) {
+        const prefix = newRole === 'EXAMINER' ? 'EX' : 'IN'
+        const empId = await generateUniqueId(prefix, 'INSTRUCTOR')
         await tx.instructorProfile.create({
           data: {
             userId,
@@ -117,6 +116,19 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       const targetEmail = user.personalEmail || user.email
       await sendStudentPromotionEmail(targetEmail, firstName, generatedStudentId)
     }
+
+    await createAuditLog({
+      userId: session.id,
+      action: AuditAction.UPDATE,
+      entity: 'User',
+      entityId: userId,
+      description: `Changed user role from ${user.role} to ${newRole}.`,
+      changes: {
+        previousRole: user.role,
+        newRole,
+        generatedStudentId,
+      },
+    })
 
     return NextResponse.json(updatedUser)
   } catch (error) {

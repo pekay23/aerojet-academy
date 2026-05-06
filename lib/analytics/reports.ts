@@ -1,6 +1,17 @@
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { subDays, startOfMonth, startOfYear } from 'date-fns'
 import { EnrollmentStatus } from '@prisma/client'
+
+/** Build a Prisma { gte, lt } range from optional year + month */
+function buildDateRange(year?: number, month?: number) {
+  if (!year) return undefined
+  if (month) {
+    const start = new Date(year, month - 1, 1)
+    const end = new Date(year, month, 1)
+    return { gte: start, lt: end }
+  }
+  return { gte: new Date(year, 0, 1), lt: new Date(year + 1, 0, 1) }
+}
 
 export async function getEnrollmentTrends() {
   const enrollmentsByCourse = await prisma.enrollment.groupBy({
@@ -114,48 +125,56 @@ export async function getAttendanceReport() {
 // FINANCE REPORTS
 // ============================================================================
 
-export async function getFinanceReportSummary() {
+export async function getFinanceReportSummary(filters?: { year?: number; month?: number }) {
   const now = new Date()
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
-  const startOfYear = new Date(now.getFullYear(), 0, 1)
+  const targetYear = filters?.year ?? now.getFullYear()
+  const targetMonth = filters?.month ?? now.getMonth() + 1 // 1-indexed
 
-  // Total revenue (all approved payments)
+  const startOfSelectedMonth = new Date(targetYear, targetMonth - 1, 1)
+  const endOfSelectedMonth = new Date(targetYear, targetMonth, 1)
+  const startOfSelectedYear = new Date(targetYear, 0, 1)
+  const endOfSelectedYear = new Date(targetYear + 1, 0, 1)
+
+  // Build a year-scoped date filter for aggregate queries
+  const yearDateFilter = { gte: startOfSelectedYear, lt: endOfSelectedYear }
+
+  // Total revenue for the selected year
   const totalRevenueResult = await prisma.payment.aggregate({
-    where: { status: 'APPROVED' },
+    where: { status: 'APPROVED', approvedAt: yearDateFilter },
     _sum: { amount: true },
     _count: { id: true },
   })
 
-  // Revenue this month
+  // Revenue for the selected month
   const monthRevenueResult = await prisma.payment.aggregate({
     where: {
       status: 'APPROVED',
-      approvedAt: { gte: startOfMonth },
+      approvedAt: { gte: startOfSelectedMonth, lt: endOfSelectedMonth },
     },
     _sum: { amount: true },
     _count: { id: true },
   })
 
-  // Revenue this year
+  // Revenue for the selected year
   const yearRevenueResult = await prisma.payment.aggregate({
     where: {
       status: 'APPROVED',
-      approvedAt: { gte: startOfYear },
+      approvedAt: yearDateFilter,
     },
     _sum: { amount: true },
     _count: { id: true },
   })
 
-  // Pending payments total
+  // Pending payments total (always current — not time-scoped)
   const pendingResult = await prisma.payment.aggregate({
     where: { status: 'PENDING' },
     _sum: { amount: true },
     _count: { id: true },
   })
 
-  // Rejected/Failed payments
+  // Rejected/Failed within the selected year
   const rejectedResult = await prisma.payment.aggregate({
-    where: { status: { in: ['REJECTED', 'FAILED'] } },
+    where: { status: { in: ['REJECTED', 'FAILED'] }, approvedAt: yearDateFilter },
     _sum: { amount: true },
     _count: { id: true },
   })
@@ -176,13 +195,17 @@ export async function getFinanceReportSummary() {
     pendingCount: pendingResult._count.id || 0,
     rejectedAmount: Number(rejectedResult._sum.amount || 0),
     rejectedCount: rejectedResult._count.id || 0,
+    filterYear: targetYear,
+    filterMonth: targetMonth,
   }
 }
 
-export async function getRevenueByProgrammeType() {
+export async function getRevenueByProgrammeType(filters?: { year?: number; month?: number }) {
+  const dateFilter = buildDateRange(filters?.year, filters?.month)
+
   // Full-time programme payments (via payment milestones)
   const fullTimePayments = await prisma.paymentMilestone.findMany({
-    where: { status: 'PAID' },
+    where: { status: 'PAID', ...(dateFilter && { paidAt: dateFilter }) },
     include: {
       enrollment: {
         include: { programme: true },
@@ -194,19 +217,28 @@ export async function getRevenueByProgrammeType() {
 
   // Modular enrollments
   const modularEnrollments = await prisma.modularEnrollment.findMany({
-    where: { status: { in: [EnrollmentStatus.APPROVED, EnrollmentStatus.ACTIVE, EnrollmentStatus.GRADUATED] } },
+    where: {
+      status: { in: [EnrollmentStatus.APPROVED, EnrollmentStatus.ACTIVE, EnrollmentStatus.GRADUATED] },
+      ...(dateFilter && { createdAt: dateFilter }),
+    },
   })
   const modularRevenue = modularEnrollments.reduce((sum, e) => sum + Number(e.amountPaid || 0), 0)
 
   // Pool/Exam payments (captured from memberships)
   const poolPayments = await prisma.poolMembership.findMany({
-    where: { status: { in: ['CONFIRMED', 'COMPLETED'] } },
+    where: {
+      status: { in: ['CONFIRMED', 'COMPLETED'] },
+      ...(dateFilter && { joinedAt: dateFilter }),
+    },
   })
   const poolRevenue = poolPayments.reduce((sum, pm) => sum + Number(pm.amountPaid || 0), 0)
 
   // Individual exam bookings
   const examBookings = await prisma.examBooking.findMany({
-    where: { status: 'COMPLETED' },
+    where: {
+      status: 'COMPLETED',
+      ...(dateFilter && { bookedAt: dateFilter }),
+    },
   })
   const examRevenue = examBookings.reduce((sum, eb) => sum + Number(eb.amountPaid || 0), 0)
 
@@ -215,6 +247,7 @@ export async function getRevenueByProgrammeType() {
     where: {
       status: 'APPROVED',
       referenceType: 'REGISTRATION',
+      ...(dateFilter && { approvedAt: dateFilter }),
     },
   })
   const registrationRevenue = registrationPayments.reduce(
@@ -224,7 +257,10 @@ export async function getRevenueByProgrammeType() {
 
   // Wallet top-ups (via wallet transactions)
   const walletTopups = await prisma.walletTransaction.findMany({
-    where: { type: 'TOP_UP' },
+    where: {
+      type: 'TOP_UP',
+      ...(dateFilter && { createdAt: dateFilter }),
+    },
   })
   const topupRevenue = walletTopups.reduce((sum, t) => sum + Number(t.amount || 0), 0)
 
@@ -297,37 +333,30 @@ export async function getPaymentMethodBreakdown() {
   }))
 }
 
-export async function getMonthlyRevenueData() {
+export async function getMonthlyRevenueData(filters?: { year?: number }) {
   const now = new Date()
-  const twelveMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 11, 1)
+  const targetYear = filters?.year ?? now.getFullYear()
+
   const monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
   ]
 
-  // Initialize all 12 months with zero
+  const startOfYear = new Date(targetYear, 0, 1)
+  const endOfYear = new Date(targetYear + 1, 0, 1)
+
+  // Initialize all 12 months of the selected year
   const monthlyData: Record<string, { month: string; revenue: number; count: number }> = {}
-  for (let i = 11; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-    const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
+  for (let m = 0; m < 12; m++) {
+    const key = `${monthNames[m]} ${targetYear}`
     monthlyData[key] = { month: key, revenue: 0, count: 0 }
   }
 
-  // Get payments from last 12 months
+  // Get all approved payments for the selected year
   const payments = await prisma.payment.findMany({
     where: {
       status: 'APPROVED',
-      approvedAt: { gte: twelveMonthsAgo },
+      approvedAt: { gte: startOfYear, lt: endOfYear },
     },
     select: { amount: true, approvedAt: true },
   })
@@ -346,9 +375,12 @@ export async function getMonthlyRevenueData() {
   return Object.values(monthlyData)
 }
 
-export async function getPaymentStatusBreakdown() {
+export async function getPaymentStatusBreakdown(filters?: { year?: number; month?: number }) {
+  const dateFilter = buildDateRange(filters?.year, filters?.month)
+
   const statusCounts = await prisma.payment.groupBy({
     by: ['status'],
+    where: dateFilter ? { createdAt: dateFilter } : undefined,
     _count: { id: true },
     _sum: { amount: true },
   })
@@ -422,16 +454,18 @@ export async function getCriticalAlerts() {
 // ============================================================================
 
 export async function getExamAnalytics() {
-  // Fetch both bookings and results for comprehensive data
+  // Fetch bookings for operational volume and ExamResult rows for graded outcomes.
   const [allBookings, allResults] = await Promise.all([
     prisma.examBooking.findMany({
       where: { deletedAt: null },
       select: {
         id: true,
+        userId: true,
         result: true,
         attemptType: true,
         examCategory: true,
         status: true,
+        demandStatus: true,
         moduleCode: true,
         score: true,
         percentage: true,
@@ -442,6 +476,7 @@ export async function getExamAnalytics() {
     prisma.examResult.findMany({
       select: {
         id: true,
+        userId: true,
         passed: true,
         attemptType: true,
         examCategory: true,
@@ -455,13 +490,68 @@ export async function getExamAnalytics() {
 
   const totalBookings = allBookings.length
   const totalResults = allResults.length
+  const resultKeys = new Set(
+    allResults.map((result) => `${result.userId}:${(result.moduleCode || 'UNKNOWN').toUpperCase()}`)
+  )
 
-  // === Core Stats from bookings ===
+  const normalizeAttempt = (attempt?: string | null) => {
+    const normalized = (attempt || 'FIRST').toUpperCase()
+    if (['FIRST', 'FIRST_ATTEMPT', 'INITIAL'].includes(normalized)) return 'FIRST'
+    if (['RESIT_1', 'FIRST_RESIT', 'RESIT'].includes(normalized)) return 'RESIT_1'
+    if (['RESIT_2', 'SECOND_RESIT'].includes(normalized)) return 'RESIT_2'
+    return 'RESIT_3'
+  }
+
+  const gradedRecords = [
+    ...allResults.map((result) => ({
+      id: `result-${result.id}`,
+      passed: result.passed,
+      failed: !result.passed,
+      attemptType: normalizeAttempt(result.attemptType),
+      examCategory: result.examCategory,
+      moduleCode: (result.moduleCode || 'UNKNOWN').toUpperCase(),
+      score:
+        result.score != null
+          ? Number(result.score)
+          : result.percentage != null
+            ? Number(result.percentage)
+            : null,
+      date: result.createdAt,
+    })),
+    ...allBookings
+      .filter((booking) => {
+        const key = `${booking.userId}:${(booking.moduleCode || 'UNKNOWN').toUpperCase()}`
+        const result = booking.result?.toLowerCase()
+        return !resultKeys.has(key) && (result === 'pass' || result === 'fail')
+      })
+      .map((booking) => {
+        const result = booking.result?.toLowerCase()
+        return {
+          id: `booking-${booking.id}`,
+          passed: result === 'pass',
+          failed: result === 'fail',
+          attemptType: normalizeAttempt(booking.attemptType),
+          examCategory: booking.examCategory,
+          moduleCode: (booking.moduleCode || 'UNKNOWN').toUpperCase(),
+          score:
+            booking.score != null
+              ? Number(booking.score)
+              : booking.percentage != null
+                ? Number(booking.percentage)
+                : null,
+          date: booking.examDate || booking.createdAt,
+        }
+      }),
+  ]
+
+  // === Core Stats ===
   const stats = {
-    total: totalBookings,
+    total: gradedRecords.length,
+    bookings: totalBookings,
     passed: 0,
     failed: 0,
     awaitingGrading: 0,
+    pendingScheduling: 0,
     easa: { total: 0, passed: 0, failed: 0 },
     internal: { total: 0, passed: 0, failed: 0 },
     attempts: {
@@ -502,19 +592,35 @@ export async function getExamAnalytics() {
     monthlyVolume[key] = { month: key, exams: 0, passes: 0, fails: 0 }
   }
 
-  allBookings.forEach((exam) => {
-    const res = exam.result?.toLowerCase()
+  allBookings.forEach((booking) => {
+    const hasBookingResult = ['pass', 'fail'].includes(booking.result?.toLowerCase() || '')
+    if (!hasBookingResult && booking.status === 'COMPLETED') stats.awaitingGrading++
+    if (
+      !hasBookingResult &&
+      booking.status !== 'COMPLETED' &&
+      ['DEMAND_CAPTURED', 'POOLED', 'ROLLED_FORWARD'].includes(String(booking.demandStatus || ''))
+    ) {
+      stats.pendingScheduling++
+    }
+
+    const examMonth = booking.examDate ? new Date(booking.examDate) : new Date(booking.createdAt)
+    const monthKey = `${monthNames[examMonth.getMonth()]} ${examMonth.getFullYear()}`
+    if (monthlyVolume[monthKey]) {
+      monthlyVolume[monthKey].exams++
+    }
+  })
+
+  gradedRecords.forEach((exam) => {
     const isEasa = exam.examCategory === 'OFFICIAL_EASA'
-    const moduleCode = (exam.moduleCode || 'UNKNOWN').toUpperCase()
-    const attempt = (exam.attemptType || 'FIRST') as keyof typeof stats.attempts
+    const moduleCode = exam.moduleCode
+    const attempt = exam.attemptType as keyof typeof stats.attempts
     const isFirst = attempt === 'FIRST'
-    const hasPassed = res === 'pass'
-    const hasFailed = res === 'fail'
+    const hasPassed = exam.passed
+    const hasFailed = exam.failed
 
     // Global metrics
     if (hasPassed) stats.passed++
-    else if (hasFailed) stats.failed++
-    else if (exam.status === 'COMPLETED') stats.awaitingGrading++
+    if (hasFailed) stats.failed++
 
     // Category metrics
     const cat = isEasa ? stats.easa : stats.internal
@@ -550,34 +656,20 @@ export async function getExamAnalytics() {
     if (hasFailed) mod.failed++
 
     // Score distribution
-    const scoreVal = exam.score != null ? Number(exam.score) : (exam.percentage != null ? Number(exam.percentage) : null)
-    if (scoreVal !== null) {
-      mod.scores.push(scoreVal)
-      if (scoreVal <= 25) scoreDistribution['0-25']++
-      else if (scoreVal <= 50) scoreDistribution['26-50']++
-      else if (scoreVal <= 74) scoreDistribution['51-74']++
+    if (exam.score !== null) {
+      mod.scores.push(exam.score)
+      if (exam.score <= 25) scoreDistribution['0-25']++
+      else if (exam.score <= 50) scoreDistribution['26-50']++
+      else if (exam.score <= 74) scoreDistribution['51-74']++
       else scoreDistribution['75-100']++
     }
 
-    // Monthly volume
-    const examMonth = exam.examDate ? new Date(exam.examDate) : new Date(exam.createdAt)
+    // Monthly graded outcomes
+    const examMonth = new Date(exam.date)
     const monthKey = `${monthNames[examMonth.getMonth()]} ${examMonth.getFullYear()}`
     if (monthlyVolume[monthKey]) {
-      monthlyVolume[monthKey].exams++
       if (hasPassed) monthlyVolume[monthKey].passes++
       if (hasFailed) monthlyVolume[monthKey].fails++
-    }
-  })
-
-  // Also fold in ExamResult data for score distributions where bookings have no scores
-  allResults.forEach((r) => {
-    const scoreVal = r.score != null ? Number(r.score) : (r.percentage != null ? Number(r.percentage) : null)
-    const moduleCode = (r.moduleCode || 'UNKNOWN').toUpperCase()
-    if (scoreVal !== null && !moduleMap.get(moduleCode)?.scores.includes(scoreVal)) {
-      if (scoreVal <= 25) scoreDistribution['0-25']++
-      else if (scoreVal <= 50) scoreDistribution['26-50']++
-      else if (scoreVal <= 74) scoreDistribution['51-74']++
-      else scoreDistribution['75-100']++
     }
   })
 
@@ -605,8 +697,8 @@ export async function getExamAnalytics() {
 
   return {
     ...stats,
-    passPercentage: totalBookings > 0 ? Math.round((stats.passed / totalBookings) * 100) : 0,
-    failPercentage: totalBookings > 0 ? Math.round((stats.failed / totalBookings) * 100) : 0,
+    passPercentage: stats.total > 0 ? Math.round((stats.passed / stats.total) * 100) : 0,
+    failPercentage: stats.total > 0 ? Math.round((stats.failed / stats.total) * 100) : 0,
     easaPassRate: stats.easa.total > 0 ? Math.round((stats.easa.passed / stats.easa.total) * 100) : 0,
     internalPassRate: stats.internal.total > 0 ? Math.round((stats.internal.passed / stats.internal.total) * 100) : 0,
     // New enhanced data
@@ -617,9 +709,9 @@ export async function getExamAnalytics() {
     resitTotal,
     resitPass,
     // Resit specific pass rates
-    resit1PassRate: stats.attempts.RESIT_1 > 0 ? Math.round((allBookings.filter(b => b.attemptType === 'RESIT_1' && b.result?.toLowerCase() === 'pass').length / stats.attempts.RESIT_1) * 100) : 0,
-    resit2PassRate: stats.attempts.RESIT_2 > 0 ? Math.round((allBookings.filter(b => b.attemptType === 'RESIT_2' && b.result?.toLowerCase() === 'pass').length / stats.attempts.RESIT_2) * 100) : 0,
-    resit3PassRate: stats.attempts.RESIT_3 > 0 ? Math.round((allBookings.filter(b => b.attemptType === 'RESIT_3' && b.result?.toLowerCase() === 'pass').length / stats.attempts.RESIT_3) * 100) : 0,
+    resit1PassRate: stats.attempts.RESIT_1 > 0 ? Math.round((gradedRecords.filter(b => b.attemptType === 'RESIT_1' && b.passed).length / stats.attempts.RESIT_1) * 100) : 0,
+    resit2PassRate: stats.attempts.RESIT_2 > 0 ? Math.round((gradedRecords.filter(b => b.attemptType === 'RESIT_2' && b.passed).length / stats.attempts.RESIT_2) * 100) : 0,
+    resit3PassRate: stats.attempts.RESIT_3 > 0 ? Math.round((gradedRecords.filter(b => b.attemptType === 'RESIT_3' && b.passed).length / stats.attempts.RESIT_3) * 100) : 0,
     scoreDistribution,
     monthlyTrend: Object.values(monthlyVolume),
     hardestModules,

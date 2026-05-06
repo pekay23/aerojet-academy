@@ -1,9 +1,16 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
-import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiNotFound, apiTooManyRequests, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { checkRateLimit, getClientIp } from '@/lib/auth/helpers'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
+  // Rate limit: 5 proof uploads per IP per hour
+  const ip = getClientIp(req)
+  if (!checkRateLimit(`submit-proof:${ip}`, 5, 60 * 60 * 1000)) {
+    return apiTooManyRequests('Too many upload attempts. Please try again later.')
+  }
+
   const body = await req.json()
   const { registrationCode, proofUrl } = body
 

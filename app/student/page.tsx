@@ -23,6 +23,7 @@ import { getWelcomeMessages } from '@/lib/welcome-messages'
 import { CurrencyDisplay } from '@/components/shared/CurrencyDisplay'
 import { serializeExamBooking, serializePaymentMilestone, serializeEnrollment } from '@/lib/student/serialization'
 import { SerializedPaymentMilestone } from '@/lib/student/types'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 export const metadata: Metadata = {
   title: 'Dashboard | Student Portal',
@@ -68,7 +69,7 @@ export default async function StudentDashboard() {
         },
         poolMemberships: {
           where: {
-            status: { in: ['RESERVED', 'CONFIRMED'] },
+            status: { in: ACTIVE_MEMBERSHIP_STATUSES },
             pool: { isAutoPool: false }
           },
           include: { pool: true },
@@ -85,7 +86,7 @@ export default async function StudentDashboard() {
               where: { status: { in: ['ACTIVE', 'APPROVED'] } },
             },
             poolMemberships: {
-              where: { status: { in: ['RESERVED', 'CONFIRMED'] } },
+              where: { status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
             },
           }
         }

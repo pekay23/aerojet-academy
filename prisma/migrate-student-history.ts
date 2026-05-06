@@ -106,6 +106,8 @@ async function updateWalletBalance(userId: string, amount: number, description: 
       type: 'CREDIT',
       amount: amount,
       description: description,
+      referenceType: 'HISTORICAL_MIGRATION',
+      referenceId: `MIGRATION-${userId}-${Date.now()}`,
     },
   })
 

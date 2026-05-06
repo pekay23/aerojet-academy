@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma/client'
 import { getWalletBalance } from '@/lib/wallet/balance'
 import { calculatePoolSeatPrice } from './pricing'
 import type { PoolValidationResult } from './types'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 export async function validatePoolJoin(
   poolId: string,
@@ -23,7 +24,7 @@ export async function validatePoolJoin(
   }
 
   const existing = await prisma.poolMembership.findFirst({
-    where: { poolId, userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+    where: { poolId, userId, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
   })
   if (existing) return { valid: false, error: 'You are already in this pool' }
 

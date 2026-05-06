@@ -13,7 +13,7 @@ This document tracks persistent issues and bugs that are not yet fully resolved.
 - **Cause**: Simultaneous execution of ~20 complex database queries against a remote Neon instance.
 - **Impact**: Frustrating developer experience and potential production timeouts for large datasets.
 - **Planned Fix**: Implement database indexes on all `status` and `date` columns.
-- **Current Status**: Partially mitigated. Chart components now lazy-loaded via `next/dynamic`. Prisma transaction timeouts increased to 30s. Indices applied to `AuditLog` and `ExamBooking` tables.
+- **Current Status**: Partially mitigated. Chart components lazy-loaded via `next/dynamic`. Prisma transaction timeouts increased to 30s. Indices applied to `AuditLog` and `ExamBooking` tables. Chart `width(-1) height(-1)` warnings resolved (v1.4.0).
 
 ## ✉️ Email Verification Delays
 **Problem**: Some users report delays in receiving the `verifyToken` email.
@@ -39,7 +39,17 @@ This document tracks persistent issues and bugs that are not yet fully resolved.
 - **Resolution**: Reverted to `@prisma/adapter-pg` with standard `pg` Pool in commit 6ed1cd9.
 - **Rule**: Always use `@prisma/adapter-pg` for production. Test any adapter changes against a live Vercel deployment before merging.
 
+## Local Development Neon TCP Timeouts
+**Problem**: On some local networks, `pg` TCP connections to Neon can hang until the connection timeout even when the Neon HTTP/WebSocket driver works and Vercel remains healthy.
+- **Resolution**: `next dev` dynamically uses the Neon WebSocket Prisma adapter for `*.neon.tech` URLs, while production keeps `@prisma/adapter-pg`.
+- **Rule**: Keep this as a development-only exception. Do not import/configure `ws` for Vercel runtime, and use `AEROJET_LOCAL_DB_ADAPTER=pg` if local testing specifically needs the standard `pg` adapter.
+
 ## 🛡️ Missing Error Boundaries
 **Problem**: The (auth) route segment has no `error.tsx`, and (auth)/(portal) have no `not-found.tsx`.
 - **Impact**: Auth flow errors show raw Next.js error pages instead of branded error UI.
 - **Status**: P2 backlog item in structural review.
+
+## ⚡ Client/Server Import Boundary
+**Problem**: `@/lib/analytics/metrics` re-exports `formatCurrency` but imports `prisma`, creating a transitive server dependency. Client components importing from this module will fail with `Can't resolve 'async_hooks'`.
+- **Rule**: Client components must import `formatCurrency` from `@/lib/currency` (client-safe), never from `@/lib/analytics/metrics`.
+- **Status**: Resolved in v1.4.0 for `ReportsPanel.tsx`. Pattern documented here to prevent recurrence.

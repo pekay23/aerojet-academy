@@ -1,4 +1,5 @@
 import 'dotenv/config'
+import { createRequire } from 'node:module'
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
@@ -7,34 +8,59 @@ import { Pool } from 'pg'
  * DATABASE BASE LAYER (Raw Client)
  *
  * This client provides raw database access for the Identity (Auth) system.
- * We use the standard @prisma/adapter-pg here as it is more stable in the
- * current development environment than the serverless Neon adapter.
+ * Production uses the standard @prisma/adapter-pg path for Vercel stability.
+ * Local development may use Neon's WebSocket adapter when TCP pg handshakes
+ * stall against a remote Neon URL.
  */
 
+const require = createRequire(import.meta.url)
+
 const isDev = process.env.NODE_ENV === 'development'
-// Use DIRECT_URL for the pool in development if available, as it's more stable
-// than the pooler endpoint for long-lived dev processes.
-const dbConnectionString = (isDev ? process.env.DIRECT_URL : null) || process.env.DATABASE_URL
+const isVercel = Boolean(process.env.VERCEL)
+const localAdapterOverride = process.env.AEROJET_LOCAL_DB_ADAPTER?.toLowerCase()
+
+// App runtime should use the pooler by default. DIRECT_URL remains the right
+// default for Prisma CLI/migrations, but it is less reliable for next dev.
+const dbConnectionString = isDev
+  ? process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || process.env.DIRECT_URL
+  : process.env.DATABASE_URL || process.env.DIRECT_URL
+
+const isNeonConnection = (() => {
+  if (!dbConnectionString) return false
+  try {
+    return new URL(dbConnectionString.replace('postgresql://', 'postgres://')).hostname.endsWith(
+      '.neon.tech'
+    )
+  } catch {
+    return false
+  }
+})()
+
+const useLocalNeonAdapter =
+  isDev &&
+  !isVercel &&
+  localAdapterOverride !== 'pg' &&
+  (localAdapterOverride === 'neon' || isNeonConnection)
 
 if (!dbConnectionString) {
   console.error('[DB_BASE] CRITICAL: Database connection string is missing from environment.')
 } else if (isDev) {
   try {
     const host = new URL(dbConnectionString.replace('postgresql://', 'http://')).hostname
-    console.log(`[DB_BASE] Initializing connection pool to: ${host}`)
+    const adapter = useLocalNeonAdapter ? 'neon-websocket' : 'pg'
+    console.log(`[DB_BASE] Initializing ${adapter} adapter to: ${host}`)
   } catch (e) {
-    console.log('[DB_BASE] Initializing connection pool with provided string.')
+    console.log('[DB_BASE] Initializing database adapter with provided string.')
   }
 }
 
-// Helper to create the standard PG adapter
-const createAdapter = () => {
+const createPgAdapter = () => {
   const pool = new Pool({
     connectionString: dbConnectionString,
-    max: 20,
-    connectionTimeoutMillis: 60000,
-    idleTimeoutMillis: 30000,
-    allowExitOnIdle: false,
+    max: isDev ? 5 : 20,
+    connectionTimeoutMillis: isDev ? Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 10000) : 60000,
+    idleTimeoutMillis: isDev ? 10000 : 30000,
+    allowExitOnIdle: isDev,
   })
 
   pool.on('error', (err) => {
@@ -42,6 +68,22 @@ const createAdapter = () => {
   })
 
   return new PrismaPg(pool)
+}
+
+const createLocalNeonAdapter = () => {
+  const { PrismaNeon } = require('@prisma/adapter-neon') as typeof import('@prisma/adapter-neon')
+
+  return new PrismaNeon({
+    connectionString: dbConnectionString,
+  })
+}
+
+const createAdapter = () => {
+  if (useLocalNeonAdapter) {
+    return createLocalNeonAdapter()
+  }
+
+  return createPgAdapter()
 }
 
 const globalForPrismaBase = globalThis as unknown as {

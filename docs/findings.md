@@ -59,6 +59,34 @@
 
 ---
 
+## Financial System Stabilization (Session 2026-05-06)
+
+### Fix 1 — Raw Database IDs in Financial Transactions (DONE)
+- [x] Refactored `getReferenceDisplay()` to generate human-readable references: `ENR-XXXX`, `EXM-XXXX`, `PAY-XXXX` instead of raw CUIDs
+
+### Fix 2 — Raw Student IDs in Audit Logs (DONE)
+- [x] Added profile lookups before audit logging in `actions.ts`, `exam-record/route.ts`, `book-exam/route.ts`
+- [x] Added ExamBooking/ExamResult entity label resolution in `audit-logs/page.tsx`
+
+### Fix 3 — Transactions Table Pagination & Sorting (DONE)
+- [x] Created `GET /api/staff/finance/transactions` with `page`, `limit`, `sortBy`, `sortDir`, `query` params
+- [x] Created `TransactionsTable` client component with server-side pagination and sortable columns
+
+### Fix 4 — EXAMINER Role Update 400 Error (DONE)
+- [x] Added `EXAMINER` to Zod `updateRoleSchema` enum in `staff/users/[id]/role/route.ts`
+- [x] Auto-creates InstructorProfile with `EX-` prefix when assigning EXAMINER role
+
+### Fix 5 — Chart Rendering Warnings (DONE)
+- [x] Added `minWidth={0} minHeight={0}` to all 8 `ResponsiveContainer` instances across charts
+
+### Fix 6 — Historical Financial Filtering & Reports Export (DONE)
+- [x] Added `year`/`month` params to `getFinanceReportSummary()` and `getMonthlyRevenueData()` in `lib/analytics/reports.ts`
+- [x] Created `GET /api/staff/finance/reports` — filterable reports API
+- [x] Created `GET /api/staff/finance/reports/export` — premium HTML report with Print/Save-as-PDF
+- [x] Created `ReportsPanel` client component with year/month selectors and export buttons
+
+---
+
 ## Remaining (P2/P3 — backlog)
 
 ### P2 — Structure

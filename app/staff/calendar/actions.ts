@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { CalendarAudience, RecurrenceType } from '@prisma/client'
+import { AuditAction, logAuditEvent } from '@/lib/audit/logger'
 
 export interface AdminEventInput {
   title: string
@@ -62,6 +63,20 @@ export async function createAdminCalendarEvent(data: AdminEventInput) {
         createdBy: session.user.id,
       },
     })
+    await logAuditEvent({
+      userId: session.user.id,
+      action: AuditAction.CREATE,
+      entity: 'AdminCalendarEvent',
+      entityId: event.id,
+      description: `Created calendar event "${event.title}" for ${event.visibleTo}.`,
+      changes: {
+        title: event.title,
+        startDate: event.startDate,
+        endDate: event.endDate,
+        visibleTo: event.visibleTo,
+        targetUserId: event.targetUserId,
+      },
+    })
     revalidatePath('/staff/calendar')
     return { success: true, event }
   } catch (err) {
@@ -117,6 +132,29 @@ export async function updateAdminCalendarEvent(id: string, data: AdminEventInput
         examEventId: data.examEventId || null,
       },
     })
+    await logAuditEvent({
+      userId: session.user.id,
+      action: AuditAction.UPDATE,
+      entity: 'AdminCalendarEvent',
+      entityId: event.id,
+      description: `Updated calendar event "${event.title}".`,
+      changes: {
+        before: {
+          title: existing.title,
+          startDate: existing.startDate,
+          endDate: existing.endDate,
+          visibleTo: existing.visibleTo,
+          targetUserId: existing.targetUserId,
+        },
+        after: {
+          title: event.title,
+          startDate: event.startDate,
+          endDate: event.endDate,
+          visibleTo: event.visibleTo,
+          targetUserId: event.targetUserId,
+        },
+      },
+    })
     revalidatePath('/staff/calendar')
     return { success: true, event }
   } catch (err) {
@@ -132,9 +170,25 @@ export async function deleteAdminCalendarEvent(id: string) {
   }
 
   try {
+    const existing = await prismaUnfiltered.adminCalendarEvent.findUnique({ where: { id } })
+    if (!existing || existing.deletedAt) return { error: 'Event not found' }
+
     await prismaUnfiltered.adminCalendarEvent.update({
       where: { id },
       data: { deletedAt: new Date() },
+    })
+    await logAuditEvent({
+      userId: session.user.id,
+      action: AuditAction.DELETE,
+      entity: 'AdminCalendarEvent',
+      entityId: id,
+      description: `Deleted calendar event "${existing.title}".`,
+      changes: {
+        title: existing.title,
+        startDate: existing.startDate,
+        endDate: existing.endDate,
+        visibleTo: existing.visibleTo,
+      },
     })
     revalidatePath('/staff/calendar')
     return { success: true }

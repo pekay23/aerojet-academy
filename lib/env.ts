@@ -4,6 +4,9 @@ const envSchema = z.object({
   // Database
   DATABASE_URL: z.string().url(),
   DIRECT_URL: z.string().url().optional(),
+  LOCAL_DATABASE_URL: z.string().url().optional(),
+  AEROJET_LOCAL_DB_ADAPTER: z.enum(['pg', 'neon']).optional(),
+  DB_CONNECT_TIMEOUT_MS: z.coerce.number().int().positive().optional(),
 
   // Auth
   NEXTAUTH_URL: z.string().url(),
@@ -45,6 +48,9 @@ const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build'
 const processEnv = {
   DATABASE_URL: process.env.DATABASE_URL,
   DIRECT_URL: process.env.DIRECT_URL,
+  LOCAL_DATABASE_URL: process.env.LOCAL_DATABASE_URL,
+  AEROJET_LOCAL_DB_ADAPTER: process.env.AEROJET_LOCAL_DB_ADAPTER,
+  DB_CONNECT_TIMEOUT_MS: process.env.DB_CONNECT_TIMEOUT_MS,
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,

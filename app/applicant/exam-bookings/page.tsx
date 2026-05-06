@@ -7,6 +7,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
 import Link from 'next/link'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 export const metadata: Metadata = { title: 'Exam Bookings | Applicant Portal' }
 export const dynamic = 'force-dynamic'
@@ -108,7 +109,7 @@ async function PoolList() {
           location: true,
         },
       },
-      _count: { select: { memberships: { where: { status: { in: ['RESERVED', 'CONFIRMED'] } } } } },
+      _count: { select: { memberships: { where: { status: { in: ACTIVE_MEMBERSHIP_STATUSES } } } } },
     },
     orderBy: { createdAt: 'desc' },
     take: 30,

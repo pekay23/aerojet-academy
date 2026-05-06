@@ -21,6 +21,7 @@ import { decrementPoolMemberCount } from './operations'
 import { creditToWallet } from '@/lib/wallet/operations'
 import { logAuditEvent } from '../audit/logger'
 import { sendWithdrawalConfirmationEmail, sendWaitlistPromotionEmail } from '@/lib/email/service'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 export interface WithdrawResult {
   success: boolean
@@ -41,7 +42,7 @@ export async function withdrawFromPool(poolId: string, userId: string): Promise<
 
         // Find active membership (RESERVED or CONFIRMED)
         const membership = await tx.poolMembership.findFirst({
-          where: { poolId, userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+          where: { poolId, userId, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
         })
 
         if (!membership) {

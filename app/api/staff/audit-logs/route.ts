@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server'
-import { requireStaff } from '@/lib/auth/helpers'
+import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
 import { apiPaginated, withErrorHandler } from '@/lib/api/response'
 import { parsePagination } from '@/lib/api/response'
 import { queryAuditLogs } from '@/lib/audit/logger'
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
-  await requireStaff()
+  await requirePermission(PERMISSIONS.VIEW_AUDIT_LOGS)
   const { searchParams } = new URL(req.url)
   const { page, limit, skip } = parsePagination(searchParams)
 

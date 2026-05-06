@@ -12,6 +12,7 @@
 
 import prisma from '@/lib/prisma/client'
 import { getExamPricingConfig, type ExamPricingConfig } from './pricing-config'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 export interface PriceCalculation {
   basePrice: number
@@ -42,7 +43,7 @@ export async function calculatePoolSeatPrice(
   const existingPoolCount = await prisma.poolMembership.count({
     where: {
       userId,
-      status: { in: ['RESERVED', 'CONFIRMED'] },
+      status: { in: ACTIVE_MEMBERSHIP_STATUSES },
       pool: { eventId },
     },
   })

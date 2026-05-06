@@ -68,6 +68,26 @@ export async function GET(request: Request) {
        }))
        filename = 'financial_transactions.csv'
 
+    } else if (type === 'audit-logs') {
+      const logs = await prismaUnfiltered.auditLog.findMany({
+        include: { user: { include: { profile: true } } },
+        orderBy: { createdAt: 'desc' },
+        take: 5000,
+      })
+
+      data = logs.map(l => ({
+        Date: l.createdAt.toISOString(),
+        Action: l.action,
+        Entity: l.entity || '',
+        EntityId: l.entityId || '',
+        User: l.user?.profile
+          ? `${l.user.profile.firstName || ''} ${l.user.profile.lastName || ''}`.trim()
+          : l.user?.email || 'System',
+        Description: l.description || '',
+        IP: l.ipAddress || '',
+      }))
+      filename = 'audit_logs_export.csv'
+
     } else {
       return NextResponse.json({ error: 'Invalid export type' }, { status: 400 })
     }
