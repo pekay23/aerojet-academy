@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.3.0] — 2026-05-06
+
+### Security
+- **Cron endpoint hardened** — POST handler on `/api/cron/milestone-reminders` now requires `CRON_SECRET` bearer auth (was previously unprotected)
+- **Race condition fixed** — Wallet top-up route wrapped in Serializable transaction with duplicate detection to prevent double-spending
+- **Zod validation added** — Charter booking, pool merge, wallet proof, and staff book-exam routes now validate input with Zod schemas
+
+### Performance
+- **111 loading.tsx files** added across all portals for Suspense streaming
+- **82+ staff API routes** switched from RLS `prisma` to `prismaUnfiltered` to eliminate unnecessary transaction overhead
+- **Sequential queries parallelized** — License requirements, course detail, exam event detail pages now use `Promise.all`
+- **6 reference data queries cached** — Course categories, license categories, academic years, semesters, exam components, active courses (5min TTL via `unstable_cache`)
+- **NewsMarkdownEditor** (681-line TipTap component) now lazy-loaded via `next/dynamic` in newsroom create/edit pages
+- **7 chart components** lazy-loaded in staff reports
+- **N+1 patterns fixed** — bulk-send-credentials, enrollments/batch, cron/send-reminders
+- **6 unbounded API routes** capped with `take` limits
+
+### Refactored
+- **Promotion logic consolidated** — `promoteIfFirstExamActivity()` and `upgradeRoleInTransaction()` replace 5 inline copies across book-exam, join-pool, bundles, full-time enrollment, and tuition booking
+- **Payment splits configurable** — Year 1 (40/30/30) and Year 2+ (50/50) splits moved from hardcoded values to SystemSettings (`getPaymentSplitConfig()`)
+- **Charter & merge routes modernized** — Now use `withErrorHandler` + `requireStaff()` instead of manual session checks
+
+### Fixed
+- **Vercel DB connection failure** — Restored `@prisma/adapter-pg` after `@prisma/adapter-neon` broke serverless runtime (ws module incompatible with Turbopack bundles)
+- **6 public pages** — Added `force-dynamic` to prevent build-time DB query failures
+- **Calendar megaquery** — Scoped to user's pools and future events only
+- **Removed dead dependencies** — three, shadergradient, styled-components, bufferutil, utf-8-validate, ws, @types/ws, react-hot-toast
+
 ## [1.2.0] — 2026-05-01
 
 ### Added
