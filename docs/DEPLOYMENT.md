@@ -18,6 +18,21 @@
 ### Database Adapter — IMPORTANT
 The project uses `@prisma/adapter-pg` with the standard `pg` PostgreSQL driver. **Do NOT switch to `@prisma/adapter-neon`** — the `ws` WebSocket module required by the Neon serverless adapter does not work in Vercel's Turbopack serverless bundles. See `docs/KNOWN_ISSUES.md` for details.
 
+Local exception: `next dev` may dynamically select the Neon adapter for `*.neon.tech` URLs to avoid local TCP connection stalls. Production and Vercel runtime must remain on `@prisma/adapter-pg`.
+
+## Local Development Database
+The deployed Vercel app must stay on `@prisma/adapter-pg` with the standard `pg` driver. For `next dev`, `lib/prisma/db-base.ts` keeps that production path untouched but uses a local-only Neon WebSocket adapter when the app is running in development against a `*.neon.tech` URL. This avoids the 60s TCP handshake hangs that can happen on some local networks while still preserving Prisma transaction support.
+
+Local runtime connection priority:
+1. `LOCAL_DATABASE_URL` if set, for a local Postgres database or a dedicated dev URL.
+2. `DATABASE_URL`, normally the Neon pooler URL.
+3. `DIRECT_URL`, only as a fallback.
+
+Optional local overrides:
+- `AEROJET_LOCAL_DB_ADAPTER=pg` forces the standard `pg` adapter in `next dev`.
+- `AEROJET_LOCAL_DB_ADAPTER=neon` forces the local Neon adapter in `next dev`.
+- `DB_CONNECT_TIMEOUT_MS=10000` changes the local TCP adapter's fail-fast timeout.
+
 ### Cron Jobs (Vercel)
 Configured in `vercel.json`. All cron endpoints require `Authorization: Bearer <CRON_SECRET>` header:
 ```json

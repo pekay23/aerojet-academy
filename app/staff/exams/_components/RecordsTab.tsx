@@ -55,7 +55,7 @@ interface ExamRecord {
   score: any
   maxScore?: any
   percentage?: any
-  passed: boolean
+  passed: boolean | null
   grade?: string | null
   attemptType: string | null
   bookingType?: string | null
@@ -66,7 +66,12 @@ interface ExamRecord {
   certificateUrl?: string | null
   examCategory?: 'INTERNAL' | 'OFFICIAL_EASA' | string
   examDate?: string | Date | null
+  dateDisplay?: string | null
+  dateDisplayKind?: 'DATE' | 'TBC' | 'TBD'
+  sittingLabel?: string | null
   result?: string | null
+  displayResult?: string | null
+  displayResultKind?: string | null
   createdAt: string | Date
   updatedAt?: string | Date
   user: {
@@ -93,6 +98,22 @@ const BOOKING_TYPES = [
   { value: 'TWIN_PACK', label: 'Twin Pack (€980)', seats: 2 },
   { value: 'FOUR_PACK', label: '4-Pack Bundle (€1900)', seats: 4 },
 ]
+
+function statusBadgeClass(result?: string | null) {
+  const normalized = result?.toUpperCase()
+  if (normalized === 'PASS') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+  if (normalized === 'FAIL') return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  if (normalized === 'ABSENT') return 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400'
+  if (normalized?.includes('PENDING')) return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+  if (normalized?.includes('EXCUSED')) return 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+  if (normalized === 'MIGRATED') return 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'
+  if (normalized === 'SCHEDULED') return 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400'
+  if (normalized === 'EXECUTED') return 'bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400'
+  if (normalized === 'POSTPONED') return 'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400'
+  if (normalized === 'ROLLED FORWARD') return 'bg-violet-100 text-violet-700 dark:bg-violet-900/30 dark:text-violet-400'
+  if (normalized === 'CANCELLED') return 'bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+  return 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'
+}
 
 export default function RecordsTab({ records, modules }: RecordsTabProps) {
   const router = useRouter()
@@ -690,6 +711,11 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
           </div>
         </div>
 
+        <div className="flex flex-wrap gap-3 rounded-xl border border-amber-100 bg-amber-50/50 px-4 py-3 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/20 dark:text-amber-300">
+          <span><strong>TBC</strong>: final sitting/date is still to be confirmed.</span>
+          <span><strong>TBD</strong>: no exam date has been set yet.</span>
+        </div>
+
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -720,6 +746,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                     const isEditing = editingId === record.id
                     const scoreNum = isEditing ? (editScore ? Number(editScore) : null) : (record.score ? Number(record.score) : null)
                     const passed = isEditing ? (scoreNum !== null ? scoreNum >= 75 : record.passed) : record.passed
+                    const displayResult = record.displayResult || record.result || (passed === true ? 'PASS' : passed === false ? 'FAIL' : 'Pending')
 
                     return (
                       <tr key={record.id} className={`group border-b border-slate-50 transition-all hover:bg-slate-50/50 ${isEditing ? 'bg-aerojet-blue/5 shadow-inner' : ''}`}>
@@ -786,7 +813,18 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                               className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:border-aerojet-blue focus:outline-hidden"
                             />
                           ) : (
-                            record.examDate ? format(new Date(record.examDate), 'MMM d, yyyy') : '—'
+                            <div>
+                              <span className={record.dateDisplayKind === 'DATE' ? '' : 'rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-black uppercase text-amber-700 dark:bg-amber-900/30 dark:text-amber-300'}>
+                                {record.dateDisplayKind === 'DATE' && record.examDate
+                                  ? format(new Date(record.examDate), 'MMM d, yyyy')
+                                  : record.dateDisplay || 'TBD'}
+                              </span>
+                              {record.sittingLabel && (
+                                <div className="mt-1 text-[10px] font-bold uppercase text-slate-400">
+                                  {record.sittingLabel}
+                                </div>
+                              )}
+                            </div>
                           )}
                         </td>
                         <td className="px-6 py-4">
@@ -855,13 +893,9 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                           )}
                         </td>
                         <td className="px-6 py-4">
-                          {record.result && !['pass', 'fail', 'PASS', 'FAIL'].includes(record.result) ? (
-                            <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-black uppercase text-slate-600 dark:bg-slate-800 dark:text-slate-400">
-                              {record.result}
-                            </span>
-                          ) : (
-                            passed ? <CheckCircle2 className="h-4 w-4 text-emerald-500" /> : <XCircle className="h-4 w-4 text-red-500" />
-                          )}
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${statusBadgeClass(displayResult)}`}>
+                            {displayResult}
+                          </span>
                         </td>
                         <td className="px-6 py-4 text-right font-bold">
                           {isEditing ? (

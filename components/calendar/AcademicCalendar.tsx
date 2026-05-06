@@ -55,7 +55,7 @@ function getEventStyles(source: string, color: string) {
 
 export default function AcademicCalendar({ events, initialDate, currentUserId, canCreate = false, onSave, onDelete }: Props) {
   const [currentDate, setCurrentDate] = useState(initialDate || new Date())
-  const [viewMode, setViewMode] = useState<'Month' | 'Week'>('Week')
+  const [viewMode, setViewMode] = useState<'Month' | 'Week' | 'Day'>('Week')
   const [popupEvent, setPopupEvent] = useState<UnifiedCalendarEvent | null>(null)
   const [showModal, setShowModal] = useState(false)
   const [editingEvent, setEditingEvent] = useState<UnifiedCalendarEvent | null>(null)
@@ -97,6 +97,12 @@ export default function AcademicCalendar({ events, initialDate, currentUserId, c
     })
     return map
   }, [events])
+  const currentDayEvents = useMemo(() => {
+    const dayStr = format(currentDate, 'yyyy-MM-dd')
+    return [...(eventsByDate[dayStr] || [])].sort(
+      (a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    )
+  }, [currentDate, eventsByDate])
 
   const getPos = (evt: UnifiedCalendarEvent) => {
     const start = new Date(evt.startDate)
@@ -153,9 +159,21 @@ export default function AcademicCalendar({ events, initialDate, currentUserId, c
     })
   }
 
-  const handlePrev = () => viewMode === 'Week' ? setCurrentDate(subWeeks(currentDate, 1)) : setCurrentDate(subMonths(currentDate, 1))
-  const handleNext = () => viewMode === 'Week' ? setCurrentDate(addWeeks(currentDate, 1)) : setCurrentDate(addMonths(currentDate, 1))
-  const label = viewMode === 'Week' ? format(startOfRange, 'MMMM yyyy') : format(currentDate, 'MMMM yyyy')
+  const handlePrev = () => {
+    if (viewMode === 'Day') setCurrentDate(addDays(currentDate, -1))
+    else if (viewMode === 'Week') setCurrentDate(subWeeks(currentDate, 1))
+    else setCurrentDate(subMonths(currentDate, 1))
+  }
+  const handleNext = () => {
+    if (viewMode === 'Day') setCurrentDate(addDays(currentDate, 1))
+    else if (viewMode === 'Week') setCurrentDate(addWeeks(currentDate, 1))
+    else setCurrentDate(addMonths(currentDate, 1))
+  }
+  const label = viewMode === 'Day'
+    ? format(currentDate, 'EEEE, MMMM d, yyyy')
+    : viewMode === 'Week'
+      ? format(startOfRange, 'MMMM yyyy')
+      : format(currentDate, 'MMMM yyyy')
 
   return (
     <div className="space-y-6">
@@ -165,12 +183,13 @@ export default function AcademicCalendar({ events, initialDate, currentUserId, c
           <button onClick={handlePrev} className="p-2 hover:bg-slate-100 rounded-full dark:hover:bg-slate-800 transition-colors"><ChevronLeft className="h-5 w-5 text-slate-500"/></button>
           <span className="font-black text-xl text-slate-900 dark:text-white min-w-[160px] text-center">{label}</span>
           <button onClick={handleNext} className="p-2 hover:bg-slate-100 rounded-full dark:hover:bg-slate-800 transition-colors"><ChevronRight className="h-5 w-5 text-slate-500"/></button>
-          <button onClick={() => setCurrentDate(new Date())} className="hidden md:block text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700">Today</button>
+          <button onClick={() => setCurrentDate(new Date())} className="text-xs font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700">Today</button>
         </div>
         <div className="flex gap-2">
           <div className="flex items-center rounded-xl border border-slate-200 bg-white p-1 dark:border-slate-700 dark:bg-slate-800">
             <button onClick={() => setViewMode('Month')} className={cn('px-5 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all', viewMode === 'Month' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'text-slate-500 hover:text-slate-700')}>Month</button>
             <button onClick={() => setViewMode('Week')} className={cn('px-5 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all', viewMode === 'Week' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'text-slate-500 hover:text-slate-700')}>Week</button>
+            <button onClick={() => setViewMode('Day')} className={cn('px-5 py-2 text-xs font-black uppercase tracking-widest rounded-lg transition-all', viewMode === 'Day' ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900' : 'text-slate-500 hover:text-slate-700')}>Day</button>
           </div>
           {canCreate && (
             <button onClick={openAdd} className="flex items-center gap-2 rounded-xl bg-[#FF4F33] px-6 py-2 text-sm font-bold text-white hover:bg-[#E6462D] transition-all shadow-lg shadow-[#FF4F33]/20 hover:scale-105 active:scale-95">
@@ -180,9 +199,77 @@ export default function AcademicCalendar({ events, initialDate, currentUserId, c
         </div>
       </div>
 
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-3 text-xs font-bold text-slate-500 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#4A72E8]" /> Classes</span>
+        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#FF4F33]" /> Exams</span>
+        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-[#8b5cf6]" /> Broadcasts</span>
+        <span className="flex items-center gap-1.5"><span className="h-3 w-3 rounded-full bg-amber-400" /> Personal</span>
+      </div>
+
+      <div className="space-y-2 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm md:hidden dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-black uppercase tracking-widest text-slate-400">Daily Agenda</span>
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{currentDayEvents.length}</span>
+        </div>
+        {currentDayEvents.length === 0 ? (
+          <p className="py-4 text-sm font-medium text-slate-500">No events scheduled for this day.</p>
+        ) : (
+          currentDayEvents.map((evt) => (
+            <button
+              key={evt.id}
+              onClick={() => setPopupEvent(evt)}
+              className="flex w-full items-start gap-3 rounded-xl border border-slate-100 p-3 text-left dark:border-slate-800"
+            >
+              <span className="mt-1 h-3 w-3 rounded-full" style={{ backgroundColor: evt.color }} />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-bold text-slate-900 dark:text-white">{evt.title}</span>
+                <span className="block text-xs font-medium text-slate-500">
+                  {format(new Date(evt.startDate), 'hh:mm a')}{evt.endDate ? ` - ${format(new Date(evt.endDate), 'hh:mm a')}` : ''}
+                </span>
+              </span>
+            </button>
+          ))
+        )}
+      </div>
+
+      {viewMode === 'Day' && (
+        <div className="flex flex-col rounded-[32px] border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="border-b border-slate-100 p-4 dark:border-slate-800">
+            <p className="text-sm font-bold text-slate-500">{format(currentDate, 'EEEE')}</p>
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white">{format(currentDate, 'MMMM d')}</h3>
+          </div>
+          <div className="max-h-[760px] overflow-y-auto">
+            {timeSlots.map((hour) => {
+              const hourEvents = currentDayEvents.filter((evt) => getHours(new Date(evt.startDate)) === hour)
+              return (
+                <div key={hour} className="grid min-h-[84px] grid-cols-[72px_1fr] border-b border-slate-100 dark:border-slate-800">
+                  <div className="border-r border-slate-100 px-3 py-4 text-right text-xs font-bold text-slate-400 dark:border-slate-800">
+                    {hour === 0 ? '12 am' : hour < 12 ? `${hour} am` : hour === 12 ? '12 pm' : `${hour - 12} pm`}
+                  </div>
+                  <div className="space-y-2 p-2">
+                    {hourEvents.map((evt) => (
+                      <button
+                        key={evt.id}
+                        onClick={() => setPopupEvent(evt)}
+                        title={`${evt.title} - ${format(new Date(evt.startDate), 'hh:mm a')}`}
+                        className={cn('w-full rounded-2xl p-3 text-left text-sm font-black shadow-sm', getEventStyles(evt.source, evt.color))}
+                        style={evt.source === 'admin' ? { backgroundColor: evt.color, color: '#fff' } : undefined}
+                      >
+                        <span className="block truncate">{evt.title}</span>
+                        <span className="block text-xs font-bold opacity-80">{format(new Date(evt.startDate), 'hh:mm a')}{evt.endDate ? ` - ${format(new Date(evt.endDate), 'hh:mm a')}` : ''}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Week View */}
       {viewMode === 'Week' && (
-        <div className="flex flex-col bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+        <div className="hidden md:flex flex-col bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden dark:bg-slate-900 dark:border-slate-800">
           <div className="grid grid-cols-[80px_1fr] border-b border-slate-100 dark:border-slate-800">
             <div className="p-2 border-r border-slate-100 dark:border-slate-800 flex items-center justify-center">
               <Clock className="h-4 w-4 text-slate-300" />
@@ -222,6 +309,7 @@ export default function AcademicCalendar({ events, initialDate, currentUserId, c
                     return (
                       <div key={evt.id} onClick={() => setPopupEvent(evt)}
                         className="absolute left-1 right-1 cursor-pointer transition-transform hover:scale-[1.02] hover:z-10"
+                        title={`${evt.title} - ${format(new Date(evt.startDate), 'hh:mm a')}`}
                         style={{ top: `${top}px`, height: `${height - 4}px`, gridColumnStart: di + 1, gridColumnEnd: di + 2 }}>
                         <div className={cn('w-full h-full rounded-2xl p-3 flex flex-col overflow-hidden shadow-sm border-l-4 transition-all hover:shadow-md', getEventStyles(evt.source, evt.color))}
                           style={evt.source === 'admin' ? { backgroundColor: evt.color, borderLeftColor: 'rgba(0,0,0,0.1)' } : undefined}>
@@ -243,7 +331,7 @@ export default function AcademicCalendar({ events, initialDate, currentUserId, c
 
       {/* Month View */}
       {viewMode === 'Month' && (
-        <div className="flex flex-col bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+        <div className="hidden md:flex flex-col bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden dark:bg-slate-900 dark:border-slate-800">
           <div className="grid grid-cols-7 border-b border-slate-100 bg-slate-50/50 dark:bg-slate-800/50 dark:border-slate-800">
             {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => (
               <div key={d} className="p-4 text-center text-[10px] font-black uppercase tracking-widest text-slate-500 border-r border-slate-100 dark:border-slate-800 last:border-r-0">{d}</div>
@@ -258,10 +346,16 @@ export default function AcademicCalendar({ events, initialDate, currentUserId, c
               return (
                 <div key={idx} className={cn('min-h-[140px] p-2 border-r border-b border-slate-100 dark:border-slate-800 relative transition-colors', !isCur && 'bg-slate-50/30 dark:bg-slate-900/30', isToday && 'bg-blue-50/30 dark:bg-blue-900/10')}>
                   <span className={cn('inline-flex w-7 h-7 items-center justify-center rounded-lg text-xs font-black mb-2', isToday ? 'bg-aerojet-blue text-white shadow-md shadow-aerojet-blue/20' : !isCur ? 'text-slate-400' : 'text-slate-900 dark:text-white')}>{format(day, 'd')}</span>
+                  {dayEvts.length > 0 && (
+                    <span className="absolute right-2 top-2 rounded-full bg-slate-900 px-2 py-0.5 text-[10px] font-bold text-white dark:bg-white dark:text-slate-900">
+                      {dayEvts.length}
+                    </span>
+                  )}
                   <div className="space-y-1.5">
                     {dayEvts.slice(0, 3).map(evt => (
                       <div key={evt.id} onClick={() => setPopupEvent(evt)}
                         className={cn('px-2 py-1.5 rounded-lg text-[10px] font-black truncate cursor-pointer transition-transform hover:scale-105', getEventStyles(evt.source, evt.color))}
+                        title={`${evt.title} - ${format(new Date(evt.startDate), 'hh:mm a')}`}
                         style={evt.source === 'admin' ? { backgroundColor: evt.color, color: '#fff' } : undefined}>
                         {evt.title}
                       </div>

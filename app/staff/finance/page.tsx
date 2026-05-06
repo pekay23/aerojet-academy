@@ -9,6 +9,9 @@ import FinanceTabs from '../_components/FinanceTabs'
 import FinanceOverview from '../_components/FinanceOverview'
 import ReconciliationQueue from '../_components/ReconciliationQueue'
 import PendingTopupsTable from '../_components/PendingTopupsTable'
+import TransactionsTable from '../_components/TransactionsTable'
+import ReportsPanel from '../_components/ReportsPanel'
+import { getFinanceOverviewData } from '@/lib/finance/overview'
 import {
   Table,
   TableBody,
@@ -98,56 +101,94 @@ async function getTransactionsData(query?: string) {
   const currency = await getSystemSetting('course_currency', 'EUR')
   const symbol = getCurrencySymbol(currency)
 
-  const transactions = await prismaUnfiltered.walletTransaction.findMany({
-    where: query
-      ? {
-          OR: [
-            { wallet: { user: { OR: [
-              { email: { contains: query, mode: 'insensitive' } },
-              { profile: { firstName: { contains: query, mode: 'insensitive' } } },
-              { profile: { lastName: { contains: query, mode: 'insensitive' } } },
-            ] } } },
-            { referenceId: { contains: query, mode: 'insensitive' } },
-            { referenceType: { contains: query, mode: 'insensitive' } },
-          ],
-        }
-      : undefined,
-    orderBy: { createdAt: 'desc' },
-    include: { wallet: { include: { user: { include: { profile: true } } } } },
-    take: 100,
-  })
+  const whereClause = query
+    ? {
+        OR: [
+          { wallet: { user: { OR: [
+            { email: { contains: query, mode: 'insensitive' as const } },
+            { profile: { firstName: { contains: query, mode: 'insensitive' as const } } },
+            { profile: { lastName: { contains: query, mode: 'insensitive' as const } } },
+          ] } } },
+          { referenceId: { contains: query, mode: 'insensitive' as const } },
+          { referenceType: { contains: query, mode: 'insensitive' as const } },
+        ],
+      }
+    : undefined
+
+  const [transactions, total] = await Promise.all([
+    prismaUnfiltered.walletTransaction.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'desc' },
+      include: { wallet: { include: { user: { include: { profile: true } } } } },
+      take: 25,
+    }),
+    prismaUnfiltered.walletTransaction.count({ where: whereClause }),
+  ])
 
   const serialized = serializePrisma(transactions)
+  const transactionIds = serialized.map((tx: any) => tx.id)
   
   const paymentIds = serialized
-    .filter((tx) => tx.referenceType === 'PAYMENT_ID' && tx.referenceId)
-    .map((tx) => tx.referenceId!)
+    .filter((tx: any) => tx.referenceType === 'PAYMENT_ID' && tx.referenceId)
+    .map((tx: any) => tx.referenceId!)
+  const examBookingReferenceIds = serialized
+    .filter((tx: any) => tx.referenceType === 'EXAM_BOOKING' && tx.referenceId)
+    .map((tx: any) => tx.referenceId!)
+  const fullTimeEnrollmentIds = serialized
+    .filter((tx: any) => tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId)
+    .map((tx: any) => tx.referenceId!)
 
-  const relatedPayments = await prismaUnfiltered.payment.findMany({
-    where: { id: { in: paymentIds } },
-    select: {
-      id: true,
-      reconciled: true,
-      paymentCurrency: true,
-      originalAmount: true,
-    },
-  })
-
-  // Serialize related payments to ensure Decimal fields like originalAmount are numbers
-  const serializedPayments = serializePrisma(relatedPayments)
-
-  const paymentDataMap = new Map(
-    serializedPayments.map((p) => [
-      p.id,
-      {
-        reconciled: p.reconciled,
-        originalCurrency: p.paymentCurrency,
-        originalAmount: p.originalAmount,
-      },
+  const [relatedPayments, relatedExamBookings, relatedFullTimeEnrollments, relatedModularEnrollments, relatedMilestones] =
+    await Promise.all([
+      paymentIds.length > 0
+        ? prismaUnfiltered.payment.findMany({
+            where: { id: { in: paymentIds } },
+            select: { id: true, reconciled: true, paymentCurrency: true, originalAmount: true, status: true },
+          })
+        : Promise.resolve([]),
+      transactionIds.length > 0 || examBookingReferenceIds.length > 0
+        ? prismaUnfiltered.examBooking.findMany({
+            where: {
+              OR: [
+                { id: { in: examBookingReferenceIds } },
+                { walletTxnId: { in: transactionIds } },
+              ],
+            },
+            select: { id: true, walletTxnId: true, status: true, demandStatus: true, result: true, moduleCode: true },
+          })
+        : Promise.resolve([]),
+      fullTimeEnrollmentIds.length > 0
+        ? prismaUnfiltered.fullTimeEnrollment.findMany({
+            where: { id: { in: fullTimeEnrollmentIds } },
+            select: { id: true, status: true },
+          })
+        : Promise.resolve([]),
+      transactionIds.length > 0
+        ? prismaUnfiltered.modularEnrollment.findMany({
+            where: { walletTxnId: { in: transactionIds } },
+            select: { id: true, walletTxnId: true, status: true },
+          })
+        : Promise.resolve([]),
+      transactionIds.length > 0
+        ? prismaUnfiltered.paymentMilestone.findMany({
+            where: { walletTxnId: { in: transactionIds } },
+            select: { id: true, walletTxnId: true, milestoneType: true, status: true },
+          })
+        : Promise.resolve([]),
     ])
-  )
 
-  return { serialized, symbol, paymentDataMap }
+  return {
+    serialized,
+    total,
+    symbol,
+    related: {
+      payments: serializePrisma(relatedPayments),
+      examBookings: serializePrisma(relatedExamBookings),
+      fullTimeEnrollments: serializePrisma(relatedFullTimeEnrollments),
+      modularEnrollments: serializePrisma(relatedModularEnrollments),
+      milestones: serializePrisma(relatedMilestones),
+    },
+  }
 }
 
 async function getReportsData() {
@@ -189,8 +230,11 @@ export default async function FinancePage({
 
 /* ─── Overview Tab ─── */
 async function OverviewTab() {
-  const chartData = await getOverviewChartData()
-  return <FinanceOverview chartData={chartData} />
+  const [chartData, overviewData] = await Promise.all([
+    getOverviewChartData(),
+    getFinanceOverviewData(),
+  ])
+  return <FinanceOverview chartData={chartData} initialData={overviewData} />
 }
 
 /* ─── Wallet Top-ups Tab ─── */
@@ -204,7 +248,6 @@ async function WalletTopupsTab() {
           <Clock className="h-5 w-5 text-amber-500" />
           Awaiting Verification ({pendingRequests.length})
         </h2>
-
         <PendingTopupsTable requests={pendingRequests} />
       </div>
 
@@ -213,7 +256,6 @@ async function WalletTopupsTab() {
           <CheckCircle2 className="h-5 w-5 text-emerald-500" />
           Recent Top-ups History
         </h2>
-
         <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <Table>
             <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
@@ -232,19 +274,16 @@ async function WalletTopupsTab() {
                   </TableCell>
                 </TableRow>
               ) : (
-                topupHistory.map((tx) => {
+                topupHistory.map((tx: any) => {
                   const user = tx.wallet.user
                   const userName = user.profile
                     ? `${user.profile.firstName} ${user.profile.lastName}`
                     : user.email
-
                   return (
                     <TableRow key={tx.id}>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-bold text-slate-900 dark:text-slate-100">
-                            {userName}
-                          </span>
+                          <span className="font-bold text-slate-900 dark:text-slate-100">{userName}</span>
                           <span className="text-xs text-slate-500">{user.email}</span>
                         </div>
                       </TableCell>
@@ -254,10 +293,7 @@ async function WalletTopupsTab() {
                         </span>
                       </TableCell>
                       <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-slate-50 text-slate-600 dark:bg-slate-800"
-                        >
+                        <Badge variant="outline" className="bg-slate-50 text-slate-600 dark:bg-slate-800">
                           {tx.referenceType || 'Manual'}
                         </Badge>
                       </TableCell>
@@ -278,156 +314,16 @@ async function WalletTopupsTab() {
 
 /* ─── Transactions Tab ─── */
 async function TransactionsTab({ query }: { query?: string }) {
-  const { serialized, symbol, paymentDataMap } = await getTransactionsData(query)
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case TransactionType.TOP_UP:
-      case TransactionType.REFUND:
-      case TransactionType.RELEASE:
-        return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'
-      case TransactionType.CAPTURE:
-      case TransactionType.PAYMENT:
-        return 'bg-blue-100 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400'
-      case TransactionType.RESERVE:
-        return 'bg-amber-100 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'
-      default:
-        return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
-    }
-  }
+  const { serialized, total, symbol, related } = await getTransactionsData(query)
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-end">
-        <div className="w-72">
-          <SearchInput id="finance-transactions-search" placeholder="Search user or reference..." />
-        </div>
-      </div>
-
-      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <Table>
-          <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
-            <TableRow>
-              <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                User
-              </TableHead>
-              <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Type
-              </TableHead>
-              <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Amount
-              </TableHead>
-              <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Reference & Status
-              </TableHead>
-              <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Date
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody className="divide-y divide-slate-100 dark:divide-slate-800">
-            {serialized.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={5}
-                  className="h-24 text-center font-bold text-slate-500 dark:text-slate-400"
-                >
-                  No transactions found.
-                </TableCell>
-              </TableRow>
-            ) : (
-              serialized.map((tx) => {
-                const user = tx.wallet.user
-                const userName = user.profile
-                  ? `${user.profile.firstName} ${user.profile.lastName}`
-                  : user.email
-
-                const paymentData =
-                  tx.referenceType === 'PAYMENT_ID' ? paymentDataMap.get(tx.referenceId!) : null
-                const isReconciled = paymentData?.reconciled
-
-                return (
-                  <TableRow
-                    key={tx.id}
-                    className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
-                  >
-                    <TableCell className="px-6 py-5">
-                      <div className="flex flex-col">
-                        <span className="font-bold text-slate-900 dark:text-slate-100">
-                          {userName}
-                        </span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                          {user.email}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-6 py-5">
-                      <Badge
-                        className={`${getTypeColor(tx.type)} rounded-lg border-none px-2 py-0.5 text-[10px] font-black tracking-widest uppercase transition-all`}
-                        variant="secondary"
-                      >
-                        {tx.type.replace('_', ' ')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="px-6 py-5">
-                      <div className="flex flex-col">
-                        <span
-                          className={`text-sm font-black ${
-                            [TransactionType.TOP_UP, TransactionType.REFUND, TransactionType.RELEASE].includes(
-                              tx.type as TransactionType
-                            )
-                              ? 'text-emerald-600 dark:text-emerald-400'
-                              : 'text-slate-900 dark:text-slate-100'
-                          }`}
-                        >
-                          {[
-                            TransactionType.TOP_UP,
-                            TransactionType.REFUND,
-                            TransactionType.RELEASE,
-                          ].includes(tx.type as TransactionType)
-                            ? '+'
-                            : '-'}
-                          {symbol}
-                          {tx.amount.toFixed(2)}
-                        </span>
-                        {paymentData?.originalCurrency &&
-                          paymentData.originalCurrency !== symbol && (
-                            <span className="text-[10px] font-medium text-slate-400">
-                              ({paymentData.originalCurrency}{' '}
-                              {paymentData.originalAmount?.toFixed(2)})
-                            </span>
-                          )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-6 py-5">
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                            {tx.referenceType ? tx.referenceType.replace(/_/g, ' ') : '—'}
-                          </span>
-                          {isReconciled ? (
-                            <span className="flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400">
-                              Reconciled
-                            </span>
-                          ) : tx.referenceType === 'PAYMENT_ID' ? (
-                            <span className="flex items-center gap-0.5 rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-bold text-slate-400 dark:bg-slate-800">
-                              Pending Settlement
-                            </span>
-                          ) : null}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="px-6 py-5 text-xs text-slate-500">
-                      {format(new Date(tx.createdAt), 'MMM d, yyyy HH:mm')}
-                    </TableCell>
-                  </TableRow>
-                )
-              })
-            )}
-          </TableBody>
-        </Table>
-      </div>
-    </div>
+    <TransactionsTable
+      currencySymbol={symbol}
+      initialData={serialized}
+      initialTotal={total}
+      initialRelated={related}
+      query={query}
+    />
   )
 }
 
@@ -441,266 +337,9 @@ async function ReportsTab() {
   const { summary, revenueByType, paymentMethods, monthlyData, paymentStatus } =
     await getReportsData()
 
-  const maxMonthlyRevenue = Math.max(...monthlyData.map((m) => m.revenue), 1)
-
   return (
-    <div className="space-y-6">
-      {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.totalRevenue)}</div>
-            <p className="text-muted-foreground text-xs">{summary.totalCount} transactions</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Month</CardTitle>
-            <Calendar className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.revenueThisMonth)}</div>
-            <p className="text-muted-foreground text-xs">{summary.monthCount} transactions</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">This Year</CardTitle>
-            <TrendingUp className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.revenueThisYear)}</div>
-            <p className="text-muted-foreground text-xs">{summary.yearCount} transactions</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
-            <Clock className="text-muted-foreground h-4 w-4" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.pendingAmount)}</div>
-            <p className="text-muted-foreground text-xs">{summary.pendingCount} pending</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Monthly Revenue Chart */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Monthly Revenue (Last 12 Months)</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {monthlyData.map((month) => (
-              <div key={month.month} className="flex items-center gap-3">
-                <span className="w-20 text-sm font-medium text-slate-600 dark:text-slate-400">
-                  {month.month}
-                </span>
-                <div className="flex-1">
-                  <div className="h-6 w-full overflow-hidden rounded bg-slate-100 dark:bg-slate-800">
-                    <div
-                      className="h-full rounded bg-emerald-500 transition-all"
-                      style={{ width: `${(month.revenue / maxMonthlyRevenue) * 100}%` }}
-                    />
-                  </div>
-                </div>
-                <span className="w-28 text-right text-sm font-bold text-slate-900 dark:text-slate-100">
-                  {formatCurrency(month.revenue)}
-                </span>
-                <span className="w-12 text-right text-xs text-slate-500">{month.count}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Two Column Layout: Revenue by Type & Payment Status */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Revenue by Programme Type</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {revenueByType.every((r) => r.value === 0) ? (
-              <p className="text-muted-foreground py-8 text-center">No revenue data available</p>
-            ) : (
-              <div className="space-y-4">
-                {revenueByType
-                  .filter((r) => r.value > 0)
-                  .sort((a, b) => b.value - a.value)
-                  .map((item) => (
-                    <div key={item.name} className="flex items-center gap-3">
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm font-medium">{item.name}</span>
-                          <span className="text-sm font-bold">{formatCurrency(item.value)}</span>
-                        </div>
-                        <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                          <div
-                            className="h-full rounded-full bg-aerojet-blue dark:bg-blue-400"
-                            style={{ width: `${item.percentage}%` }}
-                          />
-                        </div>
-                      </div>
-                      <span className="w-12 text-right text-xs text-slate-500">
-                        {item.percentage}%
-                      </span>
-                    </div>
-                  ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Payment Status Overview</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {paymentStatus.map((status) => (
-                <div key={status.status} className="flex items-center gap-3">
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        {status.status === PaymentStatus.APPROVED && (
-                          <CheckCircle className="h-4 w-4 text-emerald-500" />
-                        )}
-                        {status.status === PaymentStatus.PENDING && (
-                          <Clock className="h-4 w-4 text-amber-500" />
-                        )}
-                        {status.status === PaymentStatus.REJECTED && (
-                          <XCircle className="h-4 w-4 text-red-500" />
-                        )}
-                        {status.status === PaymentStatus.FAILED && <XCircle className="h-4 w-4 text-red-500" />}
-                        {status.status === PaymentStatus.PROCESSING && (
-                          <AlertCircle className="h-4 w-4 text-blue-500" />
-                        )}
-                        {status.status === PaymentStatus.COMPLETED && (
-                          <CheckCircle className="h-4 w-4 text-emerald-500" />
-                        )}
-                        <span className="text-sm font-medium">{status.status}</span>
-                      </div>
-                      <span className="text-sm font-bold">{formatCurrency(status.amount)}</span>
-                    </div>
-                    <div className="mt-1 flex items-center justify-between">
-                      <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                        <div
-                          className={`h-full rounded-full ${
-                            status.status === PaymentStatus.APPROVED
-                              ? 'bg-emerald-500'
-                              : status.status === PaymentStatus.PENDING
-                                ? 'bg-amber-500'
-                                : status.status === PaymentStatus.REJECTED || status.status === PaymentStatus.FAILED
-                                  ? 'bg-red-500'
-                                  : 'bg-blue-500'
-                          }`}
-                          style={{ width: `${status.percentage}%` }}
-                        />
-                      </div>
-                      <span className="ml-3 w-16 text-right text-xs text-slate-500">
-                        {status.count} {status.count === 1 ? 'tx' : 'txs'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Payment Methods Table */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Payment Methods Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Payment Method</TableHead>
-                <TableHead className="text-right">Transactions</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
-                <TableHead className="text-right">% of Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paymentMethods.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={4} className="text-muted-foreground py-8 text-center">
-                    No payment data available
-                  </TableCell>
-                </TableRow>
-              ) : (
-                paymentMethods.map((method) => (
-                  <TableRow key={method.method}>
-                    <TableCell className="font-medium">
-                      <Badge variant="secondary" className="uppercase">
-                        {method.method.replace('_', ' ')}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">{method.count}</TableCell>
-                    <TableCell className="text-right font-bold">
-                      {formatCurrency(method.amount)}
-                    </TableCell>
-                    <TableCell className="text-right">{method.percentage}%</TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-
-      {/* Additional Stats */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Average Transaction</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(summary.avgTransactionValue)}</div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Rejected/Failed</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">
-              {formatCurrency(summary.rejectedAmount)}
-            </div>
-            <p className="text-muted-foreground text-xs">{summary.rejectedCount} transactions</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-emerald-600">
-              {summary.totalCount + summary.rejectedCount > 0
-                ? Math.round(
-                    (summary.totalCount / (summary.totalCount + summary.rejectedCount)) * 100
-                  )
-                : 0}
-              %
-            </div>
-            <p className="text-muted-foreground text-xs">of completed transactions</p>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+    <ReportsPanel
+      initialData={{ summary, revenueByType, paymentMethods, monthlyData, paymentStatus }}
+    />
   )
 }

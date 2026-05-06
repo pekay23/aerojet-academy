@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma/client'
 import { joinPoolInternal } from './join'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 export async function joinWaitlist(poolId: string, userId: string, examComponentId: string) {
   // 1. Check if already on waitlist
@@ -18,7 +19,7 @@ export async function joinWaitlist(poolId: string, userId: string, examComponent
 
   // 2. Check if already a member
   const inPool = await prisma.poolMembership.findFirst({
-    where: { poolId, userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+    where: { poolId, userId, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
   })
   if (inPool) {
     return { success: false, error: 'You are already a member of this pool.' }

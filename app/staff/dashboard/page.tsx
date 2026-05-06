@@ -10,6 +10,7 @@ import PoolsSummaryCard from '../_components/PoolsSummaryCard'
 import TargetRevenueEditor from '../_components/TargetRevenueEditor'
 import ExaminerDashboard from '../_components/ExaminerDashboard'
 import { UserStatus, UserRole, PaymentStatus, PoolStatus } from '@/types/enums'
+import { COUNTABLE_MEMBERSHIP_STATUSES, TERMINAL_POOL_STATUSES, UPCOMING_EVENT_STATUSES, LIVE_POOL_STATUSES } from '@/lib/utils/constants'
 import {
   Users,
   UserCheck,
@@ -20,29 +21,75 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+async function fetchDashboardSettings(tx: Parameters<Parameters<typeof prismaUnfiltered.$transaction>[0]>[0]) {
+  const settings = await tx.systemSetting.findMany({
+    where: { key: { in: ['course_currency', 'target_monthly_revenue'] } },
+  })
+  const map = new Map(settings.map(s => [s.key, s.value]))
+  const currency = map.get('course_currency') || 'EUR'
+  const targetMonthlyRevenue = Number(map.get('target_monthly_revenue') || '50000')
+  const { getCurrencySymbol } = await import('@/lib/currency')
+  return { currency, targetMonthlyRevenue, currSymbol: getCurrencySymbol(currency) }
+}
+
+function buildRevenueTimeline(
+  approvedPayments: { amount: any; approvedAt: Date | null }[],
+  targetMonthlyRevenue: number,
+) {
+  const now = new Date()
+  const revenueByMonth: Record<string, number> = {}
+
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+    revenueByMonth[`${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`] = 0
+  }
+
+  for (const p of approvedPayments) {
+    if (!p.approvedAt) continue
+    const d = new Date(p.approvedAt)
+    const key = `${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`
+    if (key in revenueByMonth) revenueByMonth[key] += Number(p.amount)
+  }
+
+  return Object.entries(revenueByMonth).map(([fullKey, total]) => ({
+    month: fullKey.split(' ')[0],
+    revenue: total,
+    target: targetMonthlyRevenue,
+  }))
+}
+
+function computeUserStats(userStatusCounts: { role: string; status: string; _count: { _all: number } }[]) {
+  const sumBy = (filter: (u: typeof userStatusCounts[number]) => boolean) =>
+    userStatusCounts.filter(filter).reduce((acc, u) => acc + (u._count._all ?? 0), 0)
+
+  return {
+    totalUsers: sumBy(u => u.status === UserStatus.ACTIVE),
+    pendingApplicants: sumBy(u => u.role === UserRole.APPLICANT && u.status === UserStatus.PENDING),
+    activeStudents: sumBy(u => u.role === UserRole.STUDENT && u.status === UserStatus.ACTIVE),
+  }
+}
+
+function computeEventStats(activeEventRaw: any) {
+  if (!activeEventRaw) return null
+  return {
+    name: activeEventRaw.name,
+    totalSeatsFilled: activeEventRaw.pools.reduce((sum: number, p: any) => sum + p._count.memberships, 0),
+    totalCapacity: activeEventRaw.pools.reduce((sum: number, p: any) => sum + p.maxCandidates, 0),
+    totalConfirmedRevenue: activeEventRaw.examBookings.reduce((sum: number, b: any) => sum + Number(b.amountPaid || 0), 0),
+    targetRevenue: Number(activeEventRaw.minRevenueTarget),
+    paymentDeadline: activeEventRaw.paymentDeadline,
+  }
+}
+
 async function getDashboardData() {
   const now = new Date()
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
 
-  // Optimization: Consolidate ALL dashboard lookups into a single transaction 
-  // to reduce connection pool pressure and set RLS context exactly once.
   return await prismaUnfiltered.$transaction(async (tx) => {
-    // 1. Fetch settings using the transactional client for maximum efficiency
-    const settings = await tx.systemSetting.findMany({
-      where: {
-        key: { in: ['course_currency', 'target_monthly_revenue'] }
-      }
-    })
+    const { currency, targetMonthlyRevenue, currSymbol } = await fetchDashboardSettings(tx)
 
-    const settingsMap = new Map(settings.map(s => [s.key, s.value]))
-    const currency = settingsMap.get('course_currency') || 'EUR'
-    const targetVal = settingsMap.get('target_monthly_revenue') || '50000'
-    const targetMonthlyRevenue = Number(targetVal)
-
-    const { getCurrencySymbol } = await import('@/lib/currency')
-    const currSymbol = getCurrencySymbol(currency)
-
-    // 2. Fetch all stats and recent data in parallel on the SINGLE transaction connection
     const [
       userStatusCounts,
       pendingPayments,
@@ -72,52 +119,47 @@ async function getDashboardData() {
         orderBy: { createdAt: 'desc' },
         take: 4,
       }),
-      // Fetch the first upcoming event that isn't finished or cancelled
       tx.examEvent.findFirst({
-        where: { 
-          status: { in: ['DRAFT', 'OPEN', 'CONFIRMED', 'POSTPONED'] },
+        where: {
+          status: { in: UPCOMING_EVENT_STATUSES },
           deletedAt: null,
-          startDate: { gte: now }
+          startDate: { gte: now },
         },
         include: {
           pools: {
-            where: { status: { notIn: ['FAILED', 'MERGED', 'COMPLETED'] } },
+            where: { status: { notIn: TERMINAL_POOL_STATUSES } },
             select: {
               maxCandidates: true,
               seatPrice: true,
               _count: {
-                select: { memberships: { where: { status: { in: ['RESERVED', 'CONFIRMED', 'NO_SHOW', 'COMPLETED'] } } } }
-              }
-            }
+                select: { memberships: { where: { status: { in: COUNTABLE_MEMBERSHIP_STATUSES } } } },
+              },
+            },
           },
           examBookings: {
             where: {
               status: { notIn: ['FAILED', 'REJECTED', 'CANCELLED'] },
               deletedAt: null,
             },
-            select: {
-              amountPaid: true,
-            }
-          }
+            select: { amountPaid: true },
+          },
         },
         orderBy: { startDate: 'asc' },
       }),
-      // Summary card should include all active pools, including confirmed/locked ones
       tx.examPool.findMany({
-        where: { 
-          status: { in: [PoolStatus.OPEN, PoolStatus.NEAR_FULL, PoolStatus.CONFIRMED, PoolStatus.LOCKED] },
-          examDate: { gte: now }
+        where: {
+          status: { in: LIVE_POOL_STATUSES },
+          examDate: { gte: now },
         },
-        include: { 
+        include: {
           event: { select: { name: true } },
           _count: {
-            select: { memberships: { where: { status: { in: ['RESERVED', 'CONFIRMED', 'NO_SHOW', 'COMPLETED'] } } } }
-          }
+            select: { memberships: { where: { status: { in: COUNTABLE_MEMBERSHIP_STATUSES } } } },
+          },
         },
         orderBy: { examDate: 'asc' },
         take: 5,
       }),
-      // WALLET_TOP_UP payments (Direct cash inflow from bank/card)
       tx.payment.findMany({
         where: {
           status: PaymentStatus.APPROVED,
@@ -128,79 +170,27 @@ async function getDashboardData() {
       }),
     ])
 
-    const monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ]
-    const revenueByMonth: Record<string, { total: number }> = {}
-
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
-      revenueByMonth[key] = { total: 0 }
-    }
-
-    // Process Approved Top-up Payments
-    for (const p of approvedPayments) {
-      if (!p.approvedAt) continue
-      const d = new Date(p.approvedAt)
-      const key = `${monthNames[d.getMonth()]} ${d.getFullYear()}`
-      if (key in revenueByMonth) {
-        revenueByMonth[key].total += Number(p.amount)
-      }
-    }
-
-    const revenueData = Object.entries(revenueByMonth).map(([fullKey, val]) => ({
-      month: fullKey.split(' ')[0],
-      revenue: val.total,
-      target: targetMonthlyRevenue,
-    }))
-
-    const totalActiveUsers = userStatusCounts
-      .filter((u) => u.status === UserStatus.ACTIVE)
-      .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
-    const pendingApplicants = userStatusCounts
-      .filter((u) => u.role === UserRole.APPLICANT && u.status === UserStatus.PENDING)
-      .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
-    const activeStudents = userStatusCounts
-      .filter((u) => u.role === UserRole.STUDENT && u.status === UserStatus.ACTIVE)
-      .reduce((acc, curr) => acc + (curr._count?._all ?? 0), 0)
-
-    // Aggregate event-level stats for the Go/No-Go meter
-    let eventStats = null
-    if (activeEventRaw) {
-      const totalSeatsFilled = activeEventRaw.pools.reduce((sum, p) => sum + p._count.memberships, 0)
-      const totalCapacity = activeEventRaw.pools.reduce((sum, p) => sum + p.maxCandidates, 0)
-      const totalConfirmedRevenue = activeEventRaw.examBookings.reduce((sum, b) => sum + Number(b.amountPaid || 0), 0)
-      
-      eventStats = {
-        name: activeEventRaw.name,
-        totalSeatsFilled,
-        totalCapacity,
-        totalConfirmedRevenue,
-        targetRevenue: Number(activeEventRaw.minRevenueTarget),
-        paymentDeadline: activeEventRaw.paymentDeadline,
-      }
-    }
+    const { totalUsers, pendingApplicants, activeStudents } = computeUserStats(userStatusCounts as any)
 
     return {
-      totalUsers: totalActiveUsers,
+      totalUsers,
       pendingApplicants,
       activeStudents,
       pendingPayments,
       recentPendingPayments: serializePrisma(recentPendingPaymentsRaw),
-      activeEvent: serializePrisma(eventStats),
+      activeEvent: serializePrisma(computeEventStats(activeEventRaw)),
       openPools: serializePrisma(openPoolsRaw.map(p => ({
         ...p,
-        currentMemberCount: p._count.memberships
+        currentMemberCount: p._count.memberships,
       }))),
-      revenueData,
+      revenueData: buildRevenueTimeline(approvedPayments, targetMonthlyRevenue),
       targetMonthlyRevenue,
       currency,
       currSymbol,
     }
   }, {
     maxWait: 15000,
-    timeout: 20000
+    timeout: 20000,
   })
 }
 

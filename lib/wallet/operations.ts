@@ -1,11 +1,26 @@
 import { Prisma, TransactionType } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
 import { getCurrencySymbol } from '@/lib/currency'
+import { randomUUID } from 'crypto'
 
 type TxClient = Omit<
   typeof prisma,
   '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
 >
+
+function normalizeWalletReference(
+  type: TransactionType,
+  referenceId?: string,
+  referenceType?: string
+) {
+  const normalizedType = referenceType?.trim() || `${type}_AUTO`
+  const normalizedId = referenceId?.trim() || `${normalizedType}-${randomUUID()}`
+
+  return {
+    referenceId: normalizedId,
+    referenceType: normalizedType,
+  }
+}
 
 // ---------------------------------------------------------------------------
 // GET WALLET
@@ -65,6 +80,7 @@ export async function topUpWallet(
   const balanceBefore = wallet.balance.toNumber()
   const availableBefore = wallet.availableBalance.toNumber()
   const reservedBefore = wallet.reservedBalance.toNumber()
+  const reference = normalizeWalletReference(TransactionType.TOP_UP, referenceId, referenceType)
 
   const updated = await tx.wallet.update({
     where: { userId },
@@ -86,8 +102,8 @@ export async function topUpWallet(
       availableBefore,
       availableAfter: availableBefore + amount,
       description: description || `Wallet top-up of ${getCurrencySymbol(wallet.currency)}${amount}`,
-      referenceId,
-      referenceType,
+      referenceId: reference.referenceId,
+      referenceType: reference.referenceType,
     },
   })
 
@@ -119,6 +135,7 @@ export async function reserveFunds(
   const balanceBefore = wallet.balance.toNumber()
   const availableBefore = wallet.availableBalance.toNumber()
   const reservedBefore = wallet.reservedBalance.toNumber()
+  const reference = normalizeWalletReference(TransactionType.RESERVE, referenceId, referenceType)
 
   const updated = await tx.wallet.update({
     where: { userId },
@@ -140,8 +157,8 @@ export async function reserveFunds(
       availableBefore,
       availableAfter: availableBefore - amount,
       description: description || `Funds reserved: ${getCurrencySymbol(wallet.currency)}${amount}`,
-      referenceId,
-      referenceType,
+      referenceId: reference.referenceId,
+      referenceType: reference.referenceType,
     },
   })
 
@@ -166,6 +183,7 @@ export async function captureFunds(
   const balanceBefore = wallet.balance.toNumber()
   const availableBefore = wallet.availableBalance.toNumber()
   const reservedBefore = wallet.reservedBalance.toNumber()
+  const reference = normalizeWalletReference(TransactionType.CAPTURE, referenceId, referenceType)
 
   if (reservedBefore < amount) {
     throw new Error('Invalid capture: reserved balance is less than capture amount')
@@ -191,8 +209,8 @@ export async function captureFunds(
       availableBefore,
       availableAfter: availableBefore,
       description: description || `Payment captured: ${getCurrencySymbol(wallet.currency)}${amount}`,
-      referenceId,
-      referenceType,
+      referenceId: reference.referenceId,
+      referenceType: reference.referenceType,
     },
   })
 
@@ -217,6 +235,7 @@ export async function releaseFunds(
   const balanceBefore = wallet.balance.toNumber()
   const availableBefore = wallet.availableBalance.toNumber()
   const reservedBefore = wallet.reservedBalance.toNumber()
+  const reference = normalizeWalletReference(TransactionType.RELEASE, referenceId, referenceType)
 
   if (reservedBefore < amount) {
     throw new Error('Invalid release: requested amount exceeds reserved funds')
@@ -242,8 +261,8 @@ export async function releaseFunds(
       availableBefore,
       availableAfter: availableBefore + amount,
       description: description || `Funds released: ${getCurrencySymbol(wallet.currency)}${amount}`,
-      referenceId,
-      referenceType,
+      referenceId: reference.referenceId,
+      referenceType: reference.referenceType,
     },
   })
 
@@ -270,6 +289,7 @@ export async function creditToWallet(
   const balanceBefore = wallet.balance.toNumber()
   const availableBefore = wallet.availableBalance.toNumber()
   const reservedBefore = wallet.reservedBalance.toNumber()
+  const reference = normalizeWalletReference(TransactionType.CREDIT, referenceId, referenceType)
 
   const updated = await tx.wallet.update({
     where: { userId },
@@ -291,8 +311,8 @@ export async function creditToWallet(
       availableBefore,
       availableAfter: availableBefore + amount,
       description: description || `Wallet credited: ${getCurrencySymbol(wallet.currency)}${amount}`,
-      referenceId,
-      referenceType,
+      referenceId: reference.referenceId,
+      referenceType: reference.referenceType,
     },
   })
 
@@ -317,6 +337,7 @@ export async function chargeWallet(
   const balanceBefore = wallet.balance.toNumber()
   const availableBefore = wallet.availableBalance.toNumber()
   const reservedBefore = wallet.reservedBalance.toNumber()
+  const reference = normalizeWalletReference(TransactionType.PAYMENT, referenceId, referenceType)
 
   if (availableBefore < amount) {
     throw new Error('Insufficient available balance for this charge.')
@@ -342,8 +363,8 @@ export async function chargeWallet(
       availableBefore,
       availableAfter: availableBefore - amount,
       description: description || `Direct payment: ${getCurrencySymbol(wallet.currency)}${amount}`,
-      referenceId,
-      referenceType,
+      referenceId: reference.referenceId,
+      referenceType: reference.referenceType,
     },
   })
 
@@ -371,6 +392,7 @@ export async function adjustWallet(
   const balanceBefore = wallet.balance.toNumber()
   const availableBefore = wallet.availableBalance.toNumber()
   const reservedBefore = wallet.reservedBalance.toNumber()
+  const reference = normalizeWalletReference(TransactionType.ADJUSTMENT, referenceId, referenceType)
 
   // For debits, ensure sufficient available balance
   if (amount < 0 && availableBefore < Math.abs(amount)) {
@@ -399,8 +421,8 @@ export async function adjustWallet(
       availableBefore,
       availableAfter: availableBefore + amount,
       description: description || `Staff adjustment: ${getCurrencySymbol(wallet.currency)}${amount}`,
-      referenceId,
-      referenceType,
+      referenceId: reference.referenceId,
+      referenceType: reference.referenceType,
       createdBy,
       metadata: { direction: amount >= 0 ? 'credit' : 'debit' },
     },

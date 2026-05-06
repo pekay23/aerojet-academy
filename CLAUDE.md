@@ -87,6 +87,7 @@ If a page makes 2+ `findUnique` calls for the same record, merge them into one w
 - Toast notifications use `sonner` (NOT react-hot-toast)
 - Date formatting: `date-fns` format function
 - Serialization for client components: `serializePrisma()` from `@/lib/utils/serialization`
+- **Client components**: Import `formatCurrency` from `@/lib/currency`, NOT from `@/lib/analytics/metrics` (which pulls in Prisma → `async_hooks` → build failure)
 
 ### API Response Helpers
 Located in `lib/api/response.ts`:

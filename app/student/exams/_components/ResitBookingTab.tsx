@@ -6,6 +6,7 @@ import prisma from '@/lib/prisma/client'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 import ResitBooking from './ResitBooking'
 import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
+import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
 
 /* ── Helper: fetch common booking data ── */
 async function getBookingData(userId: string) {
@@ -60,7 +61,7 @@ async function getBookingData(userId: string) {
 
   // Determine which components the user has "active" memberships for
   const activeMemberships = await prisma.poolMembership.findMany({
-    where: { userId, status: { in: ['RESERVED', 'CONFIRMED'] } },
+    where: { userId, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
     select: { examComponentId: true }
   })
   const activeComponentIds = new Set(activeMemberships.map(m => m.examComponentId).filter(Boolean))
@@ -187,7 +188,7 @@ export default async function ResitBookingTab() {
 
   // Exclude active module memberships
   const activeMemberships = await prisma.poolMembership.findMany({
-    where: { userId: session.user.id, status: { in: ['RESERVED', 'CONFIRMED'] } },
+    where: { userId: session.user.id, status: { in: ACTIVE_MEMBERSHIP_STATUSES } },
     select: { examComponent: { select: { course: { select: { code: true } } } } },
   })
   activeMemberships.forEach((m) => {

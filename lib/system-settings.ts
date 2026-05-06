@@ -2,6 +2,30 @@ import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { cache } from 'react'
 import { unstable_cache } from 'next/cache'
 
+const DEFAULT_REGISTRATION_FEE = { fee: '350', currency: 'GHS' }
+
+async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Promise<T> {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+  const guardedPromise = promise.catch((error) => {
+    console.warn('[system-settings] Database lookup failed:', error)
+    return fallback
+  })
+
+  try {
+    return await Promise.race([
+      guardedPromise,
+      new Promise<T>((resolve) => {
+        timeoutId = setTimeout(() => {
+          console.warn(`[system-settings] Database lookup exceeded ${ms}ms; using defaults.`)
+          resolve(fallback)
+        }, ms)
+      }),
+    ])
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId)
+  }
+}
+
 /**
  * Fetches specific system settings from the database.
  * Uses React `cache` to deduplicate queries within a single request,
@@ -9,9 +33,13 @@ import { unstable_cache } from 'next/cache'
  */
 export const getSystemSettings = cache(async (keys: string[]) => {
   const fetchSettings = async () => {
-    const settings = await prisma.systemSetting.findMany({
-      where: { key: { in: keys } },
-    })
+    const settings = await withTimeout(
+      prisma.systemSetting.findMany({
+        where: { key: { in: keys } },
+      }),
+      5000,
+      []
+    )
     
     // Convert to a record for easier access: { key: value }
     return settings.reduce((acc, s) => {
@@ -40,7 +68,7 @@ export const getSystemSettings = cache(async (keys: string[]) => {
  */
 export async function getRegistrationFeeInfo() {
   const settings = await getSystemSettings(['registration_fee', 'registration_currency'])
-  const fee = settings['registration_fee'] || '350'
-  const currency = settings['registration_currency'] || 'GHS'
+  const fee = settings['registration_fee'] || DEFAULT_REGISTRATION_FEE.fee
+  const currency = settings['registration_currency'] || DEFAULT_REGISTRATION_FEE.currency
   return { fee, currency }
 }
