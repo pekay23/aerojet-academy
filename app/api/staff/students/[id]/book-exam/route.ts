@@ -20,22 +20,10 @@ export const POST = withErrorHandler(
     if (!studentId) return apiError('Student ID required')
 
     const body = await req.json()
-    const { bookingType, moduleIds, eventId, examDate, paymentMethod, notes, attemptType } =
-      body as {
-        bookingType: 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK' | 'RESIT'
-        moduleIds: string[]
-        eventId?: string
-        examDate?: string
-        paymentMethod: 'AUTO_DEBIT' | 'MANUAL_LATER'
-        notes?: string
-        attemptType?: string
-      }
-
-    // Validate booking type
-    const validTypes = ['INDIVIDUAL', 'TWIN_PACK', 'FOUR_PACK', 'RESIT']
-    if (!validTypes.includes(bookingType)) {
-      return apiError('Invalid booking type')
-    }
+    const { staffBookExamSchema, validateBody } = await import('@/lib/validation/schemas')
+    const validation = validateBody(staffBookExamSchema, body)
+    if (!validation.success) return apiError(validation.error)
+    const { bookingType, moduleIds, eventId, examDate, paymentMethod, notes, attemptType } = validation.data
 
     // Validate module count per booking type
     const expectedModules: Record<string, number> = {
@@ -44,9 +32,9 @@ export const POST = withErrorHandler(
       FOUR_PACK: 4,
       RESIT: 1,
     }
-    if (!moduleIds || moduleIds.length !== expectedModules[bookingType]) {
+    if (moduleIds.length !== expectedModules[bookingType]) {
       return apiError(
-        `${bookingType} requires exactly ${expectedModules[bookingType]} module(s). Got ${moduleIds?.length ?? 0}.`
+        `${bookingType} requires exactly ${expectedModules[bookingType]} module(s). Got ${moduleIds.length}.`
       )
     }
 

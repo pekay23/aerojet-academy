@@ -1,36 +1,25 @@
-import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/auth-options'
+import { NextRequest } from 'next/server'
+import { requireStaff } from '@/lib/auth/helpers'
+import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { createGroupBooking } from '@/lib/pools/group-booking'
+import { charterBookingSchema, validateBody } from '@/lib/validation/schemas'
 
-export async function POST(request: Request) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'STAFF')) {
-      return new NextResponse('Unauthorized', { status: 403 })
-    }
+export const POST = withErrorHandler(async (req: NextRequest) => {
+  await requireStaff()
 
-    const body = await request.json()
-    const { repUserId, eventId, groupName, memberCount, modules } = body
+  const body = await req.json()
+  const validation = validateBody(charterBookingSchema, body)
+  if (!validation.success) return apiError(validation.error)
 
-    if (!repUserId || !eventId || !groupName || !memberCount || !modules || !modules.length) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
-    }
+  const { repUserId, eventId, groupName, memberCount, modules } = validation.data
 
-    const result = await createGroupBooking({
-      repUserId,
-      eventId,
-      groupName,
-      memberCount,
-      modules,
-    })
+  const result = await createGroupBooking({
+    repUserId,
+    eventId,
+    groupName,
+    memberCount,
+    modules,
+  })
 
-    return NextResponse.json({ success: true, poolId: result.pool.id })
-  } catch (error: any) {
-    console.error('[GROUP_CHARTER]', error)
-    return NextResponse.json(
-      { error: error.message || 'Failed to create group charter booking' },
-      { status: 400 }
-    )
-  }
-}
+  return apiSuccess({ poolId: result.pool.id })
+})

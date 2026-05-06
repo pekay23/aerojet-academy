@@ -14,9 +14,10 @@ export const PUT = withErrorHandler(
     if (!txnId) return apiError('Transaction ID required')
 
     const body = await req.json()
-    const { proofUrl } = body as { proofUrl?: string }
-
-    if (!proofUrl) return apiError('proofUrl is required')
+    const { attachProofSchema, validateBody } = await import('@/lib/validation/schemas')
+    const validation = validateBody(attachProofSchema, body)
+    if (!validation.success) return apiError(validation.error)
+    const { proofUrl } = validation.data
 
     // Verify the transaction exists and belongs to the student's wallet
     const transaction = await prismaUnfiltered.walletTransaction.findUnique({

@@ -167,7 +167,14 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   })
 })
 
-export const POST = withErrorHandler(async () => {
+export const POST = withErrorHandler(async (req: NextRequest) => {
+  const cronSecret = env.CRON_SECRET
+  const authHeader = req.headers.get('authorization')
+
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+    return apiError('Unauthorized', 401)
+  }
+
   const results = await checkAndSendReminders()
   return apiSuccess({
     message: `Milestone reminder check complete`,

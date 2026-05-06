@@ -377,6 +377,37 @@ export const newsArticleSchema = z.object({
 export const updateNewsArticleSchema = newsArticleSchema.partial()
 
 // ===========================================================================
+// STAFF ADMIN SCHEMAS
+// ===========================================================================
+
+export const charterBookingSchema = z.object({
+  repUserId: z.string().cuid(),
+  eventId: z.string().cuid(),
+  groupName: z.string().min(1).max(200),
+  memberCount: z.number().int().min(1).max(28),
+  modules: z.array(z.string().min(1)).min(1).max(4),
+})
+
+export const mergePoolsSchema = z.object({
+  poolAId: z.string().cuid(),
+  poolBId: z.string().cuid(),
+})
+
+export const attachProofSchema = z.object({
+  proofUrl: z.string().url('Valid proof URL required'),
+})
+
+export const staffBookExamSchema = z.object({
+  bookingType: z.enum(['INDIVIDUAL', 'TWIN_PACK', 'FOUR_PACK', 'RESIT']),
+  moduleIds: z.array(z.string().cuid()).min(1).max(4),
+  eventId: z.string().cuid().optional(),
+  examDate: z.string().refine((val) => !val || !isNaN(Date.parse(val)), 'Invalid exam date').optional(),
+  paymentMethod: z.enum(['AUTO_DEBIT', 'MANUAL_LATER']),
+  notes: z.string().optional(),
+  attemptType: z.string().optional(),
+})
+
+// ===========================================================================
 // SETTINGS SCHEMA
 // ===========================================================================
 

@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma/client'
+import { upgradeRoleInTransaction } from './pathway'
 
 export async function bookTuitionSession(sessionId: string, userId: string) {
   const sessionData = await prisma.tuitionRun.findUnique({
@@ -60,17 +61,7 @@ export async function bookTuitionSession(sessionId: string, userId: string) {
     })
 
     // 4. Role Upgrade
-    const user = await tx.user.findUnique({ where: { id: userId } })
-    if (user?.role === 'APPLICANT') {
-      await tx.user.update({
-        where: { id: userId },
-        data: { role: 'STUDENT' },
-      })
-      await tx.studentProfile.update({
-        where: { userId },
-        data: { enrollmentStatus: 'ENROLLED' },
-      })
-    }
+    await upgradeRoleInTransaction(tx, userId)
 
     return booking
   })

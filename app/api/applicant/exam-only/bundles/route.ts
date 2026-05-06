@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { purchaseBundle, getUserBundles } from '@/lib/pools/bundles'
 import prisma from '@/lib/prisma/client'
-import { promoteApplicantToStudent } from '@/lib/enrollment/pathway'
+import { promoteIfFirstExamActivity } from '@/lib/enrollment/pathway'
 
 export async function POST(request: Request) {
   try {
@@ -102,20 +102,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
-    let promotedToStudent = false
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: { role: true },
-    })
-
-    if (user && user.role === 'APPLICANT') {
-      try {
-        await promoteApplicantToStudent(userId, userId)
-        promotedToStudent = true
-      } catch (e) {
-        console.error('Promotion failed:', e)
-      }
-    }
+    const promotedToStudent = await promoteIfFirstExamActivity(userId)
 
     await prisma.notification.create({
       data: {
