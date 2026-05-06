@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
     ],
   },
   allowedDevOrigins: ['192.168.8.173'],
+  serverExternalPackages: ['ws'],
   experimental: {
     serverActions: {
       bodySizeLimit: '4mb',
