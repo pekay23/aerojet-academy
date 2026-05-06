@@ -1,6 +1,8 @@
-# Performance Audit Findings — Session 2026-05-05
+# Performance Audit Findings — Session 2026-05-05/06
 
-## Status: Build passes (152 pages, 0 errors)
+## Status: Build passes, all structural fixes deployed
+
+---
 
 ## Completed Fixes
 
@@ -13,14 +15,14 @@
 
 ### Tier 2 (High Impact) — ALL DONE
 - [x] lib/cached-queries.ts — created with 6 cached reference data functions
-- [x] lib/settings.ts — cached getSystemSetting
-- [x] 38+ loading.tsx files created across staff/student/applicant portals
+- [x] lib/settings.ts — cached getSystemSetting + getPaymentSplitConfig
+- [x] 111 loading.tsx files created across all portals
 - [x] staff/reports — 7 chart components → next/dynamic lazy load
 - [x] staff/dashboard — RevenueChart → next/dynamic
 - [x] staff/scheduling — 4 queries → Promise.all + cached helpers
 - [x] student/page — merged double user query, parallelized
 
-### Tier 3 (Medium) — MOSTLY DONE
+### Tier 3 (Medium) — ALL DONE
 - [x] 7 fix_*.ts scripts deleted from root
 - [x] react-hot-toast removed from package.json, migrated to sonner in 7 files
 - [x] 8 unused deps removed (three, shadergradient, styled-components, bufferutil, utf-8-validate, ws, @types/ws)
@@ -29,7 +31,7 @@
 - [x] N+1 in cron/send-reminders — parallel emails, batch createMany notifications
 - [x] Calendar megaquery — scoped examPool to user's pools, examEvents to future only
 - [x] 6 unbounded API routes capped (programmes, newsroom paginated, course-categories, applicant/courses, student/courses+grades, exam-components)
-- [x] 23+ staff pages switched to prismaUnfiltered by background agent
+- [x] 82+ staff API routes switched to prismaUnfiltered
 
 ### Tier 4 (Low) — DONE
 - [x] next.config.ts — output: 'standalone', image cache TTL 60→3600
@@ -40,31 +42,41 @@
 
 ---
 
-## Remaining Issues Found in Final Audit
+## Structural Review Fixes (Session 2026-05-06)
 
-### Missing loading.tsx (59 directories)
-**Staff (32):** academic/scheduling, classes/[id]/edit, classes/create, courses/[id]/edit, courses/categories, courses/create, enrollments/batch, exams/bookings, exams/events, exams/events/[id]/edit, exams/events/[id]/pools/create, exams/events/create, exams/pools/[id]/add-candidate, exams/pools/[id]/edit, exams/pools/members, exams/results, finance/reconciliation, finance/reports, finance/transactions, finance/wallet-topups, newsroom/[id]/edit, newsroom/create, payments/approved, payments/pending, payments/rejected, reports/attendance, reports/enrollment-trends, reports/pool-analytics, reports/revenue, settings/academic-calendar, settings/email-previews, students/import
+### P0 — Security (DONE)
+- [x] **Unprotected cron POST** — Added CRON_SECRET auth check to milestone-reminders POST handler
+- [x] **Race condition** — Wrapped top-up check-then-create in Serializable transaction with duplicate detection
 
-**Student (16):** academic-calendar, ambassador, courses/[slug], courses/[slug]/grades, courses/[slug]/materials, courses/enroll, courses/revision, exam-bookings/[id], exam-bookings/[id]/join, exam-bookings/my-bookings, exams/results, exams/schedule, profile/change-password, profile/settings, registration-fee, wallet/top-up, wallet/transactions
+### P1 — Maintainability (DONE)
+- [x] **Extract duplicate promotion logic** — Created `promoteIfFirstExamActivity()` and `upgradeRoleInTransaction()` in lib/enrollment/pathway.ts. Replaced 5 inline copies across book-exam, join-pool, bundles, full-time, tuition
+- [x] **Payment splits to SystemSettings** — Moved 40/30/30 and 50/50 splits from hardcoded values to `getPaymentSplitConfig()` in lib/settings.ts, loaded from SystemSetting table with admin-editable defaults
+- [x] **Zod validation** — Added schemas (`charterBookingSchema`, `mergePoolsSchema`, `attachProofSchema`, `staffBookExamSchema`) and applied to charter, merge, wallet-proof, staff book-exam routes. Also modernized charter and merge routes to use `withErrorHandler` + `requireStaff()`
+- [x] **Dynamic NewsMarkdownEditor** — Switched to `next/dynamic` with `ssr: false` in newsroom/create and newsroom/[id]/edit (681-line TipTap component no longer in initial bundle)
 
-**Applicant (11):** application/payment, application/status, courses/[id], courses/[id]/purchase, courses/purchase, exam-bookings/[id], exam-only, exam-only/dashboard, exam-only/top-up, pathway, wallet-top-up
+### Infrastructure Fix
+- [x] **Vercel DB connection failure** — Restored `@prisma/adapter-pg` (standard PostgreSQL driver). Commit b0b5e73 had switched to `@prisma/adapter-neon` + `ws` which doesn't work in Vercel serverless bundles. The `ws` WebSocket module cannot be properly bundled by Turbopack for serverless environments.
 
-### Sequential Await Patterns — FIXED
-1. [x] staff/license-requirements/page.tsx — parallelized licenseCategories + courses
-2. [x] staff/courses/[id]/page.tsx — parallelized course + categories
-3. [x] staff/exams/events/[id]/page.tsx — parallelized evaluateGoNoGo + getEventDemandSnapshot
-4. [SKIP] staff/exams/pools/[id]/page.tsx — siblingPools depends on pool.eventId, can't parallelize
+---
 
-### Double Query Pattern (generateMetadata + page both query same entity)
-- Not fixing — Next.js deduplicates fetch calls within the same request via React.cache
+## Remaining (P2/P3 — backlog)
 
-### Additional Fixes (this session)
-- [x] 59 missing loading.tsx files created (111 total now)
-- [x] 82 staff API routes being switched to prismaUnfiltered (agent running)
-- [x] staff/newsroom/page.tsx switched to prismaUnfiltered
-- [x] staff/calendar/actions.ts switched to prismaUnfiltered
-- [x] staff/scheduling/actions.ts switched to prismaUnfiltered
-- [x] staff/exams/events/[id]/actions.ts switched to prismaUnfiltered
-- [x] api/staff/newsroom/[id]/route.ts switched to prismaUnfiltered
-- [x] online-application-terms/page.tsx — removed duplicate getRegistrationFee(), uses shared helper
-- [x] 6 public pages force-dynamic to prevent build-time DB access
+### P2 — Structure
+- [ ] Break up long functions — getDashboardData (183 lines), UsersTable (380 lines)
+- [ ] Add error.tsx in (auth) segment
+- [ ] Add not-found.tsx in (auth) and (portal) segments
+- [ ] Remove dead config — 4 unused font families in tailwind.config.ts, trackEvent in analytics
+
+### P3 — Polish
+- [ ] Centralize hardcoded values — pool magic numbers, email addresses, status arrays
+- [ ] Replace `<img>` with next/image — 2 instances in newsroom create page
+- [ ] Rate limiting — resend-verification and submit-payment-proof routes
+
+---
+
+## Key Lessons Learned
+
+1. **Never switch database adapters without Vercel testing** — `@prisma/adapter-neon` + `ws` works locally but fails in Vercel serverless. Stick with `@prisma/adapter-pg` for production.
+2. **`force-dynamic` on public pages** — Required when pages call DB functions (like `getRegistrationFeeInfo`), otherwise Next.js tries to query the DB at build time.
+3. **Promotion logic must be centralized** — 5 copies of applicant-to-student promotion across different routes is a maintenance hazard. Now consolidated to 2 helpers in `lib/enrollment/pathway.ts`.
+4. **Payment splits should be admin-editable** — Business rules like 40/30/30 splits belong in SystemSettings, not hardcoded. Pattern established in `lib/pools/pricing-config.ts` already existed.

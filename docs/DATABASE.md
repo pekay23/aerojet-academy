@@ -29,4 +29,5 @@
 - **Notification** — In-app notifications
 - **AuditLog** — All system actions
 - **FileUpload** — Uploaded files tracking
-- **SystemSetting** — Key-value settings
+- **SystemSetting** — Key-value admin-editable settings (registration fees, exam pricing, payment splits, email config)
+- **PaymentMethod** — Bank transfer details (account name, number, SWIFT, branch)

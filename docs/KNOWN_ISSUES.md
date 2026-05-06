@@ -10,10 +10,10 @@ This document tracks persistent issues and bugs that are not yet fully resolved.
 
 ## 🐢 Dashboard Analytics Latency
 **Problem**: Initial load of `/staff/reports` is slow (up to 75s in dev).
-- **Cause**: Simultaneous execution of ~20 complex database queries against a remote Supabase instance.
+- **Cause**: Simultaneous execution of ~20 complex database queries against a remote Neon instance.
 - **Impact**: Frustrating developer experience and potential production timeouts for large datasets.
 - **Planned Fix**: Implement database indexes on all `status` and `date` columns.
-- **Current Status**: Partially mitigated. Prisma transaction timeouts increased to 30s to handle peak loads. Indices applied to `AuditLog` and `ExamBooking` tables.
+- **Current Status**: Partially mitigated. Chart components now lazy-loaded via `next/dynamic`. Prisma transaction timeouts increased to 30s. Indices applied to `AuditLog` and `ExamBooking` tables.
 
 ## ✉️ Email Verification Delays
 **Problem**: Some users report delays in receiving the `verifyToken` email.
@@ -25,10 +25,21 @@ This document tracks persistent issues and bugs that are not yet fully resolved.
 - **Status**: Improved by adding state-driven success checkmarks, but could benefit from a more robust "Upload in Progress" UI.
 
 ## 🧩 Prisma Enums vs DB Enums
-**Problem**: Occasional mismatches between Prisma-defined enums and existing Supabase DB enums.
+**Problem**: Occasional mismatches between Prisma-defined enums and existing database enums.
 - **Fix Strategy**: Use the `migrate_enums.js` script to manually synchronize enums if `prisma migrate dev` fails.
 
 ## 🔗 Database Connection Safety
 **Problem**: Cold starts or high concurrent traffic can lead to Prisma connection timeouts.
 - **Symptoms**: `P2028: Transaction API error: Transaction already closed` or generic timeout errors during payment/booking.
 - **Status**: Mitigated by increasing `$transaction` timeout to 30s and implementing robust error handling in `chargeWallet` and `joinPool` services.
+
+## ⚠️ Database Adapter — DO NOT switch to @prisma/adapter-neon
+**Problem**: Commit b0b5e73 switched from `@prisma/adapter-pg` to `@prisma/adapter-neon` + `ws`, which broke all Vercel runtime DB connections.
+- **Root Cause**: The `ws` WebSocket module does not work in Vercel's Turbopack serverless bundles. The Neon serverless adapter is designed for edge/Cloudflare Workers environments, not Node.js serverless.
+- **Resolution**: Reverted to `@prisma/adapter-pg` with standard `pg` Pool in commit 6ed1cd9.
+- **Rule**: Always use `@prisma/adapter-pg` for production. Test any adapter changes against a live Vercel deployment before merging.
+
+## 🛡️ Missing Error Boundaries
+**Problem**: The (auth) route segment has no `error.tsx`, and (auth)/(portal) have no `not-found.tsx`.
+- **Impact**: Auth flow errors show raw Next.js error pages instead of branded error UI.
+- **Status**: P2 backlog item in structural review.
