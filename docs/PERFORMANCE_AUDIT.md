@@ -1,8 +1,9 @@
 # Performance Audit Report — Aerojet Academy
 
-**Date:** 2026-05-04
+**Date:** 2026-05-04 (audit) | 2026-05-06 (fixes applied)
 **Scope:** Full app audit — APIs, SSR, client components, data layer, Vercel Speed Insights
 **Metrics:** FCP, LCP, TTFB, CLS, INP
+**Status:** Tiers 1-4 COMPLETE. See `docs/findings.md` for fix details.
 
 ---
 
