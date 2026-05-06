@@ -3,7 +3,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { joinPool } from '@/lib/pools/join'
 import { validatePoolJoin } from '@/lib/pools/validation'
-import { promoteToStudent } from '@/lib/students/promotion'
+import { promoteIfFirstExamActivity } from '@/lib/enrollment/pathway'
 
 export async function POST(request: Request) {
   try {
@@ -69,27 +69,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: result.error }, { status: 400 })
     }
 
-    // Check if this is user's first booking — promote to student
-    const existingMemberships = await prisma.poolMembership.count({
-      where: { userId },
-    })
-    const existingExams = await prisma.examBooking.count({
-      where: { userId },
-    })
-
-    let promotedToStudent = false
-    if (existingMemberships === 1 && existingExams === 0) {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { role: true },
-      })
-      if (user && user.role === 'APPLICANT') {
-        const promoResult = await promoteToStudent(userId, 'EXAM_ONLY')
-        if (promoResult.success) {
-          promotedToStudent = true
-        }
-      }
-    }
+    const promotedToStudent = await promoteIfFirstExamActivity(userId)
 
     return NextResponse.json({
       success: true,

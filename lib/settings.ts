@@ -94,6 +94,24 @@ export async function getFinanceConfig() {
   }
 }
 
+export async function getPaymentSplitConfig() {
+  const settings = await getSystemSettings([
+    'ft_y1_seat_pct',
+    'ft_y1_sem1_pct',
+    'ft_y1_sem2_pct',
+    'ft_y2_sem1_pct',
+    'ft_y2_sem2_pct',
+  ])
+
+  return {
+    y1SeatPct: Number(settings.get('ft_y1_seat_pct') ?? 40),
+    y1Sem1Pct: Number(settings.get('ft_y1_sem1_pct') ?? 30),
+    y1Sem2Pct: Number(settings.get('ft_y1_sem2_pct') ?? 30),
+    y2Sem1Pct: Number(settings.get('ft_y2_sem1_pct') ?? 50),
+    y2Sem2Pct: Number(settings.get('ft_y2_sem2_pct') ?? 50),
+  }
+}
+
 export async function getEmailConfig() {
   const settings = await getSystemSettings([
     'email_from_name',

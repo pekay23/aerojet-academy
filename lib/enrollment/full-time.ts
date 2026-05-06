@@ -1,26 +1,25 @@
 import prisma from '@/lib/prisma/client'
 import { triggerAutoEnrollmentByUserId } from './engine'
+import { upgradeRoleInTransaction } from './pathway'
 
 /**
  * Generates payment milestones for a Full-Time Enrollment.
- * Y1: 40% (Seat Confirmation), 30% (Sem 1 Due), 30% (Sem 2 Due)
- * Y2+: 50% (Sem 1 Due), 50% (Sem 2 Due)
+ * Split percentages are loaded from SystemSettings (admin-editable).
+ * Defaults: Y1 = 40/30/30, Y2+ = 50/50.
  */
 export async function generateMilestonesForYear(enrollmentId: string, yearId: string) {
-  const enrollment = await prisma.fullTimeEnrollment.findUnique({
-    where: { id: enrollmentId },
-    include: {
-      programme: true,
-      student: true,
-    },
-  })
+  const { getPaymentSplitConfig } = await import('@/lib/settings')
+
+  const [enrollment, progYear, splitConfig] = await Promise.all([
+    prisma.fullTimeEnrollment.findUnique({
+      where: { id: enrollmentId },
+      include: { programme: true, student: true },
+    }),
+    prisma.programmeYear.findUnique({ where: { id: yearId } }),
+    getPaymentSplitConfig(),
+  ])
 
   if (!enrollment) throw new Error('Enrollment not found')
-
-  const progYear = await prisma.programmeYear.findUnique({
-    where: { id: yearId },
-  })
-
   if (!progYear) throw new Error('Programme Year not found')
 
   // Use year-specific fee amount, otherwise derive from programme totalFee / duration
@@ -38,15 +37,14 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
   const milestoneData = []
 
   if (progYear.yearNumber === 1) {
-    // Y1: 40% (Seat), 30% (Sem 1), 30% (Sem 2)
     milestoneData.push(
       {
         enrollmentId,
         yearNumber: 1,
         milestoneType: 'SEAT_CONFIRMATION',
         dueDate: new Date(), // Immediate
-        percentOfYearFee: 40,
-        amountDue: totalAmount * 0.4,
+        percentOfYearFee: splitConfig.y1SeatPct,
+        amountDue: totalAmount * (splitConfig.y1SeatPct / 100),
         status: 'DUE',
       },
       {
@@ -54,8 +52,8 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
         yearNumber: 1,
         milestoneType: 'SEM1_DUE',
         dueDate: sem1Date,
-        percentOfYearFee: 30,
-        amountDue: totalAmount * 0.3,
+        percentOfYearFee: splitConfig.y1Sem1Pct,
+        amountDue: totalAmount * (splitConfig.y1Sem1Pct / 100),
         status: 'DUE',
       },
       {
@@ -63,21 +61,20 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
         yearNumber: 1,
         milestoneType: 'SEM2_DUE',
         dueDate: sem2Date,
-        percentOfYearFee: 30,
-        amountDue: totalAmount * 0.3,
+        percentOfYearFee: splitConfig.y1Sem2Pct,
+        amountDue: totalAmount * (splitConfig.y1Sem2Pct / 100),
         status: 'DUE',
       }
     )
   } else {
-    // Y2+: 50% (Sem 1), 50% (Sem 2)
     milestoneData.push(
       {
         enrollmentId,
         yearNumber: progYear.yearNumber,
         milestoneType: 'SEM1_DUE',
         dueDate: sem1Date,
-        percentOfYearFee: 50,
-        amountDue: totalAmount * 0.5,
+        percentOfYearFee: splitConfig.y2Sem1Pct,
+        amountDue: totalAmount * (splitConfig.y2Sem1Pct / 100),
         status: 'DUE',
       },
       {
@@ -85,8 +82,8 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
         yearNumber: progYear.yearNumber,
         milestoneType: 'SEM2_DUE',
         dueDate: sem2Date,
-        percentOfYearFee: 50,
-        amountDue: totalAmount * 0.5,
+        percentOfYearFee: splitConfig.y2Sem2Pct,
+        amountDue: totalAmount * (splitConfig.y2Sem2Pct / 100),
         status: 'DUE',
       }
     )
@@ -160,16 +157,8 @@ export async function processMilestonePayment(milestoneId: string, userId: strin
       (m) => m.milestoneType === 'SEAT_CONFIRMATION' && (m.id === milestone.id ? true : m.status === 'PAID')
     )
 
-    const user = await tx.user.findUnique({ where: { id: userId } })
-    if (user?.role === 'APPLICANT' && seatPaid) {
-      await tx.user.update({
-        where: { id: userId },
-        data: { role: 'STUDENT' },
-      })
-      await tx.studentProfile.update({
-        where: { userId },
-        data: { enrollmentStatus: 'ENROLLED' },
-      })
+    if (seatPaid) {
+      await upgradeRoleInTransaction(tx, userId)
     }
 
     return updated
@@ -225,17 +214,7 @@ export async function payFullYear(enrollmentId: string, yearNumber: number, user
     }
 
     // Upgrade role
-    const user = await tx.user.findUnique({ where: { id: userId } })
-    if (user?.role === 'APPLICANT') {
-      await tx.user.update({
-        where: { id: userId },
-        data: { role: 'STUDENT' },
-      })
-      await tx.studentProfile.update({
-        where: { userId },
-        data: { enrollmentStatus: 'ENROLLED' },
-      })
-    }
+    await upgradeRoleInTransaction(tx, userId)
   })
 
   // Post-transaction: trigger auto-enrollment for FT/Military pathways

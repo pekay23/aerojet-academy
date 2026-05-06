@@ -3,7 +3,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { joinPool } from '@/lib/pools/join'
 import { bookStandaloneExam } from '@/lib/enrollment/exams'
-import { promoteApplicantToStudent } from '@/lib/enrollment/pathway'
+import { promoteIfFirstExamActivity } from '@/lib/enrollment/pathway'
 
 export async function POST(request: Request) {
   try {
@@ -100,22 +100,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Booking record was not created' }, { status: 500 })
       }
 
-      let promotedToStudent = false
-      const existingExams = await prisma.examBooking.count({ where: { userId } })
-      if (existingExams === 1) {
-        const user = await prisma.user.findUnique({
-          where: { id: userId },
-          select: { role: true },
-        })
-        if (user && user.role === 'APPLICANT') {
-          try {
-            await promoteApplicantToStudent(userId, userId)
-            promotedToStudent = true
-          } catch (e) {
-            console.error('Promotion failed:', e)
-          }
-        }
-      }
+      const promotedToStudent = await promoteIfFirstExamActivity(userId)
 
       return NextResponse.json({
         success: true,
@@ -197,25 +182,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: joinResult.error }, { status: 400 })
     }
 
-    // Promote to student if first booking
-    const existingMemberships = await prisma.poolMembership.count({ where: { userId } })
-    const existingExams = await prisma.examBooking.count({ where: { userId } })
-
-    let promotedToStudent = false
-    if (existingMemberships >= 1 && existingExams === 1) {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { role: true },
-      })
-      if (user && user.role === 'APPLICANT') {
-        try {
-          await promoteApplicantToStudent(userId, userId)
-          promotedToStudent = true
-        } catch (e) {
-          console.error('Promotion failed:', e)
-        }
-      }
-    }
+    const promotedToStudent = await promoteIfFirstExamActivity(userId)
 
     const assignedPoolId = joinResult.pool?.id || pool.id
     const assignedPoolName = joinResult.pool?.name || pool.name

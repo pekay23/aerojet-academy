@@ -1,54 +1,27 @@
-import { NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth/auth-options'
+import { NextRequest } from 'next/server'
+import { requireStaff } from '@/lib/auth/helpers'
+import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { canMergePools, mergePools } from '@/lib/pools/operations'
+import { mergePoolsSchema, validateBody } from '@/lib/validation/schemas'
 
-export async function POST(request: Request) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'STAFF')) {
-      return new NextResponse('Unauthorized', { status: 403 })
-    }
+export const POST = withErrorHandler(async (req: NextRequest) => {
+  const staff = await requireStaff()
 
-    const body = await request.json()
-    const { poolAId, poolBId } = body
+  const body = await req.json()
+  const validation = validateBody(mergePoolsSchema, body)
+  if (!validation.success) return apiError(validation.error)
 
-    if (!poolAId || !poolBId) {
-      return NextResponse.json({ error: 'Both poolAId and poolBId are required' }, { status: 400 })
-    }
+  const result = await mergePools(validation.data.poolAId, validation.data.poolBId, staff.id)
+  return apiSuccess(result)
+})
 
-    const result = await mergePools(poolAId, poolBId, session.user.id)
-    return NextResponse.json(result)
-  } catch (error: any) {
-    console.error('[POOL_MERGE]', error)
-    return NextResponse.json(
-      { error: error.message || 'Failed to merge pools' },
-      { status: 400 }
-    )
-  }
-}
+export const PUT = withErrorHandler(async (req: NextRequest) => {
+  await requireStaff()
 
-export async function PUT(request: Request) {
-  try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'STAFF')) {
-      return new NextResponse('Unauthorized', { status: 403 })
-    }
+  const body = await req.json()
+  const validation = validateBody(mergePoolsSchema, body)
+  if (!validation.success) return apiError(validation.error)
 
-    const body = await request.json()
-    const { poolAId, poolBId } = body
-
-    if (!poolAId || !poolBId) {
-      return NextResponse.json({ error: 'Both poolAId and poolBId are required' }, { status: 400 })
-    }
-
-    const result = await canMergePools(poolAId, poolBId)
-    return NextResponse.json(result)
-  } catch (error: any) {
-    console.error('[POOL_MERGE_VALIDATE]', error)
-    return NextResponse.json(
-      { error: error.message || 'Failed to validate merge' },
-      { status: 400 }
-    )
-  }
-}
+  const result = await canMergePools(validation.data.poolAId, validation.data.poolBId)
+  return apiSuccess(result)
+})
