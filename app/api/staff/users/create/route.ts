@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
 import { getAuthSession, hashPassword } from '@/lib/auth/helpers'
 import { requirePermission, PERMISSIONS } from '@/lib/auth/permissions'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { UserRole, EnrollmentType } from '@prisma/client'
 
@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
     const { email, password, role, firstName, lastName, phone } = validation.data
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prismaUnfiltered.user.findUnique({
       where: { email },
     })
 
@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
     const hashedPassword = await hashPassword(password)
 
     // Create user and related profiles in a transaction
-    const newUser = await prisma.$transaction(async (tx) => {
+    const newUser = await prismaUnfiltered.$transaction(async (tx) => {
       // Generate random 4-digit number with collision retry
       const generateUniqueId = async (prefix: string, type: 'STUDENT' | 'INSTRUCTOR' | 'STAFF') => {
         let isUnique = false

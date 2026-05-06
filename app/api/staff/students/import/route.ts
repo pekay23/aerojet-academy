@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import {
   requireStaff,
   hashPassword,
@@ -215,7 +215,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       }
 
       // --- Dedupe check: look up by personal email, academy email, or main email ---
-      let existingUser = await prisma.user.findFirst({
+      let existingUser = await prismaUnfiltered.user.findFirst({
         where: {
           OR: [
             { email: s.email },
@@ -246,9 +246,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         const studentId = await generateStudentId()
 
         // Look up pathway for linking
-        const pathway = await prisma.studyPathwayModel.findUnique({ where: { code: pathwayCode } })
+        const pathway = await prismaUnfiltered.studyPathwayModel.findUnique({ where: { code: pathwayCode } })
 
-        const user = await prisma.$transaction(async (tx) => {
+        const user = await prismaUnfiltered.$transaction(async (tx) => {
           const newUser = await tx.user.create({
             data: {
               email: academyEmail,
@@ -335,9 +335,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       } else {
         // ===================== UPDATE EXISTING USER =====================
         const academyEmail = s.academyEmail || existingUser.academyEmail || await generateAcademyEmail(s.firstName, s.middleName, s.lastName)
-        const pathway = await prisma.studyPathwayModel.findUnique({ where: { code: pathwayCode } })
+        const pathway = await prismaUnfiltered.studyPathwayModel.findUnique({ where: { code: pathwayCode } })
 
-        await prisma.user.update({
+        await prismaUnfiltered.user.update({
           where: { id: existingUser.id },
           data: {
             email: academyEmail,
@@ -359,7 +359,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
         // Ensure profile
         if (existingUser.profile) {
-          await prisma.profile.update({
+          await prismaUnfiltered.profile.update({
             where: { userId: existingUser.id },
             data: {
               firstName: s.firstName,
@@ -369,7 +369,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             },
           })
         } else {
-          await prisma.profile.create({
+          await prismaUnfiltered.profile.create({
             data: {
               userId: existingUser.id,
               firstName: s.firstName,
@@ -390,7 +390,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
         if (!existingUser.studentProfile) {
           const studentId = await generateStudentId()
-          await prisma.studentProfile.create({
+          await prismaUnfiltered.studentProfile.create({
             data: {
               userId: existingUser.id,
               studentId,
@@ -408,7 +408,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           finalStudentId = studentId
         } else {
           // Update existing student profile
-          await prisma.studentProfile.update({
+          await prismaUnfiltered.studentProfile.update({
             where: { userId: existingUser.id },
             data: {
               enrollmentType,
@@ -427,7 +427,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
         // Ensure wallet
         if (!existingUser.wallet) {
-          await prisma.wallet.create({
+          await prismaUnfiltered.wallet.create({
             data: { userId: existingUser.id, balance: 0, reservedBalance: 0, availableBalance: 0, currency: 'EUR' },
           })
         }
@@ -439,7 +439,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
       // ===================== WALLET CREDIT =====================
       if (s.walletCreditEur && s.walletCreditEur > 0) {
-        await prisma.$transaction(async (tx) => {
+        await prismaUnfiltered.$transaction(async (tx) => {
           // Idempotent: check if this migration credit was already applied
           const wallet = await tx.wallet.findUnique({ where: { userId } })
           if (!wallet) return
@@ -470,12 +470,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         for (const mod of s.completedModules) {
           const migRef = `${migrationRef}:COMPLETED:${mod.moduleCode}`
 
-          const existing = await prisma.examBooking.findFirst({
+          const existing = await prismaUnfiltered.examBooking.findFirst({
             where: { userId, migrationRef: migRef },
           })
 
           if (!existing) {
-            await prisma.examBooking.create({
+            await prismaUnfiltered.examBooking.create({
               data: {
                 userId,
                 bookingType: BookingType.INDIVIDUAL,
@@ -498,12 +498,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         for (const entry of s.examHistory) {
           const migRef = `${migrationRef}:${entry.bookingGroupRef}:${entry.moduleCode}:${entry.attemptType}`
 
-          const existing = await prisma.examBooking.findFirst({
+          const existing = await prismaUnfiltered.examBooking.findFirst({
             where: { userId, migrationRef: migRef },
           })
 
           if (!existing) {
-            await prisma.examBooking.create({
+            await prismaUnfiltered.examBooking.create({
               data: {
                 userId,
                 bookingType: BookingType.BUNDLE,
@@ -527,7 +527,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       // ===================== ENTITLEMENTS =====================
       if (s.entitlements && s.entitlements.length > 0) {
         for (const ent of s.entitlements) {
-          await prisma.bookingEntitlement.upsert({
+          await prismaUnfiltered.bookingEntitlement.upsert({
             where: {
               userId_bookingGroupRef: {
                 userId,
@@ -558,12 +558,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         for (const planned of s.plannedBookings) {
           const migRef = `${migrationRef}:PLANNED:${planned.bookingGroupRef}:${planned.moduleCode}`
 
-          const existing = await prisma.examBooking.findFirst({
+          const existing = await prismaUnfiltered.examBooking.findFirst({
             where: { userId, migrationRef: migRef },
           })
 
           if (!existing) {
-            await prisma.examBooking.create({
+            await prismaUnfiltered.examBooking.create({
               data: {
                 userId,
                 bookingType: BookingType.BUNDLE,
@@ -592,7 +592,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           FULL_TIME_2YEAR: 'FT2Y',
           MILITARY_1YEAR: 'MIL1Y',
         }
-        const ftProgramme = await prisma.fullTimeProgramme.findFirst({
+        const ftProgramme = await prismaUnfiltered.fullTimeProgramme.findFirst({
           where: { code: ftCodeMap[programmeChoice] },
           include: { programmeYears: { orderBy: { yearNumber: 'asc' } } },
         })
@@ -604,7 +604,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           ) || ftProgramme.programmeYears[0]
 
           if (targetProgrammeYear) {
-            await prisma.fullTimeEnrollment.upsert({
+            await prismaUnfiltered.fullTimeEnrollment.upsert({
               where: {
                 studentId_programmeId: {
                   studentId: userId,
@@ -632,13 +632,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       if (s.semesterEnrollments && s.semesterEnrollments.length > 0) {
         for (const sem of s.semesterEnrollments) {
           // Look up academic year
-          let academicYear = await prisma.academicYear.findFirst({
+          let academicYear = await prismaUnfiltered.academicYear.findFirst({
             where: { name: sem.academicYearName },
           })
           if (!academicYear) continue // Skip if academic year not configured
 
           // Look up semester
-          let semester = await prisma.semester.findFirst({
+          let semester = await prismaUnfiltered.semester.findFirst({
             where: {
               name: sem.semesterName,
               academicYearId: academicYear.id,
@@ -648,7 +648,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
           // Create enrollment for each course
           for (const courseCode of sem.courseCodes) {
-            const course = await prisma.course.findFirst({
+            const course = await prismaUnfiltered.course.findFirst({
               where: { code: courseCode },
             })
             if (!course) continue
@@ -659,7 +659,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
               : (sem.status as EnrollmentStatus || EnrollmentStatus.ACTIVE)
 
             // Use createMany-style idempotency: check first
-            const existingEnrollment = await prisma.enrollment.findFirst({
+            const existingEnrollment = await prismaUnfiltered.enrollment.findFirst({
               where: {
                 userId,
                 courseId: course.id,
@@ -668,7 +668,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             })
 
             if (!existingEnrollment) {
-              await prisma.enrollment.create({
+              await prismaUnfiltered.enrollment.create({
                 data: {
                   userId,
                   courseId: course.id,
@@ -707,7 +707,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       })
 
       // Fetch final wallet balance
-      const finalWallet = await prisma.wallet.findUnique({ where: { userId } })
+      const finalWallet = await prismaUnfiltered.wallet.findUnique({ where: { userId } })
 
       results.credentials.push({
         firstName: s.firstName,

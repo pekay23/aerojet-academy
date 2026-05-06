@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import {
   apiSuccess,
@@ -31,14 +31,14 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   }
 
   const [courses, total] = await Promise.all([
-    prisma.course.findMany({
+    prismaUnfiltered.course.findMany({
       where,
       include: { _count: { select: { enrollments: true, classes: true } } },
       orderBy: { code: 'asc' },
       skip,
       take: limit,
     }),
-    prisma.course.count({ where }),
+    prismaUnfiltered.course.count({ where }),
   ])
 
   return apiPaginated(serializePrisma(courses), total, page, limit)
@@ -51,10 +51,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const validation = validateBody(createCourseSchema, body)
   if (validation.success === false) return apiError(validation.error)
 
-  const existing = await prisma.course.findUnique({ where: { code: validation.data.code } })
+  const existing = await prismaUnfiltered.course.findUnique({ where: { code: validation.data.code } })
   if (existing) return apiError('Course code already exists', 409)
 
-  const course = await prisma.course.create({ 
+  const course = await prismaUnfiltered.course.create({ 
     data: {
       ...validation.data,
       moduleType: validation.data.moduleType ?? null,

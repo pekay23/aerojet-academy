@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 import { triggerAutoEnrollmentIfRequired } from '@/lib/enrollment/engine'
@@ -23,12 +23,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     }
 
     // Validate the pathway exists
-    const pathway = await prisma.studyPathwayModel.findUnique({ where: { code: pathwayCode } })
+    const pathway = await prismaUnfiltered.studyPathwayModel.findUnique({ where: { code: pathwayCode } })
     if (!pathway) {
       return NextResponse.json({ error: 'Invalid pathway code' }, { status: 400 })
     }
 
-    const targetUser = await prisma.user.findUnique({
+    const targetUser = await prismaUnfiltered.user.findUnique({
       where: { id },
       include: { studentProfile: { select: { id: true, pathwayId: true } } },
     })
@@ -37,7 +37,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     let studentProfileId: string
 
-    await prisma.$transaction(async (tx) => {
+    await prismaUnfiltered.$transaction(async (tx) => {
       const profileData = {
         pathwayId: pathway.id,
         studyPathwayLockedAt: new Date(),

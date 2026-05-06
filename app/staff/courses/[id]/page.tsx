@@ -37,43 +37,44 @@ export default async function CourseDetailsPage({ params }: Props) {
 
   const { id } = await params
 
-  const course = await prismaUnfiltered.course.findFirst({
-    where: { OR: [{ id }, { code: id }] },
-    include: {
-      category: true,
-      examComponents: {
-        include: { _count: { select: { exams: true, bookings: true } } },
-        orderBy: { code: 'asc' },
-      },
-      _count: {
-        select: {
-          enrollments: true,
-          classes: true,
-          examComponents: true,
+  const [course, categories] = await Promise.all([
+    prismaUnfiltered.course.findFirst({
+      where: { OR: [{ id }, { code: id }] },
+      include: {
+        category: true,
+        examComponents: {
+          include: { _count: { select: { exams: true, bookings: true } } },
+          orderBy: { code: 'asc' },
         },
-      },
-      classes: {
-        include: {
-          instructor: {
-            include: {
-              user: {
-                include: {
-                  profile: true,
+        _count: {
+          select: {
+            enrollments: true,
+            classes: true,
+            examComponents: true,
+          },
+        },
+        classes: {
+          include: {
+            instructor: {
+              include: {
+                user: {
+                  include: {
+                    profile: true,
+                  },
                 },
               },
             },
           },
+          orderBy: { startDate: 'desc' },
         },
-        orderBy: { startDate: 'desc' },
       },
-    },
-  })
+    }),
+    prismaUnfiltered.courseCategory.findMany({
+      orderBy: { name: 'asc' },
+    }),
+  ])
 
   if (!course) notFound()
-
-  const categories = await prismaUnfiltered.courseCategory.findMany({
-    orderBy: { name: 'asc' },
-  })
 
   // Serialize Prisma data for Client Components
   const serializedCourse = serializePrisma(course)

@@ -7,7 +7,7 @@
   "description": "Aerojet Aviation Training Academy - Complete Portal System",
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "npx dotenv-cli -e .env -- next build",
+    "build": "npx dotenv-cli -e .env -- cross-env NODE_ENV=production next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",

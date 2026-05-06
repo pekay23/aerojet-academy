@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 
 export const GET = withErrorHandler(async () => {
   await requireStaff()
-  const methods = await prisma.paymentMethod.findMany({
+  const methods = await prismaUnfiltered.paymentMethod.findMany({
     orderBy: { sortOrder: 'asc' },
   })
   return apiSuccess(methods)
@@ -26,10 +26,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   // Get the next sort order
-  const maxSort = await prisma.paymentMethod.aggregate({ _max: { sortOrder: true } })
+  const maxSort = await prismaUnfiltered.paymentMethod.aggregate({ _max: { sortOrder: true } })
   const nextSort = (maxSort._max.sortOrder ?? -1) + 1
 
-  const method = await prisma.paymentMethod.create({
+  const method = await prismaUnfiltered.paymentMethod.create({
     data: {
       type,
       label,

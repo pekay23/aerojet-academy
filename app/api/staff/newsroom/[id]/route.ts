@@ -1,13 +1,13 @@
 import { NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { apiSuccess, apiError } from '@/lib/api/response'
 import { getAuthSession } from '@/lib/auth/auth-options'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params
-    const article = await prisma.newsArticle.findUnique({
+    const article = await prismaUnfiltered.newsArticle.findUnique({
       where: { id },
     })
     if (!article) return apiError('Not found', 404)
@@ -42,11 +42,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       tags,
     } = data
 
-    const currentArticle = await prisma.newsArticle.findUnique({ where: { id } })
+    const currentArticle = await prismaUnfiltered.newsArticle.findUnique({ where: { id } })
     if (!currentArticle) return apiError('Not found', 404)
 
     if (slug && slug !== currentArticle.slug) {
-      const existing = await prisma.newsArticle.findUnique({ where: { slug } })
+      const existing = await prismaUnfiltered.newsArticle.findUnique({ where: { slug } })
       if (existing) return apiError('Slug already in use', 400)
     }
 
@@ -60,7 +60,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       finalPublishedAt = new Date()
     }
 
-    const updated = await prisma.newsArticle.update({
+    const updated = await prismaUnfiltered.newsArticle.update({
       where: { id },
       data: {
         title,
@@ -99,7 +99,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     }
 
     const { id } = await params
-    await prisma.newsArticle.delete({
+    await prismaUnfiltered.newsArticle.delete({
       where: { id },
     })
 

@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 import { z } from 'zod'
@@ -25,7 +25,7 @@ export const POST = withErrorHandler(
     const poolId = params.id
 
     // 1. Check pool exists
-    const pool = await prisma.examPool.findUnique({
+    const pool = await prismaUnfiltered.examPool.findUnique({
       where: { id: poolId },
     })
 
@@ -37,7 +37,7 @@ export const POST = withErrorHandler(
     }
 
     // Verify the exam component belongs to an allowed module, or check diversity cap
-    const examComponent = await prisma.examComponent.findUnique({
+    const examComponent = await prismaUnfiltered.examComponent.findUnique({
       where: { id: examComponentId },
       include: { course: { select: { code: true } } },
     })
@@ -60,7 +60,7 @@ export const POST = withErrorHandler(
     }
 
     // 3. Check if user is already in the pool
-    const existingMembership = await prisma.poolMembership.findUnique({
+    const existingMembership = await prismaUnfiltered.poolMembership.findUnique({
       where: { poolId_userId: { poolId, userId } },
     })
 
@@ -69,7 +69,7 @@ export const POST = withErrorHandler(
     }
 
     // 4. Create membership
-    const membership = await prisma.poolMembership.create({
+    const membership = await prismaUnfiltered.poolMembership.create({
       data: {
         poolId,
         userId,
@@ -80,7 +80,7 @@ export const POST = withErrorHandler(
     })
 
     // 5. Update pool count and optionally allowedModules
-    await prisma.examPool.update({
+    await prismaUnfiltered.examPool.update({
       where: { id: poolId },
       data: {
         currentMemberCount: { increment: 1 },

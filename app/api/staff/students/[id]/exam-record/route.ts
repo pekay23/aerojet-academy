@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { revalidatePath } from 'next/cache'
@@ -53,7 +53,7 @@ export const POST = withErrorHandler(
     }
 
     // Verify student exists
-    const student = await prisma.user.findUnique({ where: { id: studentId } })
+    const student = await prismaUnfiltered.user.findUnique({ where: { id: studentId } })
     if (!student) return apiError('Student not found')
 
     const createdBookings: { id: string; isNew: boolean }[] = []
@@ -63,7 +63,7 @@ export const POST = withErrorHandler(
       // Resolve final module code
       let finalModuleCode = (entry.moduleCode || '').toUpperCase().trim()
       if (entry.courseId) {
-        const course = await prisma.course.findUnique({ where: { id: entry.courseId } })
+        const course = await prismaUnfiltered.course.findUnique({ where: { id: entry.courseId } })
         if (course) finalModuleCode = course.code.toUpperCase().trim()
       }
       if (!finalModuleCode) return apiError('Module code is required')
@@ -93,7 +93,7 @@ export const POST = withErrorHandler(
       // UPSERT: update existing booking for same (userId, moduleCode, attemptType)
       // or create a new one.
       // -----------------------------------------------------------------------
-      const existing = await prisma.examBooking.findFirst({
+      const existing = await prismaUnfiltered.examBooking.findFirst({
         where: {
           userId: studentId,
           moduleCode: finalModuleCode,
@@ -107,7 +107,7 @@ export const POST = withErrorHandler(
 
       if (existing) {
         // Update the existing record
-        await prisma.examBooking.update({
+        await prismaUnfiltered.examBooking.update({
           where: { id: existing.id },
           data: {
             courseId: entry.courseId ?? existing.courseId,
@@ -124,7 +124,7 @@ export const POST = withErrorHandler(
         isNew = false
       } else {
         // Create a new record
-        const created = await prisma.examBooking.create({
+        const created = await prismaUnfiltered.examBooking.create({
           data: {
             userId: studentId,
             courseId: entry.courseId,
@@ -158,7 +158,7 @@ export const POST = withErrorHandler(
           : (percentage ?? 0) >= 75 ? 'C'
           : 'F'
 
-        const existingResult = await prisma.examResult.findFirst({
+        const existingResult = await prismaUnfiltered.examResult.findFirst({
           where: {
             userId: studentId,
             moduleCode: finalModuleCode,
@@ -167,7 +167,7 @@ export const POST = withErrorHandler(
         })
 
         if (existingResult) {
-          await prisma.examResult.update({
+          await prismaUnfiltered.examResult.update({
             where: { id: existingResult.id },
             data: {
               score: scoreVal,
@@ -179,7 +179,7 @@ export const POST = withErrorHandler(
             },
           })
         } else {
-          await prisma.examResult.create({
+          await prismaUnfiltered.examResult.create({
             data: {
               userId: studentId,
               moduleCode: finalModuleCode,
@@ -199,7 +199,7 @@ export const POST = withErrorHandler(
 
     // Notification
     const moduleCodes = entries.map((e) => e.moduleCode?.toUpperCase()).filter(Boolean)
-    await prisma.notification.create({
+    await prismaUnfiltered.notification.create({
       data: {
         userId: studentId,
         title: isPending ? 'Exam Record Created' : 'Exam Record Updated',

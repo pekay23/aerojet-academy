@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
@@ -19,7 +19,7 @@ export const DELETE = withErrorHandler(
       return apiError('A valid withdrawal reason (at least 5 characters) is required.')
     }
 
-    const result = await prisma.$transaction(
+    const result = await prismaUnfiltered.$transaction(
       async (tx) => {
         const membership = await tx.poolMembership.findUnique({
           where: { id: memberId },

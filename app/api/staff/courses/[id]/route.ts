@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { updateCourseSchema, validateBody } from '@/lib/validation/schemas'
@@ -8,7 +8,7 @@ import { softDeleteData } from '@/lib/prisma/soft-delete'
 
 // Helper: resolve param that could be a database ID or course code
 async function resolveCourseId(param: string) {
-  const course = await prisma.course.findFirst({
+  const course = await prismaUnfiltered.course.findFirst({
     where: { OR: [{ id: param }, { code: param }] },
     select: { id: true },
   })
@@ -24,7 +24,7 @@ export const GET = withErrorHandler(
     const id = await resolveCourseId(param)
     if (!id) return apiNotFound('Course not found')
 
-    const course = await prisma.course.findUnique({
+    const course = await prismaUnfiltered.course.findUnique({
       where: { id },
       include: {
         enrollments: {
@@ -63,7 +63,7 @@ export const PATCH = withErrorHandler(
     const validation = validateBody(updateCourseSchema, body)
     if (!validation.success) return apiError(validation.error)
 
-    const updated = await prisma.course.update({ where: { id }, data: validation.data })
+    const updated = await prismaUnfiltered.course.update({ where: { id }, data: validation.data })
 
     await createAuditLog({
       action: AuditAction.UPDATE,
@@ -86,7 +86,7 @@ export const DELETE = withErrorHandler(
     const id = await resolveCourseId(param)
     if (!id) return apiNotFound('Course not found')
 
-    const course = await prisma.course.findUnique({
+    const course = await prismaUnfiltered.course.findUnique({
       where: { id },
       include: {
         _count: {
@@ -113,7 +113,7 @@ export const DELETE = withErrorHandler(
     }
 
     if (hasRelated && force) {
-      await prisma.$transaction(async (tx) => {
+      await prismaUnfiltered.$transaction(async (tx) => {
         // Delete bookings first
         await tx.examBooking.updateMany({ where: { courseId: id }, data: softDeleteData() })
         // Exam component dependencies
@@ -132,7 +132,7 @@ export const DELETE = withErrorHandler(
         await tx.course.delete({ where: { id } })
       })
     } else {
-      await prisma.course.delete({ where: { id } })
+      await prismaUnfiltered.course.delete({ where: { id } })
     }
 
     await createAuditLog({

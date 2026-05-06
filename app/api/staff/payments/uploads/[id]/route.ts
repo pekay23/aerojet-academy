@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAuthSession()
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   const { id } = await params
 
   // Get the payment to find the corresponding user ID and reference type
-  const payment = await prisma.payment.findUnique({
+  const payment = await prismaUnfiltered.payment.findUnique({
     where: { id },
   })
 
@@ -20,7 +20,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   // Fetch all file uploads for this user that are likely payment proofs
-  const uploads = await prisma.fileUpload.findMany({
+  const uploads = await prismaUnfiltered.fileUpload.findMany({
     where: {
       userId: payment.userId,
       fileType: 'PaymentProof',

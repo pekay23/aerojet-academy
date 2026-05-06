@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 import { validateBody, createCourseSchema } from '@/lib/validation/schemas'
@@ -37,7 +37,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     materialsUrl,
   } = validation.data
 
-  const course = await prisma.course.create({
+  const course = await prismaUnfiltered.course.create({
     data: {
       code,
       name,

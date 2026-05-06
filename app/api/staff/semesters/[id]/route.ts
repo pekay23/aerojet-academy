@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 
@@ -23,7 +23,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Start date must be before end date' }, { status: 400 })
     }
 
-    const existingSemester = await prisma.semester.findUnique({
+    const existingSemester = await prismaUnfiltered.semester.findUnique({
       where: { id },
       include: { academicYear: true },
     })
@@ -40,7 +40,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       )
     }
 
-    const updatedSemester = await prisma.semester.update({
+    const updatedSemester = await prismaUnfiltered.semester.update({
       where: { id },
       data: {
         name,
@@ -73,7 +73,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     const staff = await requireStaff()
     const { id } = await params
 
-    const existingSemester = await prisma.semester.findUnique({
+    const existingSemester = await prismaUnfiltered.semester.findUnique({
       where: { id },
       include: {
         _count: { select: { classes: true } },
@@ -91,7 +91,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       )
     }
 
-    await prisma.semester.delete({ where: { id } })
+    await prismaUnfiltered.semester.delete({ where: { id } })
 
     await createAuditLog({
       action: 'SYSTEM_UPDATE',

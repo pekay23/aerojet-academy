@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
@@ -19,7 +19,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('paymentIds array is required')
   }
 
-  const result = await prisma.$transaction(async (tx) => {
+  const result = await prismaUnfiltered.$transaction(async (tx) => {
     const updated = await tx.payment.updateMany({
       where: {
         id: { in: paymentIds },

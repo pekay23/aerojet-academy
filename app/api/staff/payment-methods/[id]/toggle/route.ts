@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
 
@@ -8,10 +8,10 @@ export const PATCH = withErrorHandler(async (_req: NextRequest, ctx) => {
   const id = ctx?.params?.id
   if (!id) return apiError('Missing payment method ID')
 
-  const existing = await prisma.paymentMethod.findUnique({ where: { id } })
+  const existing = await prismaUnfiltered.paymentMethod.findUnique({ where: { id } })
   if (!existing) return apiNotFound('Payment method not found')
 
-  const method = await prisma.paymentMethod.update({
+  const method = await prismaUnfiltered.paymentMethod.update({
     where: { id },
     data: { isActive: !existing.isActive },
   })

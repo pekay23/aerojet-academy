@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import {
   hashPassword,
   generateToken,
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const { id } = await params
   const actorId = session.user.id
 
-  const user = await prisma.user.findUnique({
+  const user = await prismaUnfiltered.user.findUnique({
     where: { id },
     include: { profile: true },
   })
@@ -58,7 +58,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     profile.lastName
   )
 
-  await prisma.$transaction(async (tx) => {
+  await prismaUnfiltered.$transaction(async (tx) => {
     // 1. Update User: ACTIVE status, keep APPLICANT role
     await tx.user.update({
       where: { id },

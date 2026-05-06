@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { revalidatePath } from 'next/cache'
-import { prisma } from '@/lib/prisma/client'
-import { apiSuccess, apiError } from '@/lib/api/response'
+import { prismaUnfiltered } from '@/lib/prisma/client'
+import { apiSuccess, apiError, apiPaginated, parsePagination } from '@/lib/api/response'
 import { getAuthSession } from '@/lib/auth/auth-options'
 import { NewsArticleStatus } from '@prisma/client'
 
@@ -17,18 +17,25 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url)
     const status = searchParams.get('status')
+    const { page, limit, skip } = parsePagination(searchParams)
+    const where = status ? { status: status as NewsArticleStatus } : undefined
 
-    const articles = await prisma.newsArticle.findMany({
-      where: status ? { status: status as NewsArticleStatus } : undefined,
-      orderBy: { createdAt: 'desc' },
-      include: {
-        author: {
-          select: { email: true, profile: { select: { firstName: true, lastName: true } } },
+    const [articles, total] = await Promise.all([
+      prismaUnfiltered.newsArticle.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        include: {
+          author: {
+            select: { email: true, profile: { select: { firstName: true, lastName: true } } },
+          },
         },
-      },
-    })
+        take: limit,
+        skip,
+      }),
+      prismaUnfiltered.newsArticle.count({ where }),
+    ])
 
-    return apiSuccess(articles)
+    return apiPaginated(articles, total, page, limit)
   } catch (error) {
     console.error('Error fetching articles:', error)
     return apiError('Internal server error', 500)
@@ -63,12 +70,12 @@ export async function POST(req: NextRequest) {
       return apiError('Title, slug, and content are required', 400)
     }
 
-    const existing = await prisma.newsArticle.findUnique({ where: { slug } })
+    const existing = await prismaUnfiltered.newsArticle.findUnique({ where: { slug } })
     if (existing) {
       return apiError('An article with this slug already exists', 400)
     }
 
-    const article = await prisma.newsArticle.create({
+    const article = await prismaUnfiltered.newsArticle.create({
       data: {
         title,
         slug,

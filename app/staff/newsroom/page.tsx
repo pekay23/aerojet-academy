@@ -1,6 +1,6 @@
 import { Metadata } from 'next'
 import Link from 'next/link'
-import { prisma } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Plus, Edit, Trash2, Globe, FileText, CheckCircle2, Clock, Sparkles } from 'lucide-react'
 import { format } from 'date-fns'
 
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 }
 
 async function getArticles() {
-  return await prisma.newsArticle.findMany({
+  return await prismaUnfiltered.newsArticle.findMany({
     orderBy: { publishedAt: 'desc' },
     include: {
       author: {

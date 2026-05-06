@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler } from '@/lib/api/response'
 
@@ -12,7 +12,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     return apiSuccess([])
   }
 
-  const users = await prisma.user.findMany({
+  const users = await prismaUnfiltered.user.findMany({
     where: {
       AND: [
         { role: 'STUDENT' }, // Only students

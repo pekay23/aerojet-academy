@@ -6,6 +6,8 @@ import EnrollmentSteps from '../_components/EnrollmentSteps'
 import { ArrowRight, CheckCircle2, BookOpen, GraduationCap, HelpCircle } from 'lucide-react'
 import { getRegistrationFeeInfo } from '@/lib/system-settings'
 
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = { title: 'Admissions | Aerojet Academy' }
 
 export default async function AdmissionsPage() {
