@@ -147,6 +147,8 @@ function NavItem({
   collapsed,
   basePath,
   setMobileOpen,
+  hoveredItem,
+  setHoveredItem,
 }: {
   href: string
   icon?: ElementType
@@ -156,23 +158,38 @@ function NavItem({
   collapsed: boolean
   basePath: string
   setMobileOpen: (open: boolean) => void
+  hoveredItem: string | null
+  setHoveredItem: (key: string | null) => void
 }) {
+  const itemKey = `nav-${href}`
+  const isHovered = hoveredItem === itemKey && !active && !collapsed
+
   const content = (
     <Link
       href={basePath + href}
       onClick={() => setMobileOpen(false)}
-      className={`flex items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-out ${
+      onMouseEnter={() => !collapsed && setHoveredItem(itemKey)}
+      onMouseLeave={() => setHoveredItem(null)}
+      className={`relative flex items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-out ${
         collapsed ? 'mx-auto h-10 w-10 justify-center p-0' : 'gap-3'
       } ${
         active
           ? 'border-sidebar-border/40 bg-sidebar-accent font-semibold text-sidebar-foreground shadow-sm'
-          : 'border-transparent text-sidebar-foreground/60 hover:border-sidebar-border/30 hover:bg-sidebar-accent hover:text-sidebar-foreground hover:shadow-sm'
+          : 'border-transparent text-sidebar-foreground/60 hover:text-sidebar-foreground'
       }`}
     >
-      {Icon && <Icon className="h-[18px] w-[18px] shrink-0" />}
-      {!collapsed && <span className="flex-1">{label}</span>}
+      {isHovered && (
+        <motion.div
+          layoutId="sidebar-hover"
+          className="absolute inset-0 rounded-xl bg-sidebar-accent/60"
+          style={{ zIndex: 0 }}
+          transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
+        />
+      )}
+      {Icon && <Icon className="relative z-10 h-[18px] w-[18px] shrink-0" />}
+      {!collapsed && <span className="relative z-10 flex-1">{label}</span>}
       {!collapsed && badge ? (
-        <span className="min-w-[18px] rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
+        <span className="relative z-10 min-w-[18px] rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
           {badge}
         </span>
       ) : null}
@@ -208,6 +225,8 @@ function GroupItem({
   setMobileOpen,
   isActivePath,
   isGroupActive,
+  hoveredItem,
+  setHoveredItem,
 }: {
   link: SidebarLinkItem
   collapsed: boolean
@@ -217,32 +236,46 @@ function GroupItem({
   setMobileOpen: (open: boolean) => void
   isActivePath: (href: string) => boolean
   isGroupActive: (link: SidebarLink) => boolean
+  hoveredItem: string | null
+  setHoveredItem: (key: string | null) => void
 }) {
   const Icon = link.icon
   const active = isGroupActive(link)
   const isOpen = openGroups.includes(link.label)
+  const groupKey = `group-${link.label}`
+  const isHovered = hoveredItem === groupKey && !active && !collapsed
 
   const trigger = (
     <button
       onClick={() => toggleGroup(link.label)}
-      className={`flex w-full items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-out ${
+      onMouseEnter={() => !collapsed && setHoveredItem(groupKey)}
+      onMouseLeave={() => setHoveredItem(null)}
+      className={`relative flex w-full items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-out ${
         collapsed ? 'mx-auto h-10 w-10 justify-center p-0' : 'gap-3'
       } ${
         active
           ? 'border-sidebar-border/40 bg-sidebar-accent font-semibold text-sidebar-foreground shadow-sm'
-          : 'border-transparent text-sidebar-foreground/60 hover:border-sidebar-border/30 hover:bg-sidebar-accent hover:text-sidebar-foreground hover:shadow-sm'
+          : 'border-transparent text-sidebar-foreground/60 hover:text-sidebar-foreground'
       }`}
     >
-      {Icon && <Icon className="h-[18px] w-[18px] shrink-0" />}
-      {!collapsed && <span className="flex-1 text-left">{link.label}</span>}
+      {isHovered && (
+        <motion.div
+          layoutId="sidebar-hover"
+          className="absolute inset-0 rounded-xl bg-sidebar-accent/60"
+          style={{ zIndex: 0 }}
+          transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
+        />
+      )}
+      {Icon && <Icon className="relative z-10 h-[18px] w-[18px] shrink-0" />}
+      {!collapsed && <span className="relative z-10 flex-1 text-left">{link.label}</span>}
       {!collapsed && link.badge ? (
-        <span className="min-w-[18px] rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
+        <span className="relative z-10 min-w-[18px] rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
           {link.badge}
         </span>
       ) : null}
       {!collapsed && (
         <ChevronDown
-          className={`h-3.5 w-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
+          className={`relative z-10 h-3.5 w-3.5 transition-transform ${isOpen ? 'rotate-180' : ''}`}
         />
       )}
     </button>
@@ -267,20 +300,35 @@ function GroupItem({
       )}
       {!collapsed && isOpen && link.children && (
         <div className="border-sidebar-border mt-0.5 ml-7 space-y-0.5 border-l pl-3">
-          {link.children.map((child) => (
-            <Link
-              key={child.href}
-              href={basePath + child.href}
-              onClick={() => setMobileOpen(false)}
-              className={`block rounded-xl px-3 py-2 text-[13px] font-medium transition-all ${
-                isActivePath(child.href)
-                  ? 'bg-sidebar-accent font-semibold text-sidebar-foreground'
-                  : 'text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground'
-              }`}
-            >
-              {child.label}
-            </Link>
-          ))}
+          {link.children.map((child) => {
+            const childKey = `child-${child.href}`
+            const childActive = isActivePath(child.href)
+            const childHovered = hoveredItem === childKey && !childActive
+            return (
+              <Link
+                key={child.href}
+                href={basePath + child.href}
+                onClick={() => setMobileOpen(false)}
+                onMouseEnter={() => setHoveredItem(childKey)}
+                onMouseLeave={() => setHoveredItem(null)}
+                className={`relative block rounded-xl px-3 py-2 text-[13px] font-medium transition-all ${
+                  childActive
+                    ? 'bg-sidebar-accent font-semibold text-sidebar-foreground'
+                    : 'text-sidebar-foreground/60 hover:text-sidebar-foreground'
+                }`}
+              >
+                {childHovered && (
+                  <motion.div
+                    layoutId="sidebar-hover"
+                    className="absolute inset-0 rounded-xl bg-sidebar-accent/60"
+                    style={{ zIndex: 0 }}
+                    transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
+                  />
+                )}
+                <span className="relative z-10">{child.label}</span>
+              </Link>
+            )
+          })}
         </div>
       )}
     </div>
@@ -486,6 +534,8 @@ function renderSidebarContent({
   isActivePath,
   isGroupActive,
   setMobileOpen,
+  hoveredItem,
+  setHoveredItem,
   theme,
   setTheme,
   forceFull = false,
@@ -505,6 +555,8 @@ function renderSidebarContent({
   isActivePath: (href: string) => boolean
   isGroupActive: (link: SidebarLink) => boolean
   setMobileOpen: (open: boolean) => void
+  hoveredItem: string | null
+  setHoveredItem: (key: string | null) => void
   theme: string | undefined
   setTheme: (t: string) => void
   forceFull?: boolean
@@ -613,6 +665,8 @@ function renderSidebarContent({
                 setMobileOpen={setMobileOpen}
                 isActivePath={isActivePath}
                 isGroupActive={isGroupActive}
+                hoveredItem={hoveredItem}
+                setHoveredItem={setHoveredItem}
               />
             )
           }
@@ -628,6 +682,8 @@ function renderSidebarContent({
               collapsed={collapsed}
               basePath={basePath}
               setMobileOpen={setMobileOpen}
+              hoveredItem={hoveredItem}
+              setHoveredItem={setHoveredItem}
             />
           )
         })}
@@ -667,6 +723,7 @@ export default function DashboardSidebar({
   const [openGroups, setOpenGroups] = useState<string[]>([])
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isCollapsed, setIsCollapsed] = useState(false)
+  const [hoveredItem, setHoveredItem] = useState<string | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -725,6 +782,8 @@ export default function DashboardSidebar({
           isActivePath,
           isGroupActive,
           setMobileOpen,
+          hoveredItem,
+          setHoveredItem,
           theme,
           setTheme,
         })}
@@ -776,6 +835,8 @@ export default function DashboardSidebar({
                   isActivePath,
                   isGroupActive,
                   setMobileOpen,
+                  hoveredItem,
+                  setHoveredItem,
                   theme,
                   setTheme,
                   forceFull: true,

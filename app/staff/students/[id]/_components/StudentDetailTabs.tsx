@@ -2,8 +2,8 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { User, ClipboardCheck, Wallet, BookOpen, FileText, Route } from 'lucide-react'
+import MotionTabs from '@/components/ui/MotionTabs'
 
 import ProfileTab from './ProfileTab'
 import ExamsTab from './ExamsTab'
@@ -18,8 +18,8 @@ const TABS = [
   { key: 'exams', label: 'Exams', icon: ClipboardCheck },
   { key: 'wallet', label: 'Wallet', icon: Wallet },
   { key: 'academic', label: 'Academic', icon: BookOpen },
-  { key: 'notes', label: 'Admin Notes', icon: FileText },
-] as const
+  { key: 'notes', label: 'Admin Notes', shortLabel: 'Notes', icon: FileText },
+]
 
 type TabKey = (typeof TABS)[number]['key']
 
@@ -52,8 +52,8 @@ export default function StudentDetailTabs({
   )
 
   const handleTabChange = useCallback(
-    (tab: TabKey) => {
-      setActiveTab(tab)
+    (tab: string) => {
+      setActiveTab(tab as TabKey)
       router.replace(`/staff/students/${student.id}?tab=${tab}`, { scroll: false })
     },
     [router, student.id]
@@ -67,32 +67,15 @@ export default function StudentDetailTabs({
     <div className="-mx-4 md:-mx-6 lg:-mx-8">
       {/* Tab Navigation */}
       <div className="mb-6 overflow-hidden border-x-0 border-t-0 border-slate-100 bg-white px-4 md:px-6 dark:border-slate-800 dark:bg-slate-900 md:border-x md:border-t">
-        <div className="relative flex gap-0 border-b border-slate-100 dark:border-slate-800">
-          {TABS.map((tab) => {
-            const Icon = tab.icon
-            const isActive = activeTab === tab.key
-            return (
-              <button
-                key={tab.key}
-                onClick={() => handleTabChange(tab.key)}
-                className={`relative flex items-center gap-2 px-6 py-4 text-sm font-bold transition-all ${
-                  isActive
-                    ? 'text-aerojet-blue dark:text-white'
-                    : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
-                }`}
-              >
-                <Icon className="h-4 w-4" />
-                {tab.label}
-                {isActive && (
-                  <motion.div
-                    layoutId="student-tab-underline"
-                    className="absolute bottom-0 left-0 h-0.5 w-full bg-aerojet-blue dark:bg-white"
-                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-              </button>
-            )
-          })}
+        <div className="py-4 px-2">
+          <MotionTabs
+            tabs={TABS}
+            activeTab={activeTab}
+            onChange={handleTabChange}
+            layoutId="student-detail-tab"
+            ariaLabel="Student detail sections"
+            className="flex-wrap"
+          />
         </div>
 
         {/* Tab Content */}

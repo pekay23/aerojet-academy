@@ -276,7 +276,7 @@ export default function PaymentsQueue({
                     <Fragment key={p.id}>
                       <tr
                         key={p.id}
-                        className="transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60"
+                        className="transition-all duration-150 ease-out hover:bg-white/80 hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:hover:bg-slate-800/60"
                       >
                         <td className="px-5 py-3.5">
                           <p className="text-sm font-bold text-slate-700">{fullName}</p>
