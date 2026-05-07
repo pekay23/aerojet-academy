@@ -1,6 +1,7 @@
 import { Prisma, SessionType, SittingAssignmentStatus, SittingStatus } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
 import type { EventDemandSnapshot } from '@/lib/exams/demand'
+import { getHolidayDates, isHolidayDate } from '@/lib/calendar/holidays'
 
 const DEFAULT_SITTING_CAPACITY = 28
 const DEFAULT_MAX_DAILY_EXAMS = 2
@@ -99,11 +100,12 @@ function slotToken(slot: SlotKey) {
   return `${slot.dayNumber}:${slot.sessionType}`
 }
 
-function buildSlotQueue(requiredCount: number, initialDayCount: number): SlotKey[] {
+function buildSlotQueue(requiredCount: number, initialDayCount: number, excludedDays?: Set<number>): SlotKey[] {
   const slots: SlotKey[] = []
   const totalDays = Math.max(initialDayCount, Math.ceil(requiredCount / 2))
 
   for (let dayNumber = 1; dayNumber <= totalDays; dayNumber += 1) {
+    if (excludedDays?.has(dayNumber)) continue // Skip holidays
     slots.push({ dayNumber, sessionType: 'MORNING' })
     slots.push({ dayNumber, sessionType: 'AFTERNOON' })
   }
@@ -180,14 +182,15 @@ function buildSittingPlans(
   initialDayCount: number,
   existingSlots: Set<string>,
   existingUserSlots: Map<string, Set<string>>,
-  existingUserDailyCounts: Map<string, Map<number, number>>
+  existingUserDailyCounts: Map<string, Map<number, number>>,
+  excludedDays?: Set<number>
 ) {
   const requiredCount = groupedCandidates.reduce(
     (sum, group) => sum + Math.max(1, Math.ceil(group.bookings.length / DEFAULT_SITTING_CAPACITY)),
     0
   )
 
-  const slots = buildSlotQueue(requiredCount + existingSlots.size, initialDayCount)
+  const slots = buildSlotQueue(requiredCount + existingSlots.size, initialDayCount, excludedDays)
   const occupiedSlots = new Set(existingSlots)
   const userSlots = new Map(existingUserSlots)
   const userDailyCounts = new Map(existingUserDailyCounts)
@@ -365,12 +368,24 @@ export async function scheduleEventSittings(
       return b.bookings.length - a.bookings.length
     })
 
+    // Fetch holidays within the event date range and convert to excluded day numbers
+    const holidayDates = await getHolidayDates(event.startDate, event.endDate)
+    const excludedDays = new Set<number>()
+    const totalDays = getInclusiveDayCount(event.startDate, event.endDate)
+    for (let d = 1; d <= totalDays; d++) {
+      const dayDate = getEventDayDate(event.startDate, d)
+      if (isHolidayDate(dayDate, holidayDates)) {
+        excludedDays.add(d)
+      }
+    }
+
     const plans = buildSittingPlans(
       groupedList,
-      getInclusiveDayCount(event.startDate, event.endDate),
+      totalDays,
       existingSlots,
       existingUserSlots,
-      existingUserDailyCounts
+      existingUserDailyCounts,
+      excludedDays
     )
 
     const existingSittings = await tx.examSitting.findMany({

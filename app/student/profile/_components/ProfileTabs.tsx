@@ -20,7 +20,7 @@ export default function ProfileTabs({ children }: { children: React.ReactNode })
   }
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto w-full max-w-[1800px] px-4 py-6 sm:px-6 lg:px-8 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
         <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
           My Profile
@@ -31,7 +31,7 @@ export default function ProfileTabs({ children }: { children: React.ReactNode })
       </div>
 
       {/* Tab Bar */}
-      <div className="relative flex gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="tablist" aria-label="Profile sections">
+      <div className="relative inline-flex w-fit gap-1 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="tablist" aria-label="Profile sections">
         {TABS.map((t) => {
           const Icon = t.icon
           const isActive = currentTab === t.key

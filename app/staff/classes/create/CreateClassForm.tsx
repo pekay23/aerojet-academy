@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { toast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import {
   Select,
   SelectContent,
@@ -34,6 +34,13 @@ const formSchema = createClassSchema.extend({
   recurrenceType: z.enum(['NONE', 'DAILY', 'WEEKLY', 'MONTHLY', 'CUSTOM']).default('NONE'),
   recurrenceDays: z.string().optional(),
   recurrenceUntil: z.string().optional().nullable(),
+  classroomId: z.string().optional(),
+  weeklySchedule: z.array(z.object({
+    day: z.number(), // 0-6 (Sun-Sat)
+    active: z.boolean(),
+    startTime: z.string(),
+    endTime: z.string(),
+  })).optional(),
 })
 
 type FormValues = z.infer<typeof formSchema>
@@ -53,9 +60,12 @@ interface InstructorItem {
 interface CreateClassFormProps {
   courses: { id: string; name: string; code: string }[]
   instructors: InstructorItem[]
+  classrooms: { id: string; name: string; capacity: number; type: string | null }[]
 }
 
-export default function CreateClassForm({ courses, instructors }: CreateClassFormProps) {
+const DAYS_OF_WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+export default function CreateClassForm({ courses, instructors, classrooms }: CreateClassFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
 
@@ -71,6 +81,13 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
       recurrenceType: 'NONE',
       recurrenceDays: '',
       recurrenceUntil: '',
+      classroomId: undefined,
+      weeklySchedule: Array.from({ length: 7 }).map((_, i) => ({
+        day: i,
+        active: false,
+        startTime: '09:00',
+        endTime: '17:00',
+      })),
     },
   })
 
@@ -86,6 +103,8 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
         startDate: new Date(values.startDate).toISOString(),
         endDate: new Date(values.endDate).toISOString(),
         recurrenceUntil: values.recurrenceUntil ? new Date(values.recurrenceUntil).toISOString() : undefined,
+        classroomId: values.classroomId === 'none' ? undefined : values.classroomId,
+        schedule: values.weeklySchedule?.filter(s => s.active),
       }
 
       const response = await fetch('/api/staff/classes', {
@@ -186,6 +205,46 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="classroomId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel htmlFor="class-room">Classroom/Venue (Optional)</FormLabel>
+                <Select 
+                  onValueChange={(val) => {
+                    field.onChange(val)
+                    if (val !== 'none') {
+                      const room = classrooms.find(r => r.id === val)
+                      if (room) {
+                        const currentMax = form.getValues('maxStudents')
+                        if (currentMax > room.capacity) {
+                          form.setValue('maxStudents', room.capacity)
+                          toast.info('Capacity Adjusted', { description: `Max students lowered to match room capacity (${room.capacity})` })
+                        }
+                      }
+                    }
+                  }} 
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger id="class-room">
+                      <SelectValue placeholder="Select a room" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="none">Unassigned</SelectItem>
+                    {classrooms.map((room) => (
+                      <SelectItem key={room.id} value={room.id}>
+                        {room.name} (Cap: {room.capacity})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
@@ -237,7 +296,19 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
                     type="number"
                     autoComplete="off"
                     {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value))}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value)
+                      const roomId = form.getValues('classroomId')
+                      if (roomId && roomId !== 'none') {
+                        const room = classrooms.find(r => r.id === roomId)
+                        if (room && val > room.capacity) {
+                          toast.error('Capacity Exceeded', { description: `Room max capacity is ${room.capacity}` })
+                          field.onChange(room.capacity)
+                          return
+                        }
+                      }
+                      field.onChange(val)
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -259,10 +330,7 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="NONE">Does not repeat</SelectItem>
-                    <SelectItem value="DAILY">Every day</SelectItem>
-                    <SelectItem value="WEEKLY">Every week</SelectItem>
-                    <SelectItem value="MONTHLY">Every month</SelectItem>
-                    <SelectItem value="CUSTOM">Custom days...</SelectItem>
+                    <SelectItem value="WEEKLY">Weekly Schedule</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -270,25 +338,60 @@ export default function CreateClassForm({ courses, instructors }: CreateClassFor
             )}
           />
 
-          {recurrenceType === 'CUSTOM' && (
-            <FormField
-              control={form.control}
-              name="recurrenceDays"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel htmlFor="class-recurrence-days">Repeat on Days (0-6, comma separated)</FormLabel>
-                  <FormControl>
-                    <Input
-                      id="class-recurrence-days"
-                      placeholder="e.g., 1,3,5 for Mon,Wed,Fri"
-                      autoComplete="off"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          {recurrenceType === 'WEEKLY' && (
+            <div className="col-span-full mt-4 space-y-4 rounded-xl border border-slate-200 p-6 dark:border-slate-800">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">Weekly Schedule Configuration</h4>
+                  <p className="text-xs text-slate-500">Configure instruction hours for each active day.</p>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {form.watch('weeklySchedule')?.map((schedule, index) => (
+                  <div key={index} className={`flex items-center gap-4 rounded-lg border p-3 transition-colors ${schedule.active ? 'border-aerojet-blue/30 bg-blue-50/50 dark:border-aerojet-blue/50 dark:bg-blue-900/10' : 'border-slate-100 dark:border-slate-800'}`}>
+                    <label className="flex w-24 items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={schedule.active}
+                        onChange={(e) => {
+                          const schedules = [...form.getValues('weeklySchedule') || []]
+                          schedules[index].active = e.target.checked
+                          form.setValue('weeklySchedule', schedules)
+                        }}
+                        className="h-4 w-4 rounded border-slate-300 text-aerojet-blue focus:ring-aerojet-blue"
+                      />
+                      <span className={`text-sm font-bold ${schedule.active ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>
+                        {DAYS_OF_WEEK[index]}
+                      </span>
+                    </label>
+                    
+                    <div className={`flex flex-1 items-center gap-3 ${!schedule.active && 'opacity-30 pointer-events-none'}`}>
+                      <Input
+                        type="time"
+                        value={schedule.startTime}
+                        onChange={(e) => {
+                          const schedules = [...form.getValues('weeklySchedule') || []]
+                          schedules[index].startTime = e.target.value
+                          form.setValue('weeklySchedule', schedules)
+                        }}
+                        className="h-9 w-32"
+                      />
+                      <span className="text-slate-400">to</span>
+                      <Input
+                        type="time"
+                        value={schedule.endTime}
+                        onChange={(e) => {
+                          const schedules = [...form.getValues('weeklySchedule') || []]
+                          schedules[index].endTime = e.target.value
+                          form.setValue('weeklySchedule', schedules)
+                        }}
+                        className="h-9 w-32"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
 
           {recurrenceType !== 'NONE' && (

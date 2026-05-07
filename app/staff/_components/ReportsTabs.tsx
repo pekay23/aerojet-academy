@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { BarChart3, TrendingUp, DollarSign, Users, Calendar, Award } from 'lucide-react'
+import { BarChart3, TrendingUp, DollarSign, Users, Calendar, Award, GitCompareArrows } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const TABS = [
@@ -11,7 +11,9 @@ const TABS = [
   { key: 'pools', label: 'Pools', icon: Users },
   { key: 'attendance', label: 'Attendance', icon: Calendar },
   { key: 'exams', label: 'Exams', icon: Award },
+  { key: 'yoy', label: 'Year-on-Year', icon: GitCompareArrows },
 ] as const
+
 
 export default function ReportsTabs({ children }: { children: React.ReactNode }) {
   const router = useRouter()

@@ -720,3 +720,119 @@ export async function getExamAnalytics() {
   }
 }
 
+// ============================================================================
+// YEAR-OVER-YEAR COMPARISON
+// ============================================================================
+
+export async function getYoYComparison(baseYear?: number) {
+  const now = new Date()
+  const currentYear = baseYear ?? now.getFullYear()
+  const previousYear = currentYear - 1
+
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+  const startCurrent = new Date(currentYear, 0, 1)
+  const endCurrent = new Date(currentYear + 1, 0, 1)
+  const startPrevious = new Date(previousYear, 0, 1)
+  const endPrevious = new Date(currentYear, 0, 1)
+
+  // Fetch all data in parallel
+  const [
+    currentPayments,
+    previousPayments,
+    currentEnrollments,
+    previousEnrollments,
+    currentResults,
+    previousResults,
+    currentStudents,
+    previousStudents,
+  ] = await Promise.all([
+    prisma.payment.findMany({
+      where: { status: 'APPROVED', approvedAt: { gte: startCurrent, lt: endCurrent } },
+      select: { amount: true, approvedAt: true },
+    }),
+    prisma.payment.findMany({
+      where: { status: 'APPROVED', approvedAt: { gte: startPrevious, lt: endPrevious } },
+      select: { amount: true, approvedAt: true },
+    }),
+    prisma.enrollment.findMany({
+      where: { status: 'ENROLLED', enrolledAt: { gte: startCurrent, lt: endCurrent } },
+      select: { enrolledAt: true },
+    }),
+    prisma.enrollment.findMany({
+      where: { status: 'ENROLLED', enrolledAt: { gte: startPrevious, lt: endPrevious } },
+      select: { enrolledAt: true },
+    }),
+    prisma.examResult.findMany({
+      where: { createdAt: { gte: startCurrent, lt: endCurrent } },
+      select: { passed: true, createdAt: true },
+    }),
+    prisma.examResult.findMany({
+      where: { createdAt: { gte: startPrevious, lt: endPrevious } },
+      select: { passed: true, createdAt: true },
+    }),
+    prisma.studentProfile.findMany({
+      where: { createdAt: { gte: startCurrent, lt: endCurrent } },
+      select: { createdAt: true },
+    }),
+    prisma.studentProfile.findMany({
+      where: { createdAt: { gte: startPrevious, lt: endPrevious } },
+      select: { createdAt: true },
+    }),
+  ])
+
+  // Helper: build empty 12-month buckets
+  function emptyMonths(): Record<number, { revenue: number; enrollments: number; examTotal: number; examPassed: number; newStudents: number }> {
+    const m: Record<number, any> = {}
+    for (let i = 0; i < 12; i++) m[i] = { revenue: 0, enrollments: 0, examTotal: 0, examPassed: 0, newStudents: 0 }
+    return m
+  }
+
+  const cur = emptyMonths()
+  const prev = emptyMonths()
+
+  currentPayments.forEach((p) => { if (p.approvedAt) cur[new Date(p.approvedAt).getMonth()].revenue += Number(p.amount) })
+  previousPayments.forEach((p) => { if (p.approvedAt) prev[new Date(p.approvedAt).getMonth()].revenue += Number(p.amount) })
+  currentEnrollments.forEach((e) => { cur[new Date(e.enrolledAt).getMonth()].enrollments++ })
+  previousEnrollments.forEach((e) => { prev[new Date(e.enrolledAt).getMonth()].enrollments++ })
+  currentResults.forEach((r) => { const m = cur[new Date(r.createdAt).getMonth()]; m.examTotal++; if (r.passed) m.examPassed++ })
+  previousResults.forEach((r) => { const m = prev[new Date(r.createdAt).getMonth()]; m.examTotal++; if (r.passed) m.examPassed++ })
+  currentStudents.forEach((s) => { cur[new Date(s.createdAt).getMonth()].newStudents++ })
+  previousStudents.forEach((s) => { prev[new Date(s.createdAt).getMonth()].newStudents++ })
+
+  const monthlyData = monthNames.map((name, i) => ({
+    month: name,
+    [`${currentYear}_revenue`]: cur[i].revenue,
+    [`${previousYear}_revenue`]: prev[i].revenue,
+    [`${currentYear}_enrollments`]: cur[i].enrollments,
+    [`${previousYear}_enrollments`]: prev[i].enrollments,
+    [`${currentYear}_passRate`]: cur[i].examTotal > 0 ? Math.round((cur[i].examPassed / cur[i].examTotal) * 100) : 0,
+    [`${previousYear}_passRate`]: prev[i].examTotal > 0 ? Math.round((prev[i].examPassed / prev[i].examTotal) * 100) : 0,
+    [`${currentYear}_newStudents`]: cur[i].newStudents,
+    [`${previousYear}_newStudents`]: prev[i].newStudents,
+  }))
+
+  // Annual totals
+  const totals = {
+    currentYear,
+    previousYear,
+    current: {
+      revenue: currentPayments.reduce((s, p) => s + Number(p.amount), 0),
+      enrollments: currentEnrollments.length,
+      newStudents: currentStudents.length,
+      passRate: currentResults.length > 0
+        ? Math.round((currentResults.filter(r => r.passed).length / currentResults.length) * 100)
+        : 0,
+    },
+    previous: {
+      revenue: previousPayments.reduce((s, p) => s + Number(p.amount), 0),
+      enrollments: previousEnrollments.length,
+      newStudents: previousStudents.length,
+      passRate: previousResults.length > 0
+        ? Math.round((previousResults.filter(r => r.passed).length / previousResults.length) * 100)
+        : 0,
+    },
+  }
+
+  return { monthlyData, totals, currentYear, previousYear }
+}

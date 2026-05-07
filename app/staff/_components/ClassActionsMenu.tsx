@@ -64,6 +64,11 @@ export default function ClassActionsMenu({
       href: `/staff/classes/${slugify(className) || classId}`,
     },
     {
+      label: 'View Roster',
+      icon: Users,
+      href: `/staff/classes/${classId}/roster`,
+    },
+    {
       label: 'Edit Class',
       icon: Pencil,
       href: `/staff/classes/${slugify(className) || classId}/edit`,

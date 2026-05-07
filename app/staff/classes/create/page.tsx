@@ -14,8 +14,8 @@ export default async function CreateClassPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  // Fetch courses and instructors for the form
-  const [courses, instructors] = await Promise.all([
+  // Fetch courses, instructors, and classrooms for the form
+  const [courses, instructors, classrooms] = await Promise.all([
     prismaUnfiltered.course.findMany({
       where: { isActive: true },
       select: { id: true, name: true, code: true },
@@ -38,6 +38,10 @@ export default async function CreateClassPage() {
         },
       },
     }),
+    prismaUnfiltered.classroom.findMany({
+      select: { id: true, name: true, capacity: true, type: true },
+      orderBy: { name: 'asc' },
+    }),
   ])
 
   return (
@@ -51,6 +55,7 @@ export default async function CreateClassPage() {
         <CreateClassForm
           courses={serializePrisma(courses)}
           instructors={serializePrisma(instructors)}
+          classrooms={serializePrisma(classrooms)}
         />
       </div>
     </div>

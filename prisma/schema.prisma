@@ -401,6 +401,7 @@ model Class {
   description       String?
   academicYearId    String?
   semesterId        String?
+  classroomId       String?
   startDate         DateTime
   endDate           DateTime
   schedule          Json?
@@ -415,14 +416,28 @@ model Class {
   examAttendances   ExamAttendance[]
   academicYear      AcademicYear?      @relation(fields: [academicYearId], references: [id])
   course            Course             @relation(fields: [courseId], references: [id])
-  instructor           InstructorProfile?   @relation(fields: [instructorId], references: [id])
-  semester             Semester?            @relation(fields: [semesterId], references: [id])
+  instructor        InstructorProfile? @relation(fields: [instructorId], references: [id])
+  semester          Semester?          @relation(fields: [semesterId], references: [id])
+  classroom         Classroom?         @relation(fields: [classroomId], references: [id])
   adminCalendarEvents  AdminCalendarEvent[]
 
   @@index([courseId])
   @@index([instructorId])
+  @@index([classroomId])
   @@index([startDate, endDate])
   @@map("classes")
+}
+
+model Classroom {
+  id          String   @id @default(cuid())
+  name        String
+  capacity    Int
+  type        String?  // e.g., "Lab", "Lecture Hall"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  classes     Class[]
+
+  @@map("classrooms")
 }
 
 model AttendanceRecord {
@@ -1028,6 +1043,26 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+model AuditLogArchive {
+  id                String   @id @default(cuid())
+  originalId        String
+  userId            String?
+  action            String
+  entity            String?
+  entityId          String?
+  description       String?
+  changes           Json?
+  ipAddress         String?
+  userAgent         String?
+  originalCreatedAt DateTime
+  archivedAt        DateTime @default(now())
+
+  @@index([originalCreatedAt])
+  @@index([action])
+  @@index([originalId])
+  @@map("audit_log_archives")
+}
+
 model SystemSetting {
   id          String   @id @default(cuid())
   key         String   @unique
@@ -1394,6 +1429,7 @@ model Referral {
   referee     User      @relation("ReferralsReceived", fields: [refereeId], references: [id])
   referrer    User      @relation("ReferralsMade", fields: [referrerId], references: [id])
 
+  @@unique([refereeId])
   @@unique([referrerId, refereeId])
   @@index([referrerId])
   @@index([refereeId])
@@ -1684,6 +1720,7 @@ model AdminCalendarEvent {
   recurrenceDays  String?
   recurrenceUntil DateTime?
   visibleTo       CalendarAudience  @default(ALL)
+  isHoliday       Boolean           @default(false)  // Academy closure — excluded from scheduling
   classId         String?           // Optional: linked to a specific Class
   examEventId     String?           // Optional: linked to an ExamEvent
   targetUserId    String?           // Optional: linked to a specific user

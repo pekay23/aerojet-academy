@@ -4,6 +4,8 @@ import { Users, UserPlus, Gift, Target, ArrowRight } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import SetReferrerForm from './_components/SetReferrerForm'
+import { getOrCreateReferralCode } from '@/lib/referral/operations'
+import { CopyButton } from '@/components/shared/CopyButton'
 
 export const metadata: Metadata = {
   title: 'Ambassador Program | Student Portal',
@@ -14,6 +16,9 @@ export const dynamic = 'force-dynamic'
 export default async function AmbassadorPage() {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'STUDENT') redirect('/login')
+
+  // Ensure referral code exists
+  const referralCode = await getOrCreateReferralCode(session.user.id)
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
@@ -39,13 +44,27 @@ export default async function AmbassadorPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 pb-12">
-      <div>
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
-          Ambassador Program
-        </h1>
-        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
-          Refer friends to Aerojet Academy and earn rewards. Track your referrals here.
-        </p>
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+            Ambassador Program
+          </h1>
+          <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+            Refer friends to Aerojet Academy and earn rewards. Track your referrals here.
+          </p>
+        </div>
+
+        <div className="flex flex-col gap-3 rounded-2xl border border-blue-100 bg-blue-50/50 p-4 sm:flex-row sm:items-center dark:border-blue-900/30 dark:bg-blue-900/10">
+          <div>
+            <p className="text-[10px] font-black tracking-widest text-blue-600 uppercase dark:text-blue-400">
+              Your Referral Code
+            </p>
+            <p className="text-lg font-black text-slate-900 dark:text-white">{referralCode}</p>
+          </div>
+          <div className="flex gap-2">
+            <CopyButton value={referralCode} />
+          </div>
+        </div>
       </div>
 
       <div className="grid gap-6 sm:grid-cols-3">
@@ -131,7 +150,7 @@ export default async function AmbassadorPage() {
                 Who referred you?
               </h3>
               <p className="mt-2 mb-4 text-xs text-slate-500">
-                If a friend recommended Aerojet Academy, enter their email address to link your accounts.
+                If a friend recommended Aerojet Academy, enter their <b>Email address</b> or <b>Referral Code</b> to link your accounts.
               </p>
               <SetReferrerForm />
             </div>
