@@ -3,14 +3,14 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Users, UserCheck, GraduationCap, UserCog, ShieldCheck } from 'lucide-react'
-import { motion } from 'framer-motion'
+import MotionTabs from '@/components/ui/MotionTabs'
 import UsersTable from './UsersTable'
 import ApplicantsQueue from './ApplicantsQueue'
 import StudentsTable from './StudentsTable'
 import InstructorsTable from './InstructorsTable'
 import ExaminersTable from './ExaminersTable'
 
-const TABS = [
+const TAB_DEFS = [
   { key: 'all', label: 'All Users', icon: Users },
   { key: 'applicants', label: 'Applicants', icon: UserCheck },
   { key: 'students', label: 'Students', icon: GraduationCap },
@@ -18,7 +18,7 @@ const TABS = [
   { key: 'examiners', label: 'Examiners', icon: ShieldCheck },
 ] as const
 
-type TabKey = (typeof TABS)[number]['key']
+type TabKey = (typeof TAB_DEFS)[number]['key']
 
 interface Counts {
   total: number
@@ -63,9 +63,13 @@ export default function PeopleTabs({ initialTab }: PeopleTabsProps) {
       .catch(() => {})
   }, [])
 
-  const setTab = (tab: string) => {
-    router.push(`/staff/users?tab=${tab}`, { scroll: false })
-  }
+  const tabs = TAB_DEFS.map((t) => ({
+    ...t,
+    badge:
+      t.key === 'applicants' ? counts.applicantAll :
+      t.key === 'examiners' ? counts.examinerAll :
+      undefined,
+  }))
 
   const applicantCounts = {
     all: counts.applicantAll,
@@ -91,47 +95,14 @@ export default function PeopleTabs({ initialTab }: PeopleTabsProps) {
         </p>
       </div>
 
-      {/* Tab Bar */}
-      <div className="relative inline-flex gap-1 rounded-2xl bg-slate-100 p-1.5 shadow-inner ring-1 ring-black/5 dark:bg-slate-800/80 dark:ring-white/5">
-        {TABS.map((t) => {
-          const Icon = t.icon
-          const isActive = currentTab === t.key
-          const badge =
-            t.key === 'applicants' && counts.applicantAll > 0 ? counts.applicantAll :
-            t.key === 'examiners' && counts.examinerAll > 0 ? counts.examinerAll :
-            undefined
+      <MotionTabs
+        tabs={tabs}
+        activeTab={currentTab}
+        onChange={(tab) => router.push(`/staff/users?tab=${tab}`, { scroll: false })}
+        layoutId="people-tab"
+        ariaLabel="People management"
+      />
 
-          return (
-            <button
-              key={t.key}
-              onClick={() => setTab(t.key)}
-              className={`relative flex items-center gap-1.5 rounded-full px-4 py-2 text-xs font-bold transition-colors duration-150 ${
-                isActive
-                  ? 'text-aerojet-blue dark:text-white'
-                  : 'text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-slate-200'
-              }`}
-            >
-              {isActive && (
-                <motion.div
-                  layoutId="people-tab"
-                  className="absolute inset-0 bg-white shadow-md ring-1 ring-black/5 dark:bg-slate-700 dark:ring-white/10"
-                  style={{ borderRadius: 9999, zIndex: 0 }}
-                  transition={{ type: 'spring', bounce: 0.15, duration: 0.35 }}
-                />
-              )}
-              <Icon className="relative z-10 h-3.5 w-3.5" />
-              <span className="relative z-10 hidden sm:inline">{t.label}</span>
-              {badge !== undefined && (
-                <span className="relative z-10 rounded-full bg-amber-500 px-1.5 py-0.5 text-[9px] font-black text-white">
-                  {badge}
-                </span>
-              )}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Tab Content */}
       <div>
         {currentTab === 'all' && <UsersTable initialTotal={counts.total} />}
         {currentTab === 'applicants' && <ApplicantsQueue initialCounts={applicantCounts} />}

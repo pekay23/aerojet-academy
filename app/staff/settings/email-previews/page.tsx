@@ -97,6 +97,7 @@ const TEMPLATES = [
 
 export default function EmailPreviewsPage() {
   const [activeTemplate, setActiveTemplate] = useState('registration')
+  const [hoveredTemplate, setHoveredTemplate] = useState<string | null>(null)
   const [allTemplates, setAllTemplates] = useState(TEMPLATES) // Start with default TEMPLATES
   const [isEditing, setIsEditing] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -332,21 +333,35 @@ export default function EmailPreviewsPage() {
               Templates
             </CardTitle>
           </CardHeader>
-          <CardContent className="relative space-y-1 p-2">
-            {allTemplates.map((tmpl) => (
+          <CardContent className="relative space-y-1 p-2" onMouseLeave={() => setHoveredTemplate(null)}>
+            {allTemplates.map((tmpl) => {
+              const isActive = activeTemplate === tmpl.id
+              const isHovered = hoveredTemplate === tmpl.id && !isActive
+              return (
               <button
                 key={tmpl.id}
                 onClick={() => {
                   setActiveTemplate(tmpl.id)
                   setIsEditing(false)
                 }}
+                onMouseEnter={() => setHoveredTemplate(tmpl.id)}
                 className={`relative flex w-full items-center gap-3 rounded-xl p-3 text-left transition-all ${
-                  activeTemplate === tmpl.id
+                  isActive
                     ? 'font-bold text-aerojet-blue'
                     : 'text-slate-500 hover:text-slate-700'
                 }`}
               >
-                {activeTemplate === tmpl.id && (
+                {/* Hover highlight */}
+                {isHovered && (
+                  <motion.div
+                    layoutId="template-hover"
+                    className="absolute inset-0 bg-slate-100 dark:bg-slate-800/50"
+                    style={{ borderRadius: 12, zIndex: 0 }}
+                    transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
+                  />
+                )}
+                {/* Active indicator */}
+                {isActive && (
                   <motion.div
                     layoutId="template-pill"
                     className="absolute inset-0 bg-white shadow-md"
@@ -356,14 +371,15 @@ export default function EmailPreviewsPage() {
                 )}
                 <div
                   className={`relative z-10 rounded-lg p-2 ${
-                    activeTemplate === tmpl.id ? 'bg-aerojet-blue text-white' : 'bg-slate-200'
+                    isActive ? 'bg-aerojet-blue text-white' : 'bg-slate-200'
                   }`}
                 >
                   <tmpl.icon className="h-4 w-4" />
                 </div>
                 <span className="relative z-10 text-sm">{tmpl.name}</span>
               </button>
-            ))}
+              )
+            })}
           </CardContent>
         </Card>
 
