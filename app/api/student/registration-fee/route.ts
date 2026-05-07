@@ -109,6 +109,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         paymentApprovedAt: new Date(),
       },
     })
+
+    // Qualify any pending referral for this user
+    const { qualifyReferral } = await import('@/lib/referral/operations')
+    await qualifyReferral(userId)
   }, {
     timeout: 20000 // Increase timeout to 20s to handle DB latency/cold starts
   })

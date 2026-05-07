@@ -1,0 +1,131 @@
+'use client'
+
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from 'recharts'
+
+function shortCurrency(v: number) {
+  if (v >= 1_000_000) return `€${(v / 1_000_000).toFixed(1)}M`
+  if (v >= 1_000) return `€${(v / 1_000).toFixed(0)}K`
+  return `€${v.toFixed(0)}`
+}
+
+const CURRENT_COLOR = '#1E40AF'   // aerojet blue
+const PREVIOUS_COLOR = '#94A3B8'  // slate-400
+
+export function YoYRevenueChart({
+  data,
+  currentYear,
+  previousYear,
+}: {
+  data: any[]
+  currentYear: number
+  previousYear: number
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={280}>
+      <BarChart data={data} barGap={2} barCategoryGap="30%">
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+        <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+        <YAxis tickFormatter={shortCurrency} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+        <Tooltip
+          formatter={(v: any, name: any) => [shortCurrency(Number(v)), String(name).includes(String(currentYear)) ? String(currentYear) : String(previousYear)]}
+          contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 }}
+        />
+        <Legend formatter={(v) => v.includes(String(currentYear)) ? String(currentYear) : String(previousYear)} />
+        <Bar dataKey={`${currentYear}_revenue`} fill={CURRENT_COLOR} radius={[4, 4, 0, 0]} name={`${currentYear}_revenue`} />
+        <Bar dataKey={`${previousYear}_revenue`} fill={PREVIOUS_COLOR} radius={[4, 4, 0, 0]} name={`${previousYear}_revenue`} />
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}
+
+export function YoYEnrollmentChart({
+  data,
+  currentYear,
+  previousYear,
+}: {
+  data: any[]
+  currentYear: number
+  previousYear: number
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={280}>
+      <BarChart data={data} barGap={2} barCategoryGap="30%">
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+        <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+        <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+        <Tooltip
+          formatter={(v: any, name: any) => [v, String(name).includes(String(currentYear)) ? String(currentYear) : String(previousYear)]}
+          contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 }}
+        />
+        <Legend formatter={(v) => v.includes(String(currentYear)) ? String(currentYear) : String(previousYear)} />
+        <Bar dataKey={`${currentYear}_enrollments`} fill="#10B981" radius={[4, 4, 0, 0]} name={`${currentYear}_enrollments`} />
+        <Bar dataKey={`${previousYear}_enrollments`} fill="#6EE7B7" radius={[4, 4, 0, 0]} name={`${previousYear}_enrollments`} />
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}
+
+export function YoYPassRateChart({
+  data,
+  currentYear,
+  previousYear,
+}: {
+  data: any[]
+  currentYear: number
+  previousYear: number
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={280}>
+      <LineChart data={data}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+        <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+        <YAxis unit="%" domain={[0, 100]} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+        <Tooltip
+          formatter={(v: any, name: any) => [`${v}%`, String(name).includes(String(currentYear)) ? String(currentYear) : String(previousYear)]}
+          contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 }}
+        />
+        <Legend formatter={(v) => v.includes(String(currentYear)) ? String(currentYear) : String(previousYear)} />
+        <Line type="monotone" dataKey={`${currentYear}_passRate`} stroke="#7C3AED" strokeWidth={2.5} dot={{ r: 3 }} name={`${currentYear}_passRate`} />
+        <Line type="monotone" dataKey={`${previousYear}_passRate`} stroke="#C4B5FD" strokeWidth={2} dot={{ r: 3 }} strokeDasharray="5 3" name={`${previousYear}_passRate`} />
+      </LineChart>
+    </ResponsiveContainer>
+  )
+}
+
+export function YoYStudentChart({
+  data,
+  currentYear,
+  previousYear,
+}: {
+  data: any[]
+  currentYear: number
+  previousYear: number
+}) {
+  return (
+    <ResponsiveContainer width="100%" height={280}>
+      <BarChart data={data} barGap={2} barCategoryGap="30%">
+        <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+        <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#94a3b8', fontWeight: 700 }} axisLine={false} tickLine={false} />
+        <YAxis allowDecimals={false} tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
+        <Tooltip
+          formatter={(v: any, name: any) => [v, String(name).includes(String(currentYear)) ? String(currentYear) : String(previousYear)]}
+          contentStyle={{ borderRadius: 12, border: '1px solid #e2e8f0', fontSize: 12 }}
+        />
+        <Legend formatter={(v) => v.includes(String(currentYear)) ? String(currentYear) : String(previousYear)} />
+        <Bar dataKey={`${currentYear}_newStudents`} fill="#F59E0B" radius={[4, 4, 0, 0]} name={`${currentYear}_newStudents`} />
+        <Bar dataKey={`${previousYear}_newStudents`} fill="#FDE68A" radius={[4, 4, 0, 0]} name={`${previousYear}_newStudents`} />
+      </BarChart>
+    </ResponsiveContainer>
+  )
+}

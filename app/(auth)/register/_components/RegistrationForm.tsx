@@ -89,6 +89,7 @@ export default function RegistrationForm({
       phone: '',
       dateOfBirth: '',
       selectedProgramme: undefined, // Will require selection
+      referralCode: '',
       acknowledgeFeeDeletion: false,
     },
     mode: 'onTouched', // Validate on touch for immediate feedback
@@ -389,6 +390,26 @@ export default function RegistrationForm({
                     <SelectItem value="MILITARY_1YEAR">Military (1 Year)</SelectItem>
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div>
+          <FormField
+            control={form.control}
+            name="referralCode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-gray-700">Referral Code (Optional)</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Enter referral code if you have one"
+                    className="focus:ring-aerojet-blue rounded-lg border-gray-300 bg-white px-4 py-6 text-slate-900 placeholder:text-slate-400 focus:ring-2"
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}

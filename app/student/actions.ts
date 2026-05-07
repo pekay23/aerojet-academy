@@ -732,6 +732,14 @@ export async function updateUserSettings(settings: UserSettings) {
     const newSettings = {
       ...currentSettings,
       ...settings,
+      notifications: {
+        ...(currentSettings.notifications || {}),
+        ...(settings.notifications || {}),
+      },
+      appearance: {
+        ...(currentSettings.appearance || {}),
+        ...(settings.appearance || {}),
+      },
     }
 
     await prisma.user.update({
@@ -1279,11 +1287,11 @@ export async function createGroupBookingAction(params: {
   }
 }
 
-export async function setReferrerAction(referrerEmail: string) {
+export async function setReferrerAction(input: string) {
   try {
     const user = await requireStudent()
     
-    // Check if already referred
+    // 1. Check if already referred (one person can only be referred by one person)
     const existingReferral = await prisma.referral.findFirst({
       where: { refereeId: user.id }
     })
@@ -1292,33 +1300,46 @@ export async function setReferrerAction(referrerEmail: string) {
       return { error: 'You have already set a referrer.' }
     }
 
-    const referrer = await prisma.user.findUnique({
-      where: { email: referrerEmail.toLowerCase().trim() }
+    // 2. Find referrer by Email or Referral Code
+    const referrer = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: input.toLowerCase().trim() },
+          { referralCode: { equals: input.trim(), mode: 'insensitive' } }
+        ]
+      }
     })
 
     if (!referrer) {
-      return { error: 'No user found with that email address.' }
+      return { error: 'No student found with that email address or referral code.' }
     }
 
-    if (referrer.role !== 'STUDENT') {
-      return { error: 'Only active students can be set as referrers.' }
+    if (referrer.role !== 'STUDENT' && referrer.role !== 'STAFF') {
+      return { error: 'This user is not eligible to be a referrer.' }
     }
 
     if (referrer.id === user.id) {
       return { error: 'You cannot refer yourself.' }
     }
 
-    await prisma.$transaction(async (tx) => {
-      await tx.referral.create({
-        data: {
-          referrerId: referrer.id,
-          refereeId: user.id,
-          status: 'PENDING'
-        }
-      })
+    // 3. Circular dependency check: If A referred B, B cannot refer A
+    const circularReferral = await prisma.referral.findFirst({
+      where: {
+        referrerId: user.id,
+        refereeId: referrer.id
+      }
+    })
 
-      // Optionally increment successful referrals if it counts immediately
-      // But typically it requires some conditions. We'll leave it as PENDING.
+    if (circularReferral) {
+      return { error: 'Circular referral detected: You have already referred this person.' }
+    }
+
+    await prisma.referral.create({
+      data: {
+        referrerId: referrer.id,
+        refereeId: user.id,
+        status: 'PENDING'
+      }
     })
 
     revalidatePath('/student/ambassador')

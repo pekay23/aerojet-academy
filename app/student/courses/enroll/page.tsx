@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import {
+  AlertTriangle,
   ArrowLeft,
   BadgeCheck,
   BookOpen,
@@ -62,6 +63,9 @@ export default async function EnrollPage({
           enrollmentType: true,
           programmeChoice: true,
           pathwayRel: { select: { code: true } },
+          licenseTargets: {
+            select: { licenseCategory: { select: { code: true } } },
+          },
         },
       },
       enrollments: {
@@ -107,14 +111,33 @@ export default async function EnrollPage({
     }),
   ])
 
-  // Filter restricted courses for Modular students
+  // Build set of the student's license target base codes (e.g. 'B1.1' → 'B1')
+  const studentLicenseCodes = new Set(
+    studentProfile?.licenseTargets?.map(t => {
+      const code = t.licenseCategory.code
+      // Map specific sub-categories to their base (B1.1 → B1, B1.3 → B1, B2 → B2)
+      const dotIdx = code.indexOf('.')
+      return dotIdx > 0 ? code.substring(0, dotIdx) : code
+    }) ?? []
+  )
+
+  // Filter courses based on pathway constraints
   const filteredCourses = allCourses.filter(course => {
+    // Rule 1: Modular students cannot see Full-Time specific categories
     if (effectiveEnrollmentType === 'MODULAR') {
       const fullTimeCategories = ['FOUR_YEAR', 'TWO_YEAR', 'MILITARY']
       if (course.category && fullTimeCategories.includes(course.category.name)) {
         return false
       }
     }
+
+    // Rule 2: Filter by applicable license categories if the student has targets
+    // and the course has applicableCategories set
+    if (studentLicenseCodes.size > 0 && course.applicableCategories.length > 0) {
+      const hasOverlap = course.applicableCategories.some(cat => studentLicenseCodes.has(cat))
+      if (!hasOverlap) return false
+    }
+
     return true
   })
 
@@ -265,6 +288,12 @@ export default async function EnrollPage({
                               {course.description ||
                                 'Comprehensive EASA Part-66 training designed for certification progress and practical readiness.'}
                             </p>
+                            {course.requiresPrerequisite && course.prerequisites.length > 0 && (
+                              <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50/80 px-3 py-2 text-[11px] font-bold text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-400">
+                                <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                                Requires: {course.prerequisites.join(', ')}
+                              </div>
+                            )}
                           </div>
 
                           <div className="mt-5 grid grid-cols-2 gap-3">

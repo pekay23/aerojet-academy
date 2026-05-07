@@ -73,7 +73,8 @@
       "Bash(grep -l \"pdf\\\\|PDF\\\\|report\" /c/Projects/aerojet-academy/app/api/cron/*.ts)",
       "Bash(find /c/Projects/aerojet-academy/app/api/cron -type f -name \"*.ts\" -exec grep -l \"pdf\\\\|PDF\\\\|report\" {} \\\\;)",
       "Bash(find /c/Projects/aerojet-academy -type f \\\\\\( -name \"*.ts\" -o -name \"*.tsx\" \\\\\\) -exec grep -l \"Invoice\\\\|invoice\" {} \\\\;)",
-      "Read(//c/Users/PC/.claude/projects/c--Projects-aerojet-academy/980a6bf0-4041-4f50-8c05-e242d5fc64fe/tool-results/**)"
+      "Read(//c/Users/PC/.claude/projects/c--Projects-aerojet-academy/980a6bf0-4041-4f50-8c05-e242d5fc64fe/tool-results/**)",
+      "Bash(python3 -c \"import sys,json; [print\\(json.loads\\(l\\).get\\('message',{}\\).get\\('content',[{}]\\)[-1].get\\('text',''\\)\\) for l in sys.stdin if 'end_turn' in l]\")"
     ],
     "additionalDirectories": [
       "d:\\Projects\\aerojet-academy\\app\\api\\staff\\students\\[id]\\wallet\\[txnId]"
