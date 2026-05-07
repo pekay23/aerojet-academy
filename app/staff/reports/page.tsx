@@ -17,19 +17,20 @@ import {
   getExamAnalytics,
   getYoYComparison,
 } from '@/lib/analytics/reports'
-import dynamic from 'next/dynamic'
-const YoYRevenueChart = dynamic(() => import('./_components/YoYCharts').then(m => m.YoYRevenueChart), { ssr: false })
-const YoYEnrollmentChart = dynamic(() => import('./_components/YoYCharts').then(m => m.YoYEnrollmentChart), { ssr: false })
-const YoYPassRateChart = dynamic(() => import('./_components/YoYCharts').then(m => m.YoYPassRateChart), { ssr: false })
-const YoYStudentChart = dynamic(() => import('./_components/YoYCharts').then(m => m.YoYStudentChart), { ssr: false })
-import { 
-  EnrollmentChart, 
-  RevenueChart, 
-  PoolFillChart, 
-  AttendanceChart, 
-  ExamTrendChart, 
-  ScoreDistributionChart, 
-  Sparkline 
+import {
+  YoYRevenueChart,
+  YoYEnrollmentChart,
+  YoYPassRateChart,
+  YoYStudentChart,
+} from './_components/YoYCharts'
+import {
+  EnrollmentChart,
+  RevenueChart,
+  PoolFillChart,
+  AttendanceChart,
+  ExamTrendChart,
+  ScoreDistributionChart,
+  Sparkline
 } from './_components/ReportCharts'
 import ReportsTabs from '../_components/ReportsTabs'
 import { PeriodFilter } from './_components/PeriodFilter'
