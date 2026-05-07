@@ -218,7 +218,7 @@ export default function ExamBookingsTable({ bookings }: ExamBookingsTableProps) 
                   return (
                     <tr
                       key={booking.id}
-                      className={`group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${
+                      className={`group transition-all duration-150 ease-out hover:bg-white/80 hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:hover:bg-slate-800/60 ${
                         selectedIds.includes(booking.id) ? 'bg-aerojet-blue/5' : ''
                       }`}
                     >

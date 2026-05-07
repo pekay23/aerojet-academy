@@ -130,7 +130,7 @@ export default function ExaminersTable() {
                 </tr>
               ) : (
                 examiners.map((examiner) => (
-                  <tr key={examiner.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors">
+                  <tr key={examiner.id} className="group transition-all duration-150 hover:bg-slate-50/50 hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:hover:bg-slate-800/50">
                     <td className="px-6 py-4">
                       <Square className="h-4 w-4 text-slate-200" />
                     </td>

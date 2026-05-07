@@ -215,7 +215,7 @@ export default function ReconciliationQueue() {
                 filteredPayments.map((p) => (
                   <tr
                     key={p.id}
-                    className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"
+                    className="group transition-all duration-150 ease-out hover:bg-white/80 hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:hover:bg-slate-800/40"
                   >
                     <td className="px-6 py-5">
                       <label htmlFor={`select-payment-${p.id}`} className="sr-only">

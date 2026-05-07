@@ -198,93 +198,119 @@ export default function PublicNav() {
                   setNavValue(val)
                 }}
               >
-                <NavigationMenuList>
-                  {navLinks.map((item) =>
-                    item.isDropdown ? (
-                      <NavigationMenuItem key={item.label} value={item.label}>
-                        <NavigationMenuTrigger
-                          onClick={() => setAccordionValue('')}
-                          className={`relative flex h-10 items-center px-4 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${linkColorClasses} hover:${activeLinkColorClasses} bg-transparent transition-none! translate-y-px`}
-                        >
-                          {item.label}
-                        </NavigationMenuTrigger>
-                        <NavigationMenuContent>
-                          <div className="w-[400px] p-4 md:w-[500px]">
-                            <div className="mb-4 border-b border-slate-100 pb-3">
-                              <Link
-                                href="/courses"
-                                className="text-public-secondary hover:text-public-primary flex items-center gap-2 px-3 text-xs font-black tracking-widest uppercase transition-colors"
+                {/* Pill container for nav links */}
+                <div className={`inline-flex items-center gap-1 rounded-full p-1 transition-colors ${
+                  scrolled || forceSolid
+                    ? 'bg-slate-100 dark:bg-slate-800'
+                    : 'bg-white/10'
+                }`}>
+                  <NavigationMenuList>
+                    {navLinks.map((item) =>
+                      item.isDropdown ? (
+                        <NavigationMenuItem key={item.label} value={item.label}>
+                          <NavigationMenuTrigger
+                            onClick={() => setAccordionValue('')}
+                            className={`relative flex h-auto cursor-pointer items-center rounded-full px-4 py-2 text-xs font-black tracking-[0.15em] uppercase transition-all duration-300 bg-transparent transition-none! ${
+                              pathname?.startsWith('/courses')
+                                ? scrolled || forceSolid ? 'text-aerojet-blue dark:text-white' : 'text-white'
+                                : scrolled || forceSolid ? 'text-slate-500 dark:text-slate-400' : 'text-white/70'
+                            }`}
+                          >
+                            {pathname?.startsWith('/courses') && (
+                              <motion.div
+                                layoutId="nav-pill"
+                                className={`absolute inset-0 rounded-full ${
+                                  scrolled || forceSolid
+                                    ? 'bg-white shadow-sm dark:bg-slate-900'
+                                    : 'bg-white/20'
+                                }`}
+                                style={{ zIndex: 0 }}
+                                transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+                              />
+                            )}
+                            <span className="relative z-10">{item.label}</span>
+                          </NavigationMenuTrigger>
+                          <NavigationMenuContent>
+                            <div className="w-[400px] p-4 md:w-[500px]">
+                              <div className="mb-4 border-b border-slate-100 pb-3">
+                                <Link
+                                  href="/courses"
+                                  className="text-public-secondary hover:text-public-primary flex items-center gap-2 px-3 text-xs font-black tracking-widest uppercase transition-colors"
+                                >
+                                  View All Training Programs <ArrowRight className="h-4 w-4" />
+                                </Link>
+                              </div>
+                              <Accordion
+                                type="single"
+                                collapsible
+                                value={accordionValue}
+                                onValueChange={setAccordionValue}
                               >
-                                View All Training Programs <ArrowRight className="h-4 w-4" />
-                              </Link>
+                                {item.groups?.map((group) => (
+                                  <AccordionItem value={group.value} key={group.value}>
+                                    <AccordionTrigger
+                                      onPointerDown={(e) => e.stopPropagation()}
+                                      className="text-public-primary px-3 text-sm font-bold hover:no-underline dark:text-white"
+                                    >
+                                      {group.title}
+                                    </AccordionTrigger>
+                                    <AccordionContent className="pt-2">
+                                      {group.links.length > 0 ? (
+                                        group.links.map((link) => (
+                                          <Link
+                                            href={link.disabled ? '#' : link.href}
+                                            key={link.href}
+                                            className={`block rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-slate-100 dark:hover:bg-slate-800 ${link.disabled ? 'cursor-not-allowed opacity-60' : ''}`}
+                                          >
+                                            <div className="text-public-dark text-sm leading-none font-medium dark:text-slate-200">
+                                              {link.label}
+                                            </div>
+                                          </Link>
+                                        ))
+                                      ) : (
+                                        <p className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">
+                                          Coming soon.
+                                        </p>
+                                      )}
+                                    </AccordionContent>
+                                  </AccordionItem>
+                                ))}
+                              </Accordion>
                             </div>
-                            <Accordion
-                              type="single"
-                              collapsible
-                              value={accordionValue}
-                              onValueChange={setAccordionValue}
-                            >
-                              {item.groups?.map((group) => (
-                                <AccordionItem value={group.value} key={group.value}>
-                                  <AccordionTrigger
-                                    onPointerDown={(e) => e.stopPropagation()}
-                                    className="text-public-primary px-3 text-sm font-bold hover:no-underline dark:text-white"
-                                  >
-                                    {group.title}
-                                  </AccordionTrigger>
-                                  <AccordionContent className="pt-2">
-                                    {group.links.length > 0 ? (
-                                      group.links.map((link) => (
-                                        <Link
-                                          href={link.disabled ? '#' : link.href}
-                                          key={link.href}
-                                          className={`block rounded-md p-3 leading-none no-underline transition-colors outline-none select-none hover:bg-slate-100 dark:hover:bg-slate-800 ${link.disabled ? 'cursor-not-allowed opacity-60' : ''}`}
-                                        >
-                                          <div className="text-public-dark text-sm leading-none font-medium dark:text-slate-200">
-                                            {link.label}
-                                          </div>
-                                        </Link>
-                                      ))
-                                    ) : (
-                                      <p className="px-3 py-2 text-sm text-slate-500 dark:text-slate-400">
-                                        Coming soon.
-                                      </p>
-                                    )}
-                                  </AccordionContent>
-                                </AccordionItem>
-                              ))}
-                            </Accordion>
-                          </div>
-                        </NavigationMenuContent>
-                      </NavigationMenuItem>
-                    ) : (
-                      <NavigationMenuItem key={item.label} value={item.label}>
-                        <Link
-                          href={item.href || '#'}
-                          className={`relative flex h-10 items-center px-4 text-xs font-black tracking-[0.2em] uppercase transition-all duration-300 ${
-                            pathname === item.href ? activeLinkColorClasses : linkColorClasses
-                          } hover:${activeLinkColorClasses}`}
-                        >
-                          {pathname === item.href && (
-                            <motion.div
-                              layoutId="nav-pill"
-                              className={`absolute inset-0 rounded-full ${
-                                scrolled || mobileOpen || forceSolid
-                                  ? 'bg-aerojet-blue/5'
-                                  : 'bg-white/10'
-                              }`}
-                              transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                            />
-                          )}
-                          <span className="relative z-10">{item.label}</span>
-                        </Link>
-                      </NavigationMenuItem>
-                    )
-                  )}
-                </NavigationMenuList>
+                          </NavigationMenuContent>
+                        </NavigationMenuItem>
+                      ) : (
+                        <NavigationMenuItem key={item.label} value={item.label}>
+                          <Link
+                            href={item.href || '#'}
+                            className={`relative flex items-center rounded-full px-4 py-2 text-xs font-black tracking-[0.15em] uppercase transition-colors ${
+                              pathname === item.href
+                                ? scrolled || forceSolid ? 'text-aerojet-blue dark:text-white' : 'text-white'
+                                : scrolled || forceSolid ? 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300' : 'text-white/70 hover:text-white'
+                            }`}
+                          >
+                            {pathname === item.href && (
+                              <motion.div
+                                layoutId="nav-pill"
+                                className={`absolute inset-0 rounded-full ${
+                                  scrolled || forceSolid
+                                    ? 'bg-white shadow-sm dark:bg-slate-900'
+                                    : 'bg-white/20'
+                                }`}
+                                style={{ zIndex: 0 }}
+                                transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
+                              />
+                            )}
+                            <span className="relative z-10">{item.label}</span>
+                          </Link>
+                        </NavigationMenuItem>
+                      )
+                    )}
+                  </NavigationMenuList>
+                </div>
               </NavigationMenu>
             )}
-            <div className={scrolled || forceSolid ? 'text-slate-500 dark:text-slate-300' : 'text-white/80'}>
+            <div className={`ml-3 transition-colors ${scrolled || forceSolid ? 'text-slate-500 dark:text-slate-300' : 'text-white/80'}`}>
               <SearchModal />
             </div>
           </div>

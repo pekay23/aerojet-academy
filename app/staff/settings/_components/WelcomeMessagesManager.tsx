@@ -10,7 +10,13 @@ interface WelcomeMessagesManagerProps {
   initialMessages: Record<string, string[]> | string[]
 }
 
-const ROLES = ['STUDENT', 'STAFF', 'INSTRUCTOR', 'ADMIN']
+const ROLE_TABS = [
+  { key: 'STUDENT', label: 'Student' },
+  { key: 'STAFF', label: 'Staff' },
+  { key: 'INSTRUCTOR', label: 'Instructor' },
+  { key: 'ADMIN', label: 'Admin' },
+]
+const ROLES = ROLE_TABS.map((t) => t.key)
 
 export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessagesManagerProps) {
   // Normalize initial messages
@@ -108,12 +114,10 @@ export default function WelcomeMessagesManager({ initialMessages }: WelcomeMessa
         {/* Role Tabs */}
         <div className="flex border-t border-slate-100 p-2 lg:border-t-0 dark:border-slate-800">
           <MotionTabs
-            tabs={ROLES}
+            tabs={ROLE_TABS}
             activeTab={activeRole}
             onChange={setActiveRole}
             layoutId="role-tabs"
-            containerClassName="bg-transparent dark:bg-transparent"
-            tabClassName="py-2.5"
           />
         </div>
       </div>

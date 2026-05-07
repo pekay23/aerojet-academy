@@ -271,7 +271,7 @@ export default function InstructorsTable() {
                   <tr
                     key={instructor.id}
                     onClick={() => router.push(`/staff/users/${instructor.id}`)}
-                    className={`group cursor-pointer transition-colors duration-100 ease-out hover:bg-accent dark:hover:bg-accent ${selectedIds.includes(instructor.id) ? 'bg-aerojet-blue/5' : ''}`}
+                    className={`group cursor-pointer transition-all duration-150 ease-out hover:bg-accent hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:hover:bg-accent ${selectedIds.includes(instructor.id) ? 'bg-aerojet-blue/5' : ''}`}
                   >
                     <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
                       <button

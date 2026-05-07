@@ -405,7 +405,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                     return (
                       <tr
                         key={applicant.id}
-                        className={`cursor-pointer transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/60 ${selectedIds.includes(applicant.id) ? 'bg-aerojet-blue/5' : ''}`}
+                        className={`cursor-pointer transition-all duration-150 ease-out hover:bg-white/80 hover:shadow-[0_1px_4px_rgba(0,0,0,0.06)] dark:hover:bg-slate-800/60 ${selectedIds.includes(applicant.id) ? 'bg-aerojet-blue/5' : ''}`}
                       >
                         <td className="px-6 py-4">
                           <button
