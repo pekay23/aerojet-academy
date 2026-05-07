@@ -15,7 +15,13 @@ import {
   getCriticalAlerts,
   getFinanceReportSummary,
   getExamAnalytics,
+  getYoYComparison,
 } from '@/lib/analytics/reports'
+import dynamic from 'next/dynamic'
+const YoYRevenueChart = dynamic(() => import('./_components/YoYCharts').then(m => m.YoYRevenueChart), { ssr: false })
+const YoYEnrollmentChart = dynamic(() => import('./_components/YoYCharts').then(m => m.YoYEnrollmentChart), { ssr: false })
+const YoYPassRateChart = dynamic(() => import('./_components/YoYCharts').then(m => m.YoYPassRateChart), { ssr: false })
+const YoYStudentChart = dynamic(() => import('./_components/YoYCharts').then(m => m.YoYStudentChart), { ssr: false })
 import { 
   EnrollmentChart, 
   RevenueChart, 
@@ -1088,6 +1094,85 @@ async function ExamsTab() {
 
 /* ────────────────────────────── Main Page ────────────────────────────── */
 
+
+/* ─────────────────────────── YoY Tab ─────────────────────────── */
+
+async function YoYTab({ year }: { year?: number }) {
+  const { monthlyData, totals, currentYear, previousYear } = await getYoYComparison(year)
+
+  function pct(cur: number, prev: number) {
+    if (prev === 0) return cur > 0 ? '+inf' : '—'
+    const delta = Math.round(((cur - prev) / prev) * 100)
+    return delta >= 0 ? `+${delta}%` : `${delta}%`
+  }
+
+  const kpis: Array<{ label: string; cur: string | number; prev: string | number; change: string; positive: boolean; color: string; icon: any }> = [
+    { label: 'Revenue', cur: formatCurrency(totals.current.revenue), prev: formatCurrency(totals.previous.revenue), change: pct(totals.current.revenue, totals.previous.revenue), positive: totals.current.revenue >= totals.previous.revenue, color: 'bg-blue-50 text-blue-600', icon: DollarSign },
+    { label: 'New Enrollments', cur: totals.current.enrollments, prev: totals.previous.enrollments, change: pct(totals.current.enrollments, totals.previous.enrollments), positive: totals.current.enrollments >= totals.previous.enrollments, color: 'bg-emerald-50 text-emerald-600', icon: TrendingUp },
+    { label: 'New Students', cur: totals.current.newStudents, prev: totals.previous.newStudents, change: pct(totals.current.newStudents, totals.previous.newStudents), positive: totals.current.newStudents >= totals.previous.newStudents, color: 'bg-amber-50 text-amber-600', icon: Users },
+    { label: 'Exam Pass Rate', cur: `${totals.current.passRate}%`, prev: `${totals.previous.passRate}%`, change: pct(totals.current.passRate, totals.previous.passRate), positive: totals.current.passRate >= totals.previous.passRate, color: 'bg-purple-50 text-purple-600', icon: Award },
+  ]
+
+  return (
+    <div className="mx-auto max-w-[1920px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="flex items-center gap-4">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20">
+          <TrendingUp className="h-7 w-7" />
+        </div>
+        <div>
+          <h2 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white">Year-on-Year Comparison</h2>
+          <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
+            <Sparkles className="h-3.5 w-3.5 text-aerojet-sky" />
+            {previousYear} vs {currentYear} — revenue, enrollments, exam performance & growth.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {kpis.map((kpi) => {
+          const Icon = kpi.icon
+          return (
+            <div key={kpi.label} className="group relative overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:shadow-xl dark:border-slate-800 dark:bg-slate-900">
+              <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl ${kpi.color}`}><Icon className="h-5 w-5" /></div>
+              <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">{kpi.label}</p>
+              <div className="mt-1 flex items-end justify-between">
+                <div>
+                  <p className="text-2xl font-black text-aerojet-blue dark:text-slate-100">{String(kpi.cur)}</p>
+                  <p className="text-xs font-medium text-slate-400">vs {String(kpi.prev)} in {previousYear}</p>
+                </div>
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-black ${kpi.positive ? 'bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400' : 'bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-400'}`}>{kpi.change}</span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 className="mb-1 text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-white">Revenue</h3>
+          <p className="mb-4 text-xs font-medium text-slate-400">Monthly approved payments ({previousYear} vs {currentYear})</p>
+          <YoYRevenueChart data={monthlyData} currentYear={currentYear} previousYear={previousYear} />
+        </div>
+        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 className="mb-1 text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-white">Enrollments</h3>
+          <p className="mb-4 text-xs font-medium text-slate-400">Monthly new course enrollments ({previousYear} vs {currentYear})</p>
+          <YoYEnrollmentChart data={monthlyData} currentYear={currentYear} previousYear={previousYear} />
+        </div>
+        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 className="mb-1 text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-white">Exam Pass Rate</h3>
+          <p className="mb-4 text-xs font-medium text-slate-400">Monthly pass rate % ({previousYear} vs {currentYear})</p>
+          <YoYPassRateChart data={monthlyData} currentYear={currentYear} previousYear={previousYear} />
+        </div>
+        <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h3 className="mb-1 text-sm font-black tracking-widest text-aerojet-blue uppercase dark:text-white">New Students</h3>
+          <p className="mb-4 text-xs font-medium text-slate-400">Monthly student registrations ({previousYear} vs {currentYear})</p>
+          <YoYStudentChart data={monthlyData} currentYear={currentYear} previousYear={previousYear} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default async function ReportsPage({
   searchParams,
 }: {
@@ -1122,6 +1207,7 @@ export default async function ReportsPage({
           {tab === 'pools' && <PoolsTab />}
           {tab === 'attendance' && <AttendanceTab />}
           {tab === 'exams' && <ExamsTab />}
+          {tab === 'yoy' && <YoYTab />}
         </div>
       </ReportsTabs>
     </div>

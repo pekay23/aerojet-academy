@@ -35,6 +35,10 @@
     {
       "path": "/api/cron/cleanup-abandoned-accounts",
       "schedule": "0 5 * * *"
+    },
+    {
+      "path": "/api/cron/scheduled-reports",
+      "schedule": "0 8 * * 1"
     }
   ]
 }

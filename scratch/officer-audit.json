@@ -1,0 +1,703 @@
+[
+  {
+    "name": "Edith Avege",
+    "email": "e.avege@aerojet-academy.com",
+    "personalEmail": "puredzifa1@gmail.com",
+    "id": "cmmk5jycy000u98fgxb90o8hk",
+    "studentId": "AATA-2026-0017",
+    "programme": "EXAM_ONLY",
+    "wallet": {
+      "id": "cmmk5k07g000x98fgkiwd5vhi",
+      "balance": "670",
+      "reserved": "670",
+      "available": "0",
+      "txnCount": 6,
+      "transactions": [
+        {
+          "id": "cmmkw8plp00000ajvwr1cbw87",
+          "type": "PAYMENT",
+          "amount": "520",
+          "description": "Standalone Exam Booking: M2 - Individual Session",
+          "createdAt": "2026-03-10T17:38:19.165Z"
+        },
+        {
+          "id": "cmmkxc7xv00020alebg3ijy4h",
+          "type": "ADJUSTMENT",
+          "amount": "520",
+          "description": "refind for individiula booking",
+          "createdAt": "2026-03-10T18:09:02.515Z"
+        },
+        {
+          "id": "cmmkxe8de00000ajlvw79mu81",
+          "type": "RESERVE",
+          "amount": "300",
+          "description": "Seat reservation for 5th June Exams Group A (Morning) — Module M2",
+          "createdAt": "2026-03-10T18:10:36.386Z"
+        },
+        {
+          "id": "cmmm5ygpk00000al5fenqjjo3",
+          "type": "RELEASE",
+          "amount": "300",
+          "description": "Removed from pool by staff: 5th June Exams Group A (Morning). Reason: Booking Error",
+          "createdAt": "2026-03-11T14:58:03.415Z"
+        },
+        {
+          "id": "cmmk5k0qc000y98fgue47337a",
+          "type": "CREDIT",
+          "amount": "670",
+          "description": "Migration import: wallet credit €670. Upcoming M2+M3 twin booking paid USD 780 = EUR 670. Historical exam history imported.",
+          "createdAt": "2026-03-10T05:11:17.172Z"
+        },
+        {
+          "id": "cmonktt0y0000acfga7bzduop",
+          "type": "DEBIT",
+          "amount": "670",
+          "description": "Payment for TWIN_PACK: M2, M3",
+          "createdAt": "2026-05-02T00:01:31.186Z"
+        }
+      ]
+    },
+    "bookings": [
+      {
+        "id": "cmmxikrlx0000gwfglkkh58ah",
+        "moduleCode": "M8",
+        "examComponentId": "cmmjaqfmo000v18fgcygt1vdo",
+        "status": "COMPLETED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "780",
+        "result": "fail",
+        "score": "63",
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": "MIGRATED",
+        "createdAt": "2026-03-19T13:36:47.300Z"
+      },
+      {
+        "id": "cmmxikrtv0001gwfgxxomici7",
+        "moduleCode": "M10",
+        "examComponentId": "cmmjaqg5y000y18fg507znjrd",
+        "status": "COMPLETED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "780",
+        "result": "fail",
+        "score": "64",
+        "isResit": true,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": "RESIT_1",
+        "createdAt": "2026-03-19T13:36:47.587Z"
+      },
+      {
+        "id": "cmmxm2sp400070cfgawfi0wi4",
+        "moduleCode": "M9",
+        "examComponentId": null,
+        "status": "COMPLETED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "0",
+        "result": "pass",
+        "score": "82",
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": "FIRST",
+        "createdAt": "2026-03-19T15:14:47.365Z"
+      },
+      {
+        "id": "cmonkttfn0002acfg71zame5e",
+        "moduleCode": "M3",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": "BOOKING_FUNDED_1777680090868",
+        "attemptType": null,
+        "createdAt": "2026-05-02T00:01:31.715Z"
+      },
+      {
+        "id": "cmonrs8mb00087kfgd4jdhst0",
+        "moduleCode": "M2",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": null,
+        "createdAt": "2026-05-02T03:16:15.395Z"
+      }
+    ],
+    "results": [
+      {
+        "id": "cmo9cz8zq0003x4fg6d5zo30j",
+        "examId": null,
+        "moduleCode": "M8",
+        "score": "63",
+        "percentage": "63",
+        "passed": false,
+        "createdAt": "2025-04-22T00:00:00.000Z"
+      },
+      {
+        "id": "cmo9cz9dj0004x4fgaxgdrq8i",
+        "examId": null,
+        "moduleCode": "M10",
+        "score": "64",
+        "percentage": "64",
+        "passed": false,
+        "createdAt": "2025-04-23T00:00:00.000Z"
+      },
+      {
+        "id": "cmo9czb4t0008x4fgmm7960ww",
+        "examId": null,
+        "moduleCode": "M10",
+        "score": "63",
+        "percentage": "63",
+        "passed": false,
+        "createdAt": "2025-08-14T00:00:00.000Z"
+      },
+      {
+        "id": "cmo9czarj0007x4fggggjytsp",
+        "examId": null,
+        "moduleCode": "M1",
+        "score": "81",
+        "percentage": "81",
+        "passed": true,
+        "createdAt": "2025-08-15T00:00:00.000Z"
+      },
+      {
+        "id": "cmo9cz7u80000x4fgg457t2ct",
+        "examId": null,
+        "moduleCode": "M9",
+        "score": "82",
+        "percentage": "82",
+        "passed": true,
+        "createdAt": "2025-08-15T00:00:00.000Z"
+      }
+    ],
+    "entitlements": [
+      {
+        "id": "cmmk5k3zp001698fgbd4syqbw",
+        "totalResits": 1,
+        "usedResits": 1
+      },
+      {
+        "id": "cmmk5k4c3001798fg9iwowsxf",
+        "totalResits": 1,
+        "usedResits": 0
+      }
+    ],
+    "attendances": 0,
+    "enrollments": 0,
+    "grades": 0
+  },
+  {
+    "name": "Benard Bandor",
+    "email": "b.bandor@aerojet-academy.com",
+    "personalEmail": "benardbandor@gmail.com",
+    "id": "cmmk5jty1000o98fgei1hartf",
+    "studentId": "AATA-2026-0016",
+    "programme": "EXAM_ONLY",
+    "wallet": {
+      "id": "cmmk5jvqc000r98fgoi1isyto",
+      "balance": "3090",
+      "reserved": "1340",
+      "available": "1750",
+      "txnCount": 2,
+      "transactions": [
+        {
+          "id": "cmmk5jwa8000s98fgmer2a6s8",
+          "type": "CREDIT",
+          "amount": "3090",
+          "description": "Migration import: wallet credit €3090. Intended modules: M1, M2, M3, M8. Admin notes: B1 & B2.",
+          "createdAt": "2026-03-10T05:11:11.408Z"
+        },
+        {
+          "id": "cmonl0lhh0000n8fg75qvv68u",
+          "type": "DEBIT",
+          "amount": "1340",
+          "description": "Payment for FOUR_PACK: M1, M2, M3, M8",
+          "createdAt": "2026-05-02T00:06:48.006Z"
+        }
+      ]
+    },
+    "bookings": [
+      {
+        "id": "cmonl0loz0001n8fgsp62x0zj",
+        "moduleCode": "M1",
+        "examComponentId": "cmmjaqe8y000n18fg4l9w4m6z",
+        "status": "APPROVED",
+        "bookingType": "FOUR_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": "BOOKING_FUNDED_1777680407721",
+        "attemptType": null,
+        "createdAt": "2026-05-02T00:06:48.276Z"
+      },
+      {
+        "id": "cmonrs7tb00057kfg8p90gyao",
+        "moduleCode": "M2",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "FOUR_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": null,
+        "createdAt": "2026-05-02T03:16:14.351Z"
+      },
+      {
+        "id": "cmonrs80500067kfgll6su5bt",
+        "moduleCode": "M3",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "FOUR_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": null,
+        "createdAt": "2026-05-02T03:16:14.597Z"
+      },
+      {
+        "id": "cmonrs87r00077kfg9eajqkhs",
+        "moduleCode": "M8",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "FOUR_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": null,
+        "createdAt": "2026-05-02T03:16:14.871Z"
+      }
+    ],
+    "results": [],
+    "entitlements": [],
+    "attendances": 0,
+    "enrollments": 0,
+    "grades": 0
+  },
+  {
+    "name": "Fred Ampeh",
+    "email": "f.ampeh@aerojet-academy.com",
+    "personalEmail": "fredampeh@gmail.com",
+    "id": "cmmk5jpd2000i98fgi1hh54g1",
+    "studentId": "AATA-2026-0015",
+    "programme": "EXAM_ONLY",
+    "wallet": {
+      "id": "cmmk5jr62000l98fguk8dg5jg",
+      "balance": "0",
+      "reserved": "0",
+      "available": "0",
+      "txnCount": 2,
+      "transactions": [
+        {
+          "id": "cmmk5jrpi000m98fg1bb9obb4",
+          "type": "CREDIT",
+          "amount": "670",
+          "description": "Migration import: wallet credit €670. Intended modules: M2, M3.",
+          "createdAt": "2026-03-10T05:11:05.478Z"
+        },
+        {
+          "id": "cmonrfc39000090fgik48g9di",
+          "type": "DEBIT",
+          "amount": "670",
+          "description": "Payment for TWIN_PACK: M2, M3 (Restored from roadmap)",
+          "createdAt": "2026-05-02T03:06:13.366Z"
+        }
+      ]
+    },
+    "bookings": [
+      {
+        "id": "cmonrfcaf000190fgdgge4rbv",
+        "moduleCode": "M2",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": "BOOKING_FUNDED_FIXED_1777691173112",
+        "attemptType": null,
+        "createdAt": "2026-05-02T03:06:13.623Z"
+      },
+      {
+        "id": "cmonrfcho000290fgr4pukars",
+        "moduleCode": "M3",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": "BOOKING_FUNDED_FIXED_1777691173112",
+        "attemptType": null,
+        "createdAt": "2026-05-02T03:06:13.884Z"
+      }
+    ],
+    "results": [],
+    "entitlements": [],
+    "attendances": 0,
+    "enrollments": 0,
+    "grades": 0
+  },
+  {
+    "name": "Dzator Korku",
+    "email": "d.korku@aerojet-academy.com",
+    "personalEmail": "stanleykdzator@gmail.com",
+    "id": "cmmk5jl33000c98fgkmpq5kr0",
+    "studentId": "AATA-2026-0014",
+    "programme": "EXAM_ONLY",
+    "wallet": {
+      "id": "cmmk5jmu7000f98fg3zol3blf",
+      "balance": "670",
+      "reserved": "670",
+      "available": "0",
+      "txnCount": 2,
+      "transactions": [
+        {
+          "id": "cmmk5jne1000g98fgvh52zl9m",
+          "type": "CREDIT",
+          "amount": "670",
+          "description": "Migration import: wallet credit €670. Intended modules: M1, M8.",
+          "createdAt": "2026-03-10T05:10:59.881Z"
+        },
+        {
+          "id": "cmonktvbv0003acfgqkzwgjcd",
+          "type": "DEBIT",
+          "amount": "670",
+          "description": "Payment for TWIN_PACK: M1, M8",
+          "createdAt": "2026-05-02T00:01:34.171Z"
+        }
+      ]
+    },
+    "bookings": [
+      {
+        "id": "cmonrs99w000a7kfgsg8laplw",
+        "moduleCode": "M1",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": null,
+        "createdAt": "2026-05-02T03:16:16.244Z"
+      },
+      {
+        "id": "cmonrs9gf000b7kfg03jyl8bj",
+        "moduleCode": "M8",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": null,
+        "createdAt": "2026-05-02T03:16:16.479Z"
+      }
+    ],
+    "results": [],
+    "entitlements": [],
+    "attendances": 0,
+    "enrollments": 0,
+    "grades": 0
+  },
+  {
+    "name": "Ebenezer Kwarteng",
+    "email": "e.kwarteng@aerojet-academy.com",
+    "personalEmail": "odurokwarteng028@gmail.com",
+    "id": "cmmk5kbnn001j98fg9itbokwz",
+    "studentId": "AATA-2026-0019",
+    "programme": "EXAM_ONLY",
+    "wallet": {
+      "id": "cmmk5kdhh001m98fgadkks21i",
+      "balance": "0",
+      "reserved": "0",
+      "available": "0",
+      "txnCount": 0,
+      "transactions": []
+    },
+    "bookings": [
+      {
+        "id": "cmmxikv410006gwfgig27lhpj",
+        "moduleCode": "M1",
+        "examComponentId": "cmmjaqe8y000n18fg4l9w4m6z",
+        "status": "COMPLETED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "780",
+        "result": "pass",
+        "score": "78",
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": "MIGRATED",
+        "createdAt": "2026-03-19T13:36:51.841Z"
+      },
+      {
+        "id": "cmourhpno0001jofg3rh05x48",
+        "moduleCode": "M8",
+        "examComponentId": null,
+        "status": "COMPLETED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "780",
+        "result": "pass",
+        "score": "79",
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": "MIGRATED",
+        "createdAt": "2026-05-07T00:42:27.492Z"
+      }
+    ],
+    "results": [
+      {
+        "id": "cmo9cz9re0005x4fggnecx4q7",
+        "examId": null,
+        "moduleCode": "M1",
+        "score": "78",
+        "percentage": "78",
+        "passed": true,
+        "createdAt": "2025-08-15T00:00:00.000Z"
+      },
+      {
+        "id": "cmo9czae40006x4fg1ds73xip",
+        "examId": null,
+        "moduleCode": "M8",
+        "score": "79",
+        "percentage": "79",
+        "passed": true,
+        "createdAt": "2025-08-15T00:00:00.000Z"
+      }
+    ],
+    "entitlements": [
+      {
+        "id": "cmmk5kfx3001r98fgzy2wbovv",
+        "totalResits": 1,
+        "usedResits": 0
+      }
+    ],
+    "attendances": 0,
+    "enrollments": 0,
+    "grades": 0
+  },
+  {
+    "name": "Abdul Adam",
+    "email": "a.adam@aerojet-academy.com",
+    "personalEmail": "adamwahab160@gmail.com",
+    "id": "cmmk5jgu0000698fgco1cqhbp",
+    "studentId": "AATA-2026-0013",
+    "programme": "EXAM_ONLY",
+    "wallet": {
+      "id": "cmmk5jikv000998fgumn3uges",
+      "balance": "1340",
+      "reserved": "1340",
+      "available": "0",
+      "txnCount": 2,
+      "transactions": [
+        {
+          "id": "cmmk5jj3n000a98fgm34ev5n3",
+          "type": "CREDIT",
+          "amount": "1340",
+          "description": "Migration import: wallet credit €1340. Consolidated record. Intended modules: M1, M8, M2, M3.",
+          "createdAt": "2026-03-10T05:10:54.322Z"
+        },
+        {
+          "id": "cmonl0ni60005n8fgs8s599jb",
+          "type": "DEBIT",
+          "amount": "1340",
+          "description": "Payment for FOUR_PACK: M1, M2, M3, M8",
+          "createdAt": "2026-05-02T00:06:50.622Z"
+        }
+      ]
+    },
+    "bookings": [
+      {
+        "id": "cmonl0nop0006n8fgsplldu3f",
+        "moduleCode": "M1",
+        "examComponentId": "cmmjaqe8y000n18fg4l9w4m6z",
+        "status": "APPROVED",
+        "bookingType": "FOUR_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": "BOOKING_FUNDED_1777680410353",
+        "attemptType": null,
+        "createdAt": "2026-05-02T00:06:50.857Z"
+      },
+      {
+        "id": "cmonrs6te00017kfgwqzbh5fs",
+        "moduleCode": "M2",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "FOUR_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": null,
+        "createdAt": "2026-05-02T03:16:13.058Z"
+      },
+      {
+        "id": "cmonrs70000027kfginiiv60n",
+        "moduleCode": "M3",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "FOUR_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": null,
+        "createdAt": "2026-05-02T03:16:13.296Z"
+      },
+      {
+        "id": "cmonrs76o00037kfgja93u8dt",
+        "moduleCode": "M8",
+        "examComponentId": null,
+        "status": "APPROVED",
+        "bookingType": "FOUR_PACK",
+        "amountPaid": "335",
+        "result": null,
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": null,
+        "createdAt": "2026-05-02T03:16:13.536Z"
+      }
+    ],
+    "results": [],
+    "entitlements": [],
+    "attendances": 0,
+    "enrollments": 0,
+    "grades": 0
+  },
+  {
+    "name": "David Archer",
+    "email": "d.archer@aerojet-academy.com",
+    "personalEmail": "davarcher111@gmail.com",
+    "id": "cmmk5jch8000098fgldl7hg0z",
+    "studentId": "AATA-2026-0012",
+    "programme": "EXAM_ONLY",
+    "wallet": {
+      "id": "cmmk5jeal000398fg0dd4oz0j",
+      "balance": "2010",
+      "reserved": "0",
+      "available": "2010",
+      "txnCount": 1,
+      "transactions": [
+        {
+          "id": "cmmk5jeu0000498fgdmww7wbm",
+          "type": "CREDIT",
+          "amount": "2010",
+          "description": "Migration import: wallet credit €2010. Historical modules: M1, M8, M2, M3, M4, M5. M4/M5 refunded. Approved wallet credit carried forward.",
+          "createdAt": "2026-03-10T05:10:48.792Z"
+        }
+      ]
+    },
+    "bookings": [],
+    "results": [],
+    "entitlements": [],
+    "attendances": 0,
+    "enrollments": 0,
+    "grades": 0
+  },
+  {
+    "name": "Prince Wiafe",
+    "email": "p.wiafe@aerojet-academy.com",
+    "personalEmail": "prince.wiafegh@gmail.com",
+    "id": "cmmk5k5wj001998fgxnwvwzvb",
+    "studentId": "AATA-2026-0018",
+    "programme": "EXAM_ONLY",
+    "wallet": {
+      "id": "cmmk5k7oz001c98fgbv27q6hz",
+      "balance": "0",
+      "reserved": "0",
+      "available": "0",
+      "txnCount": 0,
+      "transactions": []
+    },
+    "bookings": [
+      {
+        "id": "cmmxiktlh0004gwfgfg4rfn1l",
+        "moduleCode": "M1",
+        "examComponentId": "cmmjaqe8y000n18fg4l9w4m6z",
+        "status": "COMPLETED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "780",
+        "result": "pass",
+        "score": "75",
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": "MIGRATED",
+        "createdAt": "2026-03-19T13:36:49.877Z"
+      },
+      {
+        "id": "cmourewnm0000vkfgaxlbhwvj",
+        "moduleCode": "M8",
+        "examComponentId": null,
+        "status": "COMPLETED",
+        "bookingType": "TWIN_PACK",
+        "amountPaid": "780",
+        "result": "pass",
+        "isResit": false,
+        "combinedGroupRef": null,
+        "bookingGroupRef": null,
+        "attemptType": "MIGRATED",
+        "createdAt": "2026-05-07T00:40:16.594Z"
+      }
+    ],
+    "results": [
+      {
+        "id": "cmo9cz8820001x4fgfj2arpoc",
+        "examId": null,
+        "moduleCode": "M1",
+        "score": "75",
+        "percentage": "75",
+        "passed": true,
+        "createdAt": "2025-08-15T00:00:00.000Z"
+      },
+      {
+        "id": "cmourhosm0000jofg3r0pk2vv",
+        "examId": null,
+        "moduleCode": "M8",
+        "score": "75",
+        "percentage": "75",
+        "passed": true,
+        "createdAt": "2025-08-15T00:00:00.000Z"
+      }
+    ],
+    "entitlements": [
+      {
+        "id": "cmmk5k9zo001h98fg5tm7xw9n",
+        "totalResits": 1,
+        "usedResits": 0
+      }
+    ],
+    "attendances": 0,
+    "enrollments": 0,
+    "grades": 0
+  }
+]

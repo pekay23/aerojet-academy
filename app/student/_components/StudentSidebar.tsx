@@ -14,7 +14,6 @@ import {
   Users,
   Mail,
   ScrollText,
-  Settings,
   GraduationCap,
 } from 'lucide-react'
 import type { PaymentAccessLevel } from '@/lib/access-control'
@@ -49,7 +48,8 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
     } else {
       baseLinks.push(
         { label: 'Academic Calendar', href: '/student/academic-calendar', icon: CalendarCheck },
-        { label: 'Wallet', href: '/student/wallet', icon: Wallet }
+        { label: 'Wallet', href: '/student/wallet', icon: Wallet },
+        // { label: 'My Invoices', href: '/student/invoices', icon: Receipt }, // hidden until invoice workflow is finalized
       )
     }
 
@@ -76,6 +76,7 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
         { label: 'Exams', href: '/student/exams?tab=records', icon: ClipboardCheck },
         { label: 'Revision Support', href: '/student/courses/revision', icon: GraduationCap },
         { label: 'Grades', href: '/student/grades', icon: Award },
+        { label: 'Classmates', href: '/student/classmates', icon: Users },
         { label: 'Attendance', href: '/student/attendance', icon: FileCheck },
         { label: 'Certificates', href: '/student/certificates', icon: Award }
       )
@@ -135,7 +136,6 @@ export default function StudentSidebar({
       userMenuItems={[
         { label: 'Profile', href: '/student/profile', icon: User },
         { label: 'Ambassador', href: '/student/ambassador', icon: Users },
-        { label: 'Settings', href: '/student/profile?tab=settings', icon: Settings },
       ]}
     />
   )

@@ -29,6 +29,8 @@ interface Props {
     isAmbassador: boolean
     referralCode?: string | null
     programmeChoice?: string | null
+    referralsReceived?: any[]
+    referralsMade?: any[]
     profile: any
     studentProfile: any
   }
@@ -159,7 +161,7 @@ export default function ProfileTab({
         </div>
       </Section>
 
-      {/* Programme & Pathway (merged with Student ID) */}
+      {/* Programme & Pathway */}
       <Section
         title="Programme & Pathway"
         action={
@@ -330,6 +332,64 @@ export default function ProfileTab({
           {student.referralCode && (
             <Field icon={User} label="Referral Code" value={student.referralCode} />
           )}
+        </div>
+      </Section>
+
+      {/* Referral Network */}
+      <Section title="Referral Network">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          {/* Referrer */}
+          <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+            <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Referred By</h4>
+            {student.referralsReceived && student.referralsReceived.length > 0 ? (
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-aerojet-blue font-bold dark:bg-blue-900/30">
+                  {student.referralsReceived[0].referrer.profile?.firstName?.[0]}{student.referralsReceived[0].referrer.profile?.lastName?.[0]}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {student.referralsReceived[0].referrer.profile?.firstName} {student.referralsReceived[0].referrer.profile?.lastName}
+                  </p>
+                  <p className="text-xs text-slate-500">{student.referralsReceived[0].referrer.email}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-xs italic text-slate-400">Direct registration (No referrer)</p>
+            )}
+          </div>
+
+          {/* Referrals Made */}
+          <div className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
+            <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Referrals Made</h4>
+            {student.referralsMade && student.referralsMade.length > 0 ? (
+              <div className="space-y-3">
+                {student.referralsMade.slice(0, 5).map((ref: any) => (
+                  <div key={ref.id} className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-6 w-6 rounded-full bg-slate-200 text-[10px] flex items-center justify-center font-bold dark:bg-slate-700">
+                        {ref.referee.profile?.firstName?.[0]}
+                      </div>
+                      <p className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                        {ref.referee.profile?.firstName} {ref.referee.profile?.lastName}
+                      </p>
+                    </div>
+                    <span className={`text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md ${
+                      ref.status === 'QUALIFIED' 
+                        ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' 
+                        : 'bg-slate-100 text-slate-500 dark:bg-slate-700'
+                    }`}>
+                      {ref.status}
+                    </span>
+                  </div>
+                ))}
+                {student.referralsMade.length > 5 && (
+                  <p className="text-[10px] text-center text-slate-400">+{student.referralsMade.length - 5} more referrals</p>
+                )}
+              </div>
+            ) : (
+              <p className="text-xs italic text-slate-400">Has not referred anyone yet</p>
+            )}
+          </div>
         </div>
       </Section>
     </div>

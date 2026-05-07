@@ -177,102 +177,112 @@ export default function StudentDetailPanel({
   const isCompletedResult = (result: string | null | undefined) =>
     !!result && COMPLETED_RESULT_VALUES.includes(result.toLowerCase())
 
-  // Separate completed exams (with results) from upcoming/pending bookings
-  const completedExamResults = currentStudent.examResults?.map((r: any) => ({
+  // Helper: check if a booking status means it's still upcoming/pending
+  const UPCOMING_STATUSES = ['APPROVED', 'PENDING', 'CONFIRMED']
+  const isUpcomingBooking = (booking: any) =>
+    !isCompletedResult(booking.result) && 
+    booking.score == null && 
+    (UPCOMING_STATUSES.includes(booking.status) || (!booking.result && booking.status !== 'COMPLETED'))
+
+  // ---- Build separate lists ----
+
+  // 1. Exam Results from the ExamResult table (formal grades)
+  const formalResults = (currentStudent.examResults || []).map((r: any) => ({
     id: r.id,
+    source: 'result' as const,
     type: 'FORMAL',
     moduleCode: r.moduleCode || r.exam?.examComponent?.course?.code || '—',
-    examName: r.exam?.name || 'Unknown Exam',
-    date: r.exam?.examDate,
-    score: Number(r.score),
+    examName: r.exam?.name || 'Exam Result',
+    date: r.exam?.examDate || r.createdAt,
+    score: r.score != null ? Number(r.score) : null,
     passed: r.passed,
     result: r.passed ? 'PASS' : 'FAIL',
     examCategory: r.examCategory,
     attemptType: r.attemptType,
-  })) || []
+  }))
 
-  // Include exam bookings that have a completed result OR a score (graded but result not yet written)
-  const completedExamBookings = currentStudent.examBookings
-    ?.filter((r: any) => isCompletedResult(r.result) || r.score != null)
-    .map((r: any) => ({
-      id: r.id,
+  // 2. Completed bookings (have a definitive result like pass/fail, or a score)
+  const completedBookings = (currentStudent.examBookings || [])
+    .filter((b: any) => isCompletedResult(b.result) || (b.score != null && b.status === 'COMPLETED'))
+    .map((b: any) => ({
+      id: b.id,
+      source: 'booking' as const,
       type: 'MANUAL',
-      moduleCode: r.moduleCode || '—',
-      examName: r.exam?.name || 'Manual Record',
-      date: r.examDate || r.bookedAt,
-      score: r.score != null ? Number(r.score) : null,
-      passed: r.result?.toLowerCase() === 'pass',
-      result: r.result?.toUpperCase() || (r.score != null ? 'SCORED' : null),
-      examCategory: r.examCategory,
-      attemptType: r.attemptType,
-    })) || []
+      moduleCode: b.moduleCode || '—',
+      examName: b.exam?.name || 'Exam Booking',
+      date: b.examDate || b.bookedAt,
+      score: b.score != null ? Number(b.score) : null,
+      passed: b.result?.toLowerCase() === 'pass',
+      result: b.result?.toUpperCase() || (b.score != null ? 'SCORED' : null),
+      examCategory: b.examCategory,
+      attemptType: b.attemptType,
+    }))
 
-  // Upcoming/pending exams — no result AND no score yet
-  const upcomingExams = currentStudent.examBookings
-    ?.filter((r: any) => !isCompletedResult(r.result) && r.score == null)
-    .map((r: any) => ({
-      id: r.id,
-      type: r.exam?.name ? 'BOOKED' : 'MANUAL',
-      moduleCode: r.moduleCode || '—',
-      examName: r.exam?.name || 'Upcoming Exam',
-      date: r.examDate || r.bookedAt,
-      paymentStatus: r.status,
-      examCategory: r.examCategory,
-      attemptType: r.attemptType,
-    })) || []
-
-  // Merge and consolidate results with bookings
-  const consolidatedHistory: any[] = []
-
-  // Add all bookings first
-  const allBookings = [...completedExamBookings, ...upcomingExams]
-  allBookings.forEach(b => {
-    consolidatedHistory.push({
-      ...b,
-      source: 'booking'
-    })
-  })
-
-  // Add results, but try to merge into existing bookings first
-  completedExamResults.forEach((r: any) => {
-    const existing = consolidatedHistory.find(
-      (b) => b.moduleCode?.toUpperCase() === r.moduleCode?.toUpperCase() && b.id === r.bookingId 
-    ) || consolidatedHistory.find(
-      (b) => b.moduleCode?.toUpperCase() === r.moduleCode?.toUpperCase() && 
-             ((b.attemptType || 'FIRST') === (r.attemptType || 'FIRST'))
-    )
-
-    if (existing) {
-      // Merge
-      existing.type = 'FORMAL'
-      existing.score = r.score
-      existing.passed = r.passed
-      existing.result = r.result
-      existing.examCategory = r.examCategory || existing.examCategory
-      existing.isConsolidated = true
-    } else {
-      consolidatedHistory.push({
-        ...r,
-        source: 'result'
-      })
-    }
-  })
-
-  const allExamHistory = consolidatedHistory
-    .filter(h => h.passed !== undefined || h.score !== null || h.result) // Only completed for history
-    .sort((a, b) => {
-      const da = a.date ? new Date(a.date).getTime() : 0
-      const db = b.date ? new Date(b.date).getTime() : 0
-      return db - da
-    })
-
-  const upcomingExamsList = consolidatedHistory
-    .filter(h => h.passed === undefined && h.score === null && !h.result)
-    .sort((a, b) => {
+  // 3. Upcoming bookings — no completed result, still pending/approved
+  const upcomingExamsList = (currentStudent.examBookings || [])
+    .filter((b: any) => isUpcomingBooking(b))
+    .map((b: any) => ({
+      id: b.id,
+      source: 'booking' as const,
+      type: b.exam?.name ? 'BOOKED' : 'MANUAL',
+      moduleCode: b.moduleCode || '—',
+      examName: b.exam?.name || 'Upcoming Exam',
+      date: b.examDate || b.bookedAt,
+      paymentStatus: b.status,
+      examCategory: b.examCategory,
+      attemptType: b.attemptType,
+    }))
+    .sort((a: any, b: any) => {
       const da = a.date ? new Date(a.date).getTime() : 0
       const db = b.date ? new Date(b.date).getTime() : 0
       return da - db
     })
+
+  // ---- Consolidate completed history (deduplicate results + bookings for same module) ----
+  const allExamHistory: any[] = []
+  const usedResultIds = new Set<string>()
+
+  // For each completed booking, try to find a matching formal result
+  completedBookings.forEach((booking) => {
+    const matchingResult = formalResults.find(
+      (r) =>
+        !usedResultIds.has(r.id) &&
+        r.moduleCode?.toUpperCase() === booking.moduleCode?.toUpperCase() &&
+        ((r.attemptType || 'FIRST') === (booking.attemptType || 'FIRST') ||
+         r.attemptType === 'MIGRATED' || booking.attemptType === 'MIGRATED' ||
+         !r.attemptType || !booking.attemptType)
+    )
+
+    if (matchingResult) {
+      usedResultIds.add(matchingResult.id)
+      // Merge: prefer formal result data but keep booking metadata
+      allExamHistory.push({
+        ...booking,
+        type: 'FORMAL',
+        score: matchingResult.score ?? booking.score,
+        passed: matchingResult.passed,
+        result: matchingResult.result,
+        examCategory: matchingResult.examCategory || booking.examCategory,
+        isConsolidated: true,
+      })
+    } else {
+      allExamHistory.push(booking)
+    }
+  })
+
+  // Add any remaining formal results that weren't matched to a booking
+  formalResults.forEach((r) => {
+    if (!usedResultIds.has(r.id)) {
+      allExamHistory.push(r)
+    }
+  })
+
+  // Sort by date descending
+  allExamHistory.sort((a, b) => {
+    const da = a.date ? new Date(a.date).getTime() : 0
+    const db = b.date ? new Date(b.date).getTime() : 0
+    return db - da
+  })
 
   return (
     <div

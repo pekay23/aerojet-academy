@@ -1,0 +1,154 @@
+[
+  {
+    "id": "cmom3d9kk001nuofgv15mssd9",
+    "name": "Test Ten",
+    "email": "test10@test.com",
+    "studentId": "TEST-0010",
+    "programme": null,
+    "createdAt": "2026-04-30T23:04:59.828Z"
+  },
+  {
+    "id": "cmom3d824001juofgd7dzp3if",
+    "name": "Test Nine",
+    "email": "test9@test.com",
+    "studentId": "TEST-0009",
+    "programme": null,
+    "createdAt": "2026-04-30T23:04:57.868Z"
+  },
+  {
+    "id": "cmom3d6is001fuofgqa2zbdn9",
+    "name": "Test Eight",
+    "email": "test8@test.com",
+    "studentId": "TEST-0008",
+    "programme": null,
+    "createdAt": "2026-04-30T23:04:55.876Z"
+  },
+  {
+    "id": "cmom3d4dk0018uofg7d5uefzw",
+    "name": "Test Seven",
+    "email": "test7@test.com",
+    "studentId": "TEST-0007",
+    "programme": null,
+    "createdAt": "2026-04-30T23:04:53.096Z"
+  },
+  {
+    "id": "cmom3d2v20014uofg4y8fwq6x",
+    "name": "Test Six",
+    "email": "test6@test.com",
+    "studentId": "TEST-0006",
+    "programme": null,
+    "createdAt": "2026-04-30T23:04:51.134Z"
+  },
+  {
+    "id": "cmom3d0sq000xuofgrmb08vw5",
+    "name": "Test Five",
+    "email": "test5@test.com",
+    "studentId": "TEST-0005",
+    "programme": null,
+    "createdAt": "2026-04-30T23:04:48.458Z"
+  },
+  {
+    "id": "cmom3cyos000quofg6h8zpcrr",
+    "name": "Test Four",
+    "email": "test4@test.com",
+    "studentId": "TEST-0004",
+    "programme": null,
+    "createdAt": "2026-04-30T23:04:45.724Z"
+  },
+  {
+    "id": "cmom3cw1g000guofgeegke3tu",
+    "name": "Test Three",
+    "email": "test3@test.com",
+    "studentId": "TEST-0003",
+    "programme": null,
+    "createdAt": "2026-04-30T23:04:42.292Z"
+  },
+  {
+    "id": "cmom3ctcd0006uofg6u55nkg9",
+    "name": "Test Two",
+    "email": "test2@test.com",
+    "studentId": "TEST-0002",
+    "programme": null,
+    "createdAt": "2026-04-30T23:04:38.797Z"
+  },
+  {
+    "id": "cmom3bbjv0000u8fgg5mavjcz",
+    "name": "Test One",
+    "email": "test1@test.com",
+    "studentId": "TEST-0001",
+    "programme": null,
+    "createdAt": "2026-04-30T23:03:29.084Z"
+  },
+  {
+    "id": "cmmshzent00010al45yesuguy",
+    "name": "test student",
+    "email": "student@aerojet-academy.com",
+    "studentId": "AATA-2026-7109",
+    "programme": null,
+    "createdAt": "2026-03-16T01:21:19.865Z"
+  },
+  {
+    "id": "cmmk5kbnn001j98fg9itbokwz",
+    "name": "Ebenezer Kwarteng",
+    "email": "e.kwarteng@aerojet-academy.com",
+    "studentId": "AATA-2026-0019",
+    "programme": "EXAM_ONLY",
+    "createdAt": "2026-03-10T05:11:31.063Z"
+  },
+  {
+    "id": "cmmk5k5wj001998fgxnwvwzvb",
+    "name": "Prince Wiafe",
+    "email": "p.wiafe@aerojet-academy.com",
+    "studentId": "AATA-2026-0018",
+    "programme": "EXAM_ONLY",
+    "createdAt": "2026-03-10T05:11:23.653Z"
+  },
+  {
+    "id": "cmmk5jycy000u98fgxb90o8hk",
+    "name": "Edith Avege",
+    "email": "e.avege@aerojet-academy.com",
+    "studentId": "AATA-2026-0017",
+    "programme": "EXAM_ONLY",
+    "createdAt": "2026-03-10T05:11:13.817Z"
+  },
+  {
+    "id": "cmmk5jty1000o98fgei1hartf",
+    "name": "Benard Bandor",
+    "email": "b.bandor@aerojet-academy.com",
+    "studentId": "AATA-2026-0016",
+    "programme": "EXAM_ONLY",
+    "createdAt": "2026-03-10T05:11:08.159Z"
+  },
+  {
+    "id": "cmmk5jpd2000i98fgi1hh54g1",
+    "name": "Fred Ampeh",
+    "email": "f.ampeh@aerojet-academy.com",
+    "studentId": "AATA-2026-0015",
+    "programme": "EXAM_ONLY",
+    "createdAt": "2026-03-10T05:11:02.207Z"
+  },
+  {
+    "id": "cmmk5jl33000c98fgkmpq5kr0",
+    "name": "Dzator Korku",
+    "email": "d.korku@aerojet-academy.com",
+    "studentId": "AATA-2026-0014",
+    "programme": "EXAM_ONLY",
+    "createdAt": "2026-03-10T05:10:56.660Z"
+  },
+  {
+    "id": "cmmk5jgu0000698fgco1cqhbp",
+    "name": "Abdul Adam",
+    "email": "a.adam@aerojet-academy.com",
+    "studentId": "AATA-2026-0013",
+    "programme": "EXAM_ONLY",
+    "createdAt": "2026-03-10T05:10:51.156Z"
+  },
+  {
+    "id": "cmmk5jch8000098fgldl7hg0z",
+    "name": "David Archer",
+    "email": "d.archer@aerojet-academy.com",
+    "studentId": "AATA-2026-0012",
+    "programme": "EXAM_ONLY",
+    "createdAt": "2026-03-10T05:10:45.502Z"
+  }
+]

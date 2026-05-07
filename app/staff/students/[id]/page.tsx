@@ -112,6 +112,21 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
           class: { select: { name: true, course: { select: { name: true, code: true } } } },
         },
       },
+      referralsReceived: {
+        include: {
+          referrer: {
+            include: { profile: true }
+          }
+        }
+      },
+      referralsMade: {
+        include: {
+          referee: {
+            include: { profile: true }
+          }
+        },
+        orderBy: { createdAt: 'desc' }
+      },
     },
   })
 

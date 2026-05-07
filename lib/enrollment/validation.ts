@@ -118,6 +118,86 @@ export async function validateCourseEnrollment(userId: string, courseId: string)
     }
   }
 
+  // Rule 3: Pre-requisite validation
+  if (course.requiresPrerequisite && course.prerequisites.length > 0) {
+    const prereqResult = await validatePrerequisites(userId, course.prerequisites)
+    if (!prereqResult.allowed) return prereqResult
+  }
+
+  return { allowed: true, severity: 'ERROR' }
+}
+
+/**
+ * Validates that a student has completed all prerequisite courses.
+ * A course is considered "completed" if the student has an enrollment with status
+ * GRADUATED, or has at least one passing grade (A, B, or C) for that course.
+ */
+export async function validatePrerequisites(
+  userId: string,
+  prerequisiteCodes: string[]
+): Promise<{ allowed: boolean; error?: string; severity: 'ERROR' | 'WARNING' }> {
+  if (prerequisiteCodes.length === 0) return { allowed: true, severity: 'ERROR' }
+
+  // Find all prerequisite courses by code
+  const prereqCourses = await prisma.course.findMany({
+    where: { code: { in: prerequisiteCodes } },
+    select: { id: true, code: true, name: true },
+  })
+
+  // Check for any codes that don't match real courses (stale data)
+  const foundCodes = new Set(prereqCourses.map(c => c.code))
+  const missingCodes = prerequisiteCodes.filter(c => !foundCodes.has(c))
+  if (missingCodes.length > 0) {
+    return {
+      allowed: false,
+      error: `Prerequisite course(s) not found: ${missingCodes.join(', ')}. Please contact support.`,
+      severity: 'ERROR',
+    }
+  }
+
+  // Fetch the student's enrollments + grades for prerequisite courses
+  const prereqCourseIds = prereqCourses.map(c => c.id)
+  const enrollments = await prisma.enrollment.findMany({
+    where: {
+      userId,
+      courseId: { in: prereqCourseIds },
+      deletedAt: null,
+    },
+    select: {
+      courseId: true,
+      status: true,
+      grades: {
+        select: { grade: true },
+        where: { deletedAt: null },
+      },
+    },
+  })
+
+  const PASSING_GRADES = ['A', 'B', 'C']
+  const completedCourseIds = new Set<string>()
+
+  for (const enrollment of enrollments) {
+    // Completed if GRADUATED
+    if (enrollment.status === 'GRADUATED') {
+      completedCourseIds.add(enrollment.courseId)
+      continue
+    }
+    // Or if any passing grade exists
+    if (enrollment.grades.some(g => g.grade && PASSING_GRADES.includes(g.grade))) {
+      completedCourseIds.add(enrollment.courseId)
+    }
+  }
+
+  const unmetPrereqs = prereqCourses.filter(c => !completedCourseIds.has(c.id))
+  if (unmetPrereqs.length > 0) {
+    const names = unmetPrereqs.map(c => `${c.code} (${c.name})`).join(', ')
+    return {
+      allowed: false,
+      error: `You must complete the following prerequisite(s) first: ${names}`,
+      severity: 'WARNING',
+    }
+  }
+
   return { allowed: true, severity: 'ERROR' }
 }
 
