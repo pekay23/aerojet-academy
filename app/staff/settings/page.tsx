@@ -12,6 +12,8 @@ import EmailPreviewsPage from './email-previews/page'
 import AcademicCalendarManager from './academic-calendar/_components/AcademicCalendarManager'
 import BackupManager from './_components/BackupManager'
 import ExchangeRateDisplay from './_components/ExchangeRateDisplay'
+import TwoFactorSettings from './_components/TwoFactorSettings'
+import CustomFieldsManager from './custom-fields/_components/CustomFieldsManager'
 
 export const metadata: Metadata = { title: 'Settings | Staff Portal' }
 export const dynamic = 'force-dynamic'
@@ -82,6 +84,12 @@ export default async function SettingsPage({
         {/* ── System Tab ── */}
         {tab === 'system' && <SystemSettingsForm values={values} />}
 
+        {/* ── Custom Fields Tab ── */}
+        {tab === 'custom-fields' && <CustomFieldsContent />}
+
+        {/* ── Security Tab ── */}
+        {tab === 'security' && <SecurityContent userId={session.user.id} />}
+
         {/* ── Welcome Messages Tab ── */}
         {tab === 'welcome' && <WelcomeMessagesContent />}
 
@@ -103,6 +111,14 @@ async function WelcomeMessagesContent() {
   return <WelcomeMessagesManager initialMessages={welcomeMessages} />
 }
 
+async function SecurityContent({ userId }: { userId: string }) {
+  const user = await prismaUnfiltered.user.findUnique({
+    where: { id: userId },
+    select: { twoFactorEnabled: true },
+  })
+  return <TwoFactorSettings twoFactorEnabled={user?.twoFactorEnabled ?? false} />
+}
+
 async function CalendarContent() {
   const academicYears = await prismaUnfiltered.academicYear.findMany({
     include: {
@@ -112,4 +128,11 @@ async function CalendarContent() {
     orderBy: { startDate: 'desc' },
   })
   return <AcademicCalendarManager initialYears={academicYears} />
+}
+
+async function CustomFieldsContent() {
+  const fields = await prismaUnfiltered.customFieldDefinition.findMany({
+    orderBy: [{ appliesTo: 'asc' }, { sortOrder: 'asc' }]
+  })
+  return <CustomFieldsManager initialFields={fields} />
 }

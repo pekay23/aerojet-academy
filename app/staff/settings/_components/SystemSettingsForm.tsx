@@ -53,6 +53,48 @@ const SYSTEM_FIELDS = [
     type: 'NUMBER' as const,
     default: '8',
   },
+  {
+    key: 'admissions_pipeline_enabled',
+    label: 'Admissions Pipeline',
+    description: 'Create Application records and use the full admissions tracker for new non-exam-only applicants',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
+  {
+    key: 'document_uploads_enabled',
+    label: 'Applicant Document Uploads',
+    description: 'Show configurable document upload requirements in the applicant pipeline',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
+  {
+    key: 'aptitude_test_enabled',
+    label: 'Aptitude Tests',
+    description: 'Require eligible applicants to complete the admissions aptitude test stage',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
+  {
+    key: 'interview_system_enabled',
+    label: 'Interview Scheduling',
+    description: 'Enable applicant self-service interview booking and staff interview outcomes',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
+  {
+    key: 'medical_review_enabled',
+    label: 'Medical Review',
+    description: 'Enable medical document submission and staff medical clearance decisions',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
+  {
+    key: 'internal_exam_system_enabled',
+    label: 'Internal Exam System',
+    description: 'Enable student internal exam dashboards, test sessions, and staff internal exam bank management',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
 ]
 
 interface SystemSettingsFormProps {

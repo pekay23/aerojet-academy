@@ -10,6 +10,11 @@ Base URL: `/api`
 - `POST /api/public/contact` — Submit contact form
 - `POST /api/public/submit-payment-proof` — Upload payment proof
 
+## Authentication — 2FA
+- `POST /api/auth/2fa/generate` — Generate TOTP secret and QR code (requires staff session)
+- `POST /api/auth/2fa/verify` — Verify TOTP code and enable 2FA on account
+- `POST /api/auth/2fa/disable` — Verify TOTP code and disable 2FA
+
 ## Staff (requires STAFF/ADMIN/SUPER_ADMIN role)
 - `GET/POST /api/staff/users` — List/create users
 - `GET/PUT/DELETE /api/staff/users/[id]` — User CRUD
@@ -22,8 +27,12 @@ Base URL: `/api`
 - `POST /api/staff/payments/[id]/approve` — Approve/reject payment
 - `GET/POST /api/staff/courses` — Course CRUD
 - `GET/POST /api/staff/classes` — Class CRUD
+- `GET/PUT /api/staff/classes/[id]/seating` — Class seating assignments (stored as JSON in SystemSettings)
+- `GET /api/staff/classes/[id]/seats` — Class with classroom, seats, and enrolled students
+- `GET/PUT /api/staff/classrooms/[id]/layout` — Save/retrieve classroom floor plan layout; PUT syncs Seat records
 - `GET/POST /api/staff/exam-events` — Exam event management
 - `POST /api/staff/exam-events/[id]/go-no-go` — Go/No-Go decision
+- `GET/PUT /api/staff/exams/sittings/[id]/seats` — Batch-update exam sitting seat assignments
 - `GET /api/staff/reports/*` — Reports (enrollment, revenue, pools)
 - `GET /api/staff/audit-logs` — Audit log viewer
 - `GET/PUT /api/staff/settings` — System settings

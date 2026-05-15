@@ -36,6 +36,16 @@
 - Atomic increment of member count
 - Auto-confirm/fail logic runs server-side only
 
+## Two-Factor Authentication (2FA)
+- TOTP-based 2FA available for STAFF, ADMIN, and SUPER_ADMIN accounts
+- Uses `otplib` v5 (`generateSecret`, `generateURI`, `verify`) with SHA-1 algorithm, 6 digits, 30-second period
+- QR code generated server-side via `qrcode` package (data URI, never stored)
+- Secret stored encrypted in `User.twoFactorSecret` field, enabled flag in `User.twoFactorEnabled`
+- Login flow: credentials provider throws `2FA_REQUIRED` error string → client intercepts → shows TOTP input → re-authenticates with `totpCode` parameter
+- Setup: `/api/auth/2fa/generate` → `/api/auth/2fa/verify` (enables on success)
+- Disable: `/api/auth/2fa/disable` (requires valid TOTP code to confirm identity)
+- All 2FA API routes require authenticated session with staff-level role
+
 ## Known Security Gaps (P3 backlog)
 - `api/auth/resend-verification` — No rate limiting, possible email enumeration
 - `api/public/submit-payment-proof` — No rate limiting, registration code could be brute-forced

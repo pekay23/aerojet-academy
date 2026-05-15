@@ -3,6 +3,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireAdmin, getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler, apiError } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { revalidateTag } from 'next/cache'
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireAdmin()
@@ -55,6 +56,8 @@ export async function POST(req: NextRequest) {
       userId: staff.id,
       details: { updates },
     })
+
+    revalidateTag('settings', 'max')
 
     // Return JSON when requested (client-side form submissions)
     const accept = req.headers.get('accept') || ''

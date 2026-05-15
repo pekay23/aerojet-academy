@@ -109,6 +109,21 @@ export const ourFileRouter = {
       console.log('News Audio Upload complete for userId:', metadata.userId)
       return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl }
     }),
+  // Admissions Pipeline — applicant document uploads (CV, ID, certificates, etc.)
+  applicantDocument: f({
+    pdf: { maxFileSize: '4MB', maxFileCount: 1 },
+    image: { maxFileSize: '4MB', maxFileCount: 1 },
+  })
+    .middleware(async ({ req }) => {
+      const session = await getAuthSession()
+      if (!session) throw new UploadThingError('Unauthorized')
+      return { userId: session.user.id }
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log('Applicant Document Upload complete for userId:', metadata.userId)
+      return { uploadedBy: metadata.userId, fileUrl: file.ufsUrl, fileName: file.name }
+    }),
+
   resourceFile: f({
     pdf: { maxFileSize: '32MB', maxFileCount: 1 },
     image: { maxFileSize: '16MB', maxFileCount: 1 },

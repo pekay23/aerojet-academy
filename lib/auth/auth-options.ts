@@ -14,6 +14,7 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
         token: { label: 'Token', type: 'text' }, // Added for auto-login
+        totpCode: { label: '2FA Code', type: 'text' },
       },
       async authorize(credentials) {
 
@@ -114,6 +115,22 @@ export const authOptions: NextAuthOptions = {
           })
 
           throw new Error('Invalid email or password')
+        }
+
+        // 2FA Check
+        if (user.twoFactorEnabled && user.twoFactorSecret) {
+          if (!credentials.totpCode) {
+            // This specific error string will be caught by the frontend
+            throw new Error('2FA_REQUIRED')
+          }
+          const { verify: verifyTotp } = await import('otplib')
+          const result = await verifyTotp({
+            token: credentials.totpCode,
+            secret: user.twoFactorSecret,
+          })
+          if (!result.valid) {
+            throw new Error('Invalid 2FA code')
+          }
         }
 
         // Reset login attempts on successful login

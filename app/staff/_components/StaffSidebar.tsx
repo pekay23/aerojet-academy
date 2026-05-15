@@ -11,6 +11,10 @@ import {
   BarChart3,
   Mail,
   Settings,
+  Building,
+  GitPullRequestArrow,
+  GraduationCap,
+  Wrench,
 } from 'lucide-react'
 import { useBadgeCounts } from '@/hooks/useBadgeCounts'
 
@@ -24,9 +28,16 @@ interface StaffSidebarProps {
     payments: number
     messages?: number
   }
+  internalExamEnabled?: boolean
 }
 
-export default function StaffSidebar({ userName, userRole, userImage, counts: initialCounts }: StaffSidebarProps) {
+export default function StaffSidebar({
+  userName,
+  userRole,
+  userImage,
+  counts: initialCounts,
+  internalExamEnabled = false,
+}: StaffSidebarProps) {
   const { counts } = useBadgeCounts({
     applicants: initialCounts?.applicants ?? 0,
     enrollments: initialCounts?.enrollments ?? 0,
@@ -51,6 +62,22 @@ export default function StaffSidebar({ userName, userRole, userImage, counts: in
       ],
     },
     {
+      label: 'Admissions',
+      href: '/admissions',
+      icon: GitPullRequestArrow,
+      children: [
+        { label: 'Pipeline Overview', href: '/admissions' },
+        { label: 'Intake Cycles', href: '/admissions/intake-cycles' },
+        { label: 'Document Types', href: '/admissions/document-types' },
+        { label: 'Aptitude Tests', href: '/admissions/aptitude' },
+        { label: 'Shortlisting', href: '/admissions/shortlisting' },
+        { label: 'Interviews', href: '/admissions/interviews' },
+        { label: 'Medical Review', href: '/admissions/medical' },
+        { label: 'Bonding Contracts', href: '/admissions/bonding' },
+        { label: 'Data Import', href: '/admissions/import' },
+      ],
+    },
+    {
       label: 'Academic',
       href: '/courses',
       icon: BookOpen,
@@ -69,7 +96,20 @@ export default function StaffSidebar({ userName, userRole, userImage, counts: in
       children: [
         { label: 'Course Enrollments', href: '/enrollments' },
         { label: 'Exam Management', href: '/exams' },
+        ...(internalExamEnabled ? [{ label: 'Internal Exams', href: '/exams/internal' }] : []),
         { label: 'Batch Processing', href: '/enrollments/batch' },
+        { label: 'Attendance', href: '/attendance' },
+      ],
+    },
+    {
+      label: 'Training',
+      href: '/instructors',
+      icon: GraduationCap,
+      children: [
+        { label: 'Instructors', href: '/instructors' },
+        { label: 'Practical Training', href: '/practical-assessments' },
+        { label: 'OJT Logbooks', href: '/ojt' },
+        { label: 'ATA Chapters', href: '/ata-chapters' },
       ],
     },
     {
@@ -79,6 +119,7 @@ export default function StaffSidebar({ userName, userRole, userImage, counts: in
       children: [
         { label: 'Academic Term Sync', href: '/scheduling' },
         { label: 'Standard Classes', href: '/classes' },
+        { label: 'Classrooms', href: '/classrooms' },
         { label: 'Revision Support', href: '/revision-runs' },
         { label: 'Master Calendar', href: '/calendar' },
       ],

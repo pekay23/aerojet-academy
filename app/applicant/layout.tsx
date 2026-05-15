@@ -6,6 +6,7 @@ import PortalHeader from '@/components/layouts/PortalHeader'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import ForcePasswordChange from './_components/ForcePasswordChange'
 import { resolveEffectiveEnrollmentType, resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
+import { getPipelineStageConfig, isPipelineEnabled } from '@/lib/admissions/state-machine'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,6 +30,7 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         select: { pathwayId: true, enrollmentType: true, pathwayRel: { select: { code: true } } },
       },
       fullTimeEnrollments: { take: 1, select: { id: true } },
+      application: { select: { stage: true, programmeChoice: true } },
     },
   })
 
@@ -62,6 +64,11 @@ export default async function ApplicantLayout({ children }: { children: React.Re
 
   const hasPathway = !!effectivePathwayCode || !!studentProfile?.pathwayId || !!hasFullTimeEnrollment
   const isExamOnly = effectiveEnrollmentType === 'EXAM_ONLY'
+  const pipelineEnabled = await isPipelineEnabled()
+  const applicationStage = dbUser.application?.stage ?? null
+  const enabledStageGroups = dbUser.application
+    ? await getPipelineStageConfig(dbUser.application.programmeChoice)
+    : undefined
 
   const userName = profile ? `${profile.firstName} ${profile.lastName}` : (user.email ?? '')
   const userRole = 'Applicant'
@@ -74,6 +81,9 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         userImage={user.image ?? undefined}
         hasPathway={hasPathway}
         isExamOnly={isExamOnly}
+        pipelineEnabled={pipelineEnabled}
+        applicationStage={applicationStage}
+        enabledStageGroups={enabledStageGroups}
       />
       <main id="main-content" className="relative pt-16 lg:pt-0 min-h-screen min-w-0 flex-1 overflow-x-hidden">
         <div className="mx-auto max-w-[1920px] p-4 pt-16 sm:p-8 lg:px-8 lg:py-6 lg:pt-10">

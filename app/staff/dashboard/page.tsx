@@ -6,6 +6,7 @@ import { getSystemSetting } from '@/lib/settings'
 import { DashboardCharts } from '../_components/DashboardCharts'
 import PaymentApprovalCard from '../_components/PaymentApprovalCard'
 import GoNoGoMeter from '../_components/GoNoGoMeter'
+import PipelineAnalytics from '../_components/PipelineAnalytics'
 import PoolsSummaryCard from '../_components/PoolsSummaryCard'
 import TargetRevenueEditor from '../_components/TargetRevenueEditor'
 import ExaminerDashboard from '../_components/ExaminerDashboard'
@@ -374,6 +375,11 @@ export default async function StaffDashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Admissions Pipeline Analytics */}
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
+        <PipelineAnalytics />
+      </div>
     </div>
   )
 }
