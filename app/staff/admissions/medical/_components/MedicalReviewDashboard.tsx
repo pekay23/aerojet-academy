@@ -158,7 +158,7 @@ export default function MedicalReviewDashboard({ applications }: { applications:
             const isReviewing = reviewingId === app.id
             const fullName = app.user.profile
               ? `${app.user.profile.firstName} ${app.user.profile.lastName}`
-              : app.user.name || app.user.email
+              : app.user.email
 
             return (
               <div

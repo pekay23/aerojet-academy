@@ -18,7 +18,6 @@ export default async function MedicalPage() {
         select: {
           id: true,
           email: true,
-          name: true,
           profile: { select: { firstName: true, lastName: true, phone: true } },
         },
       },
