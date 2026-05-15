@@ -17,6 +17,7 @@ import {
   GraduationCap,
   Armchair,
   FileQuestion,
+  BookMarked,
 } from 'lucide-react'
 import type { PaymentAccessLevel } from '@/lib/access-control'
 import type { SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
@@ -88,7 +89,8 @@ function buildLinks(
         { label: 'Classmates', href: '/student/classmates', icon: Users },
         { label: 'Attendance', href: '/student/attendance', icon: FileCheck },
         { label: 'My Seating', href: '/student/seating', icon: Armchair },
-        { label: 'Certificates', href: '/student/certificates', icon: Award }
+        { label: 'Certificates', href: '/student/certificates', icon: Award },
+        { label: 'OJT Logbook', href: '/student/ojt', icon: BookMarked }
       )
     }
   }

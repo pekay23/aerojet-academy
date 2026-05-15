@@ -10,6 +10,10 @@ interface ExamComponent {
   id: string
   code: string
   name: string
+  categoryCode?: string | null
+  questionCount?: number | null
+  courseCode?: string
+  courseName?: string
 }
 
 interface ExamEvent {
@@ -219,10 +223,10 @@ export default function BundleBooking({
                         }`}
                       >
                         <p className={`text-xs font-black tracking-tighter uppercase ${isSelected ? 'text-aerojet-blue dark:text-blue-300' : 'text-slate-900 dark:text-slate-100'}`}>
-                          {ec.code}
+                          {ec.courseCode ? `${ec.courseCode} - ` : ''}{ec.code}
                         </p>
                         <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
-                          {ec.name}
+                          {ec.name}{ec.categoryCode ? ` - Cat ${ec.categoryCode}` : ''}
                         </p>
                       </button>
                     )

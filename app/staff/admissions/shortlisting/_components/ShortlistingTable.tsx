@@ -12,17 +12,32 @@ import {
   CheckSquare,
   Square,
   AlertCircle,
-  Edit2
+  Edit2,
+  ChevronDown,
+  BarChart3,
+  Users,
+  ClipboardList,
 } from 'lucide-react'
 
 interface ScoreData {
   compositeScore: number
   aptitudeScore: number
+  aptitudePercentile: number | null
   profileScore: number
   referralScore: number
   experienceScore: number
+  interviewScore: number | null
+  interviewEvaluatorCount: number
   isAutoShortlist: boolean
   isAutoReject: boolean
+  mathRawScore: number | null
+  mathPercentile: number | null
+  verbalRawScore: number | null
+  verbalPercentile: number | null
+  engineeringRawScore: number | null
+  engineeringPercentile: number | null
+  reasoningRawScore: number | null
+  reasoningPercentile: number | null
 }
 
 interface ApplicationRow {
@@ -36,6 +51,46 @@ interface ApplicationRow {
   metadata: any
 }
 
+function PercentileBar({ label, percentile, raw }: { label: string; percentile: number | null; raw?: string }) {
+  if (percentile == null) return null
+  const color =
+    percentile >= 75 ? 'bg-green-500' : percentile >= 50 ? 'bg-blue-500' : percentile >= 25 ? 'bg-amber-500' : 'bg-red-500'
+  const textColor =
+    percentile >= 75
+      ? 'text-green-700 dark:text-green-400'
+      : percentile >= 50
+        ? 'text-blue-700 dark:text-blue-400'
+        : percentile >= 25
+          ? 'text-amber-700 dark:text-amber-400'
+          : 'text-red-700 dark:text-red-400'
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="w-20 text-xs text-slate-500">{label}</span>
+      <div className="relative h-2 flex-1 rounded-full bg-slate-200 dark:bg-slate-700">
+        <div className={`absolute left-0 top-0 h-2 rounded-full ${color}`} style={{ width: `${Math.min(percentile, 100)}%` }} />
+      </div>
+      <span className={`w-10 text-right text-xs font-bold ${textColor}`}>P{Math.round(percentile)}</span>
+      {raw && <span className="w-8 text-right text-xs text-slate-400">{raw}</span>}
+    </div>
+  )
+}
+
+function PercentileBadge({ value }: { value: number | null }) {
+  if (value == null) return <span className="text-xs text-slate-400">--</span>
+  const color =
+    value >= 75
+      ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+      : value >= 50
+        ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+        : value >= 25
+          ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
+          : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${color}`}>P{Math.round(value)}</span>
+  )
+}
+
 export default function ShortlistingTable({ data }: { data: ApplicationRow[] }) {
   const router = useRouter()
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -43,12 +98,13 @@ export default function ShortlistingTable({ data }: { data: ApplicationRow[] }) 
   const [processing, setProcessing] = useState(false)
   const [editingScoreId, setEditingScoreId] = useState<string | null>(null)
   const [tempScore, setTempScore] = useState<string>('')
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
-  // Filter
-  const filteredData = data.filter((row) =>
-    row.applicantName.toLowerCase().includes(search.toLowerCase()) ||
-    row.email.toLowerCase().includes(search.toLowerCase()) ||
-    row.programmeChoice.toLowerCase().includes(search.toLowerCase())
+  const filteredData = data.filter(
+    (row) =>
+      row.applicantName.toLowerCase().includes(search.toLowerCase()) ||
+      row.email.toLowerCase().includes(search.toLowerCase()) ||
+      row.programmeChoice.toLowerCase().includes(search.toLowerCase())
   )
 
   const toggleSelectAll = () => {
@@ -71,7 +127,7 @@ export default function ShortlistingTable({ data }: { data: ApplicationRow[] }) 
     let reason = ''
     if (action === 'REJECT') {
       const input = prompt('Enter rejection reason (optional):')
-      if (input === null) return // Cancelled
+      if (input === null) return
       reason = input
     }
 
@@ -108,7 +164,7 @@ export default function ShortlistingTable({ data }: { data: ApplicationRow[] }) 
       const res = await fetch(`/api/staff/admissions/shortlist/${id}/score`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ experienceScore: score })
+        body: JSON.stringify({ experienceScore: score }),
       })
       if (res.ok) {
         setEditingScoreId(null)
@@ -181,131 +237,209 @@ export default function ShortlistingTable({ data }: { data: ApplicationRow[] }) 
               </th>
               <th className="px-4 py-3 font-medium">Candidate</th>
               <th className="px-4 py-3 font-medium">Programme</th>
-              <th className="px-4 py-3 font-medium">Aptitude Score</th>
-              <th className="px-4 py-3 font-medium">Exp. Score</th>
-              <th className="px-4 py-3 font-medium">Total Score</th>
-              <th className="px-4 py-3 font-medium">Auto-Status</th>
+              <th className="px-4 py-3 font-medium">Aptitude</th>
+              <th className="px-4 py-3 font-medium">Percentile</th>
+              <th className="px-4 py-3 font-medium">Interview</th>
+              <th className="px-4 py-3 font-medium">Exp.</th>
+              <th className="px-4 py-3 font-medium">Composite</th>
+              <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
             {filteredData.length === 0 ? (
               <tr>
-                <td colSpan={8} className="py-8 text-center text-slate-500">
+                <td colSpan={10} className="py-8 text-center text-slate-500">
                   No applicants pending shortlisting.
                 </td>
               </tr>
             ) : (
-              filteredData.map((row) => (
-                <tr
-                  key={row.id}
-                  className={`group transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50 ${
-                    selectedIds.has(row.id) ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''
-                  }`}
-                >
-                  <td className="px-4 py-4">
-                    <button onClick={() => toggleSelect(row.id)} className="text-slate-400">
-                      {selectedIds.has(row.id) ? (
-                        <CheckSquare className="h-5 w-5 text-aerojet-blue" />
-                      ) : (
-                        <Square className="h-5 w-5" />
-                      )}
-                    </button>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="font-medium text-slate-900 dark:text-white">
-                      {row.applicantName}
-                    </div>
-                    <div className="text-xs text-slate-500">{row.email}</div>
-                    {row.cvUrl && (
-                      <a
-                        href={row.cvUrl}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-1 flex items-center gap-1 text-xs font-medium text-aerojet-blue hover:underline"
-                      >
-                        <FileText className="h-3 w-3" /> View CV
-                      </a>
-                    )}
-                  </td>
-                  <td className="px-4 py-4 text-slate-600 dark:text-slate-300">
-                    {row.programmeChoice}
-                    <div className="text-xs text-slate-500">{row.intakeCycle}</div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                      {row.scores.aptitudeScore}%
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    {editingScoreId === row.id ? (
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="number"
-                          className="w-16 rounded border px-2 py-1 text-xs dark:bg-slate-800"
-                          value={tempScore}
-                          onChange={(e) => setTempScore(e.target.value)}
-                        />
-                        <button onClick={() => handleSaveScore(row.id)} className="text-green-600 text-xs font-bold">Save</button>
-                        <button onClick={() => setEditingScoreId(null)} className="text-slate-500 text-xs">Cancel</button>
-                      </div>
-                    ) : (
-                      <div className="group/edit flex items-center gap-2">
-                        <span className="font-medium">{row.scores.experienceScore}</span>
+              filteredData.map((row) => {
+                const isExpanded = expandedId === row.id
+                return (
+                  <tr key={row.id} className="group">
+                    <td className="px-4 py-4 align-top">
+                      <button onClick={() => toggleSelect(row.id)} className="text-slate-400">
+                        {selectedIds.has(row.id) ? (
+                          <CheckSquare className="h-5 w-5 text-aerojet-blue" />
+                        ) : (
+                          <Square className="h-5 w-5" />
+                        )}
+                      </button>
+                    </td>
+                    <td className="px-4 py-4 align-top">
+                      <div className="font-medium text-slate-900 dark:text-white">{row.applicantName}</div>
+                      <div className="text-xs text-slate-500">{row.email}</div>
+                      <div className="mt-1 flex gap-2">
+                        {row.cvUrl && (
+                          <a
+                            href={row.cvUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="flex items-center gap-1 text-xs font-medium text-aerojet-blue hover:underline"
+                          >
+                            <FileText className="h-3 w-3" /> CV
+                          </a>
+                        )}
                         <button
-                          onClick={() => {
-                            setTempScore(String(row.scores.experienceScore))
-                            setEditingScoreId(row.id)
-                          }}
-                          className="hidden text-slate-400 hover:text-aerojet-blue group-hover/edit:block"
+                          onClick={() => setExpandedId(isExpanded ? null : row.id)}
+                          className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:underline dark:text-indigo-400"
                         >
-                          <Edit2 className="h-3 w-3" />
+                          <BarChart3 className="h-3 w-3" />
+                          {isExpanded ? 'Hide' : 'Detail'}
+                          <ChevronDown className={`h-3 w-3 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
                         </button>
                       </div>
-                    )}
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="text-lg font-black text-aerojet-blue dark:text-aerojet-sky">
-                      {row.scores.compositeScore}
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    {row.scores.isAutoShortlist ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                        <CheckCircle2 className="h-3 w-3" />
-                        Recommended
-                      </span>
-                    ) : row.scores.isAutoReject ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400">
-                        <AlertCircle className="h-3 w-3" />
-                        Flagged
-                      </span>
-                    ) : (
-                      <span className="text-xs text-slate-400">Neutral</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
-                      <button
-                        onClick={() => handleAction('REJECT', [row.id])}
-                        disabled={processing}
-                        className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-900/20 dark:hover:text-red-400"
-                        title="Reject Candidate"
-                      >
-                        <XCircle className="h-4 w-4" />
-                      </button>
-                      <button
-                        onClick={() => handleAction('SHORTLIST', [row.id])}
-                        disabled={processing}
-                        className="rounded-lg p-2 text-slate-400 hover:bg-green-50 hover:text-green-600 disabled:opacity-50 dark:hover:bg-green-900/20 dark:hover:text-green-400"
-                        title="Shortlist Candidate"
-                      >
-                        <CheckCircle2 className="h-4 w-4" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))
+
+                      {/* Expanded sub-score breakdown */}
+                      {isExpanded && (
+                        <div className="mt-3 w-72 space-y-1.5 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
+                          <p className="mb-2 text-xs font-bold text-slate-600 dark:text-slate-300">
+                            Aptitude Sub-Scores (Criteria-Style)
+                          </p>
+                          <PercentileBar
+                            label="Math"
+                            percentile={row.scores.mathPercentile}
+                            raw={row.scores.mathRawScore != null ? String(row.scores.mathRawScore) : undefined}
+                          />
+                          <PercentileBar
+                            label="Verbal"
+                            percentile={row.scores.verbalPercentile}
+                            raw={row.scores.verbalRawScore != null ? String(row.scores.verbalRawScore) : undefined}
+                          />
+                          <PercentileBar
+                            label="Engineering"
+                            percentile={row.scores.engineeringPercentile}
+                            raw={row.scores.engineeringRawScore != null ? String(row.scores.engineeringRawScore) : undefined}
+                          />
+                          <PercentileBar
+                            label="Reasoning"
+                            percentile={row.scores.reasoningPercentile}
+                            raw={row.scores.reasoningRawScore != null ? String(row.scores.reasoningRawScore) : undefined}
+                          />
+                          {row.scores.interviewScore != null && (
+                            <div className="mt-2 border-t border-slate-200 pt-2 dark:border-slate-700">
+                              <div className="flex items-center gap-2 text-xs">
+                                <Users className="h-3 w-3 text-purple-500" />
+                                <span className="text-slate-500">Interview Avg:</span>
+                                <span className="font-bold text-purple-700 dark:text-purple-400">
+                                  {row.scores.interviewScore}/100
+                                </span>
+                                <span className="text-slate-400">
+                                  ({row.scores.interviewEvaluatorCount} evaluator{row.scores.interviewEvaluatorCount !== 1 ? 's' : ''})
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-4 align-top">
+                      <div className="text-slate-600 dark:text-slate-300">{row.programmeChoice}</div>
+                      <div className="text-xs text-slate-500">{row.intakeCycle}</div>
+                    </td>
+                    <td className="px-4 py-4 align-top">
+                      <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                        {row.scores.aptitudeScore}%
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 align-top">
+                      <PercentileBadge value={row.scores.aptitudePercentile} />
+                    </td>
+                    <td className="px-4 py-4 align-top">
+                      {row.scores.interviewScore != null ? (
+                        <div className="flex items-center gap-1">
+                          <span className="text-sm font-bold text-purple-700 dark:text-purple-400">
+                            {row.scores.interviewScore}
+                          </span>
+                          <span className="text-xs text-slate-400">
+                            /{row.scores.interviewEvaluatorCount}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-slate-400">--</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-4 align-top">
+                      {editingScoreId === row.id ? (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="number"
+                            className="w-16 rounded border px-2 py-1 text-xs dark:bg-slate-800"
+                            value={tempScore}
+                            onChange={(e) => setTempScore(e.target.value)}
+                          />
+                          <button
+                            onClick={() => handleSaveScore(row.id)}
+                            className="text-xs font-bold text-green-600"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={() => setEditingScoreId(null)}
+                            className="text-xs text-slate-500"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="group/edit flex items-center gap-2">
+                          <span className="font-medium">{row.scores.experienceScore}</span>
+                          <button
+                            onClick={() => {
+                              setTempScore(String(row.scores.experienceScore))
+                              setEditingScoreId(row.id)
+                            }}
+                            className="hidden text-slate-400 hover:text-aerojet-blue group-hover/edit:block"
+                          >
+                            <Edit2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-4 py-4 align-top">
+                      <div className="text-lg font-black text-aerojet-blue dark:text-aerojet-sky">
+                        {row.scores.compositeScore}
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 align-top">
+                      {row.scores.isAutoShortlist ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                          <CheckCircle2 className="h-3 w-3" />
+                          Recommended
+                        </span>
+                      ) : row.scores.isAutoReject ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-1 text-xs font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                          <AlertCircle className="h-3 w-3" />
+                          Flagged
+                        </span>
+                      ) : (
+                        <span className="text-xs text-slate-400">Neutral</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-4 align-top text-right">
+                      <div className="flex items-center justify-end gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+                        <button
+                          onClick={() => handleAction('REJECT', [row.id])}
+                          disabled={processing}
+                          className="rounded-lg p-2 text-slate-400 hover:bg-red-50 hover:text-red-600 disabled:opacity-50 dark:hover:bg-red-900/20 dark:hover:text-red-400"
+                          title="Reject"
+                        >
+                          <XCircle className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => handleAction('SHORTLIST', [row.id])}
+                          disabled={processing}
+                          className="rounded-lg p-2 text-slate-400 hover:bg-green-50 hover:text-green-600 disabled:opacity-50 dark:hover:bg-green-900/20 dark:hover:text-green-400"
+                          title="Shortlist"
+                        >
+                          <CheckCircle2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })
             )}
           </tbody>
         </table>

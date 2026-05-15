@@ -3,6 +3,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import { getInternalBankCategoryCode, normalizeCategoryCode } from '@/lib/easa/category-selection'
 import { z } from 'zod'
 
 // GET — list all exam banks with pool health
@@ -33,7 +34,11 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
     const requiredMinimum = bank.minimumPoolSize ?? bank.mcqCount * 5
     const ratio = requiredMinimum > 0 ? questionCount / requiredMinimum : 0
     const health = ratio >= 1.0 ? 'GREEN' : ratio >= 0.6 ? 'AMBER' : 'RED'
-    return { ...bank, poolHealth: { health, questionCount, requiredMinimum } }
+    return {
+      ...bank,
+      categoryCode: getInternalBankCategoryCode(bank),
+      poolHealth: { health, questionCount, requiredMinimum },
+    }
   })
 
   return apiSuccess(enriched)
@@ -45,6 +50,7 @@ const createSchema = z.object({
   name: z.string().min(1),
   description: z.string().optional(),
   moduleCode: z.string().optional(),
+  categoryCode: z.string().optional(),
   mcqCount: z.number().min(5).default(40),
   ruleSet: z.enum(['EASA', 'CUSTOM']).default('EASA'),
 })
@@ -64,6 +70,7 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
       name: parsed.data.name,
       description: parsed.data.description || null,
       moduleCode: parsed.data.moduleCode || null,
+      categoryCode: normalizeCategoryCode(parsed.data.categoryCode),
       mcqCount: parsed.data.mcqCount,
       ruleSet: parsed.data.ruleSet as any,
       minimumPoolSize: parsed.data.mcqCount * 5,

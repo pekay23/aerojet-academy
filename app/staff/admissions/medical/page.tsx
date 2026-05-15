@@ -27,7 +27,7 @@ export default async function MedicalPage() {
         },
         include: {
           documentType: { select: { name: true } },
-          fileUpload: { select: { url: true, fileName: true } },
+          fileUpload: { select: { url: true, filename: true } },
         },
       },
     },

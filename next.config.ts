@@ -15,7 +15,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.ufs.sh' },
     ],
   },
-  allowedDevOrigins: ['192.168.8.173'],
+  allowedDevOrigins: ['192.168.8.173', '192.168.100.218'],
   experimental: {
     serverActions: {
       bodySizeLimit: '4mb',

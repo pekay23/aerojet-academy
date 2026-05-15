@@ -21,6 +21,7 @@ import { studentCreatePoolSchema, CreatePoolInput, validateBody } from '@/lib/va
 import { assertExamOnlyPathway } from '@/lib/pools/access-control'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 import { chargeWallet } from '@/lib/wallet/operations'
+import { categoryMatchesTarget, getStudentTargetCategoryCodes } from '@/lib/easa/category-selection'
 
 export async function enrollInCourse(courseId: string) {
   const user = await requireStudent()
@@ -262,10 +263,15 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
   // 3. Find exam component
   const examComponent = await prisma.examComponent.findFirst({
     where: { code: moduleCode },
-    select: { id: true },
+    select: { id: true, categoryCode: true, course: { select: { code: true } } },
   })
   if (!examComponent) {
     return { error: `No exam component found for module ${moduleCode}.` }
+  }
+
+  const targetCategories = await getStudentTargetCategoryCodes(prisma, user.id)
+  if (targetCategories.length > 0 && !categoryMatchesTarget(examComponent.categoryCode, targetCategories)) {
+    return { error: 'This module/category is not part of your selected licence pathway.' }
   }
 
   // 4. Wallet fast-fail (for UX; joinPool enforces atomically too)
@@ -287,7 +293,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     userId: user.id,
     examComponentId: examComponent.id,
     eventId: pool.eventId,
-    moduleCode,
+    moduleCode: examComponent.course.code,
     bookingType: 'POOL',
     reserveAmount: seatPrice,
     amountPaid: seatPrice,
@@ -321,7 +327,7 @@ export async function joinExamPool(poolId: string, moduleCode: string) {
     data: {
       userId: user.id,
       title: 'Exam Booking Joined Successfully',
-      message: `You have successfully secured a seat in ${pool.name} for module ${moduleCode}.`,
+      message: `You have successfully secured a seat in ${pool.name} for module ${examComponent.course.code}.`,
       type: 'SUCCESS',
       linkUrl: '/student/exam-bookings/my-bookings',
       linkText: 'View Bookings',
@@ -399,8 +405,16 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
     // 3. Find Exam Component
     const examComponent = await prisma.examComponent.findFirst({
       where: { code: moduleCode },
+      include: { course: true },
     })
     if (!examComponent) return { error: `No exam component found for module ${moduleCode}.` }
+
+    const targetCategories = await getStudentTargetCategoryCodes(prisma, user.id)
+    if (targetCategories.length > 0 && !categoryMatchesTarget(examComponent.categoryCode, targetCategories)) {
+      return { error: 'This module/category is not part of your selected licence pathway.' }
+    }
+
+    const poolModuleCode = examComponent.course.code
 
     // 4. Construct Pool Times
     const date = new Date(examDate)
@@ -424,13 +438,13 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
         data: {
           eventId,
           name: isGroup
-            ? organizationName || `Group - ${moduleCode}`
-            : `Student Initiated - ${moduleCode}`,
+            ? organizationName || `Group - ${poolModuleCode}`
+            : `Student Initiated - ${poolModuleCode}`,
           examDate: date,
           examStartTime: startTime,
           examEndTime: endTime,
           seatPrice,
-          allowedModules: isGroup ? moduleCode.split(',') : [moduleCode],
+          allowedModules: [poolModuleCode],
           status: isGroup ? PoolStatus.CONFIRMED : PoolStatus.OPEN,
           currentMemberCount: isGroup ? seats || 1 : 1,
           maxCandidates: isGroup ? seats || 28 : 28,
@@ -449,11 +463,8 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
       )
 
       // C. Create Membership — reuse examComponent from step 3 when possible
-      const primaryModule = isGroup ? moduleCode.split(',')[0] : moduleCode
-      const primaryExamComponentId =
-        primaryModule === moduleCode
-          ? examComponent.id
-          : (await tx.examComponent.findFirst({ where: { code: primaryModule } }))?.id
+      const primaryModule = poolModuleCode
+      const primaryExamComponentId = examComponent.id
 
       const booking = await tx.examBooking.create({
         data: {
@@ -501,7 +512,7 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
         data: {
           userId: user.id,
           title: 'Exam Booking Created',
-          message: `You have successfully created a new exam booking for module ${moduleCode} and reserved your seat.`,
+          message: `You have successfully created a new exam booking for module ${poolModuleCode} and reserved your seat.`,
           type: 'SUCCESS',
           linkUrl: '/student/exam-bookings/my-bookings',
           linkText: 'View Bookings',
@@ -1032,6 +1043,14 @@ export async function bookBundleExamsAtomicAction(params: {
       return { error: 'One or more selected modules could not be found.' }
     }
 
+    const targetCategories = await getStudentTargetCategoryCodes(prisma, user.id)
+    if (
+      targetCategories.length > 0 &&
+      components.some((component) => !categoryMatchesTarget(component.categoryCode, targetCategories))
+    ) {
+      return { error: 'One or more selected module categories are not part of your selected licence pathway.' }
+    }
+
     const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } })
     if (!wallet || Number(wallet.availableBalance) < bundlePrice) {
       return { error: `Insufficient funds. Bundle price is €${bundlePrice.toFixed(2)}.` }
@@ -1043,7 +1062,7 @@ export async function bookBundleExamsAtomicAction(params: {
           tx,
           user.id,
           bundlePrice,
-          `${bookingType === 'TWIN_PACK' ? 'Twin Pack' : '4-Pack'} bundle purchase: ${moduleCodes.join(', ')}`,
+          `${bookingType === 'TWIN_PACK' ? 'Twin Pack' : '4-Pack'} bundle purchase: ${components.map((component) => component.code).join(', ')}`,
           eventId,
           'EXAM_BUNDLE'
         )
@@ -1087,7 +1106,7 @@ export async function bookBundleExamsAtomicAction(params: {
     )
 
     const typeStr = bookingType === 'TWIN_PACK' ? 'Twin Pack' : '4-Pack'
-    const modulesStr = moduleCodes.join(', ')
+    const modulesStr = components.map((component) => component.code).join(', ')
 
     await prisma.notification.create({
       data: {
@@ -1115,6 +1134,14 @@ export async function bookResitExamAction(moduleCode: string, eventId: string) {
   try {
     const user = await requireStudent()
     await assertExamOnlyPathway(user.id)
+    const component = await prisma.examComponent.findFirst({
+      where: { code: moduleCode },
+      select: { categoryCode: true },
+    })
+    const targetCategories = await getStudentTargetCategoryCodes(prisma, user.id)
+    if (component && targetCategories.length > 0 && !categoryMatchesTarget(component.categoryCode, targetCategories)) {
+      return { error: 'This resit category is not part of your selected licence pathway.' }
+    }
     await bookResitExam(user.id, moduleCode, eventId)
 
     await prisma.notification.create({

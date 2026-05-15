@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma/client'
 import { resolveStandardPoolForJoin } from '@/lib/pools/assignment'
 import { joinPoolInternal } from '@/lib/pools/join'
 import { getSystemSetting } from '@/lib/settings'
+import { categoryMatchesTarget, getStudentTargetCategoryCodes } from '@/lib/easa/category-selection'
 
 /** Resolve an ExamComponent by its unique code. Accepts an optional transaction client. */
 export async function findExamComponentByCode(code: string, tx: typeof prisma = prisma) {
@@ -53,13 +54,15 @@ export async function placeExamBookingInStandardPool(
  */
 export async function bookStandaloneExam(
   userId: string,
-  params: { examId?: string; moduleCode?: string; eventId?: string }
+  params: { examId?: string; examComponentId?: string; moduleCode?: string; eventId?: string }
 ) {
-  const { examId, moduleCode, eventId } = params
+  const { examId, examComponentId: requestedExamComponentId, moduleCode, eventId } = params
 
   let courseCode = moduleCode
   let targetEventId = eventId
   let examComponentId: string | null = null
+  let componentCode: string | null = null
+  let categoryCode: string | null = null
 
   if (examId) {
     const exam = await prisma.exam.findUnique({
@@ -68,8 +71,23 @@ export async function bookStandaloneExam(
     })
     if (!exam) throw new Error('Exam not found')
     courseCode = exam.examComponent.course.code
+    componentCode = exam.examComponent.code
+    categoryCode = exam.examComponent.categoryCode
     targetEventId = exam.eventId ?? undefined
     examComponentId = exam.examComponentId
+  } else if (requestedExamComponentId && eventId) {
+    const comp = await prisma.examComponent.findUnique({
+      where: { id: requestedExamComponentId },
+      include: { course: true },
+    })
+    if (!comp) throw new Error('Exam component not found')
+    courseCode = comp.course.code
+    componentCode = comp.code
+    categoryCode = comp.categoryCode
+    examComponentId = comp.id
+    const event = await prisma.examEvent.findUnique({ where: { id: eventId } })
+    if (!event) throw new Error('Exam event not found')
+    targetEventId = event.id
   } else if (moduleCode && eventId) {
     const comp = await prisma.examComponent.findFirst({
       where: { code: moduleCode },
@@ -77,6 +95,9 @@ export async function bookStandaloneExam(
     })
     if (!comp) throw new Error(`Exam component for module ${moduleCode} not found`)
     examComponentId = comp.id
+    componentCode = comp.code
+    courseCode = comp.course.code
+    categoryCode = comp.categoryCode
     const event = await prisma.examEvent.findUnique({ where: { id: eventId } })
     if (!event) throw new Error('Exam event not found')
     targetEventId = event.id
@@ -86,6 +107,11 @@ export async function bookStandaloneExam(
 
   if (!targetEventId) throw new Error('No exam event associated with this booking.')
   if (!examComponentId) throw new Error('Exam component could not be resolved.')
+
+  const targetCategories = await getStudentTargetCategoryCodes(prisma, userId)
+  if (targetCategories.length > 0 && !categoryMatchesTarget(categoryCode, targetCategories)) {
+    throw new Error('This exam category is not part of the student licence pathway.')
+  }
 
   const settingPrice = await getSystemSetting('individual_exam_fee', '520')
   const individualPrice = Number(settingPrice)
@@ -118,7 +144,7 @@ export async function bookStandaloneExam(
       bundleId: activeBundle?.id || null,
     })
 
-    return { usedBundle: !!activeBundle, poolId: result.pool!.id, bookingId: result.booking.id }
+    return { usedBundle: !!activeBundle, poolId: result.pool!.id, bookingId: result.booking.id, componentCode }
   })
 }
 
@@ -137,6 +163,11 @@ export async function bookResitExam(userId: string, moduleCode: string, eventId:
 
   if (!comp) throw new Error(`Exam component for module ${moduleCode} not found`)
   if (!event) throw new Error('Exam event not found')
+
+  const targetCategories = await getStudentTargetCategoryCodes(prisma, userId)
+  if (targetCategories.length > 0 && !categoryMatchesTarget(comp.categoryCode, targetCategories)) {
+    throw new Error('This resit category is not part of the student licence pathway.')
+  }
 
   let resitFee = 480
   if (event.resitFee) {

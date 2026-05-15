@@ -14,12 +14,12 @@ const recordSchema = z.object({
   taskReference: z.string().optional(),
   ataChapterId: z.string().optional(),
   description: z.string().min(1),
-  deliveryMethod: z.enum(['DEMONSTRATION', 'PRACTICAL_EXERCISE', 'WORKSHOP', 'SIMULATION', 'ON_AIRCRAFT']),
+  deliveryMethod: z.enum(['TASK_PERFORMANCE', 'DEMONSTRATION', 'TECHNICAL_DISCUSSION', 'SIMULATION']),
   date: z.string(),
   durationMinutes: z.number().min(15),
   instructorId: z.string(),
   assessorId: z.string().optional(),
-  result: z.enum(['SATISFACTORY', 'UNSATISFACTORY', 'NEEDS_IMPROVEMENT']).optional(),
+  result: z.enum(['SATISFACTORY', 'UNSATISFACTORY', 'NEEDS_REVIEW']).optional(),
   assessorNotes: z.string().optional(),
 })
 

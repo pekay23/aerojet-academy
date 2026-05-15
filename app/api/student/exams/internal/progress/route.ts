@@ -3,6 +3,11 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { EASA_DEFAULTS, isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import {
+  categoryMatchesTarget,
+  getInternalBankCategoryCode,
+  getStudentTargetCategoryCodes,
+} from '@/lib/easa/category-selection'
 
 /**
  * GET /api/student/exams/internal/progress
@@ -56,6 +61,8 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
           id: true,
           name: true,
           moduleCode: true,
+          categoryCode: true,
+          categoryConfig: true,
           course: { select: { name: true, code: true } },
         },
       },
@@ -145,6 +152,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
     select: { courseId: true },
   })
   const enrolledCourseIds = [...new Set(enrollments.map((enrollment) => enrollment.courseId))]
+  const targetCategories = await getStudentTargetCategoryCodes(prismaUnfiltered, studentId)
 
   // Only show banks tied to courses the student can actually access.
   const allBanks = await prismaUnfiltered.internalExamBank.findMany({
@@ -156,16 +164,24 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
       id: true,
       name: true,
       moduleCode: true,
+      categoryCode: true,
+      categoryConfig: true,
       course: { select: { name: true, code: true } },
     },
   })
 
-  const bankProgress = allBanks.map(bank => {
+  const eligibleBanks = allBanks.filter((bank) =>
+    categoryMatchesTarget(getInternalBankCategoryCode(bank), targetCategories)
+  )
+
+  const bankProgress = eligibleBanks.map(bank => {
     const progress = byBank[bank.id]
+    const categoryCode = getInternalBankCategoryCode(bank)
     return {
       bankId: bank.id,
       bankName: bank.name,
       moduleCode: bank.moduleCode,
+      categoryCode,
       courseName: bank.course.name,
       courseCode: bank.course.code,
       attempted: !!progress,
@@ -178,7 +194,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
     }
   })
 
-  const totalBanks = allBanks.length
+  const totalBanks = eligibleBanks.length
   const passedBanks = bankProgress.filter(b => b.passed).length
 
   return apiSuccess({
@@ -191,6 +207,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
       nationality: user.profile?.nationality || null,
       enrollmentType: user.studentProfile?.enrollmentType || null,
       programmeChoice: user.studentProfile?.programmeChoice || null,
+      targetCategories,
     },
     bankProgress,
     completionWindow,
