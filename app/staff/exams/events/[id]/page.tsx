@@ -9,6 +9,7 @@ import {
   ChevronLeft,
   Plus,
   Settings,
+  Armchair,
 } from 'lucide-react'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { format } from 'date-fns'
@@ -309,12 +310,22 @@ export default async function ExamEventDetailPage({ params }: PageProps) {
                             Day {sitting.dayNumber} · {sitting.sessionType} · {format(new Date(sitting.startTime), 'dd MMM yyyy, h:mm a')}
                           </div>
                         </div>
-                        <div className="text-right">
-                          <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
-                            {sitting._count.assignments}/{sitting.capacity}
-                          </div>
-                          <div className="text-[11px] text-slate-400">
-                            {sitting.status}
+                        <div className="flex items-center gap-3">
+                          <Link
+                            href={`/staff/exams/sittings/${sitting.id}/seating`}
+                            className="flex items-center gap-1 text-xs font-bold text-aerojet-sky hover:text-aerojet-blue transition-colors"
+                            title="Manage seating"
+                          >
+                            <Armchair className="h-3.5 w-3.5" />
+                            Seats
+                          </Link>
+                          <div className="text-right">
+                            <div className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                              {sitting._count.assignments}/{sitting.capacity}
+                            </div>
+                            <div className="text-[11px] text-slate-400">
+                              {sitting.status}
+                            </div>
                           </div>
                         </div>
                       </div>

@@ -1,0 +1,2619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aerojet Academy — Admissions & Exam Pipeline Plan</title>
+<style>
+  :root {
+    --aerojet: #002855;
+    --aerojet-light: #003d80;
+    --aerojet-bg: #f0f4f8;
+    --accent: #0ea5e9;
+    --green: #22c55e;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+    --pink: #ec4899;
+    --slate: #64748b;
+    --card-bg: #ffffff;
+    --border: #e2e8f0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--aerojet-bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .hero {
+    background: linear-gradient(135deg, var(--aerojet) 0%, var(--aerojet-light) 100%);
+    color: white;
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+  }
+  .hero h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .hero p { font-size: 1.05rem; opacity: 0.85; max-width: 700px; margin: 0 auto; }
+  .hero .badge-row { margin-top: 1.2rem; display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+  .hero .badge {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 20px;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  /* ── Nav Tabs ── */
+  .tab-bar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    padding: 0 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .tab-bar button {
+    background: none;
+    border: none;
+    padding: 0.85rem 1.1rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .tab-bar button:hover { color: var(--aerojet); }
+  .tab-bar button.active {
+    color: var(--aerojet);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ── Content ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── Cards ── */
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .card h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card p, .card li { font-size: 0.9rem; color: var(--text); }
+  .card ul { padding-left: 1.2rem; }
+  .card li { margin-bottom: 0.3rem; }
+
+  /* ── Pipeline Flow ── */
+  .pipeline-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    overflow-x: auto;
+    padding: 1.5rem 0;
+    margin-bottom: 1rem;
+  }
+  .pipeline-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 100px;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.15s, opacity 0.3s;
+  }
+  .pipeline-stage:hover { transform: translateY(-3px); }
+  .pipeline-stage.dimmed { opacity: 0.15; }
+  .pipeline-dot {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    position: relative;
+    z-index: 2;
+  }
+  .pipeline-label {
+    margin-top: 0.5rem;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-align: center;
+    max-width: 90px;
+    color: var(--text-muted);
+    line-height: 1.3;
+  }
+  .pipeline-arrow {
+    width: 30px;
+    height: 2px;
+    background: var(--border);
+    position: relative;
+    flex-shrink: 0;
+    transition: opacity 0.3s;
+  }
+  .pipeline-arrow::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -4px;
+    border: 5px solid transparent;
+    border-left-color: var(--border);
+  }
+  .pipeline-arrow.dimmed { opacity: 0.15; }
+
+  /* stage colors */
+  .stage-reg { background: var(--slate); }
+  .stage-doc { background: var(--purple); }
+  .stage-apt { background: var(--accent); }
+  .stage-short { background: var(--amber); }
+  .stage-int { background: var(--pink); }
+  .stage-med { background: var(--red); }
+  .stage-enrolled { background: var(--green); }
+
+  /* ── Programme Matrix ── */
+  .matrix-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.82rem;
+    border-radius: var(--radius);
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .matrix-table th {
+    background: var(--aerojet);
+    color: white;
+    padding: 0.7rem 0.6rem;
+    text-align: center;
+    font-weight: 600;
+    font-size: 0.78rem;
+  }
+  .matrix-table th:first-child { text-align: left; min-width: 140px; }
+  .matrix-table td {
+    padding: 0.55rem 0.6rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  .matrix-table td:first-child { text-align: left; font-weight: 500; }
+  .matrix-table tr:nth-child(even) td { background: #f8fafc; }
+  .matrix-table tr:last-child td { border-bottom: none; }
+  .check { color: var(--green); font-weight: 700; }
+  .cross { color: var(--red); font-weight: 700; }
+  .opt { color: var(--amber); font-size: 0.75rem; }
+  .cell-note { font-size: 0.72rem; color: var(--text-muted); display: block; margin-top: 2px; }
+
+  /* ── Phase Cards ── */
+  .phase-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--accent);
+  }
+  .phase-num {
+    background: var(--aerojet);
+    color: white;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+  .phase-header h2 { font-size: 1.3rem; font-weight: 700; }
+
+  /* ── Data Model Diagram ── */
+  .model-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+  .model-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 0.82rem;
+    transition: box-shadow 0.15s;
+  }
+  .model-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .model-card-header {
+    background: var(--aerojet);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    font-weight: 600;
+    font-size: 0.85rem;
+  }
+  .model-card-body { padding: 0.6rem 0.75rem; }
+  .model-field {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.2rem 0;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .model-field:last-child { border-bottom: none; }
+  .field-name { font-weight: 500; color: var(--text); }
+  .field-type { color: var(--accent); font-family: 'Fira Code', monospace; font-size: 0.75rem; }
+
+  /* ── State Machine ── */
+  .state-machine {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    overflow-x: auto;
+  }
+  .state-row {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin-bottom: 0.6rem;
+    flex-wrap: wrap;
+  }
+  .state-chip {
+    padding: 0.35rem 0.7rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+    color: white;
+  }
+  .state-arrow-sm {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0 0.15rem;
+  }
+  .skip-label {
+    font-size: 0.7rem;
+    color: var(--amber);
+    background: #fffbeb;
+    border: 1px dashed var(--amber);
+    border-radius: 4px;
+    padding: 0.15rem 0.4rem;
+    margin-left: 0.5rem;
+  }
+
+  /* ── Settings List ── */
+  .settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 0.6rem;
+  }
+  .setting-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.8rem;
+  }
+  .setting-key { font-family: 'Fira Code', monospace; color: var(--aerojet); font-weight: 500; font-size: 0.75rem; }
+  .setting-val { color: var(--text-muted); font-size: 0.78rem; }
+
+  /* ── File tree ── */
+  .file-tree { font-family: 'Fira Code', monospace; font-size: 0.78rem; line-height: 1.8; }
+  .file-tree .dir { color: var(--accent); font-weight: 600; }
+  .file-tree .file { color: var(--text); }
+  .file-tree .new-badge {
+    background: var(--green);
+    color: white;
+    font-size: 0.6rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    margin-left: 0.4rem;
+    font-family: Inter, sans-serif;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+  .file-tree .mod-badge {
+    background: var(--amber);
+    color: white;
+    font-size: 0.6rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 3px;
+    margin-left: 0.4rem;
+    font-family: Inter, sans-serif;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+
+  /* ── Email table ── */
+  .email-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.82rem;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .email-table th {
+    background: var(--aerojet);
+    color: white;
+    padding: 0.6rem;
+    text-align: left;
+    font-weight: 600;
+  }
+  .email-table td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .email-table tr:nth-child(even) td { background: #f8fafc; }
+  .email-table tr:last-child td { border-bottom: none; }
+
+  /* ── Collapsible ── */
+  .collapsible { cursor: pointer; user-select: none; }
+  .collapsible::before {
+    content: '\25B6';
+    display: inline-block;
+    margin-right: 0.5rem;
+    font-size: 0.7rem;
+    transition: transform 0.2s;
+    color: var(--accent);
+  }
+  .collapsible.open::before { transform: rotate(90deg); }
+  .collapse-body { display: none; padding-top: 0.75rem; }
+  .collapse-body.open { display: block; }
+
+  /* ── Verification checklist ── */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.4rem 0;
+    font-size: 0.85rem;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .checklist li::before {
+    content: '\2610';
+    font-size: 1.1rem;
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ── Tooltip ── */
+  .tooltip-wrap { position: relative; }
+  .tooltip-wrap .tip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: white;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    white-space: nowrap;
+    z-index: 50;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .tooltip-wrap:hover .tip { display: block; }
+
+  /* ── Anti-cheat visual ── */
+  .anti-cheat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  @media (max-width: 600px) { .anti-cheat-grid { grid-template-columns: 1fr; } }
+  .ac-card {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .ac-card h4 { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--aerojet); }
+  .ac-card li { font-size: 0.8rem; margin-bottom: 0.25rem; }
+
+  /* ── Summary Stats ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat-num { font-size: 1.8rem; font-weight: 700; color: var(--aerojet); }
+  .stat-label { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem; }
+
+  /* ═══════════ INTERACTIVE ADDITIONS ═══════════ */
+
+  /* ── Toggle Switch ── */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    border: 1px solid var(--border);
+    background: white;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  .toggle-row.flag-on {
+    background: #f0fdf4;
+    border-color: #86efac;
+  }
+  .toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-track {
+    position: absolute;
+    inset: 0;
+    background: #cbd5e1;
+    border-radius: 12px;
+    transition: background 0.25s;
+  }
+  .toggle-switch input:checked + .toggle-track { background: var(--green); }
+  .toggle-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: transform 0.25s;
+  }
+  .toggle-switch input:checked ~ .toggle-knob { transform: translateX(20px); }
+  .toggle-info { flex: 1; }
+  .toggle-name { font-family: 'Fira Code', monospace; font-size: 0.8rem; font-weight: 600; color: var(--aerojet); }
+  .toggle-desc { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+  .toggle-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    flex-shrink: 0;
+  }
+  .toggle-status.on { background: #dcfce7; color: #166534; }
+  .toggle-status.off { background: #fee2e2; color: #991b1b; }
+
+  /* ── Code Block with Copy ── */
+  .code-block {
+    position: relative;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.78rem;
+    background: #1e293b;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    line-height: 1.7;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #94a3b8;
+    padding: 0.3rem 0.6rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: Inter, sans-serif;
+  }
+  .copy-btn:hover { background: rgba(255,255,255,0.2); color: white; }
+  .copy-btn.copied { background: var(--green); color: white; border-color: var(--green); }
+
+  /* ── Exam Calculator ── */
+  .calc-card {
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    border: 1px solid #93c5fd;
+    border-radius: var(--radius);
+    padding: 1.5rem;
+  }
+  .calc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  @media (max-width: 600px) { .calc-grid { grid-template-columns: 1fr; } }
+  .calc-input-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--aerojet);
+    margin-bottom: 0.3rem;
+  }
+  .calc-input-group input, .calc-input-group select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #93c5fd;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    background: white;
+    color: var(--text);
+    outline: none;
+  }
+  .calc-input-group input:focus, .calc-input-group select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(14,165,233,0.15); }
+  .calc-result {
+    margin-top: 1.2rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  .calc-result-box {
+    background: white;
+    border-radius: 8px;
+    padding: 0.75rem 1.2rem;
+    text-align: center;
+    border: 1px solid #93c5fd;
+    flex: 1;
+    min-width: 120px;
+  }
+  .calc-result-num { font-size: 1.6rem; font-weight: 700; color: var(--aerojet); }
+  .calc-result-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+
+  /* ── SVG State Machine ── */
+  .svg-state-machine {
+    width: 100%;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+  }
+  .svg-state-machine svg { display: block; margin: 0 auto; }
+  .svg-state-machine text { font-family: Inter, sans-serif; }
+
+  /* ── Live Pipeline Preview ── */
+  .live-pipeline-preview {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.2rem 1.5rem;
+    margin-top: 1rem;
+  }
+  .live-pipeline-preview h4 {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 1.5rem; }
+    .container { padding: 1rem; }
+    .model-grid { grid-template-columns: 1fr; }
+    .settings-grid { grid-template-columns: 1fr; }
+    .tab-bar button { padding: 0.7rem 0.8rem; font-size: 0.75rem; }
+    .calc-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════ HERO ════════════ -->
+<div class="hero">
+  <h1>Admissions Pipeline Plan</h1>
+  <p>Replacing BambooHR with a fully integrated in-house admissions system &mdash; from application to enrollment.</p>
+  <div class="badge-row">
+    <span class="badge">10 Phases</span>
+    <span class="badge">17+ New Models</span>
+    <span class="badge">14+ Email Templates</span>
+    <span class="badge">5 Programme Paths</span>
+    <span class="badge">17 Pipeline Stages</span>
+    <span class="badge">Internal Exam System</span>
+  </div>
+</div>
+
+<!-- ════════════ TAB BAR ════════════ -->
+<div class="tab-bar" id="tabBar">
+  <button class="active" data-tab="overview">Overview</button>
+  <button data-tab="feature-flags">Feature Flags</button>
+  <button data-tab="pipeline">Pipeline Flow</button>
+  <button data-tab="programmes">Programmes</button>
+  <button data-tab="models">Data Models</button>
+  <button data-tab="phases">All Phases</button>
+  <button data-tab="aptitude">Aptitude Test</button>
+  <button data-tab="interviews">Interviews</button>
+  <button data-tab="emails">Emails & Cron</button>
+  <button data-tab="internal-exams">Internal Exams</button>
+  <button data-tab="compliance">Part 147/145</button>
+  <button data-tab="files">File Map</button>
+  <button data-tab="verification">Verification</button>
+</div>
+
+<div class="container">
+
+<!-- ════════════ OVERVIEW ════════════ -->
+<div class="section active" id="overview">
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num">15</div><div class="stat-label">Implementation Phases</div></div>
+    <div class="stat-card"><div class="stat-num">30+</div><div class="stat-label">New Prisma Models</div></div>
+    <div class="stat-card"><div class="stat-num">17</div><div class="stat-label">Pipeline Stages</div></div>
+    <div class="stat-card"><div class="stat-num">14+</div><div class="stat-label">Email Templates</div></div>
+    <div class="stat-card"><div class="stat-num">30+</div><div class="stat-label">SystemSettings Keys</div></div>
+    <div class="stat-card"><div class="stat-num">85+</div><div class="stat-label">New API Routes</div></div>
+  </div>
+
+  <div class="card">
+    <h3>Context</h3>
+    <p>Aerojet Academy currently uses a simplified 4-step applicant flow: <strong>Register &rarr; Pay Registration Fee &rarr; Staff Approves &rarr; Portal Access</strong>. The academy previously relied on BambooHR for the full admissions pipeline (aptitude testing, interview scheduling, medical clearance). This plan brings everything in-house.</p>
+    <br>
+    <p><strong>Who this affects:</strong> All programme types (FULL_TIME_4YEAR, FULL_TIME_2YEAR, MILITARY_1YEAR, MODULAR, EXAM_ONLY). Every applicant creates an Application record when the pipeline is enabled. EASA Part 147/145 compliance features (attendance, instructor management, practical training, OJT) apply to enrolled students.</p>
+  </div>
+
+  <div class="card">
+    <h3>Phase Summary</h3>
+    <table class="matrix-table">
+      <tr><th>Phase</th><th>What</th><th>Key Deliverables</th></tr>
+      <tr><td><strong>1. Foundation</strong></td><td>Data model + State machine</td><td>Application model, stage transitions, pipeline dashboard</td></tr>
+      <tr><td><strong>2. Documents</strong></td><td>Uploads + Intake cycles</td><td>Configurable doc requirements, intake CRUD</td></tr>
+      <tr><td><strong>3. Aptitude</strong></td><td>Test system</td><td>Question banks, test UI, anti-cheat, auto-grading</td></tr>
+      <tr><td><strong>4. Shortlisting</strong></td><td>Scoring + selection</td><td>Composite scoring engine, bulk shortlist/reject</td></tr>
+      <tr><td><strong>5. Interviews</strong></td><td>Scheduler</td><td>Slot management, self-service booking, outcome recording</td></tr>
+      <tr><td><strong>6. Medical</strong></td><td>Exam + enrollment</td><td>Medical tracking, document review, programme-specific enrollment</td></tr>
+      <tr><td><strong>7. Emails</strong></td><td>Templates + cron</td><td>14 email templates, interview/deadline reminders</td></tr>
+      <tr><td><strong>8. Internal Exams</strong></td><td>EASA + non-EASA test system</td><td>Reuse aptitude infrastructure, EASA rules, keyboard auto-submit, bank health, stratified selection</td></tr>
+      <tr><td><strong>9. Import</strong></td><td>Legacy data + custom fields</td><td>CSV import wizard, admin-defined custom fields (EAV)</td></tr>
+      <tr><td><strong>10. Attendance</strong></td><td>Training hours (Part 147)</td><td>Batch attendance marking, 6hr/day max, 2,400hr tracking, NAA audit export</td></tr>
+      <tr><td><strong>11. Instructors</strong></td><td>Examiner management (Part 147)</td><td>Profiles, qualifications, 35hr/24mo recency enforcement</td></tr>
+      <tr><td><strong>12. Practical</strong></td><td>Training records (Part 147)</td><td>P1/P2 tasks, ATA chapters, dual-signature, 15-student max</td></tr>
+      <tr><td><strong>13. OJT Logbook</strong></td><td>Digital logbook (Part 145)</td><td>Per-entry tracking, ATA coverage, supervisor sign, Form 19 export</td></tr>
+      <tr><td><strong>14. Upgrades</strong></td><td>Programme + retention</td><td>2yr&rarr;4yr flow, record retention, 10-year window, 3-attempt ban</td></tr>
+      <tr><td><strong>15. Polish</strong></td><td>Integration</td><td>Pipeline analytics, audit logging, seed data, ATA directory, tours</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Key Architectural Decisions</h3>
+    <ul>
+      <li><strong>Separate Application model</strong> (not extending User) &mdash; User already has 83+ fields. Clean separation.</li>
+      <li><strong>Application for ALL programme types</strong> &mdash; Every applicant gets an Application record when pipeline is enabled. Unified tracking.</li>
+      <li><strong>Admin-configurable stage matrix</strong> &mdash; Per-programme stage toggle via JSON in SystemSettings. No code changes needed.</li>
+      <li><strong>Configurable document requirements</strong> &mdash; Admin defines required docs (ID, certs, CV) per programme. No hardcoded fields.</li>
+      <li><strong>Funding type independent of programme</strong> &mdash; Any programme can be scholarship, self-funded, or sponsored.</li>
+      <li><strong>Scholarship bonding model</strong> &mdash; Scholarship = loan payback via bonding contract. Scores only (no cert downloads). Self-funded students are not bonded.</li>
+      <li><strong>5&times; minimum bank + stratified selection</strong> &mdash; Ensures fair question rotation and sub-topic coverage across exam sessions.</li>
+      <li><strong>Part 147 compliance</strong> &mdash; Attendance, instructor recency, practical training records all auditable for NAA inspections.</li>
+      <li><strong>OJT logbook as separate model</strong> &mdash; Multi-year tracking with supervisor countersignatures and ATA chapter coverage analysis.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ════════════ FEATURE FLAGS ════════════ -->
+<div class="section" id="feature-flags">
+  <div class="phase-header"><div class="phase-num" style="font-size:0.85rem">&#9889;</div><h2>Feature Flag Strategy &mdash; Gradual Activation</h2></div>
+
+  <div class="card" style="background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fbbf24">
+    <h3 style="color:#92400e">Core Principle</h3>
+    <p style="font-size:0.9rem">The entire new system is built behind feature flags. The current simplified flow (Register &rarr; Pay &rarr; Approve &rarr; Portal Access) remains the <strong>default</strong> until admin explicitly activates each subsystem. Toggle the switches below to see how the pipeline changes.</p>
+  </div>
+
+  <div class="card">
+    <h3>Layer 1: Global Switches</h3>
+    <div class="toggle-row" id="flag-pipeline">
+      <label class="toggle-switch">
+        <input type="checkbox" onchange="updatePipelinePreview()">
+        <div class="toggle-track"></div>
+        <div class="toggle-knob"></div>
+      </label>
+      <div class="toggle-info">
+        <div class="toggle-name">admissions_pipeline_enabled</div>
+        <div class="toggle-desc">Master switch. Creates Application records for ALL programme types (including Exam Only).</div>
+      </div>
+      <span class="toggle-status off" id="status-pipeline">OFF</span>
+    </div>
+
+    <div class="toggle-row" id="flag-exams">
+      <label class="toggle-switch">
+        <input type="checkbox" onchange="updatePipelinePreview()">
+        <div class="toggle-track"></div>
+        <div class="toggle-knob"></div>
+      </label>
+      <div class="toggle-info">
+        <div class="toggle-name">internal_exam_system_enabled</div>
+        <div class="toggle-desc">Independent of admissions. Activates internal exam test-taking UI for students.</div>
+      </div>
+      <span class="toggle-status off" id="status-exams">OFF</span>
+    </div>
+
+    <h3 style="margin-top:1.5rem">Layer 2: Per-Programme Stage Matrix</h3>
+    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem">Admin controls which stages each programme goes through. Toggle any cell &mdash; changes take effect for new applicants immediately. This is a <code>pipeline_stage_config</code> JSON in SystemSettings.</p>
+
+    <div style="overflow-x:auto">
+    <table class="matrix-table" id="stageMatrix">
+      <tr>
+        <th>Programme</th>
+        <th>Documents</th>
+        <th>Aptitude</th>
+        <th>Shortlisting</th>
+        <th>Interview</th>
+        <th>Medical</th>
+      </tr>
+      <tr data-prog="FULL_TIME_4YEAR">
+        <td><strong>Full-Time 4yr</strong></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+      </tr>
+      <tr data-prog="FULL_TIME_2YEAR">
+        <td><strong>Full-Time 2yr</strong></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" onchange="updatePipelinePreview()"></td>
+      </tr>
+      <tr data-prog="MILITARY_1YEAR">
+        <td><strong>Military 1yr</strong></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+      </tr>
+      <tr data-prog="MODULAR">
+        <td><strong>Modular</strong></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" onchange="updatePipelinePreview()"></td>
+      </tr>
+      <tr data-prog="EXAM_ONLY">
+        <td><strong>Exam Only</strong></td>
+        <td><input type="checkbox" checked onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" onchange="updatePipelinePreview()"></td>
+        <td><input type="checkbox" onchange="updatePipelinePreview()"></td>
+      </tr>
+    </table>
+    </div>
+
+    <div style="display:flex;gap:0.5rem;margin-top:0.75rem;flex-wrap:wrap">
+      <button onclick="setPreset('full')" style="padding:0.4rem 0.8rem;border:1px solid var(--border);border-radius:6px;background:white;cursor:pointer;font-size:0.78rem;font-weight:500">Full Pipeline (all ON)</button>
+      <button onclick="setPreset('docs')" style="padding:0.4rem 0.8rem;border:1px solid var(--border);border-radius:6px;background:white;cursor:pointer;font-size:0.78rem;font-weight:500">Documents Only</button>
+      <button onclick="setPreset('defaults')" style="padding:0.4rem 0.8rem;border:1px solid var(--border);border-radius:6px;background:white;cursor:pointer;font-size:0.78rem;font-weight:500">Reset Defaults</button>
+    </div>
+
+    <!-- Live pipeline preview -->
+    <div class="live-pipeline-preview" style="margin-top:1rem">
+      <h4>Live Pipeline Preview <span style="font-weight:400;font-size:0.75rem">&mdash; select a programme row to preview</span></h4>
+      <div style="display:flex;gap:0.5rem;margin-bottom:0.75rem;flex-wrap:wrap">
+        <button class="prog-btn active" onclick="selectProg('FULL_TIME_4YEAR')" data-prog="FULL_TIME_4YEAR" style="padding:0.3rem 0.6rem;border:1px solid var(--accent);border-radius:4px;background:#eff6ff;cursor:pointer;font-size:0.75rem;font-weight:500;color:var(--aerojet)">4yr Full-Time</button>
+        <button class="prog-btn" onclick="selectProg('FULL_TIME_2YEAR')" data-prog="FULL_TIME_2YEAR" style="padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:4px;background:white;cursor:pointer;font-size:0.75rem;font-weight:500">2yr Full-Time</button>
+        <button class="prog-btn" onclick="selectProg('MILITARY_1YEAR')" data-prog="MILITARY_1YEAR" style="padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:4px;background:white;cursor:pointer;font-size:0.75rem;font-weight:500">Military 1yr</button>
+        <button class="prog-btn" onclick="selectProg('MODULAR')" data-prog="MODULAR" style="padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:4px;background:white;cursor:pointer;font-size:0.75rem;font-weight:500">Modular</button>
+        <button class="prog-btn" onclick="selectProg('EXAM_ONLY')" data-prog="EXAM_ONLY" style="padding:0.3rem 0.6rem;border:1px solid var(--border);border-radius:4px;background:white;cursor:pointer;font-size:0.75rem;font-weight:500">Exam Only</button>
+      </div>
+      <div id="livePipeline" class="pipeline-flow" style="padding:0.5rem 0">
+        <!-- Filled by JS -->
+      </div>
+      <p id="pipelineNote" style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem"></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Recommended Activation Sequence</h3>
+    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:1rem">Admin enables each subsystem in order as confidence grows:</p>
+    <div style="display:flex;flex-direction:column;gap:0.5rem">
+      <div style="display:flex;align-items:center;gap:0.75rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.6rem 1rem">
+        <div style="background:var(--green);color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0">1</div>
+        <div><strong style="font-size:0.85rem">admissions_pipeline_enabled</strong><br><span style="font-size:0.78rem;color:var(--text-muted)">Master switch. Creates Application records for ALL programme types. Pipeline tracker shows. Stage matrix defaults mean modular/exam-only go straight through (docs only), while full-time gets the full pipeline.</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.6rem 1rem">
+        <div style="background:var(--green);color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0">2</div>
+        <div><strong style="font-size:0.85rem">Adjust pipeline_stage_config</strong><br><span style="font-size:0.78rem;color:var(--text-muted)">Fine-tune per programme via the matrix editor. Enable/disable stages as confidence grows. Start with documents-only for all, then enable aptitude, then interviews, etc.</span></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.75rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:0.6rem 1rem">
+        <div style="background:var(--accent);color:white;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;flex-shrink:0">3</div>
+        <div><strong style="font-size:0.85rem">internal_exam_system_enabled</strong><br><span style="font-size:0.78rem;color:var(--text-muted)">Independent of admissions pipeline. Enable when student exam infrastructure is ready.</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>How the Code Checks Flags</h3>
+    <div class="code-block" id="codeFlags">
+      <button class="copy-btn" onclick="copyCode(this, 'codeFlags')">Copy</button>
+      <div style="color:#94a3b8">// Registration API &mdash; creates Application for ALL programme types</div>
+      <div><span style="color:#c084fc">if</span> (admissions_pipeline_enabled) {</div>
+      <div>&nbsp;&nbsp;<span style="color:#94a3b8">// Create Application for ALL programmes (including EXAM_ONLY)</span></div>
+      <div>&nbsp;&nbsp;<span style="color:#94a3b8">// Set initial stage to REGISTERED, auto-transition to PAYMENT_PENDING</span></div>
+      <div>} <span style="color:#c084fc">else</span> {</div>
+      <div>&nbsp;&nbsp;<span style="color:#94a3b8">// Current flow &mdash; User + Profile only, no Application</span></div>
+      <div>}</div>
+      <br>
+      <div style="color:#94a3b8">// State machine &mdash; reads per-programme stage config</div>
+      <div><span style="color:#c084fc">const</span> config = stageConfig[application.programmeChoice]</div>
+      <div><span style="color:#c084fc">if</span> (!config.aptitude) <span style="color:#94a3b8">// auto-skip APTITUDE_* stages</span></div>
+      <div><span style="color:#c084fc">if</span> (!config.shortlisting) <span style="color:#94a3b8">// auto-skip SHORTLISTED stage</span></div>
+      <div><span style="color:#c084fc">if</span> (!config.interview) <span style="color:#94a3b8">// auto-skip INTERVIEW_* stages</span></div>
+      <div><span style="color:#c084fc">if</span> (!config.medical) <span style="color:#94a3b8">// auto-skip MEDICAL_* stages</span></div>
+      <br>
+      <div style="color:#94a3b8">// Sidebar &mdash; visibility based on global switches</div>
+      <div><span style="color:#c084fc">if</span> (admissions_pipeline_enabled) <span style="color:#94a3b8">// show "Admissions" in staff sidebar</span></div>
+      <div><span style="color:#c084fc">if</span> (internal_exam_system_enabled) <span style="color:#94a3b8">// show "Internal Exams" under Academics</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Admin UI</h3>
+    <p style="font-size:0.9rem"><strong>New page:</strong> <code>app/staff/settings/pipeline-config/page.tsx</code></p>
+    <ul style="font-size:0.85rem;margin-top:0.5rem">
+      <li>2 global toggle switches: <code>admissions_pipeline_enabled</code> and <code>internal_exam_system_enabled</code></li>
+      <li>Visual stage matrix editor: rows = programme types, columns = stages, each cell = toggle (like the interactive demo above)</li>
+      <li>Preset buttons: "Full Pipeline", "Documents Only", "Reset Defaults" to quickly configure a programme row</li>
+      <li>Warning banner: "Changing this affects all new applicants immediately"</li>
+      <li>Future: per-intake-cycle overrides (different config for a specific intake)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ════════════ PIPELINE FLOW ════════════ -->
+<div class="section" id="pipeline">
+  <div class="phase-header"><div class="phase-num">&#9654;</div><h2>Applicant Pipeline Flow</h2></div>
+
+  <div class="card">
+    <h3>Full Pipeline (Default: Full-Time 4yr / Military 1yr)</h3>
+    <div class="pipeline-flow">
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-reg">1</div><div class="pipeline-label">Register</div><div class="tip">REGISTERED &rarr; PAYMENT_PENDING</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-reg">2</div><div class="pipeline-label">Payment</div><div class="tip">PAYMENT_SUBMITTED &rarr; PAYMENT_VERIFIED (staff approval)</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-doc">3</div><div class="pipeline-label">Documents</div><div class="tip">Upload CV, ID, certificates (admin-configured)</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-apt">4</div><div class="pipeline-label">Aptitude Test</div><div class="tip">Timed, fullscreen, anti-cheat. Auto-graded.</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-short">5</div><div class="pipeline-label">Shortlisting</div><div class="tip">Composite score: aptitude + profile + referral</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-int">6</div><div class="pipeline-label">Interview</div><div class="tip">Self-service slot booking, reschedule limits</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-med">7</div><div class="pipeline-label">Medical</div><div class="tip">Required for 4yr (academy places them) &amp; military. Fee payment, own facility option, doc upload.</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-enrolled">8</div><div class="pipeline-label">Enrolled</div><div class="tip">Student profile created, assigned to batch + class</div></div>
+    </div>
+
+    <h3 style="margin-top:1.5rem">Default: Full-Time 2yr (Medical OFF by default)</h3>
+    <div class="pipeline-flow">
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-reg">1</div><div class="pipeline-label">Register</div><div class="tip">REGISTERED &rarr; PAYMENT_PENDING</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-reg">2</div><div class="pipeline-label">Payment</div><div class="tip">PAYMENT_SUBMITTED &rarr; PAYMENT_VERIFIED</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-doc">3</div><div class="pipeline-label">Documents</div><div class="tip">Upload CV, ID, certificates (admin-configured)</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-apt">4</div><div class="pipeline-label">Aptitude Test</div><div class="tip">Same test as 4yr applicants</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-short">5</div><div class="pipeline-label">Shortlisting</div><div class="tip">Composite score: aptitude + profile + referral</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-int">6</div><div class="pipeline-label">Interview</div><div class="tip">Self-service slot booking, reschedule limits</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-med" style="opacity:0.5; border: 2px dashed var(--amber);">7?</div><div class="pipeline-label">Medical<br><em style="font-size:0.6rem;color:var(--amber)">may skip</em></div><div class="tip">2yr not guaranteed job by academy &mdash; medical may be skipped</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-enrolled">7/8</div><div class="pipeline-label">Enrolled</div><div class="tip">Batch + class, self-funded, certs issued, not bonded</div></div>
+    </div>
+    <p style="font-size:0.82rem; color:var(--text-muted); margin-top:0.5rem;">2-year full-time students are not guaranteed placement by the academy, so medical is OFF by default. Admin can enable it via the stage matrix if needed.</p>
+  </div>
+
+  <div class="card">
+    <h3>Default: Modular / Exam Only (Pay-as-you-go)</h3>
+    <div class="pipeline-flow">
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-reg">1</div><div class="pipeline-label">Register</div><div class="tip">REGISTERED &rarr; PAYMENT_PENDING</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-reg">2</div><div class="pipeline-label">Payment</div><div class="tip">PAYMENT_SUBMITTED &rarr; PAYMENT_VERIFIED</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-doc">3</div><div class="pipeline-label">Documents</div><div class="tip">Pathway verification &mdash; admin confirms suitability</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage" style="opacity:0.15;pointer-events:none"><div class="pipeline-dot" style="background:#ccc">-</div><div class="pipeline-label" style="text-decoration:line-through;font-size:0.65rem">Aptitude</div></div>
+      <div class="pipeline-arrow" style="opacity:0.15"></div>
+      <div class="pipeline-stage" style="opacity:0.15;pointer-events:none"><div class="pipeline-dot" style="background:#ccc">-</div><div class="pipeline-label" style="text-decoration:line-through;font-size:0.65rem">Shortlist</div></div>
+      <div class="pipeline-arrow" style="opacity:0.15"></div>
+      <div class="pipeline-stage" style="opacity:0.15;pointer-events:none"><div class="pipeline-dot" style="background:#ccc">-</div><div class="pipeline-label" style="text-decoration:line-through;font-size:0.65rem">Interview</div></div>
+      <div class="pipeline-arrow" style="opacity:0.15"></div>
+      <div class="pipeline-stage" style="opacity:0.15;pointer-events:none"><div class="pipeline-dot" style="background:#ccc">-</div><div class="pipeline-label" style="text-decoration:line-through;font-size:0.65rem">Medical</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage tooltip-wrap"><div class="pipeline-dot stage-enrolled">4</div><div class="pipeline-label">Enrolled</div><div class="tip">Modular: course catalog + deadline. Exam Only: exam booking access.</div></div>
+    </div>
+    <p style="font-size:0.82rem; color:var(--text-muted); margin-top:0.5rem;">No competitive selection by default. Pay, submit documents for pathway verification, get access. Admin can enable any stage via the matrix if needed.</p>
+  </div>
+
+  <div class="card">
+    <h3>State Machine &mdash; All 17 Stages</h3>
+    <!-- SVG State Machine Diagram -->
+    <div class="svg-state-machine">
+      <svg viewBox="0 0 920 340" width="920" height="340" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto" fill="#94a3b8"><polygon points="0 0, 8 3, 0 6"/></marker>
+          <marker id="arrow-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto" fill="#ef4444"><polygon points="0 0, 8 3, 0 6"/></marker>
+          <filter id="shadow"><feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.12"/></filter>
+        </defs>
+        <!-- Row 1: Registration & Payment -->
+        <rect x="10" y="20" width="110" height="36" rx="6" fill="#64748b" filter="url(#shadow)"/>
+        <text x="65" y="43" text-anchor="middle" fill="white" font-size="10" font-weight="600">REGISTERED</text>
+        <line x1="120" y1="38" x2="145" y2="38" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="148" y="20" width="130" height="36" rx="6" fill="#94a3b8" filter="url(#shadow)"/>
+        <text x="213" y="43" text-anchor="middle" fill="white" font-size="10" font-weight="600">PAYMENT_PENDING</text>
+        <line x1="278" y1="38" x2="303" y2="38" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="306" y="20" width="145" height="36" rx="6" fill="#94a3b8" filter="url(#shadow)"/>
+        <text x="378" y="43" text-anchor="middle" fill="white" font-size="10" font-weight="600">PAYMENT_SUBMITTED</text>
+        <line x1="451" y1="38" x2="476" y2="38" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="479" y="20" width="140" height="36" rx="6" fill="#8b5cf6" filter="url(#shadow)"/>
+        <text x="549" y="43" text-anchor="middle" fill="white" font-size="10" font-weight="600">PAYMENT_VERIFIED</text>
+
+        <!-- Row 2: Aptitude & Shortlisting -->
+        <line x1="549" y1="56" x2="549" y2="75" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="10" y="80" width="145" height="36" rx="6" fill="#0ea5e9" filter="url(#shadow)"/>
+        <text x="82" y="103" text-anchor="middle" fill="white" font-size="10" font-weight="600">APTITUDE_PENDING</text>
+        <line x1="155" y1="98" x2="180" y2="98" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="183" y="80" width="170" height="36" rx="6" fill="#0ea5e9" filter="url(#shadow)"/>
+        <text x="268" y="103" text-anchor="middle" fill="white" font-size="10" font-weight="600">APTITUDE_COMPLETED</text>
+        <line x1="353" y1="98" x2="378" y2="98" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="381" y="80" width="120" height="36" rx="6" fill="#f59e0b" filter="url(#shadow)"/>
+        <text x="441" y="103" text-anchor="middle" fill="#000" font-size="10" font-weight="600">SHORTLISTED</text>
+        <!-- skip label -->
+        <text x="550" y="103" fill="#f59e0b" font-size="9" font-style="italic">Modular + Exam Only skip</text>
+
+        <!-- Row 3: Interview -->
+        <line x1="441" y1="116" x2="441" y2="135" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="10" y="140" width="155" height="36" rx="6" fill="#ec4899" filter="url(#shadow)"/>
+        <text x="87" y="163" text-anchor="middle" fill="white" font-size="10" font-weight="600">INTERVIEW_PENDING</text>
+        <line x1="165" y1="158" x2="190" y2="158" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="193" y="140" width="170" height="36" rx="6" fill="#ec4899" filter="url(#shadow)"/>
+        <text x="278" y="163" text-anchor="middle" fill="white" font-size="10" font-weight="600">INTERVIEW_SCHEDULED</text>
+        <line x1="363" y1="158" x2="388" y2="158" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="391" y="140" width="175" height="36" rx="6" fill="#ec4899" filter="url(#shadow)"/>
+        <text x="478" y="163" text-anchor="middle" fill="white" font-size="10" font-weight="600">INTERVIEW_COMPLETED</text>
+        <text x="620" y="163" fill="#f59e0b" font-size="9" font-style="italic">Modular + Exam Only skip</text>
+
+        <!-- Row 4: Medical -->
+        <line x1="478" y1="176" x2="478" y2="195" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="10" y="200" width="100" height="36" rx="6" fill="#16a34a" filter="url(#shadow)"/>
+        <text x="60" y="223" text-anchor="middle" fill="white" font-size="10" font-weight="600">SELECTED</text>
+        <line x1="110" y1="218" x2="135" y2="218" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="138" y="200" width="150" height="36" rx="6" fill="#ef4444" filter="url(#shadow)"/>
+        <text x="213" y="223" text-anchor="middle" fill="white" font-size="10" font-weight="600">MEDICAL_PENDING</text>
+        <line x1="288" y1="218" x2="313" y2="218" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="316" y="200" width="165" height="36" rx="6" fill="#ef4444" filter="url(#shadow)"/>
+        <text x="398" y="223" text-anchor="middle" fill="white" font-size="10" font-weight="600">MEDICAL_SUBMITTED</text>
+        <line x1="481" y1="218" x2="506" y2="218" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="509" y="200" width="150" height="36" rx="6" fill="#ef4444" filter="url(#shadow)"/>
+        <text x="584" y="223" text-anchor="middle" fill="white" font-size="10" font-weight="600">MEDICAL_CLEARED</text>
+        <text x="710" y="223" fill="#f59e0b" font-size="9" font-style="italic">Modular/ExamOnly skip; 2yr may skip</text>
+
+        <!-- Row 5: Enrolled -->
+        <line x1="584" y1="236" x2="584" y2="255" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+        <rect x="520" y="260" width="130" height="40" rx="8" fill="#22c55e" filter="url(#shadow)" stroke="#16a34a" stroke-width="1"/>
+        <text x="585" y="285" text-anchor="middle" fill="white" font-size="12" font-weight="700">ENROLLED</text>
+
+        <!-- Terminal states -->
+        <rect x="720" y="260" width="100" height="36" rx="6" fill="#dc2626" filter="url(#shadow)"/>
+        <text x="770" y="283" text-anchor="middle" fill="white" font-size="10" font-weight="600">REJECTED</text>
+        <text x="770" y="310" text-anchor="middle" fill="#94a3b8" font-size="8">from any stage</text>
+        <rect x="830" y="260" width="100" height="36" rx="6" fill="#9ca3af" filter="url(#shadow)"/>
+        <text x="880" y="283" text-anchor="middle" fill="white" font-size="10" font-weight="600">WITHDRAWN</text>
+        <text x="880" y="310" text-anchor="middle" fill="#94a3b8" font-size="8">applicant-initiated</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ PROGRAMMES ════════════ -->
+<div class="section" id="programmes">
+  <div class="phase-header"><div class="phase-num">P</div><h2>Programme Pathways</h2></div>
+
+  <div class="card">
+    <h3>Full Comparison Matrix</h3>
+    <div style="overflow-x:auto">
+    <table class="matrix-table">
+      <tr>
+        <th>Aspect</th>
+        <th>Full-Time 4yr</th>
+        <th>Full-Time 2yr</th>
+        <th>Military 1yr</th>
+        <th>Modular</th>
+        <th>Exam Only</th>
+      </tr>
+      <tr><td>Batch / Class</td><td><span class="check">&#10003;</span> ~25/class</td><td><span class="check">&#10003;</span> ~25/class</td><td><span class="check">&#10003;</span> accelerated</td><td><span class="opt">Optional</span><span class="cell-note">on-demand classes</span></td><td><span class="cross">&#10007;</span></td></tr>
+      <tr><td>Academic Year</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span> compressed</td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td></tr>
+      <tr><td>Funding</td><td colspan="5" style="text-align:center"><span class="opt">Independent of programme</span><span class="cell-note">SCHOLARSHIP, SELF_FUNDED, or SPONSORED &mdash; set per applicant</span></td></tr>
+      <tr><td>OJT (Part 145)</td><td><span class="check">&#10003;</span> Included in price<span class="cell-note">2yr theory + 2yr OJT</span></td><td><span class="opt">Optional</span><span class="cell-note">Theory only; OJT payable separately</span></td><td><span class="cross">&#10007;</span> Find own</td><td>N/A</td><td>N/A</td></tr>
+      <tr><td>Programme Structure</td><td>Theory + OJT<span class="cell-note">= 2yr theory + 2yr practical</span></td><td>Theory only<span class="cell-note">Same classes/exams as 4yr</span></td><td>Accelerated theory</td><td>Self-paced</td><td>Exam access</td></tr>
+      <tr><td>Payments</td><td colspan="3" style="text-align:center"><span class="cell-note">Milestone-based (yearly installments) or full upfront. 4yr price covers theory + OJT.</span></td><td colspan="2" style="text-align:center"><span class="cell-note">Pay-as-you-go per course/exam</span></td></tr>
+      <tr><td>Exam Certificates</td><td colspan="5" style="text-align:center"><span class="cell-note">Scholarship &rarr; scores only (bonded, no certs until FULFILLED). Self-funded &rarr; certs on pass.</span></td></tr>
+      <tr><td>Bonding</td><td colspan="5" style="text-align:center"><span class="cell-note">Determined by <code>fundingType</code>: SCHOLARSHIP = bonded. SELF_FUNDED/SPONSORED = not bonded.</span></td></tr>
+      <tr><td>Study Schedule</td><td>Fixed daily hours</td><td>Fixed daily hours</td><td>Fixed (accelerated)</td><td>Self-paced</td><td>Already studied</td></tr>
+      <tr><td>Exam Booking</td><td>Per semester</td><td>Per semester</td><td>Compressed</td><td>Self-service</td><td>Self-service</td></tr>
+      <tr><td>Completion Deadline</td><td>Programme duration</td><td>Programme duration</td><td>1 year</td><td>Admin-set (24mo default)</td><td>Per-booking</td></tr>
+      <tr><td>Admission Pipeline</td><td>Full (default)</td><td>Full, medical OFF (default)</td><td>Full (default)</td><td>Docs only (default)</td><td>Docs only (default)</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Scholarship Bonding Model</h3>
+    <p>The scholarship functions like a <strong>loan</strong> &mdash; students must "pay back" the investment through a contractual work obligation (bonding contract) at the academy's engineering facility after completion. During training, scholarship students do <strong>not</strong> receive individual course exam certificates &mdash; they only see their scores. This ensures the academy retains leverage until the bonding obligation is fulfilled.</p>
+    <br>
+    <p><strong>Funding type is independent of programme.</strong> A 4-year full-time student can be either scholarship or self-funded. Bonding and certificate suppression are determined by <code>fundingType</code> (SCHOLARSHIP &rarr; bonded, no certs; SELF_FUNDED &rarr; not bonded, gets certs), not by <code>programmeChoice</code>.</p>
+    <br>
+    <p>Self-funded students (on <strong>any</strong> programme) are <strong>not bonded</strong>, are not served bonding contracts, receive certificates immediately upon passing, and are fully independent after graduation.</p>
+    <br>
+    <p><strong>Contract lifecycle:</strong> ISSUED &rarr; SIGNED &rarr; IN_PROGRESS &rarr; FULFILLED / BREACHED. Certificates unlock when status = FULFILLED.</p>
+  </div>
+
+  <div class="card">
+    <h3>Post-Enrollment Divergence</h3>
+    <ul>
+      <li><strong>Full-time 4yr:</strong> IntakeCycle &rarr; batch (~50) &rarr; Classes (~25) &rarr; AcademicYear + Semester. 2yr theory + 2yr OJT. Price includes both halves. If scholarship: bonded, scores only. If self-funded: not bonded, gets certificates.</li>
+      <li><strong>Full-time 2yr:</strong> Theory only &mdash; same classes and exams as 4yr students (can share a class). No OJT included; OJT payable separately if desired.</li>
+      <li><strong>Military (1yr):</strong> Same as full-time but with compressed AcademicTerms. Same bonding rules based on funding type.</li>
+      <li><strong>Modular:</strong> No batch/class. Course catalog + admin-set completion deadline (default 24 months, override per student). Admin creates ad-hoc classes on demand.</li>
+      <li><strong>Exam Only:</strong> Documents for pathway verification &rarr; exam booking access. No batch/class.</li>
+    </ul>
+    <p style="font-size:0.82rem;color:var(--text-muted);margin-top:0.5rem"><strong>Payments:</strong> Full-time students pay via yearly milestones or full upfront. 4yr price covers theory + OJT.</p>
+  </div>
+
+  <div class="card">
+    <h3>Academy Operations Context</h3>
+    <h3 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">Batch &rarr; Class Structure</h3>
+    <div class="collapse-body">
+      <ul>
+        <li>Currently 2 classrooms (25&ndash;28 seats each). Batch size = total capacity (~50).</li>
+        <li>Expanding for cabin crew, non-EASA, and more EASA courses.</li>
+        <li>Class 1: mornings (8&ndash;11 AM). Class 2: afternoons (12&ndash;3 PM).</li>
+        <li>Same instructor teaches both classes back-to-back.</li>
+        <li>5&ndash;15 min break every hour.</li>
+      </ul>
+    </div>
+    <br>
+    <h3 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">License Categories & Exam Levels</h3>
+    <div class="collapse-body">
+      <ul>
+        <li>B2 is higher than B1 &mdash; writing B2 exam automatically covers B1.</li>
+        <li>Same class may have students targeting B1.1 only and students targeting B1.1+B2.</li>
+        <li>They study together but write at different exam levels.</li>
+      </ul>
+    </div>
+    <br>
+    <h3 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">EASA Regulatory Changes (EU 2023/989 &mdash; June 2024)</h3>
+    <div class="collapse-body">
+      <p style="font-size:0.85rem;margin-bottom:0.5rem"><strong>Exam Structure:</strong></p>
+      <ul style="font-size:0.85rem">
+        <li>Modules 9 &amp; 10: <strong>Essay questions permanently removed</strong> &mdash; now purely MCQ</li>
+        <li>Module 10: MCQ count increased from 40 to <strong>44 questions</strong></li>
+        <li>Internal exam system must support per-module question counts (not a fixed global default)</li>
+      </ul>
+      <p style="font-size:0.85rem;margin-top:0.5rem;margin-bottom:0.5rem"><strong>New Syllabus Content:</strong></p>
+      <ul style="font-size:0.85rem">
+        <li>M6: Composite materials &amp; additive manufacturing (3D printing)</li>
+        <li>M7: EWIS &amp; CDCCL</li>
+        <li>M9/M10: Safety Management Systems (SMS), occurrence reporting</li>
+        <li>M13: Modern avionics, fly-by-wire systems</li>
+      </ul>
+      <p style="font-size:0.85rem;margin-top:0.5rem;margin-bottom:0.5rem"><strong>Distance Learning (now permanent):</strong></p>
+      <ul style="font-size:0.85rem">
+        <li>VCE (synchronous remote) and asynchronous learning formally allowed</li>
+        <li>VR/AR synthetic training devices permitted</li>
+        <li>Validates modular "class option" &mdash; online/remote classes possible</li>
+      </ul>
+      <p style="font-size:0.85rem;margin-top:0.5rem;margin-bottom:0.5rem"><strong>OJT:</strong> Competence-based assessment (replaces rigid checklist)</p>
+      <p style="font-size:0.85rem;margin-top:0.5rem;margin-bottom:0.5rem"><strong>Experience:</strong> B1.1/B1.3/B2 = 12 months Part-145. A/B1.2/B1.4/B3 = 6 months.</p>
+      <p style="font-size:0.85rem;margin-top:0.5rem;margin-bottom:0.5rem"><strong>Coming 2025+:</strong> Anti-exam-fraud (question randomization, proctoring), e-Licence rollout, language proficiency standards.</p>
+    </div>
+    <br>
+    <h3 class="collapsible" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')">Exam Pool System (Already Built)</h3>
+    <div class="collapse-body">
+      <ul>
+        <li>Pool = 1 classroom (max 28 seats), up to 4 modules per session.</li>
+        <li>Booking types: single, twin-pack, four-pack, group charter.</li>
+        <li>Multi-exam bookings go into separate sessions (can't write 2 at once).</li>
+        <li>Pool auto-fills. When full, new pool opens.</li>
+        <li>All programme types share the same pool system.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ DATA MODELS ════════════ -->
+<div class="section" id="models">
+  <div class="phase-header"><div class="phase-num">DB</div><h2>New Data Models</h2></div>
+
+  <div class="model-grid">
+    <div class="model-card">
+      <div class="model-card-header">Application</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">id</span><span class="field-type">String @id</span></div>
+        <div class="model-field"><span class="field-name">userId</span><span class="field-type">String @unique</span></div>
+        <div class="model-field"><span class="field-name">stage</span><span class="field-type">ApplicationStage</span></div>
+        <div class="model-field"><span class="field-name">previousStage</span><span class="field-type">ApplicationStage?</span></div>
+        <div class="model-field"><span class="field-name">programmeChoice</span><span class="field-type">ProgrammeChoice</span></div>
+        <div class="model-field"><span class="field-name">fundingType</span><span class="field-type">FundingType</span></div>
+        <div class="model-field"><span class="field-name">intakeCycleId</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">completionDeadline</span><span class="field-type">DateTime?</span></div>
+        <div class="model-field"><span class="field-name">interviewSlotId</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">interviewRescheduleCount</span><span class="field-type">Int @default(0)</span></div>
+        <div class="model-field"><span class="field-name">medicalStatus</span><span class="field-type">MedicalStatus?</span></div>
+        <div class="model-field"><span class="field-name">medicalFacility</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">rejectionReason</span><span class="field-type">String?</span></div>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-card-header">ApplicationStageLog</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">id</span><span class="field-type">String @id</span></div>
+        <div class="model-field"><span class="field-name">applicationId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">fromStage</span><span class="field-type">ApplicationStage</span></div>
+        <div class="model-field"><span class="field-name">toStage</span><span class="field-type">ApplicationStage</span></div>
+        <div class="model-field"><span class="field-name">actorId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">metadata</span><span class="field-type">Json?</span></div>
+        <div class="model-field"><span class="field-name">createdAt</span><span class="field-type">DateTime</span></div>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-card-header">IntakeCycle</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">id</span><span class="field-type">String @id</span></div>
+        <div class="model-field"><span class="field-name">name</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">academicYearId</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">startDate / endDate</span><span class="field-type">DateTime</span></div>
+        <div class="model-field"><span class="field-name">isActive</span><span class="field-type">Boolean</span></div>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-card-header">AptitudeTestBank</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">id</span><span class="field-type">String @id</span></div>
+        <div class="model-field"><span class="field-name">name</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">description</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">applicableProgrammes</span><span class="field-type">ProgrammeChoice[]</span></div>
+        <div class="model-field"><span class="field-name">isActive</span><span class="field-type">Boolean</span></div>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-card-header">AptitudeQuestion</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">bankId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">category</span><span class="field-type">AptitudeCategory</span></div>
+        <div class="model-field"><span class="field-name">questionType</span><span class="field-type">AptitudeQuestionType</span></div>
+        <div class="model-field"><span class="field-name">difficulty</span><span class="field-type">QuestionDifficulty</span></div>
+        <div class="model-field"><span class="field-name">text</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">options</span><span class="field-type">Json?</span></div>
+        <div class="model-field"><span class="field-name">correctAnswer</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">points</span><span class="field-type">Int @default(1)</span></div>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-card-header">AptitudeTestSession</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">userId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">bankId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">status</span><span class="field-type">TestSessionStatus</span></div>
+        <div class="model-field"><span class="field-name">startedAt / expiresAt</span><span class="field-type">DateTime</span></div>
+        <div class="model-field"><span class="field-name">score / totalPoints</span><span class="field-type">Int?</span></div>
+        <div class="model-field"><span class="field-name">passed</span><span class="field-type">Boolean?</span></div>
+        <div class="model-field"><span class="field-name">tabSwitchCount</span><span class="field-type">Int @default(0)</span></div>
+        <div class="model-field"><span class="field-name">fullscreenExits</span><span class="field-type">Int @default(0)</span></div>
+        <div class="model-field"><span class="field-name">ipAddress / userAgent</span><span class="field-type">String?</span></div>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-card-header">InterviewSlot</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">scheduleId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">date</span><span class="field-type">DateTime</span></div>
+        <div class="model-field"><span class="field-name">startTime / endTime</span><span class="field-type">DateTime</span></div>
+        <div class="model-field"><span class="field-name">capacity</span><span class="field-type">Int</span></div>
+        <div class="model-field"><span class="field-name">bookedCount</span><span class="field-type">Int @default(0)</span></div>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-card-header">ApplicationDocumentType</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">name / slug</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">fileTypes</span><span class="field-type">String (MIME)</span></div>
+        <div class="model-field"><span class="field-name">maxSizeMB</span><span class="field-type">Int @default(4)</span></div>
+        <div class="model-field"><span class="field-name">isRequired</span><span class="field-type">Boolean</span></div>
+        <div class="model-field"><span class="field-name">applicableProgrammes</span><span class="field-type">ProgrammeChoice[]</span></div>
+        <div class="model-field"><span class="field-name">sortOrder</span><span class="field-type">Int</span></div>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-card-header">ApplicationDocument</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">applicationId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">documentTypeId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">fileUploadId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">status</span><span class="field-type">DocumentReviewStatus</span></div>
+        <div class="model-field"><span class="field-name">rejectionReason</span><span class="field-type">String?</span></div>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-card-header">CustomFieldDefinition</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">name / slug</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">fieldType</span><span class="field-type">TEXT|NUMBER|DATE|...</span></div>
+        <div class="model-field"><span class="field-name">options</span><span class="field-type">Json?</span></div>
+        <div class="model-field"><span class="field-name">appliesTo</span><span class="field-type">APPLICATION|USER|...</span></div>
+        <div class="model-field"><span class="field-name">isRequired</span><span class="field-type">Boolean</span></div>
+        <div class="model-field"><span class="field-name">applicableProgrammes</span><span class="field-type">ProgrammeChoice[]</span></div>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-card-header">CustomFieldValue</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">fieldDefinitionId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">entityId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">entityType</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">value</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">fileUploadId</span><span class="field-type">String?</span></div>
+      </div>
+    </div>
+
+    <div class="model-card">
+      <div class="model-card-header">AptitudeAnswer</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">sessionId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">questionId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">selectedAnswer</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">isCorrect</span><span class="field-type">Boolean?</span></div>
+        <div class="model-field"><span class="field-name">pointsAwarded</span><span class="field-type">Int @default(0)</span></div>
+        <div class="model-field"><span class="field-name">answeredAt</span><span class="field-type">DateTime</span></div>
+      </div>
+    </div>
+
+    <div class="model-card" style="border-color:var(--amber)">
+      <div class="model-card-header" style="background:var(--amber)">BondingContract</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">id</span><span class="field-type">String @id</span></div>
+        <div class="model-field"><span class="field-name">applicationId</span><span class="field-type">String @unique</span></div>
+        <div class="model-field"><span class="field-name">studentProfileId</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">status</span><span class="field-type">BondingStatus</span></div>
+        <div class="model-field"><span class="field-name">issuedAt</span><span class="field-type">DateTime</span></div>
+        <div class="model-field"><span class="field-name">signedAt</span><span class="field-type">DateTime?</span></div>
+        <div class="model-field"><span class="field-name">startDate / endDate</span><span class="field-type">DateTime?</span></div>
+        <div class="model-field"><span class="field-name">facilityName</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">notes</span><span class="field-type">String?</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1.5rem">
+    <h3>New Enums</h3>
+    <div class="settings-grid">
+      <div class="setting-item"><span class="setting-key">ApplicationStage</span><span class="setting-val">17 values</span></div>
+      <div class="setting-item"><span class="setting-key">AptitudeCategory</span><span class="setting-val">MATH, ENGLISH, ENGINEERING, LOGICAL_REASONING, PHYSICS</span></div>
+      <div class="setting-item"><span class="setting-key">AptitudeQuestionType</span><span class="setting-val">MCQ, NUMERIC_INPUT, TRUE_FALSE</span></div>
+      <div class="setting-item"><span class="setting-key">QuestionDifficulty</span><span class="setting-val">EASY, MEDIUM, HARD</span></div>
+      <div class="setting-item"><span class="setting-key">TestSessionStatus</span><span class="setting-val">NOT_STARTED, IN_PROGRESS, COMPLETED, TIMED_OUT, FLAGGED, VOIDED</span></div>
+      <div class="setting-item"><span class="setting-key">InterviewResult</span><span class="setting-val">PASS, FAIL, CONDITIONAL, NO_SHOW</span></div>
+      <div class="setting-item"><span class="setting-key">MedicalStatus</span><span class="setting-val">PENDING, SCHEDULED, IN_PROGRESS, DOCUMENTS_SUBMITTED, CLEARED, FAILED, EXEMPTED</span></div>
+      <div class="setting-item"><span class="setting-key">FundingType</span><span class="setting-val">SCHOLARSHIP, SELF_FUNDED, SPONSORED</span></div>
+      <div class="setting-item"><span class="setting-key">DocumentReviewStatus</span><span class="setting-val">PENDING, APPROVED, REJECTED</span></div>
+      <div class="setting-item"><span class="setting-key">BondingStatus</span><span class="setting-val">ISSUED, SIGNED, IN_PROGRESS, FULFILLED, BREACHED</span></div>
+      <div class="setting-item"><span class="setting-key">ExamRuleSet</span><span class="setting-val">EASA, CUSTOM</span></div>
+      <div class="setting-item"><span class="setting-key">AttendanceStatus</span><span class="setting-val">PRESENT, ABSENT, LATE, EXCUSED, HALF_DAY</span></div>
+      <div class="setting-item"><span class="setting-key">SessionType</span><span class="setting-val">THEORY, PRACTICAL, REVISION, ASSESSMENT</span></div>
+      <div class="setting-item"><span class="setting-key">InstructorEmploymentType</span><span class="setting-val">PERMANENT, CONTRACT</span></div>
+      <div class="setting-item"><span class="setting-key">RecencyActivityType</span><span class="setting-val">THEORY_TEACHING, PRACTICAL_TEACHING, UPDATE_TRAINING, INDUSTRY_EXPERIENCE, ASSESSMENT</span></div>
+      <div class="setting-item"><span class="setting-key">PracticalTaskCategory</span><span class="setting-val">P1, P2</span></div>
+      <div class="setting-item"><span class="setting-key">PracticalDeliveryMethod</span><span class="setting-val">TASK_PERFORMANCE, DEMONSTRATION, TECHNICAL_DISCUSSION, SIMULATION</span></div>
+      <div class="setting-item"><span class="setting-key">PracticalResult</span><span class="setting-val">SATISFACTORY, UNSATISFACTORY, NEEDS_REVIEW</span></div>
+      <div class="setting-item"><span class="setting-key">ATACategory</span><span class="setting-val">AIRFRAME, POWERPLANT, AVIONICS, GENERAL</span></div>
+      <div class="setting-item"><span class="setting-key">OJTLogbookStatus</span><span class="setting-val">ACTIVE, COMPLETED, SUSPENDED</span></div>
+      <div class="setting-item"><span class="setting-key">OJTAssessmentResult</span><span class="setting-val">COMPETENT, NOT_YET_COMPETENT</span></div>
+      <div class="setting-item"><span class="setting-key">MaintenanceType</span><span class="setting-val">LINE, BASE</span></div>
+      <div class="setting-item"><span class="setting-key">UpgradeStatus</span><span class="setting-val">PENDING, APPROVED, PAYMENT_PENDING, COMPLETED, REJECTED</span></div>
+    </div>
+  </div>
+
+  <h3 style="margin-top:2rem;margin-bottom:1rem;font-size:1.2rem;color:var(--aerojet)">Phase 10&ndash;14 Models (Part 147/145 Compliance)</h3>
+  <div class="model-grid">
+    <div class="model-card" style="border-color:var(--green)">
+      <div class="model-card-header" style="background:var(--green)">AttendanceRecord</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">studentProfileId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">classId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">classSessionId</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">date</span><span class="field-type">DateTime</span></div>
+        <div class="model-field"><span class="field-name">checkInTime / checkOutTime</span><span class="field-type">DateTime?</span></div>
+        <div class="model-field"><span class="field-name">status</span><span class="field-type">AttendanceStatus</span></div>
+        <div class="model-field"><span class="field-name">instructionalHours</span><span class="field-type">Float?</span></div>
+        <div class="model-field"><span class="field-name">markedBy</span><span class="field-type">String?</span></div>
+      </div>
+    </div>
+
+    <div class="model-card" style="border-color:var(--green)">
+      <div class="model-card-header" style="background:var(--green)">ClassSession</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">classId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">courseId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">date</span><span class="field-type">DateTime</span></div>
+        <div class="model-field"><span class="field-name">scheduledStart / End</span><span class="field-type">DateTime</span></div>
+        <div class="model-field"><span class="field-name">instructorId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">sessionType</span><span class="field-type">SessionType</span></div>
+        <div class="model-field"><span class="field-name">instructionalHours</span><span class="field-type">Float</span></div>
+        <div class="model-field"><span class="field-name">ataChapters</span><span class="field-type">String[]</span></div>
+      </div>
+    </div>
+
+    <div class="model-card" style="border-color:var(--purple)">
+      <div class="model-card-header" style="background:var(--purple)">InstructorProfile</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">userId</span><span class="field-type">String @unique</span></div>
+        <div class="model-field"><span class="field-name">licenceNumber</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">licenceCategories</span><span class="field-type">String[]</span></div>
+        <div class="model-field"><span class="field-name">authorizedModules</span><span class="field-type">String[]</span></div>
+        <div class="model-field"><span class="field-name">isExaminer</span><span class="field-type">Boolean</span></div>
+        <div class="model-field"><span class="field-name">isTrainer</span><span class="field-type">Boolean (OJT)</span></div>
+        <div class="model-field"><span class="field-name">employmentType</span><span class="field-type">InstructorEmploymentType</span></div>
+        <div class="model-field"><span class="field-name">specializations</span><span class="field-type">String[]</span></div>
+      </div>
+    </div>
+
+    <div class="model-card" style="border-color:var(--purple)">
+      <div class="model-card-header" style="background:var(--purple)">InstructorQualification</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">instructorId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">qualificationType</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">issuedBy</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">issueDate / expiryDate</span><span class="field-type">DateTime</span></div>
+        <div class="model-field"><span class="field-name">documentId</span><span class="field-type">String? (FileUpload)</span></div>
+      </div>
+    </div>
+
+    <div class="model-card" style="border-color:var(--purple)">
+      <div class="model-card-header" style="background:var(--purple)">InstructorRecency</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">instructorId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">activityType</span><span class="field-type">RecencyActivityType</span></div>
+        <div class="model-field"><span class="field-name">hours</span><span class="field-type">Float</span></div>
+        <div class="model-field"><span class="field-name">date</span><span class="field-type">DateTime</span></div>
+        <div class="model-field"><span class="field-name">evidenceId</span><span class="field-type">String? (FileUpload)</span></div>
+        <div class="model-field"><span class="field-name">verifiedBy</span><span class="field-type">String?</span></div>
+      </div>
+    </div>
+
+    <div class="model-card" style="border-color:var(--pink)">
+      <div class="model-card-header" style="background:var(--pink)">PracticalTrainingRecord</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">studentProfileId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">courseId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">taskCategory</span><span class="field-type">P1 | P2</span></div>
+        <div class="model-field"><span class="field-name">ataChapterId</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">deliveryMethod</span><span class="field-type">PracticalDeliveryMethod</span></div>
+        <div class="model-field"><span class="field-name">instructorId / assessorId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">result</span><span class="field-type">PracticalResult?</span></div>
+        <div class="model-field"><span class="field-name">signedByInstructor / Student</span><span class="field-type">Boolean</span></div>
+      </div>
+    </div>
+
+    <div class="model-card" style="border-color:var(--pink)">
+      <div class="model-card-header" style="background:var(--pink)">ATAChapter</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">code</span><span class="field-type">String @unique</span></div>
+        <div class="model-field"><span class="field-name">title</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">category</span><span class="field-type">ATACategory</span></div>
+        <div class="model-field"><span class="field-name">sortOrder</span><span class="field-type">Int</span></div>
+        <div class="model-field"><span class="field-name">isActive</span><span class="field-type">Boolean</span></div>
+      </div>
+    </div>
+
+    <div class="model-card" style="border-color:#06b6d4">
+      <div class="model-card-header" style="background:#06b6d4">OJTLogbook</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">studentProfileId</span><span class="field-type">String @unique</span></div>
+        <div class="model-field"><span class="field-name">licenceCategory</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">facilityName</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">facilityApprovalNo</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">totalLoggedHours</span><span class="field-type">Float @default(0)</span></div>
+        <div class="model-field"><span class="field-name">status</span><span class="field-type">OJTLogbookStatus</span></div>
+        <div class="model-field"><span class="field-name">finalAssessmentResult</span><span class="field-type">OJTAssessmentResult?</span></div>
+      </div>
+    </div>
+
+    <div class="model-card" style="border-color:#06b6d4">
+      <div class="model-card-header" style="background:#06b6d4">OJTLogbookEntry</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">logbookId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">date</span><span class="field-type">DateTime</span></div>
+        <div class="model-field"><span class="field-name">aircraftType / Registration</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">ataChapterId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">taskDescription</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">workOrderReference</span><span class="field-type">String?</span></div>
+        <div class="model-field"><span class="field-name">maintenanceType</span><span class="field-type">LINE | BASE</span></div>
+        <div class="model-field"><span class="field-name">durationHours</span><span class="field-type">Float</span></div>
+        <div class="model-field"><span class="field-name">supervisorSignature</span><span class="field-type">Boolean</span></div>
+        <div class="model-field"><span class="field-name">studentSignature</span><span class="field-type">Boolean</span></div>
+      </div>
+    </div>
+
+    <div class="model-card" style="border-color:var(--amber)">
+      <div class="model-card-header" style="background:var(--amber)">ProgrammeUpgradeRequest</div>
+      <div class="model-card-body">
+        <div class="model-field"><span class="field-name">applicationId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">studentProfileId</span><span class="field-type">String</span></div>
+        <div class="model-field"><span class="field-name">fromProgramme / toProgramme</span><span class="field-type">ProgrammeChoice</span></div>
+        <div class="model-field"><span class="field-name">paymentDifference</span><span class="field-type">Float?</span></div>
+        <div class="model-field"><span class="field-name">status</span><span class="field-type">UpgradeStatus</span></div>
+        <div class="model-field"><span class="field-name">approvedBy / approvedAt</span><span class="field-type">String? / DateTime?</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ ALL PHASES ════════════ -->
+<div class="section" id="phases">
+  <div class="phase-header"><div class="phase-num">1</div><h2>Foundation &mdash; Data Model + State Machine</h2></div>
+  <div class="card"><h3>Core Deliverables</h3><ul>
+    <li>All new Prisma models and enums (see Data Models tab)</li>
+    <li><code>lib/admissions/state-machine.ts</code> &mdash; <code>transitionApplication()</code> with allowed transitions map, side effects, audit logging</li>
+    <li><code>lib/admissions/constants.ts</code> &mdash; Stage labels, colors, icons, per-stage instructions</li>
+    <li>Modify <code>register</code> API &mdash; Create Application for ALL programme types when pipeline enabled</li>
+    <li>Modify <code>approve</code> API &mdash; Trigger pipeline stage transitions</li>
+    <li>Dynamic pipeline tracker on applicant status page</li>
+    <li>Staff admissions dashboard (funnel visualization)</li>
+    <li>Staff sidebar: new "Admissions" section</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">2</div><h2>Document Uploads + Intake Cycles</h2></div>
+  <div class="card"><h3>Core Deliverables</h3><ul>
+    <li><code>ApplicationDocumentType</code> &mdash; admin-configurable document requirements (CV, national ID, high school cert, university cert, etc.)</li>
+    <li><code>ApplicationDocument</code> &mdash; per-applicant uploads with review status (PENDING/APPROVED/REJECTED)</li>
+    <li>Dynamic upload form based on programme type</li>
+    <li>Staff document type CRUD page</li>
+    <li>IntakeCycle CRUD (list, create, edit)</li>
+    <li>Stage-aware applicant sidebar navigation</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">3</div><h2>Aptitude Test System</h2></div>
+  <div class="card"><h3>Core Deliverables</h3><ul>
+    <li>Question bank management (CRUD for banks and questions)</li>
+    <li>5 question categories: Math, English, Engineering, Logical Reasoning, Physics</li>
+    <li>3 question types: MCQ, Numeric Input, True/False</li>
+    <li>Test-taking UI: fullscreen, timed, one-at-a-time navigation</li>
+    <li>Anti-cheat: fullscreen enforcement, tab switch detection, auto-submit on threshold</li>
+    <li>Auto-grading with configurable pass threshold</li>
+    <li>12+ SystemSettings keys for admin customization</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">4</div><h2>Shortlisting</h2></div>
+  <div class="card"><h3>Core Deliverables</h3><ul>
+    <li>Composite scoring engine: aptitude (60%) + profile (20%) + referral (10%) + experience (10%)</li>
+    <li>Auto-shortlist/reject thresholds (configurable)</li>
+    <li>Staff shortlisting dashboard with bulk actions</li>
+    <li>Filter by programme, intake cycle, score range</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">5</div><h2>Interview Scheduler</h2></div>
+  <div class="card"><h3>Core Deliverables</h3><ul>
+    <li>Admin: schedule creation, bulk slot generation (date range + time blocks + capacity)</li>
+    <li>Applicant: calendar view of available slots, self-service booking</li>
+    <li>Race-condition-safe booking via Prisma transactions</li>
+    <li>Rescheduling with configurable max reschedules and cutoff hours</li>
+    <li>Interview outcome recording: score, notes, PASS/FAIL/CONDITIONAL/NO_SHOW</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">6</div><h2>Medical Examination + Enrollment</h2></div>
+  <div class="card"><h3>Core Deliverables</h3><ul>
+    <li>Medical status tracking embedded in Application model</li>
+    <li>Applicant: view fee/location, choose academy vs own facility, upload documents</li>
+    <li>Staff: review queue, approve/reject/request resubmission</li>
+    <li>Medical required for 4yr scholarship (academy places them) and military; 2yr full-time may skip (no guaranteed placement)</li>
+    <li>Programme-specific enrollment (batch+class for full-time, catalog+deadline for modular)</li>
+    <li>Scholarship certificate suppression (scores only for 4yr students)</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">7</div><h2>Email Templates</h2></div>
+  <div class="card"><h3>Core Deliverables</h3><ul>
+    <li>14 new email templates (see Emails tab)</li>
+    <li>Cron: interview reminders (24h before), aptitude test reminders</li>
+    <li>Cron: modular deadline warnings (75% + 90% elapsed), deadline enforcement</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">8</div><h2>Internal Exam System</h2></div>
+  <div class="card"><h3>Core Deliverables</h3><ul>
+    <li>Reuse aptitude test infrastructure for post-enrollment student exams</li>
+    <li>EASA rules: 3-option MCQ, 75s/question, 75% pass, 90-day retake wait</li>
+    <li>Per-module question counts (e.g., 40 for most modules, 44 for M10)</li>
+    <li><strong>Keyboard auto-submit</strong>: any keypress = instant submission (prevents screen switching)</li>
+    <li>Non-EASA exams: same infrastructure with admin-configurable rule overrides</li>
+    <li>Instructor question upload per course/module</li>
+    <li><strong>5&times; minimum bank size</strong>: bank needs 5&times; exam question count before use (health indicator: RED/AMBER/GREEN)</li>
+    <li><strong>Stratified random selection</strong>: per sub-topic distribution with exposure-based deprioritization (<code>timesServed</code>/<code>lastServedAt</code>)</li>
+    <li><strong>3-attempt + 12-month ban</strong>: 3 consecutive failures = 12-month ban; cheating = 12-month all-module ban</li>
+    <li><strong>10-year completion window</strong>: all EASA modules must pass within 10 years of first pass; cron warns at 8yr/9yr/9.5yr</li>
+    <li>Certificate suppression for scholarship students (scores only, no downloads)</li>
+  </ul></div>
+  <div class="card"><h3>Current Implementation Status — 2026-05-15</h3><ul>
+    <li>Internal exams are guarded by <code>internal_exam_system_enabled</code> and visible through the staff, student, API, and settings surfaces.</li>
+    <li>Staff exam-bank rows now expose pool health, rules, session counts, and a copyable student link: <code>/student/exams/internal?bankId=&lt;bankId&gt;</code>.</li>
+    <li>The student dashboard lists only enrolled-course exam banks and opens the matching pre-exam lobby when a shared link includes <code>bankId</code>.</li>
+    <li>Before starting, students must confirm auto-fetched profile/student ID/programme details so the attempt is tied to the correct candidate record.</li>
+    <li>The live exam UI supports answered/unanswered counts, skip-and-return navigation, autosave, final confirmation, immediate results, and timeout submission.</li>
+    <li>Keyboard auto-submit is implemented through the submit path when <code>allowKeyboardAutoSubmit</code> is enabled; it records <code>autoSubmitted</code> and increments <code>keyboardEvents</code>.</li>
+    <li>Remaining gap: staff session/result detail review and regulatory export are still thinner than the full plan, and essay questions are model-scaffolded but not yet live in the student UI.</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">9</div><h2>Legacy Data Import + Custom Fields</h2></div>
+  <div class="card"><h3>Core Deliverables</h3><ul>
+    <li>Custom field system (EAV): admin defines arbitrary fields without schema changes</li>
+    <li>7 field types: TEXT, NUMBER, DATE, SELECT, MULTI_SELECT, FILE, BOOLEAN</li>
+    <li>CSV import wizard: upload &rarr; column mapping &rarr; validation &rarr; review &rarr; import</li>
+    <li>Support for historical batch data (set ENROLLED/WITHDRAWN/REJECTED status)</li>
+    <li>File attachment for scanned docs on imported records</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">10</div><h2>Attendance Tracking &amp; Training Hours</h2></div>
+  <div class="card"><h3>Core Deliverables (Part 147 Compliance)</h3><ul>
+    <li><code>AttendanceRecord</code> + <code>ClassSession</code> models</li>
+    <li>Batch attendance marking per class (instructor marks present/absent/late/excused)</li>
+    <li>6hr/day max instruction enforced; 15-min break after each 60-min block</li>
+    <li>Attendance % per module/semester/overall &mdash; default 90% threshold (admin-configurable)</li>
+    <li>Cumulative training hours tracked toward 2,400hr Part 147 requirement</li>
+    <li>Alert system: student falls below threshold &rarr; notification to admin + student</li>
+    <li>Exportable attendance reports per class/student/module for NAA audits</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">11</div><h2>Instructor &amp; Examiner Management</h2></div>
+  <div class="card"><h3>Core Deliverables (Part 147 Compliance)</h3><ul>
+    <li><code>InstructorProfile</code>, <code>InstructorQualification</code>, <code>InstructorRecency</code> models</li>
+    <li>Instructor directory with qualification status, licence categories, authorized modules</li>
+    <li><strong>Recency enforcement</strong>: 35 hours update training per rolling 24-month period</li>
+    <li>Auto-flag when approaching deadline; lapsed instructors blocked from teaching assignments</li>
+    <li>Qualification document upload and tracking (Part 66 licence, type ratings, training certs)</li>
+    <li>Examiner and OJT trainer toggles on instructor profile</li>
+    <li>All records available for NAA audit</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">12</div><h2>Practical Training &amp; Assessment Records</h2></div>
+  <div class="card"><h3>Core Deliverables (Part 147 Compliance)</h3><ul>
+    <li><code>PracticalTrainingRecord</code> + <code>ATAChapter</code> models</li>
+    <li>P1/P2 task categories with ATA chapter linking</li>
+    <li>Delivery methods: task performance, demonstration, technical discussion, simulation</li>
+    <li><strong>Dual-signature</strong>: instructor and student must both sign each entry</li>
+    <li><strong>15-student max</strong> per instructor for practical sessions</li>
+    <li>ATA chapter coverage analysis per student (gap highlighting per licence category)</li>
+    <li>ATA chapter directory: 50+ chapters seeded from iSpec 2200, categorized by AIRFRAME/POWERPLANT/AVIONICS/GENERAL</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">13</div><h2>OJT Digital Logbook</h2></div>
+  <div class="card"><h3>Core Deliverables (Part 145 Compliance)</h3><ul>
+    <li><code>OJTLogbook</code>, <code>OJTLogbookEntry</code>, <code>OJTMentorAssignment</code> models</li>
+    <li>Per-entry tracking: aircraft type/registration, ATA chapter, work order ref, AMM ref, line/base maintenance</li>
+    <li>Supervisor countersignature + student acknowledgement (digital dual-sign)</li>
+    <li>ATA chapter coverage analysis with gap detection per licence category</li>
+    <li>Minimum Part 145 experience tracking (12 months for B1.1/B2, 6 months for A/B1.2)</li>
+    <li><strong>Final assessment</strong>: assessor &ne; student&rsquo;s mentor; result COMPETENT / NOT_YET_COMPETENT</li>
+    <li>EASA Form 19 PDF export for licence application</li>
+    <li>Trainer/supervisor portal: dashboard of assigned students, pending signatures, coverage progress</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">14</div><h2>Programme Upgrade &amp; Record Retention</h2></div>
+  <div class="card"><h3>Core Deliverables</h3><ul>
+    <li><code>ProgrammeUpgradeRequest</code> model &mdash; 2yr &rarr; 4yr upgrade flow with payment difference calculation</li>
+    <li>Updates Application.programmeChoice, adjusts completion deadline and payment milestones</li>
+    <li><strong>Record retention</strong>: academic records (exams, attendance, practical, OJT, certs, stage history) cannot be deleted</li>
+    <li>Test student data: admin soft-delete with written reason + audit log entry (archived, not permanent)</li>
+    <li>Configurable retention policy: INDEFINITE (default), 10_YEARS, CUSTOM</li>
+  </ul></div>
+
+  <div class="phase-header"><div class="phase-num">15</div><h2>Polish + Integration</h2></div>
+  <div class="card"><h3>Core Deliverables</h3><ul>
+    <li>Pipeline analytics (funnel chart, conversion rates) on staff dashboard</li>
+    <li>Notification triggers for all stage transitions</li>
+    <li>Audit logging for all admissions actions</li>
+    <li>Seed data: sample question banks, intake cycles, ATA chapters</li>
+    <li>Welcome tour updates for applicant onboarding</li>
+    <li>Student exam dashboard: 10-year window progress, attempt tracking, retake dates</li>
+    <li>ATA chapter directory accessible to students and instructors</li>
+  </ul></div>
+</div>
+
+<!-- ════════════ APTITUDE TEST ════════════ -->
+<div class="section" id="aptitude">
+  <div class="phase-header"><div class="phase-num">3</div><h2>Aptitude Test Deep Dive</h2></div>
+
+  <div class="card">
+    <h3>Question Categories & Counts</h3>
+    <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-top:0.5rem">
+      <div style="background:#dbeafe;border-radius:8px;padding:0.6rem 1rem;text-align:center;min-width:100px"><div style="font-size:1.3rem;font-weight:700;color:var(--aerojet)">10</div><div style="font-size:0.75rem;color:var(--text-muted)">Math</div></div>
+      <div style="background:#fce7f3;border-radius:8px;padding:0.6rem 1rem;text-align:center;min-width:100px"><div style="font-size:1.3rem;font-weight:700;color:var(--aerojet)">10</div><div style="font-size:0.75rem;color:var(--text-muted)">English</div></div>
+      <div style="background:#dcfce7;border-radius:8px;padding:0.6rem 1rem;text-align:center;min-width:100px"><div style="font-size:1.3rem;font-weight:700;color:var(--aerojet)">5</div><div style="font-size:0.75rem;color:var(--text-muted)">Engineering</div></div>
+      <div style="background:#fef3c7;border-radius:8px;padding:0.6rem 1rem;text-align:center;min-width:100px"><div style="font-size:1.3rem;font-weight:700;color:var(--aerojet)">5</div><div style="font-size:0.75rem;color:var(--text-muted)">Logical Reasoning</div></div>
+      <div style="background:#ede9fe;border-radius:8px;padding:0.6rem 1rem;text-align:center;min-width:100px"><div style="font-size:1.3rem;font-weight:700;color:var(--aerojet)">&mdash;</div><div style="font-size:0.75rem;color:var(--text-muted)">Physics (configurable)</div></div>
+    </div>
+    <p style="font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem">All counts admin-configurable via SystemSettings. Default time limit: 60 minutes. Pass threshold: 50%.</p>
+  </div>
+
+  <div class="card">
+    <h3>Anti-Cheat Measures</h3>
+    <div class="anti-cheat-grid">
+      <div class="ac-card">
+        <h4>Client-Side (Deterrent)</h4>
+        <ul>
+          <li>Fullscreen API on test start</li>
+          <li>visibilitychange &amp; blur listeners</li>
+          <li>CSS user-select: none + context menu blocked</li>
+          <li>Warning overlay on each violation</li>
+          <li>Auto-submit after threshold exceeded</li>
+          <li>Browser back/forward disabled</li>
+        </ul>
+      </div>
+      <div class="ac-card">
+        <h4>Server-Side (Authoritative)</h4>
+        <ul>
+          <li>expiresAt enforced &mdash; no late submissions</li>
+          <li>tabSwitchCount &amp; fullscreenExits tracked</li>
+          <li>Auto-flag when thresholds exceeded</li>
+          <li>IP + user agent logged</li>
+          <li>One active session per user</li>
+          <li>Answer timestamps validated</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Auto-Grading Logic</h3>
+    <ul>
+      <li><strong>MCQ:</strong> Compare selected option to <code>correctAnswer</code></li>
+      <li><strong>True/False:</strong> Direct string comparison</li>
+      <li><strong>Numeric Input:</strong> Parse as float, compare with tolerance (per-question or global epsilon)</li>
+      <li><strong>Score:</strong> &Sigma;(pointsAwarded) / &Sigma;(points) &rarr; percentage</li>
+      <li><strong>Passed:</strong> percentage &ge; <code>aptitude_pass_threshold_pct</code></li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>SystemSettings Keys</h3>
+    <div class="settings-grid">
+      <div class="setting-item"><span class="setting-key">aptitude_time_limit_minutes</span><span class="setting-val">60</span></div>
+      <div class="setting-item"><span class="setting-key">aptitude_pass_threshold_pct</span><span class="setting-val">50</span></div>
+      <div class="setting-item"><span class="setting-key">aptitude_math_count</span><span class="setting-val">10</span></div>
+      <div class="setting-item"><span class="setting-key">aptitude_english_count</span><span class="setting-val">10</span></div>
+      <div class="setting-item"><span class="setting-key">aptitude_engineering_count</span><span class="setting-val">5</span></div>
+      <div class="setting-item"><span class="setting-key">aptitude_reasoning_count</span><span class="setting-val">5</span></div>
+      <div class="setting-item"><span class="setting-key">aptitude_max_tab_switches</span><span class="setting-val">3</span></div>
+      <div class="setting-item"><span class="setting-key">aptitude_shuffle_questions</span><span class="setting-val">true</span></div>
+      <div class="setting-item"><span class="setting-key">aptitude_shuffle_options</span><span class="setting-val">true</span></div>
+      <div class="setting-item"><span class="setting-key">aptitude_allow_retake</span><span class="setting-val">false</span></div>
+      <div class="setting-item"><span class="setting-key">aptitude_require_for_modular</span><span class="setting-val">false</span></div>
+      <div class="setting-item"><span class="setting-key">aptitude_show_results_to_applicant</span><span class="setting-val">false</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ INTERVIEWS ════════════ -->
+<div class="section" id="interviews">
+  <div class="phase-header"><div class="phase-num">5</div><h2>Interview System Deep Dive</h2></div>
+
+  <div class="card">
+    <h3>Booking Flow</h3>
+    <div class="pipeline-flow">
+      <div class="pipeline-stage"><div class="pipeline-dot" style="background:var(--aerojet);font-size:0.7rem">Admin</div><div class="pipeline-label">Creates schedule + generates slots</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage"><div class="pipeline-dot" style="background:var(--accent);font-size:0.7rem">App</div><div class="pipeline-label">Views calendar of available slots</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage"><div class="pipeline-dot" style="background:var(--green);font-size:0.7rem">Book</div><div class="pipeline-label">Atomic transaction (race-safe)</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage"><div class="pipeline-dot" style="background:var(--pink);font-size:0.7rem">Day</div><div class="pipeline-label">Interview conducted, notes recorded</div></div>
+      <div class="pipeline-arrow"></div>
+      <div class="pipeline-stage"><div class="pipeline-dot" style="background:var(--green);font-size:0.7rem">Pass</div><div class="pipeline-label">&rarr; SELECTED &rarr; MEDICAL</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Race Condition Prevention</h3>
+    <div class="code-block" id="codeRace">
+      <button class="copy-btn" onclick="copyCode(this, 'codeRace')">Copy</button>
+      <div style="color:#94a3b8">// Uses prismaUnfiltered.$transaction() with re-check:</div>
+      <div><span style="color:#c084fc">const</span> slot = <span style="color:#c084fc">await</span> tx.interviewSlot.findUnique({</div>
+      <div>&nbsp;&nbsp;<span style="color:#c084fc">where</span>: { id: slotId }</div>
+      <div>})</div>
+      <div><span style="color:#c084fc">if</span> (slot.bookedCount >= slot.capacity) <span style="color:#c084fc">throw</span> <span style="color:#fbbf24">'Slot full'</span></div>
+      <div><span style="color:#c084fc">await</span> tx.interviewSlot.update({</div>
+      <div>&nbsp;&nbsp;<span style="color:#c084fc">where</span>: { id: slotId },</div>
+      <div>&nbsp;&nbsp;<span style="color:#c084fc">data</span>: { bookedCount: { increment: <span style="color:#fbbf24">1</span> } }</div>
+      <div>})</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Rescheduling Rules</h3>
+    <ul>
+      <li>Max reschedules tracked on <code>Application.interviewRescheduleCount</code></li>
+      <li>Cannot reschedule within N hours of slot (<code>interview_reschedule_cutoff_hours</code>)</li>
+      <li>On reschedule: decrement old slot bookedCount, increment new, update Application</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>SystemSettings Keys</h3>
+    <div class="settings-grid">
+      <div class="setting-item"><span class="setting-key">interview_max_reschedules</span><span class="setting-val">2</span></div>
+      <div class="setting-item"><span class="setting-key">interview_reschedule_cutoff_hours</span><span class="setting-val">24</span></div>
+      <div class="setting-item"><span class="setting-key">interview_duration_minutes</span><span class="setting-val">60</span></div>
+      <div class="setting-item"><span class="setting-key">interview_daily_capacity</span><span class="setting-val">10</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ EMAILS ════════════ -->
+<div class="section" id="emails">
+  <div class="phase-header"><div class="phase-num">7</div><h2>Email Templates & Cron Jobs</h2></div>
+
+  <div class="card">
+    <h3>14 New Email Templates</h3>
+    <div style="overflow-x:auto">
+    <table class="email-table">
+      <tr><th>Template</th><th>Trigger</th><th>Key Content</th></tr>
+      <tr><td>aptitude-test-invitation</td><td>Payment verified</td><td>Link to test, rules, time limit</td></tr>
+      <tr><td>aptitude-test-result</td><td>Test completed</td><td>Score, pass/fail (if configured)</td></tr>
+      <tr><td>shortlisted</td><td>Staff shortlists</td><td>Congrats, next step: interviews</td></tr>
+      <tr><td>interview-invitation</td><td>Shortlisted</td><td>Link to schedule, available dates</td></tr>
+      <tr><td>interview-confirmed</td><td>Slot booked</td><td>Date, time, location, what to bring</td></tr>
+      <tr><td>interview-rescheduled</td><td>Slot changed</td><td>New date/time/location</td></tr>
+      <tr><td>interview-reminder</td><td>Cron (24h before)</td><td>Reminder with details</td></tr>
+      <tr><td>interview-result-pass</td><td>Interview passed</td><td>Congrats, medical next steps</td></tr>
+      <tr><td>interview-result-fail</td><td>Interview failed</td><td>Rejection with reason</td></tr>
+      <tr><td>medical-instructions</td><td>Selected</td><td>Fee, location, documents, facility option</td></tr>
+      <tr><td>medical-cleared</td><td>Medical approved</td><td>Congrats, enrollment confirmation</td></tr>
+      <tr><td>medical-resubmit</td><td>Docs rejected</td><td>What needs to be resubmitted</td></tr>
+      <tr><td>application-rejected</td><td>Any stage rejection</td><td>Stage-specific reason</td></tr>
+      <tr><td>enrollment-complete</td><td>Medical &rarr; enrolled</td><td>Welcome as student, portal link</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Cron Jobs</h3>
+    <ul>
+      <li><strong>Interview reminders</strong> &mdash; 24h before scheduled slot</li>
+      <li><strong>Aptitude test reminders</strong> &mdash; If not started within N days of becoming eligible</li>
+      <li><strong>Modular deadline warnings</strong> &mdash; At 75% and 90% of completion deadline elapsed</li>
+      <li><strong>Modular deadline enforcement</strong> &mdash; Flag/notify admin when deadline passes</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ════════════ INTERNAL EXAMS ════════════ -->
+<div class="section" id="internal-exams">
+  <div class="phase-header"><div class="phase-num">8</div><h2>Internal Exam System</h2></div>
+
+  <div class="card">
+    <h3>Concept: Reuse Aptitude Test Infrastructure</h3>
+    <p style="font-size:0.9rem">The aptitude test engine (Phase 3) handles fullscreen enforcement, anti-cheat, timed sessions, and auto-grading. The internal exam system extends this same infrastructure for post-enrollment student exams &mdash; both EASA module assessments and non-EASA course tests.</p>
+  </div>
+
+  <div class="card">
+    <h3>Current Implementation Status (2026-05-15)</h3>
+    <ul>
+      <li>Feature-flagged with <code>internal_exam_system_enabled</code>.</li>
+      <li>Staff can manage exam banks and copy student-facing links from expanded bank rows.</li>
+      <li>Student dashboard filters banks to enrolled courses and opens the correct lobby from <code>?bankId=...</code>.</li>
+      <li>Pre-exam lobby requires confirmation of auto-fetched candidate details before the exam can start.</li>
+      <li>Live exam UI includes answered/unanswered counts, skip/review navigation, autosave, final confirmation, and immediate results.</li>
+      <li>Keyboard auto-submit is handled by <code>submit/route.ts</code> with <code>autoSubmitted: true</code>; it increments <code>keyboardEvents</code>.</li>
+      <li>Remaining gaps: dedicated staff session/detail review, regulatory export packet, and live essay-question UI.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>EASA Module Exam Rules</h3>
+    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.75rem">Source: EASA Part 66 / aviacareers.com/exam.html</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.75rem">
+      <div style="background:#dbeafe;border-radius:8px;padding:0.8rem;text-align:center">
+        <div style="font-size:1.5rem;font-weight:700;color:var(--aerojet)">3</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">MCQ Options (1 correct)</div>
+      </div>
+      <div style="background:#dcfce7;border-radius:8px;padding:0.8rem;text-align:center">
+        <div style="font-size:1.5rem;font-weight:700;color:var(--aerojet)">75s</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">Per Question</div>
+      </div>
+      <div style="background:#fef3c7;border-radius:8px;padding:0.8rem;text-align:center">
+        <div style="font-size:1.5rem;font-weight:700;color:var(--aerojet)">75%</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">Pass Mark</div>
+      </div>
+      <div style="background:#fce7f3;border-radius:8px;padding:0.8rem;text-align:center">
+        <div style="font-size:1.5rem;font-weight:700;color:var(--aerojet)">90d</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">Retake Wait</div>
+      </div>
+      <div style="background:#ede9fe;border-radius:8px;padding:0.8rem;text-align:center">
+        <div style="font-size:1.5rem;font-weight:700;color:var(--aerojet)">10yr</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">Completion Window</div>
+      </div>
+      <div style="background:#fee2e2;border-radius:8px;padding:0.8rem;text-align:center">
+        <div style="font-size:1.5rem;font-weight:700;color:var(--aerojet)">20m</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">Per Essay Question</div>
+      </div>
+    </div>
+    <ul style="margin-top:0.75rem;font-size:0.85rem">
+      <li><strong>No penalty marking</strong> &mdash; wrong answers don't deduct points</li>
+      <li><strong>Keyboard press = auto-submit</strong> &mdash; any key triggers instant submission + results render. Prevents Alt-Tab/Ctrl-Tab screen switching.</li>
+      <li><strong>Time calculation:</strong> (MCQ count &times; 75s) + (essay count &times; 20min). Use the calculator below.</li>
+    </ul>
+  </div>
+
+  <!-- ── EXAM TIME CALCULATOR ── -->
+  <div class="calc-card">
+    <h3 style="margin-bottom:0.25rem">Exam Duration Calculator</h3>
+    <p style="font-size:0.82rem;color:#1e40af">Enter question counts to compute exam duration. Uses EASA timing rules by default.</p>
+    <div class="calc-grid">
+      <div class="calc-input-group">
+        <label for="calcMcq">MCQ Questions</label>
+        <input type="number" id="calcMcq" value="40" min="0" max="200" oninput="calcExamTime()">
+      </div>
+      <div class="calc-input-group">
+        <label for="calcEssay">Essay Questions</label>
+        <input type="number" id="calcEssay" value="0" min="0" max="20" oninput="calcExamTime()">
+      </div>
+      <div class="calc-input-group">
+        <label for="calcSecPerQ">Seconds per MCQ</label>
+        <input type="number" id="calcSecPerQ" value="75" min="10" max="300" oninput="calcExamTime()">
+      </div>
+      <div class="calc-input-group">
+        <label for="calcEssayMin">Minutes per Essay</label>
+        <input type="number" id="calcEssayMin" value="20" min="5" max="120" oninput="calcExamTime()">
+      </div>
+    </div>
+    <div class="calc-result" id="calcResults">
+      <div class="calc-result-box"><div class="calc-result-num" id="calcTotalSec">3000</div><div class="calc-result-label">Total Seconds</div></div>
+      <div class="calc-result-box"><div class="calc-result-num" id="calcTotalMin">50</div><div class="calc-result-label">Minutes</div></div>
+      <div class="calc-result-box"><div class="calc-result-num" id="calcHrMin">0h 50m</div><div class="calc-result-label">Duration</div></div>
+      <div class="calc-result-box"><div class="calc-result-num" id="calcPassNeed">30</div><div class="calc-result-label">Correct to Pass (75%)</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Aptitude Test vs Internal Exam Comparison</h3>
+    <div style="overflow-x:auto">
+    <table class="matrix-table">
+      <tr><th>Aspect</th><th>Aptitude Test (Pre-Enrollment)</th><th>Internal Exam (Post-Enrollment)</th></tr>
+      <tr><td>Who takes it</td><td>Applicants</td><td>Enrolled students</td></tr>
+      <tr><td>Purpose</td><td>Admissions screening</td><td>Course module assessment</td></tr>
+      <tr><td>Question format</td><td>MCQ (4 options), numeric, true/false</td><td>MCQ (3 options), essay</td></tr>
+      <tr><td>Time calculation</td><td>Fixed total (admin-set, e.g. 60 min)</td><td>Per-question: 75s &times; MCQ count</td></tr>
+      <tr><td>Pass mark</td><td>50% (configurable)</td><td>75% (EASA) / configurable (non-EASA)</td></tr>
+      <tr><td>Anti-cheat</td><td>Tab switch warning &rarr; threshold &rarr; auto-submit</td><td><strong>Any keyboard press = instant auto-submit</strong></td></tr>
+      <tr><td>Retake rules</td><td>Admin toggle (allow/deny)</td><td>90-day wait (EASA) / configurable</td></tr>
+      <tr><td>Results</td><td>Score + pass/fail (optionally hidden)</td><td>Always shown to student</td></tr>
+      <tr><td>Certificate</td><td>N/A</td><td>Issued on pass (except scholarship &mdash; scores only)</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Anti-Cheat: Keyboard Auto-Submit</h3>
+    <div class="anti-cheat-grid">
+      <div class="ac-card">
+        <h4>How It Works</h4>
+        <ul>
+          <li><code>document.addEventListener('keydown')</code> on exam container</li>
+          <li>Any key press (except mouse clicks on answer options) triggers <strong>immediate auto-submit</strong></li>
+          <li>Session marked <code>autoSubmitted: true</code></li>
+          <li>Results rendered instantly &mdash; no second chance</li>
+          <li>Combined with fullscreen enforcement from aptitude system</li>
+        </ul>
+      </div>
+      <div class="ac-card">
+        <h4>Why This Works</h4>
+        <ul>
+          <li>Alt-Tab requires keyboard &rarr; caught</li>
+          <li>Ctrl-Tab requires keyboard &rarr; caught</li>
+          <li>Win key requires keyboard &rarr; caught</li>
+          <li>Students interact with MCQs via <strong>mouse clicks only</strong></li>
+          <li>Essay questions: keyboard allowed only in designated textarea (exception handler)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>EASA Module Map (17 Modules)</h3>
+    <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.5rem">Updated per EU 2023/989 (effective June 2024). Modules 9 &amp; 10 are now MCQ-only (essays removed).</p>
+    <div style="overflow-x:auto">
+    <table class="matrix-table" style="font-size:0.78rem">
+      <tr><th>#</th><th>Module</th><th>B1.1</th><th>B1.2</th><th>B2</th><th>Changes</th></tr>
+      <tr><td>1</td><td>Mathematics</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td></td></tr>
+      <tr><td>2</td><td>Physics</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td></td></tr>
+      <tr><td>3</td><td>Electrical Fundamentals</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td></td></tr>
+      <tr><td>4</td><td>Electronic Fundamentals</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td></td></tr>
+      <tr><td>5</td><td>Digital Techniques / EIS</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td></td></tr>
+      <tr><td>6</td><td>Materials &amp; Hardware</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td style="color:var(--amber);font-size:0.72rem">+ Composites, 3D printing</td></tr>
+      <tr><td>7</td><td>Maintenance Practices</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td style="color:var(--amber);font-size:0.72rem">+ EWIS, CDCCL</td></tr>
+      <tr><td>8</td><td>Basic Aerodynamics</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td></td></tr>
+      <tr><td>9</td><td>Human Factors</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td style="color:var(--red);font-size:0.72rem">Essays removed, + SMS</td></tr>
+      <tr><td>10</td><td>Aviation Legislation</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td style="color:var(--red);font-size:0.72rem">Essays removed, 40&rarr;44 MCQ, + SMS</td></tr>
+      <tr><td>11</td><td>Turbine Aeroplane Aero/Struct/Sys</td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td></td></tr>
+      <tr><td>12</td><td>Helicopter Aero/Struct/Sys</td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td></td></tr>
+      <tr><td>13</td><td>Aircraft Aero/Struct/Sys</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td style="color:var(--amber);font-size:0.72rem">+ Fly-by-wire, modern avionics</td></tr>
+      <tr><td>14</td><td>Propulsion</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td></td></tr>
+      <tr><td>15</td><td>Gas Turbine Engine</td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td><span class="cross">&#10007;</span></td><td></td></tr>
+      <tr><td>16</td><td>Piston Engine</td><td><span class="cross">&#10007;</span></td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td></td></tr>
+      <tr><td>17</td><td>Propeller</td><td><span class="check">&#10003;</span></td><td><span class="check">&#10003;</span></td><td><span class="cross">&#10007;</span></td><td></td></tr>
+    </table>
+    </div>
+    <p style="font-size:0.78rem;color:var(--text-muted);margin-top:0.5rem">B1.1 = 15 modules (16 exams) &bull; B1.2 = 13 modules &bull; B2 = 12 modules (15 exams) &bull; Full categories: A, B1.1-B1.4, B2, B2L, B3, L, C</p>
+  </div>
+
+  <div class="card" style="background:linear-gradient(135deg,#fefce8,#fef9c3);border-color:#facc15">
+    <h3 style="color:#854d0e">Regulatory Impact on Internal Exam System</h3>
+    <ul style="font-size:0.85rem">
+      <li><strong>Per-module question count:</strong> <code>InternalExamBank</code> must store question count per bank (M10 = 44 MCQs, others may differ). No global default.</li>
+      <li><strong>Essay questions deprioritized:</strong> EASA is removing them. Keep <code>isEssay</code> field for non-EASA courses only.</li>
+      <li><strong>Anti-cheat alignment:</strong> Our keyboard auto-submit + question shuffling already satisfies EASA's upcoming anti-fraud requirements (NPA 2023-10).</li>
+      <li><strong>Distance learning:</strong> VCE class delivery mode for modular students could be added (future enhancement).</li>
+      <li><strong>e-Licence (2025/2026):</strong> May affect certificate generation format in the future.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>Non-EASA Exams (Custom Rules)</h3>
+    <p style="font-size:0.9rem">Non-EASA courses (cabin crew, specialized training, etc.) use the same test infrastructure but with admin-configurable rule overrides:</p>
+    <div class="settings-grid" style="margin-top:0.75rem">
+      <div class="setting-item"><span class="setting-key">passMarkPct</span><span class="setting-val">default 75, admin override</span></div>
+      <div class="setting-item"><span class="setting-key">timePerQuestionSecs</span><span class="setting-val">default 75, admin override</span></div>
+      <div class="setting-item"><span class="setting-key">retakeWaitDays</span><span class="setting-val">default 90, admin override</span></div>
+      <div class="setting-item"><span class="setting-key">allowKeyboardAutoSubmit</span><span class="setting-val">default true, admin toggle</span></div>
+      <div class="setting-item"><span class="setting-key">maxRetakes</span><span class="setting-val">null = unlimited</span></div>
+      <div class="setting-item"><span class="setting-key">completionWindowYears</span><span class="setting-val">default 10</span></div>
+      <div class="setting-item"><span class="setting-key">customInstructions</span><span class="setting-val">shown before exam start</span></div>
+    </div>
+  </div>
+
+  <div class="card" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-color:var(--green)">
+    <h3 style="color:#166534">Question Bank Health &amp; Stratified Selection</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.75rem;margin-top:0.75rem">
+      <div style="background:white;border-radius:8px;padding:0.8rem;text-align:center;border:1px solid #bbf7d0">
+        <div style="font-size:1.5rem;font-weight:700;color:#166534">5&times;</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">Min Pool Size (mcqCount &times; 5)</div>
+      </div>
+      <div style="background:white;border-radius:8px;padding:0.8rem;text-align:center;border:1px solid #bbf7d0">
+        <div style="font-size:1.5rem;font-weight:700;color:#166534">3</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">Health Levels (RED/AMBER/GREEN)</div>
+      </div>
+      <div style="background:white;border-radius:8px;padding:0.8rem;text-align:center;border:1px solid #bbf7d0">
+        <div style="font-size:1.5rem;font-weight:700;color:#166534">20/60/20</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">Difficulty % (EASY/MED/HARD)</div>
+      </div>
+    </div>
+    <ul style="margin-top:0.75rem;font-size:0.85rem">
+      <li><strong>Per sub-topic distribution</strong> via <code>categoryConfig</code> JSON on InternalExamBank &mdash; admin sets how many questions come from each module sub-topic</li>
+      <li><strong>Exposure tracking</strong>: <code>timesServed</code> + <code>lastServedAt</code> on each question. Selector prefers least-exposed questions, naturally rotating the full bank</li>
+      <li><strong>Validation gate</strong>: <code>/start</code> API refuses to create session if bank is below minimum pool size or any sub-topic has insufficient questions</li>
+      <li><strong>Bank health page</strong>: total vs. required, sub-topic coverage chart, difficulty distribution, exposure heatmap</li>
+    </ul>
+  </div>
+
+  <div class="card" style="background:linear-gradient(135deg,#fef2f2,#fee2e2);border-color:var(--red)">
+    <h3 style="color:#991b1b">Attempt Tracking &amp; Ban Enforcement</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.75rem;margin-top:0.75rem">
+      <div style="background:white;border-radius:8px;padding:0.8rem;text-align:center;border:1px solid #fecaca">
+        <div style="font-size:1.5rem;font-weight:700;color:#991b1b">3</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">Max Consecutive Failures</div>
+      </div>
+      <div style="background:white;border-radius:8px;padding:0.8rem;text-align:center;border:1px solid #fecaca">
+        <div style="font-size:1.5rem;font-weight:700;color:#991b1b">12mo</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">Ban After 3 Failures</div>
+      </div>
+      <div style="background:white;border-radius:8px;padding:0.8rem;text-align:center;border:1px solid #fecaca">
+        <div style="font-size:1.5rem;font-weight:700;color:#991b1b">10yr</div>
+        <div style="font-size:0.78rem;color:var(--text-muted)">Module Completion Window</div>
+      </div>
+    </div>
+    <ul style="margin-top:0.75rem;font-size:0.85rem">
+      <li><strong>3 consecutive failures</strong> on the same module &rarr; <code>banLiftDate = submittedAt + 12 months</code></li>
+      <li><strong>Cheating ban</strong>: anti-cheat confirmed &rarr; 12-month ban from ALL modules (student-level)</li>
+      <li><strong>10-year window</strong>: <code>firstModulePassDate</code> tracked; all EASA modules must pass within 10 years</li>
+      <li><strong>Cron warnings</strong>: at 8yr, 9yr, 9.5yr elapsed; admin notified when deadline approaches</li>
+      <li><strong>Pre-exam checks</strong>: bank size, active ban, attempt count, retake eligibility, enrollment, no concurrent session</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>New Models</h3>
+    <div class="model-grid">
+      <div class="model-card">
+        <div class="model-card-header">InternalExamBank</div>
+        <div class="model-card-body">
+          <div class="model-field"><span class="field-name">courseId</span><span class="field-type">String</span></div>
+          <div class="model-field"><span class="field-name">moduleCode</span><span class="field-type">String? (M1, M3...)</span></div>
+          <div class="model-field"><span class="field-name">ruleSet</span><span class="field-type">EASA | CUSTOM</span></div>
+          <div class="model-field"><span class="field-name">name</span><span class="field-type">String</span></div>
+          <div class="model-field"><span class="field-name">mcqCount</span><span class="field-type">Int (40, 44 for M10)</span></div>
+          <div class="model-field"><span class="field-name">categoryConfig</span><span class="field-type">Json? (sub-topic distribution)</span></div>
+          <div class="model-field"><span class="field-name">minimumPoolSize</span><span class="field-type">Int? (mcqCount &times; 5)</span></div>
+          <div class="model-field"><span class="field-name">isActive</span><span class="field-type">Boolean</span></div>
+        </div>
+      </div>
+      <div class="model-card">
+        <div class="model-card-header">InternalExamQuestion</div>
+        <div class="model-card-body">
+          <div class="model-field"><span class="field-name">bankId</span><span class="field-type">String</span></div>
+          <div class="model-field"><span class="field-name">text</span><span class="field-type">String</span></div>
+          <div class="model-field"><span class="field-name">options</span><span class="field-type">Json (3 options)</span></div>
+          <div class="model-field"><span class="field-name">correctAnswer</span><span class="field-type">String</span></div>
+          <div class="model-field"><span class="field-name">subTopic</span><span class="field-type">String? (sub-topic within module)</span></div>
+          <div class="model-field"><span class="field-name">difficulty</span><span class="field-type">EASY | MEDIUM | HARD</span></div>
+          <div class="model-field"><span class="field-name">timesServed</span><span class="field-type">Int @default(0)</span></div>
+          <div class="model-field"><span class="field-name">lastServedAt</span><span class="field-type">DateTime?</span></div>
+          <div class="model-field"><span class="field-name">isEssay</span><span class="field-type">Boolean</span></div>
+        </div>
+      </div>
+      <div class="model-card">
+        <div class="model-card-header">InternalExamSession</div>
+        <div class="model-card-body">
+          <div class="model-field"><span class="field-name">studentId / bankId</span><span class="field-type">String</span></div>
+          <div class="model-field"><span class="field-name">ruleSet</span><span class="field-type">EASA | CUSTOM</span></div>
+          <div class="model-field"><span class="field-name">status</span><span class="field-type">TestSessionStatus</span></div>
+          <div class="model-field"><span class="field-name">expiresAt</span><span class="field-type">DateTime (calculated)</span></div>
+          <div class="model-field"><span class="field-name">autoSubmitted</span><span class="field-type">Boolean</span></div>
+          <div class="model-field"><span class="field-name">percentage / passed</span><span class="field-type">Float / Boolean</span></div>
+          <div class="model-field"><span class="field-name">keyboardEvents</span><span class="field-type">Int @default(0)</span></div>
+          <div class="model-field"><span class="field-name">retakeEligibleAt</span><span class="field-type">DateTime?</span></div>
+          <div class="model-field"><span class="field-name">attemptNumber</span><span class="field-type">Int @default(1)</span></div>
+          <div class="model-field"><span class="field-name">banLiftDate</span><span class="field-type">DateTime?</span></div>
+        </div>
+      </div>
+      <div class="model-card">
+        <div class="model-card-header">InternalExamRuleOverride</div>
+        <div class="model-card-body">
+          <div class="model-field"><span class="field-name">bankId</span><span class="field-type">String @unique</span></div>
+          <div class="model-field"><span class="field-name">passMarkPct</span><span class="field-type">Int @default(75)</span></div>
+          <div class="model-field"><span class="field-name">timePerQuestionSecs</span><span class="field-type">Int @default(75)</span></div>
+          <div class="model-field"><span class="field-name">retakeWaitDays</span><span class="field-type">Int @default(90)</span></div>
+          <div class="model-field"><span class="field-name">allowKeyboardAutoSubmit</span><span class="field-type">Boolean @default(true)</span></div>
+          <div class="model-field"><span class="field-name">maxRetakes</span><span class="field-type">Int?</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Certificate Suppression (Scholarship Students)</h3>
+    <p style="font-size:0.9rem">After passing an internal exam, all students see their score. However, <strong>scholarship students (on any programme) cannot download individual module certificates</strong> &mdash; they only see scores. The scholarship acts as a loan; withholding certificates ensures the academy retains leverage until the bonding contract is fulfilled (status = FULFILLED). Enforced by checking <code>Application.fundingType === 'SCHOLARSHIP'</code> + <code>BondingContract.status !== 'FULFILLED'</code> in the certificate download API.</p>
+    <br>
+    <p style="font-size:0.9rem"><strong>Self-funded students</strong> (on any programme) are not bonded and receive certificate downloads immediately upon passing.</p>
+  </div>
+</div>
+
+<!-- ════════════ PART 147/145 COMPLIANCE ════════════ -->
+<div class="section" id="compliance">
+  <div class="phase-header"><div class="phase-num">P147</div><h2>Part 147 / Part 145 Compliance Features</h2></div>
+
+  <div class="card">
+    <h3>Attendance &amp; Training Hours (Phase 10)</h3>
+    <div class="settings-grid">
+      <div class="setting-item"><span class="setting-key">Max daily instruction</span><span class="setting-val">6 hours per student</span></div>
+      <div class="setting-item"><span class="setting-key">Break requirement</span><span class="setting-val">15 min after each 60-min block</span></div>
+      <div class="setting-item"><span class="setting-key">Attendance threshold</span><span class="setting-val">90% (admin-configurable)</span></div>
+      <div class="setting-item"><span class="setting-key">Training hours target</span><span class="setting-val">~2,400 hours (Part 147 basic)</span></div>
+      <div class="setting-item"><span class="setting-key">Session types</span><span class="setting-val">Theory, Practical, Revision, Assessment</span></div>
+      <div class="setting-item"><span class="setting-key">Audit export</span><span class="setting-val">Per class/student/module report</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Instructor Recency (Phase 11)</h3>
+    <div class="settings-grid">
+      <div class="setting-item"><span class="setting-key">Recency requirement</span><span class="setting-val">35 hours over rolling 24-month period</span></div>
+      <div class="setting-item"><span class="setting-key">Activity types</span><span class="setting-val">Theory teaching, Practical teaching, Update training, Industry experience, Assessment</span></div>
+      <div class="setting-item"><span class="setting-key">Enforcement</span><span class="setting-val">Lapsed instructors blocked from teaching assignments</span></div>
+      <div class="setting-item"><span class="setting-key">Employment types</span><span class="setting-val">Permanent, Contract</span></div>
+      <div class="setting-item"><span class="setting-key">Roles</span><span class="setting-val">Instructor, Examiner, OJT Trainer (toggles)</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Practical Training (Phase 12)</h3>
+    <div class="settings-grid">
+      <div class="setting-item"><span class="setting-key">Task categories</span><span class="setting-val">P1 (demonstrate), P2 (perform)</span></div>
+      <div class="setting-item"><span class="setting-key">Student:instructor ratio</span><span class="setting-val">Max 15:1 for practical sessions</span></div>
+      <div class="setting-item"><span class="setting-key">Delivery methods</span><span class="setting-val">Task performance, Demonstration, Technical discussion, Simulation</span></div>
+      <div class="setting-item"><span class="setting-key">Signature requirement</span><span class="setting-val">Dual-sign: instructor + student</span></div>
+      <div class="setting-item"><span class="setting-key">ATA chapters</span><span class="setting-val">50+ chapters seeded from iSpec 2200 / ATA 100</span></div>
+      <div class="setting-item"><span class="setting-key">Coverage analysis</span><span class="setting-val">Gap detection per licence category</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>OJT Digital Logbook (Phase 13)</h3>
+    <div class="settings-grid">
+      <div class="setting-item"><span class="setting-key">B1.1 / B2 min experience</span><span class="setting-val">2 years total, 12 months Part 145</span></div>
+      <div class="setting-item"><span class="setting-key">A / B1.2 min experience</span><span class="setting-val">1 year total, 6 months Part 145</span></div>
+      <div class="setting-item"><span class="setting-key">Entry fields</span><span class="setting-val">Aircraft type/reg, ATA chapter, work order, AMM ref, line/base maintenance</span></div>
+      <div class="setting-item"><span class="setting-key">Signature</span><span class="setting-val">Supervisor countersign + student acknowledge</span></div>
+      <div class="setting-item"><span class="setting-key">Final assessment</span><span class="setting-val">Assessor &ne; mentor, min 1 working day, COMPETENT / NOT_YET_COMPETENT</span></div>
+      <div class="setting-item"><span class="setting-key">Export</span><span class="setting-val">EASA Form 19 PDF for licence application</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Exam Compliance (Phases 8 &amp; 14)</h3>
+    <div class="settings-grid">
+      <div class="setting-item"><span class="setting-key">10-year completion window</span><span class="setting-val">All EASA modules must pass within 10 years of first pass</span></div>
+      <div class="setting-item"><span class="setting-key">3-attempt rule</span><span class="setting-val">3 consecutive failures &rarr; 12-month ban on that module</span></div>
+      <div class="setting-item"><span class="setting-key">Cheating ban</span><span class="setting-val">Anti-cheat confirmed &rarr; 12-month ban on ALL modules</span></div>
+      <div class="setting-item"><span class="setting-key">Retake wait</span><span class="setting-val">90 days after any failure</span></div>
+      <div class="setting-item"><span class="setting-key">Record retention</span><span class="setting-val">Academic records: indefinite (Part 147 requirement)</span></div>
+      <div class="setting-item"><span class="setting-key">Question bank health</span><span class="setting-val">5&times; minimum pool size; stratified random selection per sub-topic</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>ATA Chapter Categories (iSpec 2200)</h3>
+    <div class="settings-grid">
+      <div class="setting-item"><span class="setting-key" style="color:var(--aerojet)">GENERAL</span><span class="setting-val">ATA 05&ndash;12: Time limits, Dimensions, Lifting, Weighing, Towing, Parking, Placards, Servicing</span></div>
+      <div class="setting-item"><span class="setting-key" style="color:var(--accent)">AIRFRAME</span><span class="setting-val">ATA 20&ndash;57: Structures, Air conditioning, Equipment, Fire protection, Flight controls, Fuel, Hydraulic, Landing gear, Lights, etc.</span></div>
+      <div class="setting-item"><span class="setting-key" style="color:var(--purple)">AVIONICS</span><span class="setting-val">ATA 22&ndash;34: Auto flight, Communications, Electrical power, Indicating systems, Navigation</span></div>
+      <div class="setting-item"><span class="setting-key" style="color:var(--red)">POWERPLANT</span><span class="setting-val">ATA 49&ndash;85: APU, Engine general, Turbine/Turboprop, Fuel &amp; control, Ignition, Oil, Starting, Gearboxes</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ FILE MAP ════════════ -->
+<div class="section" id="files">
+  <div class="phase-header"><div class="phase-num">F</div><h2>File Map &mdash; New & Modified</h2></div>
+
+  <div class="card">
+    <h3>Modified Files</h3>
+    <div class="file-tree">
+      prisma/schema.prisma <span class="mod-badge">MOD</span><br>
+      app/api/public/register/route.ts <span class="mod-badge">MOD</span><br>
+      app/api/staff/applicants/[id]/approve/route.ts <span class="mod-badge">MOD</span><br>
+      app/applicant/application/status/page.tsx <span class="mod-badge">MOD</span><br>
+      app/applicant/_components/ApplicantSidebar.tsx <span class="mod-badge">MOD</span><br>
+      app/staff/_components/StaffSidebar.tsx <span class="mod-badge">MOD</span><br>
+      app/api/uploadthing/core.ts <span class="mod-badge">MOD</span><br>
+      lib/email/service.ts <span class="mod-badge">MOD</span><br>
+      components/Tour/AppTour.tsx <span class="mod-badge">MOD</span><br>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>New Library Files</h3>
+    <div class="file-tree">
+      <span class="dir">lib/admissions/</span><br>
+      &nbsp;&nbsp;state-machine.ts <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;constants.ts <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;scoring.ts <span class="new-badge">NEW</span><br>
+      <span class="dir">lib/aptitude/</span><br>
+      &nbsp;&nbsp;grading.ts <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;question-selector.ts <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;anti-cheat.ts <span class="new-badge">NEW</span><br>
+      <span class="dir">lib/exams/</span><br>
+      &nbsp;&nbsp;grading.ts <span class="new-badge">NEW</span> &mdash; shared grading logic<br>
+      &nbsp;&nbsp;time-calculator.ts <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;question-selector.ts <span class="new-badge">NEW</span> &mdash; stratified selection + exposure tracking<br>
+      <span class="dir">lib/attendance/</span><br>
+      &nbsp;&nbsp;calculator.ts <span class="new-badge">NEW</span> &mdash; attendance %, training hours, Part 147 compliance<br>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>New Staff Pages</h3>
+    <div class="file-tree">
+      <span class="dir">app/staff/admissions/</span><br>
+      &nbsp;&nbsp;page.tsx + loading.tsx <span class="new-badge">NEW</span> &mdash; Pipeline dashboard<br>
+      &nbsp;&nbsp;<span class="dir">intake-cycles/</span> page, create <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;<span class="dir">document-types/</span> page <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;<span class="dir">aptitude/</span> page, banks/[id], config, results <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;<span class="dir">shortlisting/</span> page <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;<span class="dir">interviews/</span> page, schedules/[id] <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;<span class="dir">medical/</span> page <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;<span class="dir">import/</span> page <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;<span class="dir">bonding/</span> page <span class="new-badge">NEW</span> &mdash; BondingContract management<br>
+      <span class="dir">app/staff/settings/</span><br>
+      &nbsp;&nbsp;<span class="dir">pipeline-config/</span> page <span class="new-badge">NEW</span> &mdash; Global flags + stage matrix editor<br>
+      &nbsp;&nbsp;<span class="dir">custom-fields/</span> page <span class="new-badge">NEW</span><br>
+      <span class="dir">app/staff/instructors/</span><br>
+      &nbsp;&nbsp;page.tsx <span class="new-badge">NEW</span> &mdash; Instructor directory<br>
+      &nbsp;&nbsp;[id]/page.tsx <span class="new-badge">NEW</span> &mdash; Profile, qualifications, recency<br>
+      &nbsp;&nbsp;[id]/recency/page.tsx <span class="new-badge">NEW</span> &mdash; Rolling 24-month tracker<br>
+      <span class="dir">app/staff/classes/[id]/</span><br>
+      &nbsp;&nbsp;<span class="dir">attendance/</span> page, report <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;<span class="dir">practical/</span> page <span class="new-badge">NEW</span><br>
+      <span class="dir">app/staff/ojt/</span><br>
+      &nbsp;&nbsp;page.tsx <span class="new-badge">NEW</span> &mdash; OJT overview<br>
+      &nbsp;&nbsp;logbooks/[id]/page.tsx <span class="new-badge">NEW</span> &mdash; Individual logbook<br>
+      &nbsp;&nbsp;logbooks/[id]/assessment/page.tsx <span class="new-badge">NEW</span> &mdash; Final assessment<br>
+      &nbsp;&nbsp;coverage/page.tsx <span class="new-badge">NEW</span> &mdash; ATA coverage dashboard<br>
+      <span class="dir">app/staff/reports/</span><br>
+      &nbsp;&nbsp;training-hours/page.tsx <span class="new-badge">NEW</span><br>
+      <span class="dir">app/staff/practical-assessments/</span><br>
+      &nbsp;&nbsp;page.tsx <span class="new-badge">NEW</span><br>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>New Applicant Pages</h3>
+    <div class="file-tree">
+      <span class="dir">app/applicant/application/</span><br>
+      &nbsp;&nbsp;<span class="dir">documents/</span> page + DocumentUploadForm <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;<span class="dir">aptitude-test/</span> page + results + components <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;<span class="dir">medical/</span> page + MedicalUploadForm <span class="new-badge">NEW</span><br>
+      <span class="dir">app/applicant/interview/</span><br>
+      &nbsp;&nbsp;schedule/page.tsx <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;status/page.tsx <span class="new-badge">NEW</span><br>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>New Student Exam Pages</h3>
+    <div class="file-tree">
+      <span class="dir">app/student/exams/internal/</span><br>
+      &nbsp;&nbsp;page.tsx <span class="new-badge">NEW</span> &mdash; Available exams<br>
+      &nbsp;&nbsp;[bankId]/page.tsx <span class="new-badge">NEW</span> &mdash; Pre-exam rules + start<br>
+      &nbsp;&nbsp;[bankId]/results/page.tsx <span class="new-badge">NEW</span> &mdash; Past results<br>
+      <span class="dir">app/student/attendance/</span><br>
+      &nbsp;&nbsp;page.tsx <span class="new-badge">NEW</span> &mdash; Own attendance + training hours<br>
+      <span class="dir">app/student/practical-training/</span><br>
+      &nbsp;&nbsp;page.tsx <span class="new-badge">NEW</span> &mdash; Practical record + ATA coverage<br>
+      <span class="dir">app/student/ata-chapters/</span><br>
+      &nbsp;&nbsp;page.tsx <span class="new-badge">NEW</span> &mdash; ATA chapter directory<br>
+      <span class="dir">app/student/ojt/</span><br>
+      &nbsp;&nbsp;page.tsx <span class="new-badge">NEW</span> &mdash; OJT logbook dashboard<br>
+      &nbsp;&nbsp;entries/page.tsx <span class="new-badge">NEW</span> &mdash; Log + view entries<br>
+      &nbsp;&nbsp;coverage/page.tsx <span class="new-badge">NEW</span> &mdash; ATA coverage chart<br>
+      &nbsp;&nbsp;logbook-export/page.tsx <span class="new-badge">NEW</span> &mdash; EASA Form 19 PDF<br>
+      <span class="dir">app/student/programme-upgrade/</span><br>
+      &nbsp;&nbsp;page.tsx <span class="new-badge">NEW</span> &mdash; Request upgrade form<br>
+      <span class="dir">app/staff/exams/internal/</span><br>
+      &nbsp;&nbsp;page.tsx <span class="new-badge">NEW</span> &mdash; Exam banks by course<br>
+      &nbsp;&nbsp;banks/[id]/page.tsx <span class="new-badge">NEW</span> &mdash; Questions editor<br>
+      &nbsp;&nbsp;banks/[id]/results/page.tsx <span class="new-badge">NEW</span> &mdash; Student results<br>
+      &nbsp;&nbsp;rules/page.tsx <span class="new-badge">NEW</span> &mdash; Non-EASA rule overrides<br>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>New API Routes (85+)</h3>
+    <div class="file-tree">
+      <span class="dir">app/api/staff/admissions/</span><br>
+      &nbsp;&nbsp;intake-cycles/ (CRUD) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;document-types/ (CRUD) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;aptitude/banks/ (CRUD + questions) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;aptitude/sessions/ (list, detail, void) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;shortlist/ (POST) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;interviews/schedules/ (CRUD + slots + generate) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;interviews/[appId]/notes/ (POST) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;import/ (validate, execute) <span class="new-badge">NEW</span><br>
+      <span class="dir">app/api/applicant/</span><br>
+      &nbsp;&nbsp;aptitude/ (start, answer, submit, anti-cheat, session) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;interview/ (available-slots, book, reschedule) <span class="new-badge">NEW</span><br>
+      <span class="dir">app/api/staff/settings/</span><br>
+      &nbsp;&nbsp;custom-fields/ (CRUD) <span class="new-badge">NEW</span><br>
+      <span class="dir">app/api/staff/exams/internal/</span><br>
+      &nbsp;&nbsp;banks/ (CRUD + questions + rules) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;sessions/ (list, detail) <span class="new-badge">NEW</span><br>
+      <span class="dir">app/api/student/exams/internal/</span><br>
+      &nbsp;&nbsp;progress, start, session, answer, submit <span class="new-badge">NEW</span><br>
+      <span class="dir">app/api/staff/instructors/</span><br>
+      &nbsp;&nbsp;(CRUD + qualifications + recency) <span class="new-badge">NEW</span><br>
+      <span class="dir">app/api/staff/classes/[id]/</span><br>
+      &nbsp;&nbsp;attendance/ (batch mark, report) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;sessions/ (class session logging) <span class="new-badge">NEW</span><br>
+      <span class="dir">app/api/staff/practical-training/</span><br>
+      &nbsp;&nbsp;(CRUD + instructor sign) <span class="new-badge">NEW</span><br>
+      <span class="dir">app/api/staff/ojt/</span><br>
+      &nbsp;&nbsp;logbooks/ (CRUD + entries + sign + assessment) <span class="new-badge">NEW</span><br>
+      <span class="dir">app/api/student/</span><br>
+      &nbsp;&nbsp;attendance/ (own records) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;practical-training/ (own records + sign) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;ojt/ (entries + sign + coverage + export) <span class="new-badge">NEW</span><br>
+      &nbsp;&nbsp;programme-upgrade/ (request) <span class="new-badge">NEW</span><br>
+      <span class="dir">app/api/staff/admissions/</span><br>
+      &nbsp;&nbsp;upgrades/[id]/ (approve/reject) <span class="new-badge">NEW</span><br>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ VERIFICATION ════════════ -->
+<div class="section" id="verification">
+  <div class="phase-header"><div class="phase-num">&#10003;</div><h2>Verification Checklist</h2></div>
+
+  <div class="card">
+    <ul class="checklist">
+      <li><code>npx prisma migrate dev</code> passes cleanly</li>
+      <li><code>npx tsc --noEmit</code> passes (excluding known pre-existing errors)</li>
+      <li>New applicant creates Application for ALL programme types (including EXAM_ONLY) when pipeline enabled</li>
+      <li>Applicant status page shows correct stage with programme-appropriate steps (modular shows fewer stages)</li>
+      <li>Stage matrix: admin can toggle any stage per programme; changes take effect for new applicants</li>
+      <li>Stage skipping: state machine reads <code>pipeline_stage_config</code> and auto-skips disabled stages</li>
+      <li>Aptitude test: full flow &mdash; start &rarr; answer &rarr; submit &rarr; auto-grade &rarr; stage transition</li>
+      <li>Banks tagged by programme for admin organization</li>
+      <li>Anti-cheat: tab switch and fullscreen exit correctly tracked and flagged</li>
+      <li>Interview booking: race condition test &mdash; two concurrent bookings for last slot</li>
+      <li>Rescheduling enforces max reschedules and cutoff time</li>
+      <li>Medical: upload &rarr; staff review &rarr; clear &rarr; auto-promote</li>
+      <li>Document rejection: admin can send custom rejection email; can enable interview for borderline cases</li>
+      <li>All 14+ emails send correctly at their trigger points</li>
+      <li>Post-enrollment (full-time): assigned to academic year; batch enrollment works</li>
+      <li>Post-enrollment (modular): course catalog access; completionDeadline set from SystemSettings default; admin override per student</li>
+      <li>Modular deadline cron: warnings fire at 75% and 90% elapsed; admin notified on expiry</li>
+      <li>Funding type: SCHOLARSHIP/SELF_FUNDED/SPONSORED tracked on Application (independent of programme)</li>
+      <li>Bonding contract: created for SCHOLARSHIP students at enrollment; lifecycle ISSUED &rarr; SIGNED &rarr; IN_PROGRESS &rarr; FULFILLED / BREACHED</li>
+      <li>Certificate suppression: blocked when <code>BondingContract.status !== FULFILLED</code>; self-funded students get certs immediately</li>
+      <li>Custom fields: admin can create/edit field definitions; values render correctly</li>
+      <li>CSV import: upload &rarr; map &rarr; validate &rarr; import with correct historical statuses</li>
+      <li>Internal EASA exam: 3-option MCQ, 75s/question timer, 75% pass mark enforced</li>
+      <li>Keyboard auto-submit: any keypress during exam triggers instant submission</li>
+      <li>EASA retake: failed exam sets retakeEligibleAt = +90 days; student blocked until then</li>
+      <li>Non-EASA exam: admin can override pass mark, time, retake rules, keyboard auto-submit</li>
+      <li>Instructor can create exam banks per course/module and upload questions</li>
+      <li>Feature flags OFF: system behaves exactly like current flow (no Application, no pipeline stages)</li>
+      <li>Feature flags ON (incremental): each subsystem independently toggleable; admin can turn on/off from settings</li>
+      <li>Revision sessions: scheduling linked to ExamSitting, Zoom/Teams links sent, 24h+1h reminders</li>
+      <li>Question bank health: 5&times; minimum enforced; RED/AMBER/GREEN indicator on staff dashboard</li>
+      <li>Stratified selection: questions drawn per sub-topic distribution; <code>timesServed</code> rotates exposure evenly</li>
+      <li>3-attempt + 12-month ban: 3 consecutive failures = module ban; cheating = all-module ban</li>
+      <li>10-year window: <code>firstModulePassDate</code> tracked; cron warns at 8yr/9yr/9.5yr</li>
+      <li>Attendance: batch marking per class session; 6hr/day max; 15-min break enforcement; 90% threshold alerts</li>
+      <li>Training hours: cumulative tracking toward 2,400hr Part 147; exportable per student/class/module</li>
+      <li>Instructor recency: 35hr/24-month rolling window; auto-flag when approaching; block when lapsed</li>
+      <li>Instructor qualifications: document upload, expiry tracking, Part 66 licence number</li>
+      <li>Practical training: P1/P2 tasks + ATA chapter linking; dual-sign; 15-student max per practical session</li>
+      <li>ATA chapter coverage: per-student analysis with gap detection per licence category</li>
+      <li>ATA chapter directory: 50+ chapters seeded from iSpec 2200; visible to students and instructors</li>
+      <li>OJT logbook: per-entry aircraft/ATA/work order tracking; supervisor countersign; student sign</li>
+      <li>OJT experience tracking: minimum Part 145 hours (12 months B1.1/B2, 6 months A/B1.2)</li>
+      <li>OJT final assessment: assessor &ne; mentor; result COMPETENT / NOT_YET_COMPETENT</li>
+      <li>EASA Form 19 PDF export: logbook export for licence application</li>
+      <li>Programme upgrade: 2yr &rarr; 4yr flow with payment difference; updates programme choice + deadlines</li>
+      <li>Record retention: academic records cannot be deleted; test data: admin soft-delete with reason + audit log</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<script>
+  // ═══════════ TAB SWITCHING ═══════════
+  const tabs = document.querySelectorAll('.tab-bar button');
+  const sections = document.querySelectorAll('.section');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      sections.forEach(s => s.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById(tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ═══════════ FEATURE FLAG TOGGLES — LIVE PIPELINE ═══════════
+  const pipelineStages = [
+    { id: 'reg',       label: 'Register',     cls: 'stage-reg',      stage: null },
+    { id: 'pay',       label: 'Payment',      cls: 'stage-reg',      stage: null },
+    { id: 'doc',       label: 'Documents',    cls: 'stage-doc',      stage: 'documents' },
+    { id: 'apt',       label: 'Aptitude',     cls: 'stage-apt',      stage: 'aptitude' },
+    { id: 'short',     label: 'Shortlist',    cls: 'stage-short',    stage: 'shortlisting' },
+    { id: 'int',       label: 'Interview',    cls: 'stage-int',      stage: 'interview' },
+    { id: 'med',       label: 'Medical',      cls: 'stage-med',      stage: 'medical' },
+    { id: 'enrolled',  label: 'Enrolled',     cls: 'stage-enrolled', stage: null },
+  ];
+
+  const stageColumns = ['documents', 'aptitude', 'shortlisting', 'interview', 'medical'];
+  let selectedProg = 'FULL_TIME_4YEAR';
+
+  function getGlobalFlag(name) {
+    const row = document.getElementById('flag-' + name);
+    return row ? row.querySelector('input[type=checkbox]').checked : false;
+  }
+
+  function getMatrixConfig(prog) {
+    const row = document.querySelector('#stageMatrix tr[data-prog="' + prog + '"]');
+    if (!row) return {};
+    const cells = row.querySelectorAll('input[type=checkbox]');
+    const config = {};
+    stageColumns.forEach((col, i) => { config[col] = cells[i] ? cells[i].checked : false; });
+    return config;
+  }
+
+  function selectProg(prog) {
+    selectedProg = prog;
+    document.querySelectorAll('.prog-btn').forEach(btn => {
+      const isProg = btn.dataset.prog === prog;
+      btn.classList.toggle('active', isProg);
+      btn.style.borderColor = isProg ? 'var(--accent)' : 'var(--border)';
+      btn.style.background = isProg ? '#eff6ff' : 'white';
+      btn.style.color = isProg ? 'var(--aerojet)' : 'var(--text)';
+    });
+    updatePipelinePreview();
+  }
+
+  function setPreset(preset) {
+    const table = document.getElementById('stageMatrix');
+    const rows = table.querySelectorAll('tr[data-prog]');
+    const defaults = {
+      FULL_TIME_4YEAR:  [true, true, true, true, true],
+      FULL_TIME_2YEAR:  [true, true, true, true, false],
+      MILITARY_1YEAR:   [true, true, true, true, true],
+      MODULAR:          [true, false, false, false, false],
+      EXAM_ONLY:        [true, false, false, false, false],
+    };
+    rows.forEach(row => {
+      const prog = row.dataset.prog;
+      const cells = row.querySelectorAll('input[type=checkbox]');
+      cells.forEach((cb, i) => {
+        if (preset === 'full') cb.checked = true;
+        else if (preset === 'docs') cb.checked = (i === 0); // only documents ON
+        else if (preset === 'defaults') cb.checked = defaults[prog] ? defaults[prog][i] : false;
+      });
+    });
+    updatePipelinePreview();
+  }
+
+  function updatePipelinePreview() {
+    const pipelineOn = getGlobalFlag('pipeline');
+    const examsOn = getGlobalFlag('exams');
+
+    // Update global switch status badges
+    ['pipeline', 'exams'].forEach(f => {
+      const statusEl = document.getElementById('status-' + f);
+      const rowEl = document.getElementById('flag-' + f);
+      const isOn = getGlobalFlag(f);
+      if (statusEl) {
+        statusEl.textContent = isOn ? 'ON' : 'OFF';
+        statusEl.className = 'toggle-status ' + (isOn ? 'on' : 'off');
+      }
+      if (rowEl) rowEl.classList.toggle('flag-on', isOn);
+    });
+
+    // Build live pipeline
+    const container = document.getElementById('livePipeline');
+    const note = document.getElementById('pipelineNote');
+    container.innerHTML = '';
+
+    if (!pipelineOn) {
+      // Show old simplified flow
+      const simple = [
+        { label: 'Register', cls: 'stage-reg' },
+        { label: 'Pay', cls: 'stage-reg' },
+        { label: 'Approve', cls: 'stage-enrolled' },
+        { label: 'Portal', cls: 'stage-enrolled' },
+      ];
+      simple.forEach((s, i) => {
+        if (i > 0) {
+          const arrow = document.createElement('div');
+          arrow.className = 'pipeline-arrow';
+          container.appendChild(arrow);
+        }
+        const stage = document.createElement('div');
+        stage.className = 'pipeline-stage';
+        stage.innerHTML = '<div class="pipeline-dot ' + s.cls + '">' + (i+1) + '</div><div class="pipeline-label">' + s.label + '</div>';
+        container.appendChild(stage);
+      });
+      note.textContent = 'Pipeline OFF \u2014 current simplified flow: Register \u2192 Pay \u2192 Approve \u2192 Portal Access';
+      return;
+    }
+
+    // Read per-programme config from matrix checkboxes
+    const config = getMatrixConfig(selectedProg);
+
+    // Build dynamic pipeline based on selected programme's matrix config
+    let stepNum = 0;
+    pipelineStages.forEach((s, i) => {
+      // Determine if this stage is active
+      let active = (s.stage === null) ? true : !!config[s.stage];
+
+      // Arrow before stage (except first)
+      if (i > 0) {
+        const arrow = document.createElement('div');
+        arrow.className = 'pipeline-arrow' + (active ? '' : ' dimmed');
+        container.appendChild(arrow);
+      }
+
+      stepNum++;
+      const stage = document.createElement('div');
+      stage.className = 'pipeline-stage' + (active ? '' : ' dimmed');
+      stage.innerHTML = '<div class="pipeline-dot ' + s.cls + '">' + (active ? stepNum : '\u00D7') + '</div><div class="pipeline-label">' + s.label + (active ? '' : '<br><em style="font-size:0.6rem;color:var(--amber)">skipped</em>') + '</div>';
+      container.appendChild(stage);
+      if (!active) stepNum--;
+    });
+
+    const activeCount = pipelineStages.filter(s => s.stage === null || config[s.stage]).length;
+    const progLabel = document.querySelector('.prog-btn.active') ? document.querySelector('.prog-btn.active').textContent : selectedProg;
+    note.textContent = progLabel + ': ' + activeCount + ' active stages. Disabled stages are auto-skipped by the state machine.';
+    if (examsOn) {
+      note.textContent += ' Internal exam system also enabled (independent of admissions).';
+    }
+  }
+
+  // Initialize pipeline on load
+  updatePipelinePreview();
+
+  // ═══════════ COPY BUTTON ═══════════
+  function copyCode(btn, blockId) {
+    const block = document.getElementById(blockId);
+    const text = block.innerText.replace('Copy', '').trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'Copy';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  }
+
+  // ═══════════ EXAM TIME CALCULATOR ═══════════
+  function calcExamTime() {
+    const mcq = parseInt(document.getElementById('calcMcq').value) || 0;
+    const essay = parseInt(document.getElementById('calcEssay').value) || 0;
+    const secPerQ = parseInt(document.getElementById('calcSecPerQ').value) || 75;
+    const essayMin = parseInt(document.getElementById('calcEssayMin').value) || 20;
+
+    const totalSec = (mcq * secPerQ) + (essay * essayMin * 60);
+    const totalMin = Math.ceil(totalSec / 60);
+    const hrs = Math.floor(totalMin / 60);
+    const mins = totalMin % 60;
+    const passNeed = Math.ceil((mcq + essay) * 0.75);
+
+    document.getElementById('calcTotalSec').textContent = totalSec.toLocaleString();
+    document.getElementById('calcTotalMin').textContent = totalMin;
+    document.getElementById('calcHrMin').textContent = hrs + 'h ' + mins + 'm';
+    document.getElementById('calcPassNeed').textContent = passNeed;
+  }
+  // Initialize calculator
+  calcExamTime();
+</script>
+</body>
+</html>

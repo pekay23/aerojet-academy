@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { Plus, Users, MapPin, Building, Edit2 } from 'lucide-react'
+import { Plus, Users, MapPin, Building, Edit2, LayoutGrid } from 'lucide-react'
 import Link from 'next/link'
 import { Badge } from '@/components/ui/badge'
 
@@ -68,6 +68,15 @@ export default async function ClassroomsPage() {
                 <Building className="h-4 w-4 text-slate-400" />
                 Active Classes: {room._count.classes}
               </div>
+            </div>
+            <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <Link
+                href={`/staff/classrooms/${room.id}`}
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-aerojet-sky hover:text-aerojet-blue transition-colors"
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+                {room.layout ? 'Edit Floor Plan' : 'Design Floor Plan'}
+              </Link>
             </div>
           </div>
         ))}

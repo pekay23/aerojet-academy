@@ -39,8 +39,8 @@ export default async function AmbassadorPage() {
 
   if (!user) redirect('/login')
 
-  const hasBeenReferred = user.referralsReceived.length > 0
-  const referrer = hasBeenReferred ? user.referralsReceived[0].referrer : null
+  const hasBeenReferred = !!user.referralsReceived
+  const referrer = hasBeenReferred ? user.referralsReceived!.referrer : null
 
   return (
     <div className="mx-auto max-w-5xl space-y-8 pb-12">

@@ -138,7 +138,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
           className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-[#003875] disabled:opacity-50"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-          {saving ? 'Saving...' : 'Save Settings'}
+          {saving ? 'Saving…' : 'Save Settings'}
         </button>
       </div>
     </form>

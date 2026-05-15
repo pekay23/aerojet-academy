@@ -15,12 +15,18 @@ import {
   Mail,
   ScrollText,
   GraduationCap,
+  Armchair,
+  FileQuestion,
 } from 'lucide-react'
 import type { PaymentAccessLevel } from '@/lib/access-control'
 import type { SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
 import { useBadgeCounts } from '@/hooks/useBadgeCounts'
 
-function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAccessLevel) {
+function buildLinks(
+  studyPathway?: string | null,
+  paymentAccessLevel?: PaymentAccessLevel,
+  internalExamEnabled = false,
+) {
   const isFullTime = [
     'FULL_TIME',
     'FULL_TIME_4Y',
@@ -74,10 +80,14 @@ function buildLinks(studyPathway?: string | null, paymentAccessLevel?: PaymentAc
     if (hasFullAccess) {
       baseLinks.push(
         { label: 'Exams', href: '/student/exams?tab=records', icon: ClipboardCheck },
+        ...(internalExamEnabled
+          ? [{ label: 'Internal Exams', href: '/student/exams/internal', icon: FileQuestion }]
+          : []),
         { label: 'Revision Support', href: '/student/courses/revision', icon: GraduationCap },
         { label: 'Grades', href: '/student/grades', icon: Award },
         { label: 'Classmates', href: '/student/classmates', icon: Users },
         { label: 'Attendance', href: '/student/attendance', icon: FileCheck },
+        { label: 'My Seating', href: '/student/seating', icon: Armchair },
         { label: 'Certificates', href: '/student/certificates', icon: Award }
       )
     }
@@ -99,6 +109,7 @@ export default function StudentSidebar({
   notificationCount = 0,
   messageCount = 0,
   paymentAccessLevel,
+  internalExamEnabled = false,
 }: {
   userName?: string
   userRole?: string
@@ -107,13 +118,14 @@ export default function StudentSidebar({
   notificationCount?: number
   messageCount?: number
   paymentAccessLevel?: PaymentAccessLevel
+  internalExamEnabled?: boolean
 }) {
   const { counts } = useBadgeCounts({
     notifications: notificationCount,
     messages: messageCount,
   })
 
-  const links = buildLinks(studyPathway, paymentAccessLevel)
+  const links = buildLinks(studyPathway, paymentAccessLevel, internalExamEnabled)
 
   const linksWithBadge = links.map((link) => {
     if (link.label === 'Notifications') {

@@ -4,22 +4,45 @@ import Link from 'next/link'
 import {
   CheckCircle2,
   Clock,
-  AlertCircle,
-  ShieldCheck,
-  ClipboardList,
-  CreditCard,
-  Calendar,
   User,
-  Phone,
-  Globe,
-  MapPin,
+  CreditCard,
+  ShieldCheck,
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { serializePrisma } from '@/lib/utils/serialization'
+import {
+  isPipelineEnabled,
+  getPipelineStageConfig,
+  calculateProgress,
+} from '@/lib/admissions/state-machine'
+import {
+  STAGE_INFO,
+  getMilestoneStages,
+  getActiveStagesForConfig,
+} from '@/lib/admissions/constants'
+import type { ApplicationStage } from '@prisma/client'
+import PipelineTracker from './_components/PipelineTracker'
 
 export const metadata: Metadata = { title: 'Application Status | Applicant Portal' }
 export const dynamic = 'force-dynamic'
+
+// ---------------------------------------------------------------------------
+// Programme labels
+// ---------------------------------------------------------------------------
+
+const PROGRAMME_LABELS: Record<string, string> = {
+  FULL_TIME_4YEAR: 'Full-Time 4-Year',
+  FULL_TIME_2YEAR: 'Full-Time 2-Year',
+  MILITARY_1YEAR: 'Military 1-Year',
+  MODULAR: 'Modular',
+  EXAM_ONLY: 'Exam Only',
+}
+
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
 
 export default async function ApplicationStatusPage() {
   const session = await getAuthSession()
@@ -27,34 +50,116 @@ export default async function ApplicationStatusPage() {
 
   const userId = session.user.id
 
-  const applicant = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      registrationPaid: true,
-      paymentProofUrl: true,
-      paymentApprovedAt: true,
-      status: true,
-      role: true,
-      registrationCode: true,
-      registrationFee: true,
-      registrationCurrency: true,
-      createdAt: true,
-      email: true,
-      profile: {
-        select: {
-          firstName: true,
-          lastName: true,
-          phone: true,
-          nationality: true,
-          country: true,
-          city: true,
-          dateOfBirth: true,
+  // Fetch user + application data in parallel with the pipeline feature flag
+  const [applicant, pipelineEnabled] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        registrationPaid: true,
+        paymentProofUrl: true,
+        paymentApprovedAt: true,
+        status: true,
+        role: true,
+        registrationCode: true,
+        registrationFee: true,
+        registrationCurrency: true,
+        createdAt: true,
+        email: true,
+        profile: {
+          select: {
+            firstName: true,
+            lastName: true,
+            phone: true,
+            nationality: true,
+            country: true,
+            city: true,
+            dateOfBirth: true,
+          },
+        },
+        application: {
+          select: {
+            id: true,
+            stage: true,
+            previousStage: true,
+            programmeChoice: true,
+            rejectionReason: true,
+            createdAt: true,
+            stageLogs: {
+              orderBy: { createdAt: 'desc' },
+              take: 50,
+              select: {
+                id: true,
+                fromStage: true,
+                toStage: true,
+                actorId: true,
+                metadata: true,
+                createdAt: true,
+              },
+            },
+          },
         },
       },
-    },
-  })
+    }),
+    isPipelineEnabled(),
+  ])
 
   if (!applicant) redirect('/login')
+
+  const application = applicant.application
+
+  // ---------------------------------------------------------------------------
+  // Pipeline enabled + application exists => dynamic tracker
+  // ---------------------------------------------------------------------------
+  if (pipelineEnabled && application) {
+    const config = await getPipelineStageConfig(application.programmeChoice)
+    const activeStages = getActiveStagesForConfig(config)
+    const milestones = getMilestoneStages(config)
+    const progress = calculateProgress(application.stage, activeStages)
+
+    // Build a serializable stage info map for the client component
+    const stageInfoMap: Record<string, {
+      label: string
+      shortLabel: string
+      description: string
+      color: string
+      textColor: string
+      applicantInstruction: string
+      group: string
+    }> = {}
+
+    for (const [stage, info] of Object.entries(STAGE_INFO)) {
+      stageInfoMap[stage] = {
+        label: info.label,
+        shortLabel: info.shortLabel,
+        description: info.description,
+        color: info.color,
+        textColor: info.textColor,
+        applicantInstruction: info.applicantInstruction,
+        group: info.group,
+      }
+    }
+
+    return (
+      <PipelineTracker
+        currentStage={application.stage}
+        previousStage={application.previousStage}
+        programmeLabel={PROGRAMME_LABELS[application.programmeChoice] ?? application.programmeChoice}
+        registrationCode={applicant.registrationCode}
+        rejectionReason={application.rejectionReason}
+        progress={progress}
+        milestones={milestones}
+        activeStages={activeStages}
+        stageLogs={serializePrisma(application.stageLogs)}
+        stageInfo={stageInfoMap}
+        paymentProofUrl={applicant.paymentProofUrl}
+        createdAt={serializePrisma(application.createdAt)}
+      />
+    )
+  }
+
+  // ---------------------------------------------------------------------------
+  // Fallback: pipeline NOT enabled — original 4-step tracker
+  // ---------------------------------------------------------------------------
 
   const isApproved = applicant.status === 'ACTIVE'
   const isRejected = applicant.status === 'SUSPENDED'
@@ -153,7 +258,7 @@ export default async function ApplicationStatusPage() {
       )}
 
       {/* Timeline */}
-      <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8">
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
         <h2 className="mb-6 font-bold text-slate-900 dark:text-slate-100">Application Progress</h2>
         <ol className="relative ml-3 space-y-8 border-l border-slate-200 dark:border-slate-700">
           {steps.map((step, i) => {
@@ -191,14 +296,14 @@ export default async function ApplicationStatusPage() {
       </div>
 
       {/* Personal Details Summary */}
-      <div className="rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 sm:p-8">
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 dark:border-slate-800 dark:bg-slate-900 sm:p-8">
         <div className="mb-5 flex items-center justify-between">
           <h2 className="font-bold text-slate-900 dark:text-slate-100">Personal Details</h2>
           <Link
             href="/applicant/profile"
             className="text-xs font-bold text-aerojet-blue hover:underline"
           >
-            Edit Profile →
+            Edit Profile
           </Link>
         </div>
         <dl className="grid gap-4 text-sm sm:grid-cols-2">
@@ -207,22 +312,20 @@ export default async function ApplicationStatusPage() {
               label: 'Full Name',
               value: applicant.profile
                 ? `${applicant.profile.firstName} ${applicant.profile.lastName}`
-                : '—',
-              icon: User,
+                : '\u2014',
             },
-            { label: 'Email', value: applicant.email, icon: ClipboardList },
-            { label: 'Phone', value: applicant.profile?.phone ?? '—', icon: Phone },
-            { label: 'Nationality', value: applicant.profile?.nationality ?? '—', icon: Globe },
-            { label: 'Country', value: applicant.profile?.country ?? '—', icon: MapPin },
-            { label: 'City', value: applicant.profile?.city ?? '—', icon: MapPin },
-          ].map(({ label, value, icon: Icon }) => (
+            { label: 'Email', value: applicant.email },
+            { label: 'Phone', value: applicant.profile?.phone ?? '\u2014' },
+            { label: 'Nationality', value: applicant.profile?.nationality ?? '\u2014' },
+            { label: 'Country', value: applicant.profile?.country ?? '\u2014' },
+            { label: 'City', value: applicant.profile?.city ?? '\u2014' },
+          ].map(({ label, value }) => (
             <div key={label} className="flex items-start gap-3">
-              <Icon className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   {label}
                 </dt>
-                <dd className="mt-0.5 font-medium text-slate-700">{value}</dd>
+                <dd className="mt-0.5 font-medium text-slate-700 dark:text-slate-300">{value}</dd>
               </div>
             </div>
           ))}

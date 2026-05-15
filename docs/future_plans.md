@@ -21,7 +21,7 @@ Items are grouped by original category then ordered by implementation effort in 
 ### Physical Resource Management
 - [x] **Classroom Mapping**: Assign classes to specific physical rooms or labs in the academy.
 - [x] **Capacity Enforcement**: Real-time validation of `maxStudents` against physical room seating capacity.
-- [ ] **Seating Arrangements**: Interactive floor plan / seating chart designer with drag-and-drop student assignment and visual occupancy heatmaps.
+- [x] ~~**Seating Arrangements**: Interactive floor plan / seating chart designer with drag-and-drop student assignment and visual occupancy heatmaps~~ *(done 2026-05-13 — FloorPlanDesigner with CSS grid paint-drag tools, exam + class seating assignment, student-facing seating view)*
 
 ### Enhanced Scheduling
 - [x] **Weekly Schedule UI**: Replace JSON configuration with a visual calendar/grid picker for daily instruction hours.
@@ -99,7 +99,7 @@ Items are grouped by original category then ordered by implementation effort in 
 
 ### Access Control
 - [x] ~~Adopt granular permissions (`requirePermission()`) in critical staff endpoints — audit logs, go/no-go, role changes, enrollment approval, payment approval/rejection~~ *(done 2026-05-06)*
-- [ ] Two-factor authentication for staff accounts.
+- [x] ~~Two-factor authentication for staff accounts~~ *(done 2026-05-13 — TOTP-based 2FA via otplib v5, Settings → Security tab, login flow 2FA interception)*
 
 ---
 
@@ -152,8 +152,8 @@ Use this queue to pick the next item to implement.
 
 | # | Item | Est. | Section | Status |
 |---|------|------|---------|--------|
-| 21 | Two-factor authentication for staff | ~3-4 days | 6 | |
-| 22 | Seating arrangements (interactive floor plan designer) | ~5+ days | 1 | |
+| 21 | Two-factor authentication for staff | ~3-4 days | 6 | **Done** |
+| 22 | Seating arrangements (interactive floor plan designer) | ~5+ days | 1 | **Done** |
 | 23 | Pre-requisite validation + auto-enrollment logic | ~3-4 days | 1 | **Done** |
 | 24 | Audit log retention policies and archival | ~1-2 days | 6 | **Done** |
 

@@ -180,14 +180,27 @@ aerojet-academy/
 │   │   │       └── edit/
 │   │   │           └── page.tsx               # Edit course
 │   │   │
+│   │   ├── classrooms/
+│   │   │   ├── page.tsx                       # Classroom list
+│   │   │   └── [id]/
+│   │   │       ├── page.tsx                   # Classroom detail + floor plan
+│   │   │       ├── loading.tsx
+│   │   │       └── _components/
+│   │   │           └── FloorPlanDesigner.tsx   # Interactive CSS grid layout builder
+│   │   │
 │   │   ├── classes/
 │   │   │   ├── page.tsx                       # Class schedules
 │   │   │   ├── create/
 │   │   │   │   └── page.tsx                   # Create class
 │   │   │   └── [id]/
 │   │   │       ├── page.tsx                   # Class details
-│   │   │       └── roster/
-│   │   │           └── page.tsx               # Class roster
+│   │   │       ├── roster/
+│   │   │       │   └── page.tsx               # Class roster
+│   │   │       └── seating/
+│   │   │           ├── page.tsx               # Class seating assignment
+│   │   │           ├── loading.tsx
+│   │   │           └── _components/
+│   │   │               └── ClassSeatingAssignment.tsx
 │   │   │
 │   │   ├── exams/
 │   │   │   ├── events/
@@ -206,6 +219,14 @@ aerojet-academy/
 │   │   │   │       ├── page.tsx               # Pool details
 │   │   │   │       └── members/
 │   │   │   │           └── page.tsx           # Pool members
+│   │   │   │
+│   │   │   ├── sittings/
+│   │   │   │   └── [id]/
+│   │   │   │       └── seating/
+│   │   │   │           ├── page.tsx           # Exam sitting seating assignment
+│   │   │   │           ├── loading.tsx
+│   │   │   │           └── _components/
+│   │   │   │               └── SeatingAssignment.tsx  # Drag-and-drop seating
 │   │   │   │
 │   │   │   ├── bookings/
 │   │   │   │   └── page.tsx                   # All exam bookings
@@ -339,6 +360,15 @@ aerojet-academy/
 │   │   ├── attendance/
 │   │   │   └── page.tsx                       # Attendance records
 │   │   │
+│   │   ├── seating/
+│   │   │   ├── page.tsx                       # My seating (class + exam)
+│   │   │   └── loading.tsx
+│   │   │
+│   │   ├── classmates/
+│   │   │   ├── page.tsx                       # Classmate directory (6 filters)
+│   │   │   └── _components/
+│   │   │       └── ClassmatesFilters.tsx       # Filter tabs + sub-filters
+│   │   │
 │   │   ├── certificates/
 │   │   │   └── page.tsx                       # Download certificates
 │   │   │
@@ -408,8 +438,15 @@ aerojet-academy/
 │   ├── api/                                   # 🔌 API ROUTES
 │   │   │
 │   │   ├── auth/
-│   │   │   └── [...nextauth]/
-│   │   │       └── route.ts                   # NextAuth configuration
+│   │   │   ├── [...nextauth]/
+│   │   │   │   └── route.ts                   # NextAuth configuration
+│   │   │   └── 2fa/
+│   │   │       ├── generate/
+│   │   │       │   └── route.ts               # Generate TOTP secret + QR
+│   │   │       ├── verify/
+│   │   │       │   └── route.ts               # Verify TOTP + enable 2FA
+│   │   │       └── disable/
+│   │   │           └── route.ts               # Verify TOTP + disable 2FA
 │   │   │
 │   │   ├── public/                            # Public API (no auth)
 │   │   │   ├── register/
@@ -471,8 +508,17 @@ aerojet-academy/
 │   │   │   │   ├── route.ts                   # CRUD classes
 │   │   │   │   └── [id]/
 │   │   │   │       ├── route.ts               # Get/update class
-│   │   │   │       └── roster/
-│   │   │   │           └── route.ts           # Class roster
+│   │   │   │       ├── roster/
+│   │   │   │       │   └── route.ts           # Class roster
+│   │   │   │       ├── seating/
+│   │   │   │       │   └── route.ts           # Class seating assignments (GET/PUT)
+│   │   │   │       └── seats/
+│   │   │   │           └── route.ts           # Class + classroom + enrolled students
+│   │   │   │
+│   │   │   ├── classrooms/
+│   │   │   │   └── [id]/
+│   │   │   │       └── layout/
+│   │   │   │           └── route.ts           # Classroom floor plan layout (GET/PUT)
 │   │   │   │
 │   │   │   ├── exam-events/
 │   │   │   │   ├── route.ts                   # CRUD exam events
@@ -484,6 +530,12 @@ aerojet-academy/
 │   │   │   │   │       └── route.ts           # Go/No-Go decision
 │   │   │   │   └── upcoming/
 │   │   │   │       └── route.ts               # Upcoming events
+│   │   │   │
+│   │   │   ├── exams/
+│   │   │   │   └── sittings/
+│   │   │   │       └── [id]/
+│   │   │   │           └── seats/
+│   │   │   │               └── route.ts       # Exam sitting seat assignments (GET/PUT)
 │   │   │   │
 │   │   │   ├── exam-pools/
 │   │   │   │   └── [id]/
@@ -662,6 +714,9 @@ aerojet-academy/
 │   │   ├── StatusBadge.tsx
 │   │   ├── UserAvatar.tsx
 │   │   └── ThemeToggle.tsx
+│   │
+│   ├── Tour/                                  # Guided tour
+│   │   └── AppTour.tsx                        # Role-specific react-joyride tours
 │   │
 │   ├── forms/                                 # Form components
 │   │   ├── FormField.tsx

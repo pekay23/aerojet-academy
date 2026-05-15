@@ -12,6 +12,7 @@ import {
   Clock,
   User as UserIcon,
   Shield,
+  Armchair,
 } from 'lucide-react'
 import ClassActionsMenu from '../../_components/ClassActionsMenu'
 import { Metadata } from 'next'
@@ -92,7 +93,18 @@ export default async function ClassDetailsPage({ params }: Props) {
               </h1>
             </div>
           </div>
-          <ClassActionsMenu classId={cls.id} className={cls.name || ''} />
+          <div className="flex items-center gap-3">
+            {cls.classroomId && (
+              <Link
+                href={`/staff/classes/${cls.id}/seating`}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-600 transition-all hover:border-aerojet-sky hover:text-aerojet-blue dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
+              >
+                <Armchair className="h-4 w-4" />
+                Manage Seating
+              </Link>
+            )}
+            <ClassActionsMenu classId={cls.id} className={cls.name || ''} />
+          </div>
         </div>
       </div>
 

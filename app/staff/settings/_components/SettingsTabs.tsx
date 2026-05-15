@@ -10,6 +10,7 @@ import {
   Send,
   Calendar,
   DatabaseBackup,
+  Shield,
 } from 'lucide-react'
 import MotionTabs from '@/components/ui/MotionTabs'
 
@@ -18,6 +19,8 @@ const TABS = [
   { key: 'finance', label: 'Finance', icon: DollarSign },
   { key: 'notifications', label: 'Notifications', icon: Mail },
   { key: 'system', label: 'System', icon: Globe },
+  { key: 'custom-fields', label: 'Custom Fields', icon: DatabaseBackup },
+  { key: 'security', label: 'Security', icon: Shield },
   { key: 'welcome', label: 'Welcome', icon: Sparkles },
   { key: 'emails', label: 'Email Templates', icon: Send },
   { key: 'calendar', label: 'Calendar', icon: Calendar },

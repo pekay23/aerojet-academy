@@ -53,3 +53,13 @@ This document tracks persistent issues and bugs that are not yet fully resolved.
 **Problem**: `@/lib/analytics/metrics` re-exports `formatCurrency` but imports `prisma`, creating a transitive server dependency. Client components importing from this module will fail with `Can't resolve 'async_hooks'`.
 - **Rule**: Client components must import `formatCurrency` from `@/lib/currency` (client-safe), never from `@/lib/analytics/metrics`.
 - **Status**: Resolved in v1.4.0 for `ReportsPanel.tsx`. Pattern documented here to prevent recurrence.
+
+## 🔑 otplib v5 API Breaking Change
+**Problem**: The project uses `otplib` v5 which has a completely different API from v4. The `authenticator` export no longer exists.
+- **Rule**: Always use named imports: `import { generateSecret, generateURI, verify } from 'otplib'`. The `verify()` function returns `{ valid: boolean }`, not a plain boolean. Use lowercase `algorithm: 'sha1'` (not `'SHA1'`).
+- **Status**: Resolved in v1.5.0. All 2FA routes and auth-options.ts use the correct v5 API. Documented here to prevent recurrence if adding new TOTP features.
+
+## 📐 Prisma JSON Field Null Filtering
+**Problem**: Filtering Prisma JSON fields with `{ not: null }` produces a TypeScript error: `Type 'null' is not assignable to type 'InputJsonValue | JsonNullValueFilter'`.
+- **Rule**: Use `Prisma.DbNull` instead of `null` when filtering JSON fields: `layout: { not: Prisma.DbNull }`. Requires `import { Prisma } from '@prisma/client'`.
+- **Status**: Applied in exam seating query (v1.5.0). Documented here to prevent recurrence.
