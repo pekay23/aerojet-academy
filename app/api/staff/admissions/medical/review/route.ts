@@ -27,6 +27,7 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
   const app = await prismaUnfiltered.application.findUnique({
     where: { id: applicationId },
     include: { user: { select: { id: true, email: true } } },
+    // fundingType is a scalar field on Application, included by default
   })
   if (!app) return apiError('Application not found', 404)
   if (app.stage !== 'MEDICAL_SUBMITTED' && app.stage !== 'MEDICAL_PENDING') {
@@ -89,6 +90,25 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
             programmeChoice: app.programmeChoice,
           },
         })
+      }
+
+      // Auto-create BondingContract for SCHOLARSHIP students
+      if (app.fundingType === 'SCHOLARSHIP') {
+        const existingContract = await prismaUnfiltered.bondingContract.findUnique({
+          where: { applicationId: app.id },
+        })
+        if (!existingContract) {
+          const sp = await prismaUnfiltered.studentProfile.findUnique({
+            where: { userId: app.userId },
+          })
+          await prismaUnfiltered.bondingContract.create({
+            data: {
+              applicationId: app.id,
+              studentProfileId: sp?.id || null,
+              status: 'ISSUED',
+            },
+          })
+        }
       }
 
       // Update user role to STUDENT

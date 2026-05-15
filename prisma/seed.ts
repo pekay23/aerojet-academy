@@ -182,12 +182,18 @@ async function main() {
   // ============================================================================
   const licenses = [
     { code: 'A', name: 'Category A \u2013 Line Maintenance Certifying Mechanic' },
+    { code: 'A1', name: 'Aeroplanes Turbine \u2013 Line Maintenance' },
+    { code: 'A2', name: 'Aeroplanes Piston \u2013 Line Maintenance' },
+    { code: 'A3', name: 'Helicopters Turbine \u2013 Line Maintenance' },
+    { code: 'A4', name: 'Helicopters Piston \u2013 Line Maintenance' },
     { code: 'B1.1', name: 'Aeroplanes Turbine \u2013 Mechanical' },
     { code: 'B1.2', name: 'Aeroplanes Piston \u2013 Mechanical' },
     { code: 'B1.3', name: 'Helicopters Turbine \u2013 Mechanical' },
     { code: 'B1.4', name: 'Helicopters Piston - Mechanical' },
     { code: 'B2', name: 'Avionics' },
+    { code: 'B2L', name: 'Avionics Systems' },
     { code: 'B3', name: 'Non-pressurised Piston Aeroplanes \u22642,000 kg' },
+    { code: 'C', name: 'Base Maintenance Certifying Engineer' },
   ]
 
   const createdLicenses: Record<string, any> = {}
@@ -360,7 +366,7 @@ async function main() {
       code: 'M7',
       name: 'Maintenance Practices',
       subtitle: 'Safety \u00b7 Tools \u00b7 Inspection \u00b7 Documentation',
-      description: 'The core practical module covering the day-to-day activities of aircraft maintenance. Includes safety precautions, workshop practices, tools, test equipment, engineering drawings, fits and clearances, riveting, welding, aircraft weight and balance, handling/storage, disassembly/inspection/repair, and maintenance procedures. Updated June 2024 \u2014 essay component removed.',
+      description: 'The core practical module covering the day-to-day activities of aircraft maintenance. Includes safety precautions, workshop practices, tools, test equipment, engineering drawings, fits and clearances, riveting, welding, aircraft weight and balance, handling/storage, disassembly/inspection/repair, and maintenance procedures. EASA Part-66 examines this module with both MCQ and essay parts.',
       duration: 15,
       price: 1030.0,
       categoryId: coreCategory.id,
@@ -371,6 +377,7 @@ async function main() {
       estimatedStudyHoursMin: 100,
       estimatedStudyHoursMax: 140,
       applicableCategories: ['A', 'B1', 'B2', 'B3'],
+      hasCombinedExam: true,
     },
     {
       code: 'M8',
@@ -392,7 +399,7 @@ async function main() {
       code: 'M9',
       name: 'Human Factors',
       subtitle: 'Performance \u00b7 Error \u00b7 CRM \u00b7 Safety Culture',
-      description: 'Examines the human element in aviation maintenance safety. Covers human performance and limitations, social psychology, team dynamics and communication (CRM), workload, fatigue, stress, situational awareness, and maintenance error. Critically studies accident causation models. Essay requirement removed June 2024 \u2014 MCQ only.',
+      description: 'Examines the human element in aviation maintenance safety. Covers human performance and limitations, social psychology, team dynamics and communication (CRM), workload, fatigue, stress, situational awareness, and maintenance error. EASA Part-66 examines this module with both MCQ and essay parts.',
       duration: 15,
       price: 1030.0,
       categoryId: coreCategory.id,
@@ -403,12 +410,13 @@ async function main() {
       estimatedStudyHoursMin: 30,
       estimatedStudyHoursMax: 50,
       applicableCategories: ['A', 'B1', 'B2', 'B3'],
+      hasCombinedExam: true,
     },
     {
       code: 'M10',
       name: 'Aviation Legislation',
       subtitle: 'EASA \u00b7 Part-M \u00b7 Part-145 \u00b7 Part-66',
-      description: 'Covers the regulatory framework governing aviation maintenance. Topics include the role of ICAO and EASA, certifying staff regulations (Part-66), approved maintenance organisations (Part-145/CAMO), commercial air transport operations, aircraft certification, Part-M airworthiness, and international requirements. Essay requirement removed June 2024.',
+      description: 'Covers the regulatory framework governing aviation maintenance. Topics include the role of ICAO and EASA, certifying staff regulations (Part-66), approved maintenance organisations (Part-145/CAMO), commercial air transport operations, aircraft certification, Part-M airworthiness, and international requirements. EASA Part-66 examines this module with both MCQ and essay parts.',
       duration: 15,
       price: 1030.0,
       categoryId: coreCategory.id,
@@ -419,6 +427,7 @@ async function main() {
       estimatedStudyHoursMin: 40,
       estimatedStudyHoursMax: 60,
       applicableCategories: ['A', 'B1', 'B2', 'B3'],
+      hasCombinedExam: true,
     },
     {
       code: 'M11A',
@@ -581,6 +590,7 @@ async function main() {
         prerequisites: mod.prerequisites,
         requiresPrerequisite: mod.requiresPrerequisite,
         topics: mod.topics,
+        hasCombinedExam: mod.hasCombinedExam ?? false,
         estimatedStudyHoursMin: mod.estimatedStudyHoursMin,
         estimatedStudyHoursMax: mod.estimatedStudyHoursMax,
         applicableCategories: mod.applicableCategories,
@@ -598,6 +608,7 @@ async function main() {
         prerequisites: mod.prerequisites,
         requiresPrerequisite: mod.requiresPrerequisite,
         topics: mod.topics,
+        hasCombinedExam: mod.hasCombinedExam ?? false,
         estimatedStudyHoursMin: mod.estimatedStudyHoursMin,
         estimatedStudyHoursMax: mod.estimatedStudyHoursMax,
         applicableCategories: mod.applicableCategories,
@@ -619,13 +630,13 @@ async function main() {
     { code: 'M1-A',  courseCode: 'M1', categoryCode: 'A',  name: 'Mathematics MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 16, duration: 20 },
     { code: 'M1-B1', courseCode: 'M1', categoryCode: 'B1', name: 'Mathematics MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 32, duration: 40 },
     { code: 'M1-B2', courseCode: 'M1', categoryCode: 'B2', name: 'Mathematics MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 32, duration: 40 },
-    { code: 'M1-B3', courseCode: 'M1', categoryCode: 'B3', name: 'Mathematics MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 30, duration: 40 },
+    { code: 'M1-B3', courseCode: 'M1', categoryCode: 'B3', name: 'Mathematics MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 28, duration: 35 },
 
     // M2 — Physics
     { code: 'M2-A',  courseCode: 'M2', categoryCode: 'A',  name: 'Physics MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 32, duration: 40 },
     { code: 'M2-B1', courseCode: 'M2', categoryCode: 'B1', name: 'Physics MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 52, duration: 65 },
     { code: 'M2-B2', courseCode: 'M2', categoryCode: 'B2', name: 'Physics MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 52, duration: 65 },
-    { code: 'M2-B3', courseCode: 'M2', categoryCode: 'B3', name: 'Physics MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 30, duration: 40 },
+    { code: 'M2-B3', courseCode: 'M2', categoryCode: 'B3', name: 'Physics MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 28, duration: 35 },
 
     // M3 — Electrical Fundamentals
     { code: 'M3-A',  courseCode: 'M3', categoryCode: 'A',  name: 'Electrical Fundamentals MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 20, duration: 25 },
@@ -636,58 +647,75 @@ async function main() {
     // M4 — Electronic Fundamentals (not required for Cat A)
     { code: 'M4-B1', courseCode: 'M4', categoryCode: 'B1', name: 'Electronic Fundamentals MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
     { code: 'M4-B2', courseCode: 'M4', categoryCode: 'B2', name: 'Electronic Fundamentals MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 40, duration: 50 },
-    { code: 'M4-B3', courseCode: 'M4', categoryCode: 'B3', name: 'Electronic Fundamentals MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M4-B3', courseCode: 'M4', categoryCode: 'B3', name: 'Electronic Fundamentals MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 8, duration: 10 },
 
     // M5 — Digital Techniques
-    { code: 'M5-A',  courseCode: 'M5', categoryCode: 'A',  name: 'Digital Techniques MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 20, duration: 25 },
-    { code: 'M5-B1', courseCode: 'M5', categoryCode: 'B1', name: 'Digital Techniques MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 40, duration: 50 },
+    { code: 'M5-A',  courseCode: 'M5', categoryCode: 'A',  name: 'Digital Techniques MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 16, duration: 20 },
+    { code: 'M5-B1.1', courseCode: 'M5', categoryCode: 'B1.1', name: 'Digital Techniques MCQ (Cat B1.1)', type: 'MCQ' as const, questionCount: 40, duration: 50 },
+    { code: 'M5-B1.2', courseCode: 'M5', categoryCode: 'B1.2', name: 'Digital Techniques MCQ (Cat B1.2)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M5-B1.3', courseCode: 'M5', categoryCode: 'B1.3', name: 'Digital Techniques MCQ (Cat B1.3)', type: 'MCQ' as const, questionCount: 40, duration: 50 },
+    { code: 'M5-B1.4', courseCode: 'M5', categoryCode: 'B1.4', name: 'Digital Techniques MCQ (Cat B1.4)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
     { code: 'M5-B2', courseCode: 'M5', categoryCode: 'B2', name: 'Digital Techniques MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 72, duration: 90 },
-    { code: 'M5-B3', courseCode: 'M5', categoryCode: 'B3', name: 'Digital Techniques MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M5-B3', courseCode: 'M5', categoryCode: 'B3', name: 'Digital Techniques MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 16, duration: 20 },
 
     // M6 — Materials & Hardware
     { code: 'M6-A',  courseCode: 'M6', categoryCode: 'A',  name: 'Materials & Hardware MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 52, duration: 65 },
-    { code: 'M6-B1', courseCode: 'M6', categoryCode: 'B1', name: 'Materials & Hardware MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 80, duration: 100 },
+    { code: 'M6-B1', courseCode: 'M6', categoryCode: 'B1', name: 'Materials & Hardware MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 72, duration: 90 },
     { code: 'M6-B2', courseCode: 'M6', categoryCode: 'B2', name: 'Materials & Hardware MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 60, duration: 75 },
-    { code: 'M6-B3', courseCode: 'M6', categoryCode: 'B3', name: 'Materials & Hardware MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 80, duration: 100 },
+    { code: 'M6-B3', courseCode: 'M6', categoryCode: 'B3', name: 'Materials & Hardware MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 60, duration: 75 },
 
     // M7 — Maintenance Practices (post June 2024)
-    { code: 'M7-A',  courseCode: 'M7', categoryCode: 'A',  name: 'Maintenance Practices MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 76, duration: 95 },
-    { code: 'M7-B1', courseCode: 'M7', categoryCode: 'B1', name: 'Maintenance Practices MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 80, duration: 100 },
-    { code: 'M7-B2', courseCode: 'M7', categoryCode: 'B2', name: 'Maintenance Practices MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 60, duration: 75 },
-    { code: 'M7-B3', courseCode: 'M7', categoryCode: 'B3', name: 'Maintenance Practices MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 80, duration: 100 },
+    { code: 'M7A-A-MCQ',  courseCode: 'M7', categoryCode: 'A',  name: 'Maintenance Practices MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 72, duration: 90 },
+    { code: 'M7A-B1-MCQ', courseCode: 'M7', categoryCode: 'B1', name: 'Maintenance Practices MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 80, duration: 100 },
+    { code: 'M7A-B2-MCQ', courseCode: 'M7', categoryCode: 'B2', name: 'Maintenance Practices MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 60, duration: 75 },
+    { code: 'M7B-B3-MCQ', courseCode: 'M7', categoryCode: 'B3', name: 'Maintenance Practices MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 60, duration: 75 },
+    { code: 'M7A-A-ESSAY',  courseCode: 'M7', categoryCode: 'A',  name: 'Maintenance Practices Essay (Cat A)',  type: 'ESSAY' as const, questionCount: 2, duration: 40 },
+    { code: 'M7A-B1-ESSAY', courseCode: 'M7', categoryCode: 'B1', name: 'Maintenance Practices Essay (Cat B1)', type: 'ESSAY' as const, questionCount: 2, duration: 40 },
+    { code: 'M7A-B2-ESSAY', courseCode: 'M7', categoryCode: 'B2', name: 'Maintenance Practices Essay (Cat B2)', type: 'ESSAY' as const, questionCount: 2, duration: 40 },
+    { code: 'M7B-B3-ESSAY', courseCode: 'M7', categoryCode: 'B3', name: 'Maintenance Practices Essay (Cat B3)', type: 'ESSAY' as const, questionCount: 2, duration: 40 },
 
     // M8 — Basic Aerodynamics
-    { code: 'M8-A',  courseCode: 'M8', categoryCode: 'A',  name: 'Basic Aerodynamics MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 24, duration: 30 },
-    { code: 'M8-B1', courseCode: 'M8', categoryCode: 'B1', name: 'Basic Aerodynamics MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 24, duration: 30 },
-    { code: 'M8-B2', courseCode: 'M8', categoryCode: 'B2', name: 'Basic Aerodynamics MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 24, duration: 30 },
-    { code: 'M8-B3', courseCode: 'M8', categoryCode: 'B3', name: 'Basic Aerodynamics MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 24, duration: 30 },
+    { code: 'M8-A',  courseCode: 'M8', categoryCode: 'A',  name: 'Basic Aerodynamics MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M8-B1', courseCode: 'M8', categoryCode: 'B1', name: 'Basic Aerodynamics MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M8-B2', courseCode: 'M8', categoryCode: 'B2', name: 'Basic Aerodynamics MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M8-B3', courseCode: 'M8', categoryCode: 'B3', name: 'Basic Aerodynamics MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
 
     // M9 — Human Factors (post June 2024 — MCQ only)
-    { code: 'M9-A',  courseCode: 'M9', categoryCode: 'A',  name: 'Human Factors MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 20, duration: 25 },
-    { code: 'M9-B1', courseCode: 'M9', categoryCode: 'B1', name: 'Human Factors MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
-    { code: 'M9-B2', courseCode: 'M9', categoryCode: 'B2', name: 'Human Factors MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
-    { code: 'M9-B3', courseCode: 'M9', categoryCode: 'B3', name: 'Human Factors MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 16, duration: 20 },
+    { code: 'M9A-A-MCQ',  courseCode: 'M9', categoryCode: 'A',  name: 'Human Factors MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M9A-B1-MCQ', courseCode: 'M9', categoryCode: 'B1', name: 'Human Factors MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M9A-B2-MCQ', courseCode: 'M9', categoryCode: 'B2', name: 'Human Factors MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M9B-B3-MCQ', courseCode: 'M9', categoryCode: 'B3', name: 'Human Factors MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 16, duration: 20 },
+    { code: 'M9A-A-ESSAY',  courseCode: 'M9', categoryCode: 'A',  name: 'Human Factors Essay (Cat A)',  type: 'ESSAY' as const, questionCount: 1, duration: 20 },
+    { code: 'M9A-B1-ESSAY', courseCode: 'M9', categoryCode: 'B1', name: 'Human Factors Essay (Cat B1)', type: 'ESSAY' as const, questionCount: 1, duration: 20 },
+    { code: 'M9A-B2-ESSAY', courseCode: 'M9', categoryCode: 'B2', name: 'Human Factors Essay (Cat B2)', type: 'ESSAY' as const, questionCount: 1, duration: 20 },
+    { code: 'M9B-B3-ESSAY', courseCode: 'M9', categoryCode: 'B3', name: 'Human Factors Essay (Cat B3)', type: 'ESSAY' as const, questionCount: 1, duration: 20 },
 
     // M10 — Aviation Legislation (post June 2024 — MCQ only)
     { code: 'M10-A',  courseCode: 'M10', categoryCode: 'A',  name: 'Aviation Legislation MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 32, duration: 40 },
     { code: 'M10-B1', courseCode: 'M10', categoryCode: 'B1', name: 'Aviation Legislation MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 40, duration: 50 },
     { code: 'M10-B2', courseCode: 'M10', categoryCode: 'B2', name: 'Aviation Legislation MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 40, duration: 50 },
     { code: 'M10-B3', courseCode: 'M10', categoryCode: 'B3', name: 'Aviation Legislation MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 32, duration: 40 },
+    { code: 'M10-A-ESSAY',  courseCode: 'M10', categoryCode: 'A',  name: 'Aviation Legislation Essay (Cat A)',  type: 'ESSAY' as const, questionCount: 1, duration: 20 },
+    { code: 'M10-B1-ESSAY', courseCode: 'M10', categoryCode: 'B1', name: 'Aviation Legislation Essay (Cat B1)', type: 'ESSAY' as const, questionCount: 1, duration: 20 },
+    { code: 'M10-B2-ESSAY', courseCode: 'M10', categoryCode: 'B2', name: 'Aviation Legislation Essay (Cat B2)', type: 'ESSAY' as const, questionCount: 1, duration: 20 },
+    { code: 'M10-B3-ESSAY', courseCode: 'M10', categoryCode: 'B3', name: 'Aviation Legislation Essay (Cat B3)', type: 'ESSAY' as const, questionCount: 1, duration: 20 },
 
     // M11A — Turbine Aeroplane Aerodynamics, Structures & Systems
-    { code: 'M11A-A',  courseCode: 'M11A', categoryCode: 'A',  name: 'Turbine Aeroplane Systems MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 100, duration: 125 },
-    { code: 'M11A-B1', courseCode: 'M11A', categoryCode: 'B1', name: 'Turbine Aeroplane Systems MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 128, duration: 160 },
+    { code: 'M11A-A1',   courseCode: 'M11A', categoryCode: 'A1',   name: 'Turbine Aeroplane Systems MCQ (Cat A1)',   type: 'MCQ' as const, questionCount: 108, duration: 135 },
+    { code: 'M11A-B1.1', courseCode: 'M11A', categoryCode: 'B1.1', name: 'Turbine Aeroplane Systems MCQ (Cat B1.1)', type: 'MCQ' as const, questionCount: 140, duration: 175 },
 
     // M11B — Piston Aeroplane Aerodynamics, Structures & Systems
-    { code: 'M11B-A',  courseCode: 'M11B', categoryCode: 'A',  name: 'Piston Aeroplane Systems MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 72, duration: 90 },
-    { code: 'M11B-B1', courseCode: 'M11B', categoryCode: 'B1', name: 'Piston Aeroplane Systems MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 92, duration: 115 },
+    { code: 'M11B-A2',   courseCode: 'M11B', categoryCode: 'A2',   name: 'Piston Aeroplane Systems MCQ (Cat A2)',   type: 'MCQ' as const, questionCount: 72, duration: 90 },
+    { code: 'M11B-B1.2', courseCode: 'M11B', categoryCode: 'B1.2', name: 'Piston Aeroplane Systems MCQ (Cat B1.2)', type: 'MCQ' as const, questionCount: 100, duration: 125 },
 
     // M11C — Piston Aeroplane (B3)
-    { code: 'M11C-B3', courseCode: 'M11C', categoryCode: 'B3', name: 'Piston Aeroplane Systems MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 72, duration: 90 },
+    { code: 'M11C-B3', courseCode: 'M11C', categoryCode: 'B3', name: 'Piston Aeroplane Systems MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 60, duration: 75 },
 
     // M12 — Helicopter Aerodynamics, Structures & Systems
-    { code: 'M12-A',  courseCode: 'M12', categoryCode: 'A',  name: 'Helicopter Systems MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 82, duration: 103 },
-    { code: 'M12-B1', courseCode: 'M12', categoryCode: 'B1', name: 'Helicopter Systems MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 108, duration: 135 },
+    { code: 'M12-A3',   courseCode: 'M12', categoryCode: 'A3',   name: 'Helicopter Systems MCQ (Cat A3)',   type: 'MCQ' as const, questionCount: 100, duration: 125 },
+    { code: 'M12-A4',   courseCode: 'M12', categoryCode: 'A4',   name: 'Helicopter Systems MCQ (Cat A4)',   type: 'MCQ' as const, questionCount: 100, duration: 125 },
+    { code: 'M12-B1.3', courseCode: 'M12', categoryCode: 'B1.3', name: 'Helicopter Systems MCQ (Cat B1.3)', type: 'MCQ' as const, questionCount: 128, duration: 160 },
+    { code: 'M12-B1.4', courseCode: 'M12', categoryCode: 'B1.4', name: 'Helicopter Systems MCQ (Cat B1.4)', type: 'MCQ' as const, questionCount: 128, duration: 160 },
 
     // M13 — Aircraft Aerodynamics, Structures & Systems (B2 only)
     { code: 'M13-B2', courseCode: 'M13', categoryCode: 'B2', name: 'Aircraft Systems MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 180, duration: 225 },
@@ -696,18 +724,24 @@ async function main() {
     { code: 'M14-B2', courseCode: 'M14', categoryCode: 'B2', name: 'Propulsion MCQ (Cat B2)', type: 'MCQ' as const, questionCount: 24, duration: 30 },
 
     // M15 — Gas Turbine Engine
-    { code: 'M15-A',  courseCode: 'M15', categoryCode: 'A',  name: 'Gas Turbine Engine MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 60, duration: 75 },
-    { code: 'M15-B1', courseCode: 'M15', categoryCode: 'B1', name: 'Gas Turbine Engine MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 92, duration: 115 },
+    { code: 'M15-A1',   courseCode: 'M15', categoryCode: 'A1',   name: 'Gas Turbine Engine MCQ (Cat A1)',   type: 'MCQ' as const, questionCount: 60, duration: 75 },
+    { code: 'M15-A3',   courseCode: 'M15', categoryCode: 'A3',   name: 'Gas Turbine Engine MCQ (Cat A3)',   type: 'MCQ' as const, questionCount: 60, duration: 75 },
+    { code: 'M15-B1.1', courseCode: 'M15', categoryCode: 'B1.1', name: 'Gas Turbine Engine MCQ (Cat B1.1)', type: 'MCQ' as const, questionCount: 92, duration: 115 },
+    { code: 'M15-B1.3', courseCode: 'M15', categoryCode: 'B1.3', name: 'Gas Turbine Engine MCQ (Cat B1.3)', type: 'MCQ' as const, questionCount: 92, duration: 115 },
 
     // M16 — Piston Engine
-    { code: 'M16-A',  courseCode: 'M16', categoryCode: 'A',  name: 'Piston Engine MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 52, duration: 65 },
-    { code: 'M16-B1', courseCode: 'M16', categoryCode: 'B1', name: 'Piston Engine MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 72, duration: 90 },
-    { code: 'M16-B3', courseCode: 'M16', categoryCode: 'B3', name: 'Piston Engine MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 68, duration: 85 },
+    { code: 'M16-A2',   courseCode: 'M16', categoryCode: 'A2',   name: 'Piston Engine MCQ (Cat A2)',   type: 'MCQ' as const, questionCount: 52, duration: 65 },
+    { code: 'M16-A4',   courseCode: 'M16', categoryCode: 'A4',   name: 'Piston Engine MCQ (Cat A4)',   type: 'MCQ' as const, questionCount: 52, duration: 65 },
+    { code: 'M16-B1.2', courseCode: 'M16', categoryCode: 'B1.2', name: 'Piston Engine MCQ (Cat B1.2)', type: 'MCQ' as const, questionCount: 72, duration: 90 },
+    { code: 'M16-B1.4', courseCode: 'M16', categoryCode: 'B1.4', name: 'Piston Engine MCQ (Cat B1.4)', type: 'MCQ' as const, questionCount: 72, duration: 90 },
+    { code: 'M16-B3',   courseCode: 'M16', categoryCode: 'B3',   name: 'Piston Engine MCQ (Cat B3)',   type: 'MCQ' as const, questionCount: 68, duration: 85 },
 
     // M17 — Propeller
-    { code: 'M17-A',  courseCode: 'M17', categoryCode: 'A',  name: 'Propeller MCQ (Cat A)',  type: 'MCQ' as const, questionCount: 20, duration: 25 },
-    { code: 'M17-B1', courseCode: 'M17', categoryCode: 'B1', name: 'Propeller MCQ (Cat B1)', type: 'MCQ' as const, questionCount: 32, duration: 40 },
-    { code: 'M17-B3', courseCode: 'M17', categoryCode: 'B3', name: 'Propeller MCQ (Cat B3)', type: 'MCQ' as const, questionCount: 28, duration: 35 },
+    { code: 'M17-A1',   courseCode: 'M17', categoryCode: 'A1',   name: 'Propeller MCQ (Cat A1)',   type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M17-A2',   courseCode: 'M17', categoryCode: 'A2',   name: 'Propeller MCQ (Cat A2)',   type: 'MCQ' as const, questionCount: 20, duration: 25 },
+    { code: 'M17-B1.1', courseCode: 'M17', categoryCode: 'B1.1', name: 'Propeller MCQ (Cat B1.1)', type: 'MCQ' as const, questionCount: 32, duration: 40 },
+    { code: 'M17-B1.2', courseCode: 'M17', categoryCode: 'B1.2', name: 'Propeller MCQ (Cat B1.2)', type: 'MCQ' as const, questionCount: 32, duration: 40 },
+    { code: 'M17-B3',   courseCode: 'M17', categoryCode: 'B3',   name: 'Propeller MCQ (Cat B3)',   type: 'MCQ' as const, questionCount: 28, duration: 35 },
   ]
 
   for (const exam of examComponents) {
@@ -743,6 +777,10 @@ async function main() {
   console.log('🔗 Mapping modules to licenses...')
   const requirementsMap: Record<string, string[]> = {
     A: ['M1', 'M2', 'M3', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10'],
+    A1: ['M1', 'M2', 'M3', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11A', 'M15', 'M17'],
+    A2: ['M1', 'M2', 'M3', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11B', 'M16', 'M17'],
+    A3: ['M1', 'M2', 'M3', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M12', 'M15'],
+    A4: ['M1', 'M2', 'M3', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M12', 'M16'],
     'B1.1': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11A', 'M15', 'M17'],
     'B1.2': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M11B', 'M16', 'M17'],
     'B1.3': ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10', 'M12', 'M15'],
@@ -1064,8 +1102,8 @@ async function main() {
   await seedTerm('FULL_TIME_4Y', 1, 1, ['M1', 'M2', 'M3', 'M4'])
   // Y1-S2: Applied science (M5-M8)
   await seedTerm('FULL_TIME_4Y', 1, 2, ['M5', 'M6', 'M7', 'M8'])
-  // Y2-S1: Human/Legal + Specialist intro (M9, M10, M11, M13)
-  await seedTerm('FULL_TIME_4Y', 2, 1, ['M9', 'M10', 'M11', 'M13'])
+  // Y2-S1: Human/Legal + Specialist intro (M9, M10, M11A, M13)
+  await seedTerm('FULL_TIME_4Y', 2, 1, ['M9', 'M10', 'M11A', 'M13'])
   // Y2-S2: Advanced specialist (M14, M15, M17 — dedup filters to student's license)
   await seedTerm('FULL_TIME_4Y', 2, 2, ['M12', 'M14', 'M15', 'M16', 'M17'])
   // Y3 & Y4 are OJT — no module assignments
@@ -1073,12 +1111,12 @@ async function main() {
   // 2-Year B1.1 Pathway
   await seedTerm('FULL_TIME_2Y', 1, 1, ['M1', 'M2', 'M3', 'M4', 'M5'])
   await seedTerm('FULL_TIME_2Y', 1, 2, ['M6', 'M7', 'M8', 'M9', 'M10'])
-  await seedTerm('FULL_TIME_2Y', 2, 1, ['M11', 'M13', 'M15', 'M14'])
-  await seedTerm('FULL_TIME_2Y', 2, 2, ['M12', 'M16', 'M17'])
+  await seedTerm('FULL_TIME_2Y', 2, 1, ['M11A', 'M15'])
+  await seedTerm('FULL_TIME_2Y', 2, 2, ['M17'])
 
   // Military 1-Year Pathway
   await seedTerm('MILITARY_1Y', 1, 1, ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7'])
-  await seedTerm('MILITARY_1Y', 1, 2, ['M8', 'M9', 'M10', 'M11', 'M13', 'M15'])
+  await seedTerm('MILITARY_1Y', 1, 2, ['M8', 'M9', 'M10', 'M11A', 'M15', 'M17'])
 
   console.log('✅ Academic Terms and Module Assignments seeded')
 

@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma/client'
 import { joinPool } from '@/lib/pools/join'
 import { validatePoolJoin } from '@/lib/pools/validation'
 import { promoteIfFirstExamActivity } from '@/lib/enrollment/pathway'
+import { categoryMatchesTarget, getStudentTargetCategoryCodes } from '@/lib/easa/category-selection'
 
 export async function POST(request: Request) {
   try {
@@ -24,12 +25,21 @@ export async function POST(request: Request) {
       where: {
         code: moduleCode,
       },
+      include: { course: true },
     })
 
     if (!examComponent) {
       return NextResponse.json(
         { error: `No exam component found for module ${moduleCode}` },
         { status: 404 }
+      )
+    }
+
+    const targetCategories = await getStudentTargetCategoryCodes(prisma, userId)
+    if (targetCategories.length > 0 && !categoryMatchesTarget(examComponent.categoryCode, targetCategories)) {
+      return NextResponse.json(
+        { error: 'This module/category is not part of your selected licence pathway.' },
+        { status: 403 }
       )
     }
 
@@ -56,7 +66,7 @@ export async function POST(request: Request) {
       poolId,
       userId,
       examComponentId: examComponent.id,
-      moduleCode,
+      moduleCode: examComponent.course.code,
     })
 
     if (!result.success) {

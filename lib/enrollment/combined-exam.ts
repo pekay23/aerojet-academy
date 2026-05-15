@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma/client'
+import { categoryMatchesTarget } from '@/lib/easa/category-selection'
 import { EASA_PASSING_GRADE } from '@/lib/utils/grading'
 import type { BookingType } from '@prisma/client'
 
@@ -7,15 +8,16 @@ function generateCombinedGroupRef(): string {
 }
 
 /**
- * Get both MCQ and Essay components for a combined-exam course.
- * Returns null if course doesn't have hasCombinedExam or doesn't have both types.
+ * Get the MCQ and essay components for a combined-exam course and category.
+ * M7, M9, and M10 have separate MCQ/essay components under the same course.
  */
-export async function getCombinedComponents(courseId: string) {
+export async function getCombinedComponents(courseId: string, categoryCode?: string | null) {
   const course = await prisma.course.findUnique({
     where: { id: courseId },
     select: {
       id: true,
       hasCombinedExam: true,
+      code: true,
       examComponents: {
         select: {
           id: true,
@@ -23,6 +25,7 @@ export async function getCombinedComponents(courseId: string) {
           name: true,
           type: true,
           courseId: true,
+          categoryCode: true,
         },
       },
     },
@@ -30,19 +33,23 @@ export async function getCombinedComponents(courseId: string) {
 
   if (!course || !course.hasCombinedExam) return null
 
-  const mcq = course.examComponents.find((c) => c.type === 'MCQ')
-  const essay = course.examComponents.find((c) => c.type === 'ESSAY')
+  const compatible = categoryCode
+    ? course.examComponents.filter((component) => categoryMatchesTarget(component.categoryCode, [categoryCode]))
+    : course.examComponents
+
+  const mcq = compatible.find((component) => component.type === 'MCQ')
+  const essay =
+    compatible.find((component) => component.type === 'ESSAY' && component.categoryCode === mcq?.categoryCode) ??
+    compatible.find((component) => component.type === 'ESSAY')
 
   if (!mcq || !essay) return null
 
-  return { mcq, essay, courseId: course.id }
+  return { mcq, essay, courseId: course.id, moduleCode: course.code }
 }
 
 /**
- * Book both MCQ and Essay components together.
- * Creates two ExamBooking records linked by combinedGroupRef.
- * Only charges the fee once (second booking gets amountPaid: 0).
- * Returns both bookings.
+ * Book both MCQ and essay components together.
+ * The first booking carries the payment; the linked essay booking is zero-value.
  */
 export async function bookCombinedExam(params: {
   userId: string
@@ -53,6 +60,7 @@ export async function bookCombinedExam(params: {
   amountPaid: number
   isResit?: boolean
   attemptType?: string
+  categoryCode?: string | null
 }) {
   const {
     userId,
@@ -63,48 +71,47 @@ export async function bookCombinedExam(params: {
     amountPaid,
     isResit = false,
     attemptType,
+    categoryCode,
   } = params
 
-  const components = await getCombinedComponents(courseId)
+  const components = await getCombinedComponents(courseId, categoryCode)
   if (!components) {
     throw new Error(
-      'Course does not support combined exams or is missing MCQ/Essay components.'
+      categoryCode
+        ? `Course does not support combined exams or is missing MCQ/essay components for category ${categoryCode}.`
+        : 'Course does not support combined exams or is missing MCQ/essay components.'
     )
   }
 
   const combinedGroupRef = generateCombinedGroupRef()
 
   return prisma.$transaction(async (tx) => {
-    // First booking (MCQ) carries the payment
+    const commonData = {
+      userId,
+      courseId,
+      eventId: eventId ?? undefined,
+      bookingType,
+      isResit,
+      attemptType: attemptType ?? undefined,
+      combinedGroupRef,
+      moduleCode: components.moduleCode,
+      status: 'APPROVED' as const,
+    }
+
     const mcqBooking = await tx.examBooking.create({
       data: {
-        userId,
-        courseId,
+        ...commonData,
         examComponentId: components.mcq.id,
-        eventId: eventId ?? undefined,
-        bookingType,
         walletTxnId: walletTxnId ?? undefined,
         amountPaid,
-        isResit,
-        attemptType: attemptType ?? undefined,
-        combinedGroupRef,
-        status: 'APPROVED',
       },
     })
 
-    // Second booking (Essay) has amountPaid: 0 since fee was charged once
     const essayBooking = await tx.examBooking.create({
       data: {
-        userId,
-        courseId,
+        ...commonData,
         examComponentId: components.essay.id,
-        eventId: eventId ?? undefined,
-        bookingType,
         amountPaid: 0,
-        isResit,
-        attemptType: attemptType ?? undefined,
-        combinedGroupRef,
-        status: 'APPROVED',
       },
     })
 
@@ -114,8 +121,7 @@ export async function bookCombinedExam(params: {
 
 /**
  * Evaluate combined exam result.
- * Both MCQ and Essay must have results and both must be >= 75% to pass.
- * Returns assessment of the combined result.
+ * Both MCQ and essay must have results and both must be >= 75% to pass.
  */
 export async function evaluateCombinedResult(combinedGroupRef: string) {
   const bookings = await prisma.examBooking.findMany({
@@ -126,19 +132,16 @@ export async function evaluateCombinedResult(combinedGroupRef: string) {
   })
 
   if (bookings.length !== 2) {
-    throw new Error(
-      `Expected 2 bookings for combined group ${combinedGroupRef}, found ${bookings.length}.`
-    )
+    throw new Error(`Expected 2 bookings for combined group ${combinedGroupRef}, found ${bookings.length}.`)
   }
 
   const mcqBooking = bookings.find((b) => b.examComponent?.type === 'MCQ')
   const essayBooking = bookings.find((b) => b.examComponent?.type === 'ESSAY')
 
   if (!mcqBooking || !essayBooking) {
-    throw new Error('Combined group is missing MCQ or Essay booking.')
+    throw new Error('Combined group is missing MCQ or essay booking.')
   }
 
-  // Read percentage from the unified ExamResult model
   const [mcqResult, essayResult] = await Promise.all([
     prisma.examResult.findFirst({ where: { examId: mcqBooking.examId ?? undefined }, orderBy: { createdAt: 'desc' } }),
     prisma.examResult.findFirst({ where: { examId: essayBooking.examId ?? undefined }, orderBy: { createdAt: 'desc' } }),
@@ -147,7 +150,6 @@ export async function evaluateCombinedResult(combinedGroupRef: string) {
   const mcqPercentage = mcqResult?.percentage != null ? Number(mcqResult.percentage) : null
   const essayPercentage = essayResult?.percentage != null ? Number(essayResult.percentage) : null
 
-  // Both must have results to evaluate
   if (mcqPercentage == null || essayPercentage == null) {
     return {
       complete: false,
@@ -212,7 +214,7 @@ export async function requiresCombinedResit(combinedGroupRef: string) {
   return {
     determined: true,
     requiresResit: true,
-    reason: `Failed component(s): ${failedComponents.join(', ')}. Both MCQ and Essay must be re-sat.`,
+    reason: `Failed component(s): ${failedComponents.join(', ')}. Both MCQ and essay must be re-sat.`,
     failedComponents,
     mcqBookingId: result.mcqBookingId,
     essayBookingId: result.essayBookingId,

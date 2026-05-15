@@ -7,6 +7,7 @@ import prisma from '@/lib/prisma/client'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
 import JoinPoolButton from './JoinPoolButton'
 import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
+import { filterForStudentTargets, getStudentTargetCategoryCodes } from '@/lib/easa/category-selection'
 
 /* ── Helper: fetch common booking data ── */
 async function getBookingData(userId: string) {
@@ -14,21 +15,33 @@ async function getBookingData(userId: string) {
     prisma.wallet.findUnique({ where: { userId } }),
     getExamPricingConfig(),
     prisma.examComponent.findMany({
-      select: { id: true, course: { select: { code: true, name: true } } },
+      select: {
+        id: true,
+        code: true,
+        name: true,
+        categoryCode: true,
+        questionCount: true,
+        course: { select: { code: true, name: true } },
+      },
       orderBy: { course: { code: 'asc' } },
     }),
   ])
   const { getCurrencySymbol } = await import('@/lib/currency')
+  const targetCategories = await getStudentTargetCategoryCodes(prisma, userId)
+  const eligibleComponents = filterForStudentTargets(examComponents, targetCategories)
   const balance = Number(wallet?.availableBalance || 0)
   const currency = wallet?.currency || 'EUR'
   const currencySymbol = getCurrencySymbol(currency)
-  const uniqueMap = new Map<string, { id: string; code: string; name: string }>()
-  examComponents.forEach((ec) => {
-    if (!uniqueMap.has(ec.course.code)) {
-      uniqueMap.set(ec.course.code, { id: ec.id, code: ec.course.code, name: ec.course.name })
-    }
-  })
-  const ecMapped = Array.from(uniqueMap.values()).sort((a, b) =>
+  const ecMapped = eligibleComponents.map((ec) => ({
+    id: ec.id,
+    code: ec.code,
+    name: ec.name,
+    categoryCode: ec.categoryCode,
+    questionCount: ec.questionCount,
+    courseCode: ec.course.code,
+    courseName: ec.course.name,
+  })).sort((a, b) =>
+    a.courseCode.localeCompare(b.courseCode, undefined, { numeric: true, sensitivity: 'base' }) ||
     a.code.localeCompare(b.code, undefined, { numeric: true, sensitivity: 'base' })
   )
 

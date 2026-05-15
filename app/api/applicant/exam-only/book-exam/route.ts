@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma/client'
 import { joinPool } from '@/lib/pools/join'
 import { bookStandaloneExam } from '@/lib/enrollment/exams'
 import { promoteIfFirstExamActivity } from '@/lib/enrollment/pathway'
+import { categoryMatchesTarget, getStudentTargetCategoryCodes } from '@/lib/easa/category-selection'
 
 export async function POST(request: Request) {
   try {
@@ -49,6 +50,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Exam component not found' }, { status: 404 })
     }
 
+    const targetCategories = await getStudentTargetCategoryCodes(prisma, userId)
+    if (targetCategories.length > 0 && !categoryMatchesTarget(examComponent.categoryCode, targetCategories)) {
+      return NextResponse.json(
+        { error: `This exam component is not available for your selected licence category.` },
+        { status: 403 }
+      )
+    }
+
     // Check wallet balance upfront (fast-fail for UX)
     if (requiredAmount > 0) {
       const wallet = await prisma.wallet.findUnique({ where: { userId } })
@@ -88,7 +97,7 @@ export async function POST(request: Request) {
       }
 
       const bookingResult = await bookStandaloneExam(userId, {
-        moduleCode: examComponent.course.code,
+        examComponentId: examComponent.id,
         eventId: examEvent.id,
       })
 

@@ -3,7 +3,7 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
-// PUT — sign/update a practical training record (dual signature)
+// PUT — sign/update a practical training record (dual signature or full admin edit)
 export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
   await requireStaff()
   const { id } = await ctx.params
@@ -12,6 +12,30 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
   const record = await prismaUnfiltered.practicalTrainingRecord.findUnique({ where: { id } })
   if (!record) return apiError('Record not found', 404)
 
+  // Handle full admin edit payload if provided
+  if (body.isFullEdit) {
+    const updated = await prismaUnfiltered.practicalTrainingRecord.update({
+      where: { id },
+      data: {
+        studentProfileId: body.studentProfileId,
+        courseId: body.courseId,
+        classId: body.classId || null,
+        taskCategory: body.taskCategory,
+        taskReference: body.taskReference || null,
+        ataChapterId: body.ataChapterId || null,
+        description: body.description,
+        deliveryMethod: body.deliveryMethod,
+        date: new Date(body.date),
+        durationMinutes: Number(body.durationMinutes),
+        instructorId: body.instructorId,
+        result: body.result || null,
+        assessorNotes: body.assessorNotes || null,
+      },
+    })
+    return apiSuccess(updated)
+  }
+
+  // Otherwise fallback to the signature/quick-result update path
   const data: any = {}
 
   // Instructor signature
@@ -42,4 +66,19 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
   })
 
   return apiSuccess(updated)
+})
+
+// DELETE — delete practical training record
+export const DELETE = withErrorHandler(async (req: NextRequest, ctx: any) => {
+  await requireStaff()
+  const { id } = await ctx.params
+
+  const record = await prismaUnfiltered.practicalTrainingRecord.findUnique({ where: { id } })
+  if (!record) return apiError('Record not found', 404)
+
+  await prismaUnfiltered.practicalTrainingRecord.delete({
+    where: { id },
+  })
+
+  return apiSuccess({ message: 'Practical training record deleted successfully' })
 })

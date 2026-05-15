@@ -20,19 +20,19 @@ export const CATEGORY_EXEMPTION_RULES: Record<
   B2: [
     {
       targetCategory: 'B1',
-      modules: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M8', 'M9A', 'M10'],
+      modules: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M8', 'M9', 'M10'],
     },
     {
       targetCategory: 'A',
-      modules: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M8', 'M9A', 'M10'],
+      modules: ['M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M8', 'M9', 'M10'],
     },
   ],
   B1: [
     {
       targetCategory: 'A',
       modules: [
-        'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7A', 'M8', 'M9A', 'M10',
-        'M11A', 'M11B', 'M15', 'M16', 'M17A',
+        'M1', 'M2', 'M3', 'M4', 'M5', 'M6', 'M7', 'M8', 'M9', 'M10',
+        'M11A', 'M11B', 'M12', 'M15', 'M16', 'M17',
       ],
     },
   ],
@@ -40,7 +40,7 @@ export const CATEGORY_EXEMPTION_RULES: Record<
 
 /**
  * Extract the base module code from an exam component code.
- * e.g. "M6_MCQ_B2" → "M6", "M9A_ESSAY_B1" → "M9A", "M11A" → "M11A"
+ * e.g. "M6_MCQ_B2" -> "M6", "M9_ESSAY_B1" -> "M9", "M11A" -> "M11A"
  */
 function extractBaseModuleCode(code: string): string {
   const match = code.match(/^(M\d+[A-Z]?)/)

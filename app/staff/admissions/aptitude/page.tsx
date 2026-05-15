@@ -1,5 +1,5 @@
 import { Metadata } from 'next'
-import { FileQuestion, Settings, Users } from 'lucide-react'
+import { Eye, FileQuestion, Settings, Users } from 'lucide-react'
 import Link from 'next/link'
 import BankList from './_components/BankList'
 
@@ -22,7 +22,7 @@ export default function AptitudePage() {
       </div>
 
       {/* Overview Cards */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link href="/staff/admissions/aptitude/config" className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-aerojet-blue/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-aerojet-blue group-hover:bg-blue-100 dark:bg-blue-900/20 dark:text-blue-400">
@@ -53,6 +53,17 @@ export default function AptitudePage() {
             <div>
               <h3 className="font-bold text-slate-800 dark:text-white">Session Results</h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">Applicant scores</p>
+            </div>
+          </div>
+        </Link>
+        <Link href="/staff/admissions/aptitude/preview" className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition-all hover:border-aerojet-blue/50 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-50 text-cyan-600 group-hover:bg-cyan-100 dark:bg-cyan-900/20 dark:text-cyan-400">
+              <Eye className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-800 dark:text-white">Preview Test</h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400">See applicant view</p>
             </div>
           </div>
         </Link>

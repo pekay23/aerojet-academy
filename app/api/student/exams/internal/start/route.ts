@@ -8,6 +8,12 @@ import {
   isInternalExamSystemEnabled,
   selectInternalExamQuestions,
 } from '@/lib/internal-exam/engine'
+import {
+  categoryMatchesTarget,
+  getInternalBankCategoryCode,
+  getStudentTargetCategoryCodes,
+  normalizeCategoryCode,
+} from '@/lib/easa/category-selection'
 
 // POST /api/student/exams/internal/start — start a new exam session
 export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
@@ -26,13 +32,21 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
     return apiError('Only enrolled students may take internal exams', 403)
   }
 
-  const { bankId } = await req.json()
+  const { bankId, categoryCode: requestedCategoryCode } = await req.json()
   if (!bankId) return apiError('bankId is required')
 
   // Verify the bank exists and get the course it belongs to
   const bank = await prismaUnfiltered.internalExamBank.findUnique({
     where: { id: bankId },
-    select: { id: true, mcqCount: true, ruleSet: true, courseId: true, isActive: true },
+    select: {
+      id: true,
+      mcqCount: true,
+      ruleSet: true,
+      courseId: true,
+      isActive: true,
+      categoryCode: true,
+      categoryConfig: true,
+    },
   })
   if (!bank) return apiError('Exam bank not found', 404)
   if (!bank.isActive) return apiError('This exam bank is not currently active', 403)
@@ -47,6 +61,17 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
   })
   if (!enrollment) {
     return apiError('You must be enrolled in the course to take this exam', 403)
+  }
+
+  const targetCategories = await getStudentTargetCategoryCodes(prismaUnfiltered, session.user.id)
+  const bankCategoryCode = getInternalBankCategoryCode(bank)
+  const selectedCategoryCode = normalizeCategoryCode(requestedCategoryCode) || bankCategoryCode
+
+  if (bankCategoryCode && selectedCategoryCode !== bankCategoryCode) {
+    return apiError(`This exam bank is configured for category ${bankCategoryCode}.`, 400)
+  }
+  if (selectedCategoryCode && !categoryMatchesTarget(selectedCategoryCode, targetCategories)) {
+    return apiError(`Category ${selectedCategoryCode} is not part of your selected licence pathway.`, 403)
   }
 
   // Check for an existing in-progress session (allow resume)
@@ -116,6 +141,7 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
       startedAt: new Date(),
       expiresAt,
       attemptNumber: (eligibility as any).attemptNumber || 1,
+      categoryCode: selectedCategoryCode,
       ipAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null,
       userAgent: req.headers.get('user-agent') || null,
     },

@@ -117,9 +117,34 @@ export default async function AuditLogsPage(req: {
         .filter(Boolean)
     ),
   ] as string[]
+  // 'users' (lowercase) is used by auth/2FA/login audit logs
+  const usersLowercaseIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'users')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const licenseCategoryIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'LicenseCategory')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
+  const licenseModuleReqIds = [
+    ...new Set(
+      logs
+        .filter((l) => l.entity === 'LicenseModuleRequirement')
+        .map((l) => l.entityId)
+        .filter(Boolean)
+    ),
+  ] as string[]
 
   // Fetch all entity labels in parallel instead of sequentially
-  const [users, courses, events, pools, comps, classes, payments, profiles, enrollments, examBookings, examResults] =
+  const [users, courses, events, pools, comps, classes, payments, profiles, enrollments, examBookings, examResults, usersLowercase, licenseCategories, licenseModuleReqs] =
     await Promise.all([
       userIds.length > 0
         ? prismaUnfiltered.user.findMany({ where: { id: { in: userIds } }, include: { profile: true } })
@@ -163,6 +188,18 @@ export default async function AuditLogsPage(req: {
             include: { user: { include: { profile: true } } },
           })
         : Promise.resolve([]),
+      usersLowercaseIds.length > 0
+        ? prismaUnfiltered.user.findMany({ where: { id: { in: usersLowercaseIds } }, include: { profile: true } })
+        : Promise.resolve([]),
+      licenseCategoryIds.length > 0
+        ? prismaUnfiltered.licenseCategory.findMany({ where: { id: { in: licenseCategoryIds } } })
+        : Promise.resolve([]),
+      licenseModuleReqIds.length > 0
+        ? prismaUnfiltered.licenseModuleRequirement.findMany({
+            where: { id: { in: licenseModuleReqIds } },
+            include: { course: { select: { name: true, code: true } }, licenseCategory: { select: { name: true } } },
+          })
+        : Promise.resolve([]),
     ])
 
   users.forEach((u: any) => (entityLabels[u.id] = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email))
@@ -184,6 +221,13 @@ export default async function AuditLogsPage(req: {
   examResults.forEach((r: any) => {
     const name = r.user?.profile ? `${r.user.profile.firstName} ${r.user.profile.lastName}` : (r.user?.email || 'Unknown')
     entityLabels[r.id] = `${name} — ${r.moduleCode || 'Result'}`
+  })
+  usersLowercase.forEach((u: any) => (entityLabels[u.id] = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email))
+  licenseCategories.forEach((lc: any) => (entityLabels[lc.id] = lc.name))
+  licenseModuleReqs.forEach((lmr: any) => {
+    const courseName = lmr.course?.code || lmr.course?.name || 'Module'
+    const catName = lmr.licenseCategory?.name || ''
+    entityLabels[lmr.id] = `${courseName}${catName ? ` — ${catName}` : ''}`
   })
 
   return (

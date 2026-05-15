@@ -19,6 +19,10 @@ interface ExamComponent {
   id: string
   code: string
   name: string
+  categoryCode?: string | null
+  questionCount?: number | null
+  courseCode?: string
+  courseName?: string
 }
 
 interface ExamEvent {
@@ -231,7 +235,9 @@ export default function StandaloneBooking({
                       <option value="">— Select a module —</option>
                       {examComponents.map((ec) => (
                         <option key={ec.id} value={ec.code}>
-                          {ec.code} | {ec.name}
+                          {ec.courseCode ? `${ec.courseCode} | ` : ''}{ec.code} | {ec.name}
+                          {ec.categoryCode ? ` | Cat ${ec.categoryCode}` : ''}
+                          {ec.questionCount ? ` | ${ec.questionCount} questions` : ''}
                         </option>
                       ))}
                     </select>

@@ -12,9 +12,19 @@ const entrySchema = z.object({
   taskDescription: z.string().min(1),
   workOrderReference: z.string().optional(),
   maintenanceManualRef: z.string().optional(),
-  maintenanceType: z.enum(['LINE', 'BASE']),
+  maintenanceType: z.enum([
+    'LINE', 'BASE', 'COMPONENT_OVERHAUL', 'ENGINE_OVERHAUL',
+    'MODIFICATION', 'REPAIR', 'TROUBLESHOOTING', 'INSPECTION',
+    'SERVICING', 'NDT',
+  ]),
   durationHours: z.number().min(0.25),
   supervisorId: z.string(),
+  // CAP 741 / EASA Part-66 Appendix III fields
+  licenceCategory: z.string().optional(),
+  workEnvironment: z.string().optional(),
+  toolsUsed: z.string().optional(),
+  partNumbersUsed: z.string().optional(),
+  safetyPrecautions: z.string().optional(),
 })
 
 // GET — get logbook detail with entries
@@ -52,9 +62,14 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
   // ATA chapter coverage
   const coveredChapters = new Set(logbook.entries.map(e => e.ataChapterId))
 
-  // Line vs base maintenance split
-  const lineHours = logbook.entries.filter(e => e.maintenanceType === 'LINE').reduce((s, e) => s + e.durationHours, 0)
-  const baseHours = logbook.entries.filter(e => e.maintenanceType === 'BASE').reduce((s, e) => s + e.durationHours, 0)
+  // Maintenance type breakdown
+  const hoursByType: Record<string, number> = {}
+  for (const e of logbook.entries) {
+    hoursByType[e.maintenanceType] = (hoursByType[e.maintenanceType] || 0) + e.durationHours
+  }
+
+  const lineHours = hoursByType['LINE'] || 0
+  const baseHours = hoursByType['BASE'] || 0
 
   return apiSuccess({
     ...logbook,
@@ -63,6 +78,9 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
       totalHours: Math.round(totalHours * 10) / 10,
       lineHours: Math.round(lineHours * 10) / 10,
       baseHours: Math.round(baseHours * 10) / 10,
+      hoursByType: Object.fromEntries(
+        Object.entries(hoursByType).map(([k, v]) => [k, Math.round(v * 10) / 10])
+      ),
       ataChaptersCovered: coveredChapters.size,
       signedEntries: logbook.entries.filter(e => e.supervisorSignature && e.studentSignature).length,
       unsignedEntries: logbook.entries.filter(e => !e.supervisorSignature || !e.studentSignature).length,
@@ -95,6 +113,11 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
       maintenanceType: parsed.data.maintenanceType as any,
       durationHours: parsed.data.durationHours,
       supervisorId: parsed.data.supervisorId,
+      licenceCategory: parsed.data.licenceCategory || null,
+      workEnvironment: parsed.data.workEnvironment || null,
+      toolsUsed: parsed.data.toolsUsed || null,
+      partNumbersUsed: parsed.data.partNumbersUsed || null,
+      safetyPrecautions: parsed.data.safetyPrecautions || null,
     },
   })
 

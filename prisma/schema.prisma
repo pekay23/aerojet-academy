@@ -7,48 +7,48 @@ datasource db {
 }
 
 model User {
-  id                          String                       @id @default(cuid())
-  email                       String                       @unique
+  id                          String                    @id @default(cuid())
+  email                       String                    @unique
   personalEmail               String?
-  academyEmail                String?                      @unique
+  academyEmail                String?                   @unique
   password                    String?
-  role                        UserRole                     @default(APPLICANT)
-  status                      UserStatus                   @default(PENDING)
-  registrationCode            String?                      @unique
-  registrationFee             Decimal                      @default(350.00) @db.Decimal(10, 2)
-  registrationCurrency        String                       @default("EUR")
-  registrationPaid            Boolean                      @default(false)
+  role                        UserRole                  @default(APPLICANT)
+  status                      UserStatus                @default(PENDING)
+  registrationCode            String?                   @unique
+  registrationFee             Decimal                   @default(350.00) @db.Decimal(10, 2)
+  registrationCurrency        String                    @default("EUR")
+  registrationPaid            Boolean                   @default(false)
   paymentProofUrl             String?
   paymentApprovedAt           DateTime?
   paymentApprovedBy           String?
   programmeChoice             ProgrammeChoice?
-  isAmbassador                Boolean                      @default(false)
-  referralCode                String?                      @unique
-  successfulReferrals         Int                          @default(0)
-  mustChangePassword          Boolean                      @default(false)
-  passwordChanged             Boolean                      @default(false)
+  isAmbassador                Boolean                   @default(false)
+  referralCode                String?                   @unique
+  successfulReferrals         Int                       @default(0)
+  mustChangePassword          Boolean                   @default(false)
+  passwordChanged             Boolean                   @default(false)
   emailVerified               DateTime?
-  verifyToken                 String?                      @unique
+  verifyToken                 String?                   @unique
   verifyTokenExpires          DateTime?
-  loginAttempts               Int                          @default(0)
+  loginAttempts               Int                       @default(0)
   lockedUntil                 DateTime?
   lastLoginAt                 DateTime?
-  createdAt                   DateTime                     @default(now())
-  updatedAt                   DateTime                     @updatedAt
+  createdAt                   DateTime                  @default(now())
+  updatedAt                   DateTime                  @updatedAt
   deletedAt                   DateTime?
-  selectedLicenseCategories   String[]                     @default([])
-  settings                    Json?                        @default("{}")
+  selectedLicenseCategories   String[]                  @default([])
+  settings                    Json?                     @default("{}")
   passwordChangedAt           DateTime?
-  marketingOptOut             Boolean                      @default(false)
-  hasCompletedTour            Boolean                      @default(false)
+  marketingOptOut             Boolean                   @default(false)
+  hasCompletedTour            Boolean                   @default(false)
   twoFactorSecret             String?
-  twoFactorEnabled            Boolean                      @default(false)
+  twoFactorEnabled            Boolean                   @default(false)
   academicIntents             AcademicIntent[]
-  adminCalendarEventsCreated  AdminCalendarEvent[]         @relation("AdminCalendarEventCreator")
-  adminCalendarEventsTargeted AdminCalendarEvent[]         @relation("AdminCalendarEventTarget")
-  adminNotesAuthored          AdminNote[]                  @relation("AdminNoteAuthor")
+  adminCalendarEventsCreated  AdminCalendarEvent[]      @relation("AdminCalendarEventCreator")
+  adminCalendarEventsTargeted AdminCalendarEvent[]      @relation("AdminCalendarEventTarget")
+  adminNotesAuthored          AdminNote[]               @relation("AdminNoteAuthor")
   application                 Application?
-  aptitudeTestSessions         AptitudeTestSession[]
+  aptitudeTestSessions        AptitudeTestSession[]
   attendanceRecords           AttendanceRecord[]
   auditLogs                   AuditLog[]
   bookingEntitlements         BookingEntitlement[]
@@ -67,25 +67,26 @@ model User {
   instructorProfile           InstructorProfile?
   internalExamSessions        InternalExamSession[]
   invoices                    Invoice[]
-  messagesReceived            Message[]                    @relation("ReceivedMessages")
-  messagesSent                Message[]                    @relation("SentMessages")
+  messagesReceived            Message[]                 @relation("ReceivedMessages")
+  messagesSent                Message[]                 @relation("SentMessages")
   modularEnrollments          ModularEnrollment[]
   newsArticles                NewsArticle[]
-  notificationsSent           Notification[]               @relation("SentNotifications")
-  notificationsReceived       Notification[]               @relation("ReceivedNotifications")
+  notificationsSent           Notification[]            @relation("SentNotifications")
+  notificationsReceived       Notification[]            @relation("ReceivedNotifications")
   payments                    Payment[]
   poolMemberships             PoolMembership[]
   waitlists                   PoolWaitlist[]
   practicalTrainingRecords    PracticalTrainingRecord[]
   profile                     Profile?
-  referralsReceived           Referral?                    @relation("ReferralsReceived")
-  referralsMade               Referral[]                   @relation("ReferralsMade")
+  referralsReceived           Referral?                 @relation("ReferralsReceived")
+  referralsMade               Referral[]                @relation("ReferralsMade")
   staffProfile                StaffProfile?
   studentCalendarEvents       StudentCalendarEvent[]
   studentProfile              StudentProfile?
   tuitionBookings             TuitionBooking[]
-  createdTuitionRuns          TuitionRun[]                 @relation("CreatedTuitionRuns")
+  createdTuitionRuns          TuitionRun[]              @relation("CreatedTuitionRuns")
   wallet                      Wallet?
+  interviewEvaluationsGiven   InterviewEvaluation[]     @relation("InterviewEvaluator")
 
   @@index([email])
   @@index([academyEmail])
@@ -126,38 +127,38 @@ model Profile {
 }
 
 model StudentProfile {
-  id                         String                       @id @default(cuid())
-  userId                     String                       @unique
-  studentId                  String                       @unique
-  enrollmentType             EnrollmentType?
-  programmeChoice            ProgrammeChoice?
-  enrollmentStatus           EnrollmentStatus             @default(ENROLLED)
-  enrollmentDate             DateTime                     @default(now())
-  graduationDate             DateTime?
-  studyPathwayLockedAt       DateTime?
-  studyPathwayLocked         Boolean                      @default(false)
-  studyPathwayLastChangedBy  String?
-  studyPathwayChangeReason   String?
-  currentYearNumber          Int                          @default(1)
-  currentSemesterNumber      Int                          @default(1)
-  CGPA                       Decimal?                     @db.Decimal(3, 2)
-  academicYearId             String?
-  semesterId                 String?
-  preferredModules           String[]
-  createdAt                  DateTime                     @default(now())
-  updatedAt                  DateTime                     @updatedAt
-  pathwayId                  String?
-  fundingSource              FundingSource                @default(SELF_FUNDED)
-  notes                      AdminNote[]
-  bondingContract          BondingContract?
-  ojtLogbook               OJTLogbook?
-  practicalTrainingRecords PracticalTrainingRecord[]
-  programmeUpgradeRequests ProgrammeUpgradeRequest[]
-  licenseTargets             StudentLicenseTarget[]
-  academicYear               AcademicYear?                @relation(fields: [academicYearId], references: [id])
-  pathwayRel                 StudyPathwayModel?           @relation(fields: [pathwayId], references: [id])
-  semester                   Semester?                    @relation(fields: [semesterId], references: [id])
-  user                       User                         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                        String                    @id @default(cuid())
+  userId                    String                    @unique
+  studentId                 String                    @unique
+  enrollmentType            EnrollmentType?
+  programmeChoice           ProgrammeChoice?
+  enrollmentStatus          EnrollmentStatus          @default(ENROLLED)
+  enrollmentDate            DateTime                  @default(now())
+  graduationDate            DateTime?
+  studyPathwayLockedAt      DateTime?
+  studyPathwayLocked        Boolean                   @default(false)
+  studyPathwayLastChangedBy String?
+  studyPathwayChangeReason  String?
+  currentYearNumber         Int                       @default(1)
+  currentSemesterNumber     Int                       @default(1)
+  CGPA                      Decimal?                  @db.Decimal(3, 2)
+  academicYearId            String?
+  semesterId                String?
+  preferredModules          String[]
+  createdAt                 DateTime                  @default(now())
+  updatedAt                 DateTime                  @updatedAt
+  pathwayId                 String?
+  fundingSource             FundingSource             @default(SELF_FUNDED)
+  notes                     AdminNote[]
+  bondingContract           BondingContract?
+  ojtLogbook                OJTLogbook?
+  practicalTrainingRecords  PracticalTrainingRecord[]
+  programmeUpgradeRequests  ProgrammeUpgradeRequest[]
+  licenseTargets            StudentLicenseTarget[]
+  academicYear              AcademicYear?             @relation(fields: [academicYearId], references: [id])
+  pathwayRel                StudyPathwayModel?        @relation(fields: [pathwayId], references: [id])
+  semester                  Semester?                 @relation(fields: [semesterId], references: [id])
+  user                      User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([studentId])
   @@index([enrollmentType])
@@ -201,18 +202,18 @@ model ExamExemption {
 }
 
 model InstructorProfile {
-  id                        String                      @id @default(cuid())
-  userId                    String                      @unique
-  employeeId                String                      @unique
-  department                String?
-  specialization            String?
-  qualifications            String?
-  hireDate                  DateTime?
-  modulesQualified          String[]
-  createdAt                 DateTime                    @default(now())
-  updatedAt                 DateTime                    @updatedAt
-  classesInstructed         Class[]
-  user                      User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                       String                    @id @default(cuid())
+  userId                   String                    @unique
+  employeeId               String                    @unique
+  department               String?
+  specialization           String?
+  qualifications           String?
+  hireDate                 DateTime?
+  modulesQualified         String[]
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
+  classesInstructed        Class[]
+  user                     User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   instructorQualifications InstructorQualification[]
   instructorRecency        InstructorRecency[]
 
@@ -337,40 +338,40 @@ model ExamComponent {
 }
 
 model Course {
-  id                         String                       @id @default(cuid())
-  code                       String                       @unique
-  name                       String
-  description                String?
-  categoryId                 String?
-  moduleType                 CourseModuleType?
-  duration                   Int?
-  price                      Decimal                      @db.Decimal(10, 2)
-  currency                   String                       @default("EUR")
-  isActive                   Boolean                      @default(true)
-  requiresPrerequisite       Boolean                      @default(false)
-  prerequisites              String[]
-  syllabusUrl                String?
-  materialsUrl               String?
-  createdAt                  DateTime                     @default(now())
-  updatedAt                  DateTime                     @updatedAt
-  applicableCategories       String[]
-  estimatedStudyHoursMax     Int?
-  estimatedStudyHoursMin     Int?
-  subtitle                   String?
-  topics                     String[]
-  hasCombinedExam            Boolean                      @default(false)
-  classSessions             ClassSession[]
-  classes                    Class[]
-  category                   CourseCategory?              @relation(fields: [categoryId], references: [id])
-  enrollments                Enrollment[]
-  examBookings               ExamBooking[]
-  examComponents             ExamComponent[]
+  id                       String                     @id @default(cuid())
+  code                     String                     @unique
+  name                     String
+  description              String?
+  categoryId               String?
+  moduleType               CourseModuleType?
+  duration                 Int?
+  price                    Decimal                    @db.Decimal(10, 2)
+  currency                 String                     @default("EUR")
+  isActive                 Boolean                    @default(true)
+  requiresPrerequisite     Boolean                    @default(false)
+  prerequisites            String[]
+  syllabusUrl              String?
+  materialsUrl             String?
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  applicableCategories     String[]
+  estimatedStudyHoursMax   Int?
+  estimatedStudyHoursMin   Int?
+  subtitle                 String?
+  topics                   String[]
+  hasCombinedExam          Boolean                    @default(false)
+  classSessions            ClassSession[]
+  classes                  Class[]
+  category                 CourseCategory?            @relation(fields: [categoryId], references: [id])
+  enrollments              Enrollment[]
+  examBookings             ExamBooking[]
+  examComponents           ExamComponent[]
   internalExamBanks        InternalExamBank[]
-  licenseRequirements        LicenseModuleRequirement[]
+  licenseRequirements      LicenseModuleRequirement[]
   practicalTrainingRecords PracticalTrainingRecord[]
-  termAssignments            TermCourseAssignment[]
-  programmeYears             ProgrammeYear[]              @relation("CourseToProgrammeYear")
-  resources                  GeneralResource[]            @relation("CourseToResource")
+  termAssignments          TermCourseAssignment[]
+  programmeYears           ProgrammeYear[]            @relation("CourseToProgrammeYear")
+  resources                GeneralResource[]          @relation("CourseToResource")
 
   @@index([code])
   @@index([categoryId])
@@ -410,33 +411,33 @@ model Enrollment {
 }
 
 model Class {
-  id                     String                   @id @default(cuid())
-  courseId               String
-  instructorId           String?
-  name                   String
-  description            String?
-  academicYearId         String?
-  semesterId             String?
-  startDate              DateTime
-  endDate                DateTime
-  schedule               Json?
-  maxStudents            Int                      @default(28)
-  currentStudents        Int                      @default(0)
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
-  recurrenceDays         String?
-  recurrenceType         RecurrenceType           @default(NONE)
-  recurrenceUntil        DateTime?
-  classroomId            String?
-  adminCalendarEvents    AdminCalendarEvent[]
-  attendanceRecords      AttendanceRecord[]
-  classSessions         ClassSession[]
-  academicYear           AcademicYear?            @relation(fields: [academicYearId], references: [id])
-  classroom              Classroom?               @relation(fields: [classroomId], references: [id])
-  course                 Course                   @relation(fields: [courseId], references: [id])
-  instructor             InstructorProfile?       @relation(fields: [instructorId], references: [id])
-  semester               Semester?                @relation(fields: [semesterId], references: [id])
-  examAttendances        ExamAttendance[]
+  id                   String                @id @default(cuid())
+  courseId             String
+  instructorId         String?
+  name                 String
+  description          String?
+  academicYearId       String?
+  semesterId           String?
+  startDate            DateTime
+  endDate              DateTime
+  schedule             Json?
+  maxStudents          Int                   @default(28)
+  currentStudents      Int                   @default(0)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  recurrenceDays       String?
+  recurrenceType       RecurrenceType        @default(NONE)
+  recurrenceUntil      DateTime?
+  classroomId          String?
+  adminCalendarEvents  AdminCalendarEvent[]
+  attendanceRecords    AttendanceRecord[]
+  classSessions        ClassSession[]
+  academicYear         AcademicYear?         @relation(fields: [academicYearId], references: [id])
+  classroom            Classroom?            @relation(fields: [classroomId], references: [id])
+  course               Course                @relation(fields: [courseId], references: [id])
+  instructor           InstructorProfile?    @relation(fields: [instructorId], references: [id])
+  semester             Semester?             @relation(fields: [semesterId], references: [id])
+  examAttendances      ExamAttendance[]
   internalExamSessions InternalExamSession[]
 
   @@index([courseId])
@@ -834,27 +835,27 @@ model Examiner {
 }
 
 model ExamSitting {
-  id                     String                   @id @default(cuid())
-  eventId                String
-  examinerId             String?
-  examComponentId        String
-  dayNumber              Int
-  sessionType            SessionType
-  startTime              DateTime
-  endTime                DateTime
-  capacity               Int                      @default(28)
-  reservedSeats          Int                      @default(0)
-  confirmedSeats         Int                      @default(0)
-  status                 SittingStatus            @default(DRAFT)
-  venue                  String?
-  notes                  String?
-  createdAt              DateTime                 @default(now())
-  updatedAt              DateTime                 @updatedAt
-  attendances            ExamAttendance[]
-  assignments            ExamSittingAssignment[]
-  event                  ExamEvent                @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  examComponent          ExamComponent            @relation(fields: [examComponentId], references: [id])
-  examiner               Examiner?                @relation(fields: [examinerId], references: [id])
+  id                   String                  @id @default(cuid())
+  eventId              String
+  examinerId           String?
+  examComponentId      String
+  dayNumber            Int
+  sessionType          SessionType
+  startTime            DateTime
+  endTime              DateTime
+  capacity             Int                     @default(28)
+  reservedSeats        Int                     @default(0)
+  confirmedSeats       Int                     @default(0)
+  status               SittingStatus           @default(DRAFT)
+  venue                String?
+  notes                String?
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  attendances          ExamAttendance[]
+  assignments          ExamSittingAssignment[]
+  event                ExamEvent               @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  examComponent        ExamComponent           @relation(fields: [examComponentId], references: [id])
+  examiner             Examiner?               @relation(fields: [examinerId], references: [id])
   internalExamSessions InternalExamSession[]
 
   @@index([eventId])
@@ -878,7 +879,7 @@ model ExamSittingAssignment {
   updatedAt        DateTime                @updatedAt
   seatId           String?
   booking          ExamBooking             @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  seat             Seat?                  @relation(fields: [seatId], references: [id])
+  seat             Seat?                   @relation(fields: [seatId], references: [id])
   sitting          ExamSitting             @relation(fields: [sittingId], references: [id], onDelete: Cascade)
   user             User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -1123,19 +1124,19 @@ model PaymentMethod {
 }
 
 model FileUpload {
-  id                    String                  @id @default(cuid())
-  userId                String
-  filename              String
-  originalName          String
-  mimeType              String
-  size                  Int
-  url                   String
-  fileType              String
-  referenceType         String?
-  referenceId           String?
-  createdAt             DateTime                @default(now())
+  id                   String                @id @default(cuid())
+  userId               String
+  filename             String
+  originalName         String
+  mimeType             String
+  size                 Int
+  url                  String
+  fileType             String
+  referenceType        String?
+  referenceId          String?
+  createdAt            DateTime              @default(now())
   applicationDocuments ApplicationDocument[]
-  user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([fileType])
@@ -1199,7 +1200,7 @@ model AcademicYear {
   updatedAt       DateTime         @updatedAt
   classes         Class[]
   enrollments     Enrollment[]
-  intakeCycles   IntakeCycle[]
+  intakeCycles    IntakeCycle[]
   semesters       Semester[]
   studentProfiles StudentProfile[]
 
@@ -1531,19 +1532,19 @@ model AcademicIntent {
 }
 
 model ApplicationDocumentType {
-  id                    String                  @id @default(cuid())
-  name                  String
-  slug                  String                  @unique
-  description           String?
-  fileTypes             String                  @default("application/pdf,image/jpeg,image/png")
-  maxSizeMB             Int                     @default(4)
-  isRequired            Boolean                 @default(true)
-  applicableProgrammes  ProgrammeChoice[]       @default([])
-  sortOrder             Int                     @default(0)
-  isActive              Boolean                 @default(true)
-  createdAt             DateTime                @default(now())
-  updatedAt             DateTime                @updatedAt
-  documents             ApplicationDocument[]
+  id                   String                @id @default(cuid())
+  name                 String
+  slug                 String                @unique
+  description          String?
+  fileTypes            String                @default("application/pdf,image/jpeg,image/png")
+  maxSizeMB            Int                   @default(4)
+  isRequired           Boolean               @default(true)
+  applicableProgrammes ProgrammeChoice[]     @default([])
+  sortOrder            Int                   @default(0)
+  isActive             Boolean               @default(true)
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  documents            ApplicationDocument[]
 
   @@map("application_document_types")
 }
@@ -1585,16 +1586,16 @@ model ApplicationStageLog {
 }
 
 model Application {
-  id                       String                     @id @default(cuid())
-  userId                   String                     @unique
-  stage                    ApplicationStage           @default(REGISTERED)
+  id                       String                    @id @default(cuid())
+  userId                   String                    @unique
+  stage                    ApplicationStage          @default(REGISTERED)
   previousStage            ApplicationStage?
   programmeChoice          ProgrammeChoice
-  fundingType              FundingType                @default(SELF_FUNDED)
+  fundingType              FundingType               @default(SELF_FUNDED)
   intakeCycleId            String?
   completionDeadline       DateTime?
   interviewSlotId          String?
-  interviewRescheduleCount Int                        @default(0)
+  interviewRescheduleCount Int                       @default(0)
   medicalStatus            MedicalStatus?
   medicalClearedAt         DateTime?
   medicalClearedBy         String?
@@ -1602,15 +1603,16 @@ model Application {
   medicalFacility          String?
   rejectionReason          String?
   metadata                 Json?
-  createdAt                DateTime                   @default(now())
-  updatedAt                DateTime                   @updatedAt
+  createdAt                DateTime                  @default(now())
+  updatedAt                DateTime                  @updatedAt
   documents                ApplicationDocument[]
   stageLogs                ApplicationStageLog[]
-  intakeCycle              IntakeCycle?                @relation(fields: [intakeCycleId], references: [id])
-  interviewSlot            InterviewSlot?              @relation(fields: [interviewSlotId], references: [id])
-  user                     User                       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  intakeCycle              IntakeCycle?              @relation(fields: [intakeCycleId], references: [id])
+  interviewSlot            InterviewSlot?            @relation(fields: [interviewSlotId], references: [id])
+  user                     User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
   bondingContract          BondingContract?
   upgradeRequests          ProgrammeUpgradeRequest[]
+  interviewEvaluations     InterviewEvaluation[]
 
   @@index([intakeCycleId])
   @@index([programmeChoice])
@@ -1635,23 +1637,23 @@ model AptitudeAnswer {
 }
 
 model AptitudeQuestion {
-  id            String              @id @default(cuid())
+  id            String               @id @default(cuid())
   bankId        String
   category      AptitudeCategory
   questionType  AptitudeQuestionType
-  difficulty    QuestionDifficulty  @default(MEDIUM)
+  difficulty    QuestionDifficulty   @default(MEDIUM)
   text          String
   options       Json?
   correctAnswer String
-  points        Int                 @default(1)
+  points        Int                  @default(1)
   explanation   String?
-  timesServed   Int                 @default(0)
+  timesServed   Int                  @default(0)
   lastServedAt  DateTime?
-  isActive      Boolean             @default(true)
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
+  isActive      Boolean              @default(true)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
   answers       AptitudeAnswer[]
-  bank          AptitudeTestBank    @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  bank          AptitudeTestBank     @relation(fields: [bankId], references: [id], onDelete: Cascade)
 
   @@index([bankId, category])
   @@index([bankId, isActive])
@@ -1688,11 +1690,32 @@ model AptitudeTestSession {
   fullscreenExits Int               @default(0)
   ipAddress       String?
   userAgent       String?
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  answers         AptitudeAnswer[]
-  bank            AptitudeTestBank  @relation(fields: [bankId], references: [id])
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Criteria-style sub-scores per category (raw correct count + percentile)
+  mathRawScore              Int?
+  mathTotalQuestions        Int?
+  mathPercentile            Float?
+  verbalRawScore            Int?
+  verbalTotalQuestions      Int?
+  verbalPercentile          Float?
+  engineeringRawScore       Int?
+  engineeringTotalQuestions Int?
+  engineeringPercentile     Float?
+  reasoningRawScore         Int?
+  reasoningTotalQuestions   Int?
+  reasoningPercentile       Float?
+  physicsRawScore           Int?
+  physicsTotalQuestions     Int?
+  physicsPercentile         Float?
+
+  // Overall percentile relative to all prior test-takers (internal norm group)
+  overallPercentile Float?
+
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  answers   AptitudeAnswer[]
+  bank      AptitudeTestBank @relation(fields: [bankId], references: [id])
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([bankId])
   @@index([status])
@@ -1738,7 +1761,7 @@ model BondingContract {
 model ClassSession {
   id                 String           @id @default(cuid())
   classId            String
-  courseId            String
+  courseId           String
   date               DateTime
   scheduledStart     DateTime
   scheduledEnd       DateTime
@@ -1762,18 +1785,18 @@ model ClassSession {
 }
 
 model CustomFieldDefinition {
-  id                   String              @id @default(cuid())
+  id                   String             @id @default(cuid())
   name                 String
-  slug                 String              @unique
+  slug                 String             @unique
   fieldType            CustomFieldType
   options              Json?
   appliesTo            CustomFieldTarget
-  isRequired           Boolean             @default(false)
-  applicableProgrammes ProgrammeChoice[]   @default([])
-  sortOrder            Int                 @default(0)
-  isActive             Boolean             @default(true)
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
+  isRequired           Boolean            @default(false)
+  applicableProgrammes ProgrammeChoice[]  @default([])
+  sortOrder            Int                @default(0)
+  isActive             Boolean            @default(true)
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
   values               CustomFieldValue[]
 
   @@map("custom_field_definitions")
@@ -1831,17 +1854,17 @@ model InstructorRecency {
 }
 
 model IntakeCycle {
-  id                 String               @id @default(cuid())
+  id                 String              @id @default(cuid())
   name               String
   description        String?
   academicYearId     String?
   startDate          DateTime
   endDate            DateTime
-  isActive           Boolean              @default(true)
-  createdAt          DateTime             @default(now())
-  updatedAt          DateTime             @updatedAt
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
   applications       Application[]
-  academicYear       AcademicYear?        @relation(fields: [academicYearId], references: [id])
+  academicYear       AcademicYear?       @relation(fields: [academicYearId], references: [id])
   interviewSchedules InterviewSchedule[]
 
   @@index([isActive])
@@ -1869,6 +1892,7 @@ model InternalExamBank {
   id              String                    @id @default(cuid())
   courseId        String
   moduleCode      String?
+  categoryCode    String?
   ruleSet         ExamRuleSet               @default(EASA)
   name            String
   description     String?
@@ -1884,6 +1908,7 @@ model InternalExamBank {
   sessions        InternalExamSession[]
 
   @@index([courseId])
+  @@index([categoryCode])
   @@map("internal_exam_banks")
 }
 
@@ -1935,6 +1960,7 @@ model InternalExamSession {
   bankId           String
   classId          String?
   sittingId        String?
+  categoryCode     String?
   ruleSet          ExamRuleSet
   status           TestSessionStatus    @default(NOT_STARTED)
   startedAt        DateTime?
@@ -1964,6 +1990,7 @@ model InternalExamSession {
   @@index([bankId])
   @@index([status])
   @@index([studentId])
+  @@index([categoryCode])
   @@map("internal_exam_sessions")
 }
 
@@ -1976,7 +2003,7 @@ model InterviewSchedule {
   isActive      Boolean         @default(true)
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
-  intakeCycle   IntakeCycle?     @relation(fields: [intakeCycleId], references: [id])
+  intakeCycle   IntakeCycle?    @relation(fields: [intakeCycleId], references: [id])
   slots         InterviewSlot[]
 
   @@map("interview_schedules")
@@ -2002,6 +2029,46 @@ model InterviewSlot {
   @@map("interview_slots")
 }
 
+/// Structured interview evaluation form filled by each interviewer per applicant.
+/// Multiple evaluators can independently assess the same applicant.
+/// Scores are averaged for composite shortlisting decisions.
+model InterviewEvaluation {
+  id            String @id @default(cuid())
+  applicationId String
+  evaluatorId   String
+
+  // Structured rubric scores (1-10 scale per dimension)
+  communicationScore   Int // Verbal clarity, confidence, articulation
+  technicalScore       Int // Technical aptitude, aviation knowledge
+  motivationScore      Int // Drive, career goals, commitment to aviation
+  problemSolvingScore  Int // Analytical thinking, situational responses
+  teamworkScore        Int // Collaboration, interpersonal skills
+  professionalismScore Int // Presentation, punctuality, demeanor
+
+  // Per-dimension remarks
+  communicationNotes   String?
+  technicalNotes       String?
+  motivationNotes      String?
+  problemSolvingNotes  String?
+  teamworkNotes        String?
+  professionalismNotes String?
+
+  // Overall assessment
+  overallImpression Int // 1-10 overall impression
+  recommendation    InterviewRecommendation
+  personalScore     Int // 0-100 — evaluator's personal composite score
+  generalRemarks    String? // Free-form remarks and observations
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  application Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  evaluator   User        @relation("InterviewEvaluator", fields: [evaluatorId], references: [id])
+
+  @@unique([applicationId, evaluatorId])
+  @@index([applicationId])
+  @@map("interview_evaluations")
+}
+
 model OJTLogbookEntry {
   id                   String          @id @default(cuid())
   logbookId            String
@@ -2022,6 +2089,13 @@ model OJTLogbookEntry {
   studentSignedAt      DateTime?
   verifiedByManagement Boolean         @default(false)
   managementSignedAt   DateTime?
+  // CAP 741 / EASA Part-66 Appendix III enhancements
+  licenceCategory      String?         // A, B1, B2, B3, C — which licence category this experience counts towards
+  workEnvironment      String?         // HANGAR, APRON, WORKSHOP, SIMULATOR
+  toolsUsed            String?         // Comma-separated list of specialised tools/test equipment used
+  partNumbersUsed      String?         // Part numbers replaced/installed
+  safetyPrecautions    String?         // Safety measures taken (LOTO, grounding, etc.)
+  competencyRating     Int?            // 1-5 rating by supervisor (CAP 741 Section 5)
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
   ataChapter           ATAChapter      @relation(fields: [ataChapterId], references: [id])
@@ -2075,7 +2149,7 @@ model PracticalTrainingRecord {
   id                 String                  @id @default(cuid())
   studentProfileId   String
   classId            String?
-  courseId            String
+  courseId           String
   taskCategory       PracticalTaskCategory
   taskReference      String?
   ataChapterId       String?
@@ -2129,17 +2203,17 @@ model ProgrammeUpgradeRequest {
 }
 
 model Seat {
-  id                   String                  @id @default(cuid())
-  classroomId          String
-  row                  Int
-  col                  Int
-  label                String?
-  isEnabled            Boolean                 @default(true)
-  type                 String                  @default("DESK")
-  createdAt            DateTime                @default(now())
-  updatedAt            DateTime                @updatedAt
-  sittingAssignments   ExamSittingAssignment[]
-  classroom            Classroom               @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  id                 String                  @id @default(cuid())
+  classroomId        String
+  row                Int
+  col                Int
+  label              String?
+  isEnabled          Boolean                 @default(true)
+  type               String                  @default("DESK")
+  createdAt          DateTime                @default(now())
+  updatedAt          DateTime                @updatedAt
+  sittingAssignments ExamSittingAssignment[]
+  classroom          Classroom               @relation(fields: [classroomId], references: [id], onDelete: Cascade)
 
   @@unique([classroomId, row, col])
   @@index([classroomId])
@@ -2490,9 +2564,25 @@ enum InterviewResult {
   NO_SHOW
 }
 
+enum InterviewRecommendation {
+  STRONG_YES
+  YES
+  MAYBE
+  NO
+  STRONG_NO
+}
+
 enum MaintenanceType {
   LINE
   BASE
+  COMPONENT_OVERHAUL
+  ENGINE_OVERHAUL
+  MODIFICATION
+  REPAIR
+  TROUBLESHOOTING
+  INSPECTION
+  SERVICING
+  NDT
 }
 
 enum MedicalStatus {

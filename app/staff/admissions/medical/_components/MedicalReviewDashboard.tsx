@@ -30,7 +30,7 @@ interface MedicalApp {
     id: string
     status: string
     documentType: { name: string }
-    fileUpload: { url: string; fileName: string }
+    fileUpload: { url: string; filename: string }
   }[]
 }
 
