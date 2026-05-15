@@ -9,6 +9,8 @@ import {
 } from '@/lib/auth/helpers'
 import { sendActivationEmail } from '@/lib/email/service'
 import { createAuditLog } from '@/lib/audit/logger'
+import { transitionApplication } from '@/lib/admissions/state-machine'
+import { ApplicationStage } from '@prisma/client'
 
 /**
  * POST /api/staff/applicants/[id]/approve
@@ -137,6 +139,29 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     userId: actorId,
     description: `Registration fee approved for ${user.email}. Credentials sent. Role remains APPLICANT until tuition payment.`,
   })
+
+  // Transition pipeline if Application record exists
+  const application = await prismaUnfiltered.application.findUnique({
+    where: { userId: id },
+    select: { id: true, stage: true },
+  })
+
+  if (application) {
+    // If at PAYMENT_SUBMITTED, advance to PAYMENT_VERIFIED → auto-cascade
+    // If at PAYMENT_PENDING (no proof uploaded yet via pipeline), also advance
+    const advanceableStages: ApplicationStage[] = [
+      ApplicationStage.PAYMENT_PENDING,
+      ApplicationStage.PAYMENT_SUBMITTED,
+    ]
+    if (advanceableStages.includes(application.stage)) {
+      await transitionApplication(
+        application.id,
+        ApplicationStage.PAYMENT_VERIFIED,
+        actorId,
+        { metadata: { trigger: 'registration_fee_approved' } }
+      ).catch(console.error)
+    }
+  }
 
   return NextResponse.json({ success: true })
 }

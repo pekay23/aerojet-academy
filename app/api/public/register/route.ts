@@ -12,6 +12,8 @@ import { apiCreated, apiError, apiTooManyRequests, withErrorHandler } from '@/li
 import { sendEmailVerificationEmail } from '@/lib/email/service'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { getRegistrationConfig } from '@/lib/settings'
+import { isPipelineEnabled, transitionApplication } from '@/lib/admissions/state-machine'
+import { ApplicationStage } from '@prisma/client'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const config = await getRegistrationConfig()
@@ -63,7 +65,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const verifyToken = generateToken()
   const verifyTokenExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
 
-  // Create user + profile in transaction
+  // Check pipeline feature flag
+  const pipelineEnabled = await isPipelineEnabled()
+
+  // Create user + profile (+ Application if pipeline enabled) in transaction
   const user = await prisma.$transaction(async (tx) => {
     const newUser = await tx.user.create({
       data: {
@@ -93,8 +98,35 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       },
     })
 
+    // EXAM_ONLY keeps the existing simplified flow and bypasses the admissions pipeline.
+    if (pipelineEnabled && selectedProgramme !== 'EXAM_ONLY') {
+      await tx.application.create({
+        data: {
+          userId: newUser.id,
+          stage: ApplicationStage.REGISTERED,
+          programmeChoice: selectedProgramme,
+        },
+      })
+    }
+
     return newUser
   })
+
+  // Auto-transition REGISTERED → PAYMENT_PENDING (non-blocking)
+  if (pipelineEnabled && selectedProgramme !== 'EXAM_ONLY') {
+    const application = await prisma.application.findUnique({
+      where: { userId: user.id },
+      select: { id: true },
+    })
+    if (application) {
+      transitionApplication(
+        application.id,
+        ApplicationStage.PAYMENT_PENDING,
+        user.id,
+        { metadata: { trigger: 'registration' } }
+      ).catch(console.error)
+    }
+  }
 
   // Record referral if a referral code was provided (non-blocking)
   if (referralCode) {

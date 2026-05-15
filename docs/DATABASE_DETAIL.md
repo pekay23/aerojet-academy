@@ -20,6 +20,8 @@ The schema is built around five core domains:
 - **ExamEvent**: High-level event container (e.g., "June 2024 Session").
 - **ExamPool**: A slot within an event. Managed using a "fill-rate" logic with configurable `minCandidates` and `maxCandidates` per-pool (defaulting to 25-28) to ensure instructor cost-efficiency.
 - **PoolMembership**: The join record between a student and a pool.
+- **InternalExamBank / InternalExamQuestion**: Course-linked internal assessment banks. Banks carry rule-set metadata and question-pool sizing so staff can monitor whether enough active questions exist before students sit an exam.
+- **InternalExamSession / InternalExamAnswer**: Per-student internal exam attempts and selected answers. Sessions track `expiresAt`, `autoSubmitted`, `keyboardEvents`, score, pass/fail, retake eligibility, and ban state. Answers are autosaved during the exam and graded on submit.
 
 ### 4. Financial System
 - **Wallet**: A virtual balance for each student. Total Balance = Available + Reserved.
@@ -30,6 +32,13 @@ The schema is built around five core domains:
 ### 5. Academic Management
 - **Class**: A specific instance of a course with an instructor and schedule.
 - **AttendanceRecord**: Daily tracking for compliance with EASA training requirements.
+
+### 5a. Facilities & Seating
+- **Classroom**: Physical rooms with `layout` (Json) storing a grid definition: `{ rows, cols, cells: [{ row, col, type, label }] }`. Cell types: `DESK`, `AISLE`, `OBSTACLE`.
+- **Seat**: Auto-created from layout desk cells. `@@unique([classroomId, row, col])`. Labels auto-generated (A1, A2, B1…).
+- **Class Seating**: Stored in `SystemSetting` as `class_seating_{classId}` → JSON map of `{ seatId: userId }`.
+- **Exam Seating**: Stored directly on `ExamSittingAssignment.seatId` (FK to `Seat`).
+- **Student View**: `/student/seating` aggregates both sources to show mini floor plans with the student's seat highlighted.
 
 ### 6. Communication & Calendar
 - **AdminCalendarEvent**: Broadcasted events with audience targeting (`ALL`, `STUDENTS`, `INSTRUCTORS`, `SPECIFIC_USER`, or pathway-specific).

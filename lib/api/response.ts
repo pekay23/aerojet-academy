@@ -95,7 +95,7 @@ export function apiServerError(message: string = 'Internal server error'): NextR
 
 export type RouteHandler = (
   req: NextRequest,
-  ctx?: { params: Record<string, string> }
+  ctx?: any
 ) => Promise<NextResponse>
 
 export function withErrorHandler(handler: RouteHandler) {

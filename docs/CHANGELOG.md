@@ -1,5 +1,36 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **Admissions/Internal Exam documentation refresh** — Documented current Phase 8 implementation status, including student detail confirmation, enrolled-course exam filtering, staff share links, skip/review navigation, autosave, and keyboard auto-submit behavior.
+- **Internal exam handover notes** — Added operational pointers for staff bank management, student exam flow, feature flagging, and the main API/component files.
+
+## [1.5.0] — 2026-05-13
+
+### Added
+- **Two-Factor Authentication (2FA)** — TOTP-based 2FA for staff/admin accounts. Setup via Settings → Security tab with QR code enrollment, 6-digit verification, and optional disable flow. Login form intercepts `2FA_REQUIRED` error to prompt for TOTP code before completing sign-in
+- **Interactive Floor Plan Designer** — CSS grid-based classroom layout builder at `/staff/classrooms/[id]`. Paint-drag tools for DESK, AISLE, and OBSTACLE cells. Auto-generates seat labels (A1, A2, B1…). Saves layout JSON and syncs `Seat` records in a single transaction
+- **Exam Seating Assignment** — Drag-and-drop interface at `/staff/exams/sittings/[id]/seating` for assigning students to seats in exam halls. Visual floor plan with unassigned student sidebar
+- **Class Seating Assignment** — Staff can assign students to seats within classes at `/staff/classes/[id]/seating`. Assignments stored as JSON in SystemSettings (`class_seating_{classId}` keys)
+- **Student Seating View** — Students can view their assigned seats for both classes and exams at `/student/seating` with mini floor plan visualizations highlighting their seat
+- **Enhanced Classmates Directory** — Expanded from 2 filters to 6 filter modes: batch, classmates, year, semester, pathway, and class. Sub-filter badges for each dimension. Semester badge added to peer cards
+- **Role-Specific Welcome Tours** — Comprehensive `react-joyride` tours covering all portal features: 12 steps for students (wallet, courses, exams, grades, classmates, seating, attendance, notifications), 10 steps for staff/admin (students, classes, facilities, exams, finance, settings with 2FA mention), 5 steps for applicants
+
+### New API Endpoints
+- `GET/PUT /api/staff/classrooms/[id]/layout` — Save/retrieve classroom floor plan layout and sync Seat records
+- `GET/PUT /api/staff/exams/sittings/[id]/seats` — Batch-update exam sitting seat assignments
+- `GET/PUT /api/staff/classes/[id]/seating` — Class seating assignments via SystemSettings
+- `GET /api/staff/classes/[id]/seats` — Class with classroom/seats and enrolled students
+- `POST /api/auth/2fa/generate` — Generate TOTP secret and QR code for 2FA setup
+- `POST /api/auth/2fa/verify` — Verify TOTP code and enable 2FA on account
+- `POST /api/auth/2fa/disable` — Verify TOTP code and disable 2FA
+
+### Fixed
+- **otplib v5 breaking API** — Migrated from removed `authenticator` export to v5 named exports (`generateSecret`, `generateURI`, `verify`). The `verify()` function now returns `{valid: boolean}` instead of a plain boolean
+- **Prisma JSON null filter** — Changed `layout: { not: null }` to `layout: { not: Prisma.DbNull }` for correct JSON field null filtering
+- **AppTour TypeScript errors** — Resolved pre-existing type errors in `react-joyride` event callback typing
+
 ## [1.4.0] — 2026-05-06
 
 ### Added

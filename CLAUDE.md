@@ -102,13 +102,31 @@ Located in `lib/api/response.ts`:
 - `requireAdmin()` — throws if not admin
 - `getCachedSession()` from `@/lib/auth/session-context` — request-scoped cached session
 
+### otplib v5 (TOTP/2FA)
+- Use named imports: `import { generateSecret, generateURI, verify } from 'otplib'`
+- `verify()` returns `{ valid: boolean }`, NOT a plain boolean
+- `generateURI()` requires lowercase `algorithm: 'sha1'` (not `'SHA1'`)
+- The `authenticator` export does NOT exist in v5
+
+### Prisma JSON Fields
+- Filter JSON nulls with `Prisma.DbNull`, not `null`: `layout: { not: Prisma.DbNull }`
+- Cast JSON values through `unknown`: `classroom.layout as unknown as LayoutData`
+
 ### File Structure
 - `app/staff/_components/` — shared staff portal components
 - `app/staff/actions.ts` — server actions for staff portal
+- `app/staff/classrooms/[id]/_components/FloorPlanDesigner.tsx` — interactive floor plan builder
+- `app/staff/classes/[id]/seating/` — class seating assignment
+- `app/staff/exams/sittings/[id]/seating/` — exam seating assignment
+- `app/student/seating/page.tsx` — student seating view (class + exam)
+- `app/student/classmates/` — classmate directory with 6 filter modes
+- `app/api/auth/2fa/` — 2FA generate/verify/disable endpoints
+- `app/staff/settings/_components/TwoFactorSettings.tsx` — 2FA setup UI
+- `components/Tour/AppTour.tsx` — role-specific welcome tour (react-joyride)
 - `lib/cached-queries.ts` — cached reference data queries
 - `lib/settings.ts` — system settings with caching
 - `components/shared/DashboardSkeleton.tsx` — skeleton components for loading states
 
 ## Testing After Changes
 Run `npx tsc --noEmit` to verify no type errors were introduced.
-Pre-existing errors in `dashboard/page.tsx` and `AppTour.tsx` are known.
+Pre-existing error in `dashboard/page.tsx` is known. AppTour.tsx errors are resolved (v1.5.0).

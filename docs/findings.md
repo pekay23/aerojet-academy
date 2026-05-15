@@ -102,9 +102,39 @@
 
 ---
 
+## Two-Factor Authentication & Seating (Session 2026-05-13)
+
+### 2FA Implementation (DONE)
+- [x] TOTP-based 2FA for staff accounts via `otplib` v5
+- [x] Login flow intercepts `2FA_REQUIRED` error to show TOTP input
+- [x] Settings → Security tab with QR setup, verify, and disable flows
+- [x] **otplib v5 migration** — Package upgraded from v4 to v5, completely new API (see Key Lessons #5)
+
+### Interactive Floor Plan Designer (DONE)
+- [x] CSS grid-based classroom layout builder with DESK/AISLE/OBSTACLE paint tools
+- [x] Auto-label generation (A1, A2, B1…) for desk cells
+- [x] Layout save syncs `Seat` records in transaction (delete all + recreate)
+- [x] Exam seating: drag-and-drop student→seat assignment stored on `ExamSittingAssignment.seatId`
+- [x] Class seating: assignments stored as JSON in SystemSettings (`class_seating_{classId}`)
+- [x] Student seating view: aggregates class + exam seats with mini floor plan visualizations
+
+### Enhanced Classmates Directory (DONE)
+- [x] 6 filter modes: batch, classmates, year, semester, pathway, class
+- [x] Client-side filter component with `useTransition` for pending state
+- [x] Semester badge added to peer profile cards
+
+### Welcome Tour Enhancements (DONE)
+- [x] Role-specific `react-joyride` tours: 12 student steps, 10 staff steps, 5 applicant steps
+- [x] Covers all sidebar features with JSX content blocks
+
+---
+
 ## Key Lessons Learned
 
 1. **Never switch database adapters without Vercel testing** — `@prisma/adapter-neon` + `ws` works locally but fails in Vercel serverless. Stick with `@prisma/adapter-pg` for production.
 2. **`force-dynamic` on public pages** — Required when pages call DB functions (like `getRegistrationFeeInfo`), otherwise Next.js tries to query the DB at build time.
 3. **Promotion logic must be centralized** — 5 copies of applicant-to-student promotion across different routes is a maintenance hazard. Now consolidated to 2 helpers in `lib/enrollment/pathway.ts`.
 4. **Payment splits should be admin-editable** — Business rules like 40/30/30 splits belong in SystemSettings, not hardcoded. Pattern established in `lib/pools/pricing-config.ts` already existed.
+5. **otplib v5 has a completely different API** — The `authenticator` export was removed. Use named imports: `generateSecret`, `generateURI`, `verify`. The `verify()` function returns `{ valid: boolean }` (not a plain boolean). The `generateURI()` function requires lowercase `algorithm: 'sha1'` (not `'SHA1'`).
+6. **Prisma JSON null filtering** — Use `Prisma.DbNull` (not `null`) when filtering JSON fields: `layout: { not: Prisma.DbNull }`.
+7. **Class seating without schema changes** — Storing assignments as JSON in SystemSettings (`class_seating_{classId}` keys) avoids migrations when the relationship is ephemeral and doesn't need referential integrity.

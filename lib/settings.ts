@@ -126,3 +126,69 @@ export async function getEmailConfig() {
     rootDomain: 'aerojet-academy.com', // Base domain for the academy
   }
 }
+
+export async function getAptitudeConfig() {
+  const settings = await getSystemSettings([
+    'aptitude_time_limit_minutes',
+    'aptitude_pass_threshold_pct',
+    'aptitude_math_count',
+    'aptitude_english_count',
+    'aptitude_engineering_count',
+    'aptitude_reasoning_count',
+    'aptitude_physics_count',
+    'aptitude_max_tab_switches',
+    'aptitude_require_for_modular',
+    'aptitude_shuffle_questions',
+    'aptitude_shuffle_options',
+  ])
+
+  return {
+    aptitude_time_limit_minutes: Number(settings.get('aptitude_time_limit_minutes') ?? 60),
+    aptitude_pass_threshold_pct: Number(settings.get('aptitude_pass_threshold_pct') ?? 50),
+    aptitude_math_count: Number(settings.get('aptitude_math_count') ?? 10),
+    aptitude_english_count: Number(settings.get('aptitude_english_count') ?? 10),
+    aptitude_engineering_count: Number(settings.get('aptitude_engineering_count') ?? 5),
+    aptitude_reasoning_count: Number(settings.get('aptitude_reasoning_count') ?? 5),
+    aptitude_physics_count: Number(settings.get('aptitude_physics_count') ?? 0),
+    aptitude_max_tab_switches: Number(settings.get('aptitude_max_tab_switches') ?? 3),
+    aptitude_require_for_modular: (settings.get('aptitude_require_for_modular') ?? 'false') === 'true',
+    aptitude_shuffle_questions: (settings.get('aptitude_shuffle_questions') ?? 'true') === 'true',
+    aptitude_shuffle_options: (settings.get('aptitude_shuffle_options') ?? 'true') === 'true',
+  }
+}
+
+export async function getShortlistConfig() {
+  const settings = await getSystemSettings([
+    'shortlist_aptitude_weight',
+    'shortlist_profile_weight',
+    'shortlist_referral_weight',
+    'shortlist_experience_weight',
+    'shortlist_auto_threshold',
+    'shortlist_auto_reject_threshold',
+  ])
+
+  return {
+    shortlist_aptitude_weight: Number(settings.get('shortlist_aptitude_weight') ?? 60),
+    shortlist_profile_weight: Number(settings.get('shortlist_profile_weight') ?? 20),
+    shortlist_referral_weight: Number(settings.get('shortlist_referral_weight') ?? 10),
+    shortlist_experience_weight: Number(settings.get('shortlist_experience_weight') ?? 10),
+    shortlist_auto_threshold: Number(settings.get('shortlist_auto_threshold') ?? 70),
+    shortlist_auto_reject_threshold: Number(settings.get('shortlist_auto_reject_threshold') ?? 30),
+  }
+}
+
+export async function getInterviewConfig() {
+  const settings = await getSystemSettings([
+    'interview_max_reschedules',
+    'interview_reschedule_cutoff_hours',
+    'interview_duration_minutes',
+    'interview_daily_capacity',
+  ])
+
+  return {
+    interview_max_reschedules: Number(settings.get('interview_max_reschedules') ?? 2),
+    interview_reschedule_cutoff_hours: Number(settings.get('interview_reschedule_cutoff_hours') ?? 24),
+    interview_duration_minutes: Number(settings.get('interview_duration_minutes') ?? 60),
+    interview_daily_capacity: Number(settings.get('interview_daily_capacity') ?? 10),
+  }
+}

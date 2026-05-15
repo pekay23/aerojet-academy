@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn, getSession } from 'next-auth/react'
 import Link from 'next/link'
-import { Eye, EyeOff, Loader2, Mail, Lock } from 'lucide-react'
+import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck } from 'lucide-react'
 
 export default function LoginForm() {
   const router = useRouter()
@@ -13,10 +13,12 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState('')
+  const [needs2FA, setNeeds2FA] = useState(false)
+  const [totpCode, setTotpCode] = useState('')
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     startTransition(async () => {
       setError('')
       try {
@@ -24,6 +26,7 @@ export default function LoginForm() {
           redirect: false,
           email: email.trim().toLowerCase(),
           password,
+          totpCode: needs2FA ? totpCode : undefined,
         })
 
         if (!result) {
@@ -31,6 +34,15 @@ export default function LoginForm() {
         }
 
         if (result.error) {
+          // Check if the error indicates 2FA is required
+          if (result.error.includes('2FA_REQUIRED')) {
+            setNeeds2FA(true)
+            setTotpCode('')
+            return
+          }
+          if (needs2FA && result.error.includes('Invalid 2FA code')) {
+            throw new Error('Invalid verification code. Please try again.')
+          }
           throw new Error('Invalid email or password.')
         }
 
@@ -126,6 +138,38 @@ export default function LoginForm() {
           </button>
         </div>
       </div>
+
+      {/* 2FA Code */}
+      {needs2FA && (
+        <div>
+          <label
+            htmlFor="totpCode"
+            className="mb-2 block text-xs font-bold tracking-widest text-slate-500 uppercase dark:text-slate-400"
+          >
+            Verification Code
+          </label>
+          <p className="mb-3 text-xs text-slate-400 dark:text-slate-500">
+            Enter the 6-digit code from your authenticator app.
+          </p>
+          <div className="relative">
+            <ShieldCheck className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <input
+              id="totpCode"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              maxLength={6}
+              value={totpCode}
+              onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="000000"
+              required
+              autoFocus
+              autoComplete="one-time-code"
+              className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-center text-lg font-mono tracking-[0.3em] text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Submit */}
       <button
