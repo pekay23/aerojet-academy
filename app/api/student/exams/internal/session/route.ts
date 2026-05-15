@@ -63,6 +63,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
       totalPoints: examSession.totalPoints,
       percentage: examSession.percentage,
       passed: examSession.passed,
+      categoryCode: examSession.categoryCode,
     })
   }
 
@@ -93,6 +94,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
     resumed: true,
     totalTimeSecs,
     expiresAt: examSession.expiresAt?.toISOString(),
+    categoryCode: examSession.categoryCode,
     rules: {
       timePerQuestionSecs: rules.timePerQuestionSecs,
       passMarkPct: rules.passMarkPct,

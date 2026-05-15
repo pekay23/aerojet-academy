@@ -50,5 +50,5 @@ export const ROLES = [
   { value: 'APPLICANT', label: 'Applicant' },
 ] as const
 
-export const B1_MODULES = ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M15','M16','M17'] as const
-export const B2_MODULES = ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M13','M14'] as const
+export const B1_MODULES = ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11A','M11B','M12','M15','M16','M17'] as const
+export const B2_MODULES = ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M13','M14'] as const

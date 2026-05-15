@@ -18,6 +18,7 @@ interface BankProgress {
   bankId: string
   bankName: string
   moduleCode: string | null
+  categoryCode: string | null
   courseName: string
   courseCode: string
   attempted: boolean
@@ -39,6 +40,7 @@ interface ProgressData {
     nationality: string | null
     enrollmentType: string | null
     programmeChoice: string | null
+    targetCategories: string[]
   }
   bankProgress: BankProgress[]
   completionWindow: {
@@ -60,6 +62,7 @@ export default function InternalExamDashboard() {
   const [showLobby, setShowLobby] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [confirmedDetails, setConfirmedDetails] = useState<Record<string, boolean>>({})
+  const [selectedCategories, setSelectedCategories] = useState<Record<string, string>>({})
 
   const fetchProgress = useCallback(async () => {
     setError(null)
@@ -87,13 +90,20 @@ export default function InternalExamDashboard() {
   }, [data?.bankProgress, searchParams])
 
   const handleStartExam = async (bankId: string) => {
+    const bank = data?.bankProgress.find((item) => item.bankId === bankId)
+    const categoryCode = bank?.categoryCode || selectedCategories[bankId] || ''
+    if (bank && !bank.categoryCode && data?.studentDetails.targetCategories.length && !categoryCode) {
+      setError('Select the licence category for this internal exam attempt.')
+      return
+    }
+
     setStarting(bankId)
     setError(null)
     try {
       const res = await fetch('/api/student/exams/internal/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bankId }),
+        body: JSON.stringify({ bankId, categoryCode: categoryCode || undefined }),
       })
       const json = await res.json()
       if (json.success && json.data) {
@@ -212,6 +222,7 @@ export default function InternalExamDashboard() {
                     <h3 className="truncate font-bold text-slate-900 dark:text-white">{bank.bankName}</h3>
                     <p className="text-xs text-slate-500">
                       {bank.courseCode} - {bank.moduleCode || 'Module'} - {bank.totalAttempts} attempt{bank.totalAttempts !== 1 ? 's' : ''}
+                      {bank.categoryCode && ` - Cat ${bank.categoryCode}`}
                       {bank.bestScore > 0 && ` - Best: ${bank.bestScore}%`}
                     </p>
                   </div>
@@ -266,6 +277,7 @@ export default function InternalExamDashboard() {
                           <div><dt className="font-bold text-slate-400">Date of Birth</dt><dd>{formatOptionalDate(data.studentDetails.dateOfBirth)}</dd></div>
                           <div><dt className="font-bold text-slate-400">Phone</dt><dd>{data.studentDetails.phone || 'Not recorded'}</dd></div>
                           <div><dt className="font-bold text-slate-400">Programme</dt><dd>{data.studentDetails.programmeChoice || data.studentDetails.enrollmentType || 'Not recorded'}</dd></div>
+                          <div><dt className="font-bold text-slate-400">Licence Target</dt><dd>{bank.categoryCode || selectedCategories[bank.bankId] || data.studentDetails.targetCategories.join(', ') || 'Not recorded'}</dd></div>
                         </dl>
                       </div>
                       <label className="flex max-w-sm items-start gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs font-medium text-slate-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
@@ -279,6 +291,23 @@ export default function InternalExamDashboard() {
                       </label>
                     </div>
                   </div>
+                  {!bank.categoryCode && data.studentDetails.targetCategories.length > 0 && (
+                    <div className="mb-4 rounded-lg border border-slate-200 bg-white p-4 dark:border-slate-700 dark:bg-slate-900">
+                      <label className="mb-2 block text-xs font-bold uppercase tracking-widest text-slate-400">
+                        Licence Category for This Attempt
+                      </label>
+                      <select
+                        value={selectedCategories[bank.bankId] || ''}
+                        onChange={(event) => setSelectedCategories(prev => ({ ...prev, [bank.bankId]: event.target.value }))}
+                        className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+                      >
+                        <option value="">Select category</option>
+                        {data.studentDetails.targetCategories.map((category) => (
+                          <option key={category} value={category}>Category {category}</option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                   <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/10">
                     <div className="flex items-start gap-3">
                       <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
@@ -310,7 +339,11 @@ export default function InternalExamDashboard() {
                       </button>
                       <button
                         onClick={() => handleStartExam(bank.bankId)}
-                        disabled={starting === bank.bankId || !confirmedDetails[bank.bankId]}
+                        disabled={
+                          starting === bank.bankId ||
+                          !confirmedDetails[bank.bankId] ||
+                          (!bank.categoryCode && data.studentDetails.targetCategories.length > 0 && !selectedCategories[bank.bankId])
+                        }
                         className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-6 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50"
                       >
                         {starting === bank.bankId ? (

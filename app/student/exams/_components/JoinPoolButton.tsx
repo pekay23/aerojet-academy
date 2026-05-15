@@ -10,6 +10,10 @@ interface ExamComponent {
   id: string
   code: string
   name: string
+  categoryCode?: string | null
+  questionCount?: number | null
+  courseCode?: string
+  courseName?: string
 }
 
 interface JoinPoolButtonProps {
@@ -46,7 +50,7 @@ export default function JoinPoolButton({
   // Determine which modules are available for selection
   const availableModules = examComponents.filter((m) => {
     // If this module is already in the pool, always allow it (not adding a new slot)
-    if (currentModules.includes(m.code)) return true
+    if (currentModules.includes(m.courseCode || m.code)) return true
     // If the pool's module cap is full, only allow existing modules
     if (atModuleCap) return false
     return true
@@ -184,8 +188,9 @@ export default function JoinPoolButton({
                     <option value="">— Choose a module —</option>
                     {availableModules.map((m) => (
                       <option key={m.code} value={m.code}>
-                        {m.code} — {m.name}
-                        {currentModules.includes(m.code) ? ' (Already in pool)' : ''}
+                        {m.courseCode ? `${m.courseCode} - ` : ''}{m.code} - {m.name}
+                        {m.categoryCode ? ` - Cat ${m.categoryCode}` : ''}
+                        {currentModules.includes(m.courseCode || m.code) ? ' (Already in pool)' : ''}
                       </option>
                     ))}
                   </select>

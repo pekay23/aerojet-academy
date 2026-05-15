@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { toast } from 'sonner'
 import {
   Stethoscope,
   Upload,
@@ -16,7 +17,7 @@ interface MedicalDoc {
   id: string
   status: string
   documentType: { name: string }
-  fileUpload: { url: string; fileName: string }
+  fileUpload: { url: string; filename: string }
 }
 
 interface MedicalData {
@@ -58,12 +59,13 @@ export default function MedicalPage() {
       })
       const json = await res.json()
       if (json.success) {
+        toast.success('Medical documents submitted for review')
         fetchData()
       } else {
-        alert(json.error || 'Failed to submit')
+        toast.error(json.error || 'Failed to submit')
       }
     } catch {
-      alert('An error occurred')
+      toast.error('An error occurred')
     } finally {
       setSubmitting(false)
     }
@@ -197,7 +199,7 @@ export default function MedicalPage() {
                   <FileText className="h-5 w-5 text-aerojet-blue dark:text-aerojet-sky" />
                   <div>
                     <p className="text-sm font-medium text-slate-900 dark:text-white">{doc.documentType.name}</p>
-                    <p className="text-xs text-slate-500">{doc.fileUpload.fileName}</p>
+                    <p className="text-xs text-slate-500">{doc.fileUpload.filename}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">

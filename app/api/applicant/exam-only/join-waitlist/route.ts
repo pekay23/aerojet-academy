@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { joinWaitlist } from '@/lib/pools/waitlist'
+import { categoryMatchesTarget, getStudentTargetCategoryCodes } from '@/lib/easa/category-selection'
 
 export async function POST(req: Request) {
   try {
@@ -19,10 +20,19 @@ export async function POST(req: Request) {
     // Find the exam component ID from the module code
     const component = await prisma.examComponent.findUnique({
       where: { code: moduleCode },
+      select: { id: true, categoryCode: true },
     })
 
     if (!component) {
       return NextResponse.json({ error: 'Invalid module code' }, { status: 400 })
+    }
+
+    const targetCategories = await getStudentTargetCategoryCodes(prisma, session.user.id)
+    if (targetCategories.length > 0 && !categoryMatchesTarget(component.categoryCode, targetCategories)) {
+      return NextResponse.json(
+        { error: 'This module/category is not part of your selected licence pathway.' },
+        { status: 403 }
+      )
     }
 
     const result = await joinWaitlist(poolId, session.user.id, component.id)

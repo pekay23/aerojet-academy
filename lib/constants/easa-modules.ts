@@ -5,10 +5,9 @@ export const EASA_MODULES = [
   { code: 'M4', name: 'Electronic Fundamentals' },
   { code: 'M5', name: 'Digital Techniques / Avionics' },
   { code: 'M6', name: 'Materials & Hardware' },
-  { code: 'M7A', name: 'Maintenance Practices' },
-  { code: 'M7B', name: 'Maintenance Practices (Avionics)' },
+  { code: 'M7', name: 'Maintenance Practices' },
   { code: 'M8', name: 'Basic Aerodynamics' },
-  { code: 'M9A', name: 'Human Factors' },
+  { code: 'M9', name: 'Human Factors' },
   { code: 'M10', name: 'Aviation Legislation' },
   { code: 'M11A', name: 'Turbine Aeroplane Aerodynamics, Structures & Systems' },
   { code: 'M11B', name: 'Piston Aeroplane Aerodynamics, Structures & Systems' },
@@ -18,7 +17,7 @@ export const EASA_MODULES = [
   { code: 'M14', name: 'Propulsion' },
   { code: 'M15', name: 'Gas Turbine Engine' },
   { code: 'M16', name: 'Piston Engine' },
-  { code: 'M17A', name: 'Propeller' },
+  { code: 'M17', name: 'Propeller' },
 ] as const
 
 export type EasaModule = (typeof EASA_MODULES)[number]
