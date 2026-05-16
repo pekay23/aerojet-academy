@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn, getSession } from 'next-auth/react'
 import Link from 'next/link'
@@ -17,6 +17,83 @@ export default function LoginForm() {
   const [needs2FA, setNeeds2FA] = useState(false)
   const [totpCode, setTotpCode] = useState('')
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false)
+  const [supportsConditionalUI, setSupportsConditionalUI] = useState(false)
+
+  // Complete passkey login after browser returns a credential (shared by button + conditional UI)
+  const completePasskeyLogin = useCallback(async (credential: any) => {
+    const verifyRes = await fetch('/api/auth/passkey/login-verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ credential }),
+    })
+
+    if (!verifyRes.ok) {
+      throw new Error(await verifyRes.text() || 'Passkey verification failed')
+    }
+
+    const { token } = await verifyRes.json()
+
+    startTransition(async () => {
+      const result = await signIn('credentials', { redirect: false, token })
+      if (result?.error) {
+        setError(result.error)
+        return
+      }
+      const session = await getSession()
+      const userRole = session?.user?.role
+      if (userRole === 'STUDENT' || userRole === 'APPLICANT') {
+        router.push('/student')
+      } else {
+        router.push('/staff')
+      }
+      router.refresh()
+    })
+  }, [router])
+
+  // Conditional UI: automatically prompt passkey when email field is focused (if browser supports it)
+  useEffect(() => {
+    let aborted = false
+
+    async function initConditionalUI() {
+      if (
+        typeof window === 'undefined' ||
+        !window.PublicKeyCredential ||
+        !PublicKeyCredential.isConditionalMediationAvailable
+      ) {
+        return
+      }
+
+      const available = await PublicKeyCredential.isConditionalMediationAvailable()
+      if (!available || aborted) return
+
+      setSupportsConditionalUI(true)
+
+      try {
+        // Get authentication options (discoverable credential flow)
+        const optionsRes = await fetch('/api/auth/passkey/login-options', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({}),
+        })
+        if (!optionsRes.ok || aborted) return
+        const { options } = await optionsRes.json()
+
+        // Start conditional mediation — browser shows passkey in autofill dropdown
+        const credential = await startAuthentication({ optionsJSON: options, useBrowserAutofill: true })
+        if (aborted) return
+
+        await completePasskeyLogin(credential)
+      } catch (err: any) {
+        // AbortError is normal when user navigates away or uses password instead
+        if (err.name !== 'AbortError' && !aborted) {
+          console.debug('[ConditionalUI]', err.message)
+        }
+      }
+    }
+
+    initConditionalUI()
+    return () => { aborted = true }
+  }, [completePasskeyLogin])
 
   const handlePasskeyLogin = async () => {
     try {
@@ -29,7 +106,7 @@ export default function LoginForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim() || undefined }),
       })
-      
+
       if (!optionsRes.ok) {
         throw new Error('Failed to initiate passkey login')
       }
@@ -46,41 +123,8 @@ export default function LoginForm() {
         throw err
       }
 
-      // 3. Verify and get one-time token
-      const verifyRes = await fetch('/api/auth/passkey/login-verify', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ credential }),
-      })
-
-      if (!verifyRes.ok) {
-        throw new Error(await verifyRes.text() || 'Passkey verification failed')
-      }
-
-      const { token } = await verifyRes.json()
-
-      // 4. Sign in to NextAuth using the token
-      startTransition(async () => {
-        const result = await signIn('credentials', {
-          redirect: false,
-          token,
-        })
-
-        if (result?.error) {
-          setError(result.error)
-          return
-        }
-
-        const session = await getSession()
-        const userRole = session?.user?.role
-
-        if (userRole === 'STUDENT' || userRole === 'APPLICANT') {
-          router.push('/student')
-        } else {
-          router.push('/staff')
-        }
-        router.refresh()
-      })
+      // 3. Verify and complete login
+      await completePasskeyLogin(credential)
     } catch (err: any) {
       console.error(err)
       setError(err.message || 'An error occurred during passkey login')
@@ -165,7 +209,7 @@ export default function LoginForm() {
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
             required
-            autoComplete="email"
+            autoComplete={supportsConditionalUI ? 'username webauthn' : 'email'}
             autoCapitalize="none"
             autoCorrect="off"
             spellCheck="false"

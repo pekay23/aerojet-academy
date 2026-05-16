@@ -1,12 +1,13 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { User, Settings, Lock } from 'lucide-react'
+import { User, Settings, Lock, Shield } from 'lucide-react'
 import MotionTabs from '@/components/ui/MotionTabs'
 
 const TABS = [
   { key: 'info', label: 'Personal Info', icon: User },
   { key: 'settings', label: 'Settings', icon: Settings },
+  { key: 'security', label: 'Security', icon: Shield },
   { key: 'password', label: 'Password', icon: Lock },
 ]
 
