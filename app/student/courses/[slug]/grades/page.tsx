@@ -9,9 +9,9 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">Course Grades</h1>
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">Course Grades</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Your grades for this course.</p>
       </div>
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 p-8 sm:p-12 text-center">

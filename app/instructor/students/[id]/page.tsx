@@ -32,7 +32,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const studentProfile = student.studentProfile
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 pb-20">
+    <div className="mx-auto max-w-5xl space-y-8 pb-20 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Back Link */}
       <Link
         href="/instructor/students"
@@ -58,7 +58,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
 
           <div className="flex-1 space-y-2">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+              <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
                 {profile?.firstName} {profile?.lastName}
               </h1>
               <Badge

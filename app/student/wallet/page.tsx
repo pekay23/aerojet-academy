@@ -62,6 +62,7 @@ export default async function WalletPage({
     prisma.payment.findMany({
       where: { userId: user.id, referenceType: 'WALLET_TOPUP', status: 'PENDING' },
       orderBy: { createdAt: 'desc' },
+      take: 50,
     }),
     prisma.fullTimeEnrollment.findFirst({
       where: { studentId: user.id },
@@ -73,6 +74,7 @@ export default async function WalletPage({
     prisma.examBundle.findMany({
       where: { userId: user.id, status: 'ACTIVE' },
       orderBy: { createdAt: 'desc' },
+      take: 50,
     }),
     prisma.payment.findMany({
       where: {
@@ -81,6 +83,7 @@ export default async function WalletPage({
         status: 'PENDING'
       },
       orderBy: { createdAt: 'desc' },
+      take: 50,
     }),
   ])
 

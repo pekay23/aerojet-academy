@@ -28,7 +28,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   })
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
         <Link
           href="/instructor/classes"
@@ -37,7 +37,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Classes
         </Link>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           Class Grades
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

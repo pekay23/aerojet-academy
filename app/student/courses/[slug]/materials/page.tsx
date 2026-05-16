@@ -82,7 +82,7 @@ export default async function MaterialsPage({ params }: PageProps) {
   const allowClasses = canAccessClasses(enrollmentType)
 
   return (
-    <div className="mx-auto max-w-5xl space-y-10">
+    <div className="mx-auto max-w-5xl space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div className="space-y-4">
         <Link

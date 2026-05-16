@@ -430,7 +430,7 @@ export default async function StudentDashboard() {
   const licenseList = profile.licenseTargets.map((t) => t.licenseCategory.code).join(' & ')
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <WelcomeBanner messages={welcomeMessages} userName={session.user.name?.split(' ')[0]} />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">

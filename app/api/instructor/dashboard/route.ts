@@ -13,7 +13,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   if (!instructorProfile) return apiForbidden('Instructor profile not found')
   const instructorId = instructorProfile.id
 
-  const [classes, upcomingClasses, totalStudents] = await Promise.all([
+  const [classes, upcomingClasses, totalStudents, recentAttendance] = await Promise.all([
     prisma.class.findMany({
       where: { instructorId },
       include: {
@@ -33,13 +33,12 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       select: { userId: true },
       distinct: ['userId'],
     }),
+    prisma.attendanceRecord.findMany({
+      where: { class: { instructorId } },
+      orderBy: { date: 'desc' },
+      take: 100,
+    }),
   ])
-
-  const recentAttendance = await prisma.attendanceRecord.findMany({
-    where: { class: { instructorId } },
-    orderBy: { date: 'desc' },
-    take: 100,
-  })
 
   const attendanceRate =
     recentAttendance.length > 0

@@ -23,11 +23,12 @@ export default async function StudentAcademicCalendarPage() {
     adminEvents,
     sittingAssignments,
   ] = await Promise.all([
-    prisma.studentCalendarEvent.findMany({ where: { userId }, orderBy: { startDate: 'asc' } }),
-    prisma.examBooking.findMany({ where: { userId, deletedAt: null } }),
+    prisma.studentCalendarEvent.findMany({ where: { userId }, orderBy: { startDate: 'asc' }, take: 200 }),
+    prisma.examBooking.findMany({ where: { userId, deletedAt: null }, take: 100 }),
     prisma.enrollment.findMany({
       where: { userId, status: { in: ['ACTIVE', 'APPROVED', 'ENROLLED'] } },
       include: { course: { include: { classes: true } } },
+      take: 50,
     }),
     prismaUnfiltered.adminCalendarEvent.findMany({
       where: {
@@ -37,6 +38,7 @@ export default async function StudentAcademicCalendarPage() {
           { visibleTo: 'SPECIFIC_USER', targetUserId: userId },
         ]
       },
+      take: 200,
     }),
     prisma.examSittingAssignment.findMany({
       where: { userId, status: { not: 'CANCELLED' } },
@@ -48,6 +50,7 @@ export default async function StudentAcademicCalendarPage() {
           },
         },
       },
+      take: 200,
     }),
   ])
 
@@ -130,12 +133,12 @@ export default async function StudentAcademicCalendarPage() {
   }
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-8">
+    <div className="mx-auto max-w-[1400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white uppercase">
           Academic Calendar
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
           Plan your studies with high-fidelity Week & Month schedules.
         </p>
       </div>

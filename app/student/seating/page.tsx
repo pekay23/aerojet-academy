@@ -24,30 +24,57 @@ export default async function StudentSeatingPage() {
 
   const userId = session.user.id
 
-  // 1. Get class seating — find classes this student attends that have classrooms with layouts
-  const myClasses = await prismaUnfiltered.attendanceRecord.findMany({
-    where: { userId },
-    distinct: ['classId'],
-    select: {
-      classId: true,
-      class: {
-        include: {
-          course: { select: { code: true, name: true } },
-          classroom: {
-            include: {
-              seats: { orderBy: [{ row: 'asc' }, { col: 'asc' }] },
+  // 1. Fetch class attendance and exam assignments in parallel
+  const [myClasses, examAssignments] = await Promise.all([
+    prismaUnfiltered.attendanceRecord.findMany({
+      where: { userId },
+      distinct: ['classId'],
+      select: {
+        classId: true,
+        class: {
+          include: {
+            course: { select: { code: true, name: true } },
+            classroom: {
+              include: {
+                seats: { orderBy: [{ row: 'asc' }, { col: 'asc' }] },
+              },
             },
           },
         },
       },
-    },
-  })
+    }),
+    prismaUnfiltered.examSittingAssignment.findMany({
+      where: {
+        userId,
+        seatId: { not: null },
+      },
+      take: 50,
+      include: {
+        seat: {
+          include: {
+            classroom: {
+              include: {
+                seats: { orderBy: [{ row: 'asc' }, { col: 'asc' }] },
+              },
+            },
+          },
+        },
+        sitting: {
+          include: {
+            examComponent: {
+              select: { code: true, name: true, course: { select: { code: true } } },
+            },
+            event: { select: { name: true } },
+          },
+        },
+      },
+    }),
+  ])
 
-  // Load class seating assignments from system settings
+  // Load class seating assignments from system settings (depends on myClasses)
   const classesWithLayout = myClasses.filter(
     (c) => c.class.classroom?.layout
   )
-
   const classSeatingKeys = classesWithLayout.map(
     (c) => `class_seating_${c.classId}`
   )
@@ -57,39 +84,11 @@ export default async function StudentSeatingPage() {
           where: { key: { in: classSeatingKeys } },
         })
       : []
-
   const classSeatingMap: Record<string, Record<string, string>> = {}
   for (const s of classSeatingSettings) {
     const classId = s.key.replace('class_seating_', '')
     classSeatingMap[classId] = JSON.parse(s.value)
   }
-
-  // 2. Get exam seating — find sitting assignments with seats
-  const examAssignments = await prismaUnfiltered.examSittingAssignment.findMany({
-    where: {
-      userId,
-      seatId: { not: null },
-    },
-    include: {
-      seat: {
-        include: {
-          classroom: {
-            include: {
-              seats: { orderBy: [{ row: 'asc' }, { col: 'asc' }] },
-            },
-          },
-        },
-      },
-      sitting: {
-        include: {
-          examComponent: {
-            select: { code: true, name: true, course: { select: { code: true } } },
-          },
-          event: { select: { name: true } },
-        },
-      },
-    },
-  })
 
   // Build class seat info
   type ClassSeatInfo = {

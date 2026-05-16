@@ -5,6 +5,7 @@ import { prismaBase as prisma } from '@/lib/prisma/db-base'
 import { verifyPassword } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 import { UserStatus } from '@prisma/client'
+import { verifyTOTP } from '@/lib/auth/totp'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -32,6 +33,18 @@ export const authOptions: NextAuthOptions = {
 
           if (user.verifyTokenExpires && user.verifyTokenExpires < new Date()) {
             throw new Error('Verification link has expired')
+          }
+
+          // If user has 2FA enabled, require TOTP even for token-based login
+          // (Unless the token is a passkey token 'pk_', which already proved possession and biometric)
+          if (user.twoFactorEnabled && user.twoFactorSecret && !credentials.token.startsWith('pk_')) {
+            const totpCode = credentials.totpCode
+            if (!totpCode || totpCode === 'undefined' || totpCode === '') {
+              throw new Error('2FA_REQUIRED')
+            }
+            if (!verifyTOTP(totpCode, user.twoFactorSecret)) {
+              throw new Error('Invalid 2FA code')
+            }
           }
 
           // Mark as verified and clear token
@@ -119,16 +132,11 @@ export const authOptions: NextAuthOptions = {
 
         // 2FA Check
         if (user.twoFactorEnabled && user.twoFactorSecret) {
-          if (!credentials.totpCode) {
-            // This specific error string will be caught by the frontend
+          const totpCode = credentials.totpCode
+          if (!totpCode || totpCode === 'undefined' || totpCode === '') {
             throw new Error('2FA_REQUIRED')
           }
-          const { verify: verifyTotp } = await import('otplib')
-          const result = await verifyTotp({
-            token: credentials.totpCode,
-            secret: user.twoFactorSecret,
-          })
-          if (!result.valid) {
+          if (!verifyTOTP(totpCode, user.twoFactorSecret)) {
             throw new Error('Invalid 2FA code')
           }
         }
@@ -166,7 +174,6 @@ export const authOptions: NextAuthOptions = {
           mustChangePassword: user.mustChangePassword && !user.passwordChanged,
         }
       } catch (error: any) {
-
         throw error
       }
     },

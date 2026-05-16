@@ -529,10 +529,10 @@ export default function ExamOnlyPathwayPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           Exam Only Pathway
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

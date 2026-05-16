@@ -54,21 +54,31 @@ export default async function CourseDetailsPage({ params }: Props) {
 
   if (!course) notFound()
 
-  const applicantState = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      programmeChoice: true,
-      studentProfile: {
-        select: {
-          enrollmentType: true,
-          pathwayRel: { select: { code: true } },
-          licenseTargets: {
-            include: { licenseCategory: true },
+  const [applicantState, examComponents, wallet] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        programmeChoice: true,
+        studentProfile: {
+          select: {
+            enrollmentType: true,
+            pathwayRel: { select: { code: true } },
+            licenseTargets: {
+              include: { licenseCategory: true },
+            },
           },
         },
       },
-    },
-  })
+    }),
+    prisma.examComponent.findMany({
+      where: { courseId: targetId },
+      orderBy: { code: 'asc' },
+    }),
+    prisma.wallet.findUnique({
+      where: { userId },
+      select: { availableBalance: true },
+    }),
+  ])
 
   const studentProfile = applicantState?.studentProfile
   const effectiveEnrollmentType = resolveEffectiveEnrollmentType({
@@ -77,16 +87,6 @@ export default async function CourseDetailsPage({ params }: Props) {
     programmeChoice: applicantState?.programmeChoice,
   })
   const isExamOnly = effectiveEnrollmentType === 'EXAM_ONLY'
-
-  const examComponents = await prisma.examComponent.findMany({
-    where: { courseId: targetId },
-    orderBy: { code: 'asc' },
-  })
-
-  const wallet = await prisma.wallet.findUnique({
-    where: { userId },
-    select: { availableBalance: true },
-  })
   const balance = Number(wallet?.availableBalance || 0)
   const lowestPoolPrice =
     examComponents.length > 0
@@ -108,7 +108,7 @@ export default async function CourseDetailsPage({ params }: Props) {
   })
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8">
+    <div className="mx-auto max-w-5xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <Link

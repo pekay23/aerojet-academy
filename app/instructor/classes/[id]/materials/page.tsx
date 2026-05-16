@@ -37,7 +37,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const { course } = classData
 
   return (
-    <div className="mx-auto max-w-5xl space-y-10">
+    <div className="mx-auto max-w-5xl space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div className="space-y-4">
         <Link
@@ -48,7 +48,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
           Back to My Classes
         </Link>
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Course Materials
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

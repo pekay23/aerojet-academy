@@ -2,11 +2,12 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { 
-  ShieldCheck, 
-  LayoutDashboard, 
-  Calendar, 
-  FileCheck, 
+import { signOut } from 'next-auth/react'
+import {
+  ShieldCheck,
+  LayoutDashboard,
+  Calendar,
+  FileCheck,
   UserCircle,
   LogOut,
   ChevronLeft
@@ -73,13 +74,13 @@ export default function ExaminerSidebar() {
 
       {/* Footer / Profile */}
       <div className="border-t border-slate-100 p-4 dark:border-slate-800">
-        <Link 
-          href="/logout"
-          className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-950/20"
+        <button
+          onClick={() => signOut({ callbackUrl: `${window.location.origin}/login` })}
+          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold text-slate-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:text-slate-400 dark:hover:bg-red-950/20"
         >
           <LogOut className="h-5 w-5" />
           <span>Logout</span>
-        </Link>
+        </button>
       </div>
     </div>
   )

@@ -51,8 +51,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const results: {
     sent: { userId: string; email: string; name: string }[]
     failed: { userId: string; error: string }[]
-    credentials: { name: string; email: string; academyEmail: string; temporaryPassword: string }[]
-  } = { sent: [], failed: [], credentials: [] }
+  } = { sent: [], failed: [] }
 
   // Batch-fetch all users upfront instead of N+1 queries in the loop
   const allUsers = await prismaUnfiltered.user.findMany({
@@ -131,13 +130,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         name: `${firstName} ${lastName}`.trim(),
       })
 
-      results.credentials.push({
-        name: `${firstName} ${lastName}`.trim(),
-        email: sendToEmail,
-        academyEmail: loginEmail,
-        temporaryPassword: tempPassword,
-      })
-
       await createAuditLog({
         action: 'SYSTEM_UPDATE',
         entity: 'User',
@@ -158,6 +150,5 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     },
     sent: results.sent,
     failed: results.failed,
-    credentials: results.credentials,
   })
 })

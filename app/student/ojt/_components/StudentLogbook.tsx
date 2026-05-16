@@ -232,7 +232,7 @@ export default function StudentLogbook({ data }: { data: LogbookData }) {
                               handleSign(entry.id)
                             }}
                             disabled={signing === entry.id}
-                            className="flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600 hover:bg-blue-100 disabled:opacity-50 dark:bg-blue-900/20 dark:text-blue-400"
+                            className="flex items-center gap-1 rounded-lg bg-blue-50 px-2 py-0.5 text-[10px] font-bold text-blue-600 transition-colors hover:bg-blue-100 disabled:opacity-50 dark:bg-blue-900/20 dark:text-blue-400"
                           >
                             {signing === entry.id ? (
                               <Loader2 className="h-3 w-3 animate-spin" />
