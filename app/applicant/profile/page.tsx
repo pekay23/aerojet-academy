@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import ProfileForm from './_components/ProfileForm'
+import { PasskeySettings } from '@/app/staff/settings/_components/PasskeySettings'
 
 export const metadata: Metadata = { title: 'My Profile | Applicant Portal' }
 export const dynamic = 'force-dynamic'
@@ -69,6 +70,9 @@ export default async function ProfilePage() {
 
       {/* Editable Profile Form */}
       <ProfileForm profile={profile} />
+
+      {/* Security — Passkeys */}
+      <PasskeySettings />
     </div>
   )
 }
