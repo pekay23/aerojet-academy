@@ -15,6 +15,7 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic'
 
 import SettingsForm from './_components/SettingsForm'
+import { PasskeySettings } from '@/app/staff/settings/_components/PasskeySettings'
 
 async function InfoTab() {
   const session = await getAuthSession()
@@ -63,6 +64,14 @@ async function SettingsTab() {
   return <SettingsForm initialSettings={serializedSettings} />
 }
 
+function SecurityTab() {
+  return (
+    <div className="space-y-6">
+      <PasskeySettings />
+    </div>
+  )
+}
+
 function PasswordTab() {
   return (
     <div className="space-y-6">
@@ -89,7 +98,15 @@ export default async function ProfilePage({
 
   return (
     <ProfileTabs>
-      {tab === 'settings' ? <SettingsTab /> : tab === 'password' ? <PasswordTab /> : <InfoTab />}
+      {tab === 'security' ? (
+        <SecurityTab />
+      ) : tab === 'settings' ? (
+        <SettingsTab />
+      ) : tab === 'password' ? (
+        <PasswordTab />
+      ) : (
+        <InfoTab />
+      )}
     </ProfileTabs>
   )
 }

@@ -121,7 +121,10 @@ Located in `lib/api/response.ts`:
 - `app/student/seating/page.tsx` — student seating view (class + exam)
 - `app/student/classmates/` — classmate directory with 6 filter modes
 - `app/api/auth/2fa/` — 2FA generate/verify/disable endpoints
+- `app/api/auth/passkey/` — Passkey (WebAuthn) register/login/manage endpoints
+- `lib/auth/passkey-config.ts` — WebAuthn Relying Party configuration
 - `app/staff/settings/_components/TwoFactorSettings.tsx` — 2FA setup UI
+- `app/staff/settings/_components/PasskeySettings.tsx` — Passkey registration & management UI
 - `components/Tour/AppTour.tsx` — role-specific welcome tour (react-joyride)
 - `lib/cached-queries.ts` — cached reference data queries
 - `lib/settings.ts` — system settings with caching
