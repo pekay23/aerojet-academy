@@ -8,7 +8,7 @@ export default async function Page() {
   const students = await getInstructorStudents()
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           My Students

@@ -25,41 +25,39 @@ export default async function SittingSeatingPage({
 
   const { id: sittingId } = await params
 
-  const sitting = await prismaUnfiltered.examSitting.findUnique({
-    where: { id: sittingId },
-    include: {
-      event: { select: { id: true, name: true } },
-      examComponent: {
-        select: { code: true, name: true, course: { select: { code: true, name: true } } },
-      },
-      assignments: {
-        include: {
-          user: {
-            include: {
-              profile: { select: { firstName: true, lastName: true } },
-            },
-          },
-          seat: true,
+  const [sitting, classroomWithSeats] = await Promise.all([
+    prismaUnfiltered.examSitting.findUnique({
+      where: { id: sittingId },
+      include: {
+        event: { select: { id: true, name: true } },
+        examComponent: {
+          select: { code: true, name: true, course: { select: { code: true, name: true } } },
         },
-        orderBy: { assignedAt: 'asc' },
+        assignments: {
+          include: {
+            user: {
+              include: {
+                profile: { select: { firstName: true, lastName: true } },
+              },
+            },
+            seat: true,
+          },
+          orderBy: { assignedAt: 'asc' },
+        },
       },
-    },
-  })
+    }),
+    prismaUnfiltered.classroom.findFirst({
+      where: {
+        layout: { not: Prisma.DbNull },
+      },
+      include: {
+        seats: { orderBy: [{ row: 'asc' }, { col: 'asc' }] },
+      },
+      orderBy: { name: 'asc' },
+    }),
+  ])
 
   if (!sitting) notFound()
-
-  // Find the classroom — we need to check if any classroom has a layout
-  // The sitting doesn't directly link to a classroom, so we check the event's venue
-  // or allow selecting a classroom
-  const classroomWithSeats = await prismaUnfiltered.classroom.findFirst({
-    where: {
-      layout: { not: Prisma.DbNull },
-    },
-    include: {
-      seats: { orderBy: [{ row: 'asc' }, { col: 'asc' }] },
-    },
-    orderBy: { name: 'asc' },
-  })
 
   const layout = classroomWithSeats?.layout as {
     rows: number

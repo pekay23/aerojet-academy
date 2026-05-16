@@ -13,6 +13,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       },
     },
     orderBy: { createdAt: 'desc' },
+    take: 100,
   })
   return apiSuccess(passedExams)
 })

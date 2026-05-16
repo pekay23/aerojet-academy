@@ -36,18 +36,23 @@ export default async function CoursesPage({
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const portalState = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      programmeChoice: true,
-      studentProfile: {
-        select: {
-          enrollmentType: true,
-          pathwayRel: { select: { code: true } },
+  const [portalState, allCategories] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        programmeChoice: true,
+        studentProfile: {
+          select: {
+            enrollmentType: true,
+            pathwayRel: { select: { code: true } },
+          },
         },
       },
-    },
-  })
+    }),
+    prisma.courseCategory.findMany({
+      orderBy: { name: 'asc' },
+    }),
+  ])
 
   const effectiveEnrollmentType = resolveEffectiveEnrollmentType({
     pathwayCode: portalState?.studentProfile?.pathwayRel?.code,
@@ -58,12 +63,8 @@ export default async function CoursesPage({
   const canEnroll = session.user.status === 'ACTIVE'
   const visibility = getCatalogVisibility(effectiveEnrollmentType)
 
-  const allCategories = await prisma.courseCategory.findMany({
-    orderBy: { name: 'asc' },
-  })
-
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1.5">
           <div className="inline-flex items-center gap-2 rounded-full bg-aerojet-blue/5 px-3 py-1 dark:bg-blue-500/10">

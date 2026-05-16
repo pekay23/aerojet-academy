@@ -74,10 +74,12 @@ export default async function UserProfilePage({ params }: Props) {
           semester: { select: { name: true } },
         },
         orderBy: { createdAt: 'asc' },
+        take: 50,
       },
       examBookings: {
         where: { deletedAt: null },
         orderBy: { examDate: 'asc' },
+        take: 50,
         select: {
           id: true,
           moduleCode: true,

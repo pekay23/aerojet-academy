@@ -61,8 +61,8 @@ export default async function RegistrationFeePage() {
   // Already paid — success state
   if (user.registrationPaid) {
     return (
-      <div className="mx-auto max-w-lg space-y-6">
-        <h1 className="text-2xl font-black text-aerojet-blue dark:text-white">Registration Fee</h1>
+      <div className="mx-auto max-w-lg space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">Registration Fee</h1>
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center dark:border-emerald-800/50 dark:bg-emerald-900/10">
           <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-emerald-500" />
           <h2 className="mb-2 text-lg font-black text-emerald-800 dark:text-emerald-200">

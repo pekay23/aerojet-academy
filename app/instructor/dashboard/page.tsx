@@ -28,7 +28,7 @@ export default async function Page() {
   const firstName = session.user.name?.split(' ')[0]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <Suspense fallback={<div className="h-32 animate-pulse rounded-2xl bg-slate-100" />}>
         <AsyncWelcomeBanner userName={firstName} />
       </Suspense>

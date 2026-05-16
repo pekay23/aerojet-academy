@@ -95,7 +95,7 @@ export default async function CourseDetailsPage({
   const allowClasses = canAccessClasses(enrollmentType)
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Error Message if redirected from gated route */}
       {error === 'payment_required' && (
         <div className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-400">
@@ -123,7 +123,7 @@ export default async function CourseDetailsPage({
               <span className="rounded-lg bg-blue-50 px-2 py-1 text-xs font-black tracking-widest text-blue-600 uppercase">
                 {course.category?.name || 'CORE'}
               </span>
-              <h1 className="mt-3 text-2xl leading-tight font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+              <h1 className="mt-3 text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
                 {course.name}
               </h1>
               <p className="mt-1 text-xs font-black tracking-widest text-aerojet-sky">

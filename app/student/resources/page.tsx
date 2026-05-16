@@ -41,9 +41,9 @@ export default async function StudentResourcesPage() {
     }
 
     return (
-      <div className="mx-auto max-w-[1600px] space-y-8">
+      <div className="mx-auto max-w-[1600px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Resources
           </h1>
           <p className="text-slate-500 dark:text-slate-400">
@@ -63,9 +63,9 @@ export default async function StudentResourcesPage() {
   const resources = await getStudentResources()
 
   return (
-    <div className="mx-auto max-w-[1600px] space-y-8">
+    <div className="mx-auto max-w-[1600px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           Resources
         </h1>
         <p className="text-slate-500 dark:text-slate-400">

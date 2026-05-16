@@ -53,7 +53,7 @@ export default async function SettingsPage({
   const { tab = 'general' } = await searchParams
 
   // Fetch settings values from DB
-  const existingSettings = await prismaUnfiltered.systemSetting.findMany()
+  const existingSettings = await prismaUnfiltered.systemSetting.findMany({ take: 200 })
   const values: Record<string, string> = {}
   for (const s of existingSettings) {
     values[s.key] = s.value
@@ -111,12 +111,19 @@ async function WelcomeMessagesContent() {
   return <WelcomeMessagesManager initialMessages={welcomeMessages} />
 }
 
+import { PasskeySettings } from './_components/PasskeySettings'
+
 async function SecurityContent({ userId }: { userId: string }) {
   const user = await prismaUnfiltered.user.findUnique({
     where: { id: userId },
     select: { twoFactorEnabled: true },
   })
-  return <TwoFactorSettings twoFactorEnabled={user?.twoFactorEnabled ?? false} />
+  return (
+    <div className="space-y-8">
+      <TwoFactorSettings twoFactorEnabled={user?.twoFactorEnabled ?? false} />
+      <PasskeySettings />
+    </div>
+  )
 }
 
 async function CalendarContent() {
@@ -126,13 +133,15 @@ async function CalendarContent() {
       _count: { select: { classes: true } },
     },
     orderBy: { startDate: 'desc' },
+    take: 200,
   })
   return <AcademicCalendarManager initialYears={academicYears} />
 }
 
 async function CustomFieldsContent() {
   const fields = await prismaUnfiltered.customFieldDefinition.findMany({
-    orderBy: [{ appliesTo: 'asc' }, { sortOrder: 'asc' }]
+    orderBy: [{ appliesTo: 'asc' }, { sortOrder: 'asc' }],
+    take: 200,
   })
   return <CustomFieldsManager initialFields={fields} />
 }

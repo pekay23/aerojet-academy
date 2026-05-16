@@ -96,7 +96,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-3xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div>
         <Link
@@ -108,7 +108,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
         </Link>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+            <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
               Booking: {moduleCode}
             </h1>
             {moduleName && (

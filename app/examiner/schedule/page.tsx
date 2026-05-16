@@ -56,12 +56,12 @@ export default async function ExaminerSchedulePage({
   ]
 
   return (
-    <div className="mx-auto max-w-[1400px] space-y-8">
+    <div className="mx-auto max-w-[1400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white uppercase">
           Invigilation Schedule
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
           Manage your exam sittings and logistical timeline.
         </p>
       </div>

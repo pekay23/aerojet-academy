@@ -91,13 +91,13 @@ export default async function StudentRevisionPage() {
   }))
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white uppercase">
             Revision Support
           </h1>
-          <p className="text-slate-500 dark:text-slate-400">Extra module support and intensive revision sessions</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Extra module support and intensive revision sessions</p>
         </div>
         <div className="flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">

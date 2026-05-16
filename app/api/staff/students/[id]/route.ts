@@ -16,7 +16,8 @@ export const GET = withErrorHandler(
     const { searchParams } = new URL(req.url)
     const full = searchParams.get('full') === '1'
 
-    const student = await prismaUnfiltered.user.findUnique({
+    const [student, ftEnrollmentsRaw] = await Promise.all([
+      prismaUnfiltered.user.findUnique({
       where: { id, role: 'STUDENT' },
       include: {
         profile: true,
@@ -87,22 +88,25 @@ export const GET = withErrorHandler(
           orderBy: { createdAt: 'desc' },
         },
       },
-    })
+      }),
+      full
+        ? prismaUnfiltered.fullTimeEnrollment.findMany({
+            where: { studentId: id },
+            include: {
+              programme: { select: { code: true, name: true } },
+              ojtPeriods: { orderBy: { startDate: 'desc' } },
+              milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
+            },
+          })
+        : Promise.resolve([]),
+    ])
 
     if (!student) return apiNotFound('Student not found')
 
-    // If full mode, also fetch full-time enrollment / OJT data
+    // If full mode, format full-time enrollment / OJT data
     let fullTimeData = null
-    if (full) {
-      const ftEnrollments = await prismaUnfiltered.fullTimeEnrollment.findMany({
-        where: { studentId: id },
-        include: {
-          programme: { select: { code: true, name: true } },
-          ojtPeriods: { orderBy: { startDate: 'desc' } },
-          milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
-        },
-      })
-      fullTimeData = ftEnrollments.map((e) => {
+    if (full && ftEnrollmentsRaw.length > 0) {
+      fullTimeData = ftEnrollmentsRaw.map((e) => {
         const { programme, ojtPeriods, milestones, ...rest } = e
         return {
           ...rest,

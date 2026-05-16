@@ -161,7 +161,7 @@ export default async function EnrollPage({
   )
 
   return (
-    <div className="relative min-h-screen space-y-8 pb-16">
+    <div className="relative min-h-screen space-y-8 pb-16 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-72 bg-linear-to-b from-sky-100/60 via-white to-transparent dark:from-slate-900 dark:via-slate-950 dark:to-transparent" />
       <div className="pointer-events-none absolute -top-20 right-0 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
       <div className="pointer-events-none absolute top-52 -left-10 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />

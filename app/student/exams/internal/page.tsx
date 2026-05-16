@@ -13,12 +13,12 @@ export default async function StudentInternalExamsPage() {
   if (!(await isInternalExamSystemEnabled())) redirect('/student/exams?tab=records')
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           Module Examinations
         </h1>
-        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
           EASA Part-66 module exams. 75% pass mark required. 3 attempts allowed per module.
         </p>
       </div>

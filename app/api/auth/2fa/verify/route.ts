@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/auth-options'
 import { prismaBase as prisma } from '@/lib/prisma/db-base'
-import { verify as verifyTotp } from 'otplib'
+import { verifyTOTP } from '@/lib/auth/totp'
 import { createAuditLog } from '@/lib/audit/logger'
 
 export async function POST(req: Request) {
@@ -18,11 +18,7 @@ export async function POST(req: Request) {
       return new NextResponse('Missing required fields', { status: 400 })
     }
 
-    // Verify the token against the provided secret
-    const result = await verifyTotp({ token, secret })
-    const isValid = result.valid
-
-    if (!isValid) {
+    if (!verifyTOTP(token, secret)) {
       return new NextResponse('Invalid 2FA code', { status: 400 })
     }
 

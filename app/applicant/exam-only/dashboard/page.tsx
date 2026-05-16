@@ -98,10 +98,10 @@ export default async function ExamOnlyDashboardPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Welcome Card */}
       <div className="rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 dark:border-slate-800 dark:bg-slate-900">
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           Welcome, {firstName}
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -128,7 +128,7 @@ export default async function ExamOnlyDashboardPage() {
         </div>
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
-            <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+            <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
               Total Balance
             </p>
             <p className="mt-1 text-xl font-black text-aerojet-blue dark:text-white">
@@ -136,7 +136,7 @@ export default async function ExamOnlyDashboardPage() {
             </p>
           </div>
           <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
-            <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+            <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
               Available
             </p>
             <p className="mt-1 text-xl font-black text-green-600 dark:text-green-400">
@@ -144,7 +144,7 @@ export default async function ExamOnlyDashboardPage() {
             </p>
           </div>
           <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800/50">
-            <p className="text-xs font-semibold tracking-wide text-slate-500 uppercase dark:text-slate-400">
+            <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
               Reserved
             </p>
             <p className="mt-1 text-xl font-black text-amber-600 dark:text-amber-400">

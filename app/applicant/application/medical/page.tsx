@@ -98,9 +98,9 @@ export default function MedicalPage() {
   const isPending = data.stage === 'MEDICAL_PENDING'
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
+    <div className="mx-auto max-w-3xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white sm:text-3xl">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           Medical Examination
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

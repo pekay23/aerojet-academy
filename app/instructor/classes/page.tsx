@@ -9,11 +9,11 @@ export default async function Page() {
   const classes = await getMyClasses()
 
   return (
-    <div className="flex flex-col space-y-8">
+    <div className="flex flex-col space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header section with Stats or Context if needed */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Course Management
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

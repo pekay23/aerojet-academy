@@ -104,7 +104,7 @@ export default async function Page({
   ]
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div>
         <Link
@@ -123,7 +123,7 @@ export default async function Page({
               <span className="h-1 w-1 rounded-full bg-slate-200 dark:bg-slate-700" />
               <span className="text-xs font-bold text-slate-400">{classData.name}</span>
             </div>
-            <h1 className="text-2xl font-black tracking-tight text-slate-900 sm:text-3xl dark:text-slate-100">
+            <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
               {course.name}
             </h1>
           </div>
