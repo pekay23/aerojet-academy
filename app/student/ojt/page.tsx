@@ -66,12 +66,12 @@ export default async function StudentOJTPage() {
 
   if (!logbook) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
             OJT Experience Logbook
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
             Your digital experience logbook for on-the-job training.
           </p>
         </div>
@@ -133,12 +133,12 @@ export default async function StudentOJTPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           OJT Experience Logbook
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
           CAP 741 / EASA Part-66 digital experience logbook — {logbook.facilityName}
         </p>
       </div>

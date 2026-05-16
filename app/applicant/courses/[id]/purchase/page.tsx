@@ -96,7 +96,7 @@ export default async function PurchasePage({ params }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-8">
+    <div className="mx-auto max-w-2xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
         <Link
           href={`/applicant/courses/${id}`}

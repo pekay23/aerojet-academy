@@ -25,7 +25,7 @@ export default async function GradingPage({
   const { tab = 'pending' } = await searchParams
 
   return (
-    <div className="mx-auto max-w-6xl pb-10">
+    <div className="mx-auto max-w-6xl pb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <GradingTabs>
         {tab === 'history' ? <HistoryTab /> : <PendingTab />}
       </GradingTabs>

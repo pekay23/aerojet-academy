@@ -4,7 +4,8 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { signIn, getSession } from 'next-auth/react'
 import Link from 'next/link'
-import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck } from 'lucide-react'
+import { startAuthentication } from '@simplewebauthn/browser'
+import { Eye, EyeOff, Loader2, Mail, Lock, ShieldCheck, Fingerprint } from 'lucide-react'
 
 export default function LoginForm() {
   const router = useRouter()
@@ -15,6 +16,78 @@ export default function LoginForm() {
   const [error, setError] = useState('')
   const [needs2FA, setNeeds2FA] = useState(false)
   const [totpCode, setTotpCode] = useState('')
+  const [isPasskeyLoading, setIsPasskeyLoading] = useState(false)
+
+  const handlePasskeyLogin = async () => {
+    try {
+      setIsPasskeyLoading(true)
+      setError('')
+
+      // 1. Get options from server
+      const optionsRes = await fetch('/api/auth/passkey/login-options', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim() || undefined }),
+      })
+      
+      if (!optionsRes.ok) {
+        throw new Error('Failed to initiate passkey login')
+      }
+      const { options } = await optionsRes.json()
+
+      // 2. Browser authentication
+      let credential
+      try {
+        credential = await startAuthentication({ optionsJSON: options })
+      } catch (err: any) {
+        if (err.name === 'NotAllowedError') {
+          return // User cancelled
+        }
+        throw err
+      }
+
+      // 3. Verify and get one-time token
+      const verifyRes = await fetch('/api/auth/passkey/login-verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential }),
+      })
+
+      if (!verifyRes.ok) {
+        throw new Error(await verifyRes.text() || 'Passkey verification failed')
+      }
+
+      const { token } = await verifyRes.json()
+
+      // 4. Sign in to NextAuth using the token
+      startTransition(async () => {
+        const result = await signIn('credentials', {
+          redirect: false,
+          token,
+        })
+
+        if (result?.error) {
+          setError(result.error)
+          return
+        }
+
+        const session = await getSession()
+        const userRole = session?.user?.role
+
+        if (userRole === 'STUDENT' || userRole === 'APPLICANT') {
+          router.push('/student')
+        } else {
+          router.push('/staff')
+        }
+        router.refresh()
+      })
+    } catch (err: any) {
+      console.error(err)
+      setError(err.message || 'An error occurred during passkey login')
+    } finally {
+      setIsPasskeyLoading(false)
+    }
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -184,6 +257,29 @@ export default function LoginForm() {
         ) : (
           'Sign In'
         )}
+      </button>
+
+      <div className="relative py-4">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-slate-200 dark:border-slate-700" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-slate-400 dark:bg-slate-950">Or continue with</span>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        onClick={handlePasskeyLogin}
+        disabled={isPending || isPasskeyLoading}
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white py-4 text-xs font-bold tracking-widest text-slate-700 uppercase shadow-sm transition-all hover:bg-slate-50 focus:ring-2 focus:ring-slate-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+      >
+        {isPasskeyLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin text-slate-500" />
+        ) : (
+          <Fingerprint className="h-4 w-4 text-slate-500" />
+        )}
+        Sign in with Passkey
       </button>
     </form>
   )

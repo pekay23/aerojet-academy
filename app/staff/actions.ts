@@ -2,7 +2,7 @@
 
 
 import { getAuthSession, requireStaff } from '@/lib/auth/helpers'
-import { prisma, prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 import { BookingType, EnrollmentStatus, ExamCategory, PaymentStatus, UserStatus, UserRole } from '@prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
@@ -15,7 +15,7 @@ export async function getStaffRecipients() {
   const user = await requireStaff().catch(() => null)
   if (!user) return []
 
-  const users = await prisma.user.findMany({
+  const users = await prismaUnfiltered.user.findMany({
     where: {
       status: UserStatus.ACTIVE,
       id: { not: user.id }, // Exclude self
@@ -57,7 +57,7 @@ export async function sendStaffMessage(recipientId: string, subject: string, bod
       return { error: 'All fields are required.' }
     }
 
-    await prisma.message.create({
+    await prismaUnfiltered.message.create({
       data: {
         senderId: user.id,
         recipientId,
@@ -82,7 +82,7 @@ export async function markMessageAsRead(messageId: string) {
   try {
     const user = await requireStaff()
 
-    await prisma.message.update({
+    await prismaUnfiltered.message.update({
       where: { id: messageId, recipientId: user.id },
       data: { isRead: true, readAt: new Date() },
     })
@@ -106,7 +106,7 @@ export async function bulkUpdateUserStatus(userIds: string[], status: UserStatus
       return { error: 'Invalid parameters.' }
     }
 
-    await prisma.user.updateMany({
+    await prismaUnfiltered.user.updateMany({
       where: { id: { in: userIds } },
       data: { status },
     })
@@ -131,7 +131,7 @@ export async function bulkDeleteUsers(userIds: string[]) {
       return { error: 'No users selected.' }
     }
 
-    await prisma.user.deleteMany({
+    await prismaUnfiltered.user.deleteMany({
       where: { id: { in: userIds } },
     })
 
@@ -170,7 +170,7 @@ export async function bulkUpdateEnrollmentStatus(enrollmentIds: string[], status
         )
       )
     } else {
-      await prisma.enrollment.updateMany({
+      await prismaUnfiltered.enrollment.updateMany({
         where: { id: { in: enrollmentIds } },
         data: { status },
       })
@@ -193,7 +193,7 @@ export async function bulkDeleteEnrollments(enrollmentIds: string[]) {
     await requireStaff()
     if (!enrollmentIds.length) return { error: 'No enrollments selected.' }
 
-    await prisma.enrollment.deleteMany({
+    await prismaUnfiltered.enrollment.deleteMany({
       where: { id: { in: enrollmentIds } },
     })
 
@@ -236,7 +236,7 @@ export async function bulkUpdatePaymentStatus(paymentIds: string[], status: Paym
     await requireStaff()
     if (!paymentIds.length || !status) return { error: 'Invalid parameters.' }
 
-    await prisma.payment.updateMany({
+    await prismaUnfiltered.payment.updateMany({
       where: { id: { in: paymentIds } },
       data: { status },
     })
@@ -258,7 +258,7 @@ export async function bulkArchiveUsers(userIds: string[]) {
     await requireStaff()
     if (!userIds.length) return { error: 'No users selected.' }
 
-    await prisma.user.updateMany({
+    await prismaUnfiltered.user.updateMany({
       where: { id: { in: userIds } },
       data: { status: UserStatus.ARCHIVED },
     })
@@ -279,7 +279,7 @@ export async function bulkBypassPasswordChange(userIds: string[]) {
     await requireStaff()
     if (!userIds.length) return { error: 'No users selected.' }
 
-    await prisma.user.updateMany({
+    await prismaUnfiltered.user.updateMany({
       where: { id: { in: userIds } },
       data: { mustChangePassword: false },
     })
@@ -770,7 +770,7 @@ export async function searchStudents(query: string) {
 
     if (!query || query.length < 2) return { students: [] }
 
-    const users = await prisma.user.findMany({
+    const users = await prismaUnfiltered.user.findMany({
       where: {
         role: { in: [UserRole.STUDENT, UserRole.APPLICANT] },
         OR: [

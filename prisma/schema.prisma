@@ -87,6 +87,7 @@ model User {
   createdTuitionRuns          TuitionRun[]              @relation("CreatedTuitionRuns")
   wallet                      Wallet?
   interviewEvaluationsGiven   InterviewEvaluation[]     @relation("InterviewEvaluator")
+  passkeys                    Passkey[]
 
   @@index([email])
   @@index([academyEmail])
@@ -2090,12 +2091,12 @@ model OJTLogbookEntry {
   verifiedByManagement Boolean         @default(false)
   managementSignedAt   DateTime?
   // CAP 741 / EASA Part-66 Appendix III enhancements
-  licenceCategory      String?         // A, B1, B2, B3, C — which licence category this experience counts towards
-  workEnvironment      String?         // HANGAR, APRON, WORKSHOP, SIMULATOR
-  toolsUsed            String?         // Comma-separated list of specialised tools/test equipment used
-  partNumbersUsed      String?         // Part numbers replaced/installed
-  safetyPrecautions    String?         // Safety measures taken (LOTO, grounding, etc.)
-  competencyRating     Int?            // 1-5 rating by supervisor (CAP 741 Section 5)
+  licenceCategory      String? // A, B1, B2, B3, C — which licence category this experience counts towards
+  workEnvironment      String? // HANGAR, APRON, WORKSHOP, SIMULATOR
+  toolsUsed            String? // Comma-separated list of specialised tools/test equipment used
+  partNumbersUsed      String? // Part numbers replaced/installed
+  safetyPrecautions    String? // Safety measures taken (LOTO, grounding, etc.)
+  competencyRating     Int? // 1-5 rating by supervisor (CAP 741 Section 5)
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
   ataChapter           ATAChapter      @relation(fields: [ataChapterId], references: [id])
@@ -2653,4 +2654,36 @@ enum UpgradeStatus {
   PAYMENT_PENDING
   COMPLETED
   REJECTED
+}
+
+model Passkey {
+  id           String    @id @default(cuid())
+  userId       String
+  credentialId String    @unique
+  publicKey    Bytes
+  counter      BigInt    @default(0)
+  deviceType   String    @default("singleDevice")
+  backedUp     Boolean   @default(false)
+  transports   String[]  @default([])
+  name         String?
+  lastUsedAt   DateTime?
+  createdAt    DateTime  @default(now())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([credentialId])
+  @@map("passkeys")
+}
+
+model PasskeyChallenge {
+  id        String   @id @default(cuid())
+  userId    String?
+  challenge String   @unique
+  type      String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([challenge])
+  @@index([expiresAt])
+  @@map("passkey_challenges")
 }

@@ -149,17 +149,20 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
           ojtPeriods: { orderBy: { startDate: 'desc' } },
           milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
         },
+        take: 50,
       }),
       prismaUnfiltered.modularEnrollment.findMany({
         where: { studentId: targetId },
         include: {
           package: { select: { id: true, name: true } },
         },
+        take: 50,
       }),
       getCachedExamComponents(),
       prismaUnfiltered.examEvent.findMany({
         where: { status: { in: ['OPEN', 'DRAFT'] }, startDate: { gte: new Date() } },
         orderBy: { startDate: 'asc' },
+        take: 50,
       }),
       getCachedAcademicYears(),
       getCachedSemesters(),

@@ -43,10 +43,10 @@ export default async function AmbassadorPage() {
   const referrer = hasBeenReferred ? user.referralsReceived!.referrer : null
 
   return (
-    <div className="mx-auto max-w-5xl space-y-8 pb-12">
+    <div className="mx-auto max-w-5xl space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
             Ambassador Program
           </h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">

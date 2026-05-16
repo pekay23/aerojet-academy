@@ -16,6 +16,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       examComponent: { include: { course: { select: { code: true, name: true } } } },
     },
     orderBy: { bookedAt: 'desc' },
+    take: 100,
   })
   return apiSuccess(bookings)
 })

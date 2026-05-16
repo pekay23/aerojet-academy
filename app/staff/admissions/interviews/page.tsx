@@ -10,34 +10,33 @@ export const dynamic = 'force-dynamic'
 export default async function InterviewsPage() {
   await requireStaff()
 
-  // Fetch applications currently in interview stages
-  const applications = await prismaUnfiltered.application.findMany({
-    where: {
-      stage: {
-        in: ['INTERVIEW_PENDING', 'INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED']
-      }
-    },
-    include: {
-      user: { include: { profile: true } },
-      intakeCycle: true,
-      interviewSlot: { include: { schedule: true } }
-    },
-    orderBy: { updatedAt: 'desc' }
-  })
-
-  // Fetch all schedules
-  const schedules = await prismaUnfiltered.interviewSchedule.findMany({
-    include: {
-      slots: {
-        include: {
-          _count: { select: { applications: true } }
-        },
-        orderBy: { date: 'asc' }
+  const [applications, schedules] = await Promise.all([
+    prismaUnfiltered.application.findMany({
+      where: {
+        stage: {
+          in: ['INTERVIEW_PENDING', 'INTERVIEW_SCHEDULED', 'INTERVIEW_COMPLETED']
+        }
       },
-      intakeCycle: true,
-    },
-    orderBy: { createdAt: 'desc' }
-  })
+      include: {
+        user: { include: { profile: true } },
+        intakeCycle: true,
+        interviewSlot: { include: { schedule: true } }
+      },
+      orderBy: { updatedAt: 'desc' }
+    }),
+    prismaUnfiltered.interviewSchedule.findMany({
+      include: {
+        slots: {
+          include: {
+            _count: { select: { applications: true } }
+          },
+          orderBy: { date: 'asc' }
+        },
+        intakeCycle: true,
+      },
+      orderBy: { createdAt: 'desc' }
+    }),
+  ])
 
   // Format data for the table
   const tableData = applications.map((app) => ({
@@ -73,10 +72,10 @@ export default async function InterviewsPage() {
   }))
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white">Interview Management</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">Interview Management</h1>
+        <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
           Manage interview schedules, slots, and record outcomes for shortlisted candidates.
         </p>
       </div>
@@ -84,7 +83,7 @@ export default async function InterviewsPage() {
       <InterviewSchedulesManager initialSchedules={scheduleData as any} />
 
       <div>
-        <h2 className="text-lg font-bold text-slate-900 dark:text-white mb-4">Candidate Interviews</h2>
+        <h2 className="text-xl font-black tracking-tight text-slate-900 dark:text-white mb-4">Candidate Interviews</h2>
         <InterviewOutcomesTable data={tableData} />
       </div>
     </div>

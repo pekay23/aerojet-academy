@@ -32,12 +32,12 @@ export default async function InterviewPage() {
   } : null
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <div className="max-w-4xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
+        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           Interview Booking
         </h1>
-        <p className="mt-2 text-slate-600 dark:text-slate-400">
+        <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
           Congratulations on being shortlisted! Please select an available interview slot that works for you. 
           The interview will be conducted by our admissions panel to assess your readiness for the programme.
         </p>

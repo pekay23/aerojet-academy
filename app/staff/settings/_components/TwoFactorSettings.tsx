@@ -92,7 +92,17 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
   }
 
   function handleCopySecret() {
-    navigator.clipboard.writeText(secret)
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(secret)
+    } else {
+      // Fallback for non-HTTPS contexts (local dev)
+      const textarea = document.createElement('textarea')
+      textarea.value = secret
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+    }
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }

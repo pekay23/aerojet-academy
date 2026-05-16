@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/auth-options'
 import { prismaBase as prisma } from '@/lib/prisma/db-base'
 import { createAuditLog } from '@/lib/audit/logger'
-import { verify as verifyTotp } from 'otplib'
+import { verifyTOTP } from '@/lib/auth/totp'
 
 export async function POST(req: Request) {
   try {
@@ -26,14 +26,7 @@ export async function POST(req: Request) {
       return new NextResponse('2FA is not enabled', { status: 400 })
     }
 
-    // Require current valid 2FA token to disable
-    const result = await verifyTotp({
-      token,
-      secret: user.twoFactorSecret
-    })
-    const isValid = result.valid
-
-    if (!isValid) {
+    if (!verifyTOTP(token, user.twoFactorSecret)) {
       return new NextResponse('Invalid 2FA code', { status: 400 })
     }
 
