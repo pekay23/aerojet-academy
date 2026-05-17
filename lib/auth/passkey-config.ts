@@ -18,13 +18,6 @@ export const rpConfig = {
   rpName: 'Aerojet Academy',
   rpID: isDev ? devRpID : prodDomain,
   origin: isDev
-    ? [
-        `http://${devRpID}:3000`,
-        'http://localhost:3000',
-        'http://192.168.100.218:3000',
-      ]
-    : [
-        `https://${prodDomain}`,
-        `https://www.${prodDomain}`,
-      ],
+    ? [`http://${devRpID}:3000`, 'http://localhost:3000', 'http://192.168.100.218:3000']
+    : [`https://${prodDomain}`, `https://www.${prodDomain}`],
 } as const

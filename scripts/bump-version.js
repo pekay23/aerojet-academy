@@ -26,14 +26,21 @@ function bumpVersion() {
       throw new Error('Invalid BUMP_TYPE. Use major, minor, or patch.')
     }
 
-    // 3. Increment version
-    // We use 'bun x version-bump' or manually update to avoid 'npm' dependency
-    // For simplicity and robustness, we'll use bun x to run a versioning tool
-    execSync(`bun x version-bump ${bumpType} --no-git-tag`, { stdio: 'inherit' })
-
-    // 3. Get new version after bump
-    const newPkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
-    const newVersion = newPkg.version
+    // 3. Increment version directly (avoids version-bump which strips extra package.json fields)
+    const parts = oldVersion.split('.').map(Number)
+    if (bumpType === 'major') {
+      parts[0]++
+      parts[1] = 0
+      parts[2] = 0
+    } else if (bumpType === 'minor') {
+      parts[1]++
+      parts[2] = 0
+    } else {
+      parts[2]++
+    }
+    const newVersion = parts.join('.')
+    pkg.version = newVersion
+    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
 
     // 4. Update CHANGELOG.md
     const changelogPath = path.resolve(process.cwd(), 'docs/CHANGELOG.md')
@@ -41,7 +48,7 @@ function bumpVersion() {
       console.log('Updating CHANGELOG.md...')
       let changelog = fs.readFileSync(changelogPath, 'utf8')
       const today = new Date().toISOString().split('T')[0]
-      
+
       // If the new version isn't already in the changelog, insert it
       if (!changelog.includes(`## [${newVersion}]`)) {
         const newEntry = `## [${newVersion}] — ${today}\n\n### Changed\n- Maintenance and stability updates.\n\n`
@@ -52,7 +59,7 @@ function bumpVersion() {
 
     // 5. Stage the modified files so they are included in the current commit
     execSync(`git add package.json docs/CHANGELOG.md`, { stdio: 'inherit' })
-    
+
     // Also try to stage lock files if they exist
     if (fs.existsSync(path.resolve(process.cwd(), 'package-lock.json'))) {
       execSync('git add package-lock.json', { stdio: 'inherit' })

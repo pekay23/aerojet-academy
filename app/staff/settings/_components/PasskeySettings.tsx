@@ -6,7 +6,18 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
 import { startRegistration } from '@simplewebauthn/browser'
-import { Fingerprint, KeyRound, Laptop, Loader2, Plus, Smartphone, Trash2, Edit2, Check, X } from 'lucide-react'
+import {
+  Fingerprint,
+  KeyRound,
+  Laptop,
+  Loader2,
+  Plus,
+  Smartphone,
+  Trash2,
+  Edit2,
+  Check,
+  X,
+} from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { useConfirmDialog } from '@/hooks/use-confirm-dialog'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
@@ -44,23 +55,21 @@ export function PasskeySettings() {
   }
 
   useEffect(() => {
-    setWebAuthnSupported(
-      typeof window !== 'undefined' && !!window.PublicKeyCredential
-    )
+    setWebAuthnSupported(typeof window !== 'undefined' && !!window.PublicKeyCredential)
     fetchPasskeys()
   }, [])
 
   const handleAddPasskey = async () => {
     try {
       setIsRegistering(true)
-      
+
       // 1. Get registration options from server
       const optionsRes = await fetch('/api/auth/passkey/register-options', { method: 'POST' })
       if (!optionsRes.ok) {
         const errData = await optionsRes.json().catch(() => null)
         throw new Error(errData?.detail || errData?.error || 'Failed to get registration options')
       }
-      
+
       const { options } = await optionsRes.json()
 
       // 2. Prompt browser to create passkey
@@ -73,7 +82,9 @@ export function PasskeySettings() {
           return
         }
         if (err.name === 'NotSupportedError') {
-          toast.error('Your device or browser does not support passkeys. Try using a security key instead.')
+          toast.error(
+            'Your device or browser does not support passkeys. Try using a security key instead.'
+          )
           return
         }
         if (err.name === 'AbortError' || err.name === 'TimeoutError') {
@@ -112,8 +123,8 @@ export function PasskeySettings() {
       onConfirm: async () => {
         try {
           const res = await fetch(`/api/auth/passkey/${id}`, { method: 'DELETE' })
-          if (!res.ok) throw new Error(await res.text() || 'Failed to delete passkey')
-          
+          if (!res.ok) throw new Error((await res.text()) || 'Failed to delete passkey')
+
           toast.success('Passkey deleted')
           setPasskeys((prev) => prev.filter((p) => p.id !== id))
         } catch (error: any) {
@@ -121,7 +132,7 @@ export function PasskeySettings() {
         } finally {
           confirmDialog.close()
         }
-      }
+      },
     })
   }
 
@@ -137,11 +148,11 @@ export function PasskeySettings() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: editName }),
       })
-      
-      if (!res.ok) throw new Error(await res.text() || 'Failed to rename passkey')
-      
+
+      if (!res.ok) throw new Error((await res.text()) || 'Failed to rename passkey')
+
       toast.success('Passkey renamed')
-      setPasskeys(passkeys.map(p => p.id === id ? { ...p, name: editName } : p))
+      setPasskeys(passkeys.map((p) => (p.id === id ? { ...p, name: editName } : p)))
       setEditingId(null)
     } catch (error: any) {
       toast.error(error.message)
@@ -149,9 +160,9 @@ export function PasskeySettings() {
   }
 
   const getDeviceIcon = (deviceType: string, backedUp: boolean) => {
-    if (backedUp) return <Smartphone className="h-5 w-5 text-muted-foreground" />
-    if (deviceType === 'singleDevice') return <Laptop className="h-5 w-5 text-muted-foreground" />
-    return <KeyRound className="h-5 w-5 text-muted-foreground" />
+    if (backedUp) return <Smartphone className="text-muted-foreground h-5 w-5" />
+    if (deviceType === 'singleDevice') return <Laptop className="text-muted-foreground h-5 w-5" />
+    return <KeyRound className="text-muted-foreground h-5 w-5" />
   }
 
   return (
@@ -165,108 +176,142 @@ export function PasskeySettings() {
       />
       <Card>
         <CardHeader>
-        <div className="flex items-center gap-2">
-          <Fingerprint className="h-6 w-6 text-primary" />
-          <div>
-            <CardTitle>Passkeys</CardTitle>
-            <CardDescription>
-              Sign in securely without a password using your device's biometrics or a security key.
-            </CardDescription>
+          <div className="flex items-center gap-2">
+            <Fingerprint className="text-primary h-6 w-6" />
+            <div>
+              <CardTitle>Passkeys</CardTitle>
+              <CardDescription>
+                Sign in securely without a password using your device's biometrics or a security
+                key.
+              </CardDescription>
+            </div>
           </div>
-        </div>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {isLoading ? (
-          <div className="flex justify-center p-4">
-            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-          </div>
-        ) : webAuthnSupported === false ? (
-          <div className="rounded-lg border border-dashed p-8 text-center">
-            <p className="text-sm text-muted-foreground">
-              Your browser does not support passkeys. Please use a modern browser (Chrome, Safari, Edge, or Firefox) to manage passkeys.
-            </p>
-          </div>
-        ) : passkeys.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-8 text-center">
-            <p className="text-sm text-muted-foreground mb-4">You haven't set up any passkeys yet.</p>
-            <Button onClick={handleAddPasskey} disabled={isRegistering}>
-              {isRegistering ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-              Add a Passkey
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            <div className="rounded-md border divide-y">
-              {passkeys.map((passkey) => (
-                <div key={passkey.id} className="flex items-center justify-between p-4">
-                  <div className="flex items-center gap-4">
-                    <div className="p-2 bg-muted rounded-full">
-                      {getDeviceIcon(passkey.deviceType, passkey.backedUp)}
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {isLoading ? (
+            <div className="flex justify-center p-4">
+              <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
+            </div>
+          ) : webAuthnSupported === false ? (
+            <div className="rounded-lg border border-dashed p-8 text-center">
+              <p className="text-muted-foreground text-sm">
+                Your browser does not support passkeys. Please use a modern browser (Chrome, Safari,
+                Edge, or Firefox) to manage passkeys.
+              </p>
+            </div>
+          ) : passkeys.length === 0 ? (
+            <div className="rounded-lg border border-dashed p-8 text-center">
+              <p className="text-muted-foreground mb-4 text-sm">
+                You haven't set up any passkeys yet.
+              </p>
+              <Button onClick={handleAddPasskey} disabled={isRegistering}>
+                {isRegistering ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="mr-2 h-4 w-4" />
+                )}
+                Add a Passkey
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <div className="divide-y rounded-md border">
+                {passkeys.map((passkey) => (
+                  <div key={passkey.id} className="flex items-center justify-between p-4">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-muted rounded-full p-2">
+                        {getDeviceIcon(passkey.deviceType, passkey.backedUp)}
+                      </div>
+                      <div>
+                        {editingId === passkey.id ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={editName}
+                              onChange={(e) => setEditName(e.target.value)}
+                              className="h-8 w-48"
+                              autoFocus
+                              onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit(passkey.id)}
+                            />
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-green-600"
+                              onClick={() => handleSaveEdit(passkey.id)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="text-muted-foreground h-8 w-8"
+                              onClick={() => setEditingId(null)}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium">
+                              {passkey.name || 'Unnamed Passkey'}
+                            </p>
+                            {passkey.backedUp && (
+                              <Badge variant="secondary" className="text-xs">
+                                Synced
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                        <p className="text-muted-foreground text-xs">
+                          Added {new Date(passkey.createdAt).toLocaleDateString()}
+                          {passkey.lastUsedAt &&
+                            ` • Last used ${new Date(passkey.lastUsedAt).toLocaleDateString()}`}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      {editingId === passkey.id ? (
-                        <div className="flex items-center gap-2">
-                          <Input 
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            className="h-8 w-48"
-                            autoFocus
-                            onKeyDown={(e) => e.key === 'Enter' && handleSaveEdit(passkey.id)}
-                          />
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600" onClick={() => handleSaveEdit(passkey.id)}>
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground" onClick={() => setEditingId(null)}>
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-sm">{passkey.name || 'Unnamed Passkey'}</p>
-                          {passkey.backedUp && <Badge variant="secondary" className="text-xs">Synced</Badge>}
-                        </div>
+                    <div className="flex items-center gap-1">
+                      {editingId !== passkey.id && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-muted-foreground hover:text-foreground"
+                          onClick={() => {
+                            setEditName(passkey.name || '')
+                            setEditingId(passkey.id)
+                          }}
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
                       )}
-                      <p className="text-xs text-muted-foreground">
-                        Added {new Date(passkey.createdAt).toLocaleDateString()}
-                        {passkey.lastUsedAt && ` • Last used ${new Date(passkey.lastUsedAt).toLocaleDateString()}`}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {editingId !== passkey.id && (
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="text-muted-foreground hover:text-foreground"
-                        onClick={() => {
-                          setEditName(passkey.name || '')
-                          setEditingId(passkey.id)
-                        }}
+                        className="text-muted-foreground hover:text-destructive"
+                        onClick={() => handleDelete(passkey.id, passkey.name || 'this passkey')}
                       >
-                        <Edit2 className="h-4 w-4" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="text-muted-foreground hover:text-destructive"
-                      onClick={() => handleDelete(passkey.id, passkey.name || 'this passkey')}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              <Button
+                onClick={handleAddPasskey}
+                disabled={isRegistering}
+                variant="outline"
+                className="w-full"
+              >
+                {isRegistering ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Plus className="mr-2 h-4 w-4" />
+                )}
+                Add Another Passkey
+              </Button>
             </div>
-            
-            <Button onClick={handleAddPasskey} disabled={isRegistering} variant="outline" className="w-full">
-              {isRegistering ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-              Add Another Passkey
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
     </>
   )
 }
