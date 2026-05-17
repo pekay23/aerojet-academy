@@ -41,7 +41,10 @@ export async function POST(req: Request) {
     })
 
     if (!verification.verified || !verification.registrationInfo) {
-      return new NextResponse('Verification failed', { status: 400 })
+      return NextResponse.json(
+        { error: 'Verification failed. Ensure you are on the correct domain.' },
+        { status: 400 }
+      )
     }
 
     const { credential: cred, credentialDeviceType, credentialBackedUp } = verification.registrationInfo
@@ -53,16 +56,22 @@ export async function POST(req: Request) {
 
     const passkeyName = name || `Passkey ${existingCount + 1}`
 
-    // Store the credential
+    // Store the credential — handle potential type edge cases
+    const publicKeyBytes = cred.publicKey instanceof Uint8Array
+      ? Buffer.from(cred.publicKey)
+      : Buffer.from(cred.publicKey as unknown as ArrayBuffer)
+
     const passkey = await prisma.passkey.create({
       data: {
         userId: session.user.id,
         credentialId: cred.id,
-        publicKey: Buffer.from(cred.publicKey),
-        counter: BigInt(cred.counter),
-        deviceType: credentialDeviceType,
-        backedUp: credentialBackedUp,
-        transports: credential.response?.transports || [],
+        publicKey: publicKeyBytes,
+        counter: BigInt(cred.counter ?? 0),
+        deviceType: credentialDeviceType || 'singleDevice',
+        backedUp: credentialBackedUp ?? false,
+        transports: Array.isArray(credential.response?.transports)
+          ? credential.response.transports
+          : [],
         name: passkeyName,
       },
     })
@@ -85,8 +94,11 @@ export async function POST(req: Request) {
       passkeyId: passkey.id,
       name: passkeyName,
     })
-  } catch (error) {
-    console.error('[PASSKEY_REGISTER_VERIFY]', error)
-    return new NextResponse('Internal Error', { status: 500 })
+  } catch (error: any) {
+    console.error('[PASSKEY_REGISTER_VERIFY]', error?.message || error)
+    return NextResponse.json(
+      { error: 'Registration verification failed', detail: error?.message },
+      { status: 500 }
+    )
   }
 }

@@ -12,14 +12,19 @@ const isDev = process.env.NODE_ENV === 'development'
 // by adding it to /etc/hosts on both machines, or use NEXT_PUBLIC_DOMAIN.
 const devRpID = process.env.NEXT_PUBLIC_DOMAIN || 'localhost'
 
+const prodDomain = process.env.NEXT_PUBLIC_DOMAIN || 'aerojet-academy.com'
+
 export const rpConfig = {
   rpName: 'Aerojet Academy',
-  rpID: isDev ? devRpID : (process.env.NEXT_PUBLIC_DOMAIN || 'aerojet-academy.com'),
+  rpID: isDev ? devRpID : prodDomain,
   origin: isDev
     ? [
         `http://${devRpID}:3000`,
         'http://localhost:3000',
         'http://192.168.100.218:3000',
       ]
-    : [`https://${process.env.NEXT_PUBLIC_DOMAIN || 'aerojet-academy.com'}`],
+    : [
+        `https://${prodDomain}`,
+        `https://www.${prodDomain}`,
+      ],
 } as const

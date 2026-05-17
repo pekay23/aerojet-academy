@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { usePathname } from 'next/navigation'
@@ -107,6 +107,17 @@ export default function PublicNav() {
   const [accordionValue, setAccordionValue] = useState<string>('item-1')
   const [navValue, setNavValue] = useState<string>('')
   const [mounted, setMounted] = useState(false)
+  const headerRef = useRef<HTMLElement>(null)
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null)
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top })
+  }, [])
+
+  const handleMouseLeave = useCallback(() => {
+    setMousePos(null)
+  }, [])
 
   useEffect(() => {
     setMounted(true)
@@ -167,8 +178,32 @@ export default function PublicNav() {
 
   return (
     <>
-      <header className={headerClasses}>
-        <div className="mx-auto flex h-16 w-full items-center justify-between px-6 sm:px-10 lg:px-16">
+      <header
+        ref={headerRef}
+        className={headerClasses}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
+        {/* Mouse-tracking glow */}
+        <div
+          className="pointer-events-none absolute inset-0 z-0 overflow-hidden"
+          aria-hidden="true"
+        >
+          <div
+            className="absolute inset-0 transition-opacity duration-300"
+            style={{
+              opacity: mousePos ? 1 : 0,
+              background: mousePos
+                ? `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, ${
+                    scrolled || forceSolid
+                      ? 'rgba(59,130,246,0.05)'
+                      : 'rgba(255,255,255,0.07)'
+                  }, transparent 40%)`
+                : 'none',
+            }}
+          />
+        </div>
+        <div className="relative z-10 mx-auto flex h-16 w-full items-center justify-between px-6 sm:px-10 lg:px-16">
           <Link href="/" className="shrink-0 flex items-center py-2">
             <Image
               src={

@@ -4,6 +4,10 @@ import { getAuthSession } from '@/lib/auth/auth-options'
 import { prismaBase as prisma } from '@/lib/prisma/db-base'
 import { rpConfig } from '@/lib/auth/passkey-config'
 
+type AuthenticatorTransport = 'ble' | 'cable' | 'hybrid' | 'internal' | 'nfc' | 'smart-card' | 'usb'
+
+const VALID_TRANSPORTS = new Set<string>(['ble', 'cable', 'hybrid', 'internal', 'nfc', 'smart-card', 'usb'])
+
 export async function POST() {
   try {
     const session = await getAuthSession()
@@ -32,16 +36,22 @@ export async function POST() {
       ? `${user.profile.firstName} ${user.profile.lastName}`
       : user.email
 
+    // Build excludeCredentials defensively — filter invalid transports
+    const excludeCredentials = user.passkeys
+      .filter((pk) => pk.credentialId)
+      .map((pk) => ({
+        id: pk.credentialId,
+        transports: (pk.transports || []).filter(
+          (t) => VALID_TRANSPORTS.has(t)
+        ) as AuthenticatorTransport[],
+      }))
+
     const options = await generateRegistrationOptions({
       rpName: rpConfig.rpName,
       rpID: rpConfig.rpID,
       userName: user.academyEmail || user.email,
       userDisplayName: displayName,
-      // Prevent re-registering existing credentials
-      excludeCredentials: user.passkeys.map((pk) => ({
-        id: pk.credentialId,
-        transports: pk.transports as AuthenticatorTransport[],
-      })),
+      excludeCredentials,
       authenticatorSelection: {
         residentKey: 'required',
         userVerification: 'required',
@@ -60,10 +70,11 @@ export async function POST() {
     })
 
     return NextResponse.json({ options })
-  } catch (error) {
-    console.error('[PASSKEY_REGISTER_OPTIONS]', error)
-    return new NextResponse('Internal Error', { status: 500 })
+  } catch (error: any) {
+    console.error('[PASSKEY_REGISTER_OPTIONS]', error?.message || error)
+    return NextResponse.json(
+      { error: 'Failed to generate registration options', detail: error?.message },
+      { status: 500 }
+    )
   }
 }
-
-type AuthenticatorTransport = 'ble' | 'cable' | 'hybrid' | 'internal' | 'nfc' | 'smart-card' | 'usb'
