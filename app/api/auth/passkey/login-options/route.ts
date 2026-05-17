@@ -39,7 +39,7 @@ export async function POST(req: Request) {
     const options = await generateAuthenticationOptions({
       rpID: rpConfig.rpID,
       allowCredentials,
-      userVerification: 'required',
+      userVerification: 'preferred',
     })
 
     await prisma.passkeyChallenge.create({
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
         userId, // Might be null if discoverable credential flow
         challenge: options.challenge,
         type: 'authentication',
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
       },
     })
 

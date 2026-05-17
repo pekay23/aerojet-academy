@@ -53,8 +53,8 @@ export async function POST() {
       userDisplayName: displayName,
       excludeCredentials,
       authenticatorSelection: {
-        residentKey: 'required',
-        userVerification: 'required',
+        residentKey: 'preferred',
+        userVerification: 'preferred',
       },
       attestationType: 'none',
     })
@@ -65,7 +65,7 @@ export async function POST() {
         userId: session.user.id,
         challenge: options.challenge,
         type: 'registration',
-        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
       },
     })
 
