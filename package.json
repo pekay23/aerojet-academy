@@ -1,6 +1,6 @@
 {
   "name": "aerojet-academy",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "packageManager": "bun@1.3.12",
   "private": true,
   "type": "module",
@@ -157,6 +157,9 @@
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,json,md,css}": "prettier --write"
   },
   "overrides": {
     "minimatch": "^10.2.1",
