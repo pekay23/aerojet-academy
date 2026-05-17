@@ -65,7 +65,15 @@ export function PasskeySettings() {
         credential = await startRegistration({ optionsJSON: options })
       } catch (err: any) {
         if (err.name === 'NotAllowedError') {
-          toast.error('Passkey creation cancelled or blocked by browser')
+          toast.error('Passkey creation was cancelled or blocked by your browser.')
+          return
+        }
+        if (err.name === 'NotSupportedError') {
+          toast.error('Your device or browser does not support passkeys. Try using a security key instead.')
+          return
+        }
+        if (err.name === 'AbortError' || err.name === 'TimeoutError') {
+          toast.error('Passkey creation timed out. Please try again.')
           return
         }
         throw err
