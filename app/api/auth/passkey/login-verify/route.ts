@@ -59,7 +59,7 @@ export async function POST(req: Request) {
         publicKey: passkey.publicKey,
         counter: Number(passkey.counter),
       },
-      requireUserVerification: true,
+      requireUserVerification: false,
     })
 
     if (!verification.verified || !verification.authenticationInfo) {

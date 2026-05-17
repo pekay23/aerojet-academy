@@ -26,6 +26,7 @@ export function PasskeySettings() {
   const [isRegistering, setIsRegistering] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
+  const [webAuthnSupported, setWebAuthnSupported] = useState<boolean | null>(null)
   const confirmDialog = useConfirmDialog()
 
   const fetchPasskeys = async () => {
@@ -43,6 +44,9 @@ export function PasskeySettings() {
   }
 
   useEffect(() => {
+    setWebAuthnSupported(
+      typeof window !== 'undefined' && !!window.PublicKeyCredential
+    )
     fetchPasskeys()
   }, [])
 
@@ -175,6 +179,12 @@ export function PasskeySettings() {
         {isLoading ? (
           <div className="flex justify-center p-4">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : webAuthnSupported === false ? (
+          <div className="rounded-lg border border-dashed p-8 text-center">
+            <p className="text-sm text-muted-foreground">
+              Your browser does not support passkeys. Please use a modern browser (Chrome, Safari, Edge, or Firefox) to manage passkeys.
+            </p>
           </div>
         ) : passkeys.length === 0 ? (
           <div className="rounded-lg border border-dashed p-8 text-center">
