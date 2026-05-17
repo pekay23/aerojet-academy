@@ -38,6 +38,7 @@ export async function POST(req: Request) {
       expectedChallenge: storedChallenge.challenge,
       expectedOrigin: rpConfig.origin as string[],
       expectedRPID: rpConfig.rpID,
+      requireUserVerification: false,
     })
 
     if (!verification.verified || !verification.registrationInfo) {
