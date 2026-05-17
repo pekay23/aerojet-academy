@@ -1,4 +1,14 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+
+// Mock Prisma — generateAcademyEmail calls prisma.user.findFirst for uniqueness check
+vi.mock('@/lib/prisma/client', () => ({
+  default: {
+    user: {
+      findFirst: vi.fn().mockResolvedValue(null),
+    },
+  },
+}))
+
 import { generateAcademyEmail } from '../lib/auth/helpers'
 
 describe('generateAcademyEmail', () => {
@@ -7,7 +17,9 @@ describe('generateAcademyEmail', () => {
   })
 
   it('should generate initials for 3 names', async () => {
-    expect(await generateAcademyEmail('John', 'Quincy', 'Adams')).toBe('j.q.adams@aerojet-academy.com')
+    expect(await generateAcademyEmail('John', 'Quincy', 'Adams')).toBe(
+      'j.q.adams@aerojet-academy.com'
+    )
   })
 
   it('should handle multiple initials from first name field', async () => {
@@ -21,7 +33,9 @@ describe('generateAcademyEmail', () => {
   })
 
   it('should handle middle names with multiple parts', async () => {
-    expect(await generateAcademyEmail('John', 'M. Q.', 'Public')).toBe('j.m.q.public@aerojet-academy.com')
+    expect(await generateAcademyEmail('John', 'M. Q.', 'Public')).toBe(
+      'j.m.q.public@aerojet-academy.com'
+    )
   })
 
   it('should handle multiple middle names', async () => {
