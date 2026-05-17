@@ -53,7 +53,8 @@ export function PasskeySettings() {
       // 1. Get registration options from server
       const optionsRes = await fetch('/api/auth/passkey/register-options', { method: 'POST' })
       if (!optionsRes.ok) {
-        throw new Error(await optionsRes.text() || 'Failed to get registration options')
+        const errData = await optionsRes.json().catch(() => null)
+        throw new Error(errData?.detail || errData?.error || 'Failed to get registration options')
       }
       
       const { options } = await optionsRes.json()
@@ -78,7 +79,8 @@ export function PasskeySettings() {
       })
 
       if (!verifyRes.ok) {
-        throw new Error(await verifyRes.text() || 'Failed to verify passkey')
+        const errData = await verifyRes.json().catch(() => null)
+        throw new Error(errData?.detail || errData?.error || 'Failed to verify passkey')
       }
 
       toast.success('Passkey added successfully')
