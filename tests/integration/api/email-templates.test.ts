@@ -2,17 +2,19 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { GET, POST, DELETE } from '@/app/api/staff/email-templates/route'
 import { NextRequest } from 'next/server'
 
-// Mock Prisma
-vi.mock('@/lib/prisma/client', () => ({
-  default: {
-    emailTemplate: {
-      findUnique: vi.fn(),
-      findMany: vi.fn(),
-      upsert: vi.fn(),
-      delete: vi.fn(),
-    },
-  },
-}))
+// Mock Prisma — route uses prismaUnfiltered (named export)
+vi.mock('@/lib/prisma/client', () => {
+  const emailTemplate = {
+    findUnique: vi.fn(),
+    findMany: vi.fn(),
+    upsert: vi.fn(),
+    delete: vi.fn(),
+  }
+  return {
+    default: { emailTemplate },
+    prismaUnfiltered: { emailTemplate },
+  }
+})
 
 // Mock Auth
 vi.mock('@/lib/auth/helpers', () => ({
