@@ -43,8 +43,14 @@ export async function POST(req: Request) {
     const parsedClientData = JSON.parse(clientDataJSON)
     const signedChallenge = parsedClientData.challenge
 
-    const storedChallenge = await prisma.passkeyChallenge.findUnique({
-      where: { challenge: signedChallenge },
+    // Atomically consume the challenge to prevent replay race conditions
+    const storedChallenge = await prisma.$transaction(async (tx) => {
+      const challenge = await tx.passkeyChallenge.findUnique({
+        where: { challenge: signedChallenge },
+      })
+      if (!challenge) return null
+      await tx.passkeyChallenge.delete({ where: { id: challenge.id } })
+      return challenge
     })
 
     if (
@@ -55,7 +61,10 @@ export async function POST(req: Request) {
       return new NextResponse('Challenge expired or not found', { status: 401 })
     }
 
-    // Validate that the challenge belongs to the same user who owns this passkey
+    // Validate challenge-user binding:
+    // - Email-scoped flow (userId set): must match the passkey owner
+    // - Discoverable flow (userId null): any authenticated passkey is valid,
+    //   security is provided by the cryptographic signature verification below
     if (storedChallenge.userId && storedChallenge.userId !== passkey.userId) {
       return new NextResponse('Challenge-user mismatch', { status: 401 })
     }
@@ -86,11 +95,6 @@ export async function POST(req: Request) {
         counter: BigInt(newCounter),
         lastUsedAt: new Date(),
       },
-    })
-
-    // Delete used challenge
-    await prisma.passkeyChallenge.delete({
-      where: { id: storedChallenge.id },
     })
 
     if (passkey.user.status !== 'ACTIVE') {
