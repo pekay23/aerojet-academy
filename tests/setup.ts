@@ -140,6 +140,11 @@ vi.mock('@/lib/prisma/client', () => ({
   prismaUnfiltered: prismaMock,
 }))
 
+vi.mock('@/lib/prisma/db-base', () => ({
+  default: prismaMock,
+  prismaBase: prismaMock,
+}))
+
 // ---------------------------------------------------------------------------
 // Mock Resend
 // ---------------------------------------------------------------------------
