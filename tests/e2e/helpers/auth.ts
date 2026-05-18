@@ -22,8 +22,22 @@ export function getStudentCredentials(): TestCredentials {
 
 export function getStaffCredentials(): TestCredentials {
   return {
-    email: process.env.E2E_STAFF_EMAIL || 'admin@aerojet-academy.com',
-    password: process.env.E2E_STAFF_PASSWORD || 'Admin@2026',
+    email: process.env.E2E_STAFF_EMAIL || 'staff@aerojet-academy.com',
+    password: process.env.E2E_STAFF_PASSWORD || 'Staff@2026',
+  }
+}
+
+export function getAdminCredentials(): TestCredentials {
+  return {
+    email: process.env.E2E_ADMIN_EMAIL || 'admin@aerojet-academy.com',
+    password: process.env.E2E_ADMIN_PASSWORD || 'Admin@2026',
+  }
+}
+
+export function getInstructorCredentials(): TestCredentials {
+  return {
+    email: process.env.E2E_INSTRUCTOR_EMAIL || 'instructor@aerojet-academy.com',
+    password: process.env.E2E_INSTRUCTOR_PASSWORD || 'Instructor@2026',
   }
 }
 

@@ -1,141 +1,284 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { prismaMock } from '@/tests/setup'
-import { POOL_EXAM_FEE, POOL_MIN_CANDIDATES } from '@/lib/pools/types'
+import {
+  POOL_MAX_CANDIDATES,
+  POOL_MIN_CANDIDATES,
+  POOL_NEAR_FULL_THRESHOLD,
+} from '@/lib/pools/types'
 
-describe('Pool Join Integration', () => {
+// Mock external dependencies that joinPoolInternal imports
+vi.mock('@/lib/pools/assignment', () => ({
+  resolveStandardPoolForJoin: vi.fn(),
+}))
+vi.mock('@/lib/wallet/operations', () => ({
+  reserveFunds: vi.fn(),
+  captureFunds: vi.fn(),
+}))
+vi.mock('@/lib/pools/confirm', () => ({
+  confirmPoolInternal: vi.fn(),
+}))
+vi.mock('@/lib/pools/pricing', () => ({
+  calculatePoolSeatPrice: vi.fn().mockResolvedValue({ totalPrice: 300 }),
+}))
+vi.mock('@/lib/pools/bundles', () => ({
+  useBundleSeat: vi.fn(),
+}))
+vi.mock('@/lib/audit/logger', () => ({
+  logAuditEvent: vi.fn(),
+  createAuditLog: vi.fn(),
+  AuditAction: {},
+}))
+vi.mock('@/lib/email/service', () => ({
+  sendPoolApproachingConfirmationEmail: vi.fn().mockResolvedValue(undefined),
+}))
+
+import { joinPoolInternal } from '@/lib/pools/join'
+import { resolveStandardPoolForJoin } from '@/lib/pools/assignment'
+import type { PoolJoinInput } from '@/lib/pools/types'
+
+const baseInput: PoolJoinInput = {
+  poolId: 'pool-1',
+  userId: 'user-1',
+  examComponentId: 'comp-1',
+  moduleCode: 'M01',
+  eventId: 'event-1',
+  bookingType: 'POOL',
+  reserveAmount: 300,
+}
+
+const sourcePool = { id: 'pool-1', eventId: 'event-1', poolType: 'MANUAL' }
+
+function makePool(overrides: Record<string, any> = {}) {
+  return {
+    id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    name: 'Test Pool',
+    status: 'OPEN',
+    currentMemberCount: 10,
+    maxCandidates: POOL_MAX_CANDIDATES,
+    minCandidates: POOL_MIN_CANDIDATES,
+    examDate: new Date('2026-07-01'),
+    examStartTime: null,
+    examEndTime: null,
+    seatPrice: 300,
+    allowedModules: [],
+    eventId: 'event-1',
+    ...overrides,
+  }
+}
+
+/** Set up the minimum mocks for a successful join */
+function setupSuccessPath(poolOverrides: Record<string, any> = {}) {
+  const pool = makePool(poolOverrides)
+
+  // Source pool lookup
+  prismaMock.examPool.findUnique.mockResolvedValueOnce(sourcePool as any)
+  // resolveStandardPoolForJoin returns the pool id
+  vi.mocked(resolveStandardPoolForJoin).mockResolvedValue(pool as any)
+  // Resolved pool lookup
+  prismaMock.examPool.findUnique.mockResolvedValueOnce(pool as any)
+  // No existing membership
+  prismaMock.poolMembership.findFirst.mockResolvedValueOnce(null)
+  // Total pools count < max
+  prismaMock.poolMembership.count.mockResolvedValueOnce(0)
+  // No duplicate in event
+  prismaMock.poolMembership.findFirst.mockResolvedValueOnce(null)
+  // Student profile (enrolled student)
+  prismaMock.studentProfile.findUnique.mockResolvedValueOnce({
+    userId: 'user-1',
+    enrollmentType: 'MODULAR',
+    user: { id: 'user-1', role: 'STUDENT' },
+  } as any)
+  // Booking create
+  prismaMock.examBooking.create.mockResolvedValueOnce({ id: 'booking-1' } as any)
+  // Membership create
+  prismaMock.poolMembership.create.mockResolvedValueOnce({
+    id: 'mem-1',
+    poolId: pool.id,
+    userId: 'user-1',
+    status: 'RESERVED',
+    amountReserved: 300,
+  } as any)
+  // Pool update after join
+  prismaMock.examPool.update.mockResolvedValueOnce({
+    ...pool,
+    currentMemberCount: pool.currentMemberCount + 1,
+  } as any)
+
+  return pool
+}
+
+describe('Pool Join — joinPoolInternal', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
-  it('rejects join when wallet has insufficient available balance', async () => {
-    prismaMock.wallet.findUnique.mockResolvedValue({
-      id: 'wallet-1',
-      userId: 'user-1',
-      balance: { toNumber: () => 100 },
-      reservedBalance: { toNumber: () => 50 },
-      availableBalance: { toNumber: () => 50 },
-      currency: 'EUR',
-    })
+  it('returns error when source pool is not found', async () => {
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(null)
 
-    const wallet = await prismaMock.wallet.findUnique({ where: { userId: 'user-1' } })
-    const available = wallet!.availableBalance.toNumber()
-    expect(available).toBeLessThan(POOL_EXAM_FEE)
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('not found')
   })
 
-  it('allows join when wallet has sufficient available balance', async () => {
-    prismaMock.wallet.findUnique.mockResolvedValue({
-      id: 'wallet-1',
-      userId: 'user-1',
-      balance: { toNumber: () => 1500 },
-      reservedBalance: { toNumber: () => 0 },
-      availableBalance: { toNumber: () => 1500 },
-      currency: 'EUR',
-    })
+  it('rejects AUTO pool type', async () => {
+    prismaMock.examPool.findUnique.mockResolvedValueOnce({
+      ...sourcePool,
+      poolType: 'AUTO',
+    } as any)
 
-    const wallet = await prismaMock.wallet.findUnique({ where: { userId: 'user-1' } })
-    const available = wallet!.availableBalance.toNumber()
-    expect(available).toBeGreaterThanOrEqual(POOL_EXAM_FEE)
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('Cannot join auto pools')
   })
 
-  it('rejects join when user already has active membership in pool', async () => {
-    prismaMock.poolMembership.findFirst.mockResolvedValue({
-      id: 'mem-1',
-      poolId: 'pool-1',
-      userId: 'user-1',
+  it('rejects GROUP_CHARTER pool type', async () => {
+    prismaMock.examPool.findUnique.mockResolvedValueOnce({
+      ...sourcePool,
+      poolType: 'GROUP_CHARTER',
+    } as any)
+
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('group booking representative')
+  })
+
+  it('rejects pool without eventId', async () => {
+    prismaMock.examPool.findUnique.mockResolvedValueOnce({
+      ...sourcePool,
+      eventId: null,
+    } as any)
+
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('not attached to an exam event')
+  })
+
+  it('rejects when moduleCode is missing', async () => {
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(sourcePool as any)
+
+    const result = await joinPoolInternal(prismaMock as any, {
+      ...baseInput,
+      moduleCode: undefined,
+    })
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('Module code is required')
+  })
+
+  it('rejects when resolved pool is not in an open-like status', async () => {
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(sourcePool as any)
+    vi.mocked(resolveStandardPoolForJoin).mockResolvedValue({
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    } as any)
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(makePool({ status: 'FAILED' }) as any)
+
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('not open')
+  })
+
+  it('rejects when pool is at max capacity', async () => {
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(sourcePool as any)
+    vi.mocked(resolveStandardPoolForJoin).mockResolvedValue({
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    } as any)
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(
+      makePool({ currentMemberCount: POOL_MAX_CANDIDATES }) as any
+    )
+
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('full')
+  })
+
+  it('rejects duplicate membership in same pool', async () => {
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(sourcePool as any)
+    vi.mocked(resolveStandardPoolForJoin).mockResolvedValue({
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    } as any)
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(makePool() as any)
+    // Existing membership found
+    prismaMock.poolMembership.findFirst.mockResolvedValueOnce({
+      id: 'existing-mem',
       status: 'RESERVED',
-    })
+    } as any)
 
-    const existing = await prismaMock.poolMembership.findFirst({
-      where: { poolId: 'pool-1', userId: 'user-1', status: { in: ['RESERVED', 'CONFIRMED'] } },
-    })
-    expect(existing).not.toBeNull()
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('already have a seat')
   })
 
-  it('rejects join when pool is not OPEN', async () => {
-    prismaMock.examPool.findUnique.mockResolvedValue({
-      id: 'pool-1',
-      status: 'CONFIRMED',
-      currentMemberCount: 25,
-      maxCandidates: 28,
-    })
+  it('rejects when user has reached max total pools', async () => {
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(sourcePool as any)
+    vi.mocked(resolveStandardPoolForJoin).mockResolvedValue({
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    } as any)
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(makePool() as any)
+    prismaMock.poolMembership.findFirst.mockResolvedValueOnce(null) // no existing
+    prismaMock.poolMembership.count.mockResolvedValueOnce(4) // at max
 
-    const pool = await prismaMock.examPool.findUnique({ where: { id: 'pool-1' } })
-    expect(pool!.status).not.toBe('OPEN')
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('maximum of 4')
   })
 
-  it('rejects join when pool is at max capacity', async () => {
-    prismaMock.examPool.findUnique.mockResolvedValue({
-      id: 'pool-1',
-      status: 'OPEN',
-      currentMemberCount: 28,
-      maxCandidates: 28,
-    })
-
-    const pool = await prismaMock.examPool.findUnique({ where: { id: 'pool-1' } })
-    expect(pool!.currentMemberCount).toBeGreaterThanOrEqual(pool!.maxCandidates)
-  })
-
-  it('creates membership and reserves wallet balance on successful join', async () => {
-    const mockPool = {
-      id: 'pool-1',
-      status: 'OPEN',
-      currentMemberCount: 10,
-      maxCandidates: 28,
-      minCandidates: POOL_MIN_CANDIDATES,
-    }
-
-    prismaMock.examPool.findUnique.mockResolvedValue(mockPool)
-    prismaMock.poolMembership.findFirst.mockResolvedValue(null) // no existing membership
-    prismaMock.poolMembership.create.mockResolvedValue({
-      id: 'mem-new',
-      poolId: 'pool-1',
+  it('rejects full-time students from joining pools individually', async () => {
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(sourcePool as any)
+    vi.mocked(resolveStandardPoolForJoin).mockResolvedValue({
+      id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    } as any)
+    prismaMock.examPool.findUnique.mockResolvedValueOnce(makePool() as any)
+    prismaMock.poolMembership.findFirst.mockResolvedValueOnce(null)
+    prismaMock.poolMembership.count.mockResolvedValueOnce(0)
+    prismaMock.poolMembership.findFirst.mockResolvedValueOnce(null) // no duplicate in event
+    // Full-time student profile
+    prismaMock.studentProfile.findUnique.mockResolvedValueOnce({
       userId: 'user-1',
-      status: 'RESERVED',
-      amountReserved: POOL_EXAM_FEE,
-    })
-    prismaMock.examPool.update.mockResolvedValue({
-      ...mockPool,
-      currentMemberCount: 11,
-    })
+      enrollmentType: 'FULL_TIME',
+      user: { id: 'user-1', role: 'STUDENT' },
+    } as any)
 
-    // Verify the pool is open and has capacity
-    const pool = await prismaMock.examPool.findUnique({ where: { id: 'pool-1' } })
-    expect(pool!.status).toBe('OPEN')
-    expect(pool!.currentMemberCount).toBeLessThan(pool!.maxCandidates)
-
-    // Verify no duplicate membership
-    const existing = await prismaMock.poolMembership.findFirst({
-      where: { poolId: 'pool-1', userId: 'user-1' },
-    })
-    expect(existing).toBeNull()
-
-    // Create membership
-    const membership = await prismaMock.poolMembership.create({
-      data: {
-        poolId: 'pool-1',
-        userId: 'user-1',
-        status: 'RESERVED',
-        amountReserved: POOL_EXAM_FEE,
-      },
-    })
-    expect(membership.status).toBe('RESERVED')
-    expect(membership.amountReserved).toBe(POOL_EXAM_FEE)
-
-    // Increment member count
-    const updatedPool = await prismaMock.examPool.update({
-      where: { id: 'pool-1' },
-      data: { currentMemberCount: { increment: 1 } },
-    })
-    expect(updatedPool.currentMemberCount).toBe(11)
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(false)
+    expect(result.error).toContain('Full-Time students do not join')
   })
 
-  it('transitions pool to NEAR_FULL when close to minimum', () => {
-    const poolWithThreshold = {
-      currentMemberCount: 23,
-      minCandidates: POOL_MIN_CANDIDATES,
-    }
-    // NEAR_FULL threshold is typically minCandidates - 2
-    const nearFull = poolWithThreshold.currentMemberCount >= POOL_MIN_CANDIDATES - 2
-    expect(nearFull).toBe(true)
+  it('succeeds for valid modular student and creates membership', async () => {
+    setupSuccessPath()
+
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(true)
+    expect(result.membership).toBeDefined()
+    expect(result.booking).toBeDefined()
+    // Verify membership was created
+    expect(prismaMock.poolMembership.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          poolId: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+          userId: 'user-1',
+          examComponentId: 'comp-1',
+        }),
+      })
+    )
+  })
+
+  it('triggers NEAR_FULL when count reaches threshold', async () => {
+    setupSuccessPath({ currentMemberCount: POOL_NEAR_FULL_THRESHOLD - 1 })
+
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(true)
+    expect(result.triggeredNearFull).toBe(true)
+  })
+
+  it('auto-confirms pool when min candidates reached', async () => {
+    const { confirmPoolInternal } = await import('@/lib/pools/confirm')
+    setupSuccessPath({ currentMemberCount: POOL_MIN_CANDIDATES - 1 })
+
+    const result = await joinPoolInternal(prismaMock as any, baseInput)
+    expect(result.success).toBe(true)
+    expect(result.autoConfirmed).toBe(true)
+    expect(confirmPoolInternal).toHaveBeenCalledWith(
+      'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+      prismaMock
+    )
   })
 })

@@ -4,6 +4,8 @@ const isCI = !!process.env.CI
 
 export default defineConfig({
   testDir: './tests/e2e',
+  globalSetup: './tests/e2e/global-setup',
+  globalTeardown: './tests/e2e/global-teardown',
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
@@ -26,7 +28,7 @@ export default defineConfig({
         { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
       ],
   webServer: {
-    command: 'npx cross-env NEXTAUTH_URL=http://localhost:3000 npm run dev',
+    command: 'npx cross-env NEXTAUTH_URL=http://localhost:3000 bun run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !isCI,
   },
