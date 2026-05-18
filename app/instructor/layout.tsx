@@ -16,10 +16,13 @@ export default async function InstructorLayout({ children }: { children: React.R
   const allowedRoles = ['INSTRUCTOR', 'ADMIN', 'SUPER_ADMIN']
   if (!allowedRoles.includes(user.role)) redirect('/login')
 
-  const dbUser = await prisma.user.findUnique({
-    where: { id: user.id },
-    select: { status: true, role: true },
-  })
+  const [dbUser, pendingCount] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: user.id },
+      select: { status: true, role: true },
+    }),
+    getPendingGradingCount(),
+  ])
 
   if (
     !dbUser ||
@@ -31,7 +34,6 @@ export default async function InstructorLayout({ children }: { children: React.R
 
   const userName = user.name || user.email || ''
   const userRole = user.role
-  const pendingCount = await getPendingGradingCount()
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
@@ -41,7 +43,10 @@ export default async function InstructorLayout({ children }: { children: React.R
         userImage={user.image ?? undefined}
         pendingCount={pendingCount}
       />
-      <main id="main-content" className="relative pt-16 lg:pt-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+      <main
+        id="main-content"
+        className="relative min-w-0 flex-1 overflow-x-hidden overflow-y-auto pt-16 lg:pt-0"
+      >
         <div className="sticky top-0 z-30 border-b border-slate-100 bg-slate-50/80 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-900/80">
           <div className="mx-auto max-w-[1920px] px-4 py-3 sm:px-8 lg:px-8">
             <PortalHeader>
@@ -49,9 +54,7 @@ export default async function InstructorLayout({ children }: { children: React.R
             </PortalHeader>
           </div>
         </div>
-        <div className="mx-auto max-w-[1920px] p-4 sm:p-8 lg:px-8 lg:py-6">
-          {children}
-        </div>
+        <div className="mx-auto max-w-[1920px] p-4 sm:p-8 lg:px-8 lg:py-6">{children}</div>
       </main>
     </div>
   )

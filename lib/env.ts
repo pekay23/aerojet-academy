@@ -40,6 +40,10 @@ const envSchema = z.object({
 
   // Webhook Signing Secrets
   RESEND_WEBHOOK_SECRET: z.string().optional(),
+
+  // Upstash Redis (rate limiting)
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
 })
 
 // Build-time safe-checks

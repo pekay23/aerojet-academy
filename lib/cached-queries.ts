@@ -6,6 +6,11 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
  * All use prismaUnfiltered to bypass RLS overhead.
  */
 
+// Academic structure data changes rarely (yearly) — cache for 1 hour
+const STRUCTURE_TTL = 3600
+// Operational data changes more frequently — cache for 5 minutes
+const OPERATIONAL_TTL = 300
+
 export const getCachedCourseCategories = unstable_cache(
   async () => {
     return prismaUnfiltered.courseCategory.findMany({
@@ -13,7 +18,7 @@ export const getCachedCourseCategories = unstable_cache(
     })
   },
   ['course-categories'],
-  { revalidate: 300, tags: ['course-categories'] }
+  { revalidate: STRUCTURE_TTL, tags: ['course-categories'] }
 )
 
 export const getCachedLicenseCategories = unstable_cache(
@@ -26,7 +31,7 @@ export const getCachedLicenseCategories = unstable_cache(
     })
   },
   ['license-categories'],
-  { revalidate: 300, tags: ['license-categories'] }
+  { revalidate: STRUCTURE_TTL, tags: ['license-categories'] }
 )
 
 export const getCachedAcademicYears = unstable_cache(
@@ -34,7 +39,7 @@ export const getCachedAcademicYears = unstable_cache(
     return prismaUnfiltered.academicYear.findMany({ orderBy: { startDate: 'desc' } })
   },
   ['academic-years'],
-  { revalidate: 300, tags: ['academic-years'] }
+  { revalidate: STRUCTURE_TTL, tags: ['academic-years'] }
 )
 
 export const getCachedSemesters = unstable_cache(
@@ -42,7 +47,7 @@ export const getCachedSemesters = unstable_cache(
     return prismaUnfiltered.semester.findMany({ orderBy: { startDate: 'desc' } })
   },
   ['semesters'],
-  { revalidate: 300, tags: ['semesters'] }
+  { revalidate: STRUCTURE_TTL, tags: ['semesters'] }
 )
 
 export const getCachedExamComponents = unstable_cache(
@@ -53,7 +58,7 @@ export const getCachedExamComponents = unstable_cache(
     })
   },
   ['exam-components'],
-  { revalidate: 300, tags: ['exam-components'] }
+  { revalidate: OPERATIONAL_TTL, tags: ['exam-components'] }
 )
 
 export const getCachedActiveCourses = unstable_cache(
@@ -65,5 +70,5 @@ export const getCachedActiveCourses = unstable_cache(
     })
   },
   ['active-courses'],
-  { revalidate: 300, tags: ['courses'] }
+  { revalidate: OPERATIONAL_TTL, tags: ['courses'] }
 )

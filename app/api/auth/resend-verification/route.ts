@@ -2,9 +2,22 @@ import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { generateToken } from '@/lib/auth/helpers'
 import { sendEmailVerificationEmail, sendActivationEmail } from '@/lib/email/service'
+import { rateLimit } from '@/lib/security/rate-limit'
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limit to prevent email flooding
+    const forwarded = req.headers.get('x-forwarded-for')
+    const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
+    const { allowed } = rateLimit(`resend-verify:${ip}`, 3, 60 * 60 * 1000) // 3 per hour per IP
+    if (!allowed) {
+      // Return uniform response to prevent enumeration
+      return NextResponse.json({
+        success: true,
+        message: 'If an account exists, a new verification link has been sent.',
+      })
+    }
+
     const { email } = await req.json()
 
     if (!email) {
@@ -25,9 +38,10 @@ export async function POST(req: NextRequest) {
     }
 
     if (user.emailVerified) {
+      // Uniform response — don't reveal verification status
       return NextResponse.json({
         success: true,
-        message: 'Email is already verified. Please login.',
+        message: 'If an account exists, a new verification link has been sent.',
       })
     }
 

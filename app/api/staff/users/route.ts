@@ -7,6 +7,9 @@ export async function GET(req: NextRequest) {
   const session = await getAuthSession()
   if (!session) return apiUnauthorized()
 
+  const staffRoles = ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER']
+  if (!staffRoles.includes(session.user.role)) return apiUnauthorized()
+
   const { searchParams } = new URL(req.url)
   const role = searchParams.get('role') || 'all'
   const status = searchParams.get('status') || 'all'
@@ -16,7 +19,7 @@ export async function GET(req: NextRequest) {
 
   const where: any = {}
   if (role !== 'all') where.role = role
-  
+
   if (status === 'all') {
     where.status = { notIn: ['ARCHIVED', 'DELETED'] }
   } else {
@@ -52,7 +55,9 @@ export async function GET(req: NextRequest) {
             }
           : role === 'EXAMINER'
             ? {
-                examinerProfile: { select: { id: true, isActive: true, maxParallelSittings: true, notes: true } },
+                examinerProfile: {
+                  select: { id: true, isActive: true, maxParallelSittings: true, notes: true },
+                },
               }
             : {}),
       },

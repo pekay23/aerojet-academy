@@ -31,13 +31,15 @@ export async function POST(req: Request) {
     // The browser doesn't send the raw challenge in the JSON, it's signed inside clientDataJSON.
     // We must find the challenge that belongs to this user, OR we need the client to send the challenge ID.
     // Actually, SimpleWebAuthn's verifyAuthenticationResponse expects `expectedChallenge: string | ((challenge: string) => boolean)`.
-    
-    // Instead of passing a single string, we can look up ALL active auth challenges 
+
+    // Instead of passing a single string, we can look up ALL active auth challenges
     // for this user (or if null userId, any challenge) and see if one matches.
     // But it's easier to retrieve the challenge from DB based on the challenge string the client signed.
     // The clientDataJSON contains the challenge. It is Base64URL encoded.
     // We can extract it by parsing clientDataJSON.
-    const clientDataJSON = Buffer.from(credential.response.clientDataJSON, 'base64').toString('utf8')
+    const clientDataJSON = Buffer.from(credential.response.clientDataJSON, 'base64').toString(
+      'utf8'
+    )
     const parsedClientData = JSON.parse(clientDataJSON)
     const signedChallenge = parsedClientData.challenge
 
@@ -45,8 +47,17 @@ export async function POST(req: Request) {
       where: { challenge: signedChallenge },
     })
 
-    if (!storedChallenge || storedChallenge.type !== 'authentication' || storedChallenge.expiresAt < new Date()) {
+    if (
+      !storedChallenge ||
+      storedChallenge.type !== 'authentication' ||
+      storedChallenge.expiresAt < new Date()
+    ) {
       return new NextResponse('Challenge expired or not found', { status: 401 })
+    }
+
+    // Validate that the challenge belongs to the same user who owns this passkey
+    if (storedChallenge.userId && storedChallenge.userId !== passkey.userId) {
+      return new NextResponse('Challenge-user mismatch', { status: 401 })
     }
 
     const verification = await verifyAuthenticationResponse({
@@ -59,7 +70,7 @@ export async function POST(req: Request) {
         publicKey: passkey.publicKey,
         counter: Number(passkey.counter),
       },
-      requireUserVerification: false,
+      requireUserVerification: true,
     })
 
     if (!verification.verified || !verification.authenticationInfo) {
@@ -87,14 +98,14 @@ export async function POST(req: Request) {
     }
 
     // Generate a one-time token prefixed with 'pk_' for NextAuth bridge
-    const verifyToken = 'pk_' + crypto.randomBytes(32).toString('hex')
-    const verifyTokenExpires = new Date(Date.now() + 60 * 1000) // 1 minute TTL
+    const bridgeToken = 'pk_' + crypto.randomBytes(32).toString('hex')
+    const bridgeExpires = new Date(Date.now() + 60 * 1000) // 1 minute TTL
 
     await prisma.user.update({
       where: { id: passkey.user.id },
       data: {
-        verifyToken,
-        verifyTokenExpires,
+        passkeyBridgeToken: bridgeToken,
+        passkeyBridgeExpires: bridgeExpires,
       },
     })
 
@@ -106,7 +117,7 @@ export async function POST(req: Request) {
       description: `Logged in via passkey: ${passkey.name || 'Unknown'}`,
     })
 
-    return NextResponse.json({ success: true, token: verifyToken })
+    return NextResponse.json({ success: true, token: bridgeToken })
   } catch (error) {
     console.error('[PASSKEY_LOGIN_VERIFY]', error)
     return new NextResponse('Internal Error', { status: 500 })

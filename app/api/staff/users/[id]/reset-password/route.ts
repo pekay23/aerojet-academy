@@ -25,7 +25,12 @@ export const POST = withErrorHandler(
 
     await prismaUnfiltered.user.update({
       where: { id },
-      data: { password: hashedPassword, mustChangePassword: true, passwordChanged: false, passwordChangedAt: new Date() },
+      data: {
+        password: hashedPassword,
+        mustChangePassword: true,
+        passwordChanged: false,
+        passwordChangedAt: new Date(),
+      },
     })
 
     // Send email with tempPassword
@@ -45,7 +50,7 @@ export const POST = withErrorHandler(
         <a href="${process.env.NEXTAUTH_URL}/login" class="btn">Log In Now</a>
       </div>
     `,
-    user.personalEmail || user.email
+      user.personalEmail || user.email
     )
 
     await sendEmail({
@@ -62,6 +67,8 @@ export const POST = withErrorHandler(
       description: `Password reset for user ${user.email} by staff`,
     })
 
-    return apiSuccess({ message: 'Password reset successfully', tempPassword })
+    return apiSuccess({
+      message: 'Password reset successfully. Temporary password sent via email.',
+    })
   }
 )

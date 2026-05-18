@@ -8,6 +8,7 @@ import { Prisma } from '@prisma/client'
 
 const SOFT_DELETE_MODELS = new Set([
   'User',
+  'AdminCalendarEvent',
   'AdminNote',
   'Enrollment',
   'Grade',
@@ -17,23 +18,24 @@ const SOFT_DELETE_MODELS = new Set([
   'Payment',
 ])
 
-export const softDeleteExtension = () => Prisma.defineExtension({
-  name: 'softDeleteExtension',
-  query: {
-    $allModels: {
-      async $allOperations({ model, operation, args, query }) {
-        if (
-          model &&
-          SOFT_DELETE_MODELS.has(model) &&
-          (operation === 'findUnique' ||
-           operation === 'findFirst' ||
-           operation === 'findMany' ||
-           operation === 'count')
-        ) {
-          args.where = { ...args.where, deletedAt: null };
-        }
-        return query(args);
+export const softDeleteExtension = () =>
+  Prisma.defineExtension({
+    name: 'softDeleteExtension',
+    query: {
+      $allModels: {
+        async $allOperations({ model, operation, args, query }) {
+          if (
+            model &&
+            SOFT_DELETE_MODELS.has(model) &&
+            (operation === 'findUnique' ||
+              operation === 'findFirst' ||
+              operation === 'findMany' ||
+              operation === 'count')
+          ) {
+            args.where = { ...args.where, deletedAt: null }
+          }
+          return query(args)
+        },
       },
     },
-  },
-});
+  })

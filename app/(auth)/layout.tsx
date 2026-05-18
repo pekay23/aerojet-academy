@@ -1,14 +1,23 @@
+import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { AuthThemeProvider } from '@/components/shared/AuthThemeProvider'
+
+export const metadata: Metadata = {
+  title: {
+    template: '%s | Aerojet Academy',
+    default: 'Aerojet Academy',
+  },
+  description: 'Sign in or register for your Aerojet Academy account',
+}
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
     <AuthThemeProvider>
       <div className="flex min-h-screen">
         {/* Left branding panel - hidden on mobile */}
-        <div className="relative hidden flex-col justify-between overflow-hidden bg-aerojet-blue p-12 lg:flex lg:w-[45%] xl:w-[40%]">
-          <div className="absolute inset-0 bg-linear-to-br from-aerojet-blue via-[#003a7c] to-[#001a3c]" />
+        <div className="bg-aerojet-blue relative hidden flex-col justify-between overflow-hidden p-12 lg:flex lg:w-[45%] xl:w-[40%]">
+          <div className="from-aerojet-blue absolute inset-0 bg-linear-to-br via-[#003a7c] to-[#001a3c]" />
           <div
             className="absolute inset-0 bg-cover bg-center opacity-20"
             style={{ backgroundImage: 'url(/images/hero/registration.webp)' }}

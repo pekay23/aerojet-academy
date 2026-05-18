@@ -5,12 +5,12 @@
 export type SerializedPrisma<T> = T extends Date
   ? string
   : T extends { toNumber(): number; d: any; s: any } // Prisma Decimal check
-  ? number
-  : T extends Array<infer U>
-  ? Array<SerializedPrisma<U>>
-  : T extends object
-  ? { [K in keyof T]: SerializedPrisma<T[K]> }
-  : T
+    ? number
+    : T extends Array<infer U>
+      ? Array<SerializedPrisma<U>>
+      : T extends object
+        ? { [K in keyof T]: SerializedPrisma<T[K]> }
+        : T
 
 /**
  * Utility to serialize Prisma data for Client Components.
@@ -23,6 +23,21 @@ export function serializePrisma<T>(data: T): SerializedPrisma<T> {
   // Handle arrays
   if (Array.isArray(data)) {
     return data.map((item) => serializePrisma(item)) as any
+  }
+
+  // Handle BigInt (e.g., Passkey.counter)
+  if (typeof data === 'bigint') {
+    return Number(data) as any
+  }
+
+  // Handle Buffer/Bytes (e.g., Passkey.publicKey)
+  if (Buffer.isBuffer(data)) {
+    return data.toString('base64') as any
+  }
+
+  // Handle Uint8Array
+  if (data instanceof Uint8Array) {
+    return Buffer.from(data).toString('base64') as any
   }
 
   // Handle objects

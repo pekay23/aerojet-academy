@@ -113,9 +113,10 @@ export const updateUserSchema = z.object({
   middleName: z.string().optional(),
   lastName: z.string().min(2).optional(),
   phone: z.string().optional(),
-  role: z.enum(['ADMIN', 'STAFF', 'INSTRUCTOR', 'APPLICANT', 'STUDENT']).optional(),
   status: z.enum(['PENDING', 'ACTIVE', 'SUSPENDED', 'ARCHIVED', 'DELETED']).optional(),
-  programmeChoice: z.enum(['FULL_TIME_4YEAR', 'FULL_TIME_2YEAR', 'MILITARY_1YEAR', 'MODULAR', 'EXAM_ONLY']).optional(),
+  programmeChoice: z
+    .enum(['FULL_TIME_4YEAR', 'FULL_TIME_2YEAR', 'MILITARY_1YEAR', 'MODULAR', 'EXAM_ONLY'])
+    .optional(),
   selectedLicenseCategories: z.array(z.string()).optional(),
   studentId: z.string().optional(),
   employeeId: z.string().optional(),
@@ -402,7 +403,10 @@ export const staffBookExamSchema = z.object({
   bookingType: z.enum(['INDIVIDUAL', 'TWIN_PACK', 'FOUR_PACK', 'RESIT']),
   moduleIds: z.array(z.string().cuid()).min(1).max(4),
   eventId: z.string().cuid().optional(),
-  examDate: z.string().refine((val) => !val || !isNaN(Date.parse(val)), 'Invalid exam date').optional(),
+  examDate: z
+    .string()
+    .refine((val) => !val || !isNaN(Date.parse(val)), 'Invalid exam date')
+    .optional(),
   paymentMethod: z.enum(['AUTO_DEBIT', 'MANUAL_LATER']),
   notes: z.string().optional(),
   attemptType: z.string().optional(),

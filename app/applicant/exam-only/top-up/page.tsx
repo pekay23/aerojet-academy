@@ -21,46 +21,54 @@ export default async function ExamOnlyTopUpPage({
 
   const userId = session.user.id
 
-  // Get user info
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      registrationPaid: true,
-      programmeChoice: true,
-      role: true,
-    },
-  })
+  // Fetch all independent data in parallel (single batch)
+  const [
+    user,
+    pendingPayment,
+    wallet,
+    examComponents,
+    pools,
+    paymentMethods,
+    walletTransactions,
+    paymentHistory,
+  ] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { registrationPaid: true, programmeChoice: true, role: true },
+    }),
+    prisma.payment.findFirst({
+      where: { userId, referenceType: 'WALLET_TOPUP', status: 'PENDING' },
+    }),
+    prisma.wallet.findUnique({ where: { userId } }),
+    prisma.examComponent.findMany({
+      where: { course: { isActive: true } },
+      select: { individualPrice: true, poolPrice: true },
+      orderBy: { individualPrice: 'asc' },
+    }),
+    prisma.examPool.findMany({
+      where: { status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] } },
+      select: { seatPrice: true },
+      orderBy: { seatPrice: 'asc' },
+    }),
+    prisma.paymentMethod.findMany({
+      where: { isActive: true },
+      orderBy: { sortOrder: 'asc' },
+    }),
+    prisma.walletTransaction.findMany({
+      where: { wallet: { userId } },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+    }),
+    prisma.payment.findMany({
+      where: { userId, referenceType: 'WALLET_TOPUP' },
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+    }),
+  ])
 
   if (!user || user.role === 'STUDENT') {
     redirect('/login')
   }
-
-  // Check pending payment
-  const pendingPayment = await prisma.payment.findFirst({
-    where: {
-      userId,
-      referenceType: 'WALLET_TOPUP',
-      status: 'PENDING',
-    },
-  })
-
-  // Get wallet
-  const wallet = await prisma.wallet.findUnique({
-    where: { userId },
-  })
-
-  // Get minimum exam fee
-  const examComponents = await prisma.examComponent.findMany({
-    where: { course: { isActive: true } },
-    select: { individualPrice: true, poolPrice: true },
-    orderBy: { individualPrice: 'asc' },
-  })
-
-  const pools = await prisma.examPool.findMany({
-    where: { status: { in: ['OPEN', 'NEAR_FULL', 'CONFIRMED', 'DRAFT'] } },
-    select: { seatPrice: true },
-    orderBy: { seatPrice: 'asc' },
-  })
 
   const lowestIndividual =
     examComponents.length > 0
@@ -69,12 +77,6 @@ export default async function ExamOnlyTopUpPage({
   const lowestPool =
     pools.length > 0 ? Math.min(...pools.map((p) => Number(p.seatPrice || 300))) : 300
   const minAmount = Math.min(lowestIndividual, lowestPool)
-
-  // Get payment methods
-  const paymentMethods = await prisma.paymentMethod.findMany({
-    where: { isActive: true },
-    orderBy: { sortOrder: 'asc' },
-  })
 
   const formattedMethods = paymentMethods.map((pm) => {
     const details: Record<string, string> = {}
@@ -104,21 +106,7 @@ export default async function ExamOnlyTopUpPage({
     }
   })
 
-  // Get transaction history
-  const walletTransactions = await prisma.walletTransaction.findMany({
-    where: { wallet: { userId } },
-    orderBy: { createdAt: 'desc' },
-    take: 20,
-  })
-
-  const paymentHistory = await prisma.payment.findMany({
-    where: {
-      userId,
-      referenceType: 'WALLET_TOPUP',
-    },
-    orderBy: { createdAt: 'desc' },
-    take: 20,
-  })
+  // walletTransactions and paymentHistory already fetched in single Promise.all above
 
   const formattedTransactions = walletTransactions.map((t) => ({
     id: t.id,
@@ -141,27 +129,29 @@ export default async function ExamOnlyTopUpPage({
   }))
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-3xl space-y-6 duration-700">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <Link
             href="/applicant/exam-only"
-            className="mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors hover:text-aerojet-blue"
+            className="hover:text-aerojet-blue mb-3 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition-colors"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Dashboard
           </Link>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             Top Up Wallet
           </h1>
-          <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">Add funds to book exam seats</p>
+          <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
+            Add funds to book exam seats
+          </p>
         </div>
       </div>
 
       {/* Wallet Balance Card */}
       <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-lg dark:border-slate-700">
-        <div className="bg-linear-to-r from-aerojet-blue to-aerojet-sky px-6 py-5">
+        <div className="from-aerojet-blue to-aerojet-sky bg-linear-to-r px-6 py-5">
           <div className="flex items-center gap-4">
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/20 backdrop-blur">
               <Wallet className="h-7 w-7 text-white" />

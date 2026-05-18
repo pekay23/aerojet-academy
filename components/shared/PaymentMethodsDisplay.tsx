@@ -45,6 +45,7 @@ function CopyButton({ text }: { text: string }) {
     <button
       onClick={handleCopy}
       className="rounded-md p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-600"
+      aria-label="Copy to clipboard"
       title="Copy"
     >
       {copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}

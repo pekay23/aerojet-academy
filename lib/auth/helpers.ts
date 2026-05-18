@@ -2,8 +2,7 @@ import { getAuthSession } from '@/lib/auth/auth-options'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import { prismaBase as prisma } from '@/lib/prisma/db-base'
-
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
+import { rateLimit } from '@/lib/security/rate-limit'
 
 /** Generates a random registration code like AERO-2026-A1B2C3 */
 export function generateRegistrationCode(): string {
@@ -29,27 +28,30 @@ export async function generateStudentId(): Promise<string> {
   // Use advisory lock via serializable transaction to prevent race conditions
   const MAX_RETRIES = 3
   for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-    const result = await prisma.$transaction(async (tx) => {
-      const lastStudent = await tx.studentProfile.findFirst({
-        where: { studentId: { startsWith: prefix } },
-        orderBy: { studentId: 'desc' },
-        select: { studentId: true },
-      })
+    const result = await prisma.$transaction(
+      async (tx) => {
+        const lastStudent = await tx.studentProfile.findFirst({
+          where: { studentId: { startsWith: prefix } },
+          orderBy: { studentId: 'desc' },
+          select: { studentId: true },
+        })
 
-      let nextSequence = 1
-      if (lastStudent?.studentId) {
-        const lastSequence = parseInt(lastStudent.studentId.replace(prefix, ''), 10)
-        if (!isNaN(lastSequence)) {
-          nextSequence = lastSequence + 1
+        let nextSequence = 1
+        if (lastStudent?.studentId) {
+          const lastSequence = parseInt(lastStudent.studentId.replace(prefix, ''), 10)
+          if (!isNaN(lastSequence)) {
+            nextSequence = lastSequence + 1
+          }
         }
-      }
 
-      if (nextSequence > 9999) {
-        throw new Error(`Student ID sequence exhausted for year ${year}`)
-      }
+        if (nextSequence > 9999) {
+          throw new Error(`Student ID sequence exhausted for year ${year}`)
+        }
 
-      return `AATA-${year}-${nextSequence.toString().padStart(4, '0')}`
-    }, { isolationLevel: 'Serializable' })
+        return `AATA-${year}-${nextSequence.toString().padStart(4, '0')}`
+      },
+      { isolationLevel: 'Serializable' }
+    )
 
     return result
   }
@@ -60,19 +62,10 @@ export async function generateStudentId(): Promise<string> {
 /**
  * Simple in-memory rate limiter.
  * Returns true if the request is allowed, false if rate-limited.
+ * Delegates to the canonical rate-limit module in lib/security/rate-limit.ts.
  */
 export function checkRateLimit(key: string, maxRequests: number, windowMs: number): boolean {
-  const now = Date.now()
-  const entry = rateLimitMap.get(key)
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs })
-    return true
-  }
-
-  if (entry.count >= maxRequests) return false
-  entry.count++
-  return true
+  return rateLimit(key, maxRequests, windowMs).allowed
 }
 
 /** Extracts client IP from Next.js request headers */
@@ -127,9 +120,7 @@ export async function generateAcademyEmail(
 
   const initials = [...firstInitials, ...middleInitials].filter(Boolean)
 
-  const baseLocal = initials.length > 0
-    ? `${initials.join('.')}.${cleanSurname}`
-    : cleanSurname
+  const baseLocal = initials.length > 0 ? `${initials.join('.')}.${cleanSurname}` : cleanSurname
 
   // Ensure uniqueness — append numeric suffix if email already taken
   let candidate = `${baseLocal}@aerojet-academy.com`

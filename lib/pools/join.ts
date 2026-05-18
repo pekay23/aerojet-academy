@@ -27,7 +27,8 @@ function getLockKeys(str: string): [number, number] {
 function resolveGuaranteeType(bookingType: BookingType) {
   if (bookingType === 'POOL') return 'POOL_FLEX' as const
   if (bookingType === 'GROUP_CHARTER') return 'COMPANY_GUARANTEED' as const
-  if (bookingType === 'TWIN_PACK' || bookingType === 'FOUR_PACK') return 'BUNDLE_GUARANTEED' as const
+  if (bookingType === 'TWIN_PACK' || bookingType === 'FOUR_PACK')
+    return 'BUNDLE_GUARANTEED' as const
   return 'INDIVIDUAL_GUARANTEED' as const
 }
 
@@ -114,7 +115,10 @@ export async function joinPoolInternal(
   })
   if (!sourcePool) return { success: false, error: 'Pool not found' }
   if (sourcePool.poolType === 'AUTO') {
-    return { success: false, error: 'Cannot join auto pools directly. Please book an exam instead.' }
+    return {
+      success: false,
+      error: 'Cannot join auto pools directly. Please book an exam instead.',
+    }
   }
   if (sourcePool.poolType === 'GROUP_CHARTER') {
     return { success: false, error: 'Group charter pools require a group booking representative.' }
@@ -133,10 +137,11 @@ export async function joinPoolInternal(
   })
   const eventIdForBooking = input.eventId || sourcePool.eventId
 
-  const [pool] = await tx.$queryRawUnsafe<any[]>(
-    `SELECT * FROM "exam_pools" WHERE id = $1 FOR UPDATE`,
-    resolvedPool.id
-  )
+  // Advisory lock on pool to prevent concurrent modifications
+  const lockKey = BigInt('0x' + resolvedPool.id.replace(/-/g, '').slice(0, 15))
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(${lockKey})`
+
+  const pool = await tx.examPool.findUnique({ where: { id: resolvedPool.id } })
   if (!pool) return { success: false, error: 'Pool not found' }
   if (!['OPEN', 'NEAR_FULL', 'DRAFT', 'CONFIRMED'].includes(pool.status)) {
     return { success: false, error: 'Pool is not open' }
@@ -282,7 +287,7 @@ export async function joinPoolInternal(
         guaranteeType,
         demandStatus: 'POOLED',
         guaranteedSeat,
-        status: isJoiningConfirmedPool ? 'APPROVED' : (feeToReserve > 0 ? 'PENDING' : 'APPROVED'),
+        status: isJoiningConfirmedPool ? 'APPROVED' : feeToReserve > 0 ? 'PENDING' : 'APPROVED',
         examDate: pool.examDate,
         isResit: input.isResit ?? bookingType === 'RESIT',
       },
@@ -307,7 +312,7 @@ export async function joinPoolInternal(
     membershipAmountPaid = feeToReserve
   } else {
     membershipStatus = feeToReserve > 0 ? 'RESERVED' : 'CONFIRMED'
-    membershipAmountPaid = feeToReserve > 0 ? 0 : input.amountPaid ?? 0
+    membershipAmountPaid = feeToReserve > 0 ? 0 : (input.amountPaid ?? 0)
   }
 
   const membership = await tx.poolMembership.create({
@@ -344,9 +349,10 @@ export async function joinPoolInternal(
   }
 
   const allowedModules = pool.allowedModules || []
-  const newAllowedModules = input.moduleCode && !allowedModules.includes(input.moduleCode)
-    ? [...allowedModules, input.moduleCode]
-    : allowedModules
+  const newAllowedModules =
+    input.moduleCode && !allowedModules.includes(input.moduleCode)
+      ? [...allowedModules, input.moduleCode]
+      : allowedModules
 
   await tx.examPool.update({
     where: { id: pool.id },

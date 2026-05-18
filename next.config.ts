@@ -15,7 +15,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.ufs.sh' },
     ],
   },
-  allowedDevOrigins: ['192.168.8.173', '192.168.100.218', '192.168.100.243'],
+  ...(process.env.NODE_ENV === 'development' && {
+    allowedDevOrigins: ['192.168.8.173', '192.168.100.218', '192.168.100.243'],
+  }),
   experimental: {
     serverActions: {
       bodySizeLimit: '4mb',
@@ -39,7 +41,17 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "frame-ancestors 'self';",
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://uploadthing.com",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://uploadthing.com https://lh3.googleusercontent.com",
+              "font-src 'self' data:",
+              "connect-src 'self' https://uploadthing.com https://*.uploadthing.com https://*.ufs.sh",
+              "frame-ancestors 'self'",
+              "base-uri 'self'",
+              "form-action 'self'",
+            ].join('; '),
           },
           {
             key: 'X-Content-Type-Options',

@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
+import type { AttendanceStatus } from '@prisma/client'
 import { requireAuth } from '@/lib/auth/helpers'
 import {
   apiSuccess,
@@ -68,33 +69,36 @@ export const POST = withErrorHandler(
 
     // Upsert attendance records
     const results = await Promise.all(
-      records.map((record: { userId: string; present: boolean; lateMinutes: number; notes?: string }) => {
-        const studentStatus = record.lateMinutes > 0 ? 'LATE' : record.present ? 'PRESENT' : 'ABSENT'
-        return prisma.attendanceRecord.upsert({
-          where: {
-            classId_userId_date: {
+      records.map(
+        (record: { userId: string; present: boolean; lateMinutes: number; notes?: string }) => {
+          const studentStatus: AttendanceStatus =
+            record.lateMinutes > 0 ? 'LATE' : record.present ? 'PRESENT' : 'ABSENT'
+          return prisma.attendanceRecord.upsert({
+            where: {
+              classId_userId_date: {
+                classId,
+                userId: record.userId,
+                date: attendanceDate,
+              },
+            },
+            update: {
+              status: studentStatus,
+              minutesLate: record.lateMinutes,
+              notes: record.notes || null,
+              recordedBy: instructorProfile.id,
+            },
+            create: {
               classId,
               userId: record.userId,
               date: attendanceDate,
+              status: studentStatus,
+              minutesLate: record.lateMinutes,
+              notes: record.notes || null,
+              recordedBy: instructorProfile.id,
             },
-          },
-          update: {
-            status: studentStatus,
-            minutesLate: record.lateMinutes,
-            notes: record.notes || null,
-            recordedBy: instructorProfile.id,
-          },
-          create: {
-            classId,
-            userId: record.userId,
-            date: attendanceDate,
-            status: studentStatus,
-            minutesLate: record.lateMinutes,
-            notes: record.notes || null,
-            recordedBy: instructorProfile.id,
-          },
-        })
-      })
+          })
+        }
+      )
     )
 
     await createAuditLog({

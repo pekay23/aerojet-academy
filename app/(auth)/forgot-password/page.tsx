@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Metadata } from 'next'
 import { Loader2, Mail, ArrowLeft, CheckCircle2 } from 'lucide-react'
 
-// export const metadata: Metadata = { title: "Forgot Password | Aerojet Academy" };
+// Metadata exported via layout — client components cannot export metadata directly
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
         <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
           <CheckCircle2 className="h-8 w-8 text-green-500" />
         </div>
-        <h2 className="mb-3 text-2xl font-black tracking-tight text-aerojet-blue uppercase">
+        <h2 className="text-aerojet-blue mb-3 text-2xl font-black tracking-tight uppercase">
           Check Your Email
         </h2>
         <p className="mb-8 text-sm text-slate-500 dark:text-slate-400">
@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
         </p>
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 text-sm font-bold text-aerojet-sky hover:underline"
+          className="text-aerojet-sky inline-flex items-center gap-2 text-sm font-bold hover:underline"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Login
         </Link>
@@ -64,7 +64,7 @@ export default function ForgotPasswordPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="text-2xl font-black tracking-tight text-aerojet-blue uppercase sm:text-3xl">
+        <h2 className="text-aerojet-blue text-2xl font-black tracking-tight uppercase sm:text-3xl">
           Reset Password
         </h2>
         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
               autoCapitalize="none"
               autoCorrect="off"
               spellCheck="false"
-              className="w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:ring-aerojet-sky focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
+              className="focus:ring-aerojet-sky w-full rounded-xl border border-slate-200 bg-white py-3.5 pr-4 pl-11 text-sm text-slate-900 transition-all placeholder:text-slate-300 focus:border-transparent focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
             />
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
         <button
           type="submit"
           disabled={loading || !email}
-          className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue py-4 text-xs font-black tracking-widest text-white uppercase shadow-lg transition-all hover:bg-aerojet-sky disabled:cursor-not-allowed disabled:opacity-50"
+          className="bg-aerojet-blue hover:bg-aerojet-sky flex w-full items-center justify-center gap-2 rounded-xl py-4 text-xs font-black tracking-widest text-white uppercase shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loading ? (
             <>
@@ -118,7 +118,7 @@ export default function ForgotPasswordPage() {
       <div className="mt-8 text-center">
         <Link
           href="/login"
-          className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-aerojet-sky dark:text-slate-400"
+          className="hover:text-aerojet-sky inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors dark:text-slate-400"
         >
           <ArrowLeft className="h-4 w-4" /> Back to Login
         </Link>

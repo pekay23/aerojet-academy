@@ -26,7 +26,8 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import RichTextEditor from '@/components/shared/RichTextEditor'
+import dynamic from 'next/dynamic'
+const RichTextEditor = dynamic(() => import('@/components/shared/RichTextEditor'), { ssr: false })
 import { cn } from '@/lib/utils'
 
 const TEMPLATES = [
@@ -260,7 +261,7 @@ export default function EmailPreviewsPage() {
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h2 className="text-xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h2 className="text-aerojet-blue text-xl font-black tracking-tight dark:text-white">
             Email Templates
           </h2>
           <p className="mt-1 text-sm text-slate-500">
@@ -273,7 +274,9 @@ export default function EmailPreviewsPage() {
             onClick={() => setIsEditing(!isEditing)}
             className={cn(
               'text-xs font-bold tracking-widest uppercase transition-all',
-              isEditing ? 'border-amber-500 text-amber-500' : 'border-aerojet-blue text-aerojet-blue'
+              isEditing
+                ? 'border-amber-500 text-amber-500'
+                : 'border-aerojet-blue text-aerojet-blue'
             )}
           >
             {isEditing ? (
@@ -289,7 +292,7 @@ export default function EmailPreviewsPage() {
           <Button
             disabled={sendingTest}
             onClick={() => handleSendTest(true)}
-            className="bg-aerojet-blue text-xs font-bold tracking-widest uppercase shadow-lg transition-all hover:bg-aerojet-sky"
+            className="bg-aerojet-blue hover:bg-aerojet-sky text-xs font-bold tracking-widest uppercase shadow-lg transition-all"
           >
             <Send className="mr-2 h-4 w-4" />
             {sendingTest ? 'Sending...' : 'Send Global Test'}
@@ -333,51 +336,52 @@ export default function EmailPreviewsPage() {
               Templates
             </CardTitle>
           </CardHeader>
-          <CardContent className="relative space-y-1 p-2" onMouseLeave={() => setHoveredTemplate(null)}>
+          <CardContent
+            className="relative space-y-1 p-2"
+            onMouseLeave={() => setHoveredTemplate(null)}
+          >
             {allTemplates.map((tmpl) => {
               const isActive = activeTemplate === tmpl.id
               const isHovered = hoveredTemplate === tmpl.id && !isActive
               return (
-              <button
-                key={tmpl.id}
-                onClick={() => {
-                  setActiveTemplate(tmpl.id)
-                  setIsEditing(false)
-                }}
-                onMouseEnter={() => setHoveredTemplate(tmpl.id)}
-                className={`relative flex w-full items-center gap-3 rounded-xl p-3 text-left transition-all ${
-                  isActive
-                    ? 'font-bold text-aerojet-blue'
-                    : 'text-slate-500 hover:text-slate-700'
-                }`}
-              >
-                {/* Hover highlight */}
-                {isHovered && (
-                  <motion.div
-                    layoutId="template-hover"
-                    className="absolute inset-0 bg-slate-100 dark:bg-slate-800/50"
-                    style={{ borderRadius: 12, zIndex: 0 }}
-                    transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
-                  />
-                )}
-                {/* Active indicator */}
-                {isActive && (
-                  <motion.div
-                    layoutId="template-pill"
-                    className="absolute inset-0 bg-white shadow-md"
-                    style={{ borderRadius: 12, zIndex: 0 }}
-                    transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <div
-                  className={`relative z-10 rounded-lg p-2 ${
-                    isActive ? 'bg-aerojet-blue text-white' : 'bg-slate-200'
+                <button
+                  key={tmpl.id}
+                  onClick={() => {
+                    setActiveTemplate(tmpl.id)
+                    setIsEditing(false)
+                  }}
+                  onMouseEnter={() => setHoveredTemplate(tmpl.id)}
+                  className={`relative flex w-full items-center gap-3 rounded-xl p-3 text-left transition-all ${
+                    isActive ? 'text-aerojet-blue font-bold' : 'text-slate-500 hover:text-slate-700'
                   }`}
                 >
-                  <tmpl.icon className="h-4 w-4" />
-                </div>
-                <span className="relative z-10 text-sm">{tmpl.name}</span>
-              </button>
+                  {/* Hover highlight */}
+                  {isHovered && (
+                    <motion.div
+                      layoutId="template-hover"
+                      className="absolute inset-0 bg-slate-100 dark:bg-slate-800/50"
+                      style={{ borderRadius: 12, zIndex: 0 }}
+                      transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
+                    />
+                  )}
+                  {/* Active indicator */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="template-pill"
+                      className="absolute inset-0 bg-white shadow-md"
+                      style={{ borderRadius: 12, zIndex: 0 }}
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <div
+                    className={`relative z-10 rounded-lg p-2 ${
+                      isActive ? 'bg-aerojet-blue text-white' : 'bg-slate-200'
+                    }`}
+                  >
+                    <tmpl.icon className="h-4 w-4" />
+                  </div>
+                  <span className="relative z-10 text-sm">{tmpl.name}</span>
+                </button>
               )
             })}
           </CardContent>
@@ -396,7 +400,7 @@ export default function EmailPreviewsPage() {
                 <Card className="overflow-hidden border-slate-200 shadow-none">
                   <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100 bg-white">
                     <div>
-                      <CardTitle className="text-xl font-bold text-aerojet-blue">
+                      <CardTitle className="text-aerojet-blue text-xl font-bold">
                         {currentTemplate?.name}
                       </CardTitle>
                       <CardDescription className="mt-1">
@@ -446,7 +450,7 @@ export default function EmailPreviewsPage() {
                   <CardHeader className="border-b border-slate-100 pb-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle className="text-xl font-bold text-aerojet-blue">
+                        <CardTitle className="text-aerojet-blue text-xl font-bold">
                           Edit Template: {currentTemplate?.name}
                         </CardTitle>
                         <CardDescription>
@@ -494,7 +498,7 @@ export default function EmailPreviewsPage() {
                             placeholder="Enter subject line..."
                             value={editData.subject}
                             onChange={(e) => setEditData({ ...editData, subject: e.target.value })}
-                            className="text-lg font-bold text-aerojet-blue"
+                            className="text-aerojet-blue text-lg font-bold"
                           />
                         </div>
 
@@ -530,10 +534,10 @@ export default function EmailPreviewsPage() {
                                   navigator.clipboard.writeText(`{{${p}}}`)
                                   toast.success(`Copied {{${p}}}`)
                                 }}
-                                className="group flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 font-mono text-[11px] transition-all hover:border-aerojet-blue"
+                                className="group hover:border-aerojet-blue flex items-center gap-1 rounded-full border border-slate-200 bg-white px-3 py-1 font-mono text-[11px] transition-all"
                               >
                                 <PlusCircle
-                                  className="h-3 w-3 text-slate-300 group-hover:text-aerojet-blue"
+                                  className="group-hover:text-aerojet-blue h-3 w-3 text-slate-300"
                                   role="presentation"
                                 />
                                 <span>
@@ -559,8 +563,8 @@ export default function EmailPreviewsPage() {
           {!isEditing && (
             <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-4">
               <div className="flex items-center gap-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-aerojet-sky/10">
-                  <Mail className="h-5 w-5 text-aerojet-sky" />
+                <div className="bg-aerojet-sky/10 flex h-10 w-10 items-center justify-center rounded-full">
+                  <Mail className="text-aerojet-sky h-5 w-5" />
                 </div>
                 <div>
                   <p className="text-sm font-bold text-slate-900">Individual Template Test</p>
@@ -573,7 +577,7 @@ export default function EmailPreviewsPage() {
                 variant="outline"
                 disabled={sendingTest}
                 onClick={() => handleSendTest(false)}
-                className="border-aerojet-blue text-[10px] font-bold tracking-widest text-aerojet-blue uppercase transition-all hover:bg-aerojet-blue hover:text-white"
+                className="border-aerojet-blue text-aerojet-blue hover:bg-aerojet-blue text-[10px] font-bold tracking-widest uppercase transition-all hover:text-white"
               >
                 {sendingTest ? 'Sending...' : 'Send Live Test'}
               </Button>
