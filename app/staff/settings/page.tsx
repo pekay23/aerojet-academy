@@ -9,12 +9,14 @@ import PaymentMethodsManager from './_components/PaymentMethodsManager'
 import WelcomeMessagesManager from './_components/WelcomeMessagesManager'
 import { getWelcomeMessagesGrouped } from '@/lib/welcome-messages'
 import nextDynamic from 'next/dynamic'
-const EmailPreviewsPage = nextDynamic(() => import('./email-previews/page'), { ssr: false })
 import AcademicCalendarManager from './academic-calendar/_components/AcademicCalendarManager'
 import BackupManager from './_components/BackupManager'
 import ExchangeRateDisplay from './_components/ExchangeRateDisplay'
 import TwoFactorSettings from './_components/TwoFactorSettings'
 import CustomFieldsManager from './custom-fields/_components/CustomFieldsManager'
+import { PasskeySettings } from './_components/PasskeySettings'
+
+const EmailPreviewsPage = nextDynamic(() => import('./email-previews/page'), { ssr: false })
 
 export const metadata: Metadata = { title: 'Settings | Staff Portal' }
 export const dynamic = 'force-dynamic'
@@ -195,9 +197,6 @@ async function WelcomeMessagesContent() {
   const welcomeMessages = await getWelcomeMessagesGrouped(prismaUnfiltered)
   return <WelcomeMessagesManager initialMessages={welcomeMessages} />
 }
-
-import { PasskeySettings } from './_components/PasskeySettings'
-
 async function SecurityContent({ userId }: { userId: string }) {
   const user = await prismaUnfiltered.user.findUnique({
     where: { id: userId },

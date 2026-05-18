@@ -34,6 +34,8 @@ import {
   getYoYComparison,
 } from '@/lib/analytics/reports'
 import dynamic from 'next/dynamic'
+import ReportsTabs from '../_components/ReportsTabs'
+import { PeriodFilter } from './_components/PeriodFilter'
 
 const YoYRevenueChart = dynamic(
   () => import('./_components/YoYCharts').then((m) => ({ default: m.YoYRevenueChart })),
@@ -79,9 +81,6 @@ const Sparkline = dynamic(
   () => import('./_components/ReportCharts').then((m) => ({ default: m.Sparkline })),
   { ssr: false }
 )
-import ReportsTabs from '../_components/ReportsTabs'
-import { PeriodFilter } from './_components/PeriodFilter'
-
 export const metadata: Metadata = { title: 'Reports | Staff Portal' }
 
 /* ────────────────────────────── Overview Tab ────────────────────────────── */
