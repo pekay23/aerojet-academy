@@ -2,6 +2,7 @@ export const ROLE_HIERARCHY: Record<string, number> = {
   SUPER_ADMIN: 100,
   ADMIN: 80,
   STAFF: 60,
+  EXAMINER: 50,
   INSTRUCTOR: 40,
   STUDENT: 20,
   APPLICANT: 10,
@@ -12,7 +13,7 @@ export function hasRole(userRole: string, requiredRole: string): boolean {
 }
 
 export function isStaff(role: string): boolean {
-  return ['SUPER_ADMIN', 'ADMIN', 'STAFF'].includes(role)
+  return ['SUPER_ADMIN', 'ADMIN', 'STAFF', 'EXAMINER'].includes(role)
 }
 
 export function isAdmin(role: string): boolean {
@@ -72,7 +73,11 @@ export async function getStaffPermissions(userId: string): Promise<Permission[]>
   return Array.isArray(perms) ? (perms as Permission[]) : []
 }
 
-export async function hasPermission(userId: string, role: string, permission: Permission): Promise<boolean> {
+export async function hasPermission(
+  userId: string,
+  role: string,
+  permission: Permission
+): Promise<boolean> {
   if (role === 'ADMIN' || role === 'SUPER_ADMIN') return true
   const permissions = await getStaffPermissions(userId)
   return permissions.includes(permission)
@@ -82,7 +87,9 @@ export async function hasPermission(userId: string, role: string, permission: Pe
  * Require a specific permission for the current session user.
  * ADMIN/SUPER_ADMIN bypass all checks. STAFF needs explicit permission.
  */
-export async function requirePermission(permission: Permission): Promise<{ id: string; role: string }> {
+export async function requirePermission(
+  permission: Permission
+): Promise<{ id: string; role: string }> {
   const session = await getAuthSession()
   if (!session) throw new Error('Unauthorized')
 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
@@ -61,6 +62,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       description: `Updated Semester: ${name}`,
     })
 
+    revalidateTag('semesters', 'max')
     return NextResponse.json(updatedSemester)
   } catch (error: any) {
     console.error('Failed to update semester:', error)
@@ -101,6 +103,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       description: `Deleted Semester: ${existingSemester.name}`,
     })
 
+    revalidateTag('semesters', 'max')
     return NextResponse.json({ success: true })
   } catch (error: any) {
     console.error('Failed to delete semester:', error)

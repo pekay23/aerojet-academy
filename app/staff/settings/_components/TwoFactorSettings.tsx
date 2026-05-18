@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Shield, ShieldCheck, ShieldOff, Loader2, Copy, Check } from 'lucide-react'
+import { Shield, ShieldCheck, ShieldOff, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { toast } from 'sonner'
@@ -15,9 +15,7 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
   const [step, setStep] = useState<'idle' | 'setup' | 'disable'>('idle')
   const [loading, setLoading] = useState(false)
   const [qrCodeUrl, setQrCodeUrl] = useState('')
-  const [secret, setSecret] = useState('')
   const [code, setCode] = useState('')
-  const [copied, setCopied] = useState(false)
 
   async function handleStartSetup() {
     setLoading(true)
@@ -26,7 +24,6 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
       if (!res.ok) throw new Error('Failed to generate 2FA secret')
       const data = await res.json()
       setQrCodeUrl(data.qrCodeUrl)
-      setSecret(data.secret)
       setStep('setup')
     } catch {
       toast.error('Failed to start 2FA setup')
@@ -45,7 +42,7 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
       const res = await fetch('/api/auth/2fa/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: code, secret }),
+        body: JSON.stringify({ token: code }),
       })
       if (!res.ok) {
         const text = await res.text()
@@ -55,7 +52,6 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
       setStep('idle')
       setCode('')
       setQrCodeUrl('')
-      setSecret('')
       toast.success('Two-factor authentication enabled')
     } catch (err: any) {
       toast.error(err.message || 'Failed to verify code')
@@ -91,22 +87,6 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
     }
   }
 
-  function handleCopySecret() {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(secret)
-    } else {
-      // Fallback for non-HTTPS contexts (local dev)
-      const textarea = document.createElement('textarea')
-      textarea.value = secret
-      document.body.appendChild(textarea)
-      textarea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textarea)
-    }
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
   return (
     <div className="space-y-6">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -115,7 +95,7 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
             <Shield className="h-6 w-6" />
           </div>
           <div className="flex-1">
-            <h3 className="text-lg font-black text-aerojet-blue dark:text-white">
+            <h3 className="text-aerojet-blue text-lg font-black dark:text-white">
               Two-Factor Authentication
             </h3>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -145,11 +125,15 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
           {enabled ? (
             <div className="space-y-4">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Your account is protected with two-factor authentication. To disable it, you will need to enter a code from your authenticator app.
+                Your account is protected with two-factor authentication. To disable it, you will
+                need to enter a code from your authenticator app.
               </p>
               <Button
                 variant="destructive"
-                onClick={() => { setStep('disable'); setCode('') }}
+                onClick={() => {
+                  setStep('disable')
+                  setCode('')
+                }}
                 disabled={loading}
               >
                 Disable 2FA
@@ -158,7 +142,8 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
           ) : (
             <div className="space-y-4">
               <p className="text-sm text-slate-600 dark:text-slate-400">
-                Protect your staff account by requiring a verification code from an authenticator app (Google Authenticator, Authy, etc.) each time you log in.
+                Protect your staff account by requiring a verification code from an authenticator
+                app (Google Authenticator, Authy, etc.) each time you log in.
               </p>
               <Button
                 onClick={handleStartSetup}
@@ -194,27 +179,6 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
               </div>
             )}
 
-            {secret && (
-              <div>
-                <p className="text-xs font-bold text-slate-500 dark:text-slate-400 mb-2">
-                  Or enter this key manually:
-                </p>
-                <div className="flex items-center gap-2">
-                  <code className="rounded-lg bg-slate-100 px-3 py-2 text-xs font-mono font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200 select-all">
-                    {secret}
-                  </code>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCopySecret}
-                    className="h-8 w-8 p-0"
-                  >
-                    {copied ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
-                  </Button>
-                </div>
-              </div>
-            )}
-
             <div>
               <h4 className="text-sm font-bold text-slate-900 dark:text-white">
                 Step 2: Enter Verification Code
@@ -231,7 +195,7 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
                   placeholder="000000"
                   value={code}
                   onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="w-40 text-center text-lg font-mono tracking-[0.3em]"
+                  className="w-40 text-center font-mono text-lg tracking-[0.3em]"
                 />
                 <Button
                   onClick={handleVerifyAndEnable}
@@ -246,7 +210,11 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
 
             <Button
               variant="ghost"
-              onClick={() => { setStep('idle'); setCode(''); setQrCodeUrl(''); setSecret('') }}
+              onClick={() => {
+                setStep('idle')
+                setCode('')
+                setQrCodeUrl('')
+              }}
             >
               Cancel
             </Button>
@@ -262,7 +230,8 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
               Confirm Disable 2FA
             </h4>
             <p className="text-sm text-red-700/80 dark:text-red-400/80">
-              Enter a code from your authenticator app to confirm you want to disable two-factor authentication.
+              Enter a code from your authenticator app to confirm you want to disable two-factor
+              authentication.
             </p>
             <div className="flex items-center gap-3">
               <Input
@@ -273,7 +242,7 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
                 placeholder="000000"
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                className="w-40 text-center text-lg font-mono tracking-[0.3em]"
+                className="w-40 text-center font-mono text-lg tracking-[0.3em]"
               />
               <Button
                 variant="destructive"
@@ -285,7 +254,10 @@ export default function TwoFactorSettings({ twoFactorEnabled }: TwoFactorSetting
               </Button>
               <Button
                 variant="ghost"
-                onClick={() => { setStep('idle'); setCode('') }}
+                onClick={() => {
+                  setStep('idle')
+                  setCode('')
+                }}
               >
                 Cancel
               </Button>

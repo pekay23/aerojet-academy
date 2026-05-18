@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       expectedChallenge: storedChallenge.challenge,
       expectedOrigin: rpConfig.origin as string[],
       expectedRPID: rpConfig.rpID,
-      requireUserVerification: false,
+      requireUserVerification: true,
     })
 
     if (!verification.verified || !verification.registrationInfo) {
@@ -48,7 +48,11 @@ export async function POST(req: Request) {
       )
     }
 
-    const { credential: cred, credentialDeviceType, credentialBackedUp } = verification.registrationInfo
+    const {
+      credential: cred,
+      credentialDeviceType,
+      credentialBackedUp,
+    } = verification.registrationInfo
 
     // Count existing passkeys for auto-naming
     const existingCount = await prisma.passkey.count({
@@ -58,9 +62,10 @@ export async function POST(req: Request) {
     const passkeyName = name || `Passkey ${existingCount + 1}`
 
     // Store the credential — handle potential type edge cases
-    const publicKeyBytes = cred.publicKey instanceof Uint8Array
-      ? Buffer.from(cred.publicKey)
-      : Buffer.from(cred.publicKey as unknown as ArrayBuffer)
+    const publicKeyBytes =
+      cred.publicKey instanceof Uint8Array
+        ? Buffer.from(cred.publicKey)
+        : Buffer.from(cred.publicKey as unknown as ArrayBuffer)
 
     const passkey = await prisma.passkey.create({
       data: {

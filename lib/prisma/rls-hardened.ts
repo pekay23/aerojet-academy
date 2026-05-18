@@ -3,6 +3,15 @@ import { AsyncLocalStorage } from 'async_hooks'
 
 const rlsBypassStorage = new AsyncLocalStorage<boolean>()
 
+// Request-scoped RLS transaction context.
+// When set, queries reuse the existing transaction instead of opening a new one per query.
+interface RlsTxContext {
+  tx: any
+  userId: string
+  userRole?: string
+}
+const rlsTxStorage = new AsyncLocalStorage<RlsTxContext>()
+
 function stripInternalPrismaArgs<T>(value: T): T {
   if (Array.isArray(value)) {
     return value.map((item) => stripInternalPrismaArgs(item)) as T
@@ -142,7 +151,10 @@ export const rlsExtension = (baseClient: any) =>
           if (!userId) return query(sanitizedArgs)
 
           const userRole = (session as any)?.user?.role
-          if (userRole && ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER'].includes(userRole)) {
+          if (
+            userRole &&
+            ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(userRole)
+          ) {
             return query(sanitizedArgs)
           }
 
@@ -151,6 +163,12 @@ export const rlsExtension = (baseClient: any) =>
           }
 
           const modelKey = model.charAt(0).toLowerCase() + model.slice(1)
+
+          // Reuse an existing request-scoped RLS transaction if available
+          const existingCtx = rlsTxStorage.getStore()
+          if (existingCtx) {
+            return existingCtx.tx[modelKey][operation](sanitizedArgs)
+          }
 
           return rlsBypassStorage.run(true, () =>
             baseClient.$transaction(
@@ -173,7 +191,10 @@ export const rlsExtension = (baseClient: any) =>
         if (!session?.user?.id) return query(sanitizedArgs)
 
         const userRole = (session as any)?.user?.role
-        if (userRole && ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER'].includes(userRole)) {
+        if (
+          userRole &&
+          ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(userRole)
+        ) {
           return query(sanitizedArgs)
         }
 
@@ -190,3 +211,38 @@ export const rlsExtension = (baseClient: any) =>
       },
     },
   })
+
+/**
+ * Run multiple RLS-protected queries in a single transaction.
+ * `set_config()` is called once, and all queries inside `fn` reuse that connection.
+ * Use this in student/applicant pages to avoid per-query transaction overhead.
+ *
+ * @example
+ * const [enrollments, grades] = await withRlsBatch(async () => {
+ *   return Promise.all([
+ *     prisma.enrollment.findMany({ where: { userId } }),
+ *     prisma.grade.findMany({ where: { userId } }),
+ *   ])
+ * })
+ */
+export async function withRlsBatch<T>(fn: () => Promise<T>): Promise<T> {
+  const session = await getSession()
+  const userId = session?.user?.id
+  if (!userId) return fn()
+
+  const userRole = (session as any)?.user?.role
+  if (userRole && ['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(userRole)) {
+    return fn()
+  }
+
+  const { prismaBase } = await import('./db-base')
+
+  return prismaBase.$transaction(
+    async (tx: any) => {
+      await applyRlsContext(tx, userId, userRole)
+      const ctx: RlsTxContext = { tx, userId, userRole }
+      return rlsTxStorage.run(ctx, fn)
+    },
+    { maxWait: 30000, timeout: 60000 }
+  )
+}

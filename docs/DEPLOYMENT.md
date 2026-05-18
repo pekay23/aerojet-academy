@@ -1,12 +1,14 @@
 # Deployment Guide
 
 ## Vercel (Recommended)
+
 1. Push code to GitHub
 2. Import project in Vercel
 3. Set environment variables (see below)
 4. Deploy
 
 ### Environment Variables for Production
+
 - `DATABASE_URL` — Neon PostgreSQL **pooler** connection string (must be set for Production AND Development environments)
 - `DIRECT_URL` — Neon direct connection string (used as fallback in dev)
 - `NEXTAUTH_URL` — Production URL
@@ -16,40 +18,56 @@
 - `CRON_SECRET` — For cron job authentication (required — all cron endpoints validate this)
 
 ### Database Adapter — IMPORTANT
+
 The project uses `@prisma/adapter-pg` with the standard `pg` PostgreSQL driver. **Do NOT switch to `@prisma/adapter-neon`** — the `ws` WebSocket module required by the Neon serverless adapter does not work in Vercel's Turbopack serverless bundles. See `docs/KNOWN_ISSUES.md` for details.
 
 Local exception: `next dev` may dynamically select the Neon adapter for `*.neon.tech` URLs to avoid local TCP connection stalls. Production and Vercel runtime must remain on `@prisma/adapter-pg`.
 
 ## Local Development Database
+
 The deployed Vercel app must stay on `@prisma/adapter-pg` with the standard `pg` driver. For `next dev`, `lib/prisma/db-base.ts` keeps that production path untouched but uses a local-only Neon WebSocket adapter when the app is running in development against a `*.neon.tech` URL. This avoids the 60s TCP handshake hangs that can happen on some local networks while still preserving Prisma transaction support.
 
 Local runtime connection priority:
+
 1. `LOCAL_DATABASE_URL` if set, for a local Postgres database or a dedicated dev URL.
 2. `DATABASE_URL`, normally the Neon pooler URL.
 3. `DIRECT_URL`, only as a fallback.
 
 Optional local overrides:
+
 - `AEROJET_LOCAL_DB_ADAPTER=pg` forces the standard `pg` adapter in `next dev`.
 - `AEROJET_LOCAL_DB_ADAPTER=neon` forces the local Neon adapter in `next dev`.
 - `DB_CONNECT_TIMEOUT_MS=10000` changes the local TCP adapter's fail-fast timeout.
 
 ### Cron Jobs (Vercel)
+
 Configured in `vercel.json`. All cron endpoints require `Authorization: Bearer <CRON_SECRET>` header:
+
 ```json
-{ "crons": [
-  { "path": "/api/cron/check-events", "schedule": "0 1 * * *" },
-  { "path": "/api/cron/check-pools", "schedule": "0 2 * * *" },
-  { "path": "/api/cron/milestone-reminders", "schedule": "0 9 * * *" },
-  { "path": "/api/cron/send-reminders", "schedule": "0 10 * * *" },
-  { "path": "/api/cron/payment-deadlines", "schedule": "0 3 * * *" },
-  { "path": "/api/cron/backup", "schedule": "0 4 * * *" },
-  { "path": "/api/cron/cleanup-audit-logs", "schedule": "0 0 1 * *" },
-  { "path": "/api/cron/expire-bundles", "schedule": "0 0 * * *" },
-  { "path": "/api/cron/cleanup-abandoned-accounts", "schedule": "0 5 * * *" }
-]}
+{
+  "crons": [
+    { "path": "/api/cron/check-events", "schedule": "0 1 * * *" },
+    { "path": "/api/cron/check-pools", "schedule": "0 2 * * *" },
+    { "path": "/api/cron/milestone-reminders", "schedule": "0 9 * * *" },
+    { "path": "/api/cron/send-reminders", "schedule": "0 10 * * *" },
+    { "path": "/api/cron/payment-deadlines", "schedule": "0 3 * * *" },
+    { "path": "/api/cron/backup", "schedule": "0 4 * * *" },
+    { "path": "/api/cron/cleanup-audit-logs", "schedule": "0 0 1 * *" },
+    { "path": "/api/cron/expire-bundles", "schedule": "0 0 * * *" },
+    { "path": "/api/cron/cleanup-abandoned-accounts", "schedule": "0 5 * * *" },
+    { "path": "/api/cron/scheduled-reports", "schedule": "0 8 * * 1" }
+  ]
+}
 ```
 
+**Route files not yet registered in vercel.json** (run manually or add schedules as needed):
+
+- `/api/cron/aptitude-reminders`
+- `/api/cron/interview-reminders`
+- `/api/cron/modular-deadlines`
+
 ## Database Migrations
+
 ```bash
 npx prisma migrate deploy     # Apply migrations
 npx prisma db push             # Push schema (dev)

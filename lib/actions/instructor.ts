@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma/client'
+import type { AttendanceStatus } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
 import { serializePrisma } from '@/lib/utils/serialization'
@@ -372,7 +373,7 @@ export async function recordAttendance(data: {
   classId: string
   userId: string
   date: Date
-  status: string
+  status: AttendanceStatus
   notes?: string
 }) {
   const session = await getAuthSession()
@@ -616,10 +617,12 @@ export async function getInstructorProfile() {
   if (!profile.profile) throw new Error('User profile missing')
   if (!profile.instructorProfile) throw new Error('Instructor details missing')
 
-  return serializePrisma(profile as Omit<typeof profile, 'profile' | 'instructorProfile'> & {
-    profile: NonNullable<typeof profile.profile>;
-    instructorProfile: NonNullable<typeof profile.instructorProfile>;
-  })
+  return serializePrisma(
+    profile as Omit<typeof profile, 'profile' | 'instructorProfile'> & {
+      profile: NonNullable<typeof profile.profile>
+      instructorProfile: NonNullable<typeof profile.instructorProfile>
+    }
+  )
 }
 
 export async function updateInstructorProfile(data: any) {

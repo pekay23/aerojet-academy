@@ -12,7 +12,7 @@ export async function POST() {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: session.user.id }
+      where: { id: session.user.id },
     })
 
     if (!user) {
@@ -35,11 +35,21 @@ export async function POST() {
     // Generate QR code data URL
     const qrCodeUrl = await QRCode.toDataURL(otpauthUrl)
 
-    // Return the secret and QR code URL
-    // The secret won't be saved to the database until the user verifies it
+    // Store the pending secret server-side in settings JSON — never trust client to send it back
+    const currentSettings = ((user.settings as Record<string, unknown>) || {}) as Record<
+      string,
+      string | number | boolean
+    >
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: {
+        settings: { ...currentSettings, pendingTwoFactorSecret: secret },
+      },
+    })
+
+    // Return QR code URL only — secret is stored server-side for verification
     return NextResponse.json({
-      secret,
-      qrCodeUrl
+      qrCodeUrl,
     })
   } catch (error) {
     console.error('[2FA_GENERATE]', error)

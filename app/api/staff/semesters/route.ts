@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
@@ -58,6 +59,7 @@ export async function POST(req: NextRequest) {
       description: `Created Semester: ${name} under ${academicYear.name}`,
     })
 
+    revalidateTag('semesters', 'max')
     return NextResponse.json(semester, { status: 201 })
   } catch (error: any) {
     console.error('Failed to create semester:', error)

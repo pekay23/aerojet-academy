@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
@@ -73,6 +74,7 @@ export const PATCH = withErrorHandler(
       details: validation.data,
     })
 
+    revalidateTag('courses', 'max')
     return apiSuccess(updated)
   }
 )
@@ -121,7 +123,10 @@ export const DELETE = withErrorHandler(
           await tx.examComponent.findMany({ where: { courseId: id }, select: { id: true } })
         ).map((c) => c.id)
         if (componentIds.length > 0) {
-          await tx.poolMembership.updateMany({ where: { examComponentId: { in: componentIds } }, data: softDeleteData() })
+          await tx.poolMembership.updateMany({
+            where: { examComponentId: { in: componentIds } },
+            data: softDeleteData(),
+          })
           await tx.exam.deleteMany({ where: { examComponentId: { in: componentIds } } })
           await tx.examComponent.deleteMany({ where: { courseId: id } })
         }
@@ -143,6 +148,7 @@ export const DELETE = withErrorHandler(
       details: { code: course.code, force },
     })
 
+    revalidateTag('courses', 'max')
     return apiSuccess({ message: 'Course deleted' })
   }
 )

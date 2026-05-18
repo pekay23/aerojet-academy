@@ -42,14 +42,27 @@ function generateCode(secret: string, counter: number): string {
 /**
  * Verify a TOTP token against a base32-encoded secret.
  * Allows ±`window` time steps (each step = 30 seconds).
+ *
+ * Returns the matching counter value on success (for replay protection),
+ * or false on failure. Callers should store the returned counter and pass
+ * it as `lastUsedCounter` on subsequent calls to prevent replay attacks.
  */
-export function verifyTOTP(token: string, secret: string, window = 1): boolean {
+export function verifyTOTP(
+  token: string,
+  secret: string,
+  window = 1,
+  lastUsedCounter?: number
+): number | false {
   const counter = Math.floor(Date.now() / 1000 / 30)
   for (let i = -window; i <= window; i++) {
-    if (generateCode(secret, counter + i) === token) {
-      return true
+    const testCounter = counter + i
+    // Reject codes at or before the last used counter (replay protection)
+    if (lastUsedCounter !== undefined && testCounter <= lastUsedCounter) continue
+    if (
+      crypto.timingSafeEqual(Buffer.from(generateCode(secret, testCounter)), Buffer.from(token))
+    ) {
+      return testCounter
     }
   }
   return false
 }
-

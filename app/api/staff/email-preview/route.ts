@@ -4,10 +4,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession()
-  if (
-    !session ||
-    (session.user.role !== 'ADMIN' && session.user.role !== 'STAFF')
-  ) {
+  if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 

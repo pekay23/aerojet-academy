@@ -6,7 +6,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 export async function GET(request: Request) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user || (session.user.role !== 'ADMIN' && session.user.role !== 'STAFF')) {
+    if (!session?.user || !['ADMIN', 'SUPER_ADMIN', 'STAFF'].includes(session.user.role)) {
       return new NextResponse('Unauthorized', { status: 403 })
     }
 
@@ -21,8 +21,8 @@ export async function GET(request: Request) {
         where: { role: 'STUDENT' },
         include: { profile: true, studentProfile: true },
       })
-      
-      data = users.map(u => ({
+
+      data = users.map((u) => ({
         ID: u.id,
         Name: `${u.profile?.firstName || ''} ${u.profile?.lastName || ''}`.trim(),
         Email: u.email,
@@ -33,13 +33,12 @@ export async function GET(request: Request) {
         JoinedAt: u.createdAt.toISOString(),
       }))
       filename = 'students_export.csv'
-
     } else if (type === 'pools') {
       const pools = await prismaUnfiltered.examPool.findMany({
         include: { event: true },
       })
-      
-      data = pools.map(p => ({
+
+      data = pools.map((p) => ({
         ID: p.id,
         Name: p.name,
         Event: p.event?.name || '',
@@ -50,24 +49,24 @@ export async function GET(request: Request) {
         Modules: p.allowedModules.join(', '),
       }))
       filename = 'exam_pools_export.csv'
-
     } else if (type === 'finances') {
-       const txs = await prismaUnfiltered.walletTransaction.findMany({
-         include: { wallet: { include: { user: { include: { profile: true } } } } },
-         orderBy: { createdAt: 'desc' }
-       })
+      const txs = await prismaUnfiltered.walletTransaction.findMany({
+        include: { wallet: { include: { user: { include: { profile: true } } } } },
+        orderBy: { createdAt: 'desc' },
+        take: 10000,
+      })
 
-       data = txs.map(t => ({
-         ID: t.id,
-         Date: t.createdAt.toISOString(),
-         Student: `${t.wallet.user.profile?.firstName || ''} ${t.wallet.user.profile?.lastName || ''}`.trim(),
-         Type: t.type,
-         Reference: t.referenceType,
-         Amount: t.amount,
-         Description: t.description,
-       }))
-       filename = 'financial_transactions.csv'
-
+      data = txs.map((t) => ({
+        ID: t.id,
+        Date: t.createdAt.toISOString(),
+        Student:
+          `${t.wallet.user.profile?.firstName || ''} ${t.wallet.user.profile?.lastName || ''}`.trim(),
+        Type: t.type,
+        Reference: t.referenceType,
+        Amount: t.amount,
+        Description: t.description,
+      }))
+      filename = 'financial_transactions.csv'
     } else if (type === 'audit-logs') {
       const logs = await prismaUnfiltered.auditLog.findMany({
         include: { user: { include: { profile: true } } },
@@ -75,7 +74,7 @@ export async function GET(request: Request) {
         take: 5000,
       })
 
-      data = logs.map(l => ({
+      data = logs.map((l) => ({
         Date: l.createdAt.toISOString(),
         Action: l.action,
         Entity: l.entity || '',
@@ -87,7 +86,6 @@ export async function GET(request: Request) {
         IP: l.ipAddress || '',
       }))
       filename = 'audit_logs_export.csv'
-
     } else {
       return NextResponse.json({ error: 'Invalid export type' }, { status: 400 })
     }
@@ -100,18 +98,20 @@ export async function GET(request: Request) {
     const headers = Object.keys(data[0])
     const csvContent = [
       headers.join(','),
-      ...data.map(row => 
-        headers.map(header => {
-          let val = row[header]
-          if (val === null || val === undefined) val = ''
-          // Escape quotes and wrap in quotes if contains comma
-          val = String(val).replace(/"/g, '""')
-          if (val.includes(',') || val.includes('"') || val.includes('\n')) {
-            val = `"${val}"`
-          }
-          return val
-        }).join(',')
-      )
+      ...data.map((row) =>
+        headers
+          .map((header) => {
+            let val = row[header]
+            if (val === null || val === undefined) val = ''
+            // Escape quotes and wrap in quotes if contains comma
+            val = String(val).replace(/"/g, '""')
+            if (val.includes(',') || val.includes('"') || val.includes('\n')) {
+              val = `"${val}"`
+            }
+            return val
+          })
+          .join(',')
+      ),
     ].join('\n')
 
     return new NextResponse(csvContent, {
@@ -122,9 +122,6 @@ export async function GET(request: Request) {
     })
   } catch (error: any) {
     console.error('[CSV_EXPORT]', error)
-    return NextResponse.json(
-      { error: error.message || 'Failed to export data' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: error.message || 'Failed to export data' }, { status: 500 })
   }
 }

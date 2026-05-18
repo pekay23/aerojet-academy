@@ -30,6 +30,10 @@ model User {
   emailVerified               DateTime?
   verifyToken                 String?                   @unique
   verifyTokenExpires          DateTime?
+  passwordResetToken          String?                   @unique
+  passwordResetExpires        DateTime?
+  passkeyBridgeToken          String?                   @unique
+  passkeyBridgeExpires        DateTime?
   loginAttempts               Int                       @default(0)
   lockedUntil                 DateTime?
   lastLoginAt                 DateTime?
@@ -463,11 +467,11 @@ model Classroom {
 }
 
 model AttendanceRecord {
-  id          String   @id @default(cuid())
+  id          String           @id @default(cuid())
   classId     String
   userId      String
   date        DateTime
-  status      String
+  status      AttendanceStatus
   minutesLate Int?
   notes       String?
   recordedBy  String?
@@ -480,6 +484,7 @@ model AttendanceRecord {
   @@index([classId])
   @@index([userId])
   @@index([date])
+  @@index([classId, date])
   @@map("attendance_records")
 }
 
@@ -635,7 +640,7 @@ model PoolWaitlist {
   userId          String
   examComponentId String
   priority        Int           @default(0)
-  status          String        @default("PENDING")
+  status          WaitlistStatus @default(PENDING)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   examComponent   ExamComponent @relation(fields: [examComponentId], references: [id])
@@ -984,7 +989,7 @@ model Invoice {
   amount        Decimal   @db.Decimal(10, 2)
   currency      String    @default("EUR")
   items         Json
-  status        String    @default("UNPAID")
+  status        InvoiceStatus @default(UNPAID)
   issuedAt      DateTime  @default(now())
   dueDate       DateTime?
   paidAt        DateTime?
@@ -1205,6 +1210,7 @@ model AcademicYear {
   semesters       Semester[]
   studentProfiles StudentProfile[]
 
+  @@index([isActive])
   @@map("academic_years")
 }
 
@@ -1223,6 +1229,7 @@ model Semester {
   studentProfiles StudentProfile[]
 
   @@index([academicYearId])
+  @@index([isActive])
   @@map("semesters")
 }
 
@@ -1266,7 +1273,7 @@ model FullTimeEnrollment {
   studentId         String
   programmeId       String
   programmeYearId   String
-  status            String             @default("PENDING_CONFIRMATION")
+  status            FullTimeEnrollmentStatus @default(PENDING_CONFIRMATION)
   currentYearNumber Int                @default(1)
   startDate         DateTime           @default(now())
   academicYear      String?            @default("2026/2027")
@@ -1291,7 +1298,7 @@ model OjtPeriod {
   supervisorEmail String?
   startDate       DateTime
   endDate         DateTime?
-  status          String             @default("PENDING")
+  status          OjtStatus          @default(PENDING)
   hoursCompleted  Int                @default(0)
   hoursRequired   Int                @default(2000)
   reportUrl       String?
@@ -1315,7 +1322,7 @@ model PaymentMilestone {
   dueDate           DateTime
   percentOfYearFee  Decimal            @db.Decimal(5, 2)
   amountDue         Decimal            @db.Decimal(10, 2)
-  status            String             @default("DUE")
+  status            MilestoneStatus    @default(DUE)
   paidAt            DateTime?
   walletTxnId       String?
   createdAt         DateTime           @default(now())
@@ -1372,7 +1379,7 @@ model TuitionRun {
   minClassSize       Int              @default(5)
   currentEnrollments Int              @default(0)
   price              Decimal          @db.Decimal(10, 2)
-  status             String           @default("SCHEDULED")
+  status             TuitionRunStatus @default(SCHEDULED)
   createdById        String?
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
@@ -1386,7 +1393,7 @@ model TuitionBooking {
   id                String             @id @default(cuid())
   tuitionRunId      String
   studentId         String
-  status            String             @default("DRAFT")
+  status            TuitionBookingStatus @default(DRAFT)
   amountPaid        Decimal            @db.Decimal(10, 2)
   walletTxnId       String?
   createdAt         DateTime           @default(now())
@@ -1434,7 +1441,7 @@ model ExamBundle {
   freeModuleChanges Int      @default(0)
   usedModuleChanges Int      @default(0)
   validUntil        DateTime
-  status            String   @default("ACTIVE")
+  status            ExamBundleStatus @default(ACTIVE)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -1448,7 +1455,7 @@ model Referral {
   id          String    @id @default(cuid())
   referrerId  String
   refereeId   String    @unique
-  status      String    @default("PENDING")
+  status      ReferralStatus @default(PENDING)
   qualifiedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -2654,6 +2661,83 @@ enum UpgradeStatus {
   PAYMENT_PENDING
   COMPLETED
   REJECTED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  EXCUSED
+  LATE
+  RECORDED
+}
+
+enum WaitlistStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum InvoiceStatus {
+  UNPAID
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum FullTimeEnrollmentStatus {
+  PENDING_CONFIRMATION
+  CONFIRMED
+  ACTIVE
+  COMPLETED
+  DEFERRED
+  SUSPENDED
+  WITHDRAWN
+}
+
+enum OjtStatus {
+  PENDING
+  ACTIVE
+  COMPLETED
+  VERIFIED
+  SUSPENDED
+}
+
+enum MilestoneStatus {
+  DUE
+  PAID
+  OVERDUE
+  WAIVED
+  PENDING
+}
+
+enum TuitionRunStatus {
+  DRAFT
+  SCHEDULED
+  OPEN
+  CONFIRMED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TuitionBookingStatus {
+  DRAFT
+  CONFIRMED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ExamBundleStatus {
+  ACTIVE
+  EXPIRED
+  USED
+  CANCELLED
+}
+
+enum ReferralStatus {
+  PENDING
+  QUALIFIED
 }
 
 model Passkey {

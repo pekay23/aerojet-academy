@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma/client'
+import { TuitionRunStatus, TuitionBookingStatus } from '@prisma/client'
 
 /**
  * Checks all SCHEDULED / OPEN Tuition Runs.
@@ -12,7 +13,7 @@ export async function evaluateTuitionRuns() {
   // Find tuition runs starting in <= 7 days, still OPEN or SCHEDULED
   const runsToEvaluate = await prisma.tuitionRun.findMany({
     where: {
-      status: { in: ['SCHEDULED', 'OPEN'] },
+      status: { in: [TuitionRunStatus.SCHEDULED, TuitionRunStatus.OPEN] },
       startDatetime: { lte: sevenDaysFromNow },
     },
     include: {
@@ -30,15 +31,15 @@ export async function evaluateTuitionRuns() {
         // Mark run as cancelled
         await tx.tuitionRun.update({
           where: { id: run.id },
-          data: { status: 'CANCELLED' },
+          data: { status: TuitionRunStatus.CANCELLED },
         })
 
         // Refund all bookings
         for (const booking of run.bookings) {
-          if (booking.status === 'CONFIRMED') {
+          if (booking.status === TuitionBookingStatus.CONFIRMED) {
             await tx.tuitionBooking.update({
               where: { id: booking.id },
-              data: { status: 'CANCELLED' },
+              data: { status: TuitionBookingStatus.CANCELLED },
             })
 
             // Refund wallet
@@ -60,7 +61,7 @@ export async function evaluateTuitionRuns() {
       // Confirm the run
       await prisma.tuitionRun.update({
         where: { id: run.id },
-        data: { status: 'CONFIRMED' },
+        data: { status: TuitionRunStatus.CONFIRMED },
       })
       confirmedCount++
     }

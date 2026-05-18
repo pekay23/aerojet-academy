@@ -3,17 +3,35 @@ import crypto from 'crypto'
 const ALGORITHM = 'aes-256-gcm'
 const SALT_LENGTH = 16
 
-function getKey(salt: Buffer): Buffer {
+// Cache derived keys to avoid re-deriving on every call
+const keyCache = new Map<string, Buffer>()
+const MAX_KEY_CACHE_SIZE = 100
+
+function deriveKeyAsync(secret: string, salt: Buffer): Promise<Buffer> {
+  const cacheKey = salt.toString('hex')
+  const cached = keyCache.get(cacheKey)
+  if (cached) return Promise.resolve(cached)
+
+  return new Promise((resolve, reject) => {
+    crypto.scrypt(secret, salt, 32, (err, derived) => {
+      if (err) return reject(err)
+      if (keyCache.size >= MAX_KEY_CACHE_SIZE) {
+        const first = keyCache.keys().next().value
+        if (first) keyCache.delete(first)
+      }
+      keyCache.set(cacheKey, derived)
+      resolve(derived)
+    })
+  })
+}
+
+export async function encrypt(text: string): Promise<string> {
   const secret = process.env.NEXTAUTH_SECRET
   if (!secret) {
     throw new Error('NEXTAUTH_SECRET is required for encryption operations')
   }
-  return crypto.scryptSync(secret, salt, 32)
-}
-
-export function encrypt(text: string): string {
   const salt = crypto.randomBytes(SALT_LENGTH)
-  const key = getKey(salt)
+  const key = await deriveKeyAsync(secret, salt)
   const iv = crypto.randomBytes(16)
   const cipher = crypto.createCipheriv(ALGORITHM, key, iv)
   let encrypted = cipher.update(text, 'utf8', 'hex')
@@ -22,10 +40,14 @@ export function encrypt(text: string): string {
   return `${salt.toString('hex')}:${iv.toString('hex')}:${authTag}:${encrypted}`
 }
 
-export function decrypt(encryptedText: string): string {
+export async function decrypt(encryptedText: string): Promise<string> {
+  const secret = process.env.NEXTAUTH_SECRET
+  if (!secret) {
+    throw new Error('NEXTAUTH_SECRET is required for encryption operations')
+  }
   const [saltHex, ivHex, authTagHex, encrypted] = encryptedText.split(':')
   const salt = Buffer.from(saltHex, 'hex')
-  const key = getKey(salt)
+  const key = await deriveKeyAsync(secret, salt)
   const iv = Buffer.from(ivHex, 'hex')
   const authTag = Buffer.from(authTagHex, 'hex')
   const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)

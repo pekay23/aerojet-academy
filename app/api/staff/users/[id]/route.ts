@@ -229,6 +229,10 @@ export const DELETE = withErrorHandler(
     const isHardDelete = searchParams.get('hard') === 'true'
 
     if (isHardDelete) {
+      // Only ADMIN/SUPER_ADMIN can permanently delete users
+      if (!['ADMIN', 'SUPER_ADMIN'].includes(staff.role)) {
+        return apiError('Only administrators can permanently delete users', 403)
+      }
       // Permanent hard delete
       await prismaUnfiltered.user.delete({ where: { id } })
 

@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
@@ -68,5 +69,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     details: validation.data,
   })
 
+  revalidateTag('courses', 'max')
   return apiCreated(serializePrisma(course))
 })

@@ -2,6 +2,7 @@
 
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import type { TuitionRunStatus } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 
 /**
@@ -134,17 +135,20 @@ export async function createTuitionRun(data: {
 /**
  * Updates an existing Revision Support tuition run.
  */
-export async function updateTuitionRun(runId: string, data: {
-  title: string
-  moduleTag?: string
-  description?: string
-  startDatetime: Date
-  endDatetime: Date
-  capacity: number
-  minClassSize: number
-  price: number
-  status: string
-}) {
+export async function updateTuitionRun(
+  runId: string,
+  data: {
+    title: string
+    moduleTag?: string
+    description?: string
+    startDatetime: Date
+    endDatetime: Date
+    capacity: number
+    minClassSize: number
+    price: number
+    status: TuitionRunStatus
+  }
+) {
   try {
     await requireStaff()
 
