@@ -9,7 +9,17 @@ import {
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { topUpWallet } from '@/lib/wallet/operations'
-import { EnrollmentType, EnrollmentStatus, ProgrammeChoice, UserRole, UserStatus, TransactionType, BookingType, PaymentStatus, FundingSource } from '@prisma/client'
+import {
+  EnrollmentType,
+  EnrollmentStatus,
+  ProgrammeChoice,
+  UserRole,
+  UserStatus,
+  TransactionType,
+  BookingType,
+  PaymentStatus,
+  FundingSource,
+} from '@prisma/client'
 import crypto from 'crypto'
 
 // ---------------------------------------------------------------------------
@@ -25,8 +35,8 @@ interface ImportStudent {
   phone?: string
 
   // Pathway & programme
-  enrollmentType?: string       // FULL_TIME, MODULAR, EXAM_ONLY, SHORT_COURSE
-  programmeChoice?: string      // FULL_TIME_4YEAR, FULL_TIME_2YEAR, MILITARY_1YEAR, MODULAR, EXAM_ONLY
+  enrollmentType?: string // FULL_TIME, MODULAR, EXAM_ONLY, SHORT_COURSE
+  programmeChoice?: string // FULL_TIME_4YEAR, FULL_TIME_2YEAR, MILITARY_1YEAR, MODULAR, EXAM_ONLY
   selectedLicenseCategories?: string[] // e.g. ['B1.1', 'B2']
 
   // Academy email override (if admin wants a specific one)
@@ -53,7 +63,7 @@ interface ImportStudent {
 
   // Scholarship / status
   fundingSource?: 'SELF_FUNDED' | 'SCHOLARSHIP' | 'SPONSORED'
-  enrollmentStatus?: string    // ACTIVE, DEFERRED, WITHDRAWN, SUSPENDED, ENROLLED
+  enrollmentStatus?: string // ACTIVE, DEFERRED, WITHDRAWN, SUSPENDED, ENROLLED
   currentYearNumber?: number
   currentSemesterNumber?: number
 
@@ -64,8 +74,8 @@ interface ImportStudent {
 interface CompletedModuleEntry {
   moduleCode: string
   result: 'pass' | 'fail'
-  completedAt?: string      // ISO date string
-  institution?: string      // where they completed it
+  completedAt?: string // ISO date string
+  institution?: string // where they completed it
   sourceNotes?: string
 }
 
@@ -73,24 +83,24 @@ interface ExamHistoryEntry {
   sittingLabel: string
   moduleCode: string
   bookingGroupRef: string
-  bookingType: string       // twin, single, quad, etc.
+  bookingType: string // twin, single, quad, etc.
   attemptType: 'first_attempt' | 'resit'
   result: 'pass' | 'fail'
   score?: number
   percentage?: number
-  examDate?: string         // ISO date string
+  examDate?: string // ISO date string
   academicYearName?: string // e.g. "2024/2025" — links exam to semester
-  semesterName?: string     // e.g. "Semester 1"
+  semesterName?: string // e.g. "Semester 1"
   sourceNotes?: string
 }
 
 interface SemesterEnrollmentEntry {
-  academicYearName: string    // e.g. "2024/2025"
-  semesterName: string        // e.g. "Semester 1"
-  yearNumber: number          // 1, 2, 3, 4
-  semesterNumber: number      // 1 or 2
-  courseCodes: string[]       // e.g. ["M1", "M2", "M3"]
-  status?: string             // "COMPLETED" | "ACTIVE" | "FAILED"
+  academicYearName: string // e.g. "2024/2025"
+  semesterName: string // e.g. "Semester 1"
+  yearNumber: number // 1, 2, 3, 4
+  semesterNumber: number // 1 or 2
+  courseCodes: string[] // e.g. ["M1", "M2", "M3"]
+  status?: string // "COMPLETED" | "ACTIVE" | "FAILED"
 }
 
 interface EntitlementEntry {
@@ -149,10 +159,13 @@ function resolveEnrollmentType(programme: string | undefined): EnrollmentType {
 
 function mapEnrollmentStatusToUserStatus(enrollmentStatus: string | undefined): UserStatus {
   switch (enrollmentStatus) {
-    case 'SUSPENDED': return UserStatus.SUSPENDED
+    case 'SUSPENDED':
+      return UserStatus.SUSPENDED
     case 'WITHDRAWN':
-    case 'EXPELLED': return UserStatus.ARCHIVED
-    default: return UserStatus.ACTIVE // ACTIVE, DEFERRED, ENROLLED, APPROVED, GRADUATED
+    case 'EXPELLED':
+      return UserStatus.ARCHIVED
+    default:
+      return UserStatus.ACTIVE // ACTIVE, DEFERRED, ENROLLED, APPROVED, GRADUATED
   }
 }
 
@@ -242,11 +255,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
       if (!existingUser) {
         // ===================== CREATE NEW USER =====================
-        const academyEmail = s.academyEmail || await generateAcademyEmail(s.firstName, s.middleName, s.lastName)
+        const academyEmail =
+          s.academyEmail || (await generateAcademyEmail(s.firstName, s.middleName, s.lastName))
         const studentId = await generateStudentId()
 
         // Look up pathway for linking
-        const pathway = await prismaUnfiltered.studyPathwayModel.findUnique({ where: { code: pathwayCode } })
+        const pathway = await prismaUnfiltered.studyPathwayModel.findUnique({
+          where: { code: pathwayCode },
+        })
 
         const user = await prismaUnfiltered.$transaction(async (tx) => {
           const newUser = await tx.user.create({
@@ -257,7 +273,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
               password: hashedPassword,
               role: UserRole.STUDENT,
               status: mapEnrollmentStatusToUserStatus(s.enrollmentStatus),
-              programmeChoice: Object.values(ProgrammeChoice).includes(programmeChoice as ProgrammeChoice)
+              programmeChoice: Object.values(ProgrammeChoice).includes(
+                programmeChoice as ProgrammeChoice
+              )
                 ? (programmeChoice as ProgrammeChoice)
                 : ProgrammeChoice.EXAM_ONLY,
               selectedLicenseCategories: s.selectedLicenseCategories || [],
@@ -279,10 +297,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             },
           })
 
-          const resolvedEnrollmentStatus = Object.values(EnrollmentStatus).includes(s.enrollmentStatus as EnrollmentStatus)
+          const resolvedEnrollmentStatus = Object.values(EnrollmentStatus).includes(
+            s.enrollmentStatus as EnrollmentStatus
+          )
             ? (s.enrollmentStatus as EnrollmentStatus)
             : EnrollmentStatus.ENROLLED
-          const resolvedFundingSource = Object.values(FundingSource).includes(s.fundingSource as unknown as FundingSource)
+          const resolvedFundingSource = Object.values(FundingSource).includes(
+            s.fundingSource as unknown as FundingSource
+          )
             ? (s.fundingSource as unknown as FundingSource)
             : FundingSource.SELF_FUNDED
 
@@ -291,7 +313,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
               userId: newUser.id,
               studentId,
               enrollmentType,
-              programmeChoice: Object.values(ProgrammeChoice).includes(programmeChoice as ProgrammeChoice)
+              programmeChoice: Object.values(ProgrammeChoice).includes(
+                programmeChoice as ProgrammeChoice
+              )
                 ? (programmeChoice as ProgrammeChoice)
                 : ProgrammeChoice.EXAM_ONLY,
               enrollmentStatus: resolvedEnrollmentStatus,
@@ -303,7 +327,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           })
 
           await tx.wallet.create({
-            data: { userId: newUser.id, balance: 0, reservedBalance: 0, availableBalance: 0, currency: 'EUR' },
+            data: {
+              userId: newUser.id,
+              balance: 0,
+              reservedBalance: 0,
+              availableBalance: 0,
+              currency: 'EUR',
+            },
           })
 
           // Link license targets if provided
@@ -334,8 +364,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         results.created++
       } else {
         // ===================== UPDATE EXISTING USER =====================
-        const academyEmail = s.academyEmail || existingUser.academyEmail || await generateAcademyEmail(s.firstName, s.middleName, s.lastName)
-        const pathway = await prismaUnfiltered.studyPathwayModel.findUnique({ where: { code: pathwayCode } })
+        const academyEmail =
+          s.academyEmail ||
+          existingUser.academyEmail ||
+          (await generateAcademyEmail(s.firstName, s.middleName, s.lastName))
+        const pathway = await prismaUnfiltered.studyPathwayModel.findUnique({
+          where: { code: pathwayCode },
+        })
 
         await prismaUnfiltered.user.update({
           where: { id: existingUser.id },
@@ -346,10 +381,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             password: hashedPassword,
             role: UserRole.STUDENT,
             status: mapEnrollmentStatusToUserStatus(s.enrollmentStatus),
-            programmeChoice: Object.values(ProgrammeChoice).includes(programmeChoice as ProgrammeChoice)
+            programmeChoice: Object.values(ProgrammeChoice).includes(
+              programmeChoice as ProgrammeChoice
+            )
               ? (programmeChoice as ProgrammeChoice)
               : existingUser.programmeChoice,
-            selectedLicenseCategories: s.selectedLicenseCategories || existingUser.selectedLicenseCategories,
+            selectedLicenseCategories:
+              s.selectedLicenseCategories || existingUser.selectedLicenseCategories,
             mustChangePassword: true,
             passwordChanged: false,
             emailVerified: existingUser.emailVerified || new Date(),
@@ -381,10 +419,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         }
 
         // Ensure student profile
-        const resolvedEnrollmentStatus = Object.values(EnrollmentStatus).includes(s.enrollmentStatus as EnrollmentStatus)
+        const resolvedEnrollmentStatus = Object.values(EnrollmentStatus).includes(
+          s.enrollmentStatus as EnrollmentStatus
+        )
           ? (s.enrollmentStatus as EnrollmentStatus)
           : undefined
-        const resolvedFundingSource = Object.values(FundingSource).includes(s.fundingSource as unknown as FundingSource)
+        const resolvedFundingSource = Object.values(FundingSource).includes(
+          s.fundingSource as unknown as FundingSource
+        )
           ? (s.fundingSource as unknown as FundingSource)
           : undefined
 
@@ -395,7 +437,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
               userId: existingUser.id,
               studentId,
               enrollmentType,
-              programmeChoice: Object.values(ProgrammeChoice).includes(programmeChoice as ProgrammeChoice)
+              programmeChoice: Object.values(ProgrammeChoice).includes(
+                programmeChoice as ProgrammeChoice
+              )
                 ? (programmeChoice as ProgrammeChoice)
                 : ProgrammeChoice.EXAM_ONLY,
               enrollmentStatus: resolvedEnrollmentStatus || EnrollmentStatus.ENROLLED,
@@ -428,7 +472,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
         // Ensure wallet
         if (!existingUser.wallet) {
           await prismaUnfiltered.wallet.create({
-            data: { userId: existingUser.id, balance: 0, reservedBalance: 0, availableBalance: 0, currency: 'EUR' },
+            data: {
+              userId: existingUser.id,
+              balance: 0,
+              reservedBalance: 0,
+              availableBalance: 0,
+              currency: 'EUR',
+            },
           })
         }
 
@@ -484,7 +534,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
                 status: PaymentStatus.COMPLETED,
                 attemptType: 'first_attempt',
                 result: mod.result,
-                sourceNotes: `[Import] Completed elsewhere${mod.institution ? ` at ${mod.institution}` : ''}. ${mod.sourceNotes || ''}`.trim(),
+                sourceNotes:
+                  `[Import] Completed elsewhere${mod.institution ? ` at ${mod.institution}` : ''}. ${mod.sourceNotes || ''}`.trim(),
                 migrationRef: migRef,
                 ...(mod.completedAt && { bookedAt: new Date(mod.completedAt) }),
               },
@@ -569,7 +620,10 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
                 bookingType: BookingType.BUNDLE,
                 moduleCode: planned.moduleCode,
                 amountPaid: 0,
-                status: planned.paymentStatus === 'paid' ? PaymentStatus.COMPLETED : PaymentStatus.PENDING,
+                status:
+                  planned.paymentStatus === 'paid'
+                    ? PaymentStatus.COMPLETED
+                    : PaymentStatus.PENDING,
                 bookingGroupRef: planned.bookingGroupRef,
                 attemptType: 'first_attempt',
                 result: 'pending',
@@ -599,9 +653,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
         if (ftProgramme) {
           const currentYear = s.currentYearNumber || 1
-          const targetProgrammeYear = ftProgramme.programmeYears.find(
-            (py) => py.yearNumber === currentYear
-          ) || ftProgramme.programmeYears[0]
+          const targetProgrammeYear =
+            ftProgramme.programmeYears.find((py) => py.yearNumber === currentYear) ||
+            ftProgramme.programmeYears[0]
 
           if (targetProgrammeYear) {
             await prismaUnfiltered.fullTimeEnrollment.upsert({
@@ -654,9 +708,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
             if (!course) continue
 
             const isCompleted = sem.status === 'COMPLETED'
-            const enrollmentStatus: EnrollmentStatus = isCompleted 
-              ? EnrollmentStatus.ENROLLED 
-              : (sem.status as EnrollmentStatus || EnrollmentStatus.ACTIVE)
+            const enrollmentStatus: EnrollmentStatus = isCompleted
+              ? EnrollmentStatus.ENROLLED
+              : (sem.status as EnrollmentStatus) || EnrollmentStatus.ACTIVE
 
             // Use createMany-style idempotency: check first
             const existingEnrollment = await prismaUnfiltered.enrollment.findFirst({
@@ -675,13 +729,11 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
                   academicYearId: academicYear.id,
                   semesterId: semester.id,
                   status: enrollmentStatus,
-                  amountPaid: course.price, 
+                  amountPaid: course.price,
                   enrolledAt: academicYear.startDate,
                   completedAt: isCompleted ? semester.endDate : null,
                 },
               })
-
-
             }
           }
         }
@@ -752,7 +804,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       skipped: results.skipped,
       errors: results.errors.length,
     },
-    credentials: results.credentials,
+    credentials: results.credentials.map(({ temporaryPassword, ...rest }) => rest),
     errors: results.errors,
   })
 })

@@ -35,6 +35,7 @@ async function checkAndSendReminders() {
     where: {
       status: { in: ['DUE', 'OVERDUE'] },
     },
+    take: 500, // Prevent unbounded fetch
     include: {
       enrollment: {
         include: {
@@ -47,37 +48,42 @@ async function checkAndSendReminders() {
     },
   })
 
-  for (const milestone of allMilestones) {
+  // Filter to only milestones that match our reminder days
+  const actionableMilestones = allMilestones.filter((m) => {
+    const daysUntil = getDaysUntilDue(m.dueDate)
+    return daysUntil >= 0 && getReminderType(daysUntil) !== null
+  })
+
+  if (actionableMilestones.length === 0) {
+    return results
+  }
+
+  // Batch idempotency check: find all existing reminders in the last 7 days for these students
+  const studentIds = [...new Set(actionableMilestones.map((m) => m.enrollment.studentId))]
+  const existingReminders = await prisma.notification.findMany({
+    where: {
+      userId: { in: studentIds },
+      title: { startsWith: 'Payment Reminder - ' },
+      createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+    },
+    select: { userId: true, title: true, message: true },
+  })
+
+  // Build lookup: "userId:reminderType:milestoneType"
+  const reminderSet = new Set(
+    existingReminders.map((r) => {
+      const type = r.title.replace('Payment Reminder - ', '')
+      return `${r.userId}:${type}`
+    })
+  )
+
+  for (const milestone of actionableMilestones) {
     try {
       const daysUntil = getDaysUntilDue(milestone.dueDate)
-      const reminderType = getReminderType(daysUntil)
+      const reminderType = getReminderType(daysUntil)!
 
-      if (!reminderType) {
-        results.skipped++
-        continue
-      }
-
-      if (daysUntil < 0) {
-        results.skipped++
-        continue
-      }
-
-      const existingReminder = await prisma.notification.findFirst({
-        where: {
-          userId: milestone.enrollment.studentId,
-          title: {
-            contains: `Payment Reminder - ${reminderType}`,
-          },
-          message: {
-            contains: milestone.milestoneType,
-          },
-          createdAt: {
-            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
-          },
-        },
-      })
-
-      if (existingReminder) {
+      const key = `${milestone.enrollment.studentId}:${reminderType}`
+      if (reminderSet.has(key)) {
         results.skipped++
         continue
       }
@@ -109,6 +115,7 @@ async function checkAndSendReminders() {
         },
       })
 
+      reminderSet.add(key) // Prevent duplicates within same run
       results.sent++
     } catch (err) {
       const error = err as Error

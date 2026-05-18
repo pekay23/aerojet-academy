@@ -17,82 +17,104 @@ export async function GET(req: NextRequest) {
 
     // Deadlines to check: T-28, T-24, T-22
     const targetDays = [28, 24, 22]
+    const todayStart = new Date(now)
+    todayStart.setHours(0, 0, 0, 0)
 
-    // Process reminders for each target day
-    for (const days of targetDays) {
+    // Fetch pricing config once
+    const { getExamPricingConfig } = await import('@/lib/pools/pricing-config')
+    const pricingConfig = await getExamPricingConfig()
+
+    // Build date ranges for all target days at once
+    const dateRanges = targetDays.map((days) => {
       const targetDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000)
-      const targetStart = new Date(targetDate)
-      targetStart.setHours(0, 0, 0, 0)
-      const targetEnd = new Date(targetDate)
-      targetEnd.setHours(23, 59, 59, 999)
+      const start = new Date(targetDate)
+      start.setHours(0, 0, 0, 0)
+      const end = new Date(targetDate)
+      end.setHours(23, 59, 59, 999)
+      return { days, start, end }
+    })
 
-      // Find events starting on this target day
-      const events = await prisma.examEvent.findMany({
+    // Fetch all relevant events across all target date ranges in one query
+    const allEvents = await prisma.examEvent.findMany({
+      where: {
+        OR: dateRanges.map(({ start, end }) => ({
+          startDate: { gte: start, lte: end },
+        })),
+        status: { in: ['OPEN', 'CONFIRMED'] },
+      },
+      select: { id: true, name: true, startDate: true },
+    })
+
+    if (allEvents.length > 0) {
+      // Fetch all pending individual bookings for these events in one query
+      const pendingBookings = await prisma.examBooking.findMany({
         where: {
-          startDate: { gte: targetStart, lte: targetEnd },
-          status: { in: ['OPEN', 'CONFIRMED'] },
+          eventId: { in: allEvents.map((e) => e.id) },
+          bookingType: 'INDIVIDUAL',
+          status: 'PENDING',
         },
-        select: { id: true, name: true, startDate: true },
+        include: {
+          user: { include: { profile: true } },
+          examComponent: { include: { course: { select: { code: true } } } },
+        },
       })
 
-      for (const event of events) {
-        // Find bookings in this event that are INDIVIDUAL and PENDING
-        const pendingBookings = await prisma.examBooking.findMany({
-          where: {
-            eventId: event.id,
-            bookingType: 'INDIVIDUAL',
-            status: 'PENDING',
-          },
-          include: {
-            user: { include: { profile: true } },
-            examComponent: { include: { course: { select: { code: true } } } },
-          },
-        })
+      // Batch idempotency check: find all existing reminders sent today
+      const bookingUserIds = [...new Set(pendingBookings.map((b) => b.userId))]
+      const existingReminders = await prisma.notification.findMany({
+        where: {
+          userId: { in: bookingUserIds },
+          type: 'WARNING',
+          title: { startsWith: 'Payment Reminder T-' },
+          createdAt: { gte: todayStart },
+        },
+        select: { userId: true, title: true },
+      })
 
-        if (pendingBookings.length > 0) {
-          // Fetch individual price to know the balance
-          const { getExamPricingConfig } = await import('@/lib/pools/pricing-config')
-          const pricingConfig = await getExamPricingConfig()
+      // Create a Set for fast lookup: "userId:T-28"
+      const reminderSet = new Set(existingReminders.map((r) => `${r.userId}:${r.title}`))
 
-          for (const booking of pendingBookings) {
-            try {
-              // Idempotency: check if reminder already sent today for this booking + day combo
-              const todayStart = new Date(now)
-              todayStart.setHours(0, 0, 0, 0)
-              const existingReminder = await prisma.notification.findFirst({
-                where: {
-                  userId: booking.userId,
-                  type: 'WARNING',
-                  title: { contains: `T-${days}` },
-                  createdAt: { gte: todayStart },
-                },
-              })
-              if (existingReminder) continue // Already reminded today
-
-              const email = booking.user.personalEmail || booking.user.email
-              const name = booking.user.profile?.firstName || 'Student'
-              const moduleLabel = booking.examComponent?.course?.code ?? 'Module'
-
-              // Booking amountPaid is the 50% deposit, so the remaining is the total subtract amountPaid
-              const balance = pricingConfig.individualExamFee - Number(booking.amountPaid)
-
-              await sendPaymentDeadlineEmail(email, name, moduleLabel, event.name, days, balance)
-
-              // Record notification for idempotency
-              await prisma.notification.create({
-                data: {
-                  userId: booking.userId,
-                  title: `Payment Reminder T-${days}`,
-                  message: `Balance of €${balance} due for ${moduleLabel} exam`,
-                  type: 'WARNING',
-                },
-              })
-
-              results.remindersSent++
-            } catch (err: any) {
-              results.errors.push(`Reminder for booking ${booking.id}: ${err.message}`)
-            }
+      // Map event IDs to their target day
+      const eventToDays = new Map<string, number>()
+      for (const event of allEvents) {
+        for (const { days, start, end } of dateRanges) {
+          if (event.startDate >= start && event.startDate <= end) {
+            eventToDays.set(event.id, days)
           }
+        }
+      }
+
+      const eventMap = new Map(allEvents.map((e) => [e.id, e]))
+
+      for (const booking of pendingBookings) {
+        if (!booking.eventId) continue
+        const days = eventToDays.get(booking.eventId)
+        if (!days) continue
+        const event = eventMap.get(booking.eventId)!
+
+        const reminderKey = `${booking.userId}:Payment Reminder T-${days}`
+        if (reminderSet.has(reminderKey)) continue // Already reminded today
+
+        try {
+          const email = booking.user.personalEmail || booking.user.email
+          const name = booking.user.profile?.firstName || 'Student'
+          const moduleLabel = booking.examComponent?.course?.code ?? 'Module'
+          const balance = pricingConfig.individualExamFee - Number(booking.amountPaid)
+
+          await sendPaymentDeadlineEmail(email, name, moduleLabel, event.name, days, balance)
+
+          await prisma.notification.create({
+            data: {
+              userId: booking.userId,
+              title: `Payment Reminder T-${days}`,
+              message: `Balance of €${balance} due for ${moduleLabel} exam`,
+              type: 'WARNING',
+            },
+          })
+
+          results.remindersSent++
+        } catch (err: any) {
+          results.errors.push(`Reminder for booking ${booking.id}: ${err.message}`)
         }
       }
     }
@@ -109,38 +131,42 @@ export async function GET(req: NextRequest) {
         startDate: { gte: t21Start, lte: t21End },
         status: { in: ['OPEN', 'CONFIRMED'] },
       },
+      select: { id: true },
     })
 
-    for (const event of t21Events) {
+    if (t21Events.length > 0) {
+      // Fetch all pending bookings for T-21 events in one query
       const expiredBookings = await prisma.examBooking.findMany({
         where: {
-          eventId: event.id,
+          eventId: { in: t21Events.map((e) => e.id) },
           bookingType: 'INDIVIDUAL',
           status: 'PENDING',
         },
       })
 
+      // Batch: find all linked pending/approved payments for these bookings
+      const bookingIds = expiredBookings.map((b) => b.id)
+      const linkedPayments = await prisma.payment.findMany({
+        where: {
+          referenceId: { in: bookingIds },
+          status: { in: ['PENDING', 'APPROVED'] },
+        },
+        select: { id: true, referenceId: true, status: true },
+      })
+      const paymentByBooking = new Map(linkedPayments.map((p) => [p.referenceId, p]))
+
       for (const booking of expiredBookings) {
         try {
-          // Safety check: don't forfeit if there's a pending or approved payment for this booking
-          const linkedPayment = await prisma.payment.findFirst({
-            where: {
-              userId: booking.userId,
-              referenceId: booking.id,
-              status: { in: ['PENDING', 'APPROVED'] },
-            },
-          })
+          const linkedPayment = paymentByBooking.get(booking.id)
           if (linkedPayment) {
-            results.errors.push(`Booking ${booking.id}: skipped forfeit — payment ${linkedPayment.id} (${linkedPayment.status}) exists`)
+            results.errors.push(
+              `Booking ${booking.id}: skipped forfeit — payment ${linkedPayment.id} (${linkedPayment.status}) exists`
+            )
             continue
           }
 
-          // Idempotency: re-check status in case another cron run already forfeited
-          const current = await prisma.examBooking.findUnique({ where: { id: booking.id }, select: { status: true } })
-          if (!current || current.status !== 'PENDING') continue
-
           await prisma.examBooking.update({
-            where: { id: booking.id },
+            where: { id: booking.id, status: 'PENDING' }, // optimistic concurrency
             data: { status: 'FAILED' },
           })
 

@@ -2,19 +2,22 @@ import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
+import { AttendanceStatus } from '@prisma/client'
 import { z } from 'zod'
 
-const STATUSES = ['PRESENT', 'ABSENT', 'LATE', 'EXCUSED'] as const
+const STATUSES = Object.values(AttendanceStatus) as [AttendanceStatus, ...AttendanceStatus[]]
 
 const batchSchema = z.object({
   classId: z.string(),
   date: z.string(),
-  records: z.array(z.object({
-    userId: z.string(),
-    status: z.enum(STATUSES),
-    minutesLate: z.number().optional(),
-    notes: z.string().optional(),
-  })),
+  records: z.array(
+    z.object({
+      userId: z.string(),
+      status: z.enum(STATUSES),
+      minutesLate: z.number().optional(),
+      notes: z.string().optional(),
+    })
+  ),
 })
 
 // GET — fetch attendance for a class + date, and the class roster (from course enrollments)
@@ -73,7 +76,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
 
   // Attendance stats
   const totalRecords = records.length
-  const present = records.filter(r => r.status === 'PRESENT' || r.status === 'LATE').length
+  const present = records.filter((r) => r.status === 'PRESENT' || r.status === 'LATE').length
   const rate = totalRecords > 0 ? Math.round((present / totalRecords) * 100) : 0
 
   return apiSuccess({
@@ -107,12 +110,14 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
 
   const totalHoursToday = sessionsToday.reduce((s, sess) => s + sess.instructionalHours, 0)
   if (totalHoursToday > 6) {
-    console.warn(`[Attendance] Day total ${totalHoursToday}h exceeds 6h limit for class ${classId} on ${date}`)
+    console.warn(
+      `[Attendance] Day total ${totalHoursToday}h exceeds 6h limit for class ${classId} on ${date}`
+    )
   }
 
   // Upsert attendance records
   const results = await prismaUnfiltered.$transaction(
-    records.map(r =>
+    records.map((r) =>
       prismaUnfiltered.attendanceRecord.upsert({
         where: {
           classId_userId_date: {

@@ -24,8 +24,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   const user = await prisma.user.findFirst({
     where: {
-      verifyToken: token,
-      verifyTokenExpires: {
+      passwordResetToken: token,
+      passwordResetExpires: {
         gt: new Date(),
       },
     },
@@ -41,8 +41,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     where: { id: user.id },
     data: {
       password: hashedPassword,
-      verifyToken: null,
-      verifyTokenExpires: null,
+      passwordResetToken: null,
+      passwordResetExpires: null,
       loginAttempts: 0,
       lockedUntil: null,
     },

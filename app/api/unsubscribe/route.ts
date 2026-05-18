@@ -1,9 +1,18 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { logAuditEvent } from '@/lib/audit/logger'
+import { rateLimit } from '@/lib/security/rate-limit'
 
 export async function POST(req: Request) {
   try {
+    // Rate limit by IP to prevent abuse
+    const forwarded = req.headers.get('x-forwarded-for')
+    const ip = forwarded?.split(',')[0]?.trim() || 'unknown'
+    const { allowed } = rateLimit(`unsubscribe:${ip}`, 5, 60 * 60 * 1000) // 5 per hour
+    if (!allowed) {
+      return NextResponse.json({ message: 'If subscribed, you have been unsubscribed.' })
+    }
+
     const { email } = await req.json()
 
     if (!email || typeof email !== 'string') {
@@ -23,12 +32,9 @@ export async function POST(req: Request) {
       select: { id: true, email: true, marketingOptOut: true },
     })
 
-    if (!user) {
-      return NextResponse.json({ error: 'Email not found' }, { status: 404 })
-    }
-
-    if (user.marketingOptOut) {
-      return NextResponse.json({ message: 'Already unsubscribed' })
+    // Uniform response regardless of whether user exists — prevents enumeration
+    if (!user || user.marketingOptOut) {
+      return NextResponse.json({ message: 'If subscribed, you have been unsubscribed.' })
     }
 
     await prisma.user.update({
@@ -44,9 +50,9 @@ export async function POST(req: Request) {
       description: `User ${user.email} unsubscribed from marketing emails`,
     })
 
-    return NextResponse.json({ message: 'Successfully unsubscribed' })
+    return NextResponse.json({ message: 'If subscribed, you have been unsubscribed.' })
   } catch (error) {
     console.error('[UNSUBSCRIBE_ERROR]', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ message: 'If subscribed, you have been unsubscribed.' })
   }
 }

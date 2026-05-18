@@ -33,11 +33,11 @@ export async function withdrawFromPool(poolId: string, userId: string): Promise<
   try {
     const result = await prisma.$transaction(
       async (tx) => {
-        // Lock pool row
-        const [pool] = await tx.$queryRawUnsafe<any[]>(
-          `SELECT * FROM "exam_pools" WHERE id = $1 FOR UPDATE`,
-          poolId
-        )
+        // Advisory lock on pool to prevent concurrent modifications
+        const lockKey = BigInt('0x' + poolId.replace(/-/g, '').slice(0, 15))
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock(${lockKey})`
+
+        const pool = await tx.examPool.findUnique({ where: { id: poolId } })
         if (!pool) return { success: false, error: 'Pool not found' }
 
         // Find active membership (RESERVED or CONFIRMED)

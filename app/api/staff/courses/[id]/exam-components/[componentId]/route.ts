@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiNotFound, withErrorHandler } from '@/lib/api/response'
@@ -13,9 +14,12 @@ export const PATCH = withErrorHandler(
     if (!componentId) return apiError('Component ID required')
 
     const body = await req.json()
-    const { code, name, type, duration, individualPrice, poolPrice, questionCount, categoryCode } = body
+    const { code, name, type, duration, individualPrice, poolPrice, questionCount, categoryCode } =
+      body
 
-    const component = await prismaUnfiltered.examComponent.findUnique({ where: { id: componentId } })
+    const component = await prismaUnfiltered.examComponent.findUnique({
+      where: { id: componentId },
+    })
     if (!component) return apiNotFound('Exam component not found')
 
     const updated = await prismaUnfiltered.examComponent.update({
@@ -29,7 +33,9 @@ export const PATCH = withErrorHandler(
           individualPrice: individualPrice ? parseFloat(individualPrice) : null,
         }),
         ...(poolPrice !== undefined && { poolPrice: poolPrice ? parseFloat(poolPrice) : null }),
-        ...(questionCount !== undefined && { questionCount: questionCount ? parseInt(questionCount) : null }),
+        ...(questionCount !== undefined && {
+          questionCount: questionCount ? parseInt(questionCount) : null,
+        }),
         ...(categoryCode !== undefined && { categoryCode: categoryCode || null }),
       },
     })
@@ -42,6 +48,7 @@ export const PATCH = withErrorHandler(
       details: body,
     })
 
+    revalidateTag('exam-components', 'max')
     return apiSuccess(updated)
   }
 )
@@ -140,8 +147,14 @@ export const DELETE = withErrorHandler(
     if (hasRelated && force) {
       await prismaUnfiltered.$transaction(async (tx) => {
         // Delete in dependency order
-        await tx.poolMembership.updateMany({ where: { examComponentId: componentId }, data: softDeleteData() })
-        await tx.examBooking.updateMany({ where: { examComponentId: componentId }, data: softDeleteData() })
+        await tx.poolMembership.updateMany({
+          where: { examComponentId: componentId },
+          data: softDeleteData(),
+        })
+        await tx.examBooking.updateMany({
+          where: { examComponentId: componentId },
+          data: softDeleteData(),
+        })
         await tx.exam.deleteMany({ where: { examComponentId: componentId } })
         await tx.examComponent.delete({ where: { id: componentId } })
       })
@@ -157,14 +170,17 @@ export const DELETE = withErrorHandler(
       details: {
         code: component.code,
         force,
-        cascaded: hasRelated ? {
-          exams: component._count.exams,
-          bookings: component._count.bookings,
-          poolMemberships: component._count.poolMemberships,
-        } : undefined,
+        cascaded: hasRelated
+          ? {
+              exams: component._count.exams,
+              bookings: component._count.bookings,
+              poolMemberships: component._count.poolMemberships,
+            }
+          : undefined,
       },
     })
 
+    revalidateTag('exam-components', 'max')
     return apiSuccess({ message: 'Exam component deleted' })
   }
 )

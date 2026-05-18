@@ -13,7 +13,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      include: ['lib/**', 'hooks/**', 'components/**'],
+      include: ['lib/**', 'hooks/**', 'components/**', 'app/api/**'],
       exclude: ['node_modules', 'tests', '.next'],
     },
   },

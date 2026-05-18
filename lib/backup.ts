@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma/client'
 import { encrypt } from '@/lib/security/encryption'
 
-function encryptBackup(json: string): string {
+async function encryptBackup(json: string): Promise<string> {
   return encrypt(json)
 }
 
@@ -92,9 +92,7 @@ export function generateJsonBackup(backup: BackupData) {
     version: '1.0',
     source: 'aerojet-academy',
     tableCount: BACKUP_MODELS.length,
-    recordCounts: Object.fromEntries(
-      BACKUP_MODELS.map((m) => [m.key, backup[m.key]?.length ?? 0])
-    ),
+    recordCounts: Object.fromEntries(BACKUP_MODELS.map((m) => [m.key, backup[m.key]?.length ?? 0])),
     tables: backup,
   }
 }
@@ -159,9 +157,9 @@ export function generateReadableReport(backup: BackupData): string {
     `
   }
 
-  const sections = BACKUP_MODELS.map((m) =>
-    buildTable(m.key, m.label, backup[m.key] || [])
-  ).join('\n')
+  const sections = BACKUP_MODELS.map((m) => buildTable(m.key, m.label, backup[m.key] || [])).join(
+    '\n'
+  )
 
   const summaryRows = BACKUP_MODELS.map(
     (m) =>
@@ -299,7 +297,7 @@ export async function sendBackupEmail(email: string, backup: BackupData) {
       attachments: [
         {
           filename: `${jsonFilename}.enc`,
-          content: Buffer.from(encryptBackup(jsonStr)).toString('base64'),
+          content: Buffer.from(await encryptBackup(jsonStr)).toString('base64'),
         },
         {
           filename: htmlFilename,

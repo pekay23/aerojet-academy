@@ -10,6 +10,8 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url)
   const status = searchParams.get('status')
   const search = searchParams.get('search')
+  const page = parseInt(searchParams.get('page') || '1')
+  const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 100)
 
   const where: any = {}
 
@@ -42,12 +44,15 @@ export async function GET(req: NextRequest) {
         },
       },
       orderBy: { createdAt: 'desc' },
-      take: 50,
+      skip: (page - 1) * limit,
+      take: limit,
     }),
   ])
 
   return NextResponse.json({
     total: count,
+    page,
+    limit,
     payments: serializePrisma(payments),
   })
 }

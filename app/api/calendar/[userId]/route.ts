@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getStudentStatus } from '@/lib/access-control'
+import { getAuthSession } from '@/lib/auth/helpers'
 import { addHours } from 'date-fns'
 
 function escapeString(str: string | null | undefined) {
@@ -12,14 +13,21 @@ function formatDateToiCal(date: Date) {
   return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z'
 }
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ userId: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params
 
   if (!userId) {
     return new NextResponse('User ID required', { status: 400 })
+  }
+
+  // Auth check: only the user themselves or staff can access this calendar
+  const session = await getAuthSession()
+  if (!session) {
+    return new NextResponse('Unauthorized', { status: 401 })
+  }
+  const staffRoles = ['ADMIN', 'SUPER_ADMIN', 'STAFF']
+  if (session.user.id !== userId && !staffRoles.includes(session.user.role)) {
+    return new NextResponse('Forbidden', { status: 403 })
   }
 
   try {

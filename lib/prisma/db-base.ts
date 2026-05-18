@@ -57,7 +57,7 @@ if (!dbConnectionString) {
 const createPgAdapter = () => {
   const pool = new Pool({
     connectionString: dbConnectionString,
-    max: isDev ? 5 : 20,
+    max: isDev ? 5 : 8,
     connectionTimeoutMillis: isDev ? Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 10000) : 60000,
     idleTimeoutMillis: isDev ? 10000 : 30000,
     allowExitOnIdle: isDev,

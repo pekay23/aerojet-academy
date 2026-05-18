@@ -47,8 +47,5 @@ export async function GET(req: NextRequest) {
     success: true,
     message: 'Email verified successfully',
     hasPassword: !!user.password,
-    role: user.role,
-    status: user.status,
-    registrationCode: user.registrationCode,
   })
 }

@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma/client'
+import { MilestoneStatus } from '@prisma/client'
 import { triggerAutoEnrollmentByUserId } from './engine'
 import { upgradeRoleInTransaction } from './pathway'
 
@@ -34,7 +35,15 @@ export async function generateMilestonesForYear(enrollmentId: string, yearId: st
   const sem2Date =
     semesters.length > 1 && semesters[1].startDate ? new Date(semesters[1].startDate) : new Date()
 
-  const milestoneData = []
+  const milestoneData: {
+    enrollmentId: string
+    yearNumber: number
+    milestoneType: string
+    dueDate: Date
+    percentOfYearFee: number
+    amountDue: number
+    status: MilestoneStatus
+  }[] = []
 
   if (progYear.yearNumber === 1) {
     milestoneData.push(
@@ -154,7 +163,9 @@ export async function processMilestonePayment(milestoneId: string, userId: strin
       where: { enrollmentId: milestone.enrollmentId, yearNumber: 1 },
     })
     const seatPaid = allMilestones.some(
-      (m) => m.milestoneType === 'SEAT_CONFIRMATION' && (m.id === milestone.id ? true : m.status === 'PAID')
+      (m) =>
+        m.milestoneType === 'SEAT_CONFIRMATION' &&
+        (m.id === milestone.id ? true : m.status === 'PAID')
     )
 
     if (seatPaid) {

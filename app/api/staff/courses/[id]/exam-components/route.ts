@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
@@ -46,7 +47,8 @@ export const POST = withErrorHandler(
     if (!courseId) return apiError('Course not found', 404)
 
     const body = await req.json()
-    const { code, name, type, duration, individualPrice, poolPrice, questionCount, categoryCode } = body
+    const { code, name, type, duration, individualPrice, poolPrice, questionCount, categoryCode } =
+      body
 
     if (!code || !name || !type || !duration) {
       return apiError('Code, name, type, and duration are required')
@@ -68,7 +70,9 @@ export const POST = withErrorHandler(
         duration: parseInt(duration),
         individualPrice: individualPrice ?? 520,
         poolPrice: poolPrice ?? 300,
-        ...(questionCount !== undefined && { questionCount: questionCount ? parseInt(questionCount) : null }),
+        ...(questionCount !== undefined && {
+          questionCount: questionCount ? parseInt(questionCount) : null,
+        }),
         ...(categoryCode !== undefined && { categoryCode: categoryCode || null }),
       },
     })
@@ -81,6 +85,7 @@ export const POST = withErrorHandler(
       details: { courseId, code, type },
     })
 
+    revalidateTag('exam-components', 'max')
     return apiCreated(component)
   }
 )

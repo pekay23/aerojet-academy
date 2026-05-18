@@ -17,30 +17,37 @@ export default async function ApplicantWalletTopUpPage() {
 
   const userId = session.user.id
 
-  const applicant = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      registrationPaid: true,
-      programmeChoice: true,
-      role: true,
-    },
-  })
+  const [applicant, pendingPayment, currency, activePaymentMethods, bankSettings] =
+    await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { registrationPaid: true, programmeChoice: true, role: true },
+      }),
+      prisma.payment.findFirst({
+        where: { userId, referenceType: 'WALLET_TOPUP', status: 'PENDING' },
+      }),
+      getSystemSetting('course_currency', 'EUR'),
+      getActivePaymentMethods(),
+      prisma.systemSetting.findMany({
+        where: {
+          key: {
+            in: [
+              'bank_name',
+              'bank_account_name',
+              'bank_account_number',
+              'bank_swift',
+              'bank_branch',
+            ],
+          },
+        },
+      }),
+    ])
 
   if (!applicant) redirect('/login')
 
   if (applicant.role === 'STUDENT') {
     redirect('/student/wallet')
   }
-
-  const pendingPayment = await prisma.payment.findFirst({
-    where: {
-      userId,
-      referenceType: 'WALLET_TOPUP',
-      status: 'PENDING',
-    },
-  })
-
-  const currency = await getSystemSetting('course_currency', 'EUR')
 
   const { getCurrencySymbol } = await import('@/lib/currency')
   const symbol = getCurrencySymbol(currency)
@@ -66,16 +73,7 @@ export default async function ApplicantWalletTopUpPage() {
     },
   ]
 
-  const activePaymentMethods = await getActivePaymentMethods()
-
-  // Bank details
-  const bankSettings = await prisma.systemSetting.findMany({
-    where: {
-      key: {
-        in: ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_swift', 'bank_branch'],
-      },
-    },
-  })
+  // activePaymentMethods and bankSettings already fetched in first Promise.all above
   const settingsMap: Record<string, string> = {}
   for (const s of bankSettings) {
     settingsMap[s.key] = s.value
@@ -90,14 +88,14 @@ export default async function ApplicantWalletTopUpPage() {
   }
 
   return (
-    <div className="max-w-7xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 max-w-7xl space-y-6 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Top-Up Your Exam Wallet
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          To join an exam booking, you must first credit your Aerojet Wallet. Uploading a valid top-up
-          receipt will automatically verify your student status.
+          To join an exam booking, you must first credit your Aerojet Wallet. Uploading a valid
+          top-up receipt will automatically verify your student status.
         </p>
       </div>
 

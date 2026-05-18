@@ -32,25 +32,43 @@ export default async function PathwayPage() {
 
   const userId = session.user.id
 
-  const applicant = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      registrationPaid: true,
-      programmeChoice: true,
-      role: true,
-    },
-  })
+  const [applicant, enrollment, currencySettings, wallet, pendingTuitionPayment, bankSettings] =
+    await Promise.all([
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { registrationPaid: true, programmeChoice: true, role: true },
+      }),
+      prisma.fullTimeEnrollment.findFirst({
+        where: { studentId: userId },
+        include: { programme: true, milestones: { orderBy: { yearNumber: 'asc' } } },
+      }),
+      prisma.systemSetting.findMany({ where: { key: 'course_currency' } }),
+      prisma.wallet.findUnique({ where: { userId } }),
+      prisma.payment.findFirst({
+        where: {
+          userId,
+          referenceType: {
+            in: ['SEAT_CONFIRMATION', 'YEAR_1_FULL', 'FULL_PROGRAMME', 'CUSTOM_PART_PAYMENT'],
+          },
+          status: 'PENDING',
+        },
+      }),
+      prisma.systemSetting.findMany({
+        where: {
+          key: {
+            in: [
+              'bank_name',
+              'bank_account_name',
+              'bank_account_number',
+              'bank_swift',
+              'bank_branch',
+            ],
+          },
+        },
+      }),
+    ])
 
   if (!applicant) redirect('/login')
-
-  // Check for existing enrollment
-  const enrollment = await prisma.fullTimeEnrollment.findFirst({
-    where: { studentId: userId },
-    include: {
-      programme: true,
-      milestones: { orderBy: { yearNumber: 'asc' } },
-    },
-  })
 
   // If already a STUDENT and has enrollment, redirect to student portal
   if (applicant.role === 'STUDENT' && enrollment) {
@@ -76,13 +94,7 @@ export default async function PathwayPage() {
   }
 
   const pricing = PRICING[choice]
-  const currencySettings = await prisma.systemSetting.findMany({
-    where: { key: 'course_currency' },
-  })
   const currency = currencySettings[0]?.value || 'EUR'
-
-  // Check wallet balance
-  const wallet = await prisma.wallet.findUnique({ where: { userId } })
 
   // If enrollment exists and seat is confirmed, show milestone tracker
   if (enrollment) {
@@ -93,7 +105,7 @@ export default async function PathwayPage() {
       return (
         <div className="max-w-7xl space-y-6">
           <div>
-            <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+            <h1 className="text-aerojet-blue text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
               Enrollment Progress
             </h1>
             <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -163,7 +175,7 @@ export default async function PathwayPage() {
               </div>
               <Link
                 href="/applicant/wallet-top-up"
-                className="flex items-center gap-1.5 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#003875]"
+                className="bg-aerojet-blue flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold text-white transition-colors hover:bg-[#003875]"
               >
                 Top Up Wallet
                 <ArrowRight className="h-3.5 w-3.5" />
@@ -190,17 +202,6 @@ export default async function PathwayPage() {
       )
     }
   }
-
-  // Look for any pending payment for tuition
-  const pendingTuitionPayment = await prisma.payment.findFirst({
-    where: {
-      userId,
-      referenceType: {
-        in: ['SEAT_CONFIRMATION', 'YEAR_1_FULL', 'FULL_PROGRAMME', 'CUSTOM_PART_PAYMENT'],
-      },
-      status: 'PENDING',
-    },
-  })
 
   // Calculate options based on programme type
   const seatConfirmation = pricing.year1 * 0.4
@@ -266,23 +267,15 @@ export default async function PathwayPage() {
         },
       ]
 
-  // Bank details
-  const bankSettings = await prisma.systemSetting.findMany({
-    where: {
-      key: {
-        in: ['bank_name', 'bank_account_name', 'bank_account_number', 'bank_swift', 'bank_branch'],
-      },
-    },
-  })
   const globalSettings: Record<string, string> = {}
   for (const s of bankSettings) {
     globalSettings[s.key] = s.value
   }
 
   return (
-    <div className="max-w-7xl space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 max-w-7xl space-y-6 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           Complete Your Enrollment
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

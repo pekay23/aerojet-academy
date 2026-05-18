@@ -43,8 +43,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   await prisma.user.update({
     where: { id: user.id },
     data: {
-      verifyToken: token,
-      verifyTokenExpires: tokenExpires,
+      passwordResetToken: token,
+      passwordResetExpires: tokenExpires,
     },
   })
 

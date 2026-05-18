@@ -8,6 +8,9 @@ import { generateStudentId } from '@/lib/auth/helpers'
 export async function POST(req: NextRequest) {
   const session = await getAuthSession()
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  if (!['APPLICANT', 'STUDENT'].includes(session.user.role)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  }
 
   const userId = session.user.id
 

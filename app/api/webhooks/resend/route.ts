@@ -37,8 +37,10 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
       }
     } else {
-      console.warn('[Webhooks] RESEND_WEBHOOK_SECRET not set — skipping signature verification')
-      payload = JSON.parse(body)
+      console.error(
+        '[Webhooks] RESEND_WEBHOOK_SECRET not configured — rejecting unverified webhook'
+      )
+      return NextResponse.json({ error: 'Webhook verification not configured' }, { status: 503 })
     }
 
     const { type, data, created_at } = payload

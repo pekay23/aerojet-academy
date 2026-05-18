@@ -22,6 +22,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     orderBy: {
       approvedAt: 'desc',
     },
+    take: 200,
   })
 
   return apiSuccess({ payments: serializePrisma(payments) })
