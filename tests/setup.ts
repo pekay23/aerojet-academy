@@ -22,6 +22,16 @@ function mockModel() {
 }
 
 // ---------------------------------------------------------------------------
+// Mock server-only (prevents "Cannot be imported from Client Component" in tests)
+// ---------------------------------------------------------------------------
+vi.mock('server-only', () => ({}))
+vi.mock('next/cache', () => ({
+  unstable_cache: vi.fn((fn: any) => fn),
+  revalidateTag: vi.fn(),
+  revalidatePath: vi.fn(),
+}))
+
+// ---------------------------------------------------------------------------
 // Mock next-auth
 // ---------------------------------------------------------------------------
 vi.mock('next-auth', () => ({ getServerSession: vi.fn() }))

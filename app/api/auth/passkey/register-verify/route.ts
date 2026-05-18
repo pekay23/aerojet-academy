@@ -19,14 +19,19 @@ export async function POST(req: Request) {
       return new NextResponse('Missing credential', { status: 400 })
     }
 
-    // Retrieve the stored challenge
-    const storedChallenge = await prisma.passkeyChallenge.findFirst({
-      where: {
-        userId: session.user.id,
-        type: 'registration',
-        expiresAt: { gt: new Date() },
-      },
-      orderBy: { createdAt: 'desc' },
+    // Atomically consume the challenge to prevent replay race conditions
+    const storedChallenge = await prisma.$transaction(async (tx) => {
+      const challenge = await tx.passkeyChallenge.findFirst({
+        where: {
+          userId: session.user.id,
+          type: 'registration',
+          expiresAt: { gt: new Date() },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      if (!challenge) return null
+      await tx.passkeyChallenge.delete({ where: { id: challenge.id } })
+      return challenge
     })
 
     if (!storedChallenge) {
@@ -80,11 +85,6 @@ export async function POST(req: Request) {
           : [],
         name: passkeyName,
       },
-    })
-
-    // Delete used challenge
-    await prisma.passkeyChallenge.delete({
-      where: { id: storedChallenge.id },
     })
 
     await createAuditLog({

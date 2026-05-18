@@ -1,16 +1,9 @@
 import { test, expect } from '@playwright/test'
-
-// Helper to log in as a specific user
-async function loginAs(page: any, email: string, password: string) {
-  await page.goto('/login')
-  await page.fill('#email', email)
-  await page.fill('#password', password)
-  await page.click('button[type="submit"]')
-}
+import { getStaffCredentials, getAdminCredentials, loginAs } from './helpers/auth'
 
 test.describe('Staff Portal E2E', () => {
   test('staff can login and reach dashboard', async ({ page }) => {
-    await loginAs(page, 'staff@aerojet-academy.com', 'REDACTED_PASSWORD')
+    await loginAs(page, getStaffCredentials())
 
     // Wait for staff layout to render by polling an element
     await expect(page.locator('nav, [role="navigation"], aside').first()).toBeVisible({
@@ -20,7 +13,7 @@ test.describe('Staff Portal E2E', () => {
   })
 
   test('admin can login and reach dashboard', async ({ page }) => {
-    await loginAs(page, 'admin@aerojet-academy.com', 'REDACTED_PASSWORD')
+    await loginAs(page, getAdminCredentials())
 
     await expect(page.locator('nav, [role="navigation"], aside').first()).toBeVisible({
       timeout: 30000,
@@ -29,7 +22,7 @@ test.describe('Staff Portal E2E', () => {
   })
 
   test('staff can navigate to newsroom', async ({ page }) => {
-    await loginAs(page, 'staff@aerojet-academy.com', 'REDACTED_PASSWORD')
+    await loginAs(page, getStaffCredentials())
     await expect(page.locator('nav, [role="navigation"], aside').first()).toBeVisible({
       timeout: 30000,
     })
@@ -42,7 +35,7 @@ test.describe('Staff Portal E2E', () => {
   })
 
   test('staff can navigate to applicants page', async ({ page }) => {
-    await loginAs(page, 'staff@aerojet-academy.com', 'REDACTED_PASSWORD')
+    await loginAs(page, getStaffCredentials())
     await expect(page.locator('nav, [role="navigation"], aside').first()).toBeVisible({
       timeout: 30000,
     })
@@ -53,7 +46,11 @@ test.describe('Staff Portal E2E', () => {
   })
 
   test('login fails with wrong password', async ({ page }) => {
-    await loginAs(page, 'staff@aerojet-academy.com', 'WrongPassword')
+    const creds = getStaffCredentials()
+    await page.goto('/login')
+    await page.fill('#email', creds.email)
+    await page.fill('#password', 'WrongPassword')
+    await page.click('button[type="submit"]')
 
     // Should stay on login page with an error message
     await expect(page.locator('body')).toContainText(/Invalid email or password/i, {
