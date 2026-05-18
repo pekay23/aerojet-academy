@@ -1,8 +1,13 @@
 import { describe, it, expect, vi } from 'vitest'
 
 // Mock Prisma — generateAcademyEmail calls prisma.user.findFirst for uniqueness check
-vi.mock('@/lib/prisma/client', () => ({
+vi.mock('@/lib/prisma/db-base', () => ({
   default: {
+    user: {
+      findFirst: vi.fn().mockResolvedValue(null),
+    },
+  },
+  prismaBase: {
     user: {
       findFirst: vi.fn().mockResolvedValue(null),
     },
