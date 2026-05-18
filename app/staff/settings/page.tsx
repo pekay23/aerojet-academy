@@ -8,15 +8,13 @@ import SystemSettingsForm from './_components/SystemSettingsForm'
 import PaymentMethodsManager from './_components/PaymentMethodsManager'
 import WelcomeMessagesManager from './_components/WelcomeMessagesManager'
 import { getWelcomeMessagesGrouped } from '@/lib/welcome-messages'
-import nextDynamic from 'next/dynamic'
+import EmailPreviewsPage from './email-previews/page'
 import AcademicCalendarManager from './academic-calendar/_components/AcademicCalendarManager'
 import BackupManager from './_components/BackupManager'
 import ExchangeRateDisplay from './_components/ExchangeRateDisplay'
 import TwoFactorSettings from './_components/TwoFactorSettings'
 import CustomFieldsManager from './custom-fields/_components/CustomFieldsManager'
 import { PasskeySettings } from './_components/PasskeySettings'
-
-const EmailPreviewsPage = nextDynamic(() => import('./email-previews/page'), { ssr: false })
 
 export const metadata: Metadata = { title: 'Settings | Staff Portal' }
 export const dynamic = 'force-dynamic'

@@ -33,54 +33,23 @@ import {
   getExamAnalytics,
   getYoYComparison,
 } from '@/lib/analytics/reports'
-import dynamic from 'next/dynamic'
 import ReportsTabs from '../_components/ReportsTabs'
 import { PeriodFilter } from './_components/PeriodFilter'
-
-const YoYRevenueChart = dynamic(
-  () => import('./_components/YoYCharts').then((m) => ({ default: m.YoYRevenueChart })),
-  { ssr: false }
-)
-const YoYEnrollmentChart = dynamic(
-  () => import('./_components/YoYCharts').then((m) => ({ default: m.YoYEnrollmentChart })),
-  { ssr: false }
-)
-const YoYPassRateChart = dynamic(
-  () => import('./_components/YoYCharts').then((m) => ({ default: m.YoYPassRateChart })),
-  { ssr: false }
-)
-const YoYStudentChart = dynamic(
-  () => import('./_components/YoYCharts').then((m) => ({ default: m.YoYStudentChart })),
-  { ssr: false }
-)
-const EnrollmentChart = dynamic(
-  () => import('./_components/ReportCharts').then((m) => ({ default: m.EnrollmentChart })),
-  { ssr: false }
-)
-const RevenueChart = dynamic(
-  () => import('./_components/ReportCharts').then((m) => ({ default: m.RevenueChart })),
-  { ssr: false }
-)
-const PoolFillChart = dynamic(
-  () => import('./_components/ReportCharts').then((m) => ({ default: m.PoolFillChart })),
-  { ssr: false }
-)
-const AttendanceChart = dynamic(
-  () => import('./_components/ReportCharts').then((m) => ({ default: m.AttendanceChart })),
-  { ssr: false }
-)
-const ExamTrendChart = dynamic(
-  () => import('./_components/ReportCharts').then((m) => ({ default: m.ExamTrendChart })),
-  { ssr: false }
-)
-const ScoreDistributionChart = dynamic(
-  () => import('./_components/ReportCharts').then((m) => ({ default: m.ScoreDistributionChart })),
-  { ssr: false }
-)
-const Sparkline = dynamic(
-  () => import('./_components/ReportCharts').then((m) => ({ default: m.Sparkline })),
-  { ssr: false }
-)
+import {
+  YoYRevenueChart,
+  YoYEnrollmentChart,
+  YoYPassRateChart,
+  YoYStudentChart
+} from './_components/YoYCharts'
+import {
+  EnrollmentChart,
+  RevenueChart,
+  PoolFillChart,
+  AttendanceChart,
+  ExamTrendChart,
+  ScoreDistributionChart,
+  Sparkline
+} from './_components/ReportCharts'
 export const metadata: Metadata = { title: 'Reports | Staff Portal' }
 
 /* ────────────────────────────── Overview Tab ────────────────────────────── */
