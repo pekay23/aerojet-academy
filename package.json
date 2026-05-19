@@ -1,13 +1,13 @@
 {
   "name": "aerojet-academy",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "packageManager": "bun@1.3.12",
   "private": true,
   "type": "module",
   "description": "Aerojet Aviation Training Academy - Complete Portal System",
   "scripts": {
     "dev": "next dev --turbo",
-    "build": "npx dotenv-cli -e .env -- cross-env NODE_ENV=production next build",
+    "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",

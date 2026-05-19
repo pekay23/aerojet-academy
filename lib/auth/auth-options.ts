@@ -9,6 +9,8 @@ import { UserStatus } from '@prisma/client'
 import { verifyTOTP } from '@/lib/auth/totp'
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NEXTAUTH_DEBUG === 'true',
   providers: [
     CredentialsProvider({
       name: 'credentials',
