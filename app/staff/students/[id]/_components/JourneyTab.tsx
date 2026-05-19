@@ -149,19 +149,13 @@ export default function JourneyTab({ student }: Props) {
     const now = new Date()
     const totalDuration = now.getTime() - signupDate.getTime()
 
-    const regPaymentDate = student.paymentApprovedAt
-      ? new Date(student.paymentApprovedAt)
-      : null
-    const timeToRegPayment = regPaymentDate
-      ? regPaymentDate.getTime() - signupDate.getTime()
-      : null
+    const regPaymentDate = student.paymentApprovedAt ? new Date(student.paymentApprovedAt) : null
+    const timeToRegPayment = regPaymentDate ? regPaymentDate.getTime() - signupDate.getTime() : null
 
     const enrollmentDate = student.studentProfile?.enrollmentDate
       ? new Date(student.studentProfile.enrollmentDate)
       : null
-    const timeToEnrollment = enrollmentDate
-      ? enrollmentDate.getTime() - signupDate.getTime()
-      : null
+    const timeToEnrollment = enrollmentDate ? enrollmentDate.getTime() - signupDate.getTime() : null
 
     // Wallet top-ups
     const walletTopUps = (student.walletTransactions || [])
@@ -196,12 +190,7 @@ export default function JourneyTab({ student }: Props) {
     <div className="space-y-8">
       {/* Summary Cards */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <StatCard
-          icon={Clock}
-          label="Time Since Signup"
-          value={stats.totalDuration}
-          color="blue"
-        />
+        <StatCard icon={Clock} label="Time Since Signup" value={stats.totalDuration} color="blue" />
         <StatCard
           icon={CreditCard}
           label="Time to Reg Payment"
@@ -247,21 +236,17 @@ export default function JourneyTab({ student }: Props) {
         </div>
 
         {events.length === 0 ? (
-          <p className="py-12 text-center text-sm text-slate-400">
-            No journey data available yet.
-          </p>
+          <p className="py-12 text-center text-sm text-slate-400">No journey data available yet.</p>
         ) : (
           <div className="relative">
             {/* Vertical line */}
-            <div className="absolute top-0 bottom-0 left-5 w-0.5 bg-gradient-to-b from-blue-300 via-slate-200 to-slate-100 dark:from-blue-700 dark:via-slate-700 dark:to-slate-800 sm:left-6" />
+            <div className="absolute top-0 bottom-0 left-5 w-0.5 bg-linear-to-b from-blue-300 via-slate-200 to-slate-100 sm:left-6 dark:from-blue-700 dark:via-slate-700 dark:to-slate-800" />
 
             <div className="space-y-0">
               {events.map((event, idx) => {
                 const colors = COLOR_MAP[event.color]
                 const prevEvent = idx > 0 ? events[idx - 1] : null
-                const gap = prevEvent
-                  ? durationBetween(prevEvent.date, event.date)
-                  : null
+                const gap = prevEvent ? durationBetween(prevEvent.date, event.date) : null
 
                 return (
                   <div key={event.id}>
@@ -296,7 +281,7 @@ export default function JourneyTab({ student }: Props) {
                             </p>
                           </div>
                           <div className="flex shrink-0 flex-col items-end gap-1">
-                            <span className="text-[10px] font-bold text-slate-400 whitespace-nowrap">
+                            <span className="text-[10px] font-bold whitespace-nowrap text-slate-400">
                               {formatDate(event.date)}
                             </span>
                             <span
@@ -492,7 +477,9 @@ function buildTimeline(student: any): TimelineEvent[] {
         category: 'wallet',
         metadata: {
           Amount: `EUR ${Number(txn.amount).toLocaleString()}`,
-          'Balance After': txn.balanceAfter ? `EUR ${Number(txn.balanceAfter).toLocaleString()}` : '—',
+          'Balance After': txn.balanceAfter
+            ? `EUR ${Number(txn.balanceAfter).toLocaleString()}`
+            : '—',
           ...(txn.staffName ? { 'Credited By': txn.staffName } : {}),
         },
       })
@@ -517,18 +504,26 @@ function buildTimeline(student: any): TimelineEvent[] {
   // 7b. Payment records (registration fee, services, etc.)
   const payments = student.payments || []
   for (const pmt of payments) {
-    const statusColor = pmt.status === 'APPROVED' || pmt.status === 'COMPLETED'
-      ? 'green' as const
-      : pmt.status === 'REJECTED' ? 'red' as const
-      : pmt.status === 'PENDING' ? 'amber' as const
-      : 'slate' as const
+    const statusColor =
+      pmt.status === 'APPROVED' || pmt.status === 'COMPLETED'
+        ? ('green' as const)
+        : pmt.status === 'REJECTED'
+          ? ('red' as const)
+          : pmt.status === 'PENDING'
+            ? ('amber' as const)
+            : ('slate' as const)
 
     events.push({
       id: `payment-${pmt.id}`,
       date: new Date(pmt.approvedAt || pmt.createdAt),
       title: `Payment: ${pmt.referenceType?.replace(/_/g, ' ') || 'General'}`,
       description: `${pmt.currency || 'EUR'} ${Number(pmt.amount).toLocaleString()} via ${pmt.paymentMethod || 'Unknown'}`,
-      icon: pmt.status === 'APPROVED' || pmt.status === 'COMPLETED' ? CheckCircle2 : pmt.status === 'REJECTED' ? XCircle : CreditCard,
+      icon:
+        pmt.status === 'APPROVED' || pmt.status === 'COMPLETED'
+          ? CheckCircle2
+          : pmt.status === 'REJECTED'
+            ? XCircle
+            : CreditCard,
       color: statusColor,
       category: 'payment',
       metadata: {
@@ -536,7 +531,11 @@ function buildTimeline(student: any): TimelineEvent[] {
         Status: pmt.status || '—',
         Method: pmt.paymentMethod || '—',
         ...(pmt.referenceCode ? { Ref: pmt.referenceCode } : {}),
-        ...(pmt.paymentCurrency && pmt.paymentCurrency !== pmt.currency ? { 'Paid In': `${pmt.paymentCurrency} ${Number(pmt.originalAmount || 0).toLocaleString()}` } : {}),
+        ...(pmt.paymentCurrency && pmt.paymentCurrency !== pmt.currency
+          ? {
+              'Paid In': `${pmt.paymentCurrency} ${Number(pmt.originalAmount || 0).toLocaleString()}`,
+            }
+          : {}),
         ...(pmt.staffName ? { 'Approved By': pmt.staffName } : {}),
       },
     })
@@ -556,11 +555,12 @@ function buildTimeline(student: any): TimelineEvent[] {
       title: `Exam Booked: ${moduleCode}`,
       description: `${moduleName}${bk.event?.name ? ` — ${bk.event.name}` : ''}`,
       icon: ClipboardCheck,
-      color: bk.status === 'APPROVED' || bk.status === 'CONFIRMED'
-        ? 'green'
-        : bk.status === 'CANCELLED'
-          ? 'red'
-          : 'sky',
+      color:
+        bk.status === 'APPROVED' || bk.status === 'CONFIRMED'
+          ? 'green'
+          : bk.status === 'CANCELLED'
+            ? 'red'
+            : 'sky',
       category: 'exam',
       metadata: {
         Status: bk.status || '—',
@@ -575,8 +575,8 @@ function buildTimeline(student: any): TimelineEvent[] {
   // 9. Exam Results
   const results = student.examResults || []
   for (const res of results) {
-    const moduleName = res.exam?.examComponent?.course?.name || 'Unknown'
-    const moduleCode = res.exam?.examComponent?.course?.code || ''
+    const moduleCode = res.moduleCode || res.exam?.examComponent?.course?.code || ''
+    const moduleName = res.exam?.examComponent?.course?.name || moduleCode || 'Unknown'
 
     events.push({
       id: `exam-result-${res.id}`,
@@ -590,7 +590,6 @@ function buildTimeline(student: any): TimelineEvent[] {
         Score: `${Number(res.score)}/${Number(res.maxScore)}`,
         Percentage: `${Number(res.percentage)}%`,
         Result: res.passed ? 'PASSED' : 'FAILED',
-        ...(res.grade ? { Grade: res.grade } : {}),
       },
     })
   }

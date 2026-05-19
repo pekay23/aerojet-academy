@@ -1,0 +1,15 @@
+# Prevent local env files from overriding Vercel env vars
+.env
+.env.local
+.env.staging
+.env.production
+
+# Dev/test files
+tests/
+stories/
+.storybook/
+.husky/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
