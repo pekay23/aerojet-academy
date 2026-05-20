@@ -5,7 +5,7 @@ This document provides a comprehensive guide for developers taking over the Aero
 ## 🚀 Quick Links
 - [Database & RLS Detail](./DATABASE_DETAIL.md)
 - [Architecture & Problem Solving](./ARCHITECTURE_STRATEGIES.md)
-- [Known Issues & Pending Fixes](./KNOWN_ISSUES.md)
+- [Known Issues & Pending Fixes](./known-issues.md)
 - [Future Roadmap](./future_plans.md)
 
 ---
@@ -62,7 +62,7 @@ This document provides a comprehensive guide for developers taking over the Aero
   - `app/student/classmates/_components/ClassmatesFilters.tsx`
 
 ### 5. Admissions Pipeline & Internal Exams
-- Admissions pipeline models, applicant stages, document uploads, aptitude testing, shortlisting, interviews, medical review, legacy import, and internal exams are scaffolded in `prisma/schema.prisma` and documented in `docs/admissions-pipeline-plan.md`.
+- Admissions pipeline models, applicant stages, document uploads, aptitude testing, shortlisting, interviews, medical review, legacy import, and internal exams are scaffolded in `prisma/schema.prisma` and documented in `docs/plans/admissions-pipeline.md`.
 - Internal exams are feature-flagged by `internal_exam_system_enabled`.
 - Staff manage exam banks at `/staff/exams/internal`; expanded bank rows include pool health, rules, and a copyable student-facing link.
 - Students use `/student/exams/internal`; the dashboard only lists exam banks for enrolled courses, requires candidate-detail confirmation before starting, supports skip/review navigation, autosaves answers, and confirms submission.

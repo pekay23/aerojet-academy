@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Future Plans · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Plans</p>
+  <h1 class="he-title">Future Plans</h1>
+  <p class="he-deck">This document tracks planned features and improvements for the Aerojet Academy platform.</p>
+</header>
+<p><strong>Last audited:</strong> 2026-05-06 (bulk update)</p>
+<hr>
+
+<section class="he-section" id="1-academy-class-management-redesign">
+  <div class="he-section__num">01 · 🎓 1. Academy Class Management Redesign</div>
+  <h2 class="he-section__title">🎓 1. Academy Class Management Redesign</h2><h3 id="student-batch-enrollment">Student &amp; Batch Enrollment</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <strong>Batch Selection</strong>: Bulk-selection interface to enroll entire batches (Academic Year + Semester cohorts) into a class in one action.</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>Roster Management</strong>: Comprehensive student list view within each class with status tracking (Enrolled, Dropped, Completed).</li>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Auto-Enrollment Logic</strong>: Link classes to specific student qualifications or pathway requirements</del> <em>(engine exists in <code>lib/enrollment/engine.ts</code> — auto-enrolls via <code>AcademicTerm</code> → <code>TermCourseAssignment</code> mapping)</em></li>
+</ul>
+<h3 id="pathway-academic-context">Pathway &amp; Academic Context</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Pathway Constraints</strong>: Restrict class visibility or enrollment based on the student&#39;s assigned <code>StudyPathway</code></del> <em>(done 2026-05-06 — enrollment page filters by license targets via <code>applicableCategories</code>)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Pre-requisite Validation</strong>: Automatic checking if students meet the course requirements before allowing class assignment</del> <em>(done 2026-05-06 — <code>validatePrerequisites()</code> in <code>lib/enrollment/validation.ts</code>, uses <code>requiresPrerequisite</code> + <code>prerequisites[]</code> on Course)</em></li>
+</ul>
+<h3 id="physical-resource-management">Physical Resource Management</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <strong>Classroom Mapping</strong>: Assign classes to specific physical rooms or labs in the academy.</li>
+<li><input checked="" disabled="" type="checkbox"> <strong>Capacity Enforcement</strong>: Real-time validation of <code>maxStudents</code> against physical room seating capacity.</li>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Seating Arrangements</strong>: Interactive floor plan / seating chart designer with drag-and-drop student assignment and visual occupancy heatmaps</del> <em>(done 2026-05-13 — FloorPlanDesigner with CSS grid paint-drag tools, exam + class seating assignment, student-facing seating view)</em></li>
+</ul>
+<h3 id="enhanced-scheduling">Enhanced Scheduling</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <strong>Weekly Schedule UI</strong>: Replace JSON configuration with a visual calendar/grid picker for daily instruction hours.</li>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Conflict Detection</strong>: Time-based examiner overlap (respects <code>maxParallelSittings</code>) and venue overlap detection</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Holiday/Break Exclusion</strong>: Automatically exclude academy holidays from the session count</del> <em>(done 2026-05-06 — <code>isHoliday</code> field on <code>AdminCalendarEvent</code>, <code>lib/calendar/holidays.ts</code> helper, integrated into exam scheduler)</em></li>
+</ul>
+<hr>
+
+<section class="he-section" id="2-student-peer-visibility">
+  <div class="he-section__num">02 · 👥 2. Student Peer Visibility</div>
+  <h2 class="he-section__title">👥 2. Student Peer Visibility</h2><h3 id="classmate-directory">Classmate Directory</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Class Roster View</strong>: Students assigned to a class can view a directory of classmates with profile photos/avatars and full names</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Sort &amp; Filter</strong>: Sortable by name, with search functionality</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Profile Cards</strong>: Compact card layout with student avatar, name, and study pathway badge</del> <em>(done 2026-05-06)</em></li>
+</ul>
+<h3 id="year-group-batch-directory">Year Group / Batch Directory</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Batch-level View</strong>: Toggle between viewing just their class and the full intake batch</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Class Filtering</strong>: Tabs/filters to switch between own class and full batch</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del><strong>Privacy Controls</strong>: Only enrolled students within the same academic year or intake group can see each other. Enforced at API level via RLS or scoped queries</del> <em>(done 2026-05-06)</em></li>
+</ul>
+<hr>
+
+<section class="he-section" id="3-advanced-analytics-reporting">
+  <div class="he-section__num">03 · 📊 3. Advanced Analytics &amp; Reporting</div>
+  <h2 class="he-section__title">📊 3. Advanced Analytics &amp; Reporting</h2><h3 id="predictive-analytics">Predictive Analytics</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <del>Revenue forecasting based on historical exam enrollment trends</del> <em>(done 2026-05-06 — <code>getRevenueForecast()</code> in <code>lib/analytics/forecasting.ts</code>, linear regression + EMA hybrid with confidence intervals)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del>Enrollment pipeline predictions (applicant to student conversion rates)</del> <em>(done 2026-05-06 — <code>getEnrollmentPipeline()</code> in <code>lib/analytics/forecasting.ts</code>, monthly conversion rate tracking + prediction)</em></li>
+</ul>
+<h3 id="automated-reporting">Automated Reporting</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <del>Scheduled PDF reports for board members (Revenue, Enrollment, Attendance)</del> <em>(done 2026-05-06, <strong>hidden</strong> — see Hidden Features section)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del>Email-based report delivery on configurable schedules (weekly/monthly)</del> <em>(done 2026-05-06, <strong>hidden</strong> — see Hidden Features section)</em></li>
+</ul>
+<h3 id="performance-benchmarking">Performance Benchmarking</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <del>Year-over-year comparison dashboards</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del>Automatic trend detection with anomaly highlighting</del> <em>(done 2026-05-06 — <code>detectTrends()</code> in <code>lib/analytics/forecasting.ts</code>, z-score anomaly detection across revenue/enrollment/pass-rate)</em></li>
+</ul>
+<hr>
+
+<section class="he-section" id="4-structural-improvements-p2-backlog">
+  <div class="he-section__num">04 · 🏗️ 4. Structural Improvements (P2 Backlog)</div>
+  <h2 class="he-section__title">🏗️ 4. Structural Improvements (P2 Backlog)</h2><h3 id="code-quality">Code Quality</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <del>Break up long functions — <code>getDashboardData</code> refactored into helper functions</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del>Break up <code>UsersTable</code> (479→230 lines) — extracted <code>UsersTableRow</code>, <code>UsersTableFilters</code>, shared types</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del>Add <code>error.tsx</code> in <code>(auth)</code> segment</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del>Add <code>not-found.tsx</code> in <code>(auth)</code> and <code>(portal)</code> segments</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del>Remove dead config — 3 unused font families in <code>tailwind.config.ts</code></del> <em>(done 2026-05-06)</em></li>
+</ul>
+<h3 id="polish">Polish</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <del>Centralize hardcoded values — status arrays now in <code>lib/utils/constants.ts</code> with Prisma-typed constants</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del>Replace <code>&lt;img&gt;</code> with <code>next/image</code> — 2 instances in newsroom create page</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del>Rate limiting — <code>submit-payment-proof</code> rate-limited to 5/hr per IP</del> <em>(done 2026-05-06)</em></li>
+</ul>
+<hr>
+
+<section class="he-section" id="5-financial-system-enhancements">
+  <div class="he-section__num">05 · 💰 5. Financial System Enhancements</div>
+  <h2 class="he-section__title">💰 5. Financial System Enhancements</h2><h3 id="revenue-by-programme-type-yearmonth-scoping">Revenue by Programme Type — Year/Month Scoping</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <del><code>getRevenueByProgrammeType()</code> and <code>getPaymentStatusBreakdown()</code> now accept <code>year</code>/<code>month</code> params</del> <em>(done 2026-05-06)</em></li>
+</ul>
+<h3 id="invoice-generation">Invoice Generation</h3><ul>
+<li><input disabled="" type="checkbox"> Auto-generate PDF invoices for enrollment payments.</li>
+<li><input disabled="" type="checkbox"> Invoice numbering system tied to academic year. <em>(Invoice model exists in schema — needs generation logic)</em></li>
+</ul>
+<h3 id="payment-gateway-integration">Payment Gateway Integration</h3><ul>
+<li><input disabled="" type="checkbox"> Direct online payment via Stripe/Paystack instead of manual proof uploads. <em>(Stripe webhook handler exists, checkout flow not built)</em></li>
+<li><input disabled="" type="checkbox"> Automatic reconciliation on payment webhook confirmation.</li>
+</ul>
+<hr>
+
+<section class="he-section" id="6-security-compliance">
+  <div class="he-section__num">06 · 🔐 6. Security &amp; Compliance</div>
+  <h2 class="he-section__title">🔐 6. Security &amp; Compliance</h2><h3 id="audit-trail-enhancements">Audit Trail Enhancements</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <del>Immutable audit log CSV export for regulatory compliance</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del>Audit log retention policies and archival</del> <em>(done 2026-05-06 — configurable via <code>audit_log_retention_days</code> setting, <code>AuditLogArchive</code> model, archival before deletion in cron)</em></li>
+</ul>
+<h3 id="access-control">Access Control</h3><ul>
+<li><input checked="" disabled="" type="checkbox"> <del>Adopt granular permissions (<code>requirePermission()</code>) in critical staff endpoints — audit logs, go/no-go, role changes, enrollment approval, payment approval/rejection</del> <em>(done 2026-05-06)</em></li>
+<li><input checked="" disabled="" type="checkbox"> <del>Two-factor authentication for staff accounts</del> <em>(done 2026-05-13 — TOTP-based 2FA via otplib v5, Settings → Security tab, login flow 2FA interception)</em></li>
+</ul>
+<hr>
+
+<section class="he-section" id="priority-implementation-queue">
+  <div class="he-section__num">07 · 📋 Priority Implementation Queue</div>
+  <h2 class="he-section__title">📋 Priority Implementation Queue</h2><p>All remaining items ordered from <strong>quickest/easiest</strong> to <strong>longest/hardest</strong>.
+Use this queue to pick the next item to implement.</p>
+<h3 id="tier-1-quick-wins-under-1-hour-each">Tier 1 — Quick Wins (under 1 hour each)</h3><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Est.</th>
+<th>Section</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Add <code>error.tsx</code> in <code>(auth)</code> segment</td>
+<td>~10 min</td>
+<td>4</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Add <code>not-found.tsx</code> in <code>(auth)</code> and <code>(portal)</code> segments</td>
+<td>~10 min</td>
+<td>4</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Remove 3 unused font families from <code>tailwind.config.ts</code></td>
+<td>~5 min</td>
+<td>4</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Replace 2 <code>&lt;img&gt;</code> with <code>next/image</code> in newsroom create page</td>
+<td>~10 min</td>
+<td>4</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Add <code>year</code>/<code>month</code> params to <code>getRevenueByProgrammeType()</code> and <code>getPaymentStatusBreakdown()</code></td>
+<td>~30 min</td>
+<td>5</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Add audit log CSV export endpoint</td>
+<td>~30 min</td>
+<td>6</td>
+<td><strong>Done</strong></td>
+</tr>
+</tbody></table>
+<h3 id="tier-2-medium-tasks-1-4-hours-each">Tier 2 — Medium Tasks (1-4 hours each)</h3><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Est.</th>
+<th>Section</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>7</td>
+<td>Rate limiting on <code>submit-payment-proof</code> and public routes</td>
+<td>~1-2 hr</td>
+<td>4</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>8</td>
+<td>Break up <code>getDashboardData</code> (183 lines) into helper functions</td>
+<td>~1-2 hr</td>
+<td>4</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>9</td>
+<td>Centralize hardcoded status arrays with Prisma-typed constants</td>
+<td>~2-3 hr</td>
+<td>4</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>10</td>
+<td>Adopt granular permissions in critical staff endpoints</td>
+<td>~2-3 hr</td>
+<td>6</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>11</td>
+<td>Scheduling conflict detection (examiner + venue time overlap)</td>
+<td>~2-3 hr</td>
+<td>1</td>
+<td><strong>Done</strong></td>
+</tr>
+</tbody></table>
+<h3 id="tier-3-medium-large-features-4-8-hours-each">Tier 3 — Medium-Large Features (4-8 hours each)</h3><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Est.</th>
+<th>Section</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>12</td>
+<td>Student classmate/batch directory with RLS scoping</td>
+<td>~4-5 hr</td>
+<td>2</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>13</td>
+<td>Scheduled PDF reports via email (cron + Resend)</td>
+<td>~4-5 hr</td>
+<td>3</td>
+<td><strong>Done</strong> (hidden)</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Invoice PDF generation with auto-numbering</td>
+<td>~4-5 hr</td>
+<td>5</td>
+<td><strong>Done</strong> (hidden)</td>
+</tr>
+<tr>
+<td>15</td>
+<td>Year-over-year comparison dashboard</td>
+<td>~4-5 hr</td>
+<td>3</td>
+<td><strong>Done</strong></td>
+</tr>
+</tbody></table>
+<h3 id="tier-4-large-features-1-3-days-each">Tier 4 — Large Features (1-3 days each)</h3><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Est.</th>
+<th>Section</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>16</td>
+<td>Revenue forecasting / predictive analytics</td>
+<td>~1-2 days</td>
+<td>3</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>17</td>
+<td>Batch enrollment interface (bulk class assignment)</td>
+<td>~1-2 days</td>
+<td>1</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>18</td>
+<td>Visual weekly schedule UI (calendar-based class scheduling)</td>
+<td>~1-2 days</td>
+<td>1</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>19</td>
+<td>Classroom/room mapping + capacity enforcement</td>
+<td>~1 day</td>
+<td>1</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>20</td>
+<td>Stripe/Paystack checkout flow for students</td>
+<td>~2-3 days</td>
+<td>5</td>
+<td></td>
+</tr>
+</tbody></table>
+<h3 id="tier-5-major-projects-3-days-each">Tier 5 — Major Projects (3+ days each)</h3><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Item</th>
+<th>Est.</th>
+<th>Section</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>21</td>
+<td>Two-factor authentication for staff</td>
+<td>~3-4 days</td>
+<td>6</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>22</td>
+<td>Seating arrangements (interactive floor plan designer)</td>
+<td>~5+ days</td>
+<td>1</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>23</td>
+<td>Pre-requisite validation + auto-enrollment logic</td>
+<td>~3-4 days</td>
+<td>1</td>
+<td><strong>Done</strong></td>
+</tr>
+<tr>
+<td>24</td>
+<td>Audit log retention policies and archival</td>
+<td>~1-2 days</td>
+<td>6</td>
+<td><strong>Done</strong></td>
+</tr>
+</tbody></table>
+<hr>
+
+<section class="he-section" id="hidden-features-to-unhide-later">
+  <div class="he-section__num">08 · 🔒 Hidden Features (To Unhide Later)</div>
+  <h2 class="he-section__title">🔒 Hidden Features (To Unhide Later)</h2><p>The following features are fully implemented but temporarily hidden. To re-enable, follow the steps below.</p>
+<h3 id="1-scheduled-pdf-reports-item-13">1. Scheduled PDF Reports (Item 13)</h3><ul>
+<li><strong>File</strong>: <code>app/api/cron/scheduled-reports/route.ts</code></li>
+<li><strong>How</strong>: Remove lines 13-14 (<code>return NextResponse.json({ success: true, message: 'Feature disabled' })</code>). The rest of the handler is live code below.</li>
+</ul>
+<h3 id="2-student-invoices-pdf-generation-item-14">2. Student Invoices &amp; PDF Generation (Item 14)</h3><p>Three files to touch:</p>
+<ol>
+<li><strong>Sidebar</strong> — <code>app/student/_components/StudentSidebar.tsx</code><ul>
+<li>Uncomment line 54 (<code>{ label: 'My Invoices', ... }</code>)</li>
+</ul>
+</li>
+<li><strong>Invoices page</strong> — <code>app/student/invoices/page.tsx</code><ul>
+<li>Delete the active <code>StudentInvoicesPage</code> function (the one-liner with <code>redirect</code>).</li>
+<li>Uncomment the <code>/* ... */</code> block containing <code>StudentInvoicesPageFull</code> and rename it to <code>StudentInvoicesPage</code>.</li>
+<li>Uncomment the imports at the top of the file.</li>
+</ul>
+</li>
+<li><strong>PDF download API</strong> — <code>app/api/student/invoices/[id]/download/route.ts</code><ul>
+<li>Delete the active <code>GET()</code> function (the one-liner returning 403).</li>
+<li>Uncomment the <code>/* ... */</code> block containing the full <code>GET</code> handler.</li>
+<li>Uncomment the imports at the top of the file.</li>
+</ul>
+</li>
+</ol>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#1-academy-class-management-redesign">🎓 1. Academy Class Management Redesign</a></li>
+    <li class="he-toc__l3"><a href="#student-batch-enrollment">Student &amp; Batch Enrollment</a></li>
+    <li class="he-toc__l3"><a href="#pathway-academic-context">Pathway &amp; Academic Context</a></li>
+    <li class="he-toc__l3"><a href="#physical-resource-management">Physical Resource Management</a></li>
+    <li class="he-toc__l3"><a href="#enhanced-scheduling">Enhanced Scheduling</a></li>
+    <li class="he-toc__l2"><a href="#2-student-peer-visibility">👥 2. Student Peer Visibility</a></li>
+    <li class="he-toc__l3"><a href="#classmate-directory">Classmate Directory</a></li>
+    <li class="he-toc__l3"><a href="#year-group-batch-directory">Year Group / Batch Directory</a></li>
+    <li class="he-toc__l2"><a href="#3-advanced-analytics-reporting">📊 3. Advanced Analytics &amp; Reporting</a></li>
+    <li class="he-toc__l3"><a href="#predictive-analytics">Predictive Analytics</a></li>
+    <li class="he-toc__l3"><a href="#automated-reporting">Automated Reporting</a></li>
+    <li class="he-toc__l3"><a href="#performance-benchmarking">Performance Benchmarking</a></li>
+    <li class="he-toc__l2"><a href="#4-structural-improvements-p2-backlog">🏗️ 4. Structural Improvements (P2 Backlog)</a></li>
+    <li class="he-toc__l3"><a href="#code-quality">Code Quality</a></li>
+    <li class="he-toc__l3"><a href="#polish">Polish</a></li>
+    <li class="he-toc__l2"><a href="#5-financial-system-enhancements">💰 5. Financial System Enhancements</a></li>
+    <li class="he-toc__l3"><a href="#revenue-by-programme-type-yearmonth-scoping">Revenue by Programme Type — Year/Month Scoping</a></li>
+    <li class="he-toc__l3"><a href="#invoice-generation">Invoice Generation</a></li>
+    <li class="he-toc__l3"><a href="#payment-gateway-integration">Payment Gateway Integration</a></li>
+    <li class="he-toc__l2"><a href="#6-security-compliance">🔐 6. Security &amp; Compliance</a></li>
+    <li class="he-toc__l3"><a href="#audit-trail-enhancements">Audit Trail Enhancements</a></li>
+    <li class="he-toc__l3"><a href="#access-control">Access Control</a></li>
+    <li class="he-toc__l2"><a href="#priority-implementation-queue">📋 Priority Implementation Queue</a></li>
+    <li class="he-toc__l3"><a href="#tier-1-quick-wins-under-1-hour-each">Tier 1 — Quick Wins (under 1 hour each)</a></li>
+    <li class="he-toc__l3"><a href="#tier-2-medium-tasks-1-4-hours-each">Tier 2 — Medium Tasks (1-4 hours each)</a></li>
+    <li class="he-toc__l3"><a href="#tier-3-medium-large-features-4-8-hours-each">Tier 3 — Medium-Large Features (4-8 hours each)</a></li>
+    <li class="he-toc__l3"><a href="#tier-4-large-features-1-3-days-each">Tier 4 — Large Features (1-3 days each)</a></li>
+    <li class="he-toc__l3"><a href="#tier-5-major-projects-3-days-each">Tier 5 — Major Projects (3+ days each)</a></li>
+    <li class="he-toc__l2"><a href="#hidden-features-to-unhide-later">🔒 Hidden Features (To Unhide Later)</a></li>
+    <li class="he-toc__l3"><a href="#1-scheduled-pdf-reports-item-13">1. Scheduled PDF Reports (Item 13)</a></li>
+    <li class="he-toc__l3"><a href="#2-student-invoices-pdf-generation-item-14">2. Student Invoices &amp; PDF Generation (Item 14)</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

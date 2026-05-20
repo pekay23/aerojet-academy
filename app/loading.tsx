@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import Image from 'next/image'
+import Logo from '@/components/shared/Logo'
 
 export default function GlobalLoading() {
   useEffect(() => {
@@ -13,14 +13,7 @@ export default function GlobalLoading() {
       <div className="relative mb-8">
         <div className="bg-public-secondary/20 absolute inset-0 animate-ping rounded-full" />
         <div className="relative flex h-32 w-32 items-center justify-center rounded-full border border-slate-100 bg-white shadow-xl">
-          <Image
-            src="/images/logos/AATA_logo_hor_onWhite.webp"
-            alt="Aerojet Logo"
-            width={80}
-            height={20}
-            style={{ width: 'auto', height: 'auto' }}
-            className="h-5 w-auto animate-pulse object-contain transition-all duration-700"
-          />
+          <Logo className="h-5 w-auto animate-pulse transition-all duration-700" />
         </div>
       </div>
 

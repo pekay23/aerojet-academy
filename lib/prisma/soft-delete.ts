@@ -1,3 +1,5 @@
+import 'server-only'
+
 /**
  * Soft-delete utilities for Prisma queries.
  *

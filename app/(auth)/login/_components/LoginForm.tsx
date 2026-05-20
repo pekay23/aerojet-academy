@@ -133,55 +133,68 @@ export default function LoginForm() {
     }
   }
 
+  // Extracted so we can trigger it from both the explicit submit and the
+  // auto-submit-on-6-digits path. The optional `codeOverride` bypasses React's
+  // state-lag: when the user types the 6th digit, the onChange-derived value
+  // is passed directly instead of waiting for the next render.
+  const performLogin = useCallback(
+    (codeOverride?: string) => {
+      startTransition(async () => {
+        setError('')
+        try {
+          const result = await signIn('credentials', {
+            redirect: false,
+            email: email.trim().toLowerCase(),
+            password,
+            totpCode: needs2FA ? (codeOverride ?? totpCode) : undefined,
+          })
+
+          if (!result) {
+            throw new Error('Something went wrong. Please try again.')
+          }
+
+          if (result.error) {
+            // Check if the error indicates 2FA is required
+            if (result.error.includes('2FA_REQUIRED')) {
+              setNeeds2FA(true)
+              setTotpCode('')
+              return
+            }
+            if (needs2FA && result.error.includes('Invalid 2FA code')) {
+              // Wipe the code on invalid attempt so the user can retype
+              // (and the autosubmit fires again on the 6th digit).
+              setTotpCode('')
+              throw new Error('Invalid verification code. Please try again.')
+            }
+            throw new Error('Invalid email or password.')
+          }
+
+          // Get session to read role and redirect accordingly
+          const session = await getSession()
+          const role = session?.user?.role
+
+          const redirectMap: Record<string, string> = {
+            SUPER_ADMIN: '/staff',
+            ADMIN: '/staff',
+            STAFF: '/staff',
+            INSTRUCTOR: '/instructor',
+            STUDENT: '/student',
+            APPLICANT: '/applicant',
+          }
+
+          // Use window.location for full page navigation after auth
+          window.location.href = redirectMap[role || ''] ?? '/login'
+        } catch (err: any) {
+          setError(err.message || 'Something went wrong. Please try again.')
+        }
+      })
+    },
+    [email, password, needs2FA, totpCode]
+  )
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-
-    startTransition(async () => {
-      setError('')
-      try {
-        const result = await signIn('credentials', {
-          redirect: false,
-          email: email.trim().toLowerCase(),
-          password,
-          totpCode: needs2FA ? totpCode : undefined,
-        })
-
-        if (!result) {
-          throw new Error('Something went wrong. Please try again.')
-        }
-
-        if (result.error) {
-          // Check if the error indicates 2FA is required
-          if (result.error.includes('2FA_REQUIRED')) {
-            setNeeds2FA(true)
-            setTotpCode('')
-            return
-          }
-          if (needs2FA && result.error.includes('Invalid 2FA code')) {
-            throw new Error('Invalid verification code. Please try again.')
-          }
-          throw new Error('Invalid email or password.')
-        }
-
-        // Get session to read role and redirect accordingly
-        const session = await getSession()
-        const role = session?.user?.role
-
-        const redirectMap: Record<string, string> = {
-          SUPER_ADMIN: '/staff',
-          ADMIN: '/staff',
-          STAFF: '/staff',
-          INSTRUCTOR: '/instructor',
-          STUDENT: '/student',
-          APPLICANT: '/applicant',
-        }
-
-        // Use window.location for full page navigation after auth
-        window.location.href = redirectMap[role || ''] ?? '/login'
-      } catch (err: any) {
-        setError(err.message || 'Something went wrong. Please try again.')
-      }
-    })
+    performLogin()
   }
 
   return (
@@ -266,7 +279,7 @@ export default function LoginForm() {
             Verification Code
           </label>
           <p className="mb-3 text-xs text-slate-400 dark:text-slate-500">
-            Enter the 6-digit code from your authenticator app.
+            Enter the 6-digit code from your authenticator app. It will submit automatically.
           </p>
           <div className="relative">
             <ShieldCheck className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -277,7 +290,18 @@ export default function LoginForm() {
               pattern="[0-9]*"
               maxLength={6}
               value={totpCode}
-              onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onChange={(e) => {
+                const next = e.target.value.replace(/\D/g, '').slice(0, 6)
+                setTotpCode(next)
+                // Auto-submit the moment the 6th digit lands. We pass the
+                // value directly (instead of relying on state) because
+                // setState hasn't flushed yet. Guard on !isPending so we
+                // don't double-fire if the user pastes a code while a
+                // submit is already in flight.
+                if (next.length === 6 && !isPending) {
+                  performLogin(next)
+                }
+              }}
               placeholder="000000"
               required
               autoFocus

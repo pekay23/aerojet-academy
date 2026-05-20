@@ -19,7 +19,7 @@
 
 ### Database Adapter — IMPORTANT
 
-The project uses `@prisma/adapter-pg` with the standard `pg` PostgreSQL driver. **Do NOT switch to `@prisma/adapter-neon`** — the `ws` WebSocket module required by the Neon serverless adapter does not work in Vercel's Turbopack serverless bundles. See `docs/KNOWN_ISSUES.md` for details.
+The project uses `@prisma/adapter-pg` with the standard `pg` PostgreSQL driver. **Do NOT switch to `@prisma/adapter-neon`** — the `ws` WebSocket module required by the Neon serverless adapter does not work in Vercel's Turbopack serverless bundles. See `docs/known-issues.md` for details.
 
 Local exception: `next dev` may dynamically select the Neon adapter for `*.neon.tech` URLs to avoid local TCP connection stalls. Production and Vercel runtime must remain on `@prisma/adapter-pg`.
 

@@ -21,6 +21,7 @@ import { toast } from 'sonner'
 import { updateExamBooking, deleteExamRecord } from '@/app/staff/actions'
 import BookExamForStudentDialog from './BookExamForStudentDialog'
 import AddExamRecordDialog from './AddExamRecordDialog'
+import CertificateReleaseControl from './CertificateReleaseControl'
 import { deriveBookingDisplayResult } from '@/lib/exams/fulfillment'
 
 const EXAM_FILTERS = [
@@ -383,6 +384,14 @@ export default function ExamsTab({
 
   return (
     <div className="space-y-6">
+      <CertificateReleaseControl
+        studentId={student.id}
+        fundingSource={student.studentProfile?.fundingSource}
+        pathwayCode={student.studentProfile?.pathwayRel?.code}
+        initialCertificatesReleased={student.studentProfile?.certificatesReleased ?? false}
+        initialDocumentsReleased={student.studentProfile?.documentsReleased ?? false}
+      />
+
       {/* Header Actions */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">

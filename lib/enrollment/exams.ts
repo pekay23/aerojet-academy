@@ -177,22 +177,50 @@ export async function bookResitExam(userId: string, moduleCode: string, eventId:
     resitFee = Number(resitFeeSetting)
   }
 
-  const wallet = await prisma.wallet.findUnique({ where: { userId } })
-  if (!wallet || Number(wallet.availableBalance) < resitFee) {
-    throw new Error(`Insufficient funds for resit. Cost: EUR ${resitFee.toFixed(2)}`)
+  // Audit 1c: a bundle with remaining free-resit entitlement covers this resit
+  // at no charge (Twin Pack = 1, Four Pack = 2). Earliest-expiring first.
+  const bundlesWithFreeResits = await prisma.examBundle.findMany({
+    where: {
+      userId,
+      status: { in: ['ACTIVE', 'USED', 'EXHAUSTED'] },
+      validUntil: { gt: new Date() },
+    },
+    orderBy: { validUntil: 'asc' },
+  })
+  const freeResitBundle =
+    bundlesWithFreeResits.find((b) => b.usedFreeResits < b.freeResitsIncluded) ?? null
+  const chargeFee = freeResitBundle ? 0 : resitFee
+
+  if (chargeFee > 0) {
+    const wallet = await prisma.wallet.findUnique({ where: { userId } })
+    if (!wallet || Number(wallet.availableBalance) < chargeFee) {
+      throw new Error(`Insufficient funds for resit. Cost: EUR ${chargeFee.toFixed(2)}`)
+    }
   }
 
   return prisma.$transaction(async (tx) => {
+    if (freeResitBundle) {
+      await tx.examBundle.update({
+        where: { id: freeResitBundle.id },
+        data: { usedFreeResits: { increment: 1 } },
+      })
+    }
+
     const result = await placeExamBookingInStandardPool(tx, {
       userId,
       eventId,
       examComponentId: comp.id,
       moduleCode: comp.course.code,
       bookingType: 'RESIT',
-      reserveAmount: resitFee,
+      reserveAmount: chargeFee,
+      bundleId: freeResitBundle?.id ?? null,
       isResit: true,
     })
 
-    return { bookingId: result.booking.id, poolId: result.pool!.id }
+    return {
+      bookingId: result.booking.id,
+      poolId: result.pool!.id,
+      usedFreeResit: !!freeResitBundle,
+    }
   })
 }

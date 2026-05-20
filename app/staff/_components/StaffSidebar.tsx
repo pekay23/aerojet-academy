@@ -11,10 +11,10 @@ import {
   BarChart3,
   Mail,
   Settings,
-  Building,
   GitPullRequestArrow,
   GraduationCap,
-  Wrench,
+  ShieldCheck,
+  Users2,
 } from 'lucide-react'
 import { useBadgeCounts } from '@/hooks/useBadgeCounts'
 
@@ -58,6 +58,8 @@ export default function StaffSidebar({
         { label: 'Student Directory', href: '/users?tab=students' },
         { label: 'Instructors', href: '/users?tab=instructors' },
         { label: 'Bulk Import (CSV)', href: '/students/import' },
+        { label: 'Withdrawals', href: '/withdrawals' },
+        { label: 'Document Vault', href: '/documents' },
         { label: 'Audit Logs', href: '/audit-logs' },
       ],
     },
@@ -98,6 +100,7 @@ export default function StaffSidebar({
         { label: 'Exam Management', href: '/exams' },
         ...(internalExamEnabled ? [{ label: 'Internal Exams', href: '/exams/internal' }] : []),
         { label: 'Batch Processing', href: '/enrollments/batch' },
+        { label: 'Year/Semester Advancement', href: '/enrollments/advancement' },
         { label: 'Attendance', href: '/attendance' },
       ],
     },
@@ -109,6 +112,7 @@ export default function StaffSidebar({
         { label: 'Instructors', href: '/instructors' },
         { label: 'Practical Training', href: '/practical-assessments' },
         { label: 'OJT Logbooks', href: '/ojt' },
+        { label: 'Part-145 Transition', href: '/part-145' },
         { label: 'ATA Chapters', href: '/ata-chapters' },
       ],
     },
@@ -122,6 +126,7 @@ export default function StaffSidebar({
         { label: 'Classrooms', href: '/classrooms' },
         { label: 'Revision Support', href: '/revision-runs' },
         { label: 'Master Calendar', href: '/calendar' },
+        { label: 'Conflict Matrix', href: '/timetable/conflicts' },
       ],
     },
     {
@@ -132,6 +137,7 @@ export default function StaffSidebar({
       children: [
         { label: 'Recent Payments', href: '/payments' },
         { label: 'Financial Reports', href: '/finance' },
+        { label: 'Refunds', href: '/finance/refunds' },
       ],
     },
     {
@@ -145,6 +151,25 @@ export default function StaffSidebar({
       ],
     },
     { label: 'System Reports', href: '/reports', icon: BarChart3 },
+    {
+      label: 'Referrals',
+      href: '/referrals',
+      icon: Users2,
+      children: [
+        { label: 'Review queue', href: '/referrals' },
+        { label: 'Payouts', href: '/referrals/payouts' },
+      ],
+    },
+    {
+      label: 'Governance',
+      href: '/gdpr',
+      icon: ShieldCheck,
+      children: [
+        { label: 'GDPR requests', href: '/gdpr' },
+        { label: 'Retention policies', href: '/settings/retention' },
+        { label: 'Permissions (RBAC)', href: '/admin/permissions' },
+      ],
+    },
   ]
 
   return (

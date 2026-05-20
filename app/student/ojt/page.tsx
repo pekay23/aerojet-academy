@@ -1,6 +1,7 @@
 import { Metadata } from 'next'
 import { requireAuth } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import { LogbookPreview, type LogbookPreviewData } from '@/components/shared/LogbookPreview'
 import StudentLogbook from './_components/StudentLogbook'
 
 export const metadata: Metadata = { title: 'OJT Logbook | Student' }
@@ -12,6 +13,12 @@ export default async function StudentOJTPage() {
   const studentProfile = await prisma.studentProfile.findUnique({
     where: { userId: user.id },
     include: {
+      user: {
+        select: {
+          email: true,
+          profile: { select: { firstName: true, lastName: true } },
+        },
+      },
       licenseTargets: {
         include: { licenseCategory: true },
       },
@@ -64,11 +71,36 @@ export default async function StudentOJTPage() {
     })
   }
 
+  const studentName = studentProfile.user.profile
+    ? `${studentProfile.user.profile.firstName ?? ''} ${studentProfile.user.profile.lastName ?? ''}`.trim()
+    : studentProfile.user.email
+
   if (!logbook) {
+    const blankLogbook: LogbookPreviewData = {
+      studentName,
+      studentId: studentProfile.studentId,
+      email: studentProfile.user.email,
+      licenceCategory: studentProfile.licenseTargets[0]?.licenseCategory?.code || 'B1.1',
+      facilityName: 'Aerojet Academy',
+      facilityApprovalNo: null,
+      startDate: new Date().toISOString(),
+      targetEndDate: null,
+      totalLoggedHours: 0,
+      status: 'PENDING',
+      entries: [],
+      analytics: {
+        totalHours: 0,
+        hoursByType: {},
+        ataChaptersCovered: 0,
+        signedEntries: 0,
+        unsignedEntries: 0,
+      },
+    }
+
     return (
-      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+      <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
             OJT Experience Logbook
           </h1>
           <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
@@ -77,9 +109,12 @@ export default async function StudentOJTPage() {
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <p className="text-slate-500">
-            Your OJT logbook has not been created yet. Please contact staff to set up your experience logbook.
+            Your OJT logbook has not been created yet. Please contact staff to set up your
+            experience logbook.
           </p>
         </div>
+
+        <LogbookPreview mode="student" logbook={blankLogbook} />
       </div>
     )
   }
@@ -91,10 +126,14 @@ export default async function StudentOJTPage() {
     hoursByType[e.maintenanceType] = (hoursByType[e.maintenanceType] || 0) + e.durationHours
   }
   const coveredChapters = new Set(logbook.entries.map((e) => e.ataChapterId))
-  const signedCount = logbook.entries.filter((e) => e.supervisorSignature && e.studentSignature).length
-
+  const signedCount = logbook.entries.filter(
+    (e) => e.supervisorSignature && e.studentSignature
+  ).length
   const serialised = {
     id: logbook.id,
+    studentName,
+    studentId: studentProfile.studentId,
+    email: studentProfile.user.email,
     licenceCategory: logbook.licenceCategory,
     facilityName: logbook.facilityName,
     facilityApprovalNo: logbook.facilityApprovalNo,
@@ -133,13 +172,13 @@ export default async function StudentOJTPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
           OJT Experience Logbook
         </h1>
         <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
-          CAP 741 / EASA Part-66 digital experience logbook — {logbook.facilityName}
+          EASA Part-66 digital experience logbook — {logbook.facilityName}
         </p>
       </div>
 

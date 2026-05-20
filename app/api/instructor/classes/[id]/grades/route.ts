@@ -69,6 +69,12 @@ export const POST = withErrorHandler(
 
     const { grades, type, title } = validation.data
 
+    // Audit 6a: instructors may only record internal continuous-assessment and
+    // assignment grades for classes assigned to them (assignment check above).
+    // Official EASA grades are never written here — they go through the staff /
+    // examiner ExamResult pipeline. Classify accordingly and never allow EASA.
+    const gradeCategory = type === 'ASSIGNMENT' ? 'ASSIGNMENT' : 'INTERNAL_CA'
+
     const results = await Promise.all(
       grades.map(
         async (g: {
@@ -97,6 +103,7 @@ export const POST = withErrorHandler(
               score: g.score,
               maxScore: g.maxScore,
               assessmentType: type || 'ASSIGNMENT',
+              category: gradeCategory,
               assessmentName: title || 'Assessment',
               percentage,
               assessmentDate: new Date(),

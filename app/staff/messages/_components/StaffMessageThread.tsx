@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { sendStaffMessage, markMessageAsRead } from '../../actions'
 import { Badge } from '@/components/ui/badge'
+import { PresencePill } from '@/components/shared/PresencePill'
 
 type MessageUser = {
   id: string
@@ -189,6 +190,7 @@ export default function StaffMessageThread({
             <p className="truncate text-base font-black text-aerojet-blue dark:text-slate-100">
               {userName(otherParticipant)}
             </p>
+            <PresencePill peerId={otherParticipant.id} />
             <Badge
               variant="outline"
               className="rounded-md border-slate-200 px-1.5 py-0 text-[9px] font-black tracking-widest text-slate-400 uppercase dark:border-slate-700"

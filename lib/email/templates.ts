@@ -1,3 +1,4 @@
+import 'server-only'
 import { getBaseUrl } from '@/lib/utils/url'
 
 const baseLayout = async (content: string, title?: string) => {

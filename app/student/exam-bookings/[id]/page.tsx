@@ -13,6 +13,10 @@ import {
   AlertCircle,
   BookOpen,
   Tag,
+  Package,
+  MapPin,
+  ListChecks,
+  Armchair,
 } from 'lucide-react'
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
@@ -64,6 +68,11 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       event: true,
       walletTransaction: true,
       user: { include: { profile: true } },
+      bundle: true,
+      sittingAssignments: {
+        include: { sitting: true, seat: true },
+        orderBy: { createdAt: 'desc' },
+      },
       poolMemberships: {
         include: {
           pool: true,
@@ -252,6 +261,109 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
             </div>
           )}
         </div>
+      </div>
+
+      {/* Bundle Information (audit 4d) */}
+      {booking.bundle && (
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+          <h2 className="mb-6 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
+            <Package className="h-3.5 w-3.5" />
+            Bundle
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-3">
+            <div>
+              <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Type</p>
+              <p className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                {booking.bundle.bundleType === 'FOUR_SEAT' ? 'Four Pack' : 'Twin Pack'}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+                Seats Used
+              </p>
+              <p className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                {booking.bundle.usedSeats}/{booking.bundle.totalSeats}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+                Free Resits Left
+              </p>
+              <p className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                {Math.max(
+                  0,
+                  booking.bundle.freeResitsIncluded - booking.bundle.usedFreeResits
+                )}{' '}
+                of {booking.bundle.freeResitsIncluded}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sitting / Venue (audit 4d) */}
+      {booking.sittingAssignments && booking.sittingAssignments.length > 0 && (
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+          <h2 className="mb-6 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
+            <MapPin className="h-3.5 w-3.5" />
+            Sitting &amp; Venue
+          </h2>
+          <div className="space-y-4">
+            {booking.sittingAssignments.map((sa) => (
+              <div
+                key={sa.id}
+                className="grid gap-4 rounded-2xl border border-slate-100 bg-slate-50/50 p-5 sm:grid-cols-3 dark:border-slate-800 dark:bg-slate-800/30"
+              >
+                <div>
+                  <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+                    Session
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                    Day {sa.sitting.dayNumber} · {sa.sitting.sessionType}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+                    Venue
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {sa.sitting.venue || 'To be announced'}
+                  </p>
+                </div>
+                <div>
+                  <p className="flex items-center gap-1 text-xs font-bold tracking-widest text-slate-400 uppercase">
+                    <Armchair className="h-3 w-3" /> Seat
+                  </p>
+                  <p className="mt-1 text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {sa.seat ? (sa.seat.label ?? 'Assigned') : 'Unassigned'}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Preparation checklist (audit 4d) */}
+      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-8">
+        <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase">
+          <ListChecks className="h-3.5 w-3.5" />
+          Exam Day Checklist
+        </h2>
+        <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-300">
+          {[
+            'Bring a valid photo ID matching your registered name.',
+            'Arrive at the venue at least 30 minutes before the start time.',
+            'Confirm your seat and session above on the day.',
+            'Electronic devices are not permitted in the exam room unless stated.',
+            'Ensure any outstanding fees are settled before the exam date.',
+          ].map((item) => (
+            <li key={item} className="flex items-start gap-2">
+              <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
       </div>
 
       {/* Pool Information */}

@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import StaffSidebar from './_components/StaffSidebar'
 import StaffTopBar from './_components/StaffTopBar'
+import Heartbeat from '@/components/shared/Heartbeat'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 import AppTour from '@/components/Tour/AppTour'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
@@ -54,6 +55,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+      <Heartbeat />
       <AppTour hasCompletedTour={dbUser.hasCompletedTour} userRole={userRole} />
       <StaffSidebar
         userName={fullName}

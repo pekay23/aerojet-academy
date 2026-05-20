@@ -28,8 +28,9 @@ bun run test:e2e:all                   # Playwright (all browsers, CI mode)
 
 # Database
 bun run db:generate       # prisma generate
-bun run db:push           # prisma db push
-bun run db:migrate        # prisma migrate dev
+bun run db:push           # prisma db push (Neon — this project has no migration history; db:push is the workflow)
+bun run db:push:supabase  # mirror schema to Supabase replica (runs scripts/sync-supabase-schema.sh)
+bun run db:migrate        # prisma migrate dev (rarely used here — kept for emergencies)
 bun run db:studio         # prisma studio (GUI)
 bun run db:seed           # seed from prisma/seed.ts
 bun run db:seed:mock      # seed mock data
@@ -37,8 +38,8 @@ bun run db:seed:mock      # seed mock data
 
 ## Git Hooks (Husky)
 
-- **pre-commit**: runs `scripts/bump-version.js` then `lint-staged` (ESLint fix + Prettier on staged files)
-- **pre-push**: runs `bun run type-check` and `bun test --run` — push will fail on type errors or test failures
+- **pre-commit**: runs `node scripts/bump-version.js` (bumps `package.json` version) then `npx lint-staged` — `lint-staged` config only formats with **Prettier** on staged `*.{ts,tsx,js,json,md,css}` files. **ESLint does NOT run on commit.**
+- **pre-push**: runs `bun run type-check` and `bun run test --run` (Vitest) — push fails on type errors or test failures. Lint is also not in pre-push; run `bun run lint` manually before opening a PR.
 
 ## Architecture
 
@@ -56,7 +57,13 @@ app/
   api/          — REST API endpoints
 ```
 
-Auth enforcement is layout-based — each portal layout checks session role. No root `middleware.ts` is active (helper utilities exist at `lib/auth/middleware-helpers.ts` and `utils/supabase/middleware.ts` but are not wired up as Next.js Edge middleware).
+Auth is enforced in **three layers**:
+
+1. **Edge middleware** at `middleware.ts:37` (active) — `ROUTE_ROLE_MAP` gates `/staff`, `/instructor`, `/student`, `/examiner`, `/applicant` and their `/api/*` siblings. Unauthenticated users get redirected to `/login?callbackUrl=…` (pages) or `401 JSON` (API). Wrong-role users get redirected to their own portal (e.g. STUDENT hitting `/staff` → `/student`).
+2. **Portal layouts** — each portal's `layout.tsx` calls `requireStaff`/`requireInstructor`/`requireStudent`/etc. from `lib/auth/helpers.ts` as a second check and to pass `session.user` into the tree.
+3. **Route handlers / server actions** — call `requireAdmin()`/`requireAuth()`/etc. directly; thrown `'Unauthorized'`/`'Forbidden'` strings are caught by `withErrorHandler` and converted to 401/403.
+
+> **Next.js 16 note**: the `middleware` file convention is deprecated in favor of `proxy.ts`. Migration: `npx @next/codemod@canary middleware-to-proxy .` (or rename the file and export `proxy` instead of `middleware`). Helper utilities at `lib/auth/middleware-helpers.ts` and `utils/supabase/middleware.ts` are NOT wired into the active middleware — they're available for ad-hoc use.
 
 ### Auth System
 
@@ -120,6 +127,54 @@ export const GET = withErrorHandler(async (req, ctx) => {
 - Routes defined in `app/api/uploadthing/core.ts` with role-based auth
 - Client helpers: `UploadButton`, `UploadDropzone` from `lib/uploads/uploadthing.ts`
 - Remote image domains configured in `next.config.ts` (`utfs.io`, `*.ufs.sh`, `uploadthing.com`)
+
+### Storage & Sync (Supabase secondary backend)
+
+Supabase is a secondary backend alongside Neon, used for structured document storage and as a replica/backup. Helpers — **do not duplicate**:
+
+- `lib/supabase/client.ts` — `getSupabaseAdmin()` (service-role), `isSupabaseConfigured()`
+- `lib/storage/supabase-storage.ts` — bucket `aerojet-documents`, `buildStoragePath()`, `uploadToStorage()`, `getSignedUrl()`, `documentCategoryFolder()` folder taxonomy
+- `lib/supabase/dual-write.ts`, `lib/supabase/backup.ts`, `lib/prisma/supabase-sync-extension.ts` — currently dormant (no callers); reserved for future logical-replication / dual-write strategies
+- Schema mirroring: `bun run db:push:supabase` runs `scripts/sync-supabase-schema.sh`
+
+Used today by Document Vault (`app/staff/documents/`) and Teaching Materials (`app/instructor/materials/`).
+
+### Audit Logging
+
+Every privileged mutation (role changes, refunds, withdrawals, certificate releases, permission grants) writes through `lib/audit/logger.ts`:
+
+```ts
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+
+await createAuditLog({
+  action: AuditAction.USER_ROLE_CHANGED,
+  userId: actor.id,
+  targetUserId: target.id,
+  description: 'STUDENT → INSTRUCTOR',   // human summary (NOT `metadata:`)
+  changes: { before: { role: 'STUDENT' }, after: { role: 'INSTRUCTOR' } },
+})
+```
+
+Field names trip people up: it's `description:` (string) and `changes:` (object diff), **not** `metadata:`. Query via `queryAuditLogs()`; retention sweep at `/api/cron/cleanup-audit-logs`.
+
+### Cron Jobs
+
+Registered in `vercel.json` and live under `app/api/cron/*/route.ts`. Pattern: check `CRON_SECRET` header → run job → return JSON. Currently scheduled (UTC):
+
+| Path | Schedule |
+|---|---|
+| `check-events` | `0 1 * * *` (daily 01:00) |
+| `check-pools` | `0 2 * * *` |
+| `payment-deadlines` | `0 3 * * *` |
+| `backup` | `0 4 * * *` |
+| `cleanup-abandoned-accounts` | `0 5 * * *` |
+| `scheduled-reports` | `0 8 * * 1` (Mondays 08:00) |
+| `milestone-reminders` | `0 9 * * *` |
+| `send-reminders` | `0 10 * * *` |
+| `expire-bundles` | `0 0 * * *` |
+| `cleanup-audit-logs` | `0 0 1 * *` (1st of month) |
+
+Route files also exist for `aptitude-reminders`, `interview-reminders`, `modular-deadlines` but are **not yet registered** in `vercel.json`. To add a cron: create the route, gate with `CRON_SECRET`, then append to `vercel.json`.
 
 ### Testing
 
@@ -217,6 +272,10 @@ If a page makes 2+ `findUnique` calls for the same record, merge them into one w
 - Filter JSON nulls with `Prisma.DbNull`, not `null`: `layout: { not: Prisma.DbNull }`
 - Cast JSON values through `unknown`: `classroom.layout as unknown as LayoutData`
 
+### Stripe
+
+- `stripe@22.x` is installed and CSP allows `js.stripe.com` / `uploadthing.com` — but **the Stripe integration is deferred** per business decision (audit 10a). Do not assume payment endpoints are wired; current payments flow is wallet/manual-proof based (`lib/wallet/*`, `lib/payments/verification.ts`). Leave the SDK in place — it's the planned future provider.
+
 ## Build & Deploy
 
 - `output: 'standalone'` in `next.config.ts` (Docker/standalone builds)
@@ -225,5 +284,7 @@ If a page makes 2+ `findUnique` calls for the same record, merge them into one w
 
 ## Verification
 
-Run `bun run type-check` to verify no type errors were introduced.
-Pre-existing error in `dashboard/page.tsx` is known.
+- `bun run type-check` — no errors expected. If `dashboard/page.tsx` regresses, check the cards array shape against `MetricCard` props (historical breakage point).
+- `bun run test --run` — Vitest suite (102 tests baseline at time of writing).
+- `bun run lint` — ESLint; not in pre-commit or pre-push, run manually before PR.
+- `bun run build` — full production build; required to catch the `formatCurrency` client-import trap (see *Code Conventions › Imports*).

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Data Flow · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Architecture</p>
+  <h1 class="he-title">Data Flow</h1>
+  
+</header>
+
+<section class="he-section" id="registration-activation">
+  <div class="he-section__num">01 · Registration → Activation</div>
+  <h2 class="he-section__title">Registration → Activation</h2><pre><code>User registers (public form)
+  → Creates User (APPLICANT, PENDING)
+  → Generates registrationCode (AERO-YYYY-XXXXXX)
+  → User uploads payment proof
+  → Status → PAYMENT_PENDING
+  → Staff reviews and approves
+  → Generates academyEmail, tempPassword
+  → Status → ACTIVE
+  → Email sent with credentials
+</code></pre>
+
+<section class="he-section" id="applicant-student-promotion">
+  <div class="he-section__num">02 · Applicant → Student Promotion</div>
+  <h2 class="he-section__title">Applicant → Student Promotion</h2><pre><code>Applicant purchases course
+  → Creates Enrollment (PENDING) + Payment (PENDING)
+  → Staff approves enrollment
+  → If role == APPLICANT:
+    → Generates studentId (AJA-YYYY-NNNN)
+    → Creates StudentProfile + Wallet
+    → Role → STUDENT
+    → Email sent
+</code></pre>
+
+<section class="he-section" id="exam-pool-lifecycle">
+  <div class="he-section__num">03 · Exam Pool Lifecycle</div>
+  <h2 class="he-section__title">Exam Pool Lifecycle</h2><pre><code>Staff creates ExamEvent → creates ExamPools
+  → Status: OPEN
+  → Students join (€300 reserved per join)
+  → At 23 members: NEAR_FULL
+  → At 25 members: auto-CONFIRMED (funds captured)
+  → Can accept up to 28 members
+  → Cron: if &lt;25 at T-21 days → FAILED (funds released)
+  → Staff can manually confirm via Go/No-Go
+</code></pre>
+
+<section class="he-section" id="wallet-operations">
+  <div class="he-section__num">04 · Wallet Operations</div>
+  <h2 class="he-section__title">Wallet Operations</h2><pre><code>TOP_UP:    balance += amount
+RESERVE:   reservedBalance += amount (available decreases)
+CAPTURE:   balance -= amount, reservedBalance -= amount
+RELEASE:   reservedBalance -= amount (available increases)
+REFUND:    balance += amount
+</code></pre>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#registration-activation">Registration → Activation</a></li>
+    <li class="he-toc__l2"><a href="#applicant-student-promotion">Applicant → Student Promotion</a></li>
+    <li class="he-toc__l2"><a href="#exam-pool-lifecycle">Exam Pool Lifecycle</a></li>
+    <li class="he-toc__l2"><a href="#wallet-operations">Wallet Operations</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

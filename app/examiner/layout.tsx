@@ -1,5 +1,6 @@
 import { requireExaminer } from '@/lib/auth/helpers'
 import ExaminerSidebar from './_components/ExaminerSidebar'
+import Heartbeat from '@/components/shared/Heartbeat'
 import { Toaster } from 'sonner'
 
 export const dynamic = 'force-dynamic'
@@ -13,9 +14,10 @@ export default async function ExaminerLayout({ children }: { children: React.Rea
 
   return (
     <div className="flex min-h-screen bg-slate-50/50 dark:bg-slate-950">
+      <Heartbeat />
       <ExaminerSidebar />
       <main id="main-content" className="flex-1 overflow-y-auto px-8 py-10">
-        <div className="mx-auto max-w-6xl">{children}</div>
+        <div className="mx-auto max-w-[1920px]">{children}</div>
       </main>
       <Toaster position="top-right" richColors />
     </div>

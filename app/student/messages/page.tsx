@@ -9,6 +9,7 @@ import { getAvailableRecipients } from '../actions'
 import NewMessageDialog from './_components/NewMessageDialog'
 import MessageThread from './_components/MessageThread'
 import AutoRefresh from '@/components/AutoRefresh'
+import MessagesRealtime from '@/components/shared/MessagesRealtime'
 
 export const metadata: Metadata = {
   title: 'Messages | Student Portal',
@@ -96,7 +97,8 @@ export default async function MessagesPage({
 
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Auto-refresh every 60s */}
+      {/* Realtime push (Supabase) — falls back to the 60s polling below */}
+      <MessagesRealtime userId={userId} />
       <AutoRefresh intervalMs={60000} />
 
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

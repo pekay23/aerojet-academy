@@ -1,3 +1,4 @@
+import 'server-only'
 import { Prisma } from '@prisma/client'
 import { isBackupEnabled } from '@/lib/supabase/client'
 import { transformForSupabase, BACKUP_MODELS } from '@/lib/supabase/dual-write'

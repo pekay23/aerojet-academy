@@ -8,6 +8,7 @@ import { getStaffRecipients } from '../actions'
 import StaffNewMessageDialog from './_components/StaffNewMessageDialog'
 import StaffMessageThread from './_components/StaffMessageThread'
 import AutoRefresh from '@/components/AutoRefresh'
+import MessagesRealtime from '@/components/shared/MessagesRealtime'
 
 export const metadata: Metadata = { title: 'Messages | Staff Portal' }
 export const dynamic = 'force-dynamic'
@@ -83,6 +84,7 @@ export default async function StaffMessagesPage() {
 
   return (
     <div className="mx-auto max-w-[1920px] space-y-8">
+      <MessagesRealtime userId={userId} />
       <AutoRefresh intervalMs={20000} />
 
       {/* Header */}

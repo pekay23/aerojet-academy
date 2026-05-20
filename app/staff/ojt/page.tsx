@@ -96,11 +96,11 @@ export default async function OJTLogbooksPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue dark:text-white sm:text-3xl">
+        <h1 className="text-aerojet-blue text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
           OJT Experience Logbooks
         </h1>
         <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
-          CAP 741 / EASA Part-66 compliant digital experience logbooks for on-the-job training.
+          EASA Part-66 compliant digital experience logbooks for on-the-job training.
         </p>
       </div>
 

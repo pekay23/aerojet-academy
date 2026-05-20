@@ -37,6 +37,13 @@ model User {
   loginAttempts               Int                       @default(0)
   lockedUntil                 DateTime?
   lastLoginAt                 DateTime?
+  /// Heartbeat timestamp updated by the client every ~30s; powers "online now"
+  /// indicators in the in-app messenger.
+  lastSeenAt                  DateTime?
+  /// User-level toggle: when true, other (non-admin) users see exact last-seen
+  /// time next to your name in messages. Online dot is always visible.
+  /// Admins can toggle this for any user via /staff/users/[id].
+  showLastSeen                Boolean                   @default(false)
   createdAt                   DateTime                  @default(now())
   updatedAt                   DateTime                  @updatedAt
   deletedAt                   DateTime?
@@ -92,6 +99,19 @@ model User {
   wallet                      Wallet?
   interviewEvaluationsGiven   InterviewEvaluation[]     @relation("InterviewEvaluator")
   passkeys                    Passkey[]
+  refunds                     Refund[]
+  withdrawalRequests          WithdrawalRequest[]
+  progressionLogs             AcademicProgressionLog[]
+  availabilitySlots           StaffAvailability[]
+  teachingMaterials           TeachingMaterial[]
+  studentDocuments            StudentDocument[]
+  maintenance145Transfers     Maintenance145Transfer[]
+  dsrRequested                DataSubjectRequest[]      @relation("DsrRequester")
+  dsrAssigned                 DataSubjectRequest[]      @relation("DsrAssignee")
+  retentionPoliciesUpdated    RetentionPolicy[]         @relation("RetentionPolicyUpdater")
+  roleGrantsCreated           RoleGrant[]               @relation("RoleGrantCreator")
+  referralsReviewed           Referral[]                @relation("ReferralReviewer")
+  referralPayoutsApproved     ReferralPayout[]          @relation("ReferralPayoutApprover")
 
   @@index([email])
   @@index([academyEmail])
@@ -154,6 +174,15 @@ model StudentProfile {
   updatedAt                 DateTime                  @updatedAt
   pathwayId                 String?
   fundingSource             FundingSource             @default(SELF_FUNDED)
+  // Admin override gates for certificate / document release (see lib/certificates/eligibility.ts).
+  // certificatesReleased: force-release official EASA exam certificates regardless of pathway/funding gate.
+  // documentsReleased: release the remaining FT-4Y second-half documents (post-OJT) on admin determination.
+  certificatesReleased      Boolean                   @default(false)
+  certificatesReleasedAt    DateTime?
+  certificatesReleasedBy    String?
+  documentsReleased         Boolean                   @default(false)
+  documentsReleasedAt       DateTime?
+  documentsReleasedBy       String?
   notes                     AdminNote[]
   bondingContract           BondingContract?
   ojtLogbook                OJTLogbook?
@@ -412,6 +441,8 @@ model Enrollment {
   @@index([academicYearId])
   @@index([semesterId])
   @@index([deletedAt])
+  // Composite for analytics queries: status filter + enrolledAt window
+  @@index([status, enrolledAt])
   @@map("enrollments")
 }
 
@@ -493,6 +524,10 @@ model Grade {
   userId         String
   enrollmentId   String
   assessmentType String
+  // Audit 6a: classifies who may enter this grade. INTERNAL_CA / ASSIGNMENT are
+  // instructor-enterable (for assigned classes only); EASA_OFFICIAL is restricted
+  // to Admin/Staff/Examiner. Enforced in the grade-entry server actions.
+  category       GradeCategory @default(INTERNAL_CA)
   assessmentName String
   score          Decimal    @db.Decimal(5, 2)
   maxScore       Decimal    @db.Decimal(5, 2)
@@ -765,7 +800,9 @@ model ExamBooking {
   rolloverToEventId     String?
   migrationRef          String?
   sourceNotes           String?
+  bundleId              String?
   examAttendance        ExamAttendance?
+  bundle                ExamBundle?             @relation(fields: [bundleId], references: [id])
   course                Course?                 @relation(fields: [courseId], references: [id])
   event                 ExamEvent?              @relation(fields: [eventId], references: [id])
   examComponent         ExamComponent?          @relation(fields: [examComponentId], references: [id])
@@ -786,6 +823,7 @@ model ExamBooking {
   @@index([migrationRef])
   @@index([combinedGroupRef])
   @@index([deletedAt])
+  @@index([bundleId])
   @@map("exam_bookings")
 }
 
@@ -1138,6 +1176,16 @@ model FileUpload {
   size                 Int
   url                  String
   fileType             String
+  /// Logical UploadThing route name (e.g. "paymentProof", "applicantDocs")
+  route                String?
+  /// Canonical UploadThing URL (mirrors `url` for legacy rows)
+  uploadthingUrl       String?
+  /// UploadThing file key — needed for deletion via UTApi
+  uploadthingKey       String?
+  /// Object path inside the Supabase `aerojet-documents` bucket once mirrored
+  supabasePath         String?
+  /// True when the nightly mirror cron has copied the file to Supabase
+  mirroredAt           DateTime?
   referenceType        String?
   referenceId          String?
   createdAt            DateTime              @default(now())
@@ -1146,6 +1194,8 @@ model FileUpload {
 
   @@index([userId])
   @@index([fileType])
+  @@index([route])
+  @@index([mirroredAt])
   @@index([referenceType, referenceId])
   @@map("file_uploads")
 }
@@ -1440,11 +1490,16 @@ model ExamBundle {
   amountPaid        Decimal  @db.Decimal(10, 2)
   freeModuleChanges Int      @default(0)
   usedModuleChanges Int      @default(0)
+  // Audit 1c: free resit entitlement tracking (Twin Pack = 1, Four Pack = 2).
+  freeResitsIncluded Int     @default(0)
+  usedFreeResits    Int      @default(0)
   validUntil        DateTime
   status            ExamBundleStatus @default(ACTIVE)
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // Audit 1a: persistent link from bundle-funded bookings back to the bundle.
+  bookings          ExamBooking[]
 
   @@index([userId])
   @@index([status])
@@ -1452,20 +1507,29 @@ model ExamBundle {
 }
 
 model Referral {
-  id          String    @id @default(cuid())
-  referrerId  String
-  refereeId   String    @unique
-  status      ReferralStatus @default(PENDING)
-  qualifiedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  referee     User      @relation("ReferralsReceived", fields: [refereeId], references: [id])
-  referrer    User      @relation("ReferralsMade", fields: [referrerId], references: [id])
+  id            String    @id @default(cuid())
+  referrerId    String
+  refereeId     String    @unique
+  status        ReferralStatus @default(PENDING)
+  qualifiedAt   DateTime?
+  fraudScore    Int       @default(0)
+  fraudReasons  String[]  @default([])
+  reviewedById  String?
+  reviewedAt    DateTime?
+  signupIpHash  String?
+  signupUaHash  String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  referee       User      @relation("ReferralsReceived", fields: [refereeId], references: [id])
+  referrer      User      @relation("ReferralsMade", fields: [referrerId], references: [id])
+  reviewer      User?     @relation("ReferralReviewer", fields: [reviewedById], references: [id])
 
   @@unique([referrerId, refereeId])
   @@index([referrerId])
   @@index([refereeId])
   @@index([status])
+  @@index([fraudScore])
+  @@index([reviewedAt])
   @@map("referrals")
 }
 
@@ -2732,12 +2796,14 @@ enum ExamBundleStatus {
   ACTIVE
   EXPIRED
   USED
+  EXHAUSTED
   CANCELLED
 }
 
 enum ReferralStatus {
   PENDING
   QUALIFIED
+  DISQUALIFIED
 }
 
 model Passkey {
@@ -2770,4 +2836,460 @@ model PasskeyChallenge {
   @@index([challenge])
   @@index([expiresAt])
   @@map("passkey_challenges")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Design Gap Audit — batched schema additions
+// (4c done above; 1a/1b/1c on ExamBooking/ExamBundle; 6a on Grade)
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum GradeCategory {
+  INTERNAL_CA // continuous assessment (instructor-enterable)
+  ASSIGNMENT // assignment grade (instructor-enterable)
+  EASA_OFFICIAL // restricted to Admin/Staff/Examiner
+}
+
+// Audit 5b — staff refund workflow with reason tracking + approval chain.
+enum RefundStatus {
+  REQUESTED
+  STAFF_CONFIRMED
+  ADMIN_APPROVED
+  REJECTED
+  PROCESSED
+  CANCELLED
+}
+
+model Refund {
+  id                 String       @id @default(cuid())
+  userId             String // student the refund is for
+  walletTxnId        String?
+  paymentId          String?
+  examBookingId      String?
+  amount             Decimal      @db.Decimal(10, 2)
+  currency           String       @default("EUR")
+  reason             String
+  status             RefundStatus @default(REQUESTED)
+  requestedById      String
+  staffConfirmedById String?
+  staffConfirmedAt   DateTime?
+  adminApprovedById  String?
+  adminApprovedAt    DateTime?
+  rejectedById       String?
+  rejectedReason     String?
+  processedAt        DateTime?
+  processedTxnId     String?
+  notes              String?
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  user               User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("refunds")
+}
+
+// Audit 5e — student withdrawal: staff confirmation + admin final approval
+// (or admin-only approval).
+enum WithdrawalStatus {
+  REQUESTED
+  STAFF_CONFIRMED
+  ADMIN_APPROVED
+  REJECTED
+  COMPLETED
+  CANCELLED
+}
+
+model WithdrawalRequest {
+  id                       String           @id @default(cuid())
+  userId                   String // student withdrawing
+  reason                   String
+  status                   WithdrawalStatus @default(REQUESTED)
+  requestedById            String
+  staffConfirmedById       String?
+  staffConfirmedAt         DateTime?
+  adminApprovedById        String?
+  adminApprovedAt          DateTime?
+  rejectedById             String?
+  rejectedReason           String?
+  financialSettlementNotes String?
+  effectiveDate            DateTime?
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+  user                     User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@map("withdrawal_requests")
+}
+
+// Audit 5d — year/semester advancement (NO GPA; EASA Part-147 progression).
+enum ProgressionDecision {
+  ADVANCED
+  REPEAT
+  HELD
+}
+
+model AcademicProgressionLog {
+  id           String              @id @default(cuid())
+  userId       String
+  runRef       String?
+  fromYear     Int
+  fromSemester Int
+  toYear       Int
+  toSemester   Int
+  decision     ProgressionDecision
+  decidedById  String?
+  notes        String?
+  createdAt    DateTime            @default(now())
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([runRef])
+  @@map("academic_progression_logs")
+}
+
+// Audit 6c / 7b — instructor & examiner self-service availability.
+enum AvailabilityKind {
+  RECURRING_WEEKLY
+  SPECIFIC_DATE
+}
+
+model StaffAvailability {
+  id        String           @id @default(cuid())
+  userId    String // instructor or examiner
+  kind      AvailabilityKind @default(RECURRING_WEEKLY)
+  dayOfWeek Int? // 0-6 for RECURRING_WEEKLY
+  date      DateTime? // for SPECIFIC_DATE
+  startTime String // "HH:mm"
+  endTime   String // "HH:mm"
+  available Boolean          @default(true)
+  notes     String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("staff_availability")
+}
+
+// Audit 6b — instructor teaching materials. courseId/classId kept as plain
+// references (resolved in queries) to avoid widening Course/Class models here.
+enum TeachingMaterialVisibility {
+  CLASS
+  COURSE
+  ALL_STUDENTS
+}
+
+model TeachingMaterial {
+  id           String                     @id @default(cuid())
+  uploadedById String // instructor user id
+  courseId     String?
+  classId      String?
+  title        String
+  description  String?
+  fileUrl      String
+  fileType     String?
+  visibility   TeachingMaterialVisibility @default(CLASS)
+  createdAt    DateTime                   @default(now())
+  updatedAt    DateTime                   @updatedAt
+  uploader     User                       @relation(fields: [uploadedById], references: [id], onDelete: Cascade)
+
+  @@index([uploadedById])
+  @@index([courseId])
+  @@index([classId])
+  @@map("teaching_materials")
+}
+
+// Audit 15b — centralized student document vault with versioning + expiry.
+// Supabase storage used as a fallback when UploadThing is unsuitable.
+enum DocumentStorageProvider {
+  UPLOADTHING
+  SUPABASE
+}
+
+enum StudentDocumentStatus {
+  ACTIVE
+  ARCHIVED
+  EXPIRED
+}
+
+model StudentDocument {
+  id              String                  @id @default(cuid())
+  userId          String // student the document belongs to
+  type            String // e.g. ID, MEDICAL, QUALIFICATION, CERTIFICATE
+  title           String
+  fileUrl         String
+  storageProvider DocumentStorageProvider @default(UPLOADTHING)
+  version         Int                     @default(1)
+  supersedesId    String?
+  expiresAt       DateTime?
+  uploadedById    String?
+  status          StudentDocumentStatus   @default(ACTIVE)
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  user            User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([type])
+  @@index([status])
+  @@map("student_documents")
+}
+
+// Audit 12 — academy is EASA Part-147 linked to a Part-145 organisation.
+// Students pass through the academy and transition their data into the linked 145.
+enum Transfer145Status {
+  INITIATED
+  DATA_PACKAGED
+  SENT
+  ACCEPTED
+  REJECTED
+}
+
+model Partner145Organisation {
+  id              String                   @id @default(cuid())
+  name            String
+  easaApprovalRef String?
+  contactEmail    String?
+  address         String?
+  isActive        Boolean                  @default(true)
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+  transfers       Maintenance145Transfer[]
+
+  @@map("partner_145_organisations")
+}
+
+model Maintenance145Transfer {
+  id              String                 @id @default(cuid())
+  userId          String // student
+  organisationId  String
+  status          Transfer145Status      @default(INITIATED)
+  dataPackageUrl  String?
+  initiatedById   String?
+  acceptedAt      DateTime?
+  rejectedReason  String?
+  notes           String?
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  user            User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organisation    Partner145Organisation @relation(fields: [organisationId], references: [id])
+
+  @@index([userId])
+  @@index([organisationId])
+  @@index([status])
+  @@map("maintenance_145_transfers")
+}
+
+// =============================================================================
+// A.4.c — GDPR module
+// =============================================================================
+
+enum DataSubjectRequestType {
+  ACCESS // Article 15 — data export
+  ERASURE // Article 17 — right to be forgotten
+  RECTIFICATION // Article 16
+  RESTRICTION // Article 18
+  PORTABILITY // Article 20
+  OBJECTION // Article 21
+}
+
+enum DataSubjectRequestStatus {
+  RECEIVED
+  IN_PROGRESS
+  AWAITING_USER
+  COMPLETED
+  DENIED
+  CANCELLED
+}
+
+enum RetentionAnchor {
+  CREATED_AT
+  UPDATED_AT
+  GRADUATION
+}
+
+model DataSubjectRequest {
+  id             String                   @id @default(cuid())
+  userId         String
+  requestType    DataSubjectRequestType
+  status         DataSubjectRequestStatus @default(RECEIVED)
+  requestedAt    DateTime                 @default(now())
+  /// 30 days from requestedAt by default (GDPR Art. 12(3))
+  dueBy          DateTime
+  completedAt    DateTime?
+  assignedToId   String?
+  notes          String?
+  decisionReason String?
+  evidenceUrl    String?
+  createdAt      DateTime                 @default(now())
+  updatedAt      DateTime                 @updatedAt
+  user           User                     @relation("DsrRequester", fields: [userId], references: [id], onDelete: Cascade)
+  assignedTo     User?                    @relation("DsrAssignee", fields: [assignedToId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([dueBy])
+  @@index([assignedToId])
+  @@map("data_subject_requests")
+}
+
+model RetentionPolicy {
+  id             String          @id @default(cuid())
+  /// Prisma model name (e.g. "AuditLog", "Notification") — must match a registered DMMF model
+  entity         String          @unique
+  retentionDays  Int
+  anchor         RetentionAnchor @default(CREATED_AT)
+  isActive       Boolean         @default(true)
+  description    String?
+  updatedById    String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  updatedBy      User?           @relation("RetentionPolicyUpdater", fields: [updatedById], references: [id])
+
+  @@index([isActive])
+  @@map("retention_policies")
+}
+
+// =============================================================================
+// A.5.c — Referral payouts + fraud review
+// =============================================================================
+
+enum ReferralPayoutStatus {
+  PENDING
+  APPROVED
+  PAID
+  REJECTED
+}
+
+model ReferralPayout {
+  id            String               @id @default(cuid())
+  referrerId    String
+  amount        Decimal              @db.Decimal(10, 2)
+  currency      String               @default("EUR")
+  periodStart   DateTime
+  periodEnd     DateTime
+  status        ReferralPayoutStatus @default(PENDING)
+  approvedById  String?
+  paidAt        DateTime?
+  csvExportId   String?
+  notes         String?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  approvedBy    User?                @relation("ReferralPayoutApprover", fields: [approvedById], references: [id])
+
+  @@index([referrerId])
+  @@index([status])
+  @@index([periodStart, periodEnd])
+  @@map("referral_payouts")
+}
+
+// =============================================================================
+// A.6.c — RBAC builder (Permission registry + grants)
+// =============================================================================
+
+enum PermissionScope {
+  ROLE
+  USER
+}
+
+model Permission {
+  /// Stable key (e.g. "MANAGE_REFERRALS"). PK so RoleGrant.permissionKey can FK to it.
+  key         String   @id
+  label       String
+  description String?
+  category    String   @default("GENERAL")
+  /// True for keys seeded from the PERMISSIONS enum (cannot be deleted via UI)
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  grants      RoleGrant[]
+
+  @@index([category])
+  @@map("permissions")
+}
+
+model RoleGrant {
+  id            String          @id @default(cuid())
+  scope         PermissionScope
+  /// Role name (e.g. "STAFF") when scope=ROLE, or User.id when scope=USER
+  targetKey     String
+  permissionKey String
+  grantedById   String?
+  expiresAt     DateTime?
+  notes         String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  permission    Permission      @relation(fields: [permissionKey], references: [key], onDelete: Cascade)
+  grantedBy     User?           @relation("RoleGrantCreator", fields: [grantedById], references: [id])
+
+  @@unique([scope, targetKey, permissionKey])
+  @@index([targetKey])
+  @@index([permissionKey])
+  @@index([expiresAt])
+  @@map("role_grants")
+}
+
+// =============================================================================
+// Communication email registry — admin-curated index of every email address
+// used by the application (auto-senders) and any custom addresses the admin
+// wants to track (internal comms, vendor relays, etc.). Used by the
+// /staff/settings#emails tab.
+// =============================================================================
+
+enum EmailRegistryCategory {
+  AUTO   // System-generated address (admissions@, noreply@, support@)
+  CUSTOM // Admin-added entry (internal comms, vendor relay, etc.)
+}
+
+model EmailRegistryEntry {
+  id          String                @id @default(cuid())
+  title       String                // "Admissions sender", "Internal comms", …
+  description String?               // Optional admin note about when/how it's used
+  address     String                // The email address itself
+  category    EmailRegistryCategory @default(CUSTOM)
+  /** True when this row was added by the system seed (cannot be deleted via UI). */
+  isSystem    Boolean               @default(false)
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  createdById String?
+
+  @@unique([address])
+  @@index([category])
+  @@map("email_registry_entries")
+}
+
+// =============================================================================
+// Email delivery log — every outbound send recorded by `lib/email/sender.ts`.
+// Surfaced on /staff/settings?tab=email-delivery so admins can see failures
+// without tailing server logs.
+// =============================================================================
+
+enum EmailDeliveryStatus {
+  SUCCESS
+  FAILED
+  RETRYING
+}
+
+model EmailDelivery {
+  id          String              @id @default(cuid())
+  recipient   String              // address (or comma-joined list)
+  subject     String
+  status      EmailDeliveryStatus
+  /// Resend message id when the send succeeded
+  messageId   String?
+  /// Last error message when status=FAILED
+  error       String?
+  /// Number of attempts spent (1 = first-try success)
+  attempts    Int                 @default(1)
+  /// "registration", "password-reset", "exam-booking", etc.
+  template    String?
+  /// Optional User.id when the recipient maps to a known account
+  userId      String?
+  createdAt   DateTime            @default(now())
+
+  @@index([status, createdAt(sort: Desc)])
+  @@index([recipient])
+  @@index([userId])
+  @@index([createdAt(sort: Desc)])
+  @@map("email_deliveries")
 }

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+import Logo from '@/components/shared/Logo'
 import { usePathname } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, Search as SearchIcon, ArrowRight } from 'lucide-react'
@@ -205,17 +205,9 @@ export default function PublicNav() {
         </div>
         <div className="relative z-10 mx-auto flex h-16 w-full items-center justify-between px-6 sm:px-10 lg:px-16">
           <Link href="/" className="shrink-0 flex items-center py-2">
-            <Image
-              src={
-                scrolled || mobileOpen || forceSolid
-                  ? '/images/logos/AATA_logo_hor_onWhite.webp'
-                  : '/images/logos/ATA_logo_hor_onDark.webp'
-              }
-              alt="Aerojet Logo"
-              width={130}
-              height={33}
-              style={{ width: 'auto', height: 'auto' }}
-              className="h-8 w-auto object-contain"
+            <Logo
+              tone={scrolled || mobileOpen || forceSolid ? 'onWhite' : 'onDark'}
+              className="h-8 w-auto"
               priority
             />
           </Link>

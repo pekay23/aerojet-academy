@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
     ],
   },
   ...(process.env.NODE_ENV === 'development' && {
-    allowedDevOrigins: ['192.168.8.173', '192.168.100.218', '192.168.100.243'],
+    allowedDevOrigins: ['192.168.8.173', '192.168.100.218', '192.168.100.243', '192.168.8.77'],
   }),
   experimental: {
     serverActions: {
@@ -47,10 +47,14 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://uploadthing.com https://lh3.googleusercontent.com",
               "font-src 'self' data:",
-              "connect-src 'self' https://uploadthing.com https://*.uploadthing.com https://*.ufs.sh",
+              "connect-src 'self' https://uploadthing.com https://*.uploadthing.com https://*.ufs.sh https://api.stripe.com",
+              "frame-src 'self' https://js.stripe.com https://hooks.stripe.com",
               "frame-ancestors 'self'",
+              "worker-src 'self' blob:",
+              "object-src 'none'",
               "base-uri 'self'",
               "form-action 'self'",
+              'upgrade-insecure-requests',
             ].join('; '),
           },
           {

@@ -773,7 +773,7 @@ export async function getAvailableRecipients() {
   // 1. Fetch Admins
   const admins = await prisma.user.findMany({
     where: {
-      role: { in: [UserRole.ADMIN, UserRole.STAFF] },
+      role: { in: [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.STAFF] },
       status: UserStatus.ACTIVE,
     },
     select: {
@@ -887,6 +887,19 @@ export async function sendMessage(recipientId: string, subject: string, body: st
 
     if (!recipientId || !subject || !body) {
       return { error: 'All fields are required.' }
+    }
+
+    // Audit 5i: students may only message admin/staff or an instructor assigned
+    // to them / their current or previous class. Enforce server-side using the
+    // same scoped recipient set the compose UI is built from.
+    if (user.role === 'STUDENT') {
+      const allowed = await getAvailableRecipients()
+      if (!allowed.some((r) => r.id === recipientId)) {
+        return {
+          error:
+            'You can only message administrators, staff, or an instructor assigned to your class.',
+        }
+      }
     }
 
     await prisma.message.create({
@@ -1079,6 +1092,9 @@ export async function bookBundleExamsAtomicAction(params: {
             status: 'ACTIVE',
             amountPaid: bundlePrice,
             freeModuleChanges: bookingType === 'FOUR_PACK' ? 1 : 0,
+            // Audit 1c: Twin Pack = 1 free resit, Four Pack = 2 free resits.
+            freeResitsIncluded: bookingType === 'FOUR_PACK' ? 2 : 1,
+            usedFreeResits: 0,
             validUntil,
           },
         })

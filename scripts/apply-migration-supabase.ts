@@ -6,7 +6,7 @@ import { Pool } from 'pg'
 
 const pool = new Pool({
   host: 'aws-1-eu-west-1.pooler.supabase.com',
-  port: 5432,
+  port: 6543,
   database: 'postgres',
   user: 'postgres.actbrdmjmfnhxbscuotz',
   password: 'Morph232*234',
