@@ -7,6 +7,7 @@ import Heartbeat from '@/components/shared/Heartbeat'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 import AppTour from '@/components/Tour/AppTour'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import packageJson from '../../package.json'
 
 export const dynamic = 'force-dynamic'
 
@@ -68,6 +69,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
           messages: 0,
         }}
         internalExamEnabled={internalExamEnabled}
+        appVersion={packageJson.version}
       />
 
       <main id="main-content" className="pt-16 lg:pt-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">

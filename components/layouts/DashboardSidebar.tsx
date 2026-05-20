@@ -59,6 +59,7 @@ interface DashboardSidebarProps {
   userImage?: string
   basePath?: string
   userMenuItems?: SidebarLinkItem[]
+  appVersion?: string
 }
 
 /* ── Mobile Top Bar with inline breadcrumb ─────────────────────────── */
@@ -539,6 +540,7 @@ function renderSidebarContent({
   setHoveredItem,
   theme,
   setTheme,
+  appVersion,
   forceFull = false,
 }: {
   isCollapsed: boolean
@@ -560,6 +562,7 @@ function renderSidebarContent({
   setHoveredItem: (key: string | null) => void
   theme: string | undefined
   setTheme: (t: string) => void
+  appVersion?: string
   forceFull?: boolean
 }) {
   const collapsed = forceFull ? false : isCollapsed
@@ -614,11 +617,18 @@ function renderSidebarContent({
         )}
 
         {!collapsed && (
-          <span
-            className={`mt-2 block text-[10px] font-black tracking-[0.2em] uppercase ${portalColor}`}
-          >
-            {portalLabel}
-          </span>
+          <div className="mt-2 flex items-center justify-between">
+            <span
+              className={`block text-[10px] font-black tracking-[0.2em] uppercase ${portalColor}`}
+            >
+              {portalLabel}
+            </span>
+            {appVersion && (
+              <span className="rounded-md bg-sidebar-foreground/5 px-1.5 py-0.5 text-[9px] font-black text-sidebar-foreground/40">
+                v{appVersion}
+              </span>
+            )}
+          </div>
         )}
       </div>
 
@@ -708,6 +718,7 @@ export default function DashboardSidebar({
   userImage,
   basePath = '',
   userMenuItems,
+  appVersion,
 }: DashboardSidebarProps) {
   const pathname = usePathname()
   const { theme, setTheme } = useTheme()
@@ -778,6 +789,7 @@ export default function DashboardSidebar({
           setHoveredItem,
           theme,
           setTheme,
+          appVersion,
         })}
       </aside>
 
