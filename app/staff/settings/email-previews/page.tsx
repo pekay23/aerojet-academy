@@ -26,10 +26,8 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import dynamic from 'next/dynamic'
+import RichTextEditor from '@/components/shared/RichTextEditor'
 import { cn } from '@/lib/utils'
-
-const RichTextEditor = dynamic(() => import('@/components/shared/RichTextEditor'), { ssr: false })
 
 const TEMPLATES = [
   {

@@ -84,7 +84,7 @@ export default async function RegistrationFeePage() {
         </div>
         <div className="text-center">
           <Link
-            href="/student/dashboard"
+            href="/student"
             className="text-sm font-medium text-aerojet-blue underline hover:no-underline dark:text-blue-400"
           >
             Back to Dashboard

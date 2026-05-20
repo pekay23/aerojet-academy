@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AlertTriangle } from 'lucide-react'
 import StudentSidebar from './_components/StudentSidebar'
+import Heartbeat from '@/components/shared/Heartbeat'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import PortalHeader from '@/components/layouts/PortalHeader'
 import WelcomeBanner from '@/components/WelcomeBanner'
@@ -130,6 +131,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+      <Heartbeat />
       <AppTour hasCompletedTour={dbUser.hasCompletedTour} userRole={userRole} />
       <StudentSidebar
         userName={userName}

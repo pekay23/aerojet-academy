@@ -1,3 +1,4 @@
+import 'server-only'
 import { Prisma } from '@prisma/client'
 import { AsyncLocalStorage } from 'async_hooks'
 

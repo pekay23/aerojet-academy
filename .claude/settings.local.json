@@ -13,7 +13,29 @@
       "Read(//d/Projects/raymond-gray-platform/**)",
       "Read(//d/Projects/raymond-gray-platform/src/**)",
       "Read(//d/Projects/raymond-gray-platform/src/app/api/**)",
-      "Bash(git -C \"d:\\\\Projects\\\\raymond-gray-platform\" log --oneline -5)"
+      "Bash(git -C \"d:\\\\Projects\\\\raymond-gray-platform\" log --oneline -5)",
+
+      "Bash(bun:*)",
+      "Bash(bunx:*)",
+      "Bash(npx @next/codemod:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx tsx:*)",
+      "Bash(node scripts/*)",
+
+      "Bash(git status)",
+      "Bash(git status:*)",
+      "Bash(git diff)",
+      "Bash(git diff:*)",
+      "Bash(git log)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git branch)",
+      "Bash(git branch:*)",
+      "Bash(git ls-files)",
+      "Bash(git ls-files:*)",
+      "Bash(git config --get:*)",
+      "Bash(git rev-parse:*)"
     ]
   }
 }

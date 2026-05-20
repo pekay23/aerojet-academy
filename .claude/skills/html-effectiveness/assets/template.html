@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{TITLE}} · {{PROJECT}}</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="./design-tokens.css">
+</head>
+<body>
+  <div class="he-shell">
+
+    <!-- ── NAV ────────────────────────────────────────────────────── -->
+    <nav class="he-nav">
+      <a class="he-nav__brand" href="./index.html">{{PROJECT}} <small>docs</small></a>
+      <div class="he-nav__links">
+        <a href="./index.html">Index</a>
+        <a href="./architecture/system-overview.html">Architecture</a>
+        <a href="./guides/setup.html">Guides</a>
+        <a href="./audits/2026-05-20-comprehensive.html">Audits</a>
+        <a href="./plans/future-plans.html">Plans</a>
+      </div>
+    </nav>
+
+    <!-- ── HEADER ─────────────────────────────────────────────────── -->
+    <header>
+      <p class="he-eyebrow">{{EYEBROW}}</p>
+      <h1 class="he-title">{{TITLE}}</h1>
+      <p class="he-deck">{{DECK}}</p>
+    </header>
+
+    <!-- ── BODY ───────────────────────────────────────────────────── -->
+    <main>
+      {{CONTENT}}
+    </main>
+
+    <!-- ── FOOTER ─────────────────────────────────────────────────── -->
+    <footer class="he-foot">
+      Generated <time datetime="{{ISO_DATE}}">{{HUMAN_DATE}}</time> from
+      <code>{{SOURCE_PATH}}</code>. Rebuild with <code>bun run docs:html</code>.
+    </footer>
+  </div>
+</body>
+</html>

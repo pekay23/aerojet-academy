@@ -12,6 +12,25 @@ export async function GET(request: Request) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type')
+    // Optional date-range filter (SEC-23). Bounded export prevents accidental
+    // multi-million row dumps + matches the financial reporting period the
+    // staff member is actually looking at.
+    const fromParam = searchParams.get('from')
+    const toParam = searchParams.get('to')
+    const limitParam = searchParams.get('limit')
+    const dateFilter: { gte?: Date; lte?: Date } = {}
+    if (fromParam) {
+      const d = new Date(fromParam)
+      if (!Number.isNaN(d.getTime())) dateFilter.gte = d
+    }
+    if (toParam) {
+      const d = new Date(toParam)
+      if (!Number.isNaN(d.getTime())) dateFilter.lte = d
+    }
+    const takeCap = Math.min(
+      Math.max(parseInt(limitParam || '10000', 10) || 10000, 1),
+      50_000
+    )
 
     let data: any[] = []
     let filename = 'export.csv'
@@ -51,9 +70,10 @@ export async function GET(request: Request) {
       filename = 'exam_pools_export.csv'
     } else if (type === 'finances') {
       const txs = await prismaUnfiltered.walletTransaction.findMany({
+        where: Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : undefined,
         include: { wallet: { include: { user: { include: { profile: true } } } } },
         orderBy: { createdAt: 'desc' },
-        take: 10000,
+        take: takeCap,
       })
 
       data = txs.map((t) => ({
@@ -69,9 +89,10 @@ export async function GET(request: Request) {
       filename = 'financial_transactions.csv'
     } else if (type === 'audit-logs') {
       const logs = await prismaUnfiltered.auditLog.findMany({
+        where: Object.keys(dateFilter).length > 0 ? { createdAt: dateFilter } : undefined,
         include: { user: { include: { profile: true } } },
         orderBy: { createdAt: 'desc' },
-        take: 5000,
+        take: Math.min(takeCap, 5000),
       })
 
       data = logs.map((l) => ({

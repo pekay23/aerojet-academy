@@ -957,3 +957,59 @@ export async function bulkUpdateExamCategory(ids: string[], category: 'INTERNAL'
     return { error: 'Failed to update records.' }
   }
 }
+
+/**
+ * Admin override for certificate / document release (audit gap 4c).
+ * "or otherwise determined by admin" — force-releases official EASA certificates
+ * and/or remaining FT-4Y second-half documents regardless of the pathway/funding
+ * gate in lib/certificates/eligibility.ts.
+ */
+export async function setCertificateRelease(
+  studentUserId: string,
+  data: { certificatesReleased?: boolean; documentsReleased?: boolean }
+) {
+  try {
+    const staff = await requireStaff()
+
+    const profile = await prismaUnfiltered.studentProfile.findUnique({
+      where: { userId: studentUserId },
+      select: { id: true, certificatesReleased: true, documentsReleased: true },
+    })
+    if (!profile) return { error: 'Student profile not found.' }
+
+    const now = new Date()
+    const update: Record<string, unknown> = {}
+    if (typeof data.certificatesReleased === 'boolean') {
+      update.certificatesReleased = data.certificatesReleased
+      update.certificatesReleasedAt = data.certificatesReleased ? now : null
+      update.certificatesReleasedBy = data.certificatesReleased ? staff.id : null
+    }
+    if (typeof data.documentsReleased === 'boolean') {
+      update.documentsReleased = data.documentsReleased
+      update.documentsReleasedAt = data.documentsReleased ? now : null
+      update.documentsReleasedBy = data.documentsReleased ? staff.id : null
+    }
+    if (Object.keys(update).length === 0) return { error: 'Nothing to update.' }
+
+    await prismaUnfiltered.studentProfile.update({
+      where: { id: profile.id },
+      data: update,
+    })
+
+    await createAuditLog({
+      action: AuditAction.UPDATE,
+      entity: 'StudentProfile',
+      entityId: profile.id,
+      userId: staff.id,
+      description: `Updated certificate/document release for student ${studentUserId}.`,
+      changes: { studentUserId, ...data },
+    })
+
+    revalidatePath(`/staff/students/${studentUserId}`)
+    revalidatePath('/student/certificates')
+    return { success: true }
+  } catch (error) {
+    console.error('[setCertificateRelease] Exception:', error)
+    return { error: 'Failed to update certificate release settings.' }
+  }
+}

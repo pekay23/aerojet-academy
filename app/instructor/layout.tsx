@@ -2,6 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma/client'
 import InstructorSidebar from './_components/InstructorSidebar'
+import Heartbeat from '@/components/shared/Heartbeat'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import PortalHeader from '@/components/layouts/PortalHeader'
 import { getPendingGradingCount } from '@/lib/actions/instructor'
@@ -37,6 +38,7 @@ export default async function InstructorLayout({ children }: { children: React.R
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+      <Heartbeat />
       <InstructorSidebar
         userName={userName}
         userRole={userRole}

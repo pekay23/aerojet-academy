@@ -100,43 +100,33 @@ export default async function ResitBookingTab() {
     })
   ])
 
-  // Aggregate free resits from bundles
-  const bookingsWithCredits = await prisma.examBooking.findMany({
+  // Audit 4e: free-resit balance comes from real ExamBundle entitlement
+  // (freeResitsIncluded / usedFreeResits) instead of guessing from pool
+  // membership counts. Earliest-expiring bundle listed first.
+  const resitBundles = await prisma.examBundle.findMany({
     where: {
       userId: session.user.id,
-      bookingType: { in: ['TWIN_PACK', 'FOUR_PACK'] },
+      validUntil: { gt: new Date() },
+      status: { in: ['ACTIVE', 'USED', 'EXHAUSTED'] },
     },
-    select: { bookingGroupRef: true, bookingType: true },
-    distinct: ['bookingGroupRef'],
+    select: {
+      id: true,
+      bundleType: true,
+      freeResitsIncluded: true,
+      usedFreeResits: true,
+      validUntil: true,
+    },
+    orderBy: { validUntil: 'asc' },
   })
 
-  // Group active memberships to find remaining resit credits via the booking relation
-  const memberships = await prisma.poolMembership.findMany({
-    where: { userId: session.user.id },
-    select: { booking: { select: { bookingGroupRef: true } } },
-  })
-  const memberCounts = memberships.reduce(
-    (acc, m) => {
-      const ref = m.booking?.bookingGroupRef
-      if (ref) acc[ref] = (acc[ref] || 0) + 1
-      return acc
-    },
-    {} as Record<string, number>
-  )
-
-  const freeResits = bookingsWithCredits
-    .map((b) => {
-      const totalAllowed = b.bookingType === 'TWIN_PACK' ? 3 : 6 // max seats config + 1 or 2 free resits
-      const used = memberCounts[b.bookingGroupRef as string] || 0
-      const remaining = Math.max(0, totalAllowed - used)
-      return {
-        bookingGroupRef: b.bookingGroupRef as string,
-        bookingType: b.bookingType,
-        remaining,
-        notes: null,
-      }
-    })
-    .filter((r) => r.remaining > 0 && r.bookingGroupRef)
+  const freeResits = resitBundles
+    .map((b) => ({
+      bookingGroupRef: b.id,
+      bookingType: b.bundleType === 'FOUR_SEAT' ? 'Four Pack' : 'Twin Pack',
+      remaining: Math.max(0, b.freeResitsIncluded - b.usedFreeResits),
+      notes: null as string | null,
+    }))
+    .filter((r) => r.remaining > 0)
 
   // Deduplicate and map failed exams by Module Code to handle legacy migrated data
   const failedMap = new Map<string, {

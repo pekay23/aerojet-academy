@@ -11,14 +11,11 @@ import {
   XCircle,
   Loader2,
   Download,
-  Copy,
   Plus,
   Trash2,
   UserPlus,
   ChevronDown,
   ChevronUp,
-  Eye,
-  EyeOff,
   Send,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -98,7 +95,9 @@ interface CredentialRow {
   lastName: string
   personalEmail: string
   academyEmail: string
-  temporaryPassword: string
+  // Temporary passwords are intentionally NOT returned from the import API:
+  // they are delivered to students via the registration email only. The staff
+  // password-reset flow can issue a new one if a student loses theirs.
   walletBalanceEur: number
   studentId: string
   enrollmentType: string
@@ -155,7 +154,6 @@ export default function ImportStudentsPage() {
   const [parsedData, setParsedData] = useState<ImportStudent[]>([])
   const [isUploading, setIsUploading] = useState(false)
   const [importResult, setImportResult] = useState<ImportResult | null>(null)
-  const [showPasswords, setShowPasswords] = useState(false)
   const [sendingCredentials, setSendingCredentials] = useState<string | null>(null)
 
   // Manual entry state
@@ -311,9 +309,9 @@ export default function ImportStudentsPage() {
   const exportCredentials = () => {
     if (!importResult?.credentials?.length) return
 
-    const csvHeader = 'First Name,Last Name,Personal Email,Academy Email,Temporary Password,Wallet EUR,Student ID,Enrollment Type,Funding Source,Status,Notes'
+    const csvHeader = 'First Name,Last Name,Personal Email,Academy Email,Wallet EUR,Student ID,Enrollment Type,Funding Source,Status,Notes'
     const csvRows = importResult.credentials.map((c) =>
-      `"${c.firstName}","${c.lastName}","${c.personalEmail}","${c.academyEmail}","${c.temporaryPassword}",${c.walletBalanceEur},"${c.studentId}","${c.enrollmentType}","${c.fundingSource || ''}","${c.enrollmentStatus || ''}","${(c.notes || '').replace(/"/g, '""')}"`
+      `"${c.firstName}","${c.lastName}","${c.personalEmail}","${c.academyEmail}",${c.walletBalanceEur},"${c.studentId}","${c.enrollmentType}","${c.fundingSource || ''}","${c.enrollmentStatus || ''}","${(c.notes || '').replace(/"/g, '""')}"`
     )
     const csv = [csvHeader, ...csvRows].join('\n')
     const blob = new Blob([csv], { type: 'text/csv' })
@@ -1036,18 +1034,14 @@ export default function ImportStudentsPage() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>Generated Credentials</CardTitle>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setShowPasswords(!showPasswords)}>
-                      {showPasswords ? <EyeOff className="mr-1 h-4 w-4" /> : <Eye className="mr-1 h-4 w-4" />}
-                      {showPasswords ? 'Hide' : 'Show'} Passwords
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={exportCredentials}>
-                      <Download className="mr-1 h-4 w-4" /> Export CSV
-                    </Button>
-                  </div>
+                  <Button variant="outline" size="sm" onClick={exportCredentials}>
+                    <Download className="mr-1 h-4 w-4" /> Export CSV
+                  </Button>
                 </div>
                 <CardDescription>
-                  Students must change their password on first login. Share credentials securely or use the send button.
+                  Temporary passwords were sent to each student&apos;s personal email and are
+                  not retrievable here. Students must change their password on first login. If a
+                  student loses their welcome email, use the per-user password-reset flow.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -1058,7 +1052,6 @@ export default function ImportStudentsPage() {
                         <TableHead>Name</TableHead>
                         <TableHead>Student ID</TableHead>
                         <TableHead>Academy Email</TableHead>
-                        <TableHead>Temp Password</TableHead>
                         <TableHead>Wallet</TableHead>
                         <TableHead>Type</TableHead>
                         <TableHead></TableHead>
@@ -1074,19 +1067,6 @@ export default function ImportStudentsPage() {
                           </TableCell>
                           <TableCell className="font-mono text-xs">{c.studentId}</TableCell>
                           <TableCell className="text-xs">{c.academyEmail}</TableCell>
-                          <TableCell>
-                            {showPasswords ? (
-                              <span className="font-mono text-xs">{c.temporaryPassword}</span>
-                            ) : (
-                              <span className="text-xs text-slate-400">••••••••</span>
-                            )}
-                            <Button
-                              variant="ghost" size="sm" className="ml-1 h-6 w-6 p-0"
-                              onClick={() => { navigator.clipboard.writeText(c.temporaryPassword); toast.success('Password copied') }}
-                            >
-                              <Copy className="h-3 w-3" />
-                            </Button>
-                          </TableCell>
                           <TableCell>€{c.walletBalanceEur}</TableCell>
                           <TableCell>
                             <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900 dark:text-blue-300">

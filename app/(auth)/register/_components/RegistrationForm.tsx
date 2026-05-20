@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import { toast } from 'sonner'
 import { Loader2, ArrowRight, Info } from 'lucide-react'
 import { useForm, Controller } from 'react-hook-form'
@@ -513,9 +514,16 @@ export default function RegistrationForm({
           )}
         </Button>
 
-        <p className="mt-4 text-center text-xs text-gray-500">
-          By clicking Start, you agree to our Terms. Your account login details will be emailed
-          after payment verification.
+        <p className="mt-4 text-center text-xs text-pretty text-gray-500">
+          By clicking Start, you agree to the{' '}
+          <Link href="/online-application-terms" className="font-bold text-aerojet-sky hover:underline">
+            Application Terms
+          </Link>{' '}
+          and acknowledge the{' '}
+          <Link href="/privacy-policy" className="font-bold text-aerojet-sky hover:underline">
+            Privacy & Data Protection Notice
+          </Link>
+          . Your account login details will be emailed after payment verification.
         </p>
       </form>
     </Form>

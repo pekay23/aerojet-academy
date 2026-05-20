@@ -32,9 +32,24 @@ interface Logbook {
 }
 
 const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string }> = {
-  ACTIVE: { label: 'Active', icon: BookOpen, color: 'text-green-700 dark:text-green-400', bg: 'bg-green-50 dark:bg-green-900/20' },
-  COMPLETED: { label: 'Completed', icon: CheckCircle2, color: 'text-blue-700 dark:text-blue-400', bg: 'bg-blue-50 dark:bg-blue-900/20' },
-  SUSPENDED: { label: 'Suspended', icon: PauseCircle, color: 'text-amber-700 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-900/20' },
+  ACTIVE: {
+    label: 'Active',
+    icon: BookOpen,
+    color: 'text-green-700 dark:text-green-400',
+    bg: 'bg-green-50 dark:bg-green-900/20',
+  },
+  COMPLETED: {
+    label: 'Completed',
+    icon: CheckCircle2,
+    color: 'text-blue-700 dark:text-blue-400',
+    bg: 'bg-blue-50 dark:bg-blue-900/20',
+  },
+  SUSPENDED: {
+    label: 'Suspended',
+    icon: PauseCircle,
+    color: 'text-amber-700 dark:text-amber-400',
+    bg: 'bg-amber-50 dark:bg-amber-900/20',
+  },
 }
 
 export default function OJTDashboard({
@@ -68,37 +83,57 @@ export default function OJTDashboard({
       {/* Stats cards */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Logbooks</div>
-          <div className="mt-1 text-2xl font-black text-slate-800 dark:text-white">{logbooks.length}</div>
+          <div className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+            Total Logbooks
+          </div>
+          <div className="mt-1 text-2xl font-black text-slate-800 dark:text-white">
+            {logbooks.length}
+          </div>
         </div>
         <div className="rounded-2xl border border-green-200 bg-green-50 p-4 dark:border-green-900/50 dark:bg-green-900/20">
-          <div className="text-xs font-bold uppercase tracking-wider text-green-600 dark:text-green-400">Active</div>
-          <div className="mt-1 text-2xl font-black text-green-700 dark:text-green-300">{statusCounts['ACTIVE'] || 0}</div>
+          <div className="text-xs font-bold tracking-wider text-green-600 uppercase dark:text-green-400">
+            Active
+          </div>
+          <div className="mt-1 text-2xl font-black text-green-700 dark:text-green-300">
+            {statusCounts['ACTIVE'] || 0}
+          </div>
         </div>
         <div className="rounded-2xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/50 dark:bg-blue-900/20">
-          <div className="text-xs font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Completed</div>
-          <div className="mt-1 text-2xl font-black text-blue-700 dark:text-blue-300">{statusCounts['COMPLETED'] || 0}</div>
+          <div className="text-xs font-bold tracking-wider text-blue-600 uppercase dark:text-blue-400">
+            Completed
+          </div>
+          <div className="mt-1 text-2xl font-black text-blue-700 dark:text-blue-300">
+            {statusCounts['COMPLETED'] || 0}
+          </div>
         </div>
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/50 dark:bg-amber-900/20">
-          <div className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Suspended</div>
-          <div className="mt-1 text-2xl font-black text-amber-700 dark:text-amber-300">{statusCounts['SUSPENDED'] || 0}</div>
+          <div className="text-xs font-bold tracking-wider text-amber-600 uppercase dark:text-amber-400">
+            Suspended
+          </div>
+          <div className="mt-1 text-2xl font-black text-amber-700 dark:text-amber-300">
+            {statusCounts['SUSPENDED'] || 0}
+          </div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Total Hours</div>
-          <div className="mt-1 text-2xl font-black text-slate-800 dark:text-white">{Math.round(totalHours * 10) / 10}</div>
+          <div className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+            Total Hours
+          </div>
+          <div className="mt-1 text-2xl font-black text-slate-800 dark:text-white">
+            {Math.round(totalHours * 10) / 10}
+          </div>
         </div>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search by name, student ID, email, or facility..."
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 focus:border-aerojet-blue focus:outline-none focus:ring-2 focus:ring-aerojet-blue/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="focus:border-aerojet-blue focus:ring-aerojet-blue/20 w-full rounded-xl border border-slate-200 bg-white py-2.5 pr-4 pl-10 text-sm text-slate-800 placeholder-slate-400 focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white"
           />
         </div>
         <div className="flex gap-1">
@@ -130,14 +165,27 @@ export default function OJTDashboard({
               <th className="px-4 py-3 font-medium">Entries</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium">Start Date</th>
-              <th className="px-4 py-3 font-medium text-right">Actions</th>
+              <th className="px-4 py-3 text-right font-medium">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={8} className="py-12 text-center text-slate-500">
-                  {search ? 'No logbooks match your search.' : 'No OJT logbooks found.'}
+                  <div className="flex flex-col items-center gap-3">
+                    <span>
+                      {search ? 'No logbooks match your search.' : 'No OJT logbooks found.'}
+                    </span>
+                    {!search && logbooks.length === 0 && (
+                      <Link
+                        href="/staff/ojt/preview"
+                        className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                      >
+                        <BookOpen className="h-3.5 w-3.5" />
+                        View generic logbook preview
+                      </Link>
+                    )}
+                  </div>
                 </td>
               </tr>
             ) : (
@@ -146,9 +194,14 @@ export default function OJTDashboard({
                 const Icon = cfg.icon
 
                 return (
-                  <tr key={lb.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                  <tr
+                    key={lb.id}
+                    className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
+                  >
                     <td className="px-4 py-3">
-                      <div className="font-bold text-slate-800 dark:text-white">{lb.studentName}</div>
+                      <div className="font-bold text-slate-800 dark:text-white">
+                        {lb.studentName}
+                      </div>
                       <div className="text-xs text-slate-500">{lb.studentId}</div>
                     </td>
                     <td className="px-4 py-3">
@@ -159,7 +212,9 @@ export default function OJTDashboard({
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-1.5">
                         <Building2 className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="text-slate-700 dark:text-slate-300">{lb.facilityName}</span>
+                        <span className="text-slate-700 dark:text-slate-300">
+                          {lb.facilityName}
+                        </span>
                       </div>
                       {lb.facilityApprovalNo && (
                         <div className="text-[10px] text-slate-400">{lb.facilityApprovalNo}</div>
@@ -177,7 +232,9 @@ export default function OJTDashboard({
                       {lb.entryCount}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${cfg.bg} ${cfg.color}`}>
+                      <span
+                        className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${cfg.bg} ${cfg.color}`}
+                      >
                         <Icon className="h-3 w-3" />
                         {cfg.label}
                       </span>

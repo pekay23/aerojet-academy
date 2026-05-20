@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Contributing to Aerojet Academy · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Guides</p>
+  <h1 class="he-title">Contributing to Aerojet Academy</h1>
+  
+</header>
+
+<section class="he-section" id="branch-strategy">
+  <div class="he-section__num">01 · 🌿 Branch Strategy</div>
+  <h2 class="he-section__title">🌿 Branch Strategy</h2><ul>
+<li><code>main</code> — Production-ready code.</li>
+<li><code>staging</code> — Pre-production validation.</li>
+<li><code>develop</code> — Integration branch for features.</li>
+<li><code>feature/*</code> — Individual feature development.</li>
+</ul>
+
+<section class="he-section" id="commit-messages-versioning">
+  <div class="he-section__num">02 · 🔄 Commit Messages &amp; Versioning</div>
+  <h2 class="he-section__title">🔄 Commit Messages &amp; Versioning</h2><p>We use <strong>Conventional Commits</strong> to automate versioning and changelogs.</p>
+<ul>
+<li><strong>feat</strong>: A new feature (bumps minor version).</li>
+<li><strong>fix</strong>: A bug fix (bumps patch version).</li>
+<li><strong>docs</strong>: Documentation changes.</li>
+<li><strong>refactor</strong>: Code change that neither fixes a bug nor adds a feature.</li>
+<li><strong>break</strong>: A breaking change (bumps major version).</li>
+</ul>
+<h3 id="automation">Automation</h3><p>The <code>pre-commit</code> hook automatically bumps the version and updates <code>docs/CHANGELOG.md</code>. 
+To specify a bump type, use the <code>BUMP_TYPE</code> environment variable:</p>
+<ul>
+<li><strong>PowerShell</strong>: <code>$env:BUMP_TYPE=&quot;minor&quot;; git commit -m &quot;...&quot;</code></li>
+<li><strong>Bash</strong>: <code>BUMP_TYPE=minor git commit -m &quot;...&quot;</code></li>
+</ul>
+
+<section class="he-section" id="development-workflow">
+  <div class="he-section__num">03 · 🧪 Development Workflow</div>
+  <h2 class="he-section__title">🧪 Development Workflow</h2><ol>
+<li>Branch from <code>develop</code>.</li>
+<li>Sync your local database: <code>bun run db:push</code>.</li>
+<li>Make changes and verify with <code>bun run type-check</code>.</li>
+<li>Submit a PR to <code>develop</code>.</li>
+</ol>
+
+<section class="he-section" id="database-management">
+  <div class="he-section__num">04 · 🗄️ Database Management</div>
+  <h2 class="he-section__title">🗄️ Database Management</h2><ul>
+<li><strong>Primary</strong>: Neon (Serverless PostgreSQL).</li>
+<li><strong>Backup/Redundant</strong>: Supabase.</li>
+<li><strong>Migrations</strong>: Always use <code>bun x prisma migrate dev</code> to generate migration files. Ensure both environments are synced if schema changes are made.</li>
+</ul>
+
+<section class="he-section" id="coding-standards">
+  <div class="he-section__num">05 · 🎨 Coding Standards</div>
+  <h2 class="he-section__title">🎨 Coding Standards</h2><ul>
+<li><strong>Strict TypeScript</strong>: No <code>any</code> types; all interfaces must be documented.</li>
+<li><strong>Branding</strong>: Use <code>text-aerojet-blue</code> for primary UI elements.</li>
+<li><strong>Components</strong>: Use Shadcn UI primitives where possible.</li>
+<li><strong>Accessibility</strong>: All interactive elements must have unique <code>id</code> and descriptive labels.</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#branch-strategy">🌿 Branch Strategy</a></li>
+    <li class="he-toc__l2"><a href="#commit-messages-versioning">🔄 Commit Messages &amp; Versioning</a></li>
+    <li class="he-toc__l3"><a href="#automation">Automation</a></li>
+    <li class="he-toc__l2"><a href="#development-workflow">🧪 Development Workflow</a></li>
+    <li class="he-toc__l2"><a href="#database-management">🗄️ Database Management</a></li>
+    <li class="he-toc__l2"><a href="#coding-standards">🎨 Coding Standards</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

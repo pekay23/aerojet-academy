@@ -4,6 +4,10 @@ export interface EmailOptions {
   html: string
   from?: string
   replyTo?: string
+  /** Logical template identifier for the EmailDelivery log */
+  template?: string
+  /** When the recipient maps to a User.id — surfaces failures per account */
+  userId?: string
 }
 
 export interface EmailResult {

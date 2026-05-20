@@ -8,7 +8,9 @@ import SystemSettingsForm from './_components/SystemSettingsForm'
 import PaymentMethodsManager from './_components/PaymentMethodsManager'
 import WelcomeMessagesManager from './_components/WelcomeMessagesManager'
 import { getWelcomeMessagesGrouped } from '@/lib/welcome-messages'
-import EmailPreviewsPage from './email-previews/page'
+import EmailPreviewsTab from './_components/EmailPreviewsTab'
+import EmailRegistryTab from './_components/EmailRegistryTab'
+import EmailDeliveryTab from './_components/EmailDeliveryTab'
 import AcademicCalendarManager from './academic-calendar/_components/AcademicCalendarManager'
 import BackupManager from './_components/BackupManager'
 import ExchangeRateDisplay from './_components/ExchangeRateDisplay'
@@ -56,6 +58,64 @@ const GENERAL_FIELDS = [
     description: 'Enable or disable the public registration form',
     type: 'BOOLEAN' as const,
     default: 'true',
+  },
+  {
+    key: 'easa_attendance_threshold',
+    label: 'EASA Approved Attendance Threshold (%)',
+    description:
+      'The EASA Part-147 approved minimum attendance percentage. Acts as the regulatory floor — the academy threshold can never be enforced below this.',
+    type: 'NUMBER' as const,
+    default: '80',
+  },
+  {
+    key: 'academy_attendance_threshold',
+    label: 'Academy Attendance Threshold (%)',
+    description:
+      'The attendance minimum the academy enforces. If set below the EASA approved threshold, the EASA value is used instead.',
+    type: 'NUMBER' as const,
+    default: '80',
+  },
+]
+
+// Audit 8a: admins toggle the full admissions pipeline on, or keep the
+// simplified 4-step flow (master flag off). Individual stages are gated
+// independently and consumed by lib/admissions/state-machine.ts.
+const ADMISSIONS_FIELDS = [
+  {
+    key: 'admissions_pipeline_enabled',
+    label: 'Full Admissions Pipeline',
+    description:
+      'On = full pipeline (document uploads, aptitude, interview, medical as enabled below). Off = simplified 4-step flow (register → pay → staff approve → portal access).',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
+  {
+    key: 'document_uploads_enabled',
+    label: 'Document Uploads Stage',
+    description: 'Require applicants to upload required documents.',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
+  {
+    key: 'aptitude_test_enabled',
+    label: 'Aptitude Test Stage',
+    description: 'Enable the aptitude testing stage in the pipeline.',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
+  {
+    key: 'interview_system_enabled',
+    label: 'Interview Stage',
+    description: 'Enable interview scheduling and evaluation.',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
+  {
+    key: 'medical_review_enabled',
+    label: 'Medical Review Stage',
+    description: 'Enable the medical document review stage.',
+    type: 'BOOLEAN' as const,
+    default: 'false',
   },
 ]
 
@@ -119,7 +179,7 @@ const NOTIFICATION_FIELDS = [
     label: 'Email Sender Address',
     description: 'From address for outgoing emails',
     type: 'STRING' as const,
-    default: 'noreply@aerojet.aviation',
+    default: 'Aerojet Academy <admissions@mail.aerojet-academy.com>',
   },
 ]
 
@@ -146,6 +206,15 @@ export default async function SettingsPage({
         {/* ── General Tab ── */}
         {tab === 'general' && (
           <SettingsForm fields={GENERAL_FIELDS} values={values} groupLabel="General settings" />
+        )}
+
+        {/* ── Admissions Tab ── */}
+        {tab === 'admissions' && (
+          <SettingsForm
+            fields={ADMISSIONS_FIELDS}
+            values={values}
+            groupLabel="Admissions pipeline"
+          />
         )}
 
         {/* ── Finance Tab ── */}
@@ -179,7 +248,13 @@ export default async function SettingsPage({
         {tab === 'welcome' && <WelcomeMessagesContent />}
 
         {/* ── Email Templates Tab ── */}
-        {tab === 'emails' && <EmailPreviewsPage />}
+        {tab === 'emails' && <EmailPreviewsTab />}
+
+        {/* ── Email Registry Tab ── */}
+        {tab === 'email-registry' && <EmailRegistryTab />}
+
+        {/* ── Email Delivery Log Tab ── */}
+        {tab === 'email-delivery' && <EmailDeliveryTab />}
 
         {/* ── Academic Calendar Tab ── */}
         {tab === 'calendar' && <CalendarContent />}

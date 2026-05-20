@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import Logo from '@/components/shared/Logo'
 import { usePathname } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { useTheme } from '@/components/shared/theme-provider'
@@ -582,19 +583,10 @@ function renderSidebarContent({
                 alt="Aerojet Academy"
                 width={32}
                 height={32}
-                className="h-auto w-auto object-contain"
-                style={{ width: 'auto', height: 'auto' }}
+                className="h-8 w-8"
               />
             ) : (
-              <Image
-                src="/images/logos/ATA_logo_hor_onDark.webp"
-                alt="Aerojet Academy"
-                width={130}
-                height={32}
-                className="h-auto w-auto object-contain"
-                style={{ width: 'auto', height: 'auto' }}
-                priority
-              />
+              <Logo tone="onDark" className="h-8 w-auto" priority />
             )}
           </Link>
 

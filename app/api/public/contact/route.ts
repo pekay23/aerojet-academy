@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { sendContactEnquiryConfirmation } from '@/lib/email/service'
 import { checkRateLimit, getClientIp } from '@/lib/auth/helpers'
 import { apiTooManyRequests } from '@/lib/api/response'
+import { EMAIL_ADDRESSES } from '@/lib/constants/business-rules'
 
 /** Escape HTML special characters to prevent XSS in email templates */
 function escapeHtml(str: string): string {
@@ -83,7 +84,7 @@ export async function POST(req: NextRequest) {
 
     // Send original notification to admin
     await resend.emails.send({
-      from: process.env.FROM_EMAIL || 'noreply@aerojet-academy.com',
+      from: process.env.FROM_EMAIL || EMAIL_ADDRESSES.fromNoReply,
       to: 'trainingprograms@aerojet-academy.com',
       replyTo: email,
       subject: `Contact Form Enquiry: ${subject}`,

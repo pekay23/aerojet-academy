@@ -14,16 +14,16 @@
 5. ~~**Add Zod validation**~~ — ✅ Added schemas for charter, merge, wallet-proof, book-exam routes
 6. ~~**Dynamic import NewsMarkdownEditor**~~ — ✅ Switched to `next/dynamic` with `ssr: false` in 2 pages
 
-### P2 — Structure (backlog)
-7. **Break up long functions** — getDashboardData (183 lines), book-exam POST (239 lines), UsersTable (380 lines)
-8. **Add error.tsx** — missing in (auth) segment
-9. **Add not-found.tsx** — missing in (auth) and (portal) segments
-10. **Remove dead config** — 4 unused font families in tailwind.config.ts, trackEvent in analytics
+### P2 — Structure (mostly resolved 2026-05-20)
+7. **Break up long functions** — getDashboardData (183 lines), book-exam POST (239 lines), UsersTable (380 lines) — STILL OPEN (low priority, cosmetic)
+8. ~~**Add error.tsx**~~ — ✅ `(auth)/error.tsx` already exists; `app/examiner/error.tsx` added 2026-05-20
+9. ~~**Add not-found.tsx**~~ — ✅ All five portals (staff/student/instructor/applicant/examiner) and `(auth)` + `(public)` now have branded `not-found.tsx`
+10. ~~**Remove dead config**~~ — ✅ Tailwind font families already pruned (only `sans`, `outfit`, `heading` remain). `trackEvent` still in `lib/analytics/events.ts` but is a minimal stub; leave for now
 
-### P3 — Polish (backlog)
-11. **Centralize hardcoded values** — pool magic numbers, email addresses, status arrays
-12. **Replace `<img>` with next/image** — 2 instances in newsroom create page
-13. **Rate limiting** — resend-verification and submit-payment-proof routes
+### P3 — Polish (resolved 2026-05-20)
+11. **Centralize hardcoded values** — partial; non-blocking
+12. ~~**Replace `<img>` with next/image**~~ — ✅ newsroom `[id]/edit/page.tsx` (the actual location, not `create`) now uses `next/image` with `fill` + `sizes`. Remaining `<img>` tags in admin tables / TwoFactor QR / export HTML are intentional (small avatars / data URIs / server-rendered HTML)
+13. ~~**Rate limiting**~~ — ✅ both `resend-verification` ([app/api/auth/resend-verification/route.ts:12](../../app/api/auth/resend-verification/route.ts#L12)) and `submit-payment-proof` ([app/api/public/submit-payment-proof/route.ts:9-12](../../app/api/public/submit-payment-proof/route.ts#L9-L12)) rate-limited
 
 ---
 

@@ -5,6 +5,7 @@ import { apiCreated, apiError, apiPaginated, withErrorHandler } from '@/lib/api/
 import { parsePagination } from '@/lib/api/response'
 import { createClassSchema, validateBody } from '@/lib/validation/schemas'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
+import { findConflicts } from '@/lib/scheduling/conflicts'
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireStaff()
@@ -50,6 +51,27 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   }
 
   const cls = await prismaUnfiltered.class.create({ data: validation.data })
+
+  // Post-create conflict probe — return 409 + the new class id so the UI can
+  // offer "go fix it" or "I know, keep it" (resubmit with force:true).
+  const force = (body as any)?.force === true
+  if (!force) {
+    const windowFrom = new Date(validation.data.startDate)
+    const windowTo = new Date(validation.data.endDate)
+    windowTo.setDate(windowTo.getDate() + 90)
+    const conflicts = await findConflicts({ from: windowFrom, to: windowTo })
+    const involvesNew = conflicts.filter(
+      (c) => c.a.classId === cls.id || c.b.classId === cls.id
+    )
+    if (involvesNew.length > 0) {
+      return apiError(
+        'Class created but has scheduling conflicts. Review at /staff/timetable/conflicts or POST again with force:true to silence.',
+        409,
+        { classId: cls.id, conflicts: involvesNew.slice(0, 10) }
+      )
+    }
+  }
+
   await createAuditLog({
     action: AuditAction.CREATE,
     entity: 'Class',

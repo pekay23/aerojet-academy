@@ -28,10 +28,13 @@ export default function InstructorSidebar({
   const links: SidebarLink[] = [
     { label: 'Dashboard', href: '/instructor/dashboard', icon: LayoutDashboard },
     { label: 'Schedule', href: '/instructor/schedule', icon: Calendar },
+    { label: 'Availability', href: '/instructor/availability', icon: Calendar },
     { type: 'header', label: 'Course Management' },
     { label: 'Courses', href: '/instructor/classes', icon: School },
     { label: 'Resources', href: '/instructor/resources', icon: FolderOpen },
+    { label: 'Teaching Materials', href: '/instructor/materials', icon: FolderOpen },
     { label: 'Students', href: '/instructor/students', icon: Users },
+    { label: 'My Metrics', href: '/instructor/metrics', icon: LayoutDashboard },
     {
       label: 'Grading',
       href: '/instructor/grading',

@@ -2,10 +2,11 @@
 
 import { useState, useTransition } from 'react'
 import ThemeToggle from '@/components/shared/ThemeToggle'
-import { Bell, Mail, Moon, Sun, Monitor, Loader2, Save } from 'lucide-react'
+import { Bell, Mail, Moon, Sun, Monitor, Loader2, Save, Eye } from 'lucide-react'
 import { updateUserSettings } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { useTheme } from '@/components/shared/theme-provider'
+import PrivacyToggle from '@/components/shared/PrivacyToggle'
 
 interface SettingsFormProps {
   initialSettings: any
@@ -85,6 +86,15 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
             </label>
           </div>
         </div>
+      </div>
+
+      {/* Privacy Section */}
+      <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
+        <h3 className="mb-6 flex items-center gap-2 border-b border-slate-50 pb-4 text-lg font-black text-aerojet-blue dark:border-slate-800 dark:text-white">
+          <Eye className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+          Privacy
+        </h3>
+        <PrivacyToggle />
       </div>
 
       {/* Appearance Section */}

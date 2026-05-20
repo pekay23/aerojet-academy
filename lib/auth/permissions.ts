@@ -76,19 +76,25 @@ export async function getStaffPermissions(userId: string): Promise<Permission[]>
 export async function hasPermission(
   userId: string,
   role: string,
-  permission: Permission
+  permission: Permission | string
 ): Promise<boolean> {
   if (role === 'ADMIN' || role === 'SUPER_ADMIN') return true
-  const permissions = await getStaffPermissions(userId)
-  return permissions.includes(permission)
+  // Defer to the cached registry so role-scoped + user-scoped grants are
+  // both honoured. Falls back to legacy StaffProfile.permissions inside.
+  const { userHasPermission } = await import('./permission-registry')
+  return userHasPermission(userId, role, permission)
 }
 
 /**
  * Require a specific permission for the current session user.
- * ADMIN/SUPER_ADMIN bypass all checks. STAFF needs explicit permission.
+ * ADMIN/SUPER_ADMIN bypass all checks. STAFF needs explicit permission via
+ * role-scoped or user-scoped RoleGrant rows (or legacy StaffProfile array).
+ *
+ * Accepts any string key — pass a value from `PERMISSIONS` for compile-time
+ * safety, or a runtime-added custom key created via the admin UI.
  */
 export async function requirePermission(
-  permission: Permission
+  permission: Permission | string
 ): Promise<{ id: string; role: string }> {
   const session = await getAuthSession()
   if (!session) throw new Error('Unauthorized')

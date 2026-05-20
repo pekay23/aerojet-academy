@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   Calendar,
   FileCheck,
+  ClipboardCheck,
   UserCircle,
   LogOut,
   ChevronLeft
@@ -17,6 +18,8 @@ import { motion } from 'framer-motion'
 const MENU_ITEMS = [
   { href: '/examiner', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/examiner/schedule', label: 'Schedule', icon: Calendar },
+  { href: '/examiner/results', label: 'Results Entry', icon: ClipboardCheck },
+  { href: '/examiner/availability', label: 'Availability', icon: Calendar },
   { href: '/examiner/compliance', label: 'Compliance', icon: FileCheck },
 ]
 

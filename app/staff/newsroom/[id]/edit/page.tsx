@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 import {
   ArrowLeft,
@@ -230,10 +231,13 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
               <div className="relative h-64 w-full overflow-hidden sm:h-80">
                 {formData.coverImage ? (
                   <>
-                    <img
+                    <Image
                       src={formData.coverImage}
                       alt={formData.title}
-                      className="h-full w-full object-cover"
+                      fill
+                      sizes="(min-width: 640px) 800px, 100vw"
+                      className="object-cover"
+                      unoptimized
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-slate-950 via-slate-950/40 to-transparent" />
                   </>
@@ -456,10 +460,13 @@ export default function EditArticlePage({ params }: { params: Promise<{ id: stri
 
               {formData.coverImage && (
                 <div className="group relative mt-2 h-32 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
-                  <img
+                  <Image
                     src={formData.coverImage}
                     alt="Cover Preview"
-                    className="h-full w-full object-cover"
+                    fill
+                    sizes="320px"
+                    className="object-cover"
+                    unoptimized
                   />
                   <button
                     type="button"

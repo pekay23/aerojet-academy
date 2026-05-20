@@ -6,7 +6,7 @@ This document expands the main refactor plan into detailed execution checklists 
 
 Use this together with:
 
-- `docs/EXAM_POOLING_REFACTOR_IMPLEMENTATION_PLAN.md`
+- `docs/plans/exam-pooling-refactor.md`
 
 This file is intended for implementation agents and engineers working directly in the codebase. Each phase includes:
 
@@ -109,7 +109,7 @@ Establish a safe baseline before structural changes begin.
 
 ### Repository and architecture review
 
-- [ ] Read `docs/EXAM_POOLING_REFACTOR_IMPLEMENTATION_PLAN.md`
+- [ ] Read `docs/plans/exam-pooling-refactor.md`
 - [ ] Read current exam and pooling source docs in `aerojet master/`
 - [ ] Confirm the current high-risk runtime entry points:
   - [ ] `app/student/actions.ts`
