@@ -32,7 +32,8 @@ export async function POST(req: NextRequest) {
 
       let value: string
       if (type === 'BOOLEAN') {
-        value = formData.has(fieldName) ? 'true' : 'false'
+        const val = formData.get(fieldName)
+        value = (val === 'on' || val === 'true') ? 'true' : 'false'
       } else {
         value = ((formData.get(fieldName) as string) ?? '').trim()
       }
