@@ -26,8 +26,16 @@ export async function POST(req: NextRequest) {
     const formData = await req.formData()
     const updates: { key: string; value: string; type: string }[] = []
 
-    for (const [fieldName] of formData.entries()) {
-      if (fieldName.endsWith('__type')) continue
+    const fieldNames = new Set<string>()
+    for (const [key] of formData.entries()) {
+      if (key.endsWith('__type')) {
+        fieldNames.add(key.replace('__type', ''))
+      } else {
+        fieldNames.add(key)
+      }
+    }
+
+    for (const fieldName of fieldNames) {
       const type = (formData.get(`${fieldName}__type`) as string) ?? 'STRING'
 
       let value: string
@@ -35,7 +43,9 @@ export async function POST(req: NextRequest) {
         const val = formData.get(fieldName)
         value = (val === 'on' || val === 'true') ? 'true' : 'false'
       } else {
-        value = ((formData.get(fieldName) as string) ?? '').trim()
+        const val = formData.get(fieldName)
+        if (val === null) continue
+        value = (val as string).trim()
       }
 
       updates.push({ key: fieldName, value, type })
