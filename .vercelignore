@@ -13,3 +13,8 @@ stories/
 *.test.tsx
 *.spec.ts
 *.spec.tsx
+
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
