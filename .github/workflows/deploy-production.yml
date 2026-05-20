@@ -29,9 +29,10 @@ jobs:
         run: bun run test --run
 
       - name: Run DB migrations
-        run: bunx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          export DATABASE_URL="${{ secrets.PRODUCTION_DATABASE_URL }}"
+          export DIRECT_URL="${DATABASE_URL/-pooler/}"
+          bunx prisma migrate deploy
 
       - name: Deploy to Vercel (Production)
         run: bunx vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }}
