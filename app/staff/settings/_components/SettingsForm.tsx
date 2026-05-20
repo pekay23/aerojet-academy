@@ -80,7 +80,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                 {field.type === 'BOOLEAN' ? (
                   <div className="flex items-center gap-3">
                     <input type="hidden" name={`${field.key}__type`} value="BOOLEAN" />
-                    <div className="relative inline-flex items-center">
+                    <div className="relative inline-flex items-center gap-3">
                       <input
                         id={field.key}
                         name={field.key}
@@ -90,12 +90,15 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                       />
                       <label
                         htmlFor={field.key}
-                        className="peer h-7 w-12 cursor-pointer rounded-full bg-slate-200 shadow-inner transition-colors peer-checked:bg-aerojet-blue peer-focus:ring-4 peer-focus:ring-aerojet-blue/20 peer-focus:outline-none after:absolute after:top-[4px] after:left-[4px] after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600"
+                        className="h-7 w-12 cursor-pointer rounded-full bg-slate-200 shadow-inner transition-colors peer-checked:bg-aerojet-blue peer-focus:ring-4 peer-focus:ring-aerojet-blue/20 peer-focus:outline-none after:absolute after:top-[4px] after:left-[4px] after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600"
                       />
+                      <span className="block text-[10px] font-black tracking-widest text-slate-400 uppercase peer-checked:hidden">
+                        Disabled
+                      </span>
+                      <span className="hidden text-[10px] font-black tracking-widest text-aerojet-blue uppercase peer-checked:block">
+                        Enabled
+                      </span>
                     </div>
-                    <span className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      {currentValue === 'true' ? 'Enabled' : 'Disabled'}
-                    </span>
                   </div>
                 ) : field.type === 'SELECT' && field.options ? (
                   <div>
