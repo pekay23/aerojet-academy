@@ -121,6 +121,14 @@ const prismaMock = {
   referral: mockModel(),
   adminNote: mockModel(),
   studentLicenseTarget: mockModel(),
+  retentionPolicy: mockModel(),
+
+  // Finance — extended
+  refund: mockModel(),
+  withdrawalRequest: mockModel(),
+
+  // Resources
+  generalResource: mockModel(),
 
   // Transaction helper
   $transaction: vi.fn((fn: any) => {
