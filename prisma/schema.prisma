@@ -967,6 +967,7 @@ model ExamResult {
   certificateIssued DateTime?
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
+  deletedAt         DateTime?
   attemptType       String?
   migrationRef      String?
   moduleCode        String?
@@ -978,6 +979,7 @@ model ExamResult {
   @@index([examId])
   @@index([userId])
   @@index([moduleCode])
+  @@index([deletedAt])
   @@map("exam_results")
 }
 
