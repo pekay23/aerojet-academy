@@ -29,6 +29,7 @@ interface StaffSidebarProps {
     messages?: number
   }
   internalExamEnabled?: boolean
+  appVersion?: string
 }
 
 export default function StaffSidebar({
@@ -37,6 +38,7 @@ export default function StaffSidebar({
   userImage,
   counts: initialCounts,
   internalExamEnabled = false,
+  appVersion,
 }: StaffSidebarProps) {
   const { counts } = useBadgeCounts({
     applicants: initialCounts?.applicants ?? 0,
@@ -184,6 +186,7 @@ export default function StaffSidebar({
       userMenuItems={[
         { label: 'Settings', href: '/settings', icon: Settings },
       ]}
+      appVersion={appVersion}
     />
   )
 }
