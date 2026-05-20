@@ -1,3 +1,5 @@
+import 'server-only'
+
 /**
  * Admissions Pipeline — Lifecycle Email Templates
  *
@@ -314,7 +316,7 @@ export async function sendEnrolledEmail(email: string, firstName: string, studen
     </ul>
 
     <div class="btn-container" style="text-align: center;">
-      <a href="${baseUrl}/student/dashboard" class="btn" style="background-color: #22c55e; border-color: #22c55e; color: #0f172a !important;">
+      <a href="${baseUrl}/student" class="btn" style="background-color: #22c55e; border-color: #22c55e; color: #0f172a !important;">
         <span>Go to Student Portal</span>
       </a>
     </div>

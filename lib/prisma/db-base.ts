@@ -1,3 +1,4 @@
+import 'server-only'
 import 'dotenv/config'
 import { createRequire } from 'node:module'
 import { PrismaClient } from '@prisma/client'

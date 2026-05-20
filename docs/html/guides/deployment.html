@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Deployment Guide · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Guides</p>
+  <h1 class="he-title">Deployment Guide</h1>
+  <p class="he-deck">1.</p>
+</header>
+
+<section class="he-section" id="vercel-recommended">
+  <div class="he-section__num">01 · Vercel (Recommended)</div>
+  <h2 class="he-section__title">Vercel (Recommended)</h2><ol>
+<li>Push code to GitHub</li>
+<li>Import project in Vercel</li>
+<li>Set environment variables (see below)</li>
+<li>Deploy</li>
+</ol>
+<h3 id="environment-variables-for-production">Environment Variables for Production</h3><ul>
+<li><code>DATABASE_URL</code> — Neon PostgreSQL <strong>pooler</strong> connection string (must be set for Production AND Development environments)</li>
+<li><code>DIRECT_URL</code> — Neon direct connection string (used as fallback in dev)</li>
+<li><code>NEXTAUTH_URL</code> — Production URL</li>
+<li><code>NEXTAUTH_SECRET</code> — Generate with <code>openssl rand -base64 32</code></li>
+<li><code>RESEND_API_KEY</code> — For emails</li>
+<li><code>UPLOADTHING_TOKEN</code> — For file uploads</li>
+<li><code>CRON_SECRET</code> — For cron job authentication (required — all cron endpoints validate this)</li>
+</ul>
+<h3 id="database-adapter-important">Database Adapter — IMPORTANT</h3><p>The project uses <code>@prisma/adapter-pg</code> with the standard <code>pg</code> PostgreSQL driver. <strong>Do NOT switch to <code>@prisma/adapter-neon</code></strong> — the <code>ws</code> WebSocket module required by the Neon serverless adapter does not work in Vercel&#39;s Turbopack serverless bundles. See <code>docs/known-issues.md</code> for details.</p>
+<p>Local exception: <code>next dev</code> may dynamically select the Neon adapter for <code>*.neon.tech</code> URLs to avoid local TCP connection stalls. Production and Vercel runtime must remain on <code>@prisma/adapter-pg</code>.</p>
+
+<section class="he-section" id="local-development-database">
+  <div class="he-section__num">02 · Local Development Database</div>
+  <h2 class="he-section__title">Local Development Database</h2><p>The deployed Vercel app must stay on <code>@prisma/adapter-pg</code> with the standard <code>pg</code> driver. For <code>next dev</code>, <code>lib/prisma/db-base.ts</code> keeps that production path untouched but uses a local-only Neon WebSocket adapter when the app is running in development against a <code>*.neon.tech</code> URL. This avoids the 60s TCP handshake hangs that can happen on some local networks while still preserving Prisma transaction support.</p>
+<p>Local runtime connection priority:</p>
+<ol>
+<li><code>LOCAL_DATABASE_URL</code> if set, for a local Postgres database or a dedicated dev URL.</li>
+<li><code>DATABASE_URL</code>, normally the Neon pooler URL.</li>
+<li><code>DIRECT_URL</code>, only as a fallback.</li>
+</ol>
+<p>Optional local overrides:</p>
+<ul>
+<li><code>AEROJET_LOCAL_DB_ADAPTER=pg</code> forces the standard <code>pg</code> adapter in <code>next dev</code>.</li>
+<li><code>AEROJET_LOCAL_DB_ADAPTER=neon</code> forces the local Neon adapter in <code>next dev</code>.</li>
+<li><code>DB_CONNECT_TIMEOUT_MS=10000</code> changes the local TCP adapter&#39;s fail-fast timeout.</li>
+</ul>
+<h3 id="cron-jobs-vercel">Cron Jobs (Vercel)</h3><p>Configured in <code>vercel.json</code>. All cron endpoints require <code>Authorization: Bearer &lt;CRON_SECRET&gt;</code> header:</p>
+<pre><code class="language-json">{
+  &quot;crons&quot;: [
+    { &quot;path&quot;: &quot;/api/cron/check-events&quot;, &quot;schedule&quot;: &quot;0 1 * * *&quot; },
+    { &quot;path&quot;: &quot;/api/cron/check-pools&quot;, &quot;schedule&quot;: &quot;0 2 * * *&quot; },
+    { &quot;path&quot;: &quot;/api/cron/milestone-reminders&quot;, &quot;schedule&quot;: &quot;0 9 * * *&quot; },
+    { &quot;path&quot;: &quot;/api/cron/send-reminders&quot;, &quot;schedule&quot;: &quot;0 10 * * *&quot; },
+    { &quot;path&quot;: &quot;/api/cron/payment-deadlines&quot;, &quot;schedule&quot;: &quot;0 3 * * *&quot; },
+    { &quot;path&quot;: &quot;/api/cron/backup&quot;, &quot;schedule&quot;: &quot;0 4 * * *&quot; },
+    { &quot;path&quot;: &quot;/api/cron/cleanup-audit-logs&quot;, &quot;schedule&quot;: &quot;0 0 1 * *&quot; },
+    { &quot;path&quot;: &quot;/api/cron/expire-bundles&quot;, &quot;schedule&quot;: &quot;0 0 * * *&quot; },
+    { &quot;path&quot;: &quot;/api/cron/cleanup-abandoned-accounts&quot;, &quot;schedule&quot;: &quot;0 5 * * *&quot; },
+    { &quot;path&quot;: &quot;/api/cron/scheduled-reports&quot;, &quot;schedule&quot;: &quot;0 8 * * 1&quot; }
+  ]
+}
+</code></pre>
+<p><strong>Route files not yet registered in vercel.json</strong> (run manually or add schedules as needed):</p>
+<ul>
+<li><code>/api/cron/aptitude-reminders</code></li>
+<li><code>/api/cron/interview-reminders</code></li>
+<li><code>/api/cron/modular-deadlines</code></li>
+</ul>
+
+<section class="he-section" id="database-migrations">
+  <div class="he-section__num">03 · Database Migrations</div>
+  <h2 class="he-section__title">Database Migrations</h2><pre><code class="language-bash">npx prisma migrate deploy     # Apply migrations
+npx prisma db push             # Push schema (dev)
+</code></pre>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#vercel-recommended">Vercel (Recommended)</a></li>
+    <li class="he-toc__l3"><a href="#environment-variables-for-production">Environment Variables for Production</a></li>
+    <li class="he-toc__l3"><a href="#database-adapter-important">Database Adapter — IMPORTANT</a></li>
+    <li class="he-toc__l2"><a href="#local-development-database">Local Development Database</a></li>
+    <li class="he-toc__l3"><a href="#cron-jobs-vercel">Cron Jobs (Vercel)</a></li>
+    <li class="he-toc__l2"><a href="#database-migrations">Database Migrations</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

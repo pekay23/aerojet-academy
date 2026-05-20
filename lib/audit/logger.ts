@@ -1,3 +1,4 @@
+import 'server-only'
 import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 
 export enum AuditAction {

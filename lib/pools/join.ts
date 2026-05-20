@@ -290,6 +290,9 @@ export async function joinPoolInternal(
         status: isJoiningConfirmedPool ? 'APPROVED' : feeToReserve > 0 ? 'PENDING' : 'APPROVED',
         examDate: pool.examDate,
         isResit: input.isResit ?? bookingType === 'RESIT',
+        // Audit 1a: persist the bundle association so bundle-funded bookings
+        // remain traceable to the bundle that paid for them.
+        bundleId: input.bundleId ?? null,
       },
     })
   }

@@ -1,6 +1,33 @@
 import prisma from '@/lib/prisma/client'
+import { getSystemSettings } from '@/lib/settings'
 
-export const ATTENDANCE_WARNING_THRESHOLD = 80
+/** EASA-approved regulatory minimum used as the default and the hard floor. */
+export const EASA_APPROVED_ATTENDANCE_THRESHOLD = 80
+
+/** Backwards-compatible default export (EASA baseline). */
+export const ATTENDANCE_WARNING_THRESHOLD = EASA_APPROVED_ATTENDANCE_THRESHOLD
+
+/**
+ * Audit 9c: the academy can configure its own attendance threshold, but it can
+ * never be set below the EASA-approved threshold. Both values are stored as
+ * SystemSettings; the effective enforced threshold is max(academy, EASA).
+ */
+export async function getAttendanceThreshold(): Promise<{
+  academy: number
+  easa: number
+  effective: number
+}> {
+  const settings = await getSystemSettings([
+    'academy_attendance_threshold',
+    'easa_attendance_threshold',
+  ])
+  const easaRaw = Number(settings.get('easa_attendance_threshold'))
+  const easa =
+    Number.isFinite(easaRaw) && easaRaw > 0 ? easaRaw : EASA_APPROVED_ATTENDANCE_THRESHOLD
+  const academyRaw = Number(settings.get('academy_attendance_threshold'))
+  const academy = Number.isFinite(academyRaw) && academyRaw > 0 ? academyRaw : easa
+  return { academy, easa, effective: Math.max(academy, easa) }
+}
 
 export async function calculateAttendancePercentage(
   userId: string,
@@ -39,6 +66,7 @@ export async function calculateAttendancePercentage(
 
   const attendedCount = present + late
   const percentage = Math.round((attendedCount / total) * 100)
+  const { effective } = await getAttendanceThreshold()
 
   return {
     percentage,
@@ -47,7 +75,7 @@ export async function calculateAttendancePercentage(
     late,
     absent,
     excused,
-    belowThreshold: percentage < ATTENDANCE_WARNING_THRESHOLD,
+    belowThreshold: percentage < effective,
   }
 }
 
@@ -66,9 +94,10 @@ export async function getAttendanceWarning(
   const attendance = await calculateAttendancePercentage(userId, enrollmentType)
 
   if (attendance.belowThreshold && attendance.total > 0) {
+    const { effective } = await getAttendanceThreshold()
     return {
       hasWarning: true,
-      message: `Your attendance is ${attendance.percentage}%, which is below the required 80%. Please improve your attendance to meet program requirements.`,
+      message: `Your attendance is ${attendance.percentage}%, which is below the required ${effective}%. Please improve your attendance to meet program requirements.`,
       percentage: attendance.percentage,
     }
   }

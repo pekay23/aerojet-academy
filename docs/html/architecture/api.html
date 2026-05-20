@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>API Reference · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Architecture</p>
+  <h1 class="he-title">API Reference</h1>
+  <p class="he-deck">Base URL: <code>/api</code>…</p>
+</header>
+
+<section class="he-section" id="authentication">
+  <div class="he-section__num">01 · Authentication</div>
+  <h2 class="he-section__title">Authentication</h2><ul>
+<li><code>POST /api/auth/[...nextauth]</code> — NextAuth endpoints (login, session, etc.)</li>
+</ul>
+
+<section class="he-section" id="public">
+  <div class="he-section__num">02 · Public</div>
+  <h2 class="he-section__title">Public</h2><ul>
+<li><code>POST /api/public/register</code> — Register new applicant</li>
+<li><code>POST /api/public/contact</code> — Submit contact form</li>
+<li><code>POST /api/public/submit-payment-proof</code> — Upload payment proof</li>
+</ul>
+
+<section class="he-section" id="authentication-2fa">
+  <div class="he-section__num">03 · Authentication — 2FA</div>
+  <h2 class="he-section__title">Authentication — 2FA</h2><ul>
+<li><code>POST /api/auth/2fa/generate</code> — Generate TOTP secret and QR code (requires staff session)</li>
+<li><code>POST /api/auth/2fa/verify</code> — Verify TOTP code and enable 2FA on account</li>
+<li><code>POST /api/auth/2fa/disable</code> — Verify TOTP code and disable 2FA</li>
+</ul>
+
+<section class="he-section" id="staff-requires-staffadminsuperadmin-role">
+  <div class="he-section__num">04 · Staff (requires STAFF/ADMIN/SUPER_ADMIN role)</div>
+  <h2 class="he-section__title">Staff (requires STAFF/ADMIN/SUPER_ADMIN role)</h2><ul>
+<li><code>GET/POST /api/staff/users</code> — List/create users</li>
+<li><code>GET/PUT/DELETE /api/staff/users/[id]</code> — User CRUD</li>
+<li><code>GET /api/staff/applicants</code> — List applicants</li>
+<li><code>POST /api/staff/applicants/[id]/approve</code> — Approve applicant</li>
+<li><code>GET /api/staff/students</code> — List students</li>
+<li><code>GET /api/staff/enrollments</code> — List enrollments</li>
+<li><code>POST /api/staff/enrollments/[id]/approve</code> — Approve enrollment</li>
+<li><code>GET /api/staff/payments/pending</code> — Pending payments</li>
+<li><code>POST /api/staff/payments/[id]/approve</code> — Approve/reject payment</li>
+<li><code>GET/POST /api/staff/courses</code> — Course CRUD</li>
+<li><code>GET/POST /api/staff/classes</code> — Class CRUD</li>
+<li><code>GET/PUT /api/staff/classes/[id]/seating</code> — Class seating assignments (stored as JSON in SystemSettings)</li>
+<li><code>GET /api/staff/classes/[id]/seats</code> — Class with classroom, seats, and enrolled students</li>
+<li><code>GET/PUT /api/staff/classrooms/[id]/layout</code> — Save/retrieve classroom floor plan layout; PUT syncs Seat records</li>
+<li><code>GET/POST /api/staff/exam-events</code> — Exam event management</li>
+<li><code>POST /api/staff/exam-events/[id]/go-no-go</code> — Go/No-Go decision</li>
+<li><code>GET/PUT /api/staff/exams/sittings/[id]/seats</code> — Batch-update exam sitting seat assignments</li>
+<li><code>GET /api/staff/reports/*</code> — Reports (enrollment, revenue, pools)</li>
+<li><code>GET /api/staff/audit-logs</code> — Audit log viewer</li>
+<li><code>GET/PUT /api/staff/settings</code> — System settings</li>
+</ul>
+
+<section class="he-section" id="applicant-requires-applicant-role">
+  <div class="he-section__num">05 · Applicant (requires APPLICANT role)</div>
+  <h2 class="he-section__title">Applicant (requires APPLICANT role)</h2><ul>
+<li><code>GET /api/applicant/dashboard</code> — Dashboard data</li>
+<li><code>GET /api/applicant/courses</code> — Browse courses</li>
+<li><code>POST /api/applicant/courses/[id]/purchase</code> — Purchase course</li>
+<li><code>GET/PATCH /api/applicant/profile</code> — Profile management</li>
+<li><code>POST /api/applicant/upload-payment</code> — Upload payment proof</li>
+</ul>
+
+<section class="he-section" id="student-requires-student-role">
+  <div class="he-section__num">06 · Student (requires STUDENT role)</div>
+  <h2 class="he-section__title">Student (requires STUDENT role)</h2><ul>
+<li><code>GET /api/student/dashboard</code> — Full dashboard data</li>
+<li><code>GET /api/student/wallet</code> — Wallet balance</li>
+<li><code>POST /api/student/wallet/top-up</code> — Request top-up</li>
+<li><code>GET /api/student/wallet/transactions</code> — Transaction history</li>
+<li><code>GET /api/student/courses</code> — My courses</li>
+<li><code>GET /api/student/exam-pools/available</code> — Available pools</li>
+<li><code>POST /api/student/exam-pools/[id]/join</code> — Join pool (€300 hold)</li>
+<li><code>GET /api/student/grades</code> — All grades</li>
+<li><code>GET /api/student/attendance</code> — Attendance records</li>
+<li><code>GET /api/student/certificates</code> — Passed exams</li>
+<li><code>GET/PATCH /api/student/notifications</code> — Notifications</li>
+<li><code>GET/PATCH /api/student/profile</code> — Profile</li>
+<li><code>POST /api/student/profile/change-password</code> — Change password</li>
+</ul>
+
+<section class="he-section" id="instructor-requires-instructor-role">
+  <div class="he-section__num">07 · Instructor (requires INSTRUCTOR role)</div>
+  <h2 class="he-section__title">Instructor (requires INSTRUCTOR role)</h2><ul>
+<li><code>GET /api/instructor/dashboard</code> — Dashboard</li>
+<li><code>GET /api/instructor/classes</code> — My classes</li>
+<li><code>POST /api/instructor/classes/[id]/attendance</code> — Take attendance</li>
+<li><code>POST /api/instructor/classes/[id]/grades</code> — Enter grades</li>
+<li><code>GET /api/instructor/schedule</code> — My schedule</li>
+</ul>
+
+<section class="he-section" id="cron-requires-cronsecret">
+  <div class="he-section__num">08 · Cron (requires CRON_SECRET)</div>
+  <h2 class="he-section__title">Cron (requires CRON_SECRET)</h2><ul>
+<li><code>GET /api/cron/check-pools</code> — Check/fail expired pools</li>
+<li><code>GET /api/cron/check-events</code> — Update event statuses</li>
+<li><code>GET /api/cron/send-reminders</code> — Send exam reminders (T-7, T-1)</li>
+</ul>
+
+<section class="he-section" id="server-actions-internal-api">
+  <div class="he-section__num">09 · Server Actions (Internal API)</div>
+  <h2 class="he-section__title">Server Actions (Internal API)</h2><p>Primary data mutation path for portal interfaces. Located in <code>app/(portal)/actions.ts</code> and domain-specific <code>actions.ts</code> files.</p>
+<h3 id="staff-actions">Staff Actions</h3><ul>
+<li><code>sendStaffMessage(recipientId, subject, body)</code> — Send internal message</li>
+<li><code>bulkUpdateUserStatus(userIds, status)</code> — Batch update user states</li>
+<li><code>updateExamBooking(recordId, data)</code> — Comprehensive exam/result sync logic</li>
+<li><code>joinPool(poolId)</code> — Canonical service for adding students to exam pools</li>
+<li><code>chargeWallet(userId, amount, type, ...)</code> — Atomic financial transaction logic</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#authentication">Authentication</a></li>
+    <li class="he-toc__l2"><a href="#public">Public</a></li>
+    <li class="he-toc__l2"><a href="#authentication-2fa">Authentication — 2FA</a></li>
+    <li class="he-toc__l2"><a href="#staff-requires-staffadminsuperadmin-role">Staff (requires STAFF/ADMIN/SUPER_ADMIN role)</a></li>
+    <li class="he-toc__l2"><a href="#applicant-requires-applicant-role">Applicant (requires APPLICANT role)</a></li>
+    <li class="he-toc__l2"><a href="#student-requires-student-role">Student (requires STUDENT role)</a></li>
+    <li class="he-toc__l2"><a href="#instructor-requires-instructor-role">Instructor (requires INSTRUCTOR role)</a></li>
+    <li class="he-toc__l2"><a href="#cron-requires-cronsecret">Cron (requires CRON_SECRET)</a></li>
+    <li class="he-toc__l2"><a href="#server-actions-internal-api">Server Actions (Internal API)</a></li>
+    <li class="he-toc__l3"><a href="#staff-actions">Staff Actions</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

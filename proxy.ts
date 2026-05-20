@@ -3,9 +3,9 @@ import type { NextRequest } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 /**
- * Root middleware — enforces authentication and basic role checks
- * for protected portal and API routes. This acts as a safety net
- * so a missing getAuthSession() call in a route handler doesn't
+ * Root proxy (Next.js 16 — formerly `middleware`) — enforces authentication
+ * and basic role checks for protected portal and API routes. This acts as a
+ * safety net so a missing getAuthSession() call in a route handler doesn't
  * silently expose data.
  */
 
@@ -34,7 +34,7 @@ const ROUTE_ROLE_MAP: Record<string, string[]> = {
   '/api/applicant': ['APPLICANT', 'STUDENT', 'ADMIN', 'SUPER_ADMIN', 'STAFF'],
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Find matching role requirement

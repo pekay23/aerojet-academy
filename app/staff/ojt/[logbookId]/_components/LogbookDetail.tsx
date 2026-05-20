@@ -22,6 +22,7 @@ import {
 import Link from 'next/link'
 import { useConfirmDialog } from '@/hooks/use-confirm-dialog'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
+import { LogbookPreview } from '@/components/shared/LogbookPreview'
 
 interface Entry {
   id: string
@@ -84,9 +85,16 @@ interface SupervisorOption {
 }
 
 const MAINTENANCE_TYPES = [
-  'LINE', 'BASE', 'COMPONENT_OVERHAUL', 'ENGINE_OVERHAUL',
-  'MODIFICATION', 'REPAIR', 'TROUBLESHOOTING', 'INSPECTION',
-  'SERVICING', 'NDT',
+  'LINE',
+  'BASE',
+  'COMPONENT_OVERHAUL',
+  'ENGINE_OVERHAUL',
+  'MODIFICATION',
+  'REPAIR',
+  'TROUBLESHOOTING',
+  'INSPECTION',
+  'SERVICING',
+  'NDT',
 ]
 
 const WORK_ENVIRONMENTS = ['HANGAR', 'APRON', 'WORKSHOP', 'SIMULATOR']
@@ -173,7 +181,8 @@ export default function LogbookDetail({
   const handleDeleteClick = (entryId: string) => {
     confirmDialog.confirm({
       title: 'Delete Logbook Entry',
-      description: 'Are you sure you want to permanently delete this OJT experience entry? Total hours will be recalculated.',
+      description:
+        'Are you sure you want to permanently delete this OJT experience entry? Total hours will be recalculated.',
       onConfirm: async () => {
         setSaving(true)
         try {
@@ -190,7 +199,7 @@ export default function LogbookDetail({
           setSaving(false)
           confirmDialog.close()
         }
-      }
+      },
     })
   }
 
@@ -199,7 +208,9 @@ export default function LogbookDetail({
     setSaving(true)
     try {
       const isEdit = !!editingEntryId
-      const url = isEdit ? `/api/staff/ojt/entries/${editingEntryId}` : `/api/staff/ojt/${logbook.id}`
+      const url = isEdit
+        ? `/api/staff/ojt/entries/${editingEntryId}`
+        : `/api/staff/ojt/${logbook.id}`
       const method = isEdit ? 'PUT' : 'POST'
 
       const res = await fetch(url, {
@@ -246,12 +257,12 @@ export default function LogbookDetail({
       <div className="flex items-center gap-4">
         <Link
           href="/staff/ojt"
-          className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-aerojet-blue dark:border-slate-700 dark:bg-slate-800"
+          className="hover:text-aerojet-blue flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="flex-1">
-          <h1 className="text-2xl font-black text-aerojet-blue dark:text-white">
+          <h1 className="text-aerojet-blue text-2xl font-black dark:text-white">
             {logbook.studentName}
           </h1>
           <p className="text-sm text-slate-500">
@@ -275,19 +286,23 @@ export default function LogbookDetail({
       {/* Analytics Cards */}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+          <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
             <Clock className="h-3.5 w-3.5" /> Total Hours
           </div>
-          <div className="mt-1 text-2xl font-black text-slate-800 dark:text-white">{a.totalHours}h</div>
+          <div className="mt-1 text-2xl font-black text-slate-800 dark:text-white">
+            {a.totalHours}h
+          </div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+          <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
             <Wrench className="h-3.5 w-3.5" /> Entries
           </div>
-          <div className="mt-1 text-2xl font-black text-slate-800 dark:text-white">{logbook.entries.length}</div>
+          <div className="mt-1 text-2xl font-black text-slate-800 dark:text-white">
+            {logbook.entries.length}
+          </div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+          <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
             <Shield className="h-3.5 w-3.5" /> ATA Coverage
           </div>
           <div className="mt-1 text-2xl font-black text-slate-800 dark:text-white">
@@ -295,7 +310,7 @@ export default function LogbookDetail({
           </div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-400">
+          <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-slate-400 uppercase">
             <FileCheck className="h-3.5 w-3.5" /> Signed
           </div>
           <div className="mt-1 text-2xl font-black text-green-600">{a.signedEntries}</div>
@@ -304,11 +319,17 @@ export default function LogbookDetail({
           )}
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Experience</div>
-          <div className="mt-1 text-2xl font-black text-slate-800 dark:text-white">{a.monthsExperience} mo</div>
+          <div className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+            Experience
+          </div>
+          <div className="mt-1 text-2xl font-black text-slate-800 dark:text-white">
+            {a.monthsExperience} mo
+          </div>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="text-xs font-bold uppercase tracking-wider text-slate-400">Line / Base</div>
+          <div className="text-xs font-bold tracking-wider text-slate-400 uppercase">
+            Line / Base
+          </div>
           <div className="mt-1 text-lg font-black text-slate-800 dark:text-white">
             {a.hoursByType['LINE'] || 0}h / {a.hoursByType['BASE'] || 0}h
           </div>
@@ -331,6 +352,8 @@ export default function LogbookDetail({
         </div>
       )}
 
+      <LogbookPreview mode="staff" logbook={logbook} />
+
       {/* Add / Edit Entry Form */}
       {logbook.status === 'ACTIVE' && (
         <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -339,103 +362,249 @@ export default function LogbookDetail({
             className="flex w-full items-center justify-between px-6 py-4"
           >
             <div className="flex items-center gap-2 font-bold text-slate-800 dark:text-white">
-              <Plus className="h-5 w-5 text-aerojet-blue" /> {editingEntryId ? 'Edit Logbook Entry' : 'Add Logbook Entry'}
+              <Plus className="text-aerojet-blue h-5 w-5" />{' '}
+              {editingEntryId ? 'Edit Logbook Entry' : 'Add Logbook Entry'}
             </div>
-            {showForm ? <ChevronUp className="h-5 w-5 text-slate-400" /> : <ChevronDown className="h-5 w-5 text-slate-400" />}
+            {showForm ? (
+              <ChevronUp className="h-5 w-5 text-slate-400" />
+            ) : (
+              <ChevronDown className="h-5 w-5 text-slate-400" />
+            )}
           </button>
 
           {showForm && (
-            <form onSubmit={handleSubmit} className="border-t border-slate-200 px-6 py-5 dark:border-slate-800">
+            <form
+              onSubmit={handleSubmit}
+              className="border-t border-slate-200 px-6 py-5 dark:border-slate-800"
+            >
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Date</label>
-                  <input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} required className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Date
+                  </label>
+                  <input
+                    type="date"
+                    value={form.date}
+                    onChange={(e) => setForm({ ...form, date: e.target.value })}
+                    required
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Aircraft Type</label>
-                  <input value={form.aircraftType} onChange={(e) => setForm({ ...form, aircraftType: e.target.value })} required placeholder="e.g. B737-800" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Aircraft Type
+                  </label>
+                  <input
+                    value={form.aircraftType}
+                    onChange={(e) => setForm({ ...form, aircraftType: e.target.value })}
+                    required
+                    placeholder="e.g. B737-800"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Registration</label>
-                  <input value={form.aircraftRegistration} onChange={(e) => setForm({ ...form, aircraftRegistration: e.target.value })} required placeholder="e.g. 9H-ABC" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Registration
+                  </label>
+                  <input
+                    value={form.aircraftRegistration}
+                    onChange={(e) => setForm({ ...form, aircraftRegistration: e.target.value })}
+                    required
+                    placeholder="e.g. 9H-ABC"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">ATA Chapter</label>
-                  <select value={form.ataChapterId} onChange={(e) => setForm({ ...form, ataChapterId: e.target.value })} required className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    ATA Chapter
+                  </label>
+                  <select
+                    value={form.ataChapterId}
+                    onChange={(e) => setForm({ ...form, ataChapterId: e.target.value })}
+                    required
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
                     {ataChapters.map((ch) => (
-                      <option key={ch.id} value={ch.id}>{ch.label}</option>
+                      <option key={ch.id} value={ch.id}>
+                        {ch.label}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Maintenance Type</label>
-                  <select value={form.maintenanceType} onChange={(e) => setForm({ ...form, maintenanceType: e.target.value })} required className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Maintenance Type
+                  </label>
+                  <select
+                    value={form.maintenanceType}
+                    onChange={(e) => setForm({ ...form, maintenanceType: e.target.value })}
+                    required
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
                     {MAINTENANCE_TYPES.map((t) => (
-                      <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>
+                      <option key={t} value={t}>
+                        {t.replace(/_/g, ' ')}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Duration (hours)</label>
-                  <input type="number" step="0.25" min="0.25" value={form.durationHours} onChange={(e) => setForm({ ...form, durationHours: parseFloat(e.target.value) || 0.25 })} required className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Duration (hours)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.25"
+                    min="0.25"
+                    value={form.durationHours}
+                    onChange={(e) =>
+                      setForm({ ...form, durationHours: parseFloat(e.target.value) || 0.25 })
+                    }
+                    required
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Supervisor</label>
-                  <select value={form.supervisorId} onChange={(e) => setForm({ ...form, supervisorId: e.target.value })} required className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Supervisor
+                  </label>
+                  <select
+                    value={form.supervisorId}
+                    onChange={(e) => setForm({ ...form, supervisorId: e.target.value })}
+                    required
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
                     {supervisors.map((s) => (
-                      <option key={s.id} value={s.id}>{s.label}</option>
+                      <option key={s.id} value={s.id}>
+                        {s.label}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Licence Category</label>
-                  <select value={form.licenceCategory} onChange={(e) => setForm({ ...form, licenceCategory: e.target.value })} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Licence Category
+                  </label>
+                  <select
+                    value={form.licenceCategory}
+                    onChange={(e) => setForm({ ...form, licenceCategory: e.target.value })}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
                     {LICENCE_CATEGORIES.map((c) => (
-                      <option key={c} value={c}>{c}</option>
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Work Environment</label>
-                  <select value={form.workEnvironment} onChange={(e) => setForm({ ...form, workEnvironment: e.target.value })} className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white">
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Work Environment
+                  </label>
+                  <select
+                    value={form.workEnvironment}
+                    onChange={(e) => setForm({ ...form, workEnvironment: e.target.value })}
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  >
                     <option value="">Select...</option>
                     {WORK_ENVIRONMENTS.map((w) => (
-                      <option key={w} value={w}>{w}</option>
+                      <option key={w} value={w}>
+                        {w}
+                      </option>
                     ))}
                   </select>
                 </div>
                 <div className="sm:col-span-2 lg:col-span-3">
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Task Description</label>
-                  <textarea value={form.taskDescription} onChange={(e) => setForm({ ...form, taskDescription: e.target.value })} required rows={3} placeholder="Detailed description of maintenance task performed..." className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Task Description
+                  </label>
+                  <textarea
+                    value={form.taskDescription}
+                    onChange={(e) => setForm({ ...form, taskDescription: e.target.value })}
+                    required
+                    rows={3}
+                    placeholder="Detailed description of maintenance task performed..."
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Work Order Ref</label>
-                  <input value={form.workOrderReference} onChange={(e) => setForm({ ...form, workOrderReference: e.target.value })} placeholder="WO-2026-001" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Work Order Ref
+                  </label>
+                  <input
+                    value={form.workOrderReference}
+                    onChange={(e) => setForm({ ...form, workOrderReference: e.target.value })}
+                    placeholder="WO-2026-001"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Manual Reference</label>
-                  <input value={form.maintenanceManualRef} onChange={(e) => setForm({ ...form, maintenanceManualRef: e.target.value })} placeholder="AMM 32-10-01" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Manual Reference
+                  </label>
+                  <input
+                    value={form.maintenanceManualRef}
+                    onChange={(e) => setForm({ ...form, maintenanceManualRef: e.target.value })}
+                    placeholder="AMM 32-10-01"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Tools / Equipment Used</label>
-                  <input value={form.toolsUsed} onChange={(e) => setForm({ ...form, toolsUsed: e.target.value })} placeholder="Torque wrench, multimeter" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Tools / Equipment Used
+                  </label>
+                  <input
+                    value={form.toolsUsed}
+                    onChange={(e) => setForm({ ...form, toolsUsed: e.target.value })}
+                    placeholder="Torque wrench, multimeter"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Part Numbers Used</label>
-                  <input value={form.partNumbersUsed} onChange={(e) => setForm({ ...form, partNumbersUsed: e.target.value })} placeholder="P/N 12345-01" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Part Numbers Used
+                  </label>
+                  <input
+                    value={form.partNumbersUsed}
+                    onChange={(e) => setForm({ ...form, partNumbersUsed: e.target.value })}
+                    placeholder="P/N 12345-01"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">Safety Precautions</label>
-                  <input value={form.safetyPrecautions} onChange={(e) => setForm({ ...form, safetyPrecautions: e.target.value })} placeholder="LOTO applied, aircraft grounded, safety pins installed" className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white" />
+                  <label className="mb-1 block text-xs font-semibold text-slate-600 dark:text-slate-400">
+                    Safety Precautions
+                  </label>
+                  <input
+                    value={form.safetyPrecautions}
+                    onChange={(e) => setForm({ ...form, safetyPrecautions: e.target.value })}
+                    placeholder="LOTO applied, aircraft grounded, safety pins installed"
+                    className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                  />
                 </div>
               </div>
 
               <div className="mt-4 flex justify-end gap-2">
-                <button type="button" onClick={() => { setShowForm(false); setEditingEntryId(null); }} className="rounded-xl border border-slate-200 px-5 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForm(false)
+                    setEditingEntryId(null)
+                  }}
+                  className="rounded-xl border border-slate-200 px-5 py-2 text-sm font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+                >
                   Cancel
                 </button>
-                <button type="submit" disabled={saving} className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2 text-sm font-bold text-white shadow-md hover:bg-blue-700 disabled:opacity-50">
-                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="bg-aerojet-blue flex items-center gap-2 rounded-xl px-5 py-2 text-sm font-bold text-white shadow-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {saving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Plus className="h-4 w-4" />
+                  )}
                   {editingEntryId ? 'Update Entry' : 'Add Entry'}
                 </button>
               </div>
@@ -477,7 +646,9 @@ export default function LogbookDetail({
                       {format(new Date(entry.date), 'dd MMM yyyy')}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-bold text-slate-800 dark:text-white">{entry.aircraftType}</div>
+                      <div className="font-bold text-slate-800 dark:text-white">
+                        {entry.aircraftType}
+                      </div>
                       <div className="text-xs text-slate-500">{entry.aircraftRegistration}</div>
                     </td>
                     <td className="px-4 py-3">
@@ -489,7 +660,9 @@ export default function LogbookDetail({
                       {entry.taskDescription}
                     </td>
                     <td className="px-4 py-3">
-                      <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${TYPE_COLORS[entry.maintenanceType] || ''}`}>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${TYPE_COLORS[entry.maintenanceType] || ''}`}
+                      >
                         {entry.maintenanceType.replace(/_/g, ' ')}
                       </span>
                     </td>
@@ -524,74 +697,110 @@ export default function LogbookDetail({
                         <div className="grid gap-4 text-xs sm:grid-cols-2 lg:grid-cols-4">
                           <div>
                             <span className="font-bold text-slate-400">ATA Chapter</span>
-                            <p className="text-slate-700 dark:text-slate-300">{entry.ataChapter.code} — {entry.ataChapter.title}</p>
+                            <p className="text-slate-700 dark:text-slate-300">
+                              {entry.ataChapter.code} — {entry.ataChapter.title}
+                            </p>
                           </div>
                           <div>
                             <span className="font-bold text-slate-400">Full Description</span>
-                            <p className="text-slate-700 dark:text-slate-300">{entry.taskDescription}</p>
+                            <p className="text-slate-700 dark:text-slate-300">
+                              {entry.taskDescription}
+                            </p>
                           </div>
                           {entry.workOrderReference && (
                             <div>
                               <span className="font-bold text-slate-400">Work Order</span>
-                              <p className="text-slate-700 dark:text-slate-300">{entry.workOrderReference}</p>
+                              <p className="text-slate-700 dark:text-slate-300">
+                                {entry.workOrderReference}
+                              </p>
                             </div>
                           )}
                           {entry.maintenanceManualRef && (
                             <div>
                               <span className="font-bold text-slate-400">Manual Ref</span>
-                              <p className="text-slate-700 dark:text-slate-300">{entry.maintenanceManualRef}</p>
+                              <p className="text-slate-700 dark:text-slate-300">
+                                {entry.maintenanceManualRef}
+                              </p>
                             </div>
                           )}
                           {entry.licenceCategory && (
                             <div>
                               <span className="font-bold text-slate-400">Licence Category</span>
-                              <p className="text-slate-700 dark:text-slate-300">{entry.licenceCategory}</p>
+                              <p className="text-slate-700 dark:text-slate-300">
+                                {entry.licenceCategory}
+                              </p>
                             </div>
                           )}
                           {entry.workEnvironment && (
                             <div>
                               <span className="font-bold text-slate-400">Work Environment</span>
-                              <p className="text-slate-700 dark:text-slate-300">{entry.workEnvironment}</p>
+                              <p className="text-slate-700 dark:text-slate-300">
+                                {entry.workEnvironment}
+                              </p>
                             </div>
                           )}
                           {entry.toolsUsed && (
                             <div>
                               <span className="font-bold text-slate-400">Tools / Equipment</span>
-                              <p className="text-slate-700 dark:text-slate-300">{entry.toolsUsed}</p>
+                              <p className="text-slate-700 dark:text-slate-300">
+                                {entry.toolsUsed}
+                              </p>
                             </div>
                           )}
                           {entry.partNumbersUsed && (
                             <div>
                               <span className="font-bold text-slate-400">Part Numbers</span>
-                              <p className="text-slate-700 dark:text-slate-300">{entry.partNumbersUsed}</p>
+                              <p className="text-slate-700 dark:text-slate-300">
+                                {entry.partNumbersUsed}
+                              </p>
                             </div>
                           )}
                           {entry.safetyPrecautions && (
                             <div className="sm:col-span-2">
                               <span className="font-bold text-slate-400">Safety Precautions</span>
-                              <p className="text-slate-700 dark:text-slate-300">{entry.safetyPrecautions}</p>
+                              <p className="text-slate-700 dark:text-slate-300">
+                                {entry.safetyPrecautions}
+                              </p>
                             </div>
                           )}
                           {entry.competencyRating && (
                             <div>
                               <span className="font-bold text-slate-400">Competency Rating</span>
-                              <p className="text-slate-700 dark:text-slate-300">{entry.competencyRating}/5</p>
+                              <p className="text-slate-700 dark:text-slate-300">
+                                {entry.competencyRating}/5
+                              </p>
                             </div>
                           )}
                           <div>
                             <span className="font-bold text-slate-400">Signatures</span>
                             <div className="mt-1 space-y-0.5">
                               <div className="flex items-center gap-1">
-                                {entry.supervisorSignature ? <CheckCircle2 className="h-3 w-3 text-green-500" /> : <XCircle className="h-3 w-3 text-slate-300" />}
-                                <span className="text-slate-600 dark:text-slate-300">Supervisor</span>
+                                {entry.supervisorSignature ? (
+                                  <CheckCircle2 className="h-3 w-3 text-green-500" />
+                                ) : (
+                                  <XCircle className="h-3 w-3 text-slate-300" />
+                                )}
+                                <span className="text-slate-600 dark:text-slate-300">
+                                  Supervisor
+                                </span>
                               </div>
                               <div className="flex items-center gap-1">
-                                {entry.studentSignature ? <CheckCircle2 className="h-3 w-3 text-blue-500" /> : <XCircle className="h-3 w-3 text-slate-300" />}
+                                {entry.studentSignature ? (
+                                  <CheckCircle2 className="h-3 w-3 text-blue-500" />
+                                ) : (
+                                  <XCircle className="h-3 w-3 text-slate-300" />
+                                )}
                                 <span className="text-slate-600 dark:text-slate-300">Student</span>
                               </div>
                               <div className="flex items-center gap-1">
-                                {entry.verifiedByManagement ? <CheckCircle2 className="h-3 w-3 text-purple-500" /> : <XCircle className="h-3 w-3 text-slate-300" />}
-                                <span className="text-slate-600 dark:text-slate-300">Management</span>
+                                {entry.verifiedByManagement ? (
+                                  <CheckCircle2 className="h-3 w-3 text-purple-500" />
+                                ) : (
+                                  <XCircle className="h-3 w-3 text-slate-300" />
+                                )}
+                                <span className="text-slate-600 dark:text-slate-300">
+                                  Management
+                                </span>
                               </div>
                             </div>
                           </div>

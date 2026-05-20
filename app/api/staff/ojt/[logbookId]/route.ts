@@ -13,13 +13,20 @@ const entrySchema = z.object({
   workOrderReference: z.string().optional(),
   maintenanceManualRef: z.string().optional(),
   maintenanceType: z.enum([
-    'LINE', 'BASE', 'COMPONENT_OVERHAUL', 'ENGINE_OVERHAUL',
-    'MODIFICATION', 'REPAIR', 'TROUBLESHOOTING', 'INSPECTION',
-    'SERVICING', 'NDT',
+    'LINE',
+    'BASE',
+    'COMPONENT_OVERHAUL',
+    'ENGINE_OVERHAUL',
+    'MODIFICATION',
+    'REPAIR',
+    'TROUBLESHOOTING',
+    'INSPECTION',
+    'SERVICING',
+    'NDT',
   ]),
   durationHours: z.number().min(0.25),
   supervisorId: z.string(),
-  // CAP 741 / EASA Part-66 Appendix III fields
+  // EASA Part-66 experience logbook fields
   licenceCategory: z.string().optional(),
   workEnvironment: z.string().optional(),
   toolsUsed: z.string().optional(),
@@ -54,13 +61,15 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
   // Calculate experience duration
   const startDate = logbook.startDate
   const now = new Date()
-  const monthsExperience = Math.floor((now.getTime() - startDate.getTime()) / (30.44 * 24 * 60 * 60 * 1000))
+  const monthsExperience = Math.floor(
+    (now.getTime() - startDate.getTime()) / (30.44 * 24 * 60 * 60 * 1000)
+  )
 
   // Total hours
   const totalHours = logbook.entries.reduce((sum, e) => sum + e.durationHours, 0)
 
   // ATA chapter coverage
-  const coveredChapters = new Set(logbook.entries.map(e => e.ataChapterId))
+  const coveredChapters = new Set(logbook.entries.map((e) => e.ataChapterId))
 
   // Maintenance type breakdown
   const hoursByType: Record<string, number> = {}
@@ -82,8 +91,10 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
         Object.entries(hoursByType).map(([k, v]) => [k, Math.round(v * 10) / 10])
       ),
       ataChaptersCovered: coveredChapters.size,
-      signedEntries: logbook.entries.filter(e => e.supervisorSignature && e.studentSignature).length,
-      unsignedEntries: logbook.entries.filter(e => !e.supervisorSignature || !e.studentSignature).length,
+      signedEntries: logbook.entries.filter((e) => e.supervisorSignature && e.studentSignature)
+        .length,
+      unsignedEntries: logbook.entries.filter((e) => !e.supervisorSignature || !e.studentSignature)
+        .length,
     },
   })
 })

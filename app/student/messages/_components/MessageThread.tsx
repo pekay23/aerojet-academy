@@ -14,6 +14,7 @@ import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { sendMessage } from '../../actions'
 import { markMessageAsRead } from '../../actions'
+import { PresencePill } from '@/components/shared/PresencePill'
 
 type MessageUser = {
   id: string
@@ -181,6 +182,7 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
             <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">
               {userName(otherParticipant)}
             </p>
+            <PresencePill peerId={otherParticipant.id} />
             {thread.unreadCount > 0 && (
               <span className="shrink-0 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-bold text-white">
                 {thread.unreadCount} new

@@ -86,10 +86,13 @@ function buildLinks(
           : []),
         { label: 'Revision Support', href: '/student/courses/revision', icon: GraduationCap },
         { label: 'Grades', href: '/student/grades', icon: Award },
+        { label: 'License Progress', href: '/student/license-progress', icon: GraduationCap },
+        { label: 'Transcript', href: '/student/transcript', icon: ScrollText },
         { label: 'Classmates', href: '/student/classmates', icon: Users },
         { label: 'Attendance', href: '/student/attendance', icon: FileCheck },
         { label: 'My Seating', href: '/student/seating', icon: Armchair },
         { label: 'Certificates', href: '/student/certificates', icon: Award },
+        { label: 'My Documents', href: '/student/documents', icon: ScrollText },
         { label: 'OJT Logbook', href: '/student/ojt', icon: BookMarked }
       )
     }
@@ -150,6 +153,7 @@ export default function StudentSidebar({
       userMenuItems={[
         { label: 'Profile', href: '/student/profile', icon: User },
         { label: 'Ambassador', href: '/student/ambassador', icon: Users },
+        { label: 'Request Withdrawal', href: '/student/withdrawal', icon: FileCheck },
       ]}
     />
   )

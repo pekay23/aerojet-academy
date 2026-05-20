@@ -10,6 +10,8 @@ import PipelineAnalytics from '../_components/PipelineAnalytics'
 import PoolsSummaryCard from '../_components/PoolsSummaryCard'
 import TargetRevenueEditor from '../_components/TargetRevenueEditor'
 import ExaminerDashboard from '../_components/ExaminerDashboard'
+import AlertsCenter from './_components/AlertsCenter'
+import { getDashboardAlerts } from '@/lib/analytics/dashboard-alerts'
 import { UserStatus, UserRole, PaymentStatus, PoolStatus } from '@/types/enums'
 import { COUNTABLE_MEMBERSHIP_STATUSES, TERMINAL_POOL_STATUSES, UPCOMING_EVENT_STATUSES, LIVE_POOL_STATUSES } from '@/lib/utils/constants'
 import {
@@ -84,115 +86,145 @@ function computeEventStats(activeEventRaw: any) {
   }
 }
 
-async function getDashboardData() {
-  const now = new Date()
-  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
+// ── Per-entity loaders ───────────────────────────────────────────────────
+// Each helper wraps a single Prisma query so `getDashboardData` becomes a
+// tight Promise.all + stitch (P2.7 refactor — split the original 110-line
+// orchestrator into named pieces).
 
-  return await prismaUnfiltered.$transaction(async (tx) => {
-    const { currency, targetMonthlyRevenue, currSymbol } = await fetchDashboardSettings(tx)
+type Tx = Parameters<Parameters<typeof prismaUnfiltered.$transaction>[0]>[0]
 
-    const [
-      userStatusCounts,
-      pendingPayments,
-      recentPendingPaymentsRaw,
-      activeEventRaw,
-      openPoolsRaw,
-      approvedPayments,
-    ] = await Promise.all([
-      tx.user.groupBy({
-        by: ['role', 'status'],
-        _count: { _all: true },
-      }),
-      tx.payment.count({ where: { status: PaymentStatus.PENDING } }),
-      tx.payment.findMany({
-        where: { status: PaymentStatus.PENDING },
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              academyEmail: true,
-              role: true,
-              profile: { select: { firstName: true, lastName: true } },
-            },
-          },
+function loadUserStatusCounts(tx: Tx) {
+  return tx.user.groupBy({ by: ['role', 'status'], _count: { _all: true } })
+}
+
+function loadPendingPaymentCount(tx: Tx) {
+  return tx.payment.count({ where: { status: PaymentStatus.PENDING } })
+}
+
+function loadRecentPendingPayments(tx: Tx) {
+  return tx.payment.findMany({
+    where: { status: PaymentStatus.PENDING },
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          academyEmail: true,
+          role: true,
+          profile: { select: { firstName: true, lastName: true } },
         },
-        orderBy: { createdAt: 'desc' },
-        take: 4,
-      }),
-      tx.examEvent.findFirst({
-        where: {
-          status: { in: UPCOMING_EVENT_STATUSES },
-          deletedAt: null,
-          startDate: { gte: now },
-        },
-        include: {
-          pools: {
-            where: { status: { notIn: TERMINAL_POOL_STATUSES } },
-            select: {
-              maxCandidates: true,
-              seatPrice: true,
-              _count: {
-                select: { memberships: { where: { status: { in: COUNTABLE_MEMBERSHIP_STATUSES } } } },
-              },
-            },
-          },
-          examBookings: {
-            where: {
-              status: { notIn: ['FAILED', 'REJECTED', 'CANCELLED'] },
-              deletedAt: null,
-            },
-            select: { amountPaid: true },
-          },
-        },
-        orderBy: { startDate: 'asc' },
-      }),
-      tx.examPool.findMany({
-        where: {
-          status: { in: LIVE_POOL_STATUSES },
-          examDate: { gte: now },
-        },
-        include: {
-          event: { select: { name: true } },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 4,
+  })
+}
+
+function loadActiveExamEvent(tx: Tx, now: Date) {
+  return tx.examEvent.findFirst({
+    where: {
+      status: { in: UPCOMING_EVENT_STATUSES },
+      deletedAt: null,
+      startDate: { gte: now },
+    },
+    include: {
+      pools: {
+        where: { status: { notIn: TERMINAL_POOL_STATUSES } },
+        select: {
+          maxCandidates: true,
+          seatPrice: true,
           _count: {
             select: { memberships: { where: { status: { in: COUNTABLE_MEMBERSHIP_STATUSES } } } },
           },
         },
-        orderBy: { examDate: 'asc' },
-        take: 5,
-      }),
-      tx.payment.findMany({
+      },
+      examBookings: {
         where: {
-          status: PaymentStatus.APPROVED,
-          approvedAt: { gte: sixMonthsAgo },
-          referenceType: 'WALLET_TOP_UP',
+          status: { notIn: ['FAILED', 'REJECTED', 'CANCELLED'] },
+          deletedAt: null,
         },
-        select: { amount: true, approvedAt: true },
-      }),
-    ])
-
-    const { totalUsers, pendingApplicants, activeStudents } = computeUserStats(userStatusCounts as any)
-
-    return {
-      totalUsers,
-      pendingApplicants,
-      activeStudents,
-      pendingPayments,
-      recentPendingPayments: serializePrisma(recentPendingPaymentsRaw),
-      activeEvent: serializePrisma(computeEventStats(activeEventRaw)),
-      openPools: serializePrisma(openPoolsRaw.map(p => ({
-        ...p,
-        currentMemberCount: p._count.memberships,
-      }))),
-      revenueData: buildRevenueTimeline(approvedPayments, targetMonthlyRevenue),
-      targetMonthlyRevenue,
-      currency,
-      currSymbol,
-    }
-  }, {
-    maxWait: 15000,
-    timeout: 20000,
+        select: { amountPaid: true },
+      },
+    },
+    orderBy: { startDate: 'asc' },
   })
+}
+
+function loadOpenPools(tx: Tx, now: Date) {
+  return tx.examPool.findMany({
+    where: {
+      status: { in: LIVE_POOL_STATUSES },
+      examDate: { gte: now },
+    },
+    include: {
+      event: { select: { name: true } },
+      _count: {
+        select: { memberships: { where: { status: { in: COUNTABLE_MEMBERSHIP_STATUSES } } } },
+      },
+    },
+    orderBy: { examDate: 'asc' },
+    take: 5,
+  })
+}
+
+function loadApprovedTopupsSince(tx: Tx, since: Date) {
+  return tx.payment.findMany({
+    where: {
+      status: PaymentStatus.APPROVED,
+      approvedAt: { gte: since },
+      referenceType: 'WALLET_TOP_UP',
+    },
+    select: { amount: true, approvedAt: true },
+  })
+}
+
+// ── Orchestrator ─────────────────────────────────────────────────────────
+async function getDashboardData() {
+  const now = new Date()
+  const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1)
+
+  return prismaUnfiltered.$transaction(
+    async (tx) => {
+      const { currency, targetMonthlyRevenue, currSymbol } = await fetchDashboardSettings(tx)
+
+      const [
+        userStatusCounts,
+        pendingPayments,
+        recentPendingPaymentsRaw,
+        activeEventRaw,
+        openPoolsRaw,
+        approvedPayments,
+      ] = await Promise.all([
+        loadUserStatusCounts(tx),
+        loadPendingPaymentCount(tx),
+        loadRecentPendingPayments(tx),
+        loadActiveExamEvent(tx, now),
+        loadOpenPools(tx, now),
+        loadApprovedTopupsSince(tx, sixMonthsAgo),
+      ])
+
+      const { totalUsers, pendingApplicants, activeStudents } = computeUserStats(
+        userStatusCounts as any
+      )
+
+      return {
+        totalUsers,
+        pendingApplicants,
+        activeStudents,
+        pendingPayments,
+        recentPendingPayments: serializePrisma(recentPendingPaymentsRaw),
+        activeEvent: serializePrisma(computeEventStats(activeEventRaw)),
+        openPools: serializePrisma(
+          openPoolsRaw.map((p) => ({ ...p, currentMemberCount: p._count.memberships }))
+        ),
+        revenueData: buildRevenueTimeline(approvedPayments, targetMonthlyRevenue),
+        targetMonthlyRevenue,
+        currency,
+        currSymbol,
+      }
+    },
+    { maxWait: 15000, timeout: 20000 }
+  )
 }
 
 export default async function StaffDashboardPage() {
@@ -204,7 +236,7 @@ export default async function StaffDashboardPage() {
   }
 
   // 2. Standard Staff/Admin logic
-  const data = await getDashboardData()
+  const [data, alerts] = await Promise.all([getDashboardData(), getDashboardAlerts()])
 
   const stats = [
     {
@@ -245,6 +277,9 @@ export default async function StaffDashboardPage() {
 
   return (
     <div className="space-y-8">
+      {/* Alerts (A.1.b) — auto-refreshes every 60s */}
+      {alerts.length > 0 && <AlertsCenter initialAlerts={alerts} />}
+
       {/* Stat Cards */}
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-4">
         {stats.map((stat) => {

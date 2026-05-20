@@ -175,8 +175,8 @@
 
 ### Added
 
-- Comprehensive Developer Handover documentation (`docs/HANDOVER.md`, `docs/DATABASE_DETAIL.md`, `docs/ARCHITECTURE_STRATEGIES.md`).
-- Known issues tracking system (`docs/KNOWN_ISSUES.md`).
+- Comprehensive Developer Handover documentation (`docs/guides/handover.md`, `docs/architecture/database-detail.md`, `docs/architecture/strategies.md`).
+- Known issues tracking system (`docs/known-issues.md`).
 - Redundant database configuration (Supabase as secondary/backup to Neon primary).
 
 ### Changed

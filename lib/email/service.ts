@@ -1,3 +1,4 @@
+import 'server-only'
 import { NotificationType } from '@prisma/client'
 import prisma from '@/lib/prisma/client'
 import { getFinanceConfig, getRegistrationConfig, getEmailConfig } from '@/lib/settings'

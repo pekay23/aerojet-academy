@@ -113,6 +113,9 @@ export async function purchaseBundle(
             status: 'ACTIVE',
             amountPaid: price,
             freeModuleChanges: freeChanges,
+            // Audit 1c: Twin Pack = 1 free resit, Four Pack = 2 free resits.
+            freeResitsIncluded: bundleType === 'FOUR_SEAT' ? 2 : 1,
+            usedFreeResits: 0,
             validUntil,
           },
         })

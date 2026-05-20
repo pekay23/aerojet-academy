@@ -1,4 +1,7 @@
-import prisma from '@/lib/prisma/client'
+// Staff-only analytics — use the raw client so we don't pay the RLS
+// transaction overhead on every count/aggregate. Staff pages are already
+// auth-gated at the layout + proxy layers.
+import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { Prisma } from '@prisma/client'
 import { getCurrencySymbol, formatCurrency } from '@/lib/currency'
 import { subDays, subHours, subYears, startOfDay, endOfDay, differenceInMilliseconds } from 'date-fns'

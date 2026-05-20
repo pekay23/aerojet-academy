@@ -1,19 +1,11 @@
 import Link from 'next/link'
-import Image from 'next/image'
+import Logo from '@/components/shared/Logo'
 
 export default function NotFound() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-6">
       <Link href="/" className="mb-12">
-        <Image
-          src="/images/logos/AATA_logo_hor_onWhite.webp"
-          alt="Aerojet Academy"
-          width={180}
-          height={40}
-          style={{ width: 'auto', height: 'auto' }}
-          className="h-auto w-[180px] object-contain"
-          priority
-        />
+        <Logo className="h-10 w-auto" priority />
       </Link>
 
       <div className="w-full max-w-md space-y-6 rounded-4xl border border-slate-100 bg-white p-12 text-center shadow-xl">

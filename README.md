@@ -10,17 +10,18 @@ EASA Part-66 Aviation Maintenance Training Portal — a multi-portal web applica
 - **Instructor** — Classes, attendance, grading, schedule
 
 ## 📂 Documentation
-For a detailed guide on the project's architecture, database, and recent implementations, please refer to the **[Developer Handover Guide](./docs/HANDOVER.md)**.
 
-### Key Resources:
-- **[Database & RLS Detail](./docs/DATABASE_DETAIL.md)**
-- **[Architecture & Problem Solving](./docs/ARCHITECTURE_STRATEGIES.md)**
-- **[Known Issues & Bugs](./docs/KNOWN_ISSUES.md)**
-- **[Future Roadmap](./docs/future_plans.md)**
+All docs live under [`docs/`](./docs/) — start with the [docs index](./docs/README.md) or open the browsable [HTML index](./docs/html/index.html).
+
+### Key resources
+- **[Handover guide](./docs/guides/handover.md)** — start here for a new developer
+- **[Architecture overview](./docs/architecture/system-overview.md)** + [database detail](./docs/architecture/database-detail.md) + [security model](./docs/architecture/security-model.md)
+- **[Latest audit](./docs/audits/2026-05-20-comprehensive.md)** — consolidated finding-by-finding cross-check (CRITICAL/HIGH all resolved)
+- **[Known issues](./docs/audits/known-issues.md)** · **[Future roadmap](./docs/plans/future-plans.md)**
 
 ## Tech Stack
 
-- **Framework:** Next.js 15 (App Router)
+- **Framework:** Next.js 16 (App Router) · React 19
 - **Language:** TypeScript
 - **Database:** PostgreSQL (**Neon** - Primary, **Supabase** - Redundant Backup) + Prisma ORM
 - **Auth:** NextAuth.js v4

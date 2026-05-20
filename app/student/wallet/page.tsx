@@ -140,17 +140,15 @@ export default async function WalletPage({
   // Fetch transactions for transactions tab
   let allTransactions: any[] = []
   if (tab === 'transactions') {
-    const [walletTransactions, pendingPayments, historyPayments] = await Promise.all([
+    // Audit 4g: the transactions tab shows only approved purchases/deposits and
+    // wallet deductions. Pending payments and invoices are intentionally excluded
+    // (invoices remain hidden; payment gateway stays hidden).
+    const [walletTransactions, historyPayments] = await Promise.all([
       prisma.walletTransaction.findMany({
         where: { wallet: { userId: user.id } },
         include: { wallet: true },
         orderBy: { createdAt: 'desc' },
         take: 100,
-      }),
-      prisma.payment.findMany({
-        where: { userId: user.id, status: { in: ['PENDING', 'PROCESSING'] } },
-        orderBy: { createdAt: 'desc' },
-        take: 50,
       }),
       prisma.payment.findMany({
         where: {
@@ -164,18 +162,6 @@ export default async function WalletPage({
     ])
 
     allTransactions = [
-      ...pendingPayments.map((p) => ({
-        id: p.id,
-        createdAt: p.createdAt,
-        type: 'PAYMENT',
-        amount: Number(p.amount),
-        description: `Pending Payment (${p.paymentMethod})`,
-        status: p.status,
-        currency: p.currency,
-        paymentCurrency: p.paymentCurrency,
-        originalAmount: p.originalAmount ? Number(p.originalAmount) : undefined,
-        isPending: true,
-      })),
       ...walletTransactions.map((tx) => ({
         id: tx.id,
         createdAt: tx.createdAt,
