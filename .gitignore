@@ -58,3 +58,8 @@ prisma/migrations
 # uploads
 /uploads
 /tmp
+
+.env*
+.flaskenv*
+!.env.project
+!.env.vault
