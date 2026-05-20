@@ -62,7 +62,7 @@ jobs:
         run: bun run build
         env:
           # Required by lib/env.ts Zod schema at runtime (partial parse at build time)
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/aerojet
           NEXTAUTH_SECRET: ci-test-secret
           NEXTAUTH_URL: http://localhost:3000
           NEXT_PUBLIC_APP_URL: http://localhost:3000
