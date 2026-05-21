@@ -1,13 +1,12 @@
 export const EASA_PASSING_GRADE = 75
 
 /**
- * Calculates a letter grade based on a percentage.
+ * Calculates an EASA-compliant result grade.
+ * ≥75% = 'P' (Pass), <75% = 'F' (Fail).
+ * Note: Legacy records may still carry A/B/C — the UI maps all of those to "Pass".
  */
 export function calculateLetterGrade(percentage: number): string {
-  if (percentage >= 90) return 'A'
-  if (percentage >= 80) return 'B'
-  if (percentage >= EASA_PASSING_GRADE) return 'C'
-  return 'F'
+  return percentage >= EASA_PASSING_GRADE ? 'P' : 'F'
 }
 
 /**
