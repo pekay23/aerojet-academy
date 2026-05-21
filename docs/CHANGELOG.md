@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.14] — 2026-05-21
+
+### Changed
+
+- Maintenance and stability updates.
+
+## [1.0.13] — 2026-05-21
+
+### Changed
+
+- Maintenance and stability updates.
+
 ## [1.0.12] — 2026-05-19
 
 ### Changed
@@ -70,8 +82,18 @@
 
 ### Added
 
+- **Student Portal Navigation & UX** — Implemented motion-based tabbed interface components, a reusable unsaved changes hook for data protection during navigation, and updated the student sidebar navigation.
+- **MessageThread Component** — Added a dedicated `MessageThread` component allowing students and staff to view, reply to, and mark message threads as read.
+- **Student Course Enrollment & Exam Booking** — Implemented dedicated server actions for course enrollment flows and exam pool bookings directly from the student portal.
+- **Exam Lockdown Mode** — Hardened internal exam workflows with a mandatory Fullscreen API prompt, tab-switching detection, and sidebar/header concealment using CSS (`.exam-lockdown`) for a distraction-free and secure testing environment.
+- **Internal Exam Engine & APIs** — Built internal exam bank management, student session initialization APIs, per-question reporting, and an admin regrade capability.
+- **Pass/Fail Grading System** — Migrated the academic grading UI from A/B/C/F letter grades to a compliant EASA Pass/Fail system (Pass ≥ 75%).
+- **UI Legends** — Implemented persistent descriptive legends in exam and grade tables (`ExamHistoryTable`, `GradesTable`) to clarify status badges (ORIGINAL/HISTORICAL) and EASA grading thresholds.
 - **Admissions/Internal Exam documentation refresh** — Documented current Phase 8 implementation status, including student detail confirmation, enrolled-course exam filtering, staff share links, skip/review navigation, autosave, and keyboard auto-submit behavior.
 - **Internal exam handover notes** — Added operational pointers for staff bank management, student exam flow, feature flagging, and the main API/component files.
+- **GDPR Data Retention Policy Engine** — Implemented a GDPR data retention policy engine and automated sweep service to manage historical user data securely and automatically.
+- **Dynamic System Settings** — Added a reusable dynamic system settings management API endpoint and React form component for the staff settings portal, including fixes to properly capture boolean toggles.
+- **CI/CD Pipeline & Deployments** — Configured a production CI/CD pipeline using Bun for the test environment, complete with automated scripts to terminate active database connections and clear stale Postgres advisory locks prior to schema migrations on Vercel.
 
 ## [1.5.0] — 2026-05-13
 
