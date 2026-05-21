@@ -36,6 +36,7 @@ import AvailablePoolsTab from './_components/AvailablePoolsTab'
 import MyBookingsTab from './_components/MyBookingsTab'
 import BookingActionTab from './_components/BookingActionTab'
 import ResitBookingTab from './_components/ResitBookingTab'
+import BookExamTab from './_components/BookExamTab'
 import { UnifiedExamRecord } from '@/lib/student/types'
 
 export const metadata: Metadata = {
@@ -69,7 +70,13 @@ export default async function ExamsPage({
   searchParams: Promise<{ tab?: string }>
 }) {
   const { tab: tabParam } = await searchParams
-  const tab = tabParam || 'records'
+  // Backward compatibility: map old tab names to new consolidated tab
+  const LEGACY_TAB_MAP: Record<string, string> = {
+    available: 'book',
+    individual: 'book',
+    group: 'book',
+  }
+  const tab = LEGACY_TAB_MAP[tabParam || ''] || tabParam || 'records'
 
   const session = await getAuthSession()
   if (!session) redirect('/login')
@@ -280,18 +287,14 @@ export default async function ExamsPage({
   const validTabs = isFullTimeStudent
     ? ['records']
     : canBook
-      ? ['available', 'individual', 'group', 'resit', 'bookings', 'records']
+      ? ['book', 'resit', 'bookings', 'records']
       : ['bookings', 'records']
       
   const effectiveTab = validTabs.includes(tab) ? tab : 'records'
 
   return (
     <ExamsTabs isFullTime={isFullTimeStudent} canBookExams={canBook}>
-      {effectiveTab === 'available' && <AvailablePoolsTab />}
-
-      {effectiveTab === 'individual' && <BookingActionTab type="individual" />}
-
-      {effectiveTab === 'group' && <BookingActionTab type="group" />}
+      {effectiveTab === 'book' && <BookExamTab />}
 
       {effectiveTab === 'resit' && <ResitBookingTab />}
 
