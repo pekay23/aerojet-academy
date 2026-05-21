@@ -5,6 +5,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 import { calculateAttendancePercentage } from '@/lib/attendance'
 import { getLicenseProgress } from '@/lib/license/progress'
+import { getStudentStatus } from '@/lib/access-control'
 import PrintButton from './PrintButton'
 
 export const metadata: Metadata = {
@@ -15,6 +16,10 @@ export const metadata: Metadata = {
 export default async function TranscriptPage() {
   const session = await getAuthSession()
   if (!session) redirect('/login')
+
+  const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
+  const showEnrollments = isFullTime
+  const showLicenseProgress = isFullTime
 
   const [profile, enrollments, results, attendance, licenseProgress] = await Promise.all([
     prisma.studentProfile.findUnique({
@@ -73,8 +78,9 @@ export default async function TranscriptPage() {
             Academic Transcript
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Academy-issued record. This is not an official EASA certificate. No grade-point
-            average is computed — this is an EASA Part-147 training record.
+            {isExamOnly || isModular
+              ? 'Summary of your EASA examination results. This is not an official EASA certificate.'
+              : 'Academy-issued record. This is not an official EASA certificate. No grade-point average is computed — this is an EASA Part-147 training record.'}
           </p>
         </div>
         <PrintButton />
@@ -85,10 +91,12 @@ export default async function TranscriptPage() {
         <Field label="Name" value={fullName} />
         <Field label="Student ID" value={profile?.studentId ?? '—'} />
         <Field label="Pathway" value={profile?.pathwayRel?.name ?? profile?.enrollmentType ?? '—'} />
-        <Field
-          label="Current Term"
-          value={`Year ${profile?.currentYearNumber ?? 1}, Sem ${profile?.currentSemesterNumber ?? 1}`}
-        />
+        {isFullTime && (
+          <Field
+            label="Current Term"
+            value={`Year ${profile?.currentYearNumber ?? 1}, Sem ${profile?.currentSemesterNumber ?? 1}`}
+          />
+        )}
         <Field
           label="Enrolled"
           value={profile?.enrollmentDate?.toLocaleDateString('en-GB') ?? '—'}
@@ -97,10 +105,12 @@ export default async function TranscriptPage() {
           label="Graduated"
           value={profile?.graduationDate?.toLocaleDateString('en-GB') ?? '—'}
         />
-        <Field
-          label="Attendance"
-          value={attendance.total > 0 ? `${attendance.percentage}%` : 'N/A'}
-        />
+        {isFullTime && (
+          <Field
+            label="Attendance"
+            value={attendance.total > 0 ? `${attendance.percentage}%` : 'N/A'}
+          />
+        )}
       </div>
 
       {/* Exam results */}
@@ -157,41 +167,42 @@ export default async function TranscriptPage() {
         </table>
       </Section>
 
-      {/* Course enrollments */}
-      <Section title="Course Enrolment Record">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-100 text-left dark:border-slate-800">
-              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">Course</th>
-              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">Status</th>
-              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Completed</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-            {enrollments.map((e, i) => (
-              <tr key={i}>
-                <td className="px-3 py-2">
-                  <span className="font-mono font-bold">{e.course.code}</span>{' '}
-                  <span className="text-slate-500">{e.course.name}</span>
-                </td>
-                <td className="px-3 py-2 text-xs">{e.status}</td>
-                <td className="px-3 py-2 text-center text-xs text-slate-500">
-                  {e.completedAt?.toLocaleDateString('en-GB') ?? '—'}
-                </td>
+      {showEnrollments && (
+        <Section title="Course Enrolment Record">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-slate-100 text-left dark:border-slate-800">
+                <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">Course</th>
+                <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">Status</th>
+                <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Completed</th>
               </tr>
-            ))}
-            {enrollments.length === 0 && (
-              <tr>
-                <td colSpan={3} className="px-3 py-6 text-center text-sm text-slate-400">
-                  No course enrolments.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </Section>
+            </thead>
+            <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+              {enrollments.map((e, i) => (
+                <tr key={i}>
+                  <td className="px-3 py-2">
+                    <span className="font-mono font-bold">{e.course.code}</span>{' '}
+                    <span className="text-slate-500">{e.course.name}</span>
+                  </td>
+                  <td className="px-3 py-2 text-xs">{e.status}</td>
+                  <td className="px-3 py-2 text-center text-xs text-slate-500">
+                    {e.completedAt?.toLocaleDateString('en-GB') ?? '—'}
+                  </td>
+                </tr>
+              ))}
+              {enrollments.length === 0 && (
+                <tr>
+                  <td colSpan={3} className="px-3 py-6 text-center text-sm text-slate-400">
+                    No course enrolments.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </Section>
+      )}
 
-      {licenseProgress.length > 0 && (
+      {showLicenseProgress && licenseProgress.length > 0 && (
         <Section title="License Progress">
           <div className="space-y-2">
             {licenseProgress.map((lp) => (

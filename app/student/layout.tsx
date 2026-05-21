@@ -15,6 +15,7 @@ import { getStudentPaymentAccessLevel, getEnrollmentMilestoneStatus } from '@/li
 import { resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
 import AppTour from '@/components/Tour/AppTour'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import { shouldShowRevisionSupport } from '@/lib/revision/visibility'
 
 export const dynamic = 'force-dynamic'
 
@@ -91,8 +92,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
     : (user.name || user.email || '')
   const userRole = user.role
 
-  // Parallelize all independent queries instead of running sequentially
-  const [unreadNotifications, unreadMessages, paymentAccessLevel, milestoneStatus, welcomeMessages, internalExamEnabled] =
+  const [unreadNotifications, unreadMessages, paymentAccessLevel, milestoneStatus, welcomeMessages, internalExamEnabled, showRevision] =
     await Promise.all([
       prismaUnfiltered.notification.count({ where: { userId: user.id, isRead: false } }),
       prismaUnfiltered.message.count({ where: { recipientId: user.id, isRead: false } }),
@@ -100,6 +100,7 @@ export default async function StudentLayout({ children }: { children: React.Reac
       getEnrollmentMilestoneStatus(user.id, preFetchedData),
       getWelcomeMessages(prismaUnfiltered, session.user.role),
       isInternalExamSystemEnabled(),
+      shouldShowRevisionSupport(user.id),
     ])
 
   const wallet = dbUser.wallet
@@ -142,6 +143,8 @@ export default async function StudentLayout({ children }: { children: React.Reac
         messageCount={unreadMessages}
         paymentAccessLevel={paymentAccessLevel}
         internalExamEnabled={internalExamEnabled}
+        showRevisionSupport={showRevision}
+        hasWallet={!!dbUser.wallet}
       />
       <main id="main-content" className="relative pt-16 lg:pt-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
         <div className="sticky top-0 z-30 border-b border-slate-100 bg-slate-50/80 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-900/80">

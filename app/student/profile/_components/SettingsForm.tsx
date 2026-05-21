@@ -7,6 +7,7 @@ import { updateUserSettings } from '@/app/student/actions'
 import { toast } from 'sonner'
 import { useTheme } from '@/components/shared/theme-provider'
 import PrivacyToggle from '@/components/shared/PrivacyToggle'
+import { useProfileDirty } from './ProfileTabs'
 
 interface SettingsFormProps {
   initialSettings: any
@@ -15,6 +16,7 @@ interface SettingsFormProps {
 export default function SettingsForm({ initialSettings }: SettingsFormProps) {
   const [isPending, startTransition] = useTransition()
   const { theme, setTheme } = useTheme()
+  const { markDirty, markClean } = useProfileDirty()
   const [emailNotifications, setEmailNotifications] = useState(
     initialSettings?.notifications?.email ?? true
   )
@@ -32,6 +34,7 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
         toast.error(result.error)
       } else {
         toast.success('Settings updated successfully')
+        markClean()
       }
     })
   }
@@ -65,6 +68,7 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
                 onChange={(e) => {
                   const val = e.target.checked
                   setEmailNotifications(val)
+                  markDirty()
                   startTransition(async () => {
                     const result = await updateUserSettings({
                       notifications: {
@@ -115,7 +119,10 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
             return (
               <button
                 key={item.id}
-                onClick={() => setTheme(item.id)}
+                onClick={() => {
+                  setTheme(item.id)
+                  markDirty()
+                }}
                 className={`flex flex-col items-center gap-3 rounded-2xl border p-4 transition-all ${
                   isActive
                     ? 'border-blue-500 bg-blue-50/50 text-blue-600 dark:border-blue-400 dark:bg-blue-400/10 dark:text-blue-400'

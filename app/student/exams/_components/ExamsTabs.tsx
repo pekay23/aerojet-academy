@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { History, FileCheck, Users, User, Layers, RefreshCcw } from 'lucide-react'
+import { History, FileCheck, Calendar, RefreshCcw } from 'lucide-react'
 import MotionTabs, { type MotionTab } from '@/components/ui/MotionTabs'
 
 interface Props {
@@ -13,9 +13,7 @@ interface Props {
 const ALL_TABS: MotionTab[] = [
   { key: 'records', label: 'Exam Records', shortLabel: 'Records', icon: History },
   { key: 'bookings', label: 'My Bookings', shortLabel: 'My Bookings', icon: FileCheck },
-  { key: 'available', label: 'Join Pools', shortLabel: 'Pools', icon: Users },
-  { key: 'individual', label: 'Individual', shortLabel: 'Individual', icon: User },
-  { key: 'group', label: 'Group', shortLabel: 'Group', icon: Layers },
+  { key: 'book', label: 'Book Exam', shortLabel: 'Book', icon: Calendar },
   { key: 'resit', label: 'Resit', shortLabel: 'Resit', icon: RefreshCcw },
 ]
 
