@@ -2,14 +2,18 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect, notFound } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Download } from 'lucide-react'
 import { Metadata } from 'next'
 import { serializePrisma } from '@/lib/utils/serialization'
 import StudentDetailTabs from './_components/StudentDetailTabs'
 import EditProfileDialog from '@/app/staff/users/[id]/_components/EditProfileDialog'
 import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
 import { compareNatural } from '@/lib/utils/natural-sort'
-import { getCachedExamComponents, getCachedAcademicYears, getCachedSemesters } from '@/lib/cached-queries'
+import {
+  getCachedExamComponents,
+  getCachedAcademicYears,
+  getCachedSemesters,
+} from '@/lib/cached-queries'
 
 export const metadata: Metadata = { title: 'Student Details | Staff Portal' }
 export const dynamic = 'force-dynamic'
@@ -115,17 +119,17 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
       referralsReceived: {
         include: {
           referrer: {
-            include: { profile: true }
-          }
-        }
+            include: { profile: true },
+          },
+        },
       },
       referralsMade: {
         include: {
           referee: {
-            include: { profile: true }
-          }
+            include: { profile: true },
+          },
         },
-        orderBy: { createdAt: 'desc' }
+        orderBy: { createdAt: 'desc' },
       },
     },
   })
@@ -133,41 +137,49 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
   if (!student) notFound()
 
   // Fetch all supplementary data in parallel
-  const [walletTransactions, fullTimeEnrollments, modularEnrollments, examComponentsRaw, upcomingEvents, academicYears, semesters, studyPathways] =
-    await Promise.all([
-      student.wallet
-        ? prismaUnfiltered.walletTransaction.findMany({
-            where: { walletId: student.wallet.id },
-            orderBy: { createdAt: 'desc' },
-            take: 100,
-          })
-        : Promise.resolve([]),
-      prismaUnfiltered.fullTimeEnrollment.findMany({
-        where: { studentId: targetId },
-        include: {
-          programme: { select: { code: true, name: true } },
-          ojtPeriods: { orderBy: { startDate: 'desc' } },
-          milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
-        },
-        take: 50,
-      }),
-      prismaUnfiltered.modularEnrollment.findMany({
-        where: { studentId: targetId },
-        include: {
-          package: { select: { id: true, name: true } },
-        },
-        take: 50,
-      }),
-      getCachedExamComponents(),
-      prismaUnfiltered.examEvent.findMany({
-        where: { status: { in: ['OPEN', 'DRAFT'] }, startDate: { gte: new Date() } },
-        orderBy: { startDate: 'asc' },
-        take: 50,
-      }),
-      getCachedAcademicYears(),
-      getCachedSemesters(),
-      prismaUnfiltered.studyPathwayModel?.findMany?.() ?? [],
-    ])
+  const [
+    walletTransactions,
+    fullTimeEnrollments,
+    modularEnrollments,
+    examComponentsRaw,
+    upcomingEvents,
+    academicYears,
+    semesters,
+    studyPathways,
+  ] = await Promise.all([
+    student.wallet
+      ? prismaUnfiltered.walletTransaction.findMany({
+          where: { walletId: student.wallet.id },
+          orderBy: { createdAt: 'desc' },
+          take: 100,
+        })
+      : Promise.resolve([]),
+    prismaUnfiltered.fullTimeEnrollment.findMany({
+      where: { studentId: targetId },
+      include: {
+        programme: { select: { code: true, name: true } },
+        ojtPeriods: { orderBy: { startDate: 'desc' } },
+        milestones: { orderBy: [{ yearNumber: 'asc' }, { createdAt: 'asc' }] },
+      },
+      take: 50,
+    }),
+    prismaUnfiltered.modularEnrollment.findMany({
+      where: { studentId: targetId },
+      include: {
+        package: { select: { id: true, name: true } },
+      },
+      take: 50,
+    }),
+    getCachedExamComponents(),
+    prismaUnfiltered.examEvent.findMany({
+      where: { status: { in: ['OPEN', 'DRAFT'] }, startDate: { gte: new Date() } },
+      orderBy: { startDate: 'asc' },
+      take: 50,
+    }),
+    getCachedAcademicYears(),
+    getCachedSemesters(),
+    prismaUnfiltered.studyPathwayModel?.findMany?.() ?? [],
+  ])
 
   // Natural sort by module code (M1, M2, M3... M10, M12 instead of M1, M10, M12)
   // and remove any duplicates by code (keep first occurrence)
@@ -206,10 +218,11 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
     staffName: t.createdBy ? staffMap[t.createdBy] : null,
   }))
 
-  const enrichedPayments = student.payments?.map((p) => ({
-    ...p,
-    staffName: p.approvedBy ? staffMap[p.approvedBy] : null,
-  })) || []
+  const enrichedPayments =
+    student.payments?.map((p) => ({
+      ...p,
+      staffName: p.approvedBy ? staffMap[p.approvedBy] : null,
+    })) || []
 
   // Serialize data for client components
   const serializedStudent = serializePrisma({
@@ -251,7 +264,7 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
 
         <div className="flex items-start gap-5">
           <div className="relative">
-            <div className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-aerojet-blue text-2xl font-black text-white shadow-lg">
+            <div className="bg-aerojet-blue relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-2xl font-black text-white shadow-lg">
               {student.profile?.profilePhotoUrl ? (
                 <img
                   src={student.profile.profilePhotoUrl}
@@ -312,10 +325,19 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
                 {student.status}
               </span>
               {student.studentProfile?.enrollmentType && (
-                <span className="rounded-full bg-aerojet-blue/10 px-2.5 py-0.5 text-[10px] font-black text-aerojet-blue uppercase">
+                <span className="bg-aerojet-blue/10 text-aerojet-blue rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase">
                   {student.studentProfile.enrollmentType.replace(/_/g, ' ')}
                 </span>
               )}
+              <a
+                href={`/api/pdf/staff/student-transcript/${student.id}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-2 flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-indigo-50 px-3 py-1 text-[10px] font-bold text-indigo-700 uppercase transition-colors hover:bg-indigo-100 dark:border-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300"
+              >
+                <Download className="h-3 w-3" />
+                Transcript PDF
+              </a>
             </div>
           </div>
         </div>
