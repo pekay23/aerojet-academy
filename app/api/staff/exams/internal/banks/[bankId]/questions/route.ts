@@ -75,7 +75,7 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
         options: parsed.data.options,
         correctAnswer: parsed.data.correctAnswer,
         subTopic: parsed.data.subTopic || null,
-        difficulty: parsed.data.difficulty as any,
+        difficulty: parsed.data.difficulty,
         points: parsed.data.points,
         syllabusRef: parsed.data.syllabusRef || null,
         knowledgeLevel: parsed.data.knowledgeLevel || null,

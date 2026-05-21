@@ -72,7 +72,7 @@ const createSchema = z.object({
   ruleSet: z.enum(['EASA', 'CUSTOM']).default('EASA'),
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest) => {
   await requireStaff()
   if (!(await isInternalExamSystemEnabled())) {
     return apiError('Internal exams are not currently available', 403)
@@ -89,7 +89,7 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
       moduleCode: parsed.data.moduleCode || null,
       categoryCode: normalizeCategoryCode(parsed.data.categoryCode),
       mcqCount: parsed.data.mcqCount,
-      ruleSet: parsed.data.ruleSet as any,
+      ruleSet: parsed.data.ruleSet,
       minimumPoolSize: parsed.data.mcqCount * 5,
     },
   })
