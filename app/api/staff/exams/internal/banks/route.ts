@@ -23,10 +23,26 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
     include: {
       course: { select: { id: true, name: true, code: true } },
       ruleOverride: true,
-      _count: { select: { questions: true, sessions: true } },
+      _count: { 
+        select: { 
+          questions: { where: { status: 'APPROVED', isActive: true } }, 
+          sessions: true 
+        } 
+      },
     },
     orderBy: { name: 'asc' },
   })
+
+  const pendingCounts = await prismaUnfiltered.internalExamQuestion.groupBy({
+    by: ['bankId'],
+    where: { 
+      bankId: { in: banks.map(b => b.id) }, 
+      status: 'PENDING_APPROVAL', 
+      isActive: true 
+    },
+    _count: true
+  })
+  const pendingMap = Object.fromEntries(pendingCounts.map(pc => [pc.bankId, pc._count]))
 
   // Compute pool health inline from _count to avoid N+1 queries
   const enriched = banks.map((bank) => {
@@ -38,6 +54,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
       ...bank,
       categoryCode: getInternalBankCategoryCode(bank),
       poolHealth: { health, questionCount, requiredMinimum },
+      pendingCount: pendingMap[bank.id] || 0,
     }
   })
 

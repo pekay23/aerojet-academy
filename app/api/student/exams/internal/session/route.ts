@@ -42,6 +42,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
               options: true,
               points: true,
               subTopic: true,
+              syllabusRef: true,
             },
           },
         },

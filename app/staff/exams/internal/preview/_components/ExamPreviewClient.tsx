@@ -34,6 +34,8 @@ interface PreviewQuestion {
   subTopic: string | null
   difficulty: string
   points: number
+  syllabusRef: string | null
+  knowledgeLevel: number | null
 }
 
 interface PreviewData {
@@ -211,14 +213,24 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
               <span className="rounded-lg bg-slate-100 px-3 py-1 text-xs font-black tracking-widest text-slate-500 dark:bg-slate-800 dark:text-slate-400">
                 Q{currentIndex + 1} of {data.questions.length}
               </span>
-              {q.subTopic && (
+              {q.syllabusRef ? (
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-700 border border-slate-200 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300">
+                  📌 {q.syllabusRef}
+                </span>
+              ) : q.subTopic && (
                 <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400">
                   {q.subTopic}
                 </span>
               )}
-              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${DIFFICULTY_COLORS[q.difficulty] || ''}`}>
-                {q.difficulty}
-              </span>
+              {q.knowledgeLevel ? (
+                <span className="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                  Level {q.knowledgeLevel}
+                </span>
+              ) : (
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${DIFFICULTY_COLORS[q.difficulty] || ''}`}>
+                  {q.difficulty}
+                </span>
+              )}
             </div>
             <span className="text-xs text-slate-400">{q.points} pt{q.points > 1 ? 's' : ''}</span>
           </div>
