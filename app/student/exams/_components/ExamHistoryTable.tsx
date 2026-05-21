@@ -184,6 +184,33 @@ export default function ExamHistoryTable({ results }: ExamHistoryTableProps) {
           </tbody>
         </table>
       </div>
+
+      {/* Legend */}
+      <div className="border-t border-stone-100 bg-stone-50/30 px-6 py-3 dark:border-white/5 dark:bg-white/2">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[10px] font-medium text-slate-400">
+          <span className="font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Legend:</span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block rounded bg-indigo-50 px-1.5 py-0.5 font-black text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400">ORIGINAL</span>
+            Result recorded in this system
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block rounded bg-amber-50 px-1.5 py-0.5 font-black text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">HISTORICAL</span>
+            Imported from legacy records
+          </span>
+          <span className="hidden sm:flex items-center gap-1.5">
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+            Pass
+          </span>
+          <span className="hidden sm:flex items-center gap-1.5">
+            <span className="inline-block h-2 w-2 rounded-full bg-red-500" />
+            Fail
+          </span>
+          <span className="hidden sm:flex items-center gap-1.5">
+            <span className="inline-block h-2 w-2 rounded-full bg-amber-500" />
+            Pending
+          </span>
+        </div>
+      </div>
     </div>
   )
 }

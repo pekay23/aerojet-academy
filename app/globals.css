@@ -109,3 +109,26 @@
     @apply float-left h-0 pointer-events-none text-slate-400;
   }
 }
+
+/* ── Exam Lockdown Mode ───────────────────────────────────
+   When body.exam-lockdown is active, the student sidebar,
+   portal header, breadcrumb, and registration banners are
+   all hidden. The main content area fills 100% viewport. */
+body.exam-lockdown [data-sidebar],
+body.exam-lockdown nav[aria-label="sidebar"],
+body.exam-lockdown aside {
+  display: none !important;
+}
+body.exam-lockdown .sticky {
+  display: none !important;
+}
+body.exam-lockdown #main-content {
+  padding-top: 0 !important;
+  margin-left: 0 !important;
+}
+body.exam-lockdown .payment-info {
+  padding: 0 !important;
+}
+body.exam-lockdown > div > div:first-child {
+  display: none !important;
+}
