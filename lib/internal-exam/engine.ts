@@ -67,7 +67,7 @@ export async function getPoolHealth(bankId: string): Promise<{ health: PoolHealt
   if (!bank) return { health: 'RED', questionCount: 0, requiredMinimum: 0 }
 
   const questionCount = await prismaUnfiltered.internalExamQuestion.count({
-    where: { bankId, isActive: true },
+    where: { bankId, isActive: true, status: 'APPROVED' },
   })
 
   const requiredMinimum = bank.minimumPoolSize ?? bank.mcqCount * 5
@@ -95,21 +95,23 @@ function shuffle<T>(array: T[]): T[] {
 
 export async function selectInternalExamQuestions(bankId: string, count: number) {
   const questions = await prismaUnfiltered.internalExamQuestion.findMany({
-    where: { bankId, isActive: true, isEssay: false },
+    where: { bankId, isActive: true, status: 'APPROVED', isEssay: false },
     select: {
       id: true,
       subTopic: true,
+      syllabusRef: true,
       difficulty: true,
+      knowledgeLevel: true,
       timesServed: true,
       lastServedAt: true,
     },
     orderBy: [{ timesServed: 'asc' }, { lastServedAt: 'asc' }],
   })
 
-  // Group by subTopic for stratified selection
+  // Group by syllabusRef or subTopic for stratified selection
   const byTopic: Record<string, typeof questions> = {}
   for (const q of questions) {
-    const key = q.subTopic || '__general__'
+    const key = q.syllabusRef || q.subTopic || '__general__'
     if (!byTopic[key]) byTopic[key] = []
     byTopic[key].push(q)
   }

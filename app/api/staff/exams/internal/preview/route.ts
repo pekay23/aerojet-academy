@@ -26,7 +26,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   if (!bank) return apiError('Bank not found', 404)
 
   const questions = await prismaUnfiltered.internalExamQuestion.findMany({
-    where: { bankId, isActive: true },
+    where: { bankId, isActive: true, status: 'APPROVED' },
     select: {
       id: true,
       text: true,
@@ -35,6 +35,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       subTopic: true,
       difficulty: true,
       points: true,
+      syllabusRef: true,
+      knowledgeLevel: true,
     },
   })
 
@@ -78,6 +80,8 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       subTopic: q.subTopic,
       difficulty: q.difficulty,
       points: q.points,
+      syllabusRef: q.syllabusRef,
+      knowledgeLevel: q.knowledgeLevel,
     })),
   })
 })

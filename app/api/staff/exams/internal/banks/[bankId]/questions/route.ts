@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { requireStaff } from '@/lib/auth/helpers'
+import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
@@ -12,19 +12,30 @@ const questionSchema = z.object({
   subTopic: z.string().optional(),
   difficulty: z.enum(['EASY', 'MEDIUM', 'HARD']).default('MEDIUM'),
   points: z.number().min(1).default(1),
+  syllabusRef: z.string().optional(),
+  knowledgeLevel: z.number().int().min(1).max(3).optional(),
 })
 
 // GET — list questions for a bank
 export const GET = withErrorHandler(async (req: NextRequest, ctx: any) => {
-  await requireStaff()
+  const session = await getAuthSession()
+  if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(session.user.role)) {
+    return apiError('Unauthorized', 403)
+  }
   if (!(await isInternalExamSystemEnabled())) {
     return apiError('Internal exams are not currently available', 403)
   }
   const { bankId } = await ctx.params
+  
+  const url = new URL(req.url)
+  const status = url.searchParams.get('status')
+  
+  const where: any = { bankId }
+  if (status) where.status = status
 
   const questions = await prismaUnfiltered.internalExamQuestion.findMany({
-    where: { bankId },
-    orderBy: [{ subTopic: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
+    where,
+    orderBy: [{ subTopic: 'asc' }, { syllabusRef: 'asc' }, { sortOrder: 'asc' }, { createdAt: 'desc' }],
   })
 
   return apiSuccess(questions)
@@ -32,7 +43,10 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: any) => {
 
 // POST — add question to bank
 export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
-  await requireStaff()
+  const session = await getAuthSession()
+  if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR'].includes(session.user.role)) {
+    return apiError('Unauthorized', 403)
+  }
   if (!(await isInternalExamSystemEnabled())) {
     return apiError('Internal exams are not currently available', 403)
   }
@@ -63,6 +77,10 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
         subTopic: parsed.data.subTopic || null,
         difficulty: parsed.data.difficulty as any,
         points: parsed.data.points,
+        syllabusRef: parsed.data.syllabusRef || null,
+        knowledgeLevel: parsed.data.knowledgeLevel || null,
+        status: 'PENDING_APPROVAL',
+        submittedById: session.user.id,
       },
     })
     created.push(q)
