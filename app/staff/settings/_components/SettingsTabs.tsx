@@ -14,6 +14,7 @@ import {
   Shield,
   ClipboardList,
   AtSign,
+  FileText,
 } from 'lucide-react'
 import MotionTabs from '@/components/ui/MotionTabs'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
@@ -33,6 +34,7 @@ const TABS = [
   { key: 'email-delivery', label: 'Email Delivery', icon: Send },
   { key: 'calendar', label: 'Calendar', icon: Calendar },
   { key: 'backup', label: 'Backup', icon: DatabaseBackup },
+  { key: 'pdf', label: 'PDF Templates', icon: FileText },
 ]
 
 // ── Context so child forms can mark dirty / clean without prop drilling ──────
@@ -71,7 +73,7 @@ export default function SettingsTabs({ children }: { children: React.ReactNode }
     <SettingsDirtyContext.Provider value={{ markDirty, markClean }}>
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue sm:text-3xl dark:text-white">
+          <h1 className="text-aerojet-blue text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
             Settings
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
