@@ -8,12 +8,12 @@ import {
   Loader2,
   AlertTriangle,
   CheckCircle2,
-  SkipForward,
   Send,
   XCircle,
-  Trophy,
   Menu,
   X,
+  Flag,
+  Hourglass,
 } from 'lucide-react'
 
 interface Question {
@@ -40,16 +40,10 @@ interface ExamData {
   }
 }
 
-interface ExamResult {
-  score: number
-  totalPoints: number
-  percentage: number
-  passed: boolean
-  passMarkPct: number
+interface SubmitResult {
+  submitted: boolean
+  pendingReview: boolean
   timedOut: boolean
-  retakeEligibleAt: string
-  banned: boolean
-  banLiftDate: string | null
 }
 
 export default function InternalExamInterface({ sessionId }: { sessionId: string }) {
@@ -60,9 +54,13 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
-  const [result, setResult] = useState<ExamResult | null>(null)
+  const [result, setResult] = useState<SubmitResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(true)
+  const [showReport, setShowReport] = useState(false)
+  const [reportReason, setReportReason] = useState('')
+  const [reportSubmitting, setReportSubmitting] = useState(false)
+  const [reportSubmitted, setReportSubmitted] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Load or resume session
@@ -172,6 +170,24 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [data?.rules.allowKeyboardAutoSubmit, result, submitting, showConfirm, answers])
 
+  const handleSubmitReport = async () => {
+    if (!reportReason.trim() || reportSubmitting) return
+    setReportSubmitting(true)
+    try {
+      const res = await fetch('/api/student/exams/internal/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId, reason: reportReason.trim() }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setReportSubmitted(true)
+        setReportReason('')
+      }
+    } catch { /* silent */ }
+    finally { setReportSubmitting(false) }
+  }
+
   // Format timer
   const formatTime = (secs: number) => {
     const m = Math.floor(secs / 60)
@@ -199,61 +215,89 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     )
   }
 
-  // Result screen
+  // ─── Pending Review Result Screen ───
   if (result) {
     return (
       <div className="mx-auto max-w-lg py-12">
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900">
-          {result.passed ? (
-            <Trophy className="mx-auto mb-4 h-16 w-16 text-green-500" />
-          ) : (
-            <XCircle className="mx-auto mb-4 h-16 w-16 text-red-500" />
-          )}
+          <Hourglass className="mx-auto mb-4 h-16 w-16 text-amber-500" />
           <h2 className="text-2xl font-black text-slate-900 dark:text-white">
-            {result.passed ? 'Congratulations!' : result.timedOut ? 'Time Expired' : 'Not Passed'}
+            {result.timedOut ? 'Time Expired — Exam Submitted' : 'Exam Submitted Successfully'}
           </h2>
-          <p className="mt-2 text-sm text-slate-500">
-            {result.passed ? 'You have passed this module examination.' : 'You did not meet the pass mark this time.'}
+          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
+            Your answers have been recorded. Results are pending admin review and will be published to your profile once confirmed.
           </p>
 
-          <div className="mx-auto mt-6 grid max-w-xs grid-cols-2 gap-4">
-            <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{result.percentage}%</p>
-              <p className="text-[10px] text-slate-500">Your Score</p>
+          <div className="mx-auto mt-6 max-w-xs rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/10">
+            <div className="flex items-center justify-center gap-2">
+              <Clock className="h-4 w-4 text-amber-600" />
+              <span className="text-sm font-bold text-amber-800 dark:text-amber-200">Pending Admin Review</span>
             </div>
-            <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{result.passMarkPct}%</p>
-              <p className="text-[10px] text-slate-500">Pass Mark</p>
-            </div>
-            <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{result.score}</p>
-              <p className="text-[10px] text-slate-500">Points</p>
-            </div>
-            <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-800">
-              <p className="text-2xl font-bold text-slate-900 dark:text-white">{result.totalPoints}</p>
-              <p className="text-[10px] text-slate-500">Total</p>
-            </div>
+            <p className="mt-1 text-xs text-amber-700 dark:text-amber-300">
+              You will be able to view your results in your exam records once they are published.
+            </p>
           </div>
 
-          {result.banned && (
-            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-800 dark:bg-red-900/10 dark:text-red-300">
-              12-month suspension applied. Retake available after {new Date(result.banLiftDate!).toLocaleDateString()}.
+          {/* Report Issue Button */}
+          {!reportSubmitted ? (
+            <button
+              onClick={() => setShowReport(true)}
+              className="mt-6 inline-flex items-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+            >
+              <Flag className="h-3.5 w-3.5" />
+              Report an Issue
+            </button>
+          ) : (
+            <div className="mt-6 inline-flex items-center gap-2 rounded-xl bg-green-50 px-4 py-2 text-xs font-bold text-green-700 dark:bg-green-900/20 dark:text-green-300">
+              <CheckCircle2 className="h-3.5 w-3.5" />
+              Report submitted — admin will review shortly
             </div>
           )}
 
-          {!result.passed && !result.banned && (
-            <p className="mt-4 text-xs text-slate-500">
-              Retake available after {new Date(result.retakeEligibleAt).toLocaleDateString()}.
-            </p>
-          )}
-
-          <a
-            href="/student/exams/internal"
-            className="mt-6 inline-block rounded-xl bg-aerojet-blue px-6 py-2.5 text-sm font-bold text-white hover:bg-aerojet-blue/90"
-          >
-            Back to Exams
-          </a>
+          <div className="mt-6">
+            <a
+              href="/student/exams/internal"
+              className="inline-block rounded-xl bg-aerojet-blue px-6 py-2.5 text-sm font-bold text-white hover:bg-aerojet-blue/90"
+            >
+              Back to Exams
+            </a>
+          </div>
         </div>
+
+        {/* Report Modal */}
+        {showReport && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+            <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">Report an Issue</h3>
+              <p className="mt-1 text-xs text-slate-500">
+                Describe the issue you experienced. Admin will review and may reset your exam session if warranted.
+              </p>
+              <textarea
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                placeholder="Describe what happened (e.g. accidental start, technical issue, unclear question)..."
+                className="mt-4 h-32 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-aerojet-blue focus:outline-none focus:ring-1 focus:ring-aerojet-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+                maxLength={1000}
+              />
+              <div className="mt-1 text-right text-[10px] text-slate-400">{reportReason.length}/1000</div>
+              <div className="mt-4 flex gap-3">
+                <button
+                  onClick={() => setShowReport(false)}
+                  className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmitReport}
+                  disabled={!reportReason.trim() || reportSubmitting}
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50"
+                >
+                  {reportSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Submit Report'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }
@@ -342,8 +386,7 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
                 </div>
                 {currentQ.syllabusRef && (
                   <div className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                    Ref: {currentQ.syllabusRef}
-                    {currentQ.knowledgeLevel && ` • Lvl ${currentQ.knowledgeLevel}`}
+                    {currentQ.syllabusRef}
                   </div>
                 )}
               </div>
@@ -500,6 +543,10 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
                 They will be marked as incorrect.
               </div>
             )}
+
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-center text-xs text-blue-700 dark:border-blue-900/50 dark:bg-blue-900/20 dark:text-blue-300 mb-6">
+              Results will be reviewed by admin before being published to your profile.
+            </div>
             
             <div className="flex gap-3">
               <button

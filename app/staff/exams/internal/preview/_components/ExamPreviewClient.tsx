@@ -66,11 +66,13 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
     try {
       const res = await fetch(`/api/staff/exams/internal/preview?bankId=${selectedBankId}`)
       const json = await res.json()
-      if (json.data) {
+      if (json.success && json.data) {
         setData(json.data)
         setCurrentIndex(0)
         setSelectedAnswers({})
         setMode('preview')
+      } else {
+        alert(json.error || 'Failed to generate preview')
       }
     } finally {
       setLoading(false)
@@ -134,7 +136,25 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
   }
 
   const q = data.questions[currentIndex]
-  if (!q) return null
+  if (!q) {
+    return (
+      <div className="mx-auto max-w-2xl text-center py-12">
+        <div className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600 mb-4 dark:bg-amber-900/30 dark:text-amber-500">
+          <BookOpen className="h-8 w-8" />
+        </div>
+        <h2 className="text-xl font-bold text-slate-800 dark:text-white mb-2">No Approved Questions Available</h2>
+        <p className="text-slate-500 mb-6">
+          There are no approved questions available in this bank for the preview. Please approve some questions in the bank's approval queue first.
+        </p>
+        <button
+          onClick={() => setMode('select')}
+          className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-6 py-3 font-semibold text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
+        >
+          <ArrowLeft className="h-4 w-4" /> Go Back
+        </button>
+      </div>
+    )
+  }
   const answered = selectedAnswers[q.questionId]
   const isCorrect = answered === q.correctAnswer
   const answeredCount = Object.keys(selectedAnswers).length

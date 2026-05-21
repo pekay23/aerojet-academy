@@ -7,11 +7,11 @@ import {
   CheckCircle2,
   XCircle,
   Clock,
-  Ban,
   Loader2,
   AlertTriangle,
   ArrowRight,
   Trophy,
+  Hourglass,
 } from 'lucide-react'
 
 interface BankProgress {
@@ -28,6 +28,8 @@ interface BankProgress {
   banned: boolean
   banLiftDate: string | null
   retakeEligibleAt: string | null
+  isPublished: boolean
+  pendingReview: boolean
 }
 
 interface ProgressData {
@@ -201,48 +203,43 @@ export default function InternalExamDashboard() {
 
       <div className="space-y-3">
         {data.bankProgress.map((bank) => {
-          const canTake = !bank.passed && !bank.banned &&
-            (!bank.retakeEligibleAt || new Date(bank.retakeEligibleAt) <= now)
-          const isWaiting = bank.retakeEligibleAt && new Date(bank.retakeEligibleAt) > now && !bank.passed
+          const canTake = bank.totalAttempts === 0
 
           return (
             <div key={bank.bankId} className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
               <div className="flex flex-col gap-4 p-5 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
                   <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-                    bank.passed ? 'bg-green-100 dark:bg-green-900/30'
-                    : bank.banned ? 'bg-red-100 dark:bg-red-900/30'
+                    bank.passed && bank.isPublished ? 'bg-green-100 dark:bg-green-900/30'
+                    : bank.pendingReview ? 'bg-amber-100 dark:bg-amber-900/30'
                     : 'bg-slate-100 dark:bg-slate-800'
                   }`}>
-                    {bank.passed ? <CheckCircle2 className="h-5 w-5 text-green-600" />
-                      : bank.banned ? <Ban className="h-5 w-5 text-red-600" />
+                    {bank.passed && bank.isPublished ? <CheckCircle2 className="h-5 w-5 text-green-600" />
+                      : bank.pendingReview ? <Hourglass className="h-5 w-5 text-amber-600" />
                       : <BookOpen className="h-5 w-5 text-slate-400" />}
                   </div>
                   <div className="min-w-0">
-                    <h3 className="truncate font-bold text-slate-900 dark:text-white">{bank.bankName}</h3>
+                    <h3 className="truncate font-bold text-slate-900 dark:text-white">
+                      {bank.moduleCode || bank.courseCode}
+                    </h3>
                     <p className="text-xs text-slate-500">
-                      {bank.courseCode} - {bank.moduleCode || 'Module'} - {bank.totalAttempts} attempt{bank.totalAttempts !== 1 ? 's' : ''}
-                      {bank.categoryCode && ` - Cat ${bank.categoryCode}`}
-                      {bank.bestScore > 0 && ` - Best: ${bank.bestScore}%`}
+                      {bank.courseCode}
+                      {bank.categoryCode && ` · Cat ${bank.categoryCode}`}
+                      {bank.totalAttempts > 0 && ` · ${bank.totalAttempts} attempt${bank.totalAttempts !== 1 ? 's' : ''}`}
+                      {bank.isPublished && bank.bestScore > 0 && ` · Best: ${bank.bestScore}%`}
                     </p>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2">
-                  {bank.passed && (
+                  {bank.passed && bank.isPublished && (
                     <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-bold text-green-700 dark:bg-green-900/30 dark:text-green-300">
                       Passed
                     </span>
                   )}
-                  {bank.banned && (
-                    <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700 dark:bg-red-900/30 dark:text-red-300">
-                      Suspended until {dateFormatter.format(new Date(bank.banLiftDate!))}
-                    </span>
-                  )}
-                  {isWaiting && (
+                  {bank.pendingReview && (
                     <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-                      <Clock className="mr-1 inline h-3 w-3" />
-                      Retake after {dateFormatter.format(new Date(bank.retakeEligibleAt!))}
+                      Pending Review
                     </span>
                   )}
                   {canTake && (
@@ -255,7 +252,7 @@ export default function InternalExamDashboard() {
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
                       ) : (
                         <>
-                          {bank.attempted ? 'Retake' : 'Start'} Exam
+                          Start Exam
                           <ArrowRight className="h-3.5 w-3.5" />
                         </>
                       )}
@@ -314,11 +311,11 @@ export default function InternalExamDashboard() {
                       <div className="text-sm">
                         <p className="font-bold text-amber-800 dark:text-amber-200">Exam Rules - Please Read Carefully</p>
                         <ul className="mt-2 space-y-1 text-xs text-amber-700 dark:text-amber-300">
+                          <li>- <strong>Single Attempt ONLY</strong> - You can only take this internal exam once. There are no retakes.</li>
+                          <li>- <strong>Timer Starts Immediately</strong> - The countdown begins the moment you confirm and start.</li>
                           <li>- <strong>3-option MCQ</strong> - Each question has exactly 3 answer options (A, B, C)</li>
-                          <li>- <strong>75 seconds per question</strong> - Timer starts immediately</li>
-                          <li>- <strong>75% pass mark</strong> - You must score at least 75% to pass</li>
-                          <li>- <strong>90-day retake wait</strong> - If you fail, you must wait 90 days before retaking</li>
-                          <li>- <strong>3 attempts maximum</strong> - After 3 failures, a 12-month suspension applies</li>
+                          <li>- <strong>75 seconds per question</strong> - Timer limits are strictly enforced.</li>
+                          <li>- <strong>75% pass mark</strong> - You must score at least 75% to pass.</li>
                           <li>- <strong>Keyboard auto-submit</strong> - Any keyboard press during the exam submits the attempt when this rule is enabled</li>
                           <li>- <strong>Auto-submit</strong> - The exam will auto-submit when time expires</li>
                           <li>- <strong>Answers are auto-saved</strong> - Your progress is saved as you answer</li>
@@ -328,7 +325,7 @@ export default function InternalExamDashboard() {
                   </div>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <p className="text-xs text-slate-500">
-                      Attempt #{bank.totalAttempts + 1} of 3
+                      Attempt 1 of 1
                     </p>
                     <div className="flex gap-2">
                       <button

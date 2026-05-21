@@ -54,7 +54,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
 
   // Get all exam banks the student has attempted
   const sessions = await prismaUnfiltered.internalExamSession.findMany({
-    where: { studentId },
+    where: { studentId, status: { not: 'VOIDED' } },
     include: {
       bank: {
         select: {
@@ -80,6 +80,8 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
     retakeEligibleAt: Date | null
     banned: boolean
     banLiftDate: Date | null
+    isPublished: boolean
+    status: string
   }> = {}
 
   for (const s of sessions) {
@@ -93,6 +95,8 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
         retakeEligibleAt: null,
         banned: false,
         banLiftDate: null,
+        isPublished: false,
+        status: s.status,
       }
     }
     const entry = byBank[s.bankId]
@@ -116,6 +120,8 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
       entry.banned = true
       entry.banLiftDate = s.banLiftDate
     }
+    if ((s as any).isPublished) entry.isPublished = true
+    entry.status = s.status
   }
 
   // 10-year completion window
@@ -177,6 +183,8 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
   const bankProgress = eligibleBanks.map(bank => {
     const progress = byBank[bank.id]
     const categoryCode = getInternalBankCategoryCode(bank)
+    // Only show scores if admin has published the results
+    const isPublished = progress?.isPublished || false
     return {
       bankId: bank.id,
       bankName: bank.name,
@@ -185,12 +193,14 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
       courseName: bank.course.name,
       courseCode: bank.course.code,
       attempted: !!progress,
-      passed: progress?.passed || false,
-      bestScore: progress?.bestScore || 0,
+      passed: isPublished ? (progress?.passed || false) : false,
+      bestScore: isPublished ? (progress?.bestScore || 0) : 0,
       totalAttempts: progress?.attempts.length || 0,
       banned: progress?.banned || false,
       banLiftDate: progress?.banLiftDate?.toISOString() || null,
       retakeEligibleAt: progress?.retakeEligibleAt?.toISOString() || null,
+      isPublished,
+      pendingReview: !!progress && !isPublished && (progress.status === 'COMPLETED' || progress.status === 'TIMED_OUT'),
     }
   })
 

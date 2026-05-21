@@ -98,6 +98,7 @@ model User {
   createdTuitionRuns          TuitionRun[]              @relation("CreatedTuitionRuns")
   wallet                      Wallet?
   interviewEvaluationsGiven   InterviewEvaluation[]     @relation("InterviewEvaluator")
+  internalExamReports         InternalExamReport[]
   passkeys                    Passkey[]
   refunds                     Refund[]
   withdrawalRequests          WithdrawalRequest[]
@@ -2067,9 +2068,11 @@ model InternalExamSession {
   retakeEligibleAt DateTime?
   attemptNumber    Int                  @default(1)
   banLiftDate      DateTime?
+  isPublished      Boolean              @default(false)
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
   answers          InternalExamAnswer[]
+  reports          InternalExamReport[]
   bank             InternalExamBank     @relation(fields: [bankId], references: [id])
   class            Class?               @relation(fields: [classId], references: [id])
   sitting          ExamSitting?         @relation(fields: [sittingId], references: [id])
@@ -2080,6 +2083,30 @@ model InternalExamSession {
   @@index([studentId])
   @@index([categoryCode])
   @@map("internal_exam_sessions")
+}
+
+enum InternalExamReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+}
+
+model InternalExamReport {
+  id          String                   @id @default(cuid())
+  sessionId   String
+  studentId   String
+  reason      String
+  status      InternalExamReportStatus @default(PENDING)
+  resolvedAt  DateTime?
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @updatedAt
+  session     InternalExamSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student     User                     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([studentId])
+  @@index([status])
+  @@map("internal_exam_reports")
 }
 
 model InterviewSchedule {
