@@ -14,6 +14,8 @@ import {
   X,
   Flag,
   Hourglass,
+  Maximize,
+  ShieldAlert,
 } from 'lucide-react'
 
 interface Question {
@@ -67,6 +69,9 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   const [questionReportReason, setQuestionReportReason] = useState('')
   const [questionReportSubmitting, setQuestionReportSubmitting] = useState(false)
   const [reportedQuestions, setReportedQuestions] = useState<Set<string>>(new Set())
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [tabSwitchCount, setTabSwitchCount] = useState(0)
+  const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Load or resume session
@@ -95,6 +100,64 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     }
     load()
   }, [sessionId])
+
+  // ─── Fullscreen lockdown mode ───
+  const enterFullscreen = useCallback(async () => {
+    try {
+      await document.documentElement.requestFullscreen()
+      setIsFullscreen(true)
+      setShowFullscreenPrompt(false)
+      // Hide the student sidebar
+      document.body.classList.add('exam-lockdown')
+    } catch {
+      // Fullscreen not supported or denied — still hide sidebar
+      document.body.classList.add('exam-lockdown')
+    }
+  }, [])
+
+  // Auto-request fullscreen when exam data loads
+  useEffect(() => {
+    if (!data || result) return
+    // Show a prompt first — browsers require a user gesture for fullscreen
+    setShowFullscreenPrompt(true)
+  }, [data, result])
+
+  // Track fullscreen exits
+  useEffect(() => {
+    if (!data || result) return
+    const onFullscreenChange = () => {
+      const inFS = !!document.fullscreenElement
+      setIsFullscreen(inFS)
+      if (!inFS && !result) {
+        // Student exited fullscreen during exam
+        setShowFullscreenPrompt(true)
+      }
+    }
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
+  }, [data, result])
+
+  // Track tab visibility changes (alt-tab / tab switching)
+  useEffect(() => {
+    if (!data || result) return
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        setTabSwitchCount(prev => prev + 1)
+      }
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange)
+  }, [data, result])
+
+  // Cleanup: remove lockdown class when leaving
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove('exam-lockdown')
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {})
+      }
+    }
+  }, [])
 
   // Timer countdown
   useEffect(() => {
@@ -340,7 +403,38 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   const optionLabels = ['A', 'B', 'C']
 
   return (
-    <div className="flex h-[calc(100vh-64px)] w-full flex-col bg-slate-50 dark:bg-slate-950 lg:flex-row overflow-hidden">
+    <>
+      {/* Fullscreen Prompt Overlay */}
+      {showFullscreenPrompt && !result && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-md animate-in zoom-in-95 rounded-2xl border border-slate-200 bg-white p-8 shadow-2xl dark:border-slate-800 dark:bg-slate-900 text-center">
+            <ShieldAlert className="mx-auto mb-4 h-16 w-16 text-amber-500" />
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+              {isFullscreen ? 'Fullscreen Required' : 'Enter Exam Mode'}
+            </h2>
+            <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              This exam must be taken in fullscreen mode to prevent unauthorized access to other resources.
+              Your screen activity is monitored.
+            </p>
+            {tabSwitchCount > 0 && (
+              <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">
+                <p className="text-xs font-bold text-red-700 dark:text-red-300">
+                  ⚠ Tab switches detected: {tabSwitchCount}. This activity is logged.
+                </p>
+              </div>
+            )}
+            <button
+              onClick={enterFullscreen}
+              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-8 py-3 text-sm font-bold text-white shadow-lg shadow-aerojet-blue/20 transition-all hover:bg-[#003a7c] active:scale-95"
+            >
+              <Maximize className="h-4 w-4" />
+              {isFullscreen ? 'Re-enter Fullscreen' : 'Enter Fullscreen & Start'}
+            </button>
+          </div>
+        </div>
+      )}
+
+    <div className="flex h-screen w-screen flex-col bg-slate-50 dark:bg-slate-950 lg:flex-row overflow-hidden">
       {/* Mobile Top Bar */}
       <div className="flex items-center justify-between border-b border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 lg:hidden">
         <button
@@ -650,6 +744,17 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
           </div>
         </div>
       )}
+
+      {/* Tab-switch warning toast */}
+      {tabSwitchCount > 0 && !result && (
+        <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 shadow-lg dark:border-red-800 dark:bg-red-900/30">
+          <ShieldAlert className="h-4 w-4 text-red-500" />
+          <span className="text-xs font-bold text-red-700 dark:text-red-300">
+            Tab switches: {tabSwitchCount} — activity logged
+          </span>
+        </div>
+      )}
     </div>
+    </>  
   )
 }
