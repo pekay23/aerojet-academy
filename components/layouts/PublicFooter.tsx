@@ -200,7 +200,8 @@ export default function PublicFooter() {
             </a>
           </div>
           <p className="text-[10px] font-bold tracking-[0.2em] text-gray-300 uppercase">
-            &copy; {new Date().getFullYear()} Aerojet Aviation. All Rights Reserved.
+            &copy; {new Date().getFullYear()} Aerojet Aviation Training Academy. All Rights
+            Reserved.
           </p>
         </div>
       </div>

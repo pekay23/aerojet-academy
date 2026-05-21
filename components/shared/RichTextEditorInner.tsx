@@ -2,7 +2,7 @@
 
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
-import Link from '@tiptap/extension-link'
+import LinkExtension from '@tiptap/extension-link'
 import Placeholder from '@tiptap/extension-placeholder'
 import {
   Bold,
@@ -33,8 +33,10 @@ export default function RichTextEditor({
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Link.configure({
+      StarterKit.configure({
+        link: false,
+      }),
+      LinkExtension.configure({
         openOnClick: false,
       }),
       Placeholder.configure({

@@ -1,21 +1,12 @@
-import { NextResponse } from 'next/server'
-// Imports below are used by the commented-out full handler.
-// import { NextRequest } from 'next/server'
-// import { getAuthSession } from '@/lib/auth/helpers'
-// import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
-// import { generateInvoicePDF } from '@/lib/invoice/generator'
+import { NextRequest, NextResponse } from 'next/server'
+import { getAuthSession } from '@/lib/auth/helpers'
+import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
+import { renderToStream } from '@react-pdf/renderer'
+import { InvoiceTemplate, InvoiceItem } from '@/components/pdf/templates/InvoiceTemplate'
+import { getPDFSettings } from '@/lib/pdf-settings'
+import React from 'react'
 
-// Feature hidden — invoice workflow not finalized yet.
-// To re-enable: remove the early return and uncomment the full handler below.
-export async function GET() {
-  return new NextResponse('Feature Disabled', { status: 403 })
-}
-
-/*
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAuthSession()
   if (!session) return new NextResponse('Unauthorized', { status: 401 })
 
@@ -23,7 +14,14 @@ export async function GET(
 
   const invoice = await prisma.invoice.findUnique({
     where: { id },
-    select: { userId: true, invoiceNumber: true },
+    include: {
+      user: {
+        include: {
+          profile: true,
+          studentProfile: true,
+        },
+      },
+    },
   })
 
   if (!invoice) return new NextResponse('Not Found', { status: 404 })
@@ -36,9 +34,45 @@ export async function GET(
   }
 
   try {
-    const pdfBuffer = await generateInvoicePDF(id)
+    const pdfSettings = await getPDFSettings(req.nextUrl.origin)
+    const studentName =
+      [invoice.user.profile?.firstName, invoice.user.profile?.lastName].filter(Boolean).join(' ') ||
+      'Student'
+
+    // Ensure items are properly shaped
+    let items = invoice.items as any as InvoiceItem[]
+    if (!items || !Array.isArray(items) || items.length === 0) {
+      items = [
+        {
+          description: 'Academy Fees',
+          quantity: 1,
+          unitPrice: Number(invoice.amount),
+          total: Number(invoice.amount),
+        },
+      ]
+    }
+
+    const stream = await renderToStream(
+      <InvoiceTemplate
+        logoUrl={pdfSettings.logoUrl}
+        watermarkUrl={pdfSettings.watermarkUrl}
+        watermarkOpacity={pdfSettings.watermarkOpacity}
+        invoiceNumber={invoice.invoiceNumber || 'N/A'}
+        date={invoice.createdAt}
+        dueDate={new Date(invoice.createdAt.getTime() + 7 * 24 * 60 * 60 * 1000)}
+        studentName={studentName}
+        studentEmail={invoice.user.email}
+        studentId={invoice.user.studentProfile?.studentId || undefined}
+        items={items}
+        subtotal={Number(invoice.amount)}
+        total={Number(invoice.amount)}
+        currency={invoice.currency || 'EUR'}
+      />
+    )
+
     const filename = `Invoice_${invoice.invoiceNumber || id}.pdf`
-    return new NextResponse(pdfBuffer, {
+
+    return new NextResponse(stream as any, {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
@@ -50,4 +84,3 @@ export async function GET(
     return new NextResponse('Internal Server Error', { status: 500 })
   }
 }
-*/

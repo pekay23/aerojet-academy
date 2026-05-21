@@ -2,6 +2,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Metadata } from 'next'
+import { getPDFSettings } from '@/lib/pdf-settings'
 import SettingsTabs from './_components/SettingsTabs'
 import SettingsForm from './_components/SettingsForm'
 import SystemSettingsForm from './_components/SystemSettingsForm'
@@ -30,7 +31,7 @@ const GENERAL_FIELDS = [
     label: 'Academy Name',
     description: 'The official name of the aviation academy',
     type: 'STRING' as const,
-    default: 'Aerojet Aviation Academy',
+    default: 'Aerojet Aviation Training Academy',
   },
   {
     key: 'academy_email',
@@ -194,8 +195,11 @@ export default async function SettingsPage({
 
   const { tab = 'general' } = await searchParams
 
-  // Fetch settings values from DB
-  const existingSettings = await prismaUnfiltered.systemSetting.findMany({ take: 200 })
+  // Fetch settings values and PDF-resolved settings in parallel
+  const [existingSettings, pdfSettings] = await Promise.all([
+    prismaUnfiltered.systemSetting.findMany({ take: 200 }),
+    tab === 'pdf' ? getPDFSettings('') : Promise.resolve(null),
+  ])
   const values: Record<string, string> = {}
   for (const s of existingSettings) {
     values[s.key] = s.value
@@ -264,7 +268,9 @@ export default async function SettingsPage({
         {tab === 'backup' && <BackupManager adminEmail={session.user?.email || ''} />}
 
         {/* ── PDF Templates Tab ── */}
-        {tab === 'pdf' && <PDFSettingsForm values={values} />}
+        {tab === 'pdf' && pdfSettings && (
+          <PDFSettingsForm values={values} pdfSettings={pdfSettings} />
+        )}
       </SettingsTabs>
     </div>
   )

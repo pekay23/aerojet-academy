@@ -45,7 +45,11 @@ export async function sendPaymentVerifiedEmail(email: string, firstName: string)
     </div>
   `
   const html = await wrapEmail('Payment Verified', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — Payment Verified', html })
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation Training Academy — Payment Verified',
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -75,7 +79,11 @@ export async function sendAptitudeTestReadyEmail(email: string, firstName: strin
     </div>
   `
   const html = await wrapEmail('Aptitude Test Ready', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — Your Aptitude Test Is Ready', html })
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation Training Academy — Your Aptitude Test Is Ready',
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -102,7 +110,11 @@ export async function sendAptitudeCompletedEmail(email: string, firstName: strin
     </div>
   `
   const html = await wrapEmail('Aptitude Test Completed', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — Aptitude Test Completed', html })
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation Training Academy — Aptitude Test Completed',
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -128,7 +140,11 @@ export async function sendShortlistedEmail(email: string, firstName: string) {
     </div>
   `
   const html = await wrapEmail('You Have Been Shortlisted!', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — You\'ve Been Shortlisted!', html })
+  return sendEmail({
+    to: email,
+    subject: "Aerojet Aviation Training Academy — You've Been Shortlisted!",
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -160,7 +176,11 @@ export async function sendInterviewScheduledEmail(
     </ul>
   `
   const html = await wrapEmail('Interview Scheduled', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — Interview Scheduled', html })
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation Training Academy — Interview Scheduled',
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -187,7 +207,11 @@ export async function sendInterviewReminderEmail(
     <p class="text">Please arrive at least 15 minutes early with a valid photo ID. Good luck!</p>
   `
   const html = await wrapEmail('Interview Reminder — Tomorrow', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — Interview Reminder', html })
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation Training Academy — Interview Reminder',
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -213,7 +237,11 @@ export async function sendSelectedEmail(email: string, firstName: string) {
     </div>
   `
   const html = await wrapEmail('You Have Been Selected!', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — You\'ve Been Selected!', html })
+  return sendEmail({
+    to: email,
+    subject: "Aerojet Aviation Training Academy — You've Been Selected!",
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -242,7 +270,11 @@ export async function sendMedicalPendingEmail(email: string, firstName: string) 
     </div>
   `
   const html = await wrapEmail('Medical Examination Required', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — Medical Examination Required', html })
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation Training Academy — Medical Examination Required',
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -261,7 +293,11 @@ export async function sendMedicalSubmittedEmail(email: string, firstName: string
     <p class="text">You will be notified once the review is complete. This typically takes 2–5 business days.</p>
   `
   const html = await wrapEmail('Medical Documents Under Review', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — Medical Documents Received', html })
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation Training Academy — Medical Documents Received',
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -287,7 +323,11 @@ export async function sendMedicalClearedEmail(email: string, firstName: string) 
     </div>
   `
   const html = await wrapEmail('Medical Cleared — Enrollment in Progress', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — Medical Cleared!', html })
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation Training Academy — Medical Cleared!',
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -322,7 +362,11 @@ export async function sendEnrolledEmail(email: string, firstName: string, studen
     </div>
   `
   const html = await wrapEmail('Welcome to Aerojet Academy!', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — Welcome, Student!', html })
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation Training Academy — Welcome, Student!',
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -334,11 +378,15 @@ export async function sendRejectedEmail(email: string, firstName: string, reason
     <p class="text">Hi ${firstName},</p>
     <p class="text">We regret to inform you that your application to Aerojet Aviation Training Academy has not been successful at this time.</p>
 
-    ${reason ? `
+    ${
+      reason
+        ? `
     <div class="info-box" style="border-left-color: #ef4444;">
       <div class="info-row"><strong>Reason:</strong> ${reason}</div>
     </div>
-    ` : ''}
+    `
+        : ''
+    }
 
     <p class="text">We appreciate your interest in our programmes and encourage you to reapply in a future intake cycle. For any questions, please contact our admissions office.</p>
 
@@ -347,14 +395,22 @@ export async function sendRejectedEmail(email: string, firstName: string, reason
     </p>
   `
   const html = await wrapEmail('Application Update', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — Application Update', html })
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation Training Academy — Application Update',
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
 // 13. APTITUDE TEST REMINDER — 24h before test deadline
 // ---------------------------------------------------------------------------
 
-export async function sendAptitudeTestReminderEmail(email: string, firstName: string, deadline: string) {
+export async function sendAptitudeTestReminderEmail(
+  email: string,
+  firstName: string,
+  deadline: string
+) {
   const baseUrl = await getBaseUrl()
   const body = `
     <p class="text">Hi ${firstName},</p>
@@ -372,7 +428,11 @@ export async function sendAptitudeTestReminderEmail(email: string, firstName: st
     </div>
   `
   const html = await wrapEmail('Aptitude Test Reminder', body, email)
-  return sendEmail({ to: email, subject: 'Aerojet Aviation — Aptitude Test Reminder', html })
+  return sendEmail({
+    to: email,
+    subject: 'Aerojet Aviation Training Academy — Aptitude Test Reminder',
+    html,
+  })
 }
 
 // ---------------------------------------------------------------------------
@@ -398,15 +458,16 @@ export async function sendModularDeadlineWarningEmail(
       <div class="info-row"><strong>Modules Remaining:</strong> ${modulesRemaining}</div>
     </div>
 
-    <p class="text">${percentElapsed >= 90
-      ? '<strong>Urgent:</strong> You have very little time remaining. Please contact your advisor immediately if you need assistance.'
-      : 'We recommend scheduling your remaining modules as soon as possible to stay on track.'
+    <p class="text">${
+      percentElapsed >= 90
+        ? '<strong>Urgent:</strong> You have very little time remaining. Please contact your advisor immediately if you need assistance.'
+        : 'We recommend scheduling your remaining modules as soon as possible to stay on track.'
     }</p>
   `
   const html = await wrapEmail(`Programme Deadline ${urgency}`, body, email)
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation — Programme Deadline ${urgency} (${percentElapsed}% elapsed)`,
+    subject: `Aerojet Aviation Training Academy — Programme Deadline ${urgency} (${percentElapsed}% elapsed)`,
     html,
   })
 }
