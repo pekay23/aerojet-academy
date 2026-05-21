@@ -49,7 +49,8 @@ Operational how-tos — read these to *do* something.
 
 Historical audit reports. Newest first; older reports preserved for context.
 
-- [**2026-05-20 · Comprehensive audit**](./audits/2026-05-20-comprehensive.md) — consolidated cross-check (CRITICAL/HIGH all resolved)
+- [**2026-05-21 · Internal exams audit**](./audits/2026-05-21-internal-exams.md) — internal-exams hardening (`94375e5` + `b928b76`), 1 CRITICAL bug (void route writes non-existent columns)
+- [2026-05-20 · Comprehensive audit](./audits/2026-05-20-comprehensive.md) — consolidated cross-check (CRITICAL/HIGH all resolved)
 - [2026-05-19 · Design-gap status](./audits/2026-05-19-design-gap-status.md) — every row of the original design gap audit re-checked
 - [2026-05-17 · Codebase audit](./audits/2026-05-17-codebase.md) — auth, db, frontend, tests (71 findings)
 - [2026-05-06 · Structural review](./audits/2026-05-06-structural-review.md) — P0–P3 plan
