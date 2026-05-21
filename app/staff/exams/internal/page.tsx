@@ -4,14 +4,23 @@ import Link from 'next/link'
 import { requireStaff } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import ExamBankManager from './_components/ExamBankManager'
+import ExamOperations from './_components/ExamOperations'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import InternalExamPageTabs from './_components/InternalExamPageTabs'
 
 export const metadata: Metadata = { title: 'Internal Exams | Staff' }
 export const dynamic = 'force-dynamic'
 
-export default async function InternalExamsPage() {
+export default async function InternalExamsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>
+}) {
   await requireStaff()
   if (!(await isInternalExamSystemEnabled())) redirect('/staff/exams')
+
+  const params = await searchParams
+  const tab = params.tab || 'banks'
 
   return (
     <div className="space-y-6">
@@ -33,7 +42,10 @@ export default async function InternalExamsPage() {
         </Link>
       </div>
 
-      <ExamBankManager />
+      <InternalExamPageTabs activeTab={tab} />
+
+      {tab === 'banks' && <ExamBankManager />}
+      {tab === 'operations' && <ExamOperations />}
     </div>
   )
 }

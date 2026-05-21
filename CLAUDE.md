@@ -59,11 +59,11 @@ app/
 
 Auth is enforced in **three layers**:
 
-1. **Edge middleware** at `middleware.ts:37` (active) — `ROUTE_ROLE_MAP` gates `/staff`, `/instructor`, `/student`, `/examiner`, `/applicant` and their `/api/*` siblings. Unauthenticated users get redirected to `/login?callbackUrl=…` (pages) or `401 JSON` (API). Wrong-role users get redirected to their own portal (e.g. STUDENT hitting `/staff` → `/student`).
+1. **Edge proxy** at `proxy.ts:37` (active — renamed from `middleware.ts` per Next.js 16) — `ROUTE_ROLE_MAP` gates `/staff`, `/instructor`, `/student`, `/examiner`, `/applicant` and their `/api/*` siblings. Unauthenticated users get redirected to `/login?callbackUrl=…` (pages) or `401 JSON` (API). Wrong-role users get redirected to their own portal (e.g. STUDENT hitting `/staff` → `/student`). Build output shows it as `ƒ Proxy (Middleware)`.
 2. **Portal layouts** — each portal's `layout.tsx` calls `requireStaff`/`requireInstructor`/`requireStudent`/etc. from `lib/auth/helpers.ts` as a second check and to pass `session.user` into the tree.
 3. **Route handlers / server actions** — call `requireAdmin()`/`requireAuth()`/etc. directly; thrown `'Unauthorized'`/`'Forbidden'` strings are caught by `withErrorHandler` and converted to 401/403.
 
-> **Next.js 16 note**: the `middleware` file convention is deprecated in favor of `proxy.ts`. Migration: `npx @next/codemod@canary middleware-to-proxy .` (or rename the file and export `proxy` instead of `middleware`). Helper utilities at `lib/auth/middleware-helpers.ts` and `utils/supabase/middleware.ts` are NOT wired into the active middleware — they're available for ad-hoc use.
+> Helper utilities at `lib/auth/middleware-helpers.ts` and `utils/supabase/middleware.ts` are NOT wired into the active proxy — they're available for ad-hoc use.
 
 ### Auth System
 
@@ -119,8 +119,9 @@ export const GET = withErrorHandler(async (req, ctx) => {
 
 ### Email (Resend)
 
-- `lib/email/sender.ts` — `sendEmail()`, `sendBulkEmails()`. Falls back to `console.log` when `RESEND_API_KEY` is not set (dev mode)
-- Default sender: `Aerojet Academy <admissions@mail.aerojet.com>`
+- `lib/email/sender.ts` — `sendEmail()`, `sendBulkEmails()`. Falls back to `console.log` when `RESEND_API_KEY` is not set (dev mode). Has 3-attempt exponential backoff (300ms / 600ms / 1200ms) for transient errors (429, 5xx, ECONN*, fetch failed).
+- Default sender pulled from `EMAIL_ADDRESSES.fromTransactional` in `lib/constants/business-rules.ts` → `Aerojet Academy <admissions@mail.aerojet-academy.com>` (override via `FROM_EMAIL` env var).
+- Every send writes an `EmailDelivery` row with status / attempts / error — see **Email Delivery Log** below.
 
 ### File Uploads (UploadThing)
 
@@ -130,14 +131,18 @@ export const GET = withErrorHandler(async (req, ctx) => {
 
 ### Storage & Sync (Supabase secondary backend)
 
-Supabase is a secondary backend alongside Neon, used for structured document storage and as a replica/backup. Helpers — **do not duplicate**:
+Supabase is a secondary backend alongside Neon, used for structured document storage and as a live replica via logical replication. Helpers — **do not duplicate**:
 
 - `lib/supabase/client.ts` — `getSupabaseAdmin()` (service-role), `isSupabaseConfigured()`
 - `lib/storage/supabase-storage.ts` — bucket `aerojet-documents`, `buildStoragePath()`, `uploadToStorage()`, `getSignedUrl()`, `documentCategoryFolder()` folder taxonomy
-- `lib/supabase/dual-write.ts`, `lib/supabase/backup.ts`, `lib/prisma/supabase-sync-extension.ts` — currently dormant (no callers); reserved for future logical-replication / dual-write strategies
-- Schema mirroring: `bun run db:push:supabase` runs `scripts/sync-supabase-schema.sh`
+- `lib/storage/uploadthing-mirror.ts` — nightly mirror cron (`/api/cron/supabase-mirror`) copies UploadThing files into the Supabase bucket
+- `lib/supabase/sync-check.ts` — weekly drift detector (`/api/cron/sync-check`); raises an AuditLog if Neon ↔ Supabase row counts diverge > 0.1%
+- `lib/supabase/backup.ts` — active; invoked by the `/api/cron/backup` daily job
+- `lib/supabase/dual-write.ts`, `lib/prisma/supabase-sync-extension.ts` — dormant (no callers); kept as fallback if logical replication ever needs disabling
+- Schema mirroring: `bun run db:push:supabase` runs `scripts/sync-supabase-schema.mjs`; `postdb:push` chains it so every `db:push` keeps Supabase in lock-step
+- Setup runbook: `docs/guides/neon-supabase-logical-replication.md` (8-step quickstart)
 
-Used today by Document Vault (`app/staff/documents/`) and Teaching Materials (`app/instructor/materials/`).
+Used today by Document Vault (`app/staff/documents/`), Teaching Materials (`app/instructor/materials/`), and the realtime messages stream (see **Realtime messaging** below).
 
 ### Audit Logging
 
@@ -159,22 +164,28 @@ Field names trip people up: it's `description:` (string) and `changes:` (object 
 
 ### Cron Jobs
 
-Registered in `vercel.json` and live under `app/api/cron/*/route.ts`. Pattern: check `CRON_SECRET` header → run job → return JSON. Currently scheduled (UTC):
+Registered in `vercel.json` and live under `app/api/cron/*/route.ts`. Pattern: check `CRON_SECRET` header → run job → return JSON. **16 jobs currently scheduled (UTC):**
 
 | Path | Schedule |
 |---|---|
-| `check-events` | `0 1 * * *` (daily 01:00) |
+| `expire-bundles` | `0 0 * * *` (daily 00:00) |
+| `cleanup-audit-logs` | `0 0 1 * *` (1st of month) |
+| `check-events` | `0 1 * * *` |
 | `check-pools` | `0 2 * * *` |
+| `gdpr-retention` | `0 3 * * 1` (Mondays 03:00) — GDPR retention sweep |
 | `payment-deadlines` | `0 3 * * *` |
 | `backup` | `0 4 * * *` |
+| `sync-check` | `0 4 * * 1` (Mondays 04:00) — Neon ↔ Supabase drift check |
+| `supabase-mirror` | `30 4 * * *` — UploadThing → Supabase storage mirror |
 | `cleanup-abandoned-accounts` | `0 5 * * *` |
 | `scheduled-reports` | `0 8 * * 1` (Mondays 08:00) |
 | `milestone-reminders` | `0 9 * * *` |
 | `send-reminders` | `0 10 * * *` |
-| `expire-bundles` | `0 0 * * *` |
-| `cleanup-audit-logs` | `0 0 1 * *` (1st of month) |
+| `aptitude-reminders` | `0 11 * * *` |
+| `interview-reminders` | `0 12 * * *` |
+| `modular-deadlines` | `0 13 * * *` |
 
-Route files also exist for `aptitude-reminders`, `interview-reminders`, `modular-deadlines` but are **not yet registered** in `vercel.json`. To add a cron: create the route, gate with `CRON_SECRET`, then append to `vercel.json`.
+To add a cron: create the route, gate with `CRON_SECRET`, then append to `vercel.json`. Every cron should write a single AuditLog row when it does meaningful work so admins can see the run history.
 
 ### Testing
 
@@ -276,6 +287,116 @@ If a page makes 2+ `findUnique` calls for the same record, merge them into one w
 
 - `stripe@22.x` is installed and CSP allows `js.stripe.com` / `uploadthing.com` — but **the Stripe integration is deferred** per business decision (audit 10a). Do not assume payment endpoints are wired; current payments flow is wallet/manual-proof based (`lib/wallet/*`, `lib/payments/verification.ts`). Leave the SDK in place — it's the planned future provider.
 
+## Centralised constants
+
+Don't sprinkle hardcoded business rules. `lib/constants/business-rules.ts` is the canonical source for:
+
+- `ACADEMIC_RULES` — EASA pass mark, grade thresholds, default class sizes
+- `POOL_DEFAULTS` — confirm threshold, max candidates, seat price, payment deadlines
+- `EMAIL_ADDRESSES` — every outbound `from:` address (`fromTransactional`, `fromNoReply`, `support`, `admissions`)
+- `WALLET_DEFAULTS` — currency, resit fee
+- `TIME_WINDOWS` — GDPR DSR SLA, attendance threshold, bundle expiry, exam cutoff
+
+Many of these are also editable at runtime via `SystemSetting` rows; the constants are the build-time defaults consumed when the row is absent. Extend the file rather than dropping new magic numbers into feature code.
+
+## Email Delivery Log
+
+Every `sendEmail()` invocation writes an `EmailDelivery` row (`recipient`, `subject`, `template`, `status`, `attempts`, `error`, `messageId`). Visible to admins at **Settings → Email Delivery** with status filtering, recipient search, and pagination. A dashboard alert fires when ≥ 1 send fails in the last 24h (CRITICAL at ≥ 10).
+
+When sending email, pass the optional `template` (e.g. `'welcome'`, `'password-reset'`) and `userId` fields so the log is filterable per template / per user:
+
+```ts
+await sendEmail({
+  to: user.email,
+  subject: 'Welcome to Aerojet Academy',
+  html: renderWelcomeEmail(user),
+  template: 'welcome',
+  userId: user.id,
+})
+```
+
+Do **not** roll your own logging — `sender.ts` already records the row regardless of success or failure.
+
+## Presence + Privacy
+
+Every authenticated portal layout mounts `<Heartbeat>` (`components/shared/Heartbeat.tsx`), which pings `POST /api/me/heartbeat` every 30 seconds while the tab is visible. The endpoint updates `User.lastSeenAt`. Visibility downstream is enforced by `lib/presence.ts:resolvePresenceForViewer()`:
+
+- **Green online dot** — always visible (binary; updates if `lastSeenAt > now - 90s`)
+- **Exact last-seen timestamp** — visible to self, to staff/admin/super_admin, or to peers when the target has opted in (`User.showLastSeen = true`)
+
+UI helpers:
+- `<PresencePill peerId>` — drop next to a peer's name in any thread
+- `<PrivacyToggle>` — self-service "show my last-seen" switch (`PATCH /api/me/privacy`)
+- `<AdminPrivacyToggle>` — admin override per user (`PATCH /api/staff/users/[id]/privacy`, audit-logged)
+
+When adding new messaging surfaces, reuse `<PresencePill>` — it batches presence fetches across mounted instances to one request per 20ms window.
+
+## Realtime Messaging
+
+In-app messages stream via Supabase Realtime (which piggybacks on the logical-replication data stream from Neon → Supabase). The wiring lives in three pieces:
+
+- `lib/realtime/client.ts` — singleton `createBrowserClient` for Realtime only (anon key, no session persistence)
+- `hooks/useRealtimeMessages.ts` — subscribes to `messages` `INSERT`/`UPDATE` events, calls `router.refresh()` + shows toast
+- `components/shared/MessagesRealtime.tsx` — UI-less mount point; already dropped into `/student/messages` and `/staff/messages`
+
+**Critical gotcha**: the Realtime filter uses `recipientId=eq.<userId>` — the actual Postgres column name (camelCase, because Prisma keeps field names verbatim without `@map`). Don't be tempted to write `recipient_id` — Supabase will silently match nothing.
+
+One-time setup: Supabase Console → **Database → Tables → messages → Enable Realtime** (NOT the Replication tab — that's for the inbound subscription only). The hook falls back to the 20-60s `AutoRefresh` polling when Supabase isn't configured, so dev/CI without env vars degrades gracefully.
+
+## RBAC
+
+`requirePermission(key)` in `lib/auth/permissions.ts` consults the DB-backed registry at `lib/auth/permission-registry.ts`:
+
+1. `Permission` table — canonical `{ key, label, description, category, isSystem }` rows
+2. `RoleGrant` table — grants scoped to `ROLE:STAFF` or `USER:<id>`, with optional `expiresAt`
+3. Legacy `StaffProfile.permissions` JSON array — honoured for back-compat
+
+ADMIN and SUPER_ADMIN bypass all checks. Everyone else needs an explicit grant. Cached per (userId, role) for 60 seconds via `unstable_cache`; bust with `invalidatePermissionsFor(userId)` or `invalidateRolePermissions(role)` after any grant change.
+
+`requirePermission` accepts **any string** — pass a `PERMISSIONS` enum value for compile-time safety, or a runtime-added custom key created via `/staff/admin/permissions`. New permissions don't need code changes to work; the seed list in `permission-registry.ts:SEED_PERMISSIONS` covers the bundled ones.
+
+Declarative route bindings live in `lib/auth/permission-routes.ts` — documentation-grade list of which permission gates which API prefix. Handler-side `requirePermission()` calls remain authoritative; divergence from the table is a code-review red flag.
+
+## Scheduling & GDPR
+
+**Scheduling conflicts** — `lib/scheduling/recurrence.ts` expands a `Class` (with `recurrenceType`/`recurrenceDays`/`recurrenceUntil`) into individual occurrences within a date window. `lib/scheduling/conflicts.ts:findConflicts()` returns instructor + classroom overlaps. UI at `/staff/timetable/conflicts`. The class-POST endpoint (`app/api/staff/classes/route.ts`) returns `409` with `conflicts[]` on overlap — pass `force: true` in the request body to silence.
+
+**GDPR module** — three libraries in `lib/gdpr/`:
+- `export.ts:buildUserDataExport()` — Article 15 access export (deep traversal into 25+ related models)
+- `anonymise.ts:anonymiseUser()` — Article 17 erasure-via-anonymisation (PII columns overwritten with `[REDACTED]`; financial/regulatory rows stay intact for audit trail integrity)
+- `retention.ts:runRetentionSweep()` — weekly sweep driven by editable `RetentionPolicy` rows; weekly cron at `/api/cron/gdpr-retention`
+
+UI: `/staff/gdpr` (DSR queue with 30-day SLA pills), `/staff/settings/retention` (admin-edit retention defaults).
+
+## Dashboard alerts
+
+`lib/analytics/dashboard-alerts.ts` returns 6 cached alerts (5-min `unstable_cache` TTL): pending payments >7 days, overdue DSRs, fraud-flagged referrals, expiring bundles, mirror backlog, email failures in last 24h. Rendered by `<AlertsCenter>` at the top of `/staff/dashboard` with a 60s `router.refresh()` poll. Add new checks here rather than scattering one-off banners across the dashboard.
+
+## Shared components inventory
+
+`components/shared/` centralises patterns that were previously duplicated. Reach for these before writing new ones:
+
+| Component | Purpose |
+|---|---|
+| `Logo` | Aerojet wordmark with correct intrinsic aspect ratio. Replaces every per-callsite `<Image>` config. Accepts `tone` (`onWhite`/`onDark`) and `className`. |
+| `FileField` | Controlled file-upload input wrapping UploadThing's `UploadButton`. Explicit empty / uploading / uploaded / error states; pass `value` + `onChange`. |
+| `Heartbeat` | UI-less, pings `/api/me/heartbeat` every 30s. Mount once per authenticated session. |
+| `PresencePill` | Online dot + last-seen text next to a peer name. Batches presence fetches. |
+| `PrivacyToggle` | Self-service "show my last-seen" switch. |
+| `AdminPrivacyToggle` | Per-user admin override of `showLastSeen`. |
+| `MessagesRealtime` | UI-less wrapper that mounts `useRealtimeMessages`. Drop into any messages page. |
+| `DashboardSkeleton`, `TableSkeleton` | Reusable Suspense skeletons for `loading.tsx`. |
+
+## Docs site & html-effectiveness skill
+
+The `docs/` tree is organised into four sections — **architecture/**, **guides/**, **audits/** (date-prefixed `YYYY-MM-DD-slug.md`), **plans/** — plus **html/** which holds the generated styled HTML mirror.
+
+- `bun run docs:html` rebuilds the mirror via `scripts/build-docs-html.mjs` (uses `marked` for MD → HTML, applies the design tokens from `.claude/skills/html-effectiveness/`).
+- The HTML output is editorial — warm clay/ivory/oat palette, 500-weight headings, numbered sections — see `.claude/skills/html-effectiveness/SKILL.md` for the design language.
+- When producing new visually-rich HTML (status reports, design-system pages, slide decks), invoke the **html-effectiveness** skill — it has a layout taxonomy mapping document types to reference layouts.
+
+The canonical doc index is `docs/README.md` for humans; `docs/html/index.html` for browsers.
+
 ## Build & Deploy
 
 - `output: 'standalone'` in `next.config.ts` (Docker/standalone builds)
@@ -284,7 +405,8 @@ If a page makes 2+ `findUnique` calls for the same record, merge them into one w
 
 ## Verification
 
-- `bun run type-check` — no errors expected. If `dashboard/page.tsx` regresses, check the cards array shape against `MetricCard` props (historical breakage point).
-- `bun run test --run` — Vitest suite (102 tests baseline at time of writing).
+- `bun run type-check` — no errors expected.
+- `bun run test --run` — Vitest suite (**102 tests** baseline).
 - `bun run lint` — ESLint; not in pre-commit or pre-push, run manually before PR.
 - `bun run build` — full production build; required to catch the `formatCurrency` client-import trap (see *Code Conventions › Imports*).
+- `bun run docs:html` — regenerates the HTML mirror of `docs/`. Run after any markdown change you want reflected on the styled doc site.

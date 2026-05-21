@@ -124,15 +124,10 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
     return { score, totalPoints, percentage, passed, rules, retakeEligibleAt, banLiftDate }
   })
 
+  // Do NOT return scores to students — results are pending admin review
   return apiSuccess({
-    score: result.score,
-    totalPoints: result.totalPoints,
-    percentage: result.percentage,
-    passed: result.passed,
-    passMarkPct: result.rules.passMarkPct,
+    submitted: true,
+    pendingReview: true,
     timedOut: isExpired,
-    retakeEligibleAt: result.retakeEligibleAt.toISOString(),
-    banned: !!result.banLiftDate,
-    banLiftDate: result.banLiftDate?.toISOString() || null,
   })
 })

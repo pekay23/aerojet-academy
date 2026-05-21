@@ -19,7 +19,7 @@ export default async function StudentInternalExamsPage() {
           Module Examinations
         </h1>
         <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">
-          EASA Part-66 module exams. 75% pass mark required. 3 attempts allowed per module.
+          EASA Part-66 module exams. 75% pass mark required. Single attempt per module.
         </p>
       </div>
       <InternalExamDashboard />
