@@ -126,8 +126,36 @@
 </ul>
 <hr>
 
+<section class="he-section" id="7-pdf-template-system-document-verification">
+  <div class="he-section__num">07 · 📄 7. PDF Template System &amp; Document Verification</div>
+  <h2 class="he-section__title">📄 7. PDF Template System &amp; Document Verification</h2><blockquote class="he-pull"><p><strong>Detailed plan:</strong> <a href="./pdf-template-system.md"><code>docs/plans/pdf-template-system.md</code></a></p>
+</blockquote><h3 id="template-configuration">Template Configuration</h3><ul>
+<li><input disabled="" type="checkbox"> Data-driven PDF templates — staff can edit text content, labels, and descriptions via UI</li>
+<li><input disabled="" type="checkbox"> Template lifecycle management (Draft → Active → Archived) with cloning</li>
+<li><input disabled="" type="checkbox"> Per-template branding overrides (logo, watermark, footer)</li>
+<li><input disabled="" type="checkbox"> Configurable certificate numbering format (<code>CERT-{YYYY}-{SEQ:4}</code>)</li>
+</ul>
+<h3 id="signature-management">Signature Management</h3><ul>
+<li><input disabled="" type="checkbox"> Upload and manage digital signature images (PNG/JPG, Supabase Storage)</li>
+<li><input disabled="" type="checkbox"> Assign signatures to template positions (left/right slots)</li>
+<li><input disabled="" type="checkbox"> Signature expiry tracking for role changes</li>
+<li><input disabled="" type="checkbox"> Signer name and role label management</li>
+</ul>
+<h3 id="document-verification-qr-codes">Document Verification (QR Codes)</h3><ul>
+<li><input disabled="" type="checkbox"> Unique verification code per generated document</li>
+<li><input disabled="" type="checkbox"> QR code embedded in PDF footer/accreditation area</li>
+<li><input disabled="" type="checkbox"> Public <code>/verify/[code]</code> page — no auth required, shows document authenticity</li>
+<li><input disabled="" type="checkbox"> Verification record with recipient, document type, issue date, certificate number</li>
+</ul>
+<h3 id="enhanced-preview">Enhanced Preview</h3><ul>
+<li><input disabled="" type="checkbox"> Real student data picker in Live PDF Viewer</li>
+<li><input disabled="" type="checkbox"> Template selector dropdown in preview</li>
+<li><input disabled="" type="checkbox"> Live signature rendering in preview</li>
+</ul>
+<hr>
+
 <section class="he-section" id="priority-implementation-queue">
-  <div class="he-section__num">07 · 📋 Priority Implementation Queue</div>
+  <div class="he-section__num">08 · 📋 Priority Implementation Queue</div>
   <h2 class="he-section__title">📋 Priority Implementation Queue</h2><p>All remaining items ordered from <strong>quickest/easiest</strong> to <strong>longest/hardest</strong>.
 Use this queue to pick the next item to implement.</p>
 <h3 id="tier-1-quick-wins-under-1-hour-each">Tier 1 — Quick Wins (under 1 hour each)</h3><table>
@@ -356,7 +384,7 @@ Use this queue to pick the next item to implement.</p>
 <hr>
 
 <section class="he-section" id="hidden-features-to-unhide-later">
-  <div class="he-section__num">08 · 🔒 Hidden Features (To Unhide Later)</div>
+  <div class="he-section__num">09 · 🔒 Hidden Features (To Unhide Later)</div>
   <h2 class="he-section__title">🔒 Hidden Features (To Unhide Later)</h2><p>The following features are fully implemented but temporarily hidden. To re-enable, follow the steps below.</p>
 <h3 id="1-scheduled-pdf-reports-item-13">1. Scheduled PDF Reports (Item 13)</h3><ul>
 <li><strong>File</strong>: <code>app/api/cron/scheduled-reports/route.ts</code></li>
@@ -409,6 +437,11 @@ Use this queue to pick the next item to implement.</p>
     <li class="he-toc__l2"><a href="#6-security-compliance">🔐 6. Security &amp; Compliance</a></li>
     <li class="he-toc__l3"><a href="#audit-trail-enhancements">Audit Trail Enhancements</a></li>
     <li class="he-toc__l3"><a href="#access-control">Access Control</a></li>
+    <li class="he-toc__l2"><a href="#7-pdf-template-system-document-verification">📄 7. PDF Template System &amp; Document Verification</a></li>
+    <li class="he-toc__l3"><a href="#template-configuration">Template Configuration</a></li>
+    <li class="he-toc__l3"><a href="#signature-management">Signature Management</a></li>
+    <li class="he-toc__l3"><a href="#document-verification-qr-codes">Document Verification (QR Codes)</a></li>
+    <li class="he-toc__l3"><a href="#enhanced-preview">Enhanced Preview</a></li>
     <li class="he-toc__l2"><a href="#priority-implementation-queue">📋 Priority Implementation Queue</a></li>
     <li class="he-toc__l3"><a href="#tier-1-quick-wins-under-1-hour-each">Tier 1 — Quick Wins (under 1 hour each)</a></li>
     <li class="he-toc__l3"><a href="#tier-2-medium-tasks-1-4-hours-each">Tier 2 — Medium Tasks (1-4 hours each)</a></li>

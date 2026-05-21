@@ -78,7 +78,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           {/* Footer */}
           <div className="border-t border-slate-100 p-6 text-center">
             <p className="text-[10px] tracking-widest text-slate-400 uppercase">
-              &copy; {new Date().getFullYear()} Aerojet Aviation. All rights reserved.
+              &copy; {new Date().getFullYear()} Aerojet Aviation Training Academy. All rights
+              reserved.
             </p>
           </div>
         </div>

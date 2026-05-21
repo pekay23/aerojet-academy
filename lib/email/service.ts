@@ -195,7 +195,7 @@ export const wrapEmail = async (title: string, bodyContent: string, recipientEma
                   <a href="${baseUrl}" style="color: ${COLORS.sky} !important;">Website</a>
                   <a href="${baseUrl}/login" style="color: ${COLORS.sky} !important;">Portal</a>
                 </div>
-                <div class="copyright" style="color: #94a3b8 !important; opacity: 1 !important;">&copy; ${new Date().getFullYear()} Aerojet Aviation. All rights reserved.</div>
+                <div class="copyright" style="color: #94a3b8 !important; opacity: 1 !important;">&copy; ${new Date().getFullYear()} Aerojet Aviation Training Academy. All rights reserved.</div>
                 <div style="margin-top: 8px; font-size: 11px; color: #94a3b8; text-align: center;">
                   <a href="${baseUrl}/unsubscribe${recipientEmail ? `?email=${encodeURIComponent(recipientEmail)}` : ''}" style="color: #94a3b8; text-decoration: underline;">Unsubscribe</a> from marketing emails.
                 </div>
@@ -220,7 +220,7 @@ export async function renderRegistrationEmail(
   const finance = await getFinanceConfig()
   const config = await getRegistrationConfig()
 
-  const defaultSubject = 'Welcome to Aerojet Aviation - Registration Received'
+  const defaultSubject = 'Welcome to Aerojet Aviation Training Academy - Registration Received'
   const defaultBody = `
     <div style="margin-bottom: 24px;">
       <div style="color: #16a34a; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">
@@ -311,7 +311,7 @@ export async function renderRegistrationEmail(
       currency: config.currency,
       fee: config.fee,
       bankName: finance.bankName || 'FNB Ghana',
-      bankAccountName: finance.bankAccountName || 'Aerojet Aviation Foundation',
+      bankAccountName: finance.bankAccountName || 'Aerojet Aviation Training Academy Foundation',
       bankAccountNumber: finance.bankAccountNumber || 'N/A',
       bankBranch: (finance as any).bankBranch || 'N/A',
       bankSwift: (finance as any).bankSwift || 'N/A',
@@ -339,7 +339,7 @@ export async function sendRegistrationEmail(
 
   return sendEmail({
     to: email,
-    subject: 'Welcome to Aerojet Aviation - Registration Received', // This is still used by Resend but the rendered HTML has its own title
+    subject: 'Welcome to Aerojet Aviation Training Academy - Registration Received', // This is still used by Resend but the rendered HTML has its own title
     html,
   })
 }
@@ -353,7 +353,7 @@ export async function renderEmailVerificationEmail(
   verifyToken: string,
   recipientEmail?: string
 ) {
-  const defaultSubject = 'Verify Your Email — Aerojet Aviation'
+  const defaultSubject = 'Verify Your Email — Aerojet Aviation Training Academy'
   const defaultBody = `
     <p class="text">Hi {{firstName}},</p>
     <p class="text">
@@ -403,7 +403,7 @@ export async function sendEmailVerificationEmail(
 
   return sendEmail({
     to: email,
-    subject: 'Aerojet Aviation - Verify Your Email',
+    subject: 'Aerojet Aviation Training Academy - Verify Your Email',
     html,
   })
 }
@@ -479,7 +479,7 @@ export async function sendActivationEmail(
 
   return sendEmail({
     to: email,
-    subject: 'Aerojet Aviation - Account Activated',
+    subject: 'Aerojet Aviation Training Academy - Account Activated',
     html,
   })
 }
@@ -540,7 +540,7 @@ export async function sendStudentPromotionEmail(
 
   return sendEmail({
     to: email,
-    subject: 'Aerojet Aviation - Welcome, Student!',
+    subject: 'Aerojet Aviation Training Academy - Welcome, Student!',
     html,
   })
 }
@@ -599,7 +599,7 @@ export async function sendPoolConfirmedEmail(
 
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation - Exam Booking Confirmed: ${poolName}`,
+    subject: `Aerojet Aviation Training Academy - Exam Booking Confirmed: ${poolName}`,
     html,
   })
 }
@@ -647,7 +647,7 @@ export async function sendPasswordResetEmail(email: string, firstName: string, r
 
   return sendEmail({
     to: email,
-    subject: 'Aerojet Aviation - Password Reset',
+    subject: 'Aerojet Aviation Training Academy - Password Reset',
     html,
   })
 }
@@ -697,7 +697,7 @@ export async function sendPaymentApprovedEmail(
 
   return sendEmail({
     to: email,
-    subject: 'Aerojet Aviation - Payment Approved',
+    subject: 'Aerojet Aviation Training Academy - Payment Approved',
     html,
   })
 }
@@ -828,7 +828,7 @@ export async function sendPaymentRejectedEmail(
 
   return sendEmail({
     to: email,
-    subject: 'Aerojet Aviation - Payment Rejected',
+    subject: 'Aerojet Aviation Training Academy - Payment Rejected',
     html,
   })
 }
@@ -873,7 +873,7 @@ export async function sendPoolFailedEmail(
   const html = await renderPoolFailedEmail(firstName, poolName, examDate, email)
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation - Exam Booking Cancelled: ${poolName}`,
+    subject: `Aerojet Aviation Training Academy - Exam Booking Cancelled: ${poolName}`,
     html,
   })
 }
@@ -936,7 +936,7 @@ export async function sendPoolApproachingConfirmationEmail(
   )
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation - Pool Almost Confirmed: ${poolName}`,
+    subject: `Aerojet Aviation Training Academy - Pool Almost Confirmed: ${poolName}`,
     html,
   })
 }
@@ -964,7 +964,7 @@ export async function sendEventGoEmail(email: string, firstName: string, eventNa
   const html = await renderEventGoEmail(firstName, eventName, email)
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation - Exam Event Confirmed: ${eventName}`,
+    subject: `Aerojet Aviation Training Academy - Exam Event Confirmed: ${eventName}`,
     html,
   })
 }
@@ -1041,7 +1041,7 @@ export async function sendPaymentDeadlineEmail(
   )
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation - Payment Reminder (${daysRemaining} Days Left)`,
+    subject: `Aerojet Aviation Training Academy - Payment Reminder (${daysRemaining} Days Left)`,
     html,
   })
 }
@@ -1279,7 +1279,7 @@ export async function sendWaitlistPromotionEmail(
   const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, email)
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation - Waitlist Promotion: ${poolName}`,
+    subject: `Aerojet Aviation Training Academy - Waitlist Promotion: ${poolName}`,
     html,
   })
 }
@@ -1314,7 +1314,7 @@ export async function sendWithdrawalConfirmationEmail(
   const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, email)
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation - Withdrawal Confirmed: ${poolName}`,
+    subject: `Aerojet Aviation Training Academy - Withdrawal Confirmed: ${poolName}`,
     html,
   })
 }
@@ -1353,7 +1353,7 @@ export async function sendBundlePurchaseEmail(
   const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, email)
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation - Bundle Purchased: ${bundleType}`,
+    subject: `Aerojet Aviation Training Academy - Bundle Purchased: ${bundleType}`,
     html,
   })
 }
@@ -1388,7 +1388,7 @@ export async function sendAmbassadorPromotionEmail(
   const html = await wrapEmail(replacePlaceholders(template.subject, { firstName }), body, email)
   return sendEmail({
     to: email,
-    subject: `Aerojet Aviation - Ambassador Status Achieved!`,
+    subject: `Aerojet Aviation Training Academy - Ambassador Status Achieved!`,
     html,
   })
 }

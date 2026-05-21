@@ -21,7 +21,7 @@ const baseLayout = async (content: string, title?: string) => {
           <!-- Header -->
           <tr>
             <td align="center" style="padding:32px 24px;background-color:#ffffff;">
-              <img src="${appUrl}/images/logos/AATA_logo_hor_onWhite.png" alt="Aerojet Aviation" width="220" style="display:block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
+              <img src="${appUrl}/images/logos/AATA_logo_hor_onWhite.png" alt="Aerojet Aviation Training Academy" width="220" style="display:block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
             </td>
           </tr>
           <!-- Content -->
@@ -34,7 +34,7 @@ const baseLayout = async (content: string, title?: string) => {
           <tr>
             <td style="background-color:#002a5c;padding:32px 24px;border-top:1px solid #002a5c;">
               <div style="text-align:center;margin-bottom:16px;">
-                <img src="${appUrl}/images/logos/ATA_logo_hor_onDark.png" alt="Aerojet Aviation" width="160" style="display:inline-block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
+                <img src="${appUrl}/images/logos/ATA_logo_hor_onDark.png" alt="Aerojet Aviation Training Academy" width="160" style="display:inline-block;outline:none;border:none;text-decoration:none;max-width:100%;height:auto;" />
               </div>
               <p style="margin:0 0 4px 0;font-size:14px;color:#ffffff;text-align:center;font-weight:600;">
                 Aerojet Aviation Training Academy
@@ -49,7 +49,7 @@ const baseLayout = async (content: string, title?: string) => {
                 +233-20-984-8423
               </p>
               <p style="margin:0;font-size:12px;color:#cbd5e1;text-align:center;">
-                &copy; ${currentYear} Aerojet Aviation. All rights reserved.
+                &copy; ${currentYear} Aerojet Aviation Training Academy. All rights reserved.
               </p>
             </td>
           </tr>
@@ -133,7 +133,11 @@ export async function paymentApprovedEmail(name: string, amount: string, referen
   )
 }
 
-export async function promotionToStudentEmail(name: string, studentId: string, academyEmail: string) {
+export async function promotionToStudentEmail(
+  name: string,
+  studentId: string,
+  academyEmail: string
+) {
   return await baseLayout(
     `
     <h2 style="color:#0f172a;">Congratulations, ${name}!</h2>
@@ -171,7 +175,12 @@ export async function poolConfirmedEmail(
   )
 }
 
-export async function poolFailedEmail(name: string, poolName: string, examDate: string, releasedAmount?: string) {
+export async function poolFailedEmail(
+  name: string,
+  poolName: string,
+  examDate: string,
+  releasedAmount?: string
+) {
   const amountText = releasedAmount || 'your reserved funds'
   return await baseLayout(
     `
@@ -209,7 +218,12 @@ export async function examReminderEmail(
   )
 }
 
-export async function contactFormEmail(name: string, email: string, subject: string, message: string) {
+export async function contactFormEmail(
+  name: string,
+  email: string,
+  subject: string,
+  message: string
+) {
   return await baseLayout(
     `
     <h2 style="color:#0f172a;">New Contact Form Submission</h2>

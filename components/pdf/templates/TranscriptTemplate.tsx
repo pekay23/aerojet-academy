@@ -23,20 +23,20 @@ const COLORS = {
 
 const styles = StyleSheet.create({
   section: {
-    marginBottom: 20,
+    marginBottom: 18,
   },
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 'bold',
     color: COLORS.headerBg,
-    marginBottom: 10,
-    letterSpacing: 0.5,
+    marginBottom: 8,
+    letterSpacing: 0.4,
     textTransform: 'uppercase',
   },
   // Student identity card
   studentCard: {
     flexDirection: 'row',
-    marginBottom: 20,
+    marginBottom: 18,
     borderWidth: 1,
     borderColor: COLORS.border,
     borderRadius: 4,
@@ -44,26 +44,26 @@ const styles = StyleSheet.create({
   },
   studentCardLeft: {
     flex: 1,
-    padding: 12,
+    padding: 10,
     backgroundColor: COLORS.sectionBg,
   },
   studentCardRight: {
     flex: 1,
-    padding: 12,
+    padding: 10,
     backgroundColor: COLORS.oddRow,
   },
   infoRow: {
-    marginBottom: 8,
+    marginBottom: 6,
   },
   infoLabel: {
-    fontSize: 7,
+    fontSize: 6.5,
     color: COLORS.label,
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
     textTransform: 'uppercase',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   infoValue: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: 'bold',
     color: COLORS.value,
   },
@@ -78,14 +78,16 @@ const styles = StyleSheet.create({
   tableHeader: {
     flexDirection: 'row',
     backgroundColor: COLORS.headerBg,
-    padding: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
   },
   tableRow: {
     flexDirection: 'row',
     borderBottomWidth: 0.5,
     borderBottomColor: COLORS.border,
-    padding: 7,
-    minHeight: 28,
+    paddingVertical: 5,
+    paddingHorizontal: 8,
+    minHeight: 24,
     alignItems: 'center',
   },
   evenRow: {
@@ -94,36 +96,36 @@ const styles = StyleSheet.create({
   oddRow: {
     backgroundColor: COLORS.oddRow,
   },
-  colCode: { width: '12%' },
-  colCourse: { width: '36%' },
+  colCode: { width: '10%' },
+  colCourse: { width: '38%' },
   colCredits: { width: '12%', alignItems: 'center' as const },
   colGrade: { width: '20%', alignItems: 'center' as const },
   colStatus: { width: '20%', alignItems: 'center' as const },
   headerText: {
-    fontSize: 8,
+    fontSize: 7,
     fontWeight: 'bold',
     color: COLORS.headerText,
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
     textTransform: 'uppercase',
   },
   rowText: {
-    fontSize: 9,
+    fontSize: 8,
     color: COLORS.text,
   },
   rowTextBold: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 'bold',
     color: COLORS.text,
   },
   // Status badges
   statusBadge: {
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
     paddingVertical: 2,
     borderRadius: 3,
-    fontSize: 7,
+    fontSize: 6.5,
     fontWeight: 'bold',
     textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
   },
   statusPass: {
     backgroundColor: COLORS.passBg,
@@ -141,28 +143,29 @@ const styles = StyleSheet.create({
   summaryRow: {
     flexDirection: 'row',
     backgroundColor: COLORS.sectionBg,
-    padding: 8,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
     borderTopWidth: 1.5,
     borderTopColor: COLORS.headerBg,
   },
   summaryText: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 'bold',
     color: COLORS.headerBg,
   },
   // Disclaimer
   disclaimer: {
-    marginTop: 20,
-    padding: 10,
+    marginTop: 16,
+    padding: 8,
     backgroundColor: COLORS.sectionBg,
     borderRadius: 3,
     borderLeftWidth: 3,
     borderLeftColor: COLORS.headerBg,
   },
   disclaimerText: {
-    fontSize: 7,
+    fontSize: 6.5,
     color: COLORS.subtext,
-    lineHeight: 1.5,
+    lineHeight: 1.4,
   },
 })
 

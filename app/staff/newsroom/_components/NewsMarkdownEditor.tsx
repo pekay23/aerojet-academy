@@ -3,6 +3,7 @@
 import { sanitizeHtml } from '@/lib/utils/sanitize'
 import { useEditor, EditorContent, Node, mergeAttributes } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
+import LinkExtension from '@tiptap/extension-link'
 import { Color } from '@tiptap/extension-color'
 import { TextStyle } from '@tiptap/extension-text-style'
 import { FontFamily } from '@tiptap/extension-font-family'
@@ -173,9 +174,10 @@ export default function NewsMarkdownEditor({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        link: {
-          openOnClick: false,
-        },
+        link: false,
+      }),
+      LinkExtension.configure({
+        openOnClick: false,
       }),
       TextStyle,
       Color,
@@ -214,34 +216,34 @@ export default function NewsMarkdownEditor({
   if (!editor) return null
 
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200 bg-white ring-offset-white focus-within:ring-2 focus-within:ring-aerojet-blue/20 dark:border-slate-800 dark:bg-slate-900/50 dark:ring-offset-slate-950">
+    <div className="focus-within:ring-aerojet-blue/20 flex flex-col rounded-2xl border border-slate-200 bg-white ring-offset-white focus-within:ring-2 dark:border-slate-800 dark:bg-slate-900/50 dark:ring-offset-slate-950">
       {/* Toolbar */}
       <div className="sticky top-0 z-10 flex flex-wrap items-center gap-1 border-b border-slate-100 bg-white/80 p-2 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80">
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('bold') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('bold') ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
         >
           <Bold className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('italic') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('italic') ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
         >
           <Italic className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('heading', { level: 1 }) ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('heading', { level: 1 }) ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
         >
           <Heading1 className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('heading', { level: 2 }) ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('heading', { level: 2 }) ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
         >
           <Heading2 className="h-4 w-4" />
         </button>
@@ -251,21 +253,21 @@ export default function NewsMarkdownEditor({
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('bulletList') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('bulletList') ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
         >
           <List className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('orderedList') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('orderedList') ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
         >
           <ListOrdered className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('blockquote') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('blockquote') ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
         >
           <Quote className="h-4 w-4" />
         </button>
@@ -280,7 +282,7 @@ export default function NewsMarkdownEditor({
               editor.chain().focus().setLink({ href: url }).run()
             }
           }}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('link') ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive('link') ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/60'}`}
         >
           <LinkIcon className="h-4 w-4" />
         </button>
@@ -306,21 +308,21 @@ export default function NewsMarkdownEditor({
         <button
           type="button"
           onClick={() => editor.chain().focus().setTextAlign('left').run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'left' }) ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'left' }) ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100'}`}
         >
           <AlignLeft className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().setTextAlign('center').run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'center' }) ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'center' }) ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100'}`}
         >
           <AlignCenter className="h-4 w-4" />
         </button>
         <button
           type="button"
           onClick={() => editor.chain().focus().setTextAlign('right').run()}
-          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'right' }) ? 'bg-blue-50 text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100'}`}
+          className={`flex h-8 w-8 items-center justify-center rounded-lg transition-colors ${editor.isActive({ textAlign: 'right' }) ? 'text-aerojet-blue bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400' : 'text-slate-500 transition-all duration-150 ease-out hover:bg-slate-100'}`}
         >
           <AlignRight className="h-4 w-4" />
         </button>
@@ -374,7 +376,7 @@ export default function NewsMarkdownEditor({
             onClick={() => setMode('WRITE')}
             className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-widest uppercase transition-all ${
               mode === 'WRITE'
-                ? 'bg-white text-aerojet-blue shadow-sm dark:bg-slate-900 dark:text-white'
+                ? 'text-aerojet-blue bg-white shadow-sm dark:bg-slate-900 dark:text-white'
                 : 'text-slate-500 hover:bg-white/60 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-slate-200'
             }`}
           >
@@ -386,7 +388,7 @@ export default function NewsMarkdownEditor({
             onClick={() => setMode('SPLIT')}
             className={`hidden items-center gap-2 rounded-lg px-3 py-1.5 text-[10px] font-black tracking-widest uppercase transition-all lg:flex ${
               mode === 'SPLIT'
-                ? 'bg-white text-aerojet-blue shadow-sm dark:bg-slate-900 dark:text-white'
+                ? 'text-aerojet-blue bg-white shadow-sm dark:bg-slate-900 dark:text-white'
                 : 'text-slate-500 hover:bg-white/60 hover:text-slate-700 dark:text-slate-400 dark:hover:bg-slate-700/50 dark:hover:text-slate-200'
             }`}
           >
@@ -638,7 +640,9 @@ export default function NewsMarkdownEditor({
               <Input
                 id="media-url"
                 placeholder={
-                  pendingMediaType === 'IMAGE' ? 'https://example.com/image.jpg' : 'https://example.com/audio.mp3'
+                  pendingMediaType === 'IMAGE'
+                    ? 'https://example.com/image.jpg'
+                    : 'https://example.com/audio.mp3'
                 }
                 value={mediaUrl}
                 onChange={(e) => setMediaUrl(e.target.value)}
@@ -675,7 +679,6 @@ export default function NewsMarkdownEditor({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </div>
   )
 }

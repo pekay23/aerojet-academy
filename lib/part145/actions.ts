@@ -8,7 +8,7 @@ import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 
 /**
  * Audit 12 — the academy is an EASA Part-147 training organisation linked to a
- * Part-145 maintenance organisation (Aerojet Aviation or a partner). Students
+ * Part-145 maintenance organisation (Aerojet Aviation Training Academy or a partner). Students
  * pass through the academy and transition their training data into the linked
  * Part-145. This is NOT a full Part-145 build — only the data hand-off.
  */
@@ -54,12 +54,7 @@ export async function initiate145Transfer(studentQuery: string, organisationId: 
     const q = studentQuery.trim()
     const student = await prismaUnfiltered.user.findFirst({
       where: {
-        OR: [
-          { id: q },
-          { email: q },
-          { academyEmail: q },
-          { studentProfile: { studentId: q } },
-        ],
+        OR: [{ id: q }, { email: q }, { academyEmail: q }, { studentProfile: { studentId: q } }],
       },
       select: {
         id: true,

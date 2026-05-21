@@ -29,19 +29,18 @@ const styles = StyleSheet.create({
     paddingTop: 15,
     paddingBottom: 80, // space for the fixed footer
   },
-  // Watermark
+  // Watermark — centered in A4 page (595 x 842 pt)
+  // Position: (595 - 280) / 2 = 157.5 left, (842 - 280) / 2 = 281 top
   watermarkContainer: {
     position: 'absolute',
-    top: '25%',
-    left: '15%',
-    width: '70%',
-    zIndex: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
+    top: 281,
+    left: 157.5,
+    width: 280,
+    height: 280,
   },
   watermarkImage: {
-    width: '100%',
-    height: 'auto',
+    width: 280,
+    height: 280,
   },
 
   // ─── Header (white background, matching email style) ───
@@ -61,39 +60,43 @@ const styles = StyleSheet.create({
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    maxWidth: '65%',
   },
   headerLogo: {
-    height: 38,
-    width: 38,
+    height: 32,
+    width: 120,
+    marginRight: 10,
   },
   headerTextContainer: {
     flexDirection: 'column',
   },
   academyName: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 'bold',
     color: BRAND.navy,
     letterSpacing: 0.2,
   },
   academySubtitle: {
-    fontSize: 7,
+    fontSize: 6.5,
     color: BRAND.slate,
-    letterSpacing: 0.8,
+    letterSpacing: 0.6,
     textTransform: 'uppercase',
     marginTop: 2,
   },
   documentTitle: {
-    fontSize: 9,
+    fontSize: 8,
     color: BRAND.slate,
     textTransform: 'uppercase',
-    letterSpacing: 1.2,
+    letterSpacing: 1,
     fontWeight: 'bold',
+    maxWidth: 180,
+    textAlign: 'right',
   },
   // Accent bar below header
   headerAccent: {
     height: 2.5,
     backgroundColor: BRAND.navy,
+    marginTop: 10,
   },
 
   // ─── Footer (navy background, matching email footer style) ───
@@ -104,26 +107,26 @@ const styles = StyleSheet.create({
     right: 0,
     backgroundColor: BRAND.navy,
     paddingHorizontal: 40,
-    paddingVertical: 14,
+    paddingVertical: 12,
   },
   footerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: 6,
   },
   footerLeft: {
     flexDirection: 'column',
-    maxWidth: '50%',
+    maxWidth: '55%',
   },
   footerAcademyName: {
-    fontSize: 9,
+    fontSize: 8,
     fontWeight: 'bold',
     color: BRAND.white,
-    marginBottom: 3,
+    marginBottom: 2,
   },
   footerAddress: {
-    fontSize: 7,
+    fontSize: 6.5,
     color: '#94a3b8',
     lineHeight: 1.4,
   },
@@ -132,7 +135,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   footerContact: {
-    fontSize: 7,
+    fontSize: 6.5,
     color: '#cbd5e1',
     textAlign: 'right',
     lineHeight: 1.4,
@@ -140,7 +143,7 @@ const styles = StyleSheet.create({
   footerDivider: {
     height: 0.5,
     backgroundColor: 'rgba(255,255,255,0.15)',
-    marginBottom: 6,
+    marginBottom: 5,
   },
   footerBottom: {
     flexDirection: 'row',
@@ -152,19 +155,19 @@ const styles = StyleSheet.create({
     color: '#64748b',
   },
   pageNumber: {
-    fontSize: 7,
+    fontSize: 6.5,
     color: '#94a3b8',
     fontWeight: 'bold',
   },
   copyright: {
-    fontSize: 6,
+    fontSize: 5.5,
     color: '#64748b',
+    marginTop: 3,
   },
 
   // Content area
   content: {
     flex: 1,
-    zIndex: 10,
   },
 })
 
@@ -182,11 +185,11 @@ export interface PDFBaseTemplateProps {
 
 export function PDFBaseTemplate({
   title,
-  academyName = 'Aerojet Aviation Academy',
+  academyName = 'Aerojet Aviation Training Academy',
   academySubtitle = 'EASA Part-147 Approved Training Organisation',
   logoUrl,
   watermarkUrl,
-  watermarkOpacity = 0.08,
+  watermarkOpacity = 0.15,
   footerText,
   orientation = 'portrait',
   children,
@@ -204,22 +207,17 @@ export function PDFBaseTemplate({
   return (
     <Document>
       <Page size="A4" orientation={orientation} style={styles.page}>
-        {/* Watermark */}
-        {watermarkUrl && (
-          <View fixed style={[styles.watermarkContainer, { opacity: watermarkOpacity }]}>
-            <Image src={watermarkUrl} style={styles.watermarkImage} />
-          </View>
-        )}
-
         {/* Header */}
         <View fixed style={styles.headerContainer}>
           <View style={styles.header}>
             <View style={styles.headerLeft}>
               {logoUrl && <Image src={logoUrl} style={styles.headerLogo} />}
-              <View style={styles.headerTextContainer}>
-                <Text style={styles.academyName}>{academyName}</Text>
-                <Text style={styles.academySubtitle}>{academySubtitle}</Text>
-              </View>
+              {!logoUrl && (
+                <View style={styles.headerTextContainer}>
+                  <Text style={styles.academyName}>{academyName}</Text>
+                  <Text style={styles.academySubtitle}>{academySubtitle}</Text>
+                </View>
+              )}
             </View>
             <Text style={styles.documentTitle}>{title}</Text>
           </View>
@@ -229,6 +227,35 @@ export function PDFBaseTemplate({
         {/* Main Content */}
         <View style={styles.contentWrapper}>
           <View style={styles.content}>{children}</View>
+        </View>
+
+        {/* Watermark — rendered AFTER content so it's visible above opaque backgrounds */}
+        <View
+          fixed
+          style={{
+            position: 'absolute',
+            top: 250,
+            left: 0,
+            right: 0,
+            alignItems: 'center',
+            justifyContent: 'center',
+            opacity: watermarkOpacity,
+          }}
+        >
+          {watermarkUrl && <Image src={watermarkUrl} style={{ width: 280, height: 280 }} />}
+          <Text
+            style={{
+              position: 'absolute',
+              color: BRAND.slate,
+              fontSize: 60,
+              fontWeight: 'bold',
+              transform: 'rotate(-45deg)',
+              opacity: 0.3,
+              letterSpacing: 4,
+            }}
+          >
+            CONFIDENTIAL
+          </Text>
         </View>
 
         {/* Footer (navy background, mirrors email footer styling) */}
@@ -242,7 +269,7 @@ export function PDFBaseTemplate({
             </View>
             <View style={styles.footerRight}>
               <Text style={styles.footerContact}>
-                contact@aerojet-academy.com{'\n'}+233 209 848 423
+                trainingprograms@aerojet-academy.com{'\n'}+233 209 848 423
               </Text>
             </View>
           </View>
@@ -256,7 +283,9 @@ export function PDFBaseTemplate({
               render={({ pageNumber, totalPages }) => `Page ${pageNumber} / ${totalPages}`}
             />
           </View>
-          <Text style={styles.copyright}>© {year} Aerojet Aviation. All rights reserved.</Text>
+          <Text style={styles.copyright}>
+            © {year} Aerojet Aviation Training Academy. All rights reserved.
+          </Text>
         </View>
       </Page>
     </Document>
