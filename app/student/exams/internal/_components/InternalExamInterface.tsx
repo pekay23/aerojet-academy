@@ -61,6 +61,10 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   const [reportReason, setReportReason] = useState('')
   const [reportSubmitting, setReportSubmitting] = useState(false)
   const [reportSubmitted, setReportSubmitted] = useState(false)
+  const [showQuestionReport, setShowQuestionReport] = useState<string | null>(null)
+  const [questionReportReason, setQuestionReportReason] = useState('')
+  const [questionReportSubmitting, setQuestionReportSubmitting] = useState(false)
+  const [reportedQuestions, setReportedQuestions] = useState<Set<string>>(new Set())
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // Load or resume session
@@ -186,6 +190,29 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
       }
     } catch { /* silent */ }
     finally { setReportSubmitting(false) }
+  }
+
+  const handleSubmitQuestionReport = async () => {
+    if (!questionReportReason.trim() || questionReportSubmitting || !showQuestionReport) return
+    setQuestionReportSubmitting(true)
+    try {
+      const res = await fetch('/api/student/exams/internal/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          sessionId,
+          questionId: showQuestionReport,
+          reason: questionReportReason.trim(),
+        }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        setReportedQuestions(prev => new Set([...prev, showQuestionReport]))
+        setShowQuestionReport(null)
+        setQuestionReportReason('')
+      }
+    } catch { /* silent */ }
+    finally { setQuestionReportSubmitting(false) }
   }
 
   // Format timer
@@ -384,11 +411,28 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
                     </div>
                   </div>
                 </div>
-                {currentQ.syllabusRef && (
-                  <div className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                    {currentQ.syllabusRef}
-                  </div>
-                )}
+                <div className="flex items-center gap-2">
+                  {currentQ.syllabusRef && (
+                    <div className="rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                      {currentQ.syllabusRef}
+                    </div>
+                  )}
+                  {reportedQuestions.has(currentQ.id) ? (
+                    <div className="flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[10px] font-bold text-amber-600 dark:bg-amber-900/20 dark:text-amber-400">
+                      <Flag className="h-3 w-3" />
+                      Reported
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowQuestionReport(currentQ.id)}
+                      className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1.5 text-[10px] font-bold text-slate-400 transition-colors hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600 dark:border-slate-700 dark:hover:border-amber-700 dark:hover:bg-amber-900/20 dark:hover:text-amber-400"
+                      title="Report this question"
+                    >
+                      <Flag className="h-3 w-3" />
+                      Report
+                    </button>
+                  )}
+                </div>
               </div>
 
               <div className="prose prose-slate dark:prose-invert max-w-none">
@@ -561,6 +605,44 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
                 className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-600 px-4 py-3 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Submit'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Per-Question Report Modal */}
+      {showQuestionReport && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <div className="mb-1 flex items-center gap-2">
+              <Flag className="h-5 w-5 text-amber-500" />
+              <h3 className="text-lg font-black text-slate-900 dark:text-white">Report Question</h3>
+            </div>
+            <p className="text-xs text-slate-500">
+              Flag this question for admin review. If the question is found to be incorrect, admin can adjust grading.
+            </p>
+            <textarea
+              value={questionReportReason}
+              onChange={(e) => setQuestionReportReason(e.target.value)}
+              placeholder="What's wrong with this question? (e.g. unclear wording, wrong answer options, missing information...)"
+              className="mt-4 h-28 w-full resize-none rounded-xl border border-slate-200 bg-slate-50 p-3 text-sm text-slate-900 placeholder:text-slate-400 focus:border-aerojet-blue focus:outline-none focus:ring-1 focus:ring-aerojet-blue dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              maxLength={1000}
+            />
+            <div className="mt-1 text-right text-[10px] text-slate-400">{questionReportReason.length}/1000</div>
+            <div className="mt-4 flex gap-3">
+              <button
+                onClick={() => { setShowQuestionReport(null); setQuestionReportReason('') }}
+                className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitQuestionReport}
+                disabled={!questionReportReason.trim() || questionReportSubmitting}
+                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-amber-600 disabled:opacity-50"
+              >
+                {questionReportSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Submit Report'}
               </button>
             </div>
           </div>

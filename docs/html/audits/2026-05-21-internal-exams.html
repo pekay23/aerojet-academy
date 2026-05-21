@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Internal Exams Audit — 2026-05-21 · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Audits</p>
+  <h1 class="he-title">Internal Exams Audit — 2026-05-21</h1>
+  <p class="he-deck">Reviews commits <code>94375e5</code> (initial system) and <code>b928b76</code> (hardening) — adding the InternalExam testing engine, admin operations dashboard, student reporting, and the policy shift to admin-controlled publication.</p>
+</header>
+<p><strong>Scope</strong>: every file touched between those two commits plus a regression
+check against the prior baseline.</p>
+
+<section class="he-section" id="verification">
+  <div class="he-section__num">01 · Verification</div>
+  <h2 class="he-section__title">Verification</h2><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>bun run type-check</code></td>
+<td>✅ exit 0</td>
+</tr>
+<tr>
+<td><code>bun run test --run</code></td>
+<td>✅ <strong>116/116</strong> (14 new tests since the last audit)</td>
+</tr>
+<tr>
+<td><code>bun run build</code></td>
+<td>Compiles cleanly (Recharts width warnings already silenced; no new warnings introduced)</td>
+</tr>
+</tbody></table>
+<hr>
+
+<section class="he-section" id="what-landed">
+  <div class="he-section__num">02 · What landed</div>
+  <h2 class="he-section__title">What landed</h2><h3 id="schema-prismaschemaprisma">Schema (<code>prisma/schema.prisma</code>)</h3><ul>
+<li><strong><code>InternalExamSession.isPublished: Boolean @default(false)</code></strong> — flips on
+when admin reviews and releases results. Gates <code>score</code>/<code>passed</code> visibility
+on every student-facing endpoint.</li>
+<li><strong><code>InternalExamReport</code></strong> — student-flagged issue tickets per session.
+Three statuses (<code>PENDING</code> / <code>REVIEWED</code> / <code>RESOLVED</code>) + <code>reason</code>,
+<code>resolvedAt</code>. Cascading deletes when the session is removed.</li>
+<li><strong><code>InternalExamReportStatus</code></strong> enum.</li>
+<li><strong><code>User.internalExamReports</code></strong> back-relation.</li>
+</ul>
+<h3 id="routes-staff-operations">Routes — staff operations</h3><table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>GET /api/staff/exams/internal/operations/sessions</code></td>
+<td>List sessions with full answers + reports; filter by <code>status</code> / <code>bankId</code>. Take 200.</td>
+</tr>
+<tr>
+<td><code>POST /api/staff/exams/internal/operations/publish</code></td>
+<td>Bulk publish <code>COMPLETED</code> / <code>TIMED_OUT</code> sessions (sets <code>isPublished: true</code>).</td>
+</tr>
+<tr>
+<td><code>POST /api/staff/exams/internal/operations/void</code></td>
+<td>Void a session + resolve its pending reports. Voiding becomes the <strong>only</strong> retake path.</td>
+</tr>
+</tbody></table>
+<h3 id="routes-student">Routes — student</h3><table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>POST /api/student/exams/internal/submit</code></td>
+<td>No longer returns <code>score</code>/<code>passed</code> (<code>pendingReview: true</code> placeholder).</td>
+</tr>
+<tr>
+<td><code>GET /api/student/exams/internal/progress</code></td>
+<td>Adds <code>isPublished</code> + <code>pendingReview</code> per bank; <code>bestScore</code>/<code>passed</code> zero-gated behind <code>isPublished</code>.</td>
+</tr>
+<tr>
+<td><code>POST /api/student/exams/internal/report</code></td>
+<td>New — student flags a session issue (10-1000 chars, dedup on <code>PENDING</code>).</td>
+</tr>
+</tbody></table>
+<h3 id="engine-libinternal-examenginets">Engine (<code>lib/internal-exam/engine.ts</code>)</h3><ul>
+<li><code>getPoolHealth</code> and <code>selectInternalExamQuestions</code> now require
+<code>status: 'APPROVED'</code> — draft/pending questions never reach a student.</li>
+<li><code>selectInternalExamQuestions</code> uses <code>syllabusRef ?? subTopic</code> for stratified
+selection — finer-grained spread per topic.</li>
+<li><strong><code>checkEligibility</code> policy change</strong>: single-attempt only. Any non-<code>VOIDED</code>
+prior <code>COMPLETED</code>/<code>TIMED_OUT</code> session blocks retake. Retake-wait + ban-day
+logic removed from this code path — voiding by admin is the sole route.</li>
+</ul>
+<h3 id="ui-staff">UI — staff</h3><ul>
+<li>New <code>&lt;ExamOperations&gt;</code> (479 lines) — Live / Review / Published / Voided
+tabs, 15s auto-refresh on Live, bulk publish, per-session detail with
+per-answer correct/incorrect marking, void button.</li>
+<li><code>&lt;InternalExamPageTabs&gt;</code> switches between the existing <strong>Banks</strong> view and
+the new <strong>Operations</strong> view.</li>
+</ul>
+<h3 id="ui-student">UI — student</h3><ul>
+<li><code>&lt;InternalExamInterface&gt;</code> adds the &quot;Pending Review&quot; screen after submission
+with a Report Issue modal (1000-char limit, dedup on pending report).</li>
+<li><code>&lt;InternalExamDashboard&gt;</code> hides scores until <code>isPublished</code>, shows
+<code>Hourglass</code> + &quot;Pending Review&quot; pill, removes the multi-attempt UI strip
+(suspension dates, retake countdown).</li>
+<li>Bank cards now show <strong>module/course codes only</strong> — no subject topic names.</li>
+</ul>
+<h3 id="seed">Seed</h3><ul>
+<li><code>scripts/seed_internal_questions.ts</code> — adds 15 sample questions marked
+<code>APPROVED</code> to the first available bank. Useful for dev/CI.</li>
+</ul>
+<hr>
+
+<section class="he-section" id="findings">
+  <div class="he-section__num">03 · Findings</div>
+  <h2 class="he-section__title">Findings</h2><h3 id="critical">🔴 CRITICAL</h3><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Evidence</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>EXAM-1</strong></td>
+<td><code>void/route.ts</code> writes to columns that don&#39;t exist in the schema</td>
+<td><a href="../../app/api/staff/exams/internal/operations/void/route.ts#L37-L43">void/route.ts:37-43</a> writes <code>voidedAt</code>, <code>voidedBy</code>, <code>voidReason</code> with <code>data: { … } as any</code>. None of those columns exist in <a href="../../prisma/schema.prisma"><code>InternalExamSession</code></a> — verified by <code>grep -nE &quot;voidedAt|voidedBy|voidReason&quot; prisma/schema.prisma</code> returning <strong>zero matches</strong>. The <code>as any</code> cast silences TypeScript, but at runtime Prisma will throw <code>PrismaClientValidationError: Unknown arg 'voidedAt'</code>. <strong>The void action will fail in production every time.</strong></td>
+<td>Either (a) add <code>voidedAt DateTime?</code>, <code>voidedBy String?</code>, <code>voidReason String?</code> to the model + <code>db:push</code>, OR (b) drop them from the route and rely on <code>updatedAt</code> + an AuditLog row for the trail. Recommended: (a) — admins want to see who voided what and why without joining audit_logs.</td>
+</tr>
+</tbody></table>
+<h3 id="high">🟡 HIGH</h3><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Evidence</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>EXAM-2</strong></td>
+<td>Privileged mutations missing <code>createAuditLog</code></td>
+<td><a href="../../app/api/staff/exams/internal/operations/publish/route.ts">publish/route.ts</a> and <a href="../../app/api/staff/exams/internal/operations/void/route.ts">void/route.ts</a> — no <code>createAuditLog</code> import or call. Both qualify per the CLAUDE.md convention: &quot;Every privileged mutation (role changes, refunds, withdrawals, certificate releases, permission grants) writes through <code>lib/audit/logger.ts</code>.&quot; Publishing exam results and voiding sessions are at least as privileged as those.</td>
+<td>Add a single <code>createAuditLog</code> call per route with <code>action: 'UPDATE'</code>, <code>entity: 'InternalExamSession'</code>, <code>description: \</code>Published ${count}`<code>/</code>description: `Voided session ${id}`<code>, and the </code>changes<code>diff (before/after</code>isPublished<code>or</code>status`).</td>
+</tr>
+<tr>
+<td><strong>EXAM-3</strong></td>
+<td>Status leakage on <code>progress/route.ts</code> — <code>entry.status</code> reflects the OLDEST attempt</td>
+<td><a href="../../app/api/student/exams/internal/progress/route.ts#L99">progress/route.ts:99,124</a> — sessions are <code>orderBy: { createdAt: 'desc' }</code> (newest first), iterated top-to-bottom. Each loop iteration overwrites <code>entry.status = s.status</code>. Final value after the loop is the <strong>oldest</strong> session&#39;s status, not the newest. For a student whose newest attempt is <code>IN_PROGRESS</code> and a prior is <code>COMPLETED</code>, <code>entry.status</code> ends up <code>COMPLETED</code> and <code>pendingReview</code> evaluates incorrectly downstream.</td>
+<td>Either reverse the iteration order, or set <code>entry.status</code> only on the first pass (when the entry is created). Cleaner: pre-compute <code>entry.status</code> as <code>attempts[0]?.status</code> after the loop, since attempts are inserted in newest-first order.</td>
+</tr>
+<tr>
+<td><strong>EXAM-4</strong></td>
+<td><code>sessions/route.ts</code> accepts arbitrary <code>status</code> query without validation</td>
+<td><a href="../../app/api/staff/exams/internal/operations/sessions/route.ts#L15">sessions/route.ts:15,19</a> passes <code>searchParams.get('status')</code> straight into <code>where.status</code>. Prisma will throw on an invalid value (e.g. <code>?status=banana</code>) — but the error message is <code>PrismaClientValidationError</code> and gets surfaced as a 500. Should be a 400 with a validation message.</td>
+<td>Wrap the route in a small <code>z.enum([...])</code> parse of the query params, mirroring the publish/void schemas.</td>
+</tr>
+<tr>
+<td><strong>EXAM-5</strong></td>
+<td><code>sessions/route.ts</code> returns every answer for every session — payload size risk</td>
+<td><a href="../../app/api/staff/exams/internal/operations/sessions/route.ts#L34-L48">sessions/route.ts:34-48</a> — <code>take: 200</code> × ~50 answers × full question text + options + correctAnswer. At 200 sessions this can easily exceed 5MB on the wire. Admins on the Live tab don&#39;t need the full answer detail.</td>
+<td>Split into list (no answers) + detail (<code>GET /…/sessions/[id]</code>). Keep <code>answers</code> only in the detail call. Or: keep current shape but <code>take: 50</code> and add pagination.</td>
+</tr>
+<tr>
+<td><strong>EXAM-6</strong></td>
+<td>Eligibility policy and submit accounting are inconsistent</td>
+<td><a href="../../app/api/student/exams/internal/submit/route.ts#L87-L105">submit/route.ts:87-105</a> still computes <code>retakeEligibleAt</code> + <code>banLiftDate</code> on every submission, even though <a href="../../lib/internal-exam/engine.ts">engine.ts:checkEligibility</a> now allows only one attempt — those fields are never re-read. Dead writes, but worse, they imply a multi-attempt model that no longer exists, which will confuse future maintainers.</td>
+<td>Remove the retake/ban computation from <code>submit/route.ts</code>. Keep the columns for migration safety, but stop populating them. Update the inline comment to reflect single-attempt + admin-void retake.</td>
+</tr>
+<tr>
+<td><strong>EXAM-7</strong></td>
+<td>New routes use <code>_ctx: any</code> instead of the typed route-context</td>
+<td><a href="../../app/api/staff/exams/internal/operations/sessions/route.ts#L11">sessions/route.ts:11</a>, <a href="../../app/api/staff/exams/internal/operations/void/route.ts#L17">void/route.ts:17</a>, <a href="../../app/api/staff/exams/internal/operations/publish/route.ts#L16">publish/route.ts:16</a>, <a href="../../app/api/student/exams/internal/report/route.ts#L14">report/route.ts:14</a>, <a href="../../app/api/student/exams/internal/submit/route.ts#L18">submit/route.ts:18</a>, <a href="../../app/api/student/exams/internal/progress/route.ts#L19">progress/route.ts:19</a>. Other routes in the codebase use the typed <code>ctx: { params: Promise&lt;…&gt; }</code> pattern. The <code>any</code> works for now but loses safety.</td>
+<td>These routes don&#39;t have dynamic params, so just drop the second parameter entirely: <code>withErrorHandler(async (req: NextRequest) =&gt; { … })</code>.</td>
+</tr>
+</tbody></table>
+<h3 id="medium">🟡 MEDIUM</h3><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Evidence</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>EXAM-8</strong></td>
+<td><code>(s as any).isPublished</code> / <code>(staff as any).id</code> escape hatches</td>
+<td><a href="../../app/api/staff/exams/internal/operations/sessions/route.ts#L79">sessions/route.ts:79</a>, <a href="../../app/api/student/exams/internal/progress/route.ts#L123">progress/route.ts:123</a>, <a href="../../app/api/staff/exams/internal/operations/void/route.ts#L40">void/route.ts:40</a>. The Prisma client should have <code>isPublished</code> typed after <code>bun run db:generate</code> ran (which it has — type-check passes). The <code>as any</code> was a workaround during dev and is no longer needed.</td>
+<td>Drop the casts. <code>s.isPublished</code> and <code>staff.id</code> are properly typed.</td>
+</tr>
+<tr>
+<td><strong>EXAM-9</strong></td>
+<td>Unused <code>apiError</code> import</td>
+<td><a href="../../app/api/staff/exams/internal/operations/sessions/route.ts#L3">sessions/route.ts:3</a> imports <code>apiError</code> but never calls it.</td>
+<td>Remove the import.</td>
+</tr>
+<tr>
+<td><strong>EXAM-10</strong></td>
+<td>Student <code>report/route.ts</code> doesn&#39;t notify staff</td>
+<td><a href="../../app/api/student/exams/internal/report/route.ts">report/route.ts</a> creates the row but never raises a dashboard alert, sends an email, or surfaces a badge. Admins discover reports only by opening the session detail in the Operations dashboard.</td>
+<td>Either (a) add an alert to <code>lib/analytics/dashboard-alerts.ts</code> (count of <code>PENDING</code> reports), or (b) emit a notification via <code>lib/email/sender.ts</code> to the exam-ops inbox. (a) is the lighter touch.</td>
+</tr>
+<tr>
+<td><strong>EXAM-11</strong></td>
+<td><code>subTopic</code> removed from student question display but still in the API/component type</td>
+<td><a href="../../app/student/exams/internal/_components/InternalExamInterface.tsx#L24">InternalExamInterface.tsx:24</a> — the field is declared but never rendered after the commit. Dead state.</td>
+<td>Either remove <code>subTopic</code> from the question response in the exam-start API, or keep it and use it (it&#39;s still useful for telemetry). Pick one.</td>
+</tr>
+<tr>
+<td><strong>EXAM-12</strong></td>
+<td><code>seed_internal_questions.ts</code> writes only 3 options when many UIs assume 4</td>
+<td><a href="../../scripts/seed_internal_questions.ts#L22">scripts/seed_internal_questions.ts:22</a> provides <code>['Option A is incorrect', 'Option B is the correct answer', 'Option C is also incorrect']</code> — three options. The exam interface renders all options from the array, so 3 will work, but most real EASA questions have 4 (A/B/C/D).</td>
+<td>Either rename to <code>seed_dev_questions.ts</code> (signals it&#39;s intentionally minimal), or pad the array to 4. Minor.</td>
+</tr>
+</tbody></table>
+<h3 id="low-stylistic">🟢 LOW / Stylistic</h3><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Evidence</th>
+<th>Fix</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>EXAM-13</strong></td>
+<td><code>ExamOperations.tsx</code> is 479 lines in a single file</td>
+<td>The component handles tabs, fetching, polling, void, publish, expand, error/success messages, and answer-detail render. Splittable into <code>&lt;OperationsTabs&gt;</code>, <code>&lt;SessionRow&gt;</code>, <code>&lt;AnswerDetail&gt;</code> — easier to test. Not blocking.</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>EXAM-14</strong></td>
+<td>15s polling interval on Operations may be aggressive</td>
+<td><code>setInterval(fetchSessions, 15000)</code> on the Live tab. With <code>take: 200</code> × full answers it&#39;s a chunky payload every 15s for any admin viewing the page. With the EXAM-5 fix (list vs detail split) this becomes cheap; until then, consider 30s or pause on tab-hidden (like <code>&lt;Heartbeat&gt;</code>).</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>EXAM-15</strong></td>
+<td>No <code>loading.tsx</code> for the new operations tab path</td>
+<td>The page is <code>/staff/exams/internal</code> (existing) with a new client tab inside it, so it inherits the existing <code>loading.tsx</code>. Fine, but worth noting that the Operations tab does its own loading skeleton inline — could lift to a sibling <code>loading.tsx</code> for first-paint.</td>
+<td></td>
+</tr>
+</tbody></table>
+<hr>
+
+<section class="he-section" id="things-done-right-worth-keeping-as-patterns">
+  <div class="he-section__num">04 · Things done right (worth keeping as patterns)</div>
+  <h2 class="he-section__title">Things done right (worth keeping as patterns)</h2><ol>
+<li><strong><code>isPublished</code> gating is applied on the API, not the UI</strong> — <code>progress/route.ts:196-197</code> zeros <code>bestScore</code>/<code>passed</code> server-side. A modified browser can&#39;t peek at scores. ✓</li>
+<li><strong><code>submit/route.ts</code> doesn&#39;t echo scores back</strong> — only <code>{ submitted, pendingReview, timedOut }</code>. ✓</li>
+<li><strong>Self-only check on student routes</strong> — <code>examSession.studentId !== session.user.id → 403</code>. ✓</li>
+<li><strong>Single-attempt policy enforced both in eligibility AND via the schema</strong> — voiding is the only escape hatch, and voided sessions are excluded from the eligibility count. ✓</li>
+<li><strong>Reports table has the right indexes</strong> — <code>[sessionId]</code>, <code>[studentId]</code>, <code>[status]</code>. ✓</li>
+<li><strong>Feature flag gating</strong> — every student endpoint short-circuits when <code>isInternalExamSystemEnabled()</code> returns false. ✓</li>
+<li><strong>Zod validation on every POST body</strong>. ✓</li>
+<li><strong>Tests grew with the feature</strong> — 102 → 116, +14 tests for the new code paths. ✓</li>
+</ol>
+<hr>
+
+<section class="he-section" id="recommended-priority-order">
+  <div class="he-section__num">05 · Recommended priority order</div>
+  <h2 class="he-section__title">Recommended priority order</h2><ol>
+<li><strong>🔴 EXAM-1</strong> — the void action is broken in production. Single schema delta + <code>db:push</code>.</li>
+<li><strong>🟡 EXAM-2</strong> — wire <code>createAuditLog</code> into publish + void. Two <code>await createAuditLog({ … })</code> calls.</li>
+<li><strong>🟡 EXAM-3</strong> — fix the oldest-status leak in the progress route. One-line ordering fix.</li>
+<li><strong>🟡 EXAM-4</strong> — add a zod enum for the sessions query <code>status</code> param. Mirrors the existing publish/void schemas.</li>
+<li><strong>🟡 EXAM-5</strong> — split sessions/route into list + detail to cap payload size.</li>
+<li><strong>🟡 EXAM-6</strong> — strip vestigial retake/ban writes from submit.</li>
+<li><strong>🟡 EXAM-7 + EXAM-8</strong> — type cleanup (<code>_ctx: any</code>, <code>as any</code>).</li>
+<li>Remaining items as time allows.</li>
+</ol>
+<hr>
+
+<section class="he-section" id="methodology">
+  <div class="he-section__num">06 · Methodology</div>
+  <h2 class="he-section__title">Methodology</h2><ul>
+<li><code>git log --oneline -20</code> to find the changed commits (<code>b928b76</code>, <code>94375e5</code>).</li>
+<li><code>git show --stat b928b76</code> for the file list.</li>
+<li>Direct read of every new route file in <code>app/api/{staff,student}/exams/internal/</code>.</li>
+<li><code>git diff 5cb0df4..b928b76 -- prisma/schema.prisma</code> + <code>awk '/model InternalExamSession/,/^}/'</code> to confirm column existence.</li>
+<li><code>git diff</code> on the engine + dashboard for behaviour deltas.</li>
+<li><code>grep -nE &quot;createAuditLog&quot;</code> across the operations routes to confirm the audit-trail gap.</li>
+</ul>
+<p>Working tree is clean. Type-check + tests pass. The CRITICAL bug (EXAM-1) doesn&#39;t surface in type-check because it&#39;s masked by <code>as any</code>; it would only surface on the first <code>void</code> click in production.</p>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#verification">Verification</a></li>
+    <li class="he-toc__l2"><a href="#what-landed">What landed</a></li>
+    <li class="he-toc__l3"><a href="#schema-prismaschemaprisma">Schema (`prisma/schema.prisma`)</a></li>
+    <li class="he-toc__l3"><a href="#routes-staff-operations">Routes — staff operations</a></li>
+    <li class="he-toc__l3"><a href="#routes-student">Routes — student</a></li>
+    <li class="he-toc__l3"><a href="#engine-libinternal-examenginets">Engine (`lib/internal-exam/engine.ts`)</a></li>
+    <li class="he-toc__l3"><a href="#ui-staff">UI — staff</a></li>
+    <li class="he-toc__l3"><a href="#ui-student">UI — student</a></li>
+    <li class="he-toc__l3"><a href="#seed">Seed</a></li>
+    <li class="he-toc__l2"><a href="#findings">Findings</a></li>
+    <li class="he-toc__l3"><a href="#critical">🔴 CRITICAL</a></li>
+    <li class="he-toc__l3"><a href="#high">🟡 HIGH</a></li>
+    <li class="he-toc__l3"><a href="#medium">🟡 MEDIUM</a></li>
+    <li class="he-toc__l3"><a href="#low-stylistic">🟢 LOW / Stylistic</a></li>
+    <li class="he-toc__l2"><a href="#things-done-right-worth-keeping-as-patterns">Things done right (worth keeping as patterns)</a></li>
+    <li class="he-toc__l2"><a href="#recommended-priority-order">Recommended priority order</a></li>
+    <li class="he-toc__l2"><a href="#methodology">Methodology</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

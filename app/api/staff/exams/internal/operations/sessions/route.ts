@@ -1,27 +1,59 @@
 import { NextRequest } from 'next/server'
+import { z } from 'zod'
 import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 
+const STATUS_VALUES = ['NOT_STARTED', 'IN_PROGRESS', 'COMPLETED', 'TIMED_OUT', 'VOIDED'] as const
+
+const querySchema = z.object({
+  status: z.enum(STATUS_VALUES).optional(),
+  bankId: z.string().min(1).optional(),
+})
+
 /**
  * GET /api/staff/exams/internal/operations/sessions
- * Returns all exam sessions grouped by status for admin monitoring.
- * Includes live (in-progress), completed (pending review), and published sessions.
+ * Slim list of exam sessions for the admin operations dashboard. Answers
+ * and questions are NOT included — drill into a row via
+ * `/sessions/[id]` to load the full breakdown. Keeps the page payload
+ * small enough for a 15-30s polling cadence.
  */
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireStaff()
 
   const url = new URL(req.url)
-  const status = url.searchParams.get('status') // IN_PROGRESS, COMPLETED, TIMED_OUT, VOIDED
-  const bankId = url.searchParams.get('bankId')
+  const parsed = querySchema.safeParse({
+    status: url.searchParams.get('status') ?? undefined,
+    bankId: url.searchParams.get('bankId') ?? undefined,
+  })
+  if (!parsed.success) {
+    return apiError(
+      `Invalid query: status must be one of ${STATUS_VALUES.join(' | ')}`,
+      400
+    )
+  }
+  const { status, bankId } = parsed.data
 
-  const where: any = {}
+  const where: Record<string, unknown> = {}
   if (status) where.status = status
   if (bankId) where.bankId = bankId
 
   const sessions = await prismaUnfiltered.internalExamSession.findMany({
     where,
-    include: {
+    select: {
+      id: true,
+      status: true,
+      startedAt: true,
+      expiresAt: true,
+      submittedAt: true,
+      score: true,
+      totalPoints: true,
+      percentage: true,
+      passed: true,
+      isPublished: true,
+      autoSubmitted: true,
+      voidedAt: true,
+      voidReason: true,
       student: {
         select: {
           id: true,
@@ -30,29 +62,18 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
           studentProfile: { select: { studentId: true } },
         },
       },
-      bank: { select: { id: true, name: true, moduleCode: true, course: { select: { code: true } } } },
-      answers: {
-        select: {
-          id: true,
-          questionId: true,
-          selectedAnswer: true,
-          isCorrect: true,
-          pointsAwarded: true,
-          answeredAt: true,
-          question: { select: { id: true, text: true, options: true, correctAnswer: true, points: true, syllabusRef: true } },
-        },
+      bank: {
+        select: { id: true, name: true, moduleCode: true, course: { select: { code: true } } },
       },
-      reports: {
-        select: { id: true, reason: true, status: true, createdAt: true },
-        orderBy: { createdAt: 'desc' },
-      },
+      // Counts only — full data lives on the detail endpoint
+      _count: { select: { answers: true, reports: true } },
     },
     orderBy: { createdAt: 'desc' },
     take: 200,
   })
 
   return apiSuccess(
-    sessions.map(s => ({
+    sessions.map((s) => ({
       id: s.id,
       student: {
         id: s.student.id,
@@ -76,22 +97,12 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
       totalPoints: s.totalPoints,
       percentage: s.percentage,
       passed: s.passed,
-      isPublished: (s as any).isPublished || false,
+      isPublished: s.isPublished,
       autoSubmitted: s.autoSubmitted,
-      answers: s.answers.map(a => ({
-        id: a.id,
-        questionId: a.questionId,
-        questionText: a.question.text,
-        questionRef: a.question.syllabusRef,
-        options: a.question.options,
-        correctAnswer: a.question.correctAnswer,
-        selectedAnswer: a.selectedAnswer,
-        isCorrect: a.isCorrect,
-        points: a.question.points,
-        pointsAwarded: a.pointsAwarded,
-        answeredAt: a.answeredAt?.toISOString() || null,
-      })),
-      reports: s.reports,
+      voidedAt: s.voidedAt?.toISOString() || null,
+      voidReason: s.voidReason,
+      answerCount: s._count.answers,
+      reportCount: s._count.reports,
     }))
   )
 })
