@@ -19,7 +19,12 @@ async function main() {
   const sampleQuestions = Array.from({ length: 15 }).map((_, i) => ({
     bankId: bank.id,
     text: `Sample seeded internal exam question ${i + 1}?`,
-    options: ['Option A is incorrect', 'Option B is the correct answer', 'Option C is also incorrect'],
+    options: [
+      'Option A is incorrect',
+      'Option B is the correct answer',
+      'Option C is also incorrect',
+      'Option D is also incorrect',
+    ],
     correctAnswer: 'Option B is the correct answer',
     subTopic: `Topic ${Math.floor(i / 5) + 1}`,
     syllabusRef: `1.0.${i + 1}`,

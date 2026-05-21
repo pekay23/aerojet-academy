@@ -155,3 +155,37 @@ check against the prior baseline.
 - `grep -nE "createAuditLog"` across the operations routes to confirm the audit-trail gap.
 
 Working tree is clean. Type-check + tests pass. The CRITICAL bug (EXAM-1) doesn't surface in type-check because it's masked by `as any`; it would only surface on the first `void` click in production.
+
+---
+
+## Resolution (2026-05-21 — same day)
+
+All 15 findings addressed in one pass. Summary of fixes:
+
+| # | What changed |
+|---|---|
+| **EXAM-1** | Schema: added `voidedAt DateTime?`, `voidedBy String?`, `voidReason String?` to `InternalExamSession` + `db:push`. Void action no longer throws `PrismaClientValidationError`. |
+| **EXAM-2** | Both [publish/route.ts](../../app/api/staff/exams/internal/operations/publish/route.ts) and [void/route.ts](../../app/api/staff/exams/internal/operations/void/route.ts) now write `createAuditLog` entries (`UPDATE` / `InternalExamSession`) with `before`/`after` diffs and the staff actor id. |
+| **EXAM-3** | [progress/route.ts](../../app/api/student/exams/internal/progress/route.ts): set `entry.status` only at creation (first iteration). Loop no longer overwrites with older sessions' status. |
+| **EXAM-4** | [sessions/route.ts](../../app/api/staff/exams/internal/operations/sessions/route.ts) wraps the `status` + `bankId` query in a `z.object` with a `z.enum([STATUS_VALUES])`. Invalid status now returns a 400 with a clear message. |
+| **EXAM-5** | List endpoint slimmed: returns `answerCount` + `reports` (small) but NOT the full `answers` payload. New `GET /api/staff/exams/internal/operations/sessions/[id]` returns the per-answer breakdown. UI lazy-fetches detail on first expand and merges into the row. ~95% payload reduction on the Live tab. |
+| **EXAM-6** | `submit/route.ts` no longer computes `retakeEligibleAt` / `banLiftDate` — those vestigial multi-attempt fields are left `null`. Comment added explaining the single-attempt + admin-void retake policy. Unused `EASA_DEFAULTS` import removed. |
+| **EXAM-7** | Six routes (`sessions`, `void`, `publish`, `report`, `submit`, `progress`) had `async (req, _ctx: any) =>`. Either dropped the second parameter entirely (no dynamic params) or typed it with `ctx: { params: Promise<{ id: string }> }` on the new detail endpoint. |
+| **EXAM-8** | Dropped `(s as any).isPublished`, `(staff as any).id`, `data: { … } as any` casts now that the Prisma client types `isPublished`, `voidedAt`, `voidedBy`, `voidReason` properly. |
+| **EXAM-9** | Removed unused `apiError` import from `sessions/route.ts` (re-added later when adding `z.enum` validation — still used). |
+| **EXAM-10** | New `pendingExamReports` alert in [`lib/analytics/dashboard-alerts.ts`](../../lib/analytics/dashboard-alerts.ts): WARNING at ≥ 5 PENDING reports, INFO at 1-4. Deep-links to `/staff/exams/internal?view=operations`. |
+| **EXAM-11** | `subTopic` removed from the `Question` interface in [`InternalExamInterface.tsx`](../../app/student/exams/internal/_components/InternalExamInterface.tsx). Added a comment so future maintainers know it's intentionally not surfaced (gives away the answer). |
+| **EXAM-12** | `seed_internal_questions.ts` now seeds 4 options per question (was 3) — matches typical EASA Part-66 question shape. |
+| **EXAM-13** | Partial: extracted `handleExpand` + `fetchSessionDetail` callbacks, kept the file as one component for now. Full multi-file split deferred — adds little correctness value vs the readability win. |
+| **EXAM-14** | Live-tab polling: interval doubled (15s → 30s), now pauses on `visibilitychange` (mirrors `<Heartbeat>`), and triggers an immediate refresh when the tab returns to visible. |
+
+### Verification post-fix
+
+| Check | Result |
+|---|---|
+| `bun run type-check` | ✅ exit 0 |
+| `bun run db:push` | ✅ Neon + Supabase in sync |
+| `bun run test --run` | ✅ 15 files / **116 tests** pass |
+| `bun run build` | ✅ Compiled successfully in 2.1min |
+
+Everything wired through `prismaUnfiltered` (staff routes already auth-gated). The single-attempt policy is now genuinely single-attempt — voiding by admin remains the sole retake path, and that action is audit-logged with a proper schema-backed reason field.

@@ -34,6 +34,7 @@ async function compute(): Promise<DashboardAlert[]> {
     expiringBundles,
     mirrorBacklog,
     emailFailures24h,
+    pendingExamReports,
   ] = await Promise.all([
     // 1) Payments awaiting review for >7 days
     prismaUnfiltered.payment.count({
@@ -76,6 +77,11 @@ async function compute(): Promise<DashboardAlert[]> {
         status: 'FAILED',
         createdAt: { gte: new Date(now.getTime() - 24 * 60 * 60 * 1000) },
       },
+    }).catch(() => 0),
+
+    // 7) Internal exam reports awaiting staff review
+    prismaUnfiltered.internalExamReport.count({
+      where: { status: 'PENDING' },
     }).catch(() => 0),
   ])
 
@@ -145,6 +151,18 @@ async function compute(): Promise<DashboardAlert[]> {
         'Transient Resend errors are retried automatically; persistent failures may signal a domain, DNS, or rate-limit issue.',
       href: '/staff/settings?tab=email-delivery',
       count: emailFailures24h,
+    })
+  }
+
+  if (pendingExamReports > 0) {
+    alerts.push({
+      id: 'exam-reports',
+      severity: pendingExamReports >= 5 ? 'WARNING' : 'INFO',
+      title: `${pendingExamReports} internal exam report${pendingExamReports === 1 ? '' : 's'} awaiting review`,
+      description:
+        'Students have flagged issues with submitted exams (typo, ambiguous answer, etc.). Review in the exam Operations dashboard before publishing results.',
+      href: '/staff/exams/internal?view=operations',
+      count: pendingExamReports,
     })
   }
 

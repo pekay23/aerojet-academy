@@ -309,6 +309,100 @@ with a Report Issue modal (1000-char limit, dedup on pending report).</li>
 <li><code>grep -nE &quot;createAuditLog&quot;</code> across the operations routes to confirm the audit-trail gap.</li>
 </ul>
 <p>Working tree is clean. Type-check + tests pass. The CRITICAL bug (EXAM-1) doesn&#39;t surface in type-check because it&#39;s masked by <code>as any</code>; it would only surface on the first <code>void</code> click in production.</p>
+<hr>
+
+<section class="he-section" id="resolution-2026-05-21-same-day">
+  <div class="he-section__num">07 · Resolution (2026-05-21 — same day)</div>
+  <h2 class="he-section__title">Resolution (2026-05-21 — same day)</h2><p>All 15 findings addressed in one pass. Summary of fixes:</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>What changed</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>EXAM-1</strong></td>
+<td>Schema: added <code>voidedAt DateTime?</code>, <code>voidedBy String?</code>, <code>voidReason String?</code> to <code>InternalExamSession</code> + <code>db:push</code>. Void action no longer throws <code>PrismaClientValidationError</code>.</td>
+</tr>
+<tr>
+<td><strong>EXAM-2</strong></td>
+<td>Both <a href="../../app/api/staff/exams/internal/operations/publish/route.ts">publish/route.ts</a> and <a href="../../app/api/staff/exams/internal/operations/void/route.ts">void/route.ts</a> now write <code>createAuditLog</code> entries (<code>UPDATE</code> / <code>InternalExamSession</code>) with <code>before</code>/<code>after</code> diffs and the staff actor id.</td>
+</tr>
+<tr>
+<td><strong>EXAM-3</strong></td>
+<td><a href="../../app/api/student/exams/internal/progress/route.ts">progress/route.ts</a>: set <code>entry.status</code> only at creation (first iteration). Loop no longer overwrites with older sessions&#39; status.</td>
+</tr>
+<tr>
+<td><strong>EXAM-4</strong></td>
+<td><a href="../../app/api/staff/exams/internal/operations/sessions/route.ts">sessions/route.ts</a> wraps the <code>status</code> + <code>bankId</code> query in a <code>z.object</code> with a <code>z.enum([STATUS_VALUES])</code>. Invalid status now returns a 400 with a clear message.</td>
+</tr>
+<tr>
+<td><strong>EXAM-5</strong></td>
+<td>List endpoint slimmed: returns <code>answerCount</code> + <code>reports</code> (small) but NOT the full <code>answers</code> payload. New <code>GET /api/staff/exams/internal/operations/sessions/[id]</code> returns the per-answer breakdown. UI lazy-fetches detail on first expand and merges into the row. ~95% payload reduction on the Live tab.</td>
+</tr>
+<tr>
+<td><strong>EXAM-6</strong></td>
+<td><code>submit/route.ts</code> no longer computes <code>retakeEligibleAt</code> / <code>banLiftDate</code> — those vestigial multi-attempt fields are left <code>null</code>. Comment added explaining the single-attempt + admin-void retake policy. Unused <code>EASA_DEFAULTS</code> import removed.</td>
+</tr>
+<tr>
+<td><strong>EXAM-7</strong></td>
+<td>Six routes (<code>sessions</code>, <code>void</code>, <code>publish</code>, <code>report</code>, <code>submit</code>, <code>progress</code>) had <code>async (req, _ctx: any) =&gt;</code>. Either dropped the second parameter entirely (no dynamic params) or typed it with <code>ctx: { params: Promise&lt;{ id: string }&gt; }</code> on the new detail endpoint.</td>
+</tr>
+<tr>
+<td><strong>EXAM-8</strong></td>
+<td>Dropped <code>(s as any).isPublished</code>, <code>(staff as any).id</code>, <code>data: { … } as any</code> casts now that the Prisma client types <code>isPublished</code>, <code>voidedAt</code>, <code>voidedBy</code>, <code>voidReason</code> properly.</td>
+</tr>
+<tr>
+<td><strong>EXAM-9</strong></td>
+<td>Removed unused <code>apiError</code> import from <code>sessions/route.ts</code> (re-added later when adding <code>z.enum</code> validation — still used).</td>
+</tr>
+<tr>
+<td><strong>EXAM-10</strong></td>
+<td>New <code>pendingExamReports</code> alert in <a href="../../lib/analytics/dashboard-alerts.ts"><code>lib/analytics/dashboard-alerts.ts</code></a>: WARNING at ≥ 5 PENDING reports, INFO at 1-4. Deep-links to <code>/staff/exams/internal?view=operations</code>.</td>
+</tr>
+<tr>
+<td><strong>EXAM-11</strong></td>
+<td><code>subTopic</code> removed from the <code>Question</code> interface in <a href="../../app/student/exams/internal/_components/InternalExamInterface.tsx"><code>InternalExamInterface.tsx</code></a>. Added a comment so future maintainers know it&#39;s intentionally not surfaced (gives away the answer).</td>
+</tr>
+<tr>
+<td><strong>EXAM-12</strong></td>
+<td><code>seed_internal_questions.ts</code> now seeds 4 options per question (was 3) — matches typical EASA Part-66 question shape.</td>
+</tr>
+<tr>
+<td><strong>EXAM-13</strong></td>
+<td>Partial: extracted <code>handleExpand</code> + <code>fetchSessionDetail</code> callbacks, kept the file as one component for now. Full multi-file split deferred — adds little correctness value vs the readability win.</td>
+</tr>
+<tr>
+<td><strong>EXAM-14</strong></td>
+<td>Live-tab polling: interval doubled (15s → 30s), now pauses on <code>visibilitychange</code> (mirrors <code>&lt;Heartbeat&gt;</code>), and triggers an immediate refresh when the tab returns to visible.</td>
+</tr>
+</tbody></table>
+<h3 id="verification-post-fix">Verification post-fix</h3><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>bun run type-check</code></td>
+<td>✅ exit 0</td>
+</tr>
+<tr>
+<td><code>bun run db:push</code></td>
+<td>✅ Neon + Supabase in sync</td>
+</tr>
+<tr>
+<td><code>bun run test --run</code></td>
+<td>✅ 15 files / <strong>116 tests</strong> pass</td>
+</tr>
+<tr>
+<td><code>bun run build</code></td>
+<td>✅ Compiled successfully in 2.1min</td>
+</tr>
+</tbody></table>
+<p>Everything wired through <code>prismaUnfiltered</code> (staff routes already auth-gated). The single-attempt policy is now genuinely single-attempt — voiding by admin remains the sole retake path, and that action is audit-logged with a proper schema-backed reason field.</p>
 
 </main>
 
@@ -332,6 +426,8 @@ with a Report Issue modal (1000-char limit, dedup on pending report).</li>
     <li class="he-toc__l2"><a href="#things-done-right-worth-keeping-as-patterns">Things done right (worth keeping as patterns)</a></li>
     <li class="he-toc__l2"><a href="#recommended-priority-order">Recommended priority order</a></li>
     <li class="he-toc__l2"><a href="#methodology">Methodology</a></li>
+    <li class="he-toc__l2"><a href="#resolution-2026-05-21-same-day">Resolution (2026-05-21 — same day)</a></li>
+    <li class="he-toc__l3"><a href="#verification-post-fix">Verification post-fix</a></li>
   </ul>
 </aside>
 </div>

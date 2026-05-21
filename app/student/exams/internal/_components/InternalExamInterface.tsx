@@ -21,7 +21,9 @@ interface Question {
   text: string
   options: any // JSON array of option strings
   points: number
-  subTopic: string | null
+  // `subTopic` is intentionally not rendered to students — the question
+  // text + module code is enough context, and topic labels can give away
+  // the answer. Kept off the wire on the server side as well.
   syllabusRef?: string | null
   knowledgeLevel?: string | null
 }

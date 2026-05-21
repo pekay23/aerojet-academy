@@ -58,8 +58,13 @@ interface SessionData {
   passed: boolean | null
   isPublished: boolean
   autoSubmitted: boolean | null
-  answers: StudentAnswer[]
+  voidedAt: string | null
+  voidReason: string | null
+  /** Total answer rows for the session (one per question). Cheap count. */
+  answerCount: number
   reports: Report[]
+  /** Full per-question detail — only populated after the row is expanded. */
+  answers?: StudentAnswer[]
 }
 
 type TabKey = 'live' | 'review' | 'published' | 'voided'
@@ -92,12 +97,66 @@ export default function ExamOperations() {
 
   useEffect(() => { fetchSessions() }, [fetchSessions])
 
-  // Auto-refresh every 15s for live tab
+  // Auto-refresh on the Live tab. Polls every 30s while the tab is visible
+  // and pauses entirely when the admin's browser tab is hidden — same
+  // pattern as `<Heartbeat>`. The slim list endpoint makes a 30s cadence
+  // cheap even with several admins on the page.
   useEffect(() => {
     if (activeTab !== 'live') return
-    const iv = setInterval(fetchSessions, 15000)
-    return () => clearInterval(iv)
+    let interval: ReturnType<typeof setInterval> | null = null
+    const start = () => {
+      if (interval != null) return
+      interval = setInterval(fetchSessions, 30_000)
+    }
+    const stop = () => {
+      if (interval != null) {
+        clearInterval(interval)
+        interval = null
+      }
+    }
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        fetchSessions() // immediate refresh on return
+        start()
+      } else {
+        stop()
+      }
+    }
+    if (document.visibilityState === 'visible') start()
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      stop()
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [activeTab, fetchSessions])
+
+  // Lazy-fetch full answer detail for one session. The list endpoint
+  // returns only counts + reports to keep the page payload small; this
+  // is called the first time an admin expands a row.
+  const fetchSessionDetail = useCallback(async (sessionId: string) => {
+    try {
+      const res = await fetch(`/api/staff/exams/internal/operations/sessions/${sessionId}`)
+      const json = await res.json()
+      if (!json.success || !json.data) return
+      const detail = json.data as SessionData
+      setSessions((prev) =>
+        prev.map((row) => (row.id === sessionId ? { ...row, ...detail } : row))
+      )
+    } catch {
+      // Silent — the row stays at "Loading…" until the next refresh
+    }
+  }, [])
+
+  const handleExpand = (sessionId: string) => {
+    setExpandedSession((cur) => {
+      const next = cur === sessionId ? null : sessionId
+      if (next) {
+        const row = sessions.find((s) => s.id === next)
+        if (row && !row.answers) void fetchSessionDetail(next)
+      }
+      return next
+    })
+  }
 
   const handleVoid = async (sessionId: string) => {
     if (!confirm('Void this session? The student will be able to retake the exam.')) return
@@ -322,8 +381,13 @@ export default function ExamOperations() {
         <div className="space-y-3">
           {currentSessions.map(session => {
             const isExpanded = expandedSession === session.id
-            const answeredCount = session.answers.filter(a => a.selectedAnswer !== null).length
-            const totalQuestions = session.answers.length
+            // Counts available without fetching answer detail; the detailed
+            // per-question breakdown lives in `session.answers` once the row
+            // has been expanded at least once.
+            const answeredCount = session.answers
+              ? session.answers.filter((a) => a.selectedAnswer !== null).length
+              : null
+            const totalQuestions = session.answerCount
             const hasReports = session.reports.length > 0
             const pendingReports = session.reports.filter(r => r.status === 'PENDING')
 
@@ -331,7 +395,7 @@ export default function ExamOperations() {
               <div key={session.id} className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
                 {/* Session Header */}
                 <button
-                  onClick={() => setExpandedSession(isExpanded ? null : session.id)}
+                  onClick={() => handleExpand(session.id)}
                   className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50"
                 >
                   {/* Score Badge */}
@@ -355,7 +419,10 @@ export default function ExamOperations() {
                     <p className="text-xs text-slate-500">
                       {session.bank.courseCode} · {session.bank.moduleCode || session.bank.name}
                       {session.student.studentId && ` · ${session.student.studentId}`}
-                      {session.status === 'IN_PROGRESS' && ` · ${answeredCount}/${totalQuestions} answered`}
+                      {session.status === 'IN_PROGRESS' &&
+                        (answeredCount !== null
+                          ? ` · ${answeredCount}/${totalQuestions} answered`
+                          : ` · ${totalQuestions} questions`)}
                     </p>
                   </div>
 
@@ -441,9 +508,22 @@ export default function ExamOperations() {
                       </div>
                     </div>
 
-                    {/* Answer detail table */}
+                    {/* Answer detail table — answers are lazy-loaded on
+                        first expand; show a skeleton until they arrive. */}
                     <div className="mb-4 overflow-x-auto">
-                      <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">Answers</h4>
+                      <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">
+                        Answers
+                      </h4>
+                      {!session.answers ? (
+                        <div className="space-y-1.5">
+                          {Array.from({ length: 6 }).map((_, i) => (
+                            <div
+                              key={i}
+                              className="h-7 w-full animate-pulse rounded bg-slate-100 dark:bg-slate-800/60"
+                            />
+                          ))}
+                        </div>
+                      ) : (
                       <table className="w-full text-xs">
                         <thead>
                           <tr className="border-b border-slate-200 dark:border-slate-700">
@@ -480,6 +560,7 @@ export default function ExamOperations() {
                           ))}
                         </tbody>
                       </table>
+                      )}
                     </div>
 
                     {/* Actions */}
