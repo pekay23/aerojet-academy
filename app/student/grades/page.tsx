@@ -23,6 +23,12 @@ export default async function GradesPage() {
   if (!session) redirect('/login')
 
   const { isFullTime, isExamOnly, isModular } = await getStudentStatus(session.user.id)
+
+  // Exam-only students have no enrollment grades — redirect to transcript
+  if (isExamOnly) {
+    redirect('/student/transcript')
+  }
+
   const hasAccess = await canAccessFeature(session.user.id, 'courses')
 
   if (isFullTime && !hasAccess) {

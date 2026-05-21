@@ -1,6 +1,7 @@
 'use client'
 
 import DashboardSidebar from '@/components/layouts/DashboardSidebar'
+import type { SidebarLink, SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
 import {
   LayoutDashboard,
   Wallet,
@@ -18,15 +19,18 @@ import {
   Armchair,
   FileQuestion,
   BookMarked,
+  FolderOpen,
+  Calendar,
 } from 'lucide-react'
 import type { PaymentAccessLevel } from '@/lib/access-control'
-import type { SidebarLinkItem } from '@/components/layouts/DashboardSidebar'
 import { useBadgeCounts } from '@/hooks/useBadgeCounts'
 
 function buildLinks(
   studyPathway?: string | null,
   paymentAccessLevel?: PaymentAccessLevel,
   internalExamEnabled = false,
+  showRevisionSupport = false,
+  hasWallet = true,
 ) {
   const isFullTime = [
     'FULL_TIME',
@@ -36,74 +40,151 @@ function buildLinks(
     'MILITARY_1Y',
   ].includes(studyPathway || '')
   const isExamOnly = studyPathway === 'EXAM_ONLY'
-  const isRestricted = paymentAccessLevel === 'RESTRICTED' || paymentAccessLevel === 'SEAT_ONLY'
-  const hasFullAccess = paymentAccessLevel === 'FULL_ACCESS'
+  const isModular = !isFullTime && !isExamOnly && !!studyPathway
 
-  const baseLinks: SidebarLinkItem[] = [
+  const links: SidebarLink[] = [
     { label: 'Dashboard', href: '/student', icon: LayoutDashboard },
   ]
 
-  // Exam-Only students: limited sidebar — wallet, exam bookings, notifications, profile
-  if (isExamOnly) {
-    baseLinks.push(
-      { label: 'Wallet', href: '/student/wallet', icon: Wallet },
-      { label: 'Exams', href: '/student/exams?tab=records', icon: ClipboardCheck }
+  // ── Academic ──
+  const academicChildren: { label: string; href: string }[] = []
+
+  if (isFullTime) {
+    // Full-time: view-only courses (no enroll option)
+    academicChildren.push({ label: 'My Courses', href: '/student/courses' })
+  } else if (isModular) {
+    // Modular: can browse catalog and enroll
+    academicChildren.push(
+      { label: 'My Courses', href: '/student/courses' },
+      { label: 'Enroll in New', href: '/student/courses/enroll' },
     )
-  } else {
-    if (isFullTime && isRestricted) {
-      baseLinks.push({ label: 'Wallet', href: '/student/wallet', icon: Wallet })
-    } else {
-      baseLinks.push(
-        { label: 'Academic Calendar', href: '/student/academic-calendar', icon: CalendarCheck },
-        { label: 'Wallet', href: '/student/wallet', icon: Wallet },
-        // { label: 'My Invoices', href: '/student/invoices', icon: Receipt }, // hidden until invoice workflow is finalized
-      )
-    }
+  }
+  // Exam-only: no courses
 
-    if (!isFullTime) {
-      baseLinks.push({ label: 'Resources', href: '/student/resources', icon: ScrollText })
-    }
+  if (!isExamOnly || isFullTime || isModular) {
+    // Resources: everyone except… actually everyone gets resources per the matrix
+  }
+  // Resources: all pathways
+  academicChildren.push({ label: 'Resources', href: '/student/resources' })
+  // Academic Calendar: all pathways
+  academicChildren.push({ label: 'Academic Calendar', href: '/student/academic-calendar' })
 
-    if (hasFullAccess || !isFullTime) {
-      baseLinks.push({
-        label: 'My Courses',
-        href: '/student/courses',
-        icon: BookOpen,
-        children: isFullTime
-          ? [{ label: 'Enrolled Courses', href: '/student/courses' }]
-          : [
-              { label: 'Enrolled Courses', href: '/student/courses' },
-              { label: 'Enroll in New', href: '/student/courses/enroll' },
-            ],
-      })
-    }
-
-    if (hasFullAccess) {
-      baseLinks.push(
-        { label: 'Exams', href: '/student/exams?tab=records', icon: ClipboardCheck },
-        ...(internalExamEnabled
-          ? [{ label: 'Internal Exams', href: '/student/exams/internal', icon: FileQuestion }]
-          : []),
-        { label: 'Revision Support', href: '/student/courses/revision', icon: GraduationCap },
-        { label: 'Grades', href: '/student/grades', icon: Award },
-        { label: 'License Progress', href: '/student/license-progress', icon: GraduationCap },
-        { label: 'Transcript', href: '/student/transcript', icon: ScrollText },
-        { label: 'Classmates', href: '/student/classmates', icon: Users },
-        { label: 'Attendance', href: '/student/attendance', icon: FileCheck },
-        { label: 'My Seating', href: '/student/seating', icon: Armchair },
-        { label: 'Certificates', href: '/student/certificates', icon: Award },
-        { label: 'My Documents', href: '/student/documents', icon: ScrollText },
-        { label: 'OJT Logbook', href: '/student/ojt', icon: BookMarked }
-      )
-    }
+  if (academicChildren.length > 0) {
+    links.push({
+      label: 'Academic',
+      href: '/student/courses',
+      icon: BookOpen,
+      children: academicChildren,
+    })
   }
 
-  baseLinks.push(
+  // ── Examinations ──
+  const examChildren: { label: string; href: string }[] = []
+
+  if (isFullTime) {
+    // Full-time: records only (internal + official EASA scores)
+    examChildren.push({ label: 'Exam Records', href: '/student/exams?tab=records' })
+  } else {
+    // Modular + Exam-only: full exam tabs
+    examChildren.push({ label: 'Exams', href: '/student/exams?tab=records' })
+  }
+
+  // Internal Exams: full-time + modular (if enabled), NOT exam-only
+  if (internalExamEnabled && !isExamOnly) {
+    examChildren.push({ label: 'Internal Exams', href: '/student/exams/internal' })
+  }
+
+  // Revision Support: modular + exam-only only (timing-gated via flag), NOT full-time
+  if (!isFullTime && showRevisionSupport) {
+    examChildren.push({ label: 'Revision Support', href: '/student/courses/revision' })
+  }
+
+  if (examChildren.length > 0) {
+    links.push({
+      label: 'Examinations',
+      href: '/student/exams',
+      icon: ClipboardCheck,
+      children: examChildren,
+    })
+  }
+
+  // ── Progress & Records ──
+  const progressChildren: { label: string; href: string }[] = []
+
+  // Grades: full-time + modular only, NOT exam-only
+  if (!isExamOnly) {
+    progressChildren.push({ label: 'Grades', href: '/student/grades' })
+  }
+
+  // License Progress: full-time only
+  if (isFullTime) {
+    progressChildren.push({ label: 'License Progress', href: '/student/license-progress' })
+  }
+
+  // Transcript: all pathways (customized per pathway at page level)
+  progressChildren.push({ label: 'Transcript', href: '/student/transcript' })
+
+  // Certificates: all pathways
+  progressChildren.push({ label: 'Certificates', href: '/student/certificates' })
+
+  if (progressChildren.length > 0) {
+    links.push({
+      label: 'Progress & Records',
+      href: '/student/grades',
+      icon: Award,
+      children: progressChildren,
+    })
+  }
+
+  // ── Academy Life ──
+  const academyLifeChildren: { label: string; href: string }[] = []
+
+  // Classmates: full-time only
+  if (isFullTime) {
+    academyLifeChildren.push({ label: 'Classmates', href: '/student/classmates' })
+  }
+
+  // Attendance: full-time (class attendance) + exam-only (exam attendance)
+  if (isFullTime || isExamOnly) {
+    academyLifeChildren.push({ label: 'Attendance', href: '/student/attendance' })
+  }
+
+  // My Seating: full-time (class seating) + exam-only (exam seating)
+  if (isFullTime || isExamOnly) {
+    academyLifeChildren.push({ label: 'My Seating', href: '/student/seating' })
+  }
+
+  // OJT Logbook: full-time only
+  if (isFullTime) {
+    academyLifeChildren.push({ label: 'OJT Logbook', href: '/student/ojt' })
+  }
+
+  if (academyLifeChildren.length > 0) {
+    links.push({
+      label: 'Academy Life',
+      href: '/student/attendance',
+      icon: GraduationCap,
+      children: academyLifeChildren,
+    })
+  }
+
+  // ── Financial ──
+  // Wallet: all pathways (for full-time, only shown if self-funded / has wallet)
+  if (!isFullTime || hasWallet) {
+    links.push({ label: 'Wallet', href: '/student/wallet', icon: Wallet })
+  }
+
+  // ── Documents ──
+  // All pathways
+  links.push({ label: 'My Documents', href: '/student/documents', icon: FolderOpen })
+
+  // ── Communication ──
+  links.push(
     { label: 'Notifications', href: '/student/notifications', icon: Bell },
     { label: 'Messages', href: '/student/messages', icon: Mail },
   )
 
-  return baseLinks
+  return links
 }
 
 export default function StudentSidebar({
@@ -115,6 +196,8 @@ export default function StudentSidebar({
   messageCount = 0,
   paymentAccessLevel,
   internalExamEnabled = false,
+  showRevisionSupport = false,
+  hasWallet = true,
 }: {
   userName?: string
   userRole?: string
@@ -124,15 +207,18 @@ export default function StudentSidebar({
   messageCount?: number
   paymentAccessLevel?: PaymentAccessLevel
   internalExamEnabled?: boolean
+  showRevisionSupport?: boolean
+  hasWallet?: boolean
 }) {
   const { counts } = useBadgeCounts({
     notifications: notificationCount,
     messages: messageCount,
   })
 
-  const links = buildLinks(studyPathway, paymentAccessLevel, internalExamEnabled)
+  const links = buildLinks(studyPathway, paymentAccessLevel, internalExamEnabled, showRevisionSupport, hasWallet)
 
   const linksWithBadge = links.map((link) => {
+    if (link.type === 'header') return link
     if (link.label === 'Notifications') {
       return { ...link, badge: counts.notifications > 0 ? counts.notifications : undefined }
     }

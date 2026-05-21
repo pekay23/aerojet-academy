@@ -19,6 +19,7 @@ import {
   Mail,
 } from 'lucide-react'
 import { updateStudentProfile, changePassword } from '@/app/student/actions'
+import { useProfileDirty } from './ProfileTabs'
 
 interface ProfileUser {
   email: string
@@ -47,6 +48,7 @@ interface ProfileFormProps {
 export default function ProfileForm({ user }: ProfileFormProps) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const { markDirty, markClean } = useProfileDirty()
 
   // Personal Info State
   const [phone, setPhone] = useState(user.profile?.phone || '')
@@ -73,6 +75,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
         toast.error(result.error)
       } else {
         toast.success('Profile updated successfully')
+        markClean()
         router.refresh()
       }
     })
@@ -129,6 +132,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
       <div className="space-y-6 lg:col-span-2">
         <form
           onSubmit={handleUpdateProfile}
+          onChange={markDirty}
           className="rounded-2xl border border-slate-100 bg-white p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900/50"
         >
           <h3 className="mb-6 flex items-center gap-2 border-b border-slate-50 pb-4 text-lg font-black text-slate-900 dark:border-slate-800 dark:text-white">

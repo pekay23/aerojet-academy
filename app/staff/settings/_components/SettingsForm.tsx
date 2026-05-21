@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react'
 import { Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
+import { useSettingsDirty } from './SettingsTabs'
 
 interface SettingField {
   key: string
@@ -22,6 +23,7 @@ interface SettingsFormProps {
 export default function SettingsForm({ fields, values, groupLabel }: SettingsFormProps) {
   const [saving, setSaving] = useState(false)
   const formRef = useRef<HTMLFormElement>(null)
+  const { markDirty, markClean } = useSettingsDirty()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,6 +47,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
 
       if (res.ok) {
         toast.success(`${groupLabel || 'Settings'} saved successfully`)
+        markClean()
       } else {
         toast.error('Failed to save settings')
       }
@@ -56,7 +59,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+    <form ref={formRef} onSubmit={handleSubmit} onChange={markDirty} className="space-y-6">
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {fields.map((field) => {
           const currentValue = values[field.key] ?? field.default

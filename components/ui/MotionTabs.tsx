@@ -18,6 +18,11 @@ interface MotionTabsProps {
   tabs: MotionTab[]
   activeTab: string
   onChange: (key: string) => void
+  /**
+   * Optional async guard called before `onChange`. Return `true` to allow the
+   * tab switch, `false` to block it (e.g. show an unsaved-changes dialog).
+   */
+  onBeforeChange?: (key: string) => Promise<boolean>
   layoutId?: string
   className?: string
   /** ARIA label for the tablist */
@@ -32,6 +37,7 @@ export default function MotionTabs({
   tabs,
   activeTab,
   onChange,
+  onBeforeChange,
   layoutId = 'motion-pill',
   className,
   ariaLabel,
@@ -58,7 +64,14 @@ export default function MotionTabs({
             key={tab.key}
             role="tab"
             aria-selected={isActive}
-            onClick={() => onChange(tab.key)}
+            onClick={async () => {
+              if (isActive) return
+              if (onBeforeChange) {
+                const allowed = await onBeforeChange(tab.key)
+                if (!allowed) return
+              }
+              onChange(tab.key)
+            }}
             onMouseEnter={() => setHoveredTab(tab.key)}
             className={cn(
               'relative flex cursor-pointer items-center justify-center gap-2 rounded-full px-4 py-2 transition-colors sm:px-5',
