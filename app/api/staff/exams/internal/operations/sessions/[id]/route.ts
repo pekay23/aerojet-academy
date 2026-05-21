@@ -56,7 +56,14 @@ export const GET = withErrorHandler(async (
         },
       },
       reports: {
-        select: { id: true, reason: true, status: true, createdAt: true },
+        select: {
+          id: true,
+          reason: true,
+          status: true,
+          createdAt: true,
+          questionId: true,
+          question: { select: { syllabusRef: true } },
+        },
         orderBy: { createdAt: 'desc' },
       },
     },
@@ -105,6 +112,13 @@ export const GET = withErrorHandler(async (
       pointsAwarded: a.pointsAwarded,
       answeredAt: a.answeredAt?.toISOString() || null,
     })),
-    reports: s.reports,
+    reports: s.reports.map((r) => ({
+      id: r.id,
+      reason: r.reason,
+      status: r.status,
+      createdAt: r.createdAt.toISOString(),
+      questionId: r.questionId,
+      questionRef: r.question?.syllabusRef ?? null,
+    })),
   })
 })

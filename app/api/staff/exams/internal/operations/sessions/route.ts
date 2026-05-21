@@ -65,8 +65,21 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       bank: {
         select: { id: true, name: true, moduleCode: true, course: { select: { code: true } } },
       },
-      // Counts only — full data lives on the detail endpoint
-      _count: { select: { answers: true, reports: true } },
+      // Reports are small — keep them on the list so the unread badge can
+      // render without a second fetch. Heavy `answers` lives on the detail
+      // endpoint only.
+      reports: {
+        select: {
+          id: true,
+          reason: true,
+          status: true,
+          createdAt: true,
+          questionId: true,
+          question: { select: { syllabusRef: true } },
+        },
+        orderBy: { createdAt: 'desc' },
+      },
+      _count: { select: { answers: true } },
     },
     orderBy: { createdAt: 'desc' },
     take: 200,
@@ -102,7 +115,14 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       voidedAt: s.voidedAt?.toISOString() || null,
       voidReason: s.voidReason,
       answerCount: s._count.answers,
-      reportCount: s._count.reports,
+      reports: s.reports.map((r) => ({
+        id: r.id,
+        reason: r.reason,
+        status: r.status,
+        createdAt: r.createdAt.toISOString(),
+        questionId: r.questionId,
+        questionRef: r.question?.syllabusRef ?? null,
+      })),
     }))
   )
 })
