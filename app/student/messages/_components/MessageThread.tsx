@@ -114,6 +114,9 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
   const [replyTo, setReplyTo] = useState<Message | null>(null)
   const [replyText, setReplyText] = useState('')
   const [sending, setSending] = useState(false)
+  // Optimistic local unread count — zeroed immediately on open so the badge
+  // disappears without waiting for a round-trip or page refresh.
+  const [localUnreadCount, setLocalUnreadCount] = useState(thread.unreadCount)
   const router = useRouter()
 
   const allMessages = [thread.root, ...thread.replies].sort(
@@ -124,18 +127,25 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
     thread.root.senderId === currentUserId ? thread.root.recipient : thread.root.sender
   const subjectDisplay = thread.root.subject || '(No subject)'
 
-  async function handleExpand() {
-    if (!expanded) {
-      // Mark unread messages as read (batched)
-      const unreadIds = allMessages
-        .filter((m) => m.recipientId === currentUserId && !m.isRead)
-        .map((m) => m.id)
-      if (unreadIds.length > 0) {
-        await Promise.all(unreadIds.map((id) => markMessageAsRead(id)))
-        router.refresh()
-      }
+  async function markThreadRead() {
+    if (localUnreadCount === 0) return
+    // Clear badge immediately (optimistic)
+    setLocalUnreadCount(0)
+    const unreadIds = allMessages
+      .filter((m) => m.recipientId === currentUserId && !m.isRead)
+      .map((m) => m.id)
+    if (unreadIds.length > 0) {
+      await Promise.all(unreadIds.map((id) => markMessageAsRead(id)))
+      router.refresh()
     }
-    setExpanded(!expanded)
+  }
+
+  async function handleExpand() {
+    const opening = !expanded
+    setExpanded(opening)
+    if (opening) {
+      await markThreadRead()
+    }
   }
 
   async function handleSendReply() {
@@ -165,7 +175,7 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
   return (
     <div
       className={`rounded-2xl border bg-white shadow-sm transition-shadow hover:shadow-md dark:bg-slate-900 ${
-        thread.unreadCount > 0 ? 'border-blue-200' : 'border-slate-100'
+        localUnreadCount > 0 ? 'border-blue-200' : 'border-slate-100'
       }`}
     >
       {/* Thread header – click to expand */}
@@ -183,9 +193,9 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
               {userName(otherParticipant)}
             </p>
             <PresencePill peerId={otherParticipant.id} />
-            {thread.unreadCount > 0 && (
+            {localUnreadCount > 0 && (
               <span className="shrink-0 rounded-full bg-blue-500 px-1.5 py-0.5 text-xs font-bold text-white">
-                {thread.unreadCount} new
+                {localUnreadCount} new
               </span>
             )}
           </div>
@@ -213,7 +223,10 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
 
       {/* Expanded conversation */}
       {expanded && (
-        <div className="border-t border-slate-100 px-5 pt-4 pb-4 dark:border-slate-800">
+        <div
+          className="border-t border-slate-100 px-5 pt-4 pb-4 dark:border-slate-800"
+          onClick={markThreadRead}
+        >
           <div className="space-y-4">
             {allMessages.map((msg) => (
               <MessageBubble
