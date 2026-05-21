@@ -5,6 +5,7 @@ import { Metadata } from 'next'
 import SettingsTabs from './_components/SettingsTabs'
 import SettingsForm from './_components/SettingsForm'
 import SystemSettingsForm from './_components/SystemSettingsForm'
+import PDFSettingsForm from './_components/PDFSettingsForm'
 import PaymentMethodsManager from './_components/PaymentMethodsManager'
 import WelcomeMessagesManager from './_components/WelcomeMessagesManager'
 import { getWelcomeMessagesGrouped } from '@/lib/welcome-messages'
@@ -261,6 +262,9 @@ export default async function SettingsPage({
 
         {/* ── Backup Tab ── */}
         {tab === 'backup' && <BackupManager adminEmail={session.user?.email || ''} />}
+
+        {/* ── PDF Templates Tab ── */}
+        {tab === 'pdf' && <PDFSettingsForm values={values} />}
       </SettingsTabs>
     </div>
   )
