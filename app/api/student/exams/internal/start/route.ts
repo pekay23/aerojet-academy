@@ -16,7 +16,7 @@ import {
 } from '@/lib/easa/category-selection'
 
 // POST /api/student/exams/internal/start — start a new exam session
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest) => {
   const session = await getAuthSession()
   if (!session?.user?.id) return apiError('Unauthorized', 401)
   if (!(await isInternalExamSystemEnabled())) {
@@ -140,7 +140,7 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
       status: 'IN_PROGRESS',
       startedAt: new Date(),
       expiresAt,
-      attemptNumber: (eligibility as any).attemptNumber || 1,
+      attemptNumber: 'attemptNumber' in eligibility ? eligibility.attemptNumber : 1,
       categoryCode: selectedCategoryCode,
       ipAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null,
       userAgent: req.headers.get('user-agent') || null,
