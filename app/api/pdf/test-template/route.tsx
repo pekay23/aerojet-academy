@@ -2,22 +2,45 @@ import { NextRequest, NextResponse } from 'next/server'
 import { renderToStream } from '@react-pdf/renderer'
 import { TranscriptTemplate, TranscriptRecord } from '@/components/pdf/templates/TranscriptTemplate'
 import { CertificateTemplate } from '@/components/pdf/templates/CertificateTemplate'
+import { InvoiceTemplate, InvoiceItem } from '@/components/pdf/templates/InvoiceTemplate'
+import { FinancialReportTemplate } from '@/components/pdf/templates/FinancialReportTemplate'
 import { getPDFSettings } from '@/lib/pdf-settings'
 import React from 'react'
 
-export async function GET(req: NextRequest) {
+async function generatePDFResponse(
+  req: NextRequest,
+  params: {
+    type?: string
+    logoUrl?: string
+    watermarkUrl?: string
+    footerText?: string
+    watermarkOpacity?: string | number
+  }
+) {
   try {
-    const type = req.nextUrl.searchParams.get('type') || 'transcript'
+    const type = params.type || 'transcript'
 
     // Fetch and resolve PDF settings
-    const pdfSettings = await getPDFSettings(req.nextUrl.origin)
+    const savedSettings = await getPDFSettings(req.nextUrl.origin)
+
+    // Override with query params if provided (for live preview matching)
+    const logoUrl = params.logoUrl || savedSettings.logoUrl
+    const watermarkUrl = params.watermarkUrl || savedSettings.watermarkUrl
+    const footerText = params.footerText || savedSettings.footerText
+    const watermarkOpacityParam = params.watermarkOpacity
+    const watermarkOpacity =
+      watermarkOpacityParam !== undefined && watermarkOpacityParam !== null
+        ? typeof watermarkOpacityParam === 'string'
+          ? parseFloat(watermarkOpacityParam)
+          : watermarkOpacityParam
+        : savedSettings.watermarkOpacity
 
     // Common base template props
     const baseProps = {
-      logoUrl: pdfSettings.logoUrl,
-      watermarkUrl: pdfSettings.watermarkUrl,
-      footerText: pdfSettings.footerText,
-      watermarkOpacity: pdfSettings.watermarkOpacity,
+      logoUrl,
+      watermarkUrl,
+      footerText,
+      watermarkOpacity,
     }
 
     let stream: NodeJS.ReadableStream
@@ -30,6 +53,71 @@ export async function GET(req: NextRequest) {
           programName="EASA Part-66 B1.1 Aircraft Maintenance"
           issueDate="15 Dec 2025"
           certificateNumber="CERT-2025-089"
+        />
+      )
+    } else if (type === 'invoice') {
+      const sampleInvoiceItems: InvoiceItem[] = [
+        {
+          description: 'Tuition Fee - B1.1 Aircraft Maintenance',
+          quantity: 1,
+          unitPrice: 5500.0,
+          total: 5500.0,
+        },
+        { description: 'Registration Fee', quantity: 1, unitPrice: 150.0, total: 150.0 },
+        { description: 'Study Materials & PPE', quantity: 1, unitPrice: 350.0, total: 350.0 },
+      ]
+
+      stream = await renderToStream(
+        <InvoiceTemplate
+          {...baseProps}
+          invoiceNumber="INV-2026-0089"
+          date={new Date()}
+          dueDate={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)}
+          studentName="John Doe"
+          studentEmail="john.doe@example.com"
+          studentId="AERO-2026-001"
+          items={sampleInvoiceItems}
+          subtotal={6000.0}
+          total={6000.0}
+          currency="EUR"
+        />
+      )
+    } else if (type === 'financial-report') {
+      const sampleFinancialSummary = {
+        totalRevenue: 1250000.0,
+        revenueThisMonth: 150000.0,
+        pendingAmount: 45000.0,
+        avgTransactionValue: 4500.0,
+      }
+
+      const sampleMonthlyData = [
+        { month: 'Jan', revenue: 95000, count: 21 },
+        { month: 'Feb', revenue: 110000, count: 24 },
+        { month: 'Mar', revenue: 105000, count: 23 },
+        { month: 'Apr', revenue: 140000, count: 31 },
+        { month: 'May', revenue: 150000, count: 33 },
+      ]
+
+      const sampleRevenueByType = [
+        { name: 'B1.1 Aircraft Maintenance', value: 850000, percentage: 68 },
+        { name: 'B2 Avionics', value: 350000, percentage: 28 },
+        { name: 'Short Courses', value: 50000, percentage: 4 },
+      ]
+
+      const samplePaymentStatus = [
+        { status: 'Completed', amount: 1205000, count: 260 },
+        { status: 'Pending', amount: 45000, count: 12 },
+      ]
+
+      stream = await renderToStream(
+        <FinancialReportTemplate
+          {...baseProps}
+          year={new Date().getFullYear()}
+          month={new Date().getMonth() + 1}
+          summary={sampleFinancialSummary}
+          monthlyData={sampleMonthlyData}
+          revenueByType={sampleRevenueByType}
+          paymentStatus={samplePaymentStatus}
         />
       )
     } else {
@@ -124,4 +212,25 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     )
   }
+}
+
+export async function GET(req: NextRequest) {
+  const params = {
+    type: req.nextUrl.searchParams.get('type') || undefined,
+    logoUrl: req.nextUrl.searchParams.get('logoUrl') || undefined,
+    watermarkUrl: req.nextUrl.searchParams.get('watermarkUrl') || undefined,
+    footerText: req.nextUrl.searchParams.get('footerText') || undefined,
+    watermarkOpacity: req.nextUrl.searchParams.get('watermarkOpacity') || undefined,
+  }
+  return generatePDFResponse(req, params)
+}
+
+export async function POST(req: NextRequest) {
+  let params = {}
+  try {
+    params = await req.json()
+  } catch (e) {
+    // If not JSON or empty body, ignore
+  }
+  return generatePDFResponse(req, params)
 }

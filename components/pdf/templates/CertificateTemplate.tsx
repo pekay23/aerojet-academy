@@ -25,15 +25,15 @@ const styles = StyleSheet.create({
     flex: 1,
     borderWidth: 0.5,
     borderColor: COLORS.gold,
-    padding: 30,
+    padding: 25,
     alignItems: 'center',
     justifyContent: 'center',
   },
   // Corner accent
   cornerDecoration: {
     position: 'absolute',
-    width: 30,
-    height: 30,
+    width: 25,
+    height: 25,
     borderColor: COLORS.gold,
   },
   topLeft: {
@@ -60,106 +60,113 @@ const styles = StyleSheet.create({
     borderBottomWidth: 2,
     borderRightWidth: 2,
   },
-  // Content
+  // Content — reduced font sizes to prevent text truncation
   title: {
-    fontSize: 28,
+    fontSize: 22,
     fontWeight: 'bold',
     color: COLORS.navy,
-    marginBottom: 8,
+    marginBottom: 6,
     textTransform: 'uppercase',
-    letterSpacing: 3,
+    letterSpacing: 2,
+    textAlign: 'center',
   },
   divider: {
-    width: 120,
+    width: 100,
     height: 2,
     backgroundColor: COLORS.gold,
-    marginBottom: 25,
-    marginTop: 5,
+    marginBottom: 20,
+    marginTop: 4,
   },
   subtitle: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.slate,
-    marginBottom: 30,
-    letterSpacing: 1,
+    marginBottom: 20,
+    letterSpacing: 0.5,
+    textAlign: 'center',
   },
   name: {
-    fontSize: 26,
+    fontSize: 22,
     fontWeight: 'bold',
     color: COLORS.navy,
     marginBottom: 8,
     textAlign: 'center',
   },
   nameUnderline: {
-    width: '70%',
+    width: '60%',
     height: 0.5,
     backgroundColor: COLORS.border,
-    marginBottom: 25,
+    marginBottom: 20,
   },
   description: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.text,
-    marginBottom: 8,
+    marginBottom: 6,
     textAlign: 'center',
-    width: '80%',
-    lineHeight: 1.6,
+    width: '85%',
+    lineHeight: 1.5,
   },
   programName: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 'bold',
     color: COLORS.navy,
-    marginBottom: 30,
+    marginBottom: 22,
     textAlign: 'center',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
+    width: '90%',
   },
   certNumber: {
-    fontSize: 8,
+    fontSize: 7.5,
     color: COLORS.slate,
     letterSpacing: 1,
     textTransform: 'uppercase',
-    marginBottom: 25,
+    marginBottom: 18,
+    textAlign: 'center',
   },
   dateText: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.text,
-    marginBottom: 40,
+    marginBottom: 30,
+    textAlign: 'center',
   },
   // Signature section
   signatureContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '85%',
-    marginTop: 30,
+    width: '80%',
+    marginTop: 20,
   },
   signatureBlock: {
     alignItems: 'center',
-    width: 180,
+    width: 160,
   },
   signatureLine: {
     width: '100%',
     borderBottomWidth: 1,
     borderBottomColor: COLORS.text,
-    marginBottom: 6,
+    marginBottom: 5,
   },
   signatureLabel: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: COLORS.slate,
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
+    textAlign: 'center',
   },
   signatureRole: {
-    fontSize: 7,
+    fontSize: 6.5,
     color: COLORS.slate,
     marginTop: 2,
+    textAlign: 'center',
   },
   // Accreditation note
   accreditation: {
-    marginTop: 30,
+    marginTop: 22,
     padding: 8,
     borderTopWidth: 0.5,
     borderTopColor: COLORS.border,
     width: '90%',
   },
   accreditationText: {
-    fontSize: 7,
+    fontSize: 6.5,
     color: COLORS.slate,
     textAlign: 'center',
     lineHeight: 1.4,
@@ -214,20 +221,20 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
             <View style={styles.signatureBlock}>
               <View style={styles.signatureLine} />
               <Text style={styles.signatureLabel}>Training Manager</Text>
-              <Text style={styles.signatureRole}>Aerojet Aviation Academy</Text>
+              <Text style={styles.signatureRole}>Aerojet Aviation Training Academy</Text>
             </View>
 
             <View style={styles.signatureBlock}>
               <View style={styles.signatureLine} />
               <Text style={styles.signatureLabel}>Academy Director</Text>
-              <Text style={styles.signatureRole}>Aerojet Aviation Academy</Text>
+              <Text style={styles.signatureRole}>Aerojet Aviation Training Academy</Text>
             </View>
           </View>
 
           {/* Accreditation */}
           <View style={styles.accreditation}>
             <Text style={styles.accreditationText}>
-              Aerojet Aviation Academy is an EASA Part-147 Approved Maintenance Training
+              Aerojet Aviation Training Academy is an EASA Part-147 Approved Maintenance Training
               Organisation. This certificate attests to the completion of the approved training
               programme and does not constitute an EASA Part-66 Aircraft Maintenance Licence.
             </Text>

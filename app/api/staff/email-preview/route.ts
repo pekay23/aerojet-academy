@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import * as emailService from '@/lib/email/service'
 import { getAuthSession } from '@/lib/auth/helpers'
+import prisma from '@/lib/prisma/client'
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession()
@@ -64,7 +65,26 @@ export async function GET(req: NextRequest) {
       )
       break
     default:
-      return new NextResponse('Invalid template name', { status: 400 })
+      // Try to fetch custom template from DB
+      try {
+        const dbTemplate = await prisma.emailTemplate.findUnique({
+          where: { name: template },
+        })
+
+        if (dbTemplate) {
+          // Replace common placeholder
+          const body = dbTemplate.body.replace(/\{\{firstName\}\}/g, 'John')
+          html = await emailService.wrapEmail(
+            dbTemplate.subject.replace(/\{\{firstName\}\}/g, 'John'),
+            body
+          )
+        } else {
+          return new NextResponse('Invalid template name', { status: 400 })
+        }
+      } catch (error) {
+        console.error('Error fetching custom template for preview:', error)
+        return new NextResponse('Error rendering template', { status: 500 })
+      }
   }
 
   return new NextResponse(html, {

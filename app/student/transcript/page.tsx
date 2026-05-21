@@ -53,7 +53,12 @@ export default async function TranscriptPage() {
         examCategory: true,
         attemptType: true,
         createdAt: true,
-        exam: { select: { examDate: true, examComponent: { select: { course: { select: { code: true, name: true } } } } } },
+        exam: {
+          select: {
+            examDate: true,
+            examComponent: { select: { course: { select: { code: true, name: true } } } },
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     }),
@@ -74,7 +79,7 @@ export default async function TranscriptPage() {
     <div className="space-y-6 print:space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white print:text-2xl">
+          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white print:text-2xl">
             Academic Transcript
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -90,7 +95,10 @@ export default async function TranscriptPage() {
       <div className="grid grid-cols-2 gap-3 rounded-2xl border border-slate-100 bg-white p-5 text-sm sm:grid-cols-4 dark:border-slate-800 dark:bg-slate-900">
         <Field label="Name" value={fullName} />
         <Field label="Student ID" value={profile?.studentId ?? '—'} />
-        <Field label="Pathway" value={profile?.pathwayRel?.name ?? profile?.enrollmentType ?? '—'} />
+        <Field
+          label="Pathway"
+          value={profile?.pathwayRel?.name ?? profile?.enrollmentType ?? '—'}
+        />
         {isFullTime && (
           <Field
             label="Current Term"
@@ -118,12 +126,24 @@ export default async function TranscriptPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 text-left dark:border-slate-800">
-              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">Module</th>
-              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">Category</th>
-              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">Attempt</th>
-              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Score</th>
-              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Result</th>
-              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Date</th>
+              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Module
+              </th>
+              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Category
+              </th>
+              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Attempt
+              </th>
+              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Score
+              </th>
+              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Result
+              </th>
+              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                Date
+              </th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -172,9 +192,15 @@ export default async function TranscriptPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-left dark:border-slate-800">
-                <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">Course</th>
-                <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">Status</th>
-                <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Completed</th>
+                <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  Course
+                </th>
+                <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  Status
+                </th>
+                <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  Completed
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -220,7 +246,8 @@ export default async function TranscriptPage() {
       )}
 
       <p className="text-xs text-slate-400 print:mt-6">
-        Generated {new Date().toLocaleString('en-GB')} · Aerojet Aviation Academy (EASA Part-147)
+        Generated {new Date().toLocaleString('en-GB')} · Aerojet Aviation Training Academy (EASA
+        Part-147)
       </p>
     </div>
   )

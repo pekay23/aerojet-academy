@@ -48,8 +48,8 @@ export const metadata: Metadata = {
     'Aircraft Engineering',
   ],
   authors: [{ name: 'Aerojet Aviation Training Academy' }],
-  creator: 'Aerojet Aviation',
-  publisher: 'Aerojet Aviation',
+  creator: 'Aerojet Aviation Training Academy',
+  publisher: 'Aerojet Aviation Training Academy',
   formatDetection: {
     email: false,
     address: false,
@@ -100,13 +100,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://utfs.io" />
       </head>
       <body
-        className={`${inter.variable} ${outfit.variable} font-sans antialiased relative`}
+        className={`${inter.variable} ${outfit.variable} relative font-sans antialiased`}
         suppressHydrationWarning
       >
         <div className="relative">
           <a
             href="#main-content"
-            className="sr-only focus:not-sr-only focus:fixed focus:inset-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-bold focus:text-aerojet-blue focus:shadow-lg"
+            className="focus:text-aerojet-blue sr-only focus:not-sr-only focus:fixed focus:inset-4 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-bold focus:shadow-lg"
           >
             Skip to main content
           </a>
