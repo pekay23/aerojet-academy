@@ -104,13 +104,33 @@
 <li>Internal exams are feature-flagged by <code>internal_exam_system_enabled</code>.</li>
 <li>Staff manage exam banks at <code>/staff/exams/internal</code>; expanded bank rows include pool health, rules, and a copyable student-facing link.</li>
 <li>Students use <code>/student/exams/internal</code>; the dashboard only lists exam banks for enrolled courses, requires candidate-detail confirmation before starting, supports skip/review navigation, autosaves answers, and confirms submission.</li>
-<li>Keyboard anti-cheat is enforced in the live exam UI when <code>allowKeyboardAutoSubmit</code> is enabled; the submit API records <code>autoSubmitted</code> and increments <code>keyboardEvents</code>.</li>
+<li><strong>Anti-Cheat &amp; Lockdown</strong>: Keyboard anti-cheat is enforced in the live exam UI (<code>allowKeyboardAutoSubmit</code>), along with a mandatory Fullscreen API prompt, tab-switching detection (<code>visibilitychange</code>), and CSS-based sidebar/header suppression (<code>.exam-lockdown</code>) to secure the exam environment.</li>
+<li><strong>Pass/Fail Grading System</strong>: Grades across the portal are mapped to an EASA-compliant Pass/Fail system (Pass ≥ 75%).</li>
 <li><strong>Key Files</strong>:<ul>
 <li><code>app/staff/exams/internal/_components/ExamBankManager.tsx</code></li>
 <li><code>app/student/exams/internal/_components/InternalExamDashboard.tsx</code></li>
 <li><code>app/student/exams/internal/_components/InternalExamInterface.tsx</code></li>
 <li><code>app/api/student/exams/internal/{progress,start,session,answer,submit}/route.ts</code></li>
 <li><code>lib/internal-exam/engine.ts</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="6-dynamic-system-settings-gdpr-compliance">6. Dynamic System Settings &amp; GDPR Compliance</h3><ul>
+<li><strong>System Settings</strong>: Staff can manage configuration dynamically via the API and React forms in the settings portal, automatically capturing and parsing boolean toggles.</li>
+<li><strong>GDPR Engine</strong>: An automated sweep service and retention policy engine have been added to manage historical user data in compliance with GDPR.</li>
+<li><strong>Key Files</strong>:<ul>
+<li><code>app/api/settings/route.ts</code></li>
+<li><code>components/settings/SystemSettingsForm.tsx</code> (or equivalent)</li>
+<li><code>lib/gdpr/</code> (if applicable)</li>
+</ul>
+</li>
+</ul>
+<h3 id="7-cicd-production-deployments">7. CI/CD &amp; Production Deployments</h3><ul>
+<li>The CI pipeline standardizes on <strong>Bun</strong> for test environment execution, minimizing deployment inconsistencies.</li>
+<li><strong>Pre-Migration Scripts</strong>: Added hooks to automatically clear stale Postgres advisory locks and terminate active connections on Vercel deployments, preventing frozen schema migrations.</li>
+<li><strong>Key Files</strong>:<ul>
+<li><code>.github/workflows/production.yml</code></li>
+<li><code>scripts/clear-locks.ts</code>, <code>scripts/terminate-connections.ts</code></li>
 </ul>
 </li>
 </ul>
@@ -165,6 +185,8 @@ $ BUMP_TYPE=major git commit -m &quot;break: core database schema change&quot;
     <li class="he-toc__l3"><a href="#3-interactive-floor-plan-seating-system">3. Interactive Floor Plan &amp; Seating System</a></li>
     <li class="he-toc__l3"><a href="#4-enhanced-classmates-directory-studentclassmates">4. Enhanced Classmates Directory (`/student/classmates`)</a></li>
     <li class="he-toc__l3"><a href="#5-admissions-pipeline-internal-exams">5. Admissions Pipeline &amp; Internal Exams</a></li>
+    <li class="he-toc__l3"><a href="#6-dynamic-system-settings-gdpr-compliance">6. Dynamic System Settings &amp; GDPR Compliance</a></li>
+    <li class="he-toc__l3"><a href="#7-cicd-production-deployments">7. CI/CD &amp; Production Deployments</a></li>
     <li class="he-toc__l2"><a href="#security-rls-implementation">🔒 Security &amp; RLS Implementation</a></li>
     <li class="he-toc__l3"><a href="#prisma-database-rls">Prisma + Database RLS</a></li>
     <li class="he-toc__l2"><a href="#maintenance-common-tasks">🛠️ Maintenance &amp; Common Tasks</a></li>
