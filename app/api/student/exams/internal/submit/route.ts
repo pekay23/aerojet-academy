@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { getBankRules, EASA_DEFAULTS, isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import { getBankRules, isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { z } from 'zod'
 
 const submitSchema = z.object({
@@ -15,7 +15,7 @@ const submitSchema = z.object({
 })
 
 // POST /api/student/exams/internal/submit — submit exam answers
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest) => {
   const session = await getAuthSession()
   if (!session?.user?.id) return apiError('Unauthorized', 401)
   if (!(await isInternalExamSystemEnabled())) {
@@ -83,32 +83,16 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
     const rules = await getBankRules(examSession.bankId)
     const passed = percentage >= rules.passMarkPct
 
-    // Calculate retake date and ban logic
-    const retakeEligibleAt = new Date(now.getTime() + rules.retakeWaitDays * 24 * 60 * 60 * 1000)
-
-    // Check if this triggers a ban (3 consecutive failures)
-    let banLiftDate: Date | null = null
-    if (!passed) {
-      const previousFails = await tx.internalExamSession.count({
-        where: {
-          studentId: session.user.id,
-          bankId: examSession.bankId,
-          passed: false,
-          status: { in: ['COMPLETED', 'TIMED_OUT'] },
-          id: { not: sessionId }, // exclude current session
-        },
-      })
-      // +1 for current attempt
-      if (rules.maxRetakes && (previousFails + 1) >= rules.maxRetakes) {
-        banLiftDate = new Date(now.getTime() + EASA_DEFAULTS.banDurationMonths * 30 * 24 * 60 * 60 * 1000)
-      }
-    }
-
-    // Update session — all in one atomic transaction
+    // Single-attempt policy: `checkEligibility` blocks any retake of a
+    // non-VOIDED COMPLETED/TIMED_OUT session, and only an admin void
+    // clears the block. We deliberately do NOT compute retakeEligibleAt
+    // or banLiftDate here — those vestigial columns from the prior
+    // multi-attempt model are left as `null` so reports surface the
+    // current policy honestly.
     await tx.internalExamSession.update({
       where: { id: sessionId },
       data: {
-        status: finalStatus as any,
+        status: finalStatus,
         submittedAt: now,
         autoSubmitted: autoSubmitted || isExpired || false,
         ...(autoSubmitted && !isExpired ? { keyboardEvents: { increment: 1 } } : {}),
@@ -116,12 +100,10 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
         totalPoints,
         percentage,
         passed,
-        retakeEligibleAt,
-        banLiftDate,
       },
     })
 
-    return { score, totalPoints, percentage, passed, rules, retakeEligibleAt, banLiftDate }
+    return { score, totalPoints, percentage, passed, rules }
   })
 
   // Do NOT return scores to students — results are pending admin review

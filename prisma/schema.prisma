@@ -2018,6 +2018,7 @@ model InternalExamQuestion {
   createdAt      DateTime             @default(now())
   updatedAt      DateTime             @updatedAt
   answers        InternalExamAnswer[]
+  reports        InternalExamReport[]
   bank           InternalExamBank     @relation(fields: [bankId], references: [id], onDelete: Cascade)
 
   @@index([bankId, isActive, status])
@@ -2069,6 +2070,11 @@ model InternalExamSession {
   attemptNumber    Int                  @default(1)
   banLiftDate      DateTime?
   isPublished      Boolean              @default(false)
+  /// Admin-void audit trail. Set when an admin voids a session (clearing
+  /// the single-attempt block so the student can retake).
+  voidedAt         DateTime?
+  voidedBy         String?
+  voidReason       String?
   createdAt        DateTime             @default(now())
   updatedAt        DateTime             @updatedAt
   answers          InternalExamAnswer[]
@@ -2095,6 +2101,7 @@ model InternalExamReport {
   id          String                   @id @default(cuid())
   sessionId   String
   studentId   String
+  questionId  String?
   reason      String
   status      InternalExamReportStatus @default(PENDING)
   resolvedAt  DateTime?
@@ -2102,9 +2109,11 @@ model InternalExamReport {
   updatedAt   DateTime                 @updatedAt
   session     InternalExamSession      @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   student     User                     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  question    InternalExamQuestion?    @relation(fields: [questionId], references: [id])
 
   @@index([sessionId])
   @@index([studentId])
+  @@index([questionId])
   @@index([status])
   @@map("internal_exam_reports")
 }

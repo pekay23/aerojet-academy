@@ -16,7 +16,7 @@ import {
  * - 10-year completion window tracking
  * - Overall module progress
  */
-export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async () => {
   const session = await getAuthSession()
   if (!session?.user?.id) return apiError('Unauthorized', 401)
   if (!(await isInternalExamSystemEnabled())) {
@@ -84,6 +84,10 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
     status: string
   }> = {}
 
+  // Sessions come back ordered `createdAt` DESC — newest first. We only
+  // set `status` on the FIRST insertion per bank so it reflects the
+  // newest attempt; iterating after that would overwrite it with the
+  // older session's status (the pre-fix bug).
   for (const s of sessions) {
     if (!byBank[s.bankId]) {
       byBank[s.bankId] = {
@@ -96,6 +100,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
         banned: false,
         banLiftDate: null,
         isPublished: false,
+        // Set once at creation = newest attempt's status (sessions are DESC)
         status: s.status,
       }
     }
@@ -120,8 +125,8 @@ export const GET = withErrorHandler(async (_req: NextRequest, _ctx: any) => {
       entry.banned = true
       entry.banLiftDate = s.banLiftDate
     }
-    if ((s as any).isPublished) entry.isPublished = true
-    entry.status = s.status
+    if (s.isPublished) entry.isPublished = true
+    // Intentionally do NOT overwrite entry.status here — see comment above.
   }
 
   // 10-year completion window

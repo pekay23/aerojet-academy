@@ -18,6 +18,7 @@ import {
   Users,
   Activity,
   Hourglass,
+  RefreshCcw,
 } from 'lucide-react'
 
 interface StudentAnswer {
@@ -38,6 +39,8 @@ interface Report {
   id: string
   reason: string
   status: string
+  questionId: string | null
+  questionRef: string | null
   createdAt: string
 }
 
@@ -148,6 +151,35 @@ export default function ExamOperations() {
     if (pending.length === 0) return
     if (!confirm(`Publish results for all ${pending.length} pending session(s)?`)) return
     handlePublish(pending.map(s => s.id))
+  }
+
+  const handleRegrade = async (sessionId: string) => {
+    if (!confirm('Regrade this session against the current question bank answers? This will recalculate the score.')) return
+    setActionLoading(sessionId)
+    try {
+      const res = await fetch('/api/staff/exams/internal/operations/regrade', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionIds: [sessionId] }),
+      })
+      const json = await res.json()
+      if (json.success) {
+        const detail = json.data.details?.[0]
+        if (detail?.changed) {
+          setSuccessMsg(`Regraded: ${detail.oldPct}% → ${detail.newPct}%`)
+        } else {
+          setSuccessMsg('Regraded — no score change.')
+        }
+        setTimeout(() => setSuccessMsg(null), 5000)
+        fetchSessions()
+      } else {
+        setError(json.error || 'Failed to regrade')
+      }
+    } catch {
+      setError('Regrade failed')
+    } finally {
+      setActionLoading(null)
+    }
   }
 
   const filteredSessions = (tab: TabKey): SessionData[] => {
@@ -359,7 +391,19 @@ export default function ExamOperations() {
                           {session.reports.map(report => (
                             <div key={report.id} className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm dark:border-red-900/50 dark:bg-red-900/10">
                               <div className="flex items-start justify-between gap-2">
-                                <p className="text-red-800 dark:text-red-200">{report.reason}</p>
+                                <div>
+                                  {report.questionRef && (
+                                    <span className="mb-1 inline-block rounded bg-red-100 px-1.5 py-0.5 font-mono text-[10px] font-bold text-red-600 dark:bg-red-800/40 dark:text-red-300">
+                                      Q: {report.questionRef}
+                                    </span>
+                                  )}
+                                  {report.questionId && !report.questionRef && (
+                                    <span className="mb-1 inline-block rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold text-red-600 dark:bg-red-800/40 dark:text-red-300">
+                                      Question Report
+                                    </span>
+                                  )}
+                                  <p className="text-red-800 dark:text-red-200">{report.reason}</p>
+                                </div>
                                 <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
                                   report.status === 'PENDING' ? 'bg-amber-100 text-amber-700' : 'bg-green-100 text-green-700'
                                 }`}>
@@ -458,6 +502,16 @@ export default function ExamOperations() {
                         >
                           {actionLoading === session.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <Megaphone className="h-3 w-3" />}
                           Publish Results
+                        </button>
+                      )}
+                      {(session.status === 'COMPLETED' || session.status === 'TIMED_OUT') && !session.isPublished && (
+                        <button
+                          onClick={() => handleRegrade(session.id)}
+                          disabled={actionLoading === session.id}
+                          className="flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100 disabled:opacity-50 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-300"
+                        >
+                          {actionLoading === session.id ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCcw className="h-3 w-3" />}
+                          Regrade
                         </button>
                       )}
                       {session.isPublished && (
