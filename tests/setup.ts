@@ -1,6 +1,32 @@
 import { vi } from 'vitest'
 
 // ---------------------------------------------------------------------------
+// MUST BE FIRST: prevent real DB connections at module-evaluation time.
+// db-base.ts creates a `pg.Pool` the moment it is imported, which opens a
+// real TCP connection to Neon. Mock the entire module before anything else
+// can import it, so the real Pool / PrismaClient is never instantiated.
+// ---------------------------------------------------------------------------
+vi.mock('pg', () => ({
+  Pool: vi.fn(() => ({
+    on: vi.fn(),
+    query: vi.fn(),
+    end: vi.fn(),
+    connect: vi.fn(),
+  })),
+  Client: vi.fn(() => ({
+    connect: vi.fn(),
+    query: vi.fn(),
+    end: vi.fn(),
+  })),
+}))
+vi.mock('@prisma/adapter-pg', () => ({
+  PrismaPg: vi.fn(() => ({})),
+}))
+vi.mock('@prisma/adapter-neon', () => ({
+  PrismaNeon: vi.fn(() => ({})),
+}))
+
+// ---------------------------------------------------------------------------
 // Helper: create a model mock with common Prisma operations
 // ---------------------------------------------------------------------------
 function mockModel() {
