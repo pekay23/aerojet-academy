@@ -28,12 +28,29 @@ jobs:
 
       - name: Generate Prisma client
         run: bun run db:generate
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/aerojet
 
       - name: Type check
         run: bun run type-check
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/aerojet
 
       - name: Run tests
         run: bun run test --run
+        env:
+          DATABASE_URL: postgresql://postgres:password@localhost:5432/aerojet
+          NEXTAUTH_SECRET: ci-test-secret
+          NEXTAUTH_URL: http://localhost:3000
+          NEXT_PUBLIC_APP_URL: http://localhost:3000
+          CRON_SECRET: ci-cron-secret
+          RESEND_API_KEY: re_ci_placeholder
+          UPLOADTHING_SECRET: sk_ci_placeholder
+          UPLOADTHING_APP_ID: ci_placeholder
+          GOOGLE_CLIENT_ID: ci_placeholder
+          GOOGLE_CLIENT_SECRET: ci_placeholder
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ci_placeholder
 
   build:
     runs-on: ubuntu-latest

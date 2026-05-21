@@ -778,6 +778,7 @@ export async function getAvailableRecipients() {
     },
     select: {
       id: true,
+      email: true,
       role: true,
       profile: {
         select: {
@@ -809,6 +810,7 @@ export async function getAvailableRecipients() {
                   user: {
                     select: {
                       id: true,
+                      email: true,
                       role: true,
                       profile: {
                         select: {
@@ -846,6 +848,7 @@ export async function getAvailableRecipients() {
   const formatRecipient = (
     u: {
       id: string
+      email?: string | null
       role: string
       profile?: {
         firstName: string
@@ -857,13 +860,20 @@ export async function getAvailableRecipients() {
     roleOverride?: string
   ) => {
     const role = roleOverride || u.role
+    const roleLabel = role === 'INSTRUCTOR'
+      ? 'Instructor'
+      : role === 'SUPER_ADMIN' || role === 'ADMIN'
+        ? 'Administrator'
+        : 'Staff'
     return {
       id: u.id,
       label: u.profile
         ? [u.profile.firstName, u.profile.middleName, u.profile.lastName]
             .filter(Boolean)
-            .join(' ') + ` (${role})`
-        : `${role === 'INSTRUCTOR' ? 'Instructor' : 'User'} ${u.id}`,
+            .join(' ') + ` (${roleLabel})`
+        : u.email
+          ? `${u.email} (${roleLabel})`
+          : roleLabel,
       role,
       avatarUrl: u.profile?.profilePhotoUrl,
     }
