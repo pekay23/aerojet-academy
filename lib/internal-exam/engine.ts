@@ -165,50 +165,36 @@ export async function checkEligibility(studentId: string, bankId: string) {
   const rules = await getBankRules(bankId)
   const now = new Date()
 
-  // Get previous sessions for this student + bank
+  // Get previous sessions for this student + bank (exclude VOIDED)
   const sessions = await prismaUnfiltered.internalExamSession.findMany({
     where: { studentId, bankId, status: { in: ['COMPLETED', 'TIMED_OUT'] } },
     orderBy: { submittedAt: 'desc' },
   })
 
-  // Check active ban
-  const latestBan = sessions.find(s => s.banLiftDate && s.banLiftDate > now)
-  if (latestBan) {
+  // Check if they've already taken it (non-voided)
+  if (sessions.length >= 1) {
     return {
       eligible: false,
-      reason: `You are banned from this exam until ${latestBan.banLiftDate!.toLocaleDateString()}`,
-      banLiftDate: latestBan.banLiftDate,
+      reason: 'Internal exams can only be taken once. You have already completed this exam.',
     }
   }
 
-  // Check retake wait period
-  const lastAttempt = sessions[0]
-  if (lastAttempt?.submittedAt) {
-    const retakeDate = new Date(lastAttempt.submittedAt.getTime() + rules.retakeWaitDays * 24 * 60 * 60 * 1000)
-    if (retakeDate > now) {
-      return {
-        eligible: false,
-        reason: `Retake available after ${retakeDate.toLocaleDateString()} (${rules.retakeWaitDays}-day wait)`,
-        retakeEligibleAt: retakeDate,
-      }
-    }
-  }
-
-  // Count consecutive failures
-  const consecutiveFails = sessions.filter(s => s.passed === false).length
-  if (rules.maxRetakes && consecutiveFails >= rules.maxRetakes) {
-    // Apply 12-month ban
-    const banLift = new Date(now.getFullYear(), now.getMonth() + EASA_DEFAULTS.banDurationMonths, now.getDate())
+  // Also check for an in-progress session
+  const inProgress = await prismaUnfiltered.internalExamSession.findFirst({
+    where: { studentId, bankId, status: 'IN_PROGRESS' },
+  })
+  if (inProgress) {
     return {
-      eligible: false,
-      reason: `Maximum ${rules.maxRetakes} attempts reached. ${EASA_DEFAULTS.banDurationMonths}-month suspension applied.`,
-      banLiftDate: banLift,
+      eligible: true,
+      attemptNumber: 1,
+      totalAttempts: 0,
+      resumeSessionId: inProgress.id,
     }
   }
 
   return {
     eligible: true,
-    attemptNumber: consecutiveFails + 1,
+    attemptNumber: 1,
     totalAttempts: sessions.length,
   }
 }
