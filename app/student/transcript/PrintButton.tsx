@@ -1,14 +1,17 @@
 'use client'
 
-import { Printer } from 'lucide-react'
+import { Download } from 'lucide-react'
 
-export default function PrintButton() {
+export default function DownloadTranscriptButton() {
   return (
-    <button
-      onClick={() => window.print()}
-      className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90 print:hidden"
+    <a
+      href="/api/pdf/student-transcript"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white transition-colors print:hidden"
     >
-      <Printer className="h-4 w-4" /> Print / Save as PDF
-    </button>
+      <Download className="h-4 w-4" />
+      Download PDF
+    </a>
   )
 }

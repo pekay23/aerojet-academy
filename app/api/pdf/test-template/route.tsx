@@ -1,88 +1,120 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { renderToStream } from '@react-pdf/renderer'
 import { TranscriptTemplate, TranscriptRecord } from '@/components/pdf/templates/TranscriptTemplate'
-import { getSystemSettings } from '@/lib/system-settings'
+import { CertificateTemplate } from '@/components/pdf/templates/CertificateTemplate'
+import { getPDFSettings } from '@/lib/pdf-settings'
 import React from 'react'
 
 export async function GET(req: NextRequest) {
   try {
-    // 1. Fetch SystemSettings for PDF Customizations
-    const settings = await getSystemSettings([
-      'pdf_header_logo_url',
-      'pdf_watermark_url',
-      'pdf_footer_text',
-      'pdf_watermark_opacity',
-    ])
+    const type = req.nextUrl.searchParams.get('type') || 'transcript'
 
-    const logoUrl = settings['pdf_header_logo_url'] || '/apple-touch-icon.webp'
-    const watermarkUrl = settings['pdf_watermark_url'] || '/apple-touch-icon.webp'
-    const footerText =
-      settings['pdf_footer_text'] ||
-      'Aerojet Aviation Academy | 123 Flight Way | contact@aerojet.com'
+    // Fetch and resolve PDF settings
+    const pdfSettings = await getPDFSettings(req.nextUrl.origin)
 
-    // Use default values for host to resolve relative URLs for React PDF since it needs absolute URLs in some environments
-    const hostUrl = req.nextUrl.origin
+    // Common base template props
+    const baseProps = {
+      logoUrl: pdfSettings.logoUrl,
+      watermarkUrl: pdfSettings.watermarkUrl,
+      footerText: pdfSettings.footerText,
+      watermarkOpacity: pdfSettings.watermarkOpacity,
+    }
 
-    // Resolve full URLs if they are relative
-    const resolvedLogoUrl = logoUrl.startsWith('/') ? `${hostUrl}${logoUrl}` : logoUrl
-    const resolvedWatermarkUrl = watermarkUrl.startsWith('/')
-      ? `${hostUrl}${watermarkUrl}`
-      : watermarkUrl
+    let stream: NodeJS.ReadableStream
 
-    // 2. Dummy Data for Transcript
-    const sampleRecords: TranscriptRecord[] = [
-      { code: 'M1', courseName: 'Mathematics', credits: 4, grade: 'Pass', status: 'Pass' },
-      { code: 'M2', courseName: 'Physics', credits: 4, grade: 'Pass', status: 'Pass' },
-      {
-        code: 'M3',
-        courseName: 'Electrical Fundamentals',
-        credits: 3,
-        grade: 'Pass',
-        status: 'Pass',
-      },
-      {
-        code: 'M4',
-        courseName: 'Electronic Fundamentals',
-        credits: 3,
-        grade: 'Pass',
-        status: 'Pass',
-      },
-      { code: 'M5', courseName: 'Digital Techniques', credits: 4, grade: 'Pass', status: 'Pass' },
-      {
-        code: 'M6',
-        courseName: 'Materials and Hardware',
-        credits: 4,
-        grade: 'Pass',
-        status: 'Pass',
-      },
-      {
-        code: 'M7',
-        courseName: 'Maintenance Practices',
-        credits: 6,
-        grade: 'In Progress',
-        status: 'In Progress',
-      },
-    ]
+    if (type === 'certificate') {
+      stream = await renderToStream(
+        <CertificateTemplate
+          {...baseProps}
+          studentName="Jane Doe"
+          programName="EASA Part-66 B1.1 Aircraft Maintenance"
+          issueDate="15 Dec 2025"
+          certificateNumber="CERT-2025-089"
+        />
+      )
+    } else {
+      const sampleRecords: TranscriptRecord[] = [
+        { code: 'M1', courseName: 'Mathematics', credits: 4, grade: 'Pass', status: 'Pass' },
+        { code: 'M2', courseName: 'Physics', credits: 4, grade: 'Pass', status: 'Pass' },
+        {
+          code: 'M3',
+          courseName: 'Electrical Fundamentals',
+          credits: 3,
+          grade: 'Pass',
+          status: 'Pass',
+        },
+        {
+          code: 'M4',
+          courseName: 'Electronic Fundamentals',
+          credits: 3,
+          grade: 'Pass',
+          status: 'Pass',
+        },
+        {
+          code: 'M5',
+          courseName: 'Digital Techniques / Electronic Instrument Systems',
+          credits: 4,
+          grade: 'Pass',
+          status: 'Pass',
+        },
+        {
+          code: 'M6',
+          courseName: 'Materials and Hardware',
+          credits: 4,
+          grade: 'Pass',
+          status: 'Pass',
+        },
+        {
+          code: 'M7',
+          courseName: 'Maintenance Practices',
+          credits: 6,
+          grade: 'In Progress',
+          status: 'In Progress',
+        },
+        {
+          code: 'M8',
+          courseName: 'Basic Aerodynamics',
+          credits: 3,
+          grade: 'Fail',
+          status: 'Fail',
+        },
+        {
+          code: 'M9',
+          courseName: 'Human Factors',
+          credits: 2,
+          grade: 'Pass',
+          status: 'Pass',
+        },
+        {
+          code: 'M10',
+          courseName: 'Aviation Legislation',
+          credits: 3,
+          grade: 'Pass',
+          status: 'Pass',
+        },
+      ]
 
-    // 3. Render the PDF
-    const stream = await renderToStream(
-      <TranscriptTemplate
-        logoUrl={resolvedLogoUrl}
-        watermarkUrl={resolvedWatermarkUrl}
-        footerText={footerText}
-        studentName="John Doe"
-        studentId="Aero-2026-001"
-        programName="EASA Part-66 B1.1 Aircraft Maintenance"
-        enrollmentDate="01 Sep 2025"
-        records={sampleRecords}
-      />
-    )
+      stream = await renderToStream(
+        <TranscriptTemplate
+          {...baseProps}
+          studentName="John Doe"
+          studentId="AERO-2026-001"
+          programName="EASA Part-66 B1.1 Aircraft Maintenance"
+          enrollmentDate="01 Sep 2025"
+          generatedDate={new Date().toLocaleDateString('en-GB', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })}
+          records={sampleRecords}
+        />
+      )
+    }
 
-    // 4. Return as PDF stream
     return new NextResponse(stream as any, {
       headers: {
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'inline; filename="test-transcript.pdf"',
+        'Content-Disposition': `inline; filename="test-${type}.pdf"`,
       },
     })
   } catch (error: any) {
