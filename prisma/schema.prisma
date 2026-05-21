@@ -1985,29 +1985,43 @@ model InternalExamBank {
   @@index([categoryCode])
   @@map("internal_exam_banks")
 }
+enum QuestionStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+}
 
 model InternalExamQuestion {
-  id            String               @id @default(cuid())
-  bankId        String
-  text          String
-  options       Json
-  correctAnswer String
-  points        Int                  @default(1)
-  subTopic      String?
-  difficulty    QuestionDifficulty   @default(MEDIUM)
-  isEssay       Boolean              @default(false)
-  essayTimeMins Int                  @default(20)
-  timesServed   Int                  @default(0)
-  lastServedAt  DateTime?
-  sortOrder     Int?
-  isActive      Boolean              @default(true)
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
-  answers       InternalExamAnswer[]
-  bank          InternalExamBank     @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  id             String               @id @default(cuid())
+  bankId         String
+  text           String
+  options        Json
+  correctAnswer  String
+  points         Int                  @default(1)
+  subTopic       String?
+  difficulty     QuestionDifficulty   @default(MEDIUM)
+  status         QuestionStatus       @default(DRAFT)
+  syllabusRef    String?
+  knowledgeLevel Int?
+  submittedById  String?
+  reviewedById   String?
+  reviewNote     String?
+  reviewedAt     DateTime?
+  isEssay        Boolean              @default(false)
+  essayTimeMins  Int                  @default(20)
+  timesServed    Int                  @default(0)
+  lastServedAt   DateTime?
+  sortOrder      Int?
+  isActive       Boolean              @default(true)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  answers        InternalExamAnswer[]
+  bank           InternalExamBank     @relation(fields: [bankId], references: [id], onDelete: Cascade)
 
-  @@index([bankId, isActive])
-  @@index([bankId, subTopic])
+  @@index([bankId, isActive, status])
+  @@index([bankId, syllabusRef])
+  @@index([status])
   @@map("internal_exam_questions")
 }
 

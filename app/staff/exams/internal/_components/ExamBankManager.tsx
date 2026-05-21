@@ -12,6 +12,7 @@ import {
   BarChart3,
   Copy,
 } from 'lucide-react'
+import ApprovalQueue from './ApprovalQueue'
 
 type PoolHealth = 'GREEN' | 'AMBER' | 'RED'
 
@@ -25,6 +26,7 @@ interface ExamBank {
   course: { id: string; name: string; code: string }
   _count: { questions: number; sessions: number }
   poolHealth: { health: PoolHealth; questionCount: number; requiredMinimum: number }
+  pendingCount: number
   ruleOverride: any | null
 }
 
@@ -146,7 +148,12 @@ export default function ExamBankManager() {
                     <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${health.bg} ${health.color}`}>
                       {health.label} ({bank.poolHealth.questionCount}/{bank.poolHealth.requiredMinimum})
                     </span>
-                    <span className="text-xs text-slate-400">{bank._count.sessions} sessions</span>
+                    {bank.pendingCount > 0 && (
+                      <span className="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
+                        {bank.pendingCount} Pending
+                      </span>
+                    )}
+                    <span className="hidden sm:inline text-xs text-slate-400">{bank._count.sessions} sessions</span>
                     <ChevronRight className={`h-4 w-4 text-slate-400 transition-transform ${expanded ? 'rotate-90' : ''}`} />
                   </div>
                 </button>
@@ -205,13 +212,20 @@ export default function ExamBankManager() {
                           <button
                             type="button"
                             onClick={() => copyStudentLink(bank.id)}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                           >
                             <Copy className="h-3.5 w-3.5" />
                             {copiedId === bank.id ? 'Copied' : 'Copy Link'}
                           </button>
                         </div>
                       </div>
+                      
+                      {bank.pendingCount > 0 && (
+                        <div className="sm:col-span-2 mt-4">
+                          <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400">Pending Review ({bank.pendingCount})</h4>
+                          <ApprovalQueue bankId={bank.id} />
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
