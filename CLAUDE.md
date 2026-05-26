@@ -10,7 +10,7 @@ Prisma ORM, Neon PostgreSQL, NextAuth.js sessions, Vercel deployment. Package ma
 ## Common Commands
 
 ```bash
-bun dev              # Start dev server (Next.js Turbopack)
+bun dev              # Start dev server with Turbopack & 3GB RAM limit
 bun run build        # Production build (requires .env)
 bun run lint         # ESLint
 bun run lint:fix     # ESLint auto-fix
@@ -119,7 +119,7 @@ export const GET = withErrorHandler(async (req, ctx) => {
 
 ### Email (Resend)
 
-- `lib/email/sender.ts` — `sendEmail()`, `sendBulkEmails()`. Falls back to `console.log` when `RESEND_API_KEY` is not set (dev mode). Has 3-attempt exponential backoff (300ms / 600ms / 1200ms) for transient errors (429, 5xx, ECONN*, fetch failed).
+- `lib/email/sender.ts` — `sendEmail()`, `sendBulkEmails()`. Falls back to `console.log` when `RESEND_API_KEY` is not set (dev mode). Has 3-attempt exponential backoff (300ms / 600ms / 1200ms) for transient errors (429, 5xx, ECONN\*, fetch failed).
 - Default sender pulled from `EMAIL_ADDRESSES.fromTransactional` in `lib/constants/business-rules.ts` → `Aerojet Academy <admissions@mail.aerojet-academy.com>` (override via `FROM_EMAIL` env var).
 - Every send writes an `EmailDelivery` row with status / attempts / error — see **Email Delivery Log** below.
 
@@ -155,7 +155,7 @@ await createAuditLog({
   action: AuditAction.USER_ROLE_CHANGED,
   userId: actor.id,
   targetUserId: target.id,
-  description: 'STUDENT → INSTRUCTOR',   // human summary (NOT `metadata:`)
+  description: 'STUDENT → INSTRUCTOR', // human summary (NOT `metadata:`)
   changes: { before: { role: 'STUDENT' }, after: { role: 'INSTRUCTOR' } },
 })
 ```
@@ -166,24 +166,24 @@ Field names trip people up: it's `description:` (string) and `changes:` (object 
 
 Registered in `vercel.json` and live under `app/api/cron/*/route.ts`. Pattern: check `CRON_SECRET` header → run job → return JSON. **16 jobs currently scheduled (UTC):**
 
-| Path | Schedule |
-|---|---|
-| `expire-bundles` | `0 0 * * *` (daily 00:00) |
-| `cleanup-audit-logs` | `0 0 1 * *` (1st of month) |
-| `check-events` | `0 1 * * *` |
-| `check-pools` | `0 2 * * *` |
-| `gdpr-retention` | `0 3 * * 1` (Mondays 03:00) — GDPR retention sweep |
-| `payment-deadlines` | `0 3 * * *` |
-| `backup` | `0 4 * * *` |
-| `sync-check` | `0 4 * * 1` (Mondays 04:00) — Neon ↔ Supabase drift check |
-| `supabase-mirror` | `30 4 * * *` — UploadThing → Supabase storage mirror |
-| `cleanup-abandoned-accounts` | `0 5 * * *` |
-| `scheduled-reports` | `0 8 * * 1` (Mondays 08:00) |
-| `milestone-reminders` | `0 9 * * *` |
-| `send-reminders` | `0 10 * * *` |
-| `aptitude-reminders` | `0 11 * * *` |
-| `interview-reminders` | `0 12 * * *` |
-| `modular-deadlines` | `0 13 * * *` |
+| Path                         | Schedule                                                  |
+| ---------------------------- | --------------------------------------------------------- |
+| `expire-bundles`             | `0 0 * * *` (daily 00:00)                                 |
+| `cleanup-audit-logs`         | `0 0 1 * *` (1st of month)                                |
+| `check-events`               | `0 1 * * *`                                               |
+| `check-pools`                | `0 2 * * *`                                               |
+| `gdpr-retention`             | `0 3 * * 1` (Mondays 03:00) — GDPR retention sweep        |
+| `payment-deadlines`          | `0 3 * * *`                                               |
+| `backup`                     | `0 4 * * *`                                               |
+| `sync-check`                 | `0 4 * * 1` (Mondays 04:00) — Neon ↔ Supabase drift check |
+| `supabase-mirror`            | `30 4 * * *` — UploadThing → Supabase storage mirror      |
+| `cleanup-abandoned-accounts` | `0 5 * * *`                                               |
+| `scheduled-reports`          | `0 8 * * 1` (Mondays 08:00)                               |
+| `milestone-reminders`        | `0 9 * * *`                                               |
+| `send-reminders`             | `0 10 * * *`                                              |
+| `aptitude-reminders`         | `0 11 * * *`                                              |
+| `interview-reminders`        | `0 12 * * *`                                              |
+| `modular-deadlines`          | `0 13 * * *`                                              |
 
 To add a cron: create the route, gate with `CRON_SECRET`, then append to `vercel.json`. Every cron should write a single AuditLog row when it does meaningful work so admins can see the run history.
 
@@ -325,6 +325,7 @@ Every authenticated portal layout mounts `<Heartbeat>` (`components/shared/Heart
 - **Exact last-seen timestamp** — visible to self, to staff/admin/super_admin, or to peers when the target has opted in (`User.showLastSeen = true`)
 
 UI helpers:
+
 - `<PresencePill peerId>` — drop next to a peer's name in any thread
 - `<PrivacyToggle>` — self-service "show my last-seen" switch (`PATCH /api/me/privacy`)
 - `<AdminPrivacyToggle>` — admin override per user (`PATCH /api/staff/users/[id]/privacy`, audit-logged)
@@ -362,6 +363,7 @@ Declarative route bindings live in `lib/auth/permission-routes.ts` — documenta
 **Scheduling conflicts** — `lib/scheduling/recurrence.ts` expands a `Class` (with `recurrenceType`/`recurrenceDays`/`recurrenceUntil`) into individual occurrences within a date window. `lib/scheduling/conflicts.ts:findConflicts()` returns instructor + classroom overlaps. UI at `/staff/timetable/conflicts`. The class-POST endpoint (`app/api/staff/classes/route.ts`) returns `409` with `conflicts[]` on overlap — pass `force: true` in the request body to silence.
 
 **GDPR module** — three libraries in `lib/gdpr/`:
+
 - `export.ts:buildUserDataExport()` — Article 15 access export (deep traversal into 25+ related models)
 - `anonymise.ts:anonymiseUser()` — Article 17 erasure-via-anonymisation (PII columns overwritten with `[REDACTED]`; financial/regulatory rows stay intact for audit trail integrity)
 - `retention.ts:runRetentionSweep()` — weekly sweep driven by editable `RetentionPolicy` rows; weekly cron at `/api/cron/gdpr-retention`
@@ -376,16 +378,16 @@ UI: `/staff/gdpr` (DSR queue with 30-day SLA pills), `/staff/settings/retention`
 
 `components/shared/` centralises patterns that were previously duplicated. Reach for these before writing new ones:
 
-| Component | Purpose |
-|---|---|
-| `Logo` | Aerojet wordmark with correct intrinsic aspect ratio. Replaces every per-callsite `<Image>` config. Accepts `tone` (`onWhite`/`onDark`) and `className`. |
-| `FileField` | Controlled file-upload input wrapping UploadThing's `UploadButton`. Explicit empty / uploading / uploaded / error states; pass `value` + `onChange`. |
-| `Heartbeat` | UI-less, pings `/api/me/heartbeat` every 30s. Mount once per authenticated session. |
-| `PresencePill` | Online dot + last-seen text next to a peer name. Batches presence fetches. |
-| `PrivacyToggle` | Self-service "show my last-seen" switch. |
-| `AdminPrivacyToggle` | Per-user admin override of `showLastSeen`. |
-| `MessagesRealtime` | UI-less wrapper that mounts `useRealtimeMessages`. Drop into any messages page. |
-| `DashboardSkeleton`, `TableSkeleton` | Reusable Suspense skeletons for `loading.tsx`. |
+| Component                            | Purpose                                                                                                                                                  |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Logo`                               | Aerojet wordmark with correct intrinsic aspect ratio. Replaces every per-callsite `<Image>` config. Accepts `tone` (`onWhite`/`onDark`) and `className`. |
+| `FileField`                          | Controlled file-upload input wrapping UploadThing's `UploadButton`. Explicit empty / uploading / uploaded / error states; pass `value` + `onChange`.     |
+| `Heartbeat`                          | UI-less, pings `/api/me/heartbeat` every 30s. Mount once per authenticated session.                                                                      |
+| `PresencePill`                       | Online dot + last-seen text next to a peer name. Batches presence fetches.                                                                               |
+| `PrivacyToggle`                      | Self-service "show my last-seen" switch.                                                                                                                 |
+| `AdminPrivacyToggle`                 | Per-user admin override of `showLastSeen`.                                                                                                               |
+| `MessagesRealtime`                   | UI-less wrapper that mounts `useRealtimeMessages`. Drop into any messages page.                                                                          |
+| `DashboardSkeleton`, `TableSkeleton` | Reusable Suspense skeletons for `loading.tsx`.                                                                                                           |
 
 ## Docs site & html-effectiveness skill
 
@@ -408,5 +410,5 @@ The canonical doc index is `docs/README.md` for humans; `docs/html/index.html` f
 - `bun run type-check` — no errors expected.
 - `bun run test --run` — Vitest suite (**102 tests** baseline).
 - `bun run lint` — ESLint; not in pre-commit or pre-push, run manually before PR.
-- `bun run build` — full production build; required to catch the `formatCurrency` client-import trap (see *Code Conventions › Imports*).
+- `bun run build` — full production build; required to catch the `formatCurrency` client-import trap (see _Code Conventions › Imports_).
 - `bun run docs:html` — regenerates the HTML mirror of `docs/`. Run after any markdown change you want reflected on the styled doc site.
