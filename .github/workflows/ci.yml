@@ -78,6 +78,11 @@ jobs:
       - name: Build
         run: bun run build
         env:
+          # Raise Node's heap ceiling for this CI runner only — ubuntu-latest caps
+          # the default heap at ~2GB and doesn't auto-size, OOMing next build's TS
+          # phase. Vercel sizes its own heap, so this is intentionally NOT in the
+          # build script (kept CI-machine-specific).
+          NODE_OPTIONS: --max_old_space_size=4096
           # Required by lib/env.ts Zod schema at runtime (partial parse at build time)
           DATABASE_URL: postgresql://postgres:password@localhost:5432/aerojet
           NEXTAUTH_SECRET: ci-test-secret

@@ -1,0 +1,58 @@
+{
+  "scope": "page",
+  "isRedesign": true,
+  "targetPath": "app/(public)/page.tsx",
+  "targetName": "PublicHomepage",
+  "painPoints": [
+    "Inconsistent editorial system",
+    "Under-animated",
+    "Generic stock imagery",
+    "Hierarchy flattens on mobile"
+  ],
+  "inspiration": {
+    "visual": [
+      "Editorial magazine layouts",
+      "Aviation/engineering blueprint systems",
+      "Apple-spacious",
+      "Stripe-clean"
+    ],
+    "functional": ["Scroll-reveal", "Parallax", "Progressive disclosure"]
+  },
+  "brand": {
+    "adjectives": ["professional", "editorial", "credible", "modern", "institutional"],
+    "density": "spacious",
+    "darkMode": false
+  },
+  "persona": {
+    "primary": "End consumer (prospective students + parents + industry partners)",
+    "context": "both equally",
+    "keyTasks": [
+      "Understand programmes/pathways",
+      "Build trust in accreditation",
+      "Start registration / contact"
+    ]
+  },
+  "constraints": {
+    "mustKeep": [
+      "All text content",
+      "Navigation structure",
+      "Brand tokens aerojet-blue/aerojet-sky"
+    ],
+    "technical": [
+      "No new dependencies (use Framer Motion 12)",
+      "Use existing Tailwind v4 tokens",
+      "WCAG accessible",
+      "Real-academy-photo placeholders only"
+    ]
+  },
+  "directions": {
+    "A": "Refined editorial (evolve current brand)",
+    "B": "Modern aviation-tech (dark, blueprint, mono)",
+    "C": "Editorial + heritage/legacy (serif, ruled lines, institutional)",
+    "D": "Structured bento / modular grid",
+    "E": "Expressive / kinetic (parallax, oversized type, motion-forward)"
+  },
+  "framework": "nextjs-app",
+  "packageManager": "bun",
+  "stylingSystem": "tailwind-v4"
+}
