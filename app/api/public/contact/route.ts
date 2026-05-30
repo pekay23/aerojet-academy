@@ -16,7 +16,10 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;')
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Use a placeholder when the key is absent (e.g. Preview/CI builds) so the
+// Resend constructor doesn't throw during `next build` page-data collection.
+// Real sends only happen at runtime where RESEND_API_KEY is set.
+const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder')
 
 const contactFormSchema = z.object({
   name: z.string().min(2).max(100),
