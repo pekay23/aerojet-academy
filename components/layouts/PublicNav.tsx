@@ -350,7 +350,7 @@ export default function PublicNav() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 pr-4 md:pr-8">
             <Link
               href="/login"
               className={`hidden items-center rounded-lg px-4 py-2 text-xs font-bold tracking-widest uppercase transition-all sm:inline-flex ${scrolled || forceSolid ? 'hover:text-public-primary text-slate-500 dark:text-slate-300 dark:hover:text-white' : 'text-white/80 hover:text-white'}`}
