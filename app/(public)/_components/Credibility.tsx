@@ -62,7 +62,7 @@ export default function Credibility() {
                   height={partner.height}
                   priority
                   sizes="(max-width: 768px) 160px, 200px"
-                  className="h-12 w-auto object-contain mix-blend-multiply brightness-0 opacity-90 sm:h-14"
+                  className="h-12 w-auto object-contain mix-blend-multiply sm:h-14"
                 />
               </div>
             ))}
