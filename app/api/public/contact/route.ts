@@ -16,7 +16,7 @@ function escapeHtml(str: string): string {
     .replace(/'/g, '&#039;')
 }
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY || 're_mock_key')
 
 const contactFormSchema = z.object({
   name: z.string().min(2).max(100),
