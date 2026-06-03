@@ -59,6 +59,7 @@ export default async function Home() {
               width={800}
               height={1000}
               sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
               className="aspect-3/4 w-full rounded-sm object-cover sepia-[0.15]"
             />
             <ul className="mt-6 divide-y divide-[#1b2430]/15 border-y border-[#1b2430]/15">

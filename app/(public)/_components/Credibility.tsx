@@ -1,7 +1,15 @@
 'use client'
 
 import Image from 'next/image'
-import SectionReveal from './SectionReveal' // We'll wrap this in a reveal for a nice effect
+import { useRef } from 'react'
+import { useGSAP } from '@gsap/react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import SectionReveal from './SectionReveal'
+
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger)
+}
 
 const partners = [
   { name: 'EASA', src: '/images/partners/easa-logo.webp', width: 200, height: 65 },
@@ -18,8 +26,24 @@ const partners = [
 ]
 
 export default function Credibility() {
+  const containerRef = useRef<HTMLElement>(null)
+
+  useGSAP(() => {
+    gsap.from('.partner-logo', {
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: 'top 85%',
+      },
+      y: 30,
+      opacity: 0,
+      duration: 0.6,
+      stagger: 0.1,
+      ease: 'back.out(1.7)'
+    })
+  }, { scope: containerRef })
+
   return (
-    <section className="bg-paper-dark border-y border-[#1b2430]/15 py-20 sm:py-24">
+    <section ref={containerRef} className="bg-paper-dark border-y border-[#1b2430]/15 py-20 sm:py-24">
       <SectionReveal>
         <div className="container mx-auto px-6 text-center">
           <h3 className="mb-12 font-serif text-lg font-medium tracking-wide text-[#1b2430]/60">
@@ -29,7 +53,7 @@ export default function Credibility() {
             {partners.map((partner) => (
               <div
                 key={partner.name}
-                className="opacity-80 grayscale transition-all duration-500 hover:scale-105 hover:opacity-100 hover:grayscale-0"
+                className="partner-logo opacity-80 grayscale transition-all duration-500 hover:scale-105 hover:opacity-100 hover:grayscale-0"
               >
                 <Image
                   src={partner.src}
