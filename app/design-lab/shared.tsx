@@ -125,21 +125,25 @@ export const LICENSING = {
 } as const
 
 export const ENROLL = [
-  { n: '01', t: 'Register Online', d: 'Pay the registration fee and create your portal account.' },
+  {
+    n: '01',
+    t: 'Register',
+    d: 'Fill out the online application form with your personal details and select your programme.',
+  },
   {
     n: '02',
-    t: 'Complete Application',
-    d: 'Submit your documents and complete the online application form.',
+    t: 'Choose Pathway',
+    d: 'Select your preferred EASA Part-66 training pathway — full-time, modular, or military.',
   },
   {
     n: '03',
-    t: 'Get Approved',
-    d: 'Our team reviews your application and issues a confirmation invoice.',
+    t: 'Make Payment',
+    d: 'Pay the one-time registration fee via bank transfer or mobile money.',
   },
   {
     n: '04',
     t: 'Begin Training',
-    d: 'Pay your confirmation fee, get onboarded, and start your journey.',
+    d: 'Once approved, receive your portal login and prepare for your first class.',
   },
 ] as const
 
