@@ -75,9 +75,8 @@ export default function HeroSlider() {
         />
       ))}
 
-
-      {/* Dark Overlay using modern Tailwind syntax */}
-      <div className="absolute inset-0 z-10 bg-linear-to-b from-black/20 via-black/60 to-black/80" />
+      {/* Warm Dark Overlay */}
+      <div className="absolute inset-0 z-10 bg-linear-to-b from-[#1b2430]/30 via-[#1b2430]/60 to-[#1b2430]/90" />
 
       {/* Content Area - Centered */}
       <div className="relative z-20 w-full px-6 py-20 text-center md:container md:mx-auto">
@@ -90,14 +89,19 @@ export default function HeroSlider() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             >
-              <h1 className="mb-6 text-4xl leading-[1.1] font-black text-white md:text-6xl lg:text-7xl">
+              <div className="text-aerojet-sky mb-6 flex items-center justify-center gap-4 text-[11px] font-bold tracking-[0.35em] uppercase">
+                <span className="bg-aerojet-sky/40 h-px w-12" />
+                EASA Part-66 · Accra, Ghana
+                <span className="bg-aerojet-sky/40 h-px w-12" />
+              </div>
+              <h1 className="mb-6 font-serif text-4xl leading-[1.06] font-medium tracking-tight text-white md:text-6xl lg:text-7xl">
                 {slides[currentSlide].headline.split(' ').map((word, i) => (
                   <span key={i} className="mr-[0.25em] inline-block last:mr-0">
                     {word}
                   </span>
                 ))}
               </h1>
-              <p className="mx-auto mb-10 max-w-2xl text-lg font-medium text-gray-200/90 md:text-xl">
+              <p className="mx-auto mb-10 max-w-2xl font-serif text-lg font-medium text-gray-200/90 italic md:text-xl">
                 {slides[currentSlide].subhead}
               </p>
 
@@ -105,7 +109,7 @@ export default function HeroSlider() {
                 <Button
                   asChild
                   size="lg"
-                  className="bg-public-secondary hover:bg-public-secondary/90 h-14 rounded-full px-10 text-xs font-black tracking-widest text-white uppercase shadow-xl transition-all hover:scale-105"
+                  className="bg-aerojet-sky inline-flex h-12 items-center gap-3 rounded-sm px-8 text-[11px] font-bold tracking-[0.25em] text-white uppercase transition hover:bg-[#1b2430]"
                 >
                   <Link href="/register">Start Registration</Link>
                 </Button>
@@ -113,7 +117,7 @@ export default function HeroSlider() {
                   asChild
                   size="lg"
                   variant="outline"
-                  className="h-14 rounded-full border-2 border-white/30 bg-white/10 px-10 text-xs font-black tracking-widest text-white backdrop-blur-sm transition-all hover:bg-white hover:text-aerojet-blue"
+                  className="inline-flex h-12 items-center rounded-sm border border-white/40 bg-transparent px-8 text-[11px] font-bold tracking-[0.25em] text-white uppercase transition hover:bg-white hover:text-[#1b2430]"
                 >
                   <Link href="/courses">Explore Courses</Link>
                 </Button>
