@@ -178,13 +178,13 @@ export const wrapEmail = async (title: string, bodyContent: string, recipientEma
       <body>
         <div class="wrapper">
           <table class="main-table" align="center">
-            <tr><td class="header"><img src="${logoDarkOnWhite}" alt="Aerojet Academy" /></td></tr>
+            <tr><td class="header"><img src="${logoDarkOnWhite}" alt="Aerojet Aviation Training Academy" /></td></tr>
             <tr><td class="content"><h1 class="h1">${title}</h1>${bodyContent}</td></tr>
             <tr>
               <td class="footer" bgcolor="${COLORS.navy}" style="background-color: ${COLORS.navy} !important;">
                 <table width="100%">
                   <tr>
-                    <td valign="top"><img src="${logoWhiteOnDark}" class="footer-logo" alt="Aerojet Academy" /></td>
+                    <td valign="top"><img src="${logoWhiteOnDark}" class="footer-logo" alt="Aerojet Aviation Training Academy" /></td>
                     <td valign="top" class="footer-contact" style="color: #cbd5e1 !important; text-align: right;">
                       <strong style="white-space: nowrap;">Aerojet Aviation Training Academy</strong><br/>
                       <span style="font-size: 11px; opacity: 0.8;">Small Engines Dept., ATTC<br/>Kokomlemle, Accra - Ghana<br/>+233 209 848 423</span>
@@ -707,7 +707,8 @@ export async function renderSeatReservationConfirmedEmail(
   currency: string,
   recipientEmail?: string
 ) {
-  const defaultSubject = 'Seat Reservation Confirmed - Welcome to Aerojet Academy!'
+  const defaultSubject =
+    'Seat Reservation Confirmed - Welcome to Aerojet Aviation Training Academy!'
   const defaultBody = `
     <p class="text">Hi {{firstName}},</p>
     
@@ -771,7 +772,7 @@ export async function sendSeatReservationConfirmedEmail(
 
   return sendEmail({
     to: email,
-    subject: 'Seat Reservation Confirmed - Welcome to Aerojet Academy!',
+    subject: 'Seat Reservation Confirmed - Welcome to Aerojet Aviation Training Academy!',
     html,
   })
 }
@@ -1143,7 +1144,7 @@ export async function sendContactEnquiryConfirmation(email: string, name: string
 
   return sendEmail({
     to: email,
-    subject: `Aerojet Academy - Enquiry Received: ${subject}`,
+    subject: `Aerojet Aviation Training Academy - Enquiry Received: ${subject}`,
     html,
   })
 }

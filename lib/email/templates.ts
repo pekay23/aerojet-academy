@@ -75,7 +75,7 @@ const baseLayout = async (content: string, title?: string) => {
 export async function welcomeEmail(name: string, registrationCode: string) {
   return await baseLayout(
     `
-    <h2 style="color:#0f172a;">Welcome to Aerojet Academy, ${name}!</h2>
+    <h2 style="color:#0f172a;">Welcome to Aerojet Aviation Training Academy, ${name}!</h2>
     <p>Thank you for registering. Your registration code is:</p>
     <div style="background:#f1f5f9;padding:16px;border-radius:8px;text-align:center;margin:16px 0;">
       <strong style="font-size:20px;color:#0f172a;">${registrationCode}</strong>
@@ -92,7 +92,7 @@ export async function activationEmail(name: string, academyEmail: string, tempPa
     `
     <h2 style="color:#0f172a;">Account Activated!</h2>
     <p>Dear ${name},</p>
-    <p>Your Aerojet Academy account has been activated. Here are your credentials:</p>
+    <p>Your Aerojet Aviation Training Academy account has been activated. Here are your credentials:</p>
     <div style="background:#f1f5f9;padding:16px;border-radius:8px;margin:16px 0;">
       <p><strong>Academy Email:</strong> ${academyEmail}</p>
       <p><strong>Temporary Password:</strong> ${tempPassword}</p>
@@ -141,7 +141,7 @@ export async function promotionToStudentEmail(
   return await baseLayout(
     `
     <h2 style="color:#0f172a;">Congratulations, ${name}!</h2>
-    <p>You have been promoted to a full student at Aerojet Academy.</p>
+    <p>You have been promoted to a full student at Aerojet Aviation Training Academy.</p>
     <div style="background:#f1f5f9;padding:16px;border-radius:8px;margin:16px 0;">
       <p><strong>Student ID:</strong> ${studentId}</p>
       <p><strong>Academy Email:</strong> ${academyEmail}</p>
