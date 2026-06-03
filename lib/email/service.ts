@@ -426,12 +426,10 @@ export async function renderActivationEmail(
     <div class="info-box" style="border-left-color: #22c55e;">
       <div class="info-row"><strong>Login Credentials:</strong></div>
       <div class="info-row" style="margin-top:10px;">
-        <strong>Academy Email:</strong><br/>
-        <span style="font-size: 15px; color: #0f172a; font-weight:bold;">{{academyEmail}}</span>
+        <strong>Academy Email:</strong> <span style="color: #0f172a; font-weight:bold;">{{academyEmail}}</span>
       </div>
       <div class="info-row" style="margin-top:5px;">
-        <strong>Temporary Password:</strong><br/>
-        <span style="font-family: monospace; font-size: 16px; letter-spacing: 1px; color: #0f172a; background: #f8fafc; border: 1px solid #e2e8f0; padding: 4px 8px; border-radius: 4px;">{{tempPassword}}</span>
+        <strong>Temporary Password:</strong> <span style="font-family: monospace; font-size: 15px; letter-spacing: 1px; color: #0f172a; background: #f1f5f9; border: 1px solid #e2e8f0; padding: 2px 6px; border-radius: 4px; display: inline-block;">{{tempPassword}}</span>
       </div>
     </div>
 
@@ -1174,7 +1172,7 @@ export async function renderMilestoneReminderEmail(
     <div class="info-box" style="border-left-color: {{urgencyColor}};">
       <div class="info-row"><strong>Payment Type:</strong> {{milestoneType}}</div>
       <div class="info-row" style="margin-top:5px;"><strong>Amount Due:</strong> €{{amount}}</div>
-      <div class="info-row" style="margin-top:5px;"><strong>Due In:</strong> <strong>{{daysUntil}} day{{daysUntil > 1 ? 's' : ''}}</strong></div>
+      <div class="info-row" style="margin-top:5px;"><strong>Due In:</strong> <strong>{{daysUntil}} day{{daysUntilSuffix}}</strong></div>
     </div>
 
     <p class="text">Please ensure your payment is made before the due date to avoid any interruption to your studies.</p>
@@ -1209,6 +1207,7 @@ export async function renderMilestoneReminderEmail(
     milestoneType,
     amount: amount.toLocaleString(),
     daysUntil: daysUntil.toString(),
+    daysUntilSuffix: daysUntil > 1 ? 's' : '',
     programmeName,
     urgencyText,
     urgencyColor,
