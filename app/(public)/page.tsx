@@ -58,6 +58,7 @@ export default async function Home() {
               alt="Aerojet student"
               width={800}
               height={1000}
+              quality={90}
               sizes="(max-width: 1024px) 100vw, 50vw"
               priority
               className="aspect-3/4 w-full rounded-sm object-cover sepia-[0.15]"
