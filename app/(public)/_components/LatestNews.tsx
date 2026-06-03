@@ -42,20 +42,20 @@ export default async function LatestNews() {
   }
 
   return (
-    <section className="bg-slate-50 py-20 sm:py-28 dark:bg-slate-900/10">
+    <section className="bg-paper py-20 sm:py-28 dark:bg-[#1b2430]">
       <div className="container mx-auto w-full px-6">
         <div className="flex flex-col items-center justify-between gap-4 text-center sm:flex-row sm:text-left">
           <div>
-            <span className="text-public-secondary mb-2 block text-xs font-bold tracking-[0.2em] uppercase">
+            <span className="mb-2 block text-xs font-bold tracking-[0.2em] text-[#1b2430]/60 uppercase">
               Updates
             </span>
-            <h2 className="text-public-primary text-3xl font-black tracking-tight uppercase sm:text-4xl dark:text-white">
+            <h2 className="text-aerojet-blue font-serif text-3xl font-medium sm:text-4xl dark:text-white">
               Latest News & Updates
             </h2>
           </div>
           <Link
             href="/newsroom"
-            className="text-public-secondary hidden items-center gap-2 text-xs font-black tracking-widest uppercase transition-all hover:gap-3 sm:inline-flex"
+            className="text-aerojet-blue hidden items-center gap-2 text-xs font-bold tracking-widest uppercase transition-all hover:gap-3 sm:inline-flex"
           >
             View All News <ArrowRight className="h-4 w-4" />
           </Link>

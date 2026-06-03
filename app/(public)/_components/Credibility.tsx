@@ -19,10 +19,10 @@ const partners = [
 
 export default function Credibility() {
   return (
-    <section className="bg-slate-50 py-20 sm:py-24">
+    <section className="bg-paper-dark border-y border-[#1b2430]/15 py-20 sm:py-24">
       <SectionReveal>
         <div className="container mx-auto px-6 text-center">
-          <h3 className="mb-12 text-xs font-black tracking-[0.3em] text-slate-500 uppercase">
+          <h3 className="mb-12 font-serif text-lg font-medium tracking-wide text-[#1b2430]/60">
             Partners & Certification Standards
           </h3>
           <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8 md:gap-x-20">
