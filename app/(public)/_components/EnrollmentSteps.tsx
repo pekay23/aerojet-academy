@@ -23,20 +23,22 @@ const SectionReveal = ({ children, delay = 0 }: { children: React.ReactNode; del
 export default function EnrollmentSteps({ fee = '350', currency = 'GHS' }: EnrollmentStepsProps) {
   const steps = [
     {
-      title: 'Create Account',
-      description: 'Register online and submit your basic details to start.',
+      title: 'Register',
+      description:
+        'Fill out the online application form with your personal details and select your programme.',
     },
     {
-      title: 'Select Pathway',
-      description: 'Choose your desired training programme and schedule.',
+      title: 'Choose Pathway',
+      description:
+        'Select your preferred EASA Part-66 training pathway — full-time, modular, or military.',
     },
     {
-      title: 'Aptitude Test',
-      description: 'Complete our technical and english proficiency assessment.',
+      title: 'Make Payment',
+      description: `Pay the one-time ${currency} ${fee} registration fee via bank transfer or mobile money.`,
     },
     {
       title: 'Begin Training',
-      description: 'Receive your acceptance and prepare for your first class.',
+      description: 'Once approved, receive your portal login and prepare for your first class.',
     },
   ]
 
@@ -49,7 +51,7 @@ export default function EnrollmentSteps({ fee = '350', currency = 'GHS' }: Enrol
               Start Your Journey
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-lg text-[#1b2430]/70">
-              Four simple steps to begin your career.
+              Four steps from application to your first class.
             </p>
           </div>
         </SectionReveal>

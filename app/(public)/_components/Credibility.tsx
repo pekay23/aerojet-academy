@@ -7,7 +7,13 @@ const partners = [
   { name: 'EASA', src: '/images/partners/easa-logo.webp', width: 200, height: 65 },
   { name: 'USTDA', src: '/images/partners/ustda.webp', width: 200, height: 65 },
   { name: 'Ghana Air Force', src: '/images/partners/Airforce-logo.webp', width: 200, height: 65 },
-  { name: 'Joramco', src: '/images/partners/Joramco-Logo-AI.webp', width: 200, height: 60, priority: true },
+  {
+    name: 'Joramco',
+    src: '/images/partners/Joramco-Logo-AI.webp',
+    width: 200,
+    height: 60,
+    priority: true,
+  },
   { name: 'Gaptek', src: '/images/partners/Logotip-GAPTEK.webp', width: 200, height: 65 },
   {
     name: 'Aerojet Foundation',
@@ -29,7 +35,7 @@ export default function Credibility() {
             {partners.map((partner) => (
               <div
                 key={partner.name}
-                className="opacity-80 grayscale transition-all duration-500 hover:scale-105 hover:opacity-100 hover:grayscale-0"
+                className="transition-all duration-500 md:opacity-80 md:grayscale md:hover:scale-105 md:hover:opacity-100 md:hover:grayscale-0"
               >
                 <Image
                   src={partner.src}
