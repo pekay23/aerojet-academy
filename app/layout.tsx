@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { Inter, Outfit } from 'next/font/google'
+import { Inter, Outfit, Playfair_Display } from 'next/font/google'
 import './globals.css'
 // import '@uploadthing/react/styles.css'
 import { Providers } from './providers'
@@ -15,6 +15,12 @@ const inter = Inter({
 const outfit = Outfit({
   subsets: ['latin'],
   variable: '--font-outfit',
+  display: 'swap',
+})
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-playfair',
   display: 'swap',
 })
 
@@ -100,7 +106,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://utfs.io" />
       </head>
       <body
-        className={`${inter.variable} ${outfit.variable} relative font-sans antialiased`}
+        className={`${inter.variable} ${outfit.variable} ${playfair.variable} relative font-sans antialiased`}
         suppressHydrationWarning
       >
         <div className="relative">

@@ -195,19 +195,17 @@ export default function PublicNav() {
               opacity: mousePos ? 1 : 0,
               background: mousePos
                 ? `radial-gradient(600px circle at ${mousePos.x}px ${mousePos.y}px, ${
-                    scrolled || forceSolid
-                      ? 'rgba(59,130,246,0.05)'
-                      : 'rgba(255,255,255,0.07)'
+                    scrolled || forceSolid ? 'rgba(59,130,246,0.05)' : 'rgba(255,255,255,0.07)'
                   }, transparent 40%)`
                 : 'none',
             }}
           />
         </div>
         <div className="relative z-10 mx-auto flex h-16 w-full items-center justify-between px-6 sm:px-10 lg:px-16">
-          <Link href="/" className="shrink-0 flex items-center py-2">
+          <Link href="/" className="flex shrink-0 items-center pr-4 md:pr-8">
             <Logo
               tone={scrolled || mobileOpen || forceSolid ? 'onWhite' : 'onDark'}
-              className="h-8 w-auto"
+              className="h-10 w-auto sm:h-12"
               priority
             />
           </Link>
@@ -226,21 +224,25 @@ export default function PublicNav() {
                 }}
               >
                 {/* Pill container for nav links */}
-                <div className={`inline-flex items-center gap-1 rounded-full p-1 transition-colors ${
-                  scrolled || forceSolid
-                    ? 'bg-slate-100 dark:bg-slate-800'
-                    : 'bg-white/10'
-                }`}>
+                <div
+                  className={`inline-flex items-center gap-1 rounded-full p-1 transition-colors ${
+                    scrolled || forceSolid ? 'bg-slate-100 dark:bg-slate-800' : 'bg-white/10'
+                  }`}
+                >
                   <NavigationMenuList>
                     {navLinks.map((item) =>
                       item.isDropdown ? (
                         <NavigationMenuItem key={item.label} value={item.label}>
                           <NavigationMenuTrigger
                             onClick={() => setAccordionValue('')}
-                            className={`relative flex h-auto cursor-pointer items-center rounded-full px-4 py-2 text-xs font-black tracking-[0.15em] uppercase transition-all duration-300 bg-transparent transition-none! ${
+                            className={`relative flex h-auto cursor-pointer items-center rounded-full bg-transparent px-4 py-2 text-xs font-black tracking-[0.15em] uppercase transition-all transition-none! duration-300 ${
                               pathname?.startsWith('/courses')
-                                ? scrolled || forceSolid ? 'text-aerojet-blue dark:text-white' : 'text-white'
-                                : scrolled || forceSolid ? 'text-slate-500 dark:text-slate-400' : 'text-white/70'
+                                ? scrolled || forceSolid
+                                  ? 'text-aerojet-blue dark:text-white'
+                                  : 'text-white'
+                                : scrolled || forceSolid
+                                  ? 'text-slate-500 dark:text-slate-400'
+                                  : 'text-white/70'
                             }`}
                           >
                             {pathname?.startsWith('/courses') && (
@@ -312,8 +314,12 @@ export default function PublicNav() {
                             href={item.href || '#'}
                             className={`relative flex items-center rounded-full px-4 py-2 text-xs font-black tracking-[0.15em] uppercase transition-colors ${
                               pathname === item.href
-                                ? scrolled || forceSolid ? 'text-aerojet-blue dark:text-white' : 'text-white'
-                                : scrolled || forceSolid ? 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300' : 'text-white/70 hover:text-white'
+                                ? scrolled || forceSolid
+                                  ? 'text-aerojet-blue dark:text-white'
+                                  : 'text-white'
+                                : scrolled || forceSolid
+                                  ? 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300'
+                                  : 'text-white/70 hover:text-white'
                             }`}
                           >
                             {pathname === item.href && (
@@ -337,7 +343,9 @@ export default function PublicNav() {
                 </div>
               </NavigationMenu>
             )}
-            <div className={`ml-3 transition-colors ${scrolled || forceSolid ? 'text-slate-500 dark:text-slate-300' : 'text-white/80'}`}>
+            <div
+              className={`ml-3 transition-colors ${scrolled || forceSolid ? 'text-slate-500 dark:text-slate-300' : 'text-white/80'}`}
+            >
               <SearchModal />
             </div>
           </div>
