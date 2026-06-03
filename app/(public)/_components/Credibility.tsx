@@ -53,7 +53,7 @@ export default function Credibility() {
             {partners.map((partner) => (
               <div
                 key={partner.name}
-                className="partner-logo opacity-80 grayscale transition-all duration-500 hover:scale-105 hover:opacity-100 hover:grayscale-0"
+                className="partner-logo transition-all duration-500 hover:scale-105"
               >
                 <Image
                   src={partner.src}
