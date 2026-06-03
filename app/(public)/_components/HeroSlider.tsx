@@ -89,10 +89,10 @@ export default function HeroSlider() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             >
-              <div className="text-aerojet-sky mb-6 flex items-center justify-center gap-4 text-[11px] font-bold tracking-[0.35em] uppercase">
-                <span className="bg-aerojet-sky/40 h-px w-12" />
+              <div className="text-white/90 mb-6 flex items-center justify-center gap-4 text-[11px] font-bold tracking-[0.35em] uppercase">
+                <span className="bg-white/40 h-px w-12" />
                 EASA Part-66 · Accra, Ghana
-                <span className="bg-aerojet-sky/40 h-px w-12" />
+                <span className="bg-white/40 h-px w-12" />
               </div>
               <h1 className="mb-6 font-serif text-4xl leading-[1.06] font-medium tracking-tight text-white md:text-6xl lg:text-7xl">
                 {slides[currentSlide].headline.split(' ').map((word, i) => (
