@@ -40,11 +40,12 @@ export default function Careers() {
             </p>
           </SectionReveal>
 
-          <div className="mt-10 flex flex-col gap-y-4 font-serif text-2xl sm:text-3xl">
+          <div className="mt-10 flex flex-col gap-y-3 font-serif text-2xl sm:text-3xl">
             {careerPoints.map((c, i) => (
-              <SectionReveal key={c} delay={i * 0.08} className="flex items-center gap-4">
-                <span className="text-aerojet-sky text-opacity-50">✦</span>
-                <span>{c}</span>
+              <SectionReveal key={c} delay={i * 0.08}>
+                <div className="border-l-2 border-[#7eb8d4]/50 py-1 pl-5 text-[#f7f3ec]/90">
+                  {c}
+                </div>
               </SectionReveal>
             ))}
           </div>
