@@ -25,7 +25,7 @@ export default function Careers() {
           quality={90}
         />
         {/* Dark blue gradient overlay fading to the right so text stays readable but the image pops on the right */}
-        <div className="absolute inset-0 bg-linear-to-b from-[#0d1624]/70 via-[#0d1624]/60 to-[#0d1624]/80 sm:bg-linear-to-r sm:from-[#0d1624]/95 sm:via-[#0d1624]/80 sm:to-[#0d1624]/20" />
+        <div className="absolute inset-0 bg-linear-to-b from-[#0d1624]/70 via-[#0d1624]/60 to-[#0d1624]/80 sm:from-[#0d1624]/95 sm:via-[#0d1624]/80 sm:to-[#0d1624]/20" />
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 sm:py-32">

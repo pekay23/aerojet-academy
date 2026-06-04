@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>05 · Component library · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+    <a href="../design-system.html">Design</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Design</p>
+  <h1 class="he-title">05 · Component library</h1>
+  <p class="he-deck">The component layer is split into three tiers…</p>
+</header>
+<ul>
+<li>❌ No emoji as icons. Always Lucide React (<code>lucide-react</code>).</li>
+<li>❌ No hard-coded <code>text-white</code> inside portal chrome — use <code>text-card-foreground</code> or a CSS var.</li>
+<li>❌ No raw <code>bg-blue-500</code> / <code>bg-red-500</code> etc. on the public site — use the <code>--aero-*</code> tokens.</li>
+<li>❌ No buttons smaller than 44×44 px (WCAG).</li>
+<li>❌ No default <code>font-bold</code> on body — <code>font-medium</code> (500) is the heading cap.</li>
+<li>❌ No <code>transition-all</code> on heavy properties — prefer <code>transition-colors</code> or <code>transition-transform</code>.</li>
+<li>❌ No silent accessibility drops — every interactive element needs <code>cursor-pointer</code>, focus ring, and an accessible label.</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#51-shadcnui-primitives-tailwind-only">5.1 · shadcn/ui primitives (Tailwind only)</a></li>
+    <li class="he-toc__l3"><a href="#button-componentsuibuttontsx">Button (`components/ui/button.tsx`)</a></li>
+    <li class="he-toc__l3"><a href="#card-componentsuicardtsx">Card (`components/ui/card.tsx`)</a></li>
+    <li class="he-toc__l3"><a href="#badge-componentsuibadgetsx">Badge (`components/ui/badge.tsx`)</a></li>
+    <li class="he-toc__l3"><a href="#other-primitives">Other primitives</a></li>
+    <li class="he-toc__l2"><a href="#52-shared-composites-componentsshared">5.2 · Shared composites (`components/shared/*`)</a></li>
+    <li class="he-toc__l3"><a href="#composite-design-tokens">Composite design tokens</a></li>
+    <li class="he-toc__l2"><a href="#53-marketing-sections-apppubliccomponents">5.3 · Marketing sections (`app/(public)/_components/*`)</a></li>
+    <li class="he-toc__l3"><a href="#the-programme-list-pattern-editorial">The programme-list pattern (editorial)</a></li>
+    <li class="he-toc__l2"><a href="#54-marketing-library-componentsmarketingsections">5.4 · Marketing library (`components/marketing/sections/*`)</a></li>
+    <li class="he-toc__l2"><a href="#55-layouts-componentslayouts">5.5 · Layouts (`components/layouts/*`)</a></li>
+    <li class="he-toc__l2"><a href="#56-forbidden-patterns">5.6 · Forbidden patterns</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

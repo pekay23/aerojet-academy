@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+﻿#!/usr/bin/env node
 /**
  * Build static HTML for every markdown file under `docs/`.
  *
@@ -35,6 +35,7 @@ const SECTIONS = [
   { dir: 'guides',       title: 'Guides',       blurb: 'Operational how-tos — setup, deployment, handover.' },
   { dir: 'audits',       title: 'Audits',       blurb: 'Historical audit reports, newest first.' },
   { dir: 'plans',        title: 'Plans',        blurb: 'RFCs and implementation roadmaps.' },
+  { dir: 'design',       title: 'Design',       blurb: 'Design system — tokens, typography, components.' },
 ]
 
 // ── HTML helpers ─────────────────────────────────────────────────────────
@@ -207,6 +208,7 @@ function pageHtml({ title, eyebrow, deckHtml, body, toc, project, basePathToHtml
     <a href="${basePathToHtml}guides/setup.html">Guides</a>
     <a href="${basePathToHtml}audits/2026-05-20-comprehensive.html">Audits</a>
     <a href="${basePathToHtml}plans/future-plans.html">Plans</a>
+    <a href="${basePathToHtml}design-system.html">Design</a>
   </div>
 </nav>`
 
@@ -444,7 +446,7 @@ ${standalone}
     title: 'Documentation',
     eyebrow: `${project} · docs`,
     deckHtml:
-      'All project documentation, organised by purpose. Markdown sources live in <code>docs/architecture</code>, <code>docs/guides</code>, <code>docs/audits</code>, and <code>docs/plans</code>.',
+      'All project documentation, organised by purpose. Markdown sources live in <code>docs/architecture</code>, <code>docs/guides</code>, <code>docs/audits</code>, <code>docs/plans</code>, and <code>docs/design</code>.',
     body,
     toc: [],
     project,
@@ -460,6 +462,12 @@ async function main() {
   await fs.mkdir(OUT, { recursive: true })
 
   // Copy tokens + site CSS into /html/ so all generated pages can link them.
+  // Copy Aerojet-specific design tokens (used by design-system.html and preview)
+  const aeroTokens = path.join(ROOT, 'docs', 'html', 'aerojet-design-tokens.css')
+  if (await fs.stat(aeroTokens).catch(() => null)) {
+    await fs.copyFile(aeroTokens, path.join(OUT, 'aerojet-design-tokens.css'))
+  }
+
   const tokens = await fs.readFile(TOKENS_SRC, 'utf8')
   await fs.writeFile(path.join(OUT, 'design-tokens.css'), tokens, 'utf8')
   await fs.writeFile(path.join(OUT, 'docs.css'), SITE_CSS, 'utf8')
@@ -511,3 +519,7 @@ main().catch((err) => {
   console.error('[build-docs-html] failed:', err)
   process.exit(1)
 })
+
+
+
+
