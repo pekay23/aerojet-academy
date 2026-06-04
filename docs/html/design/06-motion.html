@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>06 · Motion &amp; interaction · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+    <a href="../design-system.html">Design</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Design</p>
+  <h1 class="he-title">06 · Motion &amp; interaction</h1>
+  <p class="he-deck">The portal deliberately keeps motion <strong>short, restrained, and purposeful</strong> — no parallax, no scroll-jacking, no long reveals.</p>
+</header>
+<ul>
+<li><code>Skeleton</code> from shadcn: <code>animate-pulse rounded-md bg-muted</code>.</li>
+<li><code>aria-busy</code> is set on busy buttons (<code>ChangePasswordForm</code>, calendar
+save button).</li>
+<li>Buttons in a busy state get <code>disabled:opacity-50 disabled:pointer-events-none</code>
+plus the same <code>aria-busy</code> attribute.</li>
+<li>A few components toggle a tiny &quot;PROCESSING…&quot; / &quot;SAVING…&quot; caption
+via <code>aria-live=&quot;polite&quot;</code>.</li>
+</ul>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#61-core-durations">6.1 · Core durations</a></li>
+    <li class="he-toc__l2"><a href="#62-easing-curves">6.2 · Easing curves</a></li>
+    <li class="he-toc__l2"><a href="#63-keyframes">6.3 · Keyframes</a></li>
+    <li class="he-toc__l2"><a href="#64-framer-motion-patterns">6.4 · Framer Motion patterns</a></li>
+    <li class="he-toc__l3"><a href="#sectionreveal-live-site">SectionReveal` (live site)</a></li>
+    <li class="he-toc__l3"><a href="#hero-word-by-word-reveal">Hero word-by-word reveal</a></li>
+    <li class="he-toc__l3"><a href="#motiontabs-underline">MotionTabs` underline</a></li>
+    <li class="he-toc__l3"><a href="#changepasswordform-form-state-animation">ChangePasswordForm` form-state animation</a></li>
+    <li class="he-toc__l2"><a href="#65-gsap">6.5 · GSAP</a></li>
+    <li class="he-toc__l2"><a href="#66-hover-patterns">6.6 · Hover patterns</a></li>
+    <li class="he-toc__l2"><a href="#67-focus-accessibility-motion">6.7 · Focus &amp; accessibility motion</a></li>
+    <li class="he-toc__l2"><a href="#68-loading-skeleton-patterns">6.8 · Loading &amp; skeleton patterns</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

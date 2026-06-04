@@ -16,6 +16,9 @@
 - `RESEND_API_KEY` — For emails
 - `UPLOADTHING_TOKEN` — For file uploads
 - `CRON_SECRET` — For cron job authentication (required — all cron endpoints validate this)
+- `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` — Payments
+- `SUPABASE_DATABASE_URL` / `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` — Supabase mirror + Realtime
+- `UPLOADTHING_SECRET` / `UPLOADTHING_APP_ID` — UploadThing dual credentials
 
 ### Database Adapter — IMPORTANT
 
@@ -39,36 +42,71 @@ Optional local overrides:
 - `AEROJET_LOCAL_DB_ADAPTER=neon` forces the local Neon adapter in `next dev`.
 - `DB_CONNECT_TIMEOUT_MS=10000` changes the local TCP adapter's fail-fast timeout.
 
-### Cron Jobs (Vercel)
+## Cron Jobs (Vercel)
 
-Configured in `vercel.json`. All cron endpoints require `Authorization: Bearer <CRON_SECRET>` header:
+All 16 cron endpoints are registered in `vercel.json` and require
+`Authorization: Bearer <CRON_SECRET>`. Schedules are in `vercel.json`:
 
-```json
-{
-  "crons": [
-    { "path": "/api/cron/check-events", "schedule": "0 1 * * *" },
-    { "path": "/api/cron/check-pools", "schedule": "0 2 * * *" },
-    { "path": "/api/cron/milestone-reminders", "schedule": "0 9 * * *" },
-    { "path": "/api/cron/send-reminders", "schedule": "0 10 * * *" },
-    { "path": "/api/cron/payment-deadlines", "schedule": "0 3 * * *" },
-    { "path": "/api/cron/backup", "schedule": "0 4 * * *" },
-    { "path": "/api/cron/cleanup-audit-logs", "schedule": "0 0 1 * *" },
-    { "path": "/api/cron/expire-bundles", "schedule": "0 0 * * *" },
-    { "path": "/api/cron/cleanup-abandoned-accounts", "schedule": "0 5 * * *" },
-    { "path": "/api/cron/scheduled-reports", "schedule": "0 8 * * 1" }
-  ]
-}
-```
-
-**Route files not yet registered in vercel.json** (run manually or add schedules as needed):
-
-- `/api/cron/aptitude-reminders`
-- `/api/cron/interview-reminders`
-- `/api/cron/modular-deadlines`
+| Endpoint                               | Schedule (cron) | Purpose                                            |
+| -------------------------------------- | --------------- | -------------------------------------------------- |
+| `/api/cron/check-events`               | `0 1 * * *`     | Daily 01:00 — Update exam event statuses           |
+| `/api/cron/check-pools`                | `0 2 * * *`     | Daily 02:00 — Fail expired exam pools              |
+| `/api/cron/payment-deadlines`          | `0 3 * * *`     | Daily 03:00 — Mark overdue payments                |
+| `/api/cron/backup`                     | `0 4 * * *`     | Daily 04:00 — Trigger DB backup                    |
+| `/api/cron/sync-check`                 | `0 4 * * 1`     | Mondays 04:00 — Neon ↔ Supabase replication health |
+| `/api/cron/supabase-mirror`            | `30 4 * * *`    | Daily 04:30 — Push pending writes to Supabase      |
+| `/api/cron/cleanup-abandoned-accounts` | `0 5 * * *`     | Daily 05:00 — GDPR-style cleanup                   |
+| `/api/cron/scheduled-reports`          | `0 8 * * 1`     | Mondays 08:00 — Scheduled analytics                |
+| `/api/cron/milestone-reminders`        | `0 9 * * *`     | Daily 09:00 — Milestone T-7/T-1 reminders          |
+| `/api/cron/send-reminders`             | `0 10 * * *`    | Daily 10:00 — Exam T-7/T-1 reminders               |
+| `/api/cron/aptitude-reminders`         | `0 11 * * *`    | Daily 11:00 — Aptitude test reminders              |
+| `/api/cron/interview-reminders`        | `0 12 * * *`    | Daily 12:00 — Interview reminders                  |
+| `/api/cron/modular-deadlines`          | `0 13 * * *`    | Daily 13:00 — Modular deadline checks              |
+| `/api/cron/expire-bundles`             | `0 0 * * *`     | Daily 00:00 — Expire exam bundles                  |
+| `/api/cron/cleanup-audit-logs`         | `0 0 1 * *`     | 1st of month 00:00 — Retention sweep               |
+| `/api/cron/gdpr-retention`             | `0 3 * * 1`     | Mondays 03:00 — Data retention sweep               |
 
 ## Database Migrations
 
 ```bash
-npx prisma migrate deploy     # Apply migrations
-npx prisma db push             # Push schema (dev)
+bunx prisma migrate deploy     # Apply migrations
+bunx prisma db push             # Push schema (dev)
+bunx prisma generate            # Regenerate client after schema edits
+```
+
+Post-push, the `postdb:push` npm script mirrors the schema to Supabase via
+`scripts/sync-supabase-schema.mjs` (skipped automatically if
+`SUPABASE_DATABASE_URL` isn't set).
+
+## Supabase mirror
+
+- `bunx prisma db push` (Neon) is the source of truth.
+- `scripts/sync-supabase-schema.mjs` runs as `postdb:push` and applies the
+  same Prisma schema to Supabase.
+- `scripts/sync-data-to-supabase.mjs` is the one-time data backfill.
+- Logical replication (Neon → Supabase) is documented in
+  `docs/guides/neon-supabase-logical-replication.md`.
+
+## Files / uploads
+
+`UploadThing` is the primary file store; `supabase-mirror` keeps a copy in
+Supabase storage nightly.
+
+## Reverse proxy / middleware
+
+The Next.js 16 codebase uses `proxy.ts` (the Next 16 replacement for
+`middleware.ts`) at the repo root to enforce `ROUTE_ROLE_MAP` for every
+portal and its `/api/*` siblings.
+
+## Webhooks
+
+- `POST /api/webhooks/resend` — Resend email events
+- `POST /api/webhooks/stripe` — Stripe payment events
+- `POST /api/webhooks/uploadthing` — UploadThing events
+
+## Smoke test after deploy
+
+```bash
+curl https://your-domain.example/api/health
+# 200 OK + a JSON body
 ```
