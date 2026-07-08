@@ -15,8 +15,18 @@ const careerPoints = [
 export default function Careers() {
   return (
     <section className="relative min-h-[420px] overflow-hidden border-t border-[#1b2430]/15 text-[#f7f3ec] sm:min-h-0">
-      {/* Background Image */}
-      <div className="absolute inset-0 z-0">
+      {/* Background Image — mobile */}
+      <div className="absolute inset-0 z-0 sm:hidden">
+        <Image
+          src="/images/home/careerwidemobile.png"
+          alt="Careers at Aerojet Academy"
+          fill
+          className="object-cover object-center"
+          quality={90}
+        />
+      </div>
+      {/* Background Image — desktop */}
+      <div className="absolute inset-0 z-0 hidden sm:block">
         <Image
           src="/images/home/careerwide.webp"
           alt="Careers at Aerojet Academy"
@@ -24,9 +34,9 @@ export default function Careers() {
           className="object-cover object-center sm:object-top-right"
           quality={90}
         />
-        {/* Dark blue gradient overlay fading to the right so text stays readable but the image pops on the right */}
-        <div className="absolute inset-0 bg-linear-to-b from-[#0d1624]/70 via-[#0d1624]/60 to-[#0d1624]/80 sm:from-[#0d1624]/95 sm:via-[#0d1624]/80 sm:to-[#0d1624]/20" />
       </div>
+      {/* Dark blue gradient overlay fading to the right so text stays readable but the image pops on the right */}
+      <div className="absolute inset-0 bg-linear-to-b from-[#0d1624]/70 via-[#0d1624]/60 to-[#0d1624]/80 sm:from-[#0d1624]/95 sm:via-[#0d1624]/80 sm:to-[#0d1624]/20" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-6 py-24 sm:py-32">
         <div className="max-w-3xl">
