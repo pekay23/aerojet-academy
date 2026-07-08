@@ -55,25 +55,34 @@ export const SYSTEM_EMAIL_INVENTORY: SystemEntry[] = [
   },
 ]
 
-/** Idempotent seed of the AUTO entries. Safe to call on every settings load. */
+/** Idempotent seed of the AUTO entries. Only creates new entries or re-tags
+ *  existing ones as AUTO/system — never overwrites admin edits to title,
+ *  description, or address. Safe to call on every settings load. */
 export async function seedSystemEmailRegistry() {
   for (const entry of SYSTEM_EMAIL_INVENTORY) {
-    await prismaUnfiltered.emailRegistryEntry.upsert({
+    const existing = await prismaUnfiltered.emailRegistryEntry.findUnique({
       where: { address: entry.address },
-      create: {
-        title: entry.title,
-        description: entry.description,
-        address: entry.address,
-        category: 'AUTO',
-        isSystem: true,
-      },
-      update: {
-        title: entry.title,
-        description: entry.description,
-        category: 'AUTO',
-        isSystem: true,
-      },
     })
+    if (!existing) {
+      await prismaUnfiltered.emailRegistryEntry.create({
+        data: {
+          title: entry.title,
+          description: entry.description,
+          address: entry.address,
+          category: 'AUTO',
+          isSystem: true,
+        },
+      })
+    } else {
+      // Re-tag as AUTO/system but preserve any admin edits
+      await prismaUnfiltered.emailRegistryEntry.update({
+        where: { address: entry.address },
+        data: {
+          category: 'AUTO',
+          isSystem: true,
+        },
+      })
+    }
   }
 }
 
