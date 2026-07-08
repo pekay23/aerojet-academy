@@ -18,7 +18,7 @@ export default function Careers() {
       {/* Background Image — mobile */}
       <div className="absolute inset-0 z-0 sm:hidden">
         <Image
-          src="/images/home/careerwidemobile.png"
+          src="/images/home/careerwidemobile.webp"
           alt="Careers at Aerojet Academy"
           fill
           className="object-cover object-center"

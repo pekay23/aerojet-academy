@@ -16,7 +16,13 @@ const nextConfig: NextConfig = {
     ],
   },
   ...(process.env.NODE_ENV === 'development' && {
-    allowedDevOrigins: ['192.168.8.173', '192.168.100.218', '192.168.100.243', '192.168.8.77'],
+    allowedDevOrigins: [
+      '192.168.8.202',
+      '192.168.8.173',
+      '192.168.100.218',
+      '192.168.100.243',
+      '192.168.8.77',
+    ],
   }),
   experimental: {
     serverActions: {
