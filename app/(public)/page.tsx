@@ -23,12 +23,11 @@ export default async function Home() {
   const { fee, currency } = await getRegistrationFeeInfo()
 
   return (
-    <div className="bg-white">
+    <div className="bg-paper">
       <HeroSlider />
       <TrustStrip />
 
       {/* ===== START: REPLACEMENT "WHO WE ARE" SECTION ===== */}
-      <div className="bg-paper">
       <section className="mx-auto max-w-7xl px-6 py-24 text-[#1b2430] sm:py-32">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
           <SectionReveal skipInitial>
@@ -80,13 +79,11 @@ export default async function Home() {
           </SectionReveal>
         </div>
       </section>
-      </div>
       {/* ===== END: REPLACEMENT "WHO WE ARE" SECTION ===== */}
 
       <TrainingPathways />
 
       {/* ===== START: REPLACEMENT "PROGRAMS" SECTION ===== */}
-      <div className="bg-paper">
       <section className="mx-auto max-w-7xl px-6 py-20 text-[#1b2430] sm:py-32">
         <SectionReveal>
           <h2 className="text-aerojet-blue mb-8 font-serif text-3xl font-medium sm:text-4xl">
@@ -144,7 +141,6 @@ export default async function Home() {
           ))}
         </div>
       </section>
-      </div>
       {/* ===== END: REPLACEMENT "PROGRAMS" SECTION ===== */}
 
       <Careers />

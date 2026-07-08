@@ -7,7 +7,7 @@ import SectionReveal from './SectionReveal'
 export default function HomeContact() {
   return (
     <SectionReveal>
-      <section className="bg-paper-dark border-y border-[#1b2430]/15 px-6 py-24">
+      <section className="border-y border-[#1b2430]/15 px-6 py-24">
         <div className="mx-auto flex w-full max-w-6xl flex-col items-center justify-between gap-10 border border-[#1b2430] bg-[#1b2430] p-8 text-[#f7f3ec] sm:p-16 lg:flex-row">
           <div className="text-center lg:text-left">
             <h2 className="mb-4 font-serif text-3xl font-medium sm:text-5xl">Ready to Begin?</h2>
