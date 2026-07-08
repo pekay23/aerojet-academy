@@ -36,8 +36,9 @@ yarn-error.log*
 # local env files
 .env
 .env*.local
-.env.production
-.env.staging
+# .env.production and .env.staging are committed for Vercel deployment
+# !.env.production
+# !.env.staging
 
 # vercel
 .vercel
@@ -63,3 +64,5 @@ prisma/migrations
 .flaskenv*
 !.env.project
 !.env.vault
+!.env.production
+!.env.staging

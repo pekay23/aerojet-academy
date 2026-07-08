@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>04 · Sizing, spacing, layout · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+    <a href="../design-system.html">Design</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Design</p>
+  <h1 class="he-title">04 · Sizing, spacing, layout</h1>
+  <p class="he-deck"><code>--radius</code> is set to <code>0.5rem</code> (8px) in <code>app/globals.css</code>. The Tailwind config re-exports <code>lg/md/sm</code> in terms of that variable.…</p>
+</header>
+
+<section class="he-section" id="41-border-radius">
+  <div class="he-section__num">01 · 4.1 · Border radius</div>
+  <h2 class="he-section__title">4.1 · Border radius</h2><p><code>--radius</code> is set to <code>0.5rem</code> (8px) in <code>app/globals.css</code>. The Tailwind
+config re-exports <code>lg/md/sm</code> in terms of that variable.</p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>rounded-sm</code></td>
+<td><code>calc(var(--radius) - 4px)</code> = 4 px</td>
+<td>Tight inputs, badges</td>
+</tr>
+<tr>
+<td><code>rounded-md</code></td>
+<td><code>calc(var(--radius) - 2px)</code> = 6 px</td>
+<td>Default <code>Button</code>, <code>Card</code>, <code>Input</code></td>
+</tr>
+<tr>
+<td><code>rounded-lg</code></td>
+<td><code>var(--radius)</code> = 8 px</td>
+<td>Larger cards, sheets</td>
+</tr>
+<tr>
+<td><code>rounded-xl</code></td>
+<td>12 px (Tailwind default)</td>
+<td>Marketing CTAs</td>
+</tr>
+<tr>
+<td><code>rounded-2xl</code></td>
+<td>16 px</td>
+<td>Marketing feature tiles</td>
+</tr>
+<tr>
+<td><code>rounded-3xl</code></td>
+<td>24 px</td>
+<td>Hero image frames</td>
+</tr>
+<tr>
+<td><code>rounded-4xl</code></td>
+<td>32 px</td>
+<td>Variant D hero block</td>
+</tr>
+<tr>
+<td><code>rounded-full</code></td>
+<td>9999 px</td>
+<td>Pills, chips, avatar</td>
+</tr>
+</tbody></table>
+
+<section class="he-section" id="42-component-sizes-shadcn">
+  <div class="he-section__num">02 · 4.2 · Component sizes (shadcn)</div>
+  <h2 class="he-section__title">4.2 · Component sizes (shadcn)</h2><table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Size</th>
+<th>Class</th>
+<th>Touch target</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>Button</code></td>
+<td><code>default</code></td>
+<td><code>h-11 px-4 py-2</code></td>
+<td><strong>44×44</strong> ✅ WCAG</td>
+</tr>
+<tr>
+<td><code>Button</code></td>
+<td><code>sm</code></td>
+<td><code>h-9 px-3</code></td>
+<td>36×32</td>
+</tr>
+<tr>
+<td><code>Button</code></td>
+<td><code>lg</code></td>
+<td><code>h-12 px-10</code></td>
+<td>48×≥40</td>
+</tr>
+<tr>
+<td><code>Button</code></td>
+<td><code>icon</code></td>
+<td><code>h-11 w-11</code></td>
+<td>44×44</td>
+</tr>
+<tr>
+<td><code>Input</code></td>
+<td>default</td>
+<td><code>h-11</code></td>
+<td>44</td>
+</tr>
+<tr>
+<td><code>Switch</code></td>
+<td>thumb</td>
+<td><code>h-5 w-5</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>Avatar</code></td>
+<td>default</td>
+<td><code>h-10 w-10</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>Dialog</code></td>
+<td>default</td>
+<td><code>max-w-lg</code> (512 px)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>Sheet</code></td>
+<td>default</td>
+<td><code>max-w-sm</code> (384 px)</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>Progress</code></td>
+<td>default</td>
+<td><code>h-4</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>DropdownMenu item</code></td>
+<td>default</td>
+<td><code>px-2 py-1.5</code></td>
+<td>—</td>
+</tr>
+</tbody></table>
+<blockquote><p>Touch target rule: every interactive element must be ≥ 44×44 px
+(WCAG 2.5.5 AAA / Apple HIG). The portal enforces this on <code>Button</code> and
+<code>Switch</code>.</p>
+</blockquote>
+<section class="he-section" id="43-spacing-rhythm">
+  <div class="he-section__num">03 · 4.3 · Spacing rhythm</div>
+  <h2 class="he-section__title">4.3 · Spacing rhythm</h2><p>Tailwind 4-pt scale is used everywhere. The most common values across the
+codebase:</p>
+<table>
+<thead>
+<tr>
+<th>Tailwind class</th>
+<th>px</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>p-1</code> / <code>m-1</code></td>
+<td>4</td>
+<td>Tight inline gaps</td>
+</tr>
+<tr>
+<td><code>p-2</code> / <code>m-2</code></td>
+<td>8</td>
+<td>Component inner padding, gap between icons</td>
+</tr>
+<tr>
+<td><code>p-3</code> / <code>m-3</code></td>
+<td>12</td>
+<td>Card padding (compact), button px</td>
+</tr>
+<tr>
+<td><code>p-4</code> / <code>m-4</code></td>
+<td>16</td>
+<td>Card padding (default), <code>py-4</code> section gap</td>
+</tr>
+<tr>
+<td><code>p-5</code> / <code>m-5</code></td>
+<td>20</td>
+<td>Section-level outer padding</td>
+</tr>
+<tr>
+<td><code>p-6</code> / <code>m-6</code></td>
+<td>24</td>
+<td>shadcn <code>Card</code> body, section gutters</td>
+</tr>
+<tr>
+<td><code>p-7</code> / <code>m-7</code></td>
+<td>28</td>
+<td>Variant D hero block</td>
+</tr>
+<tr>
+<td><code>p-8</code> / <code>m-8</code></td>
+<td>32</td>
+<td>Marketing tile padding</td>
+</tr>
+<tr>
+<td><code>px-6</code></td>
+<td>24</td>
+<td>Editorial section horizontal padding</td>
+</tr>
+<tr>
+<td><code>py-12</code></td>
+<td>48</td>
+<td>Default section padding</td>
+</tr>
+<tr>
+<td><code>py-16</code></td>
+<td>64</td>
+<td>Section padding (lg)</td>
+</tr>
+<tr>
+<td><code>py-20</code></td>
+<td>80</td>
+<td>Section padding (xl)</td>
+</tr>
+<tr>
+<td><code>py-24</code></td>
+<td>96</td>
+<td>Section padding (2xl, marketing variant)</td>
+</tr>
+<tr>
+<td><code>py-32</code></td>
+<td>128</td>
+<td>Section padding (3xl, marketing variant)</td>
+</tr>
+</tbody></table>
+
+<section class="he-section" id="44-page-layout-widths">
+  <div class="he-section__num">04 · 4.4 · Page layout widths</div>
+  <h2 class="he-section__title">4.4 · Page layout widths</h2><table>
+<thead>
+<tr>
+<th>Container</th>
+<th>Max width</th>
+<th>Used in</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Editorial prose</td>
+<td><code>max-w-2xl</code></td>
+<td>Hero sub-headline (Variant C)</td>
+</tr>
+<tr>
+<td>Card grid</td>
+<td><code>max-w-4xl</code></td>
+<td>Variant C hero stats</td>
+</tr>
+<tr>
+<td>Form / dialog</td>
+<td><code>max-w-md</code></td>
+<td>Global error card, login form</td>
+</tr>
+<tr>
+<td>Marketing</td>
+<td><code>max-w-7xl</code></td>
+<td><code>(public)/page.tsx</code> sections, Variant D hero</td>
+</tr>
+<tr>
+<td>Public prose</td>
+<td><code>max-w-2xl</code></td>
+<td>Hero sub-headline</td>
+</tr>
+</tbody></table>
+<p><code>mx-auto px-6</code> is the standard section wrapper.</p>
+
+<section class="he-section" id="45-z-index-scale">
+  <div class="he-section__num">05 · 4.5 · Z-index scale</div>
+  <h2 class="he-section__title">4.5 · Z-index scale</h2><p>Default Tailwind values, plus three custom values in <code>tailwind.config.ts</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Used in</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>z-50</code></td>
+<td>50</td>
+<td>Modals, dropdowns, sticky nav</td>
+</tr>
+<tr>
+<td><code>z-60</code></td>
+<td>60</td>
+<td>Custom — public-nav scrolled state</td>
+</tr>
+<tr>
+<td><code>z-70</code></td>
+<td>70</td>
+<td>Custom — public mobile menu open</td>
+</tr>
+<tr>
+<td><code>z-80</code></td>
+<td>80</td>
+<td>Custom — sidebar close (mobile)</td>
+</tr>
+<tr>
+<td><code>z-50</code> focus</td>
+<td>50</td>
+<td>Skip-link when focused</td>
+</tr>
+</tbody></table>
+
+<section class="he-section" id="46-shadows">
+  <div class="he-section__num">06 · 4.6 · Shadows</div>
+  <h2 class="he-section__title">4.6 · Shadows</h2><table>
+<thead>
+<tr>
+<th>Tailwind class</th>
+<th>Used in</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>shadow-sm</code></td>
+<td>shadcn <code>Card</code> default</td>
+</tr>
+<tr>
+<td><code>shadow-lg</code></td>
+<td>Floating nav, modal</td>
+</tr>
+<tr>
+<td><code>shadow-xl</code></td>
+<td>Hero CTA cards</td>
+</tr>
+<tr>
+<td><code>shadow-2xl</code></td>
+<td>Variant A &quot;100% EASA Standards&quot; badge</td>
+</tr>
+<tr>
+<td><code>shadow-aerojet-blue/20</code></td>
+<td>Custom shadow color tinting</td>
+</tr>
+<tr>
+<td><code>shadow-[#FF4F33]/20</code></td>
+<td>Custom shadow color tinting (red CTA)</td>
+</tr>
+<tr>
+<td><code>shadow-[0_1px_4px_rgba(0,0,0,0.06)]</code></td>
+<td>Custom table row hover shadow</td>
+</tr>
+</tbody></table>
+<p>The <code>shadow-aerojet-blue/20</code> pattern shows the team is comfortable with
+arbitrary <code>shadow-{color}/{opacity}</code> Tailwind 4 syntax.</p>
+
+<section class="he-section" id="47-grid-flex-patterns">
+  <div class="he-section__num">07 · 4.7 · Grid &amp; flex patterns</div>
+  <h2 class="he-section__title">4.7 · Grid &amp; flex patterns</h2><table>
+<thead>
+<tr>
+<th>Pattern</th>
+<th>Class signature</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Editorial two-column with drop cap</td>
+<td><code>sm:columns-2</code> + <code>first-letter:</code> utilities</td>
+</tr>
+<tr>
+<td>Marketing 2-up with image</td>
+<td><code>grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:gap-16</code></td>
+</tr>
+<tr>
+<td>Marketing 3-up</td>
+<td><code>grid sm:grid-cols-2 lg:grid-cols-3</code></td>
+</tr>
+<tr>
+<td>Marketing 4-up</td>
+<td><code>grid sm:grid-cols-2 lg:grid-cols-4</code></td>
+</tr>
+<tr>
+<td>Programme list</td>
+<td><code>sm:grid-cols-[3rem_1.2fr_2fr_2rem]</code></td>
+</tr>
+<tr>
+<td>Stat strip</td>
+<td><code>grid grid-cols-2 lg:grid-cols-4</code></td>
+</tr>
+<tr>
+<td>License B1/B2 split</td>
+<td><code>grid lg:grid-cols-2</code></td>
+</tr>
+<tr>
+<td>Hero split (text + image)</td>
+<td><code>grid lg:grid-cols-[1.2fr_1fr]</code></td>
+</tr>
+</tbody></table>
+
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#41-border-radius">4.1 · Border radius</a></li>
+    <li class="he-toc__l2"><a href="#42-component-sizes-shadcn">4.2 · Component sizes (shadcn)</a></li>
+    <li class="he-toc__l2"><a href="#43-spacing-rhythm">4.3 · Spacing rhythm</a></li>
+    <li class="he-toc__l2"><a href="#44-page-layout-widths">4.4 · Page layout widths</a></li>
+    <li class="he-toc__l2"><a href="#45-z-index-scale">4.5 · Z-index scale</a></li>
+    <li class="he-toc__l2"><a href="#46-shadows">4.6 · Shadows</a></li>
+    <li class="he-toc__l2"><a href="#47-grid-flex-patterns">4.7 · Grid &amp; flex patterns</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

@@ -69,6 +69,8 @@ const config: Config = {
         'public-dark': 'hsl(var(--public-dark))',
         'background-light': '#f6f6f8',
         'background-dark': '#101622',
+        paper: '#f7f3ec',
+        'paper-dark': '#efe8dc',
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -79,6 +81,7 @@ const config: Config = {
         sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
         outfit: ['var(--font-outfit)', 'sans-serif'],
         heading: ['var(--font-cal)', 'var(--font-inter)', 'system-ui', 'sans-serif'],
+        serif: ['var(--font-playfair)', 'Georgia', 'serif'],
       },
       keyframes: {
         'accordion-down': {

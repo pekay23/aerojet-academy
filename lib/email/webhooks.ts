@@ -1,7 +1,9 @@
 import 'server-only'
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Placeholder when the key is absent (Preview/CI builds) so the Resend
+// constructor doesn't throw during `next build` page-data collection.
+const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder')
 
 /**
  * Create a new Resend webhook

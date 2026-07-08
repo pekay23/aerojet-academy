@@ -28,74 +28,54 @@ export default async function Home() {
       <TrustStrip />
 
       {/* ===== START: REPLACEMENT "WHO WE ARE" SECTION ===== */}
-      <section className="relative overflow-hidden bg-slate-50 px-6 py-24 sm:py-32">
-        <div className="absolute -top-24 -right-24 h-96 w-96 rounded-full bg-blue-100/50 blur-3xl" />
-        <div className="mx-auto grid max-w-7xl items-center gap-16 lg:grid-cols-2 lg:gap-24">
+      <section className="bg-paper mx-auto max-w-7xl px-6 py-24 text-[#1b2430] sm:py-32">
+        <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
           <SectionReveal skipInitial>
-            <div className="relative">
-              <span className="mb-4 block text-sm font-black tracking-[0.3em] text-aerojet-sky uppercase">
-                Who We Are
-              </span>
-              <h2 className="mb-8 text-4xl leading-[1.05] font-black tracking-tight text-aerojet-blue uppercase sm:text-5xl lg:text-6xl">
-                Building the Future of <br className="hidden sm:block" />
-                <span className="text-aerojet-sky">African Aviation</span>
-              </h2>
-
-              <div className="space-y-6 text-lg leading-relaxed text-slate-600/90">
-                <p className="font-medium">
-                  Aerojet Aviation Training Academy is Africa’s foremost institution and leader in
-                  the field of Aviation Training and Engineering. Training engineers for one of the
-                  most demanding professions in the world is a truly important responsibility that
-                  we take very seriously.
-                </p>
-                <p>
-                  At Aerojet, we are committed to educating and preparing aircraft engineers to the
-                  highest standards. During your training, you will gain direct insight into how
-                  work is carried out in a live aircraft hangar, supported by opportunities to train
-                  in our EASA Part 145 Facility or at partner facilities worldwide.
-                </p>
-              </div>
-
-              <div className="mt-12 space-y-4 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
-                <p className="text-xs font-black tracking-widest text-aerojet-blue/50 uppercase">
-                  Our Training Includes:
-                </p>
-                <ul className="grid gap-4 sm:grid-cols-2">
-                  {[
-                    'Live Hangar Experience',
-                    'EASA Part-145 Standards',
-                    'Global Partner Network',
-                    'Hands-on Mentorship',
-                  ].map((item) => (
-                    <li key={item} className="flex items-center gap-3 font-bold text-slate-800">
-                      <div className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-50 text-emerald-500">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                      </div>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+            <div className="text-aerojet-blue/60 text-[11px] font-bold tracking-[0.3em] uppercase">
+              — Who We Are
+            </div>
+            <h2 className="text-aerojet-blue mt-4 max-w-2xl font-serif text-4xl leading-[1.1] font-medium sm:text-5xl">
+              Building the Future of African Aviation
+            </h2>
+            <div className="mt-7 gap-8 text-lg leading-relaxed text-[#1b2430]/85 sm:columns-2">
+              <p className="first-letter:text-aerojet-blue first-letter:float-left first-letter:mr-2 first-letter:font-serif first-letter:text-6xl first-letter:leading-[0.8] first-letter:font-medium">
+                Aerojet Aviation Training Academy is Africa’s foremost institution and leader in the
+                field of Aviation Training and Engineering. Training engineers for one of the most
+                demanding professions in the world is a truly important responsibility that we take
+                very seriously.
+              </p>
+              <p className="mt-4">
+                At Aerojet, we are committed to educating and preparing aircraft engineers to the
+                highest standards. During your training, you will gain direct insight into how work
+                is carried out in a live aircraft hangar, supported by opportunities to train in our
+                EASA Part 145 Facility or at partner facilities worldwide.
+              </p>
             </div>
           </SectionReveal>
-          <SectionReveal delay={0.2} className="relative">
-            <div className="absolute -bottom-10 -left-10 z-0 h-72 w-72 rounded-3xl border-8 border-white bg-aerojet-blue shadow-2xl" />
-            <div className="relative z-10 overflow-hidden rounded-3xl shadow-2xl">
-              <Image
-                src="/images/home/al4.webp"
-                alt="Aerojet student"
-                width={800}
-                height={1000}
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="h-auto w-full object-cover transition-transform duration-700 hover:scale-110"
-              />
-            </div>
-            <div className="bg-public-secondary absolute -right-6 bottom-12 z-20 flex flex-col items-center justify-center rounded-2xl p-6 text-white shadow-xl">
-              <span className="text-3xl font-black">100%</span>
-              <span className="text-xs font-black tracking-widest uppercase">
-                EASA Standards
-              </span>
-            </div>
+          <SectionReveal delay={0.2}>
+            <Image
+              src="/images/home/al4.webp"
+              alt="Aerojet student"
+              width={800}
+              height={1000}
+              quality={90}
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              priority
+              className="aspect-3/4 w-full rounded-sm object-cover sepia-[0.15]"
+            />
+            <ul className="mt-6 divide-y divide-[#1b2430]/15 border-y border-[#1b2430]/15">
+              {[
+                'Live Hangar Experience',
+                'EASA Part-145 Standards',
+                'Global Partner Network',
+                'Hands-on Mentorship',
+              ].map((t) => (
+                <li key={t} className="flex items-center justify-between py-3 font-serif text-lg">
+                  {t}
+                  <span className="text-aerojet-blue/40">✦</span>
+                </li>
+              ))}
+            </ul>
           </SectionReveal>
         </div>
       </section>
@@ -104,70 +84,61 @@ export default async function Home() {
       <TrainingPathways />
 
       {/* ===== START: REPLACEMENT "PROGRAMS" SECTION ===== */}
-      <section className="bg-white px-6 py-24 sm:py-32">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-16 grid items-end gap-8 lg:grid-cols-[1fr_auto] lg:gap-16">
-            <SectionReveal>
-              <div>
-                <span className="mb-4 block text-sm font-black tracking-[0.3em] text-aerojet-sky uppercase">
-                  Our Programmes
-                </span>
-                <h2 className="mb-6 text-4xl font-black tracking-tight text-aerojet-blue uppercase sm:text-5xl lg:text-6xl">
-                  Choose Your <br className="hidden sm:block" />
-                  <span className="text-aerojet-sky">Pathway</span>
-                </h2>
-                <p className="max-w-xl text-lg leading-relaxed text-slate-600">
-                  Whether you're starting fresh or are an experienced professional, we have a
-                  program tailored to your career goals. Explore our offerings to find the perfect
-                  fit for your journey in aviation.
-                </p>
-              </div>
-            </SectionReveal>
+      <section className="bg-paper mx-auto max-w-7xl px-6 py-20 text-[#1b2430] sm:py-32">
+        <SectionReveal>
+          <h2 className="text-aerojet-blue mb-8 font-serif text-3xl font-medium sm:text-4xl">
+            Programmes of Study
+          </h2>
+        </SectionReveal>
 
-            <SectionReveal delay={0.1}>
+        <div className="border-t-2 border-[#1b2430]">
+          {[
+            {
+              title: '4-Year Full-Time',
+              badge: 'Flagship',
+              desc: 'Our flagship EASA-certified program for aspiring engineers. Comprehensive B1/B2 training.',
+              href: '/courses/aircraft-engineering/easa-part-66/four-year-b1-b2',
+            },
+            {
+              title: '2-Year Full-Time',
+              badge: null,
+              desc: 'An accelerated B1.1 mechanical certification path focused on core engineering excellence.',
+              href: '/courses/aircraft-engineering/easa-part-66/two-year-b1',
+            },
+            {
+              title: 'Modular Training',
+              badge: null,
+              desc: 'Flexible, self-paced study with expert support. Enroll in specific EASA modules as needed.',
+              href: '/courses/aircraft-engineering/easa-part-66/modular-training',
+            },
+            {
+              title: 'Military / Industry',
+              badge: null,
+              desc: 'A 1-year fast-track for experienced personnel entering civil aviation maintenance.',
+              href: '/courses/aircraft-engineering/easa-part-66/military-certification',
+            },
+          ].map((p, i) => (
+            <SectionReveal key={p.title} delay={i * 0.05}>
               <Link
-                href="/courses"
-                className="group flex h-16 items-center gap-4 rounded-full bg-aerojet-blue px-10 text-xs font-black tracking-[0.2em] text-white uppercase transition-all hover:bg-aerojet-sky hover:shadow-xl"
+                href={p.href}
+                className="group grid items-center gap-3 border-b border-[#1b2430]/15 py-6 transition hover:bg-[#efe8dc] sm:grid-cols-[3rem_1.2fr_2fr_2rem] sm:px-3"
               >
-                View All Programmes
-                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-2" />
+                <span className="text-aerojet-blue/40 font-serif text-2xl">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span className="text-aerojet-blue font-serif text-2xl font-medium">
+                  {p.title}
+                  {p.badge && (
+                    <span className="text-aerojet-blue/50 ml-2 align-middle text-[10px] font-bold tracking-widest uppercase">
+                      · {p.badge}
+                    </span>
+                  )}
+                </span>
+                <span className="text-[#1b2430]/70">{p.desc}</span>
+                <ArrowRight className="text-aerojet-blue hidden h-5 w-5 transition group-hover:translate-x-1 sm:block" />
               </Link>
             </SectionReveal>
-          </div>
-
-          <SectionReveal delay={0.2}>
-            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-              <ProgramCard
-                icon="graduationCap"
-                title="4-Year Full-Time"
-                description="Our flagship EASA-certified program for aspiring engineers. Comprehensive B1/B2 training."
-                href="/courses/aircraft-engineering/easa-part-66/four-year-b1-b2"
-                badge="Flagship"
-                index={0}
-              />
-              <ProgramCard
-                icon="clock"
-                title="2-Year Full-Time"
-                description="An accelerated B1.1 mechanical certification path focused on core engineering excellence."
-                href="/courses/aircraft-engineering/easa-part-66/two-year-b1"
-                index={1}
-              />
-              <ProgramCard
-                icon="bookOpen"
-                title="Modular Training"
-                description="Flexible, self-paced study with expert support. Enroll in specific EASA modules as needed."
-                href="/courses/aircraft-engineering/easa-part-66/modular-training"
-                index={2}
-              />
-              <ProgramCard
-                icon="users"
-                title="Military / Industry"
-                description="A 1-year fast-track for experienced personnel entering civil aviation maintenance."
-                href="/courses/aircraft-engineering/easa-part-66/military-certification"
-                index={3}
-              />
-            </div>
-          </SectionReveal>
+          ))}
         </div>
       </section>
       {/* ===== END: REPLACEMENT "PROGRAMS" SECTION ===== */}
