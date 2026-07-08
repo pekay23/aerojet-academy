@@ -51,12 +51,19 @@ const useLocalNeonAdapter =
   (localAdapterOverride === 'neon' || isNeonConnection)
 
 const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build'
+const isProd = process.env.NODE_ENV === 'production'
 
 if (!dbConnectionString) {
   if (isBuildTime) {
     console.warn(
       '[DB_BASE] WARNING: Database connection string is missing during build time. This is expected for static builds.'
     )
+  } else if (isProd) {
+    console.error(
+      '[DB_BASE] CRITICAL: DATABASE_URL is not set. Set it in Vercel dashboard → Settings → Environment Variables.'
+    )
+    // Don't throw — let PrismaClient fail naturally when a query is attempted,
+    // so non-DB pages (e.g. public homepage) can still render.
   } else {
     throw new Error(
       '[DB_BASE] CRITICAL: Database connection string is missing from environment. Ensure DATABASE_URL is set in .env.local'
