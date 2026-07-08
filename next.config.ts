@@ -37,49 +37,56 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false,
   },
   async headers() {
+    const isDev = process.env.NODE_ENV === 'development'
+    const headers = [
+      {
+        key: 'X-Frame-Options',
+        value: 'SAMEORIGIN',
+      },
+      {
+        key: 'X-Content-Type-Options',
+        value: 'nosniff',
+      },
+      {
+        key: 'Referrer-Policy',
+        value: 'origin-when-cross-origin',
+      },
+      {
+        key: 'Permissions-Policy',
+        value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+      },
+    ]
+
+    // Skip strict CSP in development so images load over local network
+    if (!isDev) {
+      headers.push({
+        key: 'Content-Security-Policy',
+        value: [
+          "default-src 'self'",
+          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://uploadthing.com https://www.google.com https://www.gstatic.com https://va.vercel-scripts.com",
+          "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+          "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://uploadthing.com https://lh3.googleusercontent.com https://flagcdn.com https://www.gstatic.com",
+          "font-src 'self' data: https://fonts.gstatic.com",
+          "connect-src 'self' https://uploadthing.com https://*.uploadthing.com https://*.ufs.sh https://api.stripe.com https://www.google.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+          "frame-src 'self' blob: https://js.stripe.com https://hooks.stripe.com https://www.google.com",
+          "frame-ancestors 'self'",
+          "worker-src 'self' blob:",
+          "object-src 'none'",
+          "base-uri 'self'",
+          "form-action 'self'",
+          'upgrade-insecure-requests',
+        ].join('; '),
+      })
+      headers.push({
+        key: 'Strict-Transport-Security',
+        value: 'max-age=31536000; includeSubDomains',
+      })
+    }
+
     return [
       {
         source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
-          },
-          {
-            key: 'Content-Security-Policy',
-            value: [
-              "default-src 'self'",
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://uploadthing.com https://www.google.com https://www.gstatic.com https://va.vercel-scripts.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://uploadthing.com https://lh3.googleusercontent.com https://flagcdn.com https://www.gstatic.com",
-              "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://uploadthing.com https://*.uploadthing.com https://*.ufs.sh https://api.stripe.com https://www.google.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
-              "frame-src 'self' blob: https://js.stripe.com https://hooks.stripe.com https://www.google.com",
-              "frame-ancestors 'self'",
-              "worker-src 'self' blob:",
-              "object-src 'none'",
-              "base-uri 'self'",
-              "form-action 'self'",
-              'upgrade-insecure-requests',
-            ].join('; '),
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains',
-          },
-        ],
+        headers,
       },
     ]
   },
