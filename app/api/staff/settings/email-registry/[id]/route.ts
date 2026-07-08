@@ -8,6 +8,7 @@ import { createAuditLog } from '@/lib/audit/logger'
 const patchSchema = z.object({
   title: z.string().min(2).max(80).optional(),
   description: z.string().max(280).nullable().optional(),
+  address: z.string().email().max(120).optional(),
 })
 
 export const PATCH = withErrorHandler(
@@ -18,13 +19,21 @@ export const PATCH = withErrorHandler(
 
     const existing = await prismaUnfiltered.emailRegistryEntry.findUnique({ where: { id } })
     if (!existing) return apiError('Entry not found', 404)
-    if (existing.isSystem) return apiError('System entries cannot be edited', 400)
+
+    // Check for address uniqueness if changing address
+    if (body.address) {
+      const duplicate = await prismaUnfiltered.emailRegistryEntry.findFirst({
+        where: { address: body.address.toLowerCase(), id: { not: id } },
+      })
+      if (duplicate) return apiError('That address is already in the registry', 409)
+    }
 
     const updated = await prismaUnfiltered.emailRegistryEntry.update({
       where: { id },
       data: {
         title: body.title?.trim() ?? existing.title,
         description: body.description?.trim() ?? existing.description,
+        address: body.address?.trim().toLowerCase() ?? existing.address,
       },
     })
     await createAuditLog({
@@ -46,7 +55,13 @@ export const DELETE = withErrorHandler(
 
     const existing = await prismaUnfiltered.emailRegistryEntry.findUnique({ where: { id } })
     if (!existing) return apiError('Entry not found', 404)
-    if (existing.isSystem) return apiError('System entries cannot be deleted', 400)
+    // Allow deletion of any non-AUTO entry. AUTO entries are synced from code
+    // and can be removed if no longer needed.
+    if (existing.category === 'AUTO')
+      return apiError(
+        'Auto-synced entries cannot be deleted — update the source code or change the address instead',
+        400
+      )
 
     await prismaUnfiltered.emailRegistryEntry.delete({ where: { id } })
     await createAuditLog({
