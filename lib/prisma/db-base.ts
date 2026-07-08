@@ -1,5 +1,6 @@
 import 'server-only'
-import 'dotenv/config'
+import dotenv from 'dotenv'
+import path from 'node:path'
 import { createRequire } from 'node:module'
 import { PrismaClient } from '@prisma/client'
 import { PrismaPg } from '@prisma/adapter-pg'
@@ -13,6 +14,12 @@ import { Pool } from 'pg'
  * Local development may use Neon's WebSocket adapter when TCP pg handshakes
  * stall against a remote Neon URL.
  */
+
+// Explicitly load .env (and .env.local) in ESM — `import 'dotenv/config'` is
+// unreliable with "type": "module" in package.json.
+const envDir = path.resolve(process.cwd())
+dotenv.config({ path: path.join(envDir, '.env') })
+dotenv.config({ path: path.join(envDir, '.env.local'), override: false })
 
 const require = createRequire(import.meta.url)
 
@@ -44,8 +51,12 @@ const useLocalNeonAdapter =
   (localAdapterOverride === 'neon' || isNeonConnection)
 
 if (!dbConnectionString) {
-  console.error('[DB_BASE] CRITICAL: Database connection string is missing from environment.')
-} else if (isDev) {
+  throw new Error(
+    '[DB_BASE] CRITICAL: Database connection string is missing from environment. Ensure DATABASE_URL is set in .env.local'
+  )
+}
+
+if (isDev && dbConnectionString) {
   try {
     const host = new URL(dbConnectionString.replace('postgresql://', 'http://')).hostname
     const adapter = useLocalNeonAdapter ? 'neon-websocket' : 'pg'
