@@ -18,6 +18,7 @@
     <a href="./guides/setup.html">Guides</a>
     <a href="./audits/2026-05-20-comprehensive.html">Audits</a>
     <a href="./plans/future-plans.html">Plans</a>
+    <a href="./design-system.html">Design</a>
   </div>
 </nav>
 
@@ -25,13 +26,13 @@
 <header>
   <p class="he-eyebrow">Aerojet Academy · docs</p>
   <h1 class="he-title">Documentation</h1>
-  <p class="he-deck">All project documentation, organised by purpose. Markdown sources live in <code>docs/architecture</code>, <code>docs/guides</code>, <code>docs/audits</code>, and <code>docs/plans</code>.</p>
+  <p class="he-deck">All project documentation, organised by purpose. Markdown sources live in <code>docs/architecture</code>, <code>docs/guides</code>, <code>docs/audits</code>, <code>docs/plans</code>, and <code>docs/design</code>.</p>
 </header>
 
 <div class="he-kpis">
-  <div class="he-kpi"><div class="he-kpi__value">30</div><div class="he-kpi__label">Generated pages</div></div>
-  <div class="he-kpi"><div class="he-kpi__value">4</div><div class="he-kpi__label">Sections</div></div>
-  <div class="he-kpi"><div class="he-kpi__value">4</div><div class="he-kpi__label">Standalone reports</div></div>
+  <div class="he-kpi"><div class="he-kpi__value">37</div><div class="he-kpi__label">Generated pages</div></div>
+  <div class="he-kpi"><div class="he-kpi__value">5</div><div class="he-kpi__label">Sections</div></div>
+  <div class="he-kpi"><div class="he-kpi__value">6</div><div class="he-kpi__label">Standalone reports</div></div>
 </div>
 
 <section class="he-index-section" id="architecture">
@@ -43,7 +44,7 @@
     <a class="he-card" href="./architecture/api.html">
       <div class="he-card__eyebrow">Architecture</div>
       <h3>API Reference</h3>
-      <p>Base URL: `/api`…</p>
+      <p>Base URL: `/api` — all routes are Next.js App Router route handlers under `app/api/**/route.ts`. Server Actions (in `app/**/actions.ts`) handle most portal mutations and are not ex</p>
       <div class="he-card__meta">
         <span>docs/architecture/api.md</span>
       </div>
@@ -310,6 +311,71 @@
   </div>
 </section>
 
+<section class="he-index-section" id="design">
+  <div class="he-index-section__head">
+    <h2>Design</h2>
+    <p class="he-index-section__blurb">Design system — tokens, typography, components.</p>
+  </div>
+  <div class="he-grid">
+    <a class="he-card" href="./design/01-foundations.html">
+      <div class="he-card__eyebrow">Design</div>
+      <h3>01-foundations</h3>
+      <p>s # 01 · Foundations…</p>
+      <div class="he-card__meta">
+        <span>docs/design/01-foundations.md</span>
+      </div>
+    </a>
+    <a class="he-card" href="./design/02-colors.html">
+      <div class="he-card__eyebrow">Design</div>
+      <h3>02 · Color tokens</h3>
+      <p>The Aerojet palette is split into three layers, all defined in `app/globals.css` and exported as Tailwind utilities through `tailwind.config.ts`…</p>
+      <div class="he-card__meta">
+        <span>docs/design/02-colors.md</span>
+      </div>
+    </a>
+    <a class="he-card" href="./design/03-typography.html">
+      <div class="he-card__eyebrow">Design</div>
+      <h3>03 · Typography</h3>
+      <p>All three are loaded via `next/font/google` with `display: 'swap'` and exposed as CSS variables on `&lt;html&gt;` (`app/layout.tsx`)…</p>
+      <div class="he-card__meta">
+        <span>docs/design/03-typography.md</span>
+      </div>
+    </a>
+    <a class="he-card" href="./design/04-sizing.html">
+      <div class="he-card__eyebrow">Design</div>
+      <h3>04 · Sizing, spacing, layout</h3>
+      <p>`--radius` is set to `0.5rem` (8px) in `app/globals.css`. The Tailwind config re-exports `lg/md/sm` in terms of that variable.…</p>
+      <div class="he-card__meta">
+        <span>docs/design/04-sizing.md</span>
+      </div>
+    </a>
+    <a class="he-card" href="./design/05-components.html">
+      <div class="he-card__eyebrow">Design</div>
+      <h3>05 · Component library</h3>
+      <p>The component layer is split into three tiers…</p>
+      <div class="he-card__meta">
+        <span>docs/design/05-components.md</span>
+      </div>
+    </a>
+    <a class="he-card" href="./design/06-motion.html">
+      <div class="he-card__eyebrow">Design</div>
+      <h3>06 · Motion &amp; interaction</h3>
+      <p>The portal deliberately keeps motion **short, restrained, and purposeful** — no parallax, no scroll-jacking, no long reveals.</p>
+      <div class="he-card__meta">
+        <span>docs/design/06-motion.md</span>
+      </div>
+    </a>
+    <a class="he-card" href="./design/07-icons-illustrations.html">
+      <div class="he-card__eyebrow">Design</div>
+      <h3>07 · Icons, illustrations, and imagery</h3>
+      <p>**Library:** `lucide-react` (pinned to `1.8.0` in `package.json`).</p>
+      <div class="he-card__meta">
+        <span>docs/design/07-icons-illustrations.md</span>
+      </div>
+    </a>
+  </div>
+</section>
+
 <section class="he-index-section" id="standalone">
   <div class="he-index-section__head">
     <h2>Standalone HTML</h2>
@@ -322,6 +388,14 @@
     </div>
     <div class="he-standalone-card">
       <a href="./design-gap-audit.html">design gap audit</a>
+      <p>↗ open report</p>
+    </div>
+    <div class="he-standalone-card">
+      <a href="./design-system-preview.html">design system preview</a>
+      <p>↗ open report</p>
+    </div>
+    <div class="he-standalone-card">
+      <a href="./design-system.html">design system</a>
       <p>↗ open report</p>
     </div>
     <div class="he-standalone-card">

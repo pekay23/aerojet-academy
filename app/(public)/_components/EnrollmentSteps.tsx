@@ -1,81 +1,90 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { getCurrencySymbol } from '@/lib/currency'
+import Link from 'next/link'
+import { ArrowRight } from 'lucide-react'
 
 interface EnrollmentStepsProps {
   fee?: string
   currency?: string
 }
 
-export default function EnrollmentSteps({ fee = '350', currency = 'GHS' }: EnrollmentStepsProps) {
-  const symbol = getCurrencySymbol(currency || 'GHS')
+const SectionReveal = ({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ duration: 0.6, delay }}
+  >
+    {children}
+  </motion.div>
+)
 
+export default function EnrollmentSteps({ fee = '350', currency = 'GHS' }: EnrollmentStepsProps) {
   const steps = [
     {
-      num: '01',
-      title: 'Register Online',
-      desc: `Pay the ${symbol}${fee} registration fee and create your portal account.`,
+      title: 'Register',
+      description:
+        'Fill out the online application form with your personal details and select your programme.',
     },
     {
-      num: '02',
-      title: 'Complete Application',
-      desc: 'Submit your documents and complete the online application form.',
+      title: 'Choose Pathway',
+      description:
+        'Select your preferred EASA Part-66 training pathway — full-time, modular, or military.',
     },
     {
-      num: '03',
-      title: 'Get Approved',
-      desc: 'Our team reviews your application and issues a confirmation invoice.',
+      title: 'Make Payment',
+      description: `Pay the one-time ${currency} ${fee} registration fee via bank transfer or mobile money.`,
     },
     {
-      num: '04',
       title: 'Begin Training',
-      desc: 'Pay your confirmation fee, get onboarded, and start your journey.',
+      description: 'Once approved, receive your portal login and prepare for your first class.',
     },
   ]
 
   return (
-    <section className="px-6 py-20 sm:py-28">
-      <div className="mx-auto w-full">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-          className="mb-16 text-center"
-        >
-          <span className="text-public-secondary mb-4 block text-sm font-bold tracking-[0.25em] uppercase">
-            How to Enroll
-          </span>
-          <h2 className="text-public-primary text-4xl font-black tracking-tight uppercase md:text-5xl">
-            Four Simple Steps
-          </h2>
-        </motion.div>
+    <section className="border-y border-[#1b2430]/15 bg-stone-50 px-6 py-24 sm:py-32">
+      <div className="mx-auto max-w-7xl">
+        <SectionReveal>
+          <div className="mb-16 text-center">
+            <h2 className="font-serif text-3xl font-medium text-[#1b2430] sm:text-4xl">
+              Start Your Journey
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-[#1b2430]/70">
+              Four steps from application to your first class.
+            </p>
+          </div>
+        </SectionReveal>
 
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, i) => (
-            <motion.div
-              key={i}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="group relative"
-            >
-              <div className="hover:border-public-secondary h-full rounded-3xl border border-slate-200 bg-white p-8 transition-all duration-500 hover:shadow-xl sm:p-10">
-                <span className="text-public-secondary group-hover:text-public-primary block text-6xl leading-none font-black transition-colors duration-300 sm:text-7xl">
-                  {step.num}
-                </span>
-                <h3 className="mt-5 mb-3 text-xl font-bold text-slate-900">{step.title}</h3>
-                <p className="text-base leading-relaxed text-slate-600">{step.desc}</p>
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map((step, index) => (
+            <SectionReveal key={step.title} delay={index * 0.1}>
+              <div className="group relative h-full border border-[#1b2430]/15 bg-white p-6 transition-all hover:bg-[#1b2430] hover:text-white">
+                <div className="font-serif text-4xl font-medium text-[#1b2430]/30 group-hover:text-white/30">
+                  {String(index + 1).padStart(2, '0')}
+                </div>
+                <h3 className="mt-6 font-serif text-xl font-medium text-[#1b2430] group-hover:text-white">
+                  {step.title}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-[#1b2430]/70 group-hover:text-white/70">
+                  {step.description}
+                </p>
               </div>
-              {/* Connector line on desktop */}
-              {i < steps.length - 1 && (
-                <div className="absolute top-1/2 -right-3 hidden h-px w-6 bg-slate-200 lg:block" />
-              )}
-            </motion.div>
+            </SectionReveal>
           ))}
         </div>
+
+        <SectionReveal delay={0.4}>
+          <div className="mt-16 text-center">
+            <Link
+              href="/register"
+              className="inline-flex h-12 items-center gap-3 bg-[#1b2430] px-8 text-[11px] font-bold tracking-[0.25em] text-white uppercase transition-colors hover:bg-[#1b2430]/90"
+            >
+              Start Application
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </SectionReveal>
       </div>
     </section>
   )

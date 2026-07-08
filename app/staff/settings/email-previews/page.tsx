@@ -329,14 +329,14 @@ export default function EmailPreviewsPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
         {/* Sidebar List */}
-        <Card className="border-none border-slate-200 bg-slate-50/50 shadow-sm lg:col-span-1">
-          <CardHeader className="pb-3">
+        <Card className="flex flex-col border-none border-slate-200 bg-slate-50/50 shadow-sm lg:sticky lg:top-6 lg:col-span-1 lg:max-h-[calc(100vh-120px)] lg:self-start">
+          <CardHeader className="shrink-0 pb-3">
             <CardTitle className="text-sm font-bold tracking-wider text-slate-400 uppercase">
               Templates
             </CardTitle>
           </CardHeader>
           <CardContent
-            className="relative space-y-1 p-2"
+            className="relative flex-1 space-y-1 overflow-y-auto p-2"
             onMouseLeave={() => setHoveredTemplate(null)}
           >
             {allTemplates.map((tmpl) => {
@@ -423,7 +423,7 @@ export default function EmailPreviewsPage() {
                         </div>
                         <div className="ml-4 flex flex-1 items-center justify-between rounded border border-slate-200 bg-white px-3 py-1 text-[11px] text-slate-400">
                           <span>
-                            From: Aerojet Academy Training Academy
+                            From: Aerojet Aviation Training Academy
                             &lt;noreply@aerojet-academy.com&gt;
                           </span>
                           <Eye className="h-3 w-3" />
