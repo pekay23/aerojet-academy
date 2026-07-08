@@ -28,7 +28,7 @@ export default function EmailRegistryTab() {
   const [loading, setLoading] = useState(true)
   const [editing, setEditing] = useState<string | null>(null)
   const [draft, setDraft] = useState({ title: '', description: '', address: '' })
-  const [editDraft, setEditDraft] = useState({ title: '', description: '' })
+  const [editDraft, setEditDraft] = useState({ title: '', description: '', address: '' })
 
   const reload = async () => {
     setLoading(true)
@@ -69,11 +69,23 @@ export default function EmailRegistryTab() {
     startTransition(() => router.refresh())
   }
 
-  const onSaveEdit = async (id: string) => {
-    const res = await fetch(`/api/staff/settings/email-registry/${id}`, {
+  const onSaveEdit = async (entry: RegistryEntry) => {
+    const payload: Record<string, string> = {}
+    if (editDraft.title !== entry.title) payload.title = editDraft.title
+    if (editDraft.description !== (entry.description ?? ''))
+      payload.description = editDraft.description
+    if (editDraft.address !== entry.address) payload.address = editDraft.address
+
+    if (Object.keys(payload).length === 0) {
+      toast.info('No changes to save')
+      setEditing(null)
+      return
+    }
+
+    const res = await fetch(`/api/staff/settings/email-registry/${entry.id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(editDraft),
+      body: JSON.stringify(payload),
     })
     const json = await res.json()
     if (!res.ok || json?.success === false) {
@@ -86,8 +98,10 @@ export default function EmailRegistryTab() {
   }
 
   const onDelete = async (entry: RegistryEntry) => {
-    if (entry.isSystem) {
-      toast.error('System entries cannot be deleted')
+    if (entry.category === 'AUTO') {
+      toast.error(
+        'Auto-synced entries cannot be deleted — update the source code or change the address instead'
+      )
       return
     }
     if (!confirm(`Remove "${entry.title}" from the registry?`)) return
@@ -110,11 +124,13 @@ export default function EmailRegistryTab() {
     <div className="space-y-8">
       <div>
         <h2 className="flex items-center gap-2 text-lg font-black text-slate-900 dark:text-slate-100">
-          <Mail className="h-5 w-5 text-aerojet-blue" />
+          <Mail className="text-aerojet-blue h-5 w-5" />
           Communication emails
         </h2>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Every email address used by the application — auto-senders (read-only, kept in sync with code) plus admin-added entries for internal comms, vendor relays, or anything else worth tracking centrally.
+          Every email address used by the application — both code-synced senders and admin-added
+          entries. Edit any entry's title, description, or address. Auto-synced entries (tagged
+          "AUTO") are re-linked on each visit but your edits are preserved.
         </p>
       </div>
 
@@ -136,23 +152,83 @@ export default function EmailRegistryTab() {
               {autoEntries.map((entry) => (
                 <li
                   key={entry.id}
-                  className="flex items-start gap-3 rounded-2xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
+                  className="rounded-2xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
                 >
-                  <Lock className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" />
-                  <div className="flex-1 space-y-1">
-                    <div className="flex flex-wrap items-baseline gap-2">
-                      <p className="font-bold text-slate-900 dark:text-slate-100">{entry.title}</p>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${PILL_COLOURS.AUTO}`}
-                      >
-                        auto
-                      </span>
+                  {editing === entry.id ? (
+                    <div className="space-y-2">
+                      <input
+                        value={editDraft.title}
+                        onChange={(e) => setEditDraft({ ...editDraft, title: e.target.value })}
+                        placeholder="Title"
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                      />
+                      <input
+                        value={editDraft.address}
+                        onChange={(e) => setEditDraft({ ...editDraft, address: e.target.value })}
+                        placeholder="Email address"
+                        type="email"
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                      />
+                      <input
+                        value={editDraft.description}
+                        onChange={(e) =>
+                          setEditDraft({ ...editDraft, description: e.target.value })
+                        }
+                        placeholder="Description / note"
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                      />
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => onSaveEdit(entry)}
+                          className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold text-white"
+                        >
+                          <Save className="h-3.5 w-3.5" /> Save
+                        </button>
+                        <button
+                          onClick={() => setEditing(null)}
+                          className="flex items-center gap-1 rounded-lg bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+                        >
+                          <X className="h-3.5 w-3.5" /> Cancel
+                        </button>
+                      </div>
                     </div>
-                    <p className="font-mono text-xs text-aerojet-blue">{entry.address}</p>
-                    {entry.description && (
-                      <p className="text-xs text-slate-500">{entry.description}</p>
-                    )}
-                  </div>
+                  ) : (
+                    <div className="flex items-start gap-3">
+                      <Lock className="mt-0.5 h-4 w-4 shrink-0 text-slate-300" />
+                      <div className="flex-1 space-y-1">
+                        <div className="flex flex-wrap items-baseline gap-2">
+                          <p className="font-bold text-slate-900 dark:text-slate-100">
+                            {entry.title}
+                          </p>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-black tracking-widest uppercase ${PILL_COLOURS.AUTO}`}
+                          >
+                            auto
+                          </span>
+                        </div>
+                        <p className="text-aerojet-blue font-mono text-xs">{entry.address}</p>
+                        {entry.description && (
+                          <p className="text-xs text-slate-500">{entry.description}</p>
+                        )}
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => {
+                            setEditing(entry.id)
+                            setEditDraft({
+                              title: entry.title,
+                              description: entry.description ?? '',
+                              address: entry.address,
+                            })
+                          }}
+                          className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                          aria-label="Edit"
+                        >
+                          <Edit2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
@@ -164,9 +240,7 @@ export default function EmailRegistryTab() {
               <h3 className="text-sm font-bold tracking-widest text-slate-500 uppercase">
                 Custom entries
               </h3>
-              <span className="text-xs text-slate-400">
-                {customEntries.length} entries
-              </span>
+              <span className="text-xs text-slate-400">{customEntries.length} entries</span>
             </header>
             <ul className="space-y-2">
               {customEntries.map((entry) => (
@@ -183,6 +257,13 @@ export default function EmailRegistryTab() {
                         className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
                       />
                       <input
+                        value={editDraft.address}
+                        onChange={(e) => setEditDraft({ ...editDraft, address: e.target.value })}
+                        placeholder="Email address"
+                        type="email"
+                        className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
+                      />
+                      <input
                         value={editDraft.description}
                         onChange={(e) =>
                           setEditDraft({ ...editDraft, description: e.target.value })
@@ -192,8 +273,8 @@ export default function EmailRegistryTab() {
                       />
                       <div className="flex gap-2">
                         <button
-                          onClick={() => onSaveEdit(entry.id)}
-                          className="flex items-center gap-1 rounded-lg bg-aerojet-blue px-3 py-1.5 text-xs font-bold text-white hover:bg-aerojet-blue/90"
+                          onClick={() => onSaveEdit(entry)}
+                          className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold text-white"
                         >
                           <Save className="h-3.5 w-3.5" /> Save
                         </button>
@@ -218,7 +299,7 @@ export default function EmailRegistryTab() {
                             custom
                           </span>
                         </div>
-                        <p className="font-mono text-xs text-aerojet-blue">{entry.address}</p>
+                        <p className="text-aerojet-blue font-mono text-xs">{entry.address}</p>
                         {entry.description && (
                           <p className="text-xs text-slate-500">{entry.description}</p>
                         )}
@@ -230,6 +311,7 @@ export default function EmailRegistryTab() {
                             setEditDraft({
                               title: entry.title,
                               description: entry.description ?? '',
+                              address: entry.address,
                             })
                           }}
                           className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-200"
@@ -285,7 +367,7 @@ export default function EmailRegistryTab() {
             </div>
             <button
               onClick={onAdd}
-              className="mt-3 flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-3 py-2 text-sm font-bold text-white hover:bg-aerojet-blue/90"
+              className="bg-aerojet-blue hover:bg-aerojet-blue/90 mt-3 flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-bold text-white"
             >
               <Plus className="h-4 w-4" /> Add to registry
             </button>
