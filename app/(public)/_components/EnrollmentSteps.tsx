@@ -43,7 +43,7 @@ export default function EnrollmentSteps({ fee = '350', currency = 'GHS' }: Enrol
   ]
 
   return (
-    <section className="border-y border-[#1b2430]/15 bg-stone-50 px-6 py-24 sm:py-32">
+    <section className="border-y border-[#1b2430]/15 px-6 py-24 sm:py-32">
       <div className="mx-auto max-w-7xl">
         <SectionReveal>
           <div className="mb-16 text-center">
