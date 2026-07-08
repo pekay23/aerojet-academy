@@ -20,7 +20,7 @@ const pathways = [
 
 export default function TrainingPathways() {
   return (
-    <section className="bg-paper-dark border-y border-[#1b2430]/15">
+    <section className="border-y border-[#1b2430]/15">
       <div className="mx-auto max-w-7xl px-6 py-20">
         <SectionReveal>
           <h2 className="text-aerojet-blue mb-10 font-serif text-3xl font-medium sm:text-4xl">

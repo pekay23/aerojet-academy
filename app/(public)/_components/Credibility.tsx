@@ -25,7 +25,7 @@ const partners = [
 
 export default function Credibility() {
   return (
-    <section className="bg-paper-dark border-y border-[#1b2430]/15 py-20 sm:py-24">
+    <section className="border-y border-[#1b2430]/15 py-20 sm:py-24">
       <SectionReveal>
         <div className="container mx-auto px-6 text-center">
           <h3 className="mb-12 font-serif text-lg font-medium tracking-wide text-[#1b2430]/60">
