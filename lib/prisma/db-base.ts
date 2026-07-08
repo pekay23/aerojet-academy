@@ -50,10 +50,18 @@ const useLocalNeonAdapter =
   localAdapterOverride !== 'pg' &&
   (localAdapterOverride === 'neon' || isNeonConnection)
 
+const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build'
+
 if (!dbConnectionString) {
-  throw new Error(
-    '[DB_BASE] CRITICAL: Database connection string is missing from environment. Ensure DATABASE_URL is set in .env.local'
-  )
+  if (isBuildTime) {
+    console.warn(
+      '[DB_BASE] WARNING: Database connection string is missing during build time. This is expected for static builds.'
+    )
+  } else {
+    throw new Error(
+      '[DB_BASE] CRITICAL: Database connection string is missing from environment. Ensure DATABASE_URL is set in .env.local'
+    )
+  }
 }
 
 if (isDev && dbConnectionString) {
