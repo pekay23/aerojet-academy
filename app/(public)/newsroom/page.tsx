@@ -3,15 +3,19 @@ import Hero from '../_components/Hero'
 import NewsCard from '../_components/NewsCard'
 import { prisma } from '@/lib/prisma/client'
 import NewsPagination from './_components/NewsPagination'
+import NewsSortControl from './_components/NewsSortControl'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = { title: 'Newsroom ' }
 
-async function getArticles(skip: number, take: number) {
+type SortOrder = 'newest' | 'oldest'
+
+async function getArticles(skip: number, take: number, sort: SortOrder = 'newest') {
+  const order = sort === 'oldest' ? 'asc' : 'desc'
   return await prisma.newsArticle.findMany({
     where: { status: 'PUBLISHED' },
-    orderBy: { publishedAt: 'desc' },
+    orderBy: { publishedAt: order },
     skip,
     take,
   })
@@ -24,14 +28,15 @@ async function getArticlesCount() {
 }
 
 export default async function NewsroomPage(props: {
-  searchParams: Promise<{ page?: string; limit?: string }>
+  searchParams: Promise<{ page?: string; limit?: string; sort?: string }>
 }) {
   const searchParams = await props.searchParams
   const page = Number(searchParams.page) || 1
   const limit = Number(searchParams.limit) || 9
+  const sort: SortOrder = searchParams.sort === 'oldest' ? 'oldest' : 'newest'
   const skip = (page - 1) * limit
 
-  const [articles, total] = await Promise.all([getArticles(skip, limit), getArticlesCount()])
+  const [articles, total] = await Promise.all([getArticles(skip, limit, sort), getArticlesCount()])
 
   return (
     <div className="relative min-h-screen bg-slate-50">
@@ -42,6 +47,7 @@ export default async function NewsroomPage(props: {
       />
 
       <div className="relative mx-auto w-full px-6 py-20">
+        {articles.length > 0 && <NewsSortControl current={sort} />}
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {articles.map((article, i) => {
             const wordsPerMinute = 200

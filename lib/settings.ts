@@ -41,6 +41,14 @@ export async function getSystemSettings(keys: string[]): Promise<Map<string, str
   )().then((entries) => new Map(entries))
 }
 
+export async function getExamsConfig() {
+  const settings = await getSystemSettings(['exams_open'])
+
+  return {
+    isOpen: (settings.get('exams_open') || 'true') === 'true',
+  }
+}
+
 export async function getRegistrationConfig() {
   const settings = await getSystemSettings([
     'registration_fee',
