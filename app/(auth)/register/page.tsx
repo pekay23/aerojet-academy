@@ -7,7 +7,7 @@ import PaymentInstructions from './_components/PaymentInstructions'
 import { getRegistrationConfig } from '@/lib/settings'
 import { getActivePaymentMethods } from '@/lib/payment-methods'
 
-export const metadata: Metadata = { title: 'Register | Aerojet Academy' }
+export const metadata: Metadata = { title: 'Register ' }
 
 export default async function RegisterPage({
   searchParams,
@@ -90,6 +90,18 @@ async function RegisterContent({
               </Link>
             </div>
           </div>
+        ) : !config.isOpen ? (
+          <div className="py-6 text-center">
+            <h3 className="mb-3 text-xl font-bold text-slate-800">Applications Suspended</h3>
+            <p className="text-base text-slate-500">
+              No courses are currently running. We will announce when programs restart.
+            </p>
+            <div className="mt-8 border-t border-slate-100 pt-4">
+              <Link href="/login" className="text-aerojet-sky font-bold hover:underline">
+                Sign in to your portal
+              </Link>
+            </div>
+          </div>
         ) : (
           <>
             <div className="mb-8">
@@ -106,7 +118,7 @@ async function RegisterContent({
 
             <div className="mt-6 border-t border-gray-100 pt-4 text-center text-base text-gray-500">
               Already have an account?{' '}
-              <Link href="/login" className="font-bold text-aerojet-sky hover:underline">
+              <Link href="/login" className="text-aerojet-sky font-bold hover:underline">
                 Sign in
               </Link>
             </div>

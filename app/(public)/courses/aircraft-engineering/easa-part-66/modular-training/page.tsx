@@ -2,18 +2,11 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import Hero from '../../../../_components/Hero'
 import SectionReveal from '../../../../_components/SectionReveal'
-import {
-  CheckCircle2,
-  Calendar,
-  MonitorPlay,
-  Users,
-  AlertCircle,
-  BookOpen,
-} from 'lucide-react'
+import { CheckCircle2, Calendar, MonitorPlay, Users, AlertCircle, BookOpen } from 'lucide-react'
 import ModuleGrid from '@/app/(public)/_components/ModuleGrid'
 
 export const metadata: Metadata = {
-  title: 'Modular Training Program | Aerojet Academy',
+  title: 'Modular Training Program ',
   description:
     'Flexible EASA Part-66 modular training — study at your own pace with expert tuition support.',
 }
@@ -57,7 +50,6 @@ const avionicsModules = [
   { code: 'M14', name: 'Propulsion', info: '15 Tuition Hours' },
 ]
 
-
 export default function ModularTrainingPage() {
   return (
     <div className="bg-white">
@@ -81,7 +73,7 @@ export default function ModularTrainingPage() {
                   <strong>study at your own pace</strong> by booking any of the EASA B1 or B2
                   Modules.
                 </p>
-                <p className="leading-relaxed text-lg text-slate-600">
+                <p className="text-lg leading-relaxed text-slate-600">
                   Once you choose a selected course in the student portal, you will receive the
                   corresponding learning materials and be able to book the most convenient tuition
                   and exam dates using the scheduled slots available.
@@ -131,7 +123,7 @@ export default function ModularTrainingPage() {
                   >
                     <Icon className="text-public-primary mb-4 h-8 w-8" />
                     <h5 className="mb-2 text-lg font-bold text-slate-900">{title}</h5>
-                    <p className="text-base text-slate-600 leading-relaxed">{desc}</p>
+                    <p className="text-base leading-relaxed text-slate-600">{desc}</p>
                   </div>
                 ))}
               </div>
@@ -158,7 +150,7 @@ export default function ModularTrainingPage() {
                   Portal Access
                 </span>
                 <div className="mt-3 text-4xl font-black">Lifetime</div>
-                <p className="mt-5 mb-8 text-base text-blue-100/80 leading-relaxed">
+                <p className="mt-5 mb-8 text-base leading-relaxed text-blue-100/80">
                   One-time registration gives you lifetime access to buy and book as many training
                   modules as you wish.
                 </p>
@@ -197,15 +189,15 @@ export default function ModularTrainingPage() {
         <SectionReveal>
           <section className="space-y-16">
             <div>
-              <h3 className="mb-8 text-3xl font-bold text-aerojet-blue">Core Modules</h3>
+              <h3 className="text-aerojet-blue mb-8 text-3xl font-bold">Core Modules</h3>
               <ModuleGrid modules={coreModules} />
             </div>
             <div>
-              <h3 className="mb-8 text-3xl font-bold text-aerojet-blue">Specialist Modules</h3>
+              <h3 className="text-aerojet-blue mb-8 text-3xl font-bold">Specialist Modules</h3>
               <ModuleGrid modules={specialistModules} />
             </div>
             <div>
-              <h3 className="mb-8 text-3xl font-bold text-aerojet-blue">Avionics Modules</h3>
+              <h3 className="text-aerojet-blue mb-8 text-3xl font-bold">Avionics Modules</h3>
               <ModuleGrid modules={avionicsModules} />
             </div>
             <div className="mt-6 text-center text-base text-slate-600">
@@ -234,14 +226,14 @@ export default function ModularTrainingPage() {
               ].map((item, i) => (
                 <div key={i} className="flex items-start gap-4">
                   <CheckCircle2 className="text-public-secondary mt-0.5 h-6 w-6 shrink-0" />
-                  <p className="text-blue-100 leading-relaxed">
+                  <p className="leading-relaxed text-blue-100">
                     <strong className="text-white">{item.bold}</strong> {item.text}
                   </p>
                 </div>
               ))}
             </div>
             <div className="mt-8 border-t border-white/10 pt-8">
-              <p className="text-base text-blue-100 leading-relaxed">
+              <p className="text-base leading-relaxed text-blue-100">
                 <strong className="text-white">Payment Methods:</strong> Electronic payments (Visa,
                 Mobile Money), Bank Transfer, or Cheque. Bank charges borne by student.
               </p>
@@ -255,7 +247,7 @@ export default function ModularTrainingPage() {
             <h2 className="mb-5 text-3xl font-black tracking-tight uppercase md:text-4xl">
               Ready to Book Your Modules?
             </h2>
-            <p className="mx-auto mb-10 max-w-2xl text-lg text-blue-100/80 leading-relaxed">
+            <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-blue-100/80">
               Register on our portal to get lifetime access and start booking.
             </p>
             <Link

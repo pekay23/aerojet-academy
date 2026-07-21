@@ -16,7 +16,6 @@ import {
   AtSign,
   FileText,
 } from 'lucide-react'
-import MotionTabs from '@/components/ui/MotionTabs'
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges'
 import { UnsavedChangesDialog } from '@/components/shared/UnsavedChangesDialog'
 
@@ -24,17 +23,11 @@ const TABS = [
   { key: 'general', label: 'General', icon: School },
   { key: 'admissions', label: 'Admissions', icon: ClipboardList },
   { key: 'finance', label: 'Finance', icon: DollarSign },
-  { key: 'notifications', label: 'Notifications', icon: Mail },
-  { key: 'system', label: 'System', icon: Globe },
-  { key: 'custom-fields', label: 'Custom Fields', icon: DatabaseBackup },
-  { key: 'security', label: 'Security', icon: Shield },
-  { key: 'welcome', label: 'Welcome', icon: Sparkles },
-  { key: 'emails', label: 'Email Templates', icon: Send },
-  { key: 'email-registry', label: 'Email Addresses', icon: AtSign },
-  { key: 'email-delivery', label: 'Email Delivery', icon: Send },
-  { key: 'calendar', label: 'Calendar', icon: Calendar },
-  { key: 'backup', label: 'Backup', icon: DatabaseBackup },
-  { key: 'pdf', label: 'PDF Templates', icon: FileText },
+  { key: 'comms', label: 'Emails & Comms', icon: Mail },
+  { key: 'academic', label: 'Academic', icon: Calendar },
+  { key: 'templates', label: 'Templates', icon: FileText },
+  { key: 'system', label: 'System & Data', icon: Globe },
+  { key: 'security', label: 'My Security', icon: Shield },
 ]
 
 // ── Context so child forms can mark dirty / clean without prop drilling ──────
@@ -69,27 +62,16 @@ export default function SettingsTabs({ children }: { children: React.ReactNode }
     [router, markClean]
   )
 
+  const currentTabObj = TABS.find((t) => t.key === currentTab) || TABS[0]
+
   return (
     <SettingsDirtyContext.Provider value={{ markDirty, markClean }}>
       <div className="space-y-6">
         <div>
           <h1 className="text-aerojet-blue text-2xl font-black tracking-tight sm:text-3xl dark:text-white">
-            Settings
+            {currentTabObj.label} Settings
           </h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-            Configure your academy platform settings and preferences
-          </p>
         </div>
-
-        <MotionTabs
-          tabs={TABS}
-          activeTab={currentTab}
-          onChange={handleChange}
-          onBeforeChange={confirmLeave}
-          layoutId="settings-tab"
-          ariaLabel="Settings sections"
-          className="flex-wrap"
-        />
 
         {children}
 

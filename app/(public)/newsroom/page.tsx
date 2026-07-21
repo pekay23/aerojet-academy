@@ -6,7 +6,7 @@ import NewsPagination from './_components/NewsPagination'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { title: 'Newsroom | Aerojet Academy' }
+export const metadata: Metadata = { title: 'Newsroom ' }
 
 async function getArticles(skip: number, take: number) {
   return await prisma.newsArticle.findMany({
@@ -31,20 +31,17 @@ export default async function NewsroomPage(props: {
   const limit = Number(searchParams.limit) || 9
   const skip = (page - 1) * limit
 
-  const [articles, total] = await Promise.all([
-    getArticles(skip, limit),
-    getArticlesCount(),
-  ])
+  const [articles, total] = await Promise.all([getArticles(skip, limit), getArticlesCount()])
 
   return (
-    <div className="relative bg-slate-50 min-h-screen">
+    <div className="relative min-h-screen bg-slate-50">
       <Hero
         title="News & Updates"
         subtitle="Stay informed about our latest intakes, partnerships, and facility milestones."
         backgroundImage="/images/hero/news.webp"
       />
 
-      <div className="mx-auto w-full px-6 py-20 relative">
+      <div className="relative mx-auto w-full px-6 py-20">
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {articles.map((article, i) => {
             const wordsPerMinute = 200
@@ -77,9 +74,7 @@ export default async function NewsroomPage(props: {
           })}
         </div>
 
-        {total > 0 && (
-          <NewsPagination total={total} page={page} limit={limit} />
-        )}
+        {total > 0 && <NewsPagination total={total} page={page} limit={limit} />}
 
         {articles.length === 0 && (
           <div className="flex flex-col items-center justify-center py-20 text-center">

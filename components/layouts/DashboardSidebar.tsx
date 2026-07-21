@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import Logo from '@/components/shared/Logo'
-import { usePathname } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { signOut } from 'next-auth/react'
 import { useTheme } from '@/components/shared/theme-provider'
 import {
@@ -60,6 +60,8 @@ interface DashboardSidebarProps {
   basePath?: string
   userMenuItems?: SidebarLinkItem[]
   appVersion?: string
+  onBack?: () => void
+  backLabel?: string
 }
 
 /* ── Mobile Top Bar with inline breadcrumb ─────────────────────────── */
@@ -91,7 +93,7 @@ function MobileTopBar({
   const currentPageLabel = displaySegments.length === 0 ? 'Dashboard' : null
 
   return (
-    <div className="fixed top-0 right-0 left-0 z-40 flex items-center gap-3 border-b border-border/50 bg-white/80 px-4 py-3 backdrop-blur-lg lg:hidden dark:bg-slate-900/80">
+    <div className="border-border/50 fixed top-0 right-0 left-0 z-40 flex items-center gap-3 border-b bg-white/80 px-4 py-3 backdrop-blur-lg lg:hidden dark:bg-slate-900/80">
       {/* Hamburger */}
       <button
         onClick={onOpenMenu}
@@ -114,11 +116,9 @@ function MobileTopBar({
 
             return (
               <span key={i} className="flex shrink-0 items-center gap-1.5">
-                {i > 0 && (
-                  <span className="text-xs text-slate-300 dark:text-slate-600">/</span>
-                )}
+                {i > 0 && <span className="text-xs text-slate-300 dark:text-slate-600">/</span>}
                 <span
-                  className={`max-w-[120px] truncate text-xs ${
+                  className={`max-w-30 truncate text-xs ${
                     isLast
                       ? 'font-bold text-slate-800 dark:text-slate-100'
                       : 'font-medium text-slate-400 dark:text-slate-500'
@@ -176,22 +176,22 @@ function NavItem({
         collapsed ? 'mx-auto h-10 w-10 justify-center p-0' : 'gap-3'
       } ${
         active
-          ? 'border-sidebar-border/40 bg-sidebar-accent font-semibold text-sidebar-foreground shadow-sm'
-          : 'border-transparent text-sidebar-foreground/60 hover:text-sidebar-foreground'
+          ? 'border-sidebar-border/40 bg-sidebar-accent text-sidebar-foreground font-semibold shadow-sm'
+          : 'text-sidebar-foreground/60 hover:text-sidebar-foreground border-transparent'
       }`}
     >
       {isHovered && (
         <motion.div
           layoutId="sidebar-hover"
-          className="absolute inset-0 rounded-xl bg-sidebar-accent/60"
+          className="bg-sidebar-accent/60 absolute inset-0 rounded-xl"
           style={{ zIndex: 0 }}
           transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
         />
       )}
-      {Icon && <Icon className="relative z-10 h-[18px] w-[18px] shrink-0" />}
+      {Icon && <Icon className="relative z-10 h-4.5 w-4.5 shrink-0" />}
       {!collapsed && <span className="relative z-10 flex-1">{label}</span>}
       {!collapsed && badge ? (
-        <span className="relative z-10 min-w-[18px] rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
+        <span className="relative z-10 min-w-4.5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
           {badge}
         </span>
       ) : null}
@@ -205,7 +205,7 @@ function NavItem({
         <TooltipContent side="right" className="flex items-center gap-2">
           {label}
           {badge ? (
-            <span className="min-w-[16px] rounded-full bg-red-500 px-1 py-0.5 text-center text-[10px] font-black text-white">
+            <span className="min-w-4 rounded-full bg-red-500 px-1 py-0.5 text-center text-[10px] font-black text-white">
               {badge}
             </span>
           ) : null}
@@ -256,22 +256,22 @@ function GroupItem({
         collapsed ? 'mx-auto h-10 w-10 justify-center p-0' : 'gap-3'
       } ${
         active
-          ? 'border-sidebar-border/40 bg-sidebar-accent font-semibold text-sidebar-foreground shadow-sm'
-          : 'border-transparent text-sidebar-foreground/60 hover:text-sidebar-foreground'
+          ? 'border-sidebar-border/40 bg-sidebar-accent text-sidebar-foreground font-semibold shadow-sm'
+          : 'text-sidebar-foreground/60 hover:text-sidebar-foreground border-transparent'
       }`}
     >
       {isHovered && (
         <motion.div
           layoutId="sidebar-hover"
-          className="absolute inset-0 rounded-xl bg-sidebar-accent/60"
+          className="bg-sidebar-accent/60 absolute inset-0 rounded-xl"
           style={{ zIndex: 0 }}
           transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
         />
       )}
-      {Icon && <Icon className="relative z-10 h-[18px] w-[18px] shrink-0" />}
+      {Icon && <Icon className="relative z-10 h-4.5 w-4.5 shrink-0" />}
       {!collapsed && <span className="relative z-10 flex-1 text-left">{link.label}</span>}
       {!collapsed && link.badge ? (
-        <span className="relative z-10 min-w-[18px] rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
+        <span className="relative z-10 min-w-4.5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
           {link.badge}
         </span>
       ) : null}
@@ -291,7 +291,7 @@ function GroupItem({
           <TooltipContent side="right" className="flex items-center gap-2">
             {link.label}
             {link.badge ? (
-              <span className="min-w-[16px] rounded-full bg-red-500 px-1 py-0.5 text-center text-[10px] font-black text-white">
+              <span className="min-w-4 rounded-full bg-red-500 px-1 py-0.5 text-center text-[10px] font-black text-white">
                 {link.badge}
               </span>
             ) : null}
@@ -315,14 +315,14 @@ function GroupItem({
                 onMouseLeave={() => setHoveredItem(null)}
                 className={`relative block rounded-xl px-3 py-2 text-[13px] font-medium transition-all ${
                   childActive
-                    ? 'bg-sidebar-accent font-semibold text-sidebar-foreground'
+                    ? 'bg-sidebar-accent text-sidebar-foreground font-semibold'
                     : 'text-sidebar-foreground/60 hover:text-sidebar-foreground'
                 }`}
               >
                 {childHovered && (
                   <motion.div
                     layoutId="sidebar-hover"
-                    className="absolute inset-0 rounded-xl bg-sidebar-accent/60"
+                    className="bg-sidebar-accent/60 absolute inset-0 rounded-xl"
                     style={{ zIndex: 0 }}
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
                   />
@@ -368,15 +368,20 @@ function UserMenu({
   const [open, setOpen] = useState(false)
 
   const initials = userName
-    ? userName.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase()
+    ? userName
+        .split(' ')
+        .map((w) => w[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
     : '?'
 
   const avatar = () => (
-    <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-xl border border-sidebar-border/50 bg-sidebar-accent">
+    <div className="border-sidebar-border/50 bg-sidebar-accent relative h-8 w-8 shrink-0 overflow-hidden rounded-xl border">
       {userImage ? (
         <Image src={userImage} alt={userName || 'User'} fill className="object-cover" />
       ) : (
-        <div className="flex h-full w-full items-center justify-center text-[11px] font-black uppercase text-sidebar-foreground/50">
+        <div className="text-sidebar-foreground/50 flex h-full w-full items-center justify-center text-[11px] font-black uppercase">
           {initials}
         </div>
       )}
@@ -411,7 +416,7 @@ function UserMenu({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 6 }}
             transition={{ type: 'spring', bounce: 0.1, duration: 0.22 }}
-            className="absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-2xl border border-white/15 bg-sidebar/95 shadow-2xl backdrop-blur-xl"
+            className="bg-sidebar/95 absolute right-0 bottom-full left-0 z-50 mb-2 overflow-hidden rounded-2xl border border-white/15 shadow-2xl backdrop-blur-xl"
           >
             <div className="p-1.5">
               {userMenuItems?.map((item) => {
@@ -424,7 +429,7 @@ function UserMenu({
                     onClick={() => setOpen(false)}
                     className={menuLink}
                   >
-                    {Icon ? <Icon className="h-4 w-4 text-sidebar-foreground/40" /> : null}
+                    {Icon ? <Icon className="text-sidebar-foreground/40 h-4 w-4" /> : null}
                     {!collapsed && item.label}
                   </Link>
                 )
@@ -432,16 +437,16 @@ function UserMenu({
 
               {/* Homepage */}
               <Link href="/" onClick={() => setOpen(false)} className={menuLink}>
-                <Home className="h-4 w-4 text-sidebar-foreground/40" />
+                <Home className="text-sidebar-foreground/40 h-4 w-4" />
                 {!collapsed && 'Homepage'}
               </Link>
 
               {/* Appearance */}
               {!collapsed && (
                 <>
-                  <div className="my-1.5 h-px bg-sidebar-border/50" />
+                  <div className="bg-sidebar-border/50 my-1.5 h-px" />
                   <div className="px-1 py-1.5">
-                    <p className="mb-2 px-2 text-[10px] font-black tracking-widest uppercase text-sidebar-foreground/30">
+                    <p className="text-sidebar-foreground/30 mb-2 px-2 text-[10px] font-black tracking-widest uppercase">
                       Appearance
                     </p>
                     <div className="flex gap-1 rounded-2xl bg-black/20 p-1.5 ring-1 ring-white/5">
@@ -464,7 +469,7 @@ function UserMenu({
                 </>
               )}
 
-              <div className="my-1.5 h-px bg-sidebar-border/50" />
+              <div className="bg-sidebar-border/50 my-1.5 h-px" />
 
               {/* Sign out */}
               <button
@@ -485,7 +490,7 @@ function UserMenu({
           <TooltipTrigger asChild>
             <button
               onClick={() => setOpen((v) => !v)}
-              className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl border border-sidebar-border/40 bg-sidebar-accent/20 transition-all duration-150 ease-out hover:border-sidebar-border/70 hover:bg-sidebar-accent/50"
+              className="border-sidebar-border/40 bg-sidebar-accent/20 hover:border-sidebar-border/70 hover:bg-sidebar-accent/50 mx-auto flex h-10 w-10 items-center justify-center rounded-xl border transition-all duration-150 ease-out"
             >
               {avatar()}
             </button>
@@ -495,21 +500,23 @@ function UserMenu({
       ) : (
         <button
           onClick={() => setOpen((v) => !v)}
-          className="flex w-full items-center gap-3 rounded-xl border border-sidebar-border/40 bg-sidebar-accent/20 px-3 py-2.5 text-left transition-all duration-150 ease-out hover:border-sidebar-border/70 hover:bg-sidebar-accent/50"
+          className="border-sidebar-border/40 bg-sidebar-accent/20 hover:border-sidebar-border/70 hover:bg-sidebar-accent/50 flex w-full items-center gap-3 rounded-xl border px-3 py-2.5 text-left transition-all duration-150 ease-out"
         >
           {avatar()}
           <div className="min-w-0 flex-1">
-            <p className="truncate text-xs font-bold text-sidebar-foreground">
+            <p className="text-sidebar-foreground truncate text-xs font-bold">
               {userName || 'User'}
             </p>
             {userRole && (
-              <p className={`mt-0.5 truncate text-[10px] font-bold tracking-widest uppercase ${portalColor}`}>
+              <p
+                className={`mt-0.5 truncate text-[10px] font-bold tracking-widest uppercase ${portalColor}`}
+              >
                 {userRole}
               </p>
             )}
           </div>
           <ChevronDown
-            className={`h-3.5 w-3.5 shrink-0 text-sidebar-foreground/30 transition-transform duration-200 ${
+            className={`text-sidebar-foreground/30 h-3.5 w-3.5 shrink-0 transition-transform duration-200 ${
               open ? 'rotate-180' : ''
             }`}
           />
@@ -518,7 +525,6 @@ function UserMenu({
     </div>
   )
 }
-
 
 function renderSidebarContent({
   isCollapsed,
@@ -542,6 +548,8 @@ function renderSidebarContent({
   setTheme,
   appVersion,
   forceFull = false,
+  onBack,
+  backLabel,
 }: {
   isCollapsed: boolean
   setIsCollapsed: (c: boolean) => void
@@ -564,6 +572,8 @@ function renderSidebarContent({
   setTheme: (t: string) => void
   appVersion?: string
   forceFull?: boolean
+  onBack?: () => void
+  backLabel?: string
 }) {
   const collapsed = forceFull ? false : isCollapsed
 
@@ -596,7 +606,7 @@ function renderSidebarContent({
           {!collapsed && (
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="hidden h-8 w-8 items-center justify-center rounded-md text-sidebar-foreground/40 transition-all hover:bg-sidebar-accent hover:text-sidebar-foreground lg:flex"
+              className="text-sidebar-foreground/40 hover:bg-sidebar-accent hover:text-sidebar-foreground hidden h-8 w-8 items-center justify-center rounded-md transition-all lg:flex"
               title="Collapse sidebar"
               aria-label="Collapse sidebar"
             >
@@ -608,7 +618,7 @@ function renderSidebarContent({
         {collapsed && (
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="mt-4 hidden h-8 w-8 items-center justify-center rounded-md text-sidebar-foreground/40 transition-all hover:bg-sidebar-accent hover:text-sidebar-foreground lg:flex"
+            className="text-sidebar-foreground/40 hover:bg-sidebar-accent hover:text-sidebar-foreground mt-4 hidden h-8 w-8 items-center justify-center rounded-md transition-all lg:flex"
             title="Expand sidebar"
             aria-label="Expand sidebar"
           >
@@ -618,13 +628,15 @@ function renderSidebarContent({
 
         {!collapsed && (
           <div className="mt-2 flex items-center justify-between">
-            <span
-              className={`block text-[10px] font-black tracking-[0.2em] uppercase ${portalColor}`}
-            >
-              {portalLabel}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span
+                className={`block text-[10px] font-black tracking-[0.2em] uppercase ${portalColor}`}
+              >
+                {portalLabel}
+              </span>
+            </div>
             {appVersion && (
-              <span className="rounded-md bg-sidebar-foreground/5 px-1.5 py-0.5 text-[9px] font-black text-sidebar-foreground/40">
+              <span className="bg-sidebar-foreground/5 text-sidebar-foreground/40 rounded-md px-1.5 py-0.5 text-[9px] font-black">
                 v{appVersion}
               </span>
             )}
@@ -641,12 +653,36 @@ function renderSidebarContent({
           scrollbarColor: 'rgba(255,255,255,0.08) transparent',
         }}
       >
+        {onBack && (
+          <button
+            onClick={onBack}
+            className={`group text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-foreground mb-2 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+              collapsed ? 'justify-center' : ''
+            }`}
+            title="Go back"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-4 w-4 shrink-0 transition-transform group-hover:-translate-x-1"
+            >
+              <path d="m15 18-6-6 6-6" />
+            </svg>
+            {!collapsed && <span>{backLabel || 'Back'}</span>}
+          </button>
+        )}
+
         {links.map((link, idx) => {
           if (link.type === 'header') {
             return (
               <div
                 key={link.label || idx}
-                className={`px-3 pt-5 pb-2 text-[10px] font-black tracking-widest text-muted-foreground/50 uppercase transition-all ${
+                className={`text-muted-foreground/50 px-3 pt-5 pb-2 text-[10px] font-black tracking-widest uppercase transition-all ${
                   collapsed ? 'text-center' : ''
                 }`}
               >
@@ -719,8 +755,11 @@ export default function DashboardSidebar({
   basePath = '',
   userMenuItems,
   appVersion,
+  onBack,
+  backLabel,
 }: DashboardSidebarProps) {
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const { theme, setTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
   const [openGroups, setOpenGroups] = useState<string[]>([])
@@ -750,16 +789,28 @@ export default function DashboardSidebar({
     )
   }
 
-  const isActivePath = (href: string) => pathname === basePath + href
-  const isGroupActive = (link: SidebarLink): boolean => {
-    if (link.type === 'header') return false
-    return (
-      pathname.startsWith(basePath + (link.href ?? '')) ||
-      (link.children?.some((c) => pathname.startsWith(basePath + c.href)) ?? false)
-    )
+  const getComparableUrl = (href: string) => {
+    if (!href.includes('?')) return basePath + href
+    return basePath + href
   }
 
+  const isActivePath = (href: string) => {
+    if (href.includes('?')) {
+      const url = new URL(`http://localhost${basePath}${href}`)
+      let allMatch = true
+      url.searchParams.forEach((val, key) => {
+        if (searchParams.get(key) !== val) allMatch = false
+      })
+      return pathname === url.pathname && allMatch
+    }
+    return pathname === basePath + href
+  }
 
+  const isGroupActive = (link: SidebarLink): boolean => {
+    if (link.type === 'header') return false
+    if (link.href && isActivePath(link.href)) return true
+    return link.children?.some((c) => isActivePath(c.href)) ?? false
+  }
 
   return (
     <>
@@ -790,6 +841,8 @@ export default function DashboardSidebar({
           theme,
           setTheme,
           appVersion,
+          onBack,
+          backLabel,
         })}
       </aside>
 
@@ -844,6 +897,9 @@ export default function DashboardSidebar({
                   theme,
                   setTheme,
                   forceFull: true,
+                  appVersion,
+                  onBack,
+                  backLabel,
                 })}
               </div>
             </motion.aside>

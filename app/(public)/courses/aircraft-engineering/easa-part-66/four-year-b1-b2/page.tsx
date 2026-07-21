@@ -14,9 +14,10 @@ import {
 } from 'lucide-react'
 import ModuleGrid from '@/app/(public)/_components/ModuleGrid'
 import ModuleTabs from './ModuleTabs'
+import { getRegistrationConfig } from '@/lib/settings'
 
 export const metadata: Metadata = {
-  title: '4-Year Full-Time Program (B1.1 & B2) | Aerojet Academy',
+  title: '4-Year Full-Time Program (B1.1 & B2) ',
   description:
     'Comprehensive 4-year EASA Part-66 training with guaranteed job placement upon completion.',
 }
@@ -52,7 +53,9 @@ const b2Modules = [
   { code: 'M14', name: 'Propulsion' },
 ]
 
-export default function FourYearPage() {
+export default async function FourYearPage() {
+  const { isOpen } = await getRegistrationConfig()
+
   return (
     <div className="bg-white">
       <Hero
@@ -64,17 +67,16 @@ export default function FourYearPage() {
       <div className="mx-auto max-w-7xl space-y-24 px-6 py-20">
         {/* Intro */}
         <SectionReveal skipInitial>
-
           <section className="max-w-4xl">
             <div className="mb-8 flex flex-wrap gap-4">
-              <span className="rounded-full bg-aerojet-blue px-5 py-2.5 text-sm font-black tracking-widest text-white uppercase">
+              <span className="bg-aerojet-blue rounded-full px-5 py-2.5 text-sm font-black tracking-widest text-white uppercase">
                 Full-Time Training
               </span>
-              <span className="rounded-full bg-blue-100 px-5 py-2.5 text-sm font-black tracking-widest text-aerojet-blue uppercase">
+              <span className="text-aerojet-blue rounded-full bg-blue-100 px-5 py-2.5 text-sm font-black tracking-widest uppercase">
                 B1.1 & B2 License
               </span>
             </div>
-            <h2 className="mb-8 text-3xl font-black tracking-tight text-aerojet-blue md:text-4xl">
+            <h2 className="text-aerojet-blue mb-8 text-3xl font-black tracking-tight md:text-4xl">
               Your Career Starts Here
             </h2>
             <p className="mb-6 text-xl leading-relaxed text-slate-700">
@@ -82,7 +84,7 @@ export default function FourYearPage() {
               aircraft maintenance, this is the course for you. You will be working towards one of
               the industry's most widely recognized qualification standards.
             </p>
-            <p className="leading-relaxed text-lg text-slate-600">
+            <p className="text-lg leading-relaxed text-slate-600">
               This four-year program includes a required experience period of{' '}
               <strong>two years working on live operational aircraft</strong> under strict
               supervision. Because this is an internationally certified course, students have the
@@ -95,8 +97,8 @@ export default function FourYearPage() {
         {/* What Does It Involve */}
         <SectionReveal>
           <section className="rounded-3xl border border-slate-100 bg-slate-50 p-8 sm:p-12">
-            <h3 className="mb-6 flex items-center gap-3 text-2xl font-bold text-aerojet-blue">
-              <Hammer className="h-6 w-6 text-aerojet-sky" /> What Does It Involve?
+            <h3 className="text-aerojet-blue mb-6 flex items-center gap-3 text-2xl font-bold">
+              <Hammer className="text-aerojet-sky h-6 w-6" /> What Does It Involve?
             </h3>
             <p className="mb-8 text-lg leading-relaxed text-slate-700">
               As an aircraft maintenance engineer, your work involves installing, maintaining,
@@ -108,14 +110,14 @@ export default function FourYearPage() {
                 (s) => (
                   <div
                     key={s}
-                    className="rounded-xl border border-slate-200 bg-white px-5 py-4 text-center text-base font-semibold text-aerojet-blue"
+                    className="text-aerojet-blue rounded-xl border border-slate-200 bg-white px-5 py-4 text-center text-base font-semibold"
                   >
                     {s}
                   </div>
                 )
               )}
             </div>
-            <p className="border-l-4 border-aerojet-sky pl-5 text-lg text-slate-600 italic">
+            <p className="border-aerojet-sky border-l-4 pl-5 text-lg text-slate-600 italic">
               "You may work on flight systems on one day and wing or fuselage materials on another."
             </p>
           </section>
@@ -139,8 +141,8 @@ export default function FourYearPage() {
         <div className="grid gap-8 sm:gap-12 lg:grid-cols-2">
           <SectionReveal>
             <div>
-              <h4 className="mb-6 flex items-center gap-3 text-xl font-bold text-aerojet-blue">
-                <Clock className="h-6 w-6 text-aerojet-sky" /> Course Details
+              <h4 className="text-aerojet-blue mb-6 flex items-center gap-3 text-xl font-bold">
+                <Clock className="text-aerojet-sky h-6 w-6" /> Course Details
               </h4>
               <ul className="space-y-5">
                 {[
@@ -151,9 +153,9 @@ export default function FourYearPage() {
                   { label: 'Hands-on Training', value: 'Over 2,000 hours required' },
                 ].map((item) => (
                   <li key={item.label} className="flex items-start gap-4 text-base">
-                    <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-aerojet-sky" />
+                    <CheckCircle2 className="text-aerojet-sky mt-0.5 h-6 w-6 shrink-0" />
                     <div className="grid grid-cols-[100px_1fr] gap-2">
-                      <span className="font-bold text-aerojet-blue">{item.label}</span>
+                      <span className="text-aerojet-blue font-bold">{item.label}</span>
                       <span className="text-slate-700">{item.value}</span>
                     </div>
                   </li>
@@ -164,8 +166,8 @@ export default function FourYearPage() {
 
           <SectionReveal delay={0.1}>
             <div>
-              <h4 className="mb-6 flex items-center gap-3 text-xl font-bold text-aerojet-blue">
-                <BookOpen className="h-6 w-6 text-aerojet-sky" /> What You'll Learn
+              <h4 className="text-aerojet-blue mb-6 flex items-center gap-3 text-xl font-bold">
+                <BookOpen className="text-aerojet-sky h-6 w-6" /> What You'll Learn
               </h4>
               <div className="space-y-3">
                 {[
@@ -180,7 +182,7 @@ export default function FourYearPage() {
                     key={topic}
                     className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 px-5 py-4 text-base text-slate-700"
                   >
-                    <div className="h-1.5 w-1.5 shrink-0 rounded-full bg-aerojet-sky" />
+                    <div className="bg-aerojet-sky h-1.5 w-1.5 shrink-0 rounded-full" />
                     {topic}
                   </div>
                 ))}
@@ -193,12 +195,13 @@ export default function FourYearPage() {
         <SectionReveal>
           <section className="space-y-12">
             <div>
-              <h3 className="mb-6 text-3xl font-bold tracking-tight text-aerojet-blue uppercase">
+              <h3 className="text-aerojet-blue mb-6 text-3xl font-bold tracking-tight uppercase">
                 Technical Modules Breakdown
               </h3>
               <p className="text-lg text-slate-600">
-                The 4-year program covers all modules required for both B1.1 (Mechanical) and B2 (Avionics)
-                EASA categories, providing you with a dual-scope capability that is highly valued in the industry.
+                The 4-year program covers all modules required for both B1.1 (Mechanical) and B2
+                (Avionics) EASA categories, providing you with a dual-scope capability that is
+                highly valued in the industry.
               </p>
             </div>
             <ModuleTabs b1Modules={b1Modules} b2Modules={b2Modules} />
@@ -208,7 +211,7 @@ export default function FourYearPage() {
         {/* What's Provided */}
         <SectionReveal>
           <section className="rounded-3xl border border-blue-100 bg-blue-50 p-8 sm:p-12">
-            <h4 className="mb-6 text-xl font-bold text-aerojet-blue">What's Provided</h4>
+            <h4 className="text-aerojet-blue mb-6 text-xl font-bold">What's Provided</h4>
             <div className="grid gap-4 sm:grid-cols-2">
               {[
                 'All learning materials & study resources',
@@ -217,7 +220,7 @@ export default function FourYearPage() {
                 'EASA Part 66 License application assistance',
               ].map((item) => (
                 <div key={item} className="flex items-center gap-3 text-base text-slate-700">
-                  <CheckCircle2 className="h-5 w-5 shrink-0 text-aerojet-sky" />
+                  <CheckCircle2 className="text-aerojet-sky h-5 w-5 shrink-0" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -231,7 +234,7 @@ export default function FourYearPage() {
 
         {/* Admission Process */}
         <SectionReveal>
-          <section className="rounded-r-3xl border-l-4 border-aerojet-blue bg-white p-8 shadow-sm sm:p-10">
+          <section className="border-aerojet-blue rounded-r-3xl border-l-4 bg-white p-8 shadow-sm sm:p-10">
             <h3 className="mb-10 text-3xl font-bold text-slate-900">How to Apply</h3>
             <div className="max-w-3xl space-y-8">
               {[
@@ -257,11 +260,11 @@ export default function FourYearPage() {
                 },
               ].map((step, i) => (
                 <div key={i} className="flex gap-5">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-aerojet-blue text-lg font-bold text-white">
+                  <div className="bg-aerojet-blue flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-bold text-white">
                     {i + 1}
                   </div>
                   <div>
-                    <h5 className="mb-2 text-lg font-bold text-aerojet-blue">{step.title}</h5>
+                    <h5 className="text-aerojet-blue mb-2 text-lg font-bold">{step.title}</h5>
                     <p className="text-base text-slate-600">{step.desc}</p>
                   </div>
                 </div>
@@ -272,7 +275,7 @@ export default function FourYearPage() {
               <h5 className="mb-3 flex items-center gap-3 text-lg font-bold text-green-800">
                 <Award className="h-6 w-6" /> Top 50 Candidates Eligible for Scholarships
               </h5>
-              <p className="text-base text-green-700 leading-relaxed">
+              <p className="text-base leading-relaxed text-green-700">
                 The top 50 highest-scoring candidates on entry aptitude tests will be selected for
                 further assessment. Only 10 full scholarship slots are available each year.
               </p>
@@ -282,19 +285,32 @@ export default function FourYearPage() {
 
         {/* CTA */}
         <SectionReveal>
-          <div className="rounded-3xl bg-linear-to-r from-aerojet-blue to-aerojet-sky p-10 text-center text-white sm:p-16">
-            <h2 className="mb-5 text-3xl font-black tracking-tight uppercase md:text-4xl">
-              Ready to Apply?
-            </h2>
-            <p className="mx-auto mb-10 max-w-2xl text-lg text-blue-100/80 leading-relaxed">
-              Applications are open for the 2026/2027 intake. Secure your place today.
-            </p>
-            <Link
-              href="/register"
-              className="inline-block rounded-xl bg-white px-12 py-5 text-sm font-black tracking-widest text-aerojet-blue transition-all hover:bg-blue-50 active:scale-[0.98]"
-            >
-              Start Registration
-            </Link>
+          <div className="from-aerojet-blue to-aerojet-sky rounded-3xl bg-linear-to-r p-10 text-center text-white sm:p-16">
+            {isOpen ? (
+              <>
+                <h2 className="mb-5 text-3xl font-black tracking-tight uppercase md:text-4xl">
+                  Ready to Apply?
+                </h2>
+                <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-blue-100/80">
+                  Applications are open for the 2026/2027 intake. Secure your place today.
+                </p>
+                <Link
+                  href="/register"
+                  className="text-aerojet-blue inline-block rounded-xl bg-white px-12 py-5 text-sm font-black tracking-widest transition-all hover:bg-blue-50 active:scale-[0.98]"
+                >
+                  Start Registration
+                </Link>
+              </>
+            ) : (
+              <>
+                <h2 className="mb-5 text-3xl font-black tracking-tight uppercase md:text-4xl">
+                  Applications Suspended
+                </h2>
+                <p className="mx-auto text-lg leading-relaxed text-blue-100/80">
+                  No courses are currently running. We will announce when programs restart.
+                </p>
+              </>
+            )}
           </div>
         </SectionReveal>
       </div>

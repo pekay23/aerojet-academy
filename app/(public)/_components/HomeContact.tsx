@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Phone, Mail } from 'lucide-react'
 import SectionReveal from './SectionReveal'
 
-export default function HomeContact() {
+export default function HomeContact({ isOpen = true }: { isOpen?: boolean }) {
   return (
     <SectionReveal>
       <section className="border-y border-[#1b2430]/15 px-6 py-24">
@@ -33,12 +33,14 @@ export default function HomeContact() {
           </div>
 
           <div className="flex w-full shrink-0 flex-col gap-4 md:w-auto">
-            <Link
-              href="/register"
-              className="bg-aerojet-sky inline-flex h-12 items-center justify-center rounded-sm px-10 text-[11px] font-bold tracking-[0.2em] text-[#1b2430] uppercase transition hover:bg-white"
-            >
-              Start Registration
-            </Link>
+            {isOpen && (
+              <Link
+                href="/register"
+                className="bg-aerojet-sky inline-flex h-12 items-center justify-center rounded-sm px-10 text-[11px] font-bold tracking-[0.2em] text-[#1b2430] uppercase transition hover:bg-white"
+              >
+                Start Registration
+              </Link>
+            )}
             <Link
               href="/contact"
               className="inline-flex h-12 items-center justify-center rounded-sm border border-[#f7f3ec]/40 px-10 text-[11px] font-bold tracking-[0.2em] text-[#f7f3ec] uppercase transition hover:bg-[#f7f3ec] hover:text-[#1b2430]"
