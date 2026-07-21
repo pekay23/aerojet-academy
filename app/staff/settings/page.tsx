@@ -100,6 +100,13 @@ const GENERAL_FEATURES_FIELDS = [
     type: 'STRING' as const,
     default: '',
   },
+  {
+    key: 'exams_open',
+    label: 'Accept Exam Bookings',
+    description: 'Enable or disable the public exam schedule page and exam booking.',
+    type: 'BOOLEAN' as const,
+    default: 'true',
+  },
 ]
 
 const GENERAL_ATTENDANCE_FIELDS = [

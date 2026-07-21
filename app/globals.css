@@ -134,6 +134,69 @@ body.exam-lockdown > div > div:first-child {
   display: none !important;
 }
 
+/* ── News Article Component Styles ────────────────────────────── */
+@layer components {
+  .article-blockquote {
+    @apply border-aerojet-sky relative my-8 rounded-r-xl border-l-4 bg-white/50 py-4 pr-6 pl-6 text-lg leading-relaxed text-slate-700 italic shadow-sm;
+  }
+  .article-blockquote::before {
+    content: '\201C';
+    @apply text-aerojet-sky/30 absolute -top-2 left-3 font-serif text-4xl leading-none;
+  }
+
+  .article-pullquote {
+    @apply text-aerojet-blue border-aerojet-sky/20 my-10 border-y-2 px-8 py-8 text-center text-2xl leading-snug font-bold;
+  }
+
+  .article-section-heading {
+    @apply text-aerojet-blue border-aerojet-sky/30 mt-10 mb-4 border-b-2 pb-3 text-2xl font-black tracking-tight uppercase;
+  }
+
+  .article-stat {
+    @apply bg-aerojet-blue my-8 rounded-2xl p-6 text-white shadow-xl;
+  }
+  .article-stat p {
+    @apply text-lg leading-relaxed;
+  }
+  .article-stat strong {
+    @apply text-aerojet-sky;
+  }
+
+  .article-list {
+    @apply my-6 space-y-3;
+  }
+  .article-list li {
+    @apply flex items-start gap-3 leading-relaxed text-slate-700;
+  }
+  .article-list li::before {
+    content: '';
+    @apply bg-aerojet-sky mt-2.5 block h-1.5 w-1.5 shrink-0 rounded-full;
+  }
+
+  .article-timeline {
+    @apply border-aerojet-sky/40 relative border-l-2 pb-8 pl-8 last:border-l-0 last:pb-0;
+  }
+  .article-timeline::before {
+    content: '';
+    @apply bg-aerojet-sky absolute top-1 left-[-5px] h-2.5 w-2.5 rounded-full border-2 border-white shadow;
+  }
+  .article-timeline strong:first-child {
+    @apply text-aerojet-sky mb-1 block text-sm font-black tracking-widest uppercase;
+  }
+
+  .article-timeline-group {
+    @apply my-8 pl-2;
+  }
+
+  .article-source {
+    @apply mt-8 border-t border-slate-200 pt-4 text-xs text-slate-400 italic;
+  }
+
+  .article-metric {
+    @apply bg-aerojet-sky/10 text-aerojet-blue inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-black;
+  }
+}
+
 /* Hide scrollbar globally to prevent overlapping buttons when zoomed in */
 ::-webkit-scrollbar {
   display: none;
