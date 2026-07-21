@@ -2,13 +2,13 @@ import { Metadata } from 'next'
 import Link from 'next/link'
 import UploadProofForm from './_components/UploadProofForm'
 
-export const metadata: Metadata = { title: 'Upload Payment Proof | Aerojet Academy' }
+export const metadata: Metadata = { title: 'Upload Payment Proof ' }
 
 export default function UploadProofPage() {
   return (
     <div>
       <div className="mb-8">
-        <h2 className="dark:text-aerojet-blue text-2xl font-black tracking-tight text-aerojet-blue uppercase sm:text-3xl">
+        <h2 className="dark:text-aerojet-blue text-aerojet-blue text-2xl font-black tracking-tight uppercase sm:text-3xl">
           Upload Proof
         </h2>
         <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">

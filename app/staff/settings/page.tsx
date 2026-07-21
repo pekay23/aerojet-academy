@@ -25,7 +25,29 @@ export const dynamic = 'force-dynamic'
 
 // ── Field definitions per tab ─────────────────────────────────────────────
 
-const GENERAL_FIELDS = [
+const TIMEZONE_OPTIONS = [
+  'Africa/Accra',
+  'Africa/Nairobi',
+  'Africa/Lagos',
+  'Africa/Johannesburg',
+  'Africa/Cairo',
+  'Europe/London',
+  'Europe/Paris',
+  'Europe/Berlin',
+  'America/New_York',
+  'America/Chicago',
+  'America/Los_Angeles',
+  'Asia/Dubai',
+  'Asia/Kolkata',
+  'Asia/Singapore',
+  'Australia/Sydney',
+  'Pacific/Auckland',
+  'UTC',
+]
+
+const DATE_FORMAT_OPTIONS = ['DD/MM/YYYY', 'MM/DD/YYYY', 'YYYY-MM-DD', 'DD-MMM-YYYY']
+
+const GENERAL_DETAILS_FIELDS = [
   {
     key: 'academy_name',
     label: 'Academy Name',
@@ -54,6 +76,9 @@ const GENERAL_FIELDS = [
     type: 'STRING' as const,
     default: '',
   },
+]
+
+const GENERAL_FEATURES_FIELDS = [
   {
     key: 'registration_open',
     label: 'Accept New Registrations',
@@ -61,6 +86,23 @@ const GENERAL_FIELDS = [
     type: 'BOOLEAN' as const,
     default: 'true',
   },
+  {
+    key: 'advisory_enabled',
+    label: 'Enable Public Advisory Banner',
+    description: 'Display an emergency advisory note at the top of all public pages.',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
+  {
+    key: 'advisory_message',
+    label: 'Advisory Message',
+    description: 'The text displayed inside the advisory banner.',
+    type: 'STRING' as const,
+    default: '',
+  },
+]
+
+const GENERAL_ATTENDANCE_FIELDS = [
   {
     key: 'easa_attendance_threshold',
     label: 'EASA Approved Attendance Threshold (%)',
@@ -76,6 +118,25 @@ const GENERAL_FIELDS = [
       'The attendance minimum the academy enforces. If set below the EASA approved threshold, the EASA value is used instead.',
     type: 'NUMBER' as const,
     default: '80',
+  },
+]
+
+const GENERAL_REGIONAL_FIELDS = [
+  {
+    key: 'timezone',
+    label: 'Primary Timezone',
+    description: 'System-wide timezone for all academic dates, exams, and logs',
+    type: 'SELECT' as const,
+    default: 'Africa/Accra',
+    options: TIMEZONE_OPTIONS,
+  },
+  {
+    key: 'date_format',
+    label: 'Date Display Format',
+    description: 'Preferred format for all date displays throughout the portal',
+    type: 'SELECT' as const,
+    default: 'DD/MM/YYYY',
+    options: DATE_FORMAT_OPTIONS,
   },
 ]
 
@@ -206,11 +267,32 @@ export default async function SettingsPage({
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1800px] px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full px-4 pt-0 pb-8 sm:px-6 lg:px-8">
       <SettingsTabs>
         {/* ── General Tab ── */}
         {tab === 'general' && (
-          <SettingsForm fields={GENERAL_FIELDS} values={values} groupLabel="General settings" />
+          <div className="space-y-8">
+            <SettingsForm
+              fields={GENERAL_DETAILS_FIELDS}
+              values={values}
+              groupLabel="Academy Details"
+            />
+            <SettingsForm
+              fields={GENERAL_REGIONAL_FIELDS}
+              values={values}
+              groupLabel="Regional Settings"
+            />
+            <SettingsForm
+              fields={GENERAL_FEATURES_FIELDS}
+              values={values}
+              groupLabel="Public Features"
+            />
+            <SettingsForm
+              fields={GENERAL_ATTENDANCE_FIELDS}
+              values={values}
+              groupLabel="Attendance Rules"
+            />
+          </div>
         )}
 
         {/* ── Admissions Tab ── */}
@@ -231,46 +313,42 @@ export default async function SettingsPage({
           </div>
         )}
 
-        {/* ── Notifications Tab ── */}
-        {tab === 'notifications' && (
-          <SettingsForm
-            fields={NOTIFICATION_FIELDS}
-            values={values}
-            groupLabel="Notification settings"
-          />
+        {/* ── Emails & Comms Tab ── */}
+        {tab === 'comms' && (
+          <div className="space-y-12">
+            <SettingsForm
+              fields={NOTIFICATION_FIELDS}
+              values={values}
+              groupLabel="Notification Preferences"
+            />
+            <EmailPreviewsTab />
+            <EmailRegistryTab />
+            <EmailDeliveryTab />
+          </div>
         )}
 
-        {/* ── System Tab ── */}
-        {tab === 'system' && <SystemSettingsForm values={values} />}
+        {/* ── Academic Tab ── */}
+        {tab === 'academic' && <CalendarContent />}
 
-        {/* ── Custom Fields Tab ── */}
-        {tab === 'custom-fields' && <CustomFieldsContent />}
+        {/* ── Templates Tab ── */}
+        {tab === 'templates' && (
+          <div className="space-y-12">
+            <WelcomeMessagesContent />
+            {pdfSettings && <PDFSettingsForm values={values} pdfSettings={pdfSettings} />}
+          </div>
+        )}
 
-        {/* ── Security Tab ── */}
+        {/* ── System & Data Tab ── */}
+        {tab === 'system' && (
+          <div className="space-y-12">
+            <SystemSettingsForm values={values} />
+            <CustomFieldsContent />
+            <BackupManager adminEmail={session.user?.email || ''} />
+          </div>
+        )}
+
+        {/* ── My Security Tab ── */}
         {tab === 'security' && <SecurityContent userId={session.user.id} />}
-
-        {/* ── Welcome Messages Tab ── */}
-        {tab === 'welcome' && <WelcomeMessagesContent />}
-
-        {/* ── Email Templates Tab ── */}
-        {tab === 'emails' && <EmailPreviewsTab />}
-
-        {/* ── Email Registry Tab ── */}
-        {tab === 'email-registry' && <EmailRegistryTab />}
-
-        {/* ── Email Delivery Log Tab ── */}
-        {tab === 'email-delivery' && <EmailDeliveryTab />}
-
-        {/* ── Academic Calendar Tab ── */}
-        {tab === 'calendar' && <CalendarContent />}
-
-        {/* ── Backup Tab ── */}
-        {tab === 'backup' && <BackupManager adminEmail={session.user?.email || ''} />}
-
-        {/* ── PDF Templates Tab ── */}
-        {tab === 'pdf' && pdfSettings && (
-          <PDFSettingsForm values={values} pdfSettings={pdfSettings} />
-        )}
       </SettingsTabs>
     </div>
   )

@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Hero from '../../_components/Hero'
 import SectionReveal from '../../_components/SectionReveal'
 
-export const metadata: Metadata = { title: 'Accra MRO Project | Aerojet Academy' }
+export const metadata: Metadata = { title: 'Accra MRO Project ' }
 
 export default function MROPage() {
   return (
@@ -17,8 +17,8 @@ export default function MROPage() {
       <div className="mx-auto max-w-7xl space-y-12 px-6 py-20">
         <SectionReveal>
           <section>
-            <div className="mb-5 h-1.5 w-14 rounded-full bg-aerojet-sky" />
-            <h2 className="mb-6 text-3xl font-black uppercase tracking-tight text-aerojet-blue">
+            <div className="bg-aerojet-sky mb-5 h-1.5 w-14 rounded-full" />
+            <h2 className="text-aerojet-blue mb-6 text-3xl font-black tracking-tight uppercase">
               Vision & Purpose
             </h2>
             <p className="mb-4 text-lg leading-relaxed text-slate-600">
@@ -37,7 +37,7 @@ export default function MROPage() {
         <SectionReveal>
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:p-8">
-              <h3 className="mb-3 text-base font-black uppercase tracking-widest text-aerojet-blue">
+              <h3 className="text-aerojet-blue mb-3 text-base font-black tracking-widest uppercase">
                 Local Capacity
               </h3>
               <p className="text-base leading-relaxed text-slate-600">
@@ -46,7 +46,7 @@ export default function MROPage() {
               </p>
             </div>
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 sm:p-8">
-              <h3 className="mb-3 text-base font-black uppercase tracking-widest text-aerojet-blue">
+              <h3 className="text-aerojet-blue mb-3 text-base font-black tracking-widest uppercase">
                 Economic Impact
               </h3>
               <p className="text-base leading-relaxed text-slate-600">
@@ -58,7 +58,7 @@ export default function MROPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <section className="rounded-2xl bg-aerojet-blue p-8 text-white shadow-2xl sm:rounded-3xl sm:p-14">
+          <section className="bg-aerojet-blue rounded-2xl p-8 text-white shadow-2xl sm:rounded-3xl sm:p-14">
             <h2 className="mb-5 text-2xl font-black uppercase">The Role of the Academy</h2>
             <p className="mb-8 leading-relaxed text-blue-100/80">
               A world-class MRO facility requires world-class engineers. Aerojet Academy was
@@ -67,7 +67,7 @@ export default function MROPage() {
             </p>
             <Link
               href="/about"
-              className="inline-block rounded-xl bg-white px-8 py-3 text-sm font-black uppercase tracking-[0.2em] text-aerojet-blue transition-all hover:bg-aerojet-sky hover:text-white"
+              className="text-aerojet-blue hover:bg-aerojet-sky inline-block rounded-xl bg-white px-8 py-3 text-sm font-black tracking-[0.2em] uppercase transition-all hover:text-white"
             >
               Learn More About the Academy
             </Link>

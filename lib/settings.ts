@@ -14,7 +14,11 @@ export async function getSystemSetting(key: string, defaultValue: string = ''): 
   )()
 }
 
-export async function updateSystemSetting(key: string, value: string, type: string = 'STRING'): Promise<void> {
+export async function updateSystemSetting(
+  key: string,
+  value: string,
+  type: string = 'STRING'
+): Promise<void> {
   await prisma.systemSetting.upsert({
     where: { key },
     update: { value },
@@ -48,6 +52,15 @@ export async function getRegistrationConfig() {
     fee: settings.get('registration_fee') || '500',
     currency: settings.get('registration_currency') || 'EUR',
     isOpen: (settings.get('registration_open') || 'true') === 'true',
+  }
+}
+
+export async function getAdvisoryConfig() {
+  const settings = await getSystemSettings(['advisory_enabled', 'advisory_message'])
+
+  return {
+    enabled: (settings.get('advisory_enabled') || 'false') === 'true',
+    message: settings.get('advisory_message') || '',
   }
 }
 
@@ -151,7 +164,8 @@ export async function getAptitudeConfig() {
     aptitude_reasoning_count: Number(settings.get('aptitude_reasoning_count') ?? 5),
     aptitude_physics_count: Number(settings.get('aptitude_physics_count') ?? 0),
     aptitude_max_tab_switches: Number(settings.get('aptitude_max_tab_switches') ?? 3),
-    aptitude_require_for_modular: (settings.get('aptitude_require_for_modular') ?? 'false') === 'true',
+    aptitude_require_for_modular:
+      (settings.get('aptitude_require_for_modular') ?? 'false') === 'true',
     aptitude_shuffle_questions: (settings.get('aptitude_shuffle_questions') ?? 'true') === 'true',
     aptitude_shuffle_options: (settings.get('aptitude_shuffle_options') ?? 'true') === 'true',
   }
@@ -187,7 +201,9 @@ export async function getInterviewConfig() {
 
   return {
     interview_max_reschedules: Number(settings.get('interview_max_reschedules') ?? 2),
-    interview_reschedule_cutoff_hours: Number(settings.get('interview_reschedule_cutoff_hours') ?? 24),
+    interview_reschedule_cutoff_hours: Number(
+      settings.get('interview_reschedule_cutoff_hours') ?? 24
+    ),
     interview_duration_minutes: Number(settings.get('interview_duration_minutes') ?? 60),
     interview_daily_capacity: Number(settings.get('interview_daily_capacity') ?? 10),
   }

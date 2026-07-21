@@ -6,7 +6,7 @@ import TMinusTooltip from '@/components/shared/TMinusTooltip'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { title: 'Application Terms | Aerojet Academy' }
+export const metadata: Metadata = { title: 'Application Terms ' }
 
 export default async function TermsPage() {
   const { fee, currency } = await getRegistrationFeeInfo()
@@ -17,10 +17,10 @@ export default async function TermsPage() {
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-xl sm:rounded-3xl sm:p-14">
           <div className="mb-10 border-b border-slate-100 pb-6">
-            <span className="mb-4 inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-black tracking-widest text-aerojet-sky uppercase">
+            <span className="text-aerojet-sky mb-4 inline-block rounded-full bg-blue-50 px-3 py-1 text-xs font-black tracking-widest uppercase">
               Legal Policy
             </span>
-            <h1 className="text-3xl leading-tight font-black tracking-tight text-aerojet-blue uppercase sm:text-4xl dark:text-white">
+            <h1 className="text-aerojet-blue text-3xl leading-tight font-black tracking-tight uppercase sm:text-4xl dark:text-white">
               Online Application Terms & Conditions
             </h1>
             <p className="mt-3 text-sm text-slate-400 italic">Last Updated: February 2026</p>
@@ -53,9 +53,15 @@ export default async function TermsPage() {
               {
                 title: '3. Examination Policies',
                 items: [
-                  <>Exam windows are confirmed 21 days prior (Go/No-Go at <TMinusTooltip days={21} />).</>,
+                  <>
+                    Exam windows are confirmed 21 days prior (Go/No-Go at{' '}
+                    <TMinusTooltip days={21} />
+                    ).
+                  </>,
                   'If cancelled, all bookings roll to next available window at no extra cost.',
-                  <>Late bookings (within <TMinusTooltip days={14} />) incur a surcharge.</>,
+                  <>
+                    Late bookings (within <TMinusTooltip days={14} />) incur a surcharge.
+                  </>,
                   'No-shows forfeit their fees.',
                 ],
               },
@@ -81,7 +87,7 @@ export default async function TermsPage() {
               },
             ].map((section) => (
               <section key={section.title}>
-                <h3 className="mb-3 text-lg font-black tracking-tight text-aerojet-blue uppercase">
+                <h3 className="text-aerojet-blue mb-3 text-lg font-black tracking-tight uppercase">
                   {section.title}
                 </h3>
                 <ul className="list-disc space-y-1.5 pl-5 text-sm leading-relaxed text-slate-600">
@@ -94,19 +100,19 @@ export default async function TermsPage() {
 
             <div className="mt-12 flex flex-col items-center justify-between gap-5 border-t border-slate-100 pt-8 sm:flex-row">
               <div>
-                <p className="text-sm font-black text-aerojet-blue uppercase">Have Questions?</p>
+                <p className="text-aerojet-blue text-sm font-black uppercase">Have Questions?</p>
                 <p className="text-xs text-slate-500">Send us an enquiry.</p>
               </div>
               <div className="flex items-center gap-4">
                 <Link
                   href="/contact"
-                  className="text-xs font-bold tracking-widest text-aerojet-sky uppercase hover:underline"
+                  className="text-aerojet-sky text-xs font-bold tracking-widest uppercase hover:underline"
                 >
                   Contact Us
                 </Link>
                 <Link
                   href="/register"
-                  className="rounded-xl bg-aerojet-sky px-6 py-3 text-xs font-black tracking-widest text-white uppercase transition-all hover:bg-aerojet-blue"
+                  className="bg-aerojet-sky hover:bg-aerojet-blue rounded-xl px-6 py-3 text-xs font-black tracking-widest text-white uppercase transition-all"
                 >
                   Start Registration
                 </Link>

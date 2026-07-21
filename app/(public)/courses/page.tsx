@@ -7,7 +7,7 @@ import CourseComparison from '../_components/CourseComparison'
 import CourseListings from '../_components/CourseListings' // Import the new component
 
 export const metadata: Metadata = {
-  title: 'Training Programs | Aerojet Academy',
+  title: 'Training Programs ',
   description:
     'EASA Part-66 Certified Aircraft Engineering Training — multiple pathways to your career.',
 }
@@ -75,7 +75,7 @@ export default function CoursesPage() {
       <section className="relative overflow-hidden px-6 pt-10 pb-20 sm:pt-14 sm:pb-28">
         {/* --- The Gradient Blobs --- */}
         <div
-          className="bg-public-secondary absolute top-0 left-0 h-200 w-200anslate-x-1/2 -translate-y-1/2 rounded-full opacity-10 blur-3xl"
+          className="bg-public-secondary w-200anslate-x-1/2 absolute top-0 left-0 h-200 -translate-y-1/2 rounded-full opacity-10 blur-3xl"
           aria-hidden="true"
         />
         <div

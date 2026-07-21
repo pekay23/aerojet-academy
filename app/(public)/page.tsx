@@ -17,10 +17,11 @@ import HomeContact from './_components/HomeContact'
 import { CheckCircle2 } from 'lucide-react'
 import { getRegistrationFeeInfo } from '@/lib/system-settings'
 
-// Removed local getRegistrationFee in favor of lib/system-settings helper
+import { getRegistrationConfig } from '@/lib/settings'
 
 export default async function Home() {
   const { fee, currency } = await getRegistrationFeeInfo()
+  const { isOpen } = await getRegistrationConfig()
 
   return (
     <div className="bg-paper">
@@ -148,7 +149,7 @@ export default async function Home() {
       <EnrollmentSteps fee={fee} currency={currency} />
       <LatestNews />
       <Credibility />
-      <HomeContact />
+      <HomeContact isOpen={isOpen} />
     </div>
   )
 }
