@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Save, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -26,6 +26,21 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
   const formRef = useRef<HTMLFormElement>(null)
   const router = useRouter()
   const { markDirty, markClean } = useSettingsDirty()
+
+  // Track boolean toggle states keyed by field key
+  const [toggles, setToggles] = useState<Record<string, boolean>>(() => {
+    const initial: Record<string, boolean> = {}
+    for (const field of fields) {
+      if (field.type === 'BOOLEAN') {
+        initial[field.key] = (values[field.key] ?? field.default) === 'true'
+      }
+    }
+    return initial
+  })
+
+  const handleToggle = useCallback((key: string) => {
+    setToggles((prev) => ({ ...prev, [key]: !prev[key] }))
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -71,6 +86,8 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {fields.map((field) => {
           const currentValue = values[field.key] ?? field.default
+          const checked =
+            field.type === 'BOOLEAN' ? (toggles[field.key] ?? currentValue === 'true') : false
           return (
             <div
               key={field.key}
@@ -96,18 +113,27 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                         id={field.key}
                         name={field.key}
                         type="checkbox"
-                        defaultChecked={currentValue === 'true'}
-                        className="peer sr-only"
+                        checked={checked}
+                        onChange={() => handleToggle(field.key)}
+                        className="sr-only"
                       />
-                      <label
-                        htmlFor={field.key}
-                        className="peer-checked:bg-aerojet-blue peer-focus:ring-aerojet-blue/20 h-7 w-12 cursor-pointer rounded-full bg-slate-200 shadow-inner transition-colors peer-focus:ring-4 peer-focus:outline-none after:absolute after:top-0.5 after:left-0.5 after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600"
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={checked}
+                        onClick={() => handleToggle(field.key)}
+                        className={`h-7 w-12 cursor-pointer rounded-full shadow-inner transition-colors after:absolute after:top-0.5 after:left-0.5 after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all after:content-[''] ${
+                          checked
+                            ? 'bg-aerojet-blue after:translate-x-5 after:border-white dark:bg-blue-600'
+                            : 'bg-slate-200 dark:bg-slate-700'
+                        }`}
                       />
-                      <span className="block text-[10px] font-black tracking-widest text-slate-400 uppercase peer-checked:hidden">
-                        Disabled
-                      </span>
-                      <span className="text-aerojet-blue hidden text-[10px] font-black tracking-widest uppercase peer-checked:block">
-                        Enabled
+                      <span
+                        className={`text-[10px] font-black tracking-widest uppercase ${
+                          checked ? 'text-aerojet-blue block' : 'block text-slate-400'
+                        }`}
+                      >
+                        {checked ? 'Enabled' : 'Disabled'}
                       </span>
                     </div>
                   </div>
