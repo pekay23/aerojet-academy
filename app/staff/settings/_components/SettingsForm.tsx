@@ -62,7 +62,12 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
   }
 
   return (
-    <form ref={formRef} onSubmit={handleSubmit} onChange={markDirty} className="space-y-6">
+    <form ref={formRef} onSubmit={handleSubmit} onChange={markDirty} className="relative space-y-6">
+      {groupLabel && (
+        <h3 className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
+          {groupLabel}
+        </h3>
+      )}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {fields.map((field) => {
           const currentValue = values[field.key] ?? field.default
@@ -96,7 +101,7 @@ export default function SettingsForm({ fields, values, groupLabel }: SettingsFor
                       />
                       <label
                         htmlFor={field.key}
-                        className="peer-checked:bg-aerojet-blue peer-focus:ring-aerojet-blue/20 h-7 w-12 cursor-pointer rounded-full bg-slate-200 shadow-inner transition-colors peer-focus:ring-4 peer-focus:outline-none after:absolute after:top-[4px] after:left-[4px] after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600"
+                        className="peer-checked:bg-aerojet-blue peer-focus:ring-aerojet-blue/20 h-7 w-12 cursor-pointer rounded-full bg-slate-200 shadow-inner transition-colors peer-focus:ring-4 peer-focus:outline-none after:absolute after:top-0.5 after:left-0.5 after:h-[1.35rem] after:w-[1.35rem] after:rounded-full after:bg-white after:shadow-md after:transition-all peer-checked:after:translate-x-5 peer-checked:after:border-white dark:bg-slate-700 dark:peer-checked:bg-blue-600"
                       />
                       <span className="block text-[10px] font-black tracking-widest text-slate-400 uppercase peer-checked:hidden">
                         Disabled

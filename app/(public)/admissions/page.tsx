@@ -5,13 +5,15 @@ import SectionReveal from '../_components/SectionReveal'
 import EnrollmentSteps from '../_components/EnrollmentSteps'
 import { ArrowRight, CheckCircle2, BookOpen, GraduationCap, HelpCircle } from 'lucide-react'
 import { getRegistrationFeeInfo } from '@/lib/system-settings'
+import { getRegistrationConfig } from '@/lib/settings'
 
 export const dynamic = 'force-dynamic'
 
-export const metadata: Metadata = { title: 'Admissions | Aerojet Academy' }
+export const metadata: Metadata = { title: 'Admissions ' }
 
 export default async function AdmissionsPage() {
   const { fee, currency } = await getRegistrationFeeInfo()
+  const { isOpen } = await getRegistrationConfig()
 
   return (
     <div className="relative bg-white">
@@ -47,7 +49,7 @@ export default async function AdmissionsPage() {
               </p>
               <Link
                 href="/courses/aircraft-engineering/easa-part-66"
-                className="mt-6 inline-flex items-center gap-1 font-bold text-public-secondary hover:underline"
+                className="text-public-secondary mt-6 inline-flex items-center gap-1 font-bold hover:underline"
               >
                 Learn more about the EASA Certification standard →
               </Link>
@@ -111,18 +113,32 @@ export default async function AdmissionsPage() {
         {/* FIX: Changed background from public-primary to public-dark */}
         <section className="bg-public-dark px-6 py-20 sm:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="mb-5 text-3xl font-black tracking-tight text-white uppercase md:text-4xl">
-              Ready to Commit?
-            </h2>
-            <p className="mb-10 text-lg text-blue-100/80">
-              Applications are currently open for the 2026/2027 Academic Year. Slots are limited.
-            </p>
-            <Link
-              href="/register"
-              className="text-public-primary inline-block rounded-xl bg-white px-12 py-5 text-sm font-black tracking-widest uppercase transition-all hover:bg-slate-200"
-            >
-              Start Registration Now
-            </Link>
+            {isOpen ? (
+              <>
+                <h2 className="mb-5 text-3xl font-black tracking-tight text-white uppercase md:text-4xl">
+                  Ready to Commit?
+                </h2>
+                <p className="mb-10 text-lg text-blue-100/80">
+                  Applications are currently open for the 2026/2027 Academic Year. Slots are
+                  limited.
+                </p>
+                <Link
+                  href="/register"
+                  className="text-public-primary inline-block rounded-xl bg-white px-12 py-5 text-sm font-black tracking-widest uppercase transition-all hover:bg-slate-200"
+                >
+                  Start Registration Now
+                </Link>
+              </>
+            ) : (
+              <>
+                <h2 className="mb-5 text-3xl font-black tracking-tight text-white uppercase md:text-4xl">
+                  Applications Suspended
+                </h2>
+                <p className="text-lg text-blue-100/80">
+                  No courses are currently running. We will announce when programs restart.
+                </p>
+              </>
+            )}
           </div>
         </section>
       </SectionReveal>

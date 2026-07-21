@@ -1,5 +1,7 @@
 'use client'
 
+import { useState, useEffect } from 'react'
+import { usePathname, useSearchParams } from 'next/navigation'
 import DashboardSidebar, { type SidebarLink } from '@/components/layouts/DashboardSidebar'
 import {
   LayoutDashboard,
@@ -40,6 +42,19 @@ export default function StaffSidebar({
   internalExamEnabled = false,
   appVersion,
 }: StaffSidebarProps) {
+  const pathname = usePathname()
+  const [overrideMenu, setOverrideMenu] = useState<boolean>(false)
+
+  const searchParams = useSearchParams()
+
+  const isSettingsRoute = pathname.startsWith('/staff/settings')
+  const showSettingsMenu = isSettingsRoute && !overrideMenu
+
+  useEffect(() => {
+    // Reset override anytime the user navigates
+    setOverrideMenu(false)
+  }, [pathname, searchParams])
+
   const { counts } = useBadgeCounts({
     applicants: initialCounts?.applicants ?? 0,
     enrollments: initialCounts?.enrollments ?? 0,
@@ -174,18 +189,29 @@ export default function StaffSidebar({
     },
   ]
 
+  const settingsLinks: SidebarLink[] = [
+    { label: 'General', href: '/settings?tab=general' },
+    { label: 'Admissions', href: '/settings?tab=admissions' },
+    { label: 'Finance', href: '/settings?tab=finance' },
+    { label: 'Emails & Comms', href: '/settings?tab=comms' },
+    { label: 'Academic', href: '/settings?tab=academic' },
+    { label: 'Templates', href: '/settings?tab=templates' },
+    { label: 'System & Data', href: '/settings?tab=system' },
+    { label: 'My Security', href: '/settings?tab=security' },
+  ]
+
   return (
     <DashboardSidebar
-      links={staffLinks}
+      links={showSettingsMenu ? settingsLinks : staffLinks}
       basePath="/staff"
-      portalLabel="Staff Portal"
+      portalLabel={showSettingsMenu ? 'Settings' : 'Staff Portal'}
       portalColor="text-red-400"
+      onBack={showSettingsMenu ? () => setOverrideMenu(true) : undefined}
+      backLabel={showSettingsMenu ? 'Settings' : undefined}
       userName={userName}
       userRole={userRole}
       userImage={userImage}
-      userMenuItems={[
-        { label: 'Settings', href: '/settings', icon: Settings },
-      ]}
+      userMenuItems={[{ label: 'Settings', href: '/settings', icon: Settings }]}
       appVersion={appVersion}
     />
   )

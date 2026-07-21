@@ -170,7 +170,7 @@ export default function PublicNav() {
     pathname.startsWith('/privacy-policy') ||
     pathname.startsWith('/online-application-terms')
 
-  const headerClasses = `fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled || mobileOpen || forceSolid ? 'bg-white/95 backdrop-blur-xl shadow-sm border-slate-100 dark:bg-slate-950/95 dark:border-slate-800' : 'bg-transparent border-transparent'}`
+  const headerClasses = `fixed left-0 right-0 z-50 transition-all duration-300 border-b ${scrolled || mobileOpen || forceSolid ? 'bg-white/95 backdrop-blur-xl shadow-sm border-slate-100 dark:bg-slate-950/95 dark:border-slate-800' : 'bg-transparent border-transparent'}`
   const linkColorClasses =
     scrolled || mobileOpen || forceSolid ? 'text-slate-700 dark:text-slate-200' : 'text-white'
   const activeLinkColorClasses =
@@ -181,6 +181,7 @@ export default function PublicNav() {
       <header
         ref={headerRef}
         className={headerClasses}
+        style={{ top: 'var(--advisory-banner-height, 0px)' }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -260,7 +261,7 @@ export default function PublicNav() {
                             <span className="relative z-10">{item.label}</span>
                           </NavigationMenuTrigger>
                           <NavigationMenuContent>
-                            <div className="w-[400px] p-4 md:w-[500px]">
+                            <div className="w-100 p-4 md:w-125">
                               <div className="mb-4 border-b border-slate-100 pb-3">
                                 <Link
                                   href="/courses"

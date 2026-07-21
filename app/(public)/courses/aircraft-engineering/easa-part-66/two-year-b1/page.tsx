@@ -6,7 +6,7 @@ import { CheckCircle2, Clock, BookOpen, Zap } from 'lucide-react'
 import ModuleGrid from '@/app/(public)/_components/ModuleGrid'
 
 export const metadata: Metadata = {
-  title: '2-Year Full-Time Program (B1.1) | Aerojet Academy',
+  title: '2-Year Full-Time Program (B1.1) ',
   description: 'Accelerated 2-year EASA Part-66 B1.1 Mechanical training program.',
 }
 
@@ -37,17 +37,16 @@ export default function TwoYearPage() {
 
       <div className="mx-auto max-w-7xl space-y-24 px-6 py-20">
         <SectionReveal skipInitial>
-
           <section>
             <div className="mb-8 flex flex-wrap gap-4">
               <span className="rounded-full bg-green-600 px-5 py-2.5 text-sm font-black tracking-widest text-white uppercase">
                 Accelerated
               </span>
-              <span className="rounded-full bg-blue-100 px-5 py-2.5 text-sm font-black tracking-widest text-aerojet-blue uppercase">
+              <span className="text-aerojet-blue rounded-full bg-blue-100 px-5 py-2.5 text-sm font-black tracking-widest uppercase">
                 B1.1 License
               </span>
             </div>
-            <h2 className="mb-8 text-3xl font-black tracking-tight text-aerojet-blue md:text-4xl">
+            <h2 className="text-aerojet-blue mb-8 text-3xl font-black tracking-tight md:text-4xl">
               Focused. Intensive. Career-Ready.
             </h2>
             <p className="mb-6 text-xl leading-relaxed text-slate-700">
@@ -56,7 +55,7 @@ export default function TwoYearPage() {
               program covers all required theoretical modules and includes structured practical
               training.
             </p>
-            <p className="leading-relaxed text-lg text-slate-600">
+            <p className="text-lg leading-relaxed text-slate-600">
               Ideal for candidates who already have some technical background or who want a faster
               route into the industry without the dual B1.1/B2 scope of the 4-year program.
             </p>
@@ -66,7 +65,7 @@ export default function TwoYearPage() {
         <SectionReveal>
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-3xl border border-slate-100 bg-slate-50 p-8 sm:p-10">
-              <Zap className="mb-5 h-10 w-10 text-aerojet-sky" />
+              <Zap className="text-aerojet-sky mb-5 h-10 w-10" />
               <h3 className="mb-3 text-xl font-bold text-slate-900">Why 2 Years?</h3>
               <p className="text-base leading-relaxed text-slate-600">
                 By focusing exclusively on B1.1 modules and streamlining the curriculum, this
@@ -75,7 +74,7 @@ export default function TwoYearPage() {
               </p>
             </div>
             <div className="rounded-3xl border border-slate-100 bg-slate-50 p-8 sm:p-10">
-              <BookOpen className="mb-5 h-10 w-10 text-aerojet-sky" />
+              <BookOpen className="text-aerojet-sky mb-5 h-10 w-10" />
               <h3 className="mb-3 text-xl font-bold text-slate-900">What's Covered</h3>
               <p className="text-base leading-relaxed text-slate-600">
                 Core modules M1–M10 plus specialist modules M11, M15, and M17 — everything required
@@ -86,8 +85,8 @@ export default function TwoYearPage() {
         </SectionReveal>
 
         <SectionReveal>
-          <section className="rounded-3xl bg-aerojet-blue p-8 text-white sm:p-12">
-            <h3 className="mb-8 text-2xl font-black tracking-tight text-aerojet-sky uppercase">
+          <section className="bg-aerojet-blue rounded-3xl p-8 text-white sm:p-12">
+            <h3 className="text-aerojet-sky mb-8 text-2xl font-black tracking-tight uppercase">
               Program Details
             </h3>
             <div className="grid gap-8 sm:grid-cols-2">
@@ -103,7 +102,9 @@ export default function TwoYearPage() {
                   key={item.label}
                   className="grid grid-cols-[130px_1fr] gap-5 border-b border-white/10 pb-4 last:border-0"
                 >
-                  <span className="text-sm font-bold text-blue-200 uppercase tracking-wider">{item.label}</span>
+                  <span className="text-sm font-bold tracking-wider text-blue-200 uppercase">
+                    {item.label}
+                  </span>
                   <span className="text-base font-medium text-white">{item.value}</span>
                 </div>
               ))}
@@ -113,7 +114,7 @@ export default function TwoYearPage() {
 
         <SectionReveal>
           <section>
-            <h3 className="mb-8 flex flex-wrap items-baseline gap-3 text-3xl font-bold tracking-tight text-aerojet-blue">
+            <h3 className="text-aerojet-blue mb-8 flex flex-wrap items-baseline gap-3 text-3xl font-bold tracking-tight">
               Required Modules
               <span className="text-lg font-medium text-slate-400">(B1.1 license category)</span>
             </h3>
@@ -121,7 +122,7 @@ export default function TwoYearPage() {
             <p className="mt-6 text-base text-slate-500">
               <Link
                 href="/courses/module-requirements"
-                className="font-bold text-aerojet-sky hover:underline"
+                className="text-aerojet-sky font-bold hover:underline"
               >
                 View full module details →
               </Link>
@@ -131,17 +132,17 @@ export default function TwoYearPage() {
 
         {/* CTA */}
         <SectionReveal>
-          <div className="rounded-3xl bg-linear-to-r from-aerojet-blue to-aerojet-sky p-10 text-center text-white sm:p-16">
+          <div className="from-aerojet-blue to-aerojet-sky rounded-3xl bg-linear-to-r p-10 text-center text-white sm:p-16">
             <h2 className="mb-5 text-3xl font-black tracking-tight uppercase md:text-4xl">
               Interested in the 2-Year Program?
             </h2>
-            <p className="mx-auto mb-10 max-w-2xl text-lg text-blue-100/80 leading-relaxed">
+            <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-blue-100/80">
               Register on our portal to begin the application process.
             </p>
             <div className="flex flex-col justify-center gap-5 sm:flex-row">
               <Link
                 href="/register"
-                className="inline-block rounded-xl bg-white px-10 py-5 text-sm font-black tracking-widest text-aerojet-blue uppercase transition-all hover:bg-blue-50"
+                className="text-aerojet-blue inline-block rounded-xl bg-white px-10 py-5 text-sm font-black tracking-widest uppercase transition-all hover:bg-blue-50"
               >
                 Register Now
               </Link>
