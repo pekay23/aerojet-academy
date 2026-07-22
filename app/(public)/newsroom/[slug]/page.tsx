@@ -97,8 +97,10 @@ async function getArticleAndIncrementViews(slug: string) {
 }
 
 function calculateReadTime(content: string) {
-  const wordsPerMinute = 200
-  const words = content.trim().split(/\s+/).length
+  // Average adult reading speed: ~200-250 words per minute
+  // Use 225 words per minute as a reasonable average (matching aerojet-aviation)
+  const wordsPerMinute = 225
+  const words = content.trim().split(/\s+/).filter(Boolean).length
   return Math.ceil(words / wordsPerMinute)
 }
 
@@ -228,8 +230,8 @@ export default async function NewsroomArticlePage({ params }: Props) {
         </div>
       </div>
 
-      {/* Article Content Area */}
-      <div className="relative mx-auto max-w-4xl px-6 py-20">
+      {/* Article Content Area - using max-w-5xl to match aerojet-aviation width */}
+      <div className="relative mx-auto max-w-5xl px-6 py-20">
         <article>
           {/* Top Back Link */}
           <Link

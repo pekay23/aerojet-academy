@@ -54,7 +54,7 @@ async function main() {
 <p>In <strong>August 2025</strong>, the first batch of over 40 Aerojet Trainee Engineers successfully completed <strong>Phase 1 of EASA Part 66 certification</strong>, marking a transformative moment for Ghana's aviation technical workforce. These engineers have mastered European aviation safety agency standards through intensive theoretical coursework combined with practical workshop experience at the ATTC Kokomlemle training facility.</p>
 
 <div class="article-pullquote">"Aerojet Aviation Training Academy conducted its first set of EASA examinations for our first batch of students, and we are absolutely thrilled to share they performed brilliantly."</div>
-<p class="text-sm text-slate-500 mt-2 text-center">— Aerojet Academy Leadership</p>
+<p class="text-sm text-slate-500 mt-2 text-center">— Aerojet Aviation Leadership</p>
 
 <hr class="my-10 border-slate-200">
 
@@ -76,11 +76,11 @@ async function main() {
 <h2 class="article-section-heading">Creating a Pipeline for the Accra MRO</h2>
 
 <blockquote class="article-blockquote">"The completion of Phase 1 demonstrates the success of our training methodology. These graduates represent a new generation of African aviation professionals who can compete globally while strengthening their continent's technical capacity."</blockquote>
-<p class="text-sm text-slate-500 mt-2">— Aerojet Academy Leadership</p>
+<p class="text-sm text-slate-500 mt-2">— Aerojet Aviation Leadership</p>
 
 <p>These certified engineers are now eligible to work internationally while retaining employment opportunities with African airlines and MRO facilities. The achievement directly supports workforce needs of the planned MRO facility at Accra International Airport. The trainees now progress to Phase 2, including additional modules and extensive practical experience, moving closer to full EASA Part-66 B1 or B2 licence eligibility.</p>
 
-<p class="article-source">Source: Aerojet Academy Examination Records, August 2025; LinkedIn posts by CEO Mazisi Parkes.</p>
+<p class="article-source">Source: Aerojet Media, August 2025; LinkedIn posts by CEO Mazisi Parkes.</p>
     `),
     coverImage: '/images/newsroom/studentsafterpracticalsession.webp',
     tags: ['Training', 'EASA Part 66', 'Certification'],
