@@ -1,92 +1,128 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { getToken } from 'next-auth/jwt'
 
 /**
- * Root proxy (Next.js 16 — formerly `middleware`) — enforces authentication
- * and basic role checks for protected portal and API routes. This acts as a
- * safety net so a missing getAuthSession() call in a route handler doesn't
- * silently expose data.
+ * Next.js 16 Proxy file for image protection (replaces deprecated middleware.ts).
+ *
+ * @see https://nextjs.org/docs/messages/middleware-to-proxy
+ *
+ * Provides:
+ * - Auth-gating for /api/images/* routes via NextAuth JWT
+ * - Hotlink prevention via Referer header validation
+ * - Security headers (CSP, X-Content-Type-Options, Cache-Control) on image responses
  */
-
-const STAFF_ROLES = ['SUPER_ADMIN', 'ADMIN', 'STAFF', 'EXAMINER']
-const PORTAL_ROLES = [
-  'SUPER_ADMIN',
-  'ADMIN',
-  'STAFF',
-  'EXAMINER',
-  'INSTRUCTOR',
-  'STUDENT',
-  'APPLICANT',
-]
-
-// Map route prefixes to the roles allowed to access them
-const ROUTE_ROLE_MAP: Record<string, string[]> = {
-  '/staff': ['SUPER_ADMIN', 'ADMIN', 'STAFF'],
-  '/api/staff': ['SUPER_ADMIN', 'ADMIN', 'STAFF', 'EXAMINER'],
-  '/instructor': ['INSTRUCTOR', 'ADMIN', 'SUPER_ADMIN'],
-  '/api/instructor': ['INSTRUCTOR', 'ADMIN', 'SUPER_ADMIN'],
-  '/student': ['STUDENT', 'ADMIN', 'SUPER_ADMIN', 'STAFF'],
-  '/api/student': ['STUDENT', 'ADMIN', 'SUPER_ADMIN', 'STAFF'],
-  '/examiner': ['EXAMINER', 'ADMIN', 'SUPER_ADMIN'],
-  '/api/examiner': ['EXAMINER', 'ADMIN', 'SUPER_ADMIN'],
-  '/applicant': ['APPLICANT', 'STUDENT', 'ADMIN', 'SUPER_ADMIN', 'STAFF'],
-  '/api/applicant': ['APPLICANT', 'STUDENT', 'ADMIN', 'SUPER_ADMIN', 'STAFF'],
-}
-
-export async function proxy(request: NextRequest) {
+export default async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Find matching role requirement
-  const matchedPrefix = Object.keys(ROUTE_ROLE_MAP).find((prefix) => pathname.startsWith(prefix))
-  if (!matchedPrefix) return NextResponse.next()
+  // ── 1. Protect the image proxy/transform API routes ──────────
+  if (pathname.startsWith('/api/images/')) {
+    const token = await getToken({
+      req: request,
+      secret: process.env.NEXTAUTH_SECRET,
+    })
 
-  const token = await getToken({ req: request })
-
-  // No token → redirect to login (pages) or 401 (API)
-  if (!token) {
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!token) {
+      // Allow unauthenticated requests to /api/images/public/* only
+      if (pathname.startsWith('/api/images/public/')) {
+        return NextResponse.next()
+      }
+      return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      })
     }
-    const loginUrl = new URL('/login', request.url)
-    loginUrl.searchParams.set('callbackUrl', pathname)
-    return NextResponse.redirect(loginUrl)
+
+    // Role-gate /api/images/staff/* routes
+    if (pathname.startsWith('/api/images/staff/')) {
+      const allowedRoles = ['SUPER_ADMIN', 'ADMIN', 'STAFF', 'EXAMINER']
+      const role = (token.role as string) || ''
+      if (!allowedRoles.includes(role)) {
+        return new NextResponse(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+    }
   }
 
-  // Check role
-  const userRole = token.role as string
-  const allowedRoles = ROUTE_ROLE_MAP[matchedPrefix]
-  if (!allowedRoles.includes(userRole)) {
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+  // ── 2. Hotlink protection for image files ──
+  if (
+    pathname.match(/\.(webp|png|jpg|jpeg|gif|svg|avif)$/i) &&
+    !pathname.startsWith('/api/') &&
+    !pathname.startsWith('/_next/')
+  ) {
+    const referer = request.headers.get('referer') || ''
+    const host = request.headers.get('host') || ''
+
+    if (referer) {
+      try {
+        const refererUrl = new URL(referer)
+        if (refererUrl.hostname !== host && !refererUrl.hostname.endsWith('.' + host)) {
+          // Return a 1x1 transparent pixel instead of the real image
+          return new NextResponse(
+            new Uint8Array(
+              Buffer.from(
+                'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+                'base64'
+              )
+            ),
+            {
+              status: 200,
+              headers: {
+                'Content-Type': 'image/gif',
+                'Cache-Control': 'no-store, no-cache, must-revalidate',
+              },
+            }
+          )
+        }
+      } catch {
+        // Invalid referer URL — allow through
+      }
     }
-    // Redirect to the user's correct portal instead of login
-    const portalMap: Record<string, string> = {
-      SUPER_ADMIN: '/staff',
-      ADMIN: '/staff',
-      STAFF: '/staff',
-      INSTRUCTOR: '/instructor',
-      STUDENT: '/student',
-      APPLICANT: '/applicant',
-      EXAMINER: '/examiner',
-    }
-    return NextResponse.redirect(new URL(portalMap[userRole] || '/login', request.url))
   }
 
-  return NextResponse.next()
+  // ── 3. Add security headers for image responses ──
+  const requestHeaders = new Headers(request.headers)
+
+  // Build CSP img-src dynamically based on environment
+  const cspDirectives = [
+    "default-src 'self'",
+    `img-src 'self' data: blob: https:`,
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self' data:",
+    "frame-ancestors 'self'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ]
+
+  if (process.env.NODE_ENV === 'production') {
+    requestHeaders.set(
+      'Content-Security-Policy',
+      cspDirectives.join('; ')
+    )
+  }
+
+  // ── 4. Response with additional security headers for images ──
+  const response = NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
+  })
+
+  if (pathname.match(/\.(webp|png|jpg|jpeg|gif|svg|avif)$/i)) {
+    response.headers.set('X-Content-Type-Options', 'nosniff')
+    response.headers.set('Cache-Control', 'private, max-age=3600')
+    response.headers.set('Permissions-Policy', 'interest-cohort=()')
+  }
+
+  return response
 }
 
 export const config = {
   matcher: [
-    '/staff/:path*',
-    '/instructor/:path*',
-    '/student/:path*',
-    '/examiner/:path*',
-    '/applicant/:path*',
-    '/api/staff/:path*',
-    '/api/instructor/:path*',
-    '/api/student/:path*',
-    '/api/examiner/:path*',
-    '/api/applicant/:path*',
+    // Protect image-related API routes
+    '/api/images/:path*',
+    // Add security headers to all image files
+    '/((?!_next/static|_next/image|favicon.ico).*\\..*webp|.*\\..*png|.*\\..*jpg|.*\\..*jpeg|.*\\..*gif|.*\\..*svg|.*\\..*avif)',
   ],
 }
