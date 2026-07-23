@@ -1,7 +1,9 @@
 import type { NextConfig } from 'next'
 
+const isVercel = process.env.VERCEL === '1' || process.env.NEXT_PUBLIC_VERCEL_ENV !== undefined
+
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  ...(isVercel ? {} : { output: 'standalone' }),
   images: {
     formats: ['image/avif', 'image/webp'],
     qualities: [75, 80, 90],
