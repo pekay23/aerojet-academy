@@ -1,303 +1,40 @@
 # Changelog
 
-## [1.0.56] — 2026-07-22
+## [1.0.57] — 2026-07-23
 
 ### Changed
 
 - Maintenance and stability updates.
 
-## [1.0.55] — 2026-07-22
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.54] — 2026-07-22
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.53] — 2026-07-22
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.52] — 2026-07-22
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.51] — 2026-07-22
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.50] — 2026-07-21
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.49] — 2026-07-21
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.48] — 2026-07-21
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.47] — 2026-07-08
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.46] — 2026-07-08
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.45] — 2026-07-08
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.44] — 2026-07-08
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.43] — 2026-07-08
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.42] — 2026-07-08
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.41] — 2026-07-08
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.32] — 2026-06-03
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.31] — 2026-05-30
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.30] — 2026-05-30
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.29] — 2026-05-29
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.28] — 2026-05-29
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.27] — 2026-05-29
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.26] — 2026-05-26
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.25] — 2026-05-26
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.24] — 2026-05-26
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.23] — 2026-05-26
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.22] — 2026-05-26
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.21] — 2026-05-22
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.20] — 2026-05-21
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.19] — 2026-05-21
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.18] — 2026-05-21
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.17] — 2026-05-21
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.16] — 2026-05-21
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.15] — 2026-05-21
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.14] — 2026-05-21
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.13] — 2026-05-21
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.12] — 2026-05-19
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.11] — 2026-05-19
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.10] — 2026-05-18
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.9] — 2026-05-18
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.8] — 2026-05-18
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.7] — 2026-05-18
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.6] — 2026-05-18
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.5] — 2026-05-18
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.4] — 2026-05-18
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.3] — 2026-05-17
-
-### Changed
-
-- Maintenance and stability updates.
-
-## [1.0.2] — 2026-05-17
-
-### Changed
-
-- Maintenance and stability updates.
-
-## Unreleased
+## [Unreleased]
 
 ### Added
 
-- **Student Portal Navigation & UX** — Implemented motion-based tabbed interface components, a reusable unsaved changes hook for data protection during navigation, and updated the student sidebar navigation.
-- **MessageThread Component** — Added a dedicated `MessageThread` component allowing students and staff to view, reply to, and mark message threads as read.
-- **Student Course Enrollment & Exam Booking** — Implemented dedicated server actions for course enrollment flows and exam pool bookings directly from the student portal.
-- **Exam Lockdown Mode** — Hardened internal exam workflows with a mandatory Fullscreen API prompt, tab-switching detection, and sidebar/header concealment using CSS (`.exam-lockdown`) for a distraction-free and secure testing environment.
-- **Internal Exam Engine & APIs** — Built internal exam bank management, student session initialization APIs, per-question reporting, and an admin regrade capability.
-- **Pass/Fail Grading System** — Migrated the academic grading UI from A/B/C/F letter grades to a compliant EASA Pass/Fail system (Pass ≥ 75%).
-- **UI Legends** — Implemented persistent descriptive legends in exam and grade tables (`ExamHistoryTable`, `GradesTable`) to clarify status badges (ORIGINAL/HISTORICAL) and EASA grading thresholds.
-- **Admissions/Internal Exam documentation refresh** — Documented current Phase 8 implementation status, including student detail confirmation, enrolled-course exam filtering, staff share links, skip/review navigation, autosave, and keyboard auto-submit behavior.
-- **Internal exam handover notes** — Added operational pointers for staff bank management, student exam flow, feature flagging, and the main API/component files.
-- **GDPR Data Retention Policy Engine** — Implemented a GDPR data retention policy engine and automated sweep service to manage historical user data securely and automatically.
-- **Dynamic System Settings** — Added a reusable dynamic system settings management API endpoint and React form component for the staff settings portal, including fixes to properly capture boolean toggles.
-- **CI/CD Pipeline & Deployments** — Configured a production CI/CD pipeline using Bun for the test environment, complete with automated scripts to terminate active database connections and clear stale Postgres advisory locks prior to schema migrations on Vercel.
+- **Auth-gated image proxy & transformation** — Two new API routes (`/api/images/proxy`, `/api/images/transform`) for serving protected images through authenticated endpoints. The proxy validates the user's session and optionally checks role-based scope permissions; the transform endpoint adds sharp-based processing (watermark, resize, format conversion, EXIF stripping) available only to staff roles.
+- **Storage adapter abstraction** — `lib/storage/proxy.ts` defines the `StorageAdapter` interface (`fetch(url)` → `{ data, contentType }`) with an HTTP adapter and a commented-out S3 adapter placeholder. Active adapter selected via `STORAGE_ADAPTER` env var.
+- **ProtectedImage component** — `components/ProtectedImage.tsx` wraps `next/image` with right-click protection, drag prevention, and an optional invisible overlay to block DevTools element inspection. Supports `priority` prop for above-the-fold preloading.
+- **Image proxy URL helpers** — `lib/storage/signed-url.ts` exports `proxyImageUrl()` and `transformImageUrl()` for building proxied image URLs with scope, width, quality, watermark, and format parameters.
+- **Newsroom feature** — Full newsroom at `/newsroom` with paginated article listing (`?page=N&limit=N&sort=newest|oldest`), dynamic article detail pages at `/newsroom/[slug]` with SEO metadata (Open Graph, Twitter Cards, JSON-LD), cover image hero with overlay, view counting, read-time calculation, author attribution, and sharing buttons.
+- **Newsroom staff management** — Create/edit/publish articles from `/staff/newsroom/create` and `/staff/newsroom/[id]/edit` with markdown editor, cover image upload, tags, custom publish dates, and author attribution.
+- **Newsroom seed script** — `prisma/seed-news-article.ts` seeds sample articles (EASA phase completion, Aerojet Foundation, Lufthansa partnership, CEO interview, AME applications, technology in training, USTDA funding) with cover images.
+- **Dynamic system settings management** — Staff settings form (`app/staff/settings/_components/SettingsForm.tsx`) for editing runtime configuration with proper boolean toggle capture.
+- **Build-time database resilience** — `lib/settings.ts` now detects build phase (`NEXT_PHASE === 'phase-production-build'`) and returns defaults without hitting the database, preventing static-generation failures when the database is unreachable.
+- **Image loading optimizations** — Added `priority` prop to hero images, footer logos, partner logos, and loading-screen logo across the codebase to ensure critical images preload instead of lazy-loading. `loading="eager"` upgraded to `priority` where applicable.
+- **Exam schedule page** — Public exam schedule page at `/courses/aircraft-engineering/exam-schedule` with EASA exam dates and pricing for 2026.
+
+### Changed
+
+- **Proxy/middleware** — Edge proxy (`proxy.ts`) renamed from `middleware.ts` per Next.js 16 conventions. Build output shows it as `ƒ Proxy (Middleware)`. Role-based route protection continues with `ROUTE_ROLE_MAP`.
+- **Package manager metadata** — `package.json` updated with new `type:module` experiment and dependency bumps. Reverted from `type:module` to fix Vercel ESM require error.
+- **Tailwind CSS configuration** — Updated to resolve Node.js parsing overhead.
+- **Global styles** — `app/globals.css` updated with new utility classes and theme refinements.
+
+### Fixed
+
+- **Stale build cache** — Cleared `.next` directory to fix module resolution errors for `@/lib/storage/proxy`.
+- **Database connection failure during build** — `getSystemSettings()`, `getSystemSetting()`, and `getFinanceConfig()` in `lib/settings.ts` now gracefully handle build-time database unavailability by returning defaults.
+- **Vercel ESM require error** — Reverted `type:module` from `package.json` after it caused `require()` failures in Vercel's serverless runtime.
+- **Logo not loading in loading screen** — Added `priority` to the `<Logo>` component in `app/loading.tsx` so it preloads immediately instead of lazy-loading.
 
 ## [1.5.0] — 2026-05-13
 

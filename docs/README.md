@@ -32,17 +32,19 @@ System reference — read these to understand how Aerojet is built.
 - [Full security doc](./architecture/security.md)
 - [Database schema](./architecture/database.md) · [database detail (RLS, soft-delete, dual client)](./architecture/database-detail.md)
 - [API reference](./architecture/api.md)
+- [Image proxy & storage adapter](./architecture/image-proxy.md)
 - [Architecture strategies](./architecture/strategies.md)
 
 ## Guides
 
-Operational how-tos — read these to *do* something.
+Operational how-tos — read these to _do_ something.
 
 - [Setup](./guides/setup.md) — install, env, db push, seed
 - [Deployment](./guides/deployment.md) — Vercel deploy + cron registration
 - [Handover](./guides/handover.md) — onboarding for a new developer
 - [Contributing](./guides/contributing.md) — branch + PR conventions
 - [Role transitions](./guides/role-transitions.md) — how the user-role wizard works
+- [Newsroom](./guides/newsroom.md) — public blog, article management, SEO
 - [Neon ↔ Supabase replication](./guides/neon-supabase-logical-replication.md) — DB-level sync runbook
 
 ## Audits
@@ -61,7 +63,7 @@ Historical audit reports. Newest first; older reports preserved for context.
 
 ## Plans
 
-RFCs and implementation roadmaps. Use these to understand *why* something was designed the way it is.
+RFCs and implementation roadmaps. Use these to understand _why_ something was designed the way it is.
 
 - [Future plans](./plans/future-plans.md) — open roadmap
 - [Admissions pipeline](./plans/admissions-pipeline.md) (visual report: [admissions-pipeline.html](./html/admissions-pipeline.html))
