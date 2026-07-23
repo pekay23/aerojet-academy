@@ -16,10 +16,10 @@ import { PrismaClient } from '@prisma/client'
 // Explicitly load .env (and .env.local) — `import 'dotenv/config'` is
 // unreliable in ESM/Next.js standalone builds.
 // Skip on Vercel — env vars are injected automatically by the platform.
-const envDir = path.resolve(process.cwd())
 if (!process.env.VERCEL) {
-  dotenv.config({ path: path.join(envDir, '.env') })
-  dotenv.config({ path: path.join(envDir, '.env.local') })
+  const envDir = path.resolve(/*turbopackIgnore: true*/ process.cwd())
+  dotenv.config({ path: path.join(/*turbopackIgnore: true*/ envDir, '.env') })
+  dotenv.config({ path: path.join(/*turbopackIgnore: true*/ envDir, '.env.local') })
 }
 
 const require = createRequire(import.meta.url)
