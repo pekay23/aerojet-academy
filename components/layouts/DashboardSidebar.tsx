@@ -379,7 +379,13 @@ function UserMenu({
   const avatar = () => (
     <div className="border-sidebar-border/50 bg-sidebar-accent relative h-8 w-8 shrink-0 overflow-hidden rounded-xl border">
       {userImage ? (
-        <Image src={userImage} alt={userName || 'User'} fill className="object-cover" />
+        <Image
+          src={userImage}
+          alt={userName || 'User'}
+          fill
+          className="object-cover"
+          priority={false}
+        />
       ) : (
         <div className="text-sidebar-foreground/50 flex h-full w-full items-center justify-center text-[11px] font-black uppercase">
           {initials}
@@ -597,6 +603,7 @@ function renderSidebarContent({
                 width={32}
                 height={32}
                 className="h-8 w-8"
+                priority
               />
             ) : (
               <Logo tone="onDark" className="h-8 w-auto" priority />

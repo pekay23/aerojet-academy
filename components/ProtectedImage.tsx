@@ -7,11 +7,6 @@ type ProtectedImageProps = Omit<
   ComponentProps<typeof Image>,
   'onContextMenu' | 'onDragStart' | 'draggable'
 > & {
-  /**
-   * When true, adds an invisible overlay on top of the image to block
-   * right-click and inspect-element access to the underlying <img> tag.
-   * Default: true
-   */
   overlay?: boolean
 }
 
@@ -23,11 +18,26 @@ type ProtectedImageProps = Omit<
  * - Optionally adds an invisible overlay to block DevTools element inspection
  * - Sets `select-none` and `pointer-events-none` on the container
  *
+ * Performance:
+ * - Pass `loading="eager"` for images above the fold so they load immediately.
+ * - Pass `priority` to also preload the image (sets `loading="eager"` + preloads).
+ * - Default is `loading="lazy"` (Next.js default).
+ *
  * Usage:
  * ```tsx
+ * // Above the fold — eager load
  * <ProtectedImage
- *   src="/api/images/proxy?path=students/abc/cert.jpg"
+ *   src={proxyImageUrl("https://utfs.io/f/abc.jpg", "students")}
  *   alt="Certificate"
+ *   width={400}
+ *   height={300}
+ *   loading="eager"
+ * />
+ *
+ * // Below the fold — lazy (default)
+ * <ProtectedImage
+ *   src={proxyImageUrl("https://utfs.io/f/def.jpg")}
+ *   alt="Document"
  *   width={400}
  *   height={300}
  * />
