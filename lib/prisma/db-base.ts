@@ -15,9 +15,12 @@ import { PrismaClient } from '@prisma/client'
 
 // Explicitly load .env (and .env.local) — `import 'dotenv/config'` is
 // unreliable in ESM/Next.js standalone builds.
+// Skip on Vercel — env vars are injected automatically by the platform.
 const envDir = path.resolve(process.cwd())
-dotenv.config({ path: path.join(envDir, '.env') })
-dotenv.config({ path: path.join(envDir, '.env.local') })
+if (!process.env.VERCEL) {
+  dotenv.config({ path: path.join(envDir, '.env') })
+  dotenv.config({ path: path.join(envDir, '.env.local') })
+}
 
 const require = createRequire(import.meta.url)
 
@@ -57,7 +60,9 @@ if (!dbConnectionString) {
     : '[DB_BASE] CRITICAL: DATABASE_URL is missing. Ensure DATABASE_URL is set in .env or .env.local'
 
   if (isBuildTime) {
-    console.warn('[DB_BASE] WARNING: DATABASE_URL missing during build — this is expected for static builds.')
+    console.warn(
+      '[DB_BASE] WARNING: DATABASE_URL missing during build — this is expected for static builds.'
+    )
   } else if (isProd) {
     console.error(msg)
     // On Vercel production: create a lazy client that throws on first DB access
