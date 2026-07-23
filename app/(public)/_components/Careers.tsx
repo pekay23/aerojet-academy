@@ -14,7 +14,7 @@ const careerPoints = [
 
 export default function Careers() {
   return (
-    <section className="relative min-h-[420px] overflow-hidden border-t border-[#1b2430]/15 text-[#f7f3ec] sm:min-h-0">
+    <section className="relative min-h-105 overflow-hidden border-t border-[#1b2430]/15 text-[#f7f3ec] sm:min-h-0">
       {/* Background Image — mobile */}
       <div className="absolute inset-0 z-0 sm:hidden">
         <Image
@@ -23,6 +23,7 @@ export default function Careers() {
           fill
           className="object-cover object-center"
           quality={90}
+          priority
         />
       </div>
       {/* Background Image — desktop */}
@@ -33,6 +34,7 @@ export default function Careers() {
           fill
           className="object-cover object-center sm:object-top-right"
           quality={90}
+          priority
         />
       </div>
       {/* Dark blue gradient overlay fading to the right so text stays readable but the image pops on the right */}

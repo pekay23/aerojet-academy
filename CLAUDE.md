@@ -129,6 +129,48 @@ export const GET = withErrorHandler(async (req, ctx) => {
 - Client helpers: `UploadButton`, `UploadDropzone` from `lib/uploads/uploadthing.ts`
 - Remote image domains configured in `next.config.ts` (`utfs.io`, `*.ufs.sh`, `uploadthing.com`)
 
+### Image Proxy & Protected Images
+
+Two auth-gated API routes serve protected images through authenticated endpoints:
+
+- **`GET /api/images/proxy`** — Auth-gated image proxy. Validates session, checks optional scope-based permissions (`students`, `resources`, `staff`, `profile-photos`), fetches via the active storage adapter, and optionally resizes with sharp. Query params: `url` (required), `scope`, `w`, `q`.
+- **`GET /api/images/transform`** — Staff-only image transformation. Same auth + scope check, then applies watermark, resize, EXIF stripping, and format conversion (webp/jpeg/png/avif). Query params: `url`, `w`, `watermark`, `strip`, `q`, `format`.
+
+Storage adapter abstraction at `lib/storage/proxy.ts`:
+
+```ts
+export interface StorageAdapter {
+  name: string
+  fetch(url: string): Promise<{ data: ArrayBuffer; contentType: string }>
+}
+```
+
+Active adapter selected via `STORAGE_ADAPTER` env var (defaults to `'http'`). Commented-out S3 adapter shows the pattern for Cloudflare R2 / S3 support.
+
+URL helpers at `lib/storage/signed-url.ts`:
+
+```ts
+proxyImageUrl(imageUrl, scope?, options?)       // → /api/images/proxy?url=...
+transformImageUrl(imageUrl, options?)            // → /api/images/transform?url=...
+```
+
+Client component at `components/ProtectedImage.tsx` wraps `next/image` with right-click protection, drag prevention, and an optional invisible overlay. Pass `priority` for above-the-fold images:
+
+```tsx
+<ProtectedImage src={proxyImageUrl(url, "students")} alt="Doc" width={400} height={300} priority />
+<ProtectedImage src={proxyImageUrl(url)} alt="Doc" width={400} height={300} />
+```
+
+### Newsroom
+
+Public newsroom at `/newsroom` with paginated listing and dynamic article detail pages:
+
+- **Listing** (`app/(public)/newsroom/page.tsx`): Server component with `force-dynamic`. Query params: `?page=N&limit=N&sort=newest|oldest` (default: page=1, limit=9, sort=newest). Renders `<NewsSortControl>`, grid of `<NewsCard>`, and `<NewsPagination>`.
+- **Detail** (`app/(public)/newsroom/[slug]/page.tsx`): Server component with SEO metadata (Open Graph, Twitter Cards, JSON-LD), cover image hero, view counting, read-time calculation (`Math.ceil(wordCount / 200)`), author attribution, sharing buttons.
+- **Cover image fallback**: Hardcoded UploadThing URL when `article.coverImage` is null.
+- **Staff management**: Create at `/staff/newsroom/create`, edit at `/staff/newsroom/[id]/edit`. Markdown editor with cover image upload, tags, custom publish dates, author attribution.
+- **Seed script**: `bunx tsx prisma/seed-news-article.ts` seeds sample articles.
+
 ### Storage & Sync (Supabase secondary backend)
 
 Supabase is a secondary backend alongside Neon, used for structured document storage and as a live replica via logical replication. Helpers — **do not duplicate**:

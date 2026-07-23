@@ -4,9 +4,15 @@ import Image from 'next/image'
 import SectionReveal from './SectionReveal' // We'll wrap this in a reveal for a nice effect
 
 const partners = [
-  { name: 'EASA', src: '/images/partners/easa-logo.webp', width: 200, height: 65 },
-  { name: 'USTDA', src: '/images/partners/ustda.webp', width: 200, height: 65 },
-  { name: 'Ghana Air Force', src: '/images/partners/Airforce-logo.webp', width: 200, height: 65 },
+  { name: 'EASA', src: '/images/partners/easa-logo.webp', width: 200, height: 65, priority: true },
+  { name: 'USTDA', src: '/images/partners/ustda.webp', width: 200, height: 65, priority: true },
+  {
+    name: 'Ghana Air Force',
+    src: '/images/partners/Airforce-logo.webp',
+    width: 200,
+    height: 65,
+    priority: true,
+  },
   {
     name: 'Joramco',
     src: '/images/partners/Joramco-Logo-AI.webp',

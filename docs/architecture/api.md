@@ -4,7 +4,7 @@ Base URL: `/api` — all routes are Next.js App Router route handlers under
 `app/api/**/route.ts`. Server Actions (in `app/**/actions.ts`) handle most
 portal mutations and are not exposed as REST routes.
 
-This document was last regenerated against the codebase on **2026-06-04**.
+This document was last regenerated against the codebase on **2026-07-23**.
 For the canonical list, run `find app/api -name 'route.ts' | sort` and cross-
 reference the source.
 
@@ -26,6 +26,11 @@ reference the source.
 - `POST /api/public/contact` — Submit contact form
 - `POST /api/public/submit-payment-proof` — Upload payment proof
 - `GET/POST /api/public/courses` — Public course catalog (read)
+
+## Image Proxy (auth-gated)
+
+- `GET /api/images/proxy` — Auth-gated image proxy. Requires valid session. Optional `scope` param enforces role-based access (`students`, `resources`, `staff`, `profile-photos`). Fetches via active storage adapter. Optional `w` (width) and `q` (quality 1–100) params for server-side resize. Returns image with `Cache-Control: private, max-age=3600`.
+- `GET /api/images/transform` — Staff-only image transformation. Same auth as proxy plus staff role check. Adds sharp processing: watermark overlay (`© Aerojet Academy`), EXIF stripping, format conversion (`webp`/`jpeg`/`png`/`avif`). Query params: `url` (required), `w`, `watermark`, `strip`, `q`, `format`.
 
 ## Admin (SUPER_ADMIN only)
 
