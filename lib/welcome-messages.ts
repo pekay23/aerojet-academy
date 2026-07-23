@@ -73,6 +73,9 @@ export const getWelcomeMessages = cache(
     // hitting the DB on every single layout load.
     const getCachedMessages = unstable_cache(
       async () => {
+        const defaults =
+          DEFAULT_ROLE_WELCOME_MESSAGES[role] || DEFAULT_ROLE_WELCOME_MESSAGES.STUDENT
+
         let setting: { value: string } | null = null
         try {
           setting = await prismaClient.systemSetting.findUnique({
@@ -81,9 +84,6 @@ export const getWelcomeMessages = cache(
         } catch {
           return defaults
         }
-
-        const defaults =
-          DEFAULT_ROLE_WELCOME_MESSAGES[role] || DEFAULT_ROLE_WELCOME_MESSAGES.STUDENT
 
         if (!setting) return defaults
 
