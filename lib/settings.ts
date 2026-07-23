@@ -10,10 +10,14 @@ export async function getSystemSetting(key: string, defaultValue: string = ''): 
 
   return unstable_cache(
     async () => {
-      const setting = await prisma.systemSetting.findUnique({
-        where: { key },
-      })
-      return setting?.value ?? defaultValue
+      try {
+        const setting = await prisma.systemSetting.findUnique({
+          where: { key },
+        })
+        return setting?.value ?? defaultValue
+      } catch (error) {
+        return defaultValue
+      }
     },
     [`setting-${key}`],
     { revalidate: 300, tags: ['settings'] }
