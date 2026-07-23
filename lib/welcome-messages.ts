@@ -73,17 +73,12 @@ export const getWelcomeMessages = cache(
     // hitting the DB on every single layout load.
     const getCachedMessages = unstable_cache(
       async () => {
+        const setting = await prismaClient.systemSetting.findUnique({
+          where: { key: 'welcome_messages' },
+        })
+
         const defaults =
           DEFAULT_ROLE_WELCOME_MESSAGES[role] || DEFAULT_ROLE_WELCOME_MESSAGES.STUDENT
-
-        let setting: { value: string } | null = null
-        try {
-          setting = await prismaClient.systemSetting.findUnique({
-            where: { key: 'welcome_messages' },
-          })
-        } catch {
-          return defaults
-        }
 
         if (!setting) return defaults
 
@@ -119,14 +114,9 @@ export async function getWelcomeMessagesGrouped(prismaClient: {
     findUnique: (args: any) => Promise<{ value: string } | null>
   }
 }): Promise<Record<string, string[]>> {
-  let setting: { value: string } | null = null
-  try {
-    setting = await prismaClient.systemSetting.findUnique({
-      where: { key: 'welcome_messages' },
-    })
-  } catch {
-    return DEFAULT_ROLE_WELCOME_MESSAGES
-  }
+  const setting = await prismaClient.systemSetting.findUnique({
+    where: { key: 'welcome_messages' },
+  })
 
   if (!setting) return DEFAULT_ROLE_WELCOME_MESSAGES
 

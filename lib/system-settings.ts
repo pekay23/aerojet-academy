@@ -33,27 +33,22 @@ async function withTimeout<T>(promise: Promise<T>, ms: number, fallback: T): Pro
  */
 export const getSystemSettings = cache(async (keys: string[]) => {
   const fetchSettings = async () => {
-    try {
-      const settings = await withTimeout(
-        prisma.systemSetting.findMany({
-          where: { key: { in: keys } },
-        }),
-        5000,
-        []
-      )
+    const settings = await withTimeout(
+      prisma.systemSetting.findMany({
+        where: { key: { in: keys } },
+      }),
+      5000,
+      []
+    )
 
-      // Convert to a record for easier access: { key: value }
-      return settings.reduce(
-        (acc, s) => {
-          acc[s.key] = s.value
-          return acc
-        },
-        {} as Record<string, string>
-      )
-    } catch (error) {
-      console.warn('[system-settings] fetchSettings try-catch fallback triggered:', error)
-      return {} as Record<string, string>
-    }
+    // Convert to a record for easier access: { key: value }
+    return settings.reduce(
+      (acc, s) => {
+        acc[s.key] = s.value
+        return acc
+      },
+      {} as Record<string, string>
+    )
   }
 
   // Bypass unstable_cache during build or production to avoid isolated context env-stripping bugs
@@ -65,7 +60,7 @@ export const getSystemSettings = cache(async (keys: string[]) => {
   }
 
   return unstable_cache(fetchSettings, [`system-settings-${keys.sort().join('-')}`], {
-    revalidate: 300, // Revalidate every 5 minutes
+    revalidate: 300,
     tags: ['system-settings'],
   })()
 })

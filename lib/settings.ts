@@ -1,23 +1,13 @@
 import { prismaUnfiltered as prisma } from '@/lib/prisma/client'
 import { unstable_cache } from 'next/cache'
 
-function isBuildTime(): boolean {
-  return process.env.NEXT_PHASE === 'phase-production-build'
-}
-
 export async function getSystemSetting(key: string, defaultValue: string = ''): Promise<string> {
-  if (isBuildTime()) return defaultValue
-
   return unstable_cache(
     async () => {
-      try {
-        const setting = await prisma.systemSetting.findUnique({
-          where: { key },
-        })
-        return setting?.value ?? defaultValue
-      } catch (error) {
-        return defaultValue
-      }
+      const setting = await prisma.systemSetting.findUnique({
+        where: { key },
+      })
+      return setting?.value ?? defaultValue
     },
     [`setting-${key}`],
     { revalidate: 300, tags: ['settings'] }
@@ -37,22 +27,14 @@ export async function updateSystemSetting(
 }
 
 export async function getSystemSettings(keys: string[]): Promise<Map<string, string>> {
-  // During build time the database may not be reachable — return defaults.
-  if (isBuildTime()) return new Map()
-
   return unstable_cache(
     async () => {
-      try {
-        const settings = await prisma.systemSetting.findMany({
-          where: { key: { in: keys } },
-        })
-        const map = new Map<string, string>()
-        settings.forEach((s) => map.set(s.key, s.value))
-        return Array.from(map.entries()) // Cache returns serializable data
-      } catch {
-        // Database unavailable — return empty map so callers fall back to defaults
-        return []
-      }
+      const settings = await prisma.systemSetting.findMany({
+        where: { key: { in: keys } },
+      })
+      const map = new Map<string, string>()
+      settings.forEach((s) => map.set(s.key, s.value))
+      return Array.from(map.entries()) // Cache returns serializable data
     },
     [`settings-${keys.sort().join('-')}`],
     { revalidate: 300, tags: ['settings'] }
@@ -93,58 +75,42 @@ export async function getAdvisoryConfig() {
 export async function getFinanceConfig() {
   const settings = await getSystemSettings(['course_currency', 'payment_methods'])
 
-  let bankAccountName = ''
-  let bankAccountNumber = ''
-  let bankName = ''
-  let bankSwift = ''
-  let bankBranch = ''
+  // Try new PaymentMethod model first
+  const bankMethods = await prisma.paymentMethod.findMany({
+    where: { isActive: true, type: 'BANK_TRANSFER' },
+    orderBy: { sortOrder: 'asc' },
+    take: 1,
+  })
 
-  if (!isBuildTime()) {
-    try {
-      // Try new PaymentMethod model first
-      const bankMethods = await prisma.paymentMethod.findMany({
-        where: { isActive: true, type: 'BANK_TRANSFER' },
-        orderBy: { sortOrder: 'asc' },
-        take: 1,
-      })
-
-      if (bankMethods.length > 0) {
-        const bank = bankMethods[0]
-        bankAccountName = bank.bankAccountName || ''
-        bankAccountNumber = bank.bankAccountNumber || ''
-        bankName = bank.bankName || ''
-        bankSwift = bank.bankSwiftCode || ''
-        bankBranch = bank.bankBranch || ''
-      }
-    } catch {
-      // DB unavailable during build — fall through to legacy defaults
+  if (bankMethods.length > 0) {
+    const bank = bankMethods[0]
+    return {
+      courseCurrency: settings.get('course_currency') || 'EUR',
+      bankAccountName: bank.bankAccountName || '',
+      bankAccountNumber: bank.bankAccountNumber || '',
+      bankName: bank.bankName || '',
+      bankSwift: bank.bankSwiftCode || '',
+      bankBranch: bank.bankBranch || '',
+      paymentMethods: ['BANK_TRANSFER'],
     }
   }
 
-  if (!bankName) {
-    // Fallback to legacy flat settings
-    const legacySettings = await getSystemSettings([
-      'bank_account_name',
-      'bank_account_number',
-      'bank_name',
-      'bank_swift',
-      'bank_branch',
-    ])
-
-    bankAccountName = legacySettings.get('bank_account_name') || ''
-    bankAccountNumber = legacySettings.get('bank_account_number') || ''
-    bankName = legacySettings.get('bank_name') || 'Fidelity Bank'
-    bankSwift = legacySettings.get('bank_swift') || ''
-    bankBranch = legacySettings.get('bank_branch') || ''
-  }
+  // Fallback to legacy flat settings
+  const legacySettings = await getSystemSettings([
+    'bank_account_name',
+    'bank_account_number',
+    'bank_name',
+    'bank_swift',
+    'bank_branch',
+  ])
 
   return {
     courseCurrency: settings.get('course_currency') || 'EUR',
-    bankAccountName,
-    bankAccountNumber,
-    bankName,
-    bankSwift,
-    bankBranch,
+    bankAccountName: legacySettings.get('bank_account_name') || '',
+    bankAccountNumber: legacySettings.get('bank_account_number') || '',
+    bankName: legacySettings.get('bank_name') || 'Fidelity Bank',
+    bankSwift: legacySettings.get('bank_swift') || '',
+    bankBranch: legacySettings.get('bank_branch') || '',
     paymentMethods: (settings.get('payment_methods') || 'BANK_TRANSFER').split(','),
   }
 }
@@ -178,7 +144,7 @@ export async function getEmailConfig() {
     fromName: settings.get('email_from_name') || 'Aerojet Academy',
     fromAddress: settings.get('email_from_address') || 'admissions',
     subdomain: settings.get('email_subdomain') || 'mail',
-    rootDomain: 'aerojet-academy.com', // Base domain for the academy
+    rootDomain: 'aerojet-academy.com',
   }
 }
 
