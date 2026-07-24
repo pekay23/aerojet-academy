@@ -1,6 +1,4 @@
 import 'server-only'
-import dotenv from 'dotenv'
-import path from 'node:path'
 import { createRequire } from 'node:module'
 import { PrismaClient } from '@prisma/client'
 
@@ -11,89 +9,28 @@ import { PrismaClient } from '@prisma/client'
  * Production uses the standard @prisma/adapter-pg path for Vercel stability.
  * Local development may use Neon's WebSocket adapter when TCP pg handshakes
  * stall against a remote Neon URL.
+ *
+ * NOTE: Next.js automatically loads .env, .env.local, .env.production files.
+ * Do NOT use dotenv.config() here — it conflicts with Next.js's built-in
+ * env loading and causes race conditions with Turbopack module initialization.
+ *
+ * IMPORTANT: All env var reads happen lazily inside getClient(), NOT at
+ * module top level. This ensures Next.js has finished loading .env files
+ * before we try to read DATABASE_URL.
  */
-
-// Explicitly load .env files — `import 'dotenv/config'` is
-// unreliable in ESM/Next.js standalone builds.
-// Order matters: later files override earlier ones.
-const envDir = path.resolve(process.cwd())
-dotenv.config({ path: path.join(envDir, '.env') })
-dotenv.config({ path: path.join(envDir, '.env.local') })
-// Load .env.production when NODE_ENV is production (Vercel build)
-if (process.env.NODE_ENV === 'production') {
-  dotenv.config({ path: path.join(envDir, '.env.production'), override: true })
-}
 
 const require = createRequire(import.meta.url)
 
-const isDev = process.env.NODE_ENV === 'development'
-const isVercel = Boolean(process.env.VERCEL)
-const localAdapterOverride = process.env.AEROJET_LOCAL_DB_ADAPTER?.toLowerCase()
-
-// App runtime should use the pooler by default. DIRECT_URL remains the right
-// default for Prisma CLI/migrations, but it is less reliable for next dev.
-const dbConnectionString = isDev
-  ? process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || process.env.DIRECT_URL
-  : process.env.DATABASE_URL || process.env.DIRECT_URL
-
-const isNeonConnection = (() => {
-  if (!dbConnectionString) return false
-  try {
-    return new URL(dbConnectionString.replace('postgresql://', 'postgres://')).hostname.endsWith(
-      '.neon.tech'
-    )
-  } catch {
-    return false
-  }
-})()
-
-const useLocalNeonAdapter =
-  isDev &&
-  !isVercel &&
-  localAdapterOverride !== 'pg' &&
-  (localAdapterOverride === 'neon' || isNeonConnection)
-
-const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build'
-const isProd = process.env.NODE_ENV === 'production'
-
-if (!dbConnectionString) {
-  const msg = isProd
-    ? '[DB_BASE] CRITICAL: DATABASE_URL is not set. Set it in Vercel dashboard → Settings → Environment Variables.'
-    : '[DB_BASE] CRITICAL: DATABASE_URL is missing. Ensure DATABASE_URL is set in .env or .env.local'
-
-  if (isBuildTime) {
-    console.warn(
-      '[DB_BASE] WARNING: DATABASE_URL missing during build — this is expected for static builds.'
-    )
-  } else if (isProd) {
-    console.error(msg)
-    // On Vercel production: create a lazy client that throws on first DB access
-    // instead of crashing the entire process on module load. This allows
-    // static/non-DB pages (like the public homepage) to render.
-  } else {
-    throw new Error(msg)
-  }
-}
-
-if (isDev && dbConnectionString) {
-  try {
-    const host = new URL(dbConnectionString.replace('postgresql://', 'http://')).hostname
-    const adapter = useLocalNeonAdapter ? 'neon-websocket' : 'pg'
-    console.log(`[DB_BASE] Initializing ${adapter} adapter to: ${host}`)
-  } catch {
-    console.log('[DB_BASE] Initializing database adapter with provided string.')
-  }
-}
-
 // ── Adapter factories (only called when client is created) ────────────
 
-function createPgAdapter() {
-  // Lazy import to avoid top-level crash when pg is unavailable
+function createPgAdapter(connectionString: string) {
   const { PrismaPg } = require('@prisma/adapter-pg') as typeof import('@prisma/adapter-pg')
   const { Pool } = require('pg') as typeof import('pg')
 
+  const isDev = process.env.NODE_ENV === 'development'
+
   const pool = new Pool({
-    connectionString: dbConnectionString,
+    connectionString,
     max: isDev ? 5 : 8,
     connectionTimeoutMillis: isDev ? Number(process.env.DB_CONNECT_TIMEOUT_MS ?? 10000) : 60000,
     idleTimeoutMillis: isDev ? 10000 : 30000,
@@ -107,9 +44,9 @@ function createPgAdapter() {
   return new PrismaPg(pool)
 }
 
-function createLocalNeonAdapter() {
+function createLocalNeonAdapter(connectionString: string) {
   const { PrismaNeon } = require('@prisma/adapter-neon') as typeof import('@prisma/adapter-neon')
-  return new PrismaNeon({ connectionString: dbConnectionString })
+  return new PrismaNeon({ connectionString })
 }
 
 // ── Client singleton (lazy in production when URL is missing) ─────────
@@ -123,6 +60,35 @@ let _client: PrismaClient | undefined
 
 function getClient(): PrismaClient {
   if (_client) return _client
+
+  // Read env vars lazily — Next.js may not have finished loading .env files
+  // at module evaluation time.
+  const isDev = process.env.NODE_ENV === 'development'
+  const isVercel = Boolean(process.env.VERCEL)
+  const localAdapterOverride = process.env.AEROJET_LOCAL_DB_ADAPTER?.toLowerCase()
+  const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build'
+  const isProd = process.env.NODE_ENV === 'production'
+
+  const dbConnectionString = isDev
+    ? process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || process.env.DIRECT_URL
+    : process.env.DATABASE_URL || process.env.DIRECT_URL
+
+  const isNeonConnection = (() => {
+    if (!dbConnectionString) return false
+    try {
+      return new URL(dbConnectionString.replace('postgresql://', 'postgres://')).hostname.endsWith(
+        '.neon.tech'
+      )
+    } catch {
+      return false
+    }
+  })()
+
+  const useLocalNeonAdapter =
+    isDev &&
+    !isVercel &&
+    localAdapterOverride !== 'pg' &&
+    (localAdapterOverride === 'neon' || isNeonConnection)
 
   // When DATABASE_URL is absent in production, return a proxy that throws
   // on any access with a clear error, rather than crashing the module.
@@ -141,7 +107,52 @@ function getClient(): PrismaClient {
     return proxy
   }
 
-  const adapter = useLocalNeonAdapter ? createLocalNeonAdapter() : createPgAdapter()
+  // During build time with no DB connection, return a proxy that allows
+  // non-DB pages to render but throws on actual DB access.
+  if (isBuildTime && !dbConnectionString) {
+    const proxy = new Proxy({} as PrismaClient, {
+      get(_target, prop) {
+        if (prop === '$connect' || prop === '$disconnect') {
+          return async () => {}
+        }
+        throw new Error(
+          '[DB_BASE] Database is unavailable during build. Set DATABASE_URL in Vercel dashboard or .env.production.'
+        )
+      },
+    })
+    _client = proxy
+    return proxy
+  }
+
+  if (!dbConnectionString) {
+    const msg = isProd
+      ? '[DB_BASE] CRITICAL: DATABASE_URL is not set. Set it in Vercel dashboard → Settings → Environment Variables.'
+      : '[DB_BASE] CRITICAL: DATABASE_URL is missing. Ensure DATABASE_URL is set in .env or .env.local'
+
+    if (isBuildTime) {
+      console.warn(
+        '[DB_BASE] WARNING: DATABASE_URL missing during build — this is expected for static builds.'
+      )
+    } else if (isProd) {
+      console.error(msg)
+    } else {
+      throw new Error(msg)
+    }
+  }
+
+  if (isDev && dbConnectionString) {
+    try {
+      const host = new URL(dbConnectionString.replace('postgresql://', 'http://')).hostname
+      const adapter = useLocalNeonAdapter ? 'neon-websocket' : 'pg'
+      console.log(`[DB_BASE] Initializing ${adapter} adapter to: ${host}`)
+    } catch {
+      console.log('[DB_BASE] Initializing database adapter with provided string.')
+    }
+  }
+
+  const adapter = useLocalNeonAdapter
+    ? createLocalNeonAdapter(dbConnectionString!)
+    : createPgAdapter(dbConnectionString!)
 
   _client = new PrismaClient({
     adapter,
