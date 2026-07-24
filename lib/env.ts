@@ -1,5 +1,5 @@
+import 'server-only'
 import { z } from 'zod'
-
 const envSchema = z.object({
   // Database
   DATABASE_URL: z.string().url(),
@@ -44,6 +44,18 @@ const envSchema = z.object({
   // Upstash Redis (rate limiting)
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+
+  // reCAPTCHA
+  RECAPTCHA_SECRET_KEY: z.string().optional(),
+
+  // Admin seed credentials (dev only)
+  ADMIN_EMAIL: z.string().email().optional(),
+  ADMIN_PASSWORD: z.string().min(8).optional(),
+
+  // Vercel-specific
+  VERCEL: z.string().optional(),
+  VERCEL_ENV: z.string().optional(),
+  VERCEL_URL: z.string().optional(),
 })
 
 // Build-time safe-checks
@@ -74,7 +86,16 @@ const processEnv = {
   FROM_EMAIL: process.env.FROM_EMAIL,
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   STRIPE_PUBLISHABLE_KEY: process.env.STRIPE_PUBLISHABLE_KEY,
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
   RESEND_WEBHOOK_SECRET: process.env.RESEND_WEBHOOK_SECRET,
+  UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
+  UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+  RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY,
+  ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+  ADMIN_PASSWORD: process.env.ADMIN_PASSWORD,
+  VERCEL: process.env.VERCEL,
+  VERCEL_ENV: process.env.VERCEL_ENV,
+  VERCEL_URL: process.env.VERCEL_URL,
 }
 
 const parsed = isBuildTime
