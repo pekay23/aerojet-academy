@@ -5,6 +5,8 @@ import MobileStickyBar from '@/components/layouts/MobileNav'
 import { getAdvisoryConfig } from '@/lib/settings'
 import AdvisoryBanner from './_components/AdvisoryBanner'
 
+export const dynamic = 'force-dynamic'
+
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const advisory = await getAdvisoryConfig()
 
