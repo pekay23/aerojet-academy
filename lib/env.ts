@@ -1,5 +1,38 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// ⚠️  CRITICAL: DO NOT MODIFY THIS FILE WITHOUT READING THE COMMENT BELOW  ⚠️
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// 📌 HISTORICAL LESSONS (2026-07-24):
+//
+// ❌ PROBLEM: Missing env vars in processEnv object
+//    The processEnv object was missing several env vars that were defined
+//    in the schema (STRIPE_WEBHOOK_SECRET, UPSTASH_REDIS_REST_URL,
+//    UPSTASH_REDIS_REST_TOKEN, RECAPTCHA_SECRET_KEY, ADMIN_EMAIL,
+//    ADMIN_PASSWORD, VERCEL, VERCEL_ENV, VERCEL_URL). This meant they
+//    were always undefined at runtime, creating a false sense of validation.
+//
+// ✅ FIX: Every env var in the schema must also be in processEnv.
+//    If you add a new env var to the schema, add it to processEnv too.
+//
+// ❌ PROBLEM: No server-only guard
+//    This file could be imported from client components, potentially
+//    exposing server secrets (DATABASE_URL, NEXTAUTH_SECRET, etc.)
+//    in the browser bundle.
+//
+// ✅ FIX: Added `import 'server-only'` at the top. Next.js will throw
+//    a build error if any client component tries to import this file.
+//
+// 🔒 RULES FOR FUTURE MODIFICATIONS:
+//    1. ALWAYS add new env vars to BOTH the schema AND processEnv
+//    2. NEVER remove `import 'server-only'` from this file
+//    3. NEVER commit .env files with secrets to git
+//    4. Set all production secrets in Vercel Dashboard, never in .env files
+//    5. NEXT_PUBLIC_* vars are safe for client — everything else is server-only
+// ═══════════════════════════════════════════════════════════════════════════
+
 import 'server-only'
 import { z } from 'zod'
+
 const envSchema = z.object({
   // Database
   DATABASE_URL: z.string().url(),
