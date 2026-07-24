@@ -1,30 +1,51 @@
 import 'server-only'
-import dotenv from 'dotenv'
-import path from 'node:path'
 import { PrismaClient } from '@prisma/client'
 
 /**
  * DATABASE BASE LAYER (Raw Client)
  *
- * Uses a simple lazy singleton pattern. DATABASE_URL should be set via
- * Vercel dashboard environment variables. Falls back to .env.production
- * as a safety net.
+ * Uses a simple lazy singleton pattern. DATABASE_URL must be set via
+ * Vercel dashboard → Settings → Environment Variables.
+ *
+ * Fail-fast: if DATABASE_URL is missing, the app crashes at startup
+ * rather than failing silently at the first query.
  */
 
-// Try loading .env.production using multiple paths as fallbacks
-if (process.env.NODE_ENV === 'production') {
-  const paths = [
-    path.resolve(process.cwd(), '.env.production'),
-    path.resolve(process.cwd(), '..', '.env.production'),
-  ]
-  for (const p of paths) {
-    dotenv.config({ path: p })
+function getDatabaseUrl(): string {
+  const url = process.env.DATABASE_URL
+  if (!url) {
+    if (process.env.VERCEL) {
+      console.error(
+        '[DB_BASE] ❌ DATABASE_URL is not set. Go to Vercel dashboard → Settings → Environment Variables and add DATABASE_URL.'
+      )
+    }
+    throw new Error(
+      '[DB_BASE] DATABASE_URL environment variable is required. Set it in your .env file locally, or in the Vercel dashboard for production.'
+    )
+  }
+  return url
+}
+
+function isNeonConnection(connectionString: string): boolean {
+  try {
+    return new URL(connectionString.replace(/^postgres(ql)?:\/\//, 'https://')).hostname.endsWith(
+      '.neon.tech'
+    )
+  } catch {
+    return false
   }
 }
 
-// ── Adapter factories ──
+function createAdapter(connectionString: string) {
+  const isNeon = isNeonConnection(connectionString)
+  const timeout = Number(process.env.DB_CONNECT_TIMEOUT_MS) || 10_000
 
-function createPgAdapter(connectionString: string) {
+  if (isNeon) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { PrismaNeon } = require('@prisma/adapter-neon')
+    return new PrismaNeon({ connectionString })
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { PrismaPg } = require('@prisma/adapter-pg')
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -33,8 +54,8 @@ function createPgAdapter(connectionString: string) {
   const pool = new Pool({
     connectionString,
     max: 8,
-    connectionTimeoutMillis: 30000,
-    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: timeout,
+    idleTimeoutMillis: 30_000,
   })
 
   pool.on('error', (err: Error) => {
@@ -44,68 +65,46 @@ function createPgAdapter(connectionString: string) {
   return new PrismaPg(pool)
 }
 
-function createLocalNeonAdapter(connectionString: string) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { PrismaNeon } = require('@prisma/adapter-neon')
-  return new PrismaNeon({ connectionString })
-}
-
 // ── Client singleton ──
 
 const globalForPrismaBase = globalThis as unknown as {
   prismaBase: PrismaClient | undefined
 }
 
-let _client: PrismaClient | undefined
-
 function getClient(): PrismaClient {
-  if (_client) return _client
-
+  const connectionString = getDatabaseUrl()
+  const adapter = createAdapter(connectionString)
   const isDev = process.env.NODE_ENV === 'development'
-  const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build'
-  const isProd = process.env.NODE_ENV === 'production'
 
-  const dbConnectionString = isDev
-    ? process.env.LOCAL_DATABASE_URL || process.env.DATABASE_URL || process.env.DIRECT_URL
-    : process.env.DATABASE_URL || process.env.DIRECT_URL
-
-  // Proxy fallback when no connection string
-  if (!dbConnectionString) {
-    if (isBuildTime || isProd) {
-      const proxy = new Proxy({} as PrismaClient, {
-        get(_target, prop) {
-          if (prop === '$connect' || prop === '$disconnect') return async () => {}
-          throw new Error(
-            '[DB_BASE] DATABASE_URL not set. Add it in Vercel dashboard → Settings → Environment Variables.'
-          )
-        },
-      })
-      _client = proxy
-      return proxy
-    }
-    throw new Error('[DB_BASE] DATABASE_URL is missing.')
-  }
-
-  const isNeonConnection = new URL(
-    dbConnectionString.replace('postgresql://', 'postgres://')
-  ).hostname.endsWith('.neon.tech')
-
-  const isVercel = Boolean(process.env.VERCEL)
-  const useLocalNeonAdapter = isDev && !isVercel && isNeonConnection
-
-  const adapter = useLocalNeonAdapter
-    ? createLocalNeonAdapter(dbConnectionString)
-    : createPgAdapter(dbConnectionString)
-
-  _client = new PrismaClient({
+  return new PrismaClient({
     adapter,
     log: isDev ? ['error', 'warn'] : ['error'],
   })
-
-  return _client
 }
 
-export const prismaBase = globalForPrismaBase.prismaBase ?? getClient()
+let _client: PrismaClient | undefined
+
+function getOrCreateClient(): PrismaClient {
+  // Build-time stub — never actually used for queries
+  if (process.env.NEXT_PHASE === 'phase-production-build') {
+    if (!_client) {
+      _client = new Proxy({} as PrismaClient, {
+        get(_target, prop) {
+          if (prop === '$connect' || prop === '$disconnect') return async () => {}
+          if (prop === 'then') return undefined // not a promise
+          throw new Error(
+            '[DB_BASE] Prisma queries are not available during build time. DATABASE_URL must be set for runtime.'
+          )
+        },
+      })
+    }
+    return _client
+  }
+
+  return getClient()
+}
+
+export const prismaBase = globalForPrismaBase.prismaBase ?? getOrCreateClient()
 
 if (process.env.NODE_ENV !== 'production') {
   globalForPrismaBase.prismaBase = prismaBase
