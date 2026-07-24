@@ -441,11 +441,52 @@ The `docs/` tree is organised into four sections — **architecture/**, **guides
 
 The canonical doc index is `docs/README.md` for humans; `docs/html/index.html` for browsers.
 
+## Environment Variables & Security (CRITICAL)
+
+### ⚠️ Historical Lessons (2026-07-24) — Read Before Modifying Env Vars
+
+The following problems were discovered and fixed. **Do not reintroduce them.**
+
+| #   | Problem                                                                                                            | Fix                                                                              | Guard                                                                       |
+| --- | ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 1   | `.env.production` loaded from disk at runtime on Vercel — unreliable on serverless                                 | `DATABASE_URL` set in Vercel Dashboard only                                      | `getDatabaseUrl()` in `lib/prisma/db-base.ts` throws immediately if missing |
+| 2   | Fallback chain `LOCAL_DATABASE_URL \|\| DATABASE_URL \|\| DIRECT_URL` with opposite priority in `prisma.config.ts` | Single source of truth: `DATABASE_URL` is primary                                | `prisma.config.ts` uses `DATABASE_URL \|\| DIRECT_URL` (consistent)         |
+| 3   | Build-time proxy stub threw on `$extends()` during module evaluation                                               | Recursive proxy stub allows ANY property access, only throws on query invocation | `createBuildTimeStub()` in `lib/prisma/db-base.ts`                          |
+| 4   | `.env`, `.env.production`, `.env.staging` committed to git with live secrets                                       | `.gitignore` blocks ALL `.env*` except `.env.example`; removed from tracking     | `.gitignore` line: `.env*` + `!.env.example`                                |
+| 5   | `lib/env.ts` had no `server-only` guard — could leak secrets to client bundle                                      | Added `import 'server-only'` to `lib/env.ts` and all `lib/prisma/*.ts` files     | Next.js build error if client component imports these                       |
+
+### 🔒 Rules for Environment Variables
+
+1. **NEVER** load `.env` files from disk at runtime — Vercel injects env vars natively
+2. **NEVER** add silent fallbacks for `DATABASE_URL` — fail fast with a clear error
+3. **NEVER** commit `.env*` files with secrets to git — only `.env.example` is allowed
+4. **ALWAYS** add `import 'server-only'` to any file that reads server-side secrets
+5. **ALWAYS** add new env vars to BOTH the Zod schema AND the `processEnv` object in `lib/env.ts`
+6. **NEVER** use opposite URL priority order — `DATABASE_URL` is always primary
+7. **NEXT*PUBLIC*\*** vars are safe for client-side — everything else is server-only
+8. If modifying the build-time stub in `db-base.ts`, test that `$extends()` chaining works
+
+### Where to Set Env Vars
+
+| Environment             | Where to Set                                          |
+| ----------------------- | ----------------------------------------------------- |
+| **Production (Vercel)** | Vercel Dashboard → Settings → Environment Variables   |
+| **Preview (Vercel)**    | Vercel Dashboard → Settings → Environment Variables   |
+| **Local Development**   | `.env` file (listed in `.gitignore`, never committed) |
+| **CI/CD**               | GitHub Actions secrets or Vercel CLI                  |
+
+### Key Files
+
+- `lib/env.ts` — Zod schema + validation for ALL env vars (server-only)
+- `lib/prisma/db-base.ts` — Database connection with fail-fast on missing `DATABASE_URL`
+- `prisma.config.ts` — Prisma CLI config (uses `DATABASE_URL \|\| DIRECT_URL`)
+- `.gitignore` — Blocks all `.env*` files except `.env.example`
+- `.env.example` — Template with placeholder values (safe to commit)
+
 ## Build & Deploy
 
 - `output: 'standalone'` in `next.config.ts` (Docker/standalone builds)
 - Security headers applied globally (X-Frame-Options, CSP, HSTS, etc.)
-- `next.config.ts` has permanent redirects for legacy course URLs → new nested paths
 
 ## Verification
 
