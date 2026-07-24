@@ -13,11 +13,16 @@ import { PrismaClient } from '@prisma/client'
  * stall against a remote Neon URL.
  */
 
-// Explicitly load .env (and .env.local) — `import 'dotenv/config'` is
+// Explicitly load .env files — `import 'dotenv/config'` is
 // unreliable in ESM/Next.js standalone builds.
+// Order matters: later files override earlier ones.
 const envDir = path.resolve(process.cwd())
 dotenv.config({ path: path.join(envDir, '.env') })
 dotenv.config({ path: path.join(envDir, '.env.local') })
+// Load .env.production when NODE_ENV is production (Vercel build)
+if (process.env.NODE_ENV === 'production') {
+  dotenv.config({ path: path.join(envDir, '.env.production'), override: true })
+}
 
 const require = createRequire(import.meta.url)
 
