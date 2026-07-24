@@ -65,6 +65,85 @@ function createAdapter(connectionString: string) {
   return new PrismaPg(pool)
 }
 
+// ── Build-time stub ──
+
+/**
+ * Creates a recursive proxy that allows arbitrary property access
+ * (for module evaluation during build) but throws when a query method
+ * is actually invoked.
+ */
+function createBuildTimeStub(): PrismaClient {
+  const ERR_MSG =
+    '[DB_BASE] Prisma queries are not available during build time. DATABASE_URL must be set for runtime.'
+
+  const throwOnQuery = () => {
+    throw new Error(ERR_MSG)
+  }
+
+  /**
+   * Recursive handler that returns a stub function for any property.
+   * The stub function throws when called (actual query invocation).
+   * But accessing properties (model names, nested fields) returns another proxy.
+   */
+  const createModelHandler = (): ProxyHandler<object> => ({
+    get(_target, prop, _receiver) {
+      // Allow `then` so stub isn't treated as a thenable/promise
+      if (prop === 'then') return undefined
+      // Allow symbols
+      if (typeof prop === 'symbol') return undefined
+      // Allow constructor/prototype
+      if (prop === 'constructor' || prop === '__proto__' || prop === 'prototype') return undefined
+      // Allow toString/valueOf/whatever introspection
+      if (prop === 'toJSON' || prop === 'toString' || prop === 'valueOf')
+        return () => '[PrismaClient Build Stub]'
+
+      // For string property access, return a stub function that throws on invocation
+      // But the stub itself also needs to support further property access
+      // (e.g., prisma.user.findMany → first access `user`, then `findMany`)
+      const fn = (...args: unknown[]) => {
+        // $extends() returning a PrismaClient is okay — return ourselves
+        if (prop === '$extends') return buildStub
+        // $connect/$disconnect are no-ops during build
+        if (prop === '$connect' || prop === '$disconnect') return
+        // $use/$on are no-ops during build
+        if (prop === '$use' || prop === '$on') return buildStub
+        // $transaction: if called with a function, execute it; otherwise return array
+        if (prop === '$transaction') {
+          if (args.length === 1 && typeof args[0] === 'function') {
+            return args[0](buildStub)
+          }
+          return Promise.resolve(args)
+        }
+        // Any actual Prisma query (findMany, findUnique, create, etc.) → throw
+        throwOnQuery()
+      }
+
+      return new Proxy(fn, {
+        apply(target, _thisArg, args) {
+          return target(...args)
+        },
+        get(target, p) {
+          // If accessing a property on the function itself (e.g., fn.then)
+          if (p === 'then') return undefined
+          if (typeof p === 'symbol') return undefined
+          // Return another recursive stub for nested property access
+          // (e.g., prisma.user.findMany({ where: { ... } }) → `user` returns a proxy,
+          //  `findMany` returns a proxy, calling it (args) triggers throw)
+          return target
+        },
+      })
+    },
+
+    apply(_target, _thisArg, _args) {
+      // If someone tries to call the top-level proxy as a function
+      throwOnQuery()
+    },
+  })
+
+  const buildStub = new Proxy({}, createModelHandler()) as unknown as PrismaClient
+  return buildStub
+}
+
 // ── Client singleton ──
 
 const globalForPrismaBase = globalThis as unknown as {
@@ -85,18 +164,11 @@ function getClient(): PrismaClient {
 let _client: PrismaClient | undefined
 
 function getOrCreateClient(): PrismaClient {
-  // Build-time stub — never actually used for queries
+  // During build time, return a stub that allows module evaluation
+  // but throws on actual query invocation
   if (process.env.NEXT_PHASE === 'phase-production-build') {
     if (!_client) {
-      _client = new Proxy({} as PrismaClient, {
-        get(_target, prop) {
-          if (prop === '$connect' || prop === '$disconnect') return async () => {}
-          if (prop === 'then') return undefined // not a promise
-          throw new Error(
-            '[DB_BASE] Prisma queries are not available during build time. DATABASE_URL must be set for runtime.'
-          )
-        },
-      })
+      _client = createBuildTimeStub()
     }
     return _client
   }
