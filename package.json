@@ -62,7 +62,7 @@
     "@react-pdf/renderer": "^4.5.1",
     "@simplewebauthn/browser": "^13.3.0",
     "@simplewebauthn/server": "^13.3.2",
-    "@supabase/ssr": "^0.10.3",
+    "@supabase/ssr": "^0.12.0",
     "@supabase/supabase-js": "^2.110.8",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/typography": "^0.5.20",
