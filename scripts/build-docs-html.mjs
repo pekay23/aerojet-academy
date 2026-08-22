@@ -264,7 +264,17 @@ ${layoutClose}
 // ── Extra CSS for the doc site (TOC + index grid) ────────────────────────
 const SITE_CSS = `/* TOC sidebar + index grid extensions to the base tokens. */
 
-.he-shell--wide { max-width: var(--col-wide); }
+/* Full-width docs shell.
+   design-tokens.css caps the shell at --col-default (880px) / --col-wide (1080px).
+   docs.css is linked after it, so these rules win. Horizontal padding is kept so
+   text never sits flush against the viewport edge. */
+.he-shell,
+.he-shell--narrow,
+.he-shell--wide {
+  max-width: none;
+  padding-left: var(--sp-6);
+  padding-right: var(--sp-6);
+}
 
 .he-layout {
   display: grid;
