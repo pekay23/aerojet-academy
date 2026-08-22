@@ -28,11 +28,384 @@
   <h1 class="he-title">02 · Color tokens</h1>
   <p class="he-deck">The Aerojet palette is split into three layers, all defined in <code>app/globals.css</code> and exported as Tailwind utilities through <code>tailwind.config.ts</code>…</p>
 </header>
-<p>background-light   → #f6f6f8
+<ol>
+<li><strong>shadcn/ui semantic palette</strong> (the portal default) — comes from the
+<code>slate</code> base, with a <code>.dark</code> class on <code>&lt;html&gt;</code> to invert.</li>
+<li><strong>Aerojet brand palette</strong> — six <code>--aero-*</code> CSS variables used on the
+public marketing surface.</li>
+<li><strong>Public-site palette</strong> — three <code>--public-*</code> variables used in the
+nav, footer, and CTA buttons.</li>
+</ol>
+<p>There are also a handful of <strong>hard-coded hex surfaces</strong> used on the live
+homepage and in design-lab variants.</p>
+<hr>
+
+<section class="he-section" id="21-shadcnui-semantic-palette">
+  <div class="he-section__num">01 · 2.1 · shadcn/ui semantic palette</div>
+  <h2 class="he-section__title">2.1 · shadcn/ui semantic palette</h2><table>
+<thead>
+<tr>
+<th>Tailwind class</th>
+<th>CSS var</th>
+<th>Light HSL</th>
+<th>Dark HSL</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>bg-background</code></td>
+<td><code>--background</code></td>
+<td><code>0 0% 100%</code></td>
+<td><code>222.2 84% 4.9%</code></td>
+<td>Page bg</td>
+</tr>
+<tr>
+<td><code>text-foreground</code></td>
+<td><code>--foreground</code></td>
+<td><code>222.2 84% 4.9%</code></td>
+<td><code>210 40% 98%</code></td>
+<td>Default text</td>
+</tr>
+<tr>
+<td><code>bg-card</code> / <code>text-card-foreground</code></td>
+<td><code>--card</code></td>
+<td><code>0 0% 100%</code></td>
+<td><code>222.2 84% 4.9%</code></td>
+<td>Card surface</td>
+</tr>
+<tr>
+<td><code>bg-popover</code></td>
+<td><code>--popover</code></td>
+<td><code>0 0% 100%</code></td>
+<td><code>222.2 84% 4.9%</code></td>
+<td>Popover, dropdown, sheet</td>
+</tr>
+<tr>
+<td><code>bg-primary</code></td>
+<td><code>--primary</code></td>
+<td><code>222.2 47.4% 11.2%</code></td>
+<td><code>210 40% 98%</code></td>
+<td>Primary action / brand chrome</td>
+</tr>
+<tr>
+<td><code>text-primary-foreground</code></td>
+<td><code>--primary-foreground</code></td>
+<td><code>210 40% 98%</code></td>
+<td><code>222.2 47.4% 11.2%</code></td>
+<td>Text on primary</td>
+</tr>
+<tr>
+<td><code>bg-secondary</code></td>
+<td><code>--secondary</code></td>
+<td><code>210 40% 96.1%</code></td>
+<td><code>217.2 32.6% 17.5%</code></td>
+<td>Secondary surface</td>
+</tr>
+<tr>
+<td><code>bg-muted</code></td>
+<td><code>--muted</code></td>
+<td><code>210 40% 96.1%</code></td>
+<td><code>217.2 32.6% 17.5%</code></td>
+<td>Muted surface</td>
+</tr>
+<tr>
+<td><code>text-muted-foreground</code></td>
+<td><code>--muted-foreground</code></td>
+<td><code>215.4 16.3% 35%</code></td>
+<td><code>215 20.2% 75%</code></td>
+<td>Captions, helper text (contrast tuned)</td>
+</tr>
+<tr>
+<td><code>bg-accent</code></td>
+<td><code>--accent</code></td>
+<td><code>210 40% 96.1%</code></td>
+<td><code>217.2 32.6% 17.5%</code></td>
+<td>Hover/active accent</td>
+</tr>
+<tr>
+<td><code>bg-destructive</code></td>
+<td><code>--destructive</code></td>
+<td><code>0 84.2% 60.2%</code></td>
+<td><code>0 62.8% 30.6%</code></td>
+<td>Destructive / error</td>
+</tr>
+<tr>
+<td><code>border-border</code></td>
+<td><code>--border</code></td>
+<td><code>214.3 31.8% 91.4%</code></td>
+<td><code>217.2 32.6% 17.5%</code></td>
+<td>Default 1px border</td>
+</tr>
+<tr>
+<td><code>ring-ring</code></td>
+<td><code>--ring</code></td>
+<td><code>222.2 84% 4.9%</code></td>
+<td><code>212.7 26.8% 83.9%</code></td>
+<td>Focus ring</td>
+</tr>
+</tbody></table>
+<blockquote><p><code>muted-foreground</code> is <strong>deliberately darker than the shadcn default
+(35% instead of 46.9%)</strong> in light mode, and lighter in dark mode, to
+clear WCAG 4.5:1 for body text.</p>
+</blockquote><hr>
+
+<section class="he-section" id="22-sidebar-tokens">
+  <div class="he-section__num">02 · 2.2 · Sidebar tokens</div>
+  <h2 class="he-section__title">2.2 · Sidebar tokens</h2><table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Light</th>
+<th>Dark</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--sidebar-background</code></td>
+<td><code>222 47% 11%</code></td>
+<td><code>222 47% 5%</code></td>
+</tr>
+<tr>
+<td><code>--sidebar-foreground</code></td>
+<td><code>210 40% 98%</code></td>
+<td><code>210 40% 98%</code></td>
+</tr>
+<tr>
+<td><code>--sidebar-primary</code></td>
+<td><code>217 91% 60%</code></td>
+<td><code>217 91% 60%</code></td>
+</tr>
+<tr>
+<td><code>--sidebar-primary-foreground</code></td>
+<td><code>222 47% 11%</code></td>
+<td><code>222 47% 5%</code></td>
+</tr>
+<tr>
+<td><code>--sidebar-accent</code></td>
+<td><code>217 33% 17%</code></td>
+<td><code>217 33% 12%</code></td>
+</tr>
+<tr>
+<td><code>--sidebar-accent-foreground</code></td>
+<td><code>210 40% 98%</code></td>
+<td><code>210 40% 98%</code></td>
+</tr>
+<tr>
+<td><code>--sidebar-border</code></td>
+<td><code>217 33% 17%</code></td>
+<td><code>217 33% 12%</code></td>
+</tr>
+<tr>
+<td><code>--sidebar-ring</code></td>
+<td><code>217.2 91.2% 59.8%</code></td>
+<td>same</td>
+</tr>
+</tbody></table>
+<p>Reached via <code>bg-sidebar</code>, <code>text-sidebar-foreground</code>, <code>border-sidebar-border</code>,
+etc.</p>
+<hr>
+
+<section class="he-section" id="23-aerojet-brand-tokens-light">
+  <div class="he-section__num">03 · 2.3 · Aerojet brand tokens (light)</div>
+  <h2 class="he-section__title">2.3 · Aerojet brand tokens (light)</h2><p>Declared under <code>:root</code> and overridden in <code>.dark</code>. Use these on the <strong>public
+marketing surface</strong>, not inside portal chrome.</p>
+<table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Light HSL</th>
+<th>Hex</th>
+<th>Tailwind class</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Aerojet blue</td>
+<td><code>213 100% 18%</code></td>
+<td><code>#002a5c</code></td>
+<td><code>text-aerojet-blue</code> / <code>bg-aerojet-blue</code></td>
+</tr>
+<tr>
+<td>Aerojet sky</td>
+<td><code>210 82% 45%</code></td>
+<td><code>#1f7ad6</code></td>
+<td><code>text-aerojet-sky</code> / <code>bg-aerojet-sky</code></td>
+</tr>
+<tr>
+<td>Aerojet light</td>
+<td><code>204 65% 40%</code></td>
+<td><code>#2e7eb3</code></td>
+<td><code>text-aerojet-light</code></td>
+</tr>
+<tr>
+<td>Aerojet soft-blue</td>
+<td><code>210 100% 40%</code></td>
+<td><code>#0066ff</code></td>
+<td><code>text-aerojet-soft-blue</code></td>
+</tr>
+<tr>
+<td>Aerojet slate</td>
+<td><code>210 29% 24%</code></td>
+<td><code>#2c3e50</code></td>
+<td><code>text-aerojet-slate</code></td>
+</tr>
+<tr>
+<td>Aerojet offwhite</td>
+<td><code>0 0% 98%</code></td>
+<td><code>#f9f9f9</code></td>
+<td><code>bg-aerojet-offwhite</code></td>
+</tr>
+</tbody></table>
+<h3 id="dark-mode-overrides-dark">Dark-mode overrides (<code>.dark</code>)</h3><table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Dark HSL</th>
+<th>Hex</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--aero-blue</code></td>
+<td><code>213 100% 30%</code></td>
+<td><code>#0050b0</code></td>
+</tr>
+<tr>
+<td><code>--aero-sky</code></td>
+<td><code>210 82% 75%</code></td>
+<td><code>#a0c8f5</code></td>
+</tr>
+<tr>
+<td><code>--aero-light</code></td>
+<td><code>204 65% 60%</code></td>
+<td><code>#5fa6d4</code></td>
+</tr>
+<tr>
+<td><code>--aero-soft-blue</code></td>
+<td><code>210 100% 60%</code></td>
+<td><code>#66b3ff</code></td>
+</tr>
+<tr>
+<td><code>--aero-slate</code></td>
+<td><code>210 29% 45%</code></td>
+<td><code>#6585a3</code></td>
+</tr>
+<tr>
+<td><code>--aero-offwhite</code></td>
+<td><code>222 47% 11%</code></td>
+<td><code>#101e35</code></td>
+</tr>
+</tbody></table>
+<hr>
+
+<section class="he-section" id="24-public-site-tokens">
+  <div class="he-section__num">04 · 2.4 · Public-site tokens</div>
+  <h2 class="he-section__title">2.4 · Public-site tokens</h2><table>
+<thead>
+<tr>
+<th>Token</th>
+<th>Value</th>
+<th>Tailwind class</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>--public-primary</code></td>
+<td><code>211 100% 18%</code></td>
+<td><code>bg-public-primary</code></td>
+<td>Footer / dark CTAs</td>
+</tr>
+<tr>
+<td><code>--public-secondary</code></td>
+<td><code>212 82% 61%</code></td>
+<td><code>bg-public-secondary</code></td>
+<td>Accent CTA in public nav</td>
+</tr>
+<tr>
+<td><code>--public-dark</code></td>
+<td><code>216 34% 25%</code></td>
+<td><code>bg-public-dark</code></td>
+<td>Footer surface</td>
+</tr>
+</tbody></table>
+<blockquote><p>These three are <strong>identical between light and dark</strong> in the current CSS
+(the <code>.dark</code> block re-declares them at the same HSL). If you want a true
+dark nav/footer, override <code>--public-*</code> in the <code>.dark</code> block.</p>
+</blockquote><hr>
+
+<section class="he-section" id="25-hard-coded-page-surfaces-not-in-css-vars">
+  <div class="he-section__num">05 · 2.5 · Hard-coded page surfaces (not in CSS vars)</div>
+  <h2 class="he-section__title">2.5 · Hard-coded page surfaces (not in CSS vars)</h2><p>Used on the editorial live homepage and the design-lab variants.</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Hex</th>
+<th>Used in</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>bg-paper</code></td>
+<td><code>#f7f3ec</code></td>
+<td><code>(public)</code> editorial page bg</td>
+</tr>
+<tr>
+<td><code>bg-paper-dark</code></td>
+<td><code>#efe8dc</code></td>
+<td><code>(public)</code> editorial hover row</td>
+</tr>
+<tr>
+<td><code>bg-[#0a1628]</code></td>
+<td><code>#0a1628</code></td>
+<td>Hero variants A / D</td>
+</tr>
+<tr>
+<td><code>bg-[#0b0e13]</code></td>
+<td><code>#0b0e13</code></td>
+<td>Hero variant B</td>
+</tr>
+<tr>
+<td><code>bg-[#f7f3ec]</code></td>
+<td><code>#f7f3ec</code></td>
+<td>Hero variant C</td>
+</tr>
+<tr>
+<td><code>text-[#1b2430]</code></td>
+<td><code>#1b2430</code></td>
+<td>Editorial body text (Variant C / live)</td>
+</tr>
+<tr>
+<td><code>text-[#0a1628]</code></td>
+<td><code>#0a1628</code></td>
+<td>Editorial body text (Variant E)</td>
+</tr>
+<tr>
+<td><code>bg-[#FF4F33]</code></td>
+<td><code>#FF4F33</code></td>
+<td>Calendar &quot;+&quot; CTA on dark variant</td>
+</tr>
+<tr>
+<td><code>bg-[#E6462D]</code></td>
+<td><code>#E6462D</code></td>
+<td>Calendar &quot;+&quot; hover</td>
+</tr>
+</tbody></table>
+<hr>
+
+<section class="he-section" id="26-tailwind-class-css-var-hsl-quick-lookup">
+  <div class="he-section__num">06 · 2.6 · Tailwind class → CSS var → HSL quick lookup</div>
+  <h2 class="he-section__title">2.6 · Tailwind class → CSS var → HSL quick lookup</h2><pre><code>aerojet-blue       → hsl(var(--aero-blue))      → 213 100% 18%
+aerojet-sky        → hsl(var(--aero-sky))       → 210  82% 45%
+aerojet-light      → hsl(var(--aero-light))     → 204  65% 40%
+aerojet-soft-blue  → hsl(var(--aero-soft-blue)) → 210 100% 40%
+aerojet-slate      → hsl(var(--aero-slate))     → 210  29% 24%
+aerojet-offwhite   → hsl(var(--aero-offwhite))  →   0   0% 98%
+
+public-primary     → hsl(var(--public-primary))    → 211 100% 18%
+public-secondary   → hsl(var(--public-secondary))  → 212  82% 61%
+public-dark        → hsl(var(--public-dark))       → 216  34% 25%
+
+background-light   → #f6f6f8
 background-dark    → #101622
 paper              → #f7f3ec
-paper-dark         → #efe8dc</p>
-<pre><code>
+paper-dark         → #efe8dc
 </code></pre>
 
 </main>

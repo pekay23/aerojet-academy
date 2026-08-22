@@ -28,7 +28,7 @@
   <h1 class="he-title">API Reference</h1>
   <p class="he-deck">Base URL: <code>/api</code> — all routes are Next.js App Router route handlers under <code>app/api/**/route.ts</code>. Server Actions (in <code>app/**/actions.ts</code>) handle most portal mutations and are not exposed as REST routes.…</p>
 </header>
-<p>This document was last regenerated against the codebase on <strong>2026-06-04</strong>.
+<p>This document was last regenerated against the codebase on <strong>2026-07-23</strong>.
 For the canonical list, run <code>find app/api -name 'route.ts' | sort</code> and cross-
 reference the source.</p>
 
@@ -55,8 +55,15 @@ reference the source.</p>
 <li><code>GET/POST /api/public/courses</code> — Public course catalog (read)</li>
 </ul>
 
+<section class="he-section" id="image-proxy-auth-gated">
+  <div class="he-section__num">03 · Image Proxy (auth-gated)</div>
+  <h2 class="he-section__title">Image Proxy (auth-gated)</h2><ul>
+<li><code>GET /api/images/proxy</code> — Auth-gated image proxy. Requires valid session. Optional <code>scope</code> param enforces role-based access (<code>students</code>, <code>resources</code>, <code>staff</code>, <code>profile-photos</code>). Fetches via active storage adapter. Optional <code>w</code> (width) and <code>q</code> (quality 1–100) params for server-side resize. Returns image with <code>Cache-Control: private, max-age=3600</code>.</li>
+<li><code>GET /api/images/transform</code> — Staff-only image transformation. Same auth as proxy plus staff role check. Adds sharp processing: watermark overlay (<code>© Aerojet Academy</code>), EXIF stripping, format conversion (<code>webp</code>/<code>jpeg</code>/<code>png</code>/<code>avif</code>). Query params: <code>url</code> (required), <code>w</code>, <code>watermark</code>, <code>strip</code>, <code>q</code>, <code>format</code>.</li>
+</ul>
+
 <section class="he-section" id="admin-superadmin-only">
-  <div class="he-section__num">03 · Admin (SUPER_ADMIN only)</div>
+  <div class="he-section__num">04 · Admin (SUPER_ADMIN only)</div>
   <h2 class="he-section__title">Admin (SUPER_ADMIN only)</h2><ul>
 <li><code>/api/admin/*</code> — Super-admin only routes for org-wide settings</li>
 <li><code>/api/admin/backup</code> — Trigger DB backup</li>
@@ -65,7 +72,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="applicant-applicant-role">
-  <div class="he-section__num">04 · Applicant (APPLICANT role)</div>
+  <div class="he-section__num">05 · Applicant (APPLICANT role)</div>
   <h2 class="he-section__title">Applicant (APPLICANT role)</h2><ul>
 <li><code>GET /api/applicant/dashboard</code> — Dashboard</li>
 <li><code>GET /api/applicant/courses</code> — Browse courses</li>
@@ -82,7 +89,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="student-student-role">
-  <div class="he-section__num">05 · Student (STUDENT role)</div>
+  <div class="he-section__num">06 · Student (STUDENT role)</div>
   <h2 class="he-section__title">Student (STUDENT role)</h2><ul>
 <li><code>GET /api/student/dashboard</code> — Full dashboard</li>
 <li><code>GET /api/student/wallet</code> — Wallet balance</li>
@@ -107,7 +114,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="instructor-instructor-role">
-  <div class="he-section__num">06 · Instructor (INSTRUCTOR role)</div>
+  <div class="he-section__num">07 · Instructor (INSTRUCTOR role)</div>
   <h2 class="he-section__title">Instructor (INSTRUCTOR role)</h2><ul>
 <li><code>GET /api/instructor/dashboard</code></li>
 <li><code>GET /api/instructor/classes</code> — My classes</li>
@@ -118,7 +125,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="staff-staffadminsuperadmin">
-  <div class="he-section__num">07 · Staff (STAFF/ADMIN/SUPER_ADMIN)</div>
+  <div class="he-section__num">08 · Staff (STAFF/ADMIN/SUPER_ADMIN)</div>
   <h2 class="he-section__title">Staff (STAFF/ADMIN/SUPER_ADMIN)</h2><ul>
 <li><code>GET/POST /api/staff/users</code> — List/create</li>
 <li><code>GET/PUT/DELETE /api/staff/users/[id]</code> — User CRUD</li>
@@ -159,7 +166,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="cron-requires-cronsecret-in-authorization-bearer">
-  <div class="he-section__num">08 · Cron (requires CRON_SECRET in Authorization: Bearer …)</div>
+  <div class="he-section__num">09 · Cron (requires CRON_SECRET in Authorization: Bearer …)</div>
   <h2 class="he-section__title">Cron (requires <code>CRON_SECRET</code> in <code>Authorization: Bearer …</code>)</h2><ul>
 <li><code>GET /api/cron/check-pools</code> — Fail expired pools</li>
 <li><code>GET /api/cron/check-events</code> — Update event statuses</li>
@@ -180,7 +187,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="me-self-service-any-authed-user">
-  <div class="he-section__num">09 · Me (self-service, any authed user)</div>
+  <div class="he-section__num">10 · Me (self-service, any authed user)</div>
   <h2 class="he-section__title">Me (self-service, any authed user)</h2><ul>
 <li><code>POST /api/me/heartbeat</code> — Update presence (called every 30s)</li>
 <li><code>PATCH /api/me/privacy</code> — Toggle privacy settings</li>
@@ -188,7 +195,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="search-messaging-calendar">
-  <div class="he-section__num">10 · Search, messaging, calendar</div>
+  <div class="he-section__num">11 · Search, messaging, calendar</div>
   <h2 class="he-section__title">Search, messaging, calendar</h2><ul>
 <li><code>GET /api/search</code> — Global search (cmdk)</li>
 <li><code>/api/messages/*</code> — Internal messages</li>
@@ -197,7 +204,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="files-uploads">
-  <div class="he-section__num">11 · Files / uploads</div>
+  <div class="he-section__num">12 · Files / uploads</div>
   <h2 class="he-section__title">Files / uploads</h2><ul>
 <li><code>/api/uploadthing/core</code> + <code>route.ts</code> — UploadThing file uploads</li>
 <li><code>POST /api/pdf/staff/*</code> — Staff PDF generation</li>
@@ -206,7 +213,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="webhooks">
-  <div class="he-section__num">12 · Webhooks</div>
+  <div class="he-section__num">13 · Webhooks</div>
   <h2 class="he-section__title">Webhooks</h2><ul>
 <li><code>POST /api/webhooks/resend</code> — Resend email events</li>
 <li><code>POST /api/webhooks/stripe</code> — Stripe payment events</li>
@@ -214,7 +221,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="misc">
-  <div class="he-section__num">13 · Misc</div>
+  <div class="he-section__num">14 · Misc</div>
   <h2 class="he-section__title">Misc</h2><ul>
 <li><code>GET /api/exchange-rates</code> — Public FX rates</li>
 <li><code>GET /api/payment-methods</code> + <code>/api/payment-methods/active</code></li>
@@ -224,7 +231,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="server-actions-internal-api">
-  <div class="he-section__num">14 · Server Actions (internal API)</div>
+  <div class="he-section__num">15 · Server Actions (internal API)</div>
   <h2 class="he-section__title">Server Actions (internal API)</h2><p>Primary data-mutation path for portal interfaces. Located in
 <code>app/(portal)/actions.ts</code> and domain-specific <code>actions.ts</code> files.</p>
 <h3 id="staff-actions">Staff actions</h3><ul>
@@ -236,7 +243,7 @@ reference the source.</p>
 </ul>
 
 <section class="he-section" id="conventions">
-  <div class="he-section__num">15 · Conventions</div>
+  <div class="he-section__num">16 · Conventions</div>
   <h2 class="he-section__title">Conventions</h2><ul>
 <li>All mutation routes go through <code>withErrorHandler</code> (<code>lib/api/handler.ts</code>)
 which converts thrown <code>'Unauthorized'</code> / <code>'Forbidden'</code> to 401 / 403.</li>
@@ -255,6 +262,7 @@ with <code>limit</code> capped at 100 (<code>lib/api-helpers.ts</code>).</li>
   <ul>
     <li class="he-toc__l2"><a href="#auth-nextauth-helpers">Auth (NextAuth + helpers)</a></li>
     <li class="he-toc__l2"><a href="#public-no-auth">Public (no auth)</a></li>
+    <li class="he-toc__l2"><a href="#image-proxy-auth-gated">Image Proxy (auth-gated)</a></li>
     <li class="he-toc__l2"><a href="#admin-superadmin-only">Admin (SUPER_ADMIN only)</a></li>
     <li class="he-toc__l2"><a href="#applicant-applicant-role">Applicant (APPLICANT role)</a></li>
     <li class="he-toc__l2"><a href="#student-student-role">Student (STUDENT role)</a></li>

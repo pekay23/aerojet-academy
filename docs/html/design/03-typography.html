@@ -62,9 +62,13 @@ exposed as CSS variables on <code>&lt;html&gt;</code> (<code>app/layout.tsx</cod
 </tr>
 </tbody></table>
 <pre><code class="language-ts">// app/layout.tsx
-const inter    = Inter({ subsets: [&#39;latin&#39;], variable: &#39;--font-inter&#39;,    display: &#39;swap&#39; })
-const outfit   = Outfit({ subsets: [&#39;latin&#39;], variable: &#39;--font-outfit&#39;,   display: &#39;swap&#39; })
-const playfair = Playfair_Display({ subsets: [&#39;latin&#39;], variable: &#39;--font-playfair&#39;, display: &#39;swap&#39; })
+const inter = Inter({ subsets: [&#39;latin&#39;], variable: &#39;--font-inter&#39;, display: &#39;swap&#39; })
+const outfit = Outfit({ subsets: [&#39;latin&#39;], variable: &#39;--font-outfit&#39;, display: &#39;swap&#39; })
+const playfair = Playfair_Display({
+  subsets: [&#39;latin&#39;],
+  variable: &#39;--font-playfair&#39;,
+  display: &#39;swap&#39;,
+})
 </code></pre>
 
 <section class="he-section" id="32-tailwind-font-family-aliases">
