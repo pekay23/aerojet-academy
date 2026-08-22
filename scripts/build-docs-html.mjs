@@ -272,8 +272,8 @@ const SITE_CSS = `/* TOC sidebar + index grid extensions to the base tokens. */
 .he-shell--narrow,
 .he-shell--wide {
   max-width: none;
-  padding-left: var(--sp-6);
-  padding-right: var(--sp-6);
+  padding-left: clamp(var(--sp-5), 4vw, var(--sp-8));
+  padding-right: clamp(var(--sp-5), 4vw, var(--sp-8));
 }
 
 .he-layout {
