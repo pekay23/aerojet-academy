@@ -3,6 +3,7 @@
   "version": "1.0.82",
   "packageManager": "bun@1.4.0",
   "private": true,
+  "type": "module",
   "description": "Aerojet Aviation Training Academy - Complete Portal System",
   "scripts": {
     "dev": "next dev --turbo",
