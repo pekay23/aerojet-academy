@@ -21,7 +21,7 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { marked } from 'marked'
+
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -58,52 +58,50 @@ function slugify(text) {
 //   - emit numbered editorial section headers (01 · Title) for top-level h2s
 //   - give every h2/h3 an id for the TOC sidebar
 
-function buildRenderer() {
-  const renderer = new marked.Renderer()
+function buildMarkdownCallbacks() {
   let h2Counter = 0
 
-  renderer.heading = ({ tokens, depth }) => {
-    const text = marked.Parser.parseInline(tokens)
-    const plain = tokens.map((t) => t.text || '').join('')
-    const id = slugify(plain)
-    if (depth === 2) {
-      h2Counter += 1
-      const num = String(h2Counter).padStart(2, '0')
-      return `
-<section class="he-section" id="${id}">
-  <div class="he-section__num">${num} · ${escapeHtml(plain)}</div>
-  <h2 class="he-section__title">${text}</h2>`
-    }
-    return `<h${depth} id="${id}">${text}</h${depth}>`
+  const escape = (s) =>
+    String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+
+  return {
+    resetCounter: () => {
+      h2Counter = 0
+    },
+    render: (md) =>
+      Bun.markdown.render(
+        md,
+        {
+          heading: (children, { level }) => {
+            const plain = children.replace(/<[^>]+>/g, '').trim()
+            const id = slugify(plain)
+            if (level === 2) {
+              h2Counter += 1
+              const num = String(h2Counter).padStart(2, '0')
+              return `<section class="he-section" id="${id}"><div class="he-section__num">${num} · ${escape(plain)}</div><h2 class="he-section__title">${children}</h2>`
+            }
+            return `<h${level} id="${id}">${children}</h${level}>`
+          },
+          link: (children, { href, title }) => {
+            let finalHref = href
+            if (finalHref && /\.md(#|$)/i.test(finalHref) && !/^https?:/i.test(finalHref)) {
+              finalHref = finalHref.replace(/\.md(?=#|$)/i, '.html')
+            }
+            const titleAttr = title ? ` title="${escape(title)}"` : ''
+            return `<a href="${escape(finalHref)}"${titleAttr}>${children}</a>`
+          },
+          codespan: (children) => `<code>${children}</code>`,
+          blockquote: (children) => {
+            const isPull = /^<p><strong>/.test(children.trim())
+            return isPull
+              ? `<blockquote class="he-pull">${children}</blockquote>`
+              : `<blockquote>${children}</blockquote>`
+          },
+        },
+        { gfm: true },
+      ),
+    renderInline: (md) => Bun.markdown.html(md),
   }
-
-  // We don't auto-close sections; leaving them open is fine — the next
-  // <section> opens before the prior one closes, but visually each block
-  // has its top border so the seam is invisible. Real fix: process the AST,
-  // not the rendered tokens. Acceptable trade-off for a build script.
-
-  renderer.link = ({ href, title, tokens }) => {
-    const text = marked.Parser.parseInline(tokens)
-    let finalHref = href
-    if (finalHref && /\.md(#|$)/i.test(finalHref) && !/^https?:/i.test(finalHref)) {
-      finalHref = finalHref.replace(/\.md(?=#|$)/i, '.html')
-    }
-    const titleAttr = title ? ` title="${escapeHtml(title)}"` : ''
-    return `<a href="${escapeHtml(finalHref)}"${titleAttr}>${text}</a>`
-  }
-
-  renderer.codespan = ({ text }) => `<code>${escapeHtml(text)}</code>`
-
-  renderer.blockquote = ({ tokens }) => {
-    const body = marked.Parser.parse(tokens)
-    // Treat any blockquote starting with "**" as a pull-quote (serif)
-    const isPull = /^<p><strong>/.test(body.trim())
-    return isPull
-      ? `<blockquote class="he-pull">${body}</blockquote>`
-      : `<blockquote>${body}</blockquote>`
-  }
-
-  return { renderer, resetCounter: () => { h2Counter = 0 } }
 }
 
 // ── TOC extraction ───────────────────────────────────────────────────────
@@ -356,10 +354,10 @@ async function buildPage({ src, outPath, section, project, basePathToHtml }) {
   const toc = extractToc(md)
   const stripped = stripHeader(md)
 
-  const { renderer, resetCounter } = buildRenderer()
+  const { render, renderInline, resetCounter } = buildMarkdownCallbacks()
   resetCounter()
-  const body = marked.parse(stripped, { gfm: true, renderer })
-  const deckHtml = deckMarkdown ? marked.parseInline(deckMarkdown, { gfm: true }) : ''
+  const body = render(stripped)
+  const deckHtml = deckMarkdown ? renderInline(deckMarkdown) : ''
 
   const html = pageHtml({
     title,

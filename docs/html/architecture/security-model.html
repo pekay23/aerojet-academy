@@ -28,65 +28,20 @@
   <h1 class="he-title">Security Model</h1>
   
 </header>
-
-<section class="he-section" id="middleware-chain">
-  <div class="he-section__num">01 · Middleware Chain</div>
-  <h2 class="he-section__title">Middleware Chain</h2><pre><code>Request → middleware.ts
+<section class="he-section" id="middleware-chain"><div class="he-section__num">01 · Middleware Chain</div><h2 class="he-section__title">Middleware Chain</h2>Request → middleware.ts
   → Check if public route → allow
   → Get JWT token
   → Check account status (SUSPENDED/DEACTIVATED → login)
   → Check mustChangePassword → redirect to change-password
   → Check role matches portal prefix → forbid or allow
-</code></pre>
-
-<section class="he-section" id="role-based-access">
-  <div class="he-section__num">02 · Role-Based Access</div>
-  <h2 class="he-section__title">Role-Based Access</h2><table>
-<thead>
-<tr>
-<th>Portal</th>
-<th>Allowed Roles</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>/staff</td>
-<td>SUPER_ADMIN, ADMIN, STAFF</td>
-</tr>
-<tr>
-<td>/student</td>
-<td>STUDENT</td>
-</tr>
-<tr>
-<td>/applicant</td>
-<td>APPLICANT</td>
-</tr>
-<tr>
-<td>/instructor</td>
-<td>INSTRUCTOR</td>
-</tr>
-</tbody></table>
-
-<section class="he-section" id="api-security">
-  <div class="he-section__num">03 · API Security</div>
-  <h2 class="he-section__title">API Security</h2><ul>
-<li>All API routes verify session via <code>getServerSession()</code></li>
-<li>Staff routes check <code>isStaff(role)</code> or <code>isAdmin(role)</code></li>
-<li>Student routes verify <code>user.role === 'STUDENT'</code></li>
-<li>Cron routes require <code>Authorization: Bearer ${CRON_SECRET}</code></li>
-<li>Webhooks verify signatures (Stripe) or tokens (UploadThing)</li>
-</ul>
-
-<section class="he-section" id="pool-join-race-condition-prevention">
-  <div class="he-section__num">04 · Pool Join Race Condition Prevention</div>
-  <h2 class="he-section__title">Pool Join Race Condition Prevention</h2><pre><code class="language-sql">BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-SELECT * FROM &quot;ExamPool&quot; WHERE id = $1 FOR UPDATE;
+<section class="he-section" id="role-based-access"><div class="he-section__num">02 · Role-Based Access</div><h2 class="he-section__title">Role-Based Access</h2>PortalAllowed Roles/staffSUPER_ADMIN, ADMIN, STAFF/studentSTUDENT/applicantAPPLICANT/instructorINSTRUCTOR<section class="he-section" id="api-security"><div class="he-section__num">03 · API Security</div><h2 class="he-section__title">API Security</h2>All API routes verify session via <code>getServerSession()</code>Staff routes check <code>isStaff(role)</code> or <code>isAdmin(role)</code>Student routes verify <code>user.role === 'STUDENT'</code>Cron routes require <code>Authorization: Bearer ${CRON_SECRET}</code>Webhooks verify signatures (Stripe) or tokens (UploadThing)<section class="he-section" id="pool-join-race-condition-prevention"><div class="he-section__num">04 · Pool Join Race Condition Prevention</div><h2 class="he-section__title">Pool Join Race Condition Prevention</h2>BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+SELECT * FROM "ExamPool" WHERE id = $1 FOR UPDATE;
 -- Validate capacity, module diversity, wallet balance
 -- Reserve funds
 -- Create membership
 -- Increment member count atomically
--- Auto-confirm if &gt;= 25
+-- Auto-confirm if >= 25
 COMMIT;
-</code></pre>
 
 </main>
 
