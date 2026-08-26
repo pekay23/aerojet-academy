@@ -144,7 +144,7 @@ export default function FAQPage() {
           <div className="mt-12 mb-10 text-center">
             <h3 className="text-aerojet-blue mb-4 text-2xl font-bold">Still have questions?</h3>
             <p className="mb-8 text-lg text-slate-500">
-              Can't find the answer you're looking for? Chat to our friendly team.
+              Can't find the answer you're looking for? Send a message to our friendly team.
             </p>
             <Link
               href="/contact"
