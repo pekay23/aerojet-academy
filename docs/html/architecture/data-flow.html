@@ -28,10 +28,7 @@
   <h1 class="he-title">Data Flow</h1>
   
 </header>
-
-<section class="he-section" id="registration-activation">
-  <div class="he-section__num">01 · Registration → Activation</div>
-  <h2 class="he-section__title">Registration → Activation</h2><pre><code>User registers (public form)
+<section class="he-section" id="registration-activation"><div class="he-section__num">01 · Registration → Activation</div><h2 class="he-section__title">Registration → Activation</h2>User registers (public form)
   → Creates User (APPLICANT, PENDING)
   → Generates registrationCode (AERO-YYYY-XXXXXX)
   → User uploads payment proof
@@ -40,11 +37,7 @@
   → Generates academyEmail, tempPassword
   → Status → ACTIVE
   → Email sent with credentials
-</code></pre>
-
-<section class="he-section" id="applicant-student-promotion">
-  <div class="he-section__num">02 · Applicant → Student Promotion</div>
-  <h2 class="he-section__title">Applicant → Student Promotion</h2><pre><code>Applicant purchases course
+<section class="he-section" id="applicant-student-promotion"><div class="he-section__num">02 · Applicant → Student Promotion</div><h2 class="he-section__title">Applicant → Student Promotion</h2>Applicant purchases course
   → Creates Enrollment (PENDING) + Payment (PENDING)
   → Staff approves enrollment
   → If role == APPLICANT:
@@ -52,28 +45,19 @@
     → Creates StudentProfile + Wallet
     → Role → STUDENT
     → Email sent
-</code></pre>
-
-<section class="he-section" id="exam-pool-lifecycle">
-  <div class="he-section__num">03 · Exam Pool Lifecycle</div>
-  <h2 class="he-section__title">Exam Pool Lifecycle</h2><pre><code>Staff creates ExamEvent → creates ExamPools
+<section class="he-section" id="exam-pool-lifecycle"><div class="he-section__num">03 · Exam Pool Lifecycle</div><h2 class="he-section__title">Exam Pool Lifecycle</h2>Staff creates ExamEvent → creates ExamPools
   → Status: OPEN
   → Students join (€300 reserved per join)
   → At 23 members: NEAR_FULL
   → At 25 members: auto-CONFIRMED (funds captured)
   → Can accept up to 28 members
-  → Cron: if &lt;25 at T-21 days → FAILED (funds released)
+  → Cron: if <25 at T-21 days → FAILED (funds released)
   → Staff can manually confirm via Go/No-Go
-</code></pre>
-
-<section class="he-section" id="wallet-operations">
-  <div class="he-section__num">04 · Wallet Operations</div>
-  <h2 class="he-section__title">Wallet Operations</h2><pre><code>TOP_UP:    balance += amount
+<section class="he-section" id="wallet-operations"><div class="he-section__num">04 · Wallet Operations</div><h2 class="he-section__title">Wallet Operations</h2>TOP_UP:    balance += amount
 RESERVE:   reservedBalance += amount (available decreases)
 CAPTURE:   balance -= amount, reservedBalance -= amount
 RELEASE:   reservedBalance -= amount (available increases)
 REFUND:    balance += amount
-</code></pre>
 
 </main>
 

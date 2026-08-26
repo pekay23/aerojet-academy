@@ -26,138 +26,31 @@
 <header>
   <p class="he-eyebrow">Guides</p>
   <h1 class="he-title">Role transitions</h1>
-  <p class="he-deck">Aerojet has six user roles in order of authority…</p>
+  <p class="he-deck"><p>Aerojet has six user roles in order of authority…</p>
+</p>
 </header>
-<table>
-<thead>
-<tr>
-<th>Role</th>
-<th>Portal</th>
-<th>Notes</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>SUPER_ADMIN</code></td>
-<td><code>/staff</code></td>
-<td>Bypasses every permission check.</td>
-</tr>
-<tr>
-<td><code>ADMIN</code></td>
-<td><code>/staff</code></td>
-<td>Bypasses every permission check.</td>
-</tr>
-<tr>
-<td><code>STAFF</code></td>
-<td><code>/staff</code></td>
-<td>Needs explicit grants via <code>/staff/admin/permissions</code>.</td>
-</tr>
-<tr>
-<td><code>EXAMINER</code></td>
-<td><code>/examiner</code></td>
-<td>Has <code>InstructorProfile</code>; restricted to exam workflows.</td>
-</tr>
-<tr>
-<td><code>INSTRUCTOR</code></td>
-<td><code>/instructor</code></td>
-<td>Has <code>InstructorProfile</code>.</td>
-</tr>
-<tr>
-<td><code>STUDENT</code></td>
-<td><code>/student</code></td>
-<td>Has <code>StudentProfile</code> + wallet.</td>
-</tr>
-<tr>
-<td><code>APPLICANT</code></td>
-<td><code>/applicant</code></td>
-<td>No profile by default.</td>
-</tr>
-</tbody></table>
-
-<section class="he-section" id="what-happens-when-you-change-a-role">
-  <div class="he-section__num">01 · What happens when you change a role</div>
-  <h2 class="he-section__title">What happens when you change a role</h2><p>The wizard at <code>/staff/users/[id]</code> → <strong>Change role</strong> runs three steps:</p>
-<ol>
-<li><strong>Select</strong> the target role.</li>
-<li><strong>Preview</strong> — calls <code>POST /api/staff/users/[id]/role/preview</code> (read-only).
+RolePortalNotes<code>SUPER_ADMIN</code><code>/staff</code>Bypasses every permission check.<code>ADMIN</code><code>/staff</code>Bypasses every permission check.<code>STAFF</code><code>/staff</code>Needs explicit grants via <code>/staff/admin/permissions</code>.<code>EXAMINER</code><code>/examiner</code>Has <code>InstructorProfile</code>; restricted to exam workflows.<code>INSTRUCTOR</code><code>/instructor</code>Has <code>InstructorProfile</code>.<code>STUDENT</code><code>/student</code>Has <code>StudentProfile</code> + wallet.<code>APPLICANT</code><code>/applicant</code>No profile by default.<section class="he-section" id="what-happens-when-you-change-a-role"><div class="he-section__num">01 · What happens when you change a role</div><h2 class="he-section__title">What happens when you change a role</h2>The wizard at <code>/staff/users/[id]</code> → Change role runs three steps:Select the target role.Preview — calls <code>POST /api/staff/users/[id]/role/preview</code> (read-only).
 Returns the exact list of side effects the commit step will perform:
 profile creation, wallet creation, email dispatch, audit-log write,
-and any warnings (e.g. abandoned StudentProfile after demotion).</li>
-<li><strong>Confirm</strong> — type the user&#39;s full name to commit. Calls
-<code>PATCH /api/staff/users/[id]/role</code>.</li>
-</ol>
-<h3 id="profile-side-effects">Profile side effects</h3><table>
-<thead>
-<tr>
-<th>Target role</th>
-<th>Profile created if missing</th>
-<th>Generated ID</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>STUDENT</code></td>
-<td><code>StudentProfile</code> (+ <code>Wallet</code> if absent)</td>
-<td><code>AATA-XXXX</code></td>
-</tr>
-<tr>
-<td><code>INSTRUCTOR</code></td>
-<td><code>InstructorProfile</code></td>
-<td><code>IN-XXXX</code></td>
-</tr>
-<tr>
-<td><code>EXAMINER</code></td>
-<td><code>InstructorProfile</code></td>
-<td><code>EX-XXXX</code></td>
-</tr>
-<tr>
-<td><code>STAFF</code></td>
-<td><code>StaffProfile</code></td>
-<td><code>ST-XXXX</code></td>
-</tr>
-<tr>
-<td><code>ADMIN</code></td>
-<td><code>StaffProfile</code></td>
-<td><code>AD-XXXX</code></td>
-</tr>
-<tr>
-<td><code>APPLICANT</code></td>
-<td>—</td>
-<td>—</td>
-</tr>
-</tbody></table>
-<p>The <code>XXXX</code> digits are random 4-digit suffixes with a uniqueness retry loop.</p>
-<h3 id="email-side-effects">Email side effects</h3><ul>
-<li><code>→ STUDENT</code>: sends &quot;student promotion&quot; email (template
-<code>sendStudentPromotionEmail</code>) to <code>user.personalEmail || user.email</code>.</li>
-</ul>
-<h3 id="demotion-gotchas">Demotion gotchas</h3><p>The role change <strong>does not</strong>:</p>
-<ul>
-<li>Delete a previous-role profile. A demoted INSTRUCTOR keeps their
+and any warnings (e.g. abandoned StudentProfile after demotion).Confirm — type the user's full name to commit. Calls
+<code>PATCH /api/staff/users/[id]/role</code>.<h3 id="profile-side-effects">Profile side effects</h3>Target roleProfile created if missingGenerated ID<code>STUDENT</code><code>StudentProfile</code> (+ <code>Wallet</code> if absent)<code>AATA-XXXX</code><code>INSTRUCTOR</code><code>InstructorProfile</code><code>IN-XXXX</code><code>EXAMINER</code><code>InstructorProfile</code><code>EX-XXXX</code><code>STAFF</code><code>StaffProfile</code><code>ST-XXXX</code><code>ADMIN</code><code>StaffProfile</code><code>AD-XXXX</code><code>APPLICANT</code>——The <code>XXXX</code> digits are random 4-digit suffixes with a uniqueness retry loop.<h3 id="email-side-effects">Email side effects</h3><code>→ STUDENT</code>: sends "student promotion" email (template
+<code>sendStudentPromotionEmail</code>) to <code>user.personalEmail || user.email</code>.<h3 id="demotion-gotchas">Demotion gotchas</h3>The role change does not:Delete a previous-role profile. A demoted INSTRUCTOR keeps their
 <code>InstructorProfile</code>; a demoted STUDENT keeps their <code>StudentProfile</code> and
-wallet balance. Clean up manually if required.</li>
-<li>Revoke <code>RoleGrant</code> rows tied to the old role. Visit
-<code>/staff/admin/permissions</code> and revoke explicitly.</li>
-<li>Cancel pending enrollments, payments, or referrals owned by the user.</li>
-</ul>
-<h3 id="permission-required">Permission required</h3><p><code>MANAGE_ROLES</code> — granted to ADMIN/SUPER_ADMIN by default. Staff users need
-an explicit grant via <code>/staff/admin/permissions</code>.</p>
-<h3 id="audit-trail">Audit trail</h3><p>Every commit writes one <code>AuditLog</code> row with
-<code>action = UPDATE, entity = User, description = &quot;Changed user role from X to Y&quot;</code>
-and <code>changes = { previousRole, newRole, generatedStudentId? }</code>.</p>
-
-<section class="he-section" id="programmatic-usage">
-  <div class="he-section__num">02 · Programmatic usage</div>
-  <h2 class="he-section__title">Programmatic usage</h2><pre><code class="language-ts">// Read-only preview
+wallet balance. Clean up manually if required.Revoke <code>RoleGrant</code> rows tied to the old role. Visit
+<code>/staff/admin/permissions</code> and revoke explicitly.Cancel pending enrollments, payments, or referrals owned by the user.<h3 id="permission-required">Permission required</h3><code>MANAGE_ROLES</code> — granted to ADMIN/SUPER_ADMIN by default. Staff users need
+an explicit grant via <code>/staff/admin/permissions</code>.<h3 id="audit-trail">Audit trail</h3>Every commit writes one <code>AuditLog</code> row with
+<code>action = UPDATE, entity = User, description = "Changed user role from X to Y"</code>
+and <code>changes = { previousRole, newRole, generatedStudentId? }</code>.<section class="he-section" id="programmatic-usage"><div class="he-section__num">02 · Programmatic usage</div><h2 class="he-section__title">Programmatic usage</h2>// Read-only preview
 await fetch(`/api/staff/users/${id}/role/preview`, {
-  method: &#39;POST&#39;,
-  body: JSON.stringify({ role: &#39;STUDENT&#39; }),
+  method: 'POST',
+  body: JSON.stringify({ role: 'STUDENT' }),
 })
 
 // Commit
 await fetch(`/api/staff/users/${id}/role`, {
-  method: &#39;PATCH&#39;,
-  body: JSON.stringify({ role: &#39;STUDENT&#39; }),
+  method: 'PATCH',
+  body: JSON.stringify({ role: 'STUDENT' }),
 })
-</code></pre>
 
 </main>
 

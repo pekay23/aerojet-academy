@@ -23,9 +23,7 @@
   }
 }
 
-.he-main {
-  min-width: 0;
-}
+.he-main { min-width: 0; }
 
 .he-toc {
   position: sticky;
@@ -44,29 +42,14 @@
   color: var(--fg-muted);
   margin: 0 0 var(--sp-3);
 }
-.he-toc ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-.he-toc li {
-  margin: var(--sp-2) 0;
-}
-.he-toc__l3 {
-  padding-left: var(--sp-3);
-}
-.he-toc a {
-  color: var(--fg-muted);
-  border: 0;
-}
-.he-toc a:hover {
-  color: var(--clay);
-}
+.he-toc ul { list-style: none; padding: 0; margin: 0; }
+.he-toc li { margin: var(--sp-2) 0; }
+.he-toc__l3 { padding-left: var(--sp-3); }
+.he-toc a { color: var(--fg-muted); border: 0; }
+.he-toc a:hover { color: var(--clay); }
 
 /* Index page: section heading + cards */
-.he-index-section {
-  margin-top: var(--sp-7);
-}
+.he-index-section { margin-top: var(--sp-7); }
 .he-index-section__head {
   display: flex;
   align-items: baseline;
@@ -76,36 +59,16 @@
   padding-bottom: var(--sp-3);
   border-bottom: 1px solid var(--border);
 }
-.he-index-section__head h2 {
-  margin: 0;
-  font-size: var(--t-h2-size);
-  font-weight: 500;
-}
-.he-index-section__blurb {
-  color: var(--fg-muted);
-  font-size: var(--t-small-size);
-  margin: 0;
-  max-width: 50ch;
-  text-align: right;
-}
+.he-index-section__head h2 { margin: 0; font-size: var(--t-h2-size); font-weight: 500; }
+.he-index-section__blurb { color: var(--fg-muted); font-size: var(--t-small-size); margin: 0; max-width: 50ch; text-align: right; }
 
 /* "Standalone HTML" section uses minimal cards */
-.he-standalone-grid {
-  display: grid;
-  gap: var(--sp-3);
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-}
+.he-standalone-grid { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
 .he-standalone-card {
   padding: var(--sp-4) var(--sp-4);
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
 }
-.he-standalone-card a {
-  font-weight: 500;
-}
-.he-standalone-card p {
-  font-size: var(--t-small-size);
-  color: var(--fg-muted);
-  margin: var(--sp-1) 0 0;
-}
+.he-standalone-card a { font-weight: 500; }
+.he-standalone-card p { font-size: var(--t-small-size); color: var(--fg-muted); margin: var(--sp-1) 0 0; }
