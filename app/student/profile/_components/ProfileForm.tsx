@@ -93,6 +93,7 @@ export default function ProfileForm({ user }: ProfileFormProps) {
                   src={user.profile.profilePhotoUrl}
                   alt={fullName}
                   fill
+                  sizes="128px"
                   className="object-cover"
                 />
               ) : (

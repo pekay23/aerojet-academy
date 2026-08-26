@@ -168,6 +168,7 @@ export default async function UserProfilePage({ params }: Props) {
                     src={user.profile.profilePhotoUrl}
                     alt={fullName}
                     fill
+                    sizes="96px"
                     className="object-cover"
                   />
                 ) : (
