@@ -383,6 +383,7 @@ function UserMenu({
           src={userImage}
           alt={userName || 'User'}
           fill
+          sizes="32px"
           className="object-cover"
           priority={false}
         />

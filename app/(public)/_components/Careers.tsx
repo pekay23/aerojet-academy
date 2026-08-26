@@ -21,6 +21,7 @@ export default function Careers() {
           src="/images/home/careerwidemobile.webp"
           alt="Careers at Aerojet Academy"
           fill
+          sizes="100vw"
           className="object-cover object-center"
           quality={90}
           priority
@@ -32,6 +33,7 @@ export default function Careers() {
           src="/images/home/careerwide.webp"
           alt="Careers at Aerojet Academy"
           fill
+          sizes="100vw"
           className="object-cover object-center sm:object-top-right"
           quality={90}
           priority

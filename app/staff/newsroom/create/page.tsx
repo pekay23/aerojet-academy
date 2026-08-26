@@ -157,6 +157,7 @@ export default function CreateArticlePage() {
                       src={formData.coverImage}
                       alt={formData.title}
                       fill
+                      sizes="100vw"
                       className="object-cover"
                       unoptimized
                     />
@@ -385,6 +386,7 @@ export default function CreateArticlePage() {
                     src={formData.coverImage}
                     alt="Cover Preview"
                     fill
+                    sizes="100vw"
                     className="object-cover"
                     unoptimized
                   />
