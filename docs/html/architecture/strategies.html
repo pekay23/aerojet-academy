@@ -26,92 +26,18 @@
 <header>
   <p class="he-eyebrow">Architecture</p>
   <h1 class="he-title">Architecture &amp; Problem Solving Strategies</h1>
-  <p class="he-deck">This document explains the &quot;Why&quot; behind our implementation choices and the strategies used to fix common issues.</p>
+  <p class="he-deck"><p>This document explains the &quot;Why&quot; behind our implementation choices and the strategies used to fix common issues.</p>
+</p>
 </header>
-
-<section class="he-section" id="branding-strategy-aerojet-blue">
-  <div class="he-section__num">01 · 🎨 Branding Strategy: Aerojet Blue</div>
-  <h2 class="he-section__title">🎨 Branding Strategy: Aerojet Blue</h2><p>The project uses a custom branding color <code>aerojet-blue</code>. </p>
-<ul>
-<li><strong>Tailwind Config</strong>: Defined in <code>tailwind.config.ts</code> as <code>aerojet-blue: '#002855'</code>.</li>
-<li><strong>Consistency Rule</strong>: All primary headings, labels, and active UI states in the recruitment and student portals should use <code>text-aerojet-blue</code> or <code>bg-aerojet-blue</code>.</li>
-<li><strong>Refactoring Strategy</strong>: We recently moved away from generic <code>text-blue-900</code> or <code>text-slate-900</code> to this specific brand color to ensure professional consistency across the multi-step forms.</li>
-</ul>
-
-<section class="he-section" id="charting-the-recharts-responsive-fix">
-  <div class="he-section__num">02 · 📊 Charting: The Recharts &quot;Responsive&quot; Fix</div>
-  <h2 class="he-section__title">📊 Charting: The Recharts &quot;Responsive&quot; Fix</h2><p><strong>Problem</strong>: Console warnings saying <code>The width(-1) and height(-1) of chart should be greater than 0</code>.
-<strong>Cause</strong>: <code>ResponsiveContainer</code> tries to calculate its size before its parent DOM element has finished rendering (common with flex/grid and hidden tabs).
-<strong>Solution</strong>: </p>
-<ul>
-<li>Applied <code>minWidth={1}</code> and <code>minHeight={1}</code> to all <code>ResponsiveContainer</code> instances. </li>
-<li>This ensures the component has a non-zero initial state, silencing the warning and preventing layout shifts during re-calculation.</li>
-</ul>
-
-<section class="he-section" id="performance-dashboard-data-fetching">
-  <div class="he-section__num">03 · 🏎️ Performance: Dashboard Data Fetching</div>
-  <h2 class="he-section__title">🏎️ Performance: Dashboard Data Fetching</h2><p><strong>Problem</strong>: The <code>/staff/reports</code> page took 75s to load in development.
-<strong>Strategy</strong>:</p>
-<ol>
-<li><strong>Concurrent Execution</strong>: Used <code>Promise.all</code> to fetch metrics, top courses, and alerts in parallel.</li>
-<li><strong>Granular Selects</strong>: Updated Prisma queries to only <code>select</code> necessary fields instead of fetching entire objects with heavy relations.</li>
-<li><strong>Client-Side Navigation</strong>: Using Next.js <code>Link</code> and <code>tab</code> query parameters allows switching analytics views without full page reloads, though the initial load remains heavy.
-<strong>Next Step</strong>: Implement a caching layer (e.g., <code>next/cache</code> with <code>revalidatePath</code>) for analytic data that doesn&#39;t change by the second.</li>
-</ol>
-
-<section class="he-section" id="form-management-zod-react-hook-form">
-  <div class="he-section__num">04 · 📝 Form Management: Zod + React Hook Form</div>
-  <h2 class="he-section__title">📝 Form Management: Zod + React Hook Form</h2><p>For complex forms across the portal:</p>
-<ul>
-<li><strong>Strategy</strong>: Each step has its own validation schema, but they all contribute to a single <code>formData</code> state.</li>
-<li><strong>Problem</strong>: Multi-step forms losing data on &quot;Back&quot; navigation.</li>
-<li><strong>Solution</strong>: State is lifted to the parent component and synchronized with <code>localStorage</code> or a dedicated store to ensure persistence during the session.</li>
-</ul>
-
-<section class="he-section" id="file-uploads-uploadthing">
-  <div class="he-section__num">05 · 📁 File Uploads: UploadThing</div>
-  <h2 class="he-section__title">📁 File Uploads: UploadThing</h2><ul>
-<li><strong>Strategy</strong>: Client-side uploads directly to UploadThing to reduce server load.</li>
-<li><strong>Problem</strong>: Lack of confirmation/feedback after upload.</li>
-<li><strong>Fix</strong>: Implemented the <code>onClientUploadComplete</code> callback to update a &quot;ready&quot; state and show a success checkmark before the user proceeds to the next step.</li>
-</ul>
-
-<section class="he-section" id="seating-chart-system-dual-storage-pattern">
-  <div class="he-section__num">06 · 🪑 Seating Chart System: Dual Storage Pattern</div>
-  <h2 class="he-section__title">🪑 Seating Chart System: Dual Storage Pattern</h2><p><strong>Problem</strong>: Seating assignments need to support two contexts (classes and exams) with different lifecycles and integrity requirements.
-<strong>Strategy</strong>:</p>
-<ol>
-<li><strong>Classroom layout</strong> — Stored as a <code>layout</code> Json field on <code>Classroom</code>. Contains <code>{ rows, cols, cells: [{ row, col, type, label }] }</code>. Cell types: <code>DESK</code>, <code>AISLE</code>, <code>OBSTACLE</code>.</li>
-<li><strong>Seat records</strong> — <code>Seat</code> model with <code>@@unique([classroomId, row, col])</code>. Auto-synced from layout: when a layout is saved, all seats are deleted and recreated from desk cells in a single transaction.</li>
-<li><strong>Exam seating</strong> — Uses a proper FK: <code>ExamSittingAssignment.seatId</code> references <code>Seat.id</code>. Provides referential integrity for exam records.</li>
-<li><strong>Class seating</strong> — Uses SystemSettings JSON: <code>class_seating_{classId}</code> → <code>{ seatId: userId }</code>. Chosen to avoid schema migrations for an ephemeral relationship that changes frequently and doesn&#39;t need referential integrity.</li>
-<li><strong>Student view</strong> — <code>/student/seating</code> aggregates both sources and renders <code>SeatCard</code> components with mini CSS grid floor plans highlighting the student&#39;s assigned seat.</li>
-</ol>
-<p><strong>Why dual storage?</strong> Exam seating needs audit-grade referential integrity (FK). Class seating is informal and changes often — JSON in SystemSettings avoids migration churn and lets staff reassign freely without constraint violations.</p>
-
-<section class="he-section" id="two-factor-authentication-error-based-flow">
-  <div class="he-section__num">07 · 🔐 Two-Factor Authentication: Error-Based Flow</div>
-  <h2 class="he-section__title">🔐 Two-Factor Authentication: Error-Based Flow</h2><p><strong>Problem</strong>: NextAuth&#39;s credentials provider doesn&#39;t natively support multi-step authentication (password → TOTP).
-<strong>Strategy</strong>:</p>
-<ol>
-<li>The credentials provider throws a specific error string <code>'2FA_REQUIRED'</code> when the user has 2FA enabled but no TOTP code was provided.</li>
-<li>The <code>LoginForm</code> client component catches this error, shows a TOTP input field, and re-authenticates with the <code>totpCode</code> parameter included.</li>
-<li>On the second attempt, the provider verifies the TOTP code against the stored secret using <code>otplib</code> v5&#39;s <code>verify()</code> function.
-<strong>Why this approach?</strong> NextAuth doesn&#39;t support custom authentication flows or intermediate states. Using the error channel avoids patching NextAuth internals while keeping the flow entirely within the existing <code>signIn('credentials', ...)</code> API.</li>
-</ol>
-
-<section class="he-section" id="interactive-floor-plan-css-grid-paint-drag">
-  <div class="he-section__num">08 · 🎯 Interactive Floor Plan: CSS Grid + Paint-Drag</div>
-  <h2 class="he-section__title">🎯 Interactive Floor Plan: CSS Grid + Paint-Drag</h2><p><strong>Problem</strong>: Staff need a visual tool to design classroom seating layouts without specialized software.
-<strong>Strategy</strong>:</p>
-<ul>
-<li>CSS Grid with <code>gridTemplateColumns: repeat(cols, minmax(0, 1fr))</code> for the floor plan.</li>
-<li>Three paint tools: DESK (creates seats), AISLE (walkways), OBSTACLE (pillars, equipment).</li>
-<li>Paint-drag: <code>onMouseDown</code> sets tool, <code>onMouseEnter</code> applies while dragging. Prevents accidental text selection with <code>user-select: none</code>.</li>
-<li>Auto-labels: Desk cells labeled sequentially by row (A1, A2, B1, B2…). Row letter = <code>String.fromCharCode(65 + rowIndex)</code>, column number = desk count in that row.</li>
-<li>Grid resize: +/- buttons adjust rows and cols, preserving existing cell data within bounds.</li>
-</ul>
-
+<section class="he-section" id="branding-strategy-aerojet-blue"><div class="he-section__num">01 · 🎨 Branding Strategy: Aerojet Blue</div><h2 class="he-section__title">🎨 Branding Strategy: Aerojet Blue</h2>The project uses a custom branding color <code>aerojet-blue</code>.Tailwind Config: Defined in <code>tailwind.config.ts</code> as <code>aerojet-blue: '#002855'</code>.Consistency Rule: All primary headings, labels, and active UI states in the recruitment and student portals should use <code>text-aerojet-blue</code> or <code>bg-aerojet-blue</code>.Refactoring Strategy: We recently moved away from generic <code>text-blue-900</code> or <code>text-slate-900</code> to this specific brand color to ensure professional consistency across the multi-step forms.<section class="he-section" id="charting-the-recharts-responsive-fix"><div class="he-section__num">02 · 📊 Charting: The Recharts &quot;Responsive&quot; Fix</div><h2 class="he-section__title">📊 Charting: The Recharts "Responsive" Fix</h2>Problem: Console warnings saying <code>The width(-1) and height(-1) of chart should be greater than 0</code>.
+Cause: <code>ResponsiveContainer</code> tries to calculate its size before its parent DOM element has finished rendering (common with flex/grid and hidden tabs).
+Solution:Applied <code>minWidth={1}</code> and <code>minHeight={1}</code> to all <code>ResponsiveContainer</code> instances.This ensures the component has a non-zero initial state, silencing the warning and preventing layout shifts during re-calculation.<section class="he-section" id="performance-dashboard-data-fetching"><div class="he-section__num">03 · 🏎️ Performance: Dashboard Data Fetching</div><h2 class="he-section__title">🏎️ Performance: Dashboard Data Fetching</h2>Problem: The <code>/staff/reports</code> page took 75s to load in development.
+Strategy:Concurrent Execution: Used <code>Promise.all</code> to fetch metrics, top courses, and alerts in parallel.Granular Selects: Updated Prisma queries to only <code>select</code> necessary fields instead of fetching entire objects with heavy relations.Client-Side Navigation: Using Next.js <code>Link</code> and <code>tab</code> query parameters allows switching analytics views without full page reloads, though the initial load remains heavy.
+Next Step: Implement a caching layer (e.g., <code>next/cache</code> with <code>revalidatePath</code>) for analytic data that doesn't change by the second.<section class="he-section" id="form-management-zod-react-hook-form"><div class="he-section__num">04 · 📝 Form Management: Zod + React Hook Form</div><h2 class="he-section__title">📝 Form Management: Zod + React Hook Form</h2>For complex forms across the portal:Strategy: Each step has its own validation schema, but they all contribute to a single <code>formData</code> state.Problem: Multi-step forms losing data on "Back" navigation.Solution: State is lifted to the parent component and synchronized with <code>localStorage</code> or a dedicated store to ensure persistence during the session.<section class="he-section" id="file-uploads-uploadthing"><div class="he-section__num">05 · 📁 File Uploads: UploadThing</div><h2 class="he-section__title">📁 File Uploads: UploadThing</h2>Strategy: Client-side uploads directly to UploadThing to reduce server load.Problem: Lack of confirmation/feedback after upload.Fix: Implemented the <code>onClientUploadComplete</code> callback to update a "ready" state and show a success checkmark before the user proceeds to the next step.<section class="he-section" id="seating-chart-system-dual-storage-pattern"><div class="he-section__num">06 · 🪑 Seating Chart System: Dual Storage Pattern</div><h2 class="he-section__title">🪑 Seating Chart System: Dual Storage Pattern</h2>Problem: Seating assignments need to support two contexts (classes and exams) with different lifecycles and integrity requirements.
+Strategy:Classroom layout — Stored as a <code>layout</code> Json field on <code>Classroom</code>. Contains <code>{ rows, cols, cells: [{ row, col, type, label }] }</code>. Cell types: <code>DESK</code>, <code>AISLE</code>, <code>OBSTACLE</code>.Seat records — <code>Seat</code> model with <code>@@unique([classroomId, row, col])</code>. Auto-synced from layout: when a layout is saved, all seats are deleted and recreated from desk cells in a single transaction.Exam seating — Uses a proper FK: <code>ExamSittingAssignment.seatId</code> references <code>Seat.id</code>. Provides referential integrity for exam records.Class seating — Uses SystemSettings JSON: <code>class_seating_{classId}</code> → <code>{ seatId: userId }</code>. Chosen to avoid schema migrations for an ephemeral relationship that changes frequently and doesn't need referential integrity.Student view — <code>/student/seating</code> aggregates both sources and renders <code>SeatCard</code> components with mini CSS grid floor plans highlighting the student's assigned seat.Why dual storage? Exam seating needs audit-grade referential integrity (FK). Class seating is informal and changes often — JSON in SystemSettings avoids migration churn and lets staff reassign freely without constraint violations.<section class="he-section" id="two-factor-authentication-error-based-flow"><div class="he-section__num">07 · 🔐 Two-Factor Authentication: Error-Based Flow</div><h2 class="he-section__title">🔐 Two-Factor Authentication: Error-Based Flow</h2>Problem: NextAuth's credentials provider doesn't natively support multi-step authentication (password → TOTP).
+Strategy:The credentials provider throws a specific error string <code>'2FA_REQUIRED'</code> when the user has 2FA enabled but no TOTP code was provided.The <code>LoginForm</code> client component catches this error, shows a TOTP input field, and re-authenticates with the <code>totpCode</code> parameter included.On the second attempt, the provider verifies the TOTP code against the stored secret using <code>otplib</code> v5's <code>verify()</code> function.
+Why this approach? NextAuth doesn't support custom authentication flows or intermediate states. Using the error channel avoids patching NextAuth internals while keeping the flow entirely within the existing <code>signIn('credentials', ...)</code> API.<section class="he-section" id="interactive-floor-plan-css-grid-paint-drag"><div class="he-section__num">08 · 🎯 Interactive Floor Plan: CSS Grid + Paint-Drag</div><h2 class="he-section__title">🎯 Interactive Floor Plan: CSS Grid + Paint-Drag</h2>Problem: Staff need a visual tool to design classroom seating layouts without specialized software.
+Strategy:CSS Grid with <code>gridTemplateColumns: repeat(cols, minmax(0, 1fr))</code> for the floor plan.Three paint tools: DESK (creates seats), AISLE (walkways), OBSTACLE (pillars, equipment).Paint-drag: <code>onMouseDown</code> sets tool, <code>onMouseEnter</code> applies while dragging. Prevents accidental text selection with <code>user-select: none</code>.Auto-labels: Desk cells labeled sequentially by row (A1, A2, B1, B2…). Row letter = <code>String.fromCharCode(65 + rowIndex)</code>, column number = desk count in that row.Grid resize: +/- buttons adjust rows and cols, preserving existing cell data within bounds.
 </main>
 
 <aside class="he-toc" aria-label="On this page">

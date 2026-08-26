@@ -26,12 +26,10 @@
 <header>
   <p class="he-eyebrow">Design</p>
   <h1 class="he-title">06 · Motion &amp; interaction</h1>
-  <p class="he-deck">The portal deliberately keeps motion <strong>short, restrained, and purposeful</strong> — no parallax, no scroll-jacking, no long reveals.</p>
+  <p class="he-deck"><p>The portal deliberately keeps motion <strong>short, restrained, and purposeful</strong> — no parallax, no scroll-jacking, no long reveals.</p>
+</p>
 </header>
-
-<section class="he-section" id="61-core-durations">
-  <div class="he-section__num">01 · 6.1 · Core durations</div>
-  <h2 class="he-section__title">6.1 · Core durations</h2><p>| Duration   | Used for                                                         |
+<section class="he-section" id="61-core-durations"><div class="he-section__num">01 · 6.1 · Core durations</div><h2 class="he-section__title">6.1 · Core durations</h2>| Duration   | Used for                                                         |
 | ---------- | ---------------------------------------------------------------- | ----------------------------------- |
 | 120 ms     | Tiny colour swaps (link underline, icon recolour)                |
 | 150 ms     | Sidebar items, button hover (shadcn <code>transition-colors</code> default) |
@@ -40,172 +38,62 @@
 | 250 ms     | Sheet, Dialog, Tabs content fade                                 |
 | 300 ms     | Public nav scroll state transition                               |
 | 500 ms     | Pool progress bar fill, currency display                         |
-| 200–500 ms | shadcn <code>data-[state=open                                         | closed]:animate-\*</code> (Dialog, Sheet) |</p>
-
-<section class="he-section" id="62-easing-curves">
-  <div class="he-section__num">02 · 6.2 · Easing curves</div>
-  <h2 class="he-section__title">6.2 · Easing curves</h2><p>The codebase uses Tailwind 4&#39;s defaults and Framer Motion&#39;s spring
-defaults. Easing is <strong>almost never overridden</strong> — keep that.</p>
-<table>
-<thead>
-<tr>
-<th>Curve</th>
-<th>Used in</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>ease-out</code></td>
-<td>Accordion open/close (200 ms)</td>
-</tr>
-<tr>
-<td><code>ease-in-out</code></td>
-<td>shadcn Sheet (300 ms in, 500 ms out)</td>
-</tr>
-<tr>
-<td><code>cubic-bezier</code> (Framer)</td>
-<td><code>SectionReveal</code> scroll-in fade</td>
-</tr>
-<tr>
-<td>spring (stiffness 100, damping 20)</td>
-<td><code>MotionTabs</code> underline shared layout</td>
-</tr>
-</tbody></table>
-
-<section class="he-section" id="63-keyframes">
-  <div class="he-section__num">03 · 6.3 · Keyframes</div>
-  <h2 class="he-section__title">6.3 · Keyframes</h2><p>Two keyframes are declared in <code>tailwind.config.ts</code> and consumed by
-<code>Accordion</code>:</p>
-<pre><code class="language-ts">&#39;accordion-down&#39;: {
-  from: { height: &#39;0&#39; },
-  to:   { height: &#39;var(--radix-accordion-content-height)&#39; },
+| 200–500 ms | shadcn <code>data-[state=open                                         | closed]:animate-\*</code> (Dialog, Sheet) |<section class="he-section" id="62-easing-curves"><div class="he-section__num">02 · 6.2 · Easing curves</div><h2 class="he-section__title">6.2 · Easing curves</h2>The codebase uses Tailwind 4's defaults and Framer Motion's spring
+defaults. Easing is almost never overridden — keep that.CurveUsed in<code>ease-out</code>Accordion open/close (200 ms)<code>ease-in-out</code>shadcn Sheet (300 ms in, 500 ms out)<code>cubic-bezier</code> (Framer)<code>SectionReveal</code> scroll-in fadespring (stiffness 100, damping 20)<code>MotionTabs</code> underline shared layout<section class="he-section" id="63-keyframes"><div class="he-section__num">03 · 6.3 · Keyframes</div><h2 class="he-section__title">6.3 · Keyframes</h2>Two keyframes are declared in <code>tailwind.config.ts</code> and consumed by
+<code>Accordion</code>:'accordion-down': {
+  from: { height: '0' },
+  to:   { height: 'var(--radix-accordion-content-height)' },
 },
-&#39;accordion-up&#39;: {
-  from: { height: &#39;var(--radix-accordion-content-height)&#39; },
-  to:   { height: &#39;0&#39; },
+'accordion-up': {
+  from: { height: 'var(--radix-accordion-content-height)' },
+  to:   { height: '0' },
 },
 animation: {
-  &#39;accordion-down&#39;: &#39;accordion-down 0.2s ease-out&#39;,
-  &#39;accordion-up&#39;:   &#39;accordion-up   0.2s ease-out&#39;,
+  'accordion-down': 'accordion-down 0.2s ease-out',
+  'accordion-up':   'accordion-up   0.2s ease-out',
 }
-</code></pre>
-<p>shadcn ships a long list of <code>animate-in / animate-out</code> keyframes (fade,
+shadcn ships a long list of <code>animate-in / animate-out</code> keyframes (fade,
 zoom, slide) that the Dialog, Sheet, AlertDialog, Toast, etc. all
-re-use via the <code>tailwindcss-animate</code> plugin.</p>
-
-<section class="he-section" id="64-framer-motion-patterns">
-  <div class="he-section__num">04 · 6.4 · Framer Motion patterns</div>
-  <h2 class="he-section__title">6.4 · Framer Motion patterns</h2><h3 id="sectionreveal-live-site"><code>SectionReveal</code> (live site)</h3><pre><code class="language-tsx">&lt;motion.div
+re-use via the <code>tailwindcss-animate</code> plugin.<section class="he-section" id="64-framer-motion-patterns"><div class="he-section__num">04 · 6.4 · Framer Motion patterns</div><h2 class="he-section__title">6.4 · Framer Motion patterns</h2><h3 id="sectionreveal-live-site"><code>SectionReveal</code> (live site)</h3><motion.div
   initial={{ opacity: 0, y: 24 }}
   whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true, margin: &#39;-80px&#39; }}
-  transition={{ duration: 0.5, ease: &#39;easeOut&#39; }}
-&gt;
-</code></pre>
-<p>Used by every section in <code>app/(public)/_components/*</code>. Delay is 0 by
-default and staggered by 0.05–0.1 s per row for the programme list.</p>
-<h3 id="hero-word-by-word-reveal">Hero word-by-word reveal</h3><pre><code class="language-tsx">// app/(public)/_components/HeroSlider.tsx
+  viewport={{ once: true, margin: '-80px' }}
+  transition={{ duration: 0.5, ease: 'easeOut' }}
+>
+Used by every section in <code>app/(public)/_components/*</code>. Delay is 0 by
+default and staggered by 0.05–0.1 s per row for the programme list.<h3 id="hero-word-by-word-reveal">Hero word-by-word reveal</h3>// app/(public)/_components/HeroSlider.tsx
 {
-  slides[currentSlide].headline.split(&#39; &#39;).map((word, i) =&gt; (
-    &lt;motion.span
+  slides[currentSlide].headline.split(' ').map((word, i) => (
+    <motion.span
       key={i}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.05 * i, duration: 0.45, ease: &#39;easeOut&#39; }}
-    &gt;
-      {word}{&#39; &#39;}
-    &lt;/motion.span&gt;
+      transition={{ delay: 0.05 * i, duration: 0.45, ease: 'easeOut' }}
+    >
+      {word}{' '}
+    </motion.span>
   ))
 }
-</code></pre>
-<h3 id="motiontabs-underline"><code>MotionTabs</code> underline</h3><p>Uses Framer Motion&#39;s <code>layoutId</code> so the active tab underline slides
-between tabs:</p>
-<pre><code class="language-tsx">&lt;motion.div
-  layoutId=&quot;tab-underline&quot;
-  className=&quot;absolute bottom-0 left-0 right-0 h-0.5 bg-aerojet-sky&quot;
-/&gt;
-</code></pre>
-<h3 id="changepasswordform-form-state-animation"><code>ChangePasswordForm</code> form-state animation</h3><p>Uses shadcn&#39;s <code>animate-in</code> / <code>animate-out</code> for the success state:</p>
-<pre><code>animate-in fade-in zoom-in ... duration-300
+<h3 id="motiontabs-underline"><code>MotionTabs</code> underline</h3>Uses Framer Motion's <code>layoutId</code> so the active tab underline slides
+between tabs:<motion.div
+  layoutId="tab-underline"
+  className="absolute bottom-0 left-0 right-0 h-0.5 bg-aerojet-sky"
+/>
+<h3 id="changepasswordform-form-state-animation"><code>ChangePasswordForm</code> form-state animation</h3>Uses shadcn's <code>animate-in</code> / <code>animate-out</code> for the success state:animate-in fade-in zoom-in ... duration-300
 animate-in slide-in-from-top-1 ... duration-200
-</code></pre>
-
-<section class="he-section" id="65-gsap">
-  <div class="he-section__num">05 · 6.5 · GSAP</div>
-  <h2 class="he-section__title">6.5 · GSAP</h2><p><code>gsap</code> + <code>@gsap/react</code> are installed (<code>package.json</code>) and the
+<section class="he-section" id="65-gsap"><div class="he-section__num">05 · 6.5 · GSAP</div><h2 class="he-section__title">6.5 · GSAP</h2><code>gsap</code> + <code>@gsap/react</code> are installed (<code>package.json</code>) and the
 <code>@gsap/react</code> hook is used in <code>app/design-lab/FeedbackOverlay.tsx</code>.
 No production page currently consumes it — treat as a design-lab tool
-for prototyping future scroll-driven motion.</p>
-
-<section class="he-section" id="66-hover-patterns">
-  <div class="he-section__num">06 · 6.6 · Hover patterns</div>
-  <h2 class="he-section__title">6.6 · Hover patterns</h2><table>
-<thead>
-<tr>
-<th>Pattern</th>
-<th>Used in</th>
-</tr>
-</thead>
-<tbody><tr>
-<td><code>hover:translate-x-1</code> on arrow</td>
-<td>Programme rows, see <code>_components</code></td>
-</tr>
-<tr>
-<td><code>hover:border-aerojet-sky</code> + colour swap</td>
-<td>Editorial links</td>
-</tr>
-<tr>
-<td><code>hover:scale-105</code> (Tailwind 4)</td>
-<td>Calendar event chips, marketing CTAs</td>
-</tr>
-<tr>
-<td><code>hover:scale-[1.02]</code></td>
-<td>Calendar save button</td>
-</tr>
-<tr>
-<td><code>hover:bg-[#efe8dc]</code></td>
-<td>Programme row hover fill</td>
-</tr>
-<tr>
-<td><code>hover:opacity-80</code> (with <code>active:scale-[0.98]</code>)</td>
-<td>Currency display click-to-toggle</td>
-</tr>
-<tr>
-<td><code>active:scale-95</code></td>
-<td>Sidebar menu button, copy button</td>
-</tr>
-<tr>
-<td><code>group-hover:translate-x-1</code> on icon</td>
-<td>Editorial CTAs</td>
-</tr>
-</tbody></table>
-
-<section class="he-section" id="67-focus-accessibility-motion">
-  <div class="he-section__num">07 · 6.7 · Focus &amp; accessibility motion</div>
-  <h2 class="he-section__title">6.7 · Focus &amp; accessibility motion</h2><ul>
-<li>All interactive elements get a visible focus ring (2 px, 2 px offset)
-using <code>focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2</code>.</li>
-<li>The skip-link at the top of every page is <code>sr-only focus:not-sr-only</code> and
-lands at <code>inset-4 z-50 rounded-lg bg-white px-4 py-2 font-bold shadow-lg</code>.</li>
-<li><code>body.exam-lockdown</code> is a hard mode used during exams: it strips the
+for prototyping future scroll-driven motion.<section class="he-section" id="66-hover-patterns"><div class="he-section__num">06 · 6.6 · Hover patterns</div><h2 class="he-section__title">6.6 · Hover patterns</h2>PatternUsed in<code>hover:translate-x-1</code> on arrowProgramme rows, see <code>_components</code><code>hover:border-aerojet-sky</code> + colour swapEditorial links<code>hover:scale-105</code> (Tailwind 4)Calendar event chips, marketing CTAs<code>hover:scale-[1.02]</code>Calendar save button<code>hover:bg-[#efe8dc]</code>Programme row hover fill<code>hover:opacity-80</code> (with <code>active:scale-[0.98]</code>)Currency display click-to-toggle<code>active:scale-95</code>Sidebar menu button, copy button<code>group-hover:translate-x-1</code> on iconEditorial CTAs<section class="he-section" id="67-focus-accessibility-motion"><div class="he-section__num">07 · 6.7 · Focus &amp; accessibility motion</div><h2 class="he-section__title">6.7 · Focus & accessibility motion</h2>All interactive elements get a visible focus ring (2 px, 2 px offset)
+using <code>focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2</code>.The skip-link at the top of every page is <code>sr-only focus:not-sr-only</code> and
+lands at <code>inset-4 z-50 rounded-lg bg-white px-4 py-2 font-bold shadow-lg</code>.<code>body.exam-lockdown</code> is a hard mode used during exams: it strips the
 sidebar, sticky elements, breadcrumb, and registration banners
-(<code>app/globals.css</code> lines 117-136).</li>
-<li><code>prefers-reduced-motion</code> is <strong>not yet honored</strong> — the only
+(<code>app/globals.css</code> lines 117-136).<code>prefers-reduced-motion</code> is not yet honored — the only
 motion-related media query in the codebase is the dark-mode <code>prefers-color-scheme</code>
-block (which is also empty — dark mode is class-driven, not media-driven).</li>
-</ul>
-
-<section class="he-section" id="68-loading-skeleton-patterns">
-  <div class="he-section__num">08 · 6.8 · Loading &amp; skeleton patterns</div>
-  <h2 class="he-section__title">6.8 · Loading &amp; skeleton patterns</h2><ul>
-<li><code>Skeleton</code> from shadcn: <code>animate-pulse rounded-md bg-muted</code>.</li>
-<li><code>aria-busy</code> is set on busy buttons (<code>ChangePasswordForm</code>, calendar
-save button).</li>
-<li>Buttons in a busy state get <code>disabled:opacity-50 disabled:pointer-events-none</code>
-plus the same <code>aria-busy</code> attribute.</li>
-<li>A few components toggle a tiny &quot;PROCESSING…&quot; / &quot;SAVING…&quot; caption
-via <code>aria-live=&quot;polite&quot;</code>.</li>
-</ul>
-
+block (which is also empty — dark mode is class-driven, not media-driven).<section class="he-section" id="68-loading-skeleton-patterns"><div class="he-section__num">08 · 6.8 · Loading &amp; skeleton patterns</div><h2 class="he-section__title">6.8 · Loading & skeleton patterns</h2><code>Skeleton</code> from shadcn: <code>animate-pulse rounded-md bg-muted</code>.<code>aria-busy</code> is set on busy buttons (<code>ChangePasswordForm</code>, calendar
+save button).Buttons in a busy state get <code>disabled:opacity-50 disabled:pointer-events-none</code>
+plus the same <code>aria-busy</code> attribute.A few components toggle a tiny "PROCESSING…" / "SAVING…" caption
+via <code>aria-live="polite"</code>.
 </main>
 
 <aside class="he-toc" aria-label="On this page">

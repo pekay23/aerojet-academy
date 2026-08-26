@@ -53,6 +53,9 @@ prisma/migrations
 *.swp
 *.swo
 
+# kilo local config
+.kilo/kilo.jsonc
+
 # uploads
 /uploads
 /tmp
