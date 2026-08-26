@@ -14,6 +14,7 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { getRegistrationConfig } from '@/lib/settings'
 import { isPipelineEnabled, transitionApplication } from '@/lib/admissions/state-machine'
 import { ApplicationStage } from '@prisma/client'
+import { trackRegistration } from '@/lib/analytics/events'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
   const config = await getRegistrationConfig()
@@ -147,6 +148,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     details: { email: normalizedEmail },
     ipAddress: ip,
   })
+
+  // Analytics tracking (non-blocking)
+  trackRegistration(selectedProgramme, user.id).catch(console.error)
 
   return apiCreated({
     registrationCode,

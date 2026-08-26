@@ -10,6 +10,7 @@ import {
   sendSeatReservationConfirmedEmail,
   sendActivationEmail,
 } from '@/lib/email/service'
+import { trackPayment } from '@/lib/analytics/events'
 import {
   hashPassword,
   generateToken,
@@ -356,6 +357,9 @@ export const POST = withErrorHandler(
           linkText: 'View Payments',
         },
       })
+
+      // Analytics tracking (non-blocking)
+      trackPayment(Number(payment.amount), payment.currency || 'EUR', payment.id, payment.userId).catch(console.error)
 
       return apiSuccess({ message: 'Payment approved' })
     } else {
