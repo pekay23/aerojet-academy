@@ -9,6 +9,7 @@ EASA Part-66 Aviation Maintenance Training Portal — a multi-portal web applica
 - **Student** — Dashboard, wallet, exam pools, grades, certificates
 - **Instructor** — Classes, attendance, grading, schedule
 - **Examiner** — Exam administration, results, question bank
+- **Examiner** — Exam administration, results, question bank
 
 ## 📂 Documentation
 

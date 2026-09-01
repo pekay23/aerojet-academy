@@ -55,8 +55,7 @@ vi.mock('@/lib/api/response', () => ({
         const message = err instanceof Error ? err.message : String(err)
         if (message === 'Unauthorized') return { status: 401, json: () => Promise.resolve({ error: 'Unauthorized' }) }
         if (message === 'Forbidden') return { status: 403, json: () => Promise.resolve({ error: 'Forbidden' }) }
-        if (message.includes('Permission denied')) return { status: 403, json: () => Promise.resolve({ error: 'Forbidden' }) }
-         if (message === 'Permission denied') return { status: 403, json: () => Promise.resolve({ error: 'Forbidden' }) }
+        return { status: 500, json: () => Promise.resolve({ error: 'Internal Server Error' }) }
       }
     }
   }),

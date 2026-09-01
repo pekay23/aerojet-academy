@@ -34,7 +34,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
           pathwayRel: { select: { name: true } },
         },
       }),
-      prisma.examResult.findMany({
+      prismaUnfiltered.examResult.findMany({
         where: { userId: studentUserId },
         select: {
           moduleCode: true,

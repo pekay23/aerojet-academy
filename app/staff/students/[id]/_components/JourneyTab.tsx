@@ -713,7 +713,7 @@ function StatCard({
   value,
   color,
 }: {
-  icon: React.ElementType
+  icon: React.ComponentType<{ className?: string }>
   label: string
   value: string
   color: keyof typeof COLOR_MAP

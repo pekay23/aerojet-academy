@@ -44,12 +44,12 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
       case 'EXAMINATION':
         return 'bg-rose-50 text-rose-600 border-rose-100 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800'
       default:
-        return 'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+        return 'bg-slate-50 text-slate-600 border-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:text-slate-300 dark:border-slate-700'
     }
   }
 
   return (
-    <motion.div
+    <MotionDiv
       whileHover={{ y: -4 }}
       className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white transition-all hover:border-blue-100 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] dark:border-slate-800 dark:bg-slate-900 dark:hover:border-blue-900/30"
     >
@@ -61,7 +61,7 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
           </div>
           <span
             className={cn(
-              'rounded-lg border px-2 py-0.5 text-[9px] font-black tracking-widest uppercase',
+              'rounded-lg border px-2 py-0.5 text-xs font-black tracking-widest uppercase',
               getCategoryColor(resource.category)
             )}
           >

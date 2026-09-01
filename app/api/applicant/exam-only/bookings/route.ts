@@ -1,35 +1,45 @@
-import { NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { requireApplicant } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { withErrorHandler } from '@/lib/api/response'
+import { withErrorHandler, apiPaginated, parsePagination } from '@/lib/api/response'
 
-export const GET = withErrorHandler(async () => {
+export const GET = withErrorHandler(async (req: NextRequest) => {
   const user = await requireApplicant()
+  const { page, limit, skip } = parsePagination(new URL(req.url).searchParams)
 
-  const bookings = await prismaUnfiltered.examBooking.findMany({
-    where: {
-      userId: user.id,
-      bookingType: 'INDIVIDUAL',
-    },
-    include: {
-      examComponent: {
-        include: {
-          course: {
-            select: {
-              code: true,
-              name: true,
+  const [bookings, total] = await Promise.all([
+    prismaUnfiltered.examBooking.findMany({
+      where: {
+        userId: user.id,
+        bookingType: 'INDIVIDUAL',
+      },
+      include: {
+        examComponent: {
+          include: {
+            course: {
+              select: {
+                code: true,
+                name: true,
+              },
             },
           },
         },
       },
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-    take: 100,
-  })
+      orderBy: {
+        createdAt: 'desc',
+      },
+      take: limit,
+      skip,
+    }),
+    prismaUnfiltered.examBooking.count({
+      where: {
+        userId: user.id,
+        bookingType: 'INDIVIDUAL',
+      },
+    }),
+  ])
 
-  return NextResponse.json(
+  return apiPaginated(
     bookings.map((b) => ({
       id: b.id,
       status: b.status,
@@ -43,6 +53,9 @@ export const GET = withErrorHandler(async () => {
             },
           }
         : undefined,
-    }))
+    })),
+    total,
+    page,
+    limit,
   )
 })

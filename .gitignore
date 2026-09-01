@@ -59,6 +59,9 @@ prisma/migrations
 # kilo local config
 .kilo/kilo.jsonc
 
+# kilo local config
+.kilo/kilo.jsonc
+
 # uploads
 /uploads
 /tmp

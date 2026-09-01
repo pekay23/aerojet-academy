@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 async function getArticleAndIncrementViews(slug: string) {
-  const article = await prisma.newsArticle.findUnique({
+  const article = await prismaUnfiltered.newsArticle.findUnique({
     where: { slug },
     include: {
       author: {

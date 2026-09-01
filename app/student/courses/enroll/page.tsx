@@ -299,7 +299,7 @@ export default async function EnrollPage({
                           <div className="mt-5 grid grid-cols-2 gap-3">
                             <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-3 dark:border-slate-800 dark:bg-slate-900/70">
                               <div className="flex items-center gap-2">
-                                <Clock3 className="h-4 w-4 text-aerojet-sky" />
+                                <Clock3 className="h-4 w-4 text-sky-400" />
                                 <span className="text-[10px] font-black tracking-[0.18em] text-slate-400 uppercase">
                                   Duration
                                 </span>

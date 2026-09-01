@@ -28,7 +28,7 @@ export default async function PurchasePage({ params }: Props) {
       where: { id },
       include: { category: true },
     }),
-    prisma.enrollment.findFirst({
+    prismaUnfiltered.enrollment.findFirst({
       where: { userId, courseId: id },
     }),
     getActivePaymentMethods(),

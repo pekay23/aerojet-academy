@@ -105,6 +105,14 @@ function detect404Pattern(content) {
     || /return.*404/.test(content)
 }
 
+function detect404Pattern(content) {
+  return content.includes('apiNotFound')
+    || /apiError\(.*404/.test(content)
+    || /not found.*404/i.test(content)
+    || /NextResponse\.json.*status.*404/.test(content)
+    || /return.*404/.test(content)
+}
+
 function getModelNames(content) {
   const models = new Set()
   const regex = /prisma(?:Unfiltered)?\.([a-zA-Z]+)/g
@@ -325,6 +333,59 @@ function getValidBody(content) {
   return '{}'
 }
 
+function getSchemaDefaults(content) {
+  const defaults = {}
+  const schemaMatch = content.match(/z\.object\(\s*\{([\s\S]*?)\}\s*\)/)
+  if (!schemaMatch) return defaults
+  const body = schemaMatch[1]
+  const fieldRegex = /(\w+)\s*:\s*z\.(\w+)\s*\(/g
+  let match
+  while ((match = fieldRegex.exec(body)) !== null) {
+    const name = match[1]
+    const type = match[2]
+    switch (type) {
+      case 'string':
+        defaults[name] = name.includes('email') ? 'test@example.com' : 'test'
+        break
+      case 'number':
+        defaults[name] = 1
+        break
+      case 'boolean':
+        defaults[name] = true
+        break
+      case 'array': {
+        const afterArray = body.slice(match.index + match[0].length).trimStart()
+        if (afterArray.startsWith('z.object')) {
+          defaults[name] = [{ id: 'test' }]
+        } else {
+          defaults[name] = ['val1', 'val2', 'val3']
+        }
+        break
+      }
+      case 'enum': {
+        const enumMatch = body.slice(match.index).match(/z\.enum\(\s*\[([^\]]*)\]/)
+        if (enumMatch) {
+          const vals = enumMatch[1].match(/'([^']+)'/g) || []
+          defaults[name] = vals[0]?.replace(/'/g, '') || 'YES'
+        }
+        break
+      }
+      case 'object':
+        defaults[name] = { id: 'test' }
+        break
+    }
+  }
+  return defaults
+}
+
+function getValidBody(content) {
+  const defaults = getSchemaDefaults(content)
+  if (Object.keys(defaults).length > 0) {
+    return JSON.stringify(defaults)
+  }
+  return '{}'
+}
+
 function getDefaultMockValues(model, content) {
   if (model === 'application') {
     const stageMatch = content.match(/application\.stage\s*!==\s*'([^']+)'/)
@@ -386,6 +447,8 @@ function generateTest(routePath, content) {
     .replace('app/api/', '')
     .replace(/\/route\.ts$/, '')
     .replace(/\[([^\]]+)\]/g, ':$1')
+  const paramNames = (routeUrl.match(/:([^/]+)/g) || []).map(m => m.substring(1))
+  const paramsObj = paramNames.map(p => `${p}: '1'`).join(', ')
   const paramNames = (routeUrl.match(/:([^/]+)/g) || []).map(m => m.substring(1))
   const paramsObj = paramNames.map(p => `${p}: '1'`).join(', ')
   const paramNames = (routeUrl.match(/:([^/]+)/g) || []).map(m => m.substring(1))

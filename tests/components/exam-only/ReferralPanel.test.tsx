@@ -11,7 +11,7 @@ describe('ReferralPanel', () => {
   })
 
   it('shows loading state initially', () => {
-    global.fetch = vi.fn(() => new Promise(() => {}))
+    global.fetch = vi.fn(() => new Promise<Response>(() => {}))
     render(<ReferralPanel />)
     expect(screen.getByText('Loading...')).toBeInTheDocument()
   })

@@ -1,8 +1,10 @@
 import { NextRequest } from 'next/server'
 import { withErrorHandler, apiError, apiSuccess } from '@/lib/api/response'
+import { requireStaff } from '@/lib/auth/helpers'
 import { getFunnelMetrics } from '@/lib/analytics/queries'
 
 export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+  await requireStaff()
   const url = new URL(req.url)
   const funnelRaw = url.searchParams.get('funnel')
   const isValidFunnel = (f: string | null): f is 'registration' | 'enrollment' | 'exam' | 'payment' =>

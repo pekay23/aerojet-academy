@@ -185,7 +185,7 @@ export default function SchedulingClient({
             placeholder="Search by code or name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="h-11 rounded-xl border-slate-200 bg-white pl-11 shadow-sm transition-all focus:border-aerojet-sky focus:ring-2 focus:ring-aerojet-sky/10 dark:border-slate-800 dark:bg-slate-950"
+            className="h-11 rounded-xl border-slate-200 bg-white pl-11 shadow-sm transition-all focus:border-aerojet-sky focus:ring-2 focus:ring-aerojet-sky/10 dark:border-slate-800 dark:bg-slate-900/50"
           />
         </div>
       </motion.div>

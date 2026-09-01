@@ -138,7 +138,7 @@ export default function StudentDetailPanel({
           setStudent(data.data) // apiSuccess wraps in 'data'
         }
       } catch (err) {
-        console.error('Failed to fetch student details:', err)
+        toast.error('Failed to load student details')
       } finally {
         setLoading(false)
       }

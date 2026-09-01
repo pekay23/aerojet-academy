@@ -36,7 +36,7 @@ export default async function ExamOnlyTopUpPage({
       where: { id: userId },
       select: { registrationPaid: true, programmeChoice: true, role: true },
     }),
-    prisma.payment.findFirst({
+    prismaUnfiltered.payment.findFirst({
       where: { userId, referenceType: 'WALLET_TOPUP', status: 'PENDING' },
     }),
     prisma.wallet.findUnique({ where: { userId } }),

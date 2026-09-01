@@ -12,7 +12,7 @@ vi.mock('date-fns', () => ({
 
 vi.mock('@/components/ui/button', () => ({
   Button: ({ children, variant, className }: any) => (
-    <button className={className} variant={variant}>{children}</button>
+    <button className={className} data-variant={variant}>{children}</button>
   ),
 }))
 

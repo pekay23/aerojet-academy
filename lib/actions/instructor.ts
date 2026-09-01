@@ -352,6 +352,29 @@ export async function getClassData(classId: string) {
   )
 }
 
+export async function getClassData(classId: string) {
+  const session = await getAuthSession()
+  if (!session || session.user.role !== 'INSTRUCTOR') return null
+
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
+
+  return serializePrisma(
+    await prismaUnfiltered.class.findUnique({
+      where: { id: classId, instructorId },
+      include: {
+        course: {
+          include: {
+            enrollments: {
+              where: { status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
+              include: { user: { include: { profile: true } } },
+            },
+          },
+        },
+      },
+    })
+  )
+}
+
 export async function getClassAttendance(classId: string, date?: Date) {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return null

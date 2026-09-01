@@ -57,6 +57,7 @@ import { GET, PUT, DELETE } from '@/app/api/staff/exams/internal/banks/[bankId]/
 import { getAuthSession } from '@/lib/auth/helpers'
 import { createAuditLog } from '@/lib/audit/logger'
 import { createAuditLog } from '@/lib/audit/logger'
+import { createAuditLog } from '@/lib/audit/logger'
 
 describe('/staff/exams/internal/banks/:bankId/questions/:questionId', () => {
   beforeEach(() => {

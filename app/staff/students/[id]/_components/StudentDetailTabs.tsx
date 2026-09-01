@@ -104,6 +104,7 @@ export default function StudentDetailTabs({
           {activeTab === 'academic' && <AcademicTab student={student} onRefresh={handleRefresh} />}
           {activeTab === 'notes' && <AdminNotesTab student={student} onRefresh={handleRefresh} staffId={staffId} staffRole={staffRole} />}
           {activeTab === 'practical' && <PracticalTab student={student} onRefresh={handleRefresh} />}
+          {activeTab === 'practical' && <PracticalTab student={student} onRefresh={handleRefresh} />}
         </div>
       </div>
     </div>

@@ -111,3 +111,16 @@ export const SEB = {
     'http://localhost:3001',
   ],
 } as const
+
+// ── Safe Exam Browser (SEB) ────────────────────────────────────────────
+export const SEB = {
+  /** Browser Exam Key used to validate SEB request hashes */
+  BROWSER_EXAM_KEY: process.env.SEB_BROWSER_EXAM_KEY || '',
+  /** Origins allowed to launch SEB config downloads */
+  ALLOWED_ORIGINS: [
+    'https://safeexambrowser.org',
+    'https://safeexambrowser.org:4444',
+    'http://localhost:3000',
+    'http://localhost:3001',
+  ],
+} as const

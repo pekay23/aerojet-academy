@@ -222,7 +222,7 @@ export default function StaffMessageThread({
               </Badge>
             )}
             {thread.unreadCount > 0 && (
-              <span className="shrink-0 animate-pulse rounded-full bg-red-500 px-2 py-0.5 text-[9px] font-black tracking-widest text-white uppercase shadow-lg">
+              <span className="shrink-0 animate-pulse rounded-full bg-red-100 px-2 py-0.5 text-[9px] font-black tracking-widest text-red-700 uppercase shadow-lg dark:bg-red-900/30 dark:text-red-400">
                 New
               </span>
             )}

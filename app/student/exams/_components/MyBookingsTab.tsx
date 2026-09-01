@@ -272,7 +272,7 @@ export default async function MyBookingsTab() {
                       </td>
                       <td className="px-6 py-4">
                         {m.examComponent?.course?.code ? (
-                          <div className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-slate-400" /><span className="inline-flex rounded-lg bg-aerojet-blue/10 px-2.5 py-1 text-xs font-bold text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-300">{m.examComponent.course.code}</span></div>
+                          <div className="flex items-center gap-1.5"><BookOpen className="h-3.5 w-3.5 text-slate-400" /><span className="inline-flex rounded-lg bg-blue-800/10 px-2.5 py-1 text-xs font-bold text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">{m.examComponent.course.code}</span></div>
                         ) : (<span className="text-xs text-slate-400 italic">Not assigned</span>)}
                       </td>
                       <td className="px-6 py-4">

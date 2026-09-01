@@ -21,6 +21,7 @@ import { Metadata } from 'next'
 import { PathwayCode } from './_components/EditPathwayDialog'
 import { UserStatus, UserRole, EnrollmentStatus } from '@/types/enums'
 import type { SerializedFullTimeEnrollmentForOjt, SerializedStudent } from '@/lib/staff/types'
+import type { SerializedFullTimeEnrollmentForOjt, SerializedStudent } from '@/lib/staff/types'
 
 export const metadata: Metadata = { title: 'User Details | Staff Portal' }
 
@@ -99,7 +100,7 @@ export default async function UserProfilePage({ params }: Props) {
   })
 
   if (!userRaw) notFound()
-  const user = serializePrisma(userRaw) as unknown as SerializedStudent
+  const user = serializePrisma(userRaw) as unknown as SerializedStudent as unknown as SerializedStudent
 
   // Fetch OJT + exam components in parallel (both independent of each other)
   const [ftEnrollmentsRaw, examComponentsRaw] = await Promise.all([
@@ -373,7 +374,7 @@ export default async function UserProfilePage({ params }: Props) {
           )}
 
           {/* Academic History for Students */}
-          {[UserRole.STUDENT, UserRole.APPLICANT].includes(user.role as any) && (
+          {[UserRole.STUDENT, UserRole.APPLICANT].includes(user.role as UserRole) && (
             <AcademicHistorySection
               studentId={user.id}
               studentName={fullName}
@@ -383,9 +384,9 @@ export default async function UserProfilePage({ params }: Props) {
                 status: e.status,
                 completedAt: e.completedAt ?? null,
                 course: e.course,
-                academicYear: e.academicYear,
-                semester: e.semester,
-              }))}
+                academicYear: e.academicYear ?? null,
+                semester: e.semester ?? null,
+              })) as any}
               examBookings={(user.examBookings || []).map((b) => ({
                 id: b.id,
                 moduleCode: b.moduleCode,
@@ -396,9 +397,9 @@ export default async function UserProfilePage({ params }: Props) {
                 examDate: b.examDate,
                 status: b.status,
                 examCategory: b.examCategory,
-              }))}
+              })) as any}
               studentProfile={user.studentProfile ? {
-                studentId: user.studentProfile.studentId,
+                studentId: user.studentProfile.studentId ?? '',
                 enrollmentStatus: user.studentProfile.enrollmentStatus ?? '',
                 fundingSource: user.studentProfile.fundingSource ?? '',
                 currentYearNumber: user.studentProfile.currentYearNumber ?? 0,

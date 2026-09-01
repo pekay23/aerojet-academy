@@ -171,7 +171,7 @@ export default async function AvailablePoolsTab() {
                     <div className="mb-4 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50">
                       <p className="mb-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase">Modules in booking ({existingModules.length}/4)</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {existingModules.map((m) => (<span key={m} className="bg-aerojet-blue/10 text-blue-800 inline-flex rounded-md px-2 py-0.5 text-xs font-bold dark:bg-blue-900/30 dark:text-blue-300">{m}</span>))}
+                        {existingModules.map((m) => (<span key={m} className="bg-blue-800/10 text-blue-800 inline-flex rounded-md px-2 py-0.5 text-xs font-bold dark:bg-blue-900/30 dark:text-blue-300">{m}</span>))}
                       </div>
                     </div>
                   )}
@@ -184,7 +184,7 @@ export default async function AvailablePoolsTab() {
                   <div className="mt-auto flex items-center justify-between border-t border-slate-50 pt-4 dark:border-slate-800">
                     <div>
                       <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Seat Price</p>
-                      <p className="text-aerojet-blue text-lg font-black dark:text-blue-400">{currencySymbol}{seatPrice.toFixed(2)}</p>
+                      <p className="text-blue-800 text-lg font-black dark:text-blue-400">{currencySymbol}{seatPrice.toFixed(2)}</p>
                     </div>
                     {isJoined ? (
                       <button disabled className="rounded-xl bg-emerald-100 px-4 py-2 text-xs font-bold tracking-wide text-emerald-700 uppercase dark:bg-emerald-900/30 dark:text-emerald-400">Joined ✓</button>

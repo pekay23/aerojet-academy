@@ -17,6 +17,7 @@ import prisma from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Course Materials | Instructor Portal' }
 export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -43,7 +44,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <div className="space-y-4">
         <Link
           href="/instructor/classes"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-300 uppercase transition-colors hover:text-aerojet-sky"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-300 dark:text-slate-300 uppercase transition-colors hover:text-aerojet-sky"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Classes

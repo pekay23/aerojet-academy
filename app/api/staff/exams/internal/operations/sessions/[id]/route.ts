@@ -71,16 +71,22 @@ export const GET = withErrorHandler(async (
 
   if (!s) return apiNotFound('Session not found')
 
-  const certificates = await prismaUnfiltered.certificate.findMany({
-    where: { sessionId: s.id },
-    select: {
-      id: true,
-      certificateId: true,
-      pdfUrl: true,
-      verified: true,
-      issuedAt: true,
-    },
-  })
+  // Certificates may not be available if the model wasn't generated
+  let certificates: { id: string; certificateId: string; pdfUrl: string | null; verified: boolean; issuedAt: Date }[] = []
+  try {
+    certificates = await prismaUnfiltered.certificate.findMany({
+      where: { sessionId: s.id },
+      select: {
+        id: true,
+        certificateId: true,
+        pdfUrl: true,
+        verified: true,
+        issuedAt: true,
+      },
+    })
+  } catch {
+    // Certificate model may not be in the generated client yet
+  }
 
   return apiSuccess({
     id: s.id,

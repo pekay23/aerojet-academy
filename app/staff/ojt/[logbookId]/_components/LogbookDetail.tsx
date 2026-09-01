@@ -25,6 +25,8 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { LogbookPreview } from '@/components/shared/LogbookPreview'
 import ReviewSignoffPanel from './ReviewSignoffPanel'
 import MentorAssignments from './MentorAssignments'
+import ReviewSignoffPanel from './ReviewSignoffPanel'
+import MentorAssignments from './MentorAssignments'
 
 interface Entry {
   id: string
@@ -162,6 +164,12 @@ export default function LogbookDetail({
   }
 
   const [form, setForm] = useState(defaultFormValues)
+  const [editingFacility, setEditingFacility] = useState(false)
+  const [facilityForm, setFacilityForm] = useState({
+    facilityName: logbook.facilityName,
+    facilityApprovalNo: logbook.facilityApprovalNo || '',
+  })
+  const [savingFacility, setSavingFacility] = useState(false)
   const [editingFacility, setEditingFacility] = useState(false)
   const [facilityForm, setFacilityForm] = useState({
     facilityName: logbook.facilityName,

@@ -27,7 +27,7 @@ describe('Chart', () => {
     const mockPayload = [{ name: 'revenue', value: 1000, data: '#4A72E8', dataKey: 'revenue' }]
     render(
       <ChartContainer config={mockConfig}>
-        <ChartTooltipContent active={true} payload={mockPayload as any} config={mockConfig} />
+        <ChartTooltipContent active={true} payload={mockPayload as any} />
       </ChartContainer>
     )
     expect(screen.getByText('1,000')).toBeInTheDocument()
@@ -36,7 +36,7 @@ describe('Chart', () => {
   it('returns null when not active', () => {
     const { container } = render(
       <ChartContainer config={mockConfig}>
-        <ChartTooltipContent active={false} payload={[]} config={mockConfig} />
+        <ChartTooltipContent active={false} payload={[]} />
       </ChartContainer>
     )
     expect(screen.queryByText('1,000')).not.toBeInTheDocument()

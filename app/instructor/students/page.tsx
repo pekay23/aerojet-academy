@@ -4,6 +4,7 @@ import InstructorStudentsView from './_components/InstructorStudentsView'
 
 export const metadata: Metadata = { title: 'My Students | Instructor Portal' }
 export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 
 export default async function Page() {
   const [students, formerStudents] = await Promise.all([

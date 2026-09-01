@@ -8,6 +8,7 @@ import Link from 'next/link'
 
 export const metadata: Metadata = { title: 'Attendance Tracker | Instructor Portal' }
 export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 
 export default async function Page({
   params,
@@ -32,7 +33,7 @@ export default async function Page({
         <div>
           <Link
             href="/instructor/classes"
-            className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-300 uppercase transition-colors hover:text-aerojet-sky"
+            className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-300 dark:text-slate-300 uppercase transition-colors hover:text-aerojet-sky"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
             Back to My Classes

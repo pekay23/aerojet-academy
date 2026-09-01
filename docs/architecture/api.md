@@ -94,6 +94,13 @@ exhaustive inventory — many additional sub-routes exist under each prefix.
 - `GET /api/examiner/compliance` — Compliance verification
 - `GET/POST /api/examiner/availability` — Availability scheduling
 
+## Examiner (EXAMINER role)
+
+- `GET /api/examiner/sittings` — View exam sittings
+- `GET/POST /api/examiner/results` — Exam results review
+- `GET /api/examiner/compliance` — Compliance verification
+- `GET/POST /api/examiner/availability` — Availability scheduling
+
 ## Staff (STAFF/ADMIN/SUPER_ADMIN)
 
 - `GET/POST /api/staff/users` — List/create

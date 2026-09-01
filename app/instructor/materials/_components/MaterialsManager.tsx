@@ -121,7 +121,7 @@ export default function MaterialsManager({
       </div>
 
       <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-4 text-sm dark:border-slate-700 dark:bg-slate-800/40">
-        <UploadCloud className="h-4 w-4 text-slate-400 dark:text-slate-300" />
+        <UploadCloud className="h-4 w-4 text-slate-400 dark:text-slate-300 dark:text-slate-300" />
         <span className="font-bold text-slate-600 dark:text-slate-300">
           Or upload a file (Supabase storage):
         </span>

@@ -70,7 +70,7 @@ export const POST = withErrorHandler(async (
     entity: 'InternalExamQuestion',
     entityId: questionId,
     description: `Question ${questionId} restored from retired state.`,
-    changes: { questionId, bankId: existing.bankId, changeType: 'REACTIVATED' },
+    changes: { questionId, bankId: existing.bankId, changeType: 'RESTORED' },
   })
 
   return apiSuccess(restored)

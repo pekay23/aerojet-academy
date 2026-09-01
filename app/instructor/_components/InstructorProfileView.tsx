@@ -225,7 +225,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold text-slate-400 dark:text-slate-300">First Name</Label>
+                        <Label className="text-xs font-bold text-slate-400 dark:text-slate-300 dark:text-slate-300">First Name</Label>
                         <Input
                           disabled={!isEditing}
                           value={formData.profile.firstName}

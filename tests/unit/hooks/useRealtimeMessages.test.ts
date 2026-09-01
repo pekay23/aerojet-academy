@@ -10,6 +10,6 @@ describe('hooks/useRealtimeMessages', () => {
 
   it('can be called without error', () => {
     const { result } = renderHook(() => useRealtimeMessages(undefined))
-    expect(result.error).toBeUndefined()
+    expect((result as any).error).toBeUndefined()
   })
 })

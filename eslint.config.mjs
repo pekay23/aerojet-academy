@@ -54,13 +54,10 @@ export default defineConfig([
     '.playwright-mcp/**',
     // Generated / throwaway directories
     'tmp/**',
-    'tmp_consolidate.mjs',
     'scratch/**',
     'artifacts/**',
     'plans/**',
     'node_modules/**',
-    // Throwaway tools (not part of build or any npm script)
-    'tools/**',
     // One-off ad-hoc scripts at the repo root — not part of the build or
     // any npm script; kept for history but should not gate CI lint.
     'fix.js',
@@ -77,20 +74,6 @@ export default defineConfig([
     'scripts/migrate-prisma.js',
     'scripts/migrate-prisma-2.js',
     'scripts/replace.cjs',
-    // One-off generation / list / debug scripts (not referenced by any
-    // package.json script).
-    'scripts/_tmp_audit_banks.cjs',
-    'scripts/_tmp_check_eslint.mjs',
-    'scripts/_tmp_check_resources.cjs',
-    'scripts/_tmp_sanity.cjs',
-    'scripts/check-test-users.mjs',
-    'scripts/debug-login-direct.mjs',
-    'scripts/gen-tests.mjs',
-    'scripts/generate-api-tests.mjs',
-    'scripts/list-routes-to-test.mjs',
-    'scripts/sync-data-to-supabase.mjs',
-    'scripts/sync-supabase-schema.mjs',
-    'scripts/tour-verification.mjs',
   ]),
 
   // ── Next + Core Web Vitals + TypeScript ────────────────────────────────────

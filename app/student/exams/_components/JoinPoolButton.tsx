@@ -210,7 +210,7 @@ export default function JoinPoolButton({
                     {currentModules.map((m) => (
                       <span
                         key={m}
-                        className="inline-flex rounded-lg bg-white border border-slate-100 px-2.5 py-1 text-xs font-black text-aerojet-blue shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:text-blue-300"
+                        className="inline-flex rounded-lg bg-white border border-slate-100 px-2.5 py-1 text-xs font-black text-blue-800 shadow-sm dark:bg-slate-800 dark:border-slate-700 dark:text-blue-300"
                       >
                         {m}
                       </span>

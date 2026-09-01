@@ -62,7 +62,7 @@ describe('submitExaminerResults', () => {
   })
 
   it('records results for valid entries', async () => {
-    const entries = [{ assignmentId: 'assign-1', score: 85 }]
+    const entries = [{ assignmentId: 'assign-1', score: 85, absent: false }]
     const res = await submitExaminerResults('sitting-1', entries)
     if ((res as any).error) {
       console.log('Error in records test:', (res as any).error)
@@ -73,7 +73,7 @@ describe('submitExaminerResults', () => {
   })
 
   it('marks absent candidates', async () => {
-    const entries = [{ assignmentId: 'assign-1', absent: true }]
+    const entries = [{ assignmentId: 'assign-1', absent: true, score: null }]
     const res = await submitExaminerResults('sitting-1', entries)
     expect((res as any).success).toBe(true)
     expect((res as any).recorded).toBe(0)
@@ -81,7 +81,7 @@ describe('submitExaminerResults', () => {
 
   it('clamps score to 0-100 range', async () => {
     prismaMock.examResult.findMany.mockResolvedValue([])
-    const entries = [{ assignmentId: 'assign-1', score: 150 }]
+    const entries = [{ assignmentId: 'assign-1', score: 150, absent: false }]
     const res = await submitExaminerResults('sitting-1', entries)
     if ((res as any).error) {
       console.log('Error in clamp test:', (res as any).error)
@@ -94,7 +94,7 @@ describe('submitExaminerResults', () => {
     prismaMock.examResult.findMany.mockResolvedValue([
       { id: 'result-1', userId: 'candidate-1', moduleCode: 'M1', examId: null },
     ])
-    const entries = [{ assignmentId: 'assign-1', score: null }]
+    const entries = [{ assignmentId: 'assign-1', score: null, absent: false }]
     const res = await submitExaminerResults('sitting-1', entries)
     expect((res as any).success).toBe(true)
     expect(prismaMock.examResult.deleteMany).toHaveBeenCalled()
