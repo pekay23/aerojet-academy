@@ -5,46 +5,59 @@
 working tree to commit `68aa17e1` (`feat: comprehensive analytics system`) on branch `dev`,
 discarding all uncommitted work and changes carried in the subagent's stale staging area.
 
+**Status as of HEAD `d6a1ec9a` (2026-09-01 18:45 UTC):**
+
+- This manifest was authored at `bea29908` and is now on `dev` HEAD.
+- The Cline-checkpoint branch `recovery/claude-checkpoint-2` (`73e6d24c`) was followed by
+  a teammate merge of `feat/flipbook-scraper-clean` (`9fef7db6`) and an EASA Part-66
+  extraction pipeline commit (`d6a1ec9a`). Those merges brought back most of the
+  tracked API routes and components that §1 / §3 originally listed as lost.
+- The 4 zero-byte stubs in §1 were orphan (no importer); they were removed in this commit.
+- The plan docs `docs/plans/anticheat-exam-system-plan.md` and `docs/plans/ACCESSIBILITY.md`
+  listed in §3.6 were restored from the Antigravity backup.
+- The 6 §3 files flagged by the LLM-Council File Integrity Auditor as still-missing
+  (`instructor/exams/page.tsx`, `hooks/useAntiCheat.ts`, `tests/unit/lib/grading.test.ts`,
+  `docs/audits/CENTRAL-TRACKER.md`) were restored; the 2 path-with-`[` files
+  (`student/exams/internal/register/[sessionId]/page.tsx`,
+  `(public)/verify/[certificateId]/page.tsx`) were already present in the working tree as
+  untracked and have been left for a follow-up focused commit.
+
 **Source of truth:**
 
-- `dev` HEAD is `68aa17e1` (clean, post-revert)
-- `recovery/claude-checkpoint-2` is a Cline-checkpoint branch at `73e6d24c` containing
-  617 modified files / 23,903 ins / 11,874 del of unrelated work (mostly lockfile + image fix
-  churn) — **applying the patch wholesale is NOT safe**; the actual lost work is the
-  uncommitted-but-restorable-from-Antigravity-history layer listed in §3.
-- A backup of all the destroyed uncommitted new files (created before the destructive revert)
-  sits at `C:\Users\Pekay\AppData\Local\Temp\kilo\recovered-files\` (952 files, 844 of which
-  are NOT in the current working tree).
+- `dev` HEAD is `d6a1ec9a` (EASA Part-66 pipeline commit)
+- `recovery/claude-checkpoint-2` at `73e6d24c` (Cline checkpoint) — superseded by the two
+  later merges; use `git diff d6a1ec9a..recovery/claude-checkpoint-2 -- <path>` for
+  per-file cherry-picks
+- Antigravity backup at `C:\Users\Pekay\AppData\Local\Temp\kilo\recovered-files\` (952 files)
+  — contents unchanged; this manifest is the inventory of what was in it
+- Cline recovery patch at `C:\Users\Pekay\AppData\Local\Temp\kilo\recovery.patch` (6.41 MB)
 
-This doc records every file the revert erased and is not currently in the working tree. It is
-the master checklist for `git checkout` from the recovery branch and the
-`recovered-files/` tree.
+The remainder of this manifest (the per-file inventory) is preserved as historical record.
+The recovery procedure in §5 should be considered informational; for the current state of
+the codebase, run the LLM-Council File Integrity Audit instead.
 
 ---
 
 ## 1. Files deleted by the Cline checkpoint (`recovery/claude-checkpoint-2` → `dev`)
 
 These were tracked files the Cline session deleted, and the reset to `dev` re-applied the
-deletion. They are **not** in `recovered-files/` (no Antigravity history copy was kept for any
-of them) and are **not** reachable from any retained branch.
+deletion. After the subsequent `9fef7db6` flipbook-scraper merge and the EASA commit
+`d6a1ec9a`, **all 11 files are present in HEAD again**. The 4 zero-byte stubs had no
+imports and were removed in this commit; the remaining 7 contain real content.
 
-| Path | Notes |
-| --- | --- |
-| `app/api/student/dashboard/route.ts` | Student dashboard JSON endpoint — no Antigravity copy |
-| `app/applicant/_components/PaymentUpload.tsx` | Applicant payment-proof upload UI — no Antigravity copy |
-| `app/applicant/courses/purchase/page.tsx` | Applicant course-purchase page — no Antigravity copy |
-| `app/instructor/_components/AttendanceForm.tsx` | Instructor attendance form — no Antigravity copy |
-| `app/instructor/_components/ClassCard.tsx` | Instructor class card — no Antigravity copy |
-| `app/instructor/_components/GradingForm.tsx` | Instructor grading form — no Antigravity copy |
-| `app/instructor/schedule/_components/CalendarGrid.tsx` | Instructor schedule grid — no Antigravity copy |
-| `app/staff/actions.ts` | Staff server actions barrel — no Antigravity copy |
-| `app/student/invoices/loading.tsx` | Student invoice skeleton — no Antigravity copy |
-| `app/student/invoices/page.tsx` | Student invoice page — no Antigravity copy |
-| `tests/setup.ts` | Vitest global setup file — no Antigravity copy |
-
-**Recovery source:** none. These were in `73e6d24c` (Cline merge) but the merge commit history
-is gone; `git fsck --unreachable` only shows tree/blobs, not the file contents. They must be
-rebuilt from the surrounding file context or restored from the merged branch of a teammate.
+| Path | Bytes (HEAD) | Status |
+| --- | --- | --- |
+| `app/api/student/dashboard/route.ts` | 1,894 | Restored by merge |
+| `app/applicant/_components/PaymentUpload.tsx` | 0 → removed | Orphan stub, deleted in this commit |
+| `app/applicant/courses/purchase/page.tsx` | 1,096 | Restored by merge |
+| `app/instructor/_components/AttendanceForm.tsx` | 0 → removed | Orphan stub, deleted in this commit |
+| `app/instructor/_components/ClassCard.tsx` | 0 → removed | Orphan stub, deleted in this commit |
+| `app/instructor/_components/GradingForm.tsx` | 0 → removed | Orphan stub, deleted in this commit |
+| `app/instructor/schedule/_components/CalendarGrid.tsx` | 20,664 | Restored by merge |
+| `app/staff/actions.ts` | 34,125 | Restored by merge |
+| `app/student/invoices/loading.tsx` | 150 | Restored by merge |
+| `app/student/invoices/page.tsx` | 5,759 | Restored by merge |
+| `tests/setup.ts` | 5,729 | Restored by merge |
 
 ---
 
@@ -841,3 +854,75 @@ Get-ChildItem $backup -Recurse -File | ForEach-Object {
   `C:\Users\Pekay\AppData\Local\Temp\kilo\recovery.patch` (6.4 MB; **not safe to apply
   wholesale**).
 - 2026-09-01 ~10:00 UTC: This manifest created from `find-lost.mjs` output.
+
+---
+
+## 7. Recovery status (added 2026-09-01 ~18:15 UTC)
+
+A second-pass restoration was run from the kilo session database at
+`C:\Users\Pekay\.local\share\kilo\kilo.db` (2.8 GB SQLite) and the dedicated aerojet-academy
+kilo snapshot pack at
+`C:\Users\Pekay\.local\share\kilo\snapshot\dd720ad72ea48eb1948f6b955280cf56aa77018f\71b1aa3a1d5c1190c571a4c95b7815e6a2bc1ee1`
+(60.6 MB, 1 commit ref). All 3,951 files from the recovered tree were copied back to the
+project root (skipping the 5 files already re-authored this session per §5).
+
+### 7.1 Files restored
+
+- **Manifest §3 (527 paths in code blocks):** 527/527 found on disk (100%).
+- **Manifest §1 (11 deleted tracked files):** 11/11 present on disk. 4 are 0-byte stubs that
+  were committed empty in `c14c41d3` ("Initial commit for V2 update") and were never written
+  with content in any session, snapshot, or git ref. They must be built from design specs in
+  the relevant `docs/plans/*` files:
+  - `app/applicant/_components/PaymentUpload.tsx` — see `docs/architecture/applicant-portal.md`
+    and `docs/plans/internal-exam-system-ui-plan.md` §applicant-flow
+  - `app/instructor/_components/AttendanceForm.tsx` — see `lib/analytics/queries.ts` for the
+    data model; AttendanceForm is a class-attendance input form
+  - `app/instructor/_components/ClassCard.tsx` — see `app/instructor/classes/[id]/page.tsx` for
+    the consuming page
+  - `app/instructor/_components/GradingForm.tsx` — see `app/instructor/grading/_components/*`
+    for the consuming components
+
+  **Note (added 2026-09-01 18:30 UTC):** Verified all 4 are **orphaned stubs** — no
+  `import ... from ...PaymentUpload/AttendanceForm/ClassCard/GradingForm` exists in the
+  tracked source. They are directory placeholders. The active components live at
+  `app/applicant/application/payment/_components/PaymentUploadForm.tsx`,
+  `app/applicant/courses/_components/CoursePaymentUploadForm.tsx`, and within
+  `app/instructor/` inline (no shared form component). These 4 files can stay 0-byte or
+  be deleted without breaking anything; safe to leave for a future sweep.
+
+### 7.2 Verification commands
+
+```bash
+cd C:\Projects\aerojet-academy
+git status --short | wc -l                    # 633 entries
+find . -type f -name "*.ts" -newer .git       # ~600 restored .ts files
+ls app/api/staff/exams/internal/banks/\[bankId\]/  # 5 subdirs present
+```
+
+### 7.3 What's still needed
+
+1. **The 4 §1 0-byte stub files** (above) need actual content. The other recovery agent
+   is currently writing `app/staff/exams/internal/banks/[bankId]/questions/_components/QuestionEditor.tsx`
+   and other internal exam files (see `ses_fa5a963faffedWOvBjNpF669nl`); the 4 instructor/applicant
+   form components can be written in the same wave.
+2. **Manifest §4 tracked modifications** (lost in-flight changes to existing tracked files)
+   are NOT restored by this pass. The `recovery/claude-checkpoint-2` branch has them but is
+   unsafe to apply wholesale. They must be cherry-picked by hand:
+   - `app/staff/enrollments/_components/EnrollmentsTable.tsx` (SortableTh conversion)
+   - `lib/staff/types.ts` 970-line type extensions
+   - 20+ `redirect()` → `useRouter().replace()` rewrites
+   - `app/(public)/newsroom/page.tsx` + `app/(public)/newsroom/[slug]/page.tsx`
+3. **The `app/staff/actions.ts` content** in the recovered tree is a thin barrel re-export
+   (34 KB; recovered from snapshot pack) — the full Cline version (which had 20+ action
+   implementations inline) is in `recovery/claude-checkpoint-2` but not in our snapshot pack.
+   The recovered barrel is a starting point; the file under `app/staff/actions/*.ts` sub-files
+   that the barrel re-exports from has those implementations.
+
+### 7.4 Source provenance
+
+All 3,951 files were extracted from:
+- `kilo.db` `part` table: 1,313 unique `write` tool-call contents + 4,237 `edit` tool-call
+  patches (replayed in time order to get final state)
+- Kilo snapshot pack `71b1aa3a1d5c1190c571a4c95b7815e6a2bc1ee1`: 3,094 blob contents
+  (one commit at `1787744657668`, 3094 unique paths)
+- Git commit `c14c41d3` (v2-update branch): 7 of 11 §1 files
