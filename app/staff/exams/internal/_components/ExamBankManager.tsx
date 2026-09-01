@@ -11,8 +11,15 @@ import {
   Users,
   BarChart3,
   Copy,
+  History,
+  Edit3,
+  X,
+  Clock,
+  Plus,
+  Archive,
 } from 'lucide-react'
 import ApprovalQueue from './ApprovalQueue'
+import Link from 'next/link'
 
 type PoolHealth = 'GREEN' | 'AMBER' | 'RED'
 
@@ -42,6 +49,32 @@ export default function ExamBankManager() {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [copiedId, setCopiedId] = useState<string | null>(null)
 
+  const [editingRulesBankId, setEditingRulesBankId] = useState<string | null>(null)
+  const [rulesForm, setRulesForm] = useState({
+    passMarkPct: 75,
+    timePerQuestionSecs: 75,
+    retakeWaitDays: 90,
+    maxRetakes: 3,
+    completionWindowYears: 10,
+    allowKeyboardAutoSubmit: true,
+    customInstructions: '',
+    mcqCount: 40,
+  })
+  const [rulesSaving, setRulesSaving] = useState(false)
+
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    courseId: '',
+    moduleCode: '',
+    mcqCount: 40,
+    ruleSet: 'EASA' as 'EASA' | 'CUSTOM',
+  })
+  const [createSaving, setCreateSaving] = useState(false)
+  const [courses, setCourses] = useState<{ id: string; name: string; code: string }[]>([])
+  const [modules, setModules] = useState<{ code: string; name: string }[]>([])
+  const [retiringBankId, setRetiringBankId] = useState<string | null>(null)
+
   const fetchBanks = useCallback(async () => {
     try {
       const res = await fetch('/api/staff/exams/internal/banks')
@@ -64,10 +97,44 @@ export default function ExamBankManager() {
     window.setTimeout(() => setCopiedId(current => current === bankId ? null : current), 1800)
   }
 
+  const retireBank = async (bankId: string) => {
+    if (!confirm('Retire this bank? It will no longer be available for exams but existing sessions will be preserved.')) return
+    try {
+      await fetch(`/api/staff/exams/internal/banks/${bankId}/retire`, { method: 'POST' })
+      fetchBanks()
+    } finally {
+      setRetiringBankId(null)
+    }
+  }
+
   const totalQuestions = banks.reduce((s, b) => s + b._count.questions, 0)
   const totalSessions = banks.reduce((s, b) => s + b._count.sessions, 0)
   const healthyCounts = { GREEN: 0, AMBER: 0, RED: 0 }
   banks.forEach(b => healthyCounts[b.poolHealth.health]++)
+
+  useEffect(() => {
+    if (showCreateModal && courses.length === 0) {
+      fetch('/api/staff/courses?limit=100')
+        .then((r) => r.json())
+        .then((j) => {
+          if (j.data) setCourses(j.data)
+        })
+        .catch(() => {})
+    }
+  }, [showCreateModal, courses.length])
+
+  useEffect(() => {
+    if (createForm.courseId) {
+      fetch(`/api/staff/courses/${createForm.courseId}/exam-components`)
+        .then((r) => r.json())
+        .then((j) => {
+          if (j.data) setModules(j.data)
+        })
+        .catch(() => setModules([]))
+    } else {
+      setModules([])
+    }
+  }, [createForm.courseId])
 
   if (loading) {
     return (
@@ -78,6 +145,7 @@ export default function ExamBankManager() {
   }
 
   return (
+    <>
     <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
@@ -108,6 +176,15 @@ export default function ExamBankManager() {
           <p className="text-xs text-slate-500">Pool Health (G/A/R)</p>
         </div>
       </div>
+
+      {/* Create Bank Button */}
+      <button
+        onClick={() => setShowCreateModal(true)}
+        className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white shadow-sm transition-all hover:bg-blue-700"
+      >
+        <Plus className="h-4 w-4" />
+        Create New Bank
+      </button>
 
       {/* Bank List */}
       {banks.length === 0 ? (
@@ -160,6 +237,27 @@ export default function ExamBankManager() {
 
                 {expanded && (
                   <div className="border-t border-slate-100 p-5 dark:border-slate-800">
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      <Link
+                        href={`/staff/exams/internal/banks/${bank.id}/questions`}
+                        className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-blue-700"
+                      >
+                        <FileQuestion className="h-3 w-3" />
+                        Manage Questions
+                      </Link>
+                      <Link
+                        href={`/staff/exams/internal/banks/${bank.id}/schedule`}
+                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                      >
+                        Schedule Exam
+                      </Link>
+                      <Link
+                        href={`/staff/exams/internal/banks/${bank.id}/instructors`}
+                        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+                      >
+                        Assign Instructors
+                      </Link>
+                    </div>
                     <div className="grid gap-4 sm:grid-cols-2">
                       <div>
                         <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">Pool Health</h4>
@@ -183,7 +281,28 @@ export default function ExamBankManager() {
                         </div>
                       </div>
                       <div>
-                        <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">Rules</h4>
+                        <div className="mb-2 flex items-center justify-between">
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">Rules</h4>
+                          <button
+                            onClick={() => {
+                              setEditingRulesBankId(bank.id)
+                              setRulesForm({
+                                passMarkPct: bank.ruleOverride?.passMarkPct ?? 75,
+                                timePerQuestionSecs: bank.ruleOverride?.timePerQuestionSecs ?? 75,
+                                retakeWaitDays: bank.ruleOverride?.retakeWaitDays ?? 90,
+                                maxRetakes: bank.ruleOverride?.maxRetakes ?? 3,
+                                completionWindowYears: bank.ruleOverride?.completionWindowYears ?? 10,
+                                allowKeyboardAutoSubmit: bank.ruleOverride?.allowKeyboardAutoSubmit ?? true,
+                                customInstructions: bank.ruleOverride?.customInstructions ?? '',
+                                mcqCount: bank.mcqCount,
+                              })
+                            }}
+                            className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                          >
+                            <Edit3 className="h-3 w-3" />
+                            Edit
+                          </button>
+                        </div>
                         <div className="space-y-1 text-sm">
                           <div className="flex justify-between">
                             <span className="text-slate-500">Pass Mark</span>
@@ -226,6 +345,16 @@ export default function ExamBankManager() {
                           <ApprovalQueue bankId={bank.id} />
                         </div>
                       )}
+
+                      <div className="sm:col-span-2 mt-4 flex justify-end border-t border-slate-100 pt-4 dark:border-slate-800">
+                        <button
+                          onClick={() => retireBank(bank.id)}
+                          className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                        >
+                          <Archive className="h-3 w-3" />
+                          Retire Bank
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -235,5 +364,295 @@ export default function ExamBankManager() {
         </div>
       )}
     </div>
+
+    {/* Rules Editing Modal */}
+    {editingRulesBankId && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Edit Exam Rules</h3>
+            <button
+              onClick={() => setEditingRulesBankId(null)}
+              className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <p className="mt-1 text-sm text-slate-500">
+            Configure exam rules. EASA standard is 75s/question — reduce to sharpen students for final exams.
+          </p>
+
+          <div className="mt-6 space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Questions per exam
+              </label>
+              <input
+                type="number"
+                min={5}
+                max={200}
+                value={rulesForm.mcqCount}
+                onChange={(e) => setRulesForm({ ...rulesForm, mcqCount: Number(e.target.value) })}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Time per question (seconds)
+              </label>
+              <input
+                type="number"
+                min={10}
+                max={300}
+                value={rulesForm.timePerQuestionSecs}
+                onChange={(e) => setRulesForm({ ...rulesForm, timePerQuestionSecs: Number(e.target.value) })}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
+              <p className="mt-1 text-xs text-slate-400">EASA standard: 75s. Lower = more challenging.</p>
+            </div>
+
+            <div className="rounded-xl bg-blue-50 p-4 dark:bg-blue-900/10">
+              <div className="flex items-center gap-3">
+                <Clock className="h-8 w-8 text-blue-600" />
+                <div>
+                  <p className="text-xs font-bold uppercase tracking-widest text-blue-600">Total Exam Duration</p>
+                  <p className="text-2xl font-black text-slate-900 dark:text-white">
+                    {Math.round((rulesForm.timePerQuestionSecs * rulesForm.mcqCount) / 60)} minutes
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {rulesForm.mcqCount} questions × {rulesForm.timePerQuestionSecs} seconds
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Pass mark (%)
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                value={rulesForm.passMarkPct}
+                onChange={(e) => setRulesForm({ ...rulesForm, passMarkPct: Number(e.target.value) })}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Retake wait (days)
+              </label>
+              <input
+                type="number"
+                min={0}
+                max={365}
+                value={rulesForm.retakeWaitDays}
+                onChange={(e) => setRulesForm({ ...rulesForm, retakeWaitDays: Number(e.target.value) })}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Max attempts
+              </label>
+              <input
+                type="number"
+                min={1}
+                max={10}
+                value={rulesForm.maxRetakes}
+                onChange={(e) => setRulesForm({ ...rulesForm, maxRetakes: Number(e.target.value) })}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-sm text-slate-700 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={rulesForm.allowKeyboardAutoSubmit}
+                  onChange={(e) => setRulesForm({ ...rulesForm, allowKeyboardAutoSubmit: e.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-600"
+                />
+                Allow keyboard auto-submit (any key press submits exam)
+              </label>
+            </div>
+          </div>
+
+          <div className="mt-6 flex gap-3">
+            <button
+              onClick={() => setEditingRulesBankId(null)}
+              className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                setRulesSaving(true)
+                try {
+                  const res = await fetch(`/api/staff/exams/internal/banks/${editingRulesBankId}/rule-override`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(rulesForm),
+                  })
+                  if (res.ok) {
+                    setEditingRulesBankId(null)
+                    fetchBanks()
+                  }
+                } finally {
+                  setRulesSaving(false)
+                }
+              }}
+              disabled={rulesSaving}
+              className="flex-1 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {rulesSaving ? 'Saving...' : 'Save Rules'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Create Bank Modal */}
+    {showCreateModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Create New Exam Bank</h3>
+            <button
+              onClick={() => setShowCreateModal(false)}
+              className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <p className="mt-1 text-sm text-slate-500">
+            Create a new question bank for a course module.
+          </p>
+
+          <div className="mt-6 space-y-4">
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Course <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={createForm.courseId}
+                onChange={(e) => setCreateForm({ ...createForm, courseId: e.target.value, moduleCode: '' })}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              >
+                <option value="">Select a course...</option>
+                {courses.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.code} — {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Bank Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. Module 1 — Air Law"
+                value={createForm.name}
+                onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Module
+              </label>
+              <select
+                value={createForm.moduleCode}
+                onChange={(e) => setCreateForm({ ...createForm, moduleCode: e.target.value })}
+                disabled={!createForm.courseId}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              >
+                <option value="">Select a module...</option>
+                {modules.map((m) => (
+                  <option key={m.code} value={m.code}>
+                    {m.code} — {m.name}
+                  </option>
+                ))}
+              </select>
+              {!createForm.courseId && (
+                <p className="mt-1 text-xs text-slate-400">Select a course first to see its modules.</p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Questions per exam
+              </label>
+              <input
+                type="number"
+                min={1}
+                value={createForm.mcqCount}
+                onChange={(e) => setCreateForm({ ...createForm, mcqCount: Number(e.target.value) })}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              />
+              <p className="mt-1 text-xs text-slate-400">
+                Recommended minimum: {createForm.mcqCount * 5} questions in pool (5× exam size for {createForm.ruleSet} standard).
+              </p>
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                Rule Set
+              </label>
+              <select
+                value={createForm.ruleSet}
+                onChange={(e) => setCreateForm({ ...createForm, ruleSet: e.target.value as 'EASA' | 'CUSTOM' })}
+                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+              >
+                <option value="EASA">EASA (default)</option>
+                <option value="CUSTOM">Custom</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="mt-6 flex gap-3">
+            <button
+              onClick={() => setShowCreateModal(false)}
+              className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={async () => {
+                if (!createForm.courseId || !createForm.name) return
+                setCreateSaving(true)
+                try {
+                  const res = await fetch('/api/staff/exams/internal/banks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(createForm),
+                  })
+                  if (res.ok) {
+                    setShowCreateModal(false)
+                    setCreateForm({ name: '', courseId: '', moduleCode: '', mcqCount: 40, ruleSet: 'EASA' })
+                    fetchBanks()
+                  }
+                } finally {
+                  setCreateSaving(false)
+                }
+              }}
+              disabled={createSaving || !createForm.courseId || !createForm.name}
+              className="flex-1 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              {createSaving ? 'Creating...' : 'Create Bank'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   )
 }
