@@ -20,7 +20,6 @@ import {
 } from 'lucide-react'
 import ApprovalQueue from './ApprovalQueue'
 import Link from 'next/link'
-import Link from 'next/link'
 
 type PoolHealth = 'GREEN' | 'AMBER' | 'RED'
 
@@ -62,16 +61,6 @@ export default function ExamBankManager() {
     mcqCount: 40,
   })
   const [rulesSaving, setRulesSaving] = useState(false)
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [createForm, setCreateForm] = useState({
-    name: '',
-    courseId: '',
-    moduleCode: '',
-    mcqCount: 40,
-    ruleSet: 'EASA' as 'EASA' | 'CUSTOM',
-  })
-  const [createSaving, setCreateSaving] = useState(false)
-  const [courses, setCourses] = useState<{ id: string; name: string; code: string }[]>([])
 
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [createForm, setCreateForm] = useState({
@@ -107,19 +96,6 @@ export default function ExamBankManager() {
     setCopiedId(bankId)
     window.setTimeout(() => setCopiedId(current => current === bankId ? null : current), 1800)
   }
-
-  const [editingRulesBankId, setEditingRulesBankId] = useState<string | null>(null)
-  const [rulesForm, setRulesForm] = useState({
-    passMarkPct: 75,
-    timePerQuestionSecs: 75,
-    retakeWaitDays: 90,
-    maxRetakes: 3,
-    completionWindowYears: 10,
-    allowKeyboardAutoSubmit: true,
-    customInstructions: '',
-    mcqCount: 40,
-  })
-  const [rulesSaving, setRulesSaving] = useState(false)
 
   const retireBank = async (bankId: string) => {
     if (!confirm('Retire this bank? It will no longer be available for exams but existing sessions will be preserved.')) return
@@ -160,30 +136,6 @@ export default function ExamBankManager() {
     }
   }, [createForm.courseId])
 
-  useEffect(() => {
-    if (createForm.courseId) {
-      fetch(`/api/staff/courses/${createForm.courseId}/exam-components`)
-        .then((r) => r.json())
-        .then((j) => {
-          if (j.data) setModules(j.data)
-        })
-        .catch(() => setModules([]))
-    } else {
-      setModules([])
-    }
-  }, [createForm.courseId])
-
-  useEffect(() => {
-    if (showCreateModal && courses.length === 0) {
-      fetch('/api/staff/courses?limit=100')
-        .then((r) => r.json())
-        .then((j) => {
-          if (j.data) setCourses(j.data)
-        })
-        .catch(() => {})
-    }
-  }, [showCreateModal, courses.length])
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -193,7 +145,8 @@ export default function ExamBankManager() {
   }
 
   return (
-    <div className="space-y-6 relative">
+    <>
+    <div className="space-y-6">
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <div className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900">
@@ -251,7 +204,6 @@ export default function ExamBankManager() {
               <div key={bank.id} className="rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
                 <button
                   onClick={() => setExpandedId(expanded ? null : bank.id)}
-                  aria-label={expanded ? `Collapse ${bank.name}` : `Expand ${bank.name}`}
                   className="flex w-full items-center justify-between p-5 text-left"
                 >
                   <div className="flex items-center gap-4">
@@ -371,21 +323,6 @@ export default function ExamBankManager() {
                         </div>
                       </div>
                       <div className="sm:col-span-2">
-                        <div className="flex items-center justify-between">
-                          <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">Questions</h4>
-                          <Link
-                            href={`/staff/exams/internal/banks/${bank.id}/questions`}
-                            className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-bold text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                          >
-                            <FileQuestion className="h-3 w-3" />
-                            Manage Questions
-                          </Link>
-                        </div>
-                        <p className="text-sm text-slate-500">
-                          {bank._count.questions} questions in this bank. Pool health: {bank.poolHealth.health}.
-                        </p>
-                      </div>
-                      <div className="sm:col-span-2">
                         <h4 className="mb-2 text-xs font-bold uppercase tracking-widest text-slate-400">Student Access</h4>
                         <div className="flex flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800 sm:flex-row sm:items-center sm:justify-between">
                           <p className="text-sm text-slate-600 dark:text-slate-300">
@@ -394,7 +331,6 @@ export default function ExamBankManager() {
                           <button
                             type="button"
                             onClick={() => copyStudentLink(bank.id)}
-                            aria-label={`Copy student link for ${bank.name}`}
                             className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
                           >
                             <Copy className="h-3.5 w-3.5" />
@@ -419,16 +355,6 @@ export default function ExamBankManager() {
                           Retire Bank
                         </button>
                       </div>
-
-                      <div className="sm:col-span-2 mt-4 flex justify-end border-t border-slate-100 pt-4 dark:border-slate-800">
-                        <button
-                          onClick={() => retireBank(bank.id)}
-                          className="flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                        >
-                          <Archive className="h-3 w-3" />
-                          Retire Bank
-                        </button>
-                      </div>
                     </div>
                   </div>
                 )}
@@ -438,6 +364,7 @@ export default function ExamBankManager() {
         </div>
       )}
     </div>
+
     {/* Rules Editing Modal */}
     {editingRulesBankId && (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
@@ -614,143 +541,6 @@ export default function ExamBankManager() {
               <select
                 value={createForm.courseId}
                 onChange={(e) => setCreateForm({ ...createForm, courseId: e.target.value, moduleCode: '' })}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              >
-                <option value="">Select a course...</option>
-                {courses.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.code} — {c.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Bank Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Module 1 — Air Law"
-                value={createForm.name}
-                onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              />
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Module
-              </label>
-              <select
-                value={createForm.moduleCode}
-                onChange={(e) => setCreateForm({ ...createForm, moduleCode: e.target.value })}
-                disabled={!createForm.courseId}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              >
-                <option value="">Select a module...</option>
-                {modules.map((m) => (
-                  <option key={m.code} value={m.code}>
-                    {m.code} — {m.name}
-                  </option>
-                ))}
-              </select>
-              {!createForm.courseId && (
-                <p className="mt-1 text-xs text-slate-400">Select a course first to see its modules.</p>
-              )}
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Questions per exam
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={createForm.mcqCount}
-                onChange={(e) => setCreateForm({ ...createForm, mcqCount: Number(e.target.value) })}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              />
-              <p className="mt-1 text-xs text-slate-400">
-                Recommended minimum: {createForm.mcqCount * 5} questions in pool (5× exam size for {createForm.ruleSet} standard).
-              </p>
-            </div>
-
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Rule Set
-              </label>
-              <select
-                value={createForm.ruleSet}
-                onChange={(e) => setCreateForm({ ...createForm, ruleSet: e.target.value as 'EASA' | 'CUSTOM' })}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
-              >
-                <option value="EASA">EASA (default)</option>
-                <option value="CUSTOM">Custom</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="mt-6 flex gap-3">
-            <button
-              onClick={() => setShowCreateModal(false)}
-              className="flex-1 rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={async () => {
-                if (!createForm.courseId || !createForm.name) return
-                setCreateSaving(true)
-                try {
-                  const res = await fetch('/api/staff/exams/internal/banks', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(createForm),
-                  })
-                  if (res.ok) {
-                    setShowCreateModal(false)
-                    setCreateForm({ name: '', courseId: '', moduleCode: '', mcqCount: 40, ruleSet: 'EASA' })
-                    fetchBanks()
-                  }
-                } finally {
-                  setCreateSaving(false)
-                }
-              }}
-              disabled={createSaving || !createForm.courseId || !createForm.name}
-              className="flex-1 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-blue-700 disabled:opacity-50"
-            >
-              {createSaving ? 'Creating...' : 'Create Bank'}
-            </button>
-          </div>
-        </div>
-      </div>
-    )}
-    {/* Create Bank Modal */}
-    {showCreateModal && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
-          <div className="flex items-center justify-between">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Create New Exam Bank</h3>
-            <button
-              onClick={() => setShowCreateModal(false)}
-              className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-          <p className="mt-1 text-sm text-slate-500">
-            Create a new question bank for a course module.
-          </p>
-
-          <div className="mt-6 space-y-4">
-            <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
-                Course <span className="text-red-500">*</span>
-              </label>
-              <select
-                value={createForm.courseId}
-                onChange={(e) => setCreateForm({ ...createForm, courseId: e.target.value })}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800 dark:text-white"
               >
                 <option value="">Select a course...</option>
