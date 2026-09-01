@@ -31,6 +31,8 @@
     "db:studio": "prisma studio",
     "db:reset": "prisma migrate reset",
     "docs:html": "bun scripts/build-docs-html.mjs",
+    "flipbook": "bun tools/flipbook-scraper/index.ts",
+    "flipbook:inspect": "bun tools/flipbook-scraper/inspect.ts",
     "postinstall": "prisma generate",
     "prepare": "husky"
   },
