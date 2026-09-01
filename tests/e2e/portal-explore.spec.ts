@@ -13,6 +13,7 @@
 import { test, expect, Page, Route } from '@playwright/test'
 import type { Response } from '@playwright/test'
 import * as fs from 'fs'
+import * as fs from 'fs'
 
 const SCREENSHOT_DIR = 'tests/e2e/portal-explore-screenshots'
 

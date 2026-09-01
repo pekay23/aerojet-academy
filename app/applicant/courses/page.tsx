@@ -49,7 +49,7 @@ export default async function CoursesPage({
         },
       },
     }),
-    prisma.courseCategory.findMany({
+    prismaUnfiltered.courseCategory.findMany({
       orderBy: { name: 'asc' },
     }),
   ])

@@ -89,7 +89,7 @@ describe('buildUserDataExport', () => {
 
     const result = await buildUserDataExport('user-1')
 
-    expect(result.user.wallet.transactions).toHaveLength(1)
+    expect(result.user.wallet!.transactions).toHaveLength(1)
     expect(result.user.enrollments).toHaveLength(1)
     expect(result.user.examBookings).toHaveLength(1)
     expect(result.user.messagesSent).toHaveLength(1)

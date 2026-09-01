@@ -80,7 +80,7 @@ describe('Instructor Grades — GET /api/instructor/classes/[id]/grades', () => 
   })
 
   it('returns 403 when instructor profile is missing', async () => {
-    getInstructorProfileByUserId.mockResolvedValueOnce(null)
+    vi.mocked(getInstructorProfileByUserId).mockResolvedValueOnce(null)
     const req = new NextRequest('http://localhost/api/instructor/classes/class-1/grades', { method: 'GET' })
     const res = await GET(req, { params: Promise.resolve({ id: 'class-1' }) })
     expect(res.status).toBe(403)

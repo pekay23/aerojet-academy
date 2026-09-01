@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useMemo } from 'react'
-import { Search, Filter, BookOpen, GraduationCap, ClipboardList, Shield } from 'lucide-react'
+import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
 import ResourceCard from './ResourceCard'
 
@@ -46,7 +46,7 @@ export default function ResourcesView({ initialResources }: ResourcesViewProps) 
       {/* Search and Filters */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="relative max-w-lg flex-1">
-          <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-300" />
           <input
             type="text"
             placeholder="Search by module code or file name..."
@@ -84,7 +84,7 @@ export default function ResourcesView({ initialResources }: ResourcesViewProps) 
         <AnimatePresence mode="popLayout">
           {filteredResources.length > 0 ? (
             filteredResources.map((resource) => (
-              <motion.div
+              <MotionDiv
                 key={resource.id}
                 layout
                 initial={{ opacity: 0, scale: 0.9 }}
@@ -96,7 +96,7 @@ export default function ResourcesView({ initialResources }: ResourcesViewProps) 
               </MotionDiv>
             ))
           ) : (
-            <motion.div
+            <MotionDiv
               className="col-span-full py-20 text-center"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}

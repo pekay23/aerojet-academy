@@ -11,7 +11,7 @@ describe('TransactionHistory', () => {
   })
 
   it('shows loading state initially', () => {
-    global.fetch = vi.fn(() => new Promise(() => {}))
+    global.fetch = vi.fn(() => new Promise<Response>(() => {}))
     render(<TransactionHistory />)
     expect(screen.getByText('Loading transactions...')).toBeInTheDocument()
   })

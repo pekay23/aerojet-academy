@@ -38,7 +38,7 @@ export default async function PathwayPage() {
         where: { id: userId },
         select: { registrationPaid: true, programmeChoice: true, role: true },
       }),
-      prisma.fullTimeEnrollment.findFirst({
+      prismaUnfiltered.fullTimeEnrollment.findFirst({
         where: { studentId: userId },
         include: { programme: true, milestones: { orderBy: { yearNumber: 'asc' } } },
       }),

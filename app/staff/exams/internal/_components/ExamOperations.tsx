@@ -82,6 +82,23 @@ export default function ExamOperations() {
   const [error, setError] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
+  // Confirmation modal state
+  const [confirmState, setConfirmState] = useState<{
+    open: boolean
+    title: string
+    description: string
+    confirmLabel: string
+    variant: 'danger' | 'warning' | 'info'
+    onConfirm: () => void
+  }>({
+    open: false,
+    title: '',
+    description: '',
+    confirmLabel: 'Confirm',
+    variant: 'info',
+    onConfirm: () => {},
+  })
+
   const fetchSessions = useCallback(async () => {
     setError(null)
     try {
@@ -185,27 +202,36 @@ export default function ExamOperations() {
   }
 
   const handleVoid = async (sessionId: string) => {
-    if (!confirm('Void this session? The student will be able to retake the exam.')) return
-    setActionLoading(sessionId)
-    try {
-      const res = await fetch('/api/staff/exams/internal/operations/void', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionId, reason: 'Admin-initiated reset' }),
-      })
-      const json = await res.json()
-      if (json.success) {
-        setSuccessMsg('Session voided. Student can now retake.')
-        setTimeout(() => setSuccessMsg(null), 4000)
-        fetchSessions()
-      } else {
-        setError(json.error || 'Failed to void session')
-      }
-    } catch {
-      setError('Action failed')
-    } finally {
-      setActionLoading(null)
-    }
+    setConfirmState({
+      open: true,
+      title: 'Void this session?',
+      description: 'The student will be able to retake the exam. This action cannot be undone.',
+      confirmLabel: 'Void & Allow Retake',
+      variant: 'danger',
+      onConfirm: async () => {
+        setConfirmState(prev => ({ ...prev, open: false }))
+        setActionLoading(sessionId)
+        try {
+          const res = await fetch('/api/staff/exams/internal/operations/void', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, reason: 'Admin-initiated reset' }),
+          })
+          const json = await res.json()
+          if (json.success) {
+            setSuccessMsg('Session voided. Student can now retake.')
+            setTimeout(() => setSuccessMsg(null), 4000)
+            fetchSessions()
+          } else {
+            setError(json.error || 'Failed to void session')
+          }
+        } catch {
+          setError('Action failed')
+        } finally {
+          setActionLoading(null)
+        }
+      },
+    })
   }
 
   const handlePublish = async (sessionIds: string[]) => {
@@ -234,37 +260,152 @@ export default function ExamOperations() {
   const handlePublishAll = async () => {
     const pending = filteredSessions('review')
     if (pending.length === 0) return
-    if (!confirm(`Publish results for all ${pending.length} pending session(s)?`)) return
-    handlePublish(pending.map(s => s.id))
+    setConfirmState({
+      open: true,
+      title: `Publish ${pending.length} result(s)?`,
+      description: 'This will make exam results visible to all pending students. This action cannot be undone.',
+      confirmLabel: 'Publish All',
+      variant: 'info',
+      onConfirm: async () => {
+        setConfirmState(prev => ({ ...prev, open: false }))
+        handlePublish(pending.map(s => s.id))
+      },
+    })
   }
 
   const handleRegrade = async (sessionId: string) => {
-    if (!confirm('Regrade this session against the current question bank answers? This will recalculate the score.')) return
-    setActionLoading(sessionId)
-    try {
-      const res = await fetch('/api/staff/exams/internal/operations/regrade', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sessionIds: [sessionId] }),
-      })
-      const json = await res.json()
-      if (json.success) {
-        const detail = json.data.details?.[0]
-        if (detail?.changed) {
-          setSuccessMsg(`Regraded: ${detail.oldPct}% → ${detail.newPct}%`)
-        } else {
-          setSuccessMsg('Regraded — no score change.')
+    setConfirmState({
+      open: true,
+      title: 'Regrade this session?',
+      description: 'This will recalculate the score against the current question bank answers.',
+      confirmLabel: 'Regrade',
+      variant: 'warning',
+      onConfirm: async () => {
+        setConfirmState(prev => ({ ...prev, open: false }))
+        setActionLoading(sessionId)
+        try {
+          const res = await fetch('/api/staff/exams/internal/operations/regrade', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionIds: [sessionId] }),
+          })
+          const json = await res.json()
+          if (json.success) {
+            const detail = json.data.details?.[0]
+            if (detail?.changed) {
+              setSuccessMsg(`Regraded: ${detail.oldPct}% → ${detail.newPct}%`)
+            } else {
+              setSuccessMsg('Regraded — no score change.')
+            }
+            setTimeout(() => setSuccessMsg(null), 5000)
+            fetchSessions()
+          } else {
+            setError(json.error || 'Failed to regrade')
+          }
+        } catch {
+          setError('Regrade failed')
+        } finally {
+          setActionLoading(null)
         }
-        setTimeout(() => setSuccessMsg(null), 5000)
-        fetchSessions()
-      } else {
-        setError(json.error || 'Failed to regrade')
-      }
-    } catch {
-      setError('Regrade failed')
-    } finally {
-      setActionLoading(null)
-    }
+      },
+    })
+  }
+
+  const handleExtend = async (sessionId: string) => {
+    setConfirmState({
+      open: true,
+      title: 'Extend exam time?',
+      description: 'This will add extra time to the student\'s exam session.',
+      confirmLabel: 'Extend',
+      variant: 'info',
+      onConfirm: async () => {
+        setConfirmState(prev => ({ ...prev, open: false }))
+        setActionLoading(sessionId)
+        try {
+          const res = await fetch(`/api/staff/exams/internal/sessions/${sessionId}/extend`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ minutes: 5 }),
+          })
+          const json = await res.json()
+          if (json.success) {
+            setSuccessMsg('Time extended by 5 minutes')
+            setTimeout(() => setSuccessMsg(null), 4000)
+            fetchSessions()
+          } else {
+            setError(json.error || 'Failed to extend time')
+          }
+        } catch {
+          setError('Action failed')
+        } finally {
+          setActionLoading(null)
+        }
+      },
+    })
+  }
+
+  const handleForceSubmit = async (sessionId: string) => {
+    setConfirmState({
+      open: true,
+      title: 'Force submit this exam?',
+      description: 'This will immediately submit the exam with whatever answers the student has saved.',
+      confirmLabel: 'Force Submit',
+      variant: 'warning',
+      onConfirm: async () => {
+        setConfirmState(prev => ({ ...prev, open: false }))
+        setActionLoading(sessionId)
+        try {
+          const res = await fetch(`/api/staff/exams/internal/sessions/${sessionId}/force-submit`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          })
+          const json = await res.json()
+          if (json.success) {
+            setSuccessMsg('Exam force-submitted')
+            setTimeout(() => setSuccessMsg(null), 4000)
+            fetchSessions()
+          } else {
+            setError(json.error || 'Failed to force submit')
+          }
+        } catch {
+          setError('Action failed')
+        } finally {
+          setActionLoading(null)
+        }
+      },
+    })
+  }
+
+  const handleEndSession = async (sessionId: string) => {
+    setConfirmState({
+      open: true,
+      title: 'End this exam session?',
+      description: 'This will immediately end the session and auto-submit any saved answers.',
+      confirmLabel: 'End Session',
+      variant: 'danger',
+      onConfirm: async () => {
+        setConfirmState(prev => ({ ...prev, open: false }))
+        setActionLoading(sessionId)
+        try {
+          const res = await fetch(`/api/staff/exams/internal/sessions/${sessionId}/end`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+          })
+          const json = await res.json()
+          if (json.success) {
+            setSuccessMsg('Session ended')
+            setTimeout(() => setSuccessMsg(null), 4000)
+            fetchSessions()
+          } else {
+            setError(json.error || 'Failed to end session')
+          }
+        } catch {
+          setError('Action failed')
+        } finally {
+          setActionLoading(null)
+        }
+      },
+    })
   }
 
   const filteredSessions = (tab: TabKey): SessionData[] => {
@@ -314,7 +455,8 @@ export default function ExamOperations() {
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       {/* Header Row */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -622,7 +764,19 @@ export default function ExamOperations() {
                       )}
                       {(session.status === 'COMPLETED' || session.status === 'TIMED_OUT') && !session.isPublished && (
                         <button
-                          onClick={() => handlePublish([session.id])}
+                          onClick={() => {
+                            setConfirmState({
+                              open: true,
+                              title: 'Publish this result?',
+                              description: 'This will make the exam result visible to the student. This action cannot be undone.',
+                              confirmLabel: 'Publish',
+                              variant: 'info',
+                              onConfirm: async () => {
+                                setConfirmState(prev => ({ ...prev, open: false }))
+                                handlePublish([session.id])
+                              },
+                            })
+                          }}
                           disabled={actionLoading === session.id}
                           className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-2 text-xs font-bold text-white hover:bg-green-700 disabled:opacity-50"
                         >
@@ -655,5 +809,16 @@ export default function ExamOperations() {
         </div>
       )}
     </div>
-  )
-}
+
+    <ConfirmModal
+      open={confirmState.open}
+      title={confirmState.title}
+      description={confirmState.description}
+      confirmLabel={confirmState.confirmLabel}
+      variant={confirmState.variant}
+      loading={actionLoading !== null}
+      onConfirm={confirmState.onConfirm}
+      onCancel={() => setConfirmState(prev => ({ ...prev, open: false }))}
+    />
+  </>
+)}

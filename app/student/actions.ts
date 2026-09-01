@@ -15,6 +15,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { UserStatus, UserRole, EnrollmentStatus, PoolStatus, MembershipStatus, PaymentStatus } from '@/types/enums'
 import { trackReferralClick } from '@/lib/analytics/events'
+import { trackReferralClick } from '@/lib/analytics/events'
 import { requireAuth, requireStudent } from '@/lib/auth/helpers'
 import { hash, compare } from 'bcryptjs'
 import { getExamPricingConfig } from '@/lib/pools/pricing-config'
@@ -23,6 +24,7 @@ import { assertExamOnlyPathway } from '@/lib/pools/access-control'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
 import { chargeWallet } from '@/lib/wallet/operations'
 import { categoryMatchesTarget, getStudentTargetCategoryCodes } from '@/lib/easa/category-selection'
+import { trackEnrollment, trackReferralClick } from '@/lib/analytics/events'
 import { trackEnrollment, trackReferralClick } from '@/lib/analytics/events'
 
 export async function enrollInCourse(courseId: string) {
@@ -411,7 +413,7 @@ export async function createStudentPoolAction(input: CreatePoolInput) {
     })
     if (!examComponent) return { error: `No exam component found for module ${moduleCode}.` }
 
-    const targetCategories = await getStudentTargetCategoryCodes(prisma, user.id)
+    const targetCategories = await getStudentTargetCategoryCodes(prismaUnfiltered, user.id)
     if (targetCategories.length > 0 && !categoryMatchesTarget(examComponent.categoryCode, targetCategories)) {
       return { error: 'This module/category is not part of your selected licence pathway.' }
     }
@@ -986,7 +988,7 @@ export async function bookStandaloneExamAction(params: {
     revalidatePath('/student/wallet')
     revalidatePath('/student')
     return { success: true, usedBundle: result.usedBundle }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('bookStandaloneExamAction error:', error)
     return { error: error.message || 'Failed to book exam.' }
   }

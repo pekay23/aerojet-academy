@@ -26,8 +26,6 @@ from docx import Document
 import pdfplumber
 from bs4 import BeautifulSoup
 
-from doc_reader import read_doc
-
 OUT_DIR = Path(__file__).parent / "out"
 AEROJET_ROOT = Path(
     r"C:\Users\Pekay\OneDrive - Ghana Communication Technology University\AerojetAviation"
@@ -53,24 +51,17 @@ class Question:
 # ---------- DOCX / DOCX-XML readers ----------
 
 def _read_docx_paragraphs(path: Path) -> list[str]:
-    """Read paragraphs; fall back to direct XML read for macro-enabled files,
-    then to ASCII extraction for old .doc binary files."""
+    """Read paragraphs; fall back to direct XML read for macro-enabled files."""
     try:
         d = Document(str(path))
         return [p.text for p in d.paragraphs]
     except Exception:
-        pass
-    try:
-        z = zipfile.ZipFile(str(path))
-        xml = z.read("word/document.xml").decode("utf-8")
-        return re.findall(r"<w:t[^>]*>([^<]*)</w:t>", xml)
-    except Exception:
-        pass
-    if path.suffix.lower() == ".doc":
-        text = read_doc(str(path))
-        if text:
-            return text.split("\n")
-    return []
+        try:
+            z = zipfile.ZipFile(str(path))
+            xml = z.read("word/document.xml").decode("utf-8")
+            return re.findall(r"<w:t[^>]*>([^<]*)</w:t>", xml)
+        except Exception:
+            return []
 
 
 def _read_docx_table_rows(path: Path) -> list[list[str]]:
@@ -308,12 +299,11 @@ def _parse_block_bare(block: str) -> tuple[str, list[str], str | None, str | Non
     opts: list[str] = []
     correct_idx: int | None = None
     for line in lines[q_idx + 1 :]:
-        s = line.strip()
-        m = RE_OPT_PAREN.match(s) or RE_OPT_PERIOD.match(s) or RE_OPT_DOT_SPACE.match(s)
+        m = RE_OPT_PAREN.match(line.strip())
         if m:
             letter = m.group(1).upper()
             text = m.group(2).strip()
-            # Detect trailing *  (M7/M17 style: "B) opt*")
+            # Detect trailing *
             if text.endswith("*"):
                 text = text[:-1].strip()
                 correct_idx = len(opts)
@@ -417,100 +407,73 @@ def _parse_blocks(blocks: list[str], source_file: str, module: str, fmt: str) ->
 
 # Question starters in various formats
 RE_Q_START_BASIC = re.compile(r"^\s*(\d+)\s*[\.\)]\s*\S")  # "1. Q..."
-RE_Q_START_BASIC2 = re.compile(r"^\s*(\d+)\s{2,}\S")  # "3   Q" (number then 2+ spaces)
 RE_Q_START_NAMED = re.compile(r"^\s*Question\s+Number\.?\s*(\d+)\s*[\.\)]?\s*(.*)$", re.IGNORECASE)
 RE_OPT_NAMED = re.compile(r"^\s*Option\s+([A-Da-d])\s*[\.\:]\s*(.+)$")
-RE_OPT_PAREN = re.compile(r"^\s*([A-Da-d])\)\s*(.+)$")  # "A) opt" (keep trailing *)
-RE_OPT_DOT_SPACE = re.compile(r"^\s*([A-Da-d])\s+([A-Z].+)$")  # "A opt" (keep trailing *)
+RE_OPT_PAREN = re.compile(r"^\s*([A-Da-d])\)\s*(.+?)\s*\*?\s*$")  # "A) opt" or "A) opt*"
+RE_OPT_DOT_SPACE = re.compile(r"^\s*([A-Da-d])\s+([A-Z].+?)\s*\*?\s*$")  # "A opt"
 RE_EXPL = re.compile(r"^\s*Expl\s*[\.\:]\s*(.+)$", re.IGNORECASE)
 RE_Q_BARE = re.compile(r"^\s*([A-Z][^?]*\?)\s*$")  # bare question: ends with ?
 RE_SECTION = re.compile(r"^\s*(Paragraph\s+\d+|Sub\s*\d+|Chapter\s+\d+|Section\s+\d+|\d+\s*[\.\)]\s*[A-Z][^?]{3,60}$)\s*$", re.IGNORECASE)
 
-
-RE_OPT_BARE = re.compile(r"^\s*([a-dA-D])\)\s+(.+)$")  # "a) opt" (keep trailing *)
-RE_OPT_PERIOD = re.compile(r"^\s*([A-Da-d])\s*\.\s+(.+)$")  # "A. opt" (keep trailing *)
 
 def _split_blocks_flexible(paragraphs: list[str]) -> list[str]:
     """Split a flat paragraph list into question blocks. Recognises:
       - '1. ...' basic
       - 'Question Number. N. ...'
       - bare question ending in '?' followed by A)/B)/C) options
-
-    The key insight: in dense text (no blank lines), we treat a
-    "numbered line" as the start of a new question UNLESS the previous
-    block has no options yet (i.e. options may follow a question on
-    subsequent lines).
     """
     blocks: list[str] = []
     cur: list[str] = []
     in_q = False
-    has_options = False
 
     def flush():
-        nonlocal cur, in_q, has_options
+        nonlocal cur, in_q
         if cur:
             blocks.append("\n".join(cur).strip())
             cur = []
             in_q = False
-            has_options = False
 
     for line in paragraphs:
         s = line.rstrip()
         stripped = s.strip()
         if not stripped:
-            # Don't flush on blank; let the next numbered question flush us.
+            if in_q and cur:
+                flush()
             continue
         is_q_start = bool(
-            RE_Q_START_BASIC.match(s)
-            or RE_Q_START_BASIC2.match(s)
-            or RE_Q_START_NAMED.match(s)
-            or RE_OPT_NAMED.match(s)
+            RE_Q_START_BASIC.match(s) or RE_Q_START_NAMED.match(s) or RE_OPT_NAMED.match(s)
         )
-        is_option = bool(
-            RE_OPT_BARE.match(s)
-            or RE_OPT_NAMED.match(s)
-            or RE_OPT_PAREN.match(s)
-            or RE_OPT_PERIOD.match(s)
-        )
-        # Bare question = line ending in '?' and long enough
-        is_bare_q = (
-            stripped.endswith("?")
-            and len(stripped) > 15
-            and not re.match(r"^[A-Da-d][\.\)]\s", stripped)
-        )
-        # Decide block boundaries
-        if is_q_start:
-            # New numbered question. Flush current.
-            # Exception: if the current block is bare question with no options,
-            # append this as continuation.
-            if in_q and not has_options and not is_bare_q:
-                # append this line as part of the question
-                cur.append(line)
+        # Bare question = line ending in '?' (and not starting with A) etc)
+        if not is_q_start and not in_q and stripped.endswith("?"):
+            # If it looks like a real question
+            if len(stripped) > 15 and not re.match(r"^[A-Da-d][\.\)]\s", stripped):
+                flush()  # start fresh
+                cur = [line]
+                in_q = True
                 continue
+        # If we're in a question and the new line looks like a question
+        # (a '?' line or a numbered question), end the current block.
+        if in_q and (
+            RE_Q_START_BASIC.match(s)
+            or RE_Q_START_NAMED.match(s)
+            or (stripped.endswith("?") and len(stripped) > 15)
+        ):
             flush()
             cur = [line]
             in_q = True
-            has_options = False
             continue
-        if in_q and is_bare_q and has_options:
-            # A new bare question - flush
+        if is_q_start:
             flush()
             cur = [line]
             in_q = True
-            continue
-        if in_q and is_option:
-            has_options = True
-            cur.append(line)
             continue
         if in_q:
             cur.append(line)
         else:
-            if is_option:
-                # Option seen without an in-progress question: start a new
-                # question block with this as the first line.
+            # Pre-question lines could be a heading
+            if RE_OPT_PAREN.match(s) or RE_OPT_NAMED.match(s):
                 cur.append(line)
                 in_q = True
-                has_options = True
     flush()
     return [b for b in blocks if b]
 

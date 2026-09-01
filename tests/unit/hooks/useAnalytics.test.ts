@@ -10,6 +10,6 @@ describe('hooks/useAnalytics', () => {
 
   it('can be called without error', () => {
     const { result } = renderHook(() => useAnalytics())
-    expect(result.error).toBeUndefined()
+    expect((result as any).error).toBeUndefined()
   })
 })

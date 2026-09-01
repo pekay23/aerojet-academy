@@ -40,7 +40,7 @@ export default async function CourseDetailsPage({ params }: Props) {
   const targetId = matchedCourse ? matchedCourse.id : id;
 
   const [course, enrollment] = await Promise.all([
-    prisma.course.findUnique({
+    prismaUnfiltered.course.findUnique({
       where: { id: targetId },
       include: { category: true },
     }),

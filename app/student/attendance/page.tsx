@@ -121,7 +121,7 @@ export default async function AttendancePage() {
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+        <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
           Attendance Registry
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

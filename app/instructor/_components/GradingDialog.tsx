@@ -28,7 +28,7 @@ interface GradingDialogProps {
         lastName: string | null
       } | null
     }
-  } | null | null
+  } | null | null | null
   mode: 'submit' | 'edit'
   onSuccess?: () => void
 }

@@ -116,6 +116,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       voidReason: s.voidReason,
       answerCount: s._count.answers,
       violationCount: s._count.violations,
+      violationCount: s._count.violations,
       reports: s.reports.map((r) => ({
         id: r.id,
         reason: r.reason,

@@ -3,6 +3,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { UploadThingError } from 'uploadthing/server'
 import { recordFileUpload } from '@/lib/storage/file-upload-record'
 import { trackDocumentUpload } from '@/lib/analytics/events'
+import { trackDocumentUpload } from '@/lib/analytics/events'
 
 const f = createUploadthing()
 

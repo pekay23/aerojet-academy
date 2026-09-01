@@ -154,7 +154,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
   const [editCourseId, setEditCourseId] = useState<string | null>(null)
   const [editBookingType, setEditBookingType] = useState('INDIVIDUAL')
   const [editAttemptType, setEditAttemptType] = useState('FIRST')
-  const [editCategory, setEditCategory] = useState('OFFICIAL_EASA')
+  const [editCategory, setEditCategory] = useState<'INTERNAL' | 'OFFICIAL_EASA'>('OFFICIAL_EASA')
   const [editModuleCode, setEditModuleCode] = useState('')
   const [editScore, setEditScore] = useState('')
   const [editDate, setEditDate] = useState('')
@@ -280,7 +280,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
         isPending,
         entries: moduleSelections.map((sel) => ({
           courseId: sel.selected?.courseId,
-          examComponentId: (sel.selected as any)?.isComponent ? sel.selected?.id : undefined,
+          examComponentId: sel.selected?.isComponent ? sel.selected?.id : undefined,
           moduleCode: sel.selected?.moduleCode || sel.query,
           score: score ? parseFloat(score) : undefined,
           resultOverride: resultOverride === 'auto' ? undefined : resultOverride,
@@ -315,7 +315,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
     setEditCourseId(record.examId || null)
     setEditBookingType(record.bookingType || 'INDIVIDUAL')
     setEditAttemptType(record.attemptType || 'FIRST')
-    setEditCategory(record.examCategory || 'OFFICIAL_EASA')
+    setEditCategory((record.examCategory as 'INTERNAL' | 'OFFICIAL_EASA') || 'OFFICIAL_EASA')
     setEditModuleCode(record.moduleCode || '')
     setEditScore(record.score ? Number(record.score).toString() : '')
     setEditDate(record.examDate ? format(new Date(record.examDate), 'yyyy-MM-dd') : '')
@@ -503,7 +503,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
               <select
                 id="form-booking-type"
                 value={bookingType}
-                onChange={(e) => setBookingType(e.target.value as any)}
+                onChange={(e) => setBookingType(e.target.value as 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK')}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-sm font-bold transition-colors focus:border-aerojet-blue focus:bg-white focus:outline-hidden dark:border-slate-700 dark:bg-slate-800"
               >
                 {BOOKING_TYPES.map((t) => (
@@ -831,7 +831,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                           {isEditing ? (
                             <select 
                               value={editCategory} 
-                              onChange={(e) => setEditCategory(e.target.value as any)}
+                              onChange={(e) => setEditCategory(e.target.value as 'INTERNAL' | 'OFFICIAL_EASA')}
                               className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:border-aerojet-blue focus:outline-hidden"
                             >
                               <option value="OFFICIAL_EASA">EASA</option>
@@ -847,7 +847,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
                           {isEditing ? (
                             <select 
                               value={editBookingType} 
-                              onChange={(e) => setEditBookingType(e.target.value as any)}
+                              onChange={(e) => setEditBookingType(e.target.value as 'INDIVIDUAL' | 'TWIN_PACK' | 'FOUR_PACK')}
                               className="rounded-lg border border-slate-200 bg-white px-2 py-1 text-[10px] focus:border-aerojet-blue focus:outline-hidden"
                             >
                               <option value="INDIVIDUAL">IND</option>

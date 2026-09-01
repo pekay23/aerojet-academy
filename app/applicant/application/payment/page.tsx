@@ -26,7 +26,7 @@ export default async function PaymentPage() {
   if (!applicant) redirect('/login')
 
   // Fetch global registration settings and bank details
-  const settings = await prisma.systemSetting.findMany({
+  const settings = await prismaUnfiltered.systemSetting.findMany({
     where: {
       key: {
         in: [

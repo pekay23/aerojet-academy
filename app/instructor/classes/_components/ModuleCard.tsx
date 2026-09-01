@@ -44,7 +44,7 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
           <div className="flex items-center gap-3">
             <div
               className={cn(
-                'bg-opacity-10 flex h-12 w-12 items-center justify-center rounded-2xl',
+                'flex h-12 w-12 items-center justify-center rounded-2xl',
                 categoryColor.replace('bg-', 'text-')
               )}
             >
@@ -56,7 +56,7 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
                   {cls.course.code}
                 </span>
                 <span className="h-1 w-1 rounded-full bg-slate-200 dark:bg-slate-700" />
-                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-300 uppercase">
                   {cls.semester} {cls.academicYear}
                 </span>
               </div>
@@ -98,7 +98,7 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
               {new Date(cls.startDate).toLocaleDateString([], { month: 'short', day: 'numeric' })} -{' '}
               {new Date(cls.endDate).toLocaleDateString([], { month: 'short', day: 'numeric' })}
             </p>
-            <p className="mt-1 text-[9px] font-bold text-slate-400 uppercase">
+            <p className="mt-1 text-xs font-bold text-slate-400 uppercase">
               {cls.course.duration || 'Variable'} Hours Total
             </p>
           </div>

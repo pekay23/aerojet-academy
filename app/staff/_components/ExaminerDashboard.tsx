@@ -13,7 +13,7 @@ export default function ExaminerDashboard({ examinerName, nextSitting, recentSit
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase dark:text-white">
+        <h1 className="text-2xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
           Examiner Hub
         </h1>
         <p className="mt-1 text-sm text-slate-500">

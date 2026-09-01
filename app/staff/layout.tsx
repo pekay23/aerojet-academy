@@ -26,7 +26,7 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   const user = session.user
 
   // Run both queries in parallel; use prismaUnfiltered to bypass RLS transaction overhead
-  const [dbUser, welcomeMessages, internalExamEnabled, registrationConfig] = await Promise.all([
+  const [dbUser, welcomeMessages, internalExamEnabled] = await Promise.all([
     prismaUnfiltered.user.findUnique({
       where: { id: user.id },
       select: {
@@ -38,7 +38,6 @@ export default async function StaffLayout({ children }: { children: React.ReactN
     }),
     getWelcomeMessages(prismaUnfiltered, user.role),
     isInternalExamSystemEnabled(),
-    getRegistrationConfig(),
   ])
 
   if (

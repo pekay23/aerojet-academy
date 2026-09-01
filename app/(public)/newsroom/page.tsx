@@ -22,7 +22,7 @@ async function getArticles(skip: number, take: number, sort: SortOrder = 'newest
 }
 
 async function getArticlesCount() {
-  return await prisma.newsArticle.count({
+  return await prismaUnfiltered.newsArticle.count({
     where: { status: 'PUBLISHED' },
   })
 }

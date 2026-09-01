@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { useBadgeCounts } from '@/hooks/useBadgeCounts'
 import { ensureStudentSystemNotifications } from '@/app/student/actions'
+import { ensureStudentSystemNotifications } from '@/app/student/actions'
 
 export interface TopbarNotification {
   id: string

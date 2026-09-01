@@ -18,6 +18,9 @@ const questionSchema = z.object({
 }).refine(data => data.options.includes(data.correctAnswer), {
   message: 'correctAnswer must be one of the provided options',
   path: ['correctAnswer'],
+}).refine(data => data.options.includes(data.correctAnswer), {
+  message: 'correctAnswer must be one of the provided options',
+  path: ['correctAnswer'],
 })
 
 // GET — list questions for a bank

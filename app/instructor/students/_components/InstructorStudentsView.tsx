@@ -121,7 +121,7 @@ export default function InstructorStudentsView({
                     transition={{ duration: 0.2 }}
                   >
                     <StudentCard student={student} />
-                  </motion.div>
+                  </MotionDiv>
                 ))
               ) : (
                 <MotionDiv

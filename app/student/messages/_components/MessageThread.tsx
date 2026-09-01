@@ -182,7 +182,7 @@ export default function MessageThread({ thread, currentUserId }: MessageThreadPr
       <button onClick={handleExpand} className="flex w-full items-center gap-4 px-5 py-4 text-left">
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white ${
-            thread.root.senderId === currentUserId ? 'bg-aerojet-blue' : 'bg-slate-500'
+            thread.root.senderId === currentUserId ? 'bg-blue-800' : 'bg-slate-500'
           }`}
         >
           {userName(otherParticipant).charAt(0).toUpperCase()}

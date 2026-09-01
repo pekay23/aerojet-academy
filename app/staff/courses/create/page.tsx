@@ -85,6 +85,7 @@ export default function CreateCoursePage() {
       } catch (error) {
         console.error('Failed to fetch data:', error)
         toast.error('Failed to load course data')
+        toast.error('Failed to load course data')
       }
     }
     fetchData()

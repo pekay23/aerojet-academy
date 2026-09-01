@@ -3,6 +3,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getBankRules, isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
+import { validateSebRequest, SebValidationError } from '@/lib/middleware/seb-validation'
 
 /**
  * GET /api/student/exams/internal/session?sessionId=xxx
@@ -28,6 +29,28 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const sessionId = url.searchParams.get('sessionId')
   if (!sessionId) return apiError('sessionId is required')
 
+  // SEB validation if required by schedule
+  const examSessionForSeb = await prismaUnfiltered.internalExamSession.findUnique({
+    where: { id: sessionId },
+    select: { bankId: true, classId: true },
+  })
+  if (examSessionForSeb?.bankId && examSessionForSeb?.classId) {
+    const scheduleForSeb = await prismaUnfiltered.internalExamClassSchedule.findFirst({
+      where: { bankId: examSessionForSeb.bankId, classId: examSessionForSeb.classId },
+      select: { sebRequired: true },
+    })
+    if (scheduleForSeb?.sebRequired) {
+      try {
+        await validateSebRequest(sessionId, req)
+      } catch (error) {
+        if (error instanceof SebValidationError) {
+          return apiError(error.message, error.statusCode)
+        }
+        return apiError('SEB validation failed', 403)
+      }
+    }
+  }
+
   const examSession = await prismaUnfiltered.internalExamSession.findUnique({
     where: { id: sessionId },
     include: {
@@ -35,6 +58,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         select: {
           questionId: true,
           selectedAnswer: true,
+          flaggedForReview: true,
           question: {
             select: {
               id: true,
@@ -54,8 +78,52 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   if (!examSession) return apiError('Session not found', 404)
   if (examSession.studentId !== session.user.id) return apiError('Unauthorized', 403)
 
-  // If session is completed, redirect to results
+  if (examSession.status === 'IN_PROGRESS') {
+    try {
+      await validateSebRequest(examSession.id, req)
+    } catch (err) {
+      if (err instanceof SebValidationError) {
+        return apiError(err.message, err.statusCode)
+      }
+      return apiError('SEB validation failed', 403)
+    }
+  }
+
+  // If session is completed, return full results if published
   if (examSession.status !== 'IN_PROGRESS') {
+    const rules = await getBankRules(examSession.bankId)
+
+    if (!examSession.isPublished) {
+      return apiSuccess({
+        completed: true,
+        sessionId: examSession.id,
+        status: examSession.status,
+        score: examSession.score,
+        totalPoints: examSession.totalPoints,
+        percentage: examSession.percentage,
+        passed: examSession.passed,
+        categoryCode: examSession.categoryCode,
+        passMarkPct: rules.passMarkPct,
+      })
+    }
+
+    const answersWithQuestions = await prismaUnfiltered.internalExamAnswer.findMany({
+      where: { sessionId },
+      include: {
+        question: {
+          select: {
+            id: true,
+            text: true,
+            options: true,
+            points: true,
+            subTopic: true,
+            correctAnswer: true,
+            explanation: true,
+          },
+        },
+      },
+    })
+
     return apiSuccess({
       completed: true,
       sessionId: examSession.id,
@@ -65,13 +133,30 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       percentage: examSession.percentage,
       passed: examSession.passed,
       categoryCode: examSession.categoryCode,
+      passMarkPct: rules.passMarkPct,
+      isPublished: true,
+      questions: answersWithQuestions.map(a => ({
+        id: a.question.id,
+        text: a.question.text,
+        options: a.question.options,
+        points: a.question.points,
+        subTopic: a.question.subTopic,
+        correctAnswer: a.question.correctAnswer,
+        explanation: a.question.explanation,
+        studentAnswer: a.selectedAnswer,
+        isCorrect: a.isCorrect,
+        pointsAwarded: a.pointsAwarded,
+        flaggedForReview: a.flaggedForReview,
+      })),
     })
   }
 
-  // Calculate remaining time
   const now = new Date()
-  const totalTimeSecs = examSession.expiresAt
-    ? Math.max(0, Math.floor((examSession.expiresAt.getTime() - now.getTime()) / 1000))
+  const effectiveExpiresAt = examSession.expiresAt
+    ? new Date(examSession.expiresAt.getTime() + (examSession.timeExtensionSec || 0) * 1000)
+    : null
+  const totalTimeSecs = effectiveExpiresAt
+    ? Math.max(0, Math.floor((effectiveExpiresAt.getTime() - now.getTime()) / 1000))
     : 0
 
   // If expired, auto-submit
@@ -81,12 +166,23 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
 
   const rules = await getBankRules(examSession.bankId)
 
-  // Extract questions and saved answers
-  const questions = examSession.answers.map(a => a.question)
+  let questions = examSession.answers.map(a => a.question)
   const savedAnswers = examSession.answers.map(a => ({
     questionId: a.questionId,
     selectedAnswer: a.selectedAnswer,
+    flaggedForReview: a.flaggedForReview,
   }))
+
+  // Apply stored question order for randomised papers
+  if (examSession.questionOrder && Array.isArray(examSession.questionOrder)) {
+    const orderSet = new Set(examSession.questionOrder as string[])
+    const ordered = (examSession.questionOrder as string[])
+      .map((qId) => questions.find(q => q.id === qId))
+      .filter((q): q is NonNullable<typeof questions[number]> => q != null)
+    // Append any questions not in the order (shouldn't happen, but defensive)
+    const remaining = questions.filter(q => !orderSet.has(q.id))
+    questions = [...ordered, ...remaining]
+  }
 
   return apiSuccess({
     sessionId: examSession.id,
@@ -96,6 +192,12 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     resumed: true,
     totalTimeSecs,
     expiresAt: examSession.expiresAt?.toISOString(),
+    effectiveExpiresAt: effectiveExpiresAt?.toISOString(),
+    timeExtensionSec: examSession.timeExtensionSec || 0,
+    lastActivityAt: examSession.lastActivityAt?.toISOString(),
+    recoveredAt: examSession.recoveredAt?.toISOString(),
+    recoveredBy: examSession.recoveredBy || null,
+    recoveryReason: examSession.recoveryReason || null,
     categoryCode: examSession.categoryCode,
     rules: {
       timePerQuestionSecs: rules.timePerQuestionSecs,

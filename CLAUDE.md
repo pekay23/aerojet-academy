@@ -224,6 +224,7 @@ Registered in `vercel.json` and live under `app/api/cron/*/route.ts`. Pattern: c
 | `scheduled-reports`          | `0 8 * * 1` (Mondays 08:00)                               |
 | `milestone-reminders`        | `0 9 * * *`                                               |
 | `renewal-reminders`         | `0 6 * * *`                                               |
+| `renewal-reminders`         | `0 6 * * *`                                               |
 | `send-reminders`             | `0 10 * * *`                                              |
 | `aptitude-reminders`         | `0 11 * * *`                                              |
 | `interview-reminders`        | `0 12 * * *`                                              |

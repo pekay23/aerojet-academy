@@ -59,6 +59,7 @@ All 17 cron endpoints are registered in `vercel.json` and require
 | `/api/cron/scheduled-reports`          | `0 8 * * 1`     | Mondays 08:00 — Scheduled analytics                |
 | `/api/cron/milestone-reminders`        | `0 9 * * *`     | Daily 09:00 — Milestone T-7/T-1 reminders          |
 | `/api/cron/renewal-reminders`        | `0 6 * * *`     | Daily 06:00 — Subscription & certificate renewal reminders |
+| `/api/cron/renewal-reminders`        | `0 6 * * *`     | Daily 06:00 — Subscription & certificate renewal reminders |
 | `/api/cron/send-reminders`             | `0 10 * * *`    | Daily 10:00 — Exam T-7/T-1 reminders               |
 | `/api/cron/aptitude-reminders`         | `0 11 * * *`    | Daily 11:00 — Aptitude test reminders              |
 | `/api/cron/interview-reminders`        | `0 12 * * *`    | Daily 12:00 — Interview reminders                  |

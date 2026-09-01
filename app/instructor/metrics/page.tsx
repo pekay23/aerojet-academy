@@ -72,7 +72,7 @@ export default async function InstructorMetricsPage() {
         <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           My Metrics
         </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-300">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-300 dark:text-slate-300">
           Performance across the classes assigned to you. Based on internal continuous-assessment
           grades you have recorded.
         </p>

@@ -211,11 +211,12 @@ export async function findConflicts(args: {
               date: day,
               a: occ,
               b: {
-                name: 'Unavailable',
-                start: occ.start,
-                end: occ.end,
+                classId: 'availability',
+                className: 'Unavailable',
                 instructorId: occ.instructorId,
                 classroomId: occ.classroomId,
+                start: occ.start,
+                end: occ.end,
               },
             })
           }

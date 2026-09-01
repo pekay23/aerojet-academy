@@ -218,7 +218,7 @@ export default function ProfileTab({
               icon={BookOpen}
               label="License Targets"
               value={sp.licenseTargets
-                .map((t: any) => t.licenseCategory?.name || t.licenseCategory?.code)
+                .map((t) => t.licenseCategory?.name || t.licenseCategory?.code)
                 .join(', ')}
             />
           )}
@@ -363,7 +363,7 @@ export default function ProfileTab({
             <h4 className="mb-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Referrals Made</h4>
             {student.referralsMade && student.referralsMade.length > 0 ? (
               <div className="space-y-3">
-                {student.referralsMade.slice(0, 5).map((ref: any) => (
+                {student.referralsMade.slice(0, 5).map((ref) => (
                   <div key={ref.id} className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <div className="h-6 w-6 rounded-full bg-slate-200 text-[10px] flex items-center justify-center font-bold dark:bg-slate-700">
@@ -420,7 +420,7 @@ function Section({
   )
 }
 
-function Field({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+function Field({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-slate-200/60 bg-white px-4 py-3 dark:border-slate-700/50 dark:bg-slate-900">
       <p className="mb-1 flex items-center gap-1.5 text-[10px] font-black tracking-widest text-slate-400 uppercase">

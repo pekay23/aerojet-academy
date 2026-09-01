@@ -13,7 +13,7 @@ vi.mock('@radix-ui/react-accordion', () => ({
 describe('Accordion', () => {
   it('renders without crashing', () => {
     render(
-      <Accordion>
+      <Accordion type="single">
         <AccordionItem value="item-1">
           <AccordionTrigger>Section 1</AccordionTrigger>
           <AccordionContent>Content 1</AccordionContent>
@@ -25,7 +25,7 @@ describe('Accordion', () => {
 
   it('renders multiple items', () => {
     render(
-      <Accordion>
+      <Accordion type="single">
         <AccordionItem value="item-1">
           <AccordionTrigger>First</AccordionTrigger>
           <AccordionContent>First content</AccordionContent>

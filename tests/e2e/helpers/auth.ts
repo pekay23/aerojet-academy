@@ -101,6 +101,10 @@ export async function loginAsApplicant(page: Page) {
   await loginAs(page, getApplicantCredentials())
 }
 
+export async function loginAsExaminer(page: Page) {
+  await loginAs(page, getExaminerCredentials())
+}
+
 export async function waitForDashboard(page: Page, expectedText?: string) {
   const matcher = expectedText
     ? new RegExp(expectedText, 'i')

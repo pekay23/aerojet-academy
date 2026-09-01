@@ -162,7 +162,7 @@ Also rendered as a widget on the Staff Dashboard.
 
 | Endpoint | File | Returns |
 |----------|------|---------|
-| `GET /api/staff/export` | `app/api/staff/export/route.ts` | Date-bounded CSV exports for `students`, `pools`, `finances`, or `audit-logs`. 5,000 row cap (default 10,000, clamped to 5,000). |
+| `GET /api/staff/export` | `app/api/staff/export/route.ts` | Date-bounded CSV exports for `students`, `pools`, `finances`, or `audit-logs`. 50,000 row cap (audit-logs clamped to 5,000). |
 
 Triggered from the Period Filter dropdown on `/staff/reports`.
 
@@ -184,25 +184,24 @@ Used by the DSR workflow at `/staff/gdpr`.
 
 | Endpoint | Auth | Purpose |
 |----------|------|---------|
-| `GET /api/staff/analytics/dashboard` | Public | Alerts + metrics bundle |
+| `GET /api/staff/analytics/dashboard` | STAFF+ | Alerts + metrics bundle |
 | `GET /api/staff/analytics/trends` | STAFF+ | Trend directions + anomaly detection |
 | `GET /api/staff/analytics/forecast` | STAFF+ | 6-month revenue forecast |
-| `GET /api/staff/analytics/retention` | Public | Cohort retention data |
+| `GET /api/staff/analytics/retention` | STAFF+ | Cohort retention data |
 | `GET /api/staff/analytics/pipeline` | STAFF+ | Enrollment pipeline prediction |
-| `GET /api/staff/analytics/pageviews` | Public | Page view metrics |
-| `GET /api/staff/analytics/funnels` | Public | Funnel conversion data |
-| `GET /api/staff/analytics/features` | Public | Feature adoption |
+| `GET /api/staff/analytics/pageviews` | STAFF+ | Page view metrics |
+| `GET /api/staff/analytics/funnels` | STAFF+ | Funnel conversion data |
+| `GET /api/staff/analytics/features` | STAFF+ | Feature adoption |
 | `GET /api/staff/analytics/journey/[id]` | STAFF+ | Per-user event timeline |
 
 > **Auth note:** The active `proxy.ts` is **images-only** and does **not** gate
 > `/staff/*` routes, so these API endpoints are protected only by whatever their
 > own route handler enforces. `trends`, `forecast`, `pipeline`, and `journey`
 > call `requireStaff()`/`getAuthSession()`; `dashboard`, `retention`,
-> `pageviews`, `funnels`, and `features` currently have **no authentication** and
-> are publicly reachable. Gate them with `requireStaff()` (or
-> `requirePermission(...)`) before deploying to production. The analytics
-> **portal pages** (`/staff/dashboard`, `/staff/analytics`, `/staff/reports`)
-> remain staff-gated via their layouts.
+> `pageviews`, `funnels`, and `features` now call `requireStaff()` (added to close
+> an unauthenticated-access gap). `export` is guarded via `getServerSession`.
+> The analytics **portal pages** (`/staff/dashboard`, `/staff/analytics`,
+> `/staff/reports`) remain staff-gated via their layouts.
 
 ### Report APIs
 
@@ -212,7 +211,7 @@ Used by the DSR workflow at `/staff/gdpr`.
 | `GET /api/staff/reports/enrollment` | STAFF+ | Enrollment breakdown |
 | `GET /api/staff/reports/pools` | STAFF+ | Pool analytics |
 | `GET /api/staff/reports/roster/[poolId]` | STAFF/ADMIN | CSV roster download |
-| `GET /api/staff/export` | Public | CSV data exports (⚠ unauthenticated — see auth note above) |
+| `GET /api/staff/export` | STAFF+ | CSV data exports |
 | `GET /api/staff/admissions/pipeline` | STAFF+ | Admissions funnel |
 
 ---

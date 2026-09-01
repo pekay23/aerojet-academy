@@ -5,6 +5,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import ProfileForm from './_components/ProfileForm'
 import { PasskeySettings } from '@/app/staff/settings/_components/PasskeySettings'
 import { PageTransition } from '@/components/shared/PageTransition'
+import { PageTransition } from '@/components/shared/PageTransition'
 
 export const metadata: Metadata = { title: 'My Profile | Applicant Portal' }
 export const dynamic = 'force-dynamic'
@@ -20,7 +21,7 @@ export default async function ProfilePage() {
       where: { id: userId },
       select: { email: true, registrationCode: true, createdAt: true },
     }),
-    prisma.profile.findUnique({
+    prismaUnfiltered.profile.findUnique({
       where: { userId },
     }),
   ])

@@ -5,7 +5,7 @@ import Logo from '@/components/shared/Logo'
 vi.mock('next/image', () => ({
   default: (props: any) => {
     const { src, alt, width, height, priority, className } = props
-    return <img src={src} alt={alt} width={width} height={height} className={className} priority={priority ? '' : undefined} />
+    return <img src={src} alt={alt} width={width} height={height} className={className} data-priority={priority ? '' : undefined} />
   },
 }))
 
@@ -32,6 +32,6 @@ describe('Logo', () => {
   it('renders with priority', () => {
     render(<Logo priority={true} />)
     const img = screen.getByAltText('Aerojet Academy')
-    expect(img).toHaveAttribute('priority')
+    expect(img).toHaveAttribute('data-priority')
   })
 })

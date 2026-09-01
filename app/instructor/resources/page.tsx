@@ -4,6 +4,7 @@ import ResourcesView from './_components/ResourcesView'
 
 export const metadata: Metadata = { title: 'Teaching Resources | Instructor Portal' }
 export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 
 export default async function Page() {
   const resources = await getInstructorResources()

@@ -403,6 +403,101 @@ The schema **already supports** most of this; we close two gaps:
 
 ---
 
+## 3.5 Shared Module Question Bank & Instructor Access Model
+
+> **Requirement (from stakeholder):** Questions/banks are **shared within a module**, not instructor-private.
+> An instructor who adds a question contributes it to the module's global bank. **Admin** can view/edit/schedule
+> any class **or individual** to take that module's exam at any time. **Any instructor linked to the same module**
+> can access the bank and use its questions for their own students' exams. Instructors get two lists: (a) their own
+> added questions/banks, and (b) the module's global bank (questions from all instructors linked to the module),
+> plus a full **audit trail** of who added/edited/deleted each question and when.
+
+### 3.5.1 Core principle — no question ownership
+
+A `InternalExamQuestion` belongs to its **bank**, and a bank belongs to a **module** (`InternalExamBank.courseId`
++ `moduleCode`, schema lines 1966–1967). There is **no `ownerId` / per-instructor silo**. "My questions" is simply a
+*filtered view* (`submittedById = me`) over the same shared `internal_exam_questions` table — it requires **no extra
+storage**. This already fits the existing model: `POST /questions` sets `submittedById` and `status: PENDING_APPROVAL`
+(`app/api/staff/exams/internal/banks/[bankId]/questions/route.ts:94–113`).
+
+### 3.5.2 Module linkage for instructors (how "linked to the module" is resolved)
+
+An instructor is considered linked to a module when **either** is true:
+
+1. **Explicit bank assignment** — a row in `InternalExamBankInstructor` (§3.1) for a bank of that `(courseId, moduleCode)`.
+   This is also where `canEdit` / `canReview` / `canMonitor` / `canPublish` capability is granted (admin-assigned).
+2. **Course teaching** — `Class.instructorId = instructorId` where `Class.courseId = bank.courseId`
+   (schema lines 455–478). Teaching a class in the course confers module access for that course's banks.
+
+> 💡 **Suggestion:** `Class` carries `courseId` but **not** `moduleCode` (schema 453–488). If per-module teaching
+> (not just per-course) must gate access, add an optional `moduleCode` to `Class`, or resolve module from the bank
+> and treat course-level teaching as sufficient. Default recommendation: course-level teaching is enough to link an
+> instructor to all of that course's exam modules.
+
+Capability vs. access distinction:
+- **Access / use** (view the bank, schedule it for a class or individual student) → granted by module linkage (above).
+- **Edit / review** a given question → additionally requires `canEdit` / `canReview` on that bank (§3.1). Instructors can
+  **always edit their own submitted questions**; editing *another* instructor's question requires a `canEdit` grant.
+
+### 3.5.3 Instructor views (both read the shared table)
+
+| View | Query | Purpose |
+|------|-------|---------|
+| **My Questions** | `internalExamQuestion.findMany({ where: { submittedById: me, bankId: { in: myModuleBankIds } } })` | Review/revise questions the instructor personally added. |
+| **My Banks** | banks where `InternalExamBankInstructor.instructorId = me` (assigned) | Manage assignment, monitor, publish for banks they're responsible for. |
+| **Module Bank (global)** | `internalExamQuestion.findMany({ where: { bankId: { in: myModuleBankIds }, isActive: true } })` | Browse/use every instructor's questions for this module in their students' exams. Filterable by `submittedById` (me vs others), `status`, `difficulty`, `subTopic`. |
+
+> 💡 **Suggestion:** Expose as `GET /api/instructor/exams/questions?view=mine|module&bankId=&status=&submittedById=`
+> and `GET /api/instructor/exams/banks?scope=mine|module`. Reuse the existing `prismaUnfiltered` + instructorId filter
+> convention; paginate with `take`/`skip` (the "take 200" truncation trap applies).
+
+### 3.5.4 Admin override (class or individual, anytime)
+
+Admin/Super Admin are **not** scoped by module. They can:
+- View/edit **any** bank or question across all modules (existing role gate already admits `ADMIN`/`SUPER_ADMIN`).
+- **Schedule a whole class** via `InternalExamClassSchedule` (§3.2) or the class-start flow (§6.1).
+- **Schedule an individual student** — extend `POST /api/student/exams/internal/start` (or a new admin endpoint) to
+  accept `{ studentId, bankId, classId? }` and create a single `InternalExamSession` for that student at any time,
+  bypassing the schedule window when `requireAdmin()` is satisfied.
+
+### 3.5.5 Audit trail — who added/edited/deleted and when
+
+The schema **already supports** most of this; we close two gaps:
+
+| Action | Already captured? | Where |
+|--------|-------------------|-------|
+| **Added** | Partially | `submittedById` on the question (schema 2010). ⚠️ **Gap:** `POST /questions` does **not** write an `auditLog` row. Add `createAuditLog({ action: AuditAction.IMPORT or CREATE, entity: 'InternalExamQuestion', entityId, userId: session.user.id })` on create. |
+| **Edited** | ✅ Yes | `PUT /questions/[id]` writes an `InternalExamQuestionVersion` (`changeType: EDITED`, `changedById`, `changedAt`) **and** an `auditLog` `UPDATE` (route 89–149). |
+| **Retired/Deleted** | ✅ Yes | `DELETE /questions/[id]` writes a version (`RETIRED`) + `auditLog` (`UPDATE`, admin-only) (route 172–201). 💡 Use `AuditAction.DELETE` instead of `UPDATE` for clarity. |
+| **Reviewed** | Partially | `reviewedById` / `reviewedAt` on the question (schema 2008). ⚠️ **Gap:** `PATCH /questions/[id]/review` does **not** write an `auditLog` row. Add `createAuditLog({ action: AuditAction.APPROVE/REJECT, entity: 'InternalExamQuestion', ... })`. |
+
+> **Canonical history view:** a new `GET /api/.../questions/[id]/history` that returns, merged and sorted by time:
+> - `InternalExamQuestionVersion[]` (edits + retires, with `changedBy` name + `changedAt` + `changeReason`), **plus**
+> - `auditLog` rows where `entity = 'InternalExamQuestion' AND entityId = id` (create/review/import actions).
+> The version table already has a `changedBy` relation (schema 2039); `InternalExamQuestion` only has raw `submittedById` /
+> `reviewedById` with **no relation**. 💡 Add `submittedBy` / `reviewedBy` relation fields on `InternalExamQuestion` so the
+> history UI can show "Added by Jane Doe at <ts>" without a manual join. Low-risk additive schema change.
+>
+> All question mutations must also keep writing via `lib/audit/logger.ts` (`AuditAction` enum: CREATE/UPDATE/DELETE/APPROVE/IMPORT)
+> so the central audit log and the per-question version history stay in lock-step.
+
+### 3.5.6 Permission gating (reuse existing RBAC)
+
+- Question/bank routes currently gate by **role array** (`['ADMIN','SUPER_ADMIN','STAFF','EXAMINER','INSTRUCTOR']`).
+  Replace with `requirePermission(PERMISSIONS.MANAGE_EXAMS)` (seeded in `lib/auth/permission-registry.ts:41`) + the
+  module-linkage/assignment checks above, so access is capability- and module-scoped rather than "any instructor, any bank."
+- `InternalExamBankInstructor.canEdit/canReview/...` remain the **capability** flags (not ownership); combine with module
+  linkage: an instructor may *use* any module question, but may only *edit/review* with the matching grant (or their own).
+
+### 3.5.7 What this changes vs earlier sections
+
+- §3.1's `InternalExamBankInstructor` is now explicitly a **capability grant + module-linkage record**, not an ownership table.
+- §4.2 "My Banks" tab splits into **My Questions** / **My Banks** / **Module Bank** (global) as in §3.5.3.
+- §6.1 gains `GET /api/instructor/exams/questions?view=...` and an admin "schedule individual" capability (§3.5.4).
+- Audit coverage is completed for **create** and **review** (§3.5.5).
+
+---
+
 ## 4. UI Plan — Page by Page
 
 ### 4.1 Staff: Exam Bank Management (Enhanced)

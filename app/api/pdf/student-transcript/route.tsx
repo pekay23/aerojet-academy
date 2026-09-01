@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
           pathwayRel: { select: { name: true } },
         },
       }),
-      prisma.examResult.findMany({
+      prismaUnfiltered.examResult.findMany({
         where: { userId },
         select: {
           moduleCode: true,

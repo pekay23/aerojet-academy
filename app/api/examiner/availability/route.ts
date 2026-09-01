@@ -31,7 +31,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       date: kind === 'SPECIFIC_DATE' ? new Date(date as string) : null,
       startTime: startTime as string,
       endTime: endTime as string,
-      available: available ?? true,
+      available: (available as boolean | undefined) ?? true,
       notes: (notes as string | undefined)?.trim() || null,
     },
   })

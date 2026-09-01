@@ -235,9 +235,9 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
     payments: enrichedPayments,
     fullTimeEnrollments,
     modularEnrollments,
-  }) as unknown as SerializedStudent
+  }) as unknown as SerializedStudent as unknown as SerializedStudent
 
-  const serializedExamComponents = serializePrisma(examComponents) as unknown as SerializedExamComponent[]
+  const serializedExamComponents = serializePrisma(examComponents) as unknown as SerializedExamComponent[] as unknown as SerializedExamComponent[]
   const serializedUpcomingEvents = serializePrisma(upcomingEvents)
   const serializedAcademicYears = serializePrisma(academicYears)
   const serializedSemesters = serializePrisma(semesters)

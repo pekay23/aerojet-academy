@@ -7,6 +7,7 @@ import { subMonths, addMonths, startOfMonth, endOfMonth } from 'date-fns'
 
 export const metadata: Metadata = { title: 'Teaching Schedule | Instructor Portal' }
 export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 
 import AcademicCalendar, { type UnifiedCalendarEvent } from '@/components/calendar/AcademicCalendar'
 

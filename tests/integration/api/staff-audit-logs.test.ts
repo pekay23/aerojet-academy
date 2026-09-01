@@ -19,6 +19,12 @@ vi.mock('@/lib/audit/logger', () => ({
   AuditAction: { CREATE: 'CREATE', UPDATE: 'UPDATE', DELETE: 'DELETE' },
 }))
 
+vi.mock('@/lib/audit/logger', () => ({
+  queryAuditLogs: vi.fn(),
+  createAuditLog: vi.fn(),
+  AuditAction: { CREATE: 'CREATE', UPDATE: 'UPDATE', DELETE: 'DELETE' },
+}))
+
 vi.mock('@/lib/api/response', () => ({
   apiPaginated: vi.fn((data: any, total: number) => ({ status: 200, json: () => Promise.resolve({ data, total }) })),
   withErrorHandler: vi.fn((fn: any) => {

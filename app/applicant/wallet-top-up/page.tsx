@@ -23,7 +23,7 @@ export default async function ApplicantWalletTopUpPage() {
         where: { id: userId },
         select: { registrationPaid: true, programmeChoice: true, role: true },
       }),
-      prisma.payment.findFirst({
+      prismaUnfiltered.payment.findFirst({
         where: { userId, referenceType: 'WALLET_TOPUP', status: 'PENDING' },
       }),
       getSystemSetting('course_currency', 'EUR'),

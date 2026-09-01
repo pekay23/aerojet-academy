@@ -37,7 +37,7 @@ export interface Occurrence {
 
 const DAY_ABBR = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
-export function parseDays(s: string | null | undefined): Set<string> {
+export export function parseDays(s: string | null | undefined): Set<string> {
   if (!s) return new Set()
   return new Set(s.split(/[,;]/).map((x) => x.trim().slice(0, 3).toUpperCase()))
 }

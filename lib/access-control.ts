@@ -4,7 +4,7 @@ import { resolveEffectiveEnrollmentType, resolveEffectivePathwayCode } from '@/l
 
 export type PaymentAccessLevel = 'FULL_ACCESS' | 'SEAT_ONLY' | 'RESTRICTED'
 
-export type FeatureType = 'courses' | 'classes' | 'exams' | 'materials' | 'milestones' | 'pools' | 'wallet'
+export type FeatureType = 'courses' | 'classes' | 'exams' | 'materials' | 'milestones' | 'pools' | 'wallet' | 'wallet'
 
 const FEATURE_ACCESS_MATRIX: Record<PaymentAccessLevel, FeatureType[]> = {
   FULL_ACCESS: ['courses', 'classes', 'exams', 'materials', 'milestones', 'pools', 'wallet'],

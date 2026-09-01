@@ -234,6 +234,11 @@ The project auto-generates API route tests (254 files, per project memory `api-a
 ### H3. Instructor void must reuse existing void logic
 §4.2 "Void (allow retake)" must clear the single-attempt block the same way the existing `app/api/staff/exams/internal/operations/void/route.ts` does (sets `voidedAt`/`voidedBy`, clears attempt gating) — not fork a divergent copy.
 
+**Suggestion:** Have the instructor monitor call the existing `operations/void` route (guarded by the join-table `canMonitor` capability) rather than reimplementing session voiding. Note the Windows runner caveat (project memory `windows_test_timeout`): foreground `bun run test` aborts with a `ChildProcess.kill` error here — verify with `bun run test --run --no-file-parallelism --no-color` in the background runner.
+
+### H3. Instructor void must reuse existing void logic
+§4.2 "Void (allow retake)" must clear the single-attempt block the same way the existing `app/api/staff/exams/internal/operations/void/route.ts` does (sets `voidedAt`/`voidedBy`, clears attempt gating) — not fork a divergent copy.
+
 **Suggestion:** Have the instructor monitor call the existing `operations/void` route (guarded by the join-table `canMonitor` capability) rather than reimplementing session voiding.
 
 ### H4. Realtime latency needs a verification spike

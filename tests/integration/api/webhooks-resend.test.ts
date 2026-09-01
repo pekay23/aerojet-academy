@@ -10,7 +10,7 @@ vi.mock('svix', () => ({
   },
 }))
 
-import { POST } from '@/app/api/webhooks/resend/route.ts'
+import { POST } from '@/app/api/webhooks/resend/route'
 
 const SECRET = 'RESEND_WEBHOOK_SECRET'
 const originalSecret = process.env[SECRET]

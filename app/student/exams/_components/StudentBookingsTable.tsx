@@ -10,6 +10,7 @@ import { useSort, SortHeader } from '@/lib/hooks/useSort'
 import { payPendingExamBooking } from '@/app/student/actions'
 import { PaymentStatus } from '@/types/enums'
 import { PaymentStatus } from '@/types/enums'
+import { PaymentStatus } from '@/types/enums'
 
 interface BookingRecord {
   id: string

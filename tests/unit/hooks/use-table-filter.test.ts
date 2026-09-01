@@ -9,7 +9,7 @@ describe('hooks/use-table-filter', () => {
   })
 
   it('returns an object', () => {
-    const { result } = renderHook(() => useTableFilter())
+    const { result } = renderHook(() => useTableFilter([], []))
     expect(typeof result.current).toBe('object')
   })
 })

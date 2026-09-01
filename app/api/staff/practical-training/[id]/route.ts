@@ -71,7 +71,7 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
 // DELETE — delete practical training record
 export const DELETE = withErrorHandler(async (req: NextRequest, ctx: any) => {
   await requireStaff()
-  const { id } = await ctx.params
+  const { id } = ctx.params
 
   const record = await prismaUnfiltered.practicalTrainingRecord.findUnique({ where: { id } })
   if (!record) return apiError('Record not found', 404)

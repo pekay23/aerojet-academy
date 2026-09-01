@@ -11,7 +11,7 @@ describe('MyPoolsDashboard', () => {
   })
 
   it('shows loading state initially', () => {
-    global.fetch = vi.fn(() => new Promise(() => {}))
+    global.fetch = vi.fn(() => new Promise<Response>(() => {}))
     render(<MyPoolsDashboard />)
     expect(screen.getByText('Loading your pools...')).toBeInTheDocument()
   })

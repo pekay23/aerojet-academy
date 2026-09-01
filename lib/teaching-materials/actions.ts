@@ -5,6 +5,7 @@ import { requireInstructor } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { buildStoragePath, getSignedUrl, uploadToStorage } from '@/lib/storage/supabase-storage'
 import { createAuditLog } from '@/lib/audit/logger'
+import { createAuditLog } from '@/lib/audit/logger'
 
 /**
  * Audit 6b — instructor teaching-materials management. Materials are scoped to

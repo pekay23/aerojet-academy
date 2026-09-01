@@ -84,7 +84,7 @@ export default function AdminNotesTab({ student, onRefresh, staffId, staffRole }
       toast.success('Note updated')
       setEditingId(null)
       fetchNotes()
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(err.message)
     }
   }

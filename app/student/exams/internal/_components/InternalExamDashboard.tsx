@@ -195,7 +195,7 @@ export default function InternalExamDashboard() {
           <p className="text-xs text-green-600">Passed</p>
         </div>
         <div className="rounded-xl border border-blue-800/20 bg-blue-50 p-4 text-center dark:border-blue-800/50 dark:bg-blue-900/10">
-          <CheckCircle2 className="mx-auto h-5 w-5 text-aerojet-blue" />
+          <CheckCircle2 className="mx-auto h-5 w-5 text-blue-800" />
           <p className="mt-1 text-2xl font-bold text-aerojet-blue">{data.summary.progressPercent}%</p>
           <p className="text-xs text-slate-500">Complete</p>
         </div>
@@ -246,7 +246,7 @@ export default function InternalExamDashboard() {
                     <button
                       onClick={() => setShowLobby(bank.bankId)}
                       disabled={starting === bank.bankId}
-                      className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50 dark:bg-sky-400"
+                      className="flex items-center gap-1.5 rounded-lg bg-blue-800 px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50 dark:bg-sky-400"
                     >
                       {starting === bank.bankId ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />

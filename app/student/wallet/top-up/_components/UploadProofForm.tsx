@@ -201,7 +201,7 @@ export function UploadProofForm({ studentId }: UploadProofFormProps) {
               }}
               appearance={{
                 container: 'border-0 bg-slate-50/50',
-                label: 'text-aerojet-blue',
+                label: 'text-blue-800',
                 button: 'bg-blue-800 text-white hover:bg-[#003875]',
                 allowedContent: 'text-slate-400',
               }}

@@ -39,7 +39,7 @@ describe('lib/utils/serialization', () => {
   })
 
   it('serializes BigInt to number', () => {
-    const result = serializePrisma(123n)
+    const result = serializePrisma(BigInt(123))
     expect(result).toBe(123)
   })
 })

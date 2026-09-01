@@ -247,6 +247,7 @@ function generateTest(routePath, content) {
   const paramNames = (relPath.match(/\[([^\]]+)\]/g) || []).map(m => m.replace(/[\[\]]/g, ''))
   const paramsObj = paramNames.map(p => `${p}: '1'`).join(', ')
   const paramsObj = paramNames.map(p => `${p}: '1'`).join(', ')
+  const paramsObj = paramNames.map(p => `${p}: '1'`).join(', ')
   const testFileName = getTestFileName(relPath)
   const testFilePath = path.join(root, 'tests', 'integration', 'api', testFileName)
 
@@ -314,6 +315,19 @@ function generateTest(routePath, content) {
     testContent += `vi.mock('@/lib/storage/supabase-storage', () => ({\n`
     testContent += `  uploadToStorage: vi.fn().mockResolvedValue('https://test.com/file'),\n`
     testContent += `  getSignedUrl: vi.fn().mockResolvedValue('https://test.com/file'),\n`
+    testContent += `}))\n\n`
+  }
+
+  if (content.includes('isInternalExamSystemEnabled') || content.includes('/internal-exam/engine')) {
+    testContent += `vi.mock('@/lib/internal-exam/engine', () => ({\n`
+    testContent += `  isInternalExamSystemEnabled: vi.fn().mockResolvedValue(true),\n`
+    testContent += `}))\n\n`
+  }
+
+  if (content.includes('formatCurrency') || content.includes('@/lib/currency')) {
+    testContent += `vi.mock('@/lib/currency', () => ({\n`
+    testContent += `  formatCurrency: vi.fn((amount: number | string) => '€' + amount),\n`
+    testContent += `  getCurrencySymbol: vi.fn(() => '€'),\n`
     testContent += `}))\n\n`
   }
 
