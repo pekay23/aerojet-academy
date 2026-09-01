@@ -82,10 +82,18 @@ contents of each are preserved in `C:\Users\Pekay\AppData\Local\Temp\kilo\recove
 under the same relative path. Restore by copying from the backup tree back to
 `C:\Projects\aerojet-academy\<path>`.
 
-**Total lost:** 844 files (of 952 in the backup; the remaining 108 are already in the working
-tree under a different name or as recompiled output).
+**Total lost at original revert time:** 844 files (of 952 in the backup; the remaining 108
+were already in the working tree under a different name or as recompiled output).
 
-### 3.1 `app/` — 208 files lost
+**Status after 2026-09-01 18:55 UTC restoration:** Of the 844 originally listed as lost,
+**833 are now in `dev` HEAD `d6a1ec9a` + 589e23a0 commit** (restored either by the
+`feat/flipbook-scraper-clean` merge `9fef7db6`, the EASA commit `d6a1ec9a`, or this
+recovery pass). The 11 remaining uncommitted `scripts/easa-seed/_peek_*.py` /
+`_toc_m1.py` / `_check_m14.py` inspection helpers were just restored; the manifest §3
+inventory below is preserved as historical record of what was lost and is no longer
+authoritative for current state.
+
+### 3.1 `app/` — 208 files lost → 0 still missing
 
 #### 3.1.1 `app/api/` — 103 files
 
@@ -739,10 +747,12 @@ docs/teamcity-evaluation.md
 > Note: `docs/guides/sortable-tables.md` was re-authored this session and IS in the working
 > tree. The Antigravity copy is stale.
 
-### 3.7 `scripts/` — 47 files lost
+### 3.7 `scripts/` — 47 files lost → 0 still missing
 
-All PowerShell and shell scripts in `scripts/`. Restore from
-`C:\Users\Pekay\AppData\Local\Temp\kilo\recovered-files\scripts\`.
+All 47 PowerShell and shell scripts in `scripts/` have been restored to the working tree
+either by the flipbook-scraper merge or the EASA commit; the 11 EASA inspector helpers
+(`scripts/easa-seed/_peek_*.py`, `_toc_m1.py`, `_check_m14.py`) were restored in this
+commit.
 
 ### 3.8 `.kilo/` — 6 files lost
 
