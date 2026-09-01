@@ -1,11 +1,26 @@
 # Changelog
 
-## [1.0.82] — 2026-08-26
+## [1.0.87] — 2026-09-01
 
 ### Changed
 - Maintenance and stability updates.
 
-## [1.0.81] — 2026-08-26
+## [1.0.86] — 2026-09-01
+
+### Changed
+- Maintenance and stability updates.
+
+## [1.0.85] — 2026-09-01
+
+### Changed
+- Maintenance and stability updates.
+
+## [1.0.84] — 2026-09-01
+
+### Changed
+- Maintenance and stability updates.
+
+## [1.0.83] — 2026-09-01
 
 ### Changed
 - Maintenance and stability updates.
