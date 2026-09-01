@@ -46,7 +46,7 @@ async function getBookingData(userId: string) {
     }),
   ])
   const { getCurrencySymbol } = await import('@/lib/currency')
-  const targetCategories = await getStudentTargetCategoryCodes(prisma, userId)
+  const targetCategories = await getStudentTargetCategoryCodes(prismaUnfiltered, userId)
   const eligibleComponents = filterForStudentTargets(examComponents, targetCategories)
   const balance = Number(wallet?.availableBalance || 0)
   const currency = wallet?.currency || 'EUR'

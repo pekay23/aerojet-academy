@@ -3,7 +3,7 @@
 ## Authentication
 
 - NextAuth.js with JWT strategy (8-hour sessions)
-- Passwords hashed with bcrypt (12 rounds)
+- Passwords hashed with bcryptjs (12 rounds)
 - Force password change on first login for staff-created accounts
 - Role-based middleware protecting all portal routes
 
@@ -54,7 +54,9 @@
 - Disable: `/api/auth/2fa/disable` (requires valid TOTP code to confirm identity)
 - All 2FA API routes require authenticated session with staff-level role
 
-## Known Security Gaps (P3 backlog)
+## Known Security Gaps (P3 backlog) — Resolved (2026-05-06)
 
-- `api/auth/resend-verification` — No rate limiting, possible email enumeration
-- `api/public/submit-payment-proof` — No rate limiting, registration code could be brute-forced
+The following P3 gaps identified in the May 2026 audits have been resolved:
+
+- `api/auth/resend-verification` — ✅ Rate limited to 3/hour per IP ([lib/security/rate-limit.ts](../../lib/security/rate-limit.ts), [route.ts:12](../../app/api/auth/resend-verification/route.ts#L12)); uniform response prevents email enumeration ([route.ts:15-18,32-46](../../app/api/auth/resend-verification/route.ts#L15-L18))
+- `api/public/submit-payment-proof` — ✅ Rate limited to 5/hour per IP ([lib/auth/helpers.ts](../../lib/auth/helpers.ts) `checkRateLimit`, [route.ts:11-12](../../app/api/public/submit-payment-proof/route.ts#L9-L12))

@@ -13,6 +13,7 @@ import ExaminerDashboard from '../_components/ExaminerDashboard'
 import AlertsCenter from './_components/AlertsCenter'
 import { getDashboardAlerts } from '@/lib/analytics/dashboard-alerts'
 import { UserStatus, UserRole, PaymentStatus, PoolStatus } from '@/types/enums'
+import type { SerializedPaymentCard } from '@/lib/staff/types'
 import { COUNTABLE_MEMBERSHIP_STATUSES, TERMINAL_POOL_STATUSES, UPCOMING_EVENT_STATUSES, LIVE_POOL_STATUSES } from '@/lib/utils/constants'
 import {
   Users,
@@ -213,11 +214,11 @@ async function getDashboardData() {
         activeStudents,
         pendingPayments,
         recentPendingPayments: serializePrisma(recentPendingPaymentsRaw),
-        activeEvent: serializePrisma(computeEventStats(activeEventRaw)),
+        activeEvent: serializePrisma(computeEventStats(serializePrisma(activeEventRaw))),
         openPools: serializePrisma(
           openPoolsRaw.map((p) => ({ ...p, currentMemberCount: p._count.memberships }))
         ),
-        revenueData: buildRevenueTimeline(approvedPayments, targetMonthlyRevenue),
+        revenueData: buildRevenueTimeline(serializePrisma(approvedPayments), targetMonthlyRevenue),
         targetMonthlyRevenue,
         currency,
         currSymbol,
@@ -296,7 +297,7 @@ export default async function StaffDashboardPage() {
                   {stat.value}
                   {stat.alert && <AlertTriangle className="h-4 w-4 text-amber-500" />}
                 </p>
-                <p className="truncate text-[11px] font-bold tracking-wider text-slate-400 uppercase dark:text-slate-500">
+                <p className="truncate text-xs font-bold tracking-wider text-slate-400 uppercase dark:text-slate-500">
                   {stat.label}
                 </p>
               </div>
@@ -384,7 +385,7 @@ export default async function StaffDashboardPage() {
             </a>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {data.recentPendingPayments.map((payment: any) => (
+            {data.recentPendingPayments.map((payment: SerializedPaymentCard) => (
               <PaymentApprovalCard
                 key={payment.id}
                 payment={payment}

@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiCreated, apiPaginated, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 
@@ -16,7 +16,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
   const url = new URL(req.url)
   const status = url.searchParams.get('status')
 
-  const where: any = {}
+  const where: Record<string, unknown> = {}
   if (status) where.status = status
 
   const logbooks = await prismaUnfiltered.oJTLogbook.findMany({
@@ -51,7 +51,7 @@ const createSchema = z.object({
   mentorId: z.string().optional(),
 })
 
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext) => {
   await requireStaff()
   const body = await req.json()
   const parsed = createSchema.safeParse(body)

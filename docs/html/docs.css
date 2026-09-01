@@ -72,3 +72,45 @@
 }
 .he-standalone-card a { font-weight: 500; }
 .he-standalone-card p { font-size: var(--t-small-size); color: var(--fg-muted); margin: var(--sp-1) 0 0; }
+
+/* Sort controls for document listings */
+.he-sort {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  font-size: var(--t-small-size);
+}
+.he-sort__label { color: var(--fg-muted); margin-right: var(--sp-2); }
+.he-sort__btn {
+  padding: var(--sp-1) var(--sp-3);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--fg);
+  cursor: pointer;
+  font-size: var(--t-small-size);
+  transition: all 0.15s ease;
+}
+.he-sort__btn:hover { background: var(--surface-alt); border-color: var(--clay); }
+.he-sort__btn--active { background: var(--clay); color: #fff; border-color: var(--clay); }
+
+/* Folder index cards */
+.he-folder-grid { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.he-folder-card {
+  display: block;
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.he-folder-card:hover { border-color: var(--clay); transform: translateY(-2px); }
+.he-folder-card h3 { margin: 0 0 var(--sp-1); font-size: var(--t-h3-size); font-weight: 500; color: var(--clay); }
+.he-folder-card p { margin: 0; font-size: var(--t-small-size); color: var(--fg-muted); }
+.he-folder-card__count { display: inline-block; padding: var(--sp-1) var(--sp-2); background: var(--surface-alt); border-radius: var(--r-sm); font-size: var(--t-caption-size); margin-top: var(--sp-2); }

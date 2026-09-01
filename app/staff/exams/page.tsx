@@ -394,7 +394,7 @@ async function ResultsTab({ query }: { query?: string }) {
                     </td>
                   </tr>
                 ) : (
-                  allResults.map((result: any) => (
+                  allResults.map((result) => (
                     <tr
                       key={result.id}
                       className="group transition-all duration-150 ease-out hover:bg-white/80 dark:hover:bg-slate-800/40"

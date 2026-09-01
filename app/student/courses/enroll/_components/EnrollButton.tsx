@@ -47,7 +47,7 @@ export default function EnrollButton({
     >
       <button
         disabled={loading}
-        className="group/enroll relative flex h-12 w-full items-center justify-center overflow-hidden rounded-2xl bg-aerojet-blue px-6 text-xs font-black tracking-[0.2em] text-white uppercase transition-all hover:shadow-[0_0_20px_rgba(0,42,92,0.3)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
+        className="group/enroll relative flex h-12 w-full items-center justify-center overflow-hidden rounded-2xl bg-blue-800 px-6 text-xs font-black tracking-[0.2em] text-white uppercase transition-all hover:shadow-[0_0_20px_rgba(0,42,92,0.3)] active:scale-95 disabled:cursor-not-allowed disabled:opacity-70"
       >
         <div className="absolute inset-0 bg-linear-to-r from-blue-600 via-indigo-600 to-blue-600 opacity-0 transition-opacity duration-500 group-hover/enroll:opacity-100" />
         <div className="absolute inset-x-0 top-0 h-px w-full bg-linear-to-r from-transparent via-white/30 to-transparent transition-transform duration-1000 group-hover/enroll:translate-y-12" />

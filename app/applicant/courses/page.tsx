@@ -8,7 +8,7 @@ import TrackedCourseLink from '@/components/shared/TrackedCourseLink'
 import TrackedImpression from '@/components/shared/TrackedImpression'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { getCatalogVisibility, resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Browse Courses | Applicant Portal' }
 export const dynamic = 'force-dynamic'
@@ -37,7 +37,7 @@ export default async function CoursesPage({
   if (!session) redirect('/login')
 
   const [portalState, allCategories] = await Promise.all([
-    prisma.user.findUnique({
+    prismaUnfiltered.user.findUnique({
       where: { id: session.user.id },
       select: {
         programmeChoice: true,
@@ -64,7 +64,7 @@ export default async function CoursesPage({
   const visibility = getCatalogVisibility(effectiveEnrollmentType)
 
   return (
-    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <PageTransition className="space-y-10">
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div className="space-y-1.5">
           <div className="inline-flex items-center gap-2 rounded-full bg-aerojet-blue/5 px-3 py-1 dark:bg-blue-500/10">

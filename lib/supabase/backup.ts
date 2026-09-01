@@ -14,7 +14,7 @@
  * - Batch processing for large datasets
  */
 
-import { prisma } from '@/lib/prisma/client';
+import { prismaUnfiltered } from '@/lib/prisma/client';
 import { getSupabaseAdmin, isBackupEnabled } from './client';
 import { transformForSupabase } from './dual-write';
 import { BackupData } from '@/lib/backup';
@@ -82,7 +82,7 @@ async function exportAllFromNeon(): Promise<BackupData> {
   for (const model of BACKUP_MODELS) {
     try {
       // @ts-expect-error - dynamic model access
-      const records = await prisma[model].findMany();
+      const records = await prismaUnfiltered[model].findMany();
       backup[model] = records;
     } catch (err: any) {
       const error = err as Error;

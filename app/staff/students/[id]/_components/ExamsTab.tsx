@@ -66,7 +66,7 @@ export default function ExamsTab({
     bookingType?: string
     examCategory?: string
   }>({})
-  const [quickAddModule, setQuickAddModule] = useState<any>(null)
+  const [quickAddModule, setQuickAddModule] = useState<SerializedExamComponent | null>(null)
   const [sortBy, setSortBy] = useState<'moduleCode' | 'examDate' | 'score' | 'result'>('examDate')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
 
@@ -268,7 +268,7 @@ export default function ExamsTab({
   )
 
   // Handle inline edit save
-  const handleSaveEdit = async (record: any) => {
+  const handleSaveEdit = async (record: SerializedExamBooking) => {
     try {
       const res = await updateExamBooking(record.id, {
         score: editData.score,
@@ -277,7 +277,7 @@ export default function ExamsTab({
         moduleCode: editData.moduleCode || undefined,
         attemptType: editData.attemptType || undefined,
         bookingType: editData.bookingType || undefined,
-        examCategory: editData.examCategory as any || undefined,
+        examCategory: editData.examCategory || undefined,
         resultIdToSync: record.resultId || undefined,
       })
       if (res.error) {
@@ -309,7 +309,7 @@ export default function ExamsTab({
   }
 
   // Quick add handlers
-  const handleQuickAdd = (module: any) => {
+  const handleQuickAdd = (module: SerializedExamComponent) => {
     setQuickAddModule(module)
   }
 
@@ -638,7 +638,7 @@ export default function ExamsTab({
                         onChange={(e) => setEditData((d) => ({ ...d, moduleCode: e.target.value }))}
                         className="w-28 rounded border border-slate-200 px-2 py-1 font-mono text-xs"
                       >
-                        {examComponents.map((ec: any) => (
+                        {examComponents.map((ec: SerializedExamComponent) => (
                           <option key={ec.id} value={ec.course?.code || ec.code}>
                             {ec.course?.code || ec.code}
                           </option>
@@ -677,7 +677,7 @@ export default function ExamsTab({
                     {editingId === record.id ? (
                       <select
                         value={editData.examCategory ?? record.examCategory ?? 'OFFICIAL_EASA'}
-                        onChange={(e) => setEditData((d) => ({ ...d, examCategory: e.target.value }))}
+                        onChange={(e) => setEditData((d) => ({ ...d, examCategory: e.target.value as 'INTERNAL' | 'OFFICIAL_EASA' }))}
                         className="w-24 rounded border border-slate-200 px-1 py-0.5 text-[10px]"
                       >
                         <option value="OFFICIAL_EASA">OFFICIAL EASA</option>
@@ -893,7 +893,7 @@ export default function ExamsTab({
             Active Bundles
           </h3>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {student.examBundles.map((bundle: any) => (
+            {student.examBundles.map((bundle: SerializedExamBundle) => (
               <div
                 key={bundle.id}
                 className="rounded-xl border border-slate-100 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
@@ -944,7 +944,7 @@ function SummaryCard({
   color,
   bg,
 }: {
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   label: string
   value: number
   color: string

@@ -62,7 +62,7 @@ export default async function RegistrationFeePage() {
   if (user.registrationPaid) {
     return (
       <div className="mx-auto max-w-lg space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">Registration Fee</h1>
+        <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">Registration Fee</h1>
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-8 text-center dark:border-emerald-800/50 dark:bg-emerald-900/10">
           <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-emerald-500" />
           <h2 className="mb-2 text-lg font-black text-emerald-800 dark:text-emerald-200">
@@ -85,7 +85,7 @@ export default async function RegistrationFeePage() {
         <div className="text-center">
           <Link
             href="/student"
-            className="text-sm font-medium text-aerojet-blue underline hover:no-underline dark:text-blue-400"
+            className="text-sm font-medium text-blue-800 underline hover:no-underline dark:text-blue-400"
           >
             Back to Dashboard
           </Link>
@@ -97,17 +97,17 @@ export default async function RegistrationFeePage() {
   // Not paid — payment form
   return (
     <div className="mx-auto max-w-lg space-y-6">
-      <h1 className="text-2xl font-black text-aerojet-blue dark:text-white">Registration Fee</h1>
+      <h1 className="text-2xl font-black text-blue-800 dark:text-white">Registration Fee</h1>
 
       {/* Fee amount card */}
       <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-700 dark:bg-slate-800">
         <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-aerojet-blue/10 dark:bg-blue-500/10">
-            <Info className="h-5 w-5 text-aerojet-blue dark:text-blue-400" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-800/10 dark:bg-blue-500/10">
+            <Info className="h-5 w-5 text-blue-800 dark:text-blue-400" />
           </div>
           <div>
             <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Amount Due</p>
-            <p className="text-2xl font-black text-aerojet-blue dark:text-white">
+            <p className="text-2xl font-black text-blue-800 dark:text-white">
               {symbol}{fee.toFixed(2)} <span className="text-sm font-medium text-slate-400">{feeCurrency}</span>
             </p>
           </div>
@@ -157,7 +157,7 @@ export default async function RegistrationFeePage() {
             </p>
             <Link
               href="/student/wallet?action=topup"
-              className="inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#001d42]"
+              className="inline-flex items-center gap-2 rounded-xl bg-blue-800 px-6 py-2.5 text-sm font-bold text-white transition-colors hover:bg-[#001d42]"
             >
               <Wallet className="h-4 w-4" />
               Top Up Wallet

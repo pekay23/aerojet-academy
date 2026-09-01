@@ -1,9 +1,10 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import ProfileForm from './_components/ProfileForm'
 import { PasskeySettings } from '@/app/staff/settings/_components/PasskeySettings'
+import { PageTransition } from '@/components/shared/PageTransition'
 
 export const metadata: Metadata = { title: 'My Profile | Applicant Portal' }
 export const dynamic = 'force-dynamic'
@@ -15,7 +16,7 @@ export default async function ProfilePage() {
   const userId = session.user.id
 
   const [user, profile] = await Promise.all([
-    prisma.user.findUnique({
+    prismaUnfiltered.user.findUnique({
       where: { id: userId },
       select: { email: true, registrationCode: true, createdAt: true },
     }),
@@ -27,7 +28,7 @@ export default async function ProfilePage() {
   if (!user) redirect('/login')
 
   return (
-    <div className="max-w-7xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <PageTransition className="max-w-7xl space-y-8">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           My Profile

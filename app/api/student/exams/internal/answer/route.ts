@@ -15,7 +15,7 @@ const answerSchema = z.object({
  * POST /api/student/exams/internal/answer — save a single answer (autosave)
  * Called on each question answer to persist progress for resume support.
  */
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest) => {
   const session = await getAuthSession()
   if (!session?.user?.id) return apiError('Unauthorized', 401)
   if (!(await isInternalExamSystemEnabled())) {

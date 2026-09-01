@@ -3,7 +3,7 @@
 ## 🌿 Branch Strategy
 - `main` — Production-ready code.
 - `staging` — Pre-production validation.
-- `develop` — Integration branch for features.
+- `dev` — Integration branch for features.
 - `feature/*` — Individual feature development.
 
 ## 🔄 Commit Messages & Versioning
@@ -21,15 +21,15 @@ To specify a bump type, use the `BUMP_TYPE` environment variable:
 - **Bash**: `BUMP_TYPE=minor git commit -m "..."`
 
 ## 🧪 Development Workflow
-1. Branch from `develop`.
+1. Branch from `dev`.
 2. Sync your local database: `bun run db:push`.
 3. Make changes and verify with `bun run type-check`.
-4. Submit a PR to `develop`.
+4. Submit a PR to `dev`.
 
 ## 🗄️ Database Management
 - **Primary**: Neon (Serverless PostgreSQL).
 - **Backup/Redundant**: Supabase.
-- **Migrations**: Always use `bun x prisma migrate dev` to generate migration files. Ensure both environments are synced if schema changes are made.
+- **Schema changes**: Run `bun run db:push` (this project has no Prisma migration history, so `db:push` is the workflow). `postdb:push` mirrors the schema to Supabase automatically, so ensure both environments stay in sync after any schema change.
 
 ## 🎨 Coding Standards
 - **Strict TypeScript**: No `any` types; all interfaces must be documented.

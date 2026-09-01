@@ -109,7 +109,7 @@ export default async function Page({
       <div>
         <Link
           href="/instructor/classes"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-sky"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase transition-colors hover:text-aerojet-sky"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Classes
@@ -166,7 +166,7 @@ export default async function Page({
               {t.count !== undefined && (
                 <span
                   className={cn(
-                    'rounded-lg px-1.5 py-0.5 text-[10px] font-black',
+                    'rounded-lg px-1.5 py-0.5 text-xs font-black',
                     isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500 dark:bg-slate-800'
                   )}
                 >
@@ -197,7 +197,7 @@ export default async function Page({
             </div>
             <div className="divide-y divide-slate-50 dark:divide-slate-800">
               {enrollments.length > 0 ? (
-                enrollments.map((enrollment: any) => (
+                enrollments.map((enrollment) => (
                   <div
                     key={enrollment.id}
                     className="flex items-center justify-between px-6 py-4 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
@@ -275,7 +275,7 @@ export default async function Page({
             </div>
             <div className="divide-y divide-slate-50 dark:divide-slate-800">
               {attendanceRecords.length > 0 ? (
-                attendanceRecords.map((record: any) => (
+                attendanceRecords.map((record) => (
                   <div key={record.id} className="flex items-center justify-between px-6 py-3">
                     <div className="flex items-center gap-3">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-100 text-[10px] font-bold text-slate-500 uppercase dark:bg-slate-800">
@@ -349,7 +349,7 @@ export default async function Page({
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-                    {grades.map((grade: any) => {
+                    {grades.map((grade) => {
                       const pct = Number(grade.percentage) || 0
                       const passing = pct >= 75
                       return (
@@ -452,7 +452,7 @@ export default async function Page({
                   General Resources ({resources.length})
                 </h3>
                 <div className="space-y-2">
-                  {resources.map((resource: any) => (
+                  {resources.map((resource) => (
                     <div key={resource.id} className="flex items-center justify-between rounded-xl bg-slate-50 p-3 dark:bg-slate-800/50">
                       <div>
                         <p className="text-sm font-bold text-slate-900 dark:text-slate-100">{resource.name}</p>

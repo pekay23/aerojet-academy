@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { User, ClipboardCheck, Wallet, BookOpen, FileText, Route } from 'lucide-react'
+import { User, ClipboardCheck, Wallet, BookOpen, FileText, Route, ClipboardList } from 'lucide-react'
 import MotionTabs from '@/components/ui/MotionTabs'
 
 import ProfileTab from './ProfileTab'
@@ -103,6 +103,7 @@ export default function StudentDetailTabs({
           {activeTab === 'wallet' && <WalletTab student={student} onRefresh={handleRefresh} />}
           {activeTab === 'academic' && <AcademicTab student={student} onRefresh={handleRefresh} />}
           {activeTab === 'notes' && <AdminNotesTab student={student} onRefresh={handleRefresh} staffId={staffId} staffRole={staffRole} />}
+          {activeTab === 'practical' && <PracticalTab student={student} onRefresh={handleRefresh} />}
         </div>
       </div>
     </div>

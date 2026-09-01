@@ -221,7 +221,7 @@ export function CreateGradeDialog({ userId, enrollmentId, courseCode }: CreateGr
 
             {/* Sub-scores Grid (Optional) */}
             <div className="space-y-4 pt-2">
-              <Label className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+              <Label className="text-[10px] font-black tracking-widest text-slate-400 dark:text-slate-300 uppercase">
                 Granular Scores (Optional)
               </Label>
               <div className="grid grid-cols-3 gap-4">

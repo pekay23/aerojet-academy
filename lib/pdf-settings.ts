@@ -19,7 +19,7 @@ export interface PDFSettings {
 function readImageAsDataUri(filePath: string): string | null {
   try {
     // Normalize: strip any leading /public or public prefix to avoid double public/public/
-    let normalized = filePath.replace(/^\/?(public)\//i, '/')
+    const normalized = filePath.replace(/^\/?(public)\//i, '/')
     const absolutePath = normalized.startsWith('/')
       ? path.join(/*turbopackIgnore: true*/ process.cwd(), 'public', normalized)
       : normalized

@@ -59,7 +59,7 @@ export default function AttendanceManager({ classes }: { classes: ClassOption[] 
         // Build student list from roster, merging existing records
         const existingMap = new Map<string, any>(records.map((r: any) => [r.userId, r]))
         const merged: StudentRecord[] = roster.map((u: any) => {
-          const existing = existingMap.get(u.id) as any
+          const existing = existingMap.get(u.id) as StudentRecord | undefined
           return {
             userId: u.id,
             status: existing?.status || 'PRESENT',

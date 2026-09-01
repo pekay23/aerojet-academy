@@ -27,12 +27,17 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
     where: { id },
     data: body.data,
     include: {
-      user: {
+      instructor: {
         select: {
           id: true,
-          email: true,
-          profile: { select: { firstName: true, lastName: true } },
-          instructorProfile: { select: { employeeId: true } },
+          employeeId: true,
+          user: {
+            select: {
+              id: true,
+              email: true,
+              profile: { select: { firstName: true, lastName: true } },
+            },
+          },
         },
       },
     },
@@ -56,7 +61,7 @@ export const DELETE = withErrorHandler(async (req: NextRequest, ctx: { params: P
 
   const existing = await prismaUnfiltered.internalExamBankInstructor.findFirst({
     where: { id, bankId },
-    include: { user: { select: { instructorProfile: { select: { employeeId: true } } } } },
+    include: { instructor: { select: { employeeId: true } } },
   })
   if (!existing) return apiNotFound('Assignment not found')
 
@@ -67,7 +72,7 @@ export const DELETE = withErrorHandler(async (req: NextRequest, ctx: { params: P
     action: AuditAction.EXAM_BANK_INSTRUCTOR_REVOKED,
     entity: 'InternalExamBankInstructor',
     entityId: id,
-    description: `Revoked instructor ${existing.user.instructorProfile?.employeeId || id} from bank ${bankId}`,
+    description: `Revoked instructor ${existing.instructor?.employeeId || id} from bank ${bankId}`,
     changes: { instructorId: existing.instructorId, bankId },
   })
 

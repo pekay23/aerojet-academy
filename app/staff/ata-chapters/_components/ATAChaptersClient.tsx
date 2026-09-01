@@ -50,7 +50,7 @@ export default function ATAChaptersClient({
       setCode(chapter.code)
       setTitle(chapter.title)
       setDescription(chapter.description || '')
-      setCategory(chapter.category as any)
+      setCategory(chapter.category as 'AIRFRAME' | 'POWERPLANT' | 'AVIONICS' | 'GENERAL')
       setSortOrder(chapter.sortOrder)
       setIsActive(chapter.isActive)
     } else {
@@ -296,7 +296,7 @@ export default function ATAChaptersClient({
                   </label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as any)}
+                    onChange={(e) => setCategory(e.target.value as 'AIRFRAME' | 'POWERPLANT' | 'AVIONICS' | 'GENERAL')}
                     className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-white dark:focus:border-blue-500"
                   >
                     <option value="GENERAL">General</option>

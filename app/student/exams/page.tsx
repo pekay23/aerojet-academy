@@ -298,7 +298,7 @@ export default async function ExamsPage({
 
       {effectiveTab === 'resit' && <ResitBookingTab />}
 
-      {effectiveTab === 'bookings' && <MyBookingsTab />}
+      {effectiveTab === 'bookings' && <MyBookingsTab searchParams={searchParams} />}
 
       {effectiveTab === 'records' && (
         <div className="space-y-8">
@@ -306,14 +306,14 @@ export default async function ExamsPage({
           <div className="rounded-3xl border border-slate-100 bg-linear-to-br from-white to-blue-50/20 p-8 shadow-sm dark:border-slate-800 dark:from-slate-900 dark:to-slate-900/50">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-black text-aerojet-blue dark:text-white">
+                <h2 className="text-xl font-black text-blue-800 dark:text-white">
                   {studentProfile?.pathwayRel?.name || 'General Pathway'} Progress
                 </h2>
                 <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
                   Track your progress towards licensing requirements across all modules.
                 </p>
               </div>
-              <div className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-aerojet-blue text-white sm:flex">
+              <div className="hidden h-12 w-12 items-center justify-center rounded-2xl bg-blue-800 text-white sm:flex">
                 <ClipboardCheck className="h-6 w-6" />
               </div>
             </div>
@@ -337,7 +337,7 @@ export default async function ExamsPage({
               </div>
               <div className="rounded-2xl border border-slate-100 bg-white p-5 dark:border-slate-800">
                 <p className="text-xs font-bold text-slate-400 uppercase">Success Rate</p>
-                <p className="mt-1 text-2xl font-black text-aerojet-blue dark:text-blue-400">
+                <p className="mt-1 text-2xl font-black text-blue-800 dark:text-blue-400">
                   {completedAttempts.length > 0
                     ? Math.round(
                         (completedAttempts.filter((h) => h.passed).length / completedAttempts.length) * 100

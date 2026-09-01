@@ -4,6 +4,7 @@ import { School } from 'lucide-react'
 import ModuleCard from './_components/ModuleCard'
 
 export const metadata: Metadata = { title: 'My Modules | Instructor Portal' }
+export const dynamic = 'force-dynamic'
 
 export default async function Page() {
   const classes = await getMyClasses()

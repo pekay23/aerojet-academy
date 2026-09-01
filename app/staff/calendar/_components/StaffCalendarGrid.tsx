@@ -213,7 +213,7 @@ export default function StaffCalendarGrid({ events, initialDate, currentUserId }
     setFormStart(evt.startDate.slice(0, 16))
     setFormEnd(evt.endDate?.slice(0, 16) || '')
     setFormColor(evt.color)
-    setFormAudience(evt.visibleTo as any)
+    setFormAudience(evt.visibleTo as 'ALL' | 'STUDENTS' | 'INSTRUCTORS' | 'EXAM_ONLY' | 'MODULAR' | 'FULL_TIME' | 'SPECIFIC_USER')
     setFormTargetUserId(evt.targetUserId || '')
     setFormRecurrence(evt.recurrenceType || 'NONE')
     setPopupEvent(null)
@@ -794,7 +794,7 @@ export default function StaffCalendarGrid({ events, initialDate, currentUserId }
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setFormAudience(opt.value as any)}
+                      onClick={() => setFormAudience(opt.value as 'ALL' | 'STUDENTS' | 'INSTRUCTORS' | 'EXAM_ONLY' | 'MODULAR' | 'FULL_TIME' | 'SPECIFIC_USER')}
                       className={cn(
                         'flex flex-col items-center justify-center gap-1 rounded-2xl border-2 p-2 text-center text-xs font-bold transition-all',
                         formAudience === opt.value

@@ -39,7 +39,7 @@ export const POST = withErrorHandler(async (req: NextRequest, { params }: { para
 
   const slotsToCreate = []
 
-  let currentDate = new Date(start)
+  const currentDate = new Date(start)
   while (currentDate <= end) {
     if (daysOfWeek.includes(currentDate.getDay())) {
       for (const block of timeBlocks) {

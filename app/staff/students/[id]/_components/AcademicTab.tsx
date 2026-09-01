@@ -42,12 +42,12 @@ export default function AcademicTab({ student, onRefresh }: Props) {
           <EmptyState message="No course enrollments" />
         ) : (
           <div className="space-y-3">
-            {enrollments.map((enrollment: any) => {
+            {enrollments.map((enrollment) => {
               const isExpanded = expandedEnrollment === enrollment.id
               const grades = enrollment.grades || []
               const avgGrade =
                 grades.length > 0
-                  ? grades.reduce((sum: number, g: any) => sum + Number(g.percentage || 0), 0) /
+                  ? grades.reduce((sum: number, g) => sum + Number(g.percentage || 0), 0) /
                     grades.length
                   : null
 
@@ -137,7 +137,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                                 </tr>
                               </thead>
                               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                                {grades.map((grade: any) => (
+                                {grades.map((grade) => (
                                   <tr key={grade.id}>
                                     <td className="py-2">
                                       <span className="font-medium text-slate-700 dark:text-slate-300">
@@ -225,7 +225,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
-                {attendanceRecords.slice(0, 20).map((record: any) => (
+                {attendanceRecords.slice(0, 20).map((record) => (
                   <tr key={record.id}>
                     <td className="px-4 py-2 text-slate-500">
                       {new Date(record.date).toLocaleDateString('en-GB', {
@@ -260,7 +260,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
       {fullTimeEnrollments.length > 0 && (
         <Section title="On-The-Job Training (OJT)" icon={User}>
           <div className="space-y-3">
-            {fullTimeEnrollments.map((fte: any) => (
+            {fullTimeEnrollments.map((fte) => (
               <div
                 key={fte.id}
                 className="rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
@@ -284,7 +284,7 @@ export default function AcademicTab({ student, onRefresh }: Props) {
 
                 {expandedOjt === fte.id && fte.ojtPeriods?.length > 0 && (
                   <div className="space-y-3 p-4">
-                    {fte.ojtPeriods.map((ojt: any) => (
+                    {fte.ojtPeriods.map((ojt) => (
                       <div
                         key={ojt.id}
                         className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50"
@@ -349,7 +349,7 @@ function Section({
   children,
 }: {
   title: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   children: React.ReactNode
 }) {
   return (

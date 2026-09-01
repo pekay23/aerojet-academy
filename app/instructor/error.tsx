@@ -1,5 +1,5 @@
 "use client";
-export default function StaffError({ error, reset }: { error: Error; reset: () => void }) {
+export default function InstructorError({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <div className="text-center max-w-md">

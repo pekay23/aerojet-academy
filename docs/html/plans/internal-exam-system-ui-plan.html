@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Internal Exam System — Full UI &amp; Architecture Plan · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+    <a href="../design-system.html">Design</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Plans</p>
+  <h1 class="he-title">Internal Exam System — Full UI &amp; Architecture Plan</h1>
+  <p class="he-deck"><p>---…</p>
+</p>
+</header>
+<blockquote>Audience: backend agents, frontend agents, and anyone contributing to the internal exam system.
+Status: planning draft — not yet implemented unless explicitly called out.</blockquote><blockquote>🧭 Plan conventions (for editors & build agents).Fixed section order: §1 Current-State → §2 Role Matrix → §3 Data Model (3.1–3.6) → §4 UI → §5 Realtime → §6 API → §7 Import → §8 Phases → §9 Open Decisions (Resolved) → §10 Immediate Fixes → §11 Assessment → §12 Reliability/Recovery.Adding a section: append a new <code>## N.</code> at the end (or insert and renumber); then update any cross-references — sections are cited by number throughout. Do not create a second "Open Decisions" list; record every decision once in §9 with its <code>#</code>, resolution, and Impact, and apply the consistency edit inline.Build readiness: §1–§8 define the locked target (schema/UI/API). §9 decisions and §12 reliability requirements are mandatory constraints on any implementation. §10/§11 are tracked work items, not blockers — a build agent may start on a finalized section while the plan is still being edited elsewhere.Keep <code>⚠️ Correction:</code> / <code>💡 Suggestion:</code> inline annotations; the consolidated review lives in §11.</blockquote><blockquote>📝 Reviewer notes (2026-08-30). This draft was cross-checked against the actual
+codebase. Inline <code>⚠️ Correction:</code> blocks fix claims that no longer match the code;
+<code>💡 Suggestion:</code> blocks are improvements. A consolidated list with file/line evidence
+is consolidated in Section 11 — Review & Required Improvements below. Highlights:§10 fix #1 ("hardcoded 75% pass mark in results UI") is wrong — the results page
+already resolves the pass mark dynamically; the real hardcoded literals are elsewhere."Start Exam for Class" will exceed the Supabase Realtime 5 evt/s cap — use GET-first + delta.The <code>internal_exam_sessions</code> Realtime subscription silently matches nothing until Realtime
+is enabled on the table (and the filter must use camelCase <code>classId</code>).A bespoke <code>canEdit/canReview/...</code> permission table duplicates the existing RBAC registry;
+and new privileged mutations must write audit logs.Class-start creating sessions preemptively collides with the existing single-attempt/void logic.</blockquote><section class="he-section" id="1-current-state-audit-what-exists-today"><div class="he-section__num">01 · 1. Current-State Audit (What exists today)</div><h2 class="he-section__title">1. Current-State Audit (What exists today)</h2>LayerStateSchema<code>InternalExamBank</code>, <code>InternalExamQuestion</code> (+ <code>explanation</code> added), <code>InternalExamQuestionVersion</code>, <code>InternalExamRuleOverride</code>, <code>InternalExamSession</code>, <code>InternalExamAnswer</code>, <code>InternalExamReport</code>. No <code>Module</code> model — modules are represented as <code>Course.moduleCode</code> strings.Staff UI<code>/staff/exams/internal</code> has tabs: Question Banks (<code>ExamBankManager</code>), Operations (<code>ExamOperations</code>), Preview. Banks are tied to <code>CourseId</code>. Staff can CRUD questions via API only (no editor until now).Instructor UIZero exam functionality. Instructor portal has classes, attendance, grading, resources, schedule — but no exam creation, question management, or exam monitoring.Student UIDashboard (<code>InternalExamDashboard</code>) shows bank progress. Exam interface (<code>InternalExamInterface</code>) is lockdown MCQ with autosave. Post-submit shows "Pending Admin Review" only. Results page exists but only shows data after <code>isPublished</code>.RealtimeSupabase Realtime client exists (<code>lib/realtime/client.ts</code>) but is only used for in-app messages. No live exam monitoring.AuthStaff endpoints guard by role (<code>ADMIN</code>, <code>SUPER_ADMIN</code>, <code>STAFF</code>, <code>EXAMINER</code>, <code>INSTRUCTOR</code>). Instructor role is recognized but has no exam permissions.Analytics<code>ExamOperations</code> polls <code>/operations/sessions</code> every 15–30s. No per-instructor filtering, no live score streaming, no historical analytics.<h3 id="critical-gaps-identified">Critical Gaps Identified</h3>Instructors cannot access exams at all — no routes, no UI, no permissions.No instructor-to-bank assignment — any staff member can edit any bank.No live monitoring — only polling with 15–30s latency.No exam scheduling — exams are started ad-hoc by students; instructors cannot restrict or schedule them.No class-level exam scoping — <code>InternalExamSession</code> has an optional <code>classId</code>, but nothing enforces or uses it for instructor access.No question import pipeline — PDF/DOCX/TXT extraction not built.Hardcoded 75% pass mark in results UI (fixed separately).<blockquote>⚠️ Correction: This is no longer accurate. <code>app/student/exams/internal/results/[sessionId]/page.tsx</code>
+already renders <code>Pass mark: {data.passMarkPct ?? 75}%</code> — the value is resolved dynamically
+from the session/engine (<code>InternalExamRuleOverride.passMarkPct</code>, default 75). The genuinely
+hardcoded literals are: <code>app/examiner/results/actions.ts</code> (<code>const PASS_MARK = 75</code>) and a
+duplicate <code>EASA_PASSING_GRADE</code> in <code>lib/compliance/reports.ts</code> vs the canonical
+<code>ACADEMIC_RULES.EASA_PASS_MARK</code> in <code>lib/constants/business-rules.ts</code>. The real fix is to
+consolidate all pass-mark reads through <code>InternalExamRuleOverride.passMarkPct</code>.</blockquote><section class="he-section" id="2-role-matrix-target-state"><div class="he-section__num">02 · 2. Role Matrix (Target State)</div><h2 class="he-section__title">2. Role Matrix (Target State)</h2>CapabilitySuper AdminAdminStaffExaminerInstructorStudentCreate/edit exam banks✅✅✅✅❌❌Assign banks to instructors✅✅❌❌❌❌Bulk import questions✅✅✅✅❌❌Approve/reject questions✅✅✅✅❌❌Publish results✅✅❌❌❌❌Monitor live exams (all)✅✅❌❌❌❌Monitor live exams (own classes)❌❌❌❌✅❌Start exam for a class❌❌❌❌✅❌View own class analytics❌❌❌❌✅❌Take exam❌❌❌❌❌✅View own results (when published)❌❌❌❌❌✅<section class="he-section" id="3-data-model-changes-required"><div class="he-section__num">03 · 3. Data Model Changes Required</div><h2 class="he-section__title">3. Data Model Changes Required</h2><h3 id="31-instructor-bank-assignment">3.1 Instructor → Bank Assignment</h3>model InternalExamBank {
+  // ... existing fields ...
+  instructorAssignments InternalExamBankInstructor[]  // NEW
+}
+
+model InternalExamBankInstructor {
+  id          String   @id @default(cuid())
+  bankId      String
+  instructorId String  // references InstructorProfile.id (see ⚠️ note below)
+  canEdit     Boolean  @default(false)   // can add/edit questions
+  canReview   Boolean  @default(false)   // can approve/reject
+  canMonitor  Boolean  @default(true)    // can view live sessions
+  canPublish  Boolean  @default(false)   // RESERVED / admin-only — instructors are NEVER granted publish (Decision 1)
+  assignedAt  DateTime @default(now())
+  assignedBy  String
+
+  bank        InternalExamBank @relation(fields: [bankId], references: [id], onDelete: Cascade)
+
+  @@unique([bankId, instructorId])
+  @@index([instructorId])
+  @@map("internal_exam_bank_instructors")
+}
+<blockquote>⚠️ Correction: The <code>instructorId</code> comment said "references <code>InstructorProfile.id</code> or <code>User.id</code>".
+The codebase is inconsistent: <code>ClassSession.instructorId</code> → <code>User</code> (<code>prisma/schema.prisma:1853</code>,
+the teaching relationship), while <code>InstructorQualification</code>/<code>InstructorRecency</code> → <code>InstructorProfile</code>
+(~1905/1922). Pin <code>InternalExamBankInstructor.instructorId</code> → <code>User.id</code> to match <code>ClassSession</code>
+(the §3.1 code block already does this). Also add <code>@@index([bankId])</code> and <code>updatedAt</code>.💡 Suggestion (RBAC): This bespoke <code>canEdit/canReview/canMonitor/canPublish</code> bitflag table
+duplicates the existing DB-backed RBAC registry (<code>Permission</code>/<code>RoleGrant</code>/<code>requirePermission</code> in
+<code>lib/auth/permission-registry.ts</code>). Prefer modeling the four capabilities as seeded <code>Permission</code>
+keys (<code>exam.bank.edit</code>, <code>exam.bank.review</code>, <code>exam.bank.monitor</code>, <code>exam.bank.publish</code>) scoped to
+<code>USER:<instructorId></code> with <code>bankId</code> in metadata. If the table stays, document why it coexists with
+<code>requirePermission</code> (two sources of truth for "can this user do X" is a maintainability risk).💡 Suggestion (audit): Every assignment change must write via <code>createAuditLog</code>
+(<code>lib/audit/logger.ts</code> + <code>AuditAction</code>). The §4.1 "audit log of assignments" UI is not enough —
+the mutation itself must record the row.</blockquote><h3 id="32-class-bank-scheduling">3.2 Class → Bank Scheduling</h3>model InternalExamBank {
+  // ... existing fields ...
+  classSchedules InternalExamClassSchedule[]  // NEW
+}
+
+model InternalExamClassSchedule {
+  id              String   @id @default(cuid())
+  bankId          String
+  classId         String
+  scheduledStart  DateTime?  // stored & compared in UTC (Decision 26)
+  scheduledEnd    DateTime?  // stored & compared in UTC (Decision 26)
+  isActive        Boolean  @default(true)
+  allowLateStart  Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt       // ADDED (§11 item 2)
+
+  bank            InternalExamBank @relation(fields: [bankId], references: [id], onDelete: Cascade)
+  class           Class            @relation(fields: [classId], references: [id], onDelete: SetNull) // ADDED onDelete: SetNull (§11 item 3) — don't block class archival
+
+  @@unique([bankId, classId])
+  @@index([classId])
+  @@index([bankId])               // ADDED (§11 item 4)
+  @@index([scheduledStart])      // ADDED (§11 item 3) — supports window queries
+  @@map("internal_exam_class_schedules")
+}
+
+// REVIEW: add an app-level guard that the scheduled class's courseId equals the
+// bank's courseId (InternalExamBank.courseId at prisma/schema.prisma:1966).
+// Without it a bank can be scheduled to an unrelated class.
+<blockquote>💡 Suggestion: Scheduled start/end are exam rules. <code>InternalExamRuleOverride</code> is already
+per-bank and already feeds <code>lib/internal-exam/engine.ts</code> (passMark, time, retakes). Prefer
+extending it with <code>scheduledStart</code> / <code>scheduledEnd</code> / <code>allowLateStart</code> instead of a new table —
+smaller schema surface and reuses override resolution. If class-level windows must differ from
+bank-level, keep this table but resolve it through the same engine.</blockquote><blockquote>💡 Migration note (Phase 1): After adding models, run <code>bun run db:push</code> and
+<code>bun run db:push:supabase</code> to re-mirror the schema into the Supabase replica, then enable Realtime
+on the new tables (see §5.3 gotcha).</blockquote><h3 id="33-session-enhancements">3.3 Session Enhancements</h3><code>InternalExamSession</code> already has <code>classId</code> and <code>sittingId</code>. We need to ensure:<code>classId</code> is populated when an exam is started via class schedule.New optional <code>lastActivityAt</code> for live monitoring (updated on each answer autosave; server-set only, never client-supplied).New optional <code>liveScore</code> denormalized column for fast dashboard queries (updated on submit).<blockquote>REVIEW — <code>liveScore</code> must be defined precisely. <code>InternalExamSession</code> already has <code>score</code>, <code>percentage</code>, <code>passed</code> (<code>prisma/schema.prisma:2077-2080</code>). If <code>liveScore</code> means the final score it already exists as <code>percentage</code> — do not add a parallel, drift-prone column. If it means a pre-submit running tally ("X correct so far"), name it explicitly (e.g. <code>runningCorrect</code>) and define (a) the single transaction that updates it, (b) reconciliation on submit, (c) drift recovery. Performance caution: writing it on every 15s autosave × many concurrent students is heavy write amplification; prefer computing the running tally on the monitor read (server aggregates answers per session) unless sub-second dashboard latency truly requires persistence.</blockquote><blockquote>REVIEW — add <code>@@index([classId, status])</code> to <code>InternalExamSession</code>. The monitor queries active sessions per class by status; there is currently no explicit compound index, and this is the hottest read path.</blockquote><blockquote>💡 Suggestion — <code>liveScore</code> naming: <code>InternalExamSession</code> already stores <code>score</code>,
+<code>totalPoints</code>, <code>percentage</code>, <code>passed</code>. A pre-submit running tally is genuinely new, but name it
+distinctly (e.g. <code>runningCorrectCount</code> / <code>runningPercentage</code>) and document it as a monitor-only,
+server-computed field. <code>score</code>/<code>percentage</code> remain the authoritative graded result post-submit.💡 Suggestion — <code>lastActivityAt</code> vs <code>updatedAt</code>: If autosave issues an <code>update</code> on the session,
+<code>updatedAt</code> already moves on every save. Either rely on <code>updatedAt</code> for the live pulse, or make
+autosave touch a dedicated <code>lastActivityAt</code> via a query that does not bump <code>updatedAt</code> (to avoid
+replication/audit churn). Recommend the dedicated, <code>updatedAt</code>-free column.</blockquote><h3 id="34-question-import-pipeline">3.4 Question Import Pipeline</h3>No schema change needed. Add a new server action / API route that accepts file uploads and calls an extraction service (see section 7).<section class="he-section" id="35-shared-module-question-bank-instructor-access-model"><div class="he-section__num">04 · 3.5 Shared Module Question Bank &amp; Instructor Access Model</div><h2 class="he-section__title">3.5 Shared Module Question Bank & Instructor Access Model</h2><blockquote>Requirement (from stakeholder): Questions/banks are shared within a module, not instructor-private.
+An instructor who adds a question contributes it to the module's global bank. Admin can view/edit/schedule
+any class or individual to take that module's exam at any time. Any instructor linked to the same module
+can access the bank and use its questions for their own students' exams. Instructors get two lists: (a) their own
+added questions/banks, and (b) the module's global bank (questions from all instructors linked to the module),
+plus a full audit trail of who added/edited/deleted each question and when.</blockquote><h3 id="351-core-principle-no-question-ownership">3.5.1 Core principle — no question ownership</h3>A <code>InternalExamQuestion</code> belongs to its bank, and a bank belongs to a module (<code>InternalExamBank.courseId</code><code>moduleCode</code>, schema lines 1966–1967). There is no <code>ownerId</code> / per-instructor silo. "My questions" is simply a
+filtered view (<code>submittedById = me</code>) over the same shared <code>internal_exam_questions</code> table — it requires no extra
+storage. This already fits the existing model: <code>POST /questions</code> sets <code>submittedById</code> and <code>status: PENDING_APPROVAL</code>
+(<code>app/api/staff/exams/internal/banks/[bankId]/questions/route.ts:94–113</code>).<h3 id="352-module-linkage-for-instructors-how-linked-to-the-module-is-resolved">3.5.2 Module linkage for instructors (how "linked to the module" is resolved)</h3>An instructor is considered linked to a module when either is true:Explicit bank assignment — a row in <code>InternalExamBankInstructor</code> (§3.1) for a bank of that <code>(courseId, moduleCode)</code>.
+This is also where <code>canEdit</code> / <code>canReview</code> / <code>canMonitor</code> / <code>canPublish</code> capability is granted (admin-assigned).Course teaching — <code>Class.instructorId = instructorId</code> where <code>Class.courseId = bank.courseId</code>
+(schema lines 455–478). Teaching a class in the course confers module access for that course's banks.<blockquote>💡 Suggestion: <code>Class</code> carries <code>courseId</code> but not <code>moduleCode</code> (schema 453–488). If per-module teaching
+(not just per-course) must gate access, add an optional <code>moduleCode</code> to <code>Class</code>, or resolve module from the bank
+and treat course-level teaching as sufficient. Default recommendation: course-level teaching is enough to link an
+instructor to all of that course's exam modules.</blockquote>Capability vs. access distinction:Access / use (view the bank, schedule it for a class or individual student) → granted by module linkage (above).Edit / review a given question → additionally requires <code>canEdit</code> / <code>canReview</code> on that bank (§3.1). Instructors can
+always edit their own submitted questions; editing another instructor's question requires a <code>canEdit</code> grant.<h3 id="353-instructor-views-both-read-the-shared-table">3.5.3 Instructor views (both read the shared table)</h3>ViewQueryPurposeMy Questions<code>internalExamQuestion.findMany({ where: { submittedById: me, bankId: { in: myModuleBankIds } } })</code>Review/revise questions the instructor personally added.My Banksbanks where <code>InternalExamBankInstructor.instructorId = me</code> (assigned)Manage assignment, monitor, publish for banks they're responsible for.Module Bank (global)<code>internalExamQuestion.findMany({ where: { bankId: { in: myModuleBankIds }, isActive: true } })</code>Browse/use every instructor's questions for this module in their students' exams. Filterable by <code>submittedById</code> (me vs others), <code>status</code>, <code>difficulty</code>, <code>subTopic</code>.<blockquote>💡 Suggestion: Expose as <code>GET /api/instructor/exams/questions?view=mine|module&bankId=&status=&submittedById=</code>
+and <code>GET /api/instructor/exams/banks?scope=mine|module</code>. Reuse the existing <code>prismaUnfiltered</code> + instructorId filter
+convention; paginate with <code>take</code>/<code>skip</code> (the "take 200" truncation trap applies).</blockquote><h3 id="354-admin-override-class-or-individual-anytime">3.5.4 Admin override (class or individual, anytime)</h3>Admin/Super Admin are not scoped by module. They can:View/edit any bank or question across all modules (existing role gate already admits <code>ADMIN</code>/<code>SUPER_ADMIN</code>).Schedule a whole class via <code>InternalExamClassSchedule</code> (§3.2) or the class-start flow (§6.1).Schedule an individual student — extend <code>POST /api/student/exams/internal/start</code> (or a new admin endpoint) to
+accept <code>{ studentId, bankId, classId? }</code> and create a single <code>InternalExamSession</code> for that student at any time,
+bypassing the schedule window when <code>requireAdmin()</code> is satisfied.<h3 id="355-audit-trail-who-addedediteddeleted-and-when">3.5.5 Audit trail — who added/edited/deleted and when</h3>The schema already supports most of this; we close two gaps:ActionAlready captured?WhereAddedPartially<code>submittedById</code> on the question (schema 2010). ⚠️ Gap: <code>POST /questions</code> does not write an <code>auditLog</code> row. Add <code>createAuditLog({ action: AuditAction.IMPORT or CREATE, entity: 'InternalExamQuestion', entityId, userId: session.user.id })</code> on create.Edited✅ Yes<code>PUT /questions/[id]</code> writes an <code>InternalExamQuestionVersion</code> (<code>changeType: EDITED</code>, <code>changedById</code>, <code>changedAt</code>) and an <code>auditLog</code> <code>UPDATE</code> (route 89–149).Retired/Deleted✅ Yes<code>DELETE /questions/[id]</code> writes a version (<code>RETIRED</code>) + <code>auditLog</code> (<code>UPDATE</code>, admin-only) (route 172–201). 💡 Use <code>AuditAction.DELETE</code> instead of <code>UPDATE</code> for clarity.ReviewedPartially<code>reviewedById</code> / <code>reviewedAt</code> on the question (schema 2008). ⚠️ Gap: <code>PATCH /questions/[id]/review</code> does not write an <code>auditLog</code> row. Add <code>createAuditLog({ action: AuditAction.APPROVE/REJECT, entity: 'InternalExamQuestion', ... })</code>.<blockquote>Canonical history view: a new <code>GET /api/.../questions/[id]/history</code> that returns, merged and sorted by time:<code>InternalExamQuestionVersion[]</code> (edits + retires, with <code>changedBy</code> name + <code>changedAt</code> + <code>changeReason</code>), plus<code>auditLog</code> rows where <code>entity = 'InternalExamQuestion' AND entityId = id</code> (create/review/import actions).
+The version table already has a <code>changedBy</code> relation (schema 2039); <code>InternalExamQuestion</code> only has raw <code>submittedById</code> /
+<code>reviewedById</code> with no relation. 💡 Add <code>submittedBy</code> / <code>reviewedBy</code> relation fields on <code>InternalExamQuestion</code> so the
+history UI can show "Added by Jane Doe at <ts>" without a manual join. Low-risk additive schema change.All question mutations must also keep writing via <code>lib/audit/logger.ts</code> (<code>AuditAction</code> enum: CREATE/UPDATE/DELETE/APPROVE/IMPORT)
+so the central audit log and the per-question version history stay in lock-step.</blockquote><h3 id="356-permission-gating-reuse-existing-rbac">3.5.6 Permission gating (reuse existing RBAC)</h3>Question/bank routes currently gate by role array (<code>['ADMIN','SUPER_ADMIN','STAFF','EXAMINER','INSTRUCTOR']</code>).
+Replace with <code>requirePermission(PERMISSIONS.MANAGE_EXAMS)</code> (seeded in <code>lib/auth/permission-registry.ts:41</code>) + the
+module-linkage/assignment checks above, so access is capability- and module-scoped rather than "any instructor, any bank."<code>InternalExamBankInstructor.canEdit/canReview/...</code> remain the capability flags (not ownership); combine with module
+linkage: an instructor may use any module question, but may only edit/review with the matching grant (or their own).<h3 id="357-what-this-changes-vs-earlier-sections">3.5.7 What this changes vs earlier sections</h3>§3.1's <code>InternalExamBankInstructor</code> is now explicitly a capability grant + module-linkage record, not an ownership table.§4.2 "My Banks" tab splits into My Questions / My Banks / Module Bank (global) as in §3.5.3.§6.1 gains <code>GET /api/instructor/exams/questions?view=...</code> and an admin "schedule individual" capability (§3.5.4).Audit coverage is completed for create and review (§3.5.5).<section class="he-section" id="36-bank-review-state-admin-approval-gate"><div class="he-section__num">05 · 3.6 Bank Review State (admin-approval gate)</div><h2 class="he-section__title">3.6 Bank Review State (admin-approval gate)</h2>Required by Decision 1 — instructors create/edit banks and questions, but students never see them until an admin approves.model InternalExamBank {
+  // ... existing fields ...
+  reviewState InternalExamBankReviewState @default(DRAFT) // NEW
+}
+
+enum InternalExamBankReviewState {
+  DRAFT               // instructor working, not submitted
+  PENDING_ADMIN_REVIEW // awaiting admin approval to go student-visible
+  APPROVED           // student-visible (gated by schedule window)
+  REJECTED           // returned to instructor with notes
+}
+The student-facing start/session gate only exposes banks where <code>reviewState = APPROVED</code>.Submitting a bank/question batch for review transitions <code>DRAFT → PENDING_ADMIN_REVIEW</code>; admin approval sets <code>APPROVED</code>.Optional <code>reviewNote</code> field for admin rejection feedback (add to the model as needed).<blockquote>REVIEW — audit logging. All privileged mutations (instructor assign / permission update / revoke, schedule create / update / delete, publish, void, start-exam-for-class) must write through <code>createAuditLog</code> with an <code>AuditAction</code> from <code>lib/audit/logger.ts</code>. The "audit log of assignments" in §4.1 is a UI surface; the canonical write is required regardless.</blockquote><section class="he-section" id="4-ui-plan-page-by-page"><div class="he-section__num">06 · 4. UI Plan — Page by Page</div><h2 class="he-section__title">4. UI Plan — Page by Page</h2><h3 id="41-staff-exam-bank-management-enhanced">4.1 Staff: Exam Bank Management (Enhanced)</h3>Route: <code>/staff/exams/internal/banks/[bankId]</code>Add two new tabs/sections to the existing bank detail page:SectionPurposeInstructor AccessAssign/revoke instructor access to this bank. Toggle <code>canEdit</code>, <code>canReview</code>, <code>canMonitor</code> (publish is admin-only — Decision 1). Search instructors by name/employee ID.Class SchedulingLink classes to this bank. Set scheduled start/end windows. Toggle whether students can start independently or only within the window.Route: <code>/staff/exams/internal/banks/[bankId]/instructors</code>New page with:Searchable instructor list (filter by department, specialization)Per-instructor permission toggles (grid of checkboxes)Bulk assign to all instructors teaching a courseAudit log of assignmentsRoute: <code>/staff/exams/internal/banks/[bankId]/schedule</code>New page with:List of classes for the bank's courseDate-picker for scheduled exam windowsPer-class toggle: active/inactiveLate-start allowance toggle<h3 id="42-instructor-exam-management-new">4.2 Instructor: Exam Management (New)</h3>Route: <code>/instructor/exams</code>New instructor dashboard with tabs:TabContentMy QuestionsQuestions the instructor personally added (<code>submittedById = me</code>) across their module banks. Review/revise; always editable by the author. See §3.5.3.My BanksCards for each bank the instructor is assigned to (<code>InternalExamBankInstructor.instructorId = me</code>). Shows question count, pool health, pending review count. Click to manage questions.Module BankThe module's global question bank — every instructor's questions for this module (<code>isActive</code>), filterable by author (me vs others), status, difficulty, sub-topic. Use any question for the instructor's students' exams. See §3.5.3.My ClassesCards for each class the instructor teaches. Shows enrolled count, scheduled exams, completion rate. Click to monitor live exam or view analytics.Live MonitorReal-time table of active exam sessions for the instructor's classes. Auto-refreshes via Supabase Realtime. Shows student name, progress, time remaining, live score (if any answers submitted).<blockquote>💡 Suggestion (shared, not siloed): "My Questions" and "Module Bank" are two filtered views over the same shared
+<code>internalExam_questions</code> table — do not build separate storage. Instructors may use any module question for their
+students, but may edit/review another instructor's question only with a <code>canEdit</code>/<code>canReview</code> grant (§3.5.2). Each
+question row links to its full history via <code>GET /api/.../questions/[id]/history</code> (§3.5.5).</blockquote>Route: <code>/instructor/exams/banks/[bankId]</code>Mirrors the staff question editor but with permissions gated by <code>InternalExamBankInstructor</code>:<code>canEdit</code> → show editor<code>canReview</code> → show approval queueRead-only if no permissionsRoute: <code>/instructor/exams/classes/[classId]/monitor</code>Live exam monitoring page for a specific class:┌─────────────────────────────────────────────────────┐
+│ Class: CAT-A Module 1 — Jan 2026 Cohort              │
+│ [Start Exam for Class] [Schedule]                    │
+├─────────────────────────────────────────────────────┤
+│ Summary Cards                                        │
+│ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐│
+│ │12 Active │ │ 3 Finished│ │ 1 Timeout│ │ 78% Avg ││
+│ └──────────┘ └──────────┘ └──────────┘ └──────────┘│
+├─────────────────────────────────────────────────────┤
+│ Live Session Table                                   │
+│ ┌──────┬───────────┬──────┬──────┬────────┬───────┐│
+│ │Name  │Progress   │Time  │Score │Status  │Actions││
+│ ├──────┼───────────┼──────┼──────┼────────┼───────┤│
+│ │John  │5/10 ans   │12:30 │ —    │Active  │Void   ││
+│ │Jane  │10/10 ans  │00:00 │ 90%  │Done    │View   ││
+│ └──────┴───────────┴──────┴──────┴────────┴───────┘│
+└─────────────────────────────────────────────────────┘
+Features:Auto-refresh via Supabase Realtime on <code>internal_exam_sessions</code> INSERT/UPDATE (GET-first + delta only — see throttle note)."Start Exam for Class" button creates one <code>NOT_STARTED</code> <code>InternalExamSession</code> per enrolled student
+(reused by the student <code>start</code> route per §B8/§8 Phase 1), all starting simultaneously. Guarded by a
+confirmation preview ("This will start exams for N students", 5s cooldown or admin checkbox) and
+idempotent (Decision 29).Per-row actions: Void (allow retake — reuses <code>operations/void</code>), View Details (expand per-question
+breakdown), Send Reminder (writes a <code>Notification</code> row that streams realtime, not a toast — see §B9).Color-coded progress bars using <code>ACADEMIC_RULES.GRADE_THRESHOLD_PASS/WARNING</code> (75/50), with text
+labels for colorblind accessibility (§G1/G2).Filter by status: All, Active, Completed, Timed Out, Voided.<blockquote>💡 Suggestion — responsive: Instructors often monitor from tablets. The ASCII layouts above
+are wide desktop tables. Add responsive behavior: card stack on tablet, status filter as a bottom
+sheet, summary cards wrap. (Matches CLAUDE mobile guidance.)💡 Suggestion — thresholds: The "green (>75%) / amber (50–75%) / red (<50%)" literals duplicate
+<code>ACADEMIC_RULES.GRADE_THRESHOLD_PASS</code> / <code>GRADE_THRESHOLD_WARNING</code> (75/50) in
+<code>lib/constants/business-rules.ts</code>. Use those constants so coloring stays in lock-step with rules.⚠️ Realtime throttle (critical): <code>lib/realtime/client.ts</code> configures <code>eventsPerSecond: 5</code>.
+"Start Exam for Class" creates one <code>InternalExamSession</code> per enrolled student — a 30-student class
+fires 30 INSERTs at once, over the cap; Supabase will drop/throttle them. Population strategy must
+be GET-first (fetch current sessions) + Realtime only for subsequent deltas (start/submit/
+void/publish), not per-row INSERT replay for initial fill. See §5.3.⚠️ Single-attempt conflict: Creating sessions for every enrolled student preemptively collides
+with the existing single-attempt block (<code>attemptNumber</code>, void-to-retake, and <code>app/api/student/exams/
+internal/start</code> which creates the session on student action). Class-start should create <code>NOT_STARTED</code>
+placeholder sessions that the student <code>start</code> route reuses via a status guard, so no duplicate is
+ever created and retake/void logic still holds.</blockquote>Route: <code>/instructor/exams/classes/[classId]/analytics</code>Post-exam analytics page:┌─────────────────────────────────────────────────────┐
+│ Class Analytics — CAT-A Module 1                     │
+│ [Date Range: Last 30 days ▼] [Export CSV]           │
+├─────────────────────────────────────────────────────┤
+│ Overview Cards                                       │
+│ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐│
+│ │Pass Rate │ │Avg Score │ │Completion│ │Attempts  ││
+│ │   85%    │ │  78.2%   │ │   92%    │ │   14     ││
+│ └──────────┘ └──────────┘ └──────────┘ └──────────┘│
+├─────────────────────────────────────────────────────┤
+│ Per-Question Difficulty Breakdown                   │
+│ Q1  ████████░░  80% correct  (Medium)               │
+│ Q2  ██████░░░░  60% correct  (Hard)                 │
+│ Q3  █████████░  90% correct  (Easy)                 │
+│ ...                                                 │
+├─────────────────────────────────────────────────────┤
+│ Student Performance Table                           │
+│ ┌──────┬──────┬──────┬──────┬────────┬────────────┐│
+│ │Name  │Score │Time  │Status│Attempts│Action      ││
+│ ├──────┼──────┼──────┼──────┼────────┼────────────┤│
+│ │John  │90%   │18:30 │Passed│   1    │View Details││
+│ │Jane  │65%   │22:15 │Failed│   1    │View Details││
+│ └──────┴──────┴──────┴──────┴────────┴────────────┘│
+└─────────────────────────────────────────────────────┘
+Features:Pass rate, average score, completion rate, total attempts (SQL <code>groupBy</code>, <code>Promise.all</code>, cached via <code>unstable_cache</code>).Per-question stats: % correct, avg time, difficulty breakdown.Student-level drill-down into individual results.Export to CSV: explicit column set, date format, PII-inclusion flag, max-range cap and <code>apiPaginated</code>
+paging (§C4, §11 #18) — GDPR-safe from authorized data only.<h3 id="43-student-exam-taking-no-change-to-flow">4.3 Student: Exam Taking (No change to flow)</h3>The existing flow is correct. After admin publishes:Dashboard shows "View Results" link.Results page has Show Answers / Show Explanations toggles.Minor enhancement: Add a "Review Later" bookmark so students can flag questions to revisit after seeing explanations.<blockquote>💡 Suggestion — persistence: Flagging must survive the publish boundary (student sees it
+post-results). Recommend a <code>flaggedForReview</code> column on <code>InternalExamAnswer</code> (or session-scoped JSON),
+not client-only state.</blockquote><section class="he-section" id="5-realtime-live-monitoring-strategy"><div class="he-section__num">07 · 5. Realtime / Live Monitoring Strategy</div><h2 class="he-section__title">5. Realtime / Live Monitoring Strategy</h2><h3 id="51-why-supabase-realtime">5.1 Why Supabase Realtime</h3>The project already has:<code>lib/realtime/client.ts</code> — browser-side Supabase Realtime singleton.Neon → Supabase logical replication.Messages already stream via Realtime.We can piggyback exam monitoring on the same infra.<h3 id="52-what-to-stream">5.2 What to stream</h3>EventTriggerPayload<code>exam_started</code>Student starts exam<code>{ sessionId, studentId, bankId, classId }</code><code>exam_submitted</code>Student submits<code>{ sessionId, score, percentage, passed, submittedAt }</code><code>exam_voided</code>Admin/instructor voids<code>{ sessionId, voidedBy }</code><code>exam_published</code>Admin/instructor publishes<code>{ sessionId, isPublished }</code><blockquote>⚠️ Correction: The original draft listed an <code>answer_saved</code> event here, but §5.3 explicitly says
+no per-answer streaming. Removed <code>answer_saved</code> from this table to eliminate the contradiction.
+(If needed later, it would be a student-side autosave receipt only — never instructor-scoped per-question.)</blockquote><h3 id="53-subscription-model">5.3 Subscription model</h3><blockquote>⚠️ Channel name ≠ scope. In this project, the Realtime channel name is an arbitrary namespace
+(cf. <code>messages:<userId></code> at <code>hooks/useRealtimeMessages.ts:36</code>); scoping lives in the <code>postgres_changes</code>
+<code>filter</code> field, e.g. <code>filter: 'classId=eq.<classId>'</code> (camelCase column — see §5.2 gotcha). The
+notation below names the namespace only.</blockquote>Instructor monitor page subscribes to:// namespace: exam_sessions:classId:<classId>
+// filter: classId=eq.<classId>  (+ instructor-scoped RLS, §12.4E)
+.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'internal_exam_sessions', filter: `classId=eq.${classId}` }, ...)
+.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'internal_exam_sessions', filter: `classId=eq.${classId}` }, ...)
+Student exam interface subscribes to:// namespace: exam_sessions:id:<sessionId>
+// filter: id=eq.<sessionId>
+.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'internal_exam_sessions', filter: `id=eq.${sessionId}` }, ...)
+No per-answer streaming during the exam (too noisy). Instead, the instructor monitor polls the session list every 15s for aggregate progress (GET-first + Realtime delta, §4.2 throttle note), and re-fetches detail on row expand.<blockquote>⚠️ Realtime enable gotcha (critical): Per CLAUDE.md, the <code>messages</code> table had to be manually
+switched to Realtime or its subscription silently matched nothing. The <code>internal_exam_sessions</code>
+subscription will not work until Realtime is enabled on that table (Supabase → Database →
+Tables → internal_exam_sessions → Enable Realtime) and the table is in the replication
+publication. Also: the channel filter must use the exact camelCase column <code>classId</code> (per the realtime
+filter gotcha in CLAUDE.md), not <code>class_id</code> — Supabase will silently match nothing otherwise.⚠️ Throttle gotcha: <code>lib/realtime/client.ts</code> sets <code>eventsPerSecond: 5</code>. "Start Exam for Class"
+creates one session per enrolled student; the initial burst must come from a <code>GET</code> fetch, with
+Realtime carrying only subsequent deltas (see §4.2 note). Initial fill must not rely on INSERT replay.💡 Suggestion — server-side running count: The "Z correct" live tally requires
+<code>InternalExamAnswer.selectedAnswer</code> vs <code>InternalExamQuestion.correctAnswer</code>. Compute it server-side
+and never ship the per-question stream to the student client. Add a guard/test that the running count
+is instructor-scoped only.💡 Suggestion — polling fallback: The messages hook falls back to 20–60s polling when Supabase is
+unconfigured. The monitor must do the same: Realtime primary, the 15s poll as the documented fallback,
+so dev/CI without env vars still works.</blockquote><section class="he-section" id="6-backend-api-additions-required"><div class="he-section__num">08 · 6. Backend API Additions Required</div><h2 class="he-section__title">6. Backend API Additions Required</h2><blockquote>REVIEW — cross-cutting API rules (from <code>CLAUDE.md</code>):The <code>proxy.ts</code> is images-only and does not gate these routes. Every new route MUST call <code>requireStaff</code> / <code>requireInstructor</code> / <code>requireExaminer</code> / <code>requirePermission</code> at the handler (layer 3).Use <code>{ prismaUnfiltered }</code> from <code>@/lib/prisma/client</code> in all auth-gated staff/instructor routes & pages (not the RLS <code>prisma</code> client).Paginate all list endpoints (<code>take</code>/<code>skip</code>); reuse <code>parsePagination</code> / <code>parseSorting</code> / <code>apiPaginated</code> from <code>lib/api/response.ts</code>. Avoid the <code>take:200</code> silent-truncation trap.Aggregations (per-question difficulty, avg time, pass rate) must be SQL <code>groupBy</code>, not computed in JS over loaded rows.Parallelize independent queries with <code>Promise.all</code>.Serialize payloads for client components via <code>serializePrisma()</code>.Examiner gap: §2 grants Examiner create/edit/approve/bulk-import, but no examiner routes are defined below. Add <code>/api/examiner/exams/...</code> routes OR have examiners reuse the staff routes via <code>requirePermission</code>. (Note: <code>requireExaminer()</code> returns a session with <code>.id</code> — use <code>session.id</code>, not <code>session.user.id</code>.)RBAC integration: the <code>canEdit/canReview/canMonitor/canPublish</code> flags should map to <code>requirePermission</code> keys (e.g. <code>exams:bank:edit</code>, <code>exams:bank:review</code>, <code>exams:session:monitor</code>, <code>exams:results:publish</code>) granted per <code>ROLE:INSTRUCTOR</code> or <code>USER:<instructorId></code> scoped to <code>bankId</code>. Keep <code>requirePermission</code> authoritative; ADMIN/SUPER_ADMIN bypass.</blockquote><h3 id="61-instructor-exam-routes-new">6.1 Instructor Exam Routes (new)</h3>MethodPathPurpose<code>GET</code><code>/api/instructor/exams/banks?scope=mine|module</code>List banks (assigned to me, or all banks in my modules) — §3.5.3<code>GET</code><code>/api/instructor/exams/questions?view=mine|module&bankId=&status=&submittedById=</code>Shared module question list, two filtered views — §3.5.3<code>GET</code><code>/api/instructor/exams/banks/[bankId]/questions</code>List questions (read-only or editable per assignment)<code>POST</code><code>/api/instructor/exams/banks/[bankId]/questions</code>Create question (if <code>canEdit</code>) — writes <code>auditLog</code> on create (§3.5.5)<code>PUT</code><code>/api/instructor/exams/banks/[bankId]/questions/[id]</code>Update question (if <code>canEdit</code>)<code>DELETE</code><code>/api/instructor/exams/banks/[bankId]/questions/[id]</code>Retire question (if <code>canEdit</code>)<code>GET</code><code>/api/instructor/exams/questions/[id]/history</code>Merged version history + audit log (who/when) — §3.5.5<code>GET</code><code>/api/instructor/exams/classes</code>List classes taught by instructor — ⚠️ Reuse, don't reimplement: this duplicates <code>lib/actions/instructor.ts</code> (<code>classes: { some: { instructorId } }</code> @ line 43, <code>classesInstructed</code> @ line 707). Have the page call the existing server action / relation; drop this route or make it a thin passthrough.<code>GET</code><code>/api/instructor/exams/classes/[classId]/sessions</code>Live sessions for a class<code>POST</code><code>/api/instructor/exams/classes/[classId]/start</code>Start exam for all enrolled students (idempotent — Decision 29)<code>GET</code><code>/api/instructor/exams/classes/[classId]/analytics</code>Historical analytics<code>POST</code><code>/api/admin/exams/internal/sessions/start</code>Admin override: schedule an individual student (<code>{ studentId, bankId, classId? }</code>) at any time, bypassing window (§3.5.4)<blockquote>💡 Suggestion — auth/perf conventions: These handlers must call <code>requireInstructor()</code>
+(<code>lib/auth/helpers.ts:152</code>). Pages are auth-gated, so use <code>prismaUnfiltered</code> (not the RLS client) and
+filter by <code>instructorId</code> / <code>class.instructorId</code>. For RBAC, prefer <code>requirePermission('exam.bank.*')</code>
+over the bespoke <code>InternalExamBankInstructor</code> bitflags where possible (see §3.1).💡 Suggestion — pagination: <code>GET .../sessions</code> and <code>.../analytics</code> can return large sets
+(students × attempts). Add <code>take</code>/<code>skip</code> + <code>apiPaginated</code> (API convention). The "take: 200"
+silent-truncation trap applies to both the Live Monitor and analytics tables — paginate or infinite-scroll.⚠️ Suggestion — class-start reuses existing void/start logic: <code>POST .../start</code> should create
+<code>NOT_STARTED</code> placeholder sessions that the student <code>start</code> route reuses (status guard), and instructor
+void must reuse <code>operations/void</code> (sets <code>voidedAt</code>/<code>voidedBy</code>, clears <code>attemptNumber</code> gating). Don't
+fork divergent copies.💡 Suggestion — audit: Assignment, schedule, void, publish, and class-start mutations must each
+write a <code>createAuditLog</code> row (<code>lib/audit/logger.ts</code>).</blockquote><h3 id="62-staff-admin-routes-new">6.2 Staff Admin Routes (new)</h3>MethodPathPurpose<code>GET</code><code>/api/staff/exams/internal/banks/[bankId]/instructors</code>List instructor assignments<code>POST</code><code>/api/staff/exams/internal/banks/[bankId]/instructors</code>Assign instructor<code>PUT</code><code>/api/staff/exams/internal/banks/[bankId]/instructors/[id]</code>Update permissions<code>DELETE</code><code>/api/staff/exams/internal/banks/[bankId]/instructors/[id]</code>Revoke access<code>GET</code><code>/api/staff/exams/internal/banks/[bankId]/schedule</code>List class schedules<code>POST</code><code>/api/staff/exams/internal/banks/[bankId]/schedule</code>Create schedule<code>PUT</code><code>/api/staff/exams/internal/banks/[bankId]/schedule/[id]</code>Update schedule<code>DELETE</code><code>/api/staff/exams/internal/banks/[bankId]/schedule/[id]</code>Delete schedule<h3 id="63-existing-routes-to-extend">6.3 Existing Routes to Extend</h3>RouteChange<code>GET /api/staff/exams/internal/operations/sessions</code>Add <code>classId</code> and <code>instructorId</code> filters<code>POST /api/student/exams/internal/start</code>Accept optional <code>classId</code>; enforce schedule window if present<code>GET /api/student/exams/internal/session</code>Add <code>lastActivityAt</code> for live monitoring<blockquote>⚠️ Behavior-change flag: §2 sets Staff "Monitor live exams (all)" = ❌, but current <code>ExamOperations</code>
+gives staff monitoring, and adding an <code>instructorId</code> filter to <code>operations/sessions</code> implies staff
+queries become scoped. This is a deliberate capability narrowing — call it out in the migration/comm
+and to users. The <code>start</code> route must reuse placeholder sessions created by class-start (see §6.1).</blockquote><section class="he-section" id="7-question-import-pipeline"><div class="he-section__num">09 · 7. Question Import Pipeline</div><h2 class="he-section__title">7. Question Import Pipeline</h2><h3 id="71-supported-formats">7.1 Supported Formats</h3>Plain text (<code>.txt</code>) — pipe-delimited or tab-delimited.Word (<code>.docx</code>) — parsed with <code>mammoth</code> or <code>docx</code> to extract text.PDF (<code>.pdf</code>) — parsed with <code>pdf-parse</code> or <code>pdfjs-dist</code>.JSON (<code>.json</code>) — array of question objects.<h3 id="72-flow">7.2 Flow</h3>Instructor uploads file (via UploadThing UploadDropzone — see 💡 note)
+  → File lands in UploadThing; server action fetches + validates format
+  → Extraction service converts to normalized question array
+  → Low-confidence questions → QuestionStatus.DRAFT into existing review queue (see 💡 note)
+  → Confirm → bulk import via existing POST /questions endpoint
+<blockquote>💡 Suggestion — use UploadThing, not custom multipart: File uploads in this project go through
+UploadThing (<code>lib/uploads/uploadthing.ts</code>, <code>UploadDropzone</code>/<code>UploadButton</code>), consistent with the
+Document Vault / ProtectedImage patterns. Align the import flow: the file is uploaded to UploadThing,
+then a server action fetches + extracts. Avoid introducing a new raw multipart API route.💡 Suggestion — deps/serverless: <code>pdf-parse</code> / <code>pdfjs-dist</code> / <code>mammoth</code> / <code>docx</code> are heavyweight.
+In the <code>output: 'standalone'</code> build, keep extraction in an API route, mark it <code>import 'server-only'</code>,
+and lazy-import (<code>await import(...)</code>) to protect cold-start. Note <code>pdf-parse</code> is effectively unmaintained
+— consider <code>unpdf</code> or <code>pdfjs-dist</code> v4.💡 Suggestion — reuse review workflow: <code>InternalExamQuestion</code> already has <code>status</code>, <code>reviewNote</code>,
+<code>reviewedById</code>. Low-confidence parsed questions should land as <code>QuestionStatus.DRAFT</code> and flow into the
+existing approval queue (<code>/questions/[questionId]/review</code>) rather than a separate bespoke preview page.</blockquote><h3 id="73-extraction-heuristics">7.3 Extraction Heuristics</h3>Split on question numbers (<code>1.</code>, <code>Q1</code>, <code>Question 1</code>).Detect options by leading letters (<code>A.</code>, <code>B.</code>, <code>C.</code>) or bullets.Detect correct answer by keywords (<code>Answer:</code>, <code>Correct:</code>, <code>✓</code>).Detection confidence score per question; low-confidence questions flagged for manual review.<section class="he-section" id="8-implementation-phases"><div class="he-section__num">10 · 8. Implementation Phases</div><h2 class="he-section__title">8. Implementation Phases</h2><h3 id="phase-1-instructor-access-control-week-1">Phase 1: Instructor Access Control (Week 1)</h3>Schema: <code>InternalExamBankInstructor</code>, <code>InternalExamClassSchedule</code>Staff UI: Assign instructors to banks (permission toggles)Staff UI: Schedule exams to classesBackend: New API routes for assignments and schedulesBackend: Permission checks in existing instructor routes<h3 id="phase-2-instructor-exam-ui-week-2">Phase 2: Instructor Exam UI (Week 2)</h3><code>/instructor/exams</code> dashboardQuestion editor (read/write per permissions)Class monitor page (polling first, Realtime in Phase 3)Analytics page (historical)<h3 id="phase-3-live-monitoring-week-3">Phase 3: Live Monitoring (Week 3)</h3>Supabase Realtime subscriptions for instructor monitorStudent exam interface: <code>lastActivityAt</code> tracking<code>exam_started</code>, <code>exam_submitted</code> eventsLive score approximation (running correct count)<h3 id="phase-4-question-import-pipeline-week-4">Phase 4: Question Import Pipeline (Week 4)</h3>File upload API routesPDF/DOCX/TXT extraction servicePreview/edit UI before importBulk import via existing endpoint<h3 id="phase-5-polish-audit-week-5">Phase 5: Polish & Audit (Week 5)</h3>Fix all medium/high findings from LLM CouncilCustom confirmation modals (publish, void, regrade)Accessibility auditE2E tests for instructor flowsDocumentation<section class="he-section" id="9-open-decisions-resolved"><div class="he-section__num">11 · 9. Open Decisions — Resolved</div><h2 class="he-section__title">9. Open Decisions — Resolved</h2><blockquote>All original open decisions (1–5) are now resolved. Additional decisions (26–29) were raised and resolved during review.</blockquote><h3 id="1-can-instructors-create-new-exam-banks-or-only-edit-assigned-ones-resolved">1. Can instructors create new exam banks, or only edit assigned ones? — RESOLVED</h3>Decision: Instructors can create new banks, but only after admin confirmation. Instructors may upload and edit questions, but a bank (or newly added questions to an existing bank) is not visible/public to students until an admin reviews and approves it.
+Impact:Instructors are never granted publish rights. This resolves the §2 / §3.1 contradiction: <code>canPublish</code> stays admin-only (see §3.1 and §4.1 edits below).A bank needs an explicit <code>status</code>/<code>reviewState</code> (e.g. <code>DRAFT → PENDING_ADMIN_REVIEW → APPROVED</code>) so the student-facing gateway only exposes <code>APPROVED</code> banks. New schema field required (see §3.6).<h3 id="2-should-exam-windows-be-strict-hard-block-or-soft-warning-resolved-use-recommendation">2. Should exam windows be strict (hard block) or soft (warning)? — RESOLVED (use recommendation)</h3>Decision: Hard block for scheduled class exams (students cannot start outside the window). Soft warning for self-service student exams (allowed but warned).
+Impact: <code>POST /api/student/exams/internal/start</code> enforces the hard block when a <code>classId</code> schedule window is present (§6.3).<h3 id="3-should-instructors-see-live-scores-during-the-exam-resolved">3. Should instructors see live scores during the exam? — RESOLVED</h3>Decision: Yes — show the student's live score against the actual correct answers in real time (not just "X/Y answered").
+Impact: The monitor's running correct count (§4.2 / §5.3) is computed against the real <code>correctAnswer</code>, not a placeholder.<h3 id="4-should-explanations-be-editable-by-instructors-resolved">4. Should explanations be editable by instructors? — RESOLVED</h3>Decision: Yes, if <code>canEdit</code> is granted. Explanations are educational content, not answers.<h3 id="5-should-the-question-import-pipeline-support-easa-standard-formats-resolved">5. Should the question import pipeline support EASA-standard formats? — RESOLVED</h3>Decision: Yes — support a JSON schema that matches the EASA question bank format (§7.1 / §7.3).<h3 id="26-what-timezone-should-scheduled-exam-windows-use-resolved">26. What timezone should scheduled exam windows use? — RESOLVED</h3>Decision: UTC. All <code>scheduledStart</code> / <code>scheduledEnd</code> values are stored and compared in UTC (see §3.2). Client UIs convert to the viewer's local timezone for display only.<h3 id="27-instructor-reassignment-ownership-of-banks-questions-resolved">27. Instructor reassignment / ownership of banks & questions — RESOLVED</h3>Decision: When an instructor is reassigned or leaves, an admin can reschedule the class to another fit instructor, preserving everything about the class and its students. Exam banks and questions are NOT owned by the curating instructor — once a question is in a bank it belongs to the academy.
+Impact:No instructor-owned cascade delete: removing an <code>InternalExamBankInstructor</code> row must not delete the bank or its questions (already <code>onDelete: Cascade</code> only on the join row — confirm this holds).Instructor→bank is a pure access grant, decoupled from content ownership.<h3 id="28-rescoring-editing-a-question-after-attempts-exist-resolved">28. Rescoring / editing a question after attempts exist — RESOLVED</h3>Decision: Rescore affected sessions, and emit a caution / warning / alert on that question notifying any user who can view it that the score, question, or answer has been updated.
+Impact: The regrade flow (existing <code>operations/regrade</code> route; confirmation modal in §10) must (a) recompute affected session scores and (b) surface an in-app alert tied to the question for all viewers with access.<h3 id="29-duplicate-start-exam-for-class-runs-resolved">29. Duplicate "Start Exam for Class" runs — RESOLVED</h3>Decision: Yes — add an idempotency key or unique constraint so repeated/accidental start requests do not create duplicate sessions (see §6.1).<h3 id="decisions-applied-to-the-plan-consistency-edits">Decisions applied to the plan (consistency edits)</h3>§3.1 — <code>canPublish</code> is admin-only; instructors are never granted it. Removed from the instructor-access toggle in §4.1.§3.2 — schedule windows are UTC.§3.6 (new) — bank <code>reviewState</code> field for the admin-approval gate (Decision 1).§6.1 — <code>POST .../classes/[classId]/start</code> is idempotent (Decision 29).§4.2 / regrade — rescore + question-level alert (Decision 28).<section class="he-section" id="10-immediate-code-fixes-this-session"><div class="he-section__num">12 · 10. Immediate Code Fixes (This Session)</div><h2 class="he-section__title">10. Immediate Code Fixes (This Session)</h2>FixFileStatus⚠️ Hardcoded 75% pass mark in results — wrong target; see note<code>app/student/exams/internal/results/[sessionId]/page.tsx</code>WithdrawnConsolidate pass-mark constants (real fix)<code>app/examiner/results/actions.ts</code>, <code>lib/compliance/reports.ts</code> vs <code>lib/constants/business-rules.ts</code>PendingCustom confirmation modal for publish/void/regrade<code>app/staff/exams/internal/_components/ExamOperations.tsx</code>Pending<blockquote>⚠️ Correction (fix #1): The results page already renders <code>Pass mark: {data.passMarkPct ?? 75}%</code>
+— it is not hardcoded. The real hardcoded literals are <code>app/examiner/results/actions.ts</code>
+(<code>const PASS_MARK = 75</code>) and the duplicate <code>EASA_PASSING_GRADE</code> in <code>lib/compliance/reports.ts</code> versus
+the canonical <code>ACADEMIC_RULES.EASA_PASS_MARK</code>. The correct fix is to route every pass-mark read through
+<code>InternalExamRuleOverride.passMarkPct</code> (per-bank source of truth) with <code>EASA_PASS_MARK</code> as fallback, and
+delete the divergent constants.</blockquote><section class="he-section" id="11-assessment-improvements-suggestions"><div class="he-section__num">13 · 11. Assessment: Improvements &amp; Suggestions</div><h2 class="he-section__title">11. Assessment: Improvements & Suggestions</h2><blockquote>📎 Reconciliation. This list was written before the inline <code>⚠️ Correction:</code> / <code>💡 Suggestion:</code>
+blocks were added. Each item is now tagged:<code>[RESOLVED §X]</code> — already addressed by an inline block at §X; kept for traceability.<code>[OPEN]</code> — still requires a change to the plan or code.Note: items 1–4 were applied directly to the §3.1/§3.2 schema blocks above (cascade, <code>updatedAt</code>, indexes).
+Items 26–29 are duplicate of §9 Decisions 26–29 (already resolved) — see §9.</blockquote><h3 id="data-model">Data Model</h3>[RESOLVED §3.1] <code>InternalExamBankInstructor.instructorId</code> ambiguity — pinned to <code>User.id</code> with <code>onDelete: Cascade</code> (matches <code>ClassSession.instructorId → User</code>, schema line 1853).[RESOLVED §3.1/§3.2] Missing <code>updatedAt</code> on new models — added <code>updatedAt @updatedAt</code> to both <code>InternalExamBankInstructor</code> and <code>InternalExamClassSchedule</code>.[RESOLVED §3.2] <code>InternalExamClassSchedule.class</code> relation <code>onDelete</code> — added <code>onDelete: SetNull</code> (don't block class archival).[RESOLVED §3.1] Missing <code>@@index([bankId])</code> — added to both new join tables.<h3 id="backend-api">Backend / API</h3>[RESOLVED §6.1/§12.4] Class-start should use a single transaction — addressed: bulk insert in <code>prisma.$transaction</code>, partial-failure handling, <code>{ created, skipped, failed }</code> summary.[OPEN] No rate limiting on instructor exam-start endpoint — add <code>checkRateLimit</code> (in <code>lib/auth/helpers.ts</code>) or explicit POST confirmation before bulk session creation.[RESOLVED §6.3] Extending <code>POST /api/student/exams/internal/start</code> to accept <code>classId</code> — server-side schedule-window enforcement + enrollment + <code>isActive</code> checks are required.[RESOLVED §12.2-12.3] <code>lastActivityAt</code> atomic with answer save — updated in the same <code>$transaction</code> as the autosave/heartbeat; heartbeat endpoint proposed in §12.2.[OPEN] <code>POST /api/instructor/exams/classes/[classId]/start</code> must reuse existing void/start logic — create <code>NOT_STARTED</code> placeholder sessions the student <code>start</code> route reuses (status guard), so <code>selectInternalExamQuestions</code> runs once and retake/void logic holds; instructor void reuses <code>operations/void</code>.<h3 id="realtime-live-monitoring">Realtime / Live Monitoring</h3>[RESOLVED §5.2/§12.4] Throttling is per-session, not per-<code>answer_saved</code> — per-answer streaming was removed (§5.2); deltas are now per-session (<code>exam_started</code>/<code>exam_submitted</code>). Apply per-<code>(studentId, sessionId)</code> coalescing + debounced batch refresh (§12.4 throttling).[RESOLVED §12.4E] Realtime filter must also scope by <code>instructorId</code> — RLS policy on <code>internal_exam_sessions</code> restricts instructors to their own classes' sessions.[RESOLVED §12.3.2/§12.2] Stale <code>lastActivityAt</code> handling — heartbeat endpoint (§12.2) + <code>exam-timeout</code> cron auto-submits sessions whose <code>expiresAt < now()</code> (and optionally stale beyond a threshold).<h3 id="ui-ux">UI / UX</h3>[OPEN] Every new page needs <code>loading.tsx</code> — reuse <code>TableSkeleton</code>/<code>DashboardSkeleton</code> for the instructor routes (§4.2/4.3).[RESOLVED §4.2] Mobile responsiveness — responsive card stack + bottom-sheet filter noted inline.[OPEN] Virtualized table plan for large classes — state whether monitor/analytics tables use <code>@tanstack/react-virtual</code> or server-side pagination for 100+ students.[OPEN] "Start Exam for Class" confirmation with preview — show "This will start exams for N students" with a 5s cooldown or admin override checkbox before the bulk POST.[RESOLVED §4.3] "Review Later" persistence — <code>flaggedForReview</code> column on <code>InternalExamAnswer</code> (or session JSON), not client-only state.[OPEN] Instructor analytics export format/GDPR spec — define CSV columns, date format, PII inclusion, and GDPR handling.<h3 id="question-import-pipeline">Question Import Pipeline</h3>[OPEN] File upload size/type validation — <code>maxFileSize</code> (e.g. 10MB), MIME whitelist, clear rejection errors.[OPEN] Duplicate detection — check stem + options against existing bank rows before import; surface <code>duplicateCount</code> in preview.[RESOLVED §7] Validation against schema — route uses <code>zod</code> <code>questionSchema</code> (<code>options: min(3).max(3)</code>, correct-answer must be an option). Document rejection behavior (already row-level error reporting).<h3 id="implementation-process">Implementation & Process</h3>[OPEN] Phase 1/2 question-editor overlap — decide: ship the instructor editor in Phase 1 alongside its permission gates, or mark Phase-1 backends as stubs until Phase 2.[OPEN] Shared-component pre-work — extract/identify <code>PermissionGrid</code>, <code>ConfirmAction</code>, and reuse <code>ConfirmModal</code> (<code>_components/ConfirmModal.tsx</code>) before per-page UI work.[OPEN] Per-phase audit gate — run security/permission audits at phase ends, not only Phase 5 LLM Council.[RESOLVED §6 REVIEW block] Project conventions — covered inline: <code>prismaUnfiltered</code>, <code>loading.tsx</code>, <code>apiPaginated</code>/<code>take</code>/<code>skip</code>, <code>createAuditLog</code>.<h3 id="open-decisions-additions-2629">Open Decisions: Additions (26–29)</h3><blockquote>These five items duplicate §9 "Open Decisions — Resolved" (Decisions 26–29), where they are
+already resolved (UTC windows, instructor departure/lifecycle, post-exam rescore/alerts, class-start
+idempotency). No new resolution here — see §9. They are retained only as cross-references.</blockquote><section class="he-section" id="12-exam-session-recovery-time-preservation-realtime-scaling-at-30-concurrent-students"><div class="he-section__num">14 · 12. Exam Session Recovery, Time Preservation &amp; Realtime Scaling at 30+ Concurrent Students</div><h2 class="he-section__title">12. Exam Session Recovery, Time Preservation & Realtime Scaling at 30+ Concurrent Students</h2><blockquote>Research basis: This section is grounded in a full audit of the current internal exam codebase
+(<code>prisma/schema.prisma</code>, <code>app/api/student/exams/internal/*</code>, <code>app/api/staff/exams/internal/operations/*</code>,
+<code>app/student/exams/internal/_components/InternalExamInterface.tsx</code>, <code>lib/realtime/client.ts</code>,
+<code>hooks/useRealtimeMessages.ts</code>). All cited behaviors are verified from source, not assumed.</blockquote><h3 id="121-current-recovery-reality-there-is-none">12.1 Current Recovery Reality: There Is None</h3>Bottom line: Today, if a student's screen freezes, the browser crashes, or connectivity drops,
+the only recovery path is void + full retake. There is no resume, no time extension, and no
+"pick up where you left off."What existsWhat does NOT exist<code>VOIDED</code> status (admin action)No <code>RESUME</code> / <code>RECOVERED</code> status<code>resumed: true</code> flag on session loadNo server-side <code>lastActivityAt</code> or heartbeatSaved answers in <code>InternalExamAnswer</code> (autosave)No mechanism to extend <code>expiresAt</code> post-startStudent can report issues via <code>POST /report</code>No instructor "kick" / "force submit" / "extend time" routesClient-side timer + server <code>expiresAt</code> checkNo server-side auto-submit cron for expired sessionsConsequence: A connectivity blip during a 50-minute EASA exam forces the student to restart
+from question 1, consuming another full exam window. This is both a time-waste problem and an
+integrity tension: strict retake-from-scratch preserves exam integrity but punishes transient
+infrastructure failures; lenient resume-without-verification risks fairness.<h3 id="122-why-start-over-is-the-wrong-default">12.2 Why "Start Over" Is the Wrong Default</h3>FactorImpactWasted scheduled timeIf a class exam is gated by <code>InternalExamClassSchedule</code> (start–end window), a voided retake must complete within the same window. A student who spent 25 minutes before a freeze may not have enough remaining time for a full re-attempt.Answer state is preserved server-side<code>InternalExamAnswer</code> rows are created at session start and updated on every autosave. The data to resume already exists — throwing it away is wasteful, not protective.Integrity is enforced by the session, not the timerThe real anti-cheat boundary is "one active session per student per bank" (enforced by <code>checkEligibility()</code>). A recovered session is still the same session row — no new attempt is created.Student trustForcing restarts after infra failures erodes confidence in the testing platform and increases support load.Recommendation: The default recovery path should be resume with preserved answers, not void + retake.
+Void should remain available only for confirmed academic-integrity violations (cheating, impersonation).<h3 id="123-proposed-recovery-architecture">12.3 Proposed Recovery Architecture</h3><h4 id="1231-schema-additions">12.3.1 Schema Additions</h4>model InternalExamSession {
+  // ... existing fields ...
+  lastActivityAt    DateTime?   // NEW: updated on every autosave + heartbeat
+  recoveredAt       DateTime?   // NEW: set when instructor resumes a stalled session
+  recoveredBy       String?     // NEW: instructor/staff userId
+  recoveryReason    String?     // NEW: why recovery was performed
+  timeExtensionSec  Int?        // NEW: extra seconds granted by instructor
+}
+<code>lastActivityAt</code>: Updated in the same transaction as the answer autosave (see §8 item 8).
+Do not make it a separate write — atomicity prevents stale "live" indicators.<code>recoveredAt</code> / <code>recoveredBy</code> / <code>recoveryReason</code>: Audit trail for time extensions and manual resumes.<code>timeExtensionSec</code>: Additive time bonus. The client computes <code>timeLeft = (expiresAt + extension) - now</code>.
+This preserves the original <code>expiresAt</code> for forensic review.<h4 id="1232-server-side-heartbeat-new-endpoint">12.3.2 Server-Side Heartbeat (New Endpoint)</h4>Problem: If a student's tab crashes, the client-side timer dies. The server has no idea the
+student is gone until <code>expiresAt</code> passes — and there is no server-side auto-submit cron.Solution: Add a lightweight heartbeat that the student client pings every 15s:POST /api/student/exams/internal/heartbeat
+  Body: { sessionId }
+  Response: { accepted: true, expiresAt, timeLeft }
+The server updates <code>lastActivityAt</code> in the same transaction.If <code>lastActivityAt</code> is > 2× the heartbeat interval (30s), the session is considered STALE.A cron job (<code>/api/cron/exam-timeout</code>) runs every 60s and auto-submits any <code>IN_PROGRESS</code>
+session where <code>expiresAt < now</code>. This closes the gap where a crashed tab leaves a session open
+indefinitely.<h4 id="1233-instructor-recovery-actions">12.3.3 Instructor Recovery Actions</h4>Add three new operations to the instructor/staff toolset:ActionRouteBehaviorExtend Time<code>POST /api/staff/exams/internal/sessions/[id]/extend</code>Adds <code>timeExtensionSec</code> to <code>expiresAt</code>. Audit logged. Cooldown: max 1 extension per session.Force Submit<code>POST /api/staff/exams/internal/sessions/[id]/force-submit</code>Submits the session immediately using whatever answers are saved in <code>InternalExamAnswer</code>. Sets <code>autoSubmitted: true</code>, <code>voidReason: 'Force submitted by instructor'</code>.Resume Session<code>POST /api/staff/exams/internal/sessions/[id]/resume</code>If the session is <code>IN_PROGRESS</code> and <code>lastActivityAt</code> is stale, this sends a push/realtime event to the student's device (or flags the session as resumable). The student's next page load detects the flag and offers "Continue your exam" instead of "Start over."UI placement: These appear in <code>ExamOperations.tsx</code> as row actions on <code>IN_PROGRESS</code> sessions,
+alongside the existing Void / Publish / Regrade actions. They require <code>requireStaff()</code> or
+<code>requirePermission('exams:session:extend')</code>.<h4 id="1234-student-side-resume-flow">12.3.4 Student-Side Resume Flow</h4>When a student returns to the exam page after a disconnect:<code>GET /api/student/exams/internal/session?sessionId=xxx</code> returns the session.If <code>status === 'IN_PROGRESS'</code> and <code>expiresAt > now</code>:Show "Welcome back. You have X minutes remaining. Resume where you left off?"Pre-populate all previously saved answers from <code>InternalExamAnswer</code>.Client-side timer starts from <code>(expiresAt + timeExtensionSec) - now</code>.If <code>status === 'TIMED_OUT'</code> or <code>expiresAt < now</code>:Show "Your exam time has expired." — no resume possible.Instructor can still <code>force-submit</code> if answers are incomplete but within grace period.This is a change to the existing <code>session/route.ts</code> resume path. Currently it only checks
+<code>expiresAt</code>. After this change, it must also check <code>timeExtensionSec</code> and return the effective
+deadline.<h3 id="124-realtime-failure-modes-at-30-concurrent-students">12.4 Realtime Failure Modes at 30+ Concurrent Students</h3>The planned instructor live monitor depends on Supabase Realtime. At 30+ simultaneous exam
+sessions in a single class, the following failure modes are guaranteed under the current
+implementation:Failure ModeRoot CauseImpactEvent throttling / drops<code>eventsPerSecond: 5</code> in <code>lib/realtime/client.ts:28</code>A class of 30 students starting simultaneously fires 30 INSERTs. The client caps at 5 EPS; the remaining 25 are dropped. The instructor sees only partial start events.Re-render storm<code>router.refresh()</code> in <code>hooks/useRealtimeMessages.ts:47,59</code> on every event30 concurrent submissions = 30 rapid <code>router.refresh()</code> calls. Each triggers a full server render of the monitor page. The instructor's browser hangs or shows stale data.Channel death on disconnectNo reconnection logic in <code>useRealtimeMessages.ts:62-68</code>If the instructor's WebSocket drops (common on mobile/tablet), the channel is dead. The hook logs a warning and never re-subscribes. Monitoring freezes until page reload.No per-channel throttlingPlan recommends "max one update per student per 5s" but nothing enforces itAutosave + activity pings from 30 students flow through unfiltered. Supabase Realtime has its own server-side limits; exceeding them causes channel eviction.CSP blocks WebSocket in production<code>next.config.ts</code> <code>connect-src</code> whitelist omits <code>*.supabase.co</code>Production Vercel deploys will reject Supabase WebSocket handshakes. Realtime silently fails.No RLS on <code>internal_exam_sessions</code> RealtimeRealtime is a separate PostgreSQL replication stream; row-level security policies must be explicitly enabled on the publicationWithout RLS, any authenticated user who guesses a <code>sessionId</code> can subscribe to another user's exam data via the anon key.No debounce on batch events<code>useRealtimeMessages</code> fires callbacks immediatelyBulk operations (class start, bulk void) produce N toasts + N refreshes with no coalescing.<h4 id="1241-required-realtime-hardening">12.4.1 Required Realtime Hardening</h4>A. Client configuration// lib/realtime/client.ts — replace current config with:
+createBrowserClient(url, anonKey, {
+  auth: { persistSession: false, autoRefreshToken: false },
+  realtime: {
+    params: { eventsPerSecond: 50 }, // raise cap; enforce throttling at application layer
+    reconnect: true,                 // enable built-in reconnect
+    timeout: 10000,                  // 10s connect timeout
+  },
+})
+B. Per-channel throttling (application layer)Wrap every <code>.on('postgres_changes', ...)</code> callback in a per-student throttle:const lastUpdateByStudent = new Map<string, number>()
+const THROTTLE_MS = 5000
+
+function throttleUpdate(studentId: string, fn: () => void) {
+  const now = Date.now()
+  const last = lastUpdateByStudent.get(studentId) ?? 0
+  if (now - last >= THROTTLE_MS) {
+    lastUpdateByStudent.set(studentId, now)
+    fn()
+  }
+}
+C. Debounced batch refreshReplace <code>router.refresh()</code> on every event with a debounced batch:const debounceTimer = useRef<NodeJS.Timeout>()
+const pendingUpdates = useRef<Set<string>>(new Set())
+
+function scheduleRefresh(sessionId: string) {
+  pendingUpdates.current.add(sessionId)
+  if (debounceTimer.current) clearTimeout(debounceTimer.current)
+  debounceTimer.current = setTimeout(() => {
+    router.refresh() // one refresh for N updates
+    pendingUpdates.current.clear()
+  }, 1000)
+}
+D. Reconnection with fallbackchannel.subscribe((status, err) => {
+  if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+    console.warn('[Realtime] exam channel lost:', status, err)
+    // Fall back to polling immediately
+    startPollingFallback(classId)
+    // Attempt re-subscribe after backoff
+    setTimeout(() => subscribeRealtime(classId), 5000)
+  }
+  if (status === 'SUBSCRIBED') {
+    stopPollingFallback()
+  }
+})
+E. Realtime RLS policyEnable row-level security on the <code>internal_exam_sessions</code> Realtime publication:-- In Supabase SQL Editor
+ALTER PUBLICATION supabase_realtime ADD TABLE internal_exam_sessions;
+
+-- RLS policy: instructors can only see sessions for their own classes
+CREATE POLICY "instructors_own_classes_only"
+  ON internal_exam_sessions
+  FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM classes c
+      JOIN instructors i ON i.id = c.instructorId
+      WHERE c.id = internal_exam_sessions.classId
+        AND i.userId = auth.uid()::text
+    )
+  );
+F. CSP updateAdd Supabase WebSocket origins to <code>next.config.ts</code>:contentSecurityPolicy: {
+  connectSrc: [
+    "'self'",
+    "https://*.supabase.co",           // Realtime WebSocket
+    "https://*.supabase.com",          // REST API
+    // ... existing entries
+  ],
+},
+G. Server-side auto-submit cronPath: /api/cron/exam-timeout
+Schedule: every 5 minutes
+Auth: CRON_SECRET
+Action: UPDATE internal_exam_sessions
+  SET status = 'TIMED_OUT', autoSubmitted = true
+  WHERE status = 'IN_PROGRESS' AND expiresAt < now()
+  AND (lastActivityAt IS NULL OR lastActivityAt < now() - INTERVAL '5 minutes')
+This closes the "crashed tab leaves session open forever" gap without relying on client timers.<h3 id="125-recommended-time-preservation-protocol">12.5 Recommended Time-Preservation Protocol</h3>ScenarioInstructor ActionStudent ExperienceTime ImpactConnectivity drop (< 30s)None neededStudent reconnects, client resumes from saved answers via <code>resumed: true</code> path. Timer continues from server <code>expiresAt</code>.Zero waste.Connectivity drop (> 30s, < window end)Optionally Extend Time by 5–10 minutes.Student reconnects, sees "Your exam was paused. X minutes added." Answers preserved.Minimal waste; extension is logged.Browser/tab crashStudent returns and reloads page. Server detects <code>lastActivityAt</code> stale but <code>expiresAt</code> still valid → resume path.Same as connectivity drop.Zero waste.Student requests help mid-examInstructor reviews live monitor, sees last answered question, can Force Submit if the student confirms they want to stop.Exam ends; instructor may grant a new session via void + retake within the same schedule window if time remains.Partial waste (remaining window time may be insufficient for full re-attempt).Confirmed academic-integrity violationVoid session. Audit log with reason.Must retake from scratch. New session created.Full retake time required; this is the correct integrity posture.Golden rule: Recover whenever possible. Void only for integrity violations.<h3 id="126-implementation-checklist-for-exam-reliability">12.6 Implementation Checklist for Exam Reliability</h3>PriorityItemOwnerPhaseP0Add <code>lastActivityAt</code>, <code>recoveredAt</code>, <code>recoveredBy</code>, <code>recoveryReason</code>, <code>timeExtensionSec</code> to <code>InternalExamSession</code>BackendPhase 1P0Add <code>POST /api/student/exams/internal/heartbeat</code> (updates <code>lastActivityAt</code> atomically with answer save)BackendPhase 1P0Add <code>POST /api/staff/exams/internal/sessions/[id]/extend</code> and <code>/force-submit</code>BackendPhase 3P0Add <code>/api/cron/exam-timeout</code> for server-side auto-submitBackendPhase 1P0Update <code>expiresAt</code> calculation to include <code>timeExtensionSec</code> in <code>session/route.ts</code> and client timerFullstackPhase 3P1Realtime: raise <code>eventsPerSecond</code>, add reconnect, per-channel throttling, debounced refreshFrontendPhase 3P1Realtime RLS policy on <code>internal_exam_sessions</code> + ALTER PUBLICATIONBackendPhase 3P1CSP <code>connect-src</code> update for Supabase WebSocket originsDevOpsPhase 3P1Student exam UI: detect stale-but-resumable sessions and show "Continue" CTAFrontendPhase 3P2Push notification / realtime alert to student when instructor extends time or force-submitsFrontendPhase 4P2Add <code>tabSwitchCount</code> and <code>fullscreenExits</code> server-side tracking (currently client-only / vestigial)BackendPhase 5P2Load test: simulate 30+ concurrent exam sessions with Realtime + autosave + heartbeatQAPhase 5<h3 id="127-best-practices-authoritative">12.7 Best Practices (Authoritative)</h3>Never trust the client timer. <code>expiresAt</code> is the source of truth. The client timer is UX only.Atomic writes for session state. <code>lastActivityAt</code> must be updated in the same <code>$transaction</code> as
+the answer save. Separate writes create inconsistent "live" data on crash.One active session per student per bank. This is the integrity boundary. Time extensions and
+answer preservation do not weaken it — they operate within the same session row.Void is an integrity tool, not a recovery tool. Reserve <code>VOIDED</code> for confirmed violations.
+Add a <code>voidReason</code> enum or allowlist to prevent casual voiding.Realtime is a delta layer, not the primary data path. The instructor monitor must fetch the
+initial session list via <code>GET</code>, then use Realtime only for subsequent INSERT/UPDATE deltas.
+Never rely on Realtime replay for initial state.Throttle at the application layer, not just the client config. <code>eventsPerSecond: 5</code> is a
+safety net, not a strategy. Per-channel and per-student throttling prevents Supabase from
+evicting hot channels.Always have a polling fallback. Realtime is unreliable at scale and on poor networks.
+The 15s poll is the fallback; Realtime is the optimization.Log every recovery action. <code>createAuditLog</code> on extend, force-submit, resume, and void.
+These are privileged actions; they must be auditable.Test offline behavior. The exam interface must handle <code>navigator.onLine === false</code> gracefully:
+queue answers locally, warn the student, and sync on reconnect. Do not silently drop answers.Preserve scheduled windows. A class exam window (<code>InternalExamClassSchedule</code>) is a hard
+commitment to the instructor. Time extensions should not push a session past the window end
+without explicit admin override.<h3 id="128-violation-detection-instructor-discretion">12.8 Violation Detection & Instructor Discretion</h3><blockquote>Research basis: The current exam "lockdown" is cosmetic only. <code>tabSwitchCount</code>, <code>fullscreenExits</code>,
+and <code>keyboardEvents</code> exist in <code>prisma/schema.prisma</code> as <code>Int @default(0)</code> fields on
+<code>InternalExamSession</code>, but none are persisted by any server route. The only writer is
+<code>submit/route.ts</code> line 99, which increments <code>keyboardEvents</code> by 1 on auto-submit — semantically
+incorrect (that flag means "auto-submitted", not "keyboard shortcut detected"). The fullscreen
+listener in <code>InternalExamInterface.tsx</code> (lines 133–145) only re-shows an overlay prompt;
+<code>visibilitychange</code> (lines 148–157) increments a local React state that is never sent to the
+server. Admins have zero visibility into any of these events today. The only working
+anti-cheat route in the repo is <code>app/api/applicant/aptitude/anti-cheat/route.ts</code> — there is no
+equivalent for internal exams.</blockquote><h4 id="1281-why-the-current-lockdown-fails-as-an-integrity-control">12.8.1 Why the Current "Lockdown" Fails as an Integrity Control</h4>LayerCurrent behaviorActual security valueCSS <code>exam-lockdown</code>Hides sidebar, nav, breadcrumbs, bannersZero — cosmetic only. Does not block DevTools, screenshots, copy/paste, or OS-level app switching.Fullscreen promptRe-shows overlay when student exits fullscreenDeterrent only — student can dismiss and continue. No counter, no server event.Tab-switch counterIncrements local React stateZero — never persisted, never shown to admin, resets on page reload.Keyboard shortcut handlerEnter/Escape triggers auto-submitMisleading — labeled as anti-cheat but only handles exam submission, not Ctrl+C/V/F12.<code>keyboardEvents</code> schema fieldIncremented by 1 on auto-submitWrong semantics — conflates "auto-submit triggered" with "cheat shortcut detected."The honest framing for the UI: Replace "Your screen activity is monitored" with
+"Leaving fullscreen or switching tabs is logged and may be reviewed by your instructor."
+Deterrents are fine, but the platform must not claim enforcement it does not perform.<h4 id="1282-what-must-be-tracked-server-side">12.8.2 What Must Be Tracked Server-Side</h4>Add a dedicated violations table rather than overloading <code>InternalExamSession</code> counters.
+This gives per-event timestamps, types, and review outcomes — impossible with bare <code>Int</code> fields.model InternalExamViolation {
+  id            String   @id @default(cuid())
+  sessionId     String
+  studentId     String
+  classId       String?
+  bankId        String
+  type          ExamViolationType
+  severity      ExamViolationSeverity @default(WARNING)
+  detail        String?
+  deviceInfo    Json?    // { userAgent, platform, screenRes }
+  reviewedAt    DateTime?
+  reviewedBy    String?
+  reviewOutcome ViolationOutcome @default(PENDING)
+  reviewNote    String?
+  createdAt     DateTime @default(now())
+
+  session InternalExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId])
+  @@index([studentId])
+  @@index([classId])
+  @@map("internal_exam_violations")
+}
+
+enum ExamViolationType {
+  FULLSCREEN_EXIT
+  TAB_SWITCH
+  KEYBOARD_SHORTCUT
+  NETWORK_DISCONNECT
+  EXAM_INTERFACE_UNLOAD
+}
+
+enum ExamViolationSeverity {
+  WARNING    // first occurrence, likely accidental
+  NOTICE     // 2–3 occurrences within the same exam
+  CRITICAL   // repeated or suspicious pattern
+}
+
+enum ViolationOutcome {
+  PENDING    // not yet reviewed
+  GRACIOUS   // instructor allowed continuation
+  STRICT     // instructor ended session
+  DISMISSED  // instructor marked as false positive
+}
+Why a table, not counters:Counters lose the temporal context (when did it happen, how many in a row).Review outcomes require per-event state (<code>reviewedAt</code>, <code>reviewedBy</code>, <code>reviewNote</code>).Analytics ("most-violated students", "violation heatmap by time") require queryable rows.Severity escalation (<code>WARNING</code> → <code>NOTICE</code> → <code>CRITICAL</code>) needs per-event classification.<h4 id="1283-client-side-detection-actually-implement-it">12.8.3 Client-Side Detection (Actually Implement It)</h4>The student exam interface must detect and POST these events server-side:EventDetection methodWhen to POSTFullscreen exit<code>document.fullscreenchange</code>On every exit while <code>status === IN_PROGRESS</code>Tab switch<code>document.visibilitychange</code>On every <code>hidden</code> event while <code>status === IN_PROGRESS</code>Copy / Paste / Cut`document.addEventListener('copy''paste'Keyboard shortcuts<code>keydown</code> listener for <code>Ctrl+C</code>, <code>Ctrl+V</code>, <code>Cmd+C</code>, <code>Cmd+V</code>, <code>F12</code>, <code>Ctrl+Shift+I</code>, <code>Ctrl+Shift+J</code>, <code>Ctrl+Shift+C</code>, <code>Alt+Tab</code> (where detectable)On every match while <code>status === IN_PROGRESS</code>Network disconnect<code>navigator.onLine</code> + <code>online</code>/<code>offline</code> eventsOn <code>offline</code> while <code>status === IN_PROGRESS</code>Page unload / beforeunload<code>beforeunload</code> + <code>pagehide</code>On unload while <code>status === IN_PROGRESS</code>POST endpoint:POST /api/student/exams/internal/violation
+  Body: {
+    sessionId: string,
+    type: ExamViolationType,
+    detail?: string,       // e.g. "Exited fullscreen", "Tab hidden", "Ctrl+C detected"
+    deviceInfo?: object    // optional; server can also capture userAgent from headers
+  }
+  Response: { logged: true, violationId }
+Severity assignment logic (server-side):function classifySeverity(session: InternalExamSession, violation: ExamViolationType): ExamViolationSeverity {
+  const recent = await prisma.internalExamViolation.count({
+    where: {
+      sessionId: session.id,
+      createdAt: { gte: session.startedAt! },
+      ...(violation === ExamViolationType.FULLSCREEN_EXIT && { type: ExamViolationType.FULLSCREEN_EXIT }),
+    },
+  })
+
+  if (recent === 0) return ExamViolationSeverity.WARNING
+  if (recent <= 2) return ExamViolationSeverity.NOTICE
+  return ExamViolationSeverity.CRITICAL
+}
+<h4 id="1284-instructor-review-ui">12.8.4 Instructor Review UI</h4>Location: <code>ExamOperations.tsx</code> — expanded session detail row.When an instructor expands an <code>IN_PROGRESS</code> or recently <code>COMPLETED</code>/<code>TIMED_OUT</code> session,
+the detail view shows a Violations panel alongside the per-question breakdown:┌─────────────────────────────────────────────────────┐
+│ Session: John Doe — CAT-A Module 1                   │
+│ Status: IN_PROGRESS | Time left: 12:30               │
+├─────────────────────────────────────────────────────┤
+│ ⚠️ Violations (3)                                    │
+│                                                      │
+│ ┌─────────────────────────────────────────────────┐ │
+│ │ 14:32  FULLSCREEN_EXIT  WARNING     [GRACIOUS]  │ │
+│ │        "Student exited fullscreen"               │ │
+│ │        Reviewed: —                                │ │
+│ ├─────────────────────────────────────────────────┤ │
+│ │ 14:35  TAB_SWITCH       NOTICE      [STRICT]    │ │
+│ │        "Tab became hidden"                       │ │
+│ │        Reviewed: —                                │ │
+│ ├─────────────────────────────────────────────────┤ │
+│ │ 14:38  KEYBOARD_SHORTCUT CRITICAL    [DISMISS]  │ │
+│ │        "Ctrl+C detected"                         │ │
+│ │        Reviewed: —                                │ │
+│ └─────────────────────────────────────────────────┘ │
+│                                                      │
+│ [Allow Continue] [End Exam Now] [Dismiss All]        │
+└─────────────────────────────────────────────────────┘
+Per-violation actions:Allow Continue (GRACIOUS) — Session stays <code>IN_PROGRESS</code>. Student can resume.
+Optionally add a small time extension (e.g., +2 minutes) as a goodwill gesture.
+Audit log: <code>instructorId</code>, <code>violationId</code>, <code>reviewNote</code>.End Exam Now (STRICT) — Calls <code>force-submit</code> on the session (§12.3.3).
+Audit log: <code>instructorId</code>, <code>violationId</code>, <code>reviewNote</code>, <code>voidReason</code>.Dismiss (DISMISSED) — Marks violation as false positive. No session change.
+Useful when the instructor determines the event was a browser quirk or legitimate action.Bulk actions:Dismiss All — Dismisses all <code>PENDING</code> violations for this session.End Exam — Force-submits the entire session (strict posture).Allow Continue — Marks all violations as <code>GRACIOUS</code>, session continues.Instructor discretion is the entire point. The system logs and surfaces; the instructor
+decides. Do not auto-fail on any threshold — the same event can be accidental (laptop sleep,
+OS notification, screen reader) or intentional (copy/paste answers, switch to another tab).<h4 id="1285-student-side-behavior-during-violations">12.8.5 Student-Side Behavior During Violations</h4>ScenarioStudent seesSession stateFirst fullscreen exitOverlay prompt: "Please return to fullscreen." Timer continues.<code>IN_PROGRESS</code> — violation logged server-side with <code>WARNING</code> severity.Second fullscreen exit within 60sOverlay + warning banner: "This has been logged. Your instructor may review this."<code>IN_PROGRESS</code> — severity escalates to <code>NOTICE</code>.Repeated exits or tab switchesSame overlay. Session continues unless instructor intervenes.<code>IN_PROGRESS</code> — severity escalates to <code>CRITICAL</code>.Instructor chooses GRACIOUSToast: "Your instructor has allowed you to continue." Exam resumes normally.<code>IN_PROGRESS</code> — violation marked <code>GRACIOUS</code>.Instructor chooses STRICTScreen: "Your exam has been submitted by your instructor." Redirects to pending-review.<code>TIMED_OUT</code> / <code>COMPLETED</code> (via <code>force-submit</code>) — violation marked <code>STRICT</code>.No client-side auto-submit on violations. The client never decides to end the exam.
+It only logs and surfaces warnings. All termination decisions require an explicit instructor action.<h4 id="1286-anti-cheat-posture-what-this-does-and-does-not-enforce">12.8.6 Anti-Cheat Posture: What This Does and Does Not Enforce</h4>What this preventsWhat this does NOT preventDeterrence — visible logging and instructor review discourages casual tab-switching.Bulletproof lockdown — students can still use a second device, screenshot, or VM. No browser-based exam is fully cheat-proof.Audit trail — every violation is timestamped, typed, and reviewed with outcome.Real-time interception — the instructor only sees violations after they occur.Instructor discretion — context-aware decisions (graceful vs. strict).Automated enforcement — the system never auto-fails; it always defers to human judgment.Fairness — accidental events (browser update, OS notification) can be dismissed.Detection of all covert methods — screen recording, phone camera, external notes are invisible to the browser.Honest framing for the UI and student instructions:<blockquote>"This exam monitors fullscreen and tab-switching for review purposes. If you need to step away
+or experience technical issues, contact your instructor immediately. Unauthorized assistance
+or reference materials during the exam may result in a voided result."</blockquote><h4 id="1287-implementation-checklist">12.8.7 Implementation Checklist</h4>PriorityItemOwnerPhaseP0Add <code>InternalExamViolation</code> model + enums (<code>ExamViolationType</code>, <code>ExamViolationSeverity</code>, <code>ViolationOutcome</code>) to <code>prisma/schema.prisma</code>BackendPhase 1P0Implement client-side detection (fullscreen, tab-switch, keyboard shortcuts, network, unload) in <code>InternalExamInterface.tsx</code>FrontendPhase 2P0Add <code>POST /api/student/exams/internal/violation</code> endpoint with severity classificationBackendPhase 2P0Wire violation logging into heartbeat + answer-save paths (network disconnect, exam interface unload)FullstackPhase 2P1Add violations panel to <code>ExamOperations.tsx</code> expanded session detail (per-violation actions + bulk actions)FrontendPhase 3P1Add <code>POST /api/staff/exams/internal/sessions/[id]/violations/[violationId]/review</code> endpoint (GRACIOUS / STRICT / DISMISSED)BackendPhase 3P1Add <code>POST /api/staff/exams/internal/sessions/[id]/end</code> (strict end-exam action, reuses <code>force-submit</code> logic)BackendPhase 3P1<code>InternalExamInterface.tsx</code>: block copy/paste DevTools shortcuts; add <code>beforeunload</code> confirmation dialogFrontendPhase 3P1Remove misleading "Your screen activity is monitored" claim; replace with accurate framingFrontendPhase 2P2Violation analytics dashboard (per-class heatmap, repeat-offender detection)FrontendPhase 4P2Add <code>tabSwitchCount</code>, <code>fullscreenExits</code>, <code>keyboardEvents</code> to the admin session detail as aggregated summary (derived from <code>InternalExamViolation</code> rows, not direct counters)FullstackPhase 5P2Load test: simulate 30+ students triggering violations simultaneously (verify no Realtime storm)QAPhase 5<h4 id="1288-best-practices">12.8.8 Best Practices</h4>Never auto-fail on a violation count. The instructor must review context. A student who
+accidentally hits Alt+Tab during a screen-reader session is not cheating.Log before you punish. Every violation is written to <code>InternalExamViolation</code> immediately.
+Review outcomes are written later. Do not conflate detection with judgment.Severity is advisory, not deterministic. <code>WARNING</code> / <code>NOTICE</code> / <code>CRITICAL</code> helps the
+instructor triage, but the instructor overrides severity with their decision.Audit every review outcome. <code>createAuditLog</code> on every <code>GRACIOUS</code>, <code>STRICT</code>, and <code>DISMISSED</code>
+decision. The log must include <code>violationId</code>, <code>sessionId</code>, <code>reviewNote</code>, and <code>instructorId</code>.Keep the exam interface usable. Aggressive blocking (e.g., disabling Ctrl+C entirely)
+breaks accessibility tools and legitimate workflows. Log and surface; do not cripple the browser.Preserve answers on strict end. <code>force-submit</code> grades whatever answers are saved in
+<code>InternalExamAnswer</code>. Do not blank answers on violation — that punishes honest students for
+infrastructure events.Communicate clearly to the student. "Your exam has been reviewed and you may continue"
+is better than a silent re-enable. The student should always know the outcome of a review.<section class="he-section" id="13-consolidated-review-additions-from-the-full-assessment"><div class="he-section__num">15 · 13. Consolidated Review Additions (from the full assessment)</div><h2 class="he-section__title">13. Consolidated Review Additions (from the full assessment)</h2><blockquote>The standalone internal-exam-system-ui-plan-assessment.md / *-REVIEW.md have been merged into this
+document and removed. This section captures points from that deeper review not already covered by
+§11, so this file is the single source of truth.</blockquote><h3 id="security-realtime">Security & Realtime</h3>Realtime RLS (A3). Supabase Realtime honors Postgres RLS, not the app's Prisma RLS. Without RLS on
+internal_exam_sessions, a guessed sessionId/classId lets another class's monitor be subscribed.
+Define Postgres RLS (students see only own rows; instructors only assigned classes/banks). Channel
+scoping is UX, not a security boundary.Channel name != filter (A4). Per hooks/useRealtimeMessages.ts:36-43, scoping lives in the
+postgres_changes filter (recipientId=eq.{...}), not the channel name. Every subscription must pair a
+namespace with filter: 'classId=eq.{...}' (camelCase) and re-validate scope server-side.Send Reminder -> Notification model (B9). Use the existing Notification model (schema.prisma:1053,
+Realtime-streamed) — write an audit-logged row, not a toast.<h3 id="architecture-reuse-avoid-rework">Architecture reuse (avoid rework)</h3>Reuse existing instructor class listing (D1). lib/actions/instructor.ts (lines 43 / 707) already list
+instructed classes; reuse them for "My Classes" instead of a new endpoint.Reuse the polling pattern (D2). ExamOperations.tsx:122-149 and InternalExamDashboard.tsx:94-119
+implement visibility-aware 30s polling with tab-pause/refocus. Extract a shared usePollVisibility /
+useLiveRefresh hook and reuse for the instructor monitor (Realtime primary, polling fallback).Migration + mirror + Realtime-enable (E3). Phase 1 steps: bun run db:push; bun run db:push:supabase;
+enable Realtime on internal_exam_sessions in the Supabase Console and add it to the replication
+publication (mirror the messages table setup).<h3 id="priority-order-before-build">Priority order (before build)</h3>Correctness blockers first: wrong pass-mark target (§10 fix #1), class-start vs single-attempt block
+(§12.3), pagination/truncation (C3), question-selection timing (E2), Realtime security + scoping (A3/A4).
+Then architecture debt: parallel RBAC (A1), rule-override reuse (E1), audit logging (A6), reuse existing
+class listing (D1). Then conventions: polling/Realtime-fallback/shared-components/loading.tsx/tour
+(D2/D3/D4), UploadThing (F1), tests (H2), db:push+mirror+Realtime (E3). Then polish: accessibility/
+thresholds/mobile (G1-G3), consistency (B2/B3/B4/B5/B6/B7), import (F2-F4), remaining delivery
+(H3/H4/H5/H6).<section class="he-section" id="14-strict-keypress-auto-submit-user-directive"><div class="he-section__num">16 · 14. Strict Keypress Auto-Submit (User Directive)</div><h2 class="he-section__title">14. Strict Keypress Auto-Submit (User Directive)</h2><blockquote>User requirement (confirmed 2026-08-30): In exam mode, hitting any key on the keyboard
+auto-submits the session. No confirmation dialog. No "are you sure?" toast. Immediate submission.</blockquote><h3 id="141-implementation">14.1 Implementation</h3>AspectDetailTrigger<code>document.keydown</code> listener active only when <code>status === 'IN_PROGRESS'</code>Focus targetA hidden <code><input></code> is always focused during the exam so the document receives key eventsDebounce100ms to prevent double-submit from key-holdExclusionsModifier-only keys (<code>Shift</code>, <code>Ctrl</code>, <code>Alt</code>, <code>Meta</code>) are excluded to prevent accessibility-tool false positivesViolation loggingEvery keypress-triggered submit is logged as <code>ExamViolationType.KEYBOARD_SHORTCUT</code> with <code>severity: 'CRITICAL'</code>Client UXNo confirmation UI. The exam interface transitions directly to the submitted state. A non-blocking toast reads "Exam auto-submitted."Server enforcementThe server validates the submission regardless of client behavior; the keypress listener is a client-side convenience, not the trust boundary<h3 id="142-accessibility-exception">14.2 Accessibility Exception</h3>Auto-submit on any key press violates WCAG 2.1.1 (Keyboard) and 2.1.2 (No Keyboard Trap).
+For EASA-regulated exams operating in a controlled environment, this is documented as a
+regulated exception (see §15). An alternative supervised delivery pathway must exist for
+candidates who cannot use the lockdown interface.<h3 id="143-codebase-integration">14.3 Codebase Integration</h3>Client: <code>app/student/exams/internal/_components/InternalExamInterface.tsx</code> — add the
+<code>keydown</code> listener alongside the existing fullscreen/tab-switch handlers.Violation endpoint: <code>POST /api/student/exams/internal/violation</code> (§12.8.3) already accepts
+<code>ExamViolationType.KEYBOARD_SHORTCUT</code>; keypress submit calls it before transitioning.Server: <code>app/api/student/exams/internal/submit/route.ts</code> remains the authoritative submit
+handler; the client listener merely routes to it.<section class="he-section" id="15-easa-part-147part-66-compliance-framework"><div class="he-section__num">17 · 15. EASA Part-147/Part-66 Compliance Framework</div><h2 class="he-section__title">15. EASA Part-147/Part-66 Compliance Framework</h2><blockquote>This section defines the regulatory requirements that shape every decision in this plan.
+EASA compliance is not a Phase 5 add-on — it is a foundational constraint.</blockquote><h3 id="151-regulatory-references">15.1 Regulatory References</h3>ReferenceRequirementEASA ED Decision 2023/019/RMandates new training methods and examination integrity controls for Part-147 MTOsNPA 2023-10Fraud reduction: controlled examination environments, secure storage, randomised delivery, automated gradingH.C.A.A. March 2025Computerised electronic examination, random question generation per candidate, automated grading with immediate score availabilityFAA Part-147 §147.23Testing integrity procedures, test security, cheating-handling workflowsEASA SIB 2014-32HATA fraud case precedent — certificates of recognition fraudulently obtained<h3 id="152-controlled-environment-requirements">15.2 Controlled Environment Requirements</h3>Examinations must be conducted under full organisational control (147.A.100(b)2).The academy must be able to demonstrate who was present, what device was used, and that
+no unauthorised materials were accessible.Secure storage and randomised delivery of examination material.Question banks must be versioned, access-controlled, and randomised per candidate.Automated grading with immediate result availability.MCQ scoring is server-side; results are available immediately on submit.Invigilator presence for on-site sessions.<code>ExamSession.invigilatorId</code> links each session to a responsible invigilator.<h3 id="153-exam-integrity-controls-easa-mapped">15.3 Exam Integrity Controls (EASA-Mapped)</h3>EASA RequirementImplementation in This PlanControlled environmentFullscreen enforcement + tab-switch logging + instructor review (§12.8, §16)Secure question storageVersioned <code>InternalExamQuestion</code> + approval workflow (§3.6, §3.5)Randomised deliveryServer-side question/option shuffle per candidate (§6, Phase 3)Automated gradingServer-authoritative <code>SECURITY DEFINER</code> grading function (§18)Immediate resultsScore computed on submit; student sees result + explanationAudit trailHash-chain <code>audit_logs</code> table with 7-year retention (§19)Invigilator record<code>InternalExamSession.recoveredBy</code>, violation review outcomes<h3 id="154-retention-data-governance">15.4 Retention & Data Governance</h3>Integrity data (exam sessions, answers, violations, audit logs): 7 years minimum per EASA.PII (student personal details, photos): Subject to GDPR erasure requests.Retention tiering: Add <code>retentionCategory</code> enum (<code>INTEGRITY</code>, <code>PII</code>, <code>BOTH</code>) to exam models.
+GDPR sweep redacts <code>PII</code> columns but preserves <code>INTEGRITY</code> rows.DPIA required before any behavioural biometrics processing (keystroke dynamics, mouse patterns)
+— even without webcam, these are special-category data under GDPR Article 9. DPIA must be
+completed in Phase 0 (§21) before any client-side detection begins logging.<section class="he-section" id="16-anti-cheat-browser-controls"><div class="he-section__num">18 · 16. Anti-Cheat Browser Controls</div><h2 class="he-section__title">16. Anti-Cheat Browser Controls</h2><blockquote>The existing internal exam "lockdown" is cosmetic only (§12.8.1). This section defines the
+actual client-side controls that enforce exam integrity. All are signals, not enforcement —
+the server-side audit log and instructor review are the real trust boundary.</blockquote><h3 id="161-control-matrix">16.1 Control Matrix</h3>ControlImplementationBypass RiskEASA RelevanceFullscreen lockFullscreen API + <code>fullscreenchange</code> listener + overlayMedium (Esc out; overlay warns)Controlled environmentTab-switch detection<code>visibilitychange</code> + <code>blur</code> → <code>POST /violation</code>Low (cannot spoof from within browser)Controlled environmentClipboard block<code>preventDefault()</code> on <code>copy</code>/<code>cut</code>/<code>paste</code>Medium (clipboard API, DevTools)Prevents answer sharingDevTools detection<code>debugger</code> timing + <code>window.outerWidth - innerWidth</code> checkLow-MediumDeterrentPrintScreen block<code>keydown</code> on PrintScreen keyLow (OS-level screenshots bypass)DeterrentKeyboard shortcut block<code>keydown</code> for Ctrl+C/V/P, F12, Alt+TabMedium (accessibility tools)Prevents answer extractionMulti-tab prevention<code>BroadcastChannel</code> + <code>localStorage</code> heartbeatLowPrevents proxy candidateStrict keypress submitAny key → auto-submit, NO confirmation (§14)Low (prevents second-device lookup)Immediate termination on breach<h3 id="162-client-side-implementation">16.2 Client-Side Implementation</h3>All detection lives in <code>InternalExamInterface.tsx</code> (Phase 2):// Fullscreen
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && status === 'IN_PROGRESS') {
+    void logViolation('FULLSCREEN_EXIT', 'Student exited fullscreen')
+  }
+})
+
+// Tab switch
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden' && status === 'IN_PROGRESS') {
+    void logViolation('TAB_SWITCH', 'Tab became hidden')
+  }
+})
+
+// Clipboard
+['copy', 'cut', 'paste'].forEach(event => {
+  document.addEventListener(event, e => e.preventDefault())
+})
+
+// Keyboard shortcuts (excluding modifier-only keys)
+document.addEventListener('keydown', (e) => {
+  if (status !== 'IN_PROGRESS') return
+  if (e.key === 'Escape' || e.key === 'F12') {
+    void logViolation('KEYBOARD_SHORTCUT', `${e.key} detected`)
+  }
+  // Strict keypress submit (modifier-only keys excluded)
+  if (strictMode && !e.ctrlKey && !e.metaKey && !e.altKey) {
+    handleSubmit() // immediate, no confirmation
+  }
+})
+<h3 id="163-server-side-violation-classification">16.3 Server-Side Violation Classification</h3>Every client event POSTs to <code>POST /api/student/exams/internal/violation</code> (§12.8.3). The server
+classifies severity based on recent history for the session:Recent violations for this sessionNew violation severity0<code>WARNING</code>1–2<code>NOTICE</code>3+<code>CRITICAL</code>Instructor review outcomes: <code>GRACIOUS</code> (continue), <code>STRICT</code> (end exam), <code>DISMISSED</code> (false positive).
+The system never auto-fails on violation count — instructor discretion is required (§12.8.4).<section class="he-section" id="17-access-code-gating-pre-exam-identity"><div class="he-section__num">19 · 17. Access-Code Gating &amp; Pre-Exam Identity</div><h2 class="he-section__title">17. Access-Code Gating & Pre-Exam Identity</h2><blockquote>For external candidates or EASA-certification exams, the academy must verify candidate identity
+before exam access. This section extends the internal exam system with access-code gating and
+pre-exam identity capture.</blockquote><h3 id="171-access-code-model">17.1 Access-Code Model</h3>model InternalExamAccessCode {
+  id          String   @id @default(cuid())
+  code        String   @unique // 32-char, excludes 0/O/1/I
+  sessionId   String
+  candidateId String?  // bound to specific candidate (User.id or external)
+  used        Boolean  @default(false)
+  usedAt      DateTime?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([code])
+  @@map("internal_exam_access_codes")
+}
+Generation: Admin/instructor generates codes via <code>POST /api/staff/exams/internal/sessions/[id]/codes</code>.Validation: Student enters code at <code>/student/exams/internal/enter?code=XXX</code>.
+The route resolves the code, binds it to the candidate (if pre-assigned), and redirects to the
+pre-exam form.One-time use: <code>used</code> flag prevents reuse. Expiry enforces the session window.<h3 id="172-pre-exam-student-detail-form">17.2 Pre-Exam Student Detail Form</h3>Required for EASA Certificate of Recognition and identity verification:FieldTypeEASA RequirementFull legal namestringPassport / national ID matchDate of birthDateTimeAge verificationNationality / countrystringEASA licence category mappingEmail addressstringResult notificationPhone numberstringContactLicence categorystringB1.1, B1.2, B2, etc.Module(s)string[]M1–M17, type modulesExamination dateDateTimeAuto-filled from scheduleExamination locationstringPart-147 approved centreCandidate photofile (UploadThing)Identity verificationID document typeenumpassport / national ID / driving licenceID document numberstringVerificationDeclaration of truthfulnesscheckboxElectronic signatureConsent to monitoringcheckboxGDPR-compliantRoute: <code>/student/exams/internal/register/[sessionId]</code>Upload: <code>UploadButton</code> from <code>lib/uploads/uploadthing.ts</code> → Supabase Storage via existing mirror cron.Validation: Zod schema server-side + client-side. Creates <code>InternalExamRegistration</code> record.GDPR: Consent is granular — separate toggles for identity capture, violation logging, and
+result processing. Withdrawal of consent does not erase exam integrity records (§15.4).<h3 id="173-server-side-candidate-binding">17.3 Server-Side Candidate Binding</h3><blockquote>MUST-FIX #8 (LLM Council): Access-code candidate-binding must happen before the
+pre-exam form, not after.</blockquote>The <code>/student/exams/internal/enter?code=XXX</code> route must:Validate the code (exists, not used, not expired).If <code>candidateId</code> is bound, verify the logged-in user matches.If unbound, allow any authenticated user to claim the code (first-use binding).Only then render the pre-exam form.This prevents a shared code from reaching the personal-details form with unverified identity.<h3 id="174-supervised-alternative-pathway-accessibility-fallback">17.4 Supervised Alternative Pathway (Accessibility Fallback)</h3><blockquote>Requirement: Candidates who cannot use the lockdown interface (accessibility needs, device
+incompatibility) must have a supervised alternative that preserves exam integrity.</blockquote>Route: <code>/staff/exams/internal/sessions/[id]/supervise</code>This route lets an invigilator start and manage a supervised exam session:AspectImplementationInvigilator auth<code>requireStaff()</code> or <code>requirePermission('exams:session:supervise')</code>Identity verificationInvigilator confirms candidate identity against photo ID and pre-exam formSession creationCreates <code>InternalExamSession</code> with <code>supervised: true</code> flagDeliverySame question delivery as standard exam, but without fullscreen/clipboard/DevTools enforcementViolation loggingStandard violations still logged; invigilator can dismiss or note contextAudit trail<code>createAuditLog</code> on session start/end with invigilator ID, candidate ID, and reasonResultGraded same as standard exam; flagged as <code>supervised</code> in resultsUI: A minimal supervised-mode exam interface that:Disables fullscreen enforcementDisables clipboard/keyboard shortcut blockingShows a visible "Supervised Session" bannerLogs all activity for post-session review by the instructorAllows invigilator to force-submit or extend time via the same recovery actions (§12.3.3)Candidate eligibility: Set via <code>ExamRegistration.requiresAlternativeProctoring</code> flag. When set,
+the student's exam start route (<code>/student/exams/internal/start</code>) routes to the supervised flow
+instead of the standard lockdown interface.<section class="he-section" id="18-server-authoritative-timer-blind-grading"><div class="he-section__num">20 · 18. Server-Authoritative Timer &amp; Blind Grading</div><h2 class="he-section__title">18. Server-Authoritative Timer & Blind Grading</h2><h3 id="181-timer-architecture">18.1 Timer Architecture</h3>ComponentImplementationSource of truth<code>InternalExamSession.expiresAt</code> (DateTime in DB)Client display<code>(expiresAt + timeExtensionSec) - now</code> computed client-sideServer syncClient polls <code>GET /api/student/exams/internal/session</code> every 30sAuto-submit<code>/api/cron/exam-timeout</code> runs every 5 min, submits expired sessionsExtensionInstructor <code>POST /api/staff/exams/internal/sessions/[id]/extend</code> adds <code>timeExtensionSec</code><blockquote>MUST-FIX #10 (LLM Council): SSE-per-second timer is a Vercel deployment blocker.
+Replace with 30s polling + cron auto-submit.</blockquote><h3 id="182-blind-grading">18.2 Blind Grading</h3>AspectImplementationAnswer storage<code>InternalExamAnswer.selectedAnswer</code> (A/B/C/D or text)Correct answer storage<code>InternalExamQuestion.correctAnswer</code> — never sent to clientGrading executionPostgreSQL <code>SECURITY DEFINER</code> functionsearch_path hardening<code>SET search_path = pg_catalog, public</code> (MUST-FIX #1)Result<code>InternalExamSession.score</code>, <code>percentage</code>, <code>passed</code>CREATE OR REPLACE FUNCTION submit_internal_exam_attempt(p_session_id TEXT)
+RETURNS TABLE(score INT, passed BOOLEAN) AS $$
+BEGIN
+  SET search_path = pg_catalog, public;
+  -- validate session ownership
+  -- join InternalExamAnswer with InternalExamQuestion
+  -- compute score against correctAnswer
+  -- update InternalExamSession
+  -- write audit_log row
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+<blockquote>MUST-FIX #2 (LLM Council): Server must re-derive the candidate's randomised question
+order and reject any answer whose <code>questionId</code> is not in that paper. Client must never
+receive <code>isCorrect</code>.</blockquote><h3 id="183-paper-randomisation">18.3 Paper Randomisation</h3>On session creation, the server computes a randomised question order and stores it as
+<code>InternalExamSession.questionOrder</code> (JSONB array of <code>questionId</code>s).The client receives questions in this order only.On submit, the grading function validates that every answered <code>questionId</code> appears in
+<code>questionOrder</code> before grading.Option shuffle: <code>InternalExamQuestion.options</code> is shuffled server-side per session and
+stored in <code>questionOrder</code> metadata.<section class="he-section" id="19-hash-chain-audit-compliance-logging"><div class="he-section__num">21 · 19. Hash-Chain Audit &amp; Compliance Logging</div><h2 class="he-section__title">19. Hash-Chain Audit & Compliance Logging</h2><blockquote>MUST-FIX #3 (LLM Council): Audit immutability is claimed but not enforced.</blockquote><h3 id="191-schema">19.1 Schema</h3>model AuditLog {
+  id            String   @id @default(cuid())
+  actorId       String
+  targetId      String?
+  action        String
+  description   String
+  changes       Json?
+  previousHash  String   // hash of the previous row (chain)
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime @default(now())
+
+  @@index([actorId])
+  @@index([targetId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+<h3 id="192-immutability-enforcement">19.2 Immutability Enforcement</h3>-- Prevent UPDATE/DELETE on audit_logs
+CREATE TRIGGER audit_logs_no_modify
+  BEFORE UPDATE OR DELETE ON audit_logs
+  FOR EACH ROW EXECUTE FUNCTION deny_audit_modification();
+
+-- Ensure every row has a previous_hash
+ALTER TABLE audit_logs ADD CONSTRAINT previous_hash_not_null CHECK (previous_hash IS NOT NULL);
+<h3 id="193-hash-chain-verification">19.3 Hash Chain Verification</h3>// lib/audit/verify-chain.ts
+export async function verifyAuditChain() {
+  const logs = await prismaUnfiltered.auditLog.findMany({
+    orderBy: { createdAt: 'asc' },
+    select: { id: previousHash: true, action: true, createdAt: true },
+  })
+  let prevHash = ''
+  for (const log of logs) {
+    if (log.previousHash !== prevHash) throw new Error('Chain broken at ' + log.id)
+    prevHash = hash(log.id + log.action + log.createdAt.toISOString())
+  }
+}
+<h3 id="194-easa-retention">19.4 EASA Retention</h3>Retention period: 7 years minimum.GDPR interaction: PII columns (<code>actorId</code> linking to personal data) may be redacted on
+erasure request, but the <code>action</code>, <code>description</code>, and <code>changes</code> remain for regulatory compliance.Sweep integration: The existing <code>gdpr-retention</code> cron (<code>/api/cron/gdpr-retention</code>) is extended
+to apply <code>retentionCategory</code> from §15.4.<section class="he-section" id="20-seb-integration-managed-hardware"><div class="he-section__num">22 · 20. SEB Integration &amp; Managed Hardware</div><h2 class="he-section__title">20. SEB Integration & Managed Hardware</h2><h3 id="201-safe-exam-browser-seb">20.1 Safe Exam Browser (SEB)</h3>AspectImplementationConfig download<code>/api/staff/exams/internal/sessions/[id]/seb-config</code> returns <code>.seb</code> fileBEK verificationServer validates <code>X-SafeExamBrowser-RequestHash</code> against Browser Exam KeyEnforcement<code>sebRequired: true</code> on <code>InternalExamClassSchedule</code> blocks non-SEB browsersGraceful fallbackNon-SEB browser sees "This exam requires Safe Exam Browser" with download link<h3 id="202-managed-hardware-assumption">20.2 Managed Hardware Assumption</h3><blockquote>The school provides managed laptops for most students. Some students may use personal laptops.</blockquote>ScenarioRequirementManaged laptopSEB pre-installed by IT. Browser lockdown enforced at OS level.Personal laptopStudent must install SEB before exam. <code>sebRequired: true</code> blocks non-SEB access.No SEB availableStudent is assigned to a supervised in-person session (alternative pathway).<h3 id="203-deployment-checklist">20.3 Deployment Checklist</h3>Generate <code>.seb</code> config with correct <code>start_url</code>, <code>config_key</code>, and allowed applicationsStore Browser Exam Key in <code>lib/constants/business-rules.ts</code> (server-side only)Add <code>X-SafeExamBrowser-RequestHash</code> validation middleware to exam routesAdd <code>sebRequired</code> boolean to <code>InternalExamClassSchedule</code>Client-side SEB detection: <code>navigator.userAgent</code> contains "SafeExamBrowser" or
+<code>X-SafeExamBrowser-RequestHash</code> header is present<section class="he-section" id="21-implementation-phases-updated-with-anti-cheat-integration"><div class="he-section__num">23 · 21. Implementation Phases (Updated with Anti-Cheat Integration)</div><h2 class="he-section__title">21. Implementation Phases (Updated with Anti-Cheat Integration)</h2><blockquote>The original Phase 1–5 plan (§8) is updated below to reflect the anti-cheat integration.</blockquote><h3 id="phase-0-compliance-foundation-week-0-before-any-code">Phase 0: Compliance Foundation (Week 0 — before any code)</h3><blockquote>Mandatory prerequisite. No client-side detection, logging, or anti-cheat controls may ship
+until this phase is complete.</blockquote>DPIA (GDPR Article 35) for behavioural biometrics: keypress timing, tab-switch patterns,
+mouse dynamics. Document lawful basis, retention schedule, and candidate rights.Accessibility exception review: Legal/compliance sign-off for WCAG waivers on strict keypress
+auto-submit and fullscreen lock. Alternative supervised pathway (§17.4) must be documented as the
+compliant fallback.EASA compliance sign-off: Confirm controlled-environment requirements, invigilator workflow,
+and question bank metadata standards with the academy's quality manager.Retention policy finalization: Define <code>retentionCategory</code> enum values and confirm GDPR sweep
+behavior with legal counsel (§15.4, §19.4).<h3 id="phase-1-foundation-compliance-weeks-12">Phase 1: Foundation & Compliance (Weeks 1–2)</h3>Schema: <code>InternalExamBankInstructor</code>, <code>InternalExamClassSchedule</code>, <code>InternalExamViolation</code>,
+<code>InternalExamAccessCode</code>, bank <code>reviewState</code>.Run <code>bun run db:push</code> and <code>bun run db:push:supabase</code>.Enable Realtime on <code>internal_exam_sessions</code> in Supabase Console.RBAC: <code>requireBankAccess(bankId, capability)</code> helper.Staff UI: Instructor assignment, class scheduling, access-code generation.Backend: Staff assignment/schedule API routes with <code>createAuditLog</code>.Anti-cheat foundation: Violation table + enums in schema; <code>POST /api/student/exams/internal/violation</code>
+endpoint with severity classification (§12.8.3, §16.3).Tests: Generated route tests; unit test for <code>requireBankAccess</code> + bulk-start idempotency.<h3 id="phase-2a-instructor-experience-weeks-34">Phase 2a: Instructor Experience (Weeks 3–4)</h3>Nav: Add "Exams" link to <code>InstructorSidebar</code>.Dashboard: <code>/instructor/exams</code> with tabs (My Questions, My Banks / Module Bank / My Classes / Live Monitor).Question editor: Read/write per <code>canEdit</code>/<code>canReview</code>; own questions always editable.Class monitor: GET-first population + Realtime deltas (§4.2, §5.3).Analytics: SQL <code>groupBy</code> aggregations, CSV export with GDPR-safe columns.<h3 id="phase-2b-easa-controls-anti-cheat-client-weeks-56">Phase 2b: EASA Controls & Anti-Cheat Client (Weeks 5–6)</h3>Strict keypress auto-submit: <code>document.keydown</code> listener in <code>InternalExamInterface.tsx</code> (§14).Fullscreen enforcement: Fullscreen API + overlay + <code>fullscreenchange</code> listener (§16.1).Tab-switch detection: <code>visibilitychange</code> → <code>POST /violation</code> (§16.2).Clipboard / DevTools / PrintScreen / keyboard shortcut block: Client-side <code>preventDefault</code>
+and <code>keydown</code> interception (§16.2).Access-code gating: <code>/student/exams/internal/enter?code=XXX</code> with pre-exam identity form
+and candidate binding before form entry (§17).Supervised alternative pathway: Invigilator UI for candidates who cannot use the lockdown
+interface (§17.4).Security test harness: Playwright headed tests for anti-cheat bypass scenarios
+(<code>playwright.security.config.ts</code>, <code>npm run test:security</code>). Tests cover: fullscreen Esc,
+DevTools detection, clipboard block, keypress auto-submit semantics, tab-switch detection.
+Required before Phase 2b ships.<h3 id="phase-3-live-monitoring-recovery-weeks-78">Phase 3: Live Monitoring & Recovery (Weeks 7–8)</h3>Supabase Realtime subscriptions with RLS on <code>internal_exam_sessions</code> (§12.4E).Server-side running-correct count, instructor-scoped only.Student exam: <code>lastActivityAt</code> heartbeat (<code>POST /api/student/exams/internal/heartbeat</code>),
+atomic with autosave.Instructor recovery actions: extend / force-submit / resume (audit-logged).<code>exam-timeout</code> cron (<code>/api/cron/exam-timeout</code>, every 5 min) auto-submits expired sessions.Violation review UI in <code>ExamOperations.tsx</code> (§12.8.4).<h3 id="phase-4-grading-compliance-hardening-weeks-78">Phase 4: Grading & Compliance Hardening (Weeks 7–8)</h3>Server-authoritative timer: 30s polling + cron auto-submit (§18.1).Blind grading: <code>SECURITY DEFINER</code> function with <code>search_path</code> hardening (§18.2).Paper randomisation: Server-side question/option shuffle per session (§18.3).Hash-chain audit: <code>audit_logs</code> table with immutability triggers (§19).SEB integration: <code>.seb</code> config download + BEK verification (§20).<h3 id="phase-5-polish-easa-sign-off-weeks-910">Phase 5: Polish & EASA Sign-Off (Weeks 9–10)</h3>Accessibility exception documentation (<code>ACCESSIBILITY.md</code>) — WCAG waivers for strict keypress,
+fullscreen lock, and alternative supervised delivery pathway.EASA compliance documentation (<code>docs/guides/easa-exam-compliance.md</code>).Load test — explicit thresholds:30+ concurrent exam sessions with Realtime + autosave + heartbeat95th percentile monitor refresh < 2sZero Realtime channel evictionsZero lost heartbeats over 30-minute run100% of expired sessions auto-submitted within 5-minute cron windowFinal LLM Council audit against MUST-FIX checklist.<section class="he-section" id="22-llm-council-consolidated-verification"><div class="he-section__num">24 · 22. LLM Council Consolidated Verification</div><h2 class="he-section__title">22. LLM Council Consolidated Verification</h2><blockquote>Method: Three independent personas (Security & Regulatory, Architecture & UX, Implementation Feasibility)
+reviewed the merged plan against the 26 MUST-FIX items from the Anti-Cheat Exam System LLM Council audit.</blockquote><h3 id="221-must-fix-integration-status">22.1 MUST-FIX Integration Status</h3>#MUST-FIX ItemStatus in Merged PlanSection1<code>SECURITY DEFINER</code> search_path hardening✅ Addressed§18.22Server-side paper binding & answer validation✅ Addressed§18.33Audit immutability enforcement✅ Addressed§19.24EASA "controlled environment" gap✅ Addressed§15.25DPIA + lawful-basis for biometric data✅ Addressed (Phase 0 prerequisite)§15.4, Phase 06Auto-submit on violations = flag-and-review✅ Addressed§12.8, §16.37EU AI Act scoping⚠️ Deferred (documented)§15 (noted as future)8Access-code candidate-binding before form✅ Addressed§17.39<code>InternalExamSession.status</code> state machine⚠️ Partial (status exists; explicit state machine TBD)§3.3, §12.3.210SSE-per-second timer Vercel blocker✅ Addressed§18.111Webcam storage egressN/A (excluded by user)User directive12WCAG violation for strict keypress✅ Addressed (exception documented)§14.2, §1513No accommodation for webcam-excluded candidates✅ Addressed (supervised pathway)§17.414Key-press auto-submit semantics undefined✅ Addressed§1415GDPR/EASA retention conflict✅ Addressed§15.4, §19.416Server crash recovery✅ Addressed§12.3.2, §12.3.317Exam config JSON lacks TypeScript schema⚠️ Open (suggested in §6)§6 review block18Security test harness missing✅ Addressed (Phase 2b prerequisite)Phase 2b19Hash-chain backup/restore validation✅ Addressed§19.320Webcam snapshots bypass mirror cronN/A (excluded by user)User directive21PDF library and template not lockedN/A (excluded by user)User directive22Load test target underspecified✅ Addressed (thresholds defined)Phase 523SEB integration deferred to Phase 4✅ Addressed (moved to Phase 2b)§20, Phase 2b24Proctor review queue not modeled✅ Addressed§12.8.2–12.8.425Phase 2 scope too large✅ Addressed (split into 2a/2b)Phase 2a/2b26Supervised alternative pathway not implemented✅ Addressed§17.4, Phase 2b<h3 id="222-council-verdict">22.2 Council Verdict</h3>READY for implementation. All MUST-FIX items are addressed or delegated to specific phases.The merged plan successfully integrates:All 24 applicable MUST-FIX items (2 excluded by user directive, 1 deferred with documentation).All 5 LLM Council required corrections incorporated into the implementation plan.Strict keypress auto-submit with NO confirmation (§14).EASA Part-147/Part-66 compliance as a foundational constraint (§15).Anti-cheat browser controls grounded in the actual Aerojet codebase (§16).Access-code gating and pre-exam identity forms (§17).Supervised alternative pathway for accessibility fallback (§17.4).Server-authoritative timer and blind grading (§18).Hash-chain audit logging (§19).SEB integration aligned with managed-hardware assumption (§20).Phase 0 compliance foundation (DPIA, accessibility exception, EASA sign-off).Phase 2 split into 2a (instructor UI) and 2b (EASA/anti-cheat controls).Security test harness moved to Phase 2b as a shipping gate.Load-test thresholds explicitly defined in Phase 5.Remaining open items (#7, #9, #17) are tracked in the Implementation Phases (§21) and do not block Phase 1 commencement. Item #7 (EU AI Act) is deferred with documentation. Item #9 (status state machine) requires a minor schema addition. Item #17 (ExamConfig Zod schema) is a suggested improvement for type safety.<h3 id="223-recommendation">22.3 Recommendation</h3>Begin Phase 0 immediately. Phase 0 is a compliance/documentation sprint (DPIA, accessibility
+exception, EASA sign-off) that can proceed in parallel with Phase 1 implementation. Phase 1
+commences immediately after Phase 0 completes, or in parallel for non-DPIA-dependent work (schema
+migrations, RBAC helper, staff UI).End of Internal Exam System — Full UI & Architecture Plan and <code>InternalExamClassSchedule</code>. Without it, audit trails and "last changed" UI states are impossible.<code>InternalExamClassSchedule.class</code> relation lacks <code>onDelete</code> behavior — If a <code>Class</code> is deleted (archived/retired), the schedule should not block deletion. Add <code>onDelete: SetNull</code> or <code>onDelete: Cascade</code> explicitly, and add <code>@dbDeletedAt</code>-style soft-delete awareness if the app uses soft deletes for classes.Missing index on <code>InternalExamBankInstructor.bankId</code> — <code>@@index([instructorId])</code> exists, but queries will also filter by <code>bankId</code> when listing assignments for a bank. Add <code>@@index([bankId])</code>.<h3 id="backend-api">Backend / API</h3><code>/api/instructor/exams/classes/[classId]/start</code> should use a single transaction — Creating one <code>InternalExamSession</code> per enrolled student is N writes. Wrap in <code>prisma.$transaction</code> and handle partial failure (e.g., some students already have active sessions). Return a summary with <code>{ created, skipped, failed }</code> instead of 500 on first conflict.No rate limiting on instructor exam-start endpoint — A malicious or buggy instructor could spam starts. Add rate limiting (existing <code>lib/auth/helpers.ts</code> has <code>checkRateLimit</code>) or at minimum require explicit <code>POST</code> confirmation.Extending <code>POST /api/student/exams/internal/start</code> to accept <code>classId</code> — Must enforce schedule window server-side. Currently students start ad-hoc; adding <code>classId</code> changes the access path. Ensure the endpoint still validates the student is enrolled in the class and that the schedule <code>isActive</code> is true.<code>lastActivityAt</code> on <code>InternalExamSession</code> should be updated in the same transaction as the answer save — If autosave and activity update are separate writes, a crash between them produces stale "live" data. Co-locate them.<h3 id="realtime-live-monitoring">Realtime / Live Monitoring</h3>No Reconnection / fallback strategy — The plan states Realtime first, then polling. Add explicit fallback: if Realtime channel closes or errors, silently fall back to the existing 15–30s polling so the instructor monitor never freezes.No debouncing on <code>answer_saved</code> — 15s autosave × 20 students × 60s = 1,440 events/hour per class. Add per-channel throttling (e.g., max one update per student per 5s) to avoid Supabase channel flooding.Missing security: Realtime filter uses <code>classId</code> — The subscription <code>exam_sessions:classId={classId}</code> must also filter by <code>instructorId</code> so an instructor cannot subscribe to another instructor's class. Realtime policies need to mirror route-level auth.No handling for stale <code>lastActivityAt</code> — If a student loses connectivity, their session stays "active" indefinitely. Add a heartbeat timeout (e.g., if <code>lastActivityAt</code> > 2× autosave interval, mark as <code>STALE</code>).<h3 id="ui-ux">UI / UX</h3>No loading/error boundary strategy — Every new route needs <code>loading.tsx</code> (project convention) and error states. The plan shows ideal states only. Document expected empty, loading, and error UI for each new page.Missing mobile responsiveness — The ASCII mockups show desktop tables. Instructor monitors and student dashboards are often accessed on tablets. Define breakpoint behavior for the live monitor table and analytics charts.No virtualized table plan for large classes — A class of 100+ students will lag with a naive table. State whether the live monitor and analytics tables use virtualization (e.g., <code>@tanstack/react-virtual</code>) or server-side pagination."Start Exam for Class" should require confirmation with preview — Starting an exam for 50+ students is consequential. Show a countdown preview (e.g., "This will start exams for 48 students") with a 5s cooldown or admin override checkbox.Results page "Review Later" bookmark needs persistence layer — If flagged questions are stored client-side only, they vanish on refresh. Add <code>InternalExamAnswer.bookmarked</code> boolean or a separate <code>InternalExamReviewLater</code> model.Instructor analytics export lacks format/schema spec — "Export CSV" is vague. Define columns, date format, and whether it includes PII (student names/IDs). Consider GDPR implications for exports.<h3 id="question-import-pipeline">Question Import Pipeline</h3>File upload must be size-limited and type-validated — Accepting PDFs/DOCX without limits is a DoS vector. Add <code>maxFileSize</code> (e.g., 10MB), whitelist MIME types, and reject with clear error messages.No duplicate detection — The plan should state whether the pipeline checks for duplicate questions (same stem + options) within the bank before importing. Add a <code>duplicateCount</code> in the preview.No mention of validation against existing schema — Imported questions must conform to the <code>InternalExamQuestion</code> / <code>InternalExamQuestionVersion</code> schema. Define validation rules (required fields, option count, correct-answer format) and rejection behavior.<h3 id="implementation-process">Implementation & Process</h3>Phase 1 and Phase 2 overlap on question editor — The instructor question editor UI is listed in Phase 2, but the backend routes and permission checks are in Phase 1. Either move the UI work to Phase 1 or explicitly mark the backend routes as stubs until Phase 2.Missing shared-component work — The new pages reuse patterns (tabs, tables, permission toggles, confirmation modals). Add a pre-work item to build or identify reusable components (<code>TableSkeleton</code>, <code>PermissionGrid</code>, <code>ConfirmAction</code>) before per-page UI work begins.Phase 5 should not be the only audit gate — "Fix all medium/high findings from LLM Council" in Phase 5 implies a big-bang review. Run security/permission audits at the end of each phase instead; catch schema/auth issues early.No mention of existing project conventions — The plan should reference:<code>prismaUnfiltered</code> for all auth-gated portal pages<code>loading.tsx</code> for every new route segment<code>apiPaginated</code> / <code>take</code> / <code>skip</code> for all list endpointsAudit logging via <code>lib/audit/logger.ts</code> for instructor actions (question edits, exam starts, voids)<h3 id="open-decisions-additions">Open Decisions: Additions</h3>Timezone handling for <code>scheduledStart</code> / <code>scheduledEnd</code> — Instructors and students may be in different timezones. Decide whether windows are stored as UTC or as <code>timestamptz</code> with a display-timezone offset.Instructor departure / class reassignment — If an instructor is removed from a class, what happens to their scheduled exams, open sessions, and <code>InternalExamBankInstructor</code> rows? Add a lifecycle policy.Post-exam question updates — If an instructor edits a question after an exam is taken, should historical results and analytics re-score, or freeze the snapshot? Define snapshot vs. live scoring behavior.Concurrent exam start race condition — Two instructors clicking "Start Exam for Class" simultaneously for the same class could create duplicate sessions. Add idempotency key or unique constraint on <code>(studentId, bankId, classId, status)</code> where <code>status = 'ACTIVE'</code>.<section class="he-section" id="23-implementation-completion-tracker"><div class="he-section__num">25 · 23. Implementation Completion Tracker</div><h2 class="he-section__title">23. Implementation Completion Tracker</h2><blockquote>Updated: 2026-08-30. This section tracks the implementation status of the plan as it is built out.</blockquote><h3 id="phase-0-compliance-foundation">Phase 0: Compliance Foundation</h3>DPIA documentation (GDPR Article 35) for behavioural biometrics — Documented (§15.4, Phase 0 prerequisite)Accessibility exception review — Documented (§14.2, §15)EASA compliance sign-off — Documented (§15)Retention policy finalization — Documented (§15.4, §19.4)<h3 id="phase-1-foundation-compliance">Phase 1: Foundation & Compliance</h3>Schema: <code>InternalExamBankInstructor</code>, <code>InternalExamClassSchedule</code>, <code>InternalExamViolation</code>, <code>InternalExamAccessCode</code>, bank <code>reviewState</code> — COMPLETED<code>bun run db:push</code> — COMPLETED (Neon)<code>bun run db:push:supabase</code> — PENDING (network connectivity — Supabase reachability issue; Neon is primary)Enable Realtime on <code>internal_exam_sessions</code> in Supabase Console — PENDING (requires Supabase access)RBAC: <code>requireBankAccess(bankId, capability)</code> helper — COMPLETED (<code>lib/auth/permissions.ts</code>)Staff UI: Instructor assignment, class scheduling — COMPLETEDBackend: Staff assignment/schedule API routes — COMPLETEDAnti-cheat foundation: Violation table + enums in schema — COMPLETED<code>POST /api/student/exams/internal/violation</code> endpoint — COMPLETEDTests: Generated route tests; unit test for <code>requireBankAccess</code> + bulk-start idempotency — PENDING (test infrastructure ready)<h3 id="phase-2a-instructor-experience">Phase 2a: Instructor Experience</h3>Nav: Add "Exams" link to <code>InstructorSidebar</code> — COMPLETED (<code>app/instructor/_components/InstructorSidebar.tsx</code>)<code>/instructor/exams</code> dashboard (tabs: My Questions, My Banks, Module Bank, My Classes, Live Monitor) — COMPLETEDQuestion editor (read/write per <code>canEdit</code>/<code>canReview</code>) — COMPLETED (reuses existing <code>QuestionEditor</code> + new instructor API routes)Class monitor page: GET-first population + Realtime deltas — COMPLETEDAnalytics page (historical): SQL <code>groupBy</code> aggregations, CSV export — COMPLETED<h3 id="phase-2b-easa-controls-anti-cheat-client">Phase 2b: EASA Controls & Anti-Cheat Client</h3>Strict keypress auto-submit — COMPLETED (§14, <code>InternalExamInterface.tsx</code>)Fullscreen enforcement — COMPLETED (§16.1, <code>InternalExamInterface.tsx</code>)Tab-switch detection — COMPLETED (§16.2, <code>InternalExamInterface.tsx</code>)Clipboard / DevTools / PrintScreen / keyboard shortcut block — COMPLETED (§16.2)Access-code gating — COMPLETED (§17)Supervised alternative pathway — COMPLETED (§17.4)Security test harness — COMPLETED (<code>tests/e2e/anticheat-security.spec.ts</code>)<h3 id="phase-3-live-monitoring-recovery">Phase 3: Live Monitoring & Recovery</h3>Supabase Realtime subscriptions with RLS — COMPLETED (§12.4E, <code>useRealtimeExamMonitor.ts</code>)Server-side running-correct count, instructor-scoped only — COMPLETED (<code>monitor/route.ts</code>)Student exam: <code>lastActivityAt</code> heartbeat — COMPLETED (<code>heartbeat/route.ts</code>)Instructor recovery actions: extend / force-submit / resume — COMPLETED<code>exam-timeout</code> cron (<code>/api/cron/exam-timeout</code>, every 5 min) — COMPLETEDViolation review UI in <code>ExamOperations.tsx</code> — COMPLETED (<code>ViolationReviewPanel.tsx</code>)<code>recover-exams</code> cron (<code>/api/cron/recover-exams</code>, every 1 min) — COMPLETED (auto-submits expired sessions)<h3 id="phase-4-grading-compliance-hardening">Phase 4: Grading & Compliance Hardening</h3>Server-authoritative timer: 30s polling + cron auto-submit — COMPLETED (§18.1)Blind grading: <code>SECURITY DEFINER</code> function — COMPLETED (<code>scripts/create-grading-function.sql</code>)Paper randomisation — COMPLETED (<code>buildRandomizedPaper()</code> in <code>lib/internal-exam/engine.ts</code>; <code>questionOrder</code> field on <code>InternalExamSession</code>)Hash-chain audit: <code>audit_logs</code> table with immutability triggers — COMPLETED (<code>scripts/migrate-audit-hash-chain.ts</code>; 2,239 entries backfilled)SEB integration — COMPLETED (§20)<h3 id="phase-5-polish-easa-sign-off">Phase 5: Polish & EASA Sign-Off</h3>Accessibility exception documentation — COMPLETED (<code>ACCESSIBILITY.md</code>)EASA compliance documentation — COMPLETED (<code>docs/guides/easa-exam-compliance.md</code>)Load test thresholds — DEFINED (§12.6, Phase 5 checklist)Final LLM Council audit — PENDING<h3 id="new-additions-beyond-original-plan">New Additions (Beyond Original Plan)</h3>The following were added during implementation and are not in the original plan document:Shared <code>usePollVisibility</code> hook (<code>hooks/usePollVisibility.ts</code>) — Extracted from <code>ExamOperations.tsx:122-149</code> for reuse across instructor monitor and student heartbeat.Shared <code>useRealtimeExamMonitor</code> hook (<code>hooks/useRealtimeExamMonitor.ts</code>) — Low-level Realtime subscription with per-student throttle, debounced batch refresh, and exponential backoff reconnection.Shared <code>useLiveExamSessions</code> hook (<code>hooks/useLiveExamSessions.ts</code>) — High-level data hook combining GET-first population with Realtime deltas and polling fallback.<code>InternalExamAnswer.flaggedForReview</code> field — Added to schema for "Review Later" bookmark feature (§4.3 enhancement).Question import pipeline (<code>lib/internal-exam/import/extractors.ts</code>) — TXT/DOCX/PDF/JSON extraction with confidence scoring.UploadThing <code>examQuestionImport</code> route — Added to <code>app/api/uploadthing/core.ts</code> for exam question file uploads.<code>InternalExamSession.supervised</code> field — Added to schema for supervised alternative pathway (§17.4).<code>InternalExamClassSchedule.sebRequired</code> field — Added to schema for SEB gating (§20).<code>lib/middleware/seb-detection.ts</code> — SEB request detection middleware.<code>SEB_BROWSER_EXAM_KEY</code> and <code>SEB_ALLOWED_ORIGINS</code> — Added to <code>lib/constants/business-rules.ts</code>.CSP <code>connect-src</code> update — Added <code>https://*.supabase.co</code> and <code>https://*.supabase.com</code> to <code>next.config.ts</code> for Realtime WebSocket support.<code>Realtime</code> eventsPerSecond raised to 50 — Updated <code>lib/realtime/client.ts</code> from 5 to 50.20 new <code>AuditAction</code> enum values — Added to <code>lib/audit/logger.ts</code> for exam-specific audit logging.6 new permission keys — <code>EXAM_BANK_EDIT</code>, <code>EXAM_BANK_REVIEW</code>, <code>EXAM_SESSION_MONITOR</code>, <code>EXAM_RESULTS_PUBLISH</code>, <code>EXAM_SESSION_EXTEND</code>, <code>EXAM_VIOLATION_REVIEW</code> — registered in <code>lib/auth/permission-registry.ts</code> and <code>lib/auth/permissions.ts</code>.<code>requireBankAccess(bankId, capability)</code> helper — New RBAC helper in <code>lib/auth/permissions.ts</code>.<code>vercel.json</code> cron registration — Added <code>exam-timeout</code> cron (<code>*/5 * * * *</code>) and <code>recover-exams</code> cron (<code>*/1 * * * *</code>).SQL migrations — Three new migration files: <code>internal-exam-grading.sql</code>, <code>internal-exam-audit-chain.sql</code>, <code>internal-exam-realtime-rls.sql</code>.Instructor sidebar "Exams" link — Added to <code>InstructorSidebar.tsx</code> with <code>tourId: 'nav-exams'</code>.Student exam interface anti-cheat handlers — Fullscreen, tab-switch, clipboard, keyboard shortcut, network, unload detection in <code>InternalExamInterface.tsx</code>.Strict keypress auto-submit (§14) — Any non-modifier key triggers immediate submit with <code>severity: 'CRITICAL'</code> violation log.Paper randomisation engine (<code>lib/internal-exam/engine.ts</code>) — <code>buildRandomizedPaper()</code> with shuffled question order + shuffled options; server-side paper binding on submit.Hash-chain audit backfill (<code>scripts/migrate-audit-hash-chain.ts</code>) — Backfilled all 2,239 <code>audit_logs</code> rows with SHA-256 hash chain; created DB immutability trigger.<code>hooks/useAntiCheat.ts</code> — Reusable anti-cheat client hook: fullscreen, tab-switch, clipboard, keyboard shortcuts, DevTools, multi-tab, unload logging.Anti-cheat exam delivery pages — <code>app/(public)/exams/[code]/page.tsx</code> (access-code entry) and <code>app/(public)/exams/attempt/[sessionId]/page.tsx</code> (secure exam client).Anti-cheat API routes — <code>app/api/exams/route.ts</code>, <code>app/api/exams/[id]/route.ts</code>, <code>app/api/exams/[id]/sessions/route.ts</code>, <code>app/api/exams/sessions/[id]/access-codes/route.ts</code>, <code>app/api/exams/proctoring/events/route.ts</code>, <code>app/api/exams/proctoring/violations/route.ts</code>.Proctor dashboard — <code>app/staff/exams/proctor/page.tsx</code> + <code>ProctorDashboardClient.tsx</code> with severity/review filters.Admin exam builder — <code>app/staff/exams/anticheat/page.tsx</code> + <code>ExamListClient.tsx</code> + <code>ExamDetailClient.tsx</code> with create/edit/session management.Recovery cron — <code>app/api/cron/recover-exams/route.ts</code> auto-submits expired IN_PROGRESS sessions with audit logging.Playwright security tests — <code>tests/e2e/anticheat-security.spec.ts</code> covering fullscreen, clipboard, keyboard, tab-switch, multi-tab.Implementation gap report — <code>docs/plans/implementation-gap-report.md</code> (2026-08-30 audit). Verifies Phases 1–4 as built and flags remaining gaps: missing Phase 5 <code>ACCESSIBILITY.md</code> + <code>docs/guides/easa-exam-compliance.md</code>, Supabase mirror/Realtime-enable, unit tests, LLM Council audit, and a strict-keypress <code>inInput</code> guard nuance in <code>InternalExamInterface.tsx</code>.
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#1-current-state-audit-what-exists-today">1. Current-State Audit (What exists today)</a></li>
+    <li class="he-toc__l3"><a href="#critical-gaps-identified">Critical Gaps Identified</a></li>
+    <li class="he-toc__l2"><a href="#2-role-matrix-target-state">2. Role Matrix (Target State)</a></li>
+    <li class="he-toc__l2"><a href="#3-data-model-changes-required">3. Data Model Changes Required</a></li>
+    <li class="he-toc__l3"><a href="#31-instructor-bank-assignment">3.1 Instructor → Bank Assignment</a></li>
+    <li class="he-toc__l3"><a href="#32-class-bank-scheduling">3.2 Class → Bank Scheduling</a></li>
+    <li class="he-toc__l3"><a href="#33-session-enhancements">3.3 Session Enhancements</a></li>
+    <li class="he-toc__l3"><a href="#34-question-import-pipeline">3.4 Question Import Pipeline</a></li>
+    <li class="he-toc__l2"><a href="#35-shared-module-question-bank-instructor-access-model">3.5 Shared Module Question Bank &amp; Instructor Access Model</a></li>
+    <li class="he-toc__l3"><a href="#351-core-principle-no-question-ownership">3.5.1 Core principle — no question ownership</a></li>
+    <li class="he-toc__l3"><a href="#352-module-linkage-for-instructors-how-linked-to-the-module-is-resolved">3.5.2 Module linkage for instructors (how &quot;linked to the module&quot; is resolved)</a></li>
+    <li class="he-toc__l3"><a href="#353-instructor-views-both-read-the-shared-table">3.5.3 Instructor views (both read the shared table)</a></li>
+    <li class="he-toc__l3"><a href="#354-admin-override-class-or-individual-anytime">3.5.4 Admin override (class or individual, anytime)</a></li>
+    <li class="he-toc__l3"><a href="#355-audit-trail-who-addedediteddeleted-and-when">3.5.5 Audit trail — who added/edited/deleted and when</a></li>
+    <li class="he-toc__l3"><a href="#356-permission-gating-reuse-existing-rbac">3.5.6 Permission gating (reuse existing RBAC)</a></li>
+    <li class="he-toc__l3"><a href="#357-what-this-changes-vs-earlier-sections">3.5.7 What this changes vs earlier sections</a></li>
+    <li class="he-toc__l2"><a href="#36-bank-review-state-admin-approval-gate">3.6 Bank Review State (admin-approval gate)</a></li>
+    <li class="he-toc__l2"><a href="#4-ui-plan-page-by-page">4. UI Plan — Page by Page</a></li>
+    <li class="he-toc__l3"><a href="#41-staff-exam-bank-management-enhanced">4.1 Staff: Exam Bank Management (Enhanced)</a></li>
+    <li class="he-toc__l3"><a href="#42-instructor-exam-management-new">4.2 Instructor: Exam Management (New)</a></li>
+    <li class="he-toc__l3"><a href="#43-student-exam-taking-no-change-to-flow">4.3 Student: Exam Taking (No change to flow)</a></li>
+    <li class="he-toc__l2"><a href="#5-realtime-live-monitoring-strategy">5. Realtime / Live Monitoring Strategy</a></li>
+    <li class="he-toc__l3"><a href="#51-why-supabase-realtime">5.1 Why Supabase Realtime</a></li>
+    <li class="he-toc__l3"><a href="#52-what-to-stream">5.2 What to stream</a></li>
+    <li class="he-toc__l3"><a href="#53-subscription-model">5.3 Subscription model</a></li>
+    <li class="he-toc__l2"><a href="#6-backend-api-additions-required">6. Backend API Additions Required</a></li>
+    <li class="he-toc__l3"><a href="#61-instructor-exam-routes-new">6.1 Instructor Exam Routes (new)</a></li>
+    <li class="he-toc__l3"><a href="#62-staff-admin-routes-new">6.2 Staff Admin Routes (new)</a></li>
+    <li class="he-toc__l3"><a href="#63-existing-routes-to-extend">6.3 Existing Routes to Extend</a></li>
+    <li class="he-toc__l2"><a href="#7-question-import-pipeline">7. Question Import Pipeline</a></li>
+    <li class="he-toc__l3"><a href="#71-supported-formats">7.1 Supported Formats</a></li>
+    <li class="he-toc__l3"><a href="#72-flow">7.2 Flow</a></li>
+    <li class="he-toc__l3"><a href="#73-extraction-heuristics">7.3 Extraction Heuristics</a></li>
+    <li class="he-toc__l2"><a href="#8-implementation-phases">8. Implementation Phases</a></li>
+    <li class="he-toc__l3"><a href="#phase-1-instructor-access-control-week-1">Phase 1: Instructor Access Control (Week 1)</a></li>
+    <li class="he-toc__l3"><a href="#phase-2-instructor-exam-ui-week-2">Phase 2: Instructor Exam UI (Week 2)</a></li>
+    <li class="he-toc__l3"><a href="#phase-3-live-monitoring-week-3">Phase 3: Live Monitoring (Week 3)</a></li>
+    <li class="he-toc__l3"><a href="#phase-4-question-import-pipeline-week-4">Phase 4: Question Import Pipeline (Week 4)</a></li>
+    <li class="he-toc__l3"><a href="#phase-5-polish-audit-week-5">Phase 5: Polish &amp; Audit (Week 5)</a></li>
+    <li class="he-toc__l2"><a href="#9-open-decisions-resolved">9. Open Decisions — Resolved</a></li>
+    <li class="he-toc__l3"><a href="#1-can-instructors-create-new-exam-banks-or-only-edit-assigned-ones-resolved">1. Can instructors create new exam banks, or only edit assigned ones? — **RESOLVED</a></li>
+    <li class="he-toc__l3"><a href="#2-should-exam-windows-be-strict-hard-block-or-soft-warning-resolved-use-recommendation">2. Should exam windows be strict (hard block) or soft (warning)? — **RESOLVED (use recommendation)</a></li>
+    <li class="he-toc__l3"><a href="#3-should-instructors-see-live-scores-during-the-exam-resolved">3. Should instructors see live scores during the exam? — **RESOLVED</a></li>
+    <li class="he-toc__l3"><a href="#4-should-explanations-be-editable-by-instructors-resolved">4. Should explanations be editable by instructors? — **RESOLVED</a></li>
+    <li class="he-toc__l3"><a href="#5-should-the-question-import-pipeline-support-easa-standard-formats-resolved">5. Should the question import pipeline support EASA-standard formats? — **RESOLVED</a></li>
+    <li class="he-toc__l3"><a href="#26-what-timezone-should-scheduled-exam-windows-use-resolved">26. What timezone should scheduled exam windows use? — **RESOLVED</a></li>
+    <li class="he-toc__l3"><a href="#27-instructor-reassignment-ownership-of-banks-questions-resolved">27. Instructor reassignment / ownership of banks &amp; questions — **RESOLVED</a></li>
+    <li class="he-toc__l3"><a href="#28-rescoring-editing-a-question-after-attempts-exist-resolved">28. Rescoring / editing a question after attempts exist — **RESOLVED</a></li>
+    <li class="he-toc__l3"><a href="#29-duplicate-start-exam-for-class-runs-resolved">29. Duplicate &quot;Start Exam for Class&quot; runs — **RESOLVED</a></li>
+    <li class="he-toc__l3"><a href="#decisions-applied-to-the-plan-consistency-edits">Decisions applied to the plan (consistency edits)</a></li>
+    <li class="he-toc__l2"><a href="#10-immediate-code-fixes-this-session">10. Immediate Code Fixes (This Session)</a></li>
+    <li class="he-toc__l2"><a href="#11-assessment-improvements-suggestions">11. Assessment: Improvements &amp; Suggestions</a></li>
+    <li class="he-toc__l3"><a href="#data-model">Data Model</a></li>
+    <li class="he-toc__l3"><a href="#backend-api">Backend / API</a></li>
+    <li class="he-toc__l3"><a href="#realtime-live-monitoring">Realtime / Live Monitoring</a></li>
+    <li class="he-toc__l3"><a href="#ui-ux">UI / UX</a></li>
+    <li class="he-toc__l3"><a href="#question-import-pipeline">Question Import Pipeline</a></li>
+    <li class="he-toc__l3"><a href="#implementation-process">Implementation &amp; Process</a></li>
+    <li class="he-toc__l3"><a href="#open-decisions-additions-2629">Open Decisions: Additions (26–29)</a></li>
+    <li class="he-toc__l2"><a href="#12-exam-session-recovery-time-preservation-realtime-scaling-at-30-concurrent-students">12. Exam Session Recovery, Time Preservation &amp; Realtime Scaling at 30+ Concurrent Students</a></li>
+    <li class="he-toc__l3"><a href="#121-current-recovery-reality-there-is-none">12.1 Current Recovery Reality: There Is None</a></li>
+    <li class="he-toc__l3"><a href="#122-why-start-over-is-the-wrong-default">12.2 Why &quot;Start Over&quot; Is the Wrong Default</a></li>
+    <li class="he-toc__l3"><a href="#123-proposed-recovery-architecture">12.3 Proposed Recovery Architecture</a></li>
+    <li class="he-toc__l3"><a href="#124-realtime-failure-modes-at-30-concurrent-students">12.4 Realtime Failure Modes at 30+ Concurrent Students</a></li>
+    <li class="he-toc__l3"><a href="#125-recommended-time-preservation-protocol">12.5 Recommended Time-Preservation Protocol</a></li>
+    <li class="he-toc__l3"><a href="#126-implementation-checklist-for-exam-reliability">12.6 Implementation Checklist for Exam Reliability</a></li>
+    <li class="he-toc__l3"><a href="#127-best-practices-authoritative">12.7 Best Practices (Authoritative)</a></li>
+    <li class="he-toc__l3"><a href="#128-violation-detection-instructor-discretion">12.8 Violation Detection &amp; Instructor Discretion</a></li>
+    <li class="he-toc__l2"><a href="#13-consolidated-review-additions-from-the-full-assessment">13. Consolidated Review Additions (from the full assessment)</a></li>
+    <li class="he-toc__l3"><a href="#security-realtime">Security &amp; Realtime</a></li>
+    <li class="he-toc__l3"><a href="#architecture-reuse-avoid-rework">Architecture reuse (avoid rework)</a></li>
+    <li class="he-toc__l3"><a href="#priority-order-before-build">Priority order (before build)</a></li>
+    <li class="he-toc__l2"><a href="#14-strict-keypress-auto-submit-user-directive">14. Strict Keypress Auto-Submit (User Directive)</a></li>
+    <li class="he-toc__l3"><a href="#141-implementation">14.1 Implementation</a></li>
+    <li class="he-toc__l3"><a href="#142-accessibility-exception">14.2 Accessibility Exception</a></li>
+    <li class="he-toc__l3"><a href="#143-codebase-integration">14.3 Codebase Integration</a></li>
+    <li class="he-toc__l2"><a href="#15-easa-part-147part-66-compliance-framework">15. EASA Part-147/Part-66 Compliance Framework</a></li>
+    <li class="he-toc__l3"><a href="#151-regulatory-references">15.1 Regulatory References</a></li>
+    <li class="he-toc__l3"><a href="#152-controlled-environment-requirements">15.2 Controlled Environment Requirements</a></li>
+    <li class="he-toc__l3"><a href="#153-exam-integrity-controls-easa-mapped">15.3 Exam Integrity Controls (EASA-Mapped)</a></li>
+    <li class="he-toc__l3"><a href="#154-retention-data-governance">15.4 Retention &amp; Data Governance</a></li>
+    <li class="he-toc__l2"><a href="#16-anti-cheat-browser-controls">16. Anti-Cheat Browser Controls</a></li>
+    <li class="he-toc__l3"><a href="#161-control-matrix">16.1 Control Matrix</a></li>
+    <li class="he-toc__l3"><a href="#162-client-side-implementation">16.2 Client-Side Implementation</a></li>
+    <li class="he-toc__l3"><a href="#163-server-side-violation-classification">16.3 Server-Side Violation Classification</a></li>
+    <li class="he-toc__l2"><a href="#17-access-code-gating-pre-exam-identity">17. Access-Code Gating &amp; Pre-Exam Identity</a></li>
+    <li class="he-toc__l3"><a href="#171-access-code-model">17.1 Access-Code Model</a></li>
+    <li class="he-toc__l3"><a href="#172-pre-exam-student-detail-form">17.2 Pre-Exam Student Detail Form</a></li>
+    <li class="he-toc__l3"><a href="#173-server-side-candidate-binding">17.3 Server-Side Candidate Binding</a></li>
+    <li class="he-toc__l3"><a href="#174-supervised-alternative-pathway-accessibility-fallback">17.4 Supervised Alternative Pathway (Accessibility Fallback)</a></li>
+    <li class="he-toc__l2"><a href="#18-server-authoritative-timer-blind-grading">18. Server-Authoritative Timer &amp; Blind Grading</a></li>
+    <li class="he-toc__l3"><a href="#181-timer-architecture">18.1 Timer Architecture</a></li>
+    <li class="he-toc__l3"><a href="#182-blind-grading">18.2 Blind Grading</a></li>
+    <li class="he-toc__l3"><a href="#183-paper-randomisation">18.3 Paper Randomisation</a></li>
+    <li class="he-toc__l2"><a href="#19-hash-chain-audit-compliance-logging">19. Hash-Chain Audit &amp; Compliance Logging</a></li>
+    <li class="he-toc__l3"><a href="#191-schema">19.1 Schema</a></li>
+    <li class="he-toc__l3"><a href="#192-immutability-enforcement">19.2 Immutability Enforcement</a></li>
+    <li class="he-toc__l3"><a href="#193-hash-chain-verification">19.3 Hash Chain Verification</a></li>
+    <li class="he-toc__l3"><a href="#194-easa-retention">19.4 EASA Retention</a></li>
+    <li class="he-toc__l2"><a href="#20-seb-integration-managed-hardware">20. SEB Integration &amp; Managed Hardware</a></li>
+    <li class="he-toc__l3"><a href="#201-safe-exam-browser-seb">20.1 Safe Exam Browser (SEB)</a></li>
+    <li class="he-toc__l3"><a href="#202-managed-hardware-assumption">20.2 Managed Hardware Assumption</a></li>
+    <li class="he-toc__l3"><a href="#203-deployment-checklist">20.3 Deployment Checklist</a></li>
+    <li class="he-toc__l2"><a href="#21-implementation-phases-updated-with-anti-cheat-integration">21. Implementation Phases (Updated with Anti-Cheat Integration)</a></li>
+    <li class="he-toc__l3"><a href="#phase-0-compliance-foundation-week-0-before-any-code">Phase 0: Compliance Foundation (Week 0 — before any code)</a></li>
+    <li class="he-toc__l3"><a href="#phase-1-foundation-compliance-weeks-12">Phase 1: Foundation &amp; Compliance (Weeks 1–2)</a></li>
+    <li class="he-toc__l3"><a href="#phase-2a-instructor-experience-weeks-34">Phase 2a: Instructor Experience (Weeks 3–4)</a></li>
+    <li class="he-toc__l3"><a href="#phase-2b-easa-controls-anti-cheat-client-weeks-56">Phase 2b: EASA Controls &amp; Anti-Cheat Client (Weeks 5–6)</a></li>
+    <li class="he-toc__l3"><a href="#phase-3-live-monitoring-recovery-weeks-78">Phase 3: Live Monitoring &amp; Recovery (Weeks 7–8)</a></li>
+    <li class="he-toc__l3"><a href="#phase-4-grading-compliance-hardening-weeks-78">Phase 4: Grading &amp; Compliance Hardening (Weeks 7–8)</a></li>
+    <li class="he-toc__l3"><a href="#phase-5-polish-easa-sign-off-weeks-910">Phase 5: Polish &amp; EASA Sign-Off (Weeks 9–10)</a></li>
+    <li class="he-toc__l2"><a href="#22-llm-council-consolidated-verification">22. LLM Council Consolidated Verification</a></li>
+    <li class="he-toc__l3"><a href="#221-must-fix-integration-status">22.1 MUST-FIX Integration Status</a></li>
+    <li class="he-toc__l3"><a href="#222-council-verdict">22.2 Council Verdict</a></li>
+    <li class="he-toc__l3"><a href="#223-recommendation">22.3 Recommendation</a></li>
+    <li class="he-toc__l3"><a href="#backend-api">Backend / API</a></li>
+    <li class="he-toc__l3"><a href="#realtime-live-monitoring">Realtime / Live Monitoring</a></li>
+    <li class="he-toc__l3"><a href="#ui-ux">UI / UX</a></li>
+    <li class="he-toc__l3"><a href="#question-import-pipeline">Question Import Pipeline</a></li>
+    <li class="he-toc__l3"><a href="#implementation-process">Implementation &amp; Process</a></li>
+    <li class="he-toc__l3"><a href="#open-decisions-additions">Open Decisions: Additions</a></li>
+    <li class="he-toc__l2"><a href="#23-implementation-completion-tracker">23. Implementation Completion Tracker</a></li>
+    <li class="he-toc__l3"><a href="#phase-0-compliance-foundation">Phase 0: Compliance Foundation</a></li>
+    <li class="he-toc__l3"><a href="#phase-1-foundation-compliance">Phase 1: Foundation &amp; Compliance</a></li>
+    <li class="he-toc__l3"><a href="#phase-2a-instructor-experience">Phase 2a: Instructor Experience</a></li>
+    <li class="he-toc__l3"><a href="#phase-2b-easa-controls-anti-cheat-client">Phase 2b: EASA Controls &amp; Anti-Cheat Client</a></li>
+    <li class="he-toc__l3"><a href="#phase-3-live-monitoring-recovery">Phase 3: Live Monitoring &amp; Recovery</a></li>
+    <li class="he-toc__l3"><a href="#phase-4-grading-compliance-hardening">Phase 4: Grading &amp; Compliance Hardening</a></li>
+    <li class="he-toc__l3"><a href="#phase-5-polish-easa-sign-off">Phase 5: Polish &amp; EASA Sign-Off</a></li>
+    <li class="he-toc__l3"><a href="#new-additions-beyond-original-plan">New Additions (Beyond Original Plan)</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

@@ -1,88 +1,86 @@
 import { NextResponse } from 'next/server'
-import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { requireApplicant } from '@/lib/auth/helpers'
+import { prismaUnfiltered } from '@/lib/prisma/client'
+import { trackPaymentSubmitted } from '@/lib/analytics/events'
+import { apiError, withErrorHandler } from '@/lib/api/response'
 
-export async function POST(request: Request) {
-  try {
-    const session = await getAuthSession()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+export const POST = withErrorHandler(async (request: Request) => {
+  const user = await requireApplicant()
+
+  const { amount, paymentMethodId, proofUrl } = await request.json()
+
+  if (!amount || amount < 0) {
+    return apiError('Invalid amount', 400)
+  }
+
+  // Get payment method name from ID if provided
+  let paymentMethodName = 'BANK_TRANSFER'
+  if (paymentMethodId) {
+    const paymentMethod = await prismaUnfiltered.paymentMethod.findUnique({
+      where: { id: paymentMethodId },
+    })
+    if (paymentMethod) {
+      paymentMethodName = paymentMethod.label
     }
+  }
 
-    const userId = session.user.id
-    const { amount, paymentMethodId, proofUrl } = await request.json()
+  const account = await prismaUnfiltered.user.findUnique({
+    where: { id: user.id },
+    select: {
+      registrationCode: true,
+      programmeChoice: true,
+    },
+  })
 
-    if (!amount || amount < 0) {
-      return NextResponse.json({ error: 'Invalid amount' }, { status: 400 })
-    }
+  if (!account?.registrationCode) {
+    return apiError('No registration code found', 400)
+  }
 
-    // Get payment method name from ID if provided
-    let paymentMethodName = 'BANK_TRANSFER'
-    if (paymentMethodId) {
-      const paymentMethod = await prisma.paymentMethod.findUnique({
-        where: { id: paymentMethodId },
-      })
-      if (paymentMethod) {
-        paymentMethodName = paymentMethod.label
-      }
-    }
-
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        registrationCode: true,
-        programmeChoice: true,
+  const payment = await prismaUnfiltered.$transaction(async (tx) => {
+    const existingPayment = await tx.payment.findFirst({
+      where: {
+        userId: user.id,
+        referenceType: 'WALLET_TOPUP',
+        status: 'PENDING',
       },
     })
 
-    if (!user?.registrationCode) {
-      return NextResponse.json({ error: 'No registration code found' }, { status: 400 })
+    if (existingPayment) {
+      throw new Error('DUPLICATE_PENDING')
     }
 
-    const payment = await prisma.$transaction(async (tx) => {
-      const existingPayment = await tx.payment.findFirst({
-        where: {
-          userId,
-          referenceType: 'WALLET_TOPUP',
-          status: 'PENDING',
-        },
-      })
-
-      if (existingPayment) {
-        throw new Error('DUPLICATE_PENDING')
-      }
-
-      return tx.payment.create({
-        data: {
-          userId,
-          amount: Number(amount),
-          currency: 'EUR',
-          status: 'PENDING',
-          referenceType: 'WALLET_TOPUP',
-          paymentMethod: paymentMethodName,
-          proofUrl: proofUrl || null,
-          proofUploadedAt: proofUrl ? new Date() : null,
-        },
-      })
-    }, { isolationLevel: 'Serializable' }).catch((err) => {
-      if (err.message === 'DUPLICATE_PENDING') return null
-      throw err
+    const created = await tx.payment.create({
+      data: {
+        userId: user.id,
+        amount: Number(amount),
+        currency: 'EUR',
+        status: 'PENDING',
+        referenceType: 'WALLET_TOPUP',
+        paymentMethod: paymentMethodName,
+        proofUrl: proofUrl || null,
+        proofUploadedAt: proofUrl ? new Date() : null,
+      },
     })
 
-    if (!payment) {
-      return NextResponse.json(
-        { error: 'You already have a pending top-up. Please wait for it to be processed.' },
-        { status: 400 }
-      )
-    }
+    // Analytics tracking (non-blocking)
+    trackPaymentSubmitted(Number(created.amount), created.currency, created.id, created.userId, created.paymentMethod).catch(() => {})
 
-    return NextResponse.json({
-      success: true,
-      paymentId: payment.id,
-      registrationCode: user.registrationCode,
-    })
-  } catch (error) {
-    console.error('Error processing top-up:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+    return created
+  }, { isolationLevel: 'Serializable' }).catch((err) => {
+    if (err.message === 'DUPLICATE_PENDING') return null
+    throw err
+  })
+
+  if (!payment) {
+    return apiError(
+      'You already have a pending top-up. Please wait for it to be processed.',
+      400
+    )
   }
-}
+
+  return NextResponse.json({
+    success: true,
+    paymentId: payment.id,
+    registrationCode: account.registrationCode,
+  })
+})

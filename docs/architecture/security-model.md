@@ -2,7 +2,7 @@
 
 ## Middleware Chain
 ```
-Request → middleware.ts
+Request → proxy.ts
   → Check if public route → allow
   → Get JWT token
   → Check account status (SUSPENDED/DEACTIVATED → login)
@@ -24,6 +24,11 @@ Request → middleware.ts
 - Student routes verify `user.role === 'STUDENT'`
 - Cron routes require `Authorization: Bearer ${CRON_SECRET}`
 - Webhooks verify signatures (Stripe) or tokens (UploadThing)
+
+## Data Access Convention
+- All portal code uses `prismaUnfiltered` for database queries
+- The `prisma` default export (with RLS/soft-delete extensions) is not used by active portal code
+- Row-level ownership is enforced via explicit `userId` filters in query `where` clauses, not via PostgreSQL RLS policies
 
 ## Pool Join Race Condition Prevention
 ```sql

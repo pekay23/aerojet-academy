@@ -124,7 +124,7 @@ export default function InternalExamDashboard() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-8 w-8 animate-spin text-aerojet-blue" />
+        <Loader2 className="h-8 w-8 animate-spin text-blue-800" />
       </div>
     )
   }
@@ -162,7 +162,7 @@ export default function InternalExamDashboard() {
               className={`h-full rounded-full transition-all ${
                 data.completionWindow.percentElapsed > 80 ? 'bg-red-500'
                 : data.completionWindow.percentElapsed > 60 ? 'bg-amber-500'
-                : 'bg-aerojet-blue'
+                : 'bg-blue-800'
               }`}
               style={{ width: `${data.completionWindow.percentElapsed}%` }}
             />
@@ -194,7 +194,7 @@ export default function InternalExamDashboard() {
           <p className="mt-1 text-2xl font-bold text-green-800 dark:text-green-200">{data.summary.passedModules}</p>
           <p className="text-xs text-green-600">Passed</p>
         </div>
-        <div className="rounded-xl border border-aerojet-blue/20 bg-blue-50 p-4 text-center dark:border-blue-800/50 dark:bg-blue-900/10">
+        <div className="rounded-xl border border-blue-800/20 bg-blue-50 p-4 text-center dark:border-blue-800/50 dark:bg-blue-900/10">
           <CheckCircle2 className="mx-auto h-5 w-5 text-aerojet-blue" />
           <p className="mt-1 text-2xl font-bold text-aerojet-blue">{data.summary.progressPercent}%</p>
           <p className="text-xs text-slate-500">Complete</p>
@@ -246,7 +246,7 @@ export default function InternalExamDashboard() {
                     <button
                       onClick={() => setShowLobby(bank.bankId)}
                       disabled={starting === bank.bankId}
-                      className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50 dark:bg-aerojet-sky"
+                      className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90 disabled:opacity-50 dark:bg-sky-400"
                     >
                       {starting === bank.bankId ? (
                         <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -282,7 +282,7 @@ export default function InternalExamDashboard() {
                           type="checkbox"
                           checked={!!confirmedDetails[bank.bankId]}
                           onChange={(event) => setConfirmedDetails(prev => ({ ...prev, [bank.bankId]: event.target.checked }))}
-                          className="mt-0.5 h-4 w-4 rounded border-slate-300 text-aerojet-blue focus:ring-aerojet-blue"
+                          className="mt-0.5 h-4 w-4 rounded border-slate-300 text-aerojet-blue focus:ring-blue-800"
                         />
                         <span>I confirm these details are correct for this exam attempt.</span>
                       </label>

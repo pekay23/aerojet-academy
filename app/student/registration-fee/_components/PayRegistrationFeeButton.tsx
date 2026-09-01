@@ -65,7 +65,7 @@ export default function PayRegistrationFeeButton({
       <button
         onClick={handlePay}
         disabled={loading}
-        className="flex w-full items-center justify-center gap-2 rounded-xl bg-aerojet-blue px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#001d42] disabled:cursor-not-allowed disabled:opacity-50"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-blue-800 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-[#001d42] disabled:cursor-not-allowed disabled:opacity-50"
       >
         {loading ? (
           <>

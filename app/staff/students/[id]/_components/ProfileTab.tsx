@@ -350,7 +350,7 @@ export default function ProfileTab({
                   <p className="text-sm font-bold text-slate-900 dark:text-white">
                     {student.referralsReceived[0].referrer.profile?.firstName} {student.referralsReceived[0].referrer.profile?.lastName}
                   </p>
-                  <p className="text-xs text-slate-500">{student.referralsReceived[0].referrer.email}</p>
+                  <p className="text-xs text-slate-500">{student.referralsReceived[0].referrer?.email}</p>
                 </div>
               </div>
             ) : (

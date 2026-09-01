@@ -8,7 +8,7 @@ export default function DownloadTranscriptButton() {
       href="/api/pdf/student-transcript"
       target="_blank"
       rel="noopener noreferrer"
-      className="bg-aerojet-blue hover:bg-aerojet-blue/90 flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white transition-colors print:hidden"
+      className="bg-blue-800 hover:bg-blue-800/90 flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-bold text-white transition-colors print:hidden"
     >
       <Download className="h-4 w-4" />
       Download PDF

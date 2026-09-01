@@ -15,8 +15,10 @@ const meta: Meta<typeof Modal> = {
 export default meta
 type Story = StoryObj<typeof Modal>
 
+// Named function renders silence react-hooks rules-of-hooks false-positives
+// that fire on arrow `() => { ... }` renders (no component-style name).
 export const Default: Story = {
-  render: () => {
+  render: function Default() {
     const [open, setOpen] = useState(false)
     return (
       <>
@@ -30,7 +32,7 @@ export const Default: Story = {
 }
 
 export const Large: Story = {
-  render: () => {
+  render: function Large() {
     const [open, setOpen] = useState(false)
     return (
       <>

@@ -19,7 +19,7 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { format } from 'date-fns'
 import { EnrollmentStatus } from '@/types/enums'
-import { Enrollment, Course, User, Profile } from '@prisma/client'
+import { EnrollmentStatus } from '@/types/enums'
 
 type EnrollmentWithDetails = {
   id: string
@@ -119,7 +119,7 @@ export default function EnrollmentsTable({ enrollments }: EnrollmentsTableProps)
               confirmTitle: 'Cancel Enrollments',
               confirmMessage: `Are you sure you want to cancel ${selectedIds.length} selected enrollments?`,
               onClick: async (ids) => {
-                const res = await bulkUpdateEnrollmentStatus(ids, 'CANCELLED' as any)
+                const res = await bulkUpdateEnrollmentStatus(ids, EnrollmentStatus.WITHDRAWN)
                 if (res.success) {
                   toast.success(`Cancelled ${ids.length} enrollments`)
                   router.refresh()

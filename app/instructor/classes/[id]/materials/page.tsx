@@ -16,20 +16,21 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Course Materials | Instructor Portal' }
+export const dynamic = 'force-dynamic'
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') redirect('/login')
 
-  const classData = await prisma.class.findUnique({
+  const classData = await prismaUnfiltered.class.findUnique({
     where: { id },
     include: { course: true },
   })
 
   if (!classData) notFound()
 
-  const resources = await prisma.generalResource.findMany({
+  const resources = await prismaUnfiltered.generalResource.findMany({
     where: { showToInstructors: true },
     orderBy: { updatedAt: 'desc' },
   })
@@ -42,7 +43,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <div className="space-y-4">
         <Link
           href="/instructor/classes"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-sky"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-300 uppercase transition-colors hover:text-aerojet-sky"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Classes

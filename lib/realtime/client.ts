@@ -25,7 +25,7 @@ export function getRealtimeClient() {
   }
   cached = createBrowserClient(url, anonKey, {
     auth: { persistSession: false, autoRefreshToken: false },
-    realtime: { params: { eventsPerSecond: 5 } },
+    realtime: { params: { eventsPerSecond: 50 }, timeout: 10000 },
   })
   return cached
 }

@@ -195,7 +195,7 @@ export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
 
     // ─── DevTools detection (heuristic) ───
     if (detectDevTools) {
-      let devToolsCheckInterval: NodeJS.Timeout
+      const devToolsCheckInterval: NodeJS.Timeout = setInterval(checkDevTools, 2000)
 
       const checkDevTools = () => {
         const threshold = 160
@@ -206,7 +206,6 @@ export function useAntiCheat(options: UseAntiCheatOptions): UseAntiCheatReturn {
         }
       }
 
-      devToolsCheckInterval = setInterval(checkDevTools, 2000)
       return () => clearInterval(devToolsCheckInterval)
     }
   }, [detectDevTools, logViolation, isDev])

@@ -3,7 +3,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { expandMany, type Occurrence, type RecurringClassLike, type RecurrenceType } from './recurrence'
 
 export interface Conflict {
-  kind: 'INSTRUCTOR' | 'CLASSROOM'
+  kind: 'INSTRUCTOR' | 'CLASSROOM' | 'INSTRUCTOR_UNAVAILABLE'
   resourceId: string
   resourceLabel: string
   date: string // YYYY-MM-DD
@@ -17,6 +17,19 @@ function overlaps(a: Occurrence, b: Occurrence): boolean {
 
 function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10)
+}
+
+function timeToMinutes(t: string): number {
+  const [h, m] = t.split(':').map(Number)
+  return h * 60 + m
+}
+
+function timeOverlaps(startA: string, endA: string, startB: string, endB: string): boolean {
+  const aStart = timeToMinutes(startA)
+  const aEnd = timeToMinutes(endA)
+  const bStart = timeToMinutes(startB)
+  const bEnd = timeToMinutes(endB)
+  return aStart < bEnd && bStart < aEnd
 }
 
 /**
@@ -87,6 +100,29 @@ export async function findConflicts(args: {
 
   const occurrences = expandMany(expandable, args.from, args.to)
 
+  // Load instructor availability windows for the date range
+  const instructorIds = [...new Set(classes.filter(c => c.instructorId).map(c => c.instructorId!))]
+  const availability = instructorIds.length > 0
+    ? await prismaUnfiltered.staffAvailability.findMany({
+        where: {
+          userId: { in: instructorIds },
+          available: false,
+          OR: [
+            { kind: 'SPECIFIC_DATE', date: { gte: args.from, lte: args.to } },
+            { kind: 'RECURRING_WEEKLY' },
+          ],
+        },
+        select: { userId: true, kind: true, dayOfWeek: true, date: true, startTime: true, endTime: true },
+      })
+    : []
+
+  const availabilityByInstructor = new Map<string, typeof availability>()
+  for (const a of availability) {
+    const list = availabilityByInstructor.get(a.userId) || []
+    list.push(a)
+    availabilityByInstructor.set(a.userId, list)
+  }
+
   // Bucket by (resource, date) to keep the comparison cost bounded.
   const buckets = new Map<string, Occurrence[]>()
   for (const occ of occurrences) {
@@ -123,5 +159,70 @@ export async function findConflicts(args: {
       }
     }
   }
+
+  // Check instructor availability conflicts
+  const dayOfWeekMap: Record<number, string> = {
+    0: 'SUNDAY',
+    1: 'MONDAY',
+    2: 'TUESDAY',
+    3: 'WEDNESDAY',
+    4: 'THURSDAY',
+    5: 'FRIDAY',
+    6: 'SATURDAY',
+  }
+
+  for (const occ of occurrences) {
+    if (!occ.instructorId) continue
+    const day = isoDate(occ.start)
+    const occDayOfWeek = occ.start.getDay()
+    const occStart = occ.start.toTimeString().slice(0, 5)
+    const occEnd = occ.end.toTimeString().slice(0, 5)
+    const windows = availabilityByInstructor.get(occ.instructorId) || []
+
+    for (const win of windows) {
+      if (win.kind === 'SPECIFIC_DATE') {
+        if (win.date && isoDate(win.date) === day) {
+          if (timeOverlaps(win.startTime, win.endTime, occStart, occEnd)) {
+            conflicts.push({
+              kind: 'INSTRUCTOR_UNAVAILABLE',
+              resourceId: occ.instructorId,
+              resourceLabel: instructorLabel.get(occ.instructorId) ?? occ.instructorId,
+              date: day,
+              a: occ,
+              b: {
+                classId: 'availability',
+                className: 'Unavailable',
+                instructorId: occ.instructorId,
+                classroomId: occ.classroomId,
+                start: occ.start,
+                end: occ.end,
+              },
+            })
+          }
+        }
+      } else if (win.kind === 'RECURRING_WEEKLY') {
+        const winDayName = win.dayOfWeek != null ? dayOfWeekMap[win.dayOfWeek] : undefined
+        if (winDayName && occDayOfWeek === win.dayOfWeek) {
+          if (timeOverlaps(win.startTime, win.endTime, occStart, occEnd)) {
+            conflicts.push({
+              kind: 'INSTRUCTOR_UNAVAILABLE',
+              resourceId: occ.instructorId,
+              resourceLabel: instructorLabel.get(occ.instructorId) ?? occ.instructorId,
+              date: day,
+              a: occ,
+              b: {
+                name: 'Unavailable',
+                start: occ.start,
+                end: occ.end,
+                instructorId: occ.instructorId,
+                classroomId: occ.classroomId,
+              },
+            })
+          }
+        }
+      }
+    }
+  }
+
   return conflicts
 }

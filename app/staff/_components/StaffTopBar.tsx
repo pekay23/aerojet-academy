@@ -11,8 +11,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   XCircle,
-  Info,
 } from 'lucide-react'
+import TourTrigger from '@/components/Tour/TourTrigger'
 import { formatDistanceToNow } from 'date-fns'
 import {
   DropdownMenu,
@@ -162,7 +162,7 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
       <div className="flex h-12 items-center gap-4">
         <BreadcrumbNav />
         {welcomeMsg && (
-          <div className="hidden max-w-md items-center gap-2 xl:flex">
+          <div id="welcome-banner" className="hidden max-w-md items-center gap-2 xl:flex">
             <span className="h-4 w-px bg-slate-200 dark:bg-slate-700" />
             <p className="truncate text-xs text-slate-500 italic dark:text-slate-400">
               {userName && <span className="not-italic font-medium text-slate-500 dark:text-slate-400">Hi {userName}</span>}
@@ -175,20 +175,12 @@ export default function StaffTopBar({ initialCounts, welcomeMessages, userName }
 
       <div className="flex items-center gap-3">
         <LiveClock />
-
-        <button
-          onClick={() => window.dispatchEvent(new CustomEvent('start-app-tour'))}
-          className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition-all duration-150 ease-out hover:border-slate-200 hover:bg-white hover:text-slate-600 hover:shadow-sm dark:hover:border-slate-700 dark:hover:bg-slate-800/80 dark:hover:text-slate-300"
-          aria-label="Help"
-          title="Take a tour"
-        >
-          <Info className="h-4 w-4" />
-        </button>
-
+        <TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />
         {/* Notifications / Pending Actions */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
+              data-tour-id="topbar-notifications"
               className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-slate-400 transition-all duration-150 ease-out hover:border-slate-200 hover:bg-white hover:text-slate-600 hover:shadow-sm dark:hover:border-slate-700 dark:hover:bg-slate-800/80 dark:hover:text-slate-300"
               aria-label="Pending actions"
             >

@@ -520,7 +520,6 @@ export default function NewsMarkdownEditor({
           <UploadButton
             endpoint="newsImage"
             onClientUploadComplete={(res) => {
-              console.log('Image upload response:', res)
               if (res && res[0]) {
                 const url =
                   (res[0] as any).ufsUrl || res[0].url || (res[0] as any).serverData?.fileUrl
@@ -571,7 +570,6 @@ export default function NewsMarkdownEditor({
           <UploadButton
             endpoint="newsAudio"
             onClientUploadComplete={(res) => {
-              console.log('Audio upload response:', res)
               if (res && res[0]) {
                 const url =
                   (res[0] as any).ufsUrl || res[0].url || (res[0] as any).serverData?.fileUrl
@@ -581,8 +579,7 @@ export default function NewsMarkdownEditor({
               }
             }}
             onUploadError={(error: Error) => {
-              console.error('Audio upload error:', error)
-              toast.error(`Upload failed: ${error.message}`)
+              toast.error('Audio upload failed')
             }}
             appearance={{
               button:

@@ -44,7 +44,7 @@ export const POST = withErrorHandler(
     if (!examComponent) return apiError('Exam component not found', 404)
 
     const requestedModuleCode = examComponent.course.code
-    let newAllowedModules = [...pool.allowedModules]
+    const newAllowedModules = [...pool.allowedModules]
 
     // If the pool has a restricted module list and this module isn't in it:
     if (pool.allowedModules.length > 0 && !pool.allowedModules.includes(requestedModuleCode)) {

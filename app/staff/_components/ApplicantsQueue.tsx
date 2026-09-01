@@ -171,7 +171,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={fetchApplicants}
+              onClick={loadApplicants}
               className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 transition-all duration-150 ease-out hover:border-slate-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:border-slate-600"
             >
               <RefreshCw className="h-3.5 w-3.5" />
@@ -191,7 +191,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                     const res = await bulkUpdateUserStatus(ids, 'ACTIVE')
                     if (res.success) {
                       toast.success(`Approved ${ids.length} applicants`)
-                      fetchApplicants()
+                      loadApplicants()
                     } else toast.error(res.error)
                   },
                 },
@@ -299,7 +299,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                   )}
                   <span className="relative z-10">
                     {t.label}
-                    {counts[t.key as keyof Counts] !== undefined && (
+                    {counts[t.key as keyof ApplicantCounts] !== undefined && (
                       <span className="ml-1 opacity-70">
                         ({counts[t.key as keyof Counts] ?? 0})
                       </span>

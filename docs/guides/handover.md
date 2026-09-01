@@ -4,10 +4,10 @@ This document provides a comprehensive guide for developers taking over the Aero
 
 ## 🚀 Quick Links
 
-- [Database & RLS Detail](./DATABASE_DETAIL.md)
-- [Architecture & Problem Solving](./ARCHITECTURE_STRATEGIES.md)
-- [Known Issues & Pending Fixes](./known-issues.md)
-- [Future Roadmap](./future_plans.md)
+- [Database & RLS Detail](../architecture/database-detail.md)
+- [Architecture & Problem Solving](../architecture/strategies.md)
+- [Known Issues & Pending Fixes](../audits/known-issues.md)
+- [Future Roadmap](../plans/future-plans.md)
 
 ---
 
@@ -18,7 +18,7 @@ This document provides a comprehensive guide for developers taking over the Aero
 - **Database**: PostgreSQL (**Neon** as Primary, **Supabase** as Redundant/Backup)
 - **ORM**: Prisma
 - **Styling**: Tailwind CSS + Shadcn UI
-- **Auth**: NextAuth.js + TOTP 2FA (otplib v5)
+- **Auth**: NextAuth.js + TOTP 2FA (otplib v13)
 - **File Storage**: UploadThing
 
 ---
@@ -27,7 +27,7 @@ This document provides a comprehensive guide for developers taking over the Aero
 
 ### 1. Staff Analytics Dashboard (`/staff/reports`)
 
-- **Tabbed Analytics**: Overview, Enrollment, Revenue, Exam Pools, and Attendance.
+- **Tabbed Analytics**: Overview, Enrollment, Revenue, Pools, Attendance, Exams, and Year-on-Year.
 - **Timeframe Filtering**: Supports granular periods (1h, 4h, 24h, 7d, 30d, custom).
 - **Dynamic Charts**: Powered by Recharts with responsive container sizing.
 - **Key Files**:
@@ -37,7 +37,7 @@ This document provides a comprehensive guide for developers taking over the Aero
 
 ### 2. Two-Factor Authentication (`/staff/settings` → Security tab)
 
-- TOTP-based 2FA for staff/admin accounts using `otplib` v5.
+- TOTP-based 2FA for staff/admin accounts using `otplib` v13.
 - QR code enrollment, 6-digit verification, disable with confirmation.
 - Login flow intercepts `2FA_REQUIRED` error to show TOTP input.
 - **Key Files**:
@@ -101,14 +101,15 @@ This document provides a comprehensive guide for developers taking over the Aero
 
 ---
 
-## 🔒 Security & RLS Implementation
+## 🔒 Security & Data Access
 
-### Prisma + Database RLS
+### Prisma Dual-Client Setup
 
 The application uses a primary database on Neon with Supabase as a redundant backup.
 
-- **Strategy**: RLS is enforced at the database level. The app currently relies on Prisma's application-level authorization, but a migration to full database-level RLS is in progress.
-- **AsyncLocalStorage**: Used in `lib/prisma/rls.ts` (if configured) to inject the `auth.uid()` into the database session, allowing RLS policies to recognize the application user.
+- **Strategy**: Security is enforced at the application level via route guards and explicit query filters. The codebase previously included RLS scaffolding, but **no PostgreSQL RLS policies are currently defined**.
+- **Current convention**: All portal code uses `prismaUnfiltered` (the raw Prisma client) for database queries. The `prisma` default export includes soft-delete and RLS extensions but is not used by active portal code.
+- **Legacy scaffolding**: `lib/prisma/rls-hardened.ts` and `lib/prisma/soft-delete-extension.ts` remain in place for potential future use.
 
 ---
 
@@ -129,7 +130,7 @@ The project uses **Husky** and a custom script (`scripts/bump-version.js`) to au
 ### Database Migrations
 
 1. Modify `prisma/schema.prisma`.
-2. Run `bun x prisma migrate dev --name <description>`.
+2. Run `bun run db:push` (this project has no Prisma migration history, so `db:push` is the workflow). `postdb:push` mirrors the schema to Supabase automatically.
 3. **Important**: If you hit RLS issues during migrations, ensure the `shadow database` has the appropriate permissions or is temporarily disabled for the migration user.
 
 ### Adding New Reports

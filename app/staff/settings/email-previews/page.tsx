@@ -147,7 +147,7 @@ export default function EmailPreviewsPage() {
         setAllTemplates(mergedTemplates)
       }
     } catch (error) {
-      console.error('Failed to fetch all templates:', error)
+      toast.error('Failed to load email templates')
     }
   }
 
@@ -168,7 +168,7 @@ export default function EmailPreviewsPage() {
         }
       }
     } catch (error) {
-      console.error('Failed to fetch template:', error)
+      toast.error('Failed to load template')
     } finally {
       setLoading(false)
     }

@@ -57,7 +57,7 @@ async function compute(): Promise<DashboardAlert[]> {
     // 4) ExamBundles expiring in next 7 days with unused resits
     prismaUnfiltered.examBundle.count({
       where: {
-        expiresAt: { gte: tomorrow, lte: sevenDaysOut },
+        validUntil: { gte: tomorrow, lte: sevenDaysOut },
         status: { in: ['ACTIVE'] as any },
       },
     }).catch(() => 0),

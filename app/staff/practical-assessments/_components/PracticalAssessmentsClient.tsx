@@ -68,7 +68,7 @@ export default function PracticalAssessmentsClient({
   const router = useRouter()
   const confirmDialog = useConfirmDialog()
   const toast = useToast()
-  const [records, setRecords] = useState<RecordItem[]>(initialRecords)
+  const [records, setRecords] = useState<RecordItem[]>(initialRecords as unknown as RecordItem[])
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [isActionPending, setIsActionPending] = useState(false)
@@ -554,7 +554,7 @@ export default function PracticalAssessmentsClient({
                   <select
                     required
                     value={formData.deliveryMethod}
-                    onChange={(e) => setFormData({ ...formData, deliveryMethod: e.target.value as any })}
+                    onChange={(e) => setFormData({ ...formData, deliveryMethod: e.target.value as PracticalDeliveryMethod })}
                     className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                   >
                     <option value="TASK_PERFORMANCE">Task Performance</option>
@@ -601,7 +601,7 @@ export default function PracticalAssessmentsClient({
                     </label>
                     <select
                       value={formData.result}
-                      onChange={(e) => setFormData({ ...formData, result: e.target.value as any })}
+                      onChange={(e) => setFormData({ ...formData, result: e.target.value as PracticalResult })}
                       className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium shadow-sm transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
                     >
                       <option value="">-- Leave Unassessed (Pending) --</option>

@@ -1,9 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
-import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid, Cell } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 interface PoolFillChartProps {
   data: {
@@ -14,6 +14,13 @@ interface PoolFillChartProps {
   }[]
   title?: string
 }
+
+const poolFillConfig = {
+  fill: {
+    label: 'Fill Rate',
+    color: '#7C3AED',
+  },
+} as const
 
 export function PoolFillChart({ data, title = 'Pool Capacity Utilization' }: PoolFillChartProps) {
   const [mounted, setMounted] = React.useState(false)
@@ -26,12 +33,8 @@ export function PoolFillChart({ data, title = 'Pool Capacity Utilization' }: Poo
       </CardHeader>
       <CardContent className="h-[350px] w-full">
         {mounted ? (
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-            <BarChart
-              data={data}
-              layout="vertical"
-              margin={{ top: 5, right: 30, left: 40, bottom: 5 }}
-            >
+          <ChartContainer config={poolFillConfig} className="h-full w-full">
+            <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
               <XAxis type="number" hide domain={[0, 100]} />
               <YAxis
@@ -43,30 +46,24 @@ export function PoolFillChart({ data, title = 'Pool Capacity Utilization' }: Poo
                 width={100}
                 tick={{ fill: '#64748B' }}
               />
-              <Tooltip
-                cursor={{ fill: '#F1F5F9' }}
-                contentStyle={{
-                  borderRadius: '8px',
-                  border: 'none',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                }}
-                formatter={((value: any, name: string) => {
-                  if (name === 'fill') return [`${value}%`, 'Fill Rate']
-                  return [value, name]
-                }) as any}
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    formatter={(value: number | string | undefined, name: string) => {
+                      if (name === 'fill') return [`${Number(value ?? 0)}%`, 'Fill Rate'] as any
+                      return [value ?? 0, name] as any
+                    }}
+                  />
+                }
               />
-              <Bar
-                dataKey="fill"
-                fill="#7C3AED"
-                radius={[0, 4, 4, 0] as any}
-                barSize={20}
-                background={{
-                  fill: '#F1F5F9',
-                  radius: [0, 4, 4, 0] as any,
-                }}
-              />
+              <Bar dataKey="fill" radius={[0, 4, 4, 0]} barSize={20}>
+                {data.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.fill > 80 ? '#EF4444' : entry.fill > 50 ? '#F59E0B' : '#7C3AED'} />
+                ))}
+              </Bar>
             </BarChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-slate-50/50" />
         )}

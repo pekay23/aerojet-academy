@@ -46,7 +46,7 @@ export default function ExaminerDashboard({ examinerName, nextSitting, recentSit
                     </span>
                     <span className="flex items-center gap-1">
                       <Users className="h-3.5 w-3.5" />
-                      {nextSitting.maxCandidates} Candidates Allocated
+                      {nextSitting.maxCandidates != null ? `${nextSitting.maxCandidates} Candidates Allocated` : '—'}
                     </span>
                   </div>
                 </div>
@@ -76,7 +76,7 @@ export default function ExaminerDashboard({ examinerName, nextSitting, recentSit
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Sittings</span>
             </div>
             <div className="text-2xl font-black text-slate-900 dark:text-white">{recentSittings.length}</div>
-            <p className="text-[10px] text-slate-500">Completed in the last 90 days</p>
+            <p className="text-[10px] text-slate-500">Recently completed</p>
           </div>
           
           <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
@@ -119,10 +119,10 @@ export default function ExaminerDashboard({ examinerName, nextSitting, recentSit
                   <tr key={s.id} className="hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4 font-medium">{format(new Date(s.startTime), 'MMM d, yyyy')}</td>
                     <td className="px-6 py-4">
-                       <div className="font-bold text-slate-900 dark:text-white">{s.event?.name}</div>
+                     <div className="font-bold text-slate-900 dark:text-white">{s.event?.name}</div>
                        <div className="text-[10px] text-slate-500">{s.name}</div>
                     </td>
-                    <td className="px-6 py-4">{s.currentMemberCount || 0} Members</td>
+                    <td className="px-6 py-4">{s.currentMemberCount != null ? `${s.currentMemberCount} Members` : '—'}</td>
                     <td className="px-6 py-4">
                       <span className="inline-flex rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-600">
                         COMPLETED

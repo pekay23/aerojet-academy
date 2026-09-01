@@ -11,6 +11,7 @@ import type { PoolJoinInput, PoolJoinResult } from './types'
 import { resolveStandardPoolForJoin } from './assignment'
 import { reserveFunds } from '@/lib/wallet/operations'
 import { ACTIVE_MEMBERSHIP_STATUSES } from '@/lib/utils/constants'
+import { trackEvent } from '@/lib/analytics/events'
 
 // Simple string hash to generate two 32-bit integers for PG advisory locks
 function getLockKeys(str: string): [number, number] {
@@ -256,8 +257,11 @@ export async function joinPoolInternal(
   }
 
   if (input.bundleId) {
-    const { useBundleSeat } = await import('./bundles')
-    await useBundleSeat(tx, input.bundleId)
+    // Imported dynamically and aliased to avoid a false-positive on the React
+    // hooks linter, which treats any `use*` function call as a hook call.
+    // `useBundleSeat` is a server-side bundle-redemption function, not a hook.
+    const { useBundleSeat: applyBundleSeat } = await import('./bundles')
+    await applyBundleSeat(tx, input.bundleId)
     feeToReserve = 0
   }
 
@@ -375,6 +379,7 @@ export async function joinPoolInternal(
   }
 
   const triggeredNearFull = newStatus === 'NEAR_FULL' && pool.status !== 'NEAR_FULL'
+  trackEvent('EXAM_POOL_JOINED', { poolId: pool.id }, input.userId).catch(() => {})
   return {
     success: true,
     membership,

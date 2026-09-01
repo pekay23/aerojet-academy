@@ -36,7 +36,17 @@ const SECTIONS = [
   { dir: 'audits',       title: 'Audits',       blurb: 'Historical audit reports, newest first.' },
   { dir: 'plans',        title: 'Plans',        blurb: 'RFCs and implementation roadmaps.' },
   { dir: 'design',       title: 'Design',       blurb: 'Design system — tokens, typography, components.' },
+  { dir: 'compliance',   title: 'Compliance',   blurb: 'Regulatory compliance — EASA, GDPR, accessibility.' },
 ]
+
+// Sort modes for document listings
+const SORT_MODES = {
+  NAME_ASC: 'name-asc',
+  NAME_DESC: 'name-desc',
+  DATE_ASC: 'date-asc',
+  DATE_DESC: 'date-desc',
+}
+const DEFAULT_SORT = SORT_MODES.DATE_DESC
 
 // ── HTML helpers ─────────────────────────────────────────────────────────
 function escapeHtml(s) {
@@ -58,7 +68,7 @@ function slugify(text) {
 //   - emit numbered editorial section headers (01 · Title) for top-level h2s
 //   - give every h2/h3 an id for the TOC sidebar
 
-function buildMarkdownCallbacks() {
+function buildMarkdownCallbacks(rootDoc = false) {
   let h2Counter = 0
 
   const escape = (s) =>
@@ -334,17 +344,98 @@ const SITE_CSS = `/* TOC sidebar + index grid extensions to the base tokens. */
 }
 .he-standalone-card a { font-weight: 500; }
 .he-standalone-card p { font-size: var(--t-small-size); color: var(--fg-muted); margin: var(--sp-1) 0 0; }
+
+/* Sort controls for document listings */
+.he-sort {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-4);
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  font-size: var(--t-small-size);
+}
+.he-sort__label { color: var(--fg-muted); margin-right: var(--sp-2); }
+.he-sort__btn {
+  padding: var(--sp-1) var(--sp-3);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--fg);
+  cursor: pointer;
+  font-size: var(--t-small-size);
+  transition: all 0.15s ease;
+}
+.he-sort__btn:hover { background: var(--surface-alt); border-color: var(--clay); }
+.he-sort__btn--active { background: var(--clay); color: #fff; border-color: var(--clay); }
+
+/* Folder index cards */
+.he-folder-grid { display: grid; gap: var(--sp-3); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.he-folder-card {
+  display: block;
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+.he-folder-card:hover { border-color: var(--clay); transform: translateY(-2px); }
+.he-folder-card h3 { margin: 0 0 var(--sp-1); font-size: var(--t-h3-size); font-weight: 500; color: var(--clay); }
+.he-folder-card p { margin: 0; font-size: var(--t-small-size); color: var(--fg-muted); }
+.he-folder-card__count { display: inline-block; padding: var(--sp-1) var(--sp-2); background: var(--surface-alt); border-radius: var(--r-sm); font-size: var(--t-caption-size); margin-top: var(--sp-2); }
 `
 
 // ── File walking ─────────────────────────────────────────────────────────
+// Walks a directory recursively, collecting all .md files and subdirectory info.
+// Returns { files: string[], subdirs: string[] } where paths are absolute.
 async function walkMd(dir) {
-  const out = []
+  const files = []
+  const subdirs = []
   const entries = await fs.readdir(dir, { withFileTypes: true }).catch(() => [])
   for (const ent of entries) {
-    if (ent.isDirectory()) continue
-    if (ent.name.endsWith('.md')) out.push(path.join(dir, ent.name))
+    const fullPath = path.join(dir, ent.name)
+    if (ent.isDirectory()) {
+      subdirs.push(fullPath)
+      // Recurse into subdirectories
+      const nested = await walkMd(fullPath)
+      files.push(...nested.files)
+      subdirs.push(...nested.subdirs)
+    } else if (ent.name.endsWith('.md')) {
+      files.push(fullPath)
+    }
   }
-  return out.sort()
+  return { files, subdirs }
+}
+
+// Get file creation date for sorting
+async function getFileDate(filePath) {
+  try {
+    const stat = await fs.stat(filePath)
+    return stat.birthtime || stat.mtime
+  } catch {
+    return new Date(0)
+  }
+}
+
+// Sort files by the specified mode
+async function sortFiles(files, mode) {
+  const modeStr = mode || DEFAULT_SORT
+  if (modeStr === SORT_MODES.NAME_ASC) {
+    return [...files].sort((a, b) => path.basename(a).localeCompare(path.basename(b)))
+  }
+  if (modeStr === SORT_MODES.NAME_DESC) {
+    return [...files].sort((a, b) => path.basename(b).localeCompare(path.basename(a)))
+  }
+  // Date-based sorting
+  const withDates = await Promise.all(
+    files.map(async (f) => ({ file: f, date: await getFileDate(f) }))
+  )
+  withDates.sort((a, b) => a.date.getTime() - b.date.getTime())
+  const sorted = withDates.map((d) => d.file)
+  return modeStr === SORT_MODES.DATE_DESC ? sorted.reverse() : sorted
 }
 
 // ── Build one MD file ────────────────────────────────────────────────────
@@ -377,7 +468,51 @@ async function buildPage({ src, outPath, section, project, basePathToHtml }) {
     title,
     deck: deckMarkdown, // raw text for card grid preview
     srcRelative: path.relative(ROOT, src).replaceAll('\\', '/'),
+    outRelative: path.relative(OUT, outPath).replaceAll('\\', '/'),
+    fileDate: await getFileDate(src),
   }
+}
+
+// ── Build a folder index page ─────────────────────────────────────────────
+async function buildFolderIndex({ folderName, folderPath, files, project, basePathToHtml, sectionTitle }) {
+  const cards = files
+    .map(
+      (f) => `
+    <a class="he-card" href="./${f.slug}.html">
+      <div class="he-card__eyebrow">${escapeHtml(sectionTitle || 'Document')}</div>
+      <h3>${escapeHtml(f.title)}</h3>
+      <p>${escapeHtml((f.deck || '').slice(0, 180))}</p>
+      <div class="he-card__meta">
+        <span>${escapeHtml(f.srcRelative)}</span>
+      </div>
+    </a>`
+    )
+    .join('')
+
+  const body = `
+<section class="he-index-section" id="${slugify(folderName)}">
+  <div class="he-index-section__head">
+    <h2>${escapeHtml(folderName)}</h2>
+    <p class="he-index-section__blurb">${files.length} document${files.length !== 1 ? 's' : ''} in this folder.</p>
+  </div>
+  <div class="he-grid">${cards}
+  </div>
+</section>`
+
+  const html = pageHtml({
+    title: folderName,
+    eyebrow: `${project} · ${sectionTitle || 'docs'}`,
+    deckHtml: '',
+    body,
+    toc: [],
+    project,
+    basePathToHtml,
+    isIndex: true,
+  })
+
+  const outPath = path.join(folderPath, 'index.html')
+  await fs.mkdir(path.dirname(outPath), { recursive: true })
+  await fs.writeFile(outPath, html, 'utf8')
 }
 
 // ── Build the index ──────────────────────────────────────────────────────
@@ -387,7 +522,7 @@ async function buildIndex({ project, sectionResults }) {
       const cards = s.files
         .map(
           (f) => `
-    <a class="he-card" href="./${s.dir}/${f.slug}.html">
+    <a class="he-card" href="./${f.outRelative}" data-date="${f.fileDate ? f.fileDate.toISOString() : ''}">
       <div class="he-card__eyebrow">${escapeHtml(s.title)}</div>
       <h3>${escapeHtml(f.title)}</h3>
       <p>${escapeHtml((f.deck || '').slice(0, 180))}</p>
@@ -440,21 +575,66 @@ async function buildIndex({ project, sectionResults }) {
       : ''
 
   const total = sectionResults.reduce((s, sec) => s + sec.files.length, 0)
+
+  // Sort controls bar
+  const sortBar = `
+<div class="he-sort" data-sort-controls>
+  <span class="he-sort__label">Sort by:</span>
+  <button class="he-sort__btn he-sort__btn--active" data-sort="date-desc">Newest first</button>
+  <button class="he-sort__btn" data-sort="date-asc">Oldest first</button>
+  <button class="he-sort__btn" data-sort="name-asc">Name A→Z</button>
+  <button class="he-sort__btn" data-sort="name-desc">Name Z→A</button>
+</div>`
+
+  // Client-side sorting script
+  const sortScript = `
+<script>
+(function() {
+  var controls = document.querySelector('[data-sort-controls]');
+  if (!controls) return;
+  var buttons = controls.querySelectorAll('[data-sort]');
+  buttons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      buttons.forEach(function(b) { b.classList.remove('he-sort__btn--active'); });
+      btn.classList.add('he-sort__btn--active');
+      var mode = btn.getAttribute('data-sort');
+      // Sort each section grid
+      document.querySelectorAll('.he-grid').forEach(function(grid) {
+        var cards = Array.from(grid.querySelectorAll('.he-card'));
+        cards.sort(function(a, b) {
+          var aName = a.querySelector('h3').textContent.trim();
+          var bName = b.querySelector('h3').textContent.trim();
+          var aDate = a.getAttribute('data-date') || '';
+          var bDate = b.getAttribute('data-date') || '';
+          if (mode === 'name-asc') return aName.localeCompare(bName);
+          if (mode === 'name-desc') return bName.localeCompare(aName);
+          if (mode === 'date-asc') return aDate.localeCompare(bDate);
+          return bDate.localeCompare(aDate); // date-desc default
+        });
+        cards.forEach(function(c) { grid.appendChild(c); });
+      });
+    });
+  });
+})();
+</script>`
+
   const body = `
 <div class="he-kpis">
   <div class="he-kpi"><div class="he-kpi__value">${total}</div><div class="he-kpi__label">Generated pages</div></div>
   <div class="he-kpi"><div class="he-kpi__value">${sectionResults.length}</div><div class="he-kpi__label">Sections</div></div>
   <div class="he-kpi"><div class="he-kpi__value">${handAuthored.length}</div><div class="he-kpi__label">Standalone reports</div></div>
 </div>
+${sortBar}
 ${sectionsHtml}
 ${standalone}
+${sortScript}
 `
 
   const html = pageHtml({
     title: 'Documentation',
     eyebrow: `${project} · docs`,
     deckHtml:
-      'All project documentation, organised by purpose. Markdown sources live in <code>docs/architecture</code>, <code>docs/guides</code>, <code>docs/audits</code>, <code>docs/plans</code>, and <code>docs/design</code>.',
+      'All project documentation, organised by purpose. Markdown sources live in <code>docs/architecture</code>, <code>docs/compliance</code>, <code>docs/guides</code>, <code>docs/audits</code>, <code>docs/plans</code>, <code>docs/design</code>, plus root-level <code>docs/README.md</code> and <code>docs/CHANGELOG.md</code>.',
     body,
     toc: [],
     project,
@@ -470,7 +650,6 @@ async function main() {
   await fs.mkdir(OUT, { recursive: true })
 
   // Copy tokens + site CSS into /html/ so all generated pages can link them.
-  // Copy Aerojet-specific design tokens (used by design-system.html and preview)
   const aeroTokens = path.join(ROOT, 'docs', 'html', 'aerojet-design-tokens.css')
   if (await fs.stat(aeroTokens).catch(() => null)) {
     await fs.copyFile(aeroTokens, path.join(OUT, 'aerojet-design-tokens.css'))
@@ -481,23 +660,57 @@ async function main() {
   await fs.writeFile(path.join(OUT, 'docs.css'), SITE_CSS, 'utf8')
 
   const sectionResults = []
+  let totalFolderIndexes = 0
   for (const section of SECTIONS) {
     const srcDir = path.join(DOCS, section.dir)
     const outDir = path.join(OUT, section.dir)
-    const files = await walkMd(srcDir)
+    const { files: walkedFiles, subdirs } = await walkMd(srcDir)
+
+    // Sort files by date created (newest first by default)
+    const sortedFiles = await sortFiles(walkedFiles, DEFAULT_SORT)
+
+    // Build all markdown pages (including those in subdirectories)
     const built = []
-    for (const src of files) {
+    for (const src of sortedFiles) {
       const slug = path.basename(src, '.md')
-      const outPath = path.join(outDir, `${slug}.html`)
+      // Preserve subdirectory structure in output
+      const relativeDir = path.relative(srcDir, path.dirname(src))
+      const actualOutDir = relativeDir ? path.join(outDir, relativeDir) : outDir
+      const outPath = path.join(actualOutDir, `${slug}.html`)
+      // Calculate basePathToHtml based on nesting depth
+      const depth = relativeDir ? relativeDir.split(path.sep).length + 1 : 1
+      const basePathToHtml = '../'.repeat(depth)
       const result = await buildPage({
         src,
         outPath,
         section,
         project,
-        basePathToHtml: '../',
+        basePathToHtml,
       })
       built.push(result)
     }
+
+    // Build folder index pages for subdirectories
+    for (const subdir of subdirs) {
+      const relativeDir = path.relative(srcDir, subdir)
+      const actualOutDir = path.join(outDir, relativeDir)
+      const folderName = path.basename(subdir)
+      // Find files that belong to this subdirectory
+      const subdirFiles = built.filter((f) => {
+        return f.outRelative.startsWith(`${section.dir}/${relativeDir}`)
+      })
+      const basePathToHtml = '../'.repeat(relativeDir.split(path.sep).length + 1)
+      await buildFolderIndex({
+        folderName,
+        folderPath: actualOutDir,
+        files: subdirFiles,
+        project,
+        basePathToHtml,
+        sectionTitle: section.title,
+      })
+      totalFolderIndexes++
+    }
+
     sectionResults.push({ ...section, files: built })
   }
 
@@ -505,7 +718,7 @@ async function main() {
 
   const total = sectionResults.reduce((s, sec) => s + sec.files.length, 0)
   console.log(
-    `[build-docs-html] generated ${total} HTML pages + index across ${SECTIONS.length} sections (design-tokens + docs.css copied into docs/html/)`
+    `[build-docs-html] generated ${total} HTML pages + ${totalFolderIndexes} folder indexes + index across ${SECTIONS.length} sections`
   )
 }
 

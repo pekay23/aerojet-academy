@@ -30,6 +30,8 @@ export type SidebarLinkItem = {
   href: string
   icon?: ElementType
   badge?: number
+  /** Stable selector for the onboarding tour (`[data-tour-id=...]`). */
+  tourId?: string
   children?: { label: string; href: string }[]
 }
 
@@ -151,6 +153,7 @@ function NavItem({
   setMobileOpen,
   hoveredItem,
   setHoveredItem,
+  tourId,
 }: {
   href: string
   icon?: ElementType
@@ -162,6 +165,7 @@ function NavItem({
   setMobileOpen: (open: boolean) => void
   hoveredItem: string | null
   setHoveredItem: (key: string | null) => void
+  tourId?: string
 }) {
   const itemKey = `nav-${href}`
   const isHovered = hoveredItem === itemKey && !active && !collapsed
@@ -172,6 +176,7 @@ function NavItem({
       onClick={() => setMobileOpen(false)}
       onMouseEnter={() => !collapsed && setHoveredItem(itemKey)}
       onMouseLeave={() => setHoveredItem(null)}
+      data-tour-id={tourId}
       className={`relative flex items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-out ${
         collapsed ? 'mx-auto h-10 w-10 justify-center p-0' : 'gap-3'
       } ${
@@ -252,6 +257,7 @@ function GroupItem({
       onClick={() => toggleGroup(link.label)}
       onMouseEnter={() => !collapsed && setHoveredItem(groupKey)}
       onMouseLeave={() => setHoveredItem(null)}
+      data-tour-id={link.tourId}
       className={`relative flex w-full items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-all duration-150 ease-out ${
         collapsed ? 'mx-auto h-10 w-10 justify-center p-0' : 'gap-3'
       } ${
@@ -730,6 +736,7 @@ function renderSidebarContent({
               setMobileOpen={setMobileOpen}
               hoveredItem={hoveredItem}
               setHoveredItem={setHoveredItem}
+              tourId={link.tourId}
             />
           )
         })}

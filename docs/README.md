@@ -8,7 +8,9 @@ All project documentation lives here, organised by purpose. Browse the rendered 
 docs/
 ├── README.md                   This index
 ├── CHANGELOG.md                Version history (auto-bumped by pre-commit hook)
+├── LLM_COUNCIL_FRAMEWORK.md    LLM Council evaluation framework reference
 ├── architecture/               System reference — API, database, security
+├── compliance/                 Regulatory compliance registers (ISO 27001, data protection)
 ├── guides/                     Operational how-tos
 ├── audits/                     Historical audit reports (date-prefixed)
 ├── plans/                      RFCs + implementation roadmaps
@@ -61,6 +63,12 @@ Historical audit reports. Newest first; older reports preserved for context.
 - [Known issues](./audits/known-issues.md) — persistent issues + workarounds
 - [design-gap-audit.html](./html/design-gap-audit.html) — hand-authored visual report (the seed document for the 2026-05-19 cross-check)
 
+## Compliance
+
+Regulatory and security compliance registers. These map product controls to external frameworks (ISO/IEC 27001, Ghana Data Protection Act).
+
+- [ISO/IEC 27001 & Ghana Act 843 compliance register](./compliance/security-data-protection.md) — product control mapping, required governance evidence, and known gaps
+
 ## Plans
 
 RFCs and implementation roadmaps. Use these to understand _why_ something was designed the way it is.
@@ -77,8 +85,8 @@ RFCs and implementation roadmaps. Use these to understand _why_ something was de
 bun run docs:html
 ```
 
-This regenerates every `.md` under `architecture/`, `guides/`, `audits/`, and `plans/` into a styled HTML file at `docs/html/<section>/<slug>.html`, then writes a fresh `docs/html/index.html` that links to all of them plus the hand-authored visual reports.
+This regenerates every `.md` under `architecture/`, `compliance/`, `guides/`, `audits/`, `plans/`, and `design/` into a styled HTML file at `docs/html/<section>/<slug>.html`, then writes a fresh `docs/html/index.html` that links to all of them plus the hand-authored visual reports.
 
 The build script lives at [scripts/build-docs-html.mjs](../scripts/build-docs-html.mjs) and uses [marked](https://marked.js.org/) for the Markdown → HTML conversion. Internal `.md` links are rewritten to `.html` automatically; source-code links (`../../app/...`) work as-is because the HTML mirror has the same depth as the Markdown tree.
 
-Hand-authored HTML at the root of `docs/html/` (e.g. `design-gap-audit.html`) is preserved across rebuilds — the generator only writes into the `architecture/`, `guides/`, `audits/`, and `plans/` subdirectories.
+Hand-authored HTML at the root of `docs/html/` (e.g. `design-gap-audit.html`) is preserved across rebuilds — the generator only writes into the `architecture/`, `compliance/`, `guides/`, `audits/`, `plans/`, and `design/` subdirectories.

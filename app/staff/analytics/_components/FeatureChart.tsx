@@ -1,7 +1,8 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 interface FeatureChartProps {
   data: {
@@ -13,16 +14,34 @@ interface FeatureChartProps {
   }
 }
 
+const featureChartConfig = {
+  adopters: {
+    label: 'Adopters',
+    color: '#002a5c',
+  },
+  nonAdopters: {
+    label: 'Non-Adopters',
+    color: '#e5e7eb',
+  },
+} as const
+
 export default function FeatureChart({ data }: FeatureChartProps) {
+  const chartData = [
+    { name: 'Adopters', value: data.adopters, fill: '#002a5c' },
+    { name: 'Non-Adopters', value: data.totalUsers - data.adopters, fill: '#e5e7eb' },
+  ]
+
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Adoption Rate</CardTitle>
+          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Adoption Rate
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">{data.adoptionRate}%</div>
-          <p className="text-xs text-slate-500 mt-1">
+          <div className="text-3xl font-black text-aerojet-blue dark:text-aerojet-sky">{data.adoptionRate}%</div>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {data.adopters.toLocaleString()} of {data.totalUsers.toLocaleString()} users
           </p>
         </CardContent>
@@ -30,47 +49,48 @@ export default function FeatureChart({ data }: FeatureChartProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Avg Time to Adopt</CardTitle>
+          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Avg Time to Adopt
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">
+          <div className="text-3xl font-black text-aerojet-blue dark:text-aerojet-sky">
             {data.avgTimeToAdoptDays !== null ? `${data.avgTimeToAdoptDays}d` : 'N/A'}
           </div>
-          <p className="text-xs text-slate-500 mt-1">Days from signup to first use</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Days from signup to first use</p>
         </CardContent>
       </Card>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-sm">Non-Adopters</CardTitle>
+          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Non-Adopters
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-3xl font-bold">
+          <div className="text-3xl font-black text-red-600 dark:text-red-400">
             {data.totalUsers - data.adopters}
           </div>
-          <p className="text-xs text-slate-500 mt-1">Users who haven&apos;t tried this feature</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">Users who haven&apos;t tried this feature</p>
         </CardContent>
       </Card>
 
       <Card className="md:col-span-3">
         <CardHeader>
-          <CardTitle>Adoption Breakdown</CardTitle>
+          <CardTitle className="text-sm font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            Adoption Breakdown
+          </CardTitle>
         </CardHeader>
         <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart
-              data={[
-                { name: 'Adopters', value: data.adopters, fill: '#10b981' },
-                { name: 'Non-Adopters', value: data.totalUsers - data.adopters, fill: '#e5e7eb' },
-              ]}
-            >
-              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+          <ChartContainer config={featureChartConfig} className="h-[250px] w-full">
+            <BarChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis dataKey="name" tick={{ fontSize: 11 }} />
               <YAxis tick={{ fontSize: 11 }} />
-              <Tooltip formatter={(value: any) => [value.toLocaleString(), 'Users']} />
+              <ChartTooltip content={<ChartTooltipContent indicator="dot" formatter={(value: any, name: any) => [Number(value ?? 0).toLocaleString(), name] as any} />} />
               <Bar dataKey="value" radius={[4, 4, 0, 0]} />
             </BarChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         </CardContent>
       </Card>
     </div>

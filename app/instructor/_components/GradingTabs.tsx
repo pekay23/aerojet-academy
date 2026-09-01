@@ -17,7 +17,7 @@ export default function GradingTabs({ children }: { children: React.ReactNode })
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-white">
+        <h1 className="text-4xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
           Grading
         </h1>
         <p className="mt-2 text-lg font-medium text-slate-500 dark:text-slate-400">

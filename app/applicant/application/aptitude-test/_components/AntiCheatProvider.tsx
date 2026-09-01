@@ -45,7 +45,7 @@ export default function AntiCheatProvider({ children, sessionId }: { children: R
     // Attempt to enter fullscreen initially
     const enterFullscreen = () => {
       if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(e => console.warn(e))
+        document.documentElement.requestFullscreen().catch(() => {})
       }
     }
     document.addEventListener('click', enterFullscreen, { once: true })

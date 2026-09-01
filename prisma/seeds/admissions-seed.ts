@@ -5,7 +5,7 @@
  * Or: npx tsx prisma/seeds/admissions-seed.ts
  */
 
-import prisma from '../../lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 // ---------------------------------------------------------------------------
 // ATA Chapter Seed Data (EASA Part-66 standard chapters)

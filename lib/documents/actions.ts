@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { requireStaff } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
+import { trackDocumentUpload } from '@/lib/analytics/events'
 import {
   buildStoragePath,
   documentCategoryFolder,
@@ -152,6 +153,7 @@ export async function uploadStudentDocumentFile(formData: FormData) {
           status: 'ACTIVE',
         },
       })
+      trackDocumentUpload('staff_document', file.name, staff.id).catch(() => {})
       uploadedCount += 1
       await createAuditLog({
         action: AuditAction.CREATE,

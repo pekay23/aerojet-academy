@@ -11,7 +11,7 @@
  * - Automatic data transformation
  */
 
-import { prisma } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getSupabaseAdmin, isBackupEnabled } from './client'
 import { Prisma } from '@prisma/client'
 
@@ -238,7 +238,7 @@ export async function createWithBackup<T extends Prisma.UserCreateInput>(
 ): Promise<T> {
   // Write to primary (Neon) - use type assertion for dynamic access
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result = (await (prisma as any)[modelKey].create({ data })) as T
+  const result = (await (prismaUnfiltered as any)[modelKey].create({ data })) as T
 
   // Backup to Supabase (non-blocking)
   if (isBackupEnabled()) {
@@ -258,7 +258,7 @@ export async function updateWithBackup<T extends Prisma.UserUpdateInput>(
 ): Promise<T> {
   // Write to primary (Neon) - use type assertion for dynamic access
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const result = (await (prisma as any)[modelKey].update({ where, data })) as T
+  const result = (await (prismaUnfiltered as any)[modelKey].update({ where, data })) as T
 
   // Backup to Supabase (non-blocking)
   if (isBackupEnabled()) {
@@ -277,7 +277,7 @@ export async function deleteWithBackup(
 ): Promise<void> {
   // Delete from primary (Neon) - use type assertion for dynamic access
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (prisma as any)[modelKey].delete({ where })
+  await (prismaUnfiltered as any)[modelKey].delete({ where })
 
   // Delete from Supabase (non-blocking)
   if (isBackupEnabled()) {
@@ -295,7 +295,7 @@ export async function readWithFallback<T>(
   // Try primary first
   try {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await (prisma as any)[modelKey].findUnique({ where })
+    const result = await (prismaUnfiltered as any)[modelKey].findUnique({ where })
     if (result) return result as T
   } catch (error) {
     console.warn(`[Supabase] Primary DB read failed, trying backup:`, error)

@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import prisma from '@/lib/prisma/client'
 import { requireApplicant } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
+import { trackEnrollment, trackPaymentSubmitted } from '@/lib/analytics/events'
 import { trackEnrollment } from '@/lib/analytics/events'
 
 export const POST = withErrorHandler(
@@ -20,13 +21,14 @@ export const POST = withErrorHandler(
     if (!course) return apiError('Course not found', 404)
 
     // Update enrollment and create payment record in a transaction
-    await prisma.$transaction(async (tx) => {
+    const result = await prisma.$transaction(async (tx) => {
       // 1. Create or Update Enrollment
       const existingEnrollment = await tx.enrollment.findFirst({
         where: { userId: user.id, courseId: course.id },
       })
+      let enrollment
       if (existingEnrollment) {
-        await tx.enrollment.update({
+        enrollment = await tx.enrollment.update({
           where: { id: existingEnrollment.id },
           data: {
             status: 'PENDING',
@@ -35,7 +37,7 @@ export const POST = withErrorHandler(
           },
         })
       } else {
-        await tx.enrollment.create({
+        enrollment = await tx.enrollment.create({
           data: {
             userId: user.id,
             courseId: course.id,
@@ -47,7 +49,7 @@ export const POST = withErrorHandler(
       }
 
       // 2. Create Payment Record
-      await tx.payment.create({
+      const payment = await tx.payment.create({
         data: {
           userId: user.id,
           amount: course.price,
@@ -62,18 +64,15 @@ export const POST = withErrorHandler(
           notes: `Enrollment payment for ${course.name} (${course.code})`,
         },
       })
-    })
 
-    // Get the enrollment ID for tracking
-    const enrollment = await prisma.enrollment.findFirst({
-      where: { userId: user.id, courseId: course.id },
-      select: { id: true },
-    })
+      // Analytics tracking (non-blocking)
+      if (enrollment) {
+        trackEnrollment(enrollment.id, course.id, course.code, user.id).catch(() => {})
+      }
+      trackPaymentSubmitted(Number(payment.amount), payment.currency, payment.id, payment.userId, payment.paymentMethod).catch(() => {})
 
-    // Analytics tracking (non-blocking)
-    if (enrollment) {
-      trackEnrollment(enrollment.id, course.id, course.code, user.id).catch(console.error)
-    }
+      return { enrollment, payment }
+    })
 
     return apiSuccess({ message: 'Enrollment request and payment proof submitted.' })
   }

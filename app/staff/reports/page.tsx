@@ -1,3 +1,5 @@
+import { PageTransition } from '@/components/shared/PageTransition'
+import Link from 'next/link'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
 import {
@@ -129,7 +131,7 @@ async function OverviewTab({ period, from, to }: { period: string; from?: string
   if (period === 'custom') periodLabel = 'vs previous interval'
 
   return (
-    <div className="animate-in fade-in slide-in-from-bottom-4 mx-auto max-w-[1920px] duration-700">
+    <div className="mx-auto max-w-[1920px]">
       {/* Metric Cards Grid */}
       <div className="mb-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard

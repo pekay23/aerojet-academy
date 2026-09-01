@@ -1,8 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
+import { PieChart, Pie, Cell, Legend } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
 
 interface AttendanceChartProps {
   data: { name: string; value: number }[]
@@ -10,6 +11,12 @@ interface AttendanceChartProps {
 }
 
 const COLORS = ['#22C55E', '#EF4444', '#EAB308', '#3B82F6']
+
+const attendanceConfig = {
+  value: {
+    label: 'Attendance',
+  },
+} satisfies ChartConfig
 
 export function AttendanceChart({ data, title = 'Attendance Overview' }: AttendanceChartProps) {
   const [mounted, setMounted] = React.useState(false)
@@ -22,7 +29,7 @@ export function AttendanceChart({ data, title = 'Attendance Overview' }: Attenda
       </CardHeader>
       <CardContent className="h-[300px] w-full">
         {mounted ? (
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+          <ChartContainer config={attendanceConfig} className="h-full w-full">
             <PieChart>
               <Pie
                 data={data}
@@ -37,16 +44,17 @@ export function AttendanceChart({ data, title = 'Attendance Overview' }: Attenda
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  borderRadius: '8px',
-                  border: 'none',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                }}
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    formatter={(value: any, name: any) => [value ?? 0, name] as any}
+                  />
+                }
               />
               <Legend verticalAlign="bottom" height={36} iconType="circle" />
             </PieChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-slate-50/50" />
         )}

@@ -7,7 +7,7 @@ import { getInternalBankCategoryCode, normalizeCategoryCode } from '@/lib/easa/c
 import { z } from 'zod'
 
 // GET — list all exam banks with pool health
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest) => {
   await requireStaff()
   if (!(await isInternalExamSystemEnabled())) {
     return apiError('Internal exams are not currently available', 403)

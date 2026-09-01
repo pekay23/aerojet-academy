@@ -10,7 +10,7 @@ import {
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import {
   isPipelineEnabled,
@@ -52,7 +52,7 @@ export default async function ApplicationStatusPage() {
 
   // Fetch user + application data in parallel with the pipeline feature flag
   const [applicant, pipelineEnabled] = await Promise.all([
-    prisma.user.findUnique({
+    prismaUnfiltered.user.findUnique({
       where: { id: userId },
       select: {
         registrationPaid: true,
@@ -169,7 +169,7 @@ export default async function ApplicationStatusPage() {
   const steps = [
     {
       label: 'Account Created',
-      description: `Registered on ${applicant.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+      description: `Registered on ${formatDateLong(applicant.createdAt)}`,
       done: true,
       icon: User,
     },
@@ -187,7 +187,7 @@ export default async function ApplicationStatusPage() {
     {
       label: 'Payment Verified',
       description: paymentVerified
-        ? `Verified on ${applicant.paymentApprovedAt?.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) ?? 'N/A'}`
+        ? `Verified on ${formatDateLong(applicant.paymentApprovedAt) ?? 'N/A'}`
         : 'Pending admissions review.',
       done: paymentVerified,
       icon: CheckCircle2,
@@ -205,7 +205,7 @@ export default async function ApplicationStatusPage() {
   ]
 
   return (
-    <div className="max-w-7xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <PageTransition className="max-w-7xl space-y-8">
       <div>
         <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           Application Status

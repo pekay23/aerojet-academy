@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
 import PathwayPaymentForm from '../pathway/_components/PathwayPaymentForm'
 import { Info, Wallet } from 'lucide-react'
@@ -19,7 +19,7 @@ export default async function ApplicantWalletTopUpPage() {
 
   const [applicant, pendingPayment, currency, activePaymentMethods, bankSettings] =
     await Promise.all([
-      prisma.user.findUnique({
+      prismaUnfiltered.user.findUnique({
         where: { id: userId },
         select: { registrationPaid: true, programmeChoice: true, role: true },
       }),

@@ -296,3 +296,16 @@ body {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+/* ────────────────────────────────────────────────────────────── */
+/*  AppTour / react-joyride spotlight styling                    */
+/* ────────────────────────────────────────────────────────────── */
+.joyride-spotlight {
+  border-radius: 14px;
+}
+
+/* Match the rounded corners of sidebar nav items inside the spotlight */
+[data-tour-id] .joyride-spotlight,
+#sidebar-nav .joyride-spotlight {
+  border-radius: 12px;
+}

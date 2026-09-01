@@ -42,6 +42,7 @@ export default function StudentWalletTransactionsTable({
               sortKey="createdAt"
               currentSort={sortConfig}
               onSort={requestSort}
+              align="right"
               className="text-xs font-bold tracking-widest text-slate-400 uppercase"
             />
             <SortHeader
@@ -51,12 +52,14 @@ export default function StudentWalletTransactionsTable({
               onSort={requestSort}
               className="text-xs font-bold tracking-widest text-slate-400 uppercase"
             />
-            <th
-              scope="col"
-              className="px-6 py-4 text-center text-xs font-bold tracking-widest text-slate-400 uppercase"
-            >
-              Status
-            </th>
+            <SortHeader
+              label="Status"
+              sortKey="status"
+              currentSort={sortConfig}
+              onSort={requestSort}
+              align="center"
+              className="text-xs font-bold tracking-widest text-slate-400 uppercase"
+            />
             <SortHeader
               label="Amount"
               sortKey="amount"

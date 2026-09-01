@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
 import { CheckCircle2, XCircle, AlertTriangle, Clock, Ban, Loader2, RefreshCw } from 'lucide-react'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface Session {
   id: string
@@ -38,6 +39,11 @@ export default function SessionResultsPage() {
     fetchSessions()
   }, [fetchSessions])
 
+  const { items: sortedSessions, requestSort, sortConfig } = useSort<Session>(sessions, {
+    key: 'submittedAt',
+    order: 'desc',
+  })
+
   const handleVoid = async (id: string) => {
     if (!confirm('Are you sure you want to void this session? It will be marked as failed.')) return
     const res = await fetch(`/api/staff/admissions/aptitude/sessions/${id}/void`, { method: 'POST' })
@@ -65,19 +71,19 @@ export default function SessionResultsPage() {
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:bg-slate-800/50">
               <tr>
-                <th className="px-6 py-4 text-left">Applicant</th>
-                <th className="px-4 py-4 text-left">Test Bank</th>
-                <th className="px-4 py-4 text-center">Score</th>
-                <th className="px-4 py-4 text-center">Status</th>
-                <th className="px-4 py-4 text-center">Anti-Cheat</th>
-                <th className="px-4 py-4 text-center">Submitted</th>
+                <SortHeader label="Applicant" sortKey="user.lastName" currentSort={sortConfig} onSort={requestSort} />
+                <SortHeader label="Test Bank" sortKey="bank.name" currentSort={sortConfig} onSort={requestSort} />
+                <SortHeader label="Score" sortKey="percentage" currentSort={sortConfig} onSort={requestSort} align="center" />
+                <SortHeader label="Status" sortKey="status" currentSort={sortConfig} onSort={requestSort} align="center" />
+                <SortHeader label="Anti-Cheat" sortKey="tabSwitchCount" currentSort={sortConfig} onSort={requestSort} align="center" />
+                <SortHeader label="Submitted" sortKey="submittedAt" currentSort={sortConfig} onSort={requestSort} align="center" />
                 <th className="px-4 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {sessions.length === 0 ? (
                 <tr><td colSpan={7} className="px-6 py-12 text-center text-slate-500">No sessions found.</td></tr>
-              ) : sessions.map(session => (
+              ) : sortedSessions.map(session => (
                 <tr key={session.id} className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/50">
                   <td className="px-6 py-4">
                     <div className="font-bold text-slate-800 dark:text-white">{session.user.firstName} {session.user.lastName}</div>
