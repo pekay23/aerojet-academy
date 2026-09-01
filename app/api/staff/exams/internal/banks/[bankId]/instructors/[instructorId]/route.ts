@@ -31,10 +31,13 @@ export const PATCH = withErrorHandler(async (req: NextRequest, ctx: { params: Pr
     where: { bankId_instructorId: { bankId, instructorId } },
     data: parsed.data,
     include: {
-      user: {
+      instructor: {
         include: {
-          profile: { select: { firstName: true, lastName: true } },
-          instructorProfile: { select: { employeeId: true, department: true } },
+          user: {
+            include: {
+              profile: { select: { firstName: true, lastName: true } },
+            },
+          },
         },
       },
     },
