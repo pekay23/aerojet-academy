@@ -3298,6 +3298,10 @@ model InternalExamBankInstructor {
   bankId         String
   instructorId   String
   canEdit        Boolean         @default(false)
+  canReview      Boolean         @default(false)
+  canMonitor     Boolean         @default(false)
+  canPublish     Boolean         @default(false)
+  assignedBy     String?
   assignedAt     DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
   bank           InternalExamBank @relation(fields: [bankId], references: [id], onDelete: Cascade)
