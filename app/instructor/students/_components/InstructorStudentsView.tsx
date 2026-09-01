@@ -91,7 +91,7 @@ export default function InstructorStudentsView({
           {/* Search Header */}
           <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
             <div className="relative max-w-xl flex-1">
-              <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-300" />
+              <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search by name, ID, email or course..."
@@ -112,7 +112,7 @@ export default function InstructorStudentsView({
             <AnimatePresence mode="popLayout">
               {filteredStudents.length > 0 ? (
                 paged.map((student) => (
-                  <MotionDiv
+                  <motion.div
                     key={student.id}
                     layout
                     initial={{ opacity: 0, y: 20 }}
@@ -121,10 +121,10 @@ export default function InstructorStudentsView({
                     transition={{ duration: 0.2 }}
                   >
                     <StudentCard student={student} />
-                  </MotionDiv>
+                  </motion.div>
                 ))
               ) : (
-                <MotionDiv
+                <motion.div
                   className="col-span-full py-20 text-center"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
