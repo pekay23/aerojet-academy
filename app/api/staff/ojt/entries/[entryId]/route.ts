@@ -25,7 +25,7 @@ const entryUpdateSchema = z.object({
 // PUT — Update OJT Entry
 export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
   await requireStaff()
-  const { entryId } = await ctx.params
+  const { entryId } = ctx.params
   const body = await req.json()
   const parsed = entryUpdateSchema.safeParse(body)
   if (!parsed.success) return apiError('Invalid input fields')

@@ -10,6 +10,7 @@
  * Class.recurrenceDays is a comma-separated string of day-name prefixes
  * (e.g. "MON,WED,FRI") matching how the rest of the codebase encodes it.
  */
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
 
 export type RecurrenceType = 'NONE' | 'DAILY' | 'WEEKLY' | 'BIWEEKLY' | 'MONTHLY'
 
@@ -36,7 +37,7 @@ export interface Occurrence {
 
 const DAY_ABBR = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
 
-function parseDays(s: string | null | undefined): Set<string> {
+export function parseDays(s: string | null | undefined): Set<string> {
   if (!s) return new Set()
   return new Set(s.split(/[,;]/).map((x) => x.trim().slice(0, 3).toUpperCase()))
 }
@@ -125,5 +126,18 @@ export function expandMany(
   windowStart: Date,
   windowEnd: Date
 ): Occurrence[] {
-  return classes.flatMap((c) => expandClass(c, windowStart, windowEnd))
+  const all = classes.flatMap((c) => expandClass(c, windowStart, windowEnd))
+
+  const MAX_DAILY_MS = ACADEMIC_RULES.MAX_DAILY_INSTRUCTIONAL_HOURS * 60 * 60 * 1000
+  const dayHours = new Map<string, number>()
+
+  return all.filter((occ) => {
+    if (!occ.instructorId) return true
+    const dayKey = `${occ.instructorId}|${occ.start.getFullYear()}-${occ.start.getMonth()}-${occ.start.getDate()}`
+    const current = dayHours.get(dayKey) || 0
+    const duration = occ.end.getTime() - occ.start.getTime()
+    if (current + duration > MAX_DAILY_MS) return false
+    dayHours.set(dayKey, current + duration)
+    return true
+  })
 }

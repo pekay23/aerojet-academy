@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import ApplicantSidebar from './_components/ApplicantSidebar'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import PortalHeader from '@/components/layouts/PortalHeader'
+import TourTrigger from '@/components/Tour/TourTrigger'
+import AppTour from '@/components/Tour/AppTour'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import ForcePasswordChange from './_components/ForcePasswordChange'
 import { resolveEffectiveEnrollmentType, resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
@@ -85,9 +87,10 @@ export default async function ApplicantLayout({ children }: { children: React.Re
         applicationStage={applicationStage}
         enabledStageGroups={enabledStageGroups}
       />
+      <AppTour hasCompletedTour={dbUser.hasCompletedTour} userRole={userRole} />
       <main id="main-content" className="relative pt-16 lg:pt-0 min-h-screen min-w-0 flex-1 overflow-x-hidden">
         <div className="mx-auto max-w-[1920px] p-4 pt-16 sm:p-8 lg:px-8 lg:py-6 lg:pt-10">
-          <PortalHeader>
+          <PortalHeader actions={<TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />}>
             <BreadcrumbNav />
           </PortalHeader>
           {children}

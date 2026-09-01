@@ -200,7 +200,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </MotionDiv>
             ))
           ) : (
             <div className="flex flex-col items-center justify-center rounded-4xl border border-dashed border-slate-200 py-32 dark:border-slate-800">

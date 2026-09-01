@@ -84,7 +84,7 @@ export default function RevisionRunCard({
         <Button
           onClick={handleBookClick}
           disabled={loading || run.currentEnrollments >= run.capacity}
-          className="w-full rounded-xl bg-aerojet-blue font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full rounded-xl bg-blue-800 font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
         >
           {loading ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

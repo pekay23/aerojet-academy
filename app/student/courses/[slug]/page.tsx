@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const session = await getAuthSession()
   if (!session) return { title: 'Course Details' }
 
-  const enrollments = await prisma.enrollment.findMany({ where: { userId: session.user.id }, include: { course: true } });
+  const enrollments = await prismaUnfiltered.enrollment.findMany({ where: { userId: session.user.id }, include: { course: true } });
   const enrollment = enrollments.find(e => 
     e.course.name.toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') === slug ||
     e.id === slug || e.courseId === slug
@@ -46,7 +46,7 @@ export default async function CourseDetailsPage({
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const allEnrollments = await prisma.enrollment.findMany({ where: { userId: session.user.id },
+  const allEnrollments = await prismaUnfiltered.enrollment.findMany({ where: { userId: session.user.id },
     include: {
       course: {
         include: {
@@ -123,10 +123,10 @@ export default async function CourseDetailsPage({
               <span className="rounded-lg bg-blue-50 px-2 py-1 text-xs font-black tracking-widest text-blue-600 uppercase">
                 {course.category?.name || 'CORE'}
               </span>
-              <h1 className="mt-3 text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+              <h1 className="mt-3 text-3xl font-black tracking-tight text-blue-800 dark:text-white">
                 {course.name}
               </h1>
-              <p className="mt-1 text-xs font-black tracking-widest text-aerojet-sky">
+              <p className="mt-1 text-xs font-black tracking-widest text-sky-400">
                 {course.code}
               </p>
             </div>
@@ -181,7 +181,7 @@ export default async function CourseDetailsPage({
                     href={course.syllabusUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="mt-4 inline-flex items-center text-xs font-bold text-aerojet-blue hover:underline"
+                    className="mt-4 inline-flex items-center text-xs font-bold text-blue-800 hover:underline"
                   >
                     Download Syllabus
                     <ChevronRight className="ml-1 h-3 w-3" />
@@ -205,7 +205,7 @@ export default async function CourseDetailsPage({
                   isPaid ? (
                     <Link
                       href={`/student/courses/${slug}/materials`}
-                      className="mt-4 inline-flex items-center text-xs font-black tracking-widest text-aerojet-blue uppercase hover:underline dark:text-aerojet-sky"
+                      className="mt-4 inline-flex items-center text-xs font-black tracking-widest text-aerojet-blue uppercase hover:underline dark:text-sky-400"
                     >
                       View Materials Dashboard
                       <ChevronRight className="ml-1 h-3 w-3" />

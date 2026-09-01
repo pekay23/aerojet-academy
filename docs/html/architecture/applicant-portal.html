@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Applicant Portal — Route Map · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+    <a href="../design-system.html">Design</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Architecture</p>
+  <h1 class="he-title">Applicant Portal — Route Map</h1>
+  <p class="he-deck"><p>Last updated: 2026-08-28…</p>
+</p>
+</header>
+<section class="he-section" id="overview"><div class="he-section__num">01 · Overview</div><h2 class="he-section__title">Overview</h2>The Applicant portal (<code>app/applicant/</code>) is the primary entry point for prospective students. It covers registration, course browsing, document uploads, medical forms, aptitude testing, interview booking, and exam-only pathways.Auth is enforced by the root <code>layout.tsx</code>, which redirects unauthenticated users to <code>/login</code> and ensures the user role is <code>APPLICANT</code>.<section class="he-section" id="route-map"><div class="he-section__num">02 · Route Map</div><h2 class="he-section__title">Route Map</h2><h3 id="core-application-flow">Core Application Flow</h3>RouteTypeDescription<code>/applicant</code>ServerDashboard — status overview, journey timeline, quick links<code>/applicant/profile</code>ServerProfile editor + passkey settings<code>/applicant/notifications</code>ServerPaginated notification list<h3 id="admissions-pipeline">Admissions Pipeline</h3>RouteTypeDescription<code>/applicant/application/status</code>ServerApplication status tracker (pipeline-aware or legacy 4-step)<code>/applicant/application/payment</code>ServerUpload registration payment proof<code>/applicant/application/documents</code>ClientUpload required admission documents<code>/applicant/application/aptitude-test</code>ClientAptitude test landing + start flow<code>/applicant/application/aptitude-test/take</code>ClientLive aptitude test interface with timer<code>/applicant/application/interview</code>ServerInterview slot booking<code>/applicant/application/medical</code>ClientMedical examination document upload<h3 id="course-exam-pathways">Course & Exam Pathways</h3>RouteTypeDescription<code>/applicant/courses</code>ServerCourse catalogue with category filter<code>/applicant/courses/[id]</code>ServerCourse detail page<code>/applicant/courses/[id]/purchase</code>ServerPurchase/enroll in a course<code>/applicant/pathway</code>ServerComplete enrollment (full-time / military payment plan)<code>/applicant/wallet-top-up</code>ServerWallet top-up for exam bookings<code>/applicant/exam-bookings</code>ServerBrowse available exam pools<code>/applicant/exam-bookings/[id]</code>ServerPool detail view<code>/applicant/exam-only</code>ClientExam-only pathway dashboard (packages, pools, modals)<code>/applicant/exam-only/dashboard</code>ServerExam-only wallet + recent bookings summary<code>/applicant/exam-only/top-up</code>ServerExam wallet top-up form<h3 id="error-loading-boundaries">Error & Loading Boundaries</h3>FilePurpose<code>app/applicant/error.tsx</code>Root error boundary<code>app/applicant/loading.tsx</code>Root loading skeleton<code>app/applicant/not-found.tsx</code>Root 404 page<code>app/applicant/exam-only/error.tsx</code>Exam-only error boundary<code>app/applicant/exam-only/loading.tsx</code>Exam-only loading skeleton<code>app/applicant/exam-only/dashboard/loading.tsx</code>Exam-only dashboard skeleton<section class="he-section" id="api-routes"><div class="he-section__num">03 · API Routes</div><h2 class="he-section__title">API Routes</h2>All applicant API routes are under <code>app/api/applicant/</code>:<code>GET /api/applicant/dashboard</code> — Dashboard data<code>GET /api/applicant/profile</code> — Get profile<code>PATCH /api/applicant/profile</code> — Update profile<code>POST /api/applicant/profile/change-password</code> — Change password<code>/api/applicant/courses</code> — GET course catalog<code>POST /api/applicant/courses/[id]/purchase</code> — Purchase course<code>POST /api/applicant/courses/[id]/enroll</code> — Enroll in course<code>GET /api/applicant/courses/[id]</code> — Course detail<code>GET /api/applicant/documents</code> — Uploaded documents<code>POST /api/applicant/upload-payment</code> — Upload payment proof<code>POST /api/applicant/pay-milestone</code> — Milestone payment<code>POST /api/applicant/pathway-payment</code> — Pathway payment intent<code>/api/applicant/medical</code> — GET medical data / POST submit medical docs<code>/api/applicant/interview/slots</code> — GET available interview slots<code>POST /api/applicant/interview/book</code> — Book interview slot<code>/api/applicant/aptitude/*</code> — Session, start, answer, submit, anti-cheat<code>/api/applicant/exam-only/*</code> — Wallet, top-up, pools, join-pool, join-waitlist, withdraw-pool, bundles, bookings, book-exam, payments, memberships, pricing, exam-components, referrals, wallet/transactions<section class="he-section" id="shared-components"><div class="he-section__num">04 · Shared Components</div><h2 class="he-section__title">Shared Components</h2>ComponentPathPurpose<code>ApplicantSidebar</code><code>app/applicant/_components/ApplicantSidebar.tsx</code>Dynamic sidebar based on pipeline stage<code>ForcePasswordChange</code><code>app/applicant/_components/ForcePasswordChange.tsx</code>Password change gate<code>CourseCard</code><code>app/applicant/_components/CourseCard.tsx</code>Reusable course card<code>ApplicationStatusCard</code><code>app/applicant/_components/ApplicationStatusCard.tsx</code>Status display card<section class="he-section" id="key-utilities"><div class="he-section__num">05 · Key Utilities</div><h2 class="he-section__title">Key Utilities</h2>UtilityPathPurpose<code>useFetch</code><code>lib/hooks/useFetch.ts</code>Generic data-fetching hook for client components<code>PageTransition</code><code>components/shared/PageTransition.tsx</code>Consistent page entrance animation<code>formatDate</code> / <code>formatDateTime</code><code>lib/utils/date.ts</code>Centralized date formatting (date-fns)<code>slugify</code><code>lib/utils/string.ts</code>URL-safe string slugification<code>examOnlyTypes</code><code>app/applicant/exam-only/_components/examOnlyTypes.ts</code>Shared types + status maps for exam-only<section class="he-section" id="architecture-notes"><div class="he-section__num">06 · Architecture Notes</div><h2 class="he-section__title">Architecture Notes</h2>Layout: <code>app/applicant/layout.tsx</code> centralizes auth checks, user lookup, and sidebar configuration. The chrome (sidebar + header + breadcrumb + content shell) is extracted into <code>components/applicant/ApplicantPortalShell.tsx</code> (<code>ApplicantPortalShell</code>) so the auth-gated shell is defined once and reused by every applicant route.Dual Prisma: All server components and API routes use <code>prismaUnfiltered</code> for performance (RLS bypass since auth is already enforced at layout level).Dark Mode: All components include <code>dark:</code> Tailwind classes.Suspense: <code>loading.tsx</code> files exist for every route segment with server-side data fetching.
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#overview">Overview</a></li>
+    <li class="he-toc__l2"><a href="#route-map">Route Map</a></li>
+    <li class="he-toc__l3"><a href="#core-application-flow">Core Application Flow</a></li>
+    <li class="he-toc__l3"><a href="#admissions-pipeline">Admissions Pipeline</a></li>
+    <li class="he-toc__l3"><a href="#course-exam-pathways">Course &amp; Exam Pathways</a></li>
+    <li class="he-toc__l3"><a href="#error-loading-boundaries">Error &amp; Loading Boundaries</a></li>
+    <li class="he-toc__l2"><a href="#api-routes">API Routes</a></li>
+    <li class="he-toc__l2"><a href="#shared-components">Shared Components</a></li>
+    <li class="he-toc__l2"><a href="#key-utilities">Key Utilities</a></li>
+    <li class="he-toc__l2"><a href="#architecture-notes">Architecture Notes</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

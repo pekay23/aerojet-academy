@@ -3,10 +3,11 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getBankRules } from '@/lib/internal-exam/engine'
+import { createAuditLog } from '@/lib/audit/logger'
 import { z } from 'zod'
 
 const regradeSchema = z.object({
-  sessionIds: z.array(z.string()).min(1),
+  sessionIds: z.array(z.string()).min(1).max(500),
 })
 
 /**
@@ -14,8 +15,8 @@ const regradeSchema = z.object({
  * Re-evaluates all answers in the specified sessions against the CURRENT correct answers
  * in the question bank. Use after admin fixes a question's correct answer.
  */
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
-  await requireStaff()
+export const POST = withErrorHandler(async (req: NextRequest) => {
+  const staff = await requireStaff()
 
   const body = await req.json()
   const parsed = regradeSchema.safeParse(body)
@@ -74,9 +75,14 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
     const newPct = totalPoints > 0 ? Math.round((totalScore / totalPoints) * 100) : 0
     const passed = newPct >= rules.passMarkPct
 
-    // Update session scores
-    await prismaUnfiltered.internalExamSession.update({
-      where: { id: sessionId },
+    // Update session scores. Re-check status atomically in the DB so a
+    // session that flips to IN_PROGRESS/VOIDED between the guard above and
+    // the write is skipped — updateMany is non-throwing on zero matching rows.
+    const upd = await prismaUnfiltered.internalExamSession.updateMany({
+      where: {
+        id: sessionId,
+        status: { notIn: ['VOIDED', 'IN_PROGRESS'] },
+      },
       data: {
         score: totalScore,
         totalPoints,
@@ -89,11 +95,24 @@ export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
       sessionId,
       oldPct,
       newPct,
-      changed: oldPct !== newPct,
+      changed: upd.count > 0 && oldPct !== newPct,
     })
   }
 
   const changedCount = results.filter(r => r.changed).length
+
+  await createAuditLog({
+    userId: staff.id,
+    action: 'UPDATE',
+    entity: 'InternalExamSession',
+    entityId: `batch:${results.length}`,
+    description: `Regraded ${results.length} internal exam session(s); ${changedCount} score(s) changed`,
+    changes: {
+      sessionIds,
+      before: { scores: results.map((r) => ({ sessionId: r.sessionId, oldPct: r.oldPct })) },
+      after: { scores: results.map((r) => ({ sessionId: r.sessionId, newPct: r.newPct, changed: r.changed })) },
+    },
+  })
 
   return apiSuccess({
     regraded: results.length,

@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { prisma } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Eye, Clock, Calendar, User as UserIcon, ArrowLeft } from 'lucide-react'
 import ShareButtons from '../_components/ShareButtons'
 import { getBaseUrl } from '@/lib/utils/url'
@@ -16,7 +16,7 @@ type Props = { params: Promise<{ slug: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const article = await prisma.newsArticle.findUnique({
+  const article = await prismaUnfiltered.newsArticle.findUnique({
     where: { slug },
     select: {
       title: true,

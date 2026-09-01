@@ -1,9 +1,9 @@
 'use client'
 
 import * as React from 'react'
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts'
-import type { ValueType } from 'recharts/types/component/DefaultTooltipContent'
+import { Bar, BarChart, XAxis, YAxis, CartesianGrid } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 
 interface EnrollmentChartProps {
   data: {
@@ -13,6 +13,13 @@ interface EnrollmentChartProps {
   }[]
   title?: string
 }
+
+const enrollmentConfig = {
+  count: {
+    label: 'Students',
+    color: '#2563EB',
+  },
+} as const
 
 export function EnrollmentChart({ data, title = 'Enrollment by Course' }: EnrollmentChartProps) {
   const [mounted, setMounted] = React.useState(false)
@@ -25,7 +32,7 @@ export function EnrollmentChart({ data, title = 'Enrollment by Course' }: Enroll
       </CardHeader>
       <CardContent className="h-[350px] w-full">
         {mounted ? (
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+          <ChartContainer config={enrollmentConfig} className="h-full w-full">
             <BarChart data={data} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
               <XAxis
@@ -42,20 +49,17 @@ export function EnrollmentChart({ data, title = 'Enrollment by Course' }: Enroll
                 tick={{ fill: '#64748B' }}
                 tickFormatter={(value) => `${value}`}
               />
-              <Tooltip
-                cursor={{ fill: '#F1F5F9' }}
-                contentStyle={{
-                  borderRadius: '8px',
-                  border: 'none',
-                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-                }}
-                itemStyle={{ color: '#1E293B', fontWeight: 600 }}
-                formatter={((value: any) => [value, 'Students']) as any}
-                labelStyle={{ color: '#64748B', marginBottom: '0.25rem' }}
+              <ChartTooltip
+                content={
+                  <ChartTooltipContent
+                    indicator="dot"
+                    formatter={(value: any, name: any) => [value ?? 0, name] as any}
+                  />
+                }
               />
-              <Bar dataKey="count" fill="#2563EB" radius={[4, 4, 0, 0]} barSize={40} />
+              <Bar dataKey="count" fill="var(--color-count)" radius={[4, 4, 0, 0]} barSize={40} />
             </BarChart>
-          </ResponsiveContainer>
+          </ChartContainer>
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-slate-50/50" />
         )}

@@ -11,6 +11,7 @@ import {
   sendActivationEmail,
 } from '@/lib/email/service'
 import { trackPayment } from '@/lib/analytics/events'
+import { trackPayment } from '@/lib/analytics/events'
 import {
   hashPassword,
   generateToken,

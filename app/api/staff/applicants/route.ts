@@ -13,7 +13,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '20')
 
-  const where: any = {
+  const where: Record<string, unknown> = {
     role: 'APPLICANT',
     ...(search && {
       OR: [

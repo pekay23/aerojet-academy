@@ -1,4 +1,4 @@
-import prisma from '../lib/prisma/client.js'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 // Simulate build environment
 process.env.NEXT_PHASE = 'phase-production-build'

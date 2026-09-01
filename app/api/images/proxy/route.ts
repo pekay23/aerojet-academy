@@ -86,7 +86,32 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // ── 3. Fetch the image via the active storage adapter ──
+  // ── 3. Validate URL against allowed domains before fetching ──
+  const allowedHosts = [
+    'utfs.io',
+    'www.utfs.io',
+    'ufs.sh',
+    'uploadthing.com',
+  ]
+
+  let parsedUrl: URL
+  try {
+    parsedUrl = new URL(imageUrl)
+  } catch {
+    return new NextResponse(JSON.stringify({ error: 'Invalid image URL' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  if (!allowedHosts.includes(parsedUrl.hostname)) {
+    return new NextResponse(JSON.stringify({ error: 'Image source not allowed' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+
+  // ── 4. Fetch the image via the active storage adapter ──
   const adapter = getStorageAdapter()
   let data: ArrayBuffer
   let contentType: string
@@ -103,7 +128,7 @@ export async function GET(request: NextRequest) {
     })
   }
 
-  // ── 4. Optionally resize using sharp (if width param provided) ──
+  // ── 5. Optionally resize using sharp (if width param provided) ──
   if (width) {
     try {
       const sharp = (await import('sharp')).default
@@ -125,7 +150,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // ── 5. Return the original image ──
+  // ── 6. Return the original image ──
   return new NextResponse(data, {
     headers: {
       'Content-Type': contentType,

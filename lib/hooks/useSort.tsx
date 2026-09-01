@@ -22,8 +22,8 @@ export function useSort<T>(items: T[], initialSort?: SortConfig) {
         return path.split('.').reduce((acc, part) => acc && acc[part], obj)
       }
 
-      let aValue = getNestedValue(a, sortConfig.key)
-      let bValue = getNestedValue(b, sortConfig.key)
+      const aValue = getNestedValue(a, sortConfig.key)
+      const bValue = getNestedValue(b, sortConfig.key)
 
       // Handle nulls
       if (aValue === null || aValue === undefined) return 1

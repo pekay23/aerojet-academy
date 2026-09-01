@@ -113,7 +113,7 @@ export default function ClassmatesFilters({
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold transition-all',
                 isActive
-                  ? 'bg-aerojet-blue text-white shadow-sm'
+                  ? 'bg-blue-800 text-white shadow-sm'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
               )}
             >
@@ -187,7 +187,7 @@ export default function ClassmatesFilters({
 
       {isPending && (
         <div className="h-1 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-          <div className="h-full w-1/3 animate-pulse rounded-full bg-aerojet-sky" />
+          <div className="h-full w-1/3 animate-pulse rounded-full bg-sky-400" />
         </div>
       )}
     </div>

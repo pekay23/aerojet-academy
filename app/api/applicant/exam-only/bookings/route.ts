@@ -1,57 +1,48 @@
 import { NextResponse } from 'next/server'
-import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { requireApplicant } from '@/lib/auth/helpers'
+import { prismaUnfiltered } from '@/lib/prisma/client'
+import { withErrorHandler } from '@/lib/api/response'
 
-export async function GET() {
-  try {
-    const session = await getAuthSession()
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+export const GET = withErrorHandler(async () => {
+  const user = await requireApplicant()
 
-    const userId = session.user.id
-
-    const bookings = await prisma.examBooking.findMany({
-      where: {
-        userId,
-        bookingType: 'INDIVIDUAL',
-      },
-      include: {
-        examComponent: {
-          include: {
-            course: {
-              select: {
-                code: true,
-                name: true,
-              },
+  const bookings = await prismaUnfiltered.examBooking.findMany({
+    where: {
+      userId: user.id,
+      bookingType: 'INDIVIDUAL',
+    },
+    include: {
+      examComponent: {
+        include: {
+          course: {
+            select: {
+              code: true,
+              name: true,
             },
           },
         },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
-      take: 100,
-    })
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    take: 100,
+  })
 
-    return NextResponse.json(
-      bookings.map((b) => ({
-        id: b.id,
-        status: b.status,
-        amountPaid: Number(b.amountPaid),
-        examDate: b.examDate?.toISOString() || null,
-        examComponent: b.examComponent
-          ? {
-              course: {
-                code: b.examComponent.course.code,
-                name: b.examComponent.course.name,
-              },
-            }
-          : undefined,
-      }))
-    )
-  } catch (error) {
-    console.error('Error fetching bookings:', error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
-}
+  return NextResponse.json(
+    bookings.map((b) => ({
+      id: b.id,
+      status: b.status,
+      amountPaid: Number(b.amountPaid),
+      examDate: b.examDate?.toISOString() || null,
+      examComponent: b.examComponent
+        ? {
+            course: {
+              code: b.examComponent.course.code,
+              name: b.examComponent.course.name,
+            },
+          }
+        : undefined,
+    }))
+  )
+})

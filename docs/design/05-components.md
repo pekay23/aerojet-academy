@@ -134,7 +134,7 @@ focus:ring-2 focus:ring-ring focus:ring-offset-2
 | -------------------------------------------------------------------------- | ------------------------------ | ------------------------------- |
 | `bg-aerojet-blue`                                                          | Public primary CTAs            | brand blue                      |
 | `bg-aerojet-sky`                                                           | Success / live indicator       | brand sky                       |
-| `rounded-xl px-6 py-2 font-bold text-white transition-all active:scale-95` | WalletConfirmModal CTA         | standard CTA pattern            |
+| `rounded-xl px-6 py-2 font-bold text-white transition-all active:scale-95` | WalletConfirmModal CTA         | `bg-blue-600 hover:bg-blue-700` / `bg-red-600 hover:bg-red-700` |
 | `border-aerojet-blue border-t-2 pt-5`                                      | Editorial programme row        | programme-list pattern          |
 | `bg-paper` / `bg-paper-dark`                                               | Live editorial page bg / hover | `#f7f3ec` / `#efe8dc`           |
 | `text-[#1b2430]/85`                                                        | Live editorial body            | ink on paper                    |

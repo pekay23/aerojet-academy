@@ -329,7 +329,7 @@ export default function RecordsTab({ records, modules }: RecordsTabProps) {
     if (!editingId) return
     setIsUpdating(true)
 
-    const res = await updateExamBooking(editingId, {
+    const res = await updateExamBooking(editingId.startsWith('result_') ? editingId.replace('result_', '') : editingId, {
       courseId: editCourseId || undefined,
       moduleCode: editModuleCode || undefined,
       examDate: editDate ? new Date(editDate) : undefined,

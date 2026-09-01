@@ -10,13 +10,13 @@ export const GET = withErrorHandler(
     if (!courseId) return apiError('Course ID required')
 
     // Verify enrollment
-    const enrollment = await prisma.enrollment.findFirst({
+    const enrollment = await prismaUnfiltered.enrollment.findFirst({
       where: { userId: user.id, courseId },
     })
     if (!enrollment || enrollment.status === 'PENDING')
       return apiNotFound('Not enrolled in this course')
 
-    const materials = await prisma.fileUpload.findMany({
+    const materials = await prismaUnfiltered.fileUpload.findMany({
       where: {
         referenceType: 'COURSE_MATERIAL',
         referenceId: courseId,

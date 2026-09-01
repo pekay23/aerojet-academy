@@ -8,7 +8,7 @@ import PaymentMethodsDisplay from '@/components/shared/PaymentMethodsDisplay'
 import CoursePaymentUploadForm from '../../_components/CoursePaymentUploadForm'
 import { getActivePaymentMethods } from '@/lib/payment-methods'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Purchase Course | Applicant Portal' }
 
@@ -24,7 +24,7 @@ export default async function PurchasePage({ params }: Props) {
   const userId = session.user.id
 
   const [course, enrollment, paymentMethods] = await Promise.all([
-    prisma.course.findUnique({
+    prismaUnfiltered.course.findUnique({
       where: { id },
       include: { category: true },
     }),

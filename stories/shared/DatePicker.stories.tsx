@@ -10,22 +10,24 @@ const meta: Meta<typeof DatePicker> = {
 export default meta
 type Story = StoryObj<typeof DatePicker>
 
+// Named function renders silence react-hooks rules-of-hooks false-positives
+// that fire on arrow `() => { ... }` renders (no component-style name).
 export const Default: Story = {
-  render: () => {
+  render: function Default() {
     const [date, setDate] = useState<Date | undefined>()
     return <DatePicker date={date} onSelect={setDate} />
   },
 }
 
 export const WithDate: Story = {
-  render: () => {
+  render: function WithDate() {
     const [date, setDate] = useState<Date | undefined>(new Date())
     return <DatePicker date={date} onSelect={setDate} />
   },
 }
 
 export const CustomPlaceholder: Story = {
-  render: () => {
+  render: function CustomPlaceholder() {
     const [date, setDate] = useState<Date | undefined>()
     return <DatePicker date={date} onSelect={setDate} placeholder="Select start date" />
   },

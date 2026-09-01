@@ -17,8 +17,8 @@ bun install
 ## Environment Configuration
 
 ```bash
-cp .env.example .env.local
-# Edit .env.local with your database URL, API keys, etc.
+cp .env.example .env
+# Edit .env with your database URL, API keys, etc.
 ```
 
 ## Database Setup
@@ -36,7 +36,7 @@ bun run db:seed:mock   # Seed with high-fidelity test data (Pathways, Exams, etc
 bun dev                # Start dev server (http://localhost:3000)
 bun run lint           # Run ESLint
 bun run type-check     # TypeScript type checking
-bun test               # Run tests
+bun run test           # Run tests (Vitest)
 ```
 
 ## Demo Credentials (after seeding)

@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import PathwayPaymentForm from './_components/PathwayPaymentForm'
 import MilestoneTracker from './_components/MilestoneTracker'
 import { AlertCircle, FileText, Info, CheckCircle2, Wallet, ArrowRight } from 'lucide-react'
@@ -34,7 +34,7 @@ export default async function PathwayPage() {
 
   const [applicant, enrollment, currencySettings, wallet, pendingTuitionPayment, bankSettings] =
     await Promise.all([
-      prisma.user.findUnique({
+      prismaUnfiltered.user.findUnique({
         where: { id: userId },
         select: { registrationPaid: true, programmeChoice: true, role: true },
       }),
@@ -81,7 +81,7 @@ export default async function PathwayPage() {
   }
 
   const choice = applicant.programmeChoice
-  if (!choice || !PRICING[choice]) {
+  if (!choice || !PATHWAY_PRICING[choice as keyof typeof PATHWAY_PRICING]) {
     return (
       <div className="rounded-2xl border border-orange-200 bg-orange-50 p-6 text-center">
         <AlertCircle className="mx-auto mb-2 h-10 w-10 text-orange-500" />
@@ -93,7 +93,7 @@ export default async function PathwayPage() {
     )
   }
 
-  const pricing = PRICING[choice]
+  const pricing = PATHWAY_PRICING[choice as keyof typeof PATHWAY_PRICING]
   const currency = currencySettings[0]?.value || 'EUR'
 
   // If enrollment exists and seat is confirmed, show milestone tracker

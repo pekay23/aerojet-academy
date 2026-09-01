@@ -83,7 +83,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
   }, [year, month, fetchData, isInitialYear, isInitialMonth])
 
   const { summary, revenueByType, paymentMethods, monthlyData, paymentStatus } = data
-  const maxMonthlyRevenue = Math.max(...monthlyData.map((m: any) => m.revenue), 1)
+  const maxMonthlyRevenue = Math.max(...monthlyData.map((m: MonthlyRevenueItem) => m.revenue), 1)
   const successRate =
     summary.totalCount + summary.rejectedCount > 0
       ? Math.round((summary.totalCount / (summary.totalCount + summary.rejectedCount)) * 100)
@@ -235,7 +235,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
           </div>
         </div>
         <div className="space-y-2.5">
-          {monthlyData.map((m: any) => {
+          {monthlyData.map((m: MonthlyRevenueItem) => {
             const pct = maxMonthlyRevenue > 0 ? (m.revenue / maxMonthlyRevenue) * 100 : 0
             const isCurrentMonth = m.month === MONTH_NAMES[month - 1]?.slice(0, 3)
             return (
@@ -280,7 +280,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
             </div>
             <h3 className="text-sm font-black tracking-tight text-slate-800 uppercase dark:text-slate-200">Revenue by Programme</h3>
           </div>
-          {revenueByType.every((r: any) => r.value === 0) ? (
+          {revenueByType.every((r: RevenueByProgrammeItem) => r.value === 0) ? (
             <div className="flex h-40 items-center justify-center">
               <p className="text-sm font-bold text-slate-300">No revenue data available</p>
             </div>
@@ -322,7 +322,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
             <h3 className="text-sm font-black tracking-tight text-slate-800 uppercase dark:text-slate-200">Payment Status</h3>
           </div>
           <div className="space-y-3">
-            {paymentStatus.map((status: any) => {
+            {paymentStatus.map((status: PaymentStatusBreakdownItem) => {
               const cfg = STATUS_ICON[status.status] || STATUS_ICON.PROCESSING
               const Icon = cfg.icon
               return (
@@ -377,7 +377,7 @@ export default function ReportsPanel({ initialData }: ReportsPanelProps) {
                 </TableCell>
               </TableRow>
             ) : (
-              paymentMethods.map((method: any) => (
+              paymentMethods.map((method: PaymentMethodBreakdownItem) => (
                 <TableRow key={method.method} className="transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
                   <TableCell className="px-6 py-4">
                     <span className="rounded-lg bg-slate-100 px-2.5 py-1 text-[10px] font-black tracking-wider text-slate-700 uppercase dark:bg-slate-800 dark:text-slate-300">

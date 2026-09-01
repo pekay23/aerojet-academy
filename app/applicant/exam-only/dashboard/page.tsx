@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Dashboard | Exam-Only Portal' }
 export const dynamic = 'force-dynamic'
@@ -25,7 +25,7 @@ export default async function ExamOnlyDashboardPage() {
 
   const userId = session.user.id
 
-  const user = await prisma.user.findUnique({
+  const user = await prismaUnfiltered.user.findUnique({
     where: { id: userId },
     select: {
       role: true,
@@ -303,7 +303,7 @@ export default async function ExamOnlyDashboardPage() {
                     </p>
                   </div>
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-bold ${colors.bg} ${colors.text} dark:bg-opacity-20`}
+                    className={`rounded-full px-3 py-1 text-xs font-bold ${colors.bg} ${colors.text}`}
                   >
                     {booking.status}
                   </span>

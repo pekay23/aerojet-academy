@@ -7,6 +7,7 @@ import prisma from '@/lib/prisma/client'
 import { getClassAttendance } from '@/lib/actions/instructor'
 
 export const metadata: Metadata = { title: 'Class Grades | Instructor Portal' }
+export const dynamic = 'force-dynamic'
 
 export default async function Page({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -18,7 +19,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 
   const { classData } = data
 
-  const grades = await prisma.grade.findMany({
+  const grades = await prismaUnfiltered.grade.findMany({
     where: { enrollment: { courseId: classData.course.id } },
     include: {
       user: { include: { profile: true } },
@@ -32,7 +33,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <div>
         <Link
           href="/instructor/classes"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-sky"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-300 uppercase transition-colors hover:text-aerojet-sky"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Classes

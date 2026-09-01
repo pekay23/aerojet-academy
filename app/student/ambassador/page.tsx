@@ -46,7 +46,7 @@ export default async function AmbassadorPage() {
     <div className="mx-auto max-w-5xl space-y-8 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             Ambassador Program
           </h1>
           <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
@@ -69,7 +69,7 @@ export default async function AmbassadorPage() {
 
       <div className="grid gap-6 sm:grid-cols-3">
         <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-aerojet-blue dark:bg-blue-900/20 dark:text-blue-400">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400">
             <Users className="h-5 w-5" />
           </div>
           <p className="mt-4 text-xs font-bold tracking-widest text-slate-400 uppercase">
@@ -161,7 +161,7 @@ export default async function AmbassadorPage() {
               </h3>
               {referrer && (
                 <div className="mt-4 flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/50">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-aerojet-blue font-bold dark:bg-blue-900/30">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-blue-800 font-bold dark:bg-blue-900/30">
                     {referrer.profile?.firstName?.[0]}{referrer.profile?.lastName?.[0]}
                   </div>
                   <div>

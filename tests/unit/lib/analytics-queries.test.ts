@@ -43,6 +43,10 @@ describe('Analytics Queries', () => {
         { userId: 'user-1', createdAt: new Date() },
         { userId: 'user-2', createdAt: new Date() },
       ])
+      prismaMock.user.findMany.mockResolvedValue([
+        { id: 'user-1', createdAt: new Date('2024-01-01') },
+        { id: 'user-2', createdAt: new Date('2024-01-02') },
+      ])
 
       const result = await getFeatureAdoption('dashboard')
 
@@ -74,6 +78,7 @@ describe('Analytics Queries', () => {
 
   describe('getUserJourney', () => {
     it('returns ordered events for a user', async () => {
+      prismaMock.user.findUnique.mockResolvedValue({ id: 'user-123' })
       prismaMock.auditLog.findMany.mockResolvedValue([
         {
           action: 'PAGE_VIEW',

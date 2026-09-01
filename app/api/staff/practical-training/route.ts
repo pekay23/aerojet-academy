@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { requireStaff } from '@/lib/auth/helpers'
-import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
+import { apiSuccess, apiError, apiCreated, withErrorHandler, RouteContext } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { z } from 'zod'
 
@@ -24,10 +24,18 @@ const recordSchema = z.object({
 })
 
 // GET — list practical training records
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext) => {
   await requireStaff()
   const url = new URL(req.url)
-  const studentProfileId = url.searchParams.get('studentProfileId')
+  let studentProfileId = url.searchParams.get('studentProfileId')
+  const userId = url.searchParams.get('userId')
+  if (!studentProfileId && userId) {
+    const sp = await prismaUnfiltered.studentProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    })
+    if (sp) studentProfileId = sp.id
+  }
   const courseId = url.searchParams.get('courseId')
   const page = parseInt(url.searchParams.get('page') || '1')
   const limit = parseInt(url.searchParams.get('limit') || '50')
@@ -85,7 +93,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
 })
 
 // POST — create practical training record
-export const POST = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const POST = withErrorHandler(async (req: NextRequest, _ctx?: RouteContext) => {
   await requireStaff()
   const body = await req.json()
   const parsed = recordSchema.safeParse(body)

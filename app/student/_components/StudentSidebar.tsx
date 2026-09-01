@@ -43,7 +43,7 @@ function buildLinks(
   const isModular = !isFullTime && !isExamOnly && !!studyPathway
 
   const links: SidebarLink[] = [
-    { label: 'Dashboard', href: '/student', icon: LayoutDashboard },
+    { label: 'Dashboard', href: '/student', icon: LayoutDashboard, tourId: 'nav-dashboard' },
   ]
 
   // ── Academic ──
@@ -75,6 +75,7 @@ function buildLinks(
       href: '/student/courses',
       icon: BookOpen,
       children: academicChildren,
+      tourId: 'group-academic',
     })
   }
 
@@ -105,6 +106,7 @@ function buildLinks(
       href: '/student/exams',
       icon: ClipboardCheck,
       children: examChildren,
+      tourId: 'group-exams',
     })
   }
 
@@ -133,6 +135,7 @@ function buildLinks(
       href: '/student/grades',
       icon: Award,
       children: progressChildren,
+      tourId: 'group-progress',
     })
   }
 
@@ -165,13 +168,14 @@ function buildLinks(
       href: '/student/attendance',
       icon: GraduationCap,
       children: academyLifeChildren,
+      tourId: 'group-academy-life',
     })
   }
 
   // ── Financial ──
   // Wallet: all pathways (for full-time, only shown if self-funded / has wallet)
   if (!isFullTime || hasWallet) {
-    links.push({ label: 'Wallet', href: '/student/wallet', icon: Wallet })
+    links.push({ label: 'Wallet', href: '/student/wallet', icon: Wallet, tourId: 'nav-wallet' })
   }
 
   // ── Documents ──
@@ -180,7 +184,7 @@ function buildLinks(
 
   // ── Communication ──
   links.push(
-    { label: 'Notifications', href: '/student/notifications', icon: Bell },
+    { label: 'Notifications', href: '/student/notifications', icon: Bell, tourId: 'nav-notifications' },
     { label: 'Messages', href: '/student/messages', icon: Mail },
   )
 

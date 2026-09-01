@@ -11,7 +11,7 @@ export default meta
 type Story = StoryObj<typeof TablePagination>
 
 export const Default: Story = {
-  render: () => {
+  render: function Default() {
     const [page, setPage] = useState(1)
     const [perPage, setPerPage] = useState(25)
     return (

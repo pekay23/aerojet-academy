@@ -477,15 +477,6 @@ export default function DocumentsManager({ documents }: { documents: Doc[] }) {
                   <div className="mx-auto flex max-w-sm flex-col items-center gap-3 text-sm text-slate-500">
                     <Link2 className="size-8 text-slate-300" />
                     <span>No documents.</span>
-                    <Button
-                      type="button"
-                      size="sm"
-                      onClick={() => setIsUploadOpen(true)}
-                      className="bg-aerojet-blue hover:bg-aerojet-blue/90 text-white"
-                    >
-                      <Upload className="size-4" />
-                      Upload files
-                    </Button>
                   </div>
                 </td>
               </tr>

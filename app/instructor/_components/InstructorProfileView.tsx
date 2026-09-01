@@ -105,7 +105,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
     }
   }
 
-  const handleProfileChange = (field: string, value: any) => {
+  const handleProfileChange = (field: string, value: string | number | boolean | null) => {
     setFormData((prev) => ({
       ...prev,
       profile: {
@@ -118,7 +118,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
   return (
     <div className="mx-auto max-w-5xl space-y-8 pb-12">
       {/* Header Profile Card */}
-      <motion.div
+      <MotionDiv
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative overflow-hidden rounded-4xl bg-aerojet-blue p-8 text-white shadow-2xl dark:bg-slate-900"
@@ -225,7 +225,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold text-slate-400">First Name</Label>
+                        <Label className="text-xs font-bold text-slate-400 dark:text-slate-300">First Name</Label>
                         <Input
                           disabled={!isEditing}
                           value={formData.profile.firstName}
@@ -451,7 +451,7 @@ export default function InstructorProfileView({ initialData }: { initialData: Pr
                     <div className="space-y-4">
                       <Label className="text-xs font-bold text-slate-400">Recent Assignments</Label>
                       <div className="space-y-3">
-                        {formData.instructorProfile.classesInstructed.slice(0, 3).map((c: any) => (
+                        {formData.instructorProfile.classesInstructed.slice(0, 3).map((c: { id: string; course: { code: string }; name: string }) => (
                           <div
                             key={c.id}
                             className="flex items-center justify-between rounded-xl border border-slate-100 p-3 dark:border-slate-800"

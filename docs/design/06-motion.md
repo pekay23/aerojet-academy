@@ -25,7 +25,7 @@ defaults. Easing is **almost never overridden** — keep that.
 | ---------------------------------- | ------------------------------------ |
 | `ease-out`                         | Accordion open/close (200 ms)        |
 | `ease-in-out`                      | shadcn Sheet (300 ms in, 500 ms out) |
-| `cubic-bezier` (Framer)            | `SectionReveal` scroll-in fade       |
+| `cubic-bezier(0.22, 1, 0.36, 1)` | `SectionReveal` scroll-in fade       |
 | spring (stiffness 100, damping 20) | `MotionTabs` underline shared layout |
 
 ## 6.3 · Keyframes
@@ -60,43 +60,54 @@ re-use via the `tailwindcss-animate` plugin.
 <motion.div
   initial={{ opacity: 0, y: 24 }}
   whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true, margin: '-80px' }}
-  transition={{ duration: 0.5, ease: 'easeOut' }}
+  viewport={{ once: true, margin: '-120px' }}
+  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
 >
 ```
 
 Used by every section in `app/(public)/_components/*`. Delay is 0 by
 default and staggered by 0.05–0.1 s per row for the programme list.
 
-### Hero word-by-word reveal
+### Hero headline reveal
 
 ```tsx
 // app/(public)/_components/HeroSlider.tsx
-{
-  slides[currentSlide].headline.split(' ').map((word, i) => (
-    <motion.span
-      key={i}
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.05 * i, duration: 0.45, ease: 'easeOut' }}
-    >
-      {word}{' '}
-    </motion.span>
-  ))
-}
+<div className="mb-6 flex items-center justify-center gap-4 text-[11px] font-bold tracking-[0.35em] text-white/90 uppercase">
+  <span className="h-px w-12 bg-white/40" />
+  EASA Part-66 · Accra, Ghana
+  <span className="h-px w-12 bg-white/40" />
+</div>
+<h1 className="mb-6 font-serif text-4xl leading-[1.06] font-medium tracking-tight text-white md:text-6xl lg:text-7xl">
+  {slides[currentSlide].headline.split(' ').map((word, i) => (
+    <span key={i} className="mr-[0.25em] inline-block last:mr-0">
+      {word}
+    </span>
+  ))}
+</h1>
 ```
 
-### `MotionTabs` underline
+The headline is split into static `<span>` elements inside a single
+`motion.div` parent; there is no per-word Framer Motion animation.
+The parent handles the slide transition (`initial={{ opacity: 0, y: 30 }}`
+/ `animate={{ opacity: 1, y: 0 }}` / `exit={{ opacity: 0, y: -20 }}`).
 
-Uses Framer Motion's `layoutId` so the active tab underline slides
-between tabs:
+### `MotionTabs` sliding pill
+
+Uses Framer Motion's `layoutId` so the active tab pill slides between
+tabs. The default `layoutId` is `"motion-pill"` (overridable via the
+`layoutId` prop):
 
 ```tsx
 <motion.div
-  layoutId="tab-underline"
-  className="absolute bottom-0 left-0 right-0 h-0.5 bg-aerojet-sky"
+  layoutId="motion-pill"
+  className="absolute inset-0 rounded-full bg-white shadow-sm dark:bg-slate-900"
+  style={{ zIndex: 0 }}
+  transition={{ type: 'spring', bounce: 0.15, duration: 0.5 }}
 />
 ```
+
+A separate hover highlight uses the same spring config with
+`layoutId="${layoutId}-hover"` and `bg-slate-200/50 dark:bg-slate-700/50`.
 
 ### `ChangePasswordForm` form-state animation
 
@@ -136,9 +147,11 @@ for prototyping future scroll-driven motion.
 - `body.exam-lockdown` is a hard mode used during exams: it strips the
   sidebar, sticky elements, breadcrumb, and registration banners
   (`app/globals.css` lines 117-136).
-- `prefers-reduced-motion` is **not yet honored** — the only
-  motion-related media query in the codebase is the dark-mode `prefers-color-scheme`
-  block (which is also empty — dark mode is class-driven, not media-driven).
+- `prefers-reduced-motion` is **not yet honored** — the codebase does
+  not query `matchMedia('(prefers-reduced-motion: reduce)')` anywhere.
+  Dark mode is class-driven, but system theme detection does use
+  `matchMedia('(prefers-color-scheme: dark)')` in
+  `components/shared/theme-provider.tsx`.
 
 ## 6.8 · Loading & skeleton patterns
 
@@ -147,5 +160,3 @@ for prototyping future scroll-driven motion.
   save button).
 - Buttons in a busy state get `disabled:opacity-50 disabled:pointer-events-none`
   plus the same `aria-busy` attribute.
-- A few components toggle a tiny "PROCESSING…" / "SAVING…" caption
-  via `aria-live="polite"`.

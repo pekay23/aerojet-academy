@@ -5,7 +5,10 @@ import Link from 'next/link'
 import { ArrowLeft, Download } from 'lucide-react'
 import { Metadata } from 'next'
 import { serializePrisma } from '@/lib/utils/serialization'
+import { ProtectedImage } from '@/components/ProtectedImage'
+import { proxyImageUrl } from '@/lib/storage/signed-url'
 import StudentDetailTabs from './_components/StudentDetailTabs'
+import type { SerializedStudent, SerializedExamComponent } from '@/lib/staff/types'
 import EditProfileDialog from '@/app/staff/users/[id]/_components/EditProfileDialog'
 import EditProfilePhotoDialog from '@/app/staff/users/[id]/_components/EditProfilePhotoDialog'
 import { compareNatural } from '@/lib/utils/natural-sort'
@@ -232,9 +235,9 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
     payments: enrichedPayments,
     fullTimeEnrollments,
     modularEnrollments,
-  })
+  }) as unknown as SerializedStudent
 
-  const serializedExamComponents = serializePrisma(examComponents)
+  const serializedExamComponents = serializePrisma(examComponents) as unknown as SerializedExamComponent[]
   const serializedUpcomingEvents = serializePrisma(upcomingEvents)
   const serializedAcademicYears = serializePrisma(academicYears)
   const serializedSemesters = serializePrisma(semesters)
@@ -266,10 +269,13 @@ export default async function StudentManagementPage({ params, searchParams }: Pr
           <div className="relative">
             <div className="bg-aerojet-blue relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl text-2xl font-black text-white shadow-lg">
               {student.profile?.profilePhotoUrl ? (
-                <img
-                  src={student.profile.profilePhotoUrl}
+                <ProtectedImage
+                  src={proxyImageUrl(student.profile.profilePhotoUrl, 'profile-photos')}
                   alt={fullName}
-                  className="h-full w-full object-cover"
+                  width={80}
+                  height={80}
+                  className="object-cover"
+                  priority
                 />
               ) : (
                 initials

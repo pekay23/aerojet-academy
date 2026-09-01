@@ -87,7 +87,7 @@ export default function StudentCard({ student }: { student: Student }) {
           </span>
           <ChevronRight className="h-4 w-4 text-slate-300 transition-transform group-hover:translate-x-1 group-hover:text-aerojet-sky" />
         </div>
-      </motion.div>
+      </MotionDiv>
     </Link>
   )
 }

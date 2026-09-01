@@ -135,7 +135,7 @@ export default function BundleBooking({
             {/* Header */}
             <div className="flex items-center justify-between border-b border-slate-100 px-8 py-6 dark:border-slate-800">
               <div>
-                <h2 id="bundle-booking-title" className="text-xl font-black tracking-tight text-aerojet-blue dark:text-white">
+                <h2 id="bundle-booking-title" className="text-xl font-black tracking-tight text-blue-800 dark:text-white">
                    {label}
                 </h2>
                 <p className="mt-1 text-xs font-medium text-slate-500 dark:text-slate-400">
@@ -178,7 +178,7 @@ export default function BundleBooking({
               {/* Event Selection */}
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
-                  <Calendar className="h-4 w-4 text-aerojet-blue" />
+                  <Calendar className="h-4 w-4 text-blue-800" />
                   Target Exam Event
                 </label>
                 <select
@@ -216,13 +216,13 @@ export default function BundleBooking({
                         disabled={isDisabled || isPending}
                         className={`group relative rounded-xl border p-3 text-left transition-all ${
                           isSelected
-                            ? 'border-aerojet-blue bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/20'
+                            ? 'border-blue-800 bg-blue-50/50 dark:border-blue-500 dark:bg-blue-900/20'
                             : isDisabled
                               ? 'opacity-40 cursor-not-allowed border-slate-100 dark:border-slate-800'
                               : 'border-slate-100 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-800 dark:hover:border-slate-600 dark:hover:bg-slate-800/50 shadow-sm'
                         }`}
                       >
-                        <p className={`text-xs font-black tracking-tighter uppercase ${isSelected ? 'text-aerojet-blue dark:text-blue-300' : 'text-slate-900 dark:text-slate-100'}`}>
+                        <p className={`text-xs font-black tracking-tighter uppercase ${isSelected ? 'text-blue-800 dark:text-blue-300' : 'text-slate-900 dark:text-slate-100'}`}>
                           {ec.courseCode ? `${ec.courseCode} - ` : ''}{ec.code}
                         </p>
                         <p className="mt-0.5 line-clamp-1 text-[10px] font-medium text-slate-500 dark:text-slate-400">
@@ -275,7 +275,7 @@ export default function BundleBooking({
                     selectedModules.length !== bundleSize ||
                     !selectedEventId
                   }
-                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-aerojet-blue py-4 text-sm font-black text-white shadow-lg shadow-aerojet-blue/20 transition-all hover:bg-[#003a7c] hover:shadow-xl active:scale-95 disabled:opacity-50"
+                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-blue-800 py-4 text-sm font-black text-white shadow-lg shadow-blue-800/20 transition-all hover:bg-[#003a7c] hover:shadow-xl active:scale-95 disabled:opacity-50"
                 >
                   {isPending ? (
                     <>

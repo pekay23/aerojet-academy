@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Logo from '@/components/shared/Logo'
 import { AuthThemeProvider } from '@/components/shared/AuthThemeProvider'
+import ClientYear from '@/components/shared/ClientYear'
 
 export const metadata: Metadata = {
   title: {
@@ -78,7 +79,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           {/* Footer */}
           <div className="border-t border-slate-100 p-6 text-center">
             <p className="text-[10px] tracking-widest text-slate-400 uppercase">
-              &copy; {new Date().getFullYear()} Aerojet Aviation Training Academy. All rights
+              &copy; <ClientYear /> Aerojet Aviation Training Academy. All rights
               reserved.
             </p>
           </div>

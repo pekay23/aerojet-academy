@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Accessibility Documentation — Aerojet Academy Exam System · Aerojet Academy</title>
+<link rel="stylesheet" href="../design-tokens.css">
+<link rel="stylesheet" href="../docs.css">
+</head>
+<body>
+<div class="he-shell he-shell--wide">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="../index.html">Index</a>
+    <a href="../architecture/system-overview.html">Architecture</a>
+    <a href="../guides/setup.html">Guides</a>
+    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="../plans/future-plans.html">Plans</a>
+    <a href="../design-system.html">Design</a>
+  </div>
+</nav>
+<div class="he-layout">
+<main class="he-main">
+<header>
+  <p class="he-eyebrow">Plans</p>
+  <h1 class="he-title">Accessibility Documentation — Aerojet Academy Exam System</h1>
+  <p class="he-deck"><p><strong>Last updated:</strong> 2026-08-30…</p>
+</p>
+</header>
+This document records WCAG 2.1 compliance decisions for the Aerojet Academy exam system, including internal exams and anti-cheat certification exams.<section class="he-section" id="1-wcag-criteria-met"><div class="he-section__num">01 · 1. WCAG Criteria Met</div><h2 class="he-section__title">1. WCAG Criteria Met</h2>CriterionStatusEvidence1.1.1 Non-text Content✅ MetAll exam images have <code>alt</code> text. ProtectedImage component enforces this.1.3.1 Info and Relationships✅ MetExam interfaces use semantic HTML, ARIA labels, and proper heading hierarchy.1.4.3 Contrast (Minimum)✅ MetAll text meets 4.5:1 contrast ratio. Design system enforces <code>text-slate-900</code> on white backgrounds.1.4.11 Non-text Contrast✅ MetUI components (buttons, inputs, borders) meet 3:1 contrast against adjacent colors.2.1.1 Keyboard✅ MetAll exam controls are keyboard-accessible. Answer selection uses button elements with focus styles.2.4.1 Bypass Blocks✅ MetNavigation skip links present in portal layouts.2.4.2 Page Titled✅ MetAll exam pages have descriptive <code><title></code> tags via Next.js metadata.2.4.6 Headings and Labels✅ MetHeadings describe content. Form inputs have associated <code><label></code> elements.3.2.1 On Focus✅ MetNo context changes occur on focus.3.2.2 On Input✅ MetAnswer selection does not trigger unexpected context changes.3.3.1 Error Identification✅ MetValidation errors are clearly stated and associated with fields.3.3.2 Labels or Instructions✅ MetAll form fields have visible labels or instructions.4.1.1 Parsing✅ MetValid HTML5, no duplicate IDs.4.1.2 Name, Role, Value✅ MetAll interactive elements have accessible names and roles.<section class="he-section" id="2-wcag-criteria-waived-with-regulatory-justification"><div class="he-section__num">02 · 2. WCAG Criteria Waived with Regulatory Justification</div><h2 class="he-section__title">2. WCAG Criteria Waived with Regulatory Justification</h2>The following WCAG criteria are not met due to EASA controlled-environment requirements. These are documented as regulated exceptions, not oversights.CriterionStatusJustificationAlternative Pathway2.1.2 No Keyboard Trap❌ WaivedStrict keypress auto-submit (§14) means any key during an active exam triggers immediate submission. This is a deliberate keyboard trap per user requirement for exam integrity.Supervised alternative pathway (§17.4) for candidates who cannot use the lockdown interface.2.4.3 Focus Order⚠️ PartialFullscreen enforcement may disrupt focus order when entering/exiting fullscreen mode.Focus is restored to first question after fullscreen entry. Screen reader users are warned via ARIA live region before fullscreen transition.2.4.7 Focus Visible❌ WaivedFullscreen overlay and security status bar intentionally obscure normal focus indicators during exam delivery.Supervised pathway preserves normal focus visibility.4.1.3 Status Messages⚠️ PartialTimer warnings and violation alerts are not announced via ARIA live regions.Planned enhancement: add <code>aria-live="polite"</code> regions for timer warnings and security status changes.<section class="he-section" id="3-exam-interface-accessibility-features"><div class="he-section__num">03 · 3. Exam Interface Accessibility Features</div><h2 class="he-section__title">3. Exam Interface Accessibility Features</h2><h3 id="31-supervised-alternative-pathway-174">3.1 Supervised Alternative Pathway (§17.4)</h3>Candidates who cannot use the lockdown interface (accessibility needs, device incompatibility) are routed to a supervised in-person session:Route: <code>/staff/exams/internal/sessions/[id]/supervise</code>Auth: <code>requireStaff()</code> or <code>requirePermission('exams:session:supervise')</code>Features:No fullscreen enforcementNo clipboard/keyboard shortcut blockingVisible "Supervised Session" bannerInvigilator can force-submit or extend timeAll activity logged for post-session reviewEligibility: Set via <code>ExamRegistration.requiresAlternativeProctoring</code> flag.<h3 id="32-aria-live-regions">3.2 ARIA Live Regions</h3>The secure exam client (<code>components/exam/SecureExamClient.tsx</code>) includes:Security status announcements before fullscreen entryTimer warning announcements at 60 seconds remainingViolation severity announcements for proctor review<h3 id="33-focus-management">3.3 Focus Management</h3>After fullscreen entry, focus moves to the first questionAfter fullscreen exit, focus moves to the return-to-fullscreen promptModal dialogs trap focus within the dialog<section class="he-section" id="4-known-accessibility-limitations"><div class="he-section__num">04 · 4. Known Accessibility Limitations</div><h2 class="he-section__title">4. Known Accessibility Limitations</h2><h3 id="41-fullscreen-mode">4.1 Fullscreen Mode</h3>Fullscreen API is not screen-reader-friendlyScreen readers may lose context when entering fullscreenMitigation: ARIA live region announces "Entering fullscreen exam mode" before transition. Focus is moved to first question after entry.<h3 id="42-strict-keypress-auto-submit">4.2 Strict Keypress Auto-Submit</h3>Any non-modifier key triggers immediate submissionThis is a deliberate keyboard trap per EASA controlled-environment requirementsMitigation: Supervised alternative pathway for candidates with accessibility needsMitigation: Modifier-only keys (Shift, Ctrl, Alt, Meta) do not trigger auto-submit<h3 id="43-multi-tab-prevention">4.3 Multi-Tab Prevention</h3>BroadcastChannel + localStorage heartbeat detects multiple tabsThis may interfere with browser accessibility tools that open separate windowsMitigation: Supervised alternative pathway<h3 id="44-clipboard-block">4.4 Clipboard Block</h3>Copy/paste/cut events are blocked during examsThis may interfere with assistive technologies that use clipboard accessMitigation: Supervised alternative pathway<section class="he-section" id="5-accessibility-testing"><div class="he-section__num">05 · 5. Accessibility Testing</div><h2 class="he-section__title">5. Accessibility Testing</h2><h3 id="51-automated-testing">5.1 Automated Testing</h3>axe-core integrated into component testsPlaywright accessibility snapshots on exam pages<h3 id="52-manual-testing">5.2 Manual Testing</h3>Screen reader testing (NVDA, VoiceOver) on exam interfacesKeyboard-only navigation testingZoom testing up to 200%<h3 id="53-testing-checklist">5.3 Testing Checklist</h3>All interactive elements are keyboard-accessibleFocus order is logicalFocus indicators are visible (or waived with justification)ARIA live regions announce dynamic contentError messages are associated with form fieldsSupervised pathway is accessible without fullscreen/keyboard traps<section class="he-section" id="6-compliance-sign-off"><div class="he-section__num">06 · 6. Compliance Sign-Off</div><h2 class="he-section__title">6. Compliance Sign-Off</h2>RoleNameDateSignatureAccessibility LeadEASA Compliance OfficerLegal / ComplianceEnd of Accessibility Documentation
+</main>
+
+<aside class="he-toc" aria-label="On this page">
+  <p class="he-toc__label">On this page</p>
+  <ul>
+    <li class="he-toc__l2"><a href="#1-wcag-criteria-met">1. WCAG Criteria Met</a></li>
+    <li class="he-toc__l2"><a href="#2-wcag-criteria-waived-with-regulatory-justification">2. WCAG Criteria Waived with Regulatory Justification</a></li>
+    <li class="he-toc__l2"><a href="#3-exam-interface-accessibility-features">3. Exam Interface Accessibility Features</a></li>
+    <li class="he-toc__l3"><a href="#31-supervised-alternative-pathway-174">3.1 Supervised Alternative Pathway (§17.4)</a></li>
+    <li class="he-toc__l3"><a href="#32-aria-live-regions">3.2 ARIA Live Regions</a></li>
+    <li class="he-toc__l3"><a href="#33-focus-management">3.3 Focus Management</a></li>
+    <li class="he-toc__l2"><a href="#4-known-accessibility-limitations">4. Known Accessibility Limitations</a></li>
+    <li class="he-toc__l3"><a href="#41-fullscreen-mode">4.1 Fullscreen Mode</a></li>
+    <li class="he-toc__l3"><a href="#42-strict-keypress-auto-submit">4.2 Strict Keypress Auto-Submit</a></li>
+    <li class="he-toc__l3"><a href="#43-multi-tab-prevention">4.3 Multi-Tab Prevention</a></li>
+    <li class="he-toc__l3"><a href="#44-clipboard-block">4.4 Clipboard Block</a></li>
+    <li class="he-toc__l2"><a href="#5-accessibility-testing">5. Accessibility Testing</a></li>
+    <li class="he-toc__l3"><a href="#51-automated-testing">5.1 Automated Testing</a></li>
+    <li class="he-toc__l3"><a href="#52-manual-testing">5.2 Manual Testing</a></li>
+    <li class="he-toc__l3"><a href="#53-testing-checklist">5.3 Testing Checklist</a></li>
+    <li class="he-toc__l2"><a href="#6-compliance-sign-off">6. Compliance Sign-Off</a></li>
+  </ul>
+</aside>
+</div>
+<footer class="he-foot">
+  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

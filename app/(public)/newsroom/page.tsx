@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import Hero from '../_components/Hero'
 import NewsCard from '../_components/NewsCard'
-import { prisma } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import NewsPagination from './_components/NewsPagination'
 import NewsSortControl from './_components/NewsSortControl'
 
@@ -13,7 +13,7 @@ type SortOrder = 'newest' | 'oldest'
 
 async function getArticles(skip: number, take: number, sort: SortOrder = 'newest') {
   const order = sort === 'oldest' ? 'asc' : 'desc'
-  return await prisma.newsArticle.findMany({
+  return await prismaUnfiltered.newsArticle.findMany({
     where: { status: 'PUBLISHED' },
     orderBy: { publishedAt: order },
     skip,

@@ -100,7 +100,7 @@ export default async function StudentOJTPage() {
     return (
       <div className="animate-in fade-in slide-in-from-bottom-4 space-y-6 duration-700">
         <div>
-          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white">
+          <h1 className="text-blue-800 text-3xl font-black tracking-tight dark:text-white">
             OJT Experience Logbook
           </h1>
           <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">

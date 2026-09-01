@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { requireInstructor } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { buildStoragePath, getSignedUrl, uploadToStorage } from '@/lib/storage/supabase-storage'
+import { createAuditLog } from '@/lib/audit/logger'
 
 /**
  * Audit 6b — instructor teaching-materials management. Materials are scoped to
@@ -18,8 +19,8 @@ export async function addTeachingMaterial(input: {
   classId?: string
   visibility?: 'CLASS' | 'COURSE' | 'ALL_STUDENTS'
 }) {
+  const user = await requireInstructor()
   try {
-    const user = await requireInstructor()
     if (!input.title?.trim()) return { error: 'A title is required.' }
     if (!input.fileUrl?.trim()) return { error: 'A file URL is required.' }
     await prismaUnfiltered.teachingMaterial.create({
@@ -37,14 +38,19 @@ export async function addTeachingMaterial(input: {
     revalidatePath('/instructor/materials')
     return { success: true }
   } catch (e) {
-    console.error('[addTeachingMaterial]', e)
+    createAuditLog({
+      action: 'TEACHING_MATERIAL_ADD_FAILED',
+      userId: (await requireInstructor()).id,
+      description: 'Failed to add teaching material',
+      changes: { error: e instanceof Error ? e.message : String(e) },
+    })
     return { error: 'Failed to add material.' }
   }
 }
 
 export async function uploadTeachingMaterial(formData: FormData) {
+  const user = await requireInstructor()
   try {
-    const user = await requireInstructor()
     const title = String(formData.get('title') ?? '').trim()
     const courseId = String(formData.get('courseId') ?? '').trim()
     const visibility = (String(formData.get('visibility') ?? 'CLASS') || 'CLASS') as
@@ -78,21 +84,31 @@ export async function uploadTeachingMaterial(formData: FormData) {
     revalidatePath('/instructor/materials')
     return { success: true }
   } catch (e) {
-    console.error('[uploadTeachingMaterial]', e)
+    createAuditLog({
+      action: 'TEACHING_MATERIAL_UPLOAD_FAILED',
+      userId: user.id,
+      description: 'Failed to upload teaching material',
+      changes: { error: e instanceof Error ? e.message : String(e) },
+    })
     return { error: e instanceof Error ? e.message : 'Failed to upload material.' }
   }
 }
 
 export async function deleteTeachingMaterial(id: string) {
+  const user = await requireInstructor()
   try {
-    const user = await requireInstructor()
     const m = await prismaUnfiltered.teachingMaterial.findUnique({ where: { id } })
     if (!m || m.uploadedById !== user.id) return { error: 'Not found.' }
     await prismaUnfiltered.teachingMaterial.delete({ where: { id } })
     revalidatePath('/instructor/materials')
     return { success: true }
   } catch (e) {
-    console.error('[deleteTeachingMaterial]', e)
+    createAuditLog({
+      action: 'TEACHING_MATERIAL_DELETE_FAILED',
+      userId: user.id,
+      description: 'Failed to delete teaching material',
+      changes: { materialId: id, error: e instanceof Error ? e.message : String(e) },
+    })
     return { error: 'Failed to delete material.' }
   }
 }

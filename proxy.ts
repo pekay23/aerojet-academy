@@ -6,6 +6,11 @@ import { getToken } from 'next-auth/jwt'
  *
  * @see https://nextjs.org/docs/messages/middleware-to-proxy
  *
+ * IMPORTANT: This proxy is IMAGES-ONLY. It does NOT gate /staff/*, /instructor/*,
+ * /student/*, /examiner/*, /applicant/* or their /api/* siblings. Role enforcement
+ * for those portals is handled at the layout layer (lib/auth/helpers.ts) and at
+ * each individual route handler.
+ *
  * Provides:
  * - Auth-gating for /api/images/* routes via NextAuth JWT
  * - Hotlink prevention via Referer header validation
@@ -57,7 +62,9 @@ export default async function proxy(request: NextRequest) {
     if (referer) {
       try {
         const refererUrl = new URL(referer)
-        if (refererUrl.hostname !== host && !refererUrl.hostname.endsWith('.' + host)) {
+        const refererHost = refererUrl.hostname
+        const hostName = host.split(':')[0] || ''
+        if (refererHost !== hostName && !refererHost.endsWith('.' + hostName)) {
           // Return a 1x1 transparent pixel instead of the real image
           return new NextResponse(
             new Uint8Array(

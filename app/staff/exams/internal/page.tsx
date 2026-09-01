@@ -26,7 +26,7 @@ export default async function InternalExamsPage({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white sm:text-3xl">
+          <h1 className="text-2xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white sm:text-3xl">
             Internal Exam System
           </h1>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">

@@ -148,7 +148,7 @@ export default function SessionDetails({ session, isOpen, onClose }: SessionDeta
                 Cancel Session
               </button>
             </div>
-          </motion.aside>
+          </MotionAside>
         </>
       )}
     </AnimatePresence>

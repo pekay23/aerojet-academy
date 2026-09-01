@@ -27,7 +27,7 @@ async function getBookingData(userId: string) {
     }),
   ])
   const { getCurrencySymbol } = await import('@/lib/currency')
-  const targetCategories = await getStudentTargetCategoryCodes(prisma, userId)
+  const targetCategories = await getStudentTargetCategoryCodes(prismaUnfiltered, userId)
   const eligibleComponents = filterForStudentTargets(examComponents, targetCategories)
   const balance = Number(wallet?.availableBalance || 0)
   const currency = wallet?.currency || 'EUR'
@@ -147,7 +147,7 @@ export default async function AvailablePoolsTab() {
 
             return (
               <div key={pool.id} className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all hover:border-blue-200 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-                <div className={`flex items-center justify-between px-6 py-2 text-xs font-black tracking-widest text-white uppercase ${displayStatus === 'NEAR_FULL' ? 'bg-amber-500' : displayStatus === 'OPEN' ? 'bg-aerojet-blue' : displayStatus === 'CONFIRMED' ? 'bg-blue-600' : 'bg-slate-500'}`}>
+                <div className={`flex items-center justify-between px-6 py-2 text-xs font-black tracking-widest text-white uppercase ${displayStatus === 'NEAR_FULL' ? 'bg-amber-500' : displayStatus === 'OPEN' ? 'bg-blue-800' : displayStatus === 'CONFIRMED' ? 'bg-blue-600' : 'bg-slate-500'}`}>
                   <span>{displayStatus.replace('_', ' ')}</span>
                   {pool.timeSlot && <span className="text-white/80">{pool.poolLabel ? `Pool ${pool.poolLabel}` : ''} · Day ${pool.dayNumber} ${pool.timeSlot === 'MORNING' ? 'AM' : 'PM'}</span>}
                 </div>
@@ -171,7 +171,7 @@ export default async function AvailablePoolsTab() {
                     <div className="mb-4 rounded-lg border border-slate-100 bg-slate-50 px-3 py-2 dark:border-slate-800 dark:bg-slate-800/50">
                       <p className="mb-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase">Modules in booking ({existingModules.length}/4)</p>
                       <div className="flex flex-wrap gap-1.5">
-                        {existingModules.map((m) => (<span key={m} className="bg-aerojet-blue/10 text-aerojet-blue inline-flex rounded-md px-2 py-0.5 text-xs font-bold dark:bg-blue-900/30 dark:text-blue-300">{m}</span>))}
+                        {existingModules.map((m) => (<span key={m} className="bg-aerojet-blue/10 text-blue-800 inline-flex rounded-md px-2 py-0.5 text-xs font-bold dark:bg-blue-900/30 dark:text-blue-300">{m}</span>))}
                       </div>
                     </div>
                   )}

@@ -14,6 +14,7 @@ import { getWelcomeMessages } from '@/lib/welcome-messages'
 import { getStudentPaymentAccessLevel, getEnrollmentMilestoneStatus } from '@/lib/access-control'
 import { resolveEffectivePathwayCode } from '@/lib/enrollment/pathway'
 import AppTour from '@/components/Tour/AppTour'
+import TourTrigger from '@/components/Tour/TourTrigger'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import { shouldShowRevisionSupport } from '@/lib/revision/visibility'
 
@@ -133,7 +134,14 @@ export default async function StudentLayout({ children }: { children: React.Reac
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
       <Heartbeat />
-      <AppTour hasCompletedTour={dbUser.hasCompletedTour} userRole={userRole} />
+      <AppTour
+        hasCompletedTour={dbUser.hasCompletedTour}
+        userRole={userRole}
+        data={{
+          walletBalance: dbUser.wallet ? walletBalance : undefined,
+          unreadNotifications,
+        }}
+      />
       <StudentSidebar
         userName={userName}
         userRole={userRole}
@@ -150,7 +158,12 @@ export default async function StudentLayout({ children }: { children: React.Reac
         <div className="sticky top-0 z-30 border-b border-slate-100 bg-slate-50/80 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-900/80">
           <div className="mx-auto max-w-[1920px] px-4 py-3 sm:px-8 lg:px-8">
             <PortalHeader
-              actions={<StudentTopbarActions />}
+              actions={
+                <>
+                  <TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />
+                  <StudentTopbarActions />
+                </>
+              }
             >
               <BreadcrumbNav />
             </PortalHeader>

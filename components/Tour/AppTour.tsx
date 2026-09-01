@@ -1,10 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import dynamic from 'next/dynamic'
 import { EventData, STATUS, Step } from 'react-joyride'
 import { markTourAsCompleted } from '@/app/(portal)/_actions/user'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 const Joyride = dynamic(() => import('react-joyride').then(m => m.Joyride), { ssr: false })
 
@@ -240,24 +241,43 @@ function getSteps(role?: string): Step[] {
 }
 
 export default function AppTour({ hasCompletedTour, userRole }: Props) {
+  const { data: session } = useSession()
   const [run, setRun] = useState(false)
   const [mounted, setMounted] = useState(false)
   const router = useRouter()
+  const tourStartedRef = useRef(false)
 
   useEffect(() => {
     setMounted(true)
 
-    const handleStartTour = () => setRun(true)
+    const trackTourStart = () => {
+      if (tourStartedRef.current) return
+      tourStartedRef.current = true
+      setRun(true)
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'TOUR_STARTED', data: { tourName: 'app_tour' }, userId: session?.user?.id }),
+      }).catch(() => {})
+    }
+
+    const handleStartTour = () => {
+      trackTourStart()
+    }
     window.addEventListener('start-app-tour', handleStartTour)
 
     if (!hasCompletedTour) {
-      // Delay slightly to ensure layout is ready
-      const timer = setTimeout(() => setRun(true), 1500)
-      return () => clearTimeout(timer)
+      const timer = setTimeout(() => {
+        trackTourStart()
+      }, 1500)
+      return () => {
+        clearTimeout(timer)
+        window.removeEventListener('start-app-tour', handleStartTour)
+      }
     }
 
     return () => window.removeEventListener('start-app-tour', handleStartTour)
-  }, [hasCompletedTour])
+  }, [hasCompletedTour, session?.user?.id])
 
   if (!mounted) return null
 
@@ -270,6 +290,11 @@ export default function AppTour({ hasCompletedTour, userRole }: Props) {
     if (finishedStatuses.includes(status)) {
       setRun(false)
       await markTourAsCompleted()
+      fetch('/api/analytics/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'TOUR_COMPLETED', data: { tourName: 'app_tour' }, userId: session?.user?.id }),
+      }).catch(() => {})
       router.refresh()
     }
   }

@@ -73,7 +73,7 @@ export default function UsersTableRow({
       </td>
       <td className="px-5 py-3.5">
         <span
-          className={`rounded-full px-2 py-0.5 text-[10px] font-black uppercase ${ROLE_STYLE[user.role] ?? 'bg-slate-100 text-slate-500'}`}
+          className={`rounded-full px-2 py-0.5 text-xs font-black uppercase ${ROLE_STYLE[user.role] ?? 'bg-slate-100 text-slate-500'}`}
         >
           {user.role}
         </span>

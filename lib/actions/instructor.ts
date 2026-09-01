@@ -5,7 +5,7 @@ import type { AttendanceStatus } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { startOfDay, endOfDay, startOfWeek, endOfWeek } from 'date-fns'
 import { serializePrisma } from '@/lib/utils/serialization'
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 import { calculateLetterGrade, isPassing } from '@/lib/utils/grading'
 import { getInstructorProfileIdOrThrow } from '@/lib/instructor/profile'
 
@@ -55,7 +55,7 @@ export async function getInstructorDashboardData() {
   })
 
   // 3. Stats
-  const totalStudents = activeCohorts.reduce((acc, curr) => acc + curr._count.enrollments, 0)
+  const totalStudents = distinctStudents.length
 
   // 4. Pending Grades Count
   const pendingGradesCount = await prisma.grade.count({
@@ -329,6 +329,29 @@ export async function getMyClasses() {
   )
 }
 
+export async function getClassData(classId: string) {
+  const session = await getAuthSession()
+  if (!session || session.user.role !== 'INSTRUCTOR') return null
+
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
+
+  return serializePrisma(
+    await prismaUnfiltered.class.findUnique({
+      where: { id: classId, instructorId },
+      include: {
+        course: {
+          include: {
+            enrollments: {
+              where: { status: { in: ['ACTIVE', 'ENROLLED', 'APPROVED'] } },
+              include: { user: { include: { profile: true } } },
+            },
+          },
+        },
+      },
+    })
+  )
+}
+
 export async function getClassAttendance(classId: string, date?: Date) {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return null
@@ -553,6 +576,66 @@ export async function getInstructorStudents() {
   return serializePrisma(Array.from(studentMap.values()))
 }
 
+/**
+ * Former students = students whose enrollment with this instructor's classes
+ * has transitioned to a terminal / left state (GRADUATED, DEFERRED, SUSPENDED,
+ * WITHDRAWN, EXPELLED) or been soft-deleted (deletedAt is not null).
+ * Full history retained per the instructor.former_students project fact.
+ */
+export async function getInstructorFormerStudents() {
+  const session = await getAuthSession()
+  if (!session || session.user.role !== 'INSTRUCTOR') return []
+
+  const instructorId = await getInstructorProfileIdOrThrow(session.user.id)
+
+  const enrollments = await prisma.enrollment.findMany({
+    where: {
+      course: {
+        classes: {
+          some: { instructorId },
+        },
+      },
+      status: { in: ['GRADUATED', 'DEFERRED', 'SUSPENDED', 'WITHDRAWN', 'EXPELLED'] },
+    },
+    include: {
+      user: {
+        include: {
+          profile: true,
+          studentProfile: true,
+        },
+      },
+      course: true,
+    },
+  })
+
+  // Group by user to avoid duplicates
+  const studentMap = new Map()
+  enrollments.forEach((enr) => {
+    if (!studentMap.has(enr.userId)) {
+      studentMap.set(enr.userId, {
+        id: enr.userId,
+        name:
+          `${enr.user.profile?.firstName || ''} ${enr.user.profile?.lastName || ''}`.trim() ||
+          'Unknown Student',
+        email: enr.user.email,
+        image: enr.user.profile?.profilePhotoUrl,
+        studentId: enr.user.studentProfile?.studentId,
+        phone: enr.user.profile?.phone,
+        courses: [],
+        enrollmentStatus: enr.status,
+        leftAt: enr.deletedAt ?? enr.updatedAt,
+      })
+    }
+    studentMap.get(enr.userId).courses.push({
+      id: enr.course.id,
+      code: enr.course.code,
+      name: enr.course.name,
+    })
+  })
+
+  return serializePrisma(Array.from(studentMap.values()))
+}
+
 export async function getStudentDetails(userId: string) {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') return null
@@ -625,7 +708,30 @@ export async function getInstructorProfile() {
   )
 }
 
-export async function updateInstructorProfile(data: any) {
+interface UpdateProfileData {
+  personal: {
+    firstName: string
+    middleName?: string | null
+    lastName: string
+    phone?: string | null
+    alternatePhone?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    country?: string | null
+    postalCode?: string | null
+    gender?: string | null
+    dateOfBirth?: string | null
+    nationality?: string | null
+  }
+  emergency: {
+    name: string
+    phone: string
+    relation: string
+  }
+}
+
+export async function updateInstructorProfile(data: UpdateProfileData) {
   const session = await getAuthSession()
   if (!session || session.user.role !== 'INSTRUCTOR') {
     throw new Error('Unauthorized')

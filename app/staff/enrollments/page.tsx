@@ -5,50 +5,81 @@ import { serializePrisma } from '@/lib/utils/serialization'
 import EnrollmentsTable from './_components/EnrollmentsTable'
 import SearchInput from '@/components/SearchInput'
 import { Metadata } from 'next'
+import { Prisma } from '@prisma/client'
+import type { EnrollmentWithDetails } from '@/lib/staff/types'
+import { buildOrderBy } from '@/lib/utils/build-order-by'
 
 export const metadata: Metadata = { title: 'Enrollments | Staff Portal' }
+
+const ALLOWED_SORT_KEYS = {
+  student: 'user.profile.lastName',
+  course: 'course.name',
+  status: 'status',
+  enrolledAt: 'enrolledAt',
+  amount: 'amountPaid',
+} as const
+
+type SortKey = keyof typeof ALLOWED_SORT_KEYS
 
 export default async function EnrollmentsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ query?: string }>
+  searchParams: Promise<{
+    query?: string
+    page?: string
+    limit?: string
+    sort?: string
+    order?: string
+  }>
 }) {
   const session = await getAuthSession()
   if (!session) redirect('/login')
 
-  const { query } = await searchParams
+  const params = await searchParams
+  const query = params.query?.trim() || undefined
+  const page = Math.max(1, parseInt(params.page || '1', 10) || 1)
+  const limit = Math.min(100, Math.max(1, parseInt(params.limit || '25', 10) || 25))
+  const skip = (page - 1) * limit
 
-  const enrollments = await prismaUnfiltered.enrollment.findMany({
-    where: query
-      ? {
-          OR: [
-            {
-              user: {
-                OR: [
-                  { email: { contains: query, mode: 'insensitive' } },
-                  { profile: { firstName: { contains: query, mode: 'insensitive' } } },
-                  { profile: { lastName: { contains: query, mode: 'insensitive' } } },
-                ],
-              },
+  const where = query
+    ? {
+        OR: [
+          {
+            user: {
+              OR: [
+                { email: { contains: query, mode: 'insensitive' } },
+                { profile: { firstName: { contains: query, mode: 'insensitive' } } },
+                { profile: { lastName: { contains: query, mode: 'insensitive' } } },
+              ],
             },
-            { course: { name: { contains: query, mode: 'insensitive' } } },
-            { course: { code: { contains: query, mode: 'insensitive' } } },
-          ],
-        }
-      : undefined,
-    orderBy: { createdAt: 'desc' },
-    include: {
-      user: {
-        include: {
-          profile: true,
-        },
-      },
-      course: true,
-    },
-    take: 100,
-  })
+          },
+          { course: { name: { contains: query, mode: 'insensitive' } } },
+          { course: { code: { contains: query, mode: 'insensitive' } } },
+        ],
+      }
+    : undefined
 
-  const serializedEnrollments = serializePrisma(enrollments)
+  const orderBy = buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { createdAt: 'desc' })
+
+  const [enrollments, total] = await Promise.all([
+    prismaUnfiltered.enrollment.findMany({
+      where: where as unknown as Prisma.EnrollmentWhereInput,
+      orderBy: orderBy as unknown as Prisma.EnrollmentOrderByWithRelationInput,
+      include: {
+        user: {
+          include: {
+            profile: true,
+          },
+        },
+        course: true,
+      },
+      take: limit,
+      skip,
+    }),
+    prismaUnfiltered.enrollment.count({ where: where as unknown as Prisma.EnrollmentWhereInput }),
+  ])
+
+  const serializedEnrollments = serializePrisma(enrollments) as unknown as EnrollmentWithDetails[]
 
   return (
     <div className="space-y-6">
@@ -62,7 +93,13 @@ export default async function EnrollmentsPage({
         </div>
       </div>
 
-      <EnrollmentsTable enrollments={serializedEnrollments} />
+      <EnrollmentsTable
+        enrollments={serializedEnrollments}
+        page={page}
+        perPage={limit}
+        total={total}
+        query={query}
+      />
     </div>
   )
 }

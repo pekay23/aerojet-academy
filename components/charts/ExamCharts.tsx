@@ -4,20 +4,34 @@ import * as React from 'react'
 import {
   Bar,
   BarChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-  Legend,
   Line,
   ComposedChart,
   Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
 } from 'recharts'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart'
 
 interface ExamTrendChartProps {
   data: { month: string; exams: number; passes: number; fails: number }[]
 }
+
+const examTrendConfig = {
+  exams: {
+    label: 'Total Exams',
+    color: '#818CF8',
+  },
+  passes: {
+    label: 'Passes',
+    color: '#10B981',
+  },
+  fails: {
+    label: 'Fails',
+    color: '#EF4444',
+  },
+} satisfies ChartConfig
 
 export function ExamTrendChart({ data }: ExamTrendChartProps) {
   const [mounted, setMounted] = React.useState(false)
@@ -26,7 +40,7 @@ export function ExamTrendChart({ data }: ExamTrendChartProps) {
   return (
     <div className="h-[300px] w-full">
       {mounted ? (
-        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+        <ChartContainer config={examTrendConfig} className="h-full w-full">
           <ComposedChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
             <XAxis
@@ -42,39 +56,31 @@ export function ExamTrendChart({ data }: ExamTrendChartProps) {
               axisLine={false}
               tick={{ fill: '#94A3B8' }}
             />
-            <Tooltip
-              cursor={{ fill: '#F1F5F9' }}
-              contentStyle={{
-                borderRadius: '12px',
-                border: 'none',
-                boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1)',
-                fontSize: '12px',
-              }}
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  indicator="dot"
+                  formatter={(value: any, name: any) => [value ?? 0, name] as any}
+                />
+              }
             />
-            <Legend
-              wrapperStyle={{ fontSize: '11px', fontWeight: 700 }}
-              iconType="circle"
-              iconSize={8}
-            />
-            <Bar dataKey="exams" fill="#818CF8" radius={[4, 4, 0, 0]} barSize={20} name="Total Exams" />
+            <Bar dataKey="exams" fill="var(--color-exams)" radius={[4, 4, 0, 0]} barSize={20} />
             <Line
               type="monotone"
               dataKey="passes"
-              stroke="#10B981"
+              stroke="var(--color-passes)"
               strokeWidth={2}
               dot={{ r: 3 }}
-              name="Passes"
             />
             <Line
               type="monotone"
               dataKey="fails"
-              stroke="#EF4444"
+              stroke="var(--color-fails)"
               strokeWidth={2}
               dot={{ r: 3 }}
-              name="Fails"
             />
           </ComposedChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-slate-50/50" />
       )}
@@ -86,6 +92,13 @@ interface ScoreDistributionChartProps {
   data: { range: string; count: number; color: string }[]
 }
 
+const scoreDistributionConfig = {
+  count: {
+    label: 'Exams',
+    color: '#818CF8',
+  },
+} satisfies ChartConfig
+
 export function ScoreDistributionChart({ data }: ScoreDistributionChartProps) {
   const [mounted, setMounted] = React.useState(false)
   React.useEffect(() => setMounted(true), [])
@@ -93,7 +106,7 @@ export function ScoreDistributionChart({ data }: ScoreDistributionChartProps) {
   return (
     <div className="h-[260px] w-full">
       {mounted ? (
-        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+        <ChartContainer config={scoreDistributionConfig} className="h-full w-full">
           <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
             <XAxis
@@ -109,15 +122,13 @@ export function ScoreDistributionChart({ data }: ScoreDistributionChartProps) {
               axisLine={false}
               tick={{ fill: '#94A3B8' }}
             />
-            <Tooltip
-              cursor={{ fill: '#F1F5F9' }}
-              contentStyle={{
-                borderRadius: '12px',
-                border: 'none',
-                boxShadow: '0 10px 25px -5px rgb(0 0 0 / 0.1)',
-                fontSize: '12px',
-              }}
-              formatter={((value: any) => [value, 'Exams']) as any}
+            <ChartTooltip
+              content={
+                <ChartTooltipContent
+                  indicator="dot"
+                  formatter={(value: any) => [value ?? 0, 'Exams'] as any}
+                />
+              }
             />
             <Bar dataKey="count" radius={[6, 6, 0, 0]} barSize={48}>
               {data.map((entry, idx) => (
@@ -125,11 +136,10 @@ export function ScoreDistributionChart({ data }: ScoreDistributionChartProps) {
               ))}
             </Bar>
           </BarChart>
-        </ResponsiveContainer>
+        </ChartContainer>
       ) : (
         <div className="flex h-full w-full items-center justify-center bg-slate-50/50" />
       )}
     </div>
   )
 }
-

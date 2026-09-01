@@ -1,10 +1,12 @@
 import { getAuthSession } from '@/lib/auth/helpers'
 import { redirect } from 'next/navigation'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import InstructorSidebar from './_components/InstructorSidebar'
 import Heartbeat from '@/components/shared/Heartbeat'
 import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import PortalHeader from '@/components/layouts/PortalHeader'
+import TourTrigger from '@/components/Tour/TourTrigger'
+import AppTour from '@/components/Tour/AppTour'
 import { getPendingGradingCount } from '@/lib/actions/instructor'
 
 export const dynamic = 'force-dynamic'
@@ -18,9 +20,9 @@ export default async function InstructorLayout({ children }: { children: React.R
   if (!allowedRoles.includes(user.role)) redirect('/login')
 
   const [dbUser, pendingCount] = await Promise.all([
-    prisma.user.findUnique({
+    prismaUnfiltered.user.findUnique({
       where: { id: user.id },
-      select: { status: true, role: true },
+      select: { status: true, role: true, hasCompletedTour: true },
     }),
     getPendingGradingCount(),
   ])
@@ -39,6 +41,7 @@ export default async function InstructorLayout({ children }: { children: React.R
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
       <Heartbeat />
+      <AppTour hasCompletedTour={dbUser.hasCompletedTour} userRole={userRole} />
       <InstructorSidebar
         userName={userName}
         userRole={userRole}
@@ -51,7 +54,7 @@ export default async function InstructorLayout({ children }: { children: React.R
       >
         <div className="sticky top-0 z-30 border-b border-slate-100 bg-slate-50/80 backdrop-blur-lg dark:border-slate-800 dark:bg-slate-900/80">
           <div className="mx-auto max-w-[1920px] px-4 py-3 sm:px-8 lg:px-8">
-            <PortalHeader>
+            <PortalHeader actions={<TourTrigger aria-label="Take a guided tour" title="Take a tour of this portal" />}>
               <BreadcrumbNav />
             </PortalHeader>
           </div>

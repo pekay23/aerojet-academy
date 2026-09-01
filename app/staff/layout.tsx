@@ -6,6 +6,7 @@ import StaffTopBar from './_components/StaffTopBar'
 import Heartbeat from '@/components/shared/Heartbeat'
 import { getWelcomeMessages } from '@/lib/welcome-messages'
 import AppTour from '@/components/Tour/AppTour'
+import { getDashboardAlerts } from '@/lib/analytics/dashboard-alerts'
 import { isInternalExamSystemEnabled } from '@/lib/internal-exam/engine'
 import packageJson from '../../package.json'
 import { getRegistrationConfig } from '@/lib/settings'
@@ -59,7 +60,11 @@ export default async function StaffLayout({ children }: { children: React.ReactN
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
       <Heartbeat />
-      <AppTour hasCompletedTour={dbUser.hasCompletedTour} userRole={userRole} />
+      <AppTour
+        hasCompletedTour={dbUser.hasCompletedTour}
+        userRole={userRole}
+        data={{ staffAlerts, unreadNotifications }}
+      />
       <StaffSidebar
         userName={fullName}
         userRole={userRole}

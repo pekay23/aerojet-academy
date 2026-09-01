@@ -3,14 +3,29 @@ import Link from 'next/link'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { Plus, Edit, Trash2, Globe, FileText, CheckCircle2, Clock, Sparkles } from 'lucide-react'
 import { format } from 'date-fns'
+import { SortableTh } from '@/components/ui/sortable-th'
+import { buildOrderBy } from '@/lib/utils/build-order-by'
+import type { Prisma } from '@prisma/client'
 
 export const metadata: Metadata = {
   title: 'Newsroom CMS | Staff Portal',
 }
 
-async function getArticles() {
+const ALLOWED_SORT_KEYS = {
+  title: 'title',
+  author: 'author.profile.lastName',
+  status: 'status',
+  date: 'publishedAt',
+} as const
+type SortKey = keyof typeof ALLOWED_SORT_KEYS
+
+interface NewsroomPageProps {
+  searchParams: Promise<{ sort?: string; order?: string }>
+}
+
+async function getArticles(orderBy: Prisma.NewsArticleOrderByWithRelationInput) {
   return await prismaUnfiltered.newsArticle.findMany({
-    orderBy: { publishedAt: 'desc' },
+    orderBy,
     include: {
       author: {
         select: { profile: { select: { firstName: true, lastName: true } } },
@@ -19,8 +34,10 @@ async function getArticles() {
   })
 }
 
-export default async function NewsroomPage() {
-  const articles = await getArticles()
+export default async function NewsroomPage({ searchParams }: NewsroomPageProps) {
+  const params = await searchParams
+  const orderBy = buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { publishedAt: 'desc' })
+  const articles = await getArticles(orderBy as Prisma.NewsArticleOrderByWithRelationInput)
 
   return (
     <div className="mx-auto max-w-[1800px] space-y-8">
@@ -53,10 +70,10 @@ export default async function NewsroomPage() {
           <table className="w-full text-left text-sm text-slate-600 dark:text-slate-300">
             <thead className="bg-slate-50/50 text-[10px] font-black tracking-widest text-slate-400 uppercase dark:bg-slate-800/20">
               <tr>
-                <th className="px-6 py-4">Article</th>
-                <th className="px-6 py-4">Author</th>
-                <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Date</th>
+                <SortableTh sortKey="title" label="Article" />
+                <SortableTh sortKey="author" label="Author" />
+                <SortableTh sortKey="status" label="Status" />
+                <SortableTh sortKey="date" label="Date" />
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>

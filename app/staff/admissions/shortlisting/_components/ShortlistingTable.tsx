@@ -171,7 +171,7 @@ export default function ShortlistingTable({ data }: { data: ApplicationRow[] }) 
         router.refresh()
       }
     } catch (e) {
-      console.error(e)
+      toast.error('Failed to load shortlist')
     }
   }
 

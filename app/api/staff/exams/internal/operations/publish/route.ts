@@ -4,6 +4,8 @@ import { requireStaff } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { createAuditLog } from '@/lib/audit/logger'
+import { getCertificatesEnabled, createCertificate } from '@/lib/certificates/generator'
+import { getBankRules } from '@/lib/internal-exam/engine'
 
 const publishSchema = z.object({
   sessionIds: z.array(z.string()).min(1).max(500),
@@ -57,5 +59,34 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     },
   })
 
-  return apiSuccess({ published: result.count })
+  // Auto-generate certificates for students who passed (feature-gated)
+  const certificatesEnabled = await getCertificatesEnabled()
+  let certificatesGenerated = 0
+  if (certificatesEnabled) {
+    const passingSessions = candidates.filter((c) => c.passed)
+    const certPromises: Promise<any>[] = []
+
+    for (const c of passingSessions) {
+      const rules = await getBankRules(c.bankId)
+      const certPromise = createCertificate({
+        sessionId: c.id,
+        studentId: c.studentId,
+        score: 0,
+        percentage: c.percentage ?? 0,
+        passMarkPct: rules.passMarkPct,
+        issuedBy: staff.id,
+      }).catch((err) => {
+        console.error(`[certificates] Failed to generate certificate for session ${c.id}:`, err)
+        return null
+      })
+      certPromises.push(certPromise)
+    }
+
+    const certResults = await Promise.allSettled(certPromises)
+    certificatesGenerated = certResults.filter(
+      (r) => r.status === 'fulfilled' && r.value != null
+    ).length
+  }
+
+  return apiSuccess({ published: result.count, certificatesGenerated })
 })

@@ -4,6 +4,9 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { Plus, Calendar, Users, History, AlertCircle } from 'lucide-react'
 import { format } from 'date-fns'
+import { SortableTh } from '@/components/ui/sortable-th'
+import { buildOrderBy } from '@/lib/utils/build-order-by'
+import type { Prisma } from '@prisma/client'
 import CreateRevisionRunDialog from './_components/CreateRevisionRunDialog'
 import EditRevisionRunDialog from './_components/EditRevisionRunDialog'
 
@@ -11,17 +14,34 @@ export const metadata: Metadata = {
   title: 'Revision Support | Staff Portal',
 }
 
-export default async function RevisionRunsPage() {
+const ALLOWED_SORT_KEYS = {
+  title: 'title',
+  module: 'moduleTag',
+  schedule: 'startDatetime',
+  capacity: 'capacity',
+  price: 'price',
+  status: 'status',
+} as const
+type SortKey = keyof typeof ALLOWED_SORT_KEYS
+
+interface RevisionRunsPageProps {
+  searchParams: Promise<{ sort?: string; order?: string }>
+}
+
+export default async function RevisionRunsPage({ searchParams }: RevisionRunsPageProps) {
   const session = await getAuthSession()
   if (!session || !['ADMIN', 'STAFF'].includes(session.user.role)) {
     redirect('/login')
   }
 
+  const params = await searchParams
+  const orderBy = buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { startDatetime: 'desc' })
+
   const runs = await prismaUnfiltered.tuitionRun.findMany({
     include: {
       _count: { select: { bookings: true } },
     },
-    orderBy: { startDatetime: 'desc' },
+    orderBy: orderBy as Prisma.TuitionRunOrderByWithRelationInput,
   })
 
   const plainRuns = runs.map((run) => ({
@@ -58,12 +78,12 @@ export default async function RevisionRunsPage() {
               <table className="w-full text-left text-sm">
                 <thead className="bg-slate-50 text-xs font-black text-slate-500 uppercase dark:bg-slate-800/50 dark:text-slate-400">
                   <tr>
-                    <th className="px-6 py-4">Run Details</th>
-                    <th className="px-6 py-4">Module Tag</th>
-                    <th className="px-6 py-4">Schedule</th>
-                    <th className="px-6 py-4">Capacity</th>
-                    <th className="px-6 py-4">Price</th>
-                    <th className="px-6 py-4">Status</th>
+                    <SortableTh sortKey="title" label="Run Details" />
+                    <SortableTh sortKey="module" label="Module Tag" />
+                    <SortableTh sortKey="schedule" label="Schedule" />
+                    <SortableTh sortKey="capacity" label="Capacity" />
+                    <SortableTh sortKey="price" label="Price" align="right" />
+                    <SortableTh sortKey="status" label="Status" />
                     <th className="px-6 py-4 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -107,7 +127,7 @@ export default async function RevisionRunsPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 font-bold text-slate-900 dark:text-slate-100">
+                      <td className="px-6 py-4 text-right font-bold text-slate-900 tabular-nums dark:text-slate-100">
                         €{run.price.toString()}
                       </td>
                       <td className="px-6 py-4">

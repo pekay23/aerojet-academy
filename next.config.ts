@@ -16,6 +16,14 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'lightpink-guanaco-745322.hostingersite.com' },
       { protocol: 'https', hostname: '*.ufs.sh' },
     ],
+    localPatterns: [
+      { pathname: '/api/images/proxy' },
+      { pathname: '/api/images/transform' },
+      { pathname: '/images/**' },
+      { pathname: '/apple-touch-icon.webp' },
+      { pathname: '/favicon.webp' },
+      { pathname: '/favicon.ico' },
+    ],
   },
   ...(process.env.NODE_ENV === 'development' && {
     allowedDevOrigins: [
@@ -65,7 +73,7 @@ const nextConfig: NextConfig = {
         key: 'Content-Security-Policy',
         value: [
           "default-src 'self'",
-          "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://uploadthing.com https://www.google.com https://www.gstatic.com https://va.vercel-scripts.com",
+          "script-src 'self' https://js.stripe.com https://uploadthing.com https://www.google.com https://www.gstatic.com https://va.vercel-scripts.com",
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
           "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://uploadthing.com https://lh3.googleusercontent.com https://flagcdn.com https://www.gstatic.com",
           "font-src 'self' data: https://fonts.gstatic.com",

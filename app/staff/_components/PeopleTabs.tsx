@@ -48,7 +48,17 @@ interface PeopleTabsProps {
   initialTab?: string
 }
 
-export default function PeopleTabs({ initialTab }: PeopleTabsProps) {
+export default function PeopleTabs({
+  initialTab,
+  initialApplicants,
+  initialTotal,
+  initialApplicantCounts,
+}: {
+  initialTab?: string
+  initialApplicants?: ApplicantSummary[]
+  initialTotal?: number
+  initialApplicantCounts?: ApplicantCounts
+}) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const currentTab = (searchParams.get('tab') as TabKey) || initialTab || 'all'
@@ -105,7 +115,13 @@ export default function PeopleTabs({ initialTab }: PeopleTabsProps) {
 
       <div>
         {currentTab === 'all' && <UsersTable initialTotal={counts.total} />}
-        {currentTab === 'applicants' && <ApplicantsQueue initialCounts={applicantCounts} />}
+        {currentTab === 'applicants' && (
+          <ApplicantsQueue
+            initialApplicants={initialApplicants ?? []}
+            initialTotal={initialTotal ?? 0}
+            initialCounts={initialApplicantCounts ?? { all: 0, pending_payment: 0, pending_approval: 0 }}
+          />
+        )}
         {currentTab === 'students' && <StudentsTable initialCounts={studentCounts} />}
         {currentTab === 'instructors' && <InstructorsTable />}
         {currentTab === 'examiners' && <ExaminersTable />}

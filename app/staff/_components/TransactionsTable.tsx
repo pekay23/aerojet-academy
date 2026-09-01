@@ -108,7 +108,7 @@ export default function TransactionsTable({
     return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
   }
 
-  const getReferenceDisplay = (tx: any) => {
+  const getReferenceDisplay = (tx: SerializedTransactionRow) => {
     const typeLabel = tx.referenceType ? tx.referenceType.replace(/_/g, ' ') : `${tx.type.replace(/_/g, ' ')} Transaction`
     let refId: string
     if (tx.referenceType === 'FULL_TIME_ENROLLMENT' && tx.referenceId) {
@@ -137,7 +137,7 @@ export default function TransactionsTable({
     return 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400'
   }
 
-  const getTransactionStatus = (tx: any, paymentData: any) => {
+  const getTransactionStatus = (tx: SerializedTransactionRow, paymentData: SerializedTransactionRelated['payments'][0] | null | undefined) => {
     if (tx.referenceType === 'PAYMENT_ID')
       return paymentData?.reconciled ? 'Reconciled' : paymentData?.status || 'Pending Settlement'
     if (tx.referenceType === 'EXAM_BOOKING') {
@@ -235,7 +235,7 @@ export default function TransactionsTable({
               data.map((tx) => {
                 const user = tx.wallet.user
                 const userName = user.profile ? `${user.profile.firstName} ${user.profile.lastName}` : user.email
-                const paymentData = tx.referenceType === 'PAYMENT_ID' ? paymentDataMap.get(tx.referenceId!) : null
+                const paymentData = tx.referenceType === 'PAYMENT_ID' ? (paymentDataMap.get(tx.referenceId!) ?? null) : null
                 const reference = getReferenceDisplay(tx)
                 const statusLabel = getTransactionStatus(tx, paymentData)
                 const isCredit = CREDIT_TYPES.includes(tx.type)

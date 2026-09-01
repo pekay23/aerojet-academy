@@ -41,7 +41,7 @@ interface TransactionHistoryProps {
   payments: Payment[]
 }
 
-const statusConfig: Record<string, { color: string; bg: string; icon: any; label: string }> = {
+interface Transaction {
   APPROVED: { color: 'text-green-600', bg: 'bg-green-50', icon: CheckCircle2, label: 'Approved' },
   PENDING: { color: 'text-orange-600', bg: 'bg-orange-50', icon: Clock, label: 'Pending' },
   REJECTED: { color: 'text-red-600', bg: 'bg-red-50', icon: XCircle, label: 'Rejected' },

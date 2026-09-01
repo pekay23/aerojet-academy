@@ -122,6 +122,46 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     textAlign: 'center',
   },
+  examDetailsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '80%',
+    marginBottom: 20,
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  examDetailBlock: {
+    alignItems: 'center',
+    minWidth: 90,
+  },
+  examDetailLabel: {
+    fontSize: 6.5,
+    color: COLORS.slate,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    marginBottom: 2,
+    textAlign: 'center',
+  },
+  examDetailValue: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    color: COLORS.navy,
+    textAlign: 'center',
+  },
+  passBadge: {
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    backgroundColor: COLORS.gold,
+    borderRadius: 4,
+  },
+  passBadgeText: {
+    fontSize: 8,
+    color: COLORS.white,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
   dateText: {
     fontSize: 10,
     color: COLORS.text,
@@ -178,6 +218,11 @@ export interface CertificateTemplateProps extends Omit<PDFBaseTemplateProps, 'ch
   programName: string
   issueDate: string
   certificateNumber: string
+  moduleCode?: string
+  score?: number
+  totalPoints?: number
+  percentage?: number
+  passMarkPct?: number
 }
 
 export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
@@ -185,8 +230,14 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
   programName,
   issueDate,
   certificateNumber,
+  moduleCode,
+  score,
+  totalPoints,
+  percentage,
+  passMarkPct,
   ...baseProps
 }) => {
+  const passed = percentage != null && passMarkPct != null && percentage >= passMarkPct
   return (
     <PDFBaseTemplate title={`Certificate — ${certificateNumber}`} {...baseProps}>
       {/* Decorative double border */}
@@ -211,6 +262,37 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
           </Text>
 
           <Text style={styles.programName}>{programName}</Text>
+
+          {moduleCode && (
+            <Text style={styles.subtitle}>Module: {moduleCode}</Text>
+          )}
+
+          {percentage != null && (
+            <View style={styles.examDetailsContainer}>
+              <View style={styles.examDetailBlock}>
+                <Text style={styles.examDetailLabel}>Percentage</Text>
+                <Text style={styles.examDetailValue}>{percentage.toFixed(1)}%</Text>
+              </View>
+              {score != null && totalPoints != null && totalPoints > 0 && (
+                <View style={styles.examDetailBlock}>
+                  <Text style={styles.examDetailLabel}>Score</Text>
+                  <Text style={styles.examDetailValue}>{score}/{totalPoints}</Text>
+                </View>
+              )}
+              {passMarkPct != null && (
+                <View style={styles.examDetailBlock}>
+                  <Text style={styles.examDetailLabel}>Pass Mark</Text>
+                  <Text style={styles.examDetailValue}>{passMarkPct}%</Text>
+                </View>
+              )}
+            </View>
+          )}
+
+          {passed && (
+            <View style={styles.passBadge}>
+              <Text style={styles.passBadgeText}>PASSED</Text>
+            </View>
+          )}
 
           <Text style={styles.certNumber}>Certificate No. {certificateNumber}</Text>
 

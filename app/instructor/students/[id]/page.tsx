@@ -7,18 +7,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Mail,
   Phone,
-  User as UserIcon,
   Calendar,
-  BookOpen,
   GraduationCap,
   ArrowLeft,
+  BookOpen,
 } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import StudentEnrollmentsView from './_components/StudentEnrollmentsView'
 
 export const metadata: Metadata = {
   title: 'Student Profile | Instructor Portal',
 }
+export const dynamic = 'force-dynamic'
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -68,7 +69,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                 Active Student
               </Badge>
             </div>
-            <p className="text-lg font-medium text-slate-400">
+            <p className="text-lg font-medium text-slate-400 dark:text-slate-300">
               Student ID:{' '}
               <span className="text-slate-900 dark:text-slate-100">
                 {studentProfile?.studentId || 'N/A'}
@@ -102,66 +103,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               </CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-              {student.enrollments.length > 0 ? (
-                <div className="divide-y divide-slate-50 dark:divide-slate-800">
-                  {student.enrollments.map((enr: any) => (
-                    <div
-                      key={enr.id}
-                      className="p-6 transition-colors hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <h4 className="font-black text-slate-900 dark:text-white">
-                            {enr.course.name}
-                          </h4>
-                          <p className="text-sm font-bold tracking-widest text-aerojet-sky uppercase">
-                            {enr.course.code}
-                          </p>
-                        </div>
-                        <Badge className="bg-green-50 text-green-600 dark:bg-green-900/20 dark:text-green-400">
-                          {enr.status}
-                        </Badge>
-                      </div>
-
-                      <div className="mt-6 space-y-4">
-                        <h5 className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                          Recent Grades in this Module
-                        </h5>
-                        {enr.grades.length > 0 ? (
-                          <div className="grid gap-3 sm:grid-cols-2">
-                            {enr.grades.map((grade: any) => (
-                              <div
-                                key={grade.id}
-                                className="flex items-center justify-between rounded-xl border border-slate-100 bg-white p-3 dark:border-slate-800 dark:bg-slate-900/50"
-                              >
-                                <div>
-                                  <p className="text-xs font-bold text-slate-900 dark:text-white">
-                                    {grade.assessmentName}
-                                  </p>
-                                  <p className="text-[10px] text-slate-400">
-                                    {format(new Date(grade.assessmentDate), 'MMM d, yyyy')}
-                                  </p>
-                                </div>
-                                <span className="text-sm font-black text-aerojet-sky">
-                                  {grade.score}%
-                                </span>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <p className="text-xs text-slate-400 italic">
-                            No grades recorded by you for this module.
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-20 text-center">
-                  <p className="font-medium text-slate-400">No shared modules found.</p>
-                </div>
-              )}
+              <StudentEnrollmentsView enrollments={student.enrollments} />
             </CardContent>
           </Card>
         </div>
@@ -180,7 +122,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  <p className="text-[10px] font-black tracking-widest text-slate-400 dark:text-slate-300 uppercase">
                     Enrolled Since
                   </p>
                   <p className="text-sm font-bold text-slate-900 dark:text-slate-100">
@@ -196,7 +138,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                   <GraduationCap className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="text-[10px] font-black tracking-widest text-slate-400 uppercase">
+                  <p className="text-[10px] font-black tracking-widest text-slate-400 dark:text-slate-300 uppercase">
                     Enrollment Type
                   </p>
                   <p className="text-sm font-bold text-slate-900 dark:text-slate-100">

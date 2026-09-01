@@ -48,7 +48,7 @@ export function PasskeySettings() {
         setPasskeys(data.passkeys)
       }
     } catch (error) {
-      console.error('Failed to fetch passkeys', error)
+      toast.error('Failed to load passkeys')
     } finally {
       setIsLoading(false)
     }

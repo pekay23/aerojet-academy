@@ -9,7 +9,7 @@ import { getBankRules, isInternalExamSystemEnabled } from '@/lib/internal-exam/e
  * Returns the current session data for resume/load.
  * Strips correct answers from questions.
  */
-export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
+export const GET = withErrorHandler(async (req: NextRequest) => {
   const session = await getAuthSession()
   if (!session?.user?.id) return apiError('Unauthorized', 401)
   if (!(await isInternalExamSystemEnabled())) {
@@ -90,6 +90,7 @@ export const GET = withErrorHandler(async (req: NextRequest, _ctx: any) => {
 
   return apiSuccess({
     sessionId: examSession.id,
+    status: examSession.status,
     questions,
     savedAnswers,
     resumed: true,

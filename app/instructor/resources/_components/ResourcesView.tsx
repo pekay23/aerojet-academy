@@ -93,7 +93,7 @@ export default function ResourcesView({ initialResources }: ResourcesViewProps) 
                 transition={{ duration: 0.2 }}
               >
                 <ResourceCard resource={resource} />
-              </motion.div>
+              </MotionDiv>
             ))
           ) : (
             <motion.div
@@ -110,7 +110,7 @@ export default function ResourcesView({ initialResources }: ResourcesViewProps) 
               <p className="mx-auto mt-2 max-w-xs text-sm text-slate-500 dark:text-slate-400">
                 Adjust your filters or search terms to find what you're looking for.
               </p>
-            </motion.div>
+            </MotionDiv>
           )}
         </AnimatePresence>
       </div>

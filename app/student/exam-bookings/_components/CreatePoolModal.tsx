@@ -68,7 +68,7 @@ export default function CreatePoolModal({
     <>
       <button
         onClick={() => setOpen(true)}
-        className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-[#003a7c] active:scale-95"
+        className="flex items-center gap-2 rounded-xl bg-blue-800 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/20 transition-all hover:bg-[#003a7c] active:scale-95"
       >
         <Plus className="h-4 w-4" />
         Start New Booking
@@ -260,7 +260,7 @@ export default function CreatePoolModal({
                   type="button"
                   onClick={handleSubmit}
                   disabled={isPending || !canAfford || !eventId || !moduleCode || !examDate}
-                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-aerojet-blue py-4 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition-all hover:bg-[#003a7c] active:scale-95 disabled:opacity-50"
+                  className="flex flex-[1.5] items-center justify-center gap-2 rounded-2xl bg-blue-800 py-4 text-sm font-bold text-white shadow-lg shadow-blue-900/20 transition-all hover:bg-[#003a7c] active:scale-95 disabled:opacity-50"
                 >
                   {isPending ? (
                     <Loader2 className="h-5 w-5 animate-spin" />

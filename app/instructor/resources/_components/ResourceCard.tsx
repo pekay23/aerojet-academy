@@ -106,6 +106,6 @@ export default function ResourceCard({ resource }: ResourceCardProps) {
           </a>
         </div>
       </div>
-    </motion.div>
+    </MotionDiv>
   )
 }
