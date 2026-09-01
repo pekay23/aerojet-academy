@@ -1,0 +1,24 @@
+{
+  "baseUrl": "https://courses.suntech-bc.com",
+  "loginUrl": "https://courses.suntech-bc.com/login",
+  "outputDir": "./flipbook-output",
+  "pageLoadDelay": 2500,
+  "imageFormat": "jpeg",
+  "loginSelectors": {
+    "usernameField": "input[name='username'], input[name='email'], input[type='email'], #username, #email",
+    "passwordField": "input[name='password'], input[type='password'], #password",
+    "submitButton": "button[type='submit'], input[type='submit'], form button"
+  },
+  "flipbookSelectors": {
+    "container": ".flipbook-container, .flipbook, #flipbook, .book-container, [class*='flipbook'], [class*='book-viewer'], .module-content",
+    "pageImage": "img.page-image, .flipbook img, .page img, canvas.page, .book-page img, .slide img, [class*='page'] img",
+    "nextButton": ".next-page, .flipbook-next, [class*='next'], button[aria-label='Next'], .arrow-right, [class*='arrow-next']",
+    "prevButton": ".prev-page, .flipbook-prev, [class*='prev'], button[aria-label='Previous'], .arrow-left, [class*='arrow-prev']",
+    "pageIndicator": ".page-indicator, .page-count, [class*='page-info'], [class*='page-num']",
+    "totalPages": ".total-pages, [class*='total']"
+  },
+  "pdfOptions": {
+    "pageSize": "a4",
+    "margin": 0
+  }
+}
