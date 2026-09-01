@@ -11,9 +11,7 @@ seen = set()
 with corpus_path.open(encoding="utf-8") as f:
     for line in f:
         rec = json.loads(line)
-        print(f"p{rec['page']}, len(los)={len(los)}")
         if rec["page"] > 15 and not los:
-            print("  -> skipped")
             continue
         text = rec["text"]
         for m in RE_PART.finditer(text):
@@ -31,7 +29,7 @@ with corpus_path.open(encoding="utf-8") as f:
                 continue
             seen.add(code)
             if len(desc) < 3 or len(desc) > 200:
-                print(f"  SKIP len={len(desc)} code={code!r} desc={desc!r}")
+                print(f"  skip {code}: desc len={len(desc)} {desc!r}")
                 continue
             los.append({"module": "M1", "code": code, "title": desc, "level": level, "page": rec["page"]})
             print(f"  + {code}: {desc!r} (level={level}) p{rec['page']}")

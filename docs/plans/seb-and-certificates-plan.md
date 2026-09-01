@@ -1,8 +1,6 @@
 # SEB Deployment Plan
 
-**Date:** 2026-08-31  
-**Status:** Ready for implementation  
-**Audience:** IT staff, exam administrators, instructors
+**Date:** 2026-08-31 **Status:** Ready for implementation **Audience:** IT staff, exam administrators, instructors…
 
 ---
 
@@ -21,7 +19,7 @@ SEB is the **most effective anti-cheat control** because it operates at the OS l
 ### Key Features
 
 | Feature | Benefit |
-|---------|---------|
+| --- | --- |
 | **Kiosk mode** | Locks the computer to a single exam URL |
 | **Browser Exam Key (BEK)** | Cryptographic verification that the server is legitimate |
 | **Configurable rules** | Allow/block specific applications, printers, USB drives |
@@ -42,7 +40,7 @@ SEB is the **most effective anti-cheat control** because it operates at the OS l
 ### Already Implemented
 
 | Component | Status | Location |
-|-----------|--------|----------|
+| --- | --- | --- |
 | `sebRequired` flag on `InternalExamClassSchedule` | ✅ Schema | `prisma/schema.prisma:2028` |
 | SEB detection middleware | ✅ Code | `lib/middleware/seb-detection.ts` |
 | SEB config download API | ✅ Code | `app/api/staff/exams/internal/sessions/[id]/seb-config/route.ts` |
@@ -52,7 +50,7 @@ SEB is the **most effective anti-cheat control** because it operates at the OS l
 ### Missing (This Plan)
 
 | Component | Status |
-|-----------|--------|
+| --- | --- |
 | `.seb` config file generation | ❌ Not implemented |
 | BEK verification endpoint | ❌ Not implemented |
 | SEB deployment guide | ❌ Not documented |
@@ -89,12 +87,14 @@ Admin creates exam session
 ### 3.3 Server-Side BEK Verification
 
 When SEB launches an exam, it sends:
+
 ```
 X-SafeExamBrowser-RequestHash: <hash>
 X-SafeExamBrowser-ConfigKey: <public_key>
 ```
 
 Server verifies:
+
 1. `RequestHash` matches expected hash for this session
 2. `ConfigKey` matches stored BEK
 3. Session is active and not expired
@@ -152,26 +152,24 @@ export function verifySebRequestHash(requestHash: string, bekPair: BekPair, sess
 - Store `privateKey` encrypted in session metadata
 - Return `.seb` file download with `application/octet-stream` content-type
 
----
-
 ### Phase 2: SEB Deployment Guide (Week 1)
 
 **File:** `docs/guides/seb-deployment.md`
 
 Sections:
+
 1. Download SEB for Windows/macOS/iOS/Android
 2. Managed laptop imaging script (PowerShell + MDT/SCCM)
 3. IT deployment checklist
 4. Student self-installation guide
 5. Troubleshooting (BEK mismatch, URL blocked, etc.)
 
----
-
 ### Phase 3: Admin UI Toggle (Week 2)
 
 **File:** `app/staff/exams/internal/sessions/[id]/seb-config/_components/SebConfigPanel.tsx`
 
 Features:
+
 - Generate `.seb` config with one click
 - Download button
 - BEK status display (active/expired)
@@ -196,6 +194,7 @@ model InternalExamBank {
 ### 5.2 Certificate Configuration
 
 Admins can configure:
+
 - Template version (EASA Part-66 standard, academy custom)
 - Include/exclude fields (score, module list, invigilator name)
 - Signature type (digital, none)
@@ -206,6 +205,7 @@ Admins can configure:
 **Library:** `pdf-lib` (server-side, no client deps)
 
 **Flow:**
+
 1. Student passes exam
 2. System checks `bank.certificateEnabled`
 3. If enabled → generate PDF → store in Supabase Storage
@@ -215,7 +215,7 @@ Admins can configure:
 **Certificate Fields:**
 
 | Field | Source | EASA Requirement |
-|-------|--------|------------------|
+| --- | --- | --- |
 | Candidate name | `InternalExamRegistration.fullName` | Passport match |
 | Licence category | `InternalExamRegistration.licenceCategory` | B1.1, B1.2, B2, etc. |
 | Module(s) | `InternalExamRegistration.moduleCode` | M1–M17 |
@@ -250,7 +250,7 @@ app/api/student/exams/internal/
 ### 6.1 SEB Tests
 
 | Test | Method | Tool |
-|------|--------|------|
+| --- | --- | --- |
 | `.seb` config validates against SEB schema | Load in SEB client | Manual + automated snapshot |
 | BEK verification rejects tampered requests | Modify hash → expect 401 | Playwright |
 | BEK verification accepts valid requests | Valid hash → expect 200 | Playwright |
@@ -260,7 +260,7 @@ app/api/student/exams/internal/
 ### 6.2 Certificate Tests
 
 | Test | Method | Tool |
-|------|--------|------|
+| --- | --- | --- |
 | PDF generation produces valid PDF | Generate → parse with `pdf-lib` | Vitest |
 | PDF contains required fields | Extract text → assert fields | Vitest |
 | Certificate disabled → no PDF generated | `certificateEnabled: false` → no file | Vitest |
@@ -272,7 +272,7 @@ app/api/student/exams/internal/
 ### 6.3 Integration Tests
 
 | Test | Method | Tool |
-|------|--------|------|
+| --- | --- | --- |
 | Full flow: exam → pass → certificate | End-to-end | Playwright |
 | Admin toggles certificate on/off | UI test | Playwright |
 | Student downloads certificate | Authenticated flow | Playwright |

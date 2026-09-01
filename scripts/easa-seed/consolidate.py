@@ -69,62 +69,39 @@ def dedup_exact(questions: list[dict]) -> list[dict]:
 
 
 def dedup_semantic(questions: list[dict], threshold: float = 0.85) -> list[dict]:
-    """Use SemHash to drop near-duplicates.
+    """Use SemHash to drop near-duplicates."""
+    from semhash import SemHash
 
-    SemHash dedup returns a DeduplicationResult whose `selected` is the
-    list of unique records (dicts when we pass a list of dicts).
-    """
     if len(questions) <= 1:
         return questions
+    records = [q["question"] for q in questions]
     try:
-        from semhash import SemHash
+        sh = SemHash.from_records(records, columns=["question"])
     except Exception as exc:
-        print(f"  semhash import failed: {exc}", file=sys.stderr)
+        print(f"  semhash failed: {exc}", file=sys.stderr)
         return questions
-    records = [{"text": q["question"]} for q in questions]
-    try:
-        sh = SemHash.from_records(records, columns=["text"])
-        result = sh.self_deduplicate(threshold=threshold)
-        # selected is a list of dicts; match by 'text' field
-        kept = {r["text"] for r in result.selected}
-    except Exception as exc:
-        print(f"  semhash dedup failed: {exc}", file=sys.stderr)
-        return questions
-    out: list[dict] = []
-    for q in questions:
-        if q["question"] in kept:
-            out.append(q)
-            kept.discard(q["question"])  # avoid duplicates within kept
-    return out
+    deduped_idx = sh.self_deduplicate(threshold=threshold).indices
+    return [questions[i] for i in sorted(deduped_idx)]
 
 
 def tag_lo(question: dict, catalog: list[dict]) -> str | None:
-    """Assign the most likely LO code by term overlap.
-
-    Falls back to category hint if present.
-    """
+    """Assign the most likely LO code by term overlap."""
     q_text = (question.get("question", "") + " " + " ".join(question.get("options", []))).lower()
     q_tokens = set(re.findall(r"\b[a-z]{3,}\b", q_text))
-    category = (question.get("category") or "").lower()
-    cat_tokens = set(re.findall(r"\b[a-z]{3,}\b", category))
-
-    if not q_tokens and not cat_tokens:
+    if not q_tokens:
         return None
     best_code: str | None = None
-    best_score = 0.0
+    best_score = 0
     for lo in catalog:
+        # Tokenize title
         title = lo["title"].lower()
         title_tokens = set(re.findall(r"\b[a-z]{3,}\b", title))
         if not title_tokens:
             continue
-        # Question text overlap
-        q_overlap = len(q_tokens & title_tokens)
-        q_score = q_overlap / (1 + len(title_tokens) ** 0.5)
-        # Category text overlap (stronger signal)
-        c_overlap = len(cat_tokens & title_tokens) if cat_tokens else 0
-        c_score = c_overlap * 2.0
-        score = q_score + c_score
-        if score > best_score and (q_overlap + c_overlap) >= 1:
+        overlap = len(q_tokens & title_tokens)
+        # Score = overlap / (1 + log(len(title_tokens)))
+        score = overlap / (1 + len(title_tokens) ** 0.5)
+        if score > best_score and overlap >= 2:
             best_score = score
             best_code = lo["code"]
     return best_code

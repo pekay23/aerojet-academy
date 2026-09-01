@@ -581,7 +581,6 @@ function QuestionList({
   onEdit,
   onDelete,
   onRestore,
-  bankId,
 }: {
   questions: Question[]
   selectedIds: Set<string>
@@ -593,7 +592,6 @@ function QuestionList({
   onEdit: (q: Question) => void
   onDelete: (id: string) => void
   onRestore: (id: string) => void
-  bankId: string
 }) {
   const activeQuestions = questions.filter(q => q.isActive)
   const retiredQuestions = questions.filter(q => !q.isActive)

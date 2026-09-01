@@ -31,7 +31,7 @@ RE_LO = re.compile(
     re.IGNORECASE,
 )
 RE_CHAPTER = re.compile(r"^\s*(\d+)\.\s*(\d+)\s+([A-Z][^\n]{3,80})\s*$")
-RE_PART = re.compile(r"^\s*(\d+)\.(\d+)(?:\(([a-z])\))?\s+(.+)$", re.IGNORECASE | re.MULTILINE)
+RE_PART = re.compile(r"^\s*(\d+)\.(\d+)(?:\(([a-z])\))?\s+(.+)$", re.IGNORECASE)
 
 
 def extract_module(module: str) -> list[dict]:
@@ -45,14 +45,17 @@ def extract_module(module: str) -> list[dict]:
         for line in f:
             rec = json.loads(line)
             text = rec["text"]
+            # Skip non-content pages (cover, copyright, revision table)
             if rec["page"] > 15 and not los:
-                continue
+                continue  # only scan early pages for TOC
             for m in RE_PART.finditer(text):
                 lo_num, sub, letter, desc = m.group(1), m.group(2), m.group(3), m.group(4)
                 if letter and len(letter) != 1:
                     continue
+                # Detect Level inside desc
                 lvl_m = re.search(r"Level\s*(\d+)", desc, re.IGNORECASE)
                 level = int(lvl_m.group(1)) if lvl_m else None
+                # Clean description
                 desc = re.sub(r"\s*[—\-]\s*Level\s*\d+\s*$", "", desc, flags=re.IGNORECASE).strip()
                 desc = re.sub(r"\s{2,}", " ", desc)
                 code = f"{module}.{lo_num}.{sub}"
@@ -62,15 +65,6 @@ def extract_module(module: str) -> list[dict]:
                     continue
                 seen_codes.add(code)
                 if len(desc) < 3 or len(desc) > 200:
-                    continue
-                # Reject junk: sub-section must be 1-9 (single digit)
-                if not sub.isdigit() or int(sub) > 9:
-                    continue
-                # Chapter must be 1-99
-                if not lo_num.isdigit() or int(lo_num) > 99:
-                    continue
-                # Description must start with a letter (skip "0.125" / "= 2.0 x10-3")
-                if not desc[0].isalpha():
                     continue
                 los.append(
                     {
