@@ -163,13 +163,32 @@ export async function trackEvent(
 ): Promise<void> {
   const payload = validatePayload(event, data as Record<string, any>)
 
+  const resolvedUserId = userId ?? payload.userId
+
+  // Validate that the user exists before tracking (if userId is provided)
+  if (resolvedUserId) {
+    try {
+      const userExists = await prismaUnfiltered.user.findUnique({
+        where: { id: resolvedUserId },
+        select: { id: true },
+      })
+      if (!userExists) {
+        console.warn(`[ANALYTICS] Skipping event ${event}: user ${resolvedUserId} does not exist`)
+        return
+      }
+    } catch (err) {
+      // If validation fails, log but don't block the event
+      console.warn(`[ANALYTICS] Could not validate user ${resolvedUserId}:`, err)
+    }
+  }
+
   try {
     await prismaUnfiltered.auditLog.create({
       data: {
         action: event,
         entity: 'ANALYTICS',
         entityId: 'system',
-        userId: userId ?? payload.userId,
+        userId: resolvedUserId,
         changes: payload,
       },
     })
@@ -213,4 +232,20 @@ export async function trackExamCompletion(poolId: string, moduleCode: string, sc
 
 export async function trackWalletTopUp(amount: number, currency: string, method: string, userId?: string) {
   return trackEvent('WALLET_TOP_UP', { amount, currency, method }, userId)
+}
+
+export async function trackCourseAccess(courseId: string, userId?: string) {
+  return trackEvent('COURSE_ACCESSED', { courseId }, userId)
+}
+
+export async function trackDocumentUpload(documentType: string, fileName?: string, userId?: string) {
+  return trackEvent('DOCUMENT_UPLOADED', { documentType, fileName }, userId)
+}
+
+export async function trackReferralClick(referralCode?: string, landingPage?: string, userId?: string) {
+  return trackEvent('REFERRAL_CLICKED', { referralCode, landingPage }, userId)
+}
+
+export async function trackPaymentSubmitted(amount: number, currency: string, paymentId?: string, userId?: string, method?: string) {
+  return trackEvent('PAYMENT_SUBMITTED', { amount, currency, paymentId, method }, userId)
 }

@@ -15,7 +15,7 @@ import { getBaseUrl } from '@/lib/utils/url'
 // UTILITY
 // ---------------------------------------------------------------------------
 
-function replacePlaceholders(template: string, data: Record<string, any>) {
+export function replacePlaceholders(template: string, data: Record<string, any>) {
   return template.replace(/\{\{(.*?)\}\}/g, (match, key) => {
     const value = data[key.trim()]
     return value !== undefined ? String(value) : match

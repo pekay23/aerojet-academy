@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
-import { apiPaginated, apiUnauthorized } from '@/lib/api/response'
+import { apiPaginated, apiUnauthorized, parsePagination } from '@/lib/api/response'
 
 export async function GET(req: NextRequest) {
   const session = await getAuthSession()

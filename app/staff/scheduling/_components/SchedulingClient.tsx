@@ -63,7 +63,7 @@ export default function SchedulingClient({
     for (const pathway of pathways) {
       // Find matching programmes for this pathway
       const matchingCodes = PATHWAY_PROGRAMME_MAP[pathway.code] || []
-      const matchingProgrammes = programmes.filter((p: any) =>
+      const matchingProgrammes = programmes.filter((p) =>
         matchingCodes.includes(p.code)
       )
 
@@ -114,7 +114,7 @@ export default function SchedulingClient({
   const licenseCourseMap = useMemo(() => {
     const map: Record<string, Set<string>> = {}
     for (const lc of licenseCategories) {
-      map[lc.id] = new Set(lc.requirements.map((r: any) => r.course.id))
+      map[lc.id] = new Set(lc.requirements?.map((r) => r.course.id) ?? [])
     }
     return map
   }, [licenseCategories])
@@ -299,7 +299,7 @@ function ProgrammeSchedulePanel({
 
   // Filter academic terms for the current license category selection
   const filteredTerms = useMemo(() => {
-    return pathway.academicTerms.filter((term: any) => {
+    return pathway.academicTerms.filter((term) => {
       if (activeLicenseId === null) {
         return term.licenseCategoryId === null
       }
@@ -315,7 +315,7 @@ function ProgrammeSchedulePanel({
 
     const filtered: Record<string, any[]> = {}
     for (const [cat, catCourses] of Object.entries(groupedCourses)) {
-      const matching = catCourses.filter((c: any) => requiredCourseIds.has(c.id))
+      const matching = catCourses.filter((c) => requiredCourseIds.has(c.id))
       if (matching.length > 0) {
         filtered[cat] = matching
       }
@@ -389,7 +389,7 @@ function ProgrammeSchedulePanel({
                     <TableHead className="sticky left-0 z-30 w-[160px] sm:w-[300px] min-w-[160px] sm:min-w-[300px] border-r bg-slate-50 py-6 text-sm font-bold text-aerojet-blue dark:bg-slate-900 dark:text-slate-300">
                       Module Name
                     </TableHead>
-                    {filteredTerms.map((term: any) => (
+                    {filteredTerms.map((term) => (
                       <TableHead
                         key={term.id}
                         className="min-w-[160px] border-r text-center align-middle"
@@ -428,7 +428,7 @@ function ProgrammeSchedulePanel({
                       </TableRow>
 
                       {/* Course Rows */}
-                      {catCourses.map((course: any) => (
+                      {catCourses.map((course) => (
                         <TableRow
                           key={course.id}
                           className="group border-b border-slate-50 transition-all duration-150 ease-out hover:bg-white/80 dark:border-slate-800/50 dark:hover:bg-slate-800/40"

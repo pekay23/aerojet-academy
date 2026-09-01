@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import dynamic from 'next/dynamic'
 import SettingsForm from './SettingsForm'
+import { toast } from 'sonner'
 import { FileText, Award } from 'lucide-react'
 
 // Dynamically import PDFViewer with SSR disabled — @react-pdf/renderer needs DOM APIs
@@ -112,7 +113,7 @@ export default function PDFSettingsForm({ values, pdfSettings }: PDFSettingsForm
 
       setTimeout(() => URL.revokeObjectURL(url), 1000)
     } catch (error) {
-      console.error('Error downloading PDF preview:', error)
+      toast.error('Failed to download PDF preview')
       alert('Failed to generate PDF preview. Please try again.')
     } finally {
       setIsGenerating(null)

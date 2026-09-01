@@ -76,7 +76,7 @@ export default async function PracticalAssessmentsPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue uppercase dark:text-white">
             Practical Training Assessments
           </h1>
           <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">

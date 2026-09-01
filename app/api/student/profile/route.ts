@@ -18,7 +18,7 @@ export const PATCH = withErrorHandler(async (req: NextRequest) => {
   const body = await req.json()
   const validation = validateBody(updateProfileSchema, body)
   if (!validation.success) return apiError(validation.error)
-  const profile = await prisma.profile.update({
+  const profile = await prismaUnfiltered.profile.update({
     where: { userId: user.id },
     data: validation.data,
   })

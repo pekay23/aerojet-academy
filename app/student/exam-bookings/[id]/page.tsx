@@ -60,7 +60,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   const session = await getAuthSession()
   if (!session || session.user.role !== 'STUDENT') redirect('/login')
 
-  const booking = await prisma.examBooking.findUnique({
+  const booking = await prismaUnfiltered.examBooking.findUnique({
     where: { id: bookingId },
     include: {
       exam: { select: { passingScore: true } },
@@ -86,7 +86,7 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
   if (!booking) notFound()
   if (booking.userId !== session.user.id) redirect('/student/exams')
 
-  const bundle = await prisma.examBundle.findFirst({
+  const bundle = await prismaUnfiltered.examBundle.findFirst({
     where: { userId: session.user.id, status: 'ACTIVE' }
   })
   const hasFreeChanges = bundle ? bundle.freeModuleChanges > bundle.usedModuleChanges : false
@@ -110,14 +110,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
       <div>
         <Link
           href="/student/exams?tab=records"
-          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-aerojet-sky"
+          className="mb-2 inline-flex items-center gap-1.5 text-xs font-bold tracking-widest text-slate-400 uppercase transition-colors hover:text-sky-400"
         >
           <ChevronLeft className="h-3.5 w-3.5" />
           Back to My Exams
         </Link>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+            <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
               Booking: {moduleCode}
             </h1>
             {moduleName && (

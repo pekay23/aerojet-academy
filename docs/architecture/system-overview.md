@@ -37,8 +37,8 @@ A missed check in any one layer is caught by the next.
 
 `lib/prisma/client.ts` exports two clients:
 
-- `prisma` (default) — RLS-wrapped + soft-delete extension. Wraps every query in a transaction that sets PostgreSQL session vars (`aerojet.user_id`, `aerojet.user_role`) for row-level security. Used by student/applicant pages.
-- `prismaUnfiltered` (named) — raw, no overhead. Used by staff pages, which are already auth-gated.
+- `prisma` (default) — Extended with soft-delete and RLS extensions. Legacy; not used by active portal code.
+- `prismaUnfiltered` (named) — Raw base client with no RLS overhead. Used by all portals for direct queries.
 
 Adapter auto-selects per environment (Neon WS in dev, `pg` Pool in production).
 

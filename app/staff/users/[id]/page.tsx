@@ -4,7 +4,8 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { serializePrisma } from '@/lib/utils/serialization'
 import { getCachedExamComponents } from '@/lib/cached-queries'
 import Link from 'next/link'
-import Image from 'next/image'
+import { ProtectedImage } from '@/components/ProtectedImage'
+import { proxyImageUrl } from '@/lib/storage/signed-url'
 import { ArrowLeft, Mail, Phone, Globe, Calendar, User as UserIcon, Shield } from 'lucide-react'
 import UserActionsMenu from '../../_components/UserActionsMenu'
 import EditIdDialog from './_components/EditIdDialog'
@@ -19,6 +20,7 @@ import EditStaffProfileDialog from './_components/EditStaffProfileDialog'
 import { Metadata } from 'next'
 import { PathwayCode } from './_components/EditPathwayDialog'
 import { UserStatus, UserRole, EnrollmentStatus } from '@/types/enums'
+import type { SerializedFullTimeEnrollmentForOjt, SerializedStudent } from '@/lib/staff/types'
 
 export const metadata: Metadata = { title: 'User Details | Staff Portal' }
 
@@ -97,7 +99,7 @@ export default async function UserProfilePage({ params }: Props) {
   })
 
   if (!userRaw) notFound()
-  const user = serializePrisma(userRaw)
+  const user = serializePrisma(userRaw) as unknown as SerializedStudent
 
   // Fetch OJT + exam components in parallel (both independent of each other)
   const [ftEnrollmentsRaw, examComponentsRaw] = await Promise.all([
@@ -115,7 +117,7 @@ export default async function UserProfilePage({ params }: Props) {
 
   const ftEnrollments = serializePrisma(ftEnrollmentsRaw)
 
-  const ojtData = ftEnrollments.map((e: any) => ({
+  const ojtData = ftEnrollments.map((e: SerializedFullTimeEnrollmentForOjt) => ({
     id: e.id,
     programme: e.programme,
     ojtPeriods: e.ojtPeriods,
@@ -164,12 +166,13 @@ export default async function UserProfilePage({ params }: Props) {
             <div className="relative">
               <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-2xl bg-aerojet-blue text-3xl font-black text-white shadow-lg shadow-blue-900/10 transition-all hover:shadow-xl dark:bg-blue-600">
                 {user.profile?.profilePhotoUrl ? (
-                  <Image
-                    src={user.profile.profilePhotoUrl}
+                  <ProtectedImage
+                    src={proxyImageUrl(user.profile.profilePhotoUrl, 'profile-photos')}
                     alt={fullName}
                     fill
                     sizes="96px"
                     className="object-cover"
+                    priority
                   />
                 ) : (
                   initials
@@ -299,7 +302,7 @@ export default async function UserProfilePage({ params }: Props) {
           </div>
 
           {/* Role Specific Details */}
-          {[UserRole.STUDENT, UserRole.APPLICANT].includes(user.role as any) && (
+          {[UserRole.STUDENT, UserRole.APPLICANT].includes(user.role as UserRole) && (
             <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/50">
               <h2 className="mb-4 flex items-center gap-2 text-xs font-black tracking-widest text-slate-400 uppercase dark:text-slate-500">
                 <UserIcon className="h-4 w-4" /> Student Profile
@@ -311,12 +314,12 @@ export default async function UserProfilePage({ params }: Props) {
                   </p>
                   <div className="flex items-center">
                     <p className="font-mono font-bold text-slate-700 dark:text-slate-300">
-                      {user.studentProfile?.studentId || 'Not Assigned'}
+                      {user.studentProfile?.studentId ?? 'Not Assigned'}
                     </p>
                     {user.studentProfile && (
                       <EditIdDialog
                         userId={user.id}
-                        currentId={user.studentProfile.studentId}
+                        currentId={user.studentProfile.studentId ?? ''}
                         type="studentId"
                         label="Student ID"
                       />
@@ -396,12 +399,12 @@ export default async function UserProfilePage({ params }: Props) {
               }))}
               studentProfile={user.studentProfile ? {
                 studentId: user.studentProfile.studentId,
-                enrollmentStatus: user.studentProfile.enrollmentStatus,
-                fundingSource: user.studentProfile.fundingSource,
-                currentYearNumber: user.studentProfile.currentYearNumber,
-                currentSemesterNumber: user.studentProfile.currentSemesterNumber,
-                programmeChoice: user.studentProfile.programmeChoice,
-                enrollmentType: user.studentProfile.enrollmentType,
+                enrollmentStatus: user.studentProfile.enrollmentStatus ?? '',
+                fundingSource: user.studentProfile.fundingSource ?? '',
+                currentYearNumber: user.studentProfile.currentYearNumber ?? 0,
+                currentSemesterNumber: user.studentProfile.currentSemesterNumber ?? 0,
+                programmeChoice: user.studentProfile.programmeChoice ?? null,
+                enrollmentType: user.studentProfile.enrollmentType ?? null,
               } : null}
             />
           )}
@@ -482,8 +485,8 @@ export default async function UserProfilePage({ params }: Props) {
                 <EditStaffProfileDialog
                   userId={user.id}
                   initialData={{
-                    department: user.staffProfile.department,
-                    position: user.staffProfile.position,
+                    department: user.staffProfile.department ?? '',
+                    position: user.staffProfile.position ?? '',
                   }}
                 />
               </div>

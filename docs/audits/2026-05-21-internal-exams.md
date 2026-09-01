@@ -189,3 +189,78 @@ All 15 findings addressed in one pass. Summary of fixes:
 | `bun run build` | ✅ Compiled successfully in 2.1min |
 
 Everything wired through `prismaUnfiltered` (staff routes already auth-gated). The single-attempt policy is now genuinely single-attempt — voiding by admin remains the sole retake path, and that action is audit-logged with a proper schema-backed reason field.
+
+---
+
+## Re-verification (2026-08-29)
+
+A re-audit of the internal-exams subsystem against the live codebase, performed
+after the August 2026 portal audits and the `prisma` → `prismaUnfiltered`
+dual-client refactor. The "## Resolution (2026-05-21)" section above is kept as
+**historical record**; this section records what actually holds at `HEAD` and
+corrects where that resolution was incomplete.
+
+> **Correction:** the 2026-05-21 resolution for **EXAM-7** claimed the six
+> routes were fixed, but `regrade/route.ts` retained `async (req, _ctx: any)`
+> (the resolution only swept `sessions`/`void`/`publish`/`report`/`submit`/`progress`).
+> Separately, **`regrade/route.ts` was not covered by EXAM-2** — it is a
+> privileged score-mutating action but wrote no `createAuditLog`, a gap the
+> 2026-05-21 audit did not enumerate. Both are addressed in this pass.
+
+### 2026-05-21 findings against current code
+
+| # | Finding | Status | Evidence (current) |
+|---|---|---|---|
+| EXAM-1 | void writes non-existent columns | ✅ VERIFIED FIXED | `schema.prisma:2090-2095` `InternalExamSession` has `voidedAt/voidedBy/voidReason`; [void/route.ts:44-46](../../app/api/staff/exams/internal/operations/void/route.ts) writes them bare (no `as any`). |
+| EXAM-2 | publish/void missing audit log | ✅ VERIFIED FIXED | [publish/route.ts:47-58](../../app/api/staff/exams/internal/operations/publish/route.ts) and [void/route.ts:56-64](../../app/api/staff/exams/internal/operations/void/route.ts) both `createAuditLog`. |
+| EXAM-3 | progress status reflects oldest attempt | ✅ VERIFIED FIXED | [progress/route.ts:87-90,129](../../app/api/student/exams/internal/progress/route.ts) — `status` set only at first (newest) insert; loop explicitly does not overwrite. |
+| EXAM-4 | sessions accepts arbitrary `status` | ✅ VERIFIED FIXED | [sessions/route.ts:10](../../app/api/staff/exams/internal/operations/sessions/route.ts) — `z.enum(STATUS_VALUES)`. |
+| EXAM-5 | sessions leaks full answers | ✅ VERIFIED FIXED | List returns `answerCount` ([sessions/route.ts:117](../../app/api/staff/exams/internal/operations/sessions/route.ts)); detail at [sessions/[id]/route.ts](../../app/api/staff/exams/internal/operations/sessions/[id]/route.ts). |
+| EXAM-6 | submit computes retake fields | ✅ VERIFIED FIXED | [submit/route.ts:89-90](../../app/api/student/exams/internal/submit/route.ts) — comment deliberately does not compute `retakeEligibleAt`/`banLiftDate`. |
+| EXAM-7 | `_ctx: any` on routes | ✅ VERIFIED FIXED | The 2026-05-21 sweep missed the question/bank CRUD cohort. **This pass** typed every dynamic-param handler with `ctx: { params: Promise<…> }` (`versions`, `review`, `banks/[bankId]/questions` ×2, `banks/[bankId]/questions/[questionId]` ×3), dropped the unused `_ctx` in `student/exams/internal/session` and `answer`, and replaced `where: any` with `Prisma.InternalExamQuestionWhereInput` and explicit `z.enum` validation so an invalid `?status=` returns a clean 400; `grep` (for `ctx: any`/`where: any`) and `tsc` are both clean across all `exams/internal` files. |
+| EXAM-8 | `as any` escape hatches | ✅ VERIFIED FIXED | No `as any` casts on `isPublished`/`voidedAt`/`staff.id` in any internal-exam route. |
+| EXAM-9 | unused `apiError` import | ✅ N/A | `apiError` is used across the routes; import retained. |
+| EXAM-10 | no pending-report alert | ✅ VERIFIED FIXED | `lib/analytics/dashboard-alerts.ts:37,157-165` — `pendingExamReports` alert wired in. |
+| EXAM-11 | `subTopic` dead in student UI | ✅ VERIFIED FIXED | No `subTopic` references in `app/student/exams/internal/_components/`. |
+| EXAM-12 | seed writes 3 options | ✅ VERIFIED FIXED | [seed_internal_questions.ts:22-27](../../../scripts/seed_internal_questions.ts) — 4 options/A-B-C-D. |
+| EXAM-13 | `ExamOperations.tsx` monolith | ⚠️ PARTIAL | Still one file; structural split deferred (no correctness impact). |
+| EXAM-14 | Live-tab polling | ✅ FIXED + hardened | `InternalExamDashboard.tsx` — 30 s polling, pauses on `document.hidden`, refetches on focus, cleanup on unmount. |
+| EXAM-15 | no loading.tsx | ✅ INHERITED | Existing route `loading.tsx` covers the path. |
+
+### LLM Council — 3-pass verification (2026-08-29)
+
+Three independent reviewers were run over the changed files: Performance/Reliability, Security, and Accessibility+Correctness+UX.
+
+**`app/api/staff/exams/internal/operations/regrade/route.ts`**
+
+- ✅ Auth gate correct (`requireStaff` → `withErrorHandler` → 401/403); uses `prismaUnfiltered`; Zod-validated body.
+- ⚠️ (Security) Unbounded `sessionIds` → DoS. **Fixed:** `.max(500)`, matching `publish/route.ts`.
+- ⚠️ (Security) TOCTOU race — status guarded at read (`:41`) but not on the write. **Fixed:** write is now `updateMany` with `status: { notIn: ['VOIDED','IN_PROGRESS'] }` in the `where` (`:81-92`), making the check atomic and non-throwing on zero rows.
+- ⚠️ (Security) No `createAuditLog` on a privileged score mutation — CLAUDE.md mandates it. **Fixed:** single batch `createAuditLog` with before/after diffs (`:104-115`), mirroring `publish/route.ts`.
+- ⚠️ (Performance) Sequential `for…of await`, per-answer `update` (N+1), uncached `getBankRules`. **Fixed this pass** — promise-cached `getBankRules`, batched `$transaction` writes per session, and bounded concurrency; behavior-preserving (same reads/writes/results, throw-on-first-failure preserved).
+
+**`app/student/exams/internal/_components/InternalExamDashboard.tsx`**
+
+- ✅ Polling pauses on `document.hidden`, refetches on `visibilitychange`, clears interval + listener on unmount.
+- ⚠️ (Correctness) `tick` didn't check the `active` flag — could fire `fetchProgress` after unmount. **Fixed:** `tick` now guards `document.hidden || !active`; `fetchProgress` accepts an optional `AbortSignal` cancelled on unmount so in-flight calls cannot `setState` after cleanup.
+- ✅ No CSRF (`GET` only); progress endpoint auth + IDOR (`studentId` scoping) confirmed.
+
+### New / council-discovered findings
+
+| # | Finding | Severity | Status |
+|---|---|---|---|
+| EXAM-16 | `regrade/route.ts` unbounded `sessionIds` | High (DoS) | Fixed (`.max(500)`) |
+| EXAM-17 | `regrade/route.ts` TOCTOU race on status at write | Medium | Fixed (`updateMany` + status in `where`) |
+| EXAM-18 | `regrade/route.ts` no `createAuditLog` on score mutation | High (CLAUDE.md) | Fixed |
+| EXAM-19 | `banks/route.ts` residual `_ctx: any` (GET) | Low | Fixed (param dropped) |
+| EXAM-20 | `regrade/route.ts` sequential loop + N+1 answer writes + uncached `getBankRules` | Medium (perf) | Fixed (promise cache + batched `$transaction` writes + bounded concurrency) |
+
+### Verification (2026-08-29)
+
+| Check | Result |
+|---|---|
+| `npx tsc --noEmit` (edited files) | ✅ no errors in any `exams/internal` route or the two new test files |
+| `bun run docs:html` | ✅ 61 pages rendered, no broken links (regenerated) |
+| `bun run test --run` (Vitest) | ✅ runs to completion via the `--no-file-parallelism` background runner; added `tests/integration/api/staff-exams-internal-routes.test.ts` + `student-exams-internal-routes.test.ts` — 38 cases all passing (auth/authz, zod validation, audit-log writes, regrade TOCTOU/status guard). Pre-existing failures remain only in unrelated `staff-*` integration tests. |
+
+> **Note on tooling:** `bun run lint` is non-functional in this Windows env (`next lint` errors "Invalid project directory"; `npx eslint` fails on ESLint v10 vs the legacy `.eslintrc.json`). `bun run test` runs via the background runner with `--no-file-parallelism` (`bun run test --run --no-file-parallelism --no-color`); foreground execution aborts with `ChildProcess.kill` (PowerShell child-spawn limit). Type-checking remains the reliable gate for these edits.

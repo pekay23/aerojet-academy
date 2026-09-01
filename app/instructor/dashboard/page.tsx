@@ -19,6 +19,7 @@ import { getInstructorDashboardData } from '@/lib/actions/instructor'
 import prisma from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Dashboard | Instructor Portal' }
+export const dynamic = 'force-dynamic'
 
 export default async function Page() {
   const session = await getAuthSession()
@@ -45,7 +46,7 @@ export default async function Page() {
             <p className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
               {instructorData.activeCohortsCount}
             </p>
-            <p className="mt-1 text-xs font-bold tracking-widest text-slate-400 uppercase">
+            <p className="mt-1 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-300 dark:text-slate-500 uppercase">
               Active Classes
             </p>
           </div>
@@ -171,7 +172,7 @@ export default async function Page() {
                 <div key={i} className="px-6 py-5 transition-colors hover:bg-orange-50/30 dark:hover:bg-orange-950/10">
                   <div className="mb-2 flex items-center justify-between">
                     <span className="text-xs font-black text-aerojet-blue">{item.module}</span>
-                    <span className="rounded-full bg-orange-100 px-2 py-0.5 text-[9px] font-black text-orange-700 uppercase">
+                    <span className="rounded-full bg-orange-100 px-2 py-0.5 text-xs font-black text-orange-700 uppercase">
                       Needs Grade
                     </span>
                   </div>
@@ -275,6 +276,6 @@ export default async function Page() {
 async function AsyncWelcomeBanner({ userName }: { userName?: string }) {
   const session = await getAuthSession()
   const role = session?.user?.role || 'STUDENT'
-  const [welcomeMessages] = await Promise.all([getWelcomeMessages(prisma, role)])
+  const [welcomeMessages] = await Promise.all([getWelcomeMessages(prismaUnfiltered, role)])
   return <WelcomeBanner messages={welcomeMessages} userName={userName} />
 }

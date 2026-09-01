@@ -121,6 +121,6 @@ export default function ModuleCard({ cls }: ModuleCardProps) {
           </Link>
         </div>
       </div>
-    </motion.div>
+    </MotionDiv>
   )
 }

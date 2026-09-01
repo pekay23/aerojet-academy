@@ -8,7 +8,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const user = await requireAuth()
 
   // Find active session
-  let session = await prisma.aptitudeTestSession.findFirst({
+  const session = await prisma.aptitudeTestSession.findFirst({
     where: { userId: user.id },
     orderBy: { createdAt: 'desc' },
     include: {

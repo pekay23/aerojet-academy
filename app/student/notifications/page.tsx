@@ -27,7 +27,7 @@ export default async function NotificationsPage() {
     <div className="mx-auto max-w-7xl space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             Notifications
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">

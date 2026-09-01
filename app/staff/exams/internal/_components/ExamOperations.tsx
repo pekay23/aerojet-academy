@@ -19,6 +19,8 @@ import {
   Activity,
   Hourglass,
   RefreshCcw,
+  ShieldAlert,
+  Award,
 } from 'lucide-react'
 
 interface StudentAnswer {
@@ -63,6 +65,8 @@ interface SessionData {
   /** Total answer rows for the session (one per question). Cheap count. */
   answerCount: number
   reports: Report[]
+  /** Violation count from the list endpoint — used for the tab badge. */
+  violationCount?: number
   /** Full per-question detail — only populated after the row is expanded. */
   answers?: StudentAnswer[]
 }
@@ -147,12 +151,34 @@ export default function ExamOperations() {
     }
   }, [])
 
+  const fetchViolations = useCallback(async (sessionId: string) => {
+    setViolationsLoadingMap((prev) => new Set([...prev, sessionId]))
+    try {
+      const res = await fetch(`/api/staff/exams/internal/sessions/${sessionId}/violations?limit=100`)
+      const json = await res.json()
+      if (json.success && json.data) {
+        setViolationsMap((prev) => ({ ...prev, [sessionId]: json.data }))
+      } else {
+        setViolationsMap((prev) => ({ ...prev, [sessionId]: [] }))
+      }
+    } catch {
+      setViolationsMap((prev) => ({ ...prev, [sessionId]: [] }))
+    } finally {
+      setViolationsLoadingMap((prev) => {
+        const next = new Set(prev)
+        next.delete(sessionId)
+        return next
+      })
+    }
+  }, [])
+
   const handleExpand = (sessionId: string) => {
     setExpandedSession((cur) => {
       const next = cur === sessionId ? null : sessionId
       if (next) {
         const row = sessions.find((s) => s.id === next)
         if (row && !row.answers) void fetchSessionDetail(next)
+        if (row && !violationsMap[next]) void fetchViolations(next)
       }
       return next
     })
@@ -562,6 +588,25 @@ export default function ExamOperations() {
                       </table>
                       )}
                     </div>
+
+                    {/* Violations panel (only shown when there are violations) */}
+                    {(session.violationCount ?? 0) > 0 && (
+                      <div className="mb-4">
+                        <div className="mb-2 flex items-center justify-between">
+                          <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400">
+                            Violations
+                          </h4>
+                        </div>
+                        {violationsLoadingMap.has(session.id) ? (
+                          <TableSkeleton rows={4} />
+                        ) : (
+                          <ViolationReviewPanel
+                            sessionId={session.id}
+                            violations={violationsMap[session.id] ?? []}
+                          />
+                        )}
+                      </div>
+                    )}
 
                     {/* Actions */}
                     <div className="flex flex-wrap gap-2">

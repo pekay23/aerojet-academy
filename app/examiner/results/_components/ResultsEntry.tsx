@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Calendar, Users, Save, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { submitExaminerResults } from '../actions'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface Assignment {
   id: string
@@ -32,6 +33,12 @@ interface ExistingResult {
   passed: boolean
 }
 
+interface ResultEntry {
+  assignmentId: string
+  score: number | null
+  absent: boolean
+}
+
 export default function ResultsEntry({
   sittings,
   existingResults,
@@ -53,14 +60,46 @@ export default function ResultsEntry({
   const [scores, setScores] = useState<Record<string, string>>({})
   const [absent, setAbsent] = useState<Record<string, boolean>>({})
   const [isPending, startTransition] = useTransition()
+  const { items, requestSort, sortConfig } = useSort(sitting.assignments, { key: 'user.profile.lastName', order: 'asc' })
+
+  const clampScore = (value: string): string => {
+    const num = Number(value)
+    if (value === '' || Number.isNaN(num)) return ''
+    return String(Math.max(0, Math.min(100, Math.round(num))))
+  }
+
+  const handleBlur = (assignmentId: string, raw: string) => {
+    const clamped = clampScore(raw)
+    if (clamped !== raw) {
+      setScores((s) => ({ ...s, [assignmentId]: clamped }))
+    }
+  }
 
   const save = () => {
     if (!sitting) return
-    const entries = sitting.assignments.map((a) => ({
-      assignmentId: a.id,
-      absent: !!absent[a.id],
-      score: scores[a.id] !== undefined && scores[a.id] !== '' ? Number(scores[a.id]) : null,
-    }))
+    const entries = sitting.assignments.map((a) => {
+      const raw = scores[a.id]
+      const name = a.user.profile
+        ? `${a.user.profile.firstName} ${a.user.profile.lastName}`
+        : a.userId
+
+      if (raw !== undefined && raw !== '') {
+        const parsed = Number(raw)
+        if (Number.isNaN(parsed) || parsed < 0 || parsed > 100) {
+          toast.error(`Score for ${name} must be between 0 and 100.`)
+          return null
+        }
+      }
+
+      const num = raw !== undefined && raw !== '' ? Number(raw) : NaN
+      const clamped = Number.isNaN(num) ? null : Math.max(0, Math.min(100, num))
+      return {
+        assignmentId: a.id,
+        absent: !!absent[a.id],
+        score: clamped,
+      }
+    }).filter((e): e is ResultEntry => e !== null)
+
     const hasData = entries.some((e) => e.absent || e.score != null)
     if (!hasData) {
       toast.error('Enter at least one score or mark a candidate absent.')
@@ -69,8 +108,17 @@ export default function ResultsEntry({
     startTransition(async () => {
       const res = await submitExaminerResults(sitting.id, entries)
       if (res.error) toast.error(res.error)
-      else toast.success(`${res.recorded} result(s) recorded`)
+      else {
+        toast.success(`${res.recorded} result(s) recorded`)
+        setScores({})
+        setAbsent({})
+      }
     })
+  }
+
+  const reset = () => {
+    setScores({})
+    setAbsent({})
   }
 
   if (!sitting) return null
@@ -120,28 +168,18 @@ export default function ResultsEntry({
 
       {/* Candidate result table */}
       <div className="overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-800">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[720px] text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/80 text-left dark:border-slate-800 dark:bg-slate-900/50">
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Candidate
-              </th>
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Module
-              </th>
-              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Existing
-              </th>
-              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Score (%)
-              </th>
-              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Absent
-              </th>
+              <SortHeader label="Candidate" sortKey="user.profile.lastName" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
+              <SortHeader label="Module" sortKey="booking.moduleCode" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
+              <SortHeader label="Existing" sortKey="id" currentSort={sortConfig} onSort={requestSort} align="center" className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
+              <SortHeader label="Score (%)" sortKey="id" currentSort={sortConfig} onSort={requestSort} align="center" className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
+              <SortHeader label="Absent" sortKey="id" currentSort={sortConfig} onSort={requestSort} align="center" className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase" />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-            {sitting.assignments.map((a) => {
+            {items.map((a) => {
               const ex = existingFor(a)
               return (
                 <tr key={a.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-800/40">
@@ -173,12 +211,16 @@ export default function ResultsEntry({
                       type="number"
                       min={0}
                       max={100}
+                      step={1}
+                      inputMode="numeric"
                       disabled={absent[a.id]}
                       value={scores[a.id] ?? ''}
                       onChange={(e) =>
                         setScores((s) => ({ ...s, [a.id]: e.target.value }))
                       }
+                      onBlur={() => handleBlur(a.id, scores[a.id] ?? '')}
                       placeholder={ex?.score != null ? String(ex.score) : '—'}
+                      aria-label={`Score for ${a.user.profile ? `${a.user.profile.firstName} ${a.user.profile.lastName}` : a.userId}`}
                       className="w-20 rounded border border-slate-200 px-2 py-1 text-center font-mono text-xs disabled:opacity-40 dark:border-slate-700 dark:bg-slate-800"
                     />
                   </td>
@@ -189,6 +231,7 @@ export default function ResultsEntry({
                       onChange={(e) =>
                         setAbsent((s) => ({ ...s, [a.id]: e.target.checked }))
                       }
+                      aria-label={`Mark ${a.user.profile ? `${a.user.profile.firstName} ${a.user.profile.lastName}` : a.userId} as absent`}
                       className="h-4 w-4 rounded border-slate-300"
                     />
                   </td>
@@ -206,14 +249,21 @@ export default function ResultsEntry({
         </table>
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex items-center justify-between">
+        <button
+          onClick={reset}
+          disabled={isPending}
+          className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-bold text-slate-500 transition-colors hover:border-slate-300 hover:text-slate-700 disabled:opacity-50 dark:border-slate-700 dark:text-slate-400 dark:hover:border-slate-600"
+        >
+          Reset
+        </button>
         <button
           onClick={save}
           disabled={isPending || sitting.assignments.length === 0}
           className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-5 py-2.5 text-sm font-bold text-white transition-colors hover:bg-aerojet-blue/90 disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
-          {isPending ? 'Saving…' : 'Save Results'}
+          {isPending ? 'Saving…' : `Save Results — Day ${sitting.dayNumber}`}
         </button>
       </div>
     </div>

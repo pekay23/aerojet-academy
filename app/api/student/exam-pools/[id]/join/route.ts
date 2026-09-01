@@ -18,7 +18,7 @@ export const POST = withErrorHandler(
     if (!validation.success) return apiError(validation.error)
 
     // Find the exam component for the selected module
-    const examComponent = await prisma.examComponent.findFirst({
+    const examComponent = await prismaUnfiltered.examComponent.findFirst({
       where: { code: validation.data.selectedModule },
     })
 

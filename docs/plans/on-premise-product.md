@@ -81,7 +81,7 @@ PORTAL_LICENSE_KEY="lic_xxxx"
 ### 3. Database: Local PostgreSQL
 - Ship a `docker-compose.yml` with PostgreSQL + the app
 - Keep the SAME Prisma schema (PostgreSQL → PostgreSQL, no SQLite)
-- RLS works identically on local Postgres
+- Data access is enforced by application-level auth guards and explicit query filters, not PostgreSQL RLS policies
 - Customer just runs `docker compose up`
 
 ### 4. Cloud Sync Strategy
@@ -208,7 +208,7 @@ docker compose up -d
 
 These work identically on-premise with local PostgreSQL:
 - Prisma ORM + schema
-- Row-Level Security (RLS)
+- Application-level auth guards and explicit query filters
 - NextAuth credentials/2FA/passkeys
 - All staff/student/applicant portals
 - Exam system, grading, attendance

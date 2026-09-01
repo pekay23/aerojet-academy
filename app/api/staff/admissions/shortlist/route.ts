@@ -26,7 +26,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const targetStage = action === 'SHORTLIST' ? 'SHORTLISTED' : 'REJECTED'
 
   let successCount = 0
-  let failures: { id: string; error: string }[] = []
+  const failures: { id: string; error: string }[] = []
 
   for (const id of applicationIds) {
     try {

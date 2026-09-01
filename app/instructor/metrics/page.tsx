@@ -4,6 +4,7 @@ import { GraduationCap, Users, CheckCircle2, BarChart3 } from 'lucide-react'
 import { requireInstructor } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getInstructorProfileByUserId } from '@/lib/instructor/profile'
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
 
 export const metadata: Metadata = { title: 'My Metrics | Instructor Portal' }
 export const dynamic = 'force-dynamic'
@@ -44,7 +45,7 @@ export default async function InstructorMetricsPage() {
   const passRate =
     gradeCount > 0
       ? Math.round(
-          (grades.filter((g) => Number(g.percentage) >= 75).length / gradeCount) * 100
+          (grades.filter((g) => Number(g.percentage) >= ACADEMIC_RULES.EASA_PASS_MARK).length / gradeCount) * 100
         )
       : null
 
@@ -58,7 +59,7 @@ export default async function InstructorMetricsPage() {
       color: 'text-emerald-600',
     },
     {
-      label: 'Pass Rate (≥75%)',
+      label: `Pass Rate (≥${ACADEMIC_RULES.EASA_PASS_MARK}%)`,
       value: passRate != null ? `${passRate}%` : 'N/A',
       icon: CheckCircle2,
       color: 'text-amber-600',
@@ -71,7 +72,7 @@ export default async function InstructorMetricsPage() {
         <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
           My Metrics
         </h1>
-        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400 dark:text-slate-300">
           Performance across the classes assigned to you. Based on internal continuous-assessment
           grades you have recorded.
         </p>

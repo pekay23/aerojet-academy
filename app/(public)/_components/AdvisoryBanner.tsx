@@ -56,20 +56,18 @@ export default function AdvisoryBanner({ message }: { message: string }) {
       ref={bannerRef}
       className="fixed top-0 right-0 left-0 z-[60] border-b border-amber-300 bg-amber-50 px-4 py-3 shadow-sm sm:px-6 lg:px-8"
     >
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-        <div className="flex flex-1 items-start gap-3 sm:items-center">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600 sm:mt-0" />
-          <p className="text-sm leading-snug font-semibold text-amber-900">{message}</p>
-        </div>
-        <button
-          onClick={handleClose}
-          type="button"
-          className="-m-1.5 shrink-0 rounded-md p-1.5 text-amber-600 transition-colors hover:bg-amber-200/50 hover:text-amber-800 focus:ring-2 focus:ring-amber-500 focus:outline-none"
-          aria-label="Dismiss advisory"
-        >
-          <X className="h-5 w-5" aria-hidden="true" />
-        </button>
+      <div className="mx-auto flex max-w-7xl items-center justify-center gap-3">
+        <AlertCircle className="h-5 w-5 shrink-0 text-amber-600" />
+        <p className="text-center text-sm leading-snug font-semibold text-amber-900">{message}</p>
       </div>
+      <button
+        onClick={handleClose}
+        type="button"
+        className="absolute right-4 top-1/2 -translate-y-1/2 shrink-0 rounded-md p-1.5 text-amber-600 transition-colors hover:bg-amber-200/50 hover:text-amber-800 focus:ring-2 focus:ring-amber-500 focus:outline-none sm:right-6 lg:right-8"
+        aria-label="Dismiss advisory"
+      >
+        <X className="h-5 w-5" aria-hidden="true" />
+      </button>
     </div>
   )
 }

@@ -51,7 +51,7 @@ export default async function ExaminerCompliancePage() {
     { label: 'Status', value: examiner.isActive ? 'Active' : 'Inactive', icon: ShieldCheck, color: examiner.isActive ? 'text-emerald-600' : 'text-red-600' },
     { label: 'Completed Sessions', value: completedSittings.toString(), icon: CheckCircle2, color: 'text-blue-600' },
     { label: 'Upcoming Sessions', value: upcomingSittings.toString(), icon: Clock, color: 'text-amber-600' },
-    { label: 'Max Parallel Sittings', value: examiner.maxParallelSittings.toString(), icon: FileText, color: 'text-indigo-600' },
+    { label: 'Max Parallel Sittings', value: (examiner.maxParallelSittings ?? 0).toString(), icon: FileText, color: 'text-indigo-600' },
   ]
 
   return (

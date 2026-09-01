@@ -14,6 +14,7 @@ import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { getRegistrationConfig } from '@/lib/settings'
 import { isPipelineEnabled, transitionApplication } from '@/lib/admissions/state-machine'
 import { ApplicationStage } from '@prisma/client'
+import { trackRegistration, trackReferralClick } from '@/lib/analytics/events'
 import { trackRegistration } from '@/lib/analytics/events'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {
@@ -133,6 +134,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   if (referralCode) {
     import('@/lib/referral/operations')
       .then(({ recordReferral }) => recordReferral(referralCode, user.id))
+      .then(() => trackReferralClick(referralCode, '/register', user.id).catch(() => {}))
       .catch(console.error)
   }
 

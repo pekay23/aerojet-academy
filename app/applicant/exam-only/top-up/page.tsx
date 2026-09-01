@@ -2,7 +2,7 @@ import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import WalletTopUpForm from '../_components/WalletTopUpForm'
 import TransactionHistory from '../_components/TransactionHistory'
 import { ArrowLeft, Wallet, Info, PiggyBank, Clock, ArrowRight, Shield } from 'lucide-react'
@@ -32,7 +32,7 @@ export default async function ExamOnlyTopUpPage({
     walletTransactions,
     paymentHistory,
   ] = await Promise.all([
-    prisma.user.findUnique({
+    prismaUnfiltered.user.findUnique({
       where: { id: userId },
       select: { registrationPaid: true, programmeChoice: true, role: true },
     }),

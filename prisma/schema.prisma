@@ -64,6 +64,7 @@ model User {
   attendanceRecords           AttendanceRecord[]
   auditLogs                   AuditLog[]
   bookingEntitlements         BookingEntitlement[]
+  certificates                 Certificate[]
   classSessions               ClassSession[]
   dsrAssigned                 DataSubjectRequest[]      @relation("DsrAssignee")
   dsrRequested                DataSubjectRequest[]      @relation("DsrRequester")
@@ -341,6 +342,10 @@ model StudentLicenseTarget {
   id                String          @id @default(cuid())
   studentProfileId  String
   licenseCategoryId String
+  expiresAt         DateTime?
+  validFrom         DateTime?
+  ratingClass       String?
+  validityPeriodMonths Int?
   licenseCategory   LicenseCategory @relation(fields: [licenseCategoryId], references: [id])
   studentProfile    StudentProfile  @relation(fields: [studentProfileId], references: [id], onDelete: Cascade)
 
@@ -1966,6 +1971,7 @@ model InternalExamBank {
   createdAt       DateTime                  @default(now())
   updatedAt       DateTime                  @updatedAt
   categoryCode    String?
+  sebConfig       Json?
   course          Course                    @relation(fields: [courseId], references: [id])
   questions       InternalExamQuestion[]
   ruleOverride    InternalExamRuleOverride?
@@ -2003,6 +2009,7 @@ model InternalExamQuestion {
   status         QuestionStatus       @default(DRAFT)
   submittedById  String?
   syllabusRef    String?
+  explanation    String?
   // AI provenance (EASA seed pipeline)
   aiSourceRef    String?
   aiConfidence   Float?
@@ -2067,6 +2074,12 @@ model InternalExamSession {
   /// the single-attempt block so the student can retake).
   voidedAt         DateTime?
   voidedBy         String?
+  timeExtensionSec Int                  @default(0)
+  lastActivityAt   DateTime?
+  supervised       Boolean              @default(false)
+  recoveredAt      DateTime?
+  recoveredBy      String?
+  recoveryReason   String?
   answers          InternalExamAnswer[]
   reports          InternalExamReport[]
   accessCodes      InternalExamAccessCode[]
@@ -3346,6 +3359,7 @@ model InternalExamViolation {
   reviewed    Boolean            @default(false)
   reviewedBy  String?
   reviewedAt  DateTime?
+  reviewOutcome String?
   createdAt   DateTime           @default(now())
   session     InternalExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   student     User               @relation("InternalExamViolationStudent", fields: [studentId], references: [id], onDelete: Cascade)
@@ -3367,6 +3381,7 @@ model Certificate {
   moduleCode    String?
   score         Int?
   percentage    Float?
+  template      String   @default("internal_exam")
   pdfUrl        String?
   issuedAt      DateTime @default(now())
   issuedBy      String?
@@ -3376,6 +3391,7 @@ model Certificate {
   revokeReason  String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  student       User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@index([studentId])
   @@index([sessionId])

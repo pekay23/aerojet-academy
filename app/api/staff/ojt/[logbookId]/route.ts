@@ -37,7 +37,7 @@ const entrySchema = z.object({
 // GET — get logbook detail with entries
 export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
   await requireStaff()
-  const { logbookId } = await ctx.params
+  const { logbookId } = ctx.params
 
   const logbook = await prismaUnfiltered.oJTLogbook.findUnique({
     where: { id: logbookId },

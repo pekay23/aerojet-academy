@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
 import { payPendingExamBooking } from '@/app/student/actions'
 import { PaymentStatus } from '@/types/enums'
+import { PaymentStatus } from '@/types/enums'
 
 interface BookingRecord {
   id: string
@@ -44,10 +45,10 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-stone-200/60 bg-card shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:border-white/10 dark:bg-card dark:shadow-none">
+    <div className="overflow-hidden rounded-xl border border-stone-200/60 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:border-white/10 dark:bg-slate-900 dark:shadow-none">
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm" aria-label="Exam bookings">
-          <thead className="bg-stone-50/50 dark:bg-white/5">
+          <thead className="bg-stone-50/50 dark:bg-slate-800/50">
             <tr className="border-b border-stone-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-white/5">
               <SortHeader
                 label="Module"
@@ -77,7 +78,7 @@ export default function StudentBookingsTable({ bookings }: StudentBookingsTableP
             {items.map((booking) => (
               <tr
                 key={booking.id}
-                className="transition-colors hover:bg-stone-50 dark:hover:bg-white/5"
+                className="transition-colors hover:bg-stone-50 dark:hover:bg-slate-800/50"
               >
                 <td className="px-6 py-4">
                   <p className="font-bold text-slate-900 uppercase dark:text-white">

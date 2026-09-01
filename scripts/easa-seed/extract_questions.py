@@ -308,11 +308,12 @@ def _parse_block_bare(block: str) -> tuple[str, list[str], str | None, str | Non
     opts: list[str] = []
     correct_idx: int | None = None
     for line in lines[q_idx + 1 :]:
-        m = RE_OPT_PAREN.match(line.strip())
+        s = line.strip()
+        m = RE_OPT_PAREN.match(s) or RE_OPT_PERIOD.match(s) or RE_OPT_DOT_SPACE.match(s)
         if m:
             letter = m.group(1).upper()
             text = m.group(2).strip()
-            # Detect trailing *
+            # Detect trailing *  (M7/M17 style: "B) opt*")
             if text.endswith("*"):
                 text = text[:-1].strip()
                 correct_idx = len(opts)
@@ -416,16 +417,18 @@ def _parse_blocks(blocks: list[str], source_file: str, module: str, fmt: str) ->
 
 # Question starters in various formats
 RE_Q_START_BASIC = re.compile(r"^\s*(\d+)\s*[\.\)]\s*\S")  # "1. Q..."
+RE_Q_START_BASIC2 = re.compile(r"^\s*(\d+)\s{2,}\S")  # "3   Q" (number then 2+ spaces)
 RE_Q_START_NAMED = re.compile(r"^\s*Question\s+Number\.?\s*(\d+)\s*[\.\)]?\s*(.*)$", re.IGNORECASE)
 RE_OPT_NAMED = re.compile(r"^\s*Option\s+([A-Da-d])\s*[\.\:]\s*(.+)$")
-RE_OPT_PAREN = re.compile(r"^\s*([A-Da-d])\)\s*(.+?)\s*\*?\s*$")  # "A) opt" or "A) opt*"
-RE_OPT_DOT_SPACE = re.compile(r"^\s*([A-Da-d])\s+([A-Z].+?)\s*\*?\s*$")  # "A opt"
+RE_OPT_PAREN = re.compile(r"^\s*([A-Da-d])\)\s*(.+)$")  # "A) opt" (keep trailing *)
+RE_OPT_DOT_SPACE = re.compile(r"^\s*([A-Da-d])\s+([A-Z].+)$")  # "A opt" (keep trailing *)
 RE_EXPL = re.compile(r"^\s*Expl\s*[\.\:]\s*(.+)$", re.IGNORECASE)
 RE_Q_BARE = re.compile(r"^\s*([A-Z][^?]*\?)\s*$")  # bare question: ends with ?
 RE_SECTION = re.compile(r"^\s*(Paragraph\s+\d+|Sub\s*\d+|Chapter\s+\d+|Section\s+\d+|\d+\s*[\.\)]\s*[A-Z][^?]{3,60}$)\s*$", re.IGNORECASE)
 
 
-RE_OPT_BARE = re.compile(r"^\s*([a-dA-D])\)\s+(.+?)\s*\*?\s*$")  # "a) opt"
+RE_OPT_BARE = re.compile(r"^\s*([a-dA-D])\)\s+(.+)$")  # "a) opt" (keep trailing *)
+RE_OPT_PERIOD = re.compile(r"^\s*([A-Da-d])\s*\.\s+(.+)$")  # "A. opt" (keep trailing *)
 
 def _split_blocks_flexible(paragraphs: list[str]) -> list[str]:
     """Split a flat paragraph list into question blocks. Recognises:
@@ -455,13 +458,20 @@ def _split_blocks_flexible(paragraphs: list[str]) -> list[str]:
         s = line.rstrip()
         stripped = s.strip()
         if not stripped:
-            if in_q and cur:
-                flush()
+            # Don't flush on blank; let the next numbered question flush us.
             continue
         is_q_start = bool(
-            RE_Q_START_BASIC.match(s) or RE_Q_START_NAMED.match(s) or RE_OPT_NAMED.match(s)
+            RE_Q_START_BASIC.match(s)
+            or RE_Q_START_BASIC2.match(s)
+            or RE_Q_START_NAMED.match(s)
+            or RE_OPT_NAMED.match(s)
         )
-        is_option = bool(RE_OPT_BARE.match(s) or RE_OPT_NAMED.match(s) or RE_OPT_PAREN.match(s))
+        is_option = bool(
+            RE_OPT_BARE.match(s)
+            or RE_OPT_NAMED.match(s)
+            or RE_OPT_PAREN.match(s)
+            or RE_OPT_PERIOD.match(s)
+        )
         # Bare question = line ending in '?' and long enough
         is_bare_q = (
             stripped.endswith("?")
@@ -496,6 +506,8 @@ def _split_blocks_flexible(paragraphs: list[str]) -> list[str]:
             cur.append(line)
         else:
             if is_option:
+                # Option seen without an in-progress question: start a new
+                # question block with this as the first line.
                 cur.append(line)
                 in_q = True
                 has_options = True

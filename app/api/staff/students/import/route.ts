@@ -228,7 +228,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       }
 
       // --- Dedupe check: look up by personal email, academy email, or main email ---
-      let existingUser = await prismaUnfiltered.user.findFirst({
+      const existingUser = await prismaUnfiltered.user.findFirst({
         where: {
           OR: [
             { email: s.email },
@@ -686,13 +686,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       if (s.semesterEnrollments && s.semesterEnrollments.length > 0) {
         for (const sem of s.semesterEnrollments) {
           // Look up academic year
-          let academicYear = await prismaUnfiltered.academicYear.findFirst({
+          const academicYear = await prismaUnfiltered.academicYear.findFirst({
             where: { name: sem.academicYearName },
           })
           if (!academicYear) continue // Skip if academic year not configured
 
           // Look up semester
-          let semester = await prismaUnfiltered.semester.findFirst({
+          const semester = await prismaUnfiltered.semester.findFirst({
             where: {
               name: sem.semesterName,
               academicYearId: academicYear.id,

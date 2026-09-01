@@ -56,7 +56,7 @@ export default function WalletTab({ student, onRefresh }: Props) {
   const wallet = student.wallet
   const transactions = student.walletTransactions || wallet?.transactions || []
 
-  const filteredTransactions = transactions.filter((t: any) => {
+  const filteredTransactions = transactions.filter((t: SerializedWalletTransaction) => {
     if (typeFilter && t.type !== typeFilter) return false
     if (search) {
       const q = search.toLowerCase()
@@ -285,7 +285,7 @@ export default function WalletTab({ student, onRefresh }: Props) {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-              {filteredTransactions.map((txn: any) => {
+              {filteredTransactions.map((txn: SerializedWalletTransaction) => {
                 const isExpanded = expandedId === txn.id
                 const isPositive = POSITIVE_TYPES.includes(txn.type)
                 const typeColor = TYPE_COLOR[txn.type] || 'bg-slate-100 text-slate-500'

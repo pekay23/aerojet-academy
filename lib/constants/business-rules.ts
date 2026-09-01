@@ -18,6 +18,9 @@ export const ACADEMIC_RULES = {
   /** Default values when a class / event doesn't specify its own */
   DEFAULT_MAX_CANDIDATES: 28,
   MAX_MODULES_PER_EVENT: 4,
+
+  /** Max instructional hours per instructor per day (EASA Part-147) */
+  MAX_DAILY_INSTRUCTIONAL_HOURS: 10,
 } as const
 
 // ── Pool / exam pool defaults ──────────────────────────────────────────
@@ -65,6 +68,23 @@ export const WALLET_DEFAULTS = {
   RESIT_FEE_EUR: 150,
 } as const
 
+// ── Pathway / programme pricing defaults ────────────────────────────────
+export const PATHWAY_PRICING = {
+  FULL_TIME_4YEAR: {
+    year1: 8500,
+    total: 32000,
+    name: 'EASA Part-66 Full-Time (4 Years)',
+    years: 4,
+  },
+  FULL_TIME_2YEAR: {
+    year1: 9500,
+    total: 18000,
+    name: 'EASA Part-66 Full-Time (2 Years)',
+    years: 2,
+  },
+  MILITARY_1YEAR: { year1: 6500, total: 6500, name: 'Military Certification (1 Year)', years: 1 },
+} as const
+
 // ── Time windows ───────────────────────────────────────────────────────
 export const TIME_WINDOWS = {
   /** GDPR Article 12(3) response SLA */
@@ -75,4 +95,19 @@ export const TIME_WINDOWS = {
   BUNDLE_EXPIRY_DAYS: 365,
   /** Hours before exam the booking window closes */
   EXAM_CUTOFF_HOURS: 24,
+  /** Estimated business days for payment proof verification */
+  PAYMENT_VERIFICATION_DAYS: 2,
+} as const
+
+// ── Safe Exam Browser (SEB) ────────────────────────────────────────────
+export const SEB = {
+  /** Browser Exam Key used to validate SEB request hashes */
+  BROWSER_EXAM_KEY: process.env.SEB_BROWSER_EXAM_KEY || '',
+  /** Origins allowed to launch SEB config downloads */
+  ALLOWED_ORIGINS: [
+    'https://safeexambrowser.org',
+    'https://safeexambrowser.org:4444',
+    'http://localhost:3000',
+    'http://localhost:3001',
+  ],
 } as const

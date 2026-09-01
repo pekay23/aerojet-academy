@@ -71,6 +71,17 @@ export const GET = withErrorHandler(async (
 
   if (!s) return apiNotFound('Session not found')
 
+  const certificates = await prismaUnfiltered.certificate.findMany({
+    where: { sessionId: s.id },
+    select: {
+      id: true,
+      certificateId: true,
+      pdfUrl: true,
+      verified: true,
+      issuedAt: true,
+    },
+  })
+
   return apiSuccess({
     id: s.id,
     student: {
@@ -119,6 +130,13 @@ export const GET = withErrorHandler(async (
       createdAt: r.createdAt.toISOString(),
       questionId: r.questionId,
       questionRef: r.question?.syllabusRef ?? null,
+    })),
+    certificates: certificates.map((c) => ({
+      id: c.id,
+      certificateId: c.certificateId,
+      pdfUrl: c.pdfUrl,
+      verified: c.verified,
+      issuedAt: c.issuedAt.toISOString(),
     })),
   })
 })

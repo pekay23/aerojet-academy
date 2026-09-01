@@ -32,6 +32,7 @@ interface Question {
 
 interface ExamData {
   sessionId: string
+  status: string
   questions: Question[]
   savedAnswers: { questionId: string; selectedAnswer: string | null }[]
   totalTimeSecs: number
@@ -73,6 +74,33 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
   const [tabSwitchCount, setTabSwitchCount] = useState(0)
   const [showFullscreenPrompt, setShowFullscreenPrompt] = useState(false)
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+
+  const logViolation = useCallback(
+    async (type: string, detail?: string, opts?: { severity?: 'WARNING' | 'NOTICE' | 'CRITICAL' }) => {
+      void fetch('/api/student/exams/internal/violation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        body: JSON.stringify({
+          sessionId,
+          type,
+          detail,
+          deviceInfo: {
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+            platform: typeof navigator !== 'undefined' ? (navigator as any).platform : undefined,
+            language: typeof navigator !== 'undefined' ? navigator.language : undefined,
+          },
+          ...(opts?.severity ? { severity: opts.severity } : {}),
+        }),
+      })
+      toast.warning(`Violation logged: ${type}`, {
+        duration: 4000,
+        position: 'bottom-right',
+        dismissible: true,
+      })
+    },
+    [sessionId]
+  )
 
   // Load or resume session
   useEffect(() => {
@@ -124,30 +152,37 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
 
   // Track fullscreen exits
   useEffect(() => {
-    if (!data || result) return
+    if (!data || result || data.status !== 'IN_PROGRESS') return
     const onFullscreenChange = () => {
       const inFS = !!document.fullscreenElement
       setIsFullscreen(inFS)
       if (!inFS && !result) {
-        // Student exited fullscreen during exam
         setShowFullscreenPrompt(true)
+        void logViolation('FULLSCREEN_EXIT', 'Student exited fullscreen mode during exam')
       }
     }
     document.addEventListener('fullscreenchange', onFullscreenChange)
     return () => document.removeEventListener('fullscreenchange', onFullscreenChange)
-  }, [data, result])
+  }, [data, result, logViolation])
 
   // Track tab visibility changes (alt-tab / tab switching)
   useEffect(() => {
-    if (!data || result) return
+    if (!data || result || data.status !== 'IN_PROGRESS') return
+    let warned = false
     const onVisibilityChange = () => {
       if (document.hidden) {
         setTabSwitchCount(prev => prev + 1)
+        if (!warned) {
+          warned = true
+          void logViolation('TAB_SWITCH', 'Student navigated away from exam tab')
+        }
+      } else {
+        warned = false
       }
     }
     document.addEventListener('visibilitychange', onVisibilityChange)
     return () => document.removeEventListener('visibilitychange', onVisibilityChange)
-  }, [data, result])
+  }, [data, result, logViolation])
 
   // Cleanup: remove lockdown class when leaving
   useEffect(() => {
@@ -158,6 +193,75 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
       }
     }
   }, [])
+
+  // Block clipboard events (copy/cut/paste) during active exam
+  useEffect(() => {
+    if (!data || result || data.status !== 'IN_PROGRESS') return
+
+    const onClipboard = (event: ClipboardEvent) => {
+      event.preventDefault()
+      void logViolation('KEYBOARD_SHORTCUT', `Clipboard event blocked: ${event.type}`)
+    }
+
+    document.addEventListener('copy', onClipboard)
+    document.addEventListener('cut', onClipboard)
+    document.addEventListener('paste', onClipboard)
+    return () => {
+      document.removeEventListener('copy', onClipboard)
+      document.removeEventListener('cut', onClipboard)
+      document.removeEventListener('paste', onClipboard)
+    }
+  }, [data, result, logViolation])
+
+  // Network disconnect/reconnect detection
+  useEffect(() => {
+    if (!data || result || data.status !== 'IN_PROGRESS') return
+
+    const onNetworkChange = (event: Event) => {
+      const online = navigator.onLine
+      void logViolation(
+        'NETWORK_DISCONNECT',
+        `Network ${online ? 'restored' : 'lost'} during exam`,
+      )
+    }
+
+    window.addEventListener('online', onNetworkChange)
+    window.addEventListener('offline', onNetworkChange)
+    return () => {
+      window.removeEventListener('online', onNetworkChange)
+      window.removeEventListener('offline', onNetworkChange)
+    }
+  }, [data, result, logViolation])
+
+  // Page unload — log that the exam interface was exited abnormally
+  useEffect(() => {
+    if (!data || result || data.status !== 'IN_PROGRESS') return
+
+    const onUnload = () => {
+      void fetch('/api/student/exams/internal/violation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        keepalive: true,
+        body: JSON.stringify({
+          sessionId,
+          type: 'EXAM_INTERFACE_UNLOAD',
+          detail: 'Student navigated away or closed the exam interface during an active session',
+          deviceInfo: {
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+            platform: typeof navigator !== 'undefined' ? (navigator as any).platform : undefined,
+          },
+        }),
+      })
+    }
+
+    document.addEventListener('beforeunload', onUnload)
+    document.addEventListener('pagehide', onUnload)
+    return () => {
+      document.removeEventListener('beforeunload', onUnload)
+      document.removeEventListener('pagehide', onUnload)
+    }
+  }, [data, result, sessionId])
 
   // Timer countdown
   useEffect(() => {
@@ -414,7 +518,10 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
             </h2>
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
               This exam must be taken in fullscreen mode to prevent unauthorized access to other resources.
-              Your screen activity is monitored.
+              Leaving fullscreen or switching tabs is logged and may be reviewed by your instructor.
+            </p>
+            <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+              If you need to step away or experience technical issues, contact your instructor immediately.
             </p>
             {tabSwitchCount > 0 && (
               <div className="mt-3 rounded-lg border border-red-200 bg-red-50 p-3 dark:border-red-800 dark:bg-red-900/20">

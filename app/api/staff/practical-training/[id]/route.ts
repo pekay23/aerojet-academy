@@ -6,7 +6,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 // PUT — sign/update a practical training record (dual signature or full admin edit)
 export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
   await requireStaff()
-  const { id } = await ctx.params
+  const { id } = ctx.params
   const body = await req.json()
 
   const record = await prismaUnfiltered.practicalTrainingRecord.findUnique({ where: { id } })

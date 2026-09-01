@@ -49,12 +49,16 @@ const admissionsLinks = [
   { label: 'Fees & Payment', href: '/admissions/fees-and-payment' },
   { label: 'FAQ', href: '/admissions/faq' },
   { label: 'Register', href: '/register' },
+  { label: 'Privacy Policy', href: '/privacy-policy' },
+  { label: 'Application Terms', href: '/online-application-terms' },
 ]
 
 const companyLinks = [
   { label: 'About Us', href: '/about' },
   { label: 'Accra MRO Project', href: '/about/accra-mro-project' },
   { label: 'Newsroom', href: '/newsroom' },
+  { label: 'Privacy Policy', href: '/privacy-policy' },
+  { label: 'Application Terms', href: '/online-application-terms' },
 ]
 
 export default function PublicFooter() {

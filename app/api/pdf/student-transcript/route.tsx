@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { renderToStream } from '@react-pdf/renderer'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getPDFSettings } from '@/lib/pdf-settings'
 import { TranscriptTemplate, TranscriptRecord } from '@/components/pdf/templates/TranscriptTemplate'
 import React from 'react'
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     // Fetch student data in parallel
     const [profile, examResults, pdfSettings] = await Promise.all([
-      prisma.studentProfile.findUnique({
+      prismaUnfiltered.studentProfile.findUnique({
         where: { userId },
         select: {
           studentId: true,

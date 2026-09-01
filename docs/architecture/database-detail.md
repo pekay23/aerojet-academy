@@ -7,20 +7,23 @@ This document details the database schema, relational patterns, and Row Level Se
 The schema is built around five core domains:
 
 ### 1. User & Profiles
-- **User**: The central identity. Roles include `APPLICANT`, `STUDENT`, `INSTRUCTOR`, `STAFF`, `ADMIN`, and `SUPER_ADMIN`.
+- **User**: The central identity. Roles include `APPLICANT`, `STUDENT`, `INSTRUCTOR`, `EXAMINER`, `STAFF`, `ADMIN`, and `SUPER_ADMIN`.
 - **Profiles**: Split into `StudentProfile`, `InstructorProfile`, and `StaffProfile` to keep the main `User` table clean and optimized.
 - **Registration**: Handles applicant-to-student transition via `registrationCode` and `registrationFee`.
+- **CourseCategory**: Categorization of courses (e.g., theory, practical, exam), used to group programmes and filter catalog views.
 
 ### 2. Academic Core
 - **Course**: Represents modules (e.g., M1, M2) or full programmes.
 - **Enrollment**: Links users to courses. Tracks `amountPaid` and `status` (PENDING, ACTIVE, COMPLETED).
-- **StudyPathway**: Defines the sequence of courses for specific license targets (e.g., B1.1 vs B2).
+- **StudyPathwayModel**: Defines the sequence of courses for specific license targets (e.g., B1.1 vs B2).
 
 ### 3. Exam & Evaluation
 - **ExamEvent**: High-level event container (e.g., "June 2024 Session").
+- **ExamComponent**: Sub-components of an exam (e.g., written, oral, practical), each with pass-mark and grading rules.
 - **ExamPool**: A slot within an event. Managed using a "fill-rate" logic with configurable `minCandidates` and `maxCandidates` per-pool (defaulting to 25-28) to ensure instructor cost-efficiency.
 - **PoolMembership**: The join record between a student and a pool.
 - **InternalExamBank / InternalExamQuestion**: Course-linked internal assessment banks. Banks carry rule-set metadata and question-pool sizing so staff can monitor whether enough active questions exist before students sit an exam.
+- **InternalExamQuestionVersion**: Versioned history of internal exam questions, tracking the `changedBy` relation to `User` (the staff member who last modified the question). Superseded on each edit, preserving audit trail.
 - **InternalExamSession / InternalExamAnswer**: Per-student internal exam attempts and selected answers. Sessions track `expiresAt`, `autoSubmitted`, `keyboardEvents`, score, pass/fail, retake eligibility, and ban state. Answers are autosaved during the exam and graded on submit.
 
 ### 4. Financial System
@@ -28,9 +31,12 @@ The schema is built around five core domains:
 - **WalletTransaction**: Immutable ledger of all movements. Includes `RESERVE` (for pending exam joins) and `DEBIT`/`PAYMENT`.
   - **Integrity Rule**: No booking or pool membership can exist without corresponding funds being either `RESERVED` (for flexible pools) or `DEBITED` (for fixed bookings).
 - **Payment**: Tracks external proof-of-payments (manual bank transfers) which are later reconciled by Staff.
+- **PaymentMilestone**: Milestone-based payment schedule entries (e.g., registration fee, module fees), linked to `Payment` and `Invoice`.
+- **Invoice**: Generated invoices for student financial obligations, linked to `PaymentMilestone` and `WalletTransaction`.
 
 ### 5. Academic Management
 - **Class**: A specific instance of a course with an instructor and schedule.
+- **ClassSession**: Recurring session instances derived from a `Class`'s recurrence rules (type, days, until), with individual overrides and attendance tracking.
 - **AttendanceRecord**: Daily tracking for compliance with EASA training requirements.
 
 ### 5a. Facilities & Seating
@@ -44,6 +50,15 @@ The schema is built around five core domains:
 - **AdminCalendarEvent**: Broadcasted events with audience targeting (`ALL`, `STUDENTS`, `INSTRUCTORS`, `SPECIFIC_USER`, or pathway-specific).
 - **StudentCalendarEvent**: Personalized calendar entries synced from admin broadcasts or personal student schedules.
 - **Message**: Internal staff-to-user messaging system.
+
+### 7. System & Infrastructure
+- **Notification**: In-app notifications.
+- **AuditLog**: All system actions.
+- **AuditLogArchive**: Time-partitioned archive of `AuditLog` rows beyond the retention sweep window (kept for compliance; not queried by the live app).
+- **FileUpload**: Uploaded files tracking.
+- **SystemSetting**: Key-value admin-editable settings (registration fees, exam pricing, payment splits, email config, class seating assignments as `class_seating_{classId}` keys).
+- **PaymentMethod**: Bank transfer details (account name, number, SWIFT, branch).
+- **EmailDelivery**: Every `sendEmail()` call logged with `recipient`, `subject`, `template`, `status`, `attempts`, `error`, `messageId`.
 
 ---
 

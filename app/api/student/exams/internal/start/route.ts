@@ -3,6 +3,7 @@ import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import {
+  buildRandomizedPaper,
   checkEligibility,
   getBankRules,
   isInternalExamSystemEnabled,
@@ -14,6 +15,16 @@ import {
   getStudentTargetCategoryCodes,
   normalizeCategoryCode,
 } from '@/lib/easa/category-selection'
+import { isSEBRequest } from '@/lib/middleware/seb-detection'
+import { validateSebRequest } from '@/lib/middleware/seb-validation'
+import { createAuditLog, AuditAction } from '@/lib/audit/logger'
+import { z } from 'zod'
+
+const startSchema = z.object({
+  bankId: z.string().min(1),
+  categoryCode: z.string().optional(),
+  classId: z.string().optional(),
+})
 
 // POST /api/student/exams/internal/start — start a new exam session
 export const POST = withErrorHandler(async (req: NextRequest) => {
@@ -23,7 +34,6 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Internal exams are not currently available', 403)
   }
 
-  // Role guard — only students may take internal exams
   const user = await prismaUnfiltered.user.findUnique({
     where: { id: session.user.id },
     select: { role: true },
@@ -32,8 +42,12 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Only enrolled students may take internal exams', 403)
   }
 
-  const { bankId, categoryCode: requestedCategoryCode } = await req.json()
-  if (!bankId) return apiError('bankId is required')
+  const body = await req.json()
+  const parsed = startSchema.safeParse(body)
+  if (!parsed.success) {
+    return apiError('Invalid request body', 400)
+  }
+  const { bankId, categoryCode: requestedCategoryCode, classId } = parsed.data
 
   // Verify the bank exists and get the course it belongs to
   const bank = await prismaUnfiltered.internalExamBank.findUnique({
@@ -74,17 +88,168 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError(`Category ${selectedCategoryCode} is not part of your selected licence pathway.`, 403)
   }
 
+  // Class-schedule validation if classId is provided
+  let schedule = null
+  if (classId) {
+    const cls = await prismaUnfiltered.class.findUnique({
+      where: { id: classId },
+      select: { id: true },
+    })
+    if (!cls) return apiError('Class not found', 404)
+
+    schedule = await prismaUnfiltered.internalExamClassSchedule.findFirst({
+      where: { bankId, classId },
+    })
+    if (!schedule) return apiError('No exam schedule found for this class', 403)
+
+    if (!schedule.isActive) {
+      return apiError('This exam schedule is not active', 403)
+    }
+
+    const now = new Date()
+    if (schedule.scheduledStart && now < schedule.scheduledStart) {
+      return apiError('Exam has not started yet', 403)
+    }
+
+    const effectiveEnd = schedule.allowLateStart && schedule.scheduledEnd
+      ? new Date(schedule.scheduledEnd.getTime() + 15 * 60 * 1000)
+      : schedule.scheduledEnd
+
+    if (effectiveEnd && now > effectiveEnd) {
+      return apiError('Exam not available outside scheduled window', 403)
+    }
+
+    if (schedule.sebRequired && !isSEBRequest(req)) {
+      return apiError('This exam requires Safe Exam Browser', 403)
+    }
+  }
+
+  const userRecord = await prismaUnfiltered.user.findUnique({
+    where: { id: session.user.id },
+    select: { requiresAlternativeProctoring: true, email: true },
+  })
+
+  if (userRecord?.requiresAlternativeProctoring) {
+    if (classId) {
+      const eligibility = await checkEligibility(session.user.id, bankId)
+      if (!eligibility.eligible) {
+        return apiError(eligibility.reason || 'Not eligible', 403)
+      }
+
+      const rules = await getBankRules(bankId)
+      const questionIds = await selectInternalExamQuestions(bankId, bank.mcqCount)
+      if (questionIds.length === 0) {
+        return apiError('No questions available in this exam bank')
+      }
+
+      const totalTimeSecs = questionIds.length * rules.timePerQuestionSecs
+      const expiresAt = new Date(Date.now() + totalTimeSecs * 1000)
+
+      const supervisedSession = await prismaUnfiltered.internalExamSession.create({
+        data: {
+          studentId: session.user.id,
+          bankId,
+          classId,
+          ruleSet: bank.ruleSet,
+          status: 'NOT_STARTED',
+          supervised: true,
+          expiresAt,
+          attemptNumber: 'attemptNumber' in eligibility ? eligibility.attemptNumber : 1,
+          categoryCode: selectedCategoryCode,
+        },
+      })
+
+      await prismaUnfiltered.internalExamAnswer.createMany({
+        data: questionIds.map(qId => ({
+          sessionId: supervisedSession.id,
+          questionId: qId,
+        })),
+      })
+
+      await createAuditLog({
+        action: AuditAction.EXAM_SESSION_STARTED,
+        userId: session.user.id,
+        entity: 'InternalExamSession',
+        entityId: supervisedSession.id,
+        description: `Supervised exam session prepared for candidate requiring alternative proctoring`,
+        details: { bankId, classId, studentEmail: userRecord.email, questionCount: questionIds.length },
+      })
+
+      return apiSuccess({
+        supervised: true,
+        sessionId: supervisedSession.id,
+        message: 'Your invigilator will start this exam for you. Please wait.',
+      })
+    }
+
+    return apiError('Supervised exams require a scheduled class', 400)
+  }
+
+  // Check for an existing NOT_STARTED placeholder session first (reuse it)
+  if (classId) {
+    const placeholderSession = await prismaUnfiltered.internalExamSession.findFirst({
+      where: {
+        studentId: session.user.id,
+        bankId,
+        classId,
+        status: 'NOT_STARTED',
+      },
+    })
+    if (placeholderSession) {
+      const allQuestions = await prismaUnfiltered.internalExamQuestion.findMany({
+        where: {
+          answers: { some: { sessionId: placeholderSession.id } },
+        },
+        select: { id: true, text: true, options: true, points: true, subTopic: true },
+      })
+      const savedAnswers = await prismaUnfiltered.internalExamAnswer.findMany({
+        where: { sessionId: placeholderSession.id },
+        select: { id: true, selectedAnswer: true, flaggedForReview: true },
+      })
+      const rules = await getBankRules(bankId)
+
+      // Apply stored question order if present
+      let questions = allQuestions
+      if (placeholderSession.questionOrder && Array.isArray(placeholderSession.questionOrder)) {
+        const orderMap = new Map(placeholderSession.questionOrder.map((q: any) => [q.id, q]))
+        questions = placeholderSession.questionOrder
+          .map((q: any) => allQuestions.find(aq => aq.id === q.id))
+          .filter((q): q is NonNullable<typeof allQuestions[number]> => q != null)
+      }
+
+      return apiSuccess({
+        sessionId: placeholderSession.id,
+        questions,
+        savedAnswers,
+        resumed: true,
+        totalTimeSecs: placeholderSession.expiresAt
+          ? Math.max(0, Math.floor((placeholderSession.expiresAt.getTime() - Date.now()) / 1000))
+          : 0,
+        expiresAt: placeholderSession.expiresAt?.toISOString(),
+        rules: {
+          timePerQuestionSecs: rules.timePerQuestionSecs,
+          passMarkPct: rules.passMarkPct,
+          allowKeyboardAutoSubmit: rules.allowKeyboardAutoSubmit,
+        },
+      })
+    }
+  }
+
   // Check for an existing in-progress session (allow resume)
+  const existingSessionWhere: any = {
+    studentId: session.user.id,
+    bankId,
+    status: 'IN_PROGRESS',
+  }
+  if (classId) {
+    existingSessionWhere.classId = classId
+  }
+
   const existingSession = await prismaUnfiltered.internalExamSession.findFirst({
-    where: {
-      studentId: session.user.id,
-      bankId,
-      status: 'IN_PROGRESS',
-    },
+    where: existingSessionWhere,
   })
   if (existingSession) {
-    // Return the existing session for resume
-    const questions = await prismaUnfiltered.internalExamQuestion.findMany({
+    const allQuestions = await prismaUnfiltered.internalExamQuestion.findMany({
       where: {
         answers: { some: { sessionId: existingSession.id } },
       },
@@ -95,6 +260,15 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       select: { questionId: true, selectedAnswer: true },
     })
     const rules = await getBankRules(bankId)
+
+    // Apply stored question order if present
+    let questions = allQuestions
+    if (existingSession.questionOrder && Array.isArray(existingSession.questionOrder)) {
+      const orderMap = new Map(existingSession.questionOrder.map((q: any) => [q.id, q]))
+      questions = existingSession.questionOrder
+        .map((q: any) => allQuestions.find(aq => aq.id === q.id))
+        .filter(Boolean)
+    }
 
     return apiSuccess({
       sessionId: existingSession.id,
@@ -127,36 +301,8 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('No questions available in this exam bank')
   }
 
-  // Calculate expiry time
-  const totalTimeSecs = questionIds.length * rules.timePerQuestionSecs
-  const expiresAt = new Date(Date.now() + totalTimeSecs * 1000)
-
-  // Create session
-  const examSession = await prismaUnfiltered.internalExamSession.create({
-    data: {
-      studentId: session.user.id,
-      bankId,
-      ruleSet: bank.ruleSet,
-      status: 'IN_PROGRESS',
-      startedAt: new Date(),
-      expiresAt,
-      attemptNumber: 'attemptNumber' in eligibility ? eligibility.attemptNumber : 1,
-      categoryCode: selectedCategoryCode,
-      ipAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null,
-      userAgent: req.headers.get('user-agent') || null,
-    },
-  })
-
-  // Create blank answer records
-  await prismaUnfiltered.internalExamAnswer.createMany({
-    data: questionIds.map(qId => ({
-      sessionId: examSession.id,
-      questionId: qId,
-    })),
-  })
-
-  // Fetch questions for the student (without correct answers)
-  const questions = await prismaUnfiltered.internalExamQuestion.findMany({
+  // Fetch full question data for randomised paper assembly
+  const rawQuestions = await prismaUnfiltered.internalExamQuestion.findMany({
     where: { id: { in: questionIds } },
     select: {
       id: true,
@@ -164,12 +310,51 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       options: true,
       points: true,
       subTopic: true,
+      syllabusRef: true,
     },
+  })
+
+  // Build randomised paper (shuffled question order + shuffled options)
+  const { paper: randomisedQuestions, questionOrder } = buildRandomizedPaper(
+    rawQuestions.map((q) => ({
+      ...q,
+      options: Array.isArray(q.options) ? q.options.filter((o): o is string => typeof o === 'string') : [],
+    }))
+  )
+
+  // Calculate expiry time
+  const totalTimeSecs = questionIds.length * rules.timePerQuestionSecs
+  const expiresAt = new Date(Date.now() + totalTimeSecs * 1000)
+
+  // Create session with randomised question order
+  const examSession = await prismaUnfiltered.internalExamSession.create({
+    data: {
+      studentId: session.user.id,
+      bankId,
+      classId: classId || null,
+      ruleSet: bank.ruleSet,
+      status: 'IN_PROGRESS',
+      startedAt: new Date(),
+      expiresAt,
+      questionOrder,
+      attemptNumber: 'attemptNumber' in eligibility ? eligibility.attemptNumber : 1,
+      categoryCode: selectedCategoryCode,
+      ipAddress: req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || null,
+      userAgent: req.headers.get('user-agent') || null,
+    },
+  })
+
+  // Create blank answer records in randomised order
+  await prismaUnfiltered.internalExamAnswer.createMany({
+    data: questionOrder.map(qId => ({
+      sessionId: examSession.id,
+      questionId: qId,
+    })),
   })
 
   return apiSuccess({
     sessionId: examSession.id,
-    questions,
+    questions: randomisedQuestions,
     savedAnswers: [],
     resumed: false,
     totalTimeSecs,

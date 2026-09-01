@@ -56,6 +56,7 @@ export default async function InstructorExamsPage() {
   return (
     <div className="mx-auto max-w-7xl pb-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <InstructorExamsDashboard
+        instructorId={user.id}
         instructorName={user.name || user.email || ''}
         internalExamEnabled={internalExamEnabled}
         counts={counts}

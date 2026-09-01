@@ -107,6 +107,14 @@ const GENERAL_FEATURES_FIELDS = [
     type: 'BOOLEAN' as const,
     default: 'true',
   },
+  {
+    key: 'certificates_enabled',
+    label: 'Enable Certificate Generation',
+    description:
+      'When enabled, certificates are automatically generated and stored as PDFs when exam results are published for passing students. Disabled by default.',
+    type: 'BOOLEAN' as const,
+    default: 'false',
+  },
 ]
 
 const GENERAL_ATTENDANCE_FIELDS = [

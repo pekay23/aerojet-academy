@@ -70,7 +70,7 @@ interface TimelineEvent {
   date: Date
   title: string
   description: string
-  icon: React.ElementType
+  icon: React.ComponentType<{ className?: string }>
   color: 'blue' | 'green' | 'amber' | 'red' | 'purple' | 'slate' | 'emerald' | 'sky'
   category: 'account' | 'payment' | 'enrollment' | 'exam' | 'wallet' | 'milestone'
   metadata?: Record<string, string>
@@ -173,7 +173,7 @@ export default function JourneyTab({ student }: Props) {
     const results = student.examResults || []
 
     const examCount = bookings.length
-    const examsPassed = results.filter((r: any) => r.passed).length
+    const examsPassed = results.filter((r: SerializedExamResult) => r.passed).length
 
     return {
       totalDuration: formatDuration(totalDuration),
@@ -319,7 +319,7 @@ export default function JourneyTab({ student }: Props) {
 }
 
 // ─── Build the full timeline from student data ──────────────────
-function buildTimeline(student: any): TimelineEvent[] {
+function buildTimeline(student: SerializedStudent): TimelineEvent[] {
   const events: TimelineEvent[] = []
 
   // 1. Account Created

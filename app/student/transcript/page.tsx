@@ -1,8 +1,10 @@
+import 'server-only'
+
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { calculateAttendancePercentage } from '@/lib/attendance'
 import { getLicenseProgress } from '@/lib/license/progress'
 import { getStudentStatus } from '@/lib/access-control'
@@ -22,7 +24,7 @@ export default async function TranscriptPage() {
   const showLicenseProgress = isFullTime
 
   const [profile, enrollments, results, attendance, licenseProgress] = await Promise.all([
-    prisma.studentProfile.findUnique({
+    prismaUnfiltered.studentProfile.findUnique({
       where: { userId: session.user.id },
       select: {
         studentId: true,
@@ -35,7 +37,7 @@ export default async function TranscriptPage() {
         pathwayRel: { select: { name: true } },
       },
     }),
-    prisma.enrollment.findMany({
+    prismaUnfiltered.enrollment.findMany({
       where: { userId: session.user.id },
       select: {
         status: true,
@@ -44,7 +46,7 @@ export default async function TranscriptPage() {
       },
       orderBy: { createdAt: 'asc' },
     }),
-    prisma.examResult.findMany({
+    prismaUnfiltered.examResult.findMany({
       where: { userId: session.user.id },
       select: {
         moduleCode: true,
@@ -76,10 +78,11 @@ export default async function TranscriptPage() {
     r.exam?.examComponent?.course?.code ?? r.moduleCode ?? '—'
 
   return (
-    <div className="space-y-6 print:space-y-4">
+    <PageTransition>
+      <div className="space-y-6 print:space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-aerojet-blue text-3xl font-black tracking-tight dark:text-white print:text-2xl">
+          <h1 className="text-blue-800 text-3xl font-black tracking-tight dark:text-white print:text-2xl">
             Academic Transcript
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -123,108 +126,12 @@ export default async function TranscriptPage() {
 
       {/* Exam results */}
       <Section title="Examination Record">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-slate-100 text-left dark:border-slate-800">
-              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Module
-              </th>
-              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Category
-              </th>
-              <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Attempt
-              </th>
-              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Score
-              </th>
-              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Result
-              </th>
-              <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Date
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-            {results.map((r, i) => (
-              <tr key={i}>
-                <td className="px-3 py-2">
-                  <span className="font-mono font-bold">{moduleCode(r)}</span>{' '}
-                  <span className="text-slate-500">{moduleName(r)}</span>
-                </td>
-                <td className="px-3 py-2 text-xs text-slate-500">
-                  {r.examCategory === 'INTERNAL' ? 'Internal' : 'Official EASA'}
-                </td>
-                <td className="px-3 py-2 text-xs text-slate-500">
-                  {(r.attemptType || 'FIRST').replace(/_/g, ' ')}
-                </td>
-                <td className="px-3 py-2 text-center font-mono">
-                  {r.percentage != null ? `${r.percentage}%` : '—'}
-                </td>
-                <td className="px-3 py-2 text-center">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[9px] font-black uppercase ${
-                      r.passed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'
-                    }`}
-                  >
-                    {r.passed ? 'Pass' : 'Fail'}
-                  </span>
-                </td>
-                <td className="px-3 py-2 text-center text-xs text-slate-500">
-                  {(r.exam?.examDate ?? r.createdAt).toLocaleDateString('en-GB')}
-                </td>
-              </tr>
-            ))}
-            {results.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-3 py-6 text-center text-sm text-slate-400">
-                  No exam records.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
+        <ExamResultsTable results={results} />
       </Section>
 
       {showEnrollments && (
         <Section title="Course Enrolment Record">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-slate-100 text-left dark:border-slate-800">
-                <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Course
-                </th>
-                <th className="px-3 py-2 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Status
-                </th>
-                <th className="px-3 py-2 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                  Completed
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
-              {enrollments.map((e, i) => (
-                <tr key={i}>
-                  <td className="px-3 py-2">
-                    <span className="font-mono font-bold">{e.course.code}</span>{' '}
-                    <span className="text-slate-500">{e.course.name}</span>
-                  </td>
-                  <td className="px-3 py-2 text-xs">{e.status}</td>
-                  <td className="px-3 py-2 text-center text-xs text-slate-500">
-                    {e.completedAt?.toLocaleDateString('en-GB') ?? '—'}
-                  </td>
-                </tr>
-              ))}
-              {enrollments.length === 0 && (
-                <tr>
-                  <td colSpan={3} className="px-3 py-6 text-center text-sm text-slate-400">
-                    No course enrolments.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+          <EnrolmentTable enrollments={enrollments} />
         </Section>
       )}
 
@@ -250,6 +157,7 @@ export default async function TranscriptPage() {
         Part-147)
       </p>
     </div>
+    </PageTransition>
   )
 }
 

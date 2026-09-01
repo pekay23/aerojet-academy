@@ -17,10 +17,18 @@ export const metadata: Metadata = {
   title: 'Certificates | Student Portal',
   description: 'Download your certificates and credentials.',
 }
+export const dynamic = 'force-dynamic'
 
-export default async function CertificatesPage() {
+export default async function CertificatesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ sort?: string; order?: string }>
+}) {
   const session = await getAuthSession()
   if (!session) redirect('/login')
+
+  const params = await searchParams
+  const orderBy = buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { createdAt: 'desc' })
 
   const { isFullTime } = await getStudentStatus(session.user.id)
   const hasAccess = await canAccessFeature(session.user.id, 'courses')
@@ -44,7 +52,7 @@ export default async function CertificatesPage() {
     return (
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             My Certificates
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -199,21 +207,11 @@ export default async function CertificatesPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/80 text-left dark:border-slate-800 dark:bg-slate-900/50">
-                    <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      Module
-                    </th>
-                    <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      Exam
-                    </th>
-                    <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      Score
-                    </th>
-                    <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      Result
-                    </th>
-                    <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                      Date
-                    </th>
+                    <SortableTh sortKey="module" label="Module" />
+                    <SortableTh sortKey="exam" label="Exam" />
+                    <SortableTh sortKey="score" label="Score" align="center" />
+                    <SortableTh sortKey="result" label="Result" align="center" />
+                    <SortableTh sortKey="date" label="Date" align="center" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
@@ -225,7 +223,7 @@ export default async function CertificatesPage() {
                       <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
                         {courseName(r)}
                       </td>
-                      <td className="px-4 py-3 text-center font-mono font-black">
+                      <td className="px-4 py-3 text-center tabular-nums font-mono font-black">
                         {r.percentage != null ? `${r.percentage}%` : '—'}
                       </td>
                       <td className="px-4 py-3 text-center">
@@ -239,12 +237,8 @@ export default async function CertificatesPage() {
                           {r.passed ? 'Pass' : 'Fail'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-center text-xs text-slate-500">
-                        {(r.exam?.examDate ?? r.createdAt).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        })}
+                      <td className="px-4 py-3 text-center tabular-nums text-xs text-slate-500">
+                        {format(r.exam?.examDate ?? r.createdAt, 'MMM d, yyyy')}
                       </td>
                     </tr>
                   ))}

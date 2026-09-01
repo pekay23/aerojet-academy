@@ -169,7 +169,7 @@ export default async function StudentSeatingPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue sm:text-4xl dark:text-white">
+        <h1 className="text-3xl font-black tracking-tight text-blue-800 sm:text-4xl dark:text-white">
           My Seating
         </h1>
         <p className="mt-1 text-base font-medium text-slate-500 dark:text-slate-400">
@@ -322,7 +322,7 @@ function SeatCard({
                     className={cn(
                       'flex h-7 w-7 items-center justify-center rounded text-[8px] font-bold transition-all',
                       isMyDest
-                        ? 'bg-aerojet-blue text-white ring-2 ring-aerojet-sky ring-offset-1 dark:bg-indigo-600'
+                        ? 'bg-blue-800 text-white ring-2 ring-sky-400 ring-offset-1 dark:bg-indigo-600'
                         : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-500'
                     )}
                     title={seat?.label ? `Seat ${seat.label}` : undefined}

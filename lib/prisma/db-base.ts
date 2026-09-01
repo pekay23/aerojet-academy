@@ -61,7 +61,10 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import 'server-only'
+import { createRequire } from 'module'
 import { PrismaClient } from '@prisma/client'
+
+const require = createRequire(import.meta.url)
 
 /**
  * DATABASE BASE LAYER (Raw Client)
@@ -121,14 +124,14 @@ function createAdapter(connectionString: string) {
   const timeout = Number(process.env.DB_CONNECT_TIMEOUT_MS) || 10_000
 
   if (isNeon) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+     
     const { PrismaNeon } = require('@prisma/adapter-neon')
     return new PrismaNeon({ connectionString })
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+   
   const { PrismaPg } = require('@prisma/adapter-pg')
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+   
   const { Pool } = require('pg')
 
   const pool = new Pool({

@@ -53,7 +53,7 @@ export default async function CoursesPage() {
     return (
       <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white">
+          <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white">
             My Courses
           </h1>
           <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
@@ -84,7 +84,7 @@ export default async function CoursesPage() {
         {!isFullTime && !isExamOnly && (
           <Link
             href="/student/courses/enroll"
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-aerojet-blue px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-aerojet-blue/90 hover:shadow-lg active:scale-95"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-800 px-4 py-2.5 text-sm font-bold text-white transition-all hover:bg-blue-800/90 hover:shadow-lg active:scale-95"
           >
             <BookOpen className="h-4 w-4" />
             Enroll in New Course

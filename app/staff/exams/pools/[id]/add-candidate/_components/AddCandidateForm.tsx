@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { toast } from '@/hooks/use-toast'
+import { toast } from 'sonner'
 import { ExamPool } from '@prisma/client'
 
 interface AddCandidateFormProps {
@@ -67,7 +67,7 @@ export default function AddCandidateForm({ pool }: AddCandidateFormProps) {
             setSearchResults(data)
           }
         } catch (error) {
-          console.error('Search failed', error)
+          toast.error('Search failed')
         }
       } else {
         setSearchResults([])

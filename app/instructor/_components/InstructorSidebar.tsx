@@ -30,7 +30,7 @@ export default function InstructorSidebar({
     { label: 'Schedule', href: '/instructor/schedule', icon: Calendar },
     { label: 'Availability', href: '/instructor/availability', icon: Calendar },
     { type: 'header', label: 'Course Management' },
-    { label: 'Courses', href: '/instructor/classes', icon: School },
+    { label: 'Courses', href: '/instructor/classes', icon: School, tourId: 'nav-courses' },
     { label: 'Resources', href: '/instructor/resources', icon: FolderOpen },
     { label: 'Teaching Materials', href: '/instructor/materials', icon: FolderOpen },
     { label: 'Students', href: '/instructor/students', icon: Users },

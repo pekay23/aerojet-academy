@@ -179,7 +179,7 @@ export default function StudentDetailPanel({
 
   // Helper: check if a booking status means it's still upcoming/pending
   const UPCOMING_STATUSES = ['APPROVED', 'PENDING', 'CONFIRMED']
-  const isUpcomingBooking = (booking: any) =>
+  const isUpcomingBooking = (booking: Student['examBookings'][number]) =>
     !isCompletedResult(booking.result) && 
     booking.score == null && 
     (UPCOMING_STATUSES.includes(booking.status) || (!booking.result && booking.status !== 'COMPLETED'))
@@ -187,7 +187,7 @@ export default function StudentDetailPanel({
   // ---- Build separate lists ----
 
   // 1. Exam Results from the ExamResult table (formal grades)
-  const formalResults = (currentStudent.examResults || []).map((r: any) => ({
+  const formalResults = (currentStudent.examResults || []).map((r) => ({
     id: r.id,
     source: 'result' as const,
     type: 'FORMAL',
@@ -239,7 +239,7 @@ export default function StudentDetailPanel({
     })
 
   // ---- Consolidate completed history (deduplicate results + bookings for same module) ----
-  const allExamHistory: any[] = []
+  const allExamHistory: ExamHistoryItem[] = []
   const usedResultIds = new Set<string>()
 
   // For each completed booking, try to find a matching formal result
@@ -790,7 +790,7 @@ function Grid2({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-2 gap-4">{children}</div>
 }
 
-function Field({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+function Field({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
   return (
     <div className="rounded-xl border border-slate-100 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900">
       <p className="mb-1 flex items-center gap-1.5 text-[10px] font-black tracking-widest text-slate-400 uppercase">
@@ -801,7 +801,7 @@ function Field({ icon: Icon, label, value }: { icon: any; label: string; value: 
   )
 }
 
-function EmptyState({ icon: Icon, message }: { icon: any; message: string }) {
+function EmptyState({ icon: Icon, message }: { icon: React.ComponentType<{ className?: string }>; message: string }) {
   return (
     <div className="flex flex-col items-center justify-center py-10 text-center">
       <Icon className="mb-2 h-8 w-8 text-slate-200" />

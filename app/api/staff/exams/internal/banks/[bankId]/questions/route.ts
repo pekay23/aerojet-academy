@@ -14,6 +14,10 @@ const questionSchema = z.object({
   points: z.number().min(1).default(1),
   syllabusRef: z.string().optional(),
   knowledgeLevel: z.number().int().min(1).max(3).optional(),
+  explanation: z.string().optional(),
+}).refine(data => data.options.includes(data.correctAnswer), {
+  message: 'correctAnswer must be one of the provided options',
+  path: ['correctAnswer'],
 })
 
 // GET — list questions for a bank
@@ -55,6 +59,9 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
 
   // Support bulk import with row-level error reporting
   const items = Array.isArray(body) ? body : [body]
+  if (items.length > 100) {
+    return apiError('Maximum 100 questions per import', 400)
+  }
   const created = []
   const errors: { row: number; message: string }[] = []
 
@@ -79,6 +86,7 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
         points: parsed.data.points,
         syllabusRef: parsed.data.syllabusRef || null,
         knowledgeLevel: parsed.data.knowledgeLevel || null,
+        explanation: parsed.data.explanation || null,
         status: 'PENDING_APPROVAL',
         submittedById: session.user.id,
       },

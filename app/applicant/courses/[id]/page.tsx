@@ -15,7 +15,7 @@ import {
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import { resolveEffectiveEnrollmentType } from '@/lib/enrollment/pathway'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Course Details | Applicant Portal' }
 
@@ -35,7 +35,7 @@ export default async function CourseDetailsPage({ params }: Props) {
     return text?.toString().toLowerCase().trim().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-') || '';
   }
 
-  const allCourses = await prisma.course.findMany({ select: { id: true, name: true, code: true } });
+  const allCourses = await prismaUnfiltered.course.findMany({ select: { id: true, name: true, code: true } });
   const matchedCourse = allCourses.find(c => slugify(c.name) === id || slugify(c.code) === id);
   const targetId = matchedCourse ? matchedCourse.id : id;
 

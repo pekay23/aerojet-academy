@@ -21,6 +21,7 @@ type MessageUser = {
   email: string
   role: string
   profile?: { firstName: string; lastName: string; profilePhotoUrl?: string | null } | null
+  status?: string
 }
 
 type Message = {
@@ -32,8 +33,8 @@ type Message = {
   isRead: boolean
   createdAt: Date
   replyToId: string | null
-  sender: MessageUser
-  recipient: MessageUser
+  sender: MessageUser | null
+  recipient: MessageUser | null
 }
 
 type Thread = {
@@ -58,8 +59,17 @@ function formatTime(date: Date) {
   return date.toLocaleDateString([], { month: 'short', day: 'numeric' })
 }
 
-function userName(user: MessageUser) {
-  return user.profile ? `${user.profile.firstName} ${user.profile.lastName}` : user.email
+function userName(user: MessageUser | null | undefined): string {
+  if (!user) return 'Deleted User'
+  if (user.profile && user.profile.firstName && user.profile.lastName) {
+    return `${user.profile.firstName} ${user.profile.lastName}`
+  }
+  return user.email
+}
+
+function isUserInactive(user: MessageUser | null | undefined): boolean {
+  if (!user) return true
+  return user.status === 'ARCHIVED' || user.status === 'SUSPENDED' || user.status === 'DELETED'
 }
 
 function MessageBubble({
@@ -129,6 +139,7 @@ export default function StaffMessageThread({
   const otherParticipant =
     thread.root.senderId === currentUserId ? thread.root.recipient : thread.root.sender
   const subjectDisplay = thread.root.subject || '(No subject)'
+  const otherInactive = isUserInactive(otherParticipant)
 
   async function handleExpand() {
     if (!expanded) {
@@ -145,6 +156,10 @@ export default function StaffMessageThread({
 
   async function handleSendReply() {
     if (!replyText.trim()) return
+    if (otherInactive || !otherParticipant) {
+      toast.error('Cannot reply — this user is no longer active.')
+      return
+    }
     setSending(true)
     try {
       const replySubject = subjectDisplay.startsWith('Re: ')
@@ -168,9 +183,11 @@ export default function StaffMessageThread({
   return (
     <div
       className={`rounded-3xl border bg-white shadow-sm transition-all hover:shadow-md dark:bg-slate-900 ${
-        thread.unreadCount > 0
-          ? 'border-blue-200 bg-blue-50/10 ring-2 ring-blue-500/5 dark:border-blue-900 dark:bg-blue-900/10'
-          : 'border-slate-100 dark:border-slate-800'
+        otherInactive
+          ? 'border-slate-200 opacity-75'
+          : thread.unreadCount > 0
+            ? 'border-blue-200 bg-blue-50/10 ring-2 ring-blue-500/5 dark:border-blue-900 dark:bg-blue-900/10'
+            : 'border-slate-100 dark:border-slate-800'
       }`}
     >
       {/* Header */}
@@ -190,13 +207,20 @@ export default function StaffMessageThread({
             <p className="truncate text-base font-black text-aerojet-blue dark:text-slate-100">
               {userName(otherParticipant)}
             </p>
-            <PresencePill peerId={otherParticipant.id} />
-            <Badge
-              variant="outline"
-              className="rounded-md border-slate-200 px-1.5 py-0 text-[9px] font-black tracking-widest text-slate-400 uppercase dark:border-slate-700"
-            >
-              {otherParticipant.role}
-            </Badge>
+            {otherParticipant && <PresencePill peerId={otherParticipant.id} />}
+            {otherInactive && (
+              <span className="shrink-0 rounded-full bg-slate-400 px-2 py-0.5 text-[9px] font-black tracking-widest text-white uppercase shadow-lg">
+                Inactive
+              </span>
+            )}
+            {!otherInactive && otherParticipant && (
+              <Badge
+                variant="outline"
+                className="rounded-md border-slate-200 px-1.5 py-0 text-[9px] font-black tracking-widest text-slate-400 uppercase dark:border-slate-700"
+              >
+                {otherParticipant.role}
+              </Badge>
+            )}
             {thread.unreadCount > 0 && (
               <span className="shrink-0 animate-pulse rounded-full bg-red-500 px-2 py-0.5 text-[9px] font-black tracking-widest text-white uppercase shadow-lg">
                 New
@@ -243,31 +267,38 @@ export default function StaffMessageThread({
           </div>
 
           {/* Reply box */}
-          <div className="mt-8 flex gap-3">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                onKeyDown={(e) =>
-                  e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendReply())
-                }
-                placeholder={`Type a message to ${userName(otherParticipant)}…`}
-                className="w-full rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-medium text-slate-900 placeholder-slate-400 shadow-sm transition-all focus:border-aerojet-blue focus:ring-4 focus:ring-aerojet-blue/5 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-900 dark:focus:ring-blue-500/5"
-              />
+          {!otherInactive && otherParticipant && (
+            <div className="mt-8 flex gap-3">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={replyText}
+                  onChange={(e) => setReplyText(e.target.value)}
+                  onKeyDown={(e) =>
+                    e.key === 'Enter' && !e.shiftKey && (e.preventDefault(), handleSendReply())
+                  }
+                  placeholder={`Type a message to ${userName(otherParticipant)}…`}
+                  className="w-full rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-sm font-medium text-slate-900 placeholder-slate-400 shadow-sm transition-all focus:border-aerojet-blue focus:ring-4 focus:border-aerojet-blue/5 focus:outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:focus:border-blue-900 dark:focus:ring-blue-500/5"
+                />
+              </div>
+              <button
+                onClick={handleSendReply}
+                disabled={sending || !replyText.trim()}
+                className="group flex items-center justify-center rounded-2xl bg-aerojet-blue px-6 text-white shadow-xl transition-all hover:scale-105 hover:bg-[#003875] disabled:scale-100 disabled:opacity-50"
+              >
+                {sending ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <Send className="h-5 w-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                )}
+              </button>
             </div>
-            <button
-              onClick={handleSendReply}
-              disabled={sending || !replyText.trim()}
-              className="group flex items-center justify-center rounded-2xl bg-aerojet-blue px-6 text-white shadow-xl transition-all hover:scale-105 hover:bg-[#003875] disabled:scale-100 disabled:opacity-50"
-            >
-              {sending ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : (
-                <Send className="h-5 w-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-              )}
-            </button>
-          </div>
+          )}
+          {otherInactive && (
+            <p className="mt-4 text-xs text-slate-400 italic">
+              This user is no longer active. You can view this conversation but cannot reply.
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -1,148 +1,72 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
-import {
-  LayoutDashboard,
-  BookOpen,
-  Users,
-  Wallet,
-  CreditCard,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-  ArrowRight,
-  ChevronUp,
-  ChevronDown,
-  Loader2,
-  RefreshCw,
-  Package,
-} from 'lucide-react'
+export const metadata = { title: 'Exam Only Pathway | Applicant Portal' }
+
+import dynamic from 'next/dynamic'
+import { useState, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
+import { Loader2, Package, Users } from 'lucide-react'
 import { toast } from 'sonner'
 import { useSession } from 'next-auth/react'
-import TransactionHistory from './_components/TransactionHistory'
 import { CurrencyToggle, useCurrencyRates } from '@/components/shared/CurrencyDisplay'
+const PackagesTab = dynamic(() => import('./_components/PackagesTab'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex min-h-[200px] items-center justify-center">
+      <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+    </div>
+  ),
+})
+const PoolsTab = dynamic(() => import('./_components/PoolsTab'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex min-h-[200px] items-center justify-center">
+      <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+    </div>
+  ),
+})
+import {
+  ExamComponent,
+  ExamPool,
+  WalletInfo,
+  PoolMembership,
+  ExamBooking,
+  WalletTransaction,
+  WalletPayment,
+  ExamBundle,
+  TabType,
+  ExamOnlyPrices,
+  GroupedCourse,
+} from './_components/examOnlyTypes'
 
-interface ExamComponent {
-  id: string
-  code: string
-  name: string
-  type: string
-  duration: number
-  individualPrice: number
-  poolPrice: number
-  course: {
-    code: string
-    name: string
-  }
-}
+const IndividualBookingModal = dynamic(
+  () => import('./_components/IndividualBookingModal'),
+  { ssr: false }
+)
+const BundleSelectionModal = dynamic(
+  () => import('./_components/BundleSelectionModal'),
+  { ssr: false }
+)
+import type { ConfirmationBooking } from './_components/ConfirmationModal'
 
-interface ExamPool {
-  id: string
-  name: string
-  examDate: string
-  examStartTime: string
-  examEndTime: string
-  status: string
-  currentMemberCount: number
-  maxCandidates: number
-  seatPrice: number
-  allowedModules: string[]
-  event: {
-    name: string
-  }
-  modules: string[]
-}
+const ConfirmationModal = dynamic(
+  () => import('./_components/ConfirmationModal').then(m => ({ default: m.default })),
+  { ssr: false }
+)
 
-interface WalletInfo {
-  balance: number
-  reservedBalance: number
-  availableBalance: number
-}
+type TabTypeAlias = TabType
 
-interface PoolMembership {
-  id: string
-  status: string
-  amountReserved: number
-  pool: {
-    name: string
-    examDate: string
-  }
-  examComponent?: {
-    course: {
-      code: string
-    }
-  }
-}
-
-interface ExamBooking {
-  id: string
-  status: string
-  amountPaid: number
-  examDate: string
-  examComponent?: {
-    course: {
-      code: string
-      name: string
-    }
-  }
-}
-
-interface WalletTransaction {
-  id: string
-  amount: number
-  type: string
-  status: string
-  createdAt: string
-  referenceType?: string
-  referenceId?: string
-  description?: string
-}
-
-interface WalletPayment {
-  id: string
-  amount: number
-  status: string
-  paymentMethod?: string
-  createdAt: string
-  rejectionReason?: string
-}
-
-interface ExamBundle {
-  id: string
-  bundleType: string
-  totalSeats: number
-  usedSeats: number
-  amountPaid: number
-  validUntil: string
-  status: string
-}
-
-type TabType = 'packages' | 'pools'
-
-const poolStatusLabel: Record<string, string> = {
-  DRAFT: 'Upcoming',
-  OPEN: 'Open',
-  NEAR_FULL: 'Nearly Full',
-  CONFIRMED: 'Confirmed',
-  LOCKED: 'In Progress',
-  FAILED: 'Cancelled',
-}
-
-const poolStatusColor: Record<string, string> = {
-  DRAFT: 'bg-slate-100 text-slate-600',
-  OPEN: 'bg-green-100 text-green-700',
-  NEAR_FULL: 'bg-orange-100 text-orange-700',
-  CONFIRMED: 'bg-blue-100 text-blue-700',
-  LOCKED: 'bg-purple-100 text-purple-700',
-  FAILED: 'bg-red-100 text-red-700',
+const DEFAULT_PRICES: ExamOnlyPrices = {
+  pool: 300,
+  individual: 520,
+  twoSeat: 980,
+  fourSeat: 1900,
 }
 
 export default function ExamOnlyPathwayPage() {
   const { update } = useSession()
-  const searchParams = useSearchParams()
   const router = useRouter()
-  const [activeTab, setActiveTab] = useState<TabType>('packages')
+  const [activeTab, setActiveTab] = useState<TabTypeAlias>('packages')
   const [showIndividualModal, setShowIndividualModal] = useState(false)
   const [loading, setLoading] = useState(true)
   const [wallet, setWallet] = useState<WalletInfo | null>(null)
@@ -150,7 +74,7 @@ export default function ExamOnlyPathwayPage() {
   const [pools, setPools] = useState<ExamPool[]>([])
   const [memberships, setMemberships] = useState<PoolMembership[]>([])
   const [bookings, setBookings] = useState<ExamBooking[]>([])
-  const [topUpAmount, setTopUpAmount] = useState<number>(300)
+  const [topUpAmount, setTopUpAmount] = useState<number>(DEFAULT_PRICES.pool)
   const [processingPayment, setProcessingPayment] = useState(false)
   const [joiningPool, setJoiningPool] = useState<string | null>(null)
   const [joiningWaitlist, setJoiningWaitlist] = useState<string | null>(null)
@@ -165,29 +89,21 @@ export default function ExamOnlyPathwayPage() {
     null
   )
   const [bundleSelectedModules, setBundleSelectedModules] = useState<string[]>([])
-  const [confirmingBooking, setConfirmingBooking] = useState<{
-    componentId: string
-    type: 'POOL' | 'INDIVIDUAL'
-    price: number
-    moduleName: string
-  } | null>(null)
+  const [confirmingBooking, setConfirmingBooking] = useState<ConfirmationBooking | null>(null)
+  const [prices, setPrices] = useState<ExamOnlyPrices>(DEFAULT_PRICES)
   const [displayCurrency, setDisplayCurrency] = useState('EUR')
   const { convert, loading: ratesLoading } = useCurrencyRates()
 
   const fmt = (eurAmount: number) => {
-    if (displayCurrency === 'EUR') return `\u20AC${eurAmount.toFixed(2)}`
+    if (displayCurrency === 'EUR') return `€${eurAmount.toFixed(2)}`
     const converted = convert(eurAmount, 'EUR', displayCurrency)
-    const sym = displayCurrency === 'GHS' ? 'GH\u20B5' : '$'
+    const sym = displayCurrency === 'GHS' ? 'GH₵' : '$'
     return `${sym}${converted.toFixed(2)}`
   }
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
-      const [walletRes, componentsRes, poolsRes, membershipsRes, bookingsRes, txRes, bundlesRes] =
+      const [walletRes, componentsRes, poolsRes, membershipsRes, bookingsRes, txRes, bundlesRes, pricingRes] =
         await Promise.all([
           fetch('/api/applicant/exam-only/wallet')
             .then((r) => r.json())
@@ -211,6 +127,9 @@ export default function ExamOnlyPathwayPage() {
             .then((r) => r.json())
             .then((res) => res?.bundles || [])
             .catch(() => []),
+          fetch('/api/applicant/exam-only/pricing')
+            .then((r) => r.json())
+            .catch(() => null),
         ])
 
       setWallet(walletRes)
@@ -221,12 +140,25 @@ export default function ExamOnlyPathwayPage() {
       setWalletTransactions(txRes.transactions || [])
       setWalletPayments(txRes.payments || [])
       setBundles(bundlesRes)
+
+      if (pricingRes) {
+        setPrices({
+          pool: pricingRes?.pool?.standardPrice ?? DEFAULT_PRICES.pool,
+          individual: pricingRes?.individual?.price ?? DEFAULT_PRICES.individual,
+          twoSeat: pricingRes?.bundles?.twoSeat?.price ?? DEFAULT_PRICES.twoSeat,
+          fourSeat: pricingRes?.bundles?.fourSeat?.price ?? DEFAULT_PRICES.fourSeat,
+        })
+      }
     } catch (error) {
-      console.error('Error fetching data:', error)
+      toast.error('Failed to load exam data. Please refresh the page.')
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const handleTopUp = async () => {
     if (!wallet || wallet.availableBalance === 0) {
@@ -358,7 +290,7 @@ export default function ExamOnlyPathwayPage() {
     const component = examComponents.find((c) => c.id === componentId)
     if (!component) return
 
-    const requiredAmount = bookingType === 'POOL' ? 300 : 520
+    const requiredAmount = bookingType === 'POOL' ? prices.pool : prices.individual
 
     if (!wallet || Number(wallet.availableBalance) < requiredAmount) {
       toast.error(
@@ -426,9 +358,9 @@ export default function ExamOnlyPathwayPage() {
       }
 
       if (type === 'POOL' && data.pool) {
-        toast.success(`Joined ${data.pool.name}! (€300) - ${data.pool.memberCount}/28 candidates`)
+        toast.success(`Joined ${data.pool.name}! (€${prices.pool}) - ${data.pool.memberCount}/${data.pool.maxCandidates || 28} candidates`)
       } else {
-        toast.success(`Individual exam booked successfully! (€520)`)
+        toast.success(`Individual exam booked successfully! (€${prices.individual})`)
       }
       fetchData()
     } catch (error) {
@@ -441,7 +373,7 @@ export default function ExamOnlyPathwayPage() {
   const handleBuyBundle = async (bundleType: 'TWO_SEAT' | 'FOUR_SEAT', componentIds: string[]) => {
     if (!wallet) return
 
-    const requiredAmount = bundleType === 'TWO_SEAT' ? 980 : 1900
+    const requiredAmount = bundleType === 'TWO_SEAT' ? prices.twoSeat : prices.fourSeat
     const requiredSeats = bundleType === 'TWO_SEAT' ? 2 : 4
 
     if (componentIds.length !== requiredSeats) {
@@ -501,7 +433,7 @@ export default function ExamOnlyPathwayPage() {
   }
 
   const getLowestExamPrice = (): number => {
-    return 300
+    return Math.min(prices.pool, prices.individual)
   }
 
   const groupedComponents = examComponents.reduce(
@@ -517,7 +449,7 @@ export default function ExamOnlyPathwayPage() {
       acc[courseCode].components.push(component)
       return acc
     },
-    {} as Record<string, { code: string; name: string; components: ExamComponent[] }>
+    {} as Record<string, GroupedCourse>
   )
 
   if (loading) {
@@ -548,7 +480,7 @@ export default function ExamOnlyPathwayPage() {
         ].map((tab) => (
           <button
             key={tab.id}
-            onClick={() => setActiveTab(tab.id as TabType)}
+            onClick={() => setActiveTab(tab.id as TabTypeAlias)}
             className={`flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.id
                 ? 'border-aerojet-sky text-aerojet-sky'
@@ -563,599 +495,73 @@ export default function ExamOnlyPathwayPage() {
 
       {/* Packages Tab */}
       {activeTab === 'packages' && (
-        <div className="space-y-6">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {/* Individual Seat Option */}
-            <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-              <div>
-                <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                  Individual Seat
-                </h3>
-                <p className="mb-4 text-sm text-slate-500">
-                  Book a single, guaranteed individual exam seat at your preferred time.
-                </p>
-                <div className="mb-6 text-3xl font-black text-slate-900 dark:text-white">{fmt(520)}</div>
-              </div>
-              <button
-                onClick={() => setShowIndividualModal(true)}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 py-3 text-sm font-bold text-slate-700 transition-all hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-              >
-                Select Module
-              </button>
-            </div>
-
-            {/* Pool Seat Option */}
-            <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-              <div>
-                <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                  Exam Booking Seat
-                </h3>
-                <p className="mb-4 text-sm text-slate-500">
-                  Join an existing exam booking to save money on your exam seating. Best for flexible
-                  schedules.
-                </p>
-                <div className="mb-6 text-3xl font-black text-aerojet-sky">€300</div>
-              </div>
-              <button
-                onClick={() => setActiveTab('pools')}
-                className="w-full rounded-xl border border-aerojet-sky bg-aerojet-sky/10 py-3 text-sm font-bold text-aerojet-sky transition-all hover:bg-aerojet-sky/20"
-              >
-                Join an Exam Booking
-              </button>
-            </div>
-
-            {/* Twin Pack Option */}
-            <div className="flex flex-col justify-between rounded-2xl border-2 border-indigo-500 bg-white p-6 shadow-lg shadow-indigo-100 dark:border-indigo-600 dark:bg-slate-900 dark:shadow-none">
-              <div className="relative">
-                <span className="absolute -top-2 -right-2 rounded-full bg-indigo-500 px-3 py-1 text-xs font-bold text-white">
-                  Save {fmt(60)}
-                </span>
-                <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                  Twin Pack
-                </h3>
-                <p className="mb-4 text-sm text-slate-500">
-                  Buy 2 individual exam seats upfront. Guaranteed seating whenever you are ready.
-                  Valid for 12 months.
-                </p>
-                <div className="mb-1 text-3xl font-black text-indigo-600 dark:text-indigo-400">
-                  {fmt(980)}
-                </div>
-                <div className="mb-6 text-xs text-slate-400 line-through">{fmt(1040)} (2x {fmt(520)})</div>
-              </div>
-              <button
-                onClick={() => setSelectedBundleType('TWO_SEAT')}
-                disabled={purchasingBundle !== null}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-sm font-bold text-white transition-all hover:bg-indigo-700 disabled:opacity-50"
-              >
-                {purchasingBundle === 'TWO_SEAT' ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Package className="h-4 w-4" />
-                )}
-                Select Twin Pack Modules
-              </button>
-            </div>
-
-            {/* 4-Pack Option */}
-            <div className="flex flex-col justify-between rounded-2xl border border-slate-200 bg-white bg-linear-to-br from-white to-amber-50 p-6 dark:border-slate-800 dark:bg-slate-900 dark:from-slate-900 dark:to-slate-800">
-              <div className="relative">
-                <span className="absolute -top-2 -right-2 rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-white">
-                  Save {fmt(180)} + 1 Free Change
-                </span>
-                <h3 className="mb-2 text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                  4-Pack
-                </h3>
-                <p className="mb-4 text-sm text-slate-500">
-                  The ultimate individual seating package. Secure 4 guaranteed seats + 1 free module
-                  change. Valid for 12 months.
-                </p>
-                <div className="mb-1 text-3xl font-black text-amber-600">{fmt(1900)}</div>
-                <div className="mb-6 text-xs text-slate-400 line-through">{fmt(2080)} (4x {fmt(520)})</div>
-              </div>
-              <button
-                onClick={() => setSelectedBundleType('FOUR_SEAT')}
-                disabled={purchasingBundle !== null}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-amber-500 py-3 text-sm font-bold text-white transition-all hover:bg-amber-600 disabled:opacity-50"
-              >
-                {purchasingBundle === 'FOUR_SEAT' ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Package className="h-4 w-4" />
-                )}
-                Select 4-Pack Modules
-              </button>
-            </div>
-          </div>
-
-          {/* Show Active Bundles if any */}
-          {bundles.length > 0 && (
-            <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-              <h3 className="mb-4 font-bold text-slate-900 dark:text-slate-100">
-                My Exam Packages
-              </h3>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {bundles.map((bundle) => (
-                  <div
-                    key={bundle.id}
-                    className="rounded-xl border border-slate-100 p-4 dark:border-slate-800"
-                  >
-                    <div className="mb-2 flex items-center justify-between">
-                      <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {bundle.bundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'}
-                      </span>
-                      <span
-                        className={`rounded-full px-2 py-0.5 text-xs font-medium ${bundle.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}`}
-                      >
-                        {bundle.status}
-                      </span>
-                    </div>
-                    <div className="mb-3 text-sm text-slate-500">
-                      Seats Remaining: <strong>{bundle.totalSeats - bundle.usedSeats}</strong> /{' '}
-                      {bundle.totalSeats}
-                    </div>
-                    <div className="text-xs text-slate-400">
-                      Valid until {new Date(bundle.validUntil).toLocaleDateString()}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-        </div>
+        <PackagesTab
+          bundles={bundles}
+          purchasingBundle={purchasingBundle}
+          onSelectIndividual={() => setShowIndividualModal(true)}
+          onSelectPool={() => setActiveTab('pools')}
+          onSelectBundle={(type) => setSelectedBundleType(type)}
+          fmt={fmt}
+          prices={prices}
+        />
       )}
 
       {/* Pools Tab */}
       {activeTab === 'pools' && (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100">Exam Bookings</h2>
-            <p className="text-sm text-slate-500">
-              Join a booking for €
-              {pools.length > 0 ? Math.min(...pools.map((p) => Number(p.seatPrice))) : '300'} per
-              seat
-            </p>
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {pools.map((pool) => (
-              <div
-                key={pool.id}
-                className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900"
-              >
-                <div className="mb-4 flex items-start justify-between">
-                  <div>
-                    <h3 className="font-bold text-slate-900 dark:text-slate-100">{pool.name}</h3>
-                    <p className="text-sm text-slate-500">{pool.event.name}</p>
-                  </div>
-                  <span
-                    className={`rounded-full px-2 py-1 text-xs font-medium ${poolStatusColor[pool.status]}`}
-                  >
-                    {poolStatusLabel[pool.status]}
-                  </span>
-                </div>
-
-                <div className="mb-4 space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                    <Clock className="h-4 w-4" />
-                    <span>
-                      {new Date(pool.examDate).toLocaleDateString()} at{' '}
-                      {new Date(pool.examStartTime).toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
-                    <Users className="h-4 w-4" />
-                    <span>
-                      {pool.currentMemberCount}/{pool.maxCandidates} candidates
-                    </span>
-                  </div>
-                </div>
-
-                {/* Pool Fill Rate Bar */}
-                {(() => {
-                  const fillPct =
-                    pool.maxCandidates > 0
-                      ? Math.round((pool.currentMemberCount / pool.maxCandidates) * 100)
-                      : 0
-                  return (
-                    <div className="mb-4">
-                      <div className="mb-1 flex justify-between text-[10px] font-medium">
-                        <span
-                          className={
-                            fillPct >= 90
-                              ? 'font-bold text-red-500'
-                              : fillPct >= 70
-                                ? 'font-bold text-orange-500'
-                                : fillPct >= 50
-                                  ? 'text-yellow-600'
-                                  : 'text-slate-400'
-                          }
-                        >
-                          {fillPct >= 90
-                            ? '🔴 Almost Full!'
-                            : fillPct >= 70
-                              ? '🟠 Filling Fast'
-                              : fillPct >= 50
-                                ? '🟡 Half Full'
-                                : '🟢 Seats Available'}
-                        </span>
-                        <span className="text-slate-400">{fillPct}%</span>
-                      </div>
-                      <div className="h-2 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
-                        <div
-                          className={`h-full rounded-full transition-all duration-500 ${fillPct >= 90 ? 'bg-red-500' : fillPct >= 70 ? 'bg-orange-400' : fillPct >= 50 ? 'bg-yellow-400' : 'bg-green-400'}`}
-                          style={{ width: `${fillPct}%` }}
-                        />
-                      </div>
-                    </div>
-                  )
-                })()}
-
-                {/* Module Selection */}
-                {pool.allowedModules && pool.allowedModules.length > 0 && (
-                  <div className="mb-4">
-                    <label className="mb-2 block text-xs font-semibold tracking-wider text-slate-500 uppercase">
-                      Select Module
-                    </label>
-                    <select
-                      className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-aerojet-blue focus:ring-1 focus:ring-aerojet-blue dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"
-                      value={selectedModules[pool.id] || pool.allowedModules[0] || 'M1'}
-                      onChange={(e) =>
-                        setSelectedModules({ ...selectedModules, [pool.id]: e.target.value })
-                      }
-                    >
-                      {(pool.allowedModules.length > 0
-                        ? pool.allowedModules
-                        : ['M1', 'M7', 'M8', 'M15']
-                      ).map((mod) => (
-                        <option key={mod} value={mod}>
-                          Module {mod}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
-                <div className="flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-800">
-                  <div>
-                    <p className="font-bold text-slate-900 dark:text-slate-100">
-                      €{Number(pool.seatPrice).toFixed(2)}
-                    </p>
-                    <p className="text-xs text-slate-500">per seat</p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      const module = selectedModules[pool.id] || pool.allowedModules?.[0] || 'M1'
-                      if (pool.currentMemberCount >= pool.maxCandidates) {
-                        handleJoinWaitlist(pool.id, module)
-                      } else {
-                        handleJoinPool(pool.id, module)
-                      }
-                    }}
-                    disabled={
-                      joiningPool === pool.id ||
-                      !wallet ||
-                      pool.status === 'LOCKED' ||
-                      pool.status === 'FAILED' ||
-                      pool.status === 'CONFIRMED'
-                    }
-                    className="rounded-lg bg-aerojet-blue px-4 py-2 text-sm font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
-                  >
-                    {joiningPool === pool.id || joiningWaitlist === pool.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : pool.status === 'LOCKED' ? (
-                      'Locked'
-                    ) : pool.status === 'FAILED' ? (
-                      'Cancelled'
-                    ) : pool.currentMemberCount >= pool.maxCandidates ? (
-                      'Join Waitlist'
-                    ) : (
-                      'Join Booking'
-                    )}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {pools.length === 0 && (
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-12 text-center dark:border-slate-800 dark:bg-slate-900">
-              <Users className="mx-auto mb-4 h-12 w-12 text-slate-300" />
-              <p className="text-slate-500">No exam bookings available at this time</p>
-            </div>
-          )}
-        </div>
+        <PoolsTab
+          pools={pools}
+          selectedModules={selectedModules}
+          onSelectedModulesChange={setSelectedModules}
+          wallet={wallet}
+          joiningPool={joiningPool}
+          joiningWaitlist={joiningWaitlist}
+          onJoinPool={handleJoinPool}
+          onJoinWaitlist={handleJoinWaitlist}
+          fmt={fmt}
+          poolPrice={prices.pool}
+        />
       )}
 
       {/* Individual Module Selection Modal */}
-      {showIndividualModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
-            <div className="border-b border-slate-100 p-6 dark:border-slate-800">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                Select Exam Module
-              </h3>
-              <p className="mt-1 text-sm text-slate-500">
-                Choose an exam component to book an individual seat ({fmt(520)})
-              </p>
-            </div>
-
-            <div className="max-h-[50vh] overflow-y-auto p-6">
-              {Object.keys(groupedComponents).length === 0 ? (
-                <div className="py-8 text-center">
-                  <BookOpen className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-                  <p className="text-sm text-slate-500">No exam components available</p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {Object.values(groupedComponents)
-                    .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
-                    .map((course) => {
-                      const isExpanded = expandedCourse === `ind_${course.code}`
-                      return (
-                        <div key={course.code} className="rounded-xl border border-slate-200 dark:border-slate-700">
-                          <button
-                            onClick={() => setExpandedCourse(isExpanded ? null : `ind_${course.code}`)}
-                            className="flex w-full items-center justify-between p-4 text-left"
-                          >
-                            <div>
-                              <span className="font-bold text-slate-900 dark:text-slate-100">
-                                {course.code}: {course.name}
-                              </span>
-                              <span className="ml-2 text-xs text-slate-400">
-                                {course.components.length} component(s)
-                              </span>
-                            </div>
-                            {isExpanded ? (
-                              <ChevronUp className="h-4 w-4 text-slate-400" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4 text-slate-400" />
-                            )}
-                          </button>
-                          {isExpanded && (
-                            <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-800">
-                              <div className="mt-3 space-y-2">
-                                {course.components
-                                  .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
-                                  .map((component) => (
-                                    <div
-                                      key={component.id}
-                                      className="flex items-center justify-between rounded-lg bg-slate-50 p-3 dark:bg-slate-800"
-                                    >
-                                      <div>
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                            {component.code} - {component.name}
-                                          </span>
-                                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${component.type === 'MCQ' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>
-                                            {component.type}
-                                          </span>
-                                        </div>
-                                        <p className="mt-0.5 text-xs text-slate-500">{component.duration}m</p>
-                                      </div>
-                                      <button
-                                        onClick={() => {
-                                          setShowIndividualModal(false)
-                                          handleBookExamClick(component.id, 'INDIVIDUAL')
-                                        }}
-                                        disabled={bookingExam === component.id || !wallet}
-                                        className="rounded-lg bg-aerojet-blue px-3 py-1.5 text-xs font-bold text-white transition-all hover:bg-[#003875] disabled:opacity-50"
-                                      >
-                                        {bookingExam === component.id ? (
-                                          <Loader2 className="h-3 w-3 animate-spin" />
-                                        ) : (
-                                          `Book ${fmt(Number(component.individualPrice))}`
-                                        )}
-                                      </button>
-                                    </div>
-                                  ))}
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      )
-                    })}
-                </div>
-              )}
-            </div>
-
-            <div className="border-t border-slate-100 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
-              <button
-                onClick={() => setShowIndividualModal(false)}
-                className="w-full rounded-xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <IndividualBookingModal
+        open={showIndividualModal}
+        onClose={() => setShowIndividualModal(false)}
+        groupedComponents={groupedComponents}
+        expandedCourse={expandedCourse}
+        setExpandedCourse={setExpandedCourse}
+        wallet={wallet}
+        bookingExam={bookingExam}
+        onBook={(id) => handleBookExamClick(id, 'INDIVIDUAL')}
+        fmt={fmt}
+        individualPrice={prices.individual}
+      />
 
       {/* Module Selection Modal for Bundles (grouped by course) */}
-      {selectedBundleType && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
-            <div className="border-b border-slate-100 p-6 dark:border-slate-800">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                Select {selectedBundleType === 'TWO_SEAT' ? '2' : '4'} Modules
-              </h3>
-              <p className="mt-1 text-sm text-slate-500">
-                Choose the modules for your {selectedBundleType === 'TWO_SEAT' ? 'Twin Pack' : '4-Pack'}.
-                <span className="ml-1 font-semibold text-indigo-600">
-                  {bundleSelectedModules.length}/{selectedBundleType === 'TWO_SEAT' ? 2 : 4} selected
-                </span>
-              </p>
-            </div>
-
-            <div className="max-h-[50vh] overflow-y-auto p-6">
-              <div className="space-y-2">
-                {Object.values(groupedComponents)
-                  .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
-                  .map((course) => {
-                    const isExpanded = expandedCourse === `bun_${course.code}`
-                    const selectedInCourse = course.components.filter((c) =>
-                      bundleSelectedModules.includes(c.id)
-                    ).length
-                    const requiredSeats = selectedBundleType === 'TWO_SEAT' ? 2 : 4
-                    const isMaxSelected = bundleSelectedModules.length >= requiredSeats
-
-                    return (
-                      <div key={course.code} className="rounded-xl border border-slate-200 dark:border-slate-700">
-                        <button
-                          onClick={() => setExpandedCourse(isExpanded ? null : `bun_${course.code}`)}
-                          className="flex w-full items-center justify-between p-4 text-left"
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-slate-900 dark:text-slate-100">
-                              {course.code}: {course.name}
-                            </span>
-                            {selectedInCourse > 0 && (
-                              <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-bold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
-                                {selectedInCourse} selected
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-slate-400">{course.components.length}</span>
-                            {isExpanded ? (
-                              <ChevronUp className="h-4 w-4 text-slate-400" />
-                            ) : (
-                              <ChevronDown className="h-4 w-4 text-slate-400" />
-                            )}
-                          </div>
-                        </button>
-                        {isExpanded && (
-                          <div className="border-t border-slate-100 px-4 pb-4 dark:border-slate-800">
-                            <div className="mt-3 space-y-2">
-                              {course.components
-                                .sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }))
-                                .map((component) => {
-                                  const isSelected = bundleSelectedModules.includes(component.id)
-                                  return (
-                                    <label
-                                      key={component.id}
-                                      className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-colors ${
-                                        isSelected
-                                          ? 'border-indigo-500 bg-indigo-50/50 dark:border-indigo-400 dark:bg-indigo-900/20'
-                                          : 'border-slate-100 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-600'
-                                      } ${isMaxSelected && !isSelected ? 'cursor-not-allowed opacity-50' : ''}`}
-                                    >
-                                      <input
-                                        type="checkbox"
-                                        className="h-4 w-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                                        checked={isSelected}
-                                        disabled={isMaxSelected && !isSelected}
-                                        onChange={(e) => {
-                                          if (e.target.checked && !isMaxSelected) {
-                                            setBundleSelectedModules([...bundleSelectedModules, component.id])
-                                          } else if (!e.target.checked) {
-                                            setBundleSelectedModules(bundleSelectedModules.filter((id) => id !== component.id))
-                                          }
-                                        }}
-                                      />
-                                      <div className="flex-1">
-                                        <p className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                                          {component.code} - {component.name}
-                                        </p>
-                                        <p className="text-xs text-slate-500">
-                                          {component.type} &bull; {component.duration}m
-                                        </p>
-                                      </div>
-                                    </label>
-                                  )
-                                })}
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-              </div>
-            </div>
-
-            <div className="flex gap-3 border-t border-slate-100 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
-              <button
-                onClick={() => {
-                  setSelectedBundleType(null)
-                  setBundleSelectedModules([])
-                  setExpandedCourse(null)
-                }}
-                className="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-center text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleBuyBundle(selectedBundleType, bundleSelectedModules)}
-                disabled={
-                  bundleSelectedModules.length !== (selectedBundleType === 'TWO_SEAT' ? 2 : 4)
-                }
-                className="flex-1 rounded-xl bg-indigo-600 py-3 text-center text-sm font-bold text-white hover:bg-indigo-700 disabled:opacity-50"
-              >
-                Confirm & Purchase ({fmt(selectedBundleType === 'TWO_SEAT' ? 980 : 1900)})
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <BundleSelectionModal
+        bundleType={selectedBundleType}
+        onCancel={() => {
+          setSelectedBundleType(null)
+          setBundleSelectedModules([])
+          setExpandedCourse(null)
+        }}
+        selectedModules={bundleSelectedModules}
+        setSelectedModules={setBundleSelectedModules}
+        expandedCourse={expandedCourse}
+        setExpandedCourse={setExpandedCourse}
+        groupedComponents={groupedComponents}
+        onConfirm={handleBuyBundle}
+        fmt={fmt}
+        twoSeatPrice={prices.twoSeat}
+        fourSeatPrice={prices.fourSeat}
+        purchasingBundle={purchasingBundle}
+      />
 
       {/* Confirmation Modal for Individual / Pool Bookings */}
-      {confirmingBooking && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm"
-            onClick={() => setConfirmingBooking(null)}
-          />
-          <div className="relative z-10 w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl dark:bg-slate-900">
-            <div className="border-b border-slate-100 p-6 dark:border-slate-800">
-              <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                Confirm Booking
-              </h3>
-              <p className="mt-1 text-sm text-slate-500">
-                Are you sure you want to book this exam seat?
-              </p>
-            </div>
-            <div className="space-y-4 p-6">
-              <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-800">
-                <p className="text-xs font-bold tracking-wider text-slate-500 uppercase">Module</p>
-                <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
-                  {confirmingBooking.moduleName}
-                </p>
-              </div>
-              <div className="flex items-center justify-between rounded-xl bg-blue-50 p-4 dark:bg-blue-900/20">
-                <div className="flex items-center gap-2">
-                  <Wallet className="h-5 w-5 text-blue-600" />
-                  <span className="font-semibold text-blue-900 dark:text-blue-100">
-                    {confirmingBooking.type === 'POOL' ? 'Pool Seat' : 'Individual Seat'}
-                  </span>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs font-bold tracking-wider text-slate-500 uppercase">Fee</p>
-                  <p className="text-lg font-black text-blue-700 dark:text-blue-400">
-                    €{confirmingBooking.price.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="flex gap-3 border-t border-slate-100 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900">
-              <button
-                onClick={() => setConfirmingBooking(null)}
-                className="flex-1 rounded-xl border border-slate-200 bg-white py-3 text-sm font-bold text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={submitBooking}
-                className="flex-1 rounded-xl bg-blue-600 py-3 text-sm font-bold text-white hover:bg-blue-700"
-              >
-                Confirm & Pay
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmationModal
+        booking={confirmingBooking}
+        onCancel={() => setConfirmingBooking(null)}
+        onConfirm={submitBooking}
+      />
     </div>
   )
 }

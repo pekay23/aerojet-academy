@@ -113,6 +113,7 @@ export async function submitExaminerResults(sittingId: string, entries: ResultEn
       }
     })
 
+    const ctx = await getRequestContext()
     await createAuditLog({
       action: AuditAction.CREATE,
       entity: 'ExamResult',
@@ -120,6 +121,8 @@ export async function submitExaminerResults(sittingId: string, entries: ResultEn
       userId: user.id,
       description: `Examiner recorded ${recorded} result(s) for sitting ${sittingId}.`,
       changes: { sittingId, recorded },
+      ipAddress: ctx.ipAddress ?? undefined,
+      userAgent: ctx.userAgent ?? undefined,
     })
 
     revalidatePath('/examiner/results')

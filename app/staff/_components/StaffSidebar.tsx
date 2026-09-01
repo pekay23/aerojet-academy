@@ -63,20 +63,23 @@ export default function StaffSidebar({
   })
 
   const staffLinks: SidebarLink[] = [
-    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, tourId: 'nav-dashboard' },
     {
       label: 'People',
       href: '/users',
       icon: Users,
       badge: (counts.applicants ?? 0) > 0 ? counts.applicants : undefined,
+      tourId: 'group-people',
       children: [
         { label: 'All Users', href: '/users' },
         { label: 'Applicants Queue', href: '/users?tab=applicants' },
         { label: 'Student Directory', href: '/users?tab=students' },
         { label: 'Instructors', href: '/users?tab=instructors' },
+        { label: 'Examiners', href: '/users?tab=examiners' },
         { label: 'Bulk Import (CSV)', href: '/students/import' },
         { label: 'Withdrawals', href: '/withdrawals' },
         { label: 'Document Vault', href: '/documents' },
+        { label: 'Expiring Documents', href: '/documents/expiring' },
         { label: 'Audit Logs', href: '/audit-logs' },
       ],
     },
@@ -105,6 +108,7 @@ export default function StaffSidebar({
         { label: 'Programmes', href: '/programmes' },
         { label: 'License Requirements', href: '/license-requirements' },
         { label: 'Learning Resources', href: '/resources' },
+        { label: 'Academic Scheduling', href: '/academic/scheduling' },
       ],
     },
     {
@@ -112,9 +116,11 @@ export default function StaffSidebar({
       href: '/enrollments',
       icon: ClipboardList,
       badge: (counts.enrollments ?? 0) > 0 ? counts.enrollments : undefined,
+      tourId: 'group-operations',
       children: [
         { label: 'Course Enrollments', href: '/enrollments' },
         { label: 'Exam Management', href: '/exams' },
+        { label: 'Pool Members', href: '/exams/pools/members' },
         ...(internalExamEnabled ? [{ label: 'Internal Exams', href: '/exams/internal' }] : []),
         { label: 'Batch Processing', href: '/enrollments/batch' },
         { label: 'Year/Semester Advancement', href: '/enrollments/advancement' },
@@ -151,6 +157,7 @@ export default function StaffSidebar({
       href: '/payments',
       icon: CreditCard,
       badge: (counts.payments ?? 0) > 0 ? counts.payments : undefined,
+      tourId: 'group-financials',
       children: [
         { label: 'Recent Payments', href: '/payments' },
         { label: 'Financial Reports', href: '/finance' },
@@ -186,6 +193,7 @@ export default function StaffSidebar({
         { label: 'Retention policies', href: '/settings/retention' },
         { label: 'Permissions (RBAC)', href: '/admin/permissions' },
       ],
+      tourId: 'group-governance',
     },
   ]
 

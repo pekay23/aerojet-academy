@@ -135,7 +135,7 @@ export default async function StudentAcademicCalendarPage() {
   return (
     <div className="mx-auto max-w-[1400px] space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-aerojet-blue dark:text-white uppercase">
+        <h1 className="text-3xl font-black tracking-tight text-blue-800 dark:text-white uppercase">
           Academic Calendar
         </h1>
         <p className="mt-1 text-sm font-medium text-slate-500 dark:text-slate-400">

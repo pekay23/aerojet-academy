@@ -74,7 +74,7 @@ export default function ApplicantSidebar({
   } else if (hasPathway) {
     links = [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'My Application', href: '/application/status', icon: FileText },
+      { label: 'My Application', href: '/application/status', icon: FileText, tourId: 'nav-application' },
       { label: 'Wallet', href: '/wallet-top-up', icon: Wallet },
       { label: 'Browse Courses', href: '/courses', icon: BookOpen },
       { label: 'Exam Bookings', href: '/exam-bookings', icon: ClipboardList },
@@ -136,7 +136,7 @@ function buildPipelineLinks(
 
   // Wallet and courses — available after payment
   if (POST_PAYMENT_STAGES.includes(stage)) {
-    links.push({ label: 'Wallet', href: '/wallet-top-up', icon: Wallet })
+    links.push({ label: 'Wallet', href: '/wallet-top-up', icon: Wallet, tourId: 'nav-wallet' })
     if (!isExamOnly) {
       links.push({ label: 'Browse Courses', href: '/courses', icon: BookOpen })
     }
@@ -149,6 +149,6 @@ function buildPipelineLinks(
     links.push({ label: 'Exam Bookings', href: '/exam-bookings', icon: ClipboardList })
   }
 
-  links.push({ label: 'Notifications', href: '/notifications', icon: Bell })
+  links.push({ label: 'Notifications', href: '/notifications', icon: Bell, tourId: 'nav-notifications' })
   return links
 }

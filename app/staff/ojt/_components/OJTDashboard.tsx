@@ -14,24 +14,16 @@ import {
 import { format } from 'date-fns'
 import Link from 'next/link'
 
-interface Logbook {
-  id: string
-  studentName: string
-  studentId: string
-  email: string
-  programme: string
-  licenceCategory: string
-  facilityName: string
-  facilityApprovalNo: string | null
-  startDate: string
-  targetEndDate: string | null
-  totalLoggedHours: number
-  status: string
-  entryCount: number
-  hasMentor: boolean
+type StatusKey = 'ACTIVE' | 'COMPLETED' | 'SUSPENDED'
+
+interface StatusConfig {
+  label: string
+  icon: typeof BookOpen
+  color: string
+  bg: string
 }
 
-const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; bg: string }> = {
+const STATUS_CONFIG: Record<StatusKey, StatusConfig> = {
   ACTIVE: {
     label: 'Active',
     icon: BookOpen,
@@ -52,12 +44,29 @@ const STATUS_CONFIG: Record<string, { label: string; icon: any; color: string; b
   },
 }
 
+interface Logbook {
+  id: string
+  studentName: string
+  studentId: string
+  email: string
+  programme: string
+  licenceCategory: string
+  facilityName: string
+  facilityApprovalNo: string | null
+  startDate: string
+  targetEndDate: string | null
+  totalLoggedHours: number
+  status: StatusKey
+  entryCount: number
+  hasMentor: boolean
+}
+
 export default function OJTDashboard({
   logbooks,
   statusCounts,
 }: {
   logbooks: Logbook[]
-  statusCounts: Record<string, number>
+  statusCounts: Record<StatusKey, number>
 }) {
   const [filter, setFilter] = useState<string>('ALL')
   const [search, setSearch] = useState('')

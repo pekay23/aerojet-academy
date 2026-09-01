@@ -79,7 +79,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
         },
         orderBy: { createdAt: 'desc' },
       },
-      _count: { select: { answers: true } },
+      _count: { select: { answers: true, violations: true } },
     },
     orderBy: { createdAt: 'desc' },
     take: 200,
@@ -115,6 +115,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       voidedAt: s.voidedAt?.toISOString() || null,
       voidReason: s.voidReason,
       answerCount: s._count.answers,
+      violationCount: s._count.violations,
       reports: s.reports.map((r) => ({
         id: r.id,
         reason: r.reason,

@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { subMonths, addMonths, startOfMonth, endOfMonth } from 'date-fns'
 import AcademicCalendar, { type UnifiedCalendarEvent } from '@/components/calendar/AcademicCalendar'
 
@@ -22,7 +22,7 @@ export default async function ExaminerSchedulePage({
 
   const [sittings, adminEvents] = await Promise.all([
     // Examiner's assigned sittings
-    prisma.examSitting.findMany({
+    prismaUnfiltered.examSitting.findMany({
       where: {
         examiner: { userId: session.user.id },
         startTime: { gte: rangeStart, lte: rangeEnd },
@@ -36,7 +36,7 @@ export default async function ExaminerSchedulePage({
 
     // Admin events visible to examiners (ALL or specific ones)
     prisma.adminCalendarEvent.findMany({
-      where: { deletedAt: null, visibleTo: { in: ['ALL', 'INSTRUCTORS'] } }, // Examiners usually follow instructor visibility
+      where: { deletedAt: null, visibleTo: { in: ['ALL', 'INSTRUCTORS', 'EXAMINERS'] } }, // Examiners usually follow instructor visibility
       orderBy: { startDate: 'asc' },
     }),
   ])

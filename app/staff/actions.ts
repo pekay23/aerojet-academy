@@ -6,6 +6,8 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { revalidatePath } from 'next/cache'
 import { BookingType, EnrollmentStatus, ExamCategory, PaymentStatus, UserStatus, UserRole } from '@prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
+import { handleActionError } from '@/lib/staff/errors'
+import { serializePrisma } from '@/lib/utils/serialization'
 
 /**
  * Fetches all users that staff can message: Students, Instructors, other Staff/Admins.
@@ -70,8 +72,7 @@ export async function sendStaffMessage(recipientId: string, subject: string, bod
     revalidatePath('/staff/messages')
     return { success: true }
   } catch (error) {
-    console.error('Send staff message error:', error)
-    return { error: 'Failed to send message.' }
+    return { error: handleActionError('sendStaffMessage', error, 'Failed to send message.') }
   }
 }
 
@@ -90,8 +91,7 @@ export async function markMessageAsRead(messageId: string) {
     revalidatePath('/staff/messages')
     return { success: true }
   } catch (error) {
-    console.error('Mark message as read error:', error)
-    return { error: 'Failed to mark message as read.' }
+    return { error: handleActionError('markMessageAsRead', error, 'Failed to mark message as read.') }
   }
 }
 
@@ -114,8 +114,7 @@ export async function bulkUpdateUserStatus(userIds: string[], status: UserStatus
     revalidatePath('/staff/users')
     return { success: true }
   } catch (error) {
-    console.error('Bulk update user status error:', error)
-    return { error: 'Failed to update users.' }
+    return { error: handleActionError('bulkUpdateUserStatus', error, 'Failed to update users.') }
   }
 }
 
@@ -138,8 +137,7 @@ export async function bulkDeleteUsers(userIds: string[]) {
     revalidatePath('/staff/users')
     return { success: true }
   } catch (error) {
-    console.error('Bulk delete users error:', error)
-    return { error: 'Failed to delete users permanently.' }
+    return { error: handleActionError('bulkDeleteUsers', error, 'Failed to delete users permanently.') }
   }
 }
 
@@ -179,8 +177,7 @@ export async function bulkUpdateEnrollmentStatus(enrollmentIds: string[], status
     revalidatePath('/staff/enrollments')
     return { success: true }
   } catch (error) {
-    console.error('Bulk update enrollment status error:', error)
-    return { error: 'Failed to update enrollments.' }
+    return { error: handleActionError('bulkUpdateEnrollmentStatus', error, 'Failed to update enrollments.') }
   }
 }
 
@@ -223,8 +220,7 @@ export async function bulkUpdateExamBookingStatus(bookingIds: string[], status: 
     revalidatePath('/staff/reports', 'page')
     return { success: true }
   } catch (error) {
-    console.error('Bulk update exam booking status error:', error)
-    return { error: 'Failed to update bookings.' }
+    return { error: handleActionError('bulkUpdateExamBookingStatus', error, 'Failed to update bookings.') }
   }
 }
 
@@ -245,8 +241,7 @@ export async function bulkUpdatePaymentStatus(paymentIds: string[], status: Paym
     revalidatePath('/student')
     return { success: true }
   } catch (error) {
-    console.error('Bulk update payment status error:', error)
-    return { error: 'Failed to update payments.' }
+    return { error: handleActionError('bulkUpdatePaymentStatus', error, 'Failed to update payments.') }
   }
 }
 
@@ -266,8 +261,7 @@ export async function bulkArchiveUsers(userIds: string[]) {
     revalidatePath('/staff/users')
     return { success: true }
   } catch (error) {
-    console.error('Bulk archive users error:', error)
-    return { error: 'Failed to archive users.' }
+    return { error: handleActionError('bulkArchiveUsers', error, 'Failed to archive users.') }
   }
 }
 
@@ -287,8 +281,7 @@ export async function bulkBypassPasswordChange(userIds: string[]) {
     revalidatePath('/staff/users')
     return { success: true }
   } catch (error) {
-    console.error('Bulk bypass password change error:', error)
-    return { error: 'Failed to update users.' }
+    return { error: handleActionError('bulkBypassPasswordChange', error, 'Failed to update users.') }
   }
 }
 /**
@@ -523,8 +516,7 @@ export async function updateExamBooking(
     
     return { success: true }
   } catch (error) {
-    console.error('Update exam result error:', error)
-    return { error: 'Failed to update record.' }
+    return { error: handleActionError('updateExamResult', error, 'Failed to update record.') }
   }
 }
 
@@ -720,8 +712,7 @@ export async function createExamRecord(data: {
 
     return { success: true }
   } catch (error) {
-    console.error('Create exam record error:', error)
-    return { error: 'Failed to create record.' }
+    return { error: handleActionError('createExamRecord', error, 'Failed to create record.') }
   }
 }
 
@@ -797,7 +788,7 @@ export async function searchStudents(query: string) {
       })),
     }
   } catch (error) {
-    console.error('Search students error:', error)
+    handleActionError('searchStudents', error, 'Failed to search students.')
     return { students: [] }
   }
 }
@@ -844,7 +835,7 @@ export async function getAvailableModules() {
     
     return [...courseOptions, ...componentOptions].sort((a, b) => a.code.localeCompare(b.code))
   } catch (error) {
-    console.error('Get available modules error:', error)
+    handleActionError('getAvailableModules', error, 'Failed to load modules.')
     return []
   }
 }
@@ -860,8 +851,7 @@ export async function updateRevenueTarget(amount: number) {
     revalidatePath('/staff/dashboard')
     return { success: true }
   } catch (error) {
-    console.error('Update revenue target error:', error)
-    return { error: 'Failed to update target.' }
+    return { error: handleActionError('updateRevenueTarget', error, 'Failed to update target.') }
   }
 }
 
@@ -953,8 +943,7 @@ export async function bulkUpdateExamCategory(ids: string[], category: 'INTERNAL'
     revalidatePath('/staff/reports', 'page')
     return { success: true }
   } catch (error) {
-    console.error('[bulkUpdateExamCategory] Exception:', error)
-    return { error: 'Failed to update records.' }
+    return { error: handleActionError('bulkUpdateExamCategory', error, 'Failed to update records.') }
   }
 }
 
@@ -1009,7 +998,85 @@ export async function setCertificateRelease(
     revalidatePath('/student/certificates')
     return { success: true }
   } catch (error) {
-    console.error('[setCertificateRelease] Exception:', error)
-    return { error: 'Failed to update certificate release settings.' }
+    return { error: handleActionError('setCertificateRelease', error, 'Failed to update certificate release settings.') }
   }
 }
+
+interface FetchApplicantsParams {
+  tab?: string
+  search?: string
+  page?: string
+  limit?: string
+}
+
+export async function fetchApplicants(params?: FetchApplicantsParams) {
+  await requireStaff()
+
+  const status = params?.tab ?? 'all'
+  const search = params?.search ?? ''
+  const page = parseInt(params?.page ?? '1', 10)
+  const limit = parseInt(params?.limit ?? '25', 10)
+
+  const where: Record<string, unknown> = {
+    role: 'APPLICANT',
+    ...(search && {
+      OR: [
+        { email: { contains: search, mode: 'insensitive' } },
+        { profile: { firstName: { contains: search, mode: 'insensitive' } } },
+        { profile: { lastName: { contains: search, mode: 'insensitive' } } },
+        { registrationCode: { contains: search, mode: 'insensitive' } },
+      ],
+    }),
+  }
+
+  if (status === 'pending_payment') {
+    ;(where as Record<string, unknown>).registrationPaid = false
+    ;(where as Record<string, unknown>).status = 'PENDING'
+  } else if (status === 'pending_approval') {
+    ;(where as Record<string, unknown>).registrationPaid = true
+    ;(where as Record<string, unknown>).status = 'PENDING'
+  } else {
+    ;(where as Record<string, unknown>).status = 'PENDING'
+  }
+
+  const [applicants, total, allCount, pendingPaymentCount, pendingApprovalCount] =
+    await Promise.all([
+      prismaUnfiltered.user.findMany({
+        where,
+        include: {
+          profile: true,
+          payments: {
+            where: { referenceType: 'REGISTRATION' },
+            orderBy: { createdAt: 'desc' },
+            take: 1,
+          },
+        },
+        orderBy: { createdAt: 'desc' },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prismaUnfiltered.user.count({ where }),
+      prismaUnfiltered.user.count({ where: { role: 'APPLICANT', status: 'PENDING' } }),
+      prismaUnfiltered.user.count({
+        where: { role: 'APPLICANT', status: 'PENDING', registrationPaid: false },
+      }),
+      prismaUnfiltered.user.count({
+        where: { role: 'APPLICANT', status: 'PENDING', registrationPaid: true },
+      }),
+    ])
+
+  return {
+    applicants: serializePrisma(applicants),
+    meta: {
+      total,
+      page,
+      limit,
+      counts: {
+        all: allCount,
+        pending_payment: pendingPaymentCount,
+        pending_approval: pendingApprovalCount,
+      },
+    },
+  }
+}
+

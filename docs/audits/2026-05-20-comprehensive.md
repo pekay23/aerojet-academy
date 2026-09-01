@@ -199,7 +199,7 @@ Every prior 🔴 CRITICAL/HIGH/MEDIUM item was either fixed or proven stale. See
 
 **Total findings reviewed**: 71 (AUDIT_2026-05-17) + 42 (design-gap) + 12 (KNOWN_ISSUES) + 13 (structural-review backlog) = **138 distinct items**.
 
-**Aggregate status**: ~85% resolved, ~12% partial, ~3% open or intentionally deferred.
+**Aggregate status**: ~85% resolved, ~12% partial, ~3% open or intentionally deferred (this audit's 138 items). See [Addendum (2026-08-28)](#addendum-2026-08-28) for a follow-up portal audit that added 213 findings across 5 portals — all implemented, with 10 items requiring continued work.
 
 ---
 
@@ -241,3 +241,49 @@ This session added several runtime improvements on top of the audit-driven fixes
 - `<PresencePill>` renders the indicator + batches presence fetches across all message threads.
 - `<PrivacyToggle>` (self-service, in `student/profile/settings`) — flips `showLastSeen` via `PATCH /api/me/privacy`.
 - `<AdminPrivacyToggle>` + `PATCH /api/staff/users/[id]/privacy` lets admin force the value for any user (audit-logged).
+
+---
+
+## Addendum (2026-08-28) — Portal Audit Follow-up
+
+A 6-portal audit sweep (staff, student, instructor, examiner, applicant — 213 findings total) was conducted 2026-08-27. All findings implemented. LLM Council 3-pass verification found and fixed **7 critical bugs** (missing imports, runtime crashes from default-only imports, undefined variables) and corrected **1 false claim** (`window.location.origin` replacement). Full tracking at [portal-audits/PORTAL-AUDIT-TRACKER.md](./portal-audits/PORTAL-AUDIT-TRACKER.md).
+
+### Impact on open items from this audit
+
+| Original item | Status | Notes |
+|---|---|---|
+| **FE-4** (~55 segments missing `loading.tsx`) | ✅ Resolved | Portal audit added `loading.tsx` to all audited segments. 186 skeleton files now exist across portals (see [Design System convention in CLAUDE.md](../../CLAUDE.md)). |
+| **P2.7** (Break up long functions) | 🟡 Still open | `app/staff/dashboard/page.tsx` (392 lines), `UsersTable.tsx` (387 lines), `app/staff/actions.ts` (1,043 lines). Remains cosmetic/low-priority. |
+| **P3.11** (Centralise pool magic numbers) | 🟡 Partial | `lib/constants/business-rules.ts` centralises business rules; some pool arrays still inline. |
+| **TEST-1/2** (No tests for critical paths) | 🟡 Improved | 356 test files now exist (was ~14). 270 auto-generated API route tests with mocked auth/Prisma; 3 E2E specs. Most are stub-shape — real handler coverage still limited. |
+| **TEST-3** (E2E depends on seeded creds) | 🟡 See also | `tests/e2e/applicant-journey.spec.ts` and `tests/e2e/applicant-critical-flows.spec.ts` added for applicant flows. |
+| **TEST-4** (Migrations after deploy) | 🟡 Not re-verified | `.github/workflows/deploy-staging.yml` not inspected this session. |
+| **FE-8** (Examiner `id="main-content"`) | ✅ Resolved | Examiner layout now includes skip-navigation anchor. |
+| **SEC-11 / P3.13** (Rate limiting) | ✅ Resolved | Both routes rate-limited (see [architecture/security.md](../architecture/security.md)). |
+
+### New findings from portal audit (not in scope of this 2026-05-20 audit)
+
+| Severity | Count | Key areas |
+|---|---|---|
+| Critical | 3 | Missing OJT API routes, missing OJT logbook review UI, missing practical assessment tab |
+| High | 13 | Broken access control on GET `/api/staff/*`, 231 `any` types, full-table loads, analytics uncached, etc. |
+| Medium | 24 | Missing section-level error boundaries, mobile table cards, CSP `unsafe-inline`, etc. |
+| Low | 18 | Micro-labels <12px, `console.error` in client code, duplicate `slugify`, etc. |
+| Suggestions | 7 | Analytics bundle splitting, enrolments paging, RSC data-fetching pattern, DataTable adoption |
+
+**8 of these (Student H-6, Instructor M-4, plus 6 others)** were verified as already-fixed during LLM Council verification. The remaining 10 are tracked in the [Verification Follow-up](#verification-follow-up) table below.
+
+### Verification Follow-up (10 items requiring continued work)
+
+| # | Portal | Finding | Severity | Status |
+|---|---|---|---|---|
+| 1 | Instructor | M-12 | Medium | ⏸️ `getInstructorProfileByUserId` still lacks `unstable_cache` |
+| 2 | Instructor | L-4 | Low | ⏸️ Error boundaries render raw `{error.message}` in production |
+| 3 | Instructor | H-3 | Medium | ⏸️ `attendance/[id]/error.tsx` missing |
+| 4 | Staff | H-9 | High | ⏸️ `app/staff/actions.ts` still 1,043 lines (not split into domain files) |
+| 5 | Staff | M-4 | Medium | ⏸️ OJT API routes lack rate limiting |
+| 6 | Staff | H-3 | Medium | ⏸️ `any` types persist in `audit-logs/page.tsx`, `CourseInfoEditDialog.tsx`, `ExamComponentsSection.tsx` |
+| 7 | Examiner | M-2 | Medium | ⏸️ Batch update uses sequential `for...of` instead of `updateMany` |
+| 8 | Applicant | C-5 | Low | ⏸️ `exam-bookings/[id]/not-found.tsx` missing |
+| 9 | Applicant | C-5 | Low | ⏸️ Exam result hard-delete (SEC audit H-6) still allows deletion of issued results without soft-delete |
+| 10 | Staff | M-4 | Medium | ⏸️ Analytics functions in `lib/analytics/reports.ts` still lack `unstable_cache` |

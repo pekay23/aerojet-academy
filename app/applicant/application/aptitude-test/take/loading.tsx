@@ -1,5 +1,9 @@
-import { TableSkeleton } from '@/components/shared/DashboardSkeleton'
+import { Loader2 } from 'lucide-react'
 
 export default function Loading() {
-  return <TableSkeleton rows={4} />
+  return (
+    <div className="flex h-screen items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-aerojet-blue" />
+    </div>
+  )
 }

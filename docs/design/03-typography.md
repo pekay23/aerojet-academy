@@ -41,7 +41,7 @@ Pulled from the actual `(public)/_components/*.tsx` and `(public)/page.tsx`:
 
 | Role              | Class                                                                    | Size       | Weight              | Tracking                  |
 | ----------------- | ------------------------------------------------------------------------ | ---------- | ------------------- | ------------------------- |
-| Hero H1           | `font-serif text-4xl ... sm:text-6xl lg:text-7xl`                        | 4 rem      | `font-medium` (500) | `tracking-tight` (0.04em) |
+| Hero H1           | `font-serif text-4xl ... sm:text-6xl lg:text-7xl`                        | 4 rem      | `font-medium` (500) | `tracking-tight` (0.04em) / `leading-[1.06]` |
 | Section H2        | `font-serif text-3xl font-medium sm:text-4xl`                            | 1.875 rem  | 500                 | default                   |
 | H3 / Card title   | `font-serif text-2xl font-medium`                                        | 1.5 rem    | 500                 | default                   |
 | Eyebrow           | `text-[11px] font-bold tracking-[0.3em] uppercase`                       | 0.6875 rem | 700                 | `0.3em` wide              |

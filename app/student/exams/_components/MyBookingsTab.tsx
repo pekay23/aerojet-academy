@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation'
-import { FileCheck, BookOpen, Calendar, MapPin } from 'lucide-react'
+import { FileCheck, BookOpen, Calendar, MapPin, ChevronRight } from 'lucide-react'
 
 import { getAuthSession } from '@/lib/auth/helpers'
 import prisma from '@/lib/prisma/client'
+import Link from 'next/link'
 import {
   deriveBookingFulfillmentState,
   hasMixedBookingGroupFulfillment,
@@ -137,7 +138,7 @@ export default async function MyBookingsTab() {
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Funds Reserved</p>
-            <p className="mt-1 text-2xl font-black text-aerojet-blue dark:text-blue-400">{currencySymbol}{totalReserved.toFixed(2)}</p>
+            <p className="mt-1 text-2xl font-black text-blue-800 dark:text-blue-400">{currencySymbol}{totalReserved.toFixed(2)}</p>
           </div>
           <div className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Total Bookings</p>
@@ -196,7 +197,7 @@ export default async function MyBookingsTab() {
                   <div className="space-y-1">
                     <p className="text-xs font-bold tracking-widest text-slate-400 uppercase">Module</p>
                     {m.examComponent?.course?.code ? (
-                      <div className="flex items-center gap-1.5 pt-1"><BookOpen className="h-3.5 w-3.5 text-slate-400" /><span className="inline-flex rounded-lg bg-aerojet-blue/10 px-2.5 py-1 text-xs font-bold text-aerojet-blue dark:bg-blue-900/30 dark:text-blue-300">{m.examComponent.course.code}</span></div>
+                      <div className="flex items-center gap-1.5 pt-1"><BookOpen className="h-3.5 w-3.5 text-slate-400" /><span className="inline-flex rounded-lg bg-blue-800/10 px-2.5 py-1 text-xs font-bold text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">{m.examComponent.course.code}</span></div>
                     ) : (<span className="text-xs text-slate-400 italic">Not assigned</span>)}
                   </div>
                   <div className="space-y-1">
@@ -210,6 +211,14 @@ export default async function MyBookingsTab() {
                 <div className="space-y-2 border-t border-slate-50 pt-4 dark:border-slate-800">
                   <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400"><Calendar className="h-4 w-4 text-slate-400" /><span>{new Date(m.effectiveDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span></div>
                   <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400"><MapPin className="h-4 w-4 text-slate-400" /><span>{m.pool.event?.location || 'Main Campus'}</span></div>
+                  {m.booking?.id && (
+                    <Link
+                      href={`/student/exam-bookings/${m.booking.id}`}
+                      className="inline-flex items-center gap-1 text-xs font-bold text-aerojet-blue hover:underline"
+                    >
+                      View Details <ChevronRight className="h-3 w-3" />
+                    </Link>
+                  )}
                 </div>
               </div>
             )})}
@@ -282,7 +291,16 @@ export default async function MyBookingsTab() {
                         {m.visualStatus === 'RESERVED' && <p className="text-xs text-slate-400">on hold</p>}
                         {m.visualStatus === 'CONFIRMED' && <p className="text-xs text-green-600">captured</p>}
                       </td>
-                      <td className="px-6 py-4" />
+                      <td className="px-6 py-4 text-right">
+                        {m.booking?.id && (
+                          <Link
+                            href={`/student/exam-bookings/${m.booking.id}`}
+                            className="inline-flex items-center gap-1 text-xs font-bold text-aerojet-blue hover:underline"
+                          >
+                            Details <ChevronRight className="h-3 w-3" />
+                          </Link>
+                        )}
+                      </td>
                     </tr>
                     )
                   })}

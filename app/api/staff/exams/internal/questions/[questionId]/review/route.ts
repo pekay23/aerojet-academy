@@ -9,7 +9,7 @@ const reviewSchema = z.object({
   reviewNote: z.string().optional(),
 })
 
-export const PATCH = withErrorHandler(async (req: NextRequest, ctx: any) => {
+export const PATCH = withErrorHandler(async (req: NextRequest, ctx: { params: Promise<{ questionId: string }> }) => {
   const session = await getAuthSession()
   // Only Staff, Admin, Super Admin, Examiner can review
   if (!session || !['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER'].includes(session.user.role)) {

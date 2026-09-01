@@ -1,0 +1,17 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+
+/**
+ * Renders the current year only after client-side mount,
+ * preventing hydration mismatches from `new Date()` in SSR.
+ */
+export default function ClientYear() {
+  const [year, setYear] = useState<number | null>(null)
+
+  useEffect(() => {
+    setYear(new Date().getFullYear())
+  }, [])
+
+  return <>{year ?? ''}</>
+}

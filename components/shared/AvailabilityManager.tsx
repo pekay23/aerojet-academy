@@ -18,7 +18,12 @@ interface Slot {
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
 
-export default function AvailabilityManager({ slots }: { slots: Slot[] }) {
+interface AvailabilityManagerProps {
+  slots: Slot[]
+  role?: 'instructor' | 'examiner'
+}
+
+export default function AvailabilityManager({ slots, role = 'instructor' }: AvailabilityManagerProps) {
   const [isPending, startTransition] = useTransition()
   const [form, setForm] = useState({
     kind: 'RECURRING_WEEKLY' as 'RECURRING_WEEKLY' | 'SPECIFIC_DATE',
@@ -93,7 +98,7 @@ export default function AvailabilityManager({ slots }: { slots: Slot[] }) {
         <input
           value={form.notes}
           onChange={(e) => setForm((f) => ({ ...f, notes: e.target.value }))}
-          placeholder="Notes"
+          placeholder={role === 'examiner' ? 'Invigilation notes' : 'Notes'}
           className="rounded-lg border border-slate-200 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-800"
         />
         <button

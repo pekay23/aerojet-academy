@@ -43,7 +43,7 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
     <div className="space-y-6">
       {/* Notifications Section */}
       <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8 dark:border-slate-800 dark:bg-slate-900">
-        <h3 className="mb-6 flex items-center gap-2 border-b border-slate-50 pb-4 text-lg font-black text-aerojet-blue dark:border-slate-800 dark:text-white">
+        <h3 className="mb-6 flex items-center gap-2 border-b border-slate-50 pb-4 text-lg font-black text-blue-800 dark:border-slate-800 dark:text-white">
           <Bell className="h-5 w-5 text-blue-600 dark:text-blue-400" />
           Notification Preferences
         </h3>
@@ -142,7 +142,7 @@ export default function SettingsForm({ initialSettings }: SettingsFormProps) {
         <button
           onClick={handleSave}
           disabled={isPending}
-          className="flex items-center gap-2 rounded-xl bg-aerojet-blue px-8 py-3 text-sm font-bold text-white transition-all hover:bg-[#003d85] hover:shadow-lg disabled:opacity-50"
+          className="flex items-center gap-2 rounded-xl bg-blue-800 px-8 py-3 text-sm font-bold text-white transition-all hover:bg-[#003d85] hover:shadow-lg disabled:opacity-50"
         >
           {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           Save Settings

@@ -6,6 +6,7 @@ import CalendarGrid from './_components/CalendarGrid'
 import { subMonths, addMonths, startOfMonth, endOfMonth } from 'date-fns'
 
 export const metadata: Metadata = { title: 'Teaching Schedule | Instructor Portal' }
+export const dynamic = 'force-dynamic'
 
 import AcademicCalendar, { type UnifiedCalendarEvent } from '@/components/calendar/AcademicCalendar'
 
@@ -50,7 +51,7 @@ export default async function Page({
       },
       orderBy: { startTime: 'asc' },
     }),
-    prisma.adminCalendarEvent.findMany({
+    prismaUnfiltered.adminCalendarEvent.findMany({
       where: { deletedAt: null, visibleTo: { in: ['ALL', 'INSTRUCTORS'] } },
       orderBy: { startDate: 'asc' },
     }),
