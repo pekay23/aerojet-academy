@@ -3,6 +3,7 @@ import BreadcrumbNav from '@/components/layouts/BreadcrumbNav'
 import PortalHeader from '@/components/layouts/PortalHeader'
 import TourTrigger from '@/components/Tour/TourTrigger'
 import TourTrigger from '@/components/Tour/TourTrigger'
+import TourTrigger from '@/components/Tour/TourTrigger'
 
 export interface ApplicantPortalShellProps {
   userName: string

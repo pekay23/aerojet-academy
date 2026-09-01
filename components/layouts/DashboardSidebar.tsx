@@ -32,7 +32,7 @@ export type SidebarLinkItem = {
   badge?: number
   /** Stable selector for the onboarding tour (`[data-tour-id=...]`). */
   tourId?: string
-  children?: { label: string; href: string }[]
+  children?: { label: string; href: string; badge?: number }[]
 }
 
 export type SidebarLinkHeader = {
@@ -319,7 +319,7 @@ function GroupItem({
                 onClick={() => setMobileOpen(false)}
                 onMouseEnter={() => setHoveredItem(childKey)}
                 onMouseLeave={() => setHoveredItem(null)}
-                className={`relative block rounded-xl px-3 py-2 text-[13px] font-medium transition-all ${
+                className={`relative flex items-center rounded-xl px-3 py-2 text-[13px] font-medium transition-all ${
                   childActive
                     ? 'bg-sidebar-accent text-sidebar-foreground font-semibold'
                     : 'text-sidebar-foreground/60 hover:text-sidebar-foreground'
@@ -333,7 +333,12 @@ function GroupItem({
                     transition={{ type: 'spring', bounce: 0.15, duration: 0.4 }}
                   />
                 )}
-                <span className="relative z-10">{child.label}</span>
+                <span className="relative z-10 flex-1">{child.label}</span>
+                {child.badge ? (
+                  <span className="relative z-10 min-w-4.5 rounded-full bg-red-500 px-1.5 py-0.5 text-center text-[10px] font-black text-white">
+                    {child.badge}
+                  </span>
+                ) : null}
               </Link>
             )
           })}

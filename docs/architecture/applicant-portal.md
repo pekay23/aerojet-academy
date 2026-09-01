@@ -60,17 +60,23 @@ Auth is enforced by the root `layout.tsx`, which redirects unauthenticated users
 
 All applicant API routes are under `app/api/applicant/`:
 
-- `/api/applicant/medical` — GET medical data
-- `/api/applicant/medical/submit` — POST submit medical docs
-- `/api/applicant/documents` — GET uploaded documents
-- `/api/applicant/aptitude/session` — GET aptitude session status
-- `/api/applicant/aptitude/start` — POST start aptitude test
-- `/api/applicant/aptitude/answer` — POST submit answer
-- `/api/applicant/aptitude/submit` — POST submit test
-- `/api/applicant/aptitude/anti-cheat` — POST report violation
-- `/api/applicant/exam-only/*` — Wallet, pools, bookings, bundles, pricing, memberships, transactions
-- `/api/applicant/courses/[id]/enroll` — POST enroll in course
-- `/api/applicant/courses/[id]/purchase` — POST purchase course
+- `GET /api/applicant/dashboard` — Dashboard data
+- `GET /api/applicant/profile` — Get profile
+- `PATCH /api/applicant/profile` — Update profile
+- `POST /api/applicant/profile/change-password` — Change password
+- `/api/applicant/courses` — GET course catalog
+- `POST /api/applicant/courses/[id]/purchase` — Purchase course
+- `POST /api/applicant/courses/[id]/enroll` — Enroll in course
+- `GET /api/applicant/courses/[id]` — Course detail
+- `GET /api/applicant/documents` — Uploaded documents
+- `POST /api/applicant/upload-payment` — Upload payment proof
+- `POST /api/applicant/pay-milestone` — Milestone payment
+- `POST /api/applicant/pathway-payment` — Pathway payment intent
+- `/api/applicant/medical` — GET medical data / POST submit medical docs
+- `/api/applicant/interview/slots` — GET available interview slots
+- `POST /api/applicant/interview/book` — Book interview slot
+- `/api/applicant/aptitude/*` — Session, start, answer, submit, anti-cheat
+- `/api/applicant/exam-only/*` — Wallet, top-up, pools, join-pool, join-waitlist, withdraw-pool, bundles, bookings, book-exam, payments, memberships, pricing, exam-components, referrals, wallet/transactions
 
 ## Shared Components
 

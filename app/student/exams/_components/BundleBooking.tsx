@@ -199,7 +199,7 @@ export default function BundleBooking({
               {/* Module Selection */}
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm font-black text-slate-700 dark:text-slate-200 uppercase tracking-tight">
-                  <BookOpen className="h-4 w-4 text-aerojet-blue" />
+                  <BookOpen className="h-4 w-4 text-blue-800" />
                   Select {bundleSize} Modules ({selectedModules.length}/{bundleSize})
                 </label>
                 <div className="grid grid-cols-2 gap-2">

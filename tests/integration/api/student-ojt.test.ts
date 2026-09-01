@@ -152,7 +152,7 @@ describe('Student OJT — GET /api/student/ojt', () => {
 
 describe('Student OJT — POST /api/student/ojt (sign entry)', () => {
   beforeEach(() => {
-    vi.resetAllMocks()
+    vi.clearAllMocks()
     vi.mocked(requireAuth).mockResolvedValue(mockUser as any)
   })
 

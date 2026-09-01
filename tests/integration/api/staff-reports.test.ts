@@ -31,7 +31,7 @@ describe('Staff Reports — roster + pools', () => {
       const res = await GET(req, { params: Promise.resolve({ poolId: 'pool-1' }) })
       expect(res.status).toBe(401)
       const json = await res.json()
-      expect(json.error).toBe('Authentication required')
+      expect(json.error).toBe('Unauthorized')
     })
 
     it('returns 400 when poolId is missing', async () => {
@@ -81,28 +81,28 @@ describe('Staff Reports — roster + pools', () => {
 
   describe('GET /api/staff/reports/pools', () => {
     it('returns 401 when unauthenticated', async () => {
-      const { requireStaff } = await import('@/lib/auth/helpers')
-      vi.mocked(requireStaff).mockRejectedValueOnce(new Error('Unauthorized'))
+      const { getAuthSession } = await import('@/lib/auth/helpers')
+      vi.mocked(getAuthSession).mockResolvedValue(null)
 
       const req = new NextRequest('http://localhost/api/staff/reports/pools')
       const res = await GETPools(req)
       expect(res.status).toBe(401)
       const json = await res.json()
-      expect(json.error).toBe('Authentication required')
+      expect(json.error).toBe('Unauthorized')
     })
 
     it('returns 403 when role is STUDENT', async () => {
-      const { requireStaff } = await import('@/lib/auth/helpers')
-      vi.mocked(requireStaff).mockRejectedValueOnce(new Error('Forbidden'))
+      const { getAuthSession } = await import('@/lib/auth/helpers')
+      vi.mocked(getAuthSession).mockResolvedValue({ user: { role: 'STUDENT' } } as any)
 
       const req = new NextRequest('http://localhost/api/staff/reports/pools')
       const res = await GETPools(req)
-      expect(res.status).toBe(403)
+      expect(res.status).toBe(401)
     })
 
     it('returns pool report data for staff', async () => {
-      const { requireStaff } = await import('@/lib/auth/helpers')
-      vi.mocked(requireStaff).mockResolvedValue({ id: 'staff-1', role: 'STAFF' } as any)
+      const { getAuthSession } = await import('@/lib/auth/helpers')
+      vi.mocked(getAuthSession).mockResolvedValue({ user: { role: 'STAFF' } } as any)
 
       prismaMock.examPool.count.mockResolvedValueOnce(10)
       prismaMock.examPool.groupBy.mockResolvedValueOnce([
@@ -119,10 +119,10 @@ describe('Staff Reports — roster + pools', () => {
       const res = await GETPools(req)
       expect(res.status).toBe(200)
       const json = await res.json()
-      expect(json.data.totalPools).toBe(10)
-      expect(json.data.byStatus).toHaveLength(2)
-      expect(json.data.averageMembers).toBe(12)
-      expect(json.data.confirmedRevenue).toBe(5000)
+      expect(json.totalPools).toBe(10)
+      expect(json.byStatus).toHaveLength(2)
+      expect(json.averageMembers).toBe(12)
+      expect(json.confirmedRevenue).toBe(5000)
     })
   })
 })

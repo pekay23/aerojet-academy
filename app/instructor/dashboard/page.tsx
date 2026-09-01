@@ -20,6 +20,7 @@ import prisma from '@/lib/prisma/client'
 
 export const metadata: Metadata = { title: 'Dashboard | Instructor Portal' }
 export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 
 export default async function Page() {
   const session = await getAuthSession()
@@ -46,7 +47,7 @@ export default async function Page() {
             <p className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
               {instructorData.activeCohortsCount}
             </p>
-            <p className="mt-1 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-300 dark:text-slate-500 uppercase">
+            <p className="mt-1 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-300 dark:text-slate-300 dark:text-slate-500 uppercase">
               Active Classes
             </p>
           </div>
@@ -62,7 +63,7 @@ export default async function Page() {
             <p className="text-3xl font-black tracking-tight text-slate-900 dark:text-white">
               {instructorData.totalStudents}
             </p>
-            <p className="mt-1 text-xs font-bold tracking-widest text-slate-400 uppercase">
+            <p className="mt-1 text-xs font-bold tracking-widest text-slate-400 dark:text-slate-500 uppercase">
               Total Students
             </p>
           </div>

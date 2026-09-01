@@ -5,6 +5,7 @@ import { Calendar, Users, Save, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { submitExaminerResults } from '../actions'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface Assignment {
   id: string
@@ -39,6 +40,12 @@ interface ResultEntry {
   absent: boolean
 }
 
+interface ResultEntry {
+  assignmentId: string
+  score: number | null
+  absent: boolean
+}
+
 export default function ResultsEntry({
   sittings,
   existingResults,
@@ -60,6 +67,7 @@ export default function ResultsEntry({
   const [scores, setScores] = useState<Record<string, string>>({})
   const [absent, setAbsent] = useState<Record<string, boolean>>({})
   const [isPending, startTransition] = useTransition()
+  const { items, requestSort, sortConfig } = useSort(sitting.assignments, { key: 'user.profile.lastName', order: 'asc' })
   const { items, requestSort, sortConfig } = useSort(sitting.assignments, { key: 'user.profile.lastName', order: 'asc' })
 
   const clampScore = (value: string): string => {

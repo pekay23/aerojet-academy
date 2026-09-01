@@ -337,7 +337,7 @@ export default function GroupBookingModal({
                       onClick={() => setExamTimeSlot('AFTERNOON')}
                       className={`flex flex-col items-center justify-center gap-1 rounded-2xl border px-3 py-2.5 transition-all ${
                         examTimeSlot === 'AFTERNOON'
-                          ? 'border-aerojet-blue bg-blue-50/50 text-aerojet-blue dark:bg-blue-900/20 dark:text-blue-300'
+                          ? 'border-blue-800 bg-blue-50/50 text-blue-800 dark:bg-blue-900/20 dark:text-blue-300'
                           : 'border-slate-100 hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-800/50'
                       }`}
                     >

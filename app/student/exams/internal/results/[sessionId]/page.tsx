@@ -62,6 +62,8 @@ export default function ExamResultsPage() {
   const [certLoading, setCertLoading] = useState(false)
   const [certificate, setCertificate] = useState<CertificateInfo | null>(null)
   const [certLoading, setCertLoading] = useState(false)
+  const [certificate, setCertificate] = useState<CertificateInfo | null>(null)
+  const [certLoading, setCertLoading] = useState(false)
 
   useEffect(() => {
     const fetchResults = async () => {

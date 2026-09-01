@@ -263,6 +263,75 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
     }
   }, [data, result, sessionId])
 
+  // Block clipboard events (copy/cut/paste) during active exam
+  useEffect(() => {
+    if (!data || result || data.status !== 'IN_PROGRESS') return
+
+    const onClipboard = (event: ClipboardEvent) => {
+      event.preventDefault()
+      void logViolation('KEYBOARD_SHORTCUT', `Clipboard event blocked: ${event.type}`)
+    }
+
+    document.addEventListener('copy', onClipboard)
+    document.addEventListener('cut', onClipboard)
+    document.addEventListener('paste', onClipboard)
+    return () => {
+      document.removeEventListener('copy', onClipboard)
+      document.removeEventListener('cut', onClipboard)
+      document.removeEventListener('paste', onClipboard)
+    }
+  }, [data, result, logViolation])
+
+  // Network disconnect/reconnect detection
+  useEffect(() => {
+    if (!data || result || data.status !== 'IN_PROGRESS') return
+
+    const onNetworkChange = (event: Event) => {
+      const online = navigator.onLine
+      void logViolation(
+        'NETWORK_DISCONNECT',
+        `Network ${online ? 'restored' : 'lost'} during exam`,
+      )
+    }
+
+    window.addEventListener('online', onNetworkChange)
+    window.addEventListener('offline', onNetworkChange)
+    return () => {
+      window.removeEventListener('online', onNetworkChange)
+      window.removeEventListener('offline', onNetworkChange)
+    }
+  }, [data, result, logViolation])
+
+  // Page unload — log that the exam interface was exited abnormally
+  useEffect(() => {
+    if (!data || result || data.status !== 'IN_PROGRESS') return
+
+    const onUnload = () => {
+      void fetch('/api/student/exams/internal/violation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        cache: 'no-store',
+        keepalive: true,
+        body: JSON.stringify({
+          sessionId,
+          type: 'EXAM_INTERFACE_UNLOAD',
+          detail: 'Student navigated away or closed the exam interface during an active session',
+          deviceInfo: {
+            userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
+            platform: typeof navigator !== 'undefined' ? (navigator as any).platform : undefined,
+          },
+        }),
+      })
+    }
+
+    document.addEventListener('beforeunload', onUnload)
+    document.addEventListener('pagehide', onUnload)
+    return () => {
+      document.removeEventListener('beforeunload', onUnload)
+      document.removeEventListener('pagehide', onUnload)
+    }
+  }, [data, result, sessionId])
+
   // Timer countdown
   useEffect(() => {
     if (!data || result) return
@@ -519,6 +588,9 @@ export default function InternalExamInterface({ sessionId }: { sessionId: string
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
               This exam must be taken in fullscreen mode to prevent unauthorized access to other resources.
               Leaving fullscreen or switching tabs is logged and may be reviewed by your instructor.
+            </p>
+            <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+              If you need to step away or experience technical issues, contact your instructor immediately.
             </p>
             <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
               If you need to step away or experience technical issues, contact your instructor immediately.

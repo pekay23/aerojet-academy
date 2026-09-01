@@ -27,7 +27,7 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
     where: { questionId },
     orderBy: { changedAt: 'desc' },
     include: {
-      changer: {
+      changedBy: {
         select: { id: true, email: true, profile: { select: { firstName: true, lastName: true } } },
       },
     },

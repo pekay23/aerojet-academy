@@ -7,6 +7,8 @@ import SearchInput from '@/components/SearchInput'
 import { Metadata } from 'next'
 import { Prisma } from '@prisma/client'
 import type { EnrollmentWithDetails } from '@/lib/staff/types'
+import { Prisma } from '@prisma/client'
+import type { EnrollmentWithDetails } from '@/lib/staff/types'
 import { buildOrderBy } from '@/lib/utils/build-order-by'
 
 export const metadata: Metadata = { title: 'Enrollments | Staff Portal' }

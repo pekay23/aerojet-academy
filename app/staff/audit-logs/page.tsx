@@ -203,7 +203,7 @@ export default async function AuditLogsPage(req: {
     ])
 
   users.forEach((u) => (entityLabels[u.id] = u.profile ? `${u.profile.firstName} ${u.profile.lastName}` : u.email))
-  courses.forEach((c: any) => (entityLabels[c.id] = c.name))
+  courses.forEach((c) => (entityLabels[c.id] = c.name))
   events.forEach((e: any) => (entityLabels[e.id] = e.name))
   pools.forEach((p: any) => (entityLabels[p.id] = p.name))
   comps.forEach((c: any) => (entityLabels[c.id] = c.name))

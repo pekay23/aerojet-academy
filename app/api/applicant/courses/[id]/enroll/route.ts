@@ -3,6 +3,7 @@ import prisma from '@/lib/prisma/client'
 import { requireApplicant } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { trackEnrollment, trackPaymentSubmitted } from '@/lib/analytics/events'
+import { trackEnrollment, trackPaymentSubmitted } from '@/lib/analytics/events'
 import { trackEnrollment } from '@/lib/analytics/events'
 
 export const POST = withErrorHandler(
@@ -73,6 +74,17 @@ export const POST = withErrorHandler(
 
       return { enrollment, payment }
     })
+
+    // Get the enrollment ID for tracking
+    const enrollment = await prisma.enrollment.findFirst({
+      where: { userId: user.id, courseId: course.id },
+      select: { id: true },
+    })
+
+    // Analytics tracking (non-blocking)
+    if (enrollment) {
+      trackEnrollment(enrollment.id, course.id, course.code, user.id).catch(console.error)
+    }
 
     return apiSuccess({ message: 'Enrollment request and payment proof submitted.' })
   }

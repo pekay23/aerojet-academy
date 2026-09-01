@@ -106,7 +106,7 @@ describe('Student Profile — GET /api/student/profile', () => {
 
 describe('Student Profile — PATCH /api/student/profile', () => {
   beforeEach(() => {
-    vi.resetAllMocks()
+    vi.clearAllMocks()
     vi.mocked(requireStudent).mockResolvedValue(mockUser as any)
   })
 

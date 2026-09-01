@@ -35,7 +35,7 @@ export default async function ExaminerSchedulePage({
     }),
 
     // Admin events visible to examiners (ALL or specific ones)
-    prisma.adminCalendarEvent.findMany({
+    prismaUnfiltered.adminCalendarEvent.findMany({
       where: { deletedAt: null, visibleTo: { in: ['ALL', 'INSTRUCTORS', 'EXAMINERS'] } }, // Examiners usually follow instructor visibility
       orderBy: { startDate: 'asc' },
     }),

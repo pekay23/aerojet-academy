@@ -20,6 +20,7 @@ export const metadata: Metadata = {
   title: 'Student Profile | Instructor Portal',
 }
 export const dynamic = 'force-dynamic'
+export const dynamic = 'force-dynamic'
 
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -69,7 +70,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
                 Active Student
               </Badge>
             </div>
-            <p className="text-lg font-medium text-slate-400 dark:text-slate-300">
+            <p className="text-lg font-medium text-slate-400 dark:text-slate-300 dark:text-slate-300">
               Student ID:{' '}
               <span className="text-slate-900 dark:text-slate-100">
                 {studentProfile?.studentId || 'N/A'}

@@ -50,7 +50,7 @@ describe('lib/enrollment/pathway', () => {
     })
 
     it('returns SHORT_COURSE for unknown', () => {
-      expect(resolveEnrollmentType('UNKNOWN')).toBe('SHORT_COURSE')
+      expect(resolveEnrollmentType('UNKNOWN' as any)).toBe('SHORT_COURSE')
     })
   })
 

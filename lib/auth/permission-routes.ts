@@ -46,6 +46,16 @@ export const ROUTE_PERMISSION_BINDINGS: RoutePermissionBinding[] = [
   { prefix: '/api/instructor/exams/banks', permission: ADDITIONAL_PERMISSION_KEYS.EXAM_BANK_EDIT, description: 'Instructor bank question editor' },
   { prefix: '/api/instructor/exams/classes', permission: ADDITIONAL_PERMISSION_KEYS.EXAM_SESSION_MONITOR, description: 'Monitor / start instructor exam sessions' },
 
+  // Internal exam system (banks, sessions, violations)
+  { prefix: '/api/staff/exams/internal/banks', permission: PERMISSIONS.MANAGE_EXAMS, description: 'Manage internal exam bank instructors + schedule' },
+  { prefix: '/api/staff/exams/internal/sessions/[id]/extend', permission: ADDITIONAL_PERMISSION_KEYS.EXAM_SESSION_EXTEND, description: 'Extend exam time' },
+  { prefix: '/api/staff/exams/internal/sessions/[id]/force-submit', permission: ADDITIONAL_PERMISSION_KEYS.EXAM_SESSION_EXTEND, description: 'Force-submit an active exam session' },
+  { prefix: '/api/staff/exams/internal/sessions/[id]/violations/[violationId]/review', permission: ADDITIONAL_PERMISSION_KEYS.EXAM_VIOLATION_REVIEW, description: 'Review exam violations' },
+
+  // Instructor exam endpoints
+  { prefix: '/api/instructor/exams/banks', permission: ADDITIONAL_PERMISSION_KEYS.EXAM_BANK_EDIT, description: 'Instructor bank question editor' },
+  { prefix: '/api/instructor/exams/classes', permission: ADDITIONAL_PERMISSION_KEYS.EXAM_SESSION_MONITOR, description: 'Monitor / start instructor exam sessions' },
+
   // Governance
   { prefix: '/api/staff/audit-logs', permission: PERMISSIONS.VIEW_AUDIT_LOGS, description: 'Read audit trail' },
   { prefix: '/api/staff/admin/permissions', permission: ADDITIONAL_PERMISSION_KEYS.MANAGE_RBAC, description: 'Manage the permission registry + grants' },

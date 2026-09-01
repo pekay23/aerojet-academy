@@ -464,7 +464,7 @@ Before adding a new test file, verify:
 - [ ] Uses `resetAllMocks()` and shared mock configs
 - [ ] Tests real implementation, not a shadow mock
 
-**Reference**: `tests/STANDARDS.md` (Testing standards; §12 What NOT to test), `docs/plans/test-suite-remediation.md`
+**Reference**: `tests/TEST-STANDARDS.md` §12 (What NOT to test), `docs/plans/test-suite-remediation.md`
 
 ---
 

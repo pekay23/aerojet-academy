@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render, screen } from '@testing-library/react'
-import PageTransition from '@/components/shared/PageTransition'
+import { PageTransition } from '@/components/shared/PageTransition'
 
 describe('PageTransition', () => {
   it('renders children', () => {

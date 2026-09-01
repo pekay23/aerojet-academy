@@ -269,7 +269,7 @@ export default async function WalletPage({
               </a>
               <a
                 href="/student/wallet?tab=transactions"
-                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-aerojet-sky/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+                className="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-5 transition-all hover:border-sky-400/30 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
               >
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-100 sm:h-12 sm:w-12">
                   <CreditCard className="h-5 w-5 sm:h-6 sm:w-6" />

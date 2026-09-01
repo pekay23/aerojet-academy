@@ -102,7 +102,7 @@ export const GET = withErrorHandler(async (_req: NextRequest, ctx: any) => {
 // POST — add logbook entry
 export const POST = withErrorHandler(async (req: NextRequest, ctx: any) => {
   await requireStaff()
-  const { logbookId } = await ctx.params
+  const { logbookId } = ctx.params
   const body = await req.json()
   const parsed = entrySchema.safeParse(body)
   if (!parsed.success) return apiError('Invalid input')

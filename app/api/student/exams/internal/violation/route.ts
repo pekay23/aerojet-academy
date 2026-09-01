@@ -11,6 +11,7 @@ const violationSchema = z.object({
   type: z.enum(['FULLSCREEN_EXIT', 'TAB_SWITCH', 'KEYBOARD_SHORTCUT', 'NETWORK_DISCONNECT', 'EXAM_INTERFACE_UNLOAD']),
   detail: z.string().optional(),
   deviceInfo: z.any().optional(),
+  severity: z.enum(['WARNING', 'NOTICE', 'CRITICAL']).optional(),
 })
 
 /**
@@ -51,8 +52,13 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   })
 
   let severity: 'WARNING' | 'NOTICE' | 'CRITICAL' = 'WARNING'
-  if (previousCount >= 3) severity = 'CRITICAL'
-  else if (previousCount >= 1) severity = 'NOTICE'
+  if (parsed.data.severity) {
+    severity = parsed.data.severity
+  } else if (previousCount >= 3) {
+    severity = 'CRITICAL'
+  } else if (previousCount >= 1) {
+    severity = 'NOTICE'
+  }
 
   const violation = await prismaUnfiltered.internalExamViolation.create({
     data: {

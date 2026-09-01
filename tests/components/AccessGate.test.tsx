@@ -4,7 +4,7 @@ import { AccessGate } from '@/components/AccessGate'
 
 describe('AccessGate', () => {
   it('renders children when hasAccess is true', () => {
-    render(<AccessGate hasAccess={true} feature="WALLET"><div>Protected Content</div></AccessGate>)
+    render(<AccessGate hasAccess={true} feature="wallet"><div>Protected Content</div></AccessGate>)
     expect(screen.getByText('Protected Content')).toBeInTheDocument()
   })
 

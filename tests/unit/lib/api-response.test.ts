@@ -243,7 +243,7 @@ describe('serializePrisma', () => {
   it('converts BigInt to number', () => {
     // NOTE: the implementation uses Number(data), so BigInt becomes a JS number,
     // not a string. Tests assert actual behavior; large BigInts may lose precision.
-    const result = serializePrisma(42n)
+    const result = serializePrisma(BigInt(42))
     expect(result).toBe(42)
     expect(typeof result).toBe('number')
   })
@@ -257,7 +257,7 @@ describe('serializePrisma', () => {
     const out = serializePrisma(input)
     expect(out.when).toBe('2024-01-01T00:00:00.000Z')
     expect(out.list[0]).toBe('2024-01-01T00:00:00.000Z')
-    expect(out.list[1].nestedWhen).toBe('2024-01-01T00:00:00.000Z')
+    expect((out.list[1] as any).nestedWhen).toBe('2024-01-01T00:00:00.000Z')
   })
 
   it('returns null and undefined unchanged', () => {

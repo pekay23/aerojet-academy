@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import dynamic from 'next/dynamic'
 import SettingsForm from './SettingsForm'
 import { toast } from 'sonner'
+import { toast } from 'sonner'
 import { FileText, Award } from 'lucide-react'
 
 // Dynamically import PDFViewer with SSR disabled — @react-pdf/renderer needs DOM APIs

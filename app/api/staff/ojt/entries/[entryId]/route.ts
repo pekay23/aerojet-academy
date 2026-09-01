@@ -76,7 +76,7 @@ export const PUT = withErrorHandler(async (req: NextRequest, ctx: any) => {
 // DELETE — Delete OJT Entry
 export const DELETE = withErrorHandler(async (req: NextRequest, ctx: any) => {
   await requireStaff()
-  const { entryId } = await ctx.params
+  const { entryId } = ctx.params
 
   const entry = await prismaUnfiltered.oJTLogbookEntry.findUnique({ where: { id: entryId } })
   if (!entry) return apiError('Entry not found', 404)

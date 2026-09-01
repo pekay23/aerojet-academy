@@ -69,6 +69,16 @@ export default function CertificateReleaseControl({
           className="w-full rounded-lg border border-slate-200 p-2 text-sm focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20"
         />
       </div>
+      <div className="mb-4">
+        <label className="mb-1 block text-xs font-bold uppercase text-slate-500">Override Justification</label>
+        <textarea
+          value={justification}
+          onChange={(e) => setJustification(e.target.value)}
+          rows={2}
+          placeholder="Required when releasing certificates/documents..."
+          className="w-full rounded-lg border border-slate-200 p-2 text-sm focus:border-aerojet-blue focus:ring-2 focus:ring-aerojet-blue/20"
+        />
+      </div>
       <div className="flex flex-wrap gap-4">
         <label className="flex items-center gap-2 text-sm">
           <input

@@ -6,6 +6,7 @@ import { prismaUnfiltered } from '@/lib/prisma/client'
 import { CalendarAudience, RecurrenceType } from '@prisma/client'
 import { AuditAction, logAuditEvent } from '@/lib/audit/logger'
 import { handleActionError } from '@/lib/staff/errors'
+import { handleActionError } from '@/lib/staff/errors'
 
 export interface AdminEventInput {
   title: string

@@ -1,5 +1,7 @@
 import 'server-only'
 
+import 'server-only'
+
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
@@ -9,6 +11,10 @@ import { calculateAttendancePercentage } from '@/lib/attendance'
 import { getLicenseProgress } from '@/lib/license/progress'
 import { getStudentStatus } from '@/lib/access-control'
 import PrintButton from './PrintButton'
+import { PageTransition } from '@/components/shared/PageTransition'
+import ExamResultsTable from './_components/ExamResultsTable'
+import EnrolmentTable from './_components/EnrolmentTable'
+import PageTransition from '@/components/shared/PageTransition'
 
 export const metadata: Metadata = {
   title: 'Academic Transcript | Student Portal',

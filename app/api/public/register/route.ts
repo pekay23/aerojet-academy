@@ -15,6 +15,7 @@ import { getRegistrationConfig } from '@/lib/settings'
 import { isPipelineEnabled, transitionApplication } from '@/lib/admissions/state-machine'
 import { ApplicationStage } from '@prisma/client'
 import { trackRegistration, trackReferralClick } from '@/lib/analytics/events'
+import { trackRegistration, trackReferralClick } from '@/lib/analytics/events'
 import { trackRegistration } from '@/lib/analytics/events'
 
 export const POST = withErrorHandler(async (req: NextRequest) => {

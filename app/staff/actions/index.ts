@@ -3,7 +3,7 @@
 export { getStaffRecipients, sendStaffMessage, markMessageAsRead } from './messages'
 export { bulkUpdateUserStatus, bulkDeleteUsers, bulkArchiveUsers, bulkBypassPasswordChange } from './users'
 export { bulkUpdateEnrollmentStatus, bulkDeleteEnrollments } from './enrollments'
-export { bulkUpdateExamBookingStatus, updateExamBooking, bulkUpdateExamCategory } from './bookings'
+export { bulkUpdateExamBookingStatus, updateExamBooking, updateExamResult, bulkUpdateExamCategory } from './bookings'
 export { createExamRecord, deleteExamRecord } from './results'
 export { searchStudents, getAvailableModules } from './search'
 export { bulkUpdatePaymentStatus, updateRevenueTarget } from './finance'

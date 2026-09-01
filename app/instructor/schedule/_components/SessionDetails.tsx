@@ -17,7 +17,7 @@ export default function SessionDetails({ session, isOpen, onClose }: SessionDeta
       {isOpen && (
         <>
           {/* Backdrop */}
-          <motion.div
+          <MotionDiv
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -26,7 +26,7 @@ export default function SessionDetails({ session, isOpen, onClose }: SessionDeta
           />
 
           {/* Slide-over */}
-          <motion.aside
+          <MotionAside
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
@@ -45,7 +45,7 @@ export default function SessionDetails({ session, isOpen, onClose }: SessionDeta
                       <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
                       <span className="relative inline-flex h-2 w-2 rounded-full bg-red-500"></span>
                     </span>
-                    <span className="text-[10px] font-bold tracking-widest text-slate-400 uppercase">
+                    <span className="text-[10px] font-bold tracking-widest text-slate-400 dark:text-slate-300 uppercase">
                       Live Logic Pending
                     </span>
                   </div>

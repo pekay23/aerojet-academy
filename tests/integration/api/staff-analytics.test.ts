@@ -26,7 +26,7 @@ describe('Staff Analytics Dashboard — GET /api/staff/analytics/dashboard', () 
     const res = await GET(req)
     expect(res.status).toBe(401)
     const json = await res.json()
-    expect(json.error).toBe('Unauthorized')
+    expect(json.error).toBe('Authentication required')
   })
 
   it('returns 403 when role is STUDENT', async () => {
@@ -57,16 +57,16 @@ describe('Staff Analytics Dashboard — GET /api/staff/analytics/dashboard', () 
     }
 
     vi.mocked(getDashboardAlerts).mockResolvedValue(alerts as any)
-    vi.mocked(getDashboardMetrics).mockResolvedValue(metrics as any)
+    vi.mocked(getDashboardMetrics).mockResolvedValue(metrics)
 
     const req = new NextRequest('http://localhost/api/staff/analytics/dashboard')
     const res = await GET(req)
     expect(res.status).toBe(200)
     const json = await res.json()
-    expect(json.alerts).toHaveLength(1)
-    expect(json.alerts[0].id).toBe('pending-payments')
-    expect(json.metrics.totalUsers).toBe(120)
-    expect(json.metrics.totalRevenue.value).toBe(50000)
+    expect(json.data.alerts).toHaveLength(1)
+    expect(json.data.alerts[0].id).toBe('pending-payments')
+    expect(json.data.metrics.totalUsers).toBe(120)
+    expect(json.data.metrics.totalRevenue.value).toBe(50000)
   })
 
   it('returns empty alerts when nothing needs attention', async () => {
@@ -83,13 +83,13 @@ describe('Staff Analytics Dashboard — GET /api/staff/analytics/dashboard', () 
       pendingPayments: 0,
       openPools: 2,
       totalRevenue: { value: 30000, growth: 0 },
-    } as any)
+    })
 
     const req = new NextRequest('http://localhost/api/staff/analytics/dashboard')
     const res = await GET(req)
     expect(res.status).toBe(200)
     const json = await res.json()
-    expect(json.alerts).toEqual([])
-    expect(json.metrics.pendingPayments).toBe(0)
+    expect(json.data.alerts).toEqual([])
+    expect(json.data.metrics.pendingPayments).toBe(0)
   })
 })

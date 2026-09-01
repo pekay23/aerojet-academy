@@ -54,7 +54,7 @@ export default function AttendanceRow({
       value: 'PRESENT',
       label: 'Present',
       icon: Check,
-      color: 'hover:bg-green-50 text-slate-400 dark:text-slate-300 hover:text-green-600',
+      color: 'hover:bg-green-50 text-slate-400 dark:text-slate-300 dark:text-slate-300 hover:text-green-600',
       activeColor: 'bg-green-500 text-white',
     },
     {

@@ -83,7 +83,7 @@ export default function ApplicantSidebar({
   } else {
     links = [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'My Application', href: '/application/status', icon: FileText },
+      { label: 'My Application', href: '/application/status', icon: FileText, tourId: 'nav-application' },
       { label: 'Notifications', href: '/notifications', icon: Bell },
     ]
   }

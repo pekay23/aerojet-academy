@@ -19,6 +19,19 @@ const HISTORY_SORT_KEYS = {
   recorded: 'createdAt',
 } as const
 type HistorySortKey = keyof typeof HISTORY_SORT_KEYS
+import { SortableTh } from '@/components/ui/sortable-th'
+import { buildOrderBy } from '@/lib/utils/build-order-by'
+import { Prisma } from '@prisma/client'
+import { format } from 'date-fns'
+
+const HISTORY_SORT_KEYS = {
+  candidate: 'user.profile.lastName',
+  session: 'exam.examComponent.course.code',
+  score: 'score',
+  grade: 'grade',
+  recorded: 'createdAt',
+} as const
+type HistorySortKey = keyof typeof HISTORY_SORT_KEYS
 
 export const metadata: Metadata = { title: 'Results Entry | Examiner Portal' }
 export const dynamic = 'force-dynamic'

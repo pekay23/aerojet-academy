@@ -52,7 +52,7 @@ describe('Instructor Schedule — GET /api/instructor/schedule', () => {
   })
 
   it('returns 403 when instructor profile is missing', async () => {
-    getInstructorProfileByUserId.mockResolvedValueOnce(null)
+    vi.mocked(getInstructorProfileByUserId).mockResolvedValueOnce(null)
     const req = new NextRequest('http://localhost/api/instructor/schedule', { method: 'GET' })
     const res = await GET(req)
     expect(res.status).toBe(403)

@@ -209,7 +209,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                         const res = await bulkDeleteUsers(ids)
                         if (res.success) {
                           toast.success(`Permanently deleted ${ids.length} applicants`)
-                          fetchApplicants()
+                          loadApplicants()
                         } else toast.error(res.error)
                       },
                     }
@@ -301,7 +301,7 @@ export default function ApplicantsQueue({ initialCounts }: { initialCounts: Coun
                     {t.label}
                     {counts[t.key as keyof ApplicantCounts] !== undefined && (
                       <span className="ml-1 opacity-70">
-                        ({counts[t.key as keyof Counts] ?? 0})
+                        ({counts[t.key as keyof ApplicantCounts] ?? 0})
                       </span>
                     )}
                   </span>

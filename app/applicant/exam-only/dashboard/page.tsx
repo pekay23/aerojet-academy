@@ -44,7 +44,7 @@ export default async function ExamOnlyDashboardPage() {
   const firstName = user.profile?.firstName ?? 'Applicant'
 
   // Fetch wallet
-  const wallet = await prisma.wallet.findUnique({
+  const wallet = await prismaUnfiltered.wallet.findUnique({
     where: { userId },
     select: {
       balance: true,

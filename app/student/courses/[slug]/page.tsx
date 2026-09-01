@@ -169,7 +169,7 @@ export default async function CourseDetailsPage({
             </h2>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="rounded-xl border border-slate-100 p-5 transition-all hover:border-blue-100 hover:bg-blue-50/20 dark:border-slate-800">
-                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-aerojet-sky">
+                <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-sky-400">
                   <FileText className="h-5 w-5" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">Syllabus</h3>

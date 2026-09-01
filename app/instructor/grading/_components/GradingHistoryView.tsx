@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import {
   Search,
   History,
@@ -35,7 +35,7 @@ interface GradedItem {
   id: string
   assessmentName: string
   assessmentType: string
-  score: any
+  score: number
   comments?: string | null
   updatedAt: string
   user: {
@@ -62,6 +62,8 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
   const [score, setScore] = useState<string>('')
   const [comments, setComments] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
 
@@ -118,7 +120,7 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
       {/* Search Header */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="relative max-w-xl flex-1">
-          <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-300" />
           <Input
             placeholder="Search history by student, assessment, or module..."
             value={searchQuery}
@@ -129,16 +131,16 @@ export default function GradingHistoryView({ initialHistory }: GradingHistoryVie
 
         <div className="flex items-center gap-2 text-[10px] font-black tracking-widest text-slate-500 uppercase">
           <History className="h-4 w-4 text-aerojet-sky" />
-          <span>{filteredHistory.length} Graded Assessments</span>
+          <span>{total} Graded Assessments</span>
         </div>
       </div>
 
       {/* History List */}
       <div className="grid gap-4">
         <AnimatePresence mode="popLayout">
-          {filteredHistory.length > 0 ? (
-            paged.map((item) => (
-              <motion.div
+          {initialHistory.length > 0 ? (
+            initialHistory.map((item) => (
+              <MotionDiv
                 key={item.id}
                 layout
                 initial={{ opacity: 0, y: 10 }}

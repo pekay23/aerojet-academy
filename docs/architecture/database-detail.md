@@ -33,6 +33,8 @@ The schema is built around five core domains:
 - **Payment**: Tracks external proof-of-payments (manual bank transfers) which are later reconciled by Staff.
 - **PaymentMilestone**: Milestone-based payment schedule entries (e.g., registration fee, module fees), linked to `Payment` and `Invoice`.
 - **Invoice**: Generated invoices for student financial obligations, linked to `PaymentMilestone` and `WalletTransaction`.
+- **PaymentMilestone**: Milestone-based payment schedule entries (e.g., registration fee, module fees), linked to `Payment` and `Invoice`.
+- **Invoice**: Generated invoices for student financial obligations, linked to `PaymentMilestone` and `WalletTransaction`.
 
 ### 5. Academic Management
 - **Class**: A specific instance of a course with an instructor and schedule.
@@ -50,6 +52,15 @@ The schema is built around five core domains:
 - **AdminCalendarEvent**: Broadcasted events with audience targeting (`ALL`, `STUDENTS`, `INSTRUCTORS`, `SPECIFIC_USER`, or pathway-specific).
 - **StudentCalendarEvent**: Personalized calendar entries synced from admin broadcasts or personal student schedules.
 - **Message**: Internal staff-to-user messaging system.
+
+### 7. System & Infrastructure
+- **Notification**: In-app notifications.
+- **AuditLog**: All system actions.
+- **AuditLogArchive**: Time-partitioned archive of `AuditLog` rows beyond the retention sweep window (kept for compliance; not queried by the live app).
+- **FileUpload**: Uploaded files tracking.
+- **SystemSetting**: Key-value admin-editable settings (registration fees, exam pricing, payment splits, email config, class seating assignments as `class_seating_{classId}` keys).
+- **PaymentMethod**: Bank transfer details (account name, number, SWIFT, branch).
+- **EmailDelivery**: Every `sendEmail()` call logged with `recipient`, `subject`, `template`, `status`, `attempts`, `error`, `messageId`.
 
 ### 7. System & Infrastructure
 - **Notification**: In-app notifications.

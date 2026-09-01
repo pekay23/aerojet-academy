@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo } from 'react'
+import React, { useState } from 'react'
 import {
   Search,
   Filter,
@@ -63,6 +63,8 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
+  const [page, setPage] = useState(1)
+  const [perPage, setPerPage] = useState(25)
 
   const filteredQueue = useMemo(() => {
     return initialQueue.filter((item) => {
@@ -113,7 +115,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
       {/* Search Header */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
         <div className="relative max-w-xl flex-1">
-          <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Search className="absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-slate-400 dark:text-slate-300" />
           <Input
             placeholder="Search by student, assessment, or module..."
             value={searchQuery}
@@ -133,7 +135,7 @@ export default function GradingQueueView({ initialQueue }: GradingQueueViewProps
         <AnimatePresence mode="popLayout">
           {filteredQueue.length > 0 ? (
             paged.map((item) => (
-              <motion.div
+              <MotionDiv
                 key={item.id}
                 layout
                 initial={{ opacity: 0, y: 10 }}

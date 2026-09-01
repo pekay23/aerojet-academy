@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { LogbookPreview } from '@/components/shared/LogbookPreview'
 import { useSort, SortHeader } from '@/lib/hooks/useSort'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface Entry {
   id: string
@@ -77,6 +78,7 @@ export default function StudentLogbook({ data }: { data: LogbookData }) {
   const router = useRouter()
   const [expandedEntry, setExpandedEntry] = useState<string | null>(null)
   const [signing, setSigning] = useState<string | null>(null)
+  const { items, requestSort, sortConfig } = useSort(data.entries, { key: 'date', order: 'desc' })
   const { items, requestSort, sortConfig } = useSort(data.entries, { key: 'date', order: 'desc' })
 
   const handleSign = async (entryId: string) => {

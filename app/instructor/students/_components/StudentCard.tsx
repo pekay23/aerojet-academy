@@ -26,7 +26,7 @@ export default function StudentCard({ student }: { student: Student }) {
 
   return (
     <Link href={`/instructor/students/${student.id}`}>
-      <motion.div
+      <MotionDiv
         whileHover={{ y: -4 }}
         className="group relative flex flex-col items-center overflow-hidden rounded-3xl border border-slate-100 bg-white p-6 shadow-sm transition-all hover:border-aerojet-sky/30 hover:shadow-xl hover:shadow-blue-500/10 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-aerojet-sky/30"
       >
@@ -49,7 +49,7 @@ export default function StudentCard({ student }: { student: Student }) {
           <h3 className="line-clamp-1 text-lg font-black text-slate-900 transition-colors group-hover:text-aerojet-sky dark:text-white">
             {student.name}
           </h3>
-          <p className="mt-1 text-xs font-bold tracking-wider text-slate-400 uppercase">
+          <p className="mt-1 text-xs font-bold tracking-wider text-slate-400 dark:text-slate-300 uppercase">
             {student.studentId || 'No Student ID'}
           </p>
         </div>

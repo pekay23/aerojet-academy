@@ -45,6 +45,10 @@ vi.mock('@/lib/finance/overview', () => ({
   getFinanceOverviewData: vi.fn(),
 }))
 
+vi.mock('@/lib/finance/overview', () => ({
+  getFinanceOverviewData: vi.fn(),
+}))
+
 import { GET } from '@/app/api/staff/finance/overview/route'
 import { POST } from '@/app/api/staff/finance/wallet-topups/[id]/approve/route'
 import { getFinanceOverviewData } from '@/lib/finance/overview'
@@ -225,7 +229,9 @@ describe('Staff Finance — overview + wallet-topup approve', () => {
 
       await vi.waitFor(() => {
         await vi.waitFor(() => {
+        await vi.waitFor(() => {
         expect(qualifyReferral).toHaveBeenCalledWith('user-1')
+      })
       })
       })
     })

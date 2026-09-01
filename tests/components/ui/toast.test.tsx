@@ -29,7 +29,7 @@ describe('Toast', () => {
   })
 
   it('renders action button', () => {
-    render(<ToastAction>Undo</ToastAction>)
+    render(<ToastAction altText="Undo action">Undo</ToastAction>)
     expect(screen.getByText('Undo')).toBeInTheDocument()
   })
 
