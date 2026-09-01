@@ -24,10 +24,13 @@ export const GET = withErrorHandler(async (req: NextRequest, ctx: { params: Prom
   const assignments = await prismaUnfiltered.internalExamBankInstructor.findMany({
     where: { bankId },
     include: {
-      user: {
+      instructor: {
         include: {
-          profile: { select: { firstName: true, lastName: true } },
-          instructorProfile: { select: { employeeId: true, department: true } },
+          user: {
+            include: {
+              profile: { select: { firstName: true, lastName: true } },
+            },
+          },
         },
       },
     },
@@ -79,10 +82,13 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: { params: Pro
             assignedBy: staff.id,
           },
           include: {
-            user: {
+            instructor: {
               include: {
-                profile: { select: { firstName: true, lastName: true } },
-                instructorProfile: { select: { employeeId: true, department: true } },
+                user: {
+                  include: {
+                    profile: { select: { firstName: true, lastName: true } },
+                  },
+                },
               },
             },
           },
@@ -119,10 +125,13 @@ export const POST = withErrorHandler(async (req: NextRequest, ctx: { params: Pro
       assignedBy: staff.id,
     },
     include: {
-      user: {
+      instructor: {
         include: {
-          profile: { select: { firstName: true, lastName: true } },
-          instructorProfile: { select: { employeeId: true, department: true } },
+          user: {
+            include: {
+              profile: { select: { firstName: true, lastName: true } },
+            },
+          },
         },
       },
     },
