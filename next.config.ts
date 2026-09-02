@@ -77,7 +77,7 @@ const nextConfig: NextConfig = {
           "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
           "img-src 'self' data: blob: https://utfs.io https://*.ufs.sh https://uploadthing.com https://lh3.googleusercontent.com https://flagcdn.com https://www.gstatic.com",
           "font-src 'self' data: https://fonts.gstatic.com",
-          "connect-src 'self' https://uploadthing.com https://*.uploadthing.com https://*.ufs.sh https://api.stripe.com https://www.google.com https://va.vercel-scripts.com https://vitals.vercel-insights.com",
+          "connect-src 'self' https://uploadthing.com https://*.uploadthing.com https://*.ufs.sh https://api.stripe.com https://www.google.com https://va.vercel-scripts.com https://vitals.vercel-insights.com https://*.supabase.co wss://*.supabase.co https://*.supabase.in",
           "frame-src 'self' blob: https://js.stripe.com https://hooks.stripe.com https://www.google.com",
           "frame-ancestors 'self'",
           "worker-src 'self' blob:",

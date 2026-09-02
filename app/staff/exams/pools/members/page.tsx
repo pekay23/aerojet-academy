@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { ChevronLeft, Users, BookOpen, Search, Filter, Calendar } from 'lucide-react'
 import SearchInput from '@/components/SearchInput'
 import { buildOrderBy } from '@/lib/utils/build-order-by'
+import { SortableTh } from '@/components/ui/sortable-th'
 import type { Prisma } from '@prisma/client'
 
 export const metadata: Metadata = { title: 'Booking Members Report | Staff Portal' }
@@ -14,6 +15,9 @@ export const dynamic = 'force-dynamic'
 const ALLOWED_SORT_KEYS = {
   event: 'startDate',
   name: 'name',
+  student: 'user.profile.lastName',
+  module: 'examComponent.course.code',
+  status: 'status',
 } as const
 type SortKey = keyof typeof ALLOWED_SORT_KEYS
 
@@ -159,9 +163,9 @@ export default async function PoolMembersReportPage({
                       <table className="w-full text-left text-sm">
                         <thead className="bg-slate-50 text-[10px] font-bold text-slate-500 uppercase dark:bg-slate-800/50 dark:text-slate-400">
                           <tr>
-                            <th className="px-6 py-3">Student</th>
-                            <th className="px-6 py-3">Module / Component</th>
-                            <th className="px-6 py-3">Booking Status</th>
+                            <SortableTh sortKey="student" label="Student" />
+                            <SortableTh sortKey="module" label="Module / Component" />
+                            <SortableTh sortKey="status" label="Booking Status" />
                             <th className="px-6 py-3 text-right">Actions</th>
                           </tr>
                         </thead>

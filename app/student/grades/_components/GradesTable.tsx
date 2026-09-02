@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import TablePagination from '@/components/shared/TablePagination'
 import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface Grade {
   id: string
@@ -39,8 +40,19 @@ export default function GradesTable({ grades }: { grades: Grade[] }) {
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
 
-  const total = grades.length
-  const paged = grades.slice((page - 1) * perPage, page * perPage)
+  const sortableGrades = useMemo(
+    () =>
+      grades.map((g) => ({
+        ...g,
+        _percentage: Number(g.percentage),
+        _dateTs: new Date(g.assessmentDate).getTime(),
+      })),
+    [grades]
+  )
+  const { items: sortedGrades, requestSort, sortConfig } = useSort(sortableGrades)
+  const paged = sortedGrades.slice((page - 1) * perPage, page * perPage)
+
+  const total = sortedGrades.length
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -54,11 +66,11 @@ export default function GradesTable({ grades }: { grades: Grade[] }) {
             <table className="w-full text-left text-sm" aria-label="Academic grades">
               <thead>
                 <tr className="border-b border-slate-100 text-xs font-bold tracking-widest text-slate-400 uppercase dark:border-slate-800">
-                  <th scope="col" className="px-6 py-4">Assessment</th>
-                  <th scope="col" className="px-6 py-4">Course / Module</th>
-                  <th scope="col" className="px-6 py-4">Score</th>
-                  <th scope="col" className="px-6 py-4">Result</th>
-                  <th scope="col" className="px-6 py-4 text-right">Date</th>
+                  <SortHeader label="Assessment" sortKey="assessmentName" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
+                  <SortHeader label="Course / Module" sortKey="enrollment.course.name" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
+                  <SortHeader label="Score" sortKey="_percentage" currentSort={sortConfig} onSort={requestSort} align="right" className="px-6 py-4" />
+                  <SortHeader label="Result" sortKey="_percentage" currentSort={sortConfig} onSort={requestSort} align="center" className="px-6 py-4" />
+                  <SortHeader label="Date" sortKey="_dateTs" currentSort={sortConfig} onSort={requestSort} align="right" className="px-6 py-4" />
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">

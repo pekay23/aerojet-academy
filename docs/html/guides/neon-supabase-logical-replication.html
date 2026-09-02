@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Neon → Supabase Logical Replication Runbook · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,60 +27,137 @@
 <header>
   <p class="he-eyebrow">Guides</p>
   <h1 class="he-title">Neon → Supabase Logical Replication Runbook</h1>
-  <p class="he-deck"><p><strong>Status</strong>: Manual one-time DB setup required on both Neon and Supabase.</p>
-</p>
+  <p class="he-deck"><strong>Status</strong>: Manual one-time DB setup required on both Neon and Supabase.</p>
 </header>
-<section class="he-section" id="tldr-8-steps-from-zero-to-replicating"><div class="he-section__num">01 · ⚡ TL;DR — 8 steps from zero to replicating</div><h2 class="he-section__title">⚡ TL;DR — 8 steps from zero to replicating</h2>If you've read the rest of this doc and just want the checklist:Neon → Project → Settings → Beta features → toggle Logical replication (compute restarts ~30s).On Neon (as <code>neondb_owner</code>):CREATE PUBLICATION aerojet_pub FOR ALL TABLES;
-On Neon, create a dedicated replication role:CREATE ROLE neondb_replicator WITH REPLICATION LOGIN PASSWORD 'use-a-strong-random-string';
+<hr />
+<section class="he-section" id="tldr-8-steps-from-zero-to-replicating"><div class="he-section__num">01 · ⚡ TL;DR — 8 steps from zero to replicating</div><h2 class="he-section__title">⚡ TL;DR — 8 steps from zero to replicating</h2></section>
+<p>If you've read the rest of this doc and just want the checklist:</p>
+<ol>
+<li><strong>Neon → Project → Settings → Beta features → toggle Logical replication</strong> (compute restarts ~30s).</li>
+<li>On Neon (as <code>neondb_owner</code>):
+<pre><code class="language-sql">CREATE PUBLICATION aerojet_pub FOR ALL TABLES;
+</code></pre>
+</li>
+<li>On Neon, create a dedicated replication role:
+<pre><code class="language-sql">CREATE ROLE neondb_replicator WITH REPLICATION LOGIN PASSWORD 'use-a-strong-random-string';
 GRANT USAGE ON SCHEMA public TO neondb_replicator;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO neondb_replicator;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO neondb_replicator;
-Store the password in your secret manager — you'll need it in step 6.Mirror the schema to Supabase before the subscription exists:bun run db:push:supabase
+</code></pre>
+Store the password in your secret manager — you'll need it in step 6.</li>
+<li>Mirror the schema to Supabase <strong>before</strong> the subscription exists:
+<pre><code class="language-bash">bun run db:push:supabase
+</code></pre>
 This empties the Supabase tables and re-creates them to match Prisma. Skip
-if you already pushed and tables are empty.On Supabase SQL Editor (Project → Database → Extensions), confirm
+if you already pushed and tables are empty.</li>
+<li>On Supabase <strong>SQL Editor</strong> (Project → Database → Extensions), confirm
 <code>pg_subscription</code> capability is available (paid tier required for inbound
-logical replication on Supabase too).Still on Supabase, create the subscription:CREATE SUBSCRIPTION aerojet_sub
+logical replication on Supabase too).</li>
+<li>Still on Supabase, create the subscription:
+<pre><code class="language-sql">CREATE SUBSCRIPTION aerojet_sub
   CONNECTION 'host=ep-XXXX.us-east-1.aws.neon.tech
               port=5432
               user=neondb_replicator
-              password=<from step 3>
+              password=&lt;from step 3&gt;
               dbname=neondb
               sslmode=require'
   PUBLICATION aerojet_pub
   WITH (copy_data = true, create_slot = true, slot_name = 'aerojet_sub_slot', streaming = on);
+</code></pre>
 The initial copy may take a few minutes for large tables — watch progress
-with <code>SELECT * FROM pg_stat_subscription;</code>.In Vercel → Project → Settings → Environment Variables, add:<code>SUPABASE_DATABASE_URL</code> — the Supabase pooler connection string (used by
-<code>bun run db:push:supabase</code> via <code>postdb:push</code>).<code>SUPABASE_SERVICE_ROLE_KEY</code> and <code>NEXT_PUBLIC_SUPABASE_URL</code> if not already.Verify the weekly sync-check cron is live in <code>vercel.json</code> — schedule
+with <code>SELECT * FROM pg_stat_subscription;</code>.</li>
+<li>In <strong>Vercel → Project → Settings → Environment Variables</strong>, add:
+<ul>
+<li><code>SUPABASE_DATABASE_URL</code> — the Supabase pooler connection string (used by
+<code>bun run db:push:supabase</code> via <code>postdb:push</code>).</li>
+<li><code>SUPABASE_SERVICE_ROLE_KEY</code> and <code>NEXT_PUBLIC_SUPABASE_URL</code> if not already.</li>
+</ul>
+</li>
+<li>Verify the weekly sync-check cron is live in <code>vercel.json</code> — schedule
 <code>0 4 * * 1</code>. It pings <code>lib/supabase/sync-check.ts:runSyncCheck()</code> and
-writes an AuditLog row if drift > 0.1%.You're done. Every Prisma write on Neon now replicates to Supabase
+writes an AuditLog row if drift &gt; 0.1%.</li>
+</ol>
+<p><strong>You're done.</strong> Every Prisma write on Neon now replicates to Supabase
 typically within a second. Schema changes still flow via <code>bun run db:push</code>
-(which triggers <code>postdb:push</code> → <code>db:push:supabase</code> automatically).<section class="he-section" id="what-this-gives-you"><div class="he-section__num">02 · What this gives you</div><h2 class="he-section__title">What this gives you</h2>Row-level replication of every Aerojet table from Neon → Supabase
-in near real-time (typical lag <1s).Supabase becomes a live read-replica suitable for:Analytics queries that should not hit the primaryDisaster-recovery cutover (if Neon becomes unreachable)Storage parity for the Document Vault (which lives in Supabase buckets)Schema mirroring is separate and handled by <code>bun run db:push</code> (which now
-triggers <code>bun run db:push:supabase</code> automatically via the <code>postdb:push</code> hook).<section class="he-section" id="what-this-does-not-give-you"><div class="he-section__num">03 · What this does NOT give you</div><h2 class="he-section__title">What this does NOT give you</h2>Bi-directional sync. Supabase is read-only from the app's perspective.Conflict resolution. Writes must always go through Neon (via Prisma).Storage-bucket replication. The <code>aerojet-documents</code> bucket is Supabase-native;
+(which triggers <code>postdb:push</code> → <code>db:push:supabase</code> automatically).</p>
+<hr />
+<section class="he-section" id="what-this-gives-you"><div class="he-section__num">02 · What this gives you</div><h2 class="he-section__title">What this gives you</h2></section>
+<ul>
+<li><strong>Row-level</strong> replication of every Aerojet table from Neon → Supabase
+in near real-time (typical lag &lt;1s).</li>
+<li>Supabase becomes a live read-replica suitable for:
+<ul>
+<li>Analytics queries that should not hit the primary</li>
+<li>Disaster-recovery cutover (if Neon becomes unreachable)</li>
+<li>Storage parity for the Document Vault (which lives in Supabase buckets)</li>
+</ul>
+</li>
+<li>Schema mirroring is <strong>separate</strong> and handled by <code>bun run db:push</code> (which now
+triggers <code>bun run db:push:supabase</code> automatically via the <code>postdb:push</code> hook).</li>
+</ul>
+<section class="he-section" id="what-this-does-not-give-you"><div class="he-section__num">03 · What this does NOT give you</div><h2 class="he-section__title">What this does NOT give you</h2></section>
+<ul>
+<li>Bi-directional sync. Supabase is read-only from the app's perspective.</li>
+<li>Conflict resolution. Writes must always go through Neon (via Prisma).</li>
+<li>Storage-bucket replication. The <code>aerojet-documents</code> bucket is Supabase-native;
 UploadThing → Supabase mirroring is handled by
-<code>app/api/cron/supabase-mirror/route.ts</code> (separate concern).<section class="he-section" id="step-1-enable-logical-decoding-on-neon"><div class="he-section__num">04 · Step 1 — Enable logical decoding on Neon</div><h2 class="he-section__title">Step 1 — Enable logical decoding on Neon</h2>Neon supports <code>wal_level=logical</code> on paid tiers. Free tier requires upgrade.Open the Neon Console → Project → Settings → Beta features.Toggle Logical replication ON. Neon will restart the compute (≈30s).Verify in <code>psql</code>:SHOW wal_level;            -- expect: logical
-SHOW max_replication_slots; -- expect: >= 10
-SHOW max_wal_senders;       -- expect: >= 10
-<section class="he-section" id="step-2-create-the-publication-on-neon"><div class="he-section__num">05 · Step 2 — Create the publication on Neon</div><h2 class="he-section__title">Step 2 — Create the publication on Neon</h2>Connect to Neon as <code>neondb_owner</code> (or any role with <code>CREATE</code> on the schema):-- One publication covering every Aerojet table.
+<code>app/api/cron/supabase-mirror/route.ts</code> (separate concern).</li>
+</ul>
+<hr />
+<section class="he-section" id="step-1-enable-logical-decoding-on-neon"><div class="he-section__num">04 · Step 1 — Enable logical decoding on Neon</div><h2 class="he-section__title">Step 1 — Enable logical decoding on Neon</h2></section>
+<p>Neon supports <code>wal_level=logical</code> on <strong>paid tiers</strong>. Free tier requires upgrade.</p>
+<ol>
+<li>
+<p>Open the Neon Console → Project → <strong>Settings → Beta features</strong>.</p>
+</li>
+<li>
+<p>Toggle <strong>Logical replication</strong> ON. Neon will restart the compute (≈30s).</p>
+</li>
+<li>
+<p>Verify in <code>psql</code>:</p>
+<pre><code class="language-sql">SHOW wal_level;            -- expect: logical
+SHOW max_replication_slots; -- expect: &gt;= 10
+SHOW max_wal_senders;       -- expect: &gt;= 10
+</code></pre>
+</li>
+</ol>
+<section class="he-section" id="step-2-create-the-publication-on-neon"><div class="he-section__num">05 · Step 2 — Create the publication on Neon</div><h2 class="he-section__title">Step 2 — Create the publication on Neon</h2></section>
+<p>Connect to Neon as <code>neondb_owner</code> (or any role with <code>CREATE</code> on the schema):</p>
+<pre><code class="language-sql">-- One publication covering every Aerojet table.
 CREATE PUBLICATION aerojet_pub FOR ALL TABLES;
 
 -- Verify
 SELECT pubname, puballtables FROM pg_publication;
-If you prefer a curated list (e.g. exclude <code>_prisma_migrations</code>):CREATE PUBLICATION aerojet_pub
+</code></pre>
+<p>If you prefer a curated list (e.g. exclude <code>_prisma_migrations</code>):</p>
+<pre><code class="language-sql">CREATE PUBLICATION aerojet_pub
   FOR TABLE users, profiles, enrollments, payments, /* … */ ;
-Use the all-tables form unless you have a reason — it survives schema additions
-without manual ALTER PUBLICATION.<section class="he-section" id="step-3-prepare-supabase-as-the-subscriber"><div class="he-section__num">06 · Step 3 — Prepare Supabase as the subscriber</div><h2 class="he-section__title">Step 3 — Prepare Supabase as the subscriber</h2>Make sure schema is mirrored first. Run on a dev machine:bun run db:push:supabase
-This script (<code>scripts/sync-supabase-schema.sh</code>) temporarily redirects
-<code>DATABASE_URL</code> to <code>SUPABASE_DATABASE_URL</code> and runs <code>prisma db push
---accept-data-loss</code> against Supabase. Required because logical replication
-replicates data only, not DDL.On Supabase, the destination tables must be empty (or already match the
+</code></pre>
+<p>Use the all-tables form unless you have a reason — it survives schema additions
+without manual ALTER PUBLICATION.</p>
+<section class="he-section" id="step-3-prepare-supabase-as-the-subscriber"><div class="he-section__num">06 · Step 3 — Prepare Supabase as the subscriber</div><h2 class="he-section__title">Step 3 — Prepare Supabase as the subscriber</h2></section>
+<ol>
+<li>
+<p>Make sure schema is mirrored first. Run on a dev machine:</p>
+<pre><code class="language-bash">bun run db:push:supabase
+</code></pre>
+<p>This script (<code>scripts/sync-supabase-schema.sh</code>) temporarily redirects
+<code>DATABASE_URL</code> to <code>SUPABASE_DATABASE_URL</code> and runs <code>prisma db push --accept-data-loss</code> against Supabase. Required because logical replication
+replicates <strong>data only</strong>, not DDL.</p>
+</li>
+<li>
+<p>On Supabase, the destination tables must be empty (or already match the
 source) before subscription. For a fresh setup, the <code>db:push:supabase</code>
-above creates empty tables and you can proceed.Open Supabase SQL Editor and run:-- Replace placeholders before running
+above creates empty tables and you can proceed.</p>
+</li>
+<li>
+<p>Open Supabase <strong>SQL Editor</strong> and run:</p>
+<pre><code class="language-sql">-- Replace placeholders before running
 CREATE SUBSCRIPTION aerojet_sub
   CONNECTION 'host=ep-XXXX.us-east-1.aws.neon.tech
               port=5432
               user=neondb_replicator
-              password=<see 1Password>
+              password=&lt;see 1Password&gt;
               dbname=neondb
               sslmode=require'
   PUBLICATION aerojet_pub
@@ -92,41 +170,109 @@ CREATE SUBSCRIPTION aerojet_sub
 
 -- Verify
 SELECT subname, subenabled, subslotname FROM pg_subscription;
-Connection user: create a dedicated <code>neondb_replicator</code> role on Neon
+</code></pre>
+<p><strong>Connection user</strong>: create a dedicated <code>neondb_replicator</code> role on Neon
 with <code>REPLICATION</code> permission and <code>SELECT</code> on all tables. Storing its
 password in Supabase pg_subscription is acceptable for managed Postgres,
-but keep a copy in 1Password.<section class="he-section" id="step-4-monitor"><div class="he-section__num">07 · Step 4 — Monitor</div><h2 class="he-section__title">Step 4 — Monitor</h2>On Neon:SELECT slot_name, active, restart_lsn, confirmed_flush_lsn,
+but keep a copy in 1Password.</p>
+</li>
+</ol>
+<section class="he-section" id="step-4-monitor"><div class="he-section__num">07 · Step 4 — Monitor</div><h2 class="he-section__title">Step 4 — Monitor</h2></section>
+<p>On <strong>Neon</strong>:</p>
+<pre><code class="language-sql">SELECT slot_name, active, restart_lsn, confirmed_flush_lsn,
        pg_size_pretty(pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn)) AS lag
   FROM pg_replication_slots
  WHERE slot_name = 'aerojet_sub_slot';
-Lag should stay near zero. If it grows unbounded, Neon is retaining WAL —
-investigate (subscriber unreachable, network issue, schema drift).On Supabase:SELECT subname, received_lsn, latest_end_lsn, latest_end_time
+</code></pre>
+<p>Lag should stay near zero. If it grows unbounded, Neon is retaining WAL —
+investigate (subscriber unreachable, network issue, schema drift).</p>
+<p>On <strong>Supabase</strong>:</p>
+<pre><code class="language-sql">SELECT subname, received_lsn, latest_end_lsn, latest_end_time
   FROM pg_stat_subscription;
-The app's <code>/api/cron/sync-check</code> route (weekly Mondays at 04:00 UTC) calls
+</code></pre>
+<p>The app's <code>/api/cron/sync-check</code> route (weekly Mondays at 04:00 UTC) calls
 <code>lib/supabase/sync-check.ts:runSyncCheck()</code> which counts rows on both ends for
 a key set of tables (User, Enrollment, Payment, AuditLog, Grade) and writes
 an AuditLog row if drift exceeds 0.1%. Wire to PagerDuty / email via the
-existing notification helpers.<section class="he-section" id="step-5-schema-changes-after-replication-is-live"><div class="he-section__num">08 · Step 5 — Schema changes after replication is live</div><h2 class="he-section__title">Step 5 — Schema changes after replication is live</h2>Schema DDL is NOT replicated. The flow:Edit <code>prisma/schema.prisma</code>.<code>bun run db:push</code> → applies to Neon, then <code>postdb:push</code> automatically runs
-<code>db:push:supabase</code> against Supabase.If you added a table, refresh the publication on Neon:-- Only needed if your publication is NOT "FOR ALL TABLES"
+existing notification helpers.</p>
+<section class="he-section" id="step-5-schema-changes-after-replication-is-live"><div class="he-section__num">08 · Step 5 — Schema changes after replication is live</div><h2 class="he-section__title">Step 5 — Schema changes after replication is live</h2></section>
+<p>Schema DDL is <strong>NOT</strong> replicated. The flow:</p>
+<ol>
+<li>
+<p>Edit <code>prisma/schema.prisma</code>.</p>
+</li>
+<li>
+<p><code>bun run db:push</code> → applies to Neon, then <code>postdb:push</code> automatically runs
+<code>db:push:supabase</code> against Supabase.</p>
+</li>
+<li>
+<p>If you added a table, refresh the publication on Neon:</p>
+<pre><code class="language-sql">-- Only needed if your publication is NOT &quot;FOR ALL TABLES&quot;
 ALTER PUBLICATION aerojet_pub ADD TABLE new_table_name;
-The all-tables form picks up new tables automatically on next subscription
-refresh.On Supabase, refresh the subscription so it knows about new tables:ALTER SUBSCRIPTION aerojet_sub REFRESH PUBLICATION;
-<section class="he-section" id="step-6-disaster-recovery-cutover-read-path-only"><div class="he-section__num">09 · Step 6 — Disaster recovery cutover (read path only)</div><h2 class="he-section__title">Step 6 — Disaster recovery cutover (read path only)</h2>If Neon is down and you need Supabase to serve reads:Set <code>DATABASE_URL=$SUPABASE_DATABASE_URL</code> in Vercel env.Redeploy. Writes will fail (intentionally — Supabase is read-only in this
-setup) but reads will continue.Once Neon is back, set <code>DATABASE_URL</code> back, redeploy, then re-run
+</code></pre>
+<p>The all-tables form picks up new tables automatically on next subscription
+refresh.</p>
+</li>
+<li>
+<p>On Supabase, refresh the subscription so it knows about new tables:</p>
+<pre><code class="language-sql">ALTER SUBSCRIPTION aerojet_sub REFRESH PUBLICATION;
+</code></pre>
+</li>
+</ol>
+<section class="he-section" id="step-6-disaster-recovery-cutover-read-path-only"><div class="he-section__num">09 · Step 6 — Disaster recovery cutover (read path only)</div><h2 class="he-section__title">Step 6 — Disaster recovery cutover (read path only)</h2></section>
+<p>If Neon is down and you need Supabase to serve reads:</p>
+<ol>
+<li>Set <code>DATABASE_URL=$SUPABASE_DATABASE_URL</code> in Vercel env.</li>
+<li>Redeploy. Writes will fail (intentionally — Supabase is read-only in this
+setup) but reads will continue.</li>
+<li>Once Neon is back, set <code>DATABASE_URL</code> back, redeploy, then re-run
 <code>bun run db:push:supabase</code> if any schema changes happened during the
-outage.For full failover (writes too), see <code>docs/disaster-recovery.md</code> (not yet
-written — TODO).<section class="he-section" id="why-we-chose-this-over-app-level-dual-write"><div class="he-section__num">10 · Why we chose this over app-level dual-write</div><h2 class="he-section__title">Why we chose this over app-level dual-write</h2>Correctness: dual-write requires distributed transactions or eventual
+outage.</li>
+</ol>
+<p>For full failover (writes too), see <code>docs/disaster-recovery.md</code> (not yet
+written — TODO).</p>
+<hr />
+<section class="he-section" id="why-we-chose-this-over-app-level-dual-write"><div class="he-section__num">10 · Why we chose this over app-level dual-write</div><h2 class="he-section__title">Why we chose this over app-level dual-write</h2></section>
+<ul>
+<li><strong>Correctness</strong>: dual-write requires distributed transactions or eventual
 consistency tooling. Logical replication is built into Postgres and
-battle-tested.Performance: zero overhead on the app server (no second <code>await</code> per
-query, no thread fan-out).Schema parity: <code>prisma db push</code> is the single source of truth.Operational simplicity: monitoring is <code>pg_replication_slots</code>, not custom
-app metrics.The dormant <code>lib/supabase/dual-write.ts</code> and
+battle-tested.</li>
+<li><strong>Performance</strong>: zero overhead on the app server (no second <code>await</code> per
+query, no thread fan-out).</li>
+<li><strong>Schema parity</strong>: <code>prisma db push</code> is the single source of truth.</li>
+<li><strong>Operational simplicity</strong>: monitoring is <code>pg_replication_slots</code>, not custom
+app metrics.</li>
+</ul>
+<p>The dormant <code>lib/supabase/dual-write.ts</code> and
 <code>lib/prisma/supabase-sync-extension.ts</code> modules are kept in the tree as a
-fallback strategy if logical replication is unavailable (e.g. Neon free
+<strong>fallback strategy</strong> if logical replication is unavailable (e.g. Neon free
 tier). They have zero callers today and should stay that way once replication
-is healthy.<section class="he-section" id="realtime-push-notifications-in-app-messaging"><div class="he-section__num">11 · Realtime push notifications (in-app messaging)</div><h2 class="he-section__title">Realtime push notifications (in-app messaging)</h2>The in-app messages inbox subscribes to Supabase Realtime so new messages
+is healthy.</p>
+<hr />
+<section class="he-section" id="realtime-push-notifications-in-app-messaging"><div class="he-section__num">11 · Realtime push notifications (in-app messaging)</div><h2 class="he-section__title">Realtime push notifications (in-app messaging)</h2></section>
+<p>The in-app messages inbox subscribes to Supabase Realtime so new messages
 arrive without a page refresh. This piggybacks on the logical-replication
 data stream above — once a message row lands in Supabase, the Realtime
-service emits a <code>postgres_changes</code> event that the browser hook picks up.<h3 id="enabling-realtime-on-the-messages-table">Enabling Realtime on the <code>messages</code> table</h3>In current Supabase dashboards the Realtime toggle lives under Database → Tables, not under the Replication tab (the Replication tab is for the inbound logical-replication subscription described above, not for the outbound websocket stream).Open Supabase → Database → Tables.Click the <code>messages</code> row.Toggle Enable Realtime in the table-settings panel.(Optional) Repeat for <code>notifications</code> if you want push for in-app notifications too.That's it — no app code changes needed.<h3 id="client-wiring-already-in-this-repo">Client wiring (already in this repo)</h3><code>lib/realtime/client.ts</code> — singleton <code>createBrowserClient</code> for Realtime only.<code>hooks/useRealtimeMessages.ts</code> — subscribes to <code>messages</code> filtered by <code>recipientId=eq.<currentUser.id></code> (note: the column is camelCase <code>recipientId</code>, matching the Prisma field — Postgres keeps field names verbatim because there's no <code>@map</code>). On insert, calls <code>router.refresh()</code> and shows a toast.<code>components/shared/MessagesRealtime.tsx</code> — UI-less mount point; drop in any messages page.Dropped into both <code>app/student/messages/page.tsx</code> and <code>app/staff/messages/page.tsx</code> already. Existing <code>AutoRefresh</code> polling remains as a fallback when Supabase isn't reachable.<h3 id="falling-back-gracefully">Falling back gracefully</h3>If <code>NEXT_PUBLIC_SUPABASE_URL</code> or <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> are unset (e.g. CI), <code>getRealtimeClient()</code> returns <code>null</code> and the hook becomes a no-op. The 20–60s <code>AutoRefresh</code> polling continues to work, so no user-visible regression.
+service emits a <code>postgres_changes</code> event that the browser hook picks up.</p>
+<h3 id="enabling-realtime-on-the-messages-table">Enabling Realtime on the <code>messages</code> table</h3>
+<p>In current Supabase dashboards the Realtime toggle lives under <strong>Database → Tables</strong>, not under the Replication tab (the Replication tab is for the inbound logical-replication subscription described above, not for the outbound websocket stream).</p>
+<ol>
+<li>Open Supabase → <strong>Database → Tables</strong>.</li>
+<li>Click the <code>messages</code> row.</li>
+<li>Toggle <strong>Enable Realtime</strong> in the table-settings panel.</li>
+<li>(Optional) Repeat for <code>notifications</code> if you want push for in-app notifications too.</li>
+</ol>
+<p>That's it — no app code changes needed.</p>
+<h3 id="client-wiring-already-in-this-repo">Client wiring (already in this repo)</h3>
+<ul>
+<li><code>lib/realtime/client.ts</code> — singleton <code>createBrowserClient</code> for Realtime only.</li>
+<li><code>hooks/useRealtimeMessages.ts</code> — subscribes to <code>messages</code> filtered by <code>recipientId=eq.&lt;currentUser.id&gt;</code> (note: the column is camelCase <code>recipientId</code>, matching the Prisma field — Postgres keeps field names verbatim because there's no <code>@map</code>). On insert, calls <code>router.refresh()</code> and shows a toast.</li>
+<li><code>components/shared/MessagesRealtime.tsx</code> — UI-less mount point; drop in any messages page.</li>
+</ul>
+<p>Dropped into both <code>app/student/messages/page.tsx</code> and <code>app/staff/messages/page.tsx</code> already. Existing <code>AutoRefresh</code> polling remains as a fallback when Supabase isn't reachable.</p>
+<h3 id="falling-back-gracefully">Falling back gracefully</h3>
+<p>If <code>NEXT_PUBLIC_SUPABASE_URL</code> or <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code> are unset (e.g. CI), <code>getRealtimeClient()</code> returns <code>null</code> and the hook becomes a no-op. The 20–60s <code>AutoRefresh</code> polling continues to work, so no user-visible regression.</p>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -150,7 +296,7 @@ service emits a <code>postgres_changes</code> event that the browser hook picks 
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

@@ -123,6 +123,8 @@ const prismaMock = {
   examBundle: mockModel(),
   examComponent: mockModel(),
   examSitting: mockModel(),
+  examiner: mockModel(),
+  examSittingAssignment: mockModel(),
   examAttendance: mockModel(),
   sittingAssignment: mockModel(),
   bookingEntitlement: mockModel(),

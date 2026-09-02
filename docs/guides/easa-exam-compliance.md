@@ -253,4 +253,14 @@ Once a certificate is issued:
 
 ---
 
+## 10. Compliance Sign-Off
+
+| Role | Name | Date | Signature |
+|------|------|------|-----------|
+| **Accessibility Lead** | LLM Council Audit | 2026-09-02 | Partial — WCAG 2.1 AA automated coverage in place; supervised alternative pathway documented; manual SR testing and remaining contrast audit pending. |
+| **EASA Compliance Officer** | LLM Council Audit | 2026-09-02 | Partial — internal exam system and anti-cheat certification framework implemented; DB-level immutability trigger and audit hash chain in place; certificate PDF generation via pdf-lib alternative added; SEB config deployment and template approval remain pending. |
+| **Legal / Compliance** | TBD | TBD | TBD |
+
+---
+
 *End of EASA Exam Compliance Guide*

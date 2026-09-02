@@ -8,6 +8,7 @@ import { getPDFSettings } from '@/lib/pdf-settings'
 import { CertificateTemplate } from '@/components/pdf/templates/CertificateTemplate'
 import { createAuditLog, AuditAction } from '@/lib/audit/logger'
 import { getRequestContext } from '@/lib/server/request-context'
+import QRCode from 'qrcode'
 import crypto from 'crypto'
 
 export interface CertificateData {
@@ -39,6 +40,16 @@ export function generateCertificateNumber(): string {
   const year = new Date().getFullYear()
   const seq = crypto.randomInt(1, 99999)
   return `CERT-${year}-${String(seq).padStart(4, '0')}`
+}
+
+export function getCertificateVerifyUrl(certificateId: string): string {
+  const base = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+  return `${base}/verify/${certificateId}`
+}
+
+export async function generateCertificateQrDataUrl(certificateId: string): Promise<string> {
+  const url = getCertificateVerifyUrl(certificateId)
+  return QRCode.toDataURL(url, { width: 120, margin: 1 })
 }
 
 function escapeHtml(str: string): string {
@@ -113,6 +124,8 @@ export async function generateCertificatePdf(
   const watermarkOpacity = options.watermarkOpacity ?? settings.watermarkOpacity ?? 0.15
   const footerText = options.footerText ?? settings.footerText
 
+  const qrDataUrl = await generateCertificateQrDataUrl(data.certificateId)
+
   const stream = await renderToStream(
     React.createElement(CertificateTemplate, {
       logoUrl,
@@ -127,6 +140,7 @@ export async function generateCertificatePdf(
       score: data.score,
       percentage: data.percentage,
       passMarkPct: data.passMarkPct,
+      qrDataUrl,
     }) as any
   )
 

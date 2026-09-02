@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Clock, AlertCircle, School, ClipboardCheck } from 'lucide-react'
 import TablePagination from '@/components/shared/TablePagination'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface AttendanceRecord {
   id: string
@@ -19,8 +20,14 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
 
-  const total = records.length
-  const paged = records.slice((page - 1) * perPage, page * perPage)
+  const sortableRecords = useMemo(
+    () => records.map((r) => ({ ...r, _dateTs: new Date(r.date).getTime() })),
+    [records]
+  )
+  const { items: sortedRecords, requestSort, sortConfig } = useSort(sortableRecords)
+  const paged = sortedRecords.slice((page - 1) * perPage, page * perPage)
+
+  const total = sortedRecords.length
 
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -34,10 +41,10 @@ export default function AttendanceTable({ records }: { records: AttendanceRecord
             <table className="w-full text-left text-sm" aria-label="Attendance records">
               <thead>
                 <tr className="border-b border-slate-100 text-[10px] font-black tracking-widest text-slate-400 uppercase dark:border-slate-800">
-                  <th scope="col" className="px-6 py-4">Type</th>
-                  <th scope="col" className="px-6 py-4">Date</th>
-                  <th scope="col" className="px-6 py-4">Activity / Module</th>
-                  <th scope="col" className="px-6 py-4">Status</th>
+                  <SortHeader label="Type" sortKey="type" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
+                  <SortHeader label="Date" sortKey="_dateTs" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
+                  <SortHeader label="Activity / Module" sortKey="label" currentSort={sortConfig} onSort={requestSort} className="px-6 py-4" />
+                  <SortHeader label="Status" sortKey="status" currentSort={sortConfig} onSort={requestSort} align="center" className="px-6 py-4" />
                   <th scope="col" className="px-6 py-4">Notes</th>
                 </tr>
               </thead>

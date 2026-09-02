@@ -3,6 +3,8 @@ import { POST as approveWalletTopup } from '@/app/api/staff/wallet-topups/[id]/a
 import { POST as rejectWalletTopup } from '@/app/api/staff/finance/wallet-topups/[id]/reject/route'
 import { prismaMock } from '@/tests/setup'
 import { NextRequest } from 'next/server'
+import { requireStaff } from '@/lib/auth/helpers'
+import { requirePermission } from '@/lib/auth/permissions'
 
 // Mock auth helpers
 vi.mock('@/lib/auth/helpers', () => ({
@@ -29,10 +31,12 @@ vi.mock('@/lib/audit/logger', () => ({
 }))
 
 describe('Staff Wallet Top-up Routes', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    prismaMock.notification.create.mockResolvedValue({})
-  })
+   beforeEach(() => {
+     vi.resetAllMocks()
+     ;(requireStaff as any).mockResolvedValue({ id: 'staff-1', email: 'staff@test.com' })
+     ;(requirePermission as any).mockResolvedValue({ id: 'staff-1', email: 'staff@test.com' })
+     prismaMock.notification.create.mockResolvedValue({})
+   })
 
   describe('POST /api/staff/wallet-topups/[id]/approve', () => {
     it('approves a pending wallet top-up and credits wallet', async () => {

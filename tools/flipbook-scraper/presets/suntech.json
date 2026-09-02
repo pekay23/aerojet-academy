@@ -2,23 +2,23 @@
   "baseUrl": "https://courses.suntech-bc.com",
   "loginUrl": "https://courses.suntech-bc.com/login",
   "outputDir": "./flipbook-output",
-  "pageLoadDelay": 2500,
+  "pageLoadDelay": 4000,
   "imageFormat": "jpeg",
   "loginSelectors": {
-    "usernameField": "input[name='username'], input[name='email'], input[type='email'], #username, #email",
-    "passwordField": "input[name='password'], input[type='password'], #password",
-    "submitButton": "button[type='submit'], input[type='submit'], form button"
+    "usernameField": "input[name='log']",
+    "passwordField": "input[name='pwd']",
+    "submitButton": "input.wp-submit, button.accessally-login-form-submit-button"
   },
   "flipbookSelectors": {
-    "container": ".flipbook-container, .flipbook, #flipbook, .book-container, [class*='flipbook'], [class*='book-viewer'], .module-content",
-    "pageImage": "img.page-image, .flipbook img, .page img, canvas.page, .book-page img, .slide img, [class*='page'] img",
-    "nextButton": ".next-page, .flipbook-next, [class*='next'], button[aria-label='Next'], .arrow-right, [class*='arrow-next']",
-    "prevButton": ".prev-page, .flipbook-prev, [class*='prev'], button[aria-label='Previous'], .arrow-left, [class*='arrow-prev']",
-    "pageIndicator": ".page-indicator, .page-count, [class*='page-info'], [class*='page-num']",
-    "totalPages": ".total-pages, [class*='total']"
+    "container": ".flipbook-main-wrapper",
+    "pageImage": ".book img, .flipbook-main-wrapper img, .book-page img, .turn-page img",
+    "nextButton": ".flipbook-next, .next-button, [class*='next'], .flipbook-nav-next",
+    "prevButton": ".flipbook-prev, .prev-button, [class*='prev'], .flipbook-nav-prev",
+    "pageIndicator": ".flipbook-page-count, .page-info, [class*='page-count']",
+    "totalPages": ".flipbook-total-pages, [class*='total-pages']"
   },
   "pdfOptions": {
-    "pageSize": "a4",
+    "pageSize": "fit",
     "margin": 0
   }
 }

@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>audits · Aerojet Academy</title>
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
+</head>
+<body>
+<div class="he-shell ">
+
+<nav class="he-nav">
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
+  <div class="he-nav__links">
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
+  </div>
+</nav>
+
+<main>
+<header>
+  <p class="he-eyebrow">Docs</p>
+  <h1 class="he-title">audits</h1>
+  <p class="he-deck">12 documents in this folder</p>
+</header>
+
+<nav class="he-bc" aria-label="Breadcrumb">
+  <a class="he-bc__item" href="../../index.html">Docs</a><span class="he-bc__sep">/</span><span class="he-bc__item">audits</span>
+</nav>
+
+  <div class="he-folder-grid">
+    
+    <a class="he-folder-card" href="portal-audits/index.html">
+      <div class="he-folder-card__icon">📁</div>
+      <div class="he-folder-card__name">portal-audits</div>
+      <div class="he-folder-card__count">12 documents</div>
+    </a>
+  </div>
+<div class="he-folder-controls">
+  <label for="sort-select">Sort by</label>
+  <select id="sort-select" onchange="sortDocs(this.value)" class="he-sort-select">
+    <option value="newest">Newest first</option>
+    <option value="oldest">Oldest first</option>
+    <option value="az">A → Z</option>
+    <option value="za">Z → A</option>
+  </select>
+</div>
+<table class="he-docs-table">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Date</th>
+      <th>Description</th>
+      <th>Source</th>
+    </tr>
+  </thead>
+  <tbody id="docs-table-body">
+    
+    <tr data-date="2026-09-02" data-title="Central Audit, Issues &amp; Fixes Tracker">
+      <td><a href="CENTRAL-TRACKER.html">Central Audit, Issues &amp; Fixes Tracker</a></td>
+      <td>2026-09-02</td>
+      <td>**Last Updated**: 2026-09-02 (Post-Implementation Verification) **Status**: All critical issues fixed.</td>
+      <td><code>docs/audits/CENTRAL-TRACKER.md</code></td>
+    </tr>
+    <tr data-date="2026-09-01" data-title="Known Issues &amp; Pending Fixes">
+      <td><a href="known-issues.html">Known Issues &amp; Pending Fixes</a></td>
+      <td>2026-09-01</td>
+      <td>This document tracks persistent issues and bugs that are not yet fully resolved.</td>
+      <td><code>docs/audits/known-issues.md</code></td>
+    </tr>
+    <tr data-date="2026-08-30" data-title="Portal QA Issues &amp; Fixes — August 2026">
+      <td><a href="2026-08-30-portal-qa-issues.html">Portal QA Issues &amp; Fixes — August 2026</a></td>
+      <td>2026-08-30</td>
+      <td>Systematic audit of all 5 portals (Staff, Student, Instructor, Applicant, Examiner) for UI issues, backend errors, and f</td>
+      <td><code>docs/audits/2026-08-30-portal-qa-issues.md</code></td>
+    </tr>
+    <tr data-date="2026-08-29" data-title="API Audit Report: 2026-08-29">
+      <td><a href="API-AUDIT-2026-08-29.html">API Audit Report: 2026-08-29</a></td>
+      <td>2026-08-29</td>
+      <td>`app/api/applicant/exam-only/bookings/route.ts` already uses `apiPaginated` with `parsePagination`. No change needed — t</td>
+      <td><code>docs/audits/API-AUDIT-2026-08-29.md</code></td>
+    </tr>
+    <tr data-date="2026-05-21" data-title="Final Audit — 2026-05-21">
+      <td><a href="2026-05-21-final-audit.html">Final Audit — 2026-05-21</a></td>
+      <td>2026-05-21</td>
+      <td>Comprehensive sweep performed after the internal-exams hardening work landed in commits `eee14c5` and `907c4a7`.</td>
+      <td><code>docs/audits/2026-05-21-final-audit.md</code></td>
+    </tr>
+    <tr data-date="2026-05-21" data-title="Internal Exams Audit — 2026-05-21">
+      <td><a href="2026-05-21-internal-exams.html">Internal Exams Audit — 2026-05-21</a></td>
+      <td>2026-05-21</td>
+      <td>Reviews commits `94375e5` (initial system) and `b928b76` (hardening) — adding the InternalExam testing engine, admin ope</td>
+      <td><code>docs/audits/2026-05-21-internal-exams.md</code></td>
+    </tr>
+    <tr data-date="2026-05-20" data-title="Comprehensive Audit — 2026-05-20">
+      <td><a href="2026-05-20-comprehensive.html">Comprehensive Audit — 2026-05-20</a></td>
+      <td>2026-05-20</td>
+      <td>Consolidates findings across **all** active audit documents in `docs/`: - [design-gap-audit.html](./design-gap-audit.htm</td>
+      <td><code>docs/audits/2026-05-20-comprehensive.md</code></td>
+    </tr>
+    <tr data-date="2026-05-19" data-title="Design-Gap Audit — Implementation Status">
+      <td><a href="2026-05-19-design-gap-status.html">Design-Gap Audit — Implementation Status</a></td>
+      <td>2026-05-19</td>
+      <td>Cross-check of every row in [docs/design-gap-audit.html](./design-gap-audit.html) against the codebase as of the latest </td>
+      <td><code>docs/audits/2026-05-19-design-gap-status.md</code></td>
+    </tr>
+    <tr data-date="2026-05-17" data-title="Codebase Audit Report — 2026-05-17">
+      <td><a href="2026-05-17-codebase.html">Codebase Audit Report — 2026-05-17</a></td>
+      <td>2026-05-17</td>
+      <td>Comprehensive audit across 4 phases: Auth &amp; Security, Database &amp; Data Layer, Frontend &amp; Performance, Testing &amp; Docs.</td>
+      <td><code>docs/audits/2026-05-17-codebase.md</code></td>
+    </tr>
+    <tr data-date="2026-05-06" data-title="Performance Audit Findings — Session 2026-05-05/06">
+      <td><a href="2026-05-06-findings.html">Performance Audit Findings — Session 2026-05-05/06</a></td>
+      <td>2026-05-06</td>
+      <td>---…</td>
+      <td><code>docs/audits/2026-05-06-findings.md</code></td>
+    </tr>
+    <tr data-date="2026-05-06" data-title="Structural Review — 2026-05-06">
+      <td><a href="2026-05-06-structural-review.html">Structural Review — 2026-05-06</a></td>
+      <td>2026-05-06</td>
+      <td>---…</td>
+      <td><code>docs/audits/2026-05-06-structural-review.md</code></td>
+    </tr>
+    <tr data-date="2026-05-04" data-title="Performance Audit Report — Aerojet Academy">
+      <td><a href="2026-05-04-performance.html">Performance Audit Report — Aerojet Academy</a></td>
+      <td>2026-05-04</td>
+      <td>**Date:** 2026-05-04 (audit) | 2026-05-06 (fixes applied) **Scope:** Full app audit — APIs, SSR, client components, data</td>
+      <td><code>docs/audits/2026-05-04-performance.md</code></td>
+    </tr>
+  </tbody>
+</table>
+<script>
+function sortDocs(criteria) {
+  const tbody = document.getElementById('docs-table-body');
+  if (!tbody) return;
+  const rows = Array.from(tbody.querySelectorAll('tr'));
+  rows.sort((a, b) => {
+    const aDate = a.dataset.date || '';
+    const bDate = b.dataset.date || '';
+    const aTitle = a.dataset.title || '';
+    const bTitle = b.dataset.title || '';
+    switch (criteria) {
+      case 'newest': return bDate.localeCompare(aDate) || aTitle.localeCompare(bTitle);
+      case 'oldest': return aDate.localeCompare(bDate) || aTitle.localeCompare(bTitle);
+      case 'az': return aTitle.localeCompare(bTitle);
+      case 'za': return bTitle.localeCompare(aTitle);
+      default: return 0;
+    }
+  });
+  tbody.innerHTML = '';
+  rows.forEach(row => tbody.appendChild(row));
+}
+</script>
+
+</main>
+
+
+<footer class="he-foot">
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+</footer>
+</div>
+</body>
+</html>

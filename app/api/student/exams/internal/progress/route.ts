@@ -1,4 +1,5 @@
 import { NextRequest } from 'next/server'
+import { Prisma } from '@prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { prismaUnfiltered } from '@/lib/prisma/client'
@@ -71,9 +72,29 @@ export const GET = withErrorHandler(async () => {
   })
 
   // Group by bank
+  interface BankSummary {
+    id: string
+    name: string
+    moduleCode: string | null
+    categoryCode: string | null
+    categoryConfig: Prisma.JsonValue | null
+    course: { name: string; code: string }
+  }
+
+  interface SessionAttempt {
+    id: string
+    attemptNumber: number
+    status: string
+    score: number | null
+    totalPoints: number | null
+    percentage: number | null
+    passed: boolean | null
+    submittedAt: Date | null
+  }
+
   const byBank: Record<string, {
-    bank: any
-    attempts: any[]
+    bank: BankSummary
+    attempts: SessionAttempt[]
     passed: boolean
     bestScore: number
     latestAttempt: Date | null

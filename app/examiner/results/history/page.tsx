@@ -112,12 +112,12 @@ export default async function ExaminerResultsHistoryPage({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-slate-100 bg-slate-50/80 text-left dark:border-slate-800 dark:bg-slate-900/50">
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Candidate</th>
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Module</th>
-              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Score</th>
-              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Result</th>
-              <th className="px-4 py-3 text-center text-[10px] font-black tracking-widest text-slate-400 uppercase">Grade</th>
-              <th className="px-4 py-3 text-[10px] font-black tracking-widest text-slate-400 uppercase">Submitted</th>
+              <SortableTh sortKey="candidate" label="Candidate" />
+              <SortableTh sortKey="module" label="Module" />
+              <SortableTh sortKey="score" label="Score" align="center" />
+              <SortableTh sortKey="result" label="Result" align="center" />
+              <SortableTh sortKey="grade" label="Grade" align="center" />
+              <SortableTh sortKey="submitted" label="Submitted" />
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50 dark:divide-slate-800">

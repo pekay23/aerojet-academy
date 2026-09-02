@@ -76,38 +76,64 @@ vi.mock('@/lib/auth/helpers', () => ({
    }),
  }))
 
-  import { describe, it, expect, vi, beforeEach } from 'vitest'
-  import { prismaMock } from '@/tests/setup'
-  import { NextRequest } from 'next/server'
-  import { GET } from '@/app/api/applicant/exam-only/pricing/route.ts'
-  import { requireApplicant } from '@/lib/auth/helpers'
+   import { describe, it, expect, vi, beforeEach } from 'vitest'
+   import { prismaMock } from '@/tests/setup'
+   import { NextRequest } from 'next/server'
+   import { GET } from '@/app/api/applicant/exam-only/pricing/route.ts'
+   import { requireApplicant } from '@/lib/auth/helpers'
+   import { getExamPricingConfig } from '@/lib/pools/pricing-config'
+   import { getBundlePricing } from '@/lib/pools/pricing'
 
 
 describe('/applicant/exam-only/pricing', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-    ;(requireApplicant as any).mockResolvedValue({ id: 'user-1', role: 'APPLICANT' })
-    prismaMock.notification.create.mockResolvedValue({} as any)
-  })
+   beforeEach(() => {
+     vi.resetAllMocks()
+     ;(requireApplicant as any).mockResolvedValue({ id: 'user-1', role: 'APPLICANT' })
+     ;(getExamPricingConfig as any).mockResolvedValue({
+       poolExamFee: 300,
+       individualExamFee: 520,
+       multiPoolDiscountFee: 270,
+       twoSeatBundle: 980,
+       fourSeatBundle: 1900,
+       resitExamFee: 480,
+       groupCharterFee: 7500,
+       lateBookingSurcharge: 50,
+       moduleChangeFee: 50,
+       lateBookingDays: 14,
+       ambassadorCredit: 100,
+     })
+     ;(getBundlePricing as any).mockResolvedValue({
+       twoSeat: { price: 980, seats: 2, perSeat: 490, savings: 820 },
+       fourSeat: { price: 1900, seats: 4, perSeat: 475, savings: 280 },
+       groupCharter: { price: 7500, maxSeats: 28, perSeat: 268 },
+     })
+     prismaMock.notification.create.mockResolvedValue({} as any)
+   })
 
   it('returns 401 when unauthenticated', async () => {
     ;(requireApplicant as any).mockRejectedValueOnce(new Error('Unauthorized'))
     const req = new NextRequest('http://localhost/applicant/exam-only/pricing')
     const res = await GET(req)
-    expect([401, 403]).toContain(res.status)
+    expect(res.status).toBe(401)
+    const json = await res.json()
+    expect(json.error).toBe('Unauthorized')
   })
 
-  it('returns 200 with data', async () => {
+  it('returns exact pricing values', async () => {
     const req = new NextRequest('http://localhost/applicant/exam-only/pricing?page=1&limit=20')
     const res = await GET(req)
     expect(res.status).toBe(200)
     const json = await res.json()
-    expect(json).toBeDefined()
-    expect(json).toHaveProperty('pool')
-    expect(json).toHaveProperty('individual')
-    expect(json).toHaveProperty('resit')
-    expect(json).toHaveProperty('bundles')
-    expect(json).toHaveProperty('surcharges')
-    expect(json).toHaveProperty('groupCharter')
+    expect(json.pool.standardPrice).toBe(300)
+    expect(json.pool.discountedPrice).toBe(270)
+    expect(json.individual.price).toBe(520)
+    expect(json.resit.price).toBe(480)
+    expect(json.surcharges.lateBooking).toBe(50)
+    expect(json.surcharges.moduleChange).toBe(50)
+    expect(json.surcharges.lateBookingDays).toBe(14)
+    expect(json.groupCharter.price).toBe(7500)
+    expect(json.groupCharter.maxSeats).toBe(28)
+    expect(json.bundles.twoSeat.price).toBe(980)
+    expect(json.bundles.fourSeat.price).toBe(1900)
   })
 })

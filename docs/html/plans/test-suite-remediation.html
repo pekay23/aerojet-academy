@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Test Suite Remediation Plan · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,25 +27,291 @@
 <header>
   <p class="he-eyebrow">Plans</p>
   <h1 class="he-title">Test Suite Remediation Plan</h1>
-  <p class="he-deck"><p><strong>Date</strong>: 2026-08-29 <strong>Status</strong>: ✅ COMPLETED <strong>Owner</strong>: Engineering <strong>Scope</strong>: All files under <code>tests/</code>, <code>scripts/gen-tests.mjs</code>, <code>scripts/generate-api-tests.mjs</code>…</p>
-</p>
+  <p class="he-deck"><strong>Date</strong>: 2026-08-29 <strong>Status</strong>: ✅ COMPLETED <strong>Owner</strong>: Engineering <strong>Scope</strong>: All files under <code>tests/</code>, <code>scripts/gen-tests.mjs</code>, <code>scripts/generate-api-tests.mjs</code>…</p>
 </header>
-<section class="he-section" id="1-problem-statement-resolved"><div class="he-section__num">01 · 1. Problem Statement (RESOLVED)</div><h2 class="he-section__title">1. Problem Statement (RESOLVED)</h2>The test suite had 459 files (~36,000 LOC) with a severe signal-to-noise problem:254 files (55%) were auto-generated with shallow assertions (<code>expect(json).toBeDefined()</code>)41 files (9%) were UI primitive smoke tests for shadcn/ui components~20 files (4%) were genuinely valuable tests that catch real bugs~144 files (31%) were mixed quality — some real value, some wasteThe auto-generated tests mocked away everything under test (auth helpers, error handlers, Prisma queries, response helpers). They created false confidence — they passed even if the handler returned garbage.<h3 id="why-this-matters">Why this matters</h3>What manual <code>bun run dev</code> catchesWhat automated tests catchUI looks correct in the browserRegression bugs after code changesHappy-path flows workEdge cases (null, empty, boundary values)Current feature behaviorBehavior when you refactor internalsVisual layout/spacingLogic errors in pure functionsWhat you happen to think ofWhat you forgot to testThe real value of tests is not catching bugs today — it's preventing regression when you change code next month. The current suite fails at this because most files assert nothing meaningful.<section class="he-section" id="2-current-state-breakdown-post-remediation"><div class="he-section__num">02 · 2. Current State Breakdown (POST-REMEDIATION)</div><h2 class="he-section__title">2. Current State Breakdown (POST-REMEDIATION)</h2><h3 id="tier-1-excellent-expanded-to-15-files">Tier 1 — Excellent (expanded to ~15 files)</h3>FileWhat it testsAssertions<code>tests/integration/workflows/registration.test.ts</code>Registration validationRegex, edge cases, boundary values<code>tests/unit/lib/gdpr-anonymise.test.ts</code>GDPR PII redactionExact field values, 8 models<code>tests/unit/lib/examiner-results.test.ts</code>Score clamping, absent-markingExact values, side effects<code>tests/unit/lib/wallet.test.ts</code>Balance calculationNegative clamp, string inputs<code>tests/unit/proxy.test.ts</code>Hotlink protection7 extensions, host+port, invalid referer<code>tests/unit/lib/auth-permissions.test.ts</code>Role hierarchyExact numeric values, hasRole/isStaff<code>tests/unit/lib/audit-logger.test.ts</code>Audit trail creation14 tests, compliance-critical<code>tests/unit/lib/rate-limit.test.ts</code>Rate limiting19 tests, security-critical<code>tests/unit/lib/validation-schemas.test.ts</code>Zod schemas74 tests, data integrity<code>tests/unit/lib/payment-verification.test.ts</code>Payment proof validation10 tests, financial<code>tests/unit/lib/totp.test.ts</code>TOTP generation/verification20 tests, RFC 6238<code>tests/unit/lib/enrollment-engine.test.ts</code>Auto-enrollment logicComprehensive<code>tests/integration/api/pool-join.test.ts</code>Pool joining logic10+ guard clauses<code>tests/integration/api/payment-approval.test.ts</code>Payment approval flowWallet, email, audit side effects<code>tests/integration/actions/staff-actions.test.ts</code>Server actionsAuth, validation, side effects<h3 id="tier-2-good-expanded-to-50-files">Tier 2 — Good (expanded to ~50 files)</h3>Integration API tests (23 files), action tests (4 files), workflow tests (2 files), component tests (30 files), E2E tests (7 files enhanced).<h3 id="tier-3-deleted">Tier 3 — Deleted</h3>All UI primitive smoke tests, hook smoke tests, trivial <code>typeof</code> tests, and auto-generated tests have been deleted.<section class="he-section" id="3-remediation-summary-completed"><div class="he-section__num">03 · 3. Remediation Summary (COMPLETED)</div><h2 class="he-section__title">3. Remediation Summary (COMPLETED)</h2><h3 id="phase-1-delete-waste-completed">Phase 1: Delete Waste ✅ COMPLETED</h3>ActionFilesLOCResultDelete <code>tests/components/ui/*.test.tsx</code>30~2,200✅ DeletedDelete <code>tests/unit/hooks/*.test.ts</code>15~1,000✅ DeletedDelete <code>tests/integration/api/*.test.ts</code> (generated)254~20,000✅ DeletedDelete <code>scripts/gen-tests.mjs</code>1632✅ DeletedDelete <code>scripts/generate-api-tests.mjs</code>1569✅ DeletedDelete trivial unit tests2~100✅ DeletedTotal deleted: 303 files, ~24,500 LOC<h3 id="phase-2-rewrite-integration-tests-completed">Phase 2: Rewrite Integration Tests ✅ COMPLETED</h3>Created 23 hand-written integration API tests grouped by feature:Test FileRoutes CoveredTests<code>tests/integration/api/staff-analytics.test.ts</code>Dashboard stats4<code>tests/integration/api/staff-audit-logs.test.ts</code>Audit log querying4<code>tests/integration/api/staff-exam-sittings.test.ts</code>Exam sittings, seats6<code>tests/integration/api/staff-finance.test.ts</code>Finance overview, approvals8<code>tests/integration/api/staff-reports.test.ts</code>Roster CSV, pools report6<code>tests/integration/api/instructor-profile.test.ts</code>Profile GET/PATCH5<code>tests/integration/api/instructor-grading.test.ts</code>Grades, attendance7<code>tests/integration/api/instructor-schedule.test.ts</code>Class schedule4<code>tests/integration/api/applicant-profile.test.ts</code>Profile GET/PATCH4<code>tests/integration/api/applicant-exams.test.ts</code>Pools, bookings6<code>tests/integration/api/examiner-results.test.ts</code>Results, sittings5<code>tests/integration/api/images.test.ts</code>Proxy, transform auth8<code>tests/integration/api/me.test.ts</code>Heartbeat, privacy6<code>tests/integration/api/student-profile.test.ts</code>Profile GET/PATCH9<code>tests/integration/api/student-courses.test.ts</code>Enrolled courses6<code>tests/integration/api/student-exams.test.ts</code>Exam results6<code>tests/integration/api/student-ojt.test.ts</code>OJT logbook11<code>tests/integration/api/student-wallet.test.ts</code>Wallet balance5<code>tests/integration/api/student-grades.test.ts</code>Grades6<code>tests/integration/api/payment-approval.test.ts</code>Payment approve/reject6<code>tests/integration/api/pool-join.test.ts</code>Pool joining10<code>tests/integration/api/email-templates.test.ts</code>Email template CRUD5<code>tests/integration/api/auth.test.ts</code>Auth validation2Plus 4 action tests and 2 workflow tests.<h3 id="phase-3-add-critical-coverage-gaps-completed">Phase 3: Add Critical Coverage Gaps ✅ COMPLETED</h3>PriorityModuleTestsStatusP0<code>lib/audit/logger.ts</code>14 tests✅ CompleteP0<code>lib/security/rate-limit.ts</code>19 tests✅ CompleteP0<code>lib/validation/</code>74 tests✅ CompleteP1<code>lib/payments/verification.ts</code>10 tests✅ CompleteP1<code>lib/auth/totp.ts</code>20 tests✅ CompleteP1<code>lib/enrollment/</code>Comprehensive✅ CompleteP2<code>lib/pools/</code>Join, pricing covered✅ PartialP2<code>lib/exams/</code>Examiner results covered✅ PartialP2<code>lib/internal-exam/</code>Routes covered✅ PartialP3<code>lib/storage/signed-url.ts</code>Covered✅ CompleteP3<code>lib/supabase/</code>Client covered✅ Partial<h3 id="phase-4-strengthen-existing-tests-completed">Phase 4: Strengthen Existing Tests ✅ COMPLETED</h3>ActionResultFix <code>clearAllMocks</code> → <code>resetAllMocks</code>✅ Fixed in all 25+ filesCreate <code>tests/factories.ts</code>✅ 20+ factory functionsReplace <code>toBeDefined()</code> with body assertions✅ All new tests use body assertionsFix self-mocking components✅ Logo.test.tsx deletedAdd deterministic date tests✅ rate-limit tests use fake timers<h3 id="phase-5-enhance-e2e-tests-completed">Phase 5: Enhance E2E Tests ✅ COMPLETED</h3>FileBeforeAfter<code>tests/e2e/applicant-journey.spec.ts</code>6 navigation tests11 tests with form submissions, error states<code>tests/e2e/student-journey.test.ts</code>1 test8 tests with login, grades, courses, redirects<code>tests/e2e/staff-approval.test.ts</code>4 tests8 tests with dashboard, queue, empty states<code>tests/e2e/pool-joining.test.ts</code>1 test5 tests with detail, booking, redirects<code>tests/e2e/helpers/auth.ts</code>Generic <code>loginAs</code>Added <code>loginAsStudent</code>, <code>loginAsStaff</code>, <code>loginAsAdmin</code>, <code>loginAsInstructor</code>, <code>loginAsApplicant</code><section class="he-section" id="4-final-metrics"><div class="he-section__num">04 · 4. Final Metrics</div><h2 class="he-section__title">4. Final Metrics</h2>MetricBeforeAfterChangeTest files459183-60%Test LOC36,00015,885-56%Generated API tests2540All deletedUI primitive smoke tests300All deletedHook smoke tests150All deletedTrivial unit tests4+0All deletedTest generators20All deletedIntegration API tests254 (generated)23 (hand-written)Quality ↑↑↑Critical untested modules140All covered<code>clearAllMocks</code> violations250100% fixedForbidden patterns (<code>toBeDefined</code> as sole assertion)Many0100% eliminated<section class="he-section" id="5-guardrails-enforced"><div class="he-section__num">05 · 5. Guardrails (Enforced)</div><h2 class="he-section__title">5. Guardrails (Enforced)</h2>See <code>tests/TEST-STANDARDS.md</code> §12-13 and <code>.kilo/skills/aerojet-code-standards/SKILL.md</code> §21 for the full forbidden/required patterns.Quick reference:// ❌ FORBIDDEN
+<hr />
+<section class="he-section" id="1-problem-statement-resolved"><div class="he-section__num">01 · 1. Problem Statement (RESOLVED)</div><h2 class="he-section__title">1. Problem Statement (RESOLVED)</h2></section>
+<p>The test suite had <strong>459 files</strong> (~36,000 LOC) with a <strong>severe signal-to-noise problem</strong>:</p>
+<ul>
+<li><strong>254 files</strong> (55%) were auto-generated with shallow assertions (<code>expect(json).toBeDefined()</code>)</li>
+<li><strong>41 files</strong> (9%) were UI primitive smoke tests for shadcn/ui components</li>
+<li><strong>~20 files</strong> (4%) were genuinely valuable tests that catch real bugs</li>
+<li><strong>~144 files</strong> (31%) were mixed quality — some real value, some waste</li>
+</ul>
+<p>The auto-generated tests mocked away everything under test (auth helpers, error handlers, Prisma queries, response helpers). They created <strong>false confidence</strong> — they passed even if the handler returned garbage.</p>
+<h3 id="why-this-matters">Why this matters</h3>
+<table>
+<thead>
+<tr><th>What manual <code>bun run dev</code> catches</th><th>What automated tests catch</th></tr>
+</thead>
+<tbody>
+<tr><td>UI looks correct in the browser</td><td><strong>Regression bugs after code changes</strong></td></tr>
+<tr><td>Happy-path flows work</td><td><strong>Edge cases</strong> (null, empty, boundary values)</td></tr>
+<tr><td>Current feature behavior</td><td><strong>Behavior when you refactor internals</strong></td></tr>
+<tr><td>Visual layout/spacing</td><td><strong>Logic errors in pure functions</strong></td></tr>
+<tr><td>What you happen to think of</td><td><strong>What you forgot to test</strong></td></tr>
+</tbody>
+</table>
+<p>The real value of tests is <strong>not catching bugs today</strong> — it's <strong>preventing regression when you change code next month</strong>. The current suite fails at this because most files assert nothing meaningful.</p>
+<hr />
+<section class="he-section" id="2-current-state-breakdown-post-remediation"><div class="he-section__num">02 · 2. Current State Breakdown (POST-REMEDIATION)</div><h2 class="he-section__title">2. Current State Breakdown (POST-REMEDIATION)</h2></section>
+<h3 id="tier-1-excellent-expanded-to-15-files">Tier 1 — Excellent (expanded to ~15 files)</h3>
+<table>
+<thead>
+<tr><th>File</th><th>What it tests</th><th>Assertions</th></tr>
+</thead>
+<tbody>
+<tr><td><code>tests/integration/workflows/registration.test.ts</code></td><td>Registration validation</td><td>Regex, edge cases, boundary values</td></tr>
+<tr><td><code>tests/unit/lib/gdpr-anonymise.test.ts</code></td><td>GDPR PII redaction</td><td>Exact field values, 8 models</td></tr>
+<tr><td><code>tests/unit/lib/examiner-results.test.ts</code></td><td>Score clamping, absent-marking</td><td>Exact values, side effects</td></tr>
+<tr><td><code>tests/unit/lib/wallet.test.ts</code></td><td>Balance calculation</td><td>Negative clamp, string inputs</td></tr>
+<tr><td><code>tests/unit/proxy.test.ts</code></td><td>Hotlink protection</td><td>7 extensions, host+port, invalid referer</td></tr>
+<tr><td><code>tests/unit/lib/auth-permissions.test.ts</code></td><td>Role hierarchy</td><td>Exact numeric values, hasRole/isStaff</td></tr>
+<tr><td><code>tests/unit/lib/audit-logger.test.ts</code></td><td>Audit trail creation</td><td>14 tests, compliance-critical</td></tr>
+<tr><td><code>tests/unit/lib/rate-limit.test.ts</code></td><td>Rate limiting</td><td>19 tests, security-critical</td></tr>
+<tr><td><code>tests/unit/lib/validation-schemas.test.ts</code></td><td>Zod schemas</td><td>74 tests, data integrity</td></tr>
+<tr><td><code>tests/unit/lib/payment-verification.test.ts</code></td><td>Payment proof validation</td><td>10 tests, financial</td></tr>
+<tr><td><code>tests/unit/lib/totp.test.ts</code></td><td>TOTP generation/verification</td><td>20 tests, RFC 6238</td></tr>
+<tr><td><code>tests/unit/lib/enrollment-engine.test.ts</code></td><td>Auto-enrollment logic</td><td>Comprehensive</td></tr>
+<tr><td><code>tests/integration/api/pool-join.test.ts</code></td><td>Pool joining logic</td><td>10+ guard clauses</td></tr>
+<tr><td><code>tests/integration/api/payment-approval.test.ts</code></td><td>Payment approval flow</td><td>Wallet, email, audit side effects</td></tr>
+<tr><td><code>tests/integration/actions/staff-actions.test.ts</code></td><td>Server actions</td><td>Auth, validation, side effects</td></tr>
+</tbody>
+</table>
+<h3 id="tier-2-good-expanded-to-50-files">Tier 2 — Good (expanded to ~50 files)</h3>
+<p>Integration API tests (23 files), action tests (4 files), workflow tests (2 files), component tests (30 files), E2E tests (7 files enhanced).</p>
+<h3 id="tier-3-deleted">Tier 3 — Deleted</h3>
+<p>All UI primitive smoke tests, hook smoke tests, trivial <code>typeof</code> tests, and auto-generated tests have been deleted.</p>
+<hr />
+<section class="he-section" id="3-remediation-summary-completed"><div class="he-section__num">03 · 3. Remediation Summary (COMPLETED)</div><h2 class="he-section__title">3. Remediation Summary (COMPLETED)</h2></section>
+<h3 id="phase-1-delete-waste-completed">Phase 1: Delete Waste ✅ COMPLETED</h3>
+<table>
+<thead>
+<tr><th>Action</th><th>Files</th><th>LOC</th><th>Result</th></tr>
+</thead>
+<tbody>
+<tr><td>Delete <code>tests/components/ui/*.test.tsx</code></td><td>30</td><td>~2,200</td><td>✅ Deleted</td></tr>
+<tr><td>Delete <code>tests/unit/hooks/*.test.ts</code></td><td>15</td><td>~1,000</td><td>✅ Deleted</td></tr>
+<tr><td>Delete <code>tests/integration/api/*.test.ts</code> (generated)</td><td>254</td><td>~20,000</td><td>✅ Deleted</td></tr>
+<tr><td>Delete <code>scripts/gen-tests.mjs</code></td><td>1</td><td>632</td><td>✅ Deleted</td></tr>
+<tr><td>Delete <code>scripts/generate-api-tests.mjs</code></td><td>1</td><td>569</td><td>✅ Deleted</td></tr>
+<tr><td>Delete trivial unit tests</td><td>2</td><td>~100</td><td>✅ Deleted</td></tr>
+</tbody>
+</table>
+<p><strong>Total deleted</strong>: 303 files, ~24,500 LOC</p>
+<h3 id="phase-2-rewrite-integration-tests-completed">Phase 2: Rewrite Integration Tests ✅ COMPLETED</h3>
+<p>Created 23 hand-written integration API tests grouped by feature:</p>
+<table>
+<thead>
+<tr><th>Test File</th><th>Routes Covered</th><th>Tests</th></tr>
+</thead>
+<tbody>
+<tr><td><code>tests/integration/api/staff-analytics.test.ts</code></td><td>Dashboard stats</td><td>4</td></tr>
+<tr><td><code>tests/integration/api/staff-audit-logs.test.ts</code></td><td>Audit log querying</td><td>4</td></tr>
+<tr><td><code>tests/integration/api/staff-exam-sittings.test.ts</code></td><td>Exam sittings, seats</td><td>6</td></tr>
+<tr><td><code>tests/integration/api/staff-finance.test.ts</code></td><td>Finance overview, approvals</td><td>8</td></tr>
+<tr><td><code>tests/integration/api/staff-reports.test.ts</code></td><td>Roster CSV, pools report</td><td>6</td></tr>
+<tr><td><code>tests/integration/api/instructor-profile.test.ts</code></td><td>Profile GET/PATCH</td><td>5</td></tr>
+<tr><td><code>tests/integration/api/instructor-grading.test.ts</code></td><td>Grades, attendance</td><td>7</td></tr>
+<tr><td><code>tests/integration/api/instructor-schedule.test.ts</code></td><td>Class schedule</td><td>4</td></tr>
+<tr><td><code>tests/integration/api/applicant-profile.test.ts</code></td><td>Profile GET/PATCH</td><td>4</td></tr>
+<tr><td><code>tests/integration/api/applicant-exams.test.ts</code></td><td>Pools, bookings</td><td>6</td></tr>
+<tr><td><code>tests/integration/api/examiner-results.test.ts</code></td><td>Results, sittings</td><td>5</td></tr>
+<tr><td><code>tests/integration/api/images.test.ts</code></td><td>Proxy, transform auth</td><td>8</td></tr>
+<tr><td><code>tests/integration/api/me.test.ts</code></td><td>Heartbeat, privacy</td><td>6</td></tr>
+<tr><td><code>tests/integration/api/student-profile.test.ts</code></td><td>Profile GET/PATCH</td><td>9</td></tr>
+<tr><td><code>tests/integration/api/student-courses.test.ts</code></td><td>Enrolled courses</td><td>6</td></tr>
+<tr><td><code>tests/integration/api/student-exams.test.ts</code></td><td>Exam results</td><td>6</td></tr>
+<tr><td><code>tests/integration/api/student-ojt.test.ts</code></td><td>OJT logbook</td><td>11</td></tr>
+<tr><td><code>tests/integration/api/student-wallet.test.ts</code></td><td>Wallet balance</td><td>5</td></tr>
+<tr><td><code>tests/integration/api/student-grades.test.ts</code></td><td>Grades</td><td>6</td></tr>
+<tr><td><code>tests/integration/api/payment-approval.test.ts</code></td><td>Payment approve/reject</td><td>6</td></tr>
+<tr><td><code>tests/integration/api/pool-join.test.ts</code></td><td>Pool joining</td><td>10</td></tr>
+<tr><td><code>tests/integration/api/email-templates.test.ts</code></td><td>Email template CRUD</td><td>5</td></tr>
+<tr><td><code>tests/integration/api/auth.test.ts</code></td><td>Auth validation</td><td>2</td></tr>
+</tbody>
+</table>
+<p>Plus 4 action tests and 2 workflow tests.</p>
+<h3 id="phase-3-add-critical-coverage-gaps-completed">Phase 3: Add Critical Coverage Gaps ✅ COMPLETED</h3>
+<table>
+<thead>
+<tr><th>Priority</th><th>Module</th><th>Tests</th><th>Status</th></tr>
+</thead>
+<tbody>
+<tr><td>P0</td><td><code>lib/audit/logger.ts</code></td><td>14 tests</td><td>✅ Complete</td></tr>
+<tr><td>P0</td><td><code>lib/security/rate-limit.ts</code></td><td>19 tests</td><td>✅ Complete</td></tr>
+<tr><td>P0</td><td><code>lib/validation/</code></td><td>74 tests</td><td>✅ Complete</td></tr>
+<tr><td>P1</td><td><code>lib/payments/verification.ts</code></td><td>10 tests</td><td>✅ Complete</td></tr>
+<tr><td>P1</td><td><code>lib/auth/totp.ts</code></td><td>20 tests</td><td>✅ Complete</td></tr>
+<tr><td>P1</td><td><code>lib/enrollment/</code></td><td>Comprehensive</td><td>✅ Complete</td></tr>
+<tr><td>P2</td><td><code>lib/pools/</code></td><td>Join, pricing covered</td><td>✅ Partial</td></tr>
+<tr><td>P2</td><td><code>lib/exams/</code></td><td>Examiner results covered</td><td>✅ Partial</td></tr>
+<tr><td>P2</td><td><code>lib/internal-exam/</code></td><td>Routes covered</td><td>✅ Partial</td></tr>
+<tr><td>P3</td><td><code>lib/storage/signed-url.ts</code></td><td>Covered</td><td>✅ Complete</td></tr>
+<tr><td>P3</td><td><code>lib/supabase/</code></td><td>Client covered</td><td>✅ Partial</td></tr>
+</tbody>
+</table>
+<h3 id="phase-4-strengthen-existing-tests-completed">Phase 4: Strengthen Existing Tests ✅ COMPLETED</h3>
+<table>
+<thead>
+<tr><th>Action</th><th>Result</th></tr>
+</thead>
+<tbody>
+<tr><td>Fix <code>clearAllMocks</code> → <code>resetAllMocks</code></td><td>✅ Fixed in all 25+ files</td></tr>
+<tr><td>Create <code>tests/factories.ts</code></td><td>✅ 20+ factory functions</td></tr>
+<tr><td>Replace <code>toBeDefined()</code> with body assertions</td><td>✅ All new tests use body assertions</td></tr>
+<tr><td>Fix self-mocking components</td><td>✅ Logo.test.tsx deleted</td></tr>
+<tr><td>Add deterministic date tests</td><td>✅ rate-limit tests use fake timers</td></tr>
+</tbody>
+</table>
+<h3 id="phase-5-enhance-e2e-tests-completed">Phase 5: Enhance E2E Tests ✅ COMPLETED</h3>
+<table>
+<thead>
+<tr><th>File</th><th>Before</th><th>After</th></tr>
+</thead>
+<tbody>
+<tr><td><code>tests/e2e/applicant-journey.spec.ts</code></td><td>6 navigation tests</td><td>11 tests with form submissions, error states</td></tr>
+<tr><td><code>tests/e2e/student-journey.test.ts</code></td><td>1 test</td><td>8 tests with login, grades, courses, redirects</td></tr>
+<tr><td><code>tests/e2e/staff-approval.test.ts</code></td><td>4 tests</td><td>8 tests with dashboard, queue, empty states</td></tr>
+<tr><td><code>tests/e2e/pool-joining.test.ts</code></td><td>1 test</td><td>5 tests with detail, booking, redirects</td></tr>
+<tr><td><code>tests/e2e/helpers/auth.ts</code></td><td>Generic <code>loginAs</code></td><td>Added <code>loginAsStudent</code>, <code>loginAsStaff</code>, <code>loginAsAdmin</code>, <code>loginAsInstructor</code>, <code>loginAsApplicant</code></td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="4-final-metrics"><div class="he-section__num">04 · 4. Final Metrics</div><h2 class="he-section__title">4. Final Metrics</h2></section>
+<table>
+<thead>
+<tr><th>Metric</th><th>Before</th><th>After</th><th>Change</th></tr>
+</thead>
+<tbody>
+<tr><td>Test files</td><td>459</td><td>183</td><td><strong>-60%</strong></td></tr>
+<tr><td>Test LOC</td><td>36,000</td><td>15,885</td><td><strong>-56%</strong></td></tr>
+<tr><td>Generated API tests</td><td>254</td><td>0</td><td><strong>All deleted</strong></td></tr>
+<tr><td>UI primitive smoke tests</td><td>30</td><td>0</td><td><strong>All deleted</strong></td></tr>
+<tr><td>Hook smoke tests</td><td>15</td><td>0</td><td><strong>All deleted</strong></td></tr>
+<tr><td>Trivial unit tests</td><td>4+</td><td>0</td><td><strong>All deleted</strong></td></tr>
+<tr><td>Test generators</td><td>2</td><td>0</td><td><strong>All deleted</strong></td></tr>
+<tr><td>Integration API tests</td><td>254 (generated)</td><td>23 (hand-written)</td><td><strong>Quality ↑↑↑</strong></td></tr>
+<tr><td>Critical untested modules</td><td>14</td><td>0</td><td><strong>All covered</strong></td></tr>
+<tr><td><code>clearAllMocks</code> violations</td><td>25</td><td>0</td><td><strong>100% fixed</strong></td></tr>
+<tr><td>Forbidden patterns (<code>toBeDefined</code> as sole assertion)</td><td>Many</td><td>0</td><td><strong>100% eliminated</strong></td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="5-guardrails-enforced"><div class="he-section__num">05 · 5. Guardrails (Enforced)</div><h2 class="he-section__title">5. Guardrails (Enforced)</h2></section>
+<p>See <code>tests/TEST-STANDARDS.md</code> §12-13 and <code>.kilo/skills/aerojet-code-standards/SKILL.md</code> §21 for the full forbidden/required patterns.</p>
+<p><strong>Quick reference</strong>:</p>
+<pre><code class="language-ts">// ❌ FORBIDDEN
 expect(typeof fn).toBe('function')
 expect(json).toBeDefined()
 expect([401, 403]).toContain(res.status)
-vi.mock('@/components/shared/PresencePill', () => ({...})) // self-mocking
+vi.mock('@/components/shared/PresencePill', () =&gt; ({...})) // self-mocking
 
 // ✅ REQUIRED
 expect(json.data[0].email).toBe('user@example.com')
 expect(res.status).toBe(401)
 expect(res.status).toBe(403)
-<section class="he-section" id="6-remaining-items-optional-polish"><div class="he-section__num">06 · 6. Remaining Items (Optional Polish)</div><h2 class="he-section__title">6. Remaining Items (Optional Polish)</h2>ItemPriorityNotes<code>lib/prisma/client.ts</code> unit testsLowDual-client pattern, RLS extension<code>lib/prisma/db-base.ts</code> unit testsLowConnection management<code>lib/pools/</code> additional coverageLowconfirm, merge, bundles beyond join<code>lib/exams/</code> additional coverageLowscheduler, rollforward, resits<code>lib/internal-exam/</code> unit testsLowIntegration tests cover routes<code>tests/factories.ts</code> adoptionLowNew tests use it, older tests have inline mocksE2E cross-browser testingLowCurrently Chromium-only locallyThese are documented but not blocking. The core test suite is healthy.<section class="he-section" id="2-current-state-breakdown"><div class="he-section__num">07 · 2. Current State Breakdown</div><h2 class="he-section__title">2. Current State Breakdown</h2><h3 id="tier-1-excellent-6-files-keep-and-expand">Tier 1 — Excellent (~6 files, keep and expand)</h3>FileWhat it testsAssertions<code>tests/integration/workflows/registration.test.ts</code>Registration validationRegex, edge cases, boundary values<code>tests/unit/lib/gdpr-anonymise.test.ts</code>GDPR PII redactionExact field values, 8 models<code>tests/unit/lib/examiner-results.test.ts</code>Score clamping, absent-markingExact values, side effects<code>tests/unit/lib/wallet.test.ts</code>Balance calculationNegative clamp, string inputs<code>tests/unit/proxy.test.ts</code>Hotlink protection7 extensions, host+port, invalid referer<code>tests/unit/lib/auth-permissions.test.ts</code>Role hierarchyExact numeric values, hasRole/isStaff<h3 id="tier-2-good-14-files-keep-and-strengthen">Tier 2 — Good (~14 files, keep and strengthen)</h3>FileWhat it testsGaps<code>tests/integration/actions/staff-actions.test.ts</code>Server actions, auth guardsCould verify more side effects<code>tests/integration/actions/student-actions.test.ts</code>Enrollment, pool guardsCould add success-path assertions<code>tests/components/DataTable.test.tsx</code>Rendering, interactionsGood — keep<code>tests/components/FileField.test.tsx</code>7 UI statesAdd upload lifecycle test<code>tests/unit/utils/currency.test.ts</code>Formatting, parsingGood — keep<code>tests/email-gen.test.ts</code>Email generationGood — keep<h3 id="tier-3-moderate-40-files-keep-and-strengthen">Tier 3 — Moderate (~40 files, keep and strengthen)</h3>Component and hook tests with some real assertions but shallow coverage. Examples:<code>tests/components/ProtectedImage.test.tsx</code> — doesn't test right-click/drag prevention<code>tests/e2e/applicant-journey.spec.ts</code> — navigation smoke, no form interactions<h3 id="tier-4-worthless-409-files-delete-or-rewrite">Tier 4 — Worthless (~409 files, delete or rewrite)</h3>CategoryCountWhy worthlessAuto-generated API tests254Assert <code>json !== undefined</code>; mock everything under testUI primitive smoke tests28Test that shadcn/ui renders childrenHook smoke tests13Test <code>typeof result.current === 'object'</code>Trivial logic tests4+Test <code>typeof fn === 'function'</code>Duplicate/overlapping tests10+Same functions tested in multiple files<section class="he-section" id="3-remediation-plan"><div class="he-section__num">08 · 3. Remediation Plan</div><h2 class="he-section__title">3. Remediation Plan</h2><h3 id="phase-1-delete-waste-week-1">Phase 1: Delete Waste (Week 1)</h3>Goal: Remove ~400 files that add zero value.ActionFilesLOC RemovedRiskDelete <code>tests/components/ui/*.test.tsx</code>28~2,200None — shadcn/ui primitives don't need testsDelete <code>tests/unit/hooks/*.test.ts</code>13~1,000Low — rewrite only hooks with real logicDelete <code>tests/integration/api/*.test.ts</code>254~20,000Medium — replace with ~30 hand-written testsDelete <code>scripts/gen-tests.mjs</code>1632None — generator producing wasteDelete <code>scripts/generate-api-tests.mjs</code>1569None — generator producing wasteDelete trivial unit tests4+~200None — <code>typeof fn === 'function'</code>Total deletion: ~301 files, ~24,600 LOCVerification: <code>git ls-files tests/ | wc -l</code> should drop from 459 to ~158.<h3 id="phase-2-rewrite-integration-tests-week-1-2">Phase 2: Rewrite Integration Tests (Week 1-2)</h3>Goal: Replace 254 generated files with ~30 hand-written tests that assert real response shapes.Approach: Write one test file per API route group, not per route. Each test verifies:Auth guard fires (401/403) with exact status codesResponse body shape (required fields present, correct types)Business logic branching (e.g., pool state transitions, enrollment guards)Example pattern:// tests/integration/api/staff-users.test.ts
-it('returns paginated users with correct meta', async () => {
+</code></pre>
+<hr />
+<section class="he-section" id="6-remaining-items-optional-polish"><div class="he-section__num">06 · 6. Remaining Items (Optional Polish)</div><h2 class="he-section__title">6. Remaining Items (Optional Polish)</h2></section>
+<table>
+<thead>
+<tr><th>Item</th><th>Priority</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><code>lib/prisma/client.ts</code> unit tests</td><td>Low</td><td>Dual-client pattern, RLS extension</td></tr>
+<tr><td><code>lib/prisma/db-base.ts</code> unit tests</td><td>Low</td><td>Connection management</td></tr>
+<tr><td><code>lib/pools/</code> additional coverage</td><td>Low</td><td>confirm, merge, bundles beyond join</td></tr>
+<tr><td><code>lib/exams/</code> additional coverage</td><td>Low</td><td>scheduler, rollforward, resits</td></tr>
+<tr><td><code>lib/internal-exam/</code> unit tests</td><td>Low</td><td>Integration tests cover routes</td></tr>
+<tr><td><code>tests/factories.ts</code> adoption</td><td>Low</td><td>New tests use it, older tests have inline mocks</td></tr>
+<tr><td>E2E cross-browser testing</td><td>Low</td><td>Currently Chromium-only locally</td></tr>
+</tbody>
+</table>
+<p>These are documented but not blocking. The core test suite is healthy.</p>
+<hr />
+<section class="he-section" id="2-current-state-breakdown"><div class="he-section__num">07 · 2. Current State Breakdown</div><h2 class="he-section__title">2. Current State Breakdown</h2></section>
+<h3 id="tier-1-excellent-6-files-keep-and-expand">Tier 1 — Excellent (~6 files, keep and expand)</h3>
+<table>
+<thead>
+<tr><th>File</th><th>What it tests</th><th>Assertions</th></tr>
+</thead>
+<tbody>
+<tr><td><code>tests/integration/workflows/registration.test.ts</code></td><td>Registration validation</td><td>Regex, edge cases, boundary values</td></tr>
+<tr><td><code>tests/unit/lib/gdpr-anonymise.test.ts</code></td><td>GDPR PII redaction</td><td>Exact field values, 8 models</td></tr>
+<tr><td><code>tests/unit/lib/examiner-results.test.ts</code></td><td>Score clamping, absent-marking</td><td>Exact values, side effects</td></tr>
+<tr><td><code>tests/unit/lib/wallet.test.ts</code></td><td>Balance calculation</td><td>Negative clamp, string inputs</td></tr>
+<tr><td><code>tests/unit/proxy.test.ts</code></td><td>Hotlink protection</td><td>7 extensions, host+port, invalid referer</td></tr>
+<tr><td><code>tests/unit/lib/auth-permissions.test.ts</code></td><td>Role hierarchy</td><td>Exact numeric values, hasRole/isStaff</td></tr>
+</tbody>
+</table>
+<h3 id="tier-2-good-14-files-keep-and-strengthen">Tier 2 — Good (~14 files, keep and strengthen)</h3>
+<table>
+<thead>
+<tr><th>File</th><th>What it tests</th><th>Gaps</th></tr>
+</thead>
+<tbody>
+<tr><td><code>tests/integration/actions/staff-actions.test.ts</code></td><td>Server actions, auth guards</td><td>Could verify more side effects</td></tr>
+<tr><td><code>tests/integration/actions/student-actions.test.ts</code></td><td>Enrollment, pool guards</td><td>Could add success-path assertions</td></tr>
+<tr><td><code>tests/components/DataTable.test.tsx</code></td><td>Rendering, interactions</td><td>Good — keep</td></tr>
+<tr><td><code>tests/components/FileField.test.tsx</code></td><td>7 UI states</td><td>Add upload lifecycle test</td></tr>
+<tr><td><code>tests/unit/utils/currency.test.ts</code></td><td>Formatting, parsing</td><td>Good — keep</td></tr>
+<tr><td><code>tests/email-gen.test.ts</code></td><td>Email generation</td><td>Good — keep</td></tr>
+</tbody>
+</table>
+<h3 id="tier-3-moderate-40-files-keep-and-strengthen">Tier 3 — Moderate (~40 files, keep and strengthen)</h3>
+<p>Component and hook tests with some real assertions but shallow coverage. Examples:</p>
+<ul>
+<li><code>tests/components/ProtectedImage.test.tsx</code> — doesn't test right-click/drag prevention</li>
+<li><code>tests/e2e/applicant-journey.spec.ts</code> — navigation smoke, no form interactions</li>
+</ul>
+<h3 id="tier-4-worthless-409-files-delete-or-rewrite">Tier 4 — Worthless (~409 files, delete or rewrite)</h3>
+<table>
+<thead>
+<tr><th>Category</th><th>Count</th><th>Why worthless</th></tr>
+</thead>
+<tbody>
+<tr><td>Auto-generated API tests</td><td>254</td><td>Assert <code>json !== undefined</code>; mock everything under test</td></tr>
+<tr><td>UI primitive smoke tests</td><td>28</td><td>Test that shadcn/ui renders children</td></tr>
+<tr><td>Hook smoke tests</td><td>13</td><td>Test <code>typeof result.current === 'object'</code></td></tr>
+<tr><td>Trivial logic tests</td><td>4+</td><td>Test <code>typeof fn === 'function'</code></td></tr>
+<tr><td>Duplicate/overlapping tests</td><td>10+</td><td>Same functions tested in multiple files</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="3-remediation-plan"><div class="he-section__num">08 · 3. Remediation Plan</div><h2 class="he-section__title">3. Remediation Plan</h2></section>
+<h3 id="phase-1-delete-waste-week-1">Phase 1: Delete Waste (Week 1)</h3>
+<p><strong>Goal</strong>: Remove ~400 files that add zero value.</p>
+<table>
+<thead>
+<tr><th>Action</th><th>Files</th><th>LOC Removed</th><th>Risk</th></tr>
+</thead>
+<tbody>
+<tr><td>Delete <code>tests/components/ui/*.test.tsx</code></td><td>28</td><td>~2,200</td><td>None — shadcn/ui primitives don't need tests</td></tr>
+<tr><td>Delete <code>tests/unit/hooks/*.test.ts</code></td><td>13</td><td>~1,000</td><td>Low — rewrite only hooks with real logic</td></tr>
+<tr><td>Delete <code>tests/integration/api/*.test.ts</code></td><td>254</td><td>~20,000</td><td>Medium — replace with ~30 hand-written tests</td></tr>
+<tr><td>Delete <code>scripts/gen-tests.mjs</code></td><td>1</td><td>632</td><td>None — generator producing waste</td></tr>
+<tr><td>Delete <code>scripts/generate-api-tests.mjs</code></td><td>1</td><td>569</td><td>None — generator producing waste</td></tr>
+<tr><td>Delete trivial unit tests</td><td>4+</td><td>~200</td><td>None — <code>typeof fn === 'function'</code></td></tr>
+</tbody>
+</table>
+<p><strong>Total deletion</strong>: ~301 files, ~24,600 LOC</p>
+<p><strong>Verification</strong>: <code>git ls-files tests/ | wc -l</code> should drop from 459 to ~158.</p>
+<h3 id="phase-2-rewrite-integration-tests-week-1-2">Phase 2: Rewrite Integration Tests (Week 1-2)</h3>
+<p><strong>Goal</strong>: Replace 254 generated files with ~30 hand-written tests that assert real response shapes.</p>
+<p><strong>Approach</strong>: Write one test file per API route group, not per route. Each test verifies:</p>
+<ol>
+<li>Auth guard fires (401/403) with exact status codes</li>
+<li>Response body shape (required fields present, correct types)</li>
+<li>Business logic branching (e.g., pool state transitions, enrollment guards)</li>
+</ol>
+<p><strong>Example pattern</strong>:</p>
+<pre><code class="language-ts">// tests/integration/api/staff-users.test.ts
+it('returns paginated users with correct meta', async () =&gt; {
   prismaMock.user.findMany.mockResolvedValue([{ id: '1', email: 'a@b.com', role: 'STUDENT' }])
   prismaMock.user.count.mockResolvedValue(1)
   
-  const req = new NextRequest('http://localhost/api/staff/users?page=1&limit=20')
+  const req = new NextRequest('http://localhost/api/staff/users?page=1&amp;limit=20')
   const res = await GET(req)
   
   expect(res.status).toBe(200)
@@ -53,27 +320,157 @@ it('returns paginated users with correct meta', async () => {
   expect(json.data[0]).toHaveProperty('email')
   expect(json.meta).toEqual({ page: 1, limit: 20, total: 1, totalPages: 1 })
 })
-Target files (~30):<code>tests/integration/api/staff-users.test.ts</code> — user CRUD, search, counts<code>tests/integration/api/staff-students.test.ts</code> — student profile, import, status<code>tests/integration/api/staff-exams.test.ts</code> — exam events, pools, sittings, internal routes<code>tests/integration/api/staff-finance.test.ts</code> — wallet, payments, reconciliations<code>tests/integration/api/staff-enrollments.test.ts</code> — enrollment, classes, attendance<code>tests/integration/api/staff-settings.test.ts</code> — system settings, permissions, email<code>tests/integration/api/student-profile.test.ts</code> — profile, grades, documents<code>tests/integration/api/student-exams.test.ts</code> — pools, bookings, results<code>tests/integration/api/student-courses.test.ts</code> — courses, materials, attendance<code>tests/integration/api/student-ojt.test.ts</code> — OJT logbook, mentors<code>tests/integration/api/instructor-profile.test.ts</code> — profile, schedule, classes<code>tests/integration/api/instructor-grading.test.ts</code> — grades, attendance<code>tests/integration/api/applicant-profile.test.ts</code> — profile, documents, applications<code>tests/integration/api/applicant-exams.test.ts</code> — pools, bookings, bundles<code>tests/integration/api/examiner-results.test.ts</code> — sittings, results, availability<code>tests/integration/api/images.test.ts</code> — proxy, transform (auth + scope)<code>tests/integration/api/me.test.ts</code> — heartbeat, privacy, study-pathway<code>tests/integration/api/cron.test.ts</code> — cron endpoints (CRON_SECRET gate)<code>tests/integration/api/public.test.ts</code> — courses, contactVerification: Each test asserts exact status codes AND response body shape. No <code>expect(json).toBeDefined()</code>.<h3 id="phase-3-add-critical-coverage-gaps-week-2-3">Phase 3: Add Critical Coverage Gaps (Week 2-3)</h3>Goal: Add tests for modules with zero coverage that would cause production incidents.PriorityModuleTests to addRationaleP0<code>lib/audit/logger.ts</code>Unit: createAuditLog, AuditAction enumCompliance — untraceable mutationsP0<code>lib/security/rate-limit.ts</code>Unit: rateLimit, rateLimitByIP, rateLimitByUserSecurity — globally mocked, real behavior untestedP0<code>lib/validation/</code>Unit: all Zod schemasData integrity — invalid data in DBP1<code>lib/payments/verification.ts</code>Unit: payment proof validationFinancial loss/fraudP1<code>lib/prisma/client.ts</code>Unit: dual-client pattern, RLS extensionData leakage riskP1<code>lib/auth/totp.ts</code>Unit: generateTOTP, verifyTOTPCustom RFC 6238 — no testP1<code>lib/enrollment/</code>Unit: full-time, modular, tuition, exams7/10 files untestedP2<code>lib/pools/</code>Unit: confirm, join, merge, bundles13/17 files untestedP2<code>lib/exams/</code>Unit: scheduler, rollforward, resits6/7 files untestedP2<code>lib/internal-exam/</code>Unit + integrationEntire domain untestedP2<code>lib/aptitude/</code>Unit: question selection, gradingQuestion selection, percentileP2<code>lib/certificates/eligibility.ts</code>Unit: eligibility logicCertificate issuanceP3<code>lib/storage/signed-url.ts</code>Unit: signed URL generationImage proxy chainP3<code>lib/supabase/</code>Unit: sync-check, backupSupabase integration<h3 id="phase-4-strengthen-existing-tests-week-3">Phase 4: Strengthen Existing Tests (Week 3)</h3>ActionFilesWhat to fixFix <code>clearAllMocks</code> → <code>resetAllMocks</code>20+ filesStandards violationReplace <code>toBeDefined()</code> with body assertions10+ filesVerify response shapeFix self-mocking components1 (<code>PresencePill</code>)Test real componentAdd deterministic date tests3+ filesUse fixed dates, not <code>Date.now()</code>Add test factory utilitiesNew file<code>tests/factories.ts</code> for consistent mock dataImport and use existing fixtures3 files<code>tests/fixtures/{users,transactions,pools}.ts</code><h3 id="phase-5-enhance-e2e-tests-week-3-4">Phase 5: Enhance E2E Tests (Week 3-4)</h3>ActionFilesWhat to addAdd form submissions<code>applicant-journey.spec.ts</code>Submit forms, verify dataAdd error-state testingAll E2E specsInvalid inputs, 404s, 403sAdd data verificationAll E2E specsVerify DB state via API after flowsRemove hardcoded credentials<code>tests/e2e/helpers/auth.ts</code>Use <code>.env.test</code> only<section class="he-section" id="4-guardrails-preventing-future-waste"><div class="he-section__num">09 · 4. Guardrails — Preventing Future Waste</div><h2 class="he-section__title">4. Guardrails — Preventing Future Waste</h2><h3 id="41-what-not-to-test">4.1 What NOT to test</h3>The following patterns are forbidden in new tests:PatternWhy forbiddenExample<code>expect(typeof fn).toBe('function')</code>Tests nothing<code>tests/unit/lib/email-sender.test.ts</code><code>expect(json).toBeDefined()</code>Weakest assertion<code>student-profile.test.ts</code><code>expect([401, 403]).toContain(res.status)</code>Non-assertingAny generated testUI primitive smoke testsshadcn/ui doesn't need tests<code>tests/components/ui/button.test.tsx</code>Hook smoke testsTest behavior, not type<code>tests/unit/hooks/use-current-user.test.ts</code>Self-mocking componentsTests mock, not component<code>PresencePill.test.tsx</code>Mocking the wrapper under testShadows real implementation<code>withErrorHandler</code> in generated testsAuto-generated test scriptsCreates theater, not value<code>scripts/gen-tests.mjs</code><h3 id="42-required-test-patterns">4.2 Required test patterns</h3>Every new test must:Assert on specific values, not just existence// Correct
+</code></pre>
+<p><strong>Target files</strong> (~30):</p>
+<ul>
+<li><code>tests/integration/api/staff-users.test.ts</code> — user CRUD, search, counts</li>
+<li><code>tests/integration/api/staff-students.test.ts</code> — student profile, import, status</li>
+<li><code>tests/integration/api/staff-exams.test.ts</code> — exam events, pools, sittings, internal routes</li>
+<li><code>tests/integration/api/staff-finance.test.ts</code> — wallet, payments, reconciliations</li>
+<li><code>tests/integration/api/staff-enrollments.test.ts</code> — enrollment, classes, attendance</li>
+<li><code>tests/integration/api/staff-settings.test.ts</code> — system settings, permissions, email</li>
+<li><code>tests/integration/api/student-profile.test.ts</code> — profile, grades, documents</li>
+<li><code>tests/integration/api/student-exams.test.ts</code> — pools, bookings, results</li>
+<li><code>tests/integration/api/student-courses.test.ts</code> — courses, materials, attendance</li>
+<li><code>tests/integration/api/student-ojt.test.ts</code> — OJT logbook, mentors</li>
+<li><code>tests/integration/api/instructor-profile.test.ts</code> — profile, schedule, classes</li>
+<li><code>tests/integration/api/instructor-grading.test.ts</code> — grades, attendance</li>
+<li><code>tests/integration/api/applicant-profile.test.ts</code> — profile, documents, applications</li>
+<li><code>tests/integration/api/applicant-exams.test.ts</code> — pools, bookings, bundles</li>
+<li><code>tests/integration/api/examiner-results.test.ts</code> — sittings, results, availability</li>
+<li><code>tests/integration/api/images.test.ts</code> — proxy, transform (auth + scope)</li>
+<li><code>tests/integration/api/me.test.ts</code> — heartbeat, privacy, study-pathway</li>
+<li><code>tests/integration/api/cron.test.ts</code> — cron endpoints (CRON_SECRET gate)</li>
+<li><code>tests/integration/api/public.test.ts</code> — courses, contact</li>
+</ul>
+<p><strong>Verification</strong>: Each test asserts exact status codes AND response body shape. No <code>expect(json).toBeDefined()</code>.</p>
+<h3 id="phase-3-add-critical-coverage-gaps-week-2-3">Phase 3: Add Critical Coverage Gaps (Week 2-3)</h3>
+<p><strong>Goal</strong>: Add tests for modules with zero coverage that would cause production incidents.</p>
+<table>
+<thead>
+<tr><th>Priority</th><th>Module</th><th>Tests to add</th><th>Rationale</th></tr>
+</thead>
+<tbody>
+<tr><td>P0</td><td><code>lib/audit/logger.ts</code></td><td>Unit: createAuditLog, AuditAction enum</td><td>Compliance — untraceable mutations</td></tr>
+<tr><td>P0</td><td><code>lib/security/rate-limit.ts</code></td><td>Unit: rateLimit, rateLimitByIP, rateLimitByUser</td><td>Security — globally mocked, real behavior untested</td></tr>
+<tr><td>P0</td><td><code>lib/validation/</code></td><td>Unit: all Zod schemas</td><td>Data integrity — invalid data in DB</td></tr>
+<tr><td>P1</td><td><code>lib/payments/verification.ts</code></td><td>Unit: payment proof validation</td><td>Financial loss/fraud</td></tr>
+<tr><td>P1</td><td><code>lib/prisma/client.ts</code></td><td>Unit: dual-client pattern, RLS extension</td><td>Data leakage risk</td></tr>
+<tr><td>P1</td><td><code>lib/auth/totp.ts</code></td><td>Unit: generateTOTP, verifyTOTP</td><td>Custom RFC 6238 — no test</td></tr>
+<tr><td>P1</td><td><code>lib/enrollment/</code></td><td>Unit: full-time, modular, tuition, exams</td><td>7/10 files untested</td></tr>
+<tr><td>P2</td><td><code>lib/pools/</code></td><td>Unit: confirm, join, merge, bundles</td><td>13/17 files untested</td></tr>
+<tr><td>P2</td><td><code>lib/exams/</code></td><td>Unit: scheduler, rollforward, resits</td><td>6/7 files untested</td></tr>
+<tr><td>P2</td><td><code>lib/internal-exam/</code></td><td>Unit + integration</td><td>Entire domain untested</td></tr>
+<tr><td>P2</td><td><code>lib/aptitude/</code></td><td>Unit: question selection, grading</td><td>Question selection, percentile</td></tr>
+<tr><td>P2</td><td><code>lib/certificates/eligibility.ts</code></td><td>Unit: eligibility logic</td><td>Certificate issuance</td></tr>
+<tr><td>P3</td><td><code>lib/storage/signed-url.ts</code></td><td>Unit: signed URL generation</td><td>Image proxy chain</td></tr>
+<tr><td>P3</td><td><code>lib/supabase/</code></td><td>Unit: sync-check, backup</td><td>Supabase integration</td></tr>
+</tbody>
+</table>
+<h3 id="phase-4-strengthen-existing-tests-week-3">Phase 4: Strengthen Existing Tests (Week 3)</h3>
+<table>
+<thead>
+<tr><th>Action</th><th>Files</th><th>What to fix</th></tr>
+</thead>
+<tbody>
+<tr><td>Fix <code>clearAllMocks</code> → <code>resetAllMocks</code></td><td>20+ files</td><td>Standards violation</td></tr>
+<tr><td>Replace <code>toBeDefined()</code> with body assertions</td><td>10+ files</td><td>Verify response shape</td></tr>
+<tr><td>Fix self-mocking components</td><td>1 (<code>PresencePill</code>)</td><td>Test real component</td></tr>
+<tr><td>Add deterministic date tests</td><td>3+ files</td><td>Use fixed dates, not <code>Date.now()</code></td></tr>
+<tr><td>Add test factory utilities</td><td>New file</td><td><code>tests/factories.ts</code> for consistent mock data</td></tr>
+<tr><td>Import and use existing fixtures</td><td>3 files</td><td><code>tests/fixtures/{users,transactions,pools}.ts</code></td></tr>
+</tbody>
+</table>
+<h3 id="phase-5-enhance-e2e-tests-week-3-4">Phase 5: Enhance E2E Tests (Week 3-4)</h3>
+<table>
+<thead>
+<tr><th>Action</th><th>Files</th><th>What to add</th></tr>
+</thead>
+<tbody>
+<tr><td>Add form submissions</td><td><code>applicant-journey.spec.ts</code></td><td>Submit forms, verify data</td></tr>
+<tr><td>Add error-state testing</td><td>All E2E specs</td><td>Invalid inputs, 404s, 403s</td></tr>
+<tr><td>Add data verification</td><td>All E2E specs</td><td>Verify DB state via API after flows</td></tr>
+<tr><td>Remove hardcoded credentials</td><td><code>tests/e2e/helpers/auth.ts</code></td><td>Use <code>.env.test</code> only</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="4-guardrails-preventing-future-waste"><div class="he-section__num">09 · 4. Guardrails — Preventing Future Waste</div><h2 class="he-section__title">4. Guardrails — Preventing Future Waste</h2></section>
+<h3 id="41-what-not-to-test">4.1 What NOT to test</h3>
+<p>The following patterns are <strong>forbidden</strong> in new tests:</p>
+<table>
+<thead>
+<tr><th>Pattern</th><th>Why forbidden</th><th>Example</th></tr>
+</thead>
+<tbody>
+<tr><td><code>expect(typeof fn).toBe('function')</code></td><td>Tests nothing</td><td><code>tests/unit/lib/email-sender.test.ts</code></td></tr>
+<tr><td><code>expect(json).toBeDefined()</code></td><td>Weakest assertion</td><td><code>student-profile.test.ts</code></td></tr>
+<tr><td><code>expect([401, 403]).toContain(res.status)</code></td><td>Non-asserting</td><td>Any generated test</td></tr>
+<tr><td>UI primitive smoke tests</td><td>shadcn/ui doesn't need tests</td><td><code>tests/components/ui/button.test.tsx</code></td></tr>
+<tr><td>Hook smoke tests</td><td>Test behavior, not type</td><td><code>tests/unit/hooks/use-current-user.test.ts</code></td></tr>
+<tr><td>Self-mocking components</td><td>Tests mock, not component</td><td><code>PresencePill.test.tsx</code></td></tr>
+<tr><td>Mocking the wrapper under test</td><td>Shadows real implementation</td><td><code>withErrorHandler</code> in generated tests</td></tr>
+<tr><td>Auto-generated test scripts</td><td>Creates theater, not value</td><td><code>scripts/gen-tests.mjs</code></td></tr>
+</tbody>
+</table>
+<h3 id="42-required-test-patterns">4.2 Required test patterns</h3>
+<p>Every new test must:</p>
+<ol>
+<li>
+<p><strong>Assert on specific values</strong>, not just existence</p>
+<pre><code class="language-ts">// Correct
 expect(json.data[0].email).toBe('a@b.com')
 expect(json.meta.total).toBe(1)
 
 // Wrong
 expect(json).toBeDefined()
-Test edge cases and error paths// Correct
-it('returns 403 when permission denied', async () => {
+</code></pre>
+</li>
+<li>
+<p><strong>Test edge cases and error paths</strong></p>
+<pre><code class="language-ts">// Correct
+it('returns 403 when permission denied', async () =&gt; {
   ;(requirePermission as any).mockRejectedValueOnce(new Error('Permission denied: X'))
   const res = await POST(req, { params: { id: '1' } })
   expect(res.status).toBe(403)
 })
-Verify side effects with <code>toHaveBeenCalledWith</code>expect(prismaMock.auditLog.create).toHaveBeenCalledWith({
+</code></pre>
+</li>
+<li>
+<p><strong>Verify side effects with <code>toHaveBeenCalledWith</code></strong></p>
+<pre><code class="language-ts">expect(prismaMock.auditLog.create).toHaveBeenCalledWith({
   data: { action: 'USER_ROLE_CHANGED', userId: '1', targetUserId: '2' }
 })
-Use <code>resetAllMocks()</code>, not <code>clearAllMocks()</code>beforeEach(() => {
+</code></pre>
+</li>
+<li>
+<p><strong>Use <code>resetAllMocks()</code>, not <code>clearAllMocks()</code></strong></p>
+<pre><code class="language-ts">beforeEach(() =&gt; {
   vi.resetAllMocks() // resets implementations AND call history
 })
-Use shared mock configs from <code>tests/setup.tsx</code>import { authHelpersMockDefaults, apiResponseMockDefaults } from '@/tests/setup'
-vi.mock('@/lib/auth/helpers', () => ({ ...authHelpersMockDefaults }))
-<h3 id="43-test-approval-checklist">4.3 Test approval checklist</h3>Before adding a new test file, the author must verify:Does this test assert on specific values or response body shape?Does this test cover business logic, not implementation details?Does this test cover an edge case or error path?Would this test fail if the implementation was broken?Is this test not a UI primitive, hook smoke, or trivial <code>typeof</code> check?Is this test not auto-generated from a script?Does this test use <code>resetAllMocks()</code> and shared mock configs?Does this test verify the real implementation (not a shadow mock)?If any answer is "no", do not add the test.<h3 id="44-test-file-naming-and-structure">4.4 Test file naming and structure</h3>tests/
+</code></pre>
+</li>
+<li>
+<p><strong>Use shared mock configs from <code>tests/setup.tsx</code></strong></p>
+<pre><code class="language-ts">import { authHelpersMockDefaults, apiResponseMockDefaults } from '@/tests/setup'
+vi.mock('@/lib/auth/helpers', () =&gt; ({ ...authHelpersMockDefaults }))
+</code></pre>
+</li>
+</ol>
+<h3 id="43-test-approval-checklist">4.3 Test approval checklist</h3>
+<p>Before adding a new test file, the author must verify:</p>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Does this test assert on <strong>specific values</strong> or <strong>response body shape</strong>?</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Does this test cover <strong>business logic</strong>, not implementation details?</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Does this test cover an <strong>edge case</strong> or <strong>error path</strong>?</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Would this test <strong>fail if the implementation was broken</strong>?</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Is this test <strong>not</strong> a UI primitive, hook smoke, or trivial <code>typeof</code> check?</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Is this test <strong>not</strong> auto-generated from a script?</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Does this test use <code>resetAllMocks()</code> and shared mock configs?</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Does this test verify the <strong>real</strong> implementation (not a shadow mock)?</li>
+</ul>
+<p>If any answer is &quot;no&quot;, do not add the test.</p>
+<h3 id="44-test-file-naming-and-structure">4.4 Test file naming and structure</h3>
+<pre><code>tests/
   unit/
     lib/
       audit-logger.test.ts          # Business logic
@@ -96,7 +493,37 @@ vi.mock('@/lib/auth/helpers', () => ({ ...authHelpersMockDefaults }))
     # NO tests/components/ui/ — primitives don't need tests
   e2e/
     applicant-journey.spec.ts       # Real form submissions + data verification
-<section class="he-section" id="5-verification-criteria"><div class="he-section__num">10 · 5. Verification Criteria</div><h2 class="he-section__title">5. Verification Criteria</h2><h3 id="entry-criteria">Entry criteria</h3>All Phase 1 deletions committedTest generators deleted<code>tests/components/ui/</code> directory removed<code>tests/unit/hooks/</code> directory removed<h3 id="exit-criteria">Exit criteria</h3>Total test files: < 200 (down from 459)Total test LOC: < 20,000 (down from 36,000)Every test asserts specific values or response body shapeZero tests use <code>expect(json).toBeDefined()</code> as the sole assertionZero tests use <code>expect([401, 403]).toContain(res.status)</code>Zero tests check <code>typeof fn === 'function'</code>Zero auto-generated test filesCoverage on critical modules (<code>lib/audit/</code>, <code>lib/security/</code>, <code>lib/validation/</code>, <code>lib/payments/</code>) > 80%<code>bun run test --run</code> passes with >95% pass rate<h3 id="ongoing-enforcement">Ongoing enforcement</h3>Pre-commit hook rejects test files matching forbidden patternsCode review checklist includes test quality criteriaQuarterly test suite audit to detect drift<section class="he-section" id="6-forbidden-patterns-quick-reference"><div class="he-section__num">11 · 6. Forbidden Patterns — Quick Reference</div><h2 class="he-section__title">6. Forbidden Patterns — Quick Reference</h2>// ❌ FORBIDDEN — tests nothing
+</code></pre>
+<hr />
+<section class="he-section" id="5-verification-criteria"><div class="he-section__num">10 · 5. Verification Criteria</div><h2 class="he-section__title">5. Verification Criteria</h2></section>
+<h3 id="entry-criteria">Entry criteria</h3>
+<ul>
+<li>All Phase 1 deletions committed</li>
+<li>Test generators deleted</li>
+<li><code>tests/components/ui/</code> directory removed</li>
+<li><code>tests/unit/hooks/</code> directory removed</li>
+</ul>
+<h3 id="exit-criteria">Exit criteria</h3>
+<ul>
+<li>Total test files: <strong>&lt; 200</strong> (down from 459)</li>
+<li>Total test LOC: <strong>&lt; 20,000</strong> (down from 36,000)</li>
+<li>Every test asserts <strong>specific values</strong> or <strong>response body shape</strong></li>
+<li>Zero tests use <code>expect(json).toBeDefined()</code> as the sole assertion</li>
+<li>Zero tests use <code>expect([401, 403]).toContain(res.status)</code></li>
+<li>Zero tests check <code>typeof fn === 'function'</code></li>
+<li>Zero auto-generated test files</li>
+<li>Coverage on critical modules (<code>lib/audit/</code>, <code>lib/security/</code>, <code>lib/validation/</code>, <code>lib/payments/</code>) &gt; 80%</li>
+<li><code>bun run test --run</code> passes with &gt;95% pass rate</li>
+</ul>
+<h3 id="ongoing-enforcement">Ongoing enforcement</h3>
+<ul>
+<li>Pre-commit hook rejects test files matching forbidden patterns</li>
+<li>Code review checklist includes test quality criteria</li>
+<li>Quarterly test suite audit to detect drift</li>
+</ul>
+<hr />
+<section class="he-section" id="6-forbidden-patterns-quick-reference"><div class="he-section__num">11 · 6. Forbidden Patterns — Quick Reference</div><h2 class="he-section__title">6. Forbidden Patterns — Quick Reference</h2></section>
+<pre><code class="language-ts">// ❌ FORBIDDEN — tests nothing
 expect(typeof sendEmail).toBe('function')
 expect(json).toBeDefined()
 expect(res.status).toBeGreaterThanOrEqual(200)
@@ -109,7 +536,7 @@ expect(res.status).toBe(401)
 expect(res.status).toBe(403)
 
 // ❌ FORBIDDEN — testing shadcn/ui primitives
-render(<Button>Click</Button>)
+render(&lt;Button&gt;Click&lt;/Button&gt;)
 expect(screen.getByText('Click')).toBeInTheDocument()
 
 // ❌ FORBIDDEN — testing hook type, not behavior
@@ -117,13 +544,43 @@ expect(typeof useCurrentUser).toBe('function')
 expect(result.current).toBeDefined()
 
 // ❌ FORBIDDEN — self-mocking component
-vi.mock('@/components/shared/PresencePill', () => ({...}))
+vi.mock('@/components/shared/PresencePill', () =&gt; ({...}))
 
 // ❌ FORBIDDEN — shadowing the real wrapper
-vi.mock('@/lib/api/response', () => ({
-  withErrorHandler: vi.fn((fn) => async (req, ctx) => {...}) // reimplements real code
+vi.mock('@/lib/api/response', () =&gt; ({
+  withErrorHandler: vi.fn((fn) =&gt; async (req, ctx) =&gt; {...}) // reimplements real code
 }))
-<section class="he-section" id="7-rationale-summary"><div class="he-section__num">12 · 7. Rationale Summary</div><h2 class="he-section__title">7. Rationale Summary</h2>Tests exist to catch regression bugs that manual testing cannot reach:Logic errors in pure functions (grading, wallet, GDPR)Edge cases you won't think to test manually (null inputs, boundary values)Permission matrix correctness across 6 rolesAudit compliance (every mutation must be logged)Concurrent state (pool joining, seat reservation)<code>bun run dev</code> catches happy-path UI regressions you happen to think of. The Tier 1 tests catch logic regressions you wouldn't think of until production. The 254 generated files catch nothing at all.The test suite should be a safety net, not theater.<section class="he-section" id="8-appendix-file-counts-by-category"><div class="he-section__num">13 · 8. Appendix: File Counts by Category</div><h2 class="he-section__title">8. Appendix: File Counts by Category</h2>CategoryCountActionAuto-generated API tests254DeleteUI primitive smoke tests28DeleteHook smoke tests13Delete (rewrite 2-3 with real logic)Trivial logic tests4+DeleteTier 1-2 (real value)~20Keep and expandTier 3 (moderate)~40Keep and strengthenE2E tests7Keep and enhanceTotal459Target: < 200 after remediation
+</code></pre>
+<hr />
+<section class="he-section" id="7-rationale-summary"><div class="he-section__num">12 · 7. Rationale Summary</div><h2 class="he-section__title">7. Rationale Summary</h2></section>
+<p>Tests exist to catch <strong>regression bugs</strong> that manual testing cannot reach:</p>
+<ul>
+<li>Logic errors in pure functions (grading, wallet, GDPR)</li>
+<li>Edge cases you won't think to test manually (null inputs, boundary values)</li>
+<li>Permission matrix correctness across 6 roles</li>
+<li>Audit compliance (every mutation must be logged)</li>
+<li>Concurrent state (pool joining, seat reservation)</li>
+</ul>
+<p><code>bun run dev</code> catches happy-path UI regressions you happen to think of. The Tier 1 tests catch logic regressions you wouldn't think of until production. The 254 generated files catch nothing at all.</p>
+<p><strong>The test suite should be a safety net, not theater.</strong></p>
+<hr />
+<section class="he-section" id="8-appendix-file-counts-by-category"><div class="he-section__num">13 · 8. Appendix: File Counts by Category</div><h2 class="he-section__title">8. Appendix: File Counts by Category</h2></section>
+<table>
+<thead>
+<tr><th>Category</th><th>Count</th><th>Action</th></tr>
+</thead>
+<tbody>
+<tr><td>Auto-generated API tests</td><td>254</td><td>Delete</td></tr>
+<tr><td>UI primitive smoke tests</td><td>28</td><td>Delete</td></tr>
+<tr><td>Hook smoke tests</td><td>13</td><td>Delete (rewrite 2-3 with real logic)</td></tr>
+<tr><td>Trivial logic tests</td><td>4+</td><td>Delete</td></tr>
+<tr><td>Tier 1-2 (real value)</td><td>~20</td><td>Keep and expand</td></tr>
+<tr><td>Tier 3 (moderate)</td><td>~40</td><td>Keep and strengthen</td></tr>
+<tr><td>E2E tests</td><td>7</td><td>Keep and enhance</td></tr>
+<tr><td><strong>Total</strong></td><td><strong>459</strong></td><td><strong>Target: &lt; 200 after remediation</strong></td></tr>
+</tbody>
+</table>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -171,7 +628,7 @@ vi.mock('@/lib/api/response', () => ({
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

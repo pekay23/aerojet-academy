@@ -81,8 +81,11 @@ model User {
   grades                      Grade[]
   instructorProfile           InstructorProfile?
   internalExamReports         InternalExamReport[]
-  internalExamSessions        InternalExamSession[]
-  internalExamViolations      InternalExamViolation[]   @relation("InternalExamViolationStudent")
+    internalExamSessions        InternalExamSession[]
+   internalExamRegistrations   InternalExamRegistration[]
+   internalExamViolations      InternalExamViolation[]   @relation("InternalExamViolationStudent")
+   submittedQuestions          InternalExamQuestion[]    @relation("QuestionSubmittedBy")
+   reviewedQuestions           InternalExamQuestion[]    @relation("QuestionReviewedBy")
   interviewEvaluationsGiven   InterviewEvaluation[]     @relation("InterviewEvaluator")
   invoices                    Invoice[]
   maintenance145Transfers     Maintenance145Transfer[]
@@ -1095,22 +1098,25 @@ model Message {
 }
 
 model AuditLog {
-  id          String   @id @default(cuid())
-  userId      String?
-  action      String
-  entity      String?
-  entityId    String?
-  description String?
-  changes     Json?
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
-  user        User?    @relation(fields: [userId], references: [id])
+  id           String   @id @default(cuid())
+  userId       String?
+  action       String
+  entity       String?
+  entityId     String?
+  description  String?
+  changes      Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+  previousHash String?
+  hash         String?
+  user         User?    @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([action])
   @@index([entity, entityId])
   @@index([createdAt(sort: Desc)])
+  @@index([hash])
   @@map("audit_logs")
 }
 
@@ -1127,10 +1133,13 @@ model AuditLogArchive {
   userAgent         String?
   originalCreatedAt DateTime
   archivedAt        DateTime @default(now())
+  previousHash      String?
+  hash              String?
 
   @@index([originalCreatedAt])
   @@index([action])
   @@index([originalId])
+  @@index([hash])
   @@map("audit_log_archives")
 }
 
@@ -1972,6 +1981,11 @@ model InternalExamBank {
   updatedAt       DateTime                  @updatedAt
   categoryCode    String?
   sebConfig       Json?
+  certificateEnabled Boolean        @default(false)
+  reviewState     InternalExamBankReviewState @default(DRAFT)
+  reviewedAt      DateTime?
+  reviewedById    String?
+  reviewNote      String?
   course          Course                    @relation(fields: [courseId], references: [id])
   questions       InternalExamQuestion[]
   ruleOverride    InternalExamRuleOverride?
@@ -1982,6 +1996,7 @@ model InternalExamBank {
 
   @@index([courseId])
   @@index([categoryCode])
+  @@index([reviewState])
   @@map("internal_exam_banks")
 }
 
@@ -2014,11 +2029,13 @@ model InternalExamQuestion {
   aiSourceRef    String?
   aiConfidence   Float?
   aiSolvedAt     DateTime?
-  answers        InternalExamAnswer[]
-  bank           InternalExamBank     @relation(fields: [bankId], references: [id], onDelete: Cascade)
-  reports        InternalExamReport[]
+   answers        InternalExamAnswer[]
+   bank           InternalExamBank     @relation(fields: [bankId], references: [id], onDelete: Cascade)
+   reports        InternalExamReport[]
+   submittedBy    User?                @relation("QuestionSubmittedBy", fields: [submittedById], references: [id])
+   reviewedBy     User?                @relation("QuestionReviewedBy", fields: [reviewedById], references: [id])
 
-  @@index([bankId, isActive, status])
+   @@index([bankId, isActive, status])
   @@index([bankId, syllabusRef])
   @@index([status])
   @@map("internal_exam_questions")
@@ -2074,17 +2091,24 @@ model InternalExamSession {
   /// the single-attempt block so the student can retake).
   voidedAt         DateTime?
   voidedBy         String?
-  timeExtensionSec Int                  @default(0)
-  lastActivityAt   DateTime?
+   timeExtensionSec Int                  @default(0)
+   timeExtensionRecoveredAt DateTime?
+   lastActivityAt   DateTime?
   supervised       Boolean              @default(false)
   recoveredAt      DateTime?
   recoveredBy      String?
   recoveryReason   String?
-  answers          InternalExamAnswer[]
-  reports          InternalExamReport[]
-  accessCodes      InternalExamAccessCode[]
-  violations       InternalExamViolation[]
-  bank             InternalExamBank     @relation(fields: [bankId], references: [id])
+  bekExpiresAt     DateTime?
+  /// DB-level immutability trigger prevents modification of published results
+  /// (see scripts/create-immutability-trigger.sql)
+  /// Persisted randomized question order for paper randomization
+  questionOrder    Json?
+   answers          InternalExamAnswer[]
+   reports          InternalExamReport[]
+   accessCodes      InternalExamAccessCode[]
+   violations       InternalExamViolation[]
+   registrations    InternalExamRegistration[]
+   bank             InternalExamBank     @relation(fields: [bankId], references: [id])
   class            Class?               @relation(fields: [classId], references: [id])
   sitting          ExamSitting?         @relation(fields: [sittingId], references: [id])
   student          User                 @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -2093,7 +2117,43 @@ model InternalExamSession {
   @@index([status])
   @@index([studentId])
   @@index([categoryCode])
+  @@index([classId, status])
   @@map("internal_exam_sessions")
+}
+
+/// Pre-exam registration binding a candidate to an exam session.
+/// Created when an access code is validated; filled in by the pre-exam form.
+model InternalExamRegistration {
+  id                String   @id @default(cuid())
+  sessionId         String
+  userId            String
+  fullName          String?
+  dateOfBirth       DateTime?
+  nationality       String?
+  email             String?
+  phone             String?
+  licenceCategory   String?
+  modules           String[] @default([])
+  examDate          DateTime?
+  examLocation      String?
+  candidatePhoto    String?
+  idDocumentType    String?
+  idDocumentNumber  String?
+  consentTruthfulness Boolean @default(false)
+  consentMonitoring   Boolean @default(false)
+  consentIdentity     Boolean @default(false)
+  consentProcessing   Boolean @default(false)
+  status            String   @default("PENDING")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  session InternalExamSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, userId])
+  @@index([userId])
+  @@index([sessionId])
+  @@map("internal_exam_registrations")
 }
 
 model InternalExamReport {
@@ -3114,6 +3174,13 @@ enum TestSessionStatus {
   VOIDED
 }
 
+enum RetentionCategory {
+  EXAM_SESSION
+  EXAM_RESULT
+  CERTIFICATE
+  AUDIT_LOG
+}
+
 enum UpgradeStatus {
   PENDING
   APPROVED
@@ -3293,6 +3360,10 @@ enum ReferralPayoutStatus {
 }
 
 /// Many-to-many join between instructors and exam banks with edit permission
+/// NOTE: instructorId references InstructorProfile (not User.id as the UI plan
+/// specifies). This divergence is intentional — changing it would require a data
+/// migration and break existing functionality. The API layer handles mapping
+/// between User.id and InstructorProfile.id where needed.
 model InternalExamBankInstructor {
   id             String          @id @default(cuid())
   bankId         String
@@ -3316,7 +3387,7 @@ model InternalExamBankInstructor {
 model InternalExamClassSchedule {
   id              String          @id @default(cuid())
   bankId          String
-  classId         String
+  classId         String?
   scheduledStart  DateTime?
   scheduledEnd    DateTime?
   isActive        Boolean         @default(true)
@@ -3325,7 +3396,7 @@ model InternalExamClassSchedule {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
   bank            InternalExamBank @relation(fields: [bankId], references: [id], onDelete: Cascade)
-  class           Class           @relation(fields: [classId], references: [id], onDelete: Cascade)
+  class           Class?          @relation(fields: [classId], references: [id], onDelete: SetNull)
 
   @@index([bankId])
   @@index([classId])
@@ -3395,6 +3466,7 @@ model Certificate {
   revokeReason  String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  retentionCategory RetentionCategory @default(CERTIFICATE)
   student       User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@index([studentId])
@@ -3410,6 +3482,13 @@ enum PermissionScope {
 enum EmailRegistryCategory {
   AUTO
   CUSTOM
+}
+
+enum InternalExamBankReviewState {
+  DRAFT
+  PENDING_REVIEW
+  APPROVED
+  REJECTED
 }
 
 enum EmailDeliveryStatus {

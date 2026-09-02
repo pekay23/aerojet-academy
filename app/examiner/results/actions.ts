@@ -6,9 +6,9 @@ import { requireExaminer } from '@/lib/auth/helpers'
 import { prismaUnfiltered } from '@/lib/prisma/client'
 import { AuditAction, createAuditLog } from '@/lib/audit/logger'
 import { trackExamCompletion } from '@/lib/analytics/events'
-import { trackExamCompletion } from '@/lib/analytics/events'
+import { ACADEMIC_RULES } from '@/lib/constants/business-rules'
 
-const PASS_MARK = 75
+const { EASA_PASS_MARK: PASS_MARK } = ACADEMIC_RULES
 
 function letterGrade(pct: number): string {
   if (pct >= 90) return 'A'

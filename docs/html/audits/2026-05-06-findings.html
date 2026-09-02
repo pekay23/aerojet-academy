@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Performance Audit Findings — Session 2026-05-05/06 · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +27,156 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Performance Audit Findings — Session 2026-05-05/06</h1>
-  <p class="he-deck"><p>---…</p>
-</p>
+  <p class="he-deck">---…</p>
 </header>
-<section class="he-section" id="status-build-passes-all-structural-fixes-deployed"><div class="he-section__num">01 · Status: Build passes, all structural fixes deployed</div><h2 class="he-section__title">Status: Build passes, all structural fixes deployed</h2><section class="he-section" id="completed-fixes"><div class="he-section__num">02 · Completed Fixes</div><h2 class="he-section__title">Completed Fixes</h2><h3 id="tier-1-critical-all-done">Tier 1 (Critical) — ALL DONE</h3>staff/users/[id] — slug lookup via SQL, prismaUnfiltered, Promise.allstaff/students/[id] — slug lookup via SQL, prismaUnfiltered, 7 queries → Promise.allstudent/layout — 5 queries → Promise.all, prismaUnfilteredapplicant/layout — 4 queries → 1 consolidated querystaff/audit-logs — 9 entity label queries → Promise.all<h3 id="tier-2-high-impact-all-done">Tier 2 (High Impact) — ALL DONE</h3>lib/cached-queries.ts — created with 6 cached reference data functionslib/settings.ts — cached getSystemSetting + getPaymentSplitConfig111 loading.tsx files created across all portalsstaff/reports — 7 chart components → next/dynamic lazy loadstaff/dashboard — RevenueChart → next/dynamicstaff/scheduling — 4 queries → Promise.all + cached helpersstudent/page — merged double user query, parallelized<h3 id="tier-3-medium-all-done">Tier 3 (Medium) — ALL DONE</h3>7 fix_*.ts scripts deleted from rootreact-hot-toast removed from package.json, migrated to sonner in 7 files8 unused deps removed (three, shadergradient, styled-components, bufferutil, utf-8-validate, ws, @types/ws)N+1 in bulk-send-credentials — batch fetch with MapN+1 in enrollments/batch — .find() → Map lookupN+1 in cron/send-reminders — parallel emails, batch createMany notificationsCalendar megaquery — scoped examPool to user's pools, examEvents to future only6 unbounded API routes capped (programmes, newsroom paginated, course-categories, applicant/courses, student/courses+grades, exam-components)82+ staff API routes switched to prismaUnfiltered<h3 id="tier-4-low-done">Tier 4 (Low) — DONE</h3>next.config.ts — output: 'standalone', image cache TTL 60→3600AppTour — fixed missing #sidebar-nav ID, linter fixed TS errors with react-joyride v3<h3 id="build-fixes">Build Fixes</h3>6 public pages force-dynamic (/, /admissions, /fees-and-payment, /online-application-terms, /newsroom, /newsroom/[slug])<section class="he-section" id="structural-review-fixes-session-2026-05-06"><div class="he-section__num">03 · Structural Review Fixes (Session 2026-05-06)</div><h2 class="he-section__title">Structural Review Fixes (Session 2026-05-06)</h2><h3 id="p0-security-done">P0 — Security (DONE)</h3>Unprotected cron POST — Added CRON_SECRET auth check to milestone-reminders POST handlerRace condition — Wrapped top-up check-then-create in Serializable transaction with duplicate detection<h3 id="p1-maintainability-done">P1 — Maintainability (DONE)</h3>Extract duplicate promotion logic — Created <code>promoteIfFirstExamActivity()</code> and <code>upgradeRoleInTransaction()</code> in lib/enrollment/pathway.ts. Replaced 5 inline copies across book-exam, join-pool, bundles, full-time, tuitionPayment splits to SystemSettings — Moved 40/30/30 and 50/50 splits from hardcoded values to <code>getPaymentSplitConfig()</code> in lib/settings.ts, loaded from SystemSetting table with admin-editable defaultsZod validation — Added schemas (<code>charterBookingSchema</code>, <code>mergePoolsSchema</code>, <code>attachProofSchema</code>, <code>staffBookExamSchema</code>) and applied to charter, merge, wallet-proof, staff book-exam routes. Also modernized charter and merge routes to use <code>withErrorHandler</code> + <code>requireStaff()</code>Dynamic NewsMarkdownEditor — Switched to <code>next/dynamic</code> with <code>ssr: false</code> in newsroom/create and newsroom/[id]/edit (681-line TipTap component no longer in initial bundle)<h3 id="infrastructure-fix">Infrastructure Fix</h3>Vercel DB connection failure — Restored <code>@prisma/adapter-pg</code> (standard PostgreSQL driver). Commit b0b5e73 had switched to <code>@prisma/adapter-neon</code> + <code>ws</code> which doesn't work in Vercel serverless bundles. The <code>ws</code> WebSocket module cannot be properly bundled by Turbopack for serverless environments.<section class="he-section" id="financial-system-stabilization-session-2026-05-06"><div class="he-section__num">04 · Financial System Stabilization (Session 2026-05-06)</div><h2 class="he-section__title">Financial System Stabilization (Session 2026-05-06)</h2><h3 id="fix-1-raw-database-ids-in-financial-transactions-done">Fix 1 — Raw Database IDs in Financial Transactions (DONE)</h3>Refactored <code>getReferenceDisplay()</code> to generate human-readable references: <code>ENR-XXXX</code>, <code>EXM-XXXX</code>, <code>PAY-XXXX</code> instead of raw CUIDs<h3 id="fix-2-raw-student-ids-in-audit-logs-done">Fix 2 — Raw Student IDs in Audit Logs (DONE)</h3>Added profile lookups before audit logging in <code>actions.ts</code>, <code>exam-record/route.ts</code>, <code>book-exam/route.ts</code>Added ExamBooking/ExamResult entity label resolution in <code>audit-logs/page.tsx</code><h3 id="fix-3-transactions-table-pagination-sorting-done">Fix 3 — Transactions Table Pagination & Sorting (DONE)</h3>Created <code>GET /api/staff/finance/transactions</code> with <code>page</code>, <code>limit</code>, <code>sortBy</code>, <code>sortDir</code>, <code>query</code> paramsCreated <code>TransactionsTable</code> client component with server-side pagination and sortable columns<h3 id="fix-4-examiner-role-update-400-error-done">Fix 4 — EXAMINER Role Update 400 Error (DONE)</h3>Added <code>EXAMINER</code> to Zod <code>updateRoleSchema</code> enum in <code>staff/users/[id]/role/route.ts</code>Auto-creates InstructorProfile with <code>EX-</code> prefix when assigning EXAMINER role<h3 id="fix-5-chart-rendering-warnings-done">Fix 5 — Chart Rendering Warnings (DONE)</h3>Added <code>minWidth={0} minHeight={0}</code> to all 8 <code>ResponsiveContainer</code> instances across charts<h3 id="fix-6-historical-financial-filtering-reports-export-done">Fix 6 — Historical Financial Filtering & Reports Export (DONE)</h3>Added <code>year</code>/<code>month</code> params to <code>getFinanceReportSummary()</code> and <code>getMonthlyRevenueData()</code> in <code>lib/analytics/reports.ts</code>Created <code>GET /api/staff/finance/reports</code> — filterable reports APICreated <code>GET /api/staff/finance/reports/export</code> — premium HTML report with Print/Save-as-PDFCreated <code>ReportsPanel</code> client component with year/month selectors and export buttons<section class="he-section" id="remaining-p2p3-mostly-closed-2026-05-20"><div class="he-section__num">05 · Remaining (P2/P3 — mostly closed 2026-05-20)</div><h2 class="he-section__title">Remaining (P2/P3 — mostly closed 2026-05-20)</h2><h3 id="p2-structure">P2 — Structure</h3>Break up long functions — getDashboardData (183 lines), UsersTable (380 lines) (low priority)Add error.tsx in (auth) segment — already present; <code>app/examiner/error.tsx</code> also added 2026-05-20Add not-found.tsx in (auth) and (portal) segments — all five portals (staff/student/instructor/applicant/examiner) now have branded <code>not-found.tsx</code>Remove dead Tailwind fonts — only <code>sans</code>, <code>outfit</code>, <code>heading</code> remain in <code>tailwind.config.ts</code><h3 id="p3-polish">P3 — Polish</h3>Centralize hardcoded values — partial; non-blockingReplace <code><img></code> with next/image — newsroom edit page (the actual location; audit said "create" incorrectly) now uses <code>next/image</code> with <code>fill</code>+<code>sizes</code>Rate limiting — both <code>resend-verification</code> and <code>submit-payment-proof</code> covered by <code>@upstash/ratelimit</code> (production) with in-memory fallback<section class="he-section" id="two-factor-authentication-seating-session-2026-05-13"><div class="he-section__num">06 · Two-Factor Authentication &amp; Seating (Session 2026-05-13)</div><h2 class="he-section__title">Two-Factor Authentication & Seating (Session 2026-05-13)</h2><h3 id="2fa-implementation-done">2FA Implementation (DONE)</h3>TOTP-based 2FA for staff accounts via <code>otplib</code> v5Login flow intercepts <code>2FA_REQUIRED</code> error to show TOTP inputSettings → Security tab with QR setup, verify, and disable flowsotplib v5 migration — Package upgraded from v4 to v5, completely new API (see Key Lessons #5)<h3 id="interactive-floor-plan-designer-done">Interactive Floor Plan Designer (DONE)</h3>CSS grid-based classroom layout builder with DESK/AISLE/OBSTACLE paint toolsAuto-label generation (A1, A2, B1…) for desk cellsLayout save syncs <code>Seat</code> records in transaction (delete all + recreate)Exam seating: drag-and-drop student→seat assignment stored on <code>ExamSittingAssignment.seatId</code>Class seating: assignments stored as JSON in SystemSettings (<code>class_seating_{classId}</code>)Student seating view: aggregates class + exam seats with mini floor plan visualizations<h3 id="enhanced-classmates-directory-done">Enhanced Classmates Directory (DONE)</h3>6 filter modes: batch, classmates, year, semester, pathway, classClient-side filter component with <code>useTransition</code> for pending stateSemester badge added to peer profile cards<h3 id="welcome-tour-enhancements-done">Welcome Tour Enhancements (DONE)</h3>Role-specific <code>react-joyride</code> tours: 12 student steps, 10 staff steps, 5 applicant stepsCovers all sidebar features with JSX content blocks<section class="he-section" id="key-lessons-learned"><div class="he-section__num">07 · Key Lessons Learned</div><h2 class="he-section__title">Key Lessons Learned</h2>Never switch database adapters without Vercel testing — <code>@prisma/adapter-neon</code> + <code>ws</code> works locally but fails in Vercel serverless. Stick with <code>@prisma/adapter-pg</code> for production.<code>force-dynamic</code> on public pages — Required when pages call DB functions (like <code>getRegistrationFeeInfo</code>), otherwise Next.js tries to query the DB at build time.Promotion logic must be centralized — 5 copies of applicant-to-student promotion across different routes is a maintenance hazard. Now consolidated to 2 helpers in <code>lib/enrollment/pathway.ts</code>.Payment splits should be admin-editable — Business rules like 40/30/30 splits belong in SystemSettings, not hardcoded. Pattern established in <code>lib/pools/pricing-config.ts</code> already existed.otplib v5 has a completely different API — The <code>authenticator</code> export was removed. Use named imports: <code>generateSecret</code>, <code>generateURI</code>, <code>verify</code>. The <code>verify()</code> function returns <code>{ valid: boolean }</code> (not a plain boolean). The <code>generateURI()</code> function requires lowercase <code>algorithm: 'sha1'</code> (not <code>'SHA1'</code>).Prisma JSON null filtering — Use <code>Prisma.DbNull</code> (not <code>null</code>) when filtering JSON fields: <code>layout: { not: Prisma.DbNull }</code>.Class seating without schema changes — Storing assignments as JSON in SystemSettings (<code>class_seating_{classId}</code> keys) avoids migrations when the relationship is ephemeral and doesn't need referential integrity.
+<section class="he-section" id="status-build-passes-all-structural-fixes-deployed"><div class="he-section__num">01 · Status: Build passes, all structural fixes deployed</div><h2 class="he-section__title">Status: Build passes, all structural fixes deployed</h2></section>
+<hr />
+<section class="he-section" id="completed-fixes"><div class="he-section__num">02 · Completed Fixes</div><h2 class="he-section__title">Completed Fixes</h2></section>
+<h3 id="tier-1-critical-all-done">Tier 1 (Critical) — ALL DONE</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>staff/users/[id] — slug lookup via SQL, prismaUnfiltered, Promise.all</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>staff/students/[id] — slug lookup via SQL, prismaUnfiltered, 7 queries → Promise.all</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>student/layout — 5 queries → Promise.all, prismaUnfiltered</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>applicant/layout — 4 queries → 1 consolidated query</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>staff/audit-logs — 9 entity label queries → Promise.all</li>
+</ul>
+<h3 id="tier-2-high-impact-all-done">Tier 2 (High Impact) — ALL DONE</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>lib/cached-queries.ts — created with 6 cached reference data functions</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>lib/settings.ts — cached getSystemSetting + getPaymentSplitConfig</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>111 loading.tsx files created across all portals</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>staff/reports — 7 chart components → next/dynamic lazy load</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>staff/dashboard — RevenueChart → next/dynamic</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>staff/scheduling — 4 queries → Promise.all + cached helpers</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>student/page — merged double user query, parallelized</li>
+</ul>
+<h3 id="tier-3-medium-all-done">Tier 3 (Medium) — ALL DONE</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>7 fix_*.ts scripts deleted from root</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>react-hot-toast removed from package.json, migrated to sonner in 7 files</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>8 unused deps removed (three, shadergradient, styled-components, bufferutil, utf-8-validate, ws, @types/ws)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>N+1 in bulk-send-credentials — batch fetch with Map</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>N+1 in enrollments/batch — .find() → Map lookup</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>N+1 in cron/send-reminders — parallel emails, batch createMany notifications</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Calendar megaquery — scoped examPool to user's pools, examEvents to future only</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>6 unbounded API routes capped (programmes, newsroom paginated, course-categories, applicant/courses, student/courses+grades, exam-components)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>82+ staff API routes switched to prismaUnfiltered</li>
+</ul>
+<h3 id="tier-4-low-done">Tier 4 (Low) — DONE</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>next.config.ts — output: 'standalone', image cache TTL 60→3600</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>AppTour — fixed missing #sidebar-nav ID, linter fixed TS errors with react-joyride v3</li>
+</ul>
+<h3 id="build-fixes">Build Fixes</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>6 public pages force-dynamic (/, /admissions, /fees-and-payment, /online-application-terms, /newsroom, /newsroom/[slug])</li>
+</ul>
+<hr />
+<section class="he-section" id="structural-review-fixes-session-2026-05-06"><div class="he-section__num">03 · Structural Review Fixes (Session 2026-05-06)</div><h2 class="he-section__title">Structural Review Fixes (Session 2026-05-06)</h2></section>
+<h3 id="p0-security-done">P0 — Security (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Unprotected cron POST</strong> — Added CRON_SECRET auth check to milestone-reminders POST handler</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Race condition</strong> — Wrapped top-up check-then-create in Serializable transaction with duplicate detection</li>
+</ul>
+<h3 id="p1-maintainability-done">P1 — Maintainability (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Extract duplicate promotion logic</strong> — Created <code>promoteIfFirstExamActivity()</code> and <code>upgradeRoleInTransaction()</code> in lib/enrollment/pathway.ts. Replaced 5 inline copies across book-exam, join-pool, bundles, full-time, tuition</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Payment splits to SystemSettings</strong> — Moved 40/30/30 and 50/50 splits from hardcoded values to <code>getPaymentSplitConfig()</code> in lib/settings.ts, loaded from SystemSetting table with admin-editable defaults</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Zod validation</strong> — Added schemas (<code>charterBookingSchema</code>, <code>mergePoolsSchema</code>, <code>attachProofSchema</code>, <code>staffBookExamSchema</code>) and applied to charter, merge, wallet-proof, staff book-exam routes. Also modernized charter and merge routes to use <code>withErrorHandler</code> + <code>requireStaff()</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Dynamic NewsMarkdownEditor</strong> — Switched to <code>next/dynamic</code> with <code>ssr: false</code> in newsroom/create and newsroom/[id]/edit (681-line TipTap component no longer in initial bundle)</li>
+</ul>
+<h3 id="infrastructure-fix">Infrastructure Fix</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Vercel DB connection failure</strong> — Restored <code>@prisma/adapter-pg</code> (standard PostgreSQL driver). Commit b0b5e73 had switched to <code>@prisma/adapter-neon</code> + <code>ws</code> which doesn't work in Vercel serverless bundles. The <code>ws</code> WebSocket module cannot be properly bundled by Turbopack for serverless environments.</li>
+</ul>
+<hr />
+<section class="he-section" id="financial-system-stabilization-session-2026-05-06"><div class="he-section__num">04 · Financial System Stabilization (Session 2026-05-06)</div><h2 class="he-section__title">Financial System Stabilization (Session 2026-05-06)</h2></section>
+<h3 id="fix-1-raw-database-ids-in-financial-transactions-done">Fix 1 — Raw Database IDs in Financial Transactions (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Refactored <code>getReferenceDisplay()</code> to generate human-readable references: <code>ENR-XXXX</code>, <code>EXM-XXXX</code>, <code>PAY-XXXX</code> instead of raw CUIDs</li>
+</ul>
+<h3 id="fix-2-raw-student-ids-in-audit-logs-done">Fix 2 — Raw Student IDs in Audit Logs (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Added profile lookups before audit logging in <code>actions.ts</code>, <code>exam-record/route.ts</code>, <code>book-exam/route.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Added ExamBooking/ExamResult entity label resolution in <code>audit-logs/page.tsx</code></li>
+</ul>
+<h3 id="fix-3-transactions-table-pagination-amp-sorting-done">Fix 3 — Transactions Table Pagination &amp; Sorting (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Created <code>GET /api/staff/finance/transactions</code> with <code>page</code>, <code>limit</code>, <code>sortBy</code>, <code>sortDir</code>, <code>query</code> params</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Created <code>TransactionsTable</code> client component with server-side pagination and sortable columns</li>
+</ul>
+<h3 id="fix-4-examiner-role-update-400-error-done">Fix 4 — EXAMINER Role Update 400 Error (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Added <code>EXAMINER</code> to Zod <code>updateRoleSchema</code> enum in <code>staff/users/[id]/role/route.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Auto-creates InstructorProfile with <code>EX-</code> prefix when assigning EXAMINER role</li>
+</ul>
+<h3 id="fix-5-chart-rendering-warnings-done">Fix 5 — Chart Rendering Warnings (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Added <code>minWidth={0} minHeight={0}</code> to all 8 <code>ResponsiveContainer</code> instances across charts</li>
+</ul>
+<h3 id="fix-6-historical-financial-filtering-amp-reports-export-done">Fix 6 — Historical Financial Filtering &amp; Reports Export (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Added <code>year</code>/<code>month</code> params to <code>getFinanceReportSummary()</code> and <code>getMonthlyRevenueData()</code> in <code>lib/analytics/reports.ts</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Created <code>GET /api/staff/finance/reports</code> — filterable reports API</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Created <code>GET /api/staff/finance/reports/export</code> — premium HTML report with Print/Save-as-PDF</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Created <code>ReportsPanel</code> client component with year/month selectors and export buttons</li>
+</ul>
+<hr />
+<section class="he-section" id="remaining-p2p3-mostly-closed-2026-05-20"><div class="he-section__num">05 · Remaining (P2/P3 — mostly closed 2026-05-20)</div><h2 class="he-section__title">Remaining (P2/P3 — mostly closed 2026-05-20)</h2></section>
+<h3 id="p2-structure">P2 — Structure</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Break up long functions — getDashboardData (183 lines), UsersTable (380 lines) (low priority)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Add error.tsx in (auth) segment</strong> — already present; <code>app/examiner/error.tsx</code> also added 2026-05-20</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Add not-found.tsx in (auth) and (portal) segments</strong> — all five portals (staff/student/instructor/applicant/examiner) now have branded <code>not-found.tsx</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Remove dead Tailwind fonts</strong> — only <code>sans</code>, <code>outfit</code>, <code>heading</code> remain in <code>tailwind.config.ts</code></li>
+</ul>
+<h3 id="p3-polish">P3 — Polish</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Centralize hardcoded values — partial; non-blocking</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Replace <code>&lt;img&gt;</code> with next/image</strong> — newsroom edit page (the actual location; audit said &quot;create&quot; incorrectly) now uses <code>next/image</code> with <code>fill</code>+<code>sizes</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>Rate limiting</strong> — both <code>resend-verification</code> and <code>submit-payment-proof</code> covered by <code>@upstash/ratelimit</code> (production) with in-memory fallback</li>
+</ul>
+<hr />
+<section class="he-section" id="two-factor-authentication-amp-seating-session-2026-05-13"><div class="he-section__num">06 · Two-Factor Authentication &amp;amp; Seating (Session 2026-05-13)</div><h2 class="he-section__title">Two-Factor Authentication &amp; Seating (Session 2026-05-13)</h2></section>
+<h3 id="2fa-implementation-done">2FA Implementation (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>TOTP-based 2FA for staff accounts via <code>otplib</code> v5</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Login flow intercepts <code>2FA_REQUIRED</code> error to show TOTP input</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Settings → Security tab with QR setup, verify, and disable flows</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked><strong>otplib v5 migration</strong> — Package upgraded from v4 to v5, completely new API (see Key Lessons #5)</li>
+</ul>
+<h3 id="interactive-floor-plan-designer-done">Interactive Floor Plan Designer (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>CSS grid-based classroom layout builder with DESK/AISLE/OBSTACLE paint tools</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Auto-label generation (A1, A2, B1…) for desk cells</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Layout save syncs <code>Seat</code> records in transaction (delete all + recreate)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Exam seating: drag-and-drop student→seat assignment stored on <code>ExamSittingAssignment.seatId</code></li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Class seating: assignments stored as JSON in SystemSettings (<code>class_seating_{classId}</code>)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Student seating view: aggregates class + exam seats with mini floor plan visualizations</li>
+</ul>
+<h3 id="enhanced-classmates-directory-done">Enhanced Classmates Directory (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>6 filter modes: batch, classmates, year, semester, pathway, class</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Client-side filter component with <code>useTransition</code> for pending state</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Semester badge added to peer profile cards</li>
+</ul>
+<h3 id="welcome-tour-enhancements-done">Welcome Tour Enhancements (DONE)</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Role-specific <code>react-joyride</code> tours: 12 student steps, 10 staff steps, 5 applicant steps</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Covers all sidebar features with JSX content blocks</li>
+</ul>
+<hr />
+<section class="he-section" id="key-lessons-learned"><div class="he-section__num">07 · Key Lessons Learned</div><h2 class="he-section__title">Key Lessons Learned</h2></section>
+<ol>
+<li><strong>Never switch database adapters without Vercel testing</strong> — <code>@prisma/adapter-neon</code> + <code>ws</code> works locally but fails in Vercel serverless. Stick with <code>@prisma/adapter-pg</code> for production.</li>
+<li><strong><code>force-dynamic</code> on public pages</strong> — Required when pages call DB functions (like <code>getRegistrationFeeInfo</code>), otherwise Next.js tries to query the DB at build time.</li>
+<li><strong>Promotion logic must be centralized</strong> — 5 copies of applicant-to-student promotion across different routes is a maintenance hazard. Now consolidated to 2 helpers in <code>lib/enrollment/pathway.ts</code>.</li>
+<li><strong>Payment splits should be admin-editable</strong> — Business rules like 40/30/30 splits belong in SystemSettings, not hardcoded. Pattern established in <code>lib/pools/pricing-config.ts</code> already existed.</li>
+<li><strong>otplib v5 has a completely different API</strong> — The <code>authenticator</code> export was removed. Use named imports: <code>generateSecret</code>, <code>generateURI</code>, <code>verify</code>. The <code>verify()</code> function returns <code>{ valid: boolean }</code> (not a plain boolean). The <code>generateURI()</code> function requires lowercase <code>algorithm: 'sha1'</code> (not <code>'SHA1'</code>).</li>
+<li><strong>Prisma JSON null filtering</strong> — Use <code>Prisma.DbNull</code> (not <code>null</code>) when filtering JSON fields: <code>layout: { not: Prisma.DbNull }</code>.</li>
+<li><strong>Class seating without schema changes</strong> — Storing assignments as JSON in SystemSettings (<code>class_seating_{classId}</code> keys) avoids migrations when the relationship is ephemeral and doesn't need referential integrity.</li>
+</ol>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -66,7 +213,7 @@
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

@@ -198,3 +198,38 @@ export async function checkEligibility(studentId: string, bankId: string) {
     totalAttempts: sessions.length,
   }
 }
+
+// ---------------------------------------------------------------------------
+// Build randomised paper (shuffled question order + shuffled options)
+// ---------------------------------------------------------------------------
+
+export interface RandomizedPaper {
+  paper: {
+    id: string
+    text: string
+    options: string[]
+    points: number
+    subTopic?: string | null
+    syllabusRef?: string | null
+  }[]
+  questionOrder: string[]
+}
+
+export async function buildRandomizedPaper(
+  rawQuestions: Array<{
+    id: string
+    text: string
+    options: string[]
+    points: number
+    subTopic?: string | null
+    syllabusRef?: string | null
+  }>,
+): Promise<RandomizedPaper> {
+  const shuffledQuestions = shuffle(rawQuestions.map(q => ({ ...q, options: shuffle(q.options) })))
+  const questionOrder = shuffledQuestions.map(q => q.id)
+
+  return {
+    paper: shuffledQuestions,
+    questionOrder,
+  }
+}

@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Staff Portal — Performance &amp; Architecture Audit · Aerojet Academy</title>
-<link rel="stylesheet" href="../../../design-tokens.css">
-<link rel="stylesheet" href="../../../docs.css">
+<link rel="stylesheet" href="../../../../design-tokens.css">
+<link rel="stylesheet" href="../../../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../../../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../../../index.html">Index</a>
-    <a href="../../../architecture/system-overview.html">Architecture</a>
-    <a href="../../../guides/setup.html">Guides</a>
-    <a href="../../../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../../../plans/future-plans.html">Plans</a>
-    <a href="../../../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,30 +27,289 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Staff Portal — Performance &amp; Architecture Audit</h1>
-  <p class="he-deck"><p>Date: 2026-08-27 Auditor: Performance Auditor Agent…</p>
-</p>
+  <p class="he-deck">Date: 2026-08-27 Auditor: Performance Auditor Agent…</p>
 </header>
-<section class="he-section" id="executive-summary"><div class="he-section__num">01 · Executive Summary</div><h2 class="he-section__title">Executive Summary</h2>The Staff portal broadly follows the project's performance conventions: every server component uses <code>prismaUnfiltered</code>, <code>Promise.all</code> is used correctly in most orchestrators, and heavy chart libraries are dynamically imported in the Reports and Dashboard modules. However, the audit identified material gaps in pagination (several list pages load full tables), caching (analytics report functions hit the database on every request), query consolidation (duplicate <code>findUnique</code> calls for the same record in metadata + page body), and bundle splitting (the Analytics dashboard loads all Recharts sub-components in a single client chunk). One <code>loading.tsx</code> is also missing.<section class="he-section" id="findings"><div class="he-section__num">02 · Findings</div><h2 class="he-section__title">Findings</h2><h3 id="query-optimization">Query Optimization</h3><h4 id="full-table-loads-on-list-pages">Full-table loads on list pages</h4>File: <code>app/staff/classes/page.tsx</code>Lines: 16-48Severity: HighType: ImprovementDescription: The Classes list loads every class with <code>findMany({ orderBy: { startDate: 'desc' } })</code> and no <code>take</code>/<code>skip</code>. As the academy grows this will degrade render time and memory.Recommendation: Add <code>take</code> (e.g. 50-100) and cursor/offset pagination. Use the existing <code>TablePagination</code> component pattern seen in other tables.Code Reference:const classes = await prismaUnfiltered.class.findMany({
+<section class="he-section" id="executive-summary"><div class="he-section__num">01 · Executive Summary</div><h2 class="he-section__title">Executive Summary</h2></section>
+<p>The Staff portal broadly follows the project's performance conventions: every server component uses <code>prismaUnfiltered</code>, <code>Promise.all</code> is used correctly in most orchestrators, and heavy chart libraries are dynamically imported in the Reports and Dashboard modules. However, the audit identified material gaps in <strong>pagination</strong> (several list pages load full tables), <strong>caching</strong> (analytics report functions hit the database on every request), <strong>query consolidation</strong> (duplicate <code>findUnique</code> calls for the same record in metadata + page body), and <strong>bundle splitting</strong> (the Analytics dashboard loads all Recharts sub-components in a single client chunk). One <code>loading.tsx</code> is also missing.</p>
+<section class="he-section" id="findings"><div class="he-section__num">02 · Findings</div><h2 class="he-section__title">Findings</h2></section>
+<h3 id="query-optimization">Query Optimization</h3>
+<h4 id="full-table-loads-on-list-pages">Full-table loads on list pages</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/classes/page.tsx</code></li>
+<li><strong>Lines</strong>: 16-48</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: The Classes list loads every class with <code>findMany({ orderBy: { startDate: 'desc' } })</code> and no <code>take</code>/<code>skip</code>. As the academy grows this will degrade render time and memory.</li>
+<li><strong>Recommendation</strong>: Add <code>take</code> (e.g. 50-100) and cursor/offset pagination. Use the existing <code>TablePagination</code> component pattern seen in other tables.</li>
+<li><strong>Code Reference</strong>:
+<pre><code class="language-ts">const classes = await prismaUnfiltered.class.findMany({
   select: { ... },
   orderBy: { startDate: 'desc' },
   // missing take/skip
 })
-<h4 id="records-tab-loads-all-bookings-results-into-js">Records tab loads all bookings + results into JS</h4>File: <code>app/staff/exams/page.tsx</code>Lines: 510-667Severity: HighType: ImprovementDescription: <code>RecordsTabServer</code> fetches ALL <code>examBooking</code> and <code>examResult</code> rows without <code>take</code>/<code>skip</code>, then merges and sorts them in memory, finally slicing to 2000. This is an unbounded query that will time out on large datasets.Recommendation: Add <code>take</code>/<code>skip</code> (or cursor) to both <code>findMany</code> calls. Move merge/sort logic to a server action or paginated API if the unified view must support deep paging.Code Reference:const [bookingsRaw, resultsRaw, modules] = await Promise.all([
+</code></pre>
+</li>
+</ul>
+<h4 id="records-tab-loads-all-bookings-results-into-js">Records tab loads all bookings + results into JS</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/exams/page.tsx</code></li>
+<li><strong>Lines</strong>: 510-667</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>RecordsTabServer</code> fetches ALL <code>examBooking</code> and <code>examResult</code> rows without <code>take</code>/<code>skip</code>, then merges and sorts them in memory, finally slicing to 2000. This is an unbounded query that will time out on large datasets.</li>
+<li><strong>Recommendation</strong>: Add <code>take</code>/<code>skip</code> (or cursor) to both <code>findMany</code> calls. Move merge/sort logic to a server action or paginated API if the unified view must support deep paging.</li>
+<li><strong>Code Reference</strong>:
+<pre><code class="language-ts">const [bookingsRaw, resultsRaw, modules] = await Promise.all([
   prismaUnfiltered.examBooking.findMany({ ... }), // no take/skip
   prismaUnfiltered.examResult.findMany({ ... }),  // no take/skip
   getAvailableModules(),
 ])
 // ...
 const finalRecords = unifiedRecords.sort(...).slice(0, 2000)
-<h4 id="sequential-slug-resolution-before-class-fetch">Sequential slug resolution before class fetch</h4>File: <code>app/staff/classes/[id]/page.tsx</code>Lines: 37-42Severity: MediumType: ImprovementDescription: When the ID is a slug, the page loads all classes (<code>findMany({ select: { id: true, name: true } })</code>) into memory just to match a name, then fetches the target class. This is a full-table scan in application code.Recommendation: Use a SQL slug-resolve query (like <code>users/[id]/page.tsx</code> and <code>students/[id]/page.tsx</code> already do) or add a unique <code>slug</code> column.Code Reference:if (id.length < 20) {
+</code></pre>
+</li>
+</ul>
+<h4 id="sequential-slug-resolution-before-class-fetch">Sequential slug resolution before class fetch</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/classes/[id]/page.tsx</code></li>
+<li><strong>Lines</strong>: 37-42</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: When the ID is a slug, the page loads <strong>all</strong> classes (<code>findMany({ select: { id: true, name: true } })</code>) into memory just to match a name, then fetches the target class. This is a full-table scan in application code.</li>
+<li><strong>Recommendation</strong>: Use a SQL slug-resolve query (like <code>users/[id]/page.tsx</code> and <code>students/[id]/page.tsx</code> already do) or add a unique <code>slug</code> column.</li>
+<li><strong>Code Reference</strong>:
+<pre><code class="language-ts">if (id.length &lt; 20) {
   const allBasicClasses = await prismaUnfiltered.class.findMany({ select: { id: true, name: true } })
-  const matchedClass = allBasicClasses.find(c => slugify(c.name) === id)
+  const matchedClass = allBasicClasses.find(c =&gt; slugify(c.name) === id)
   if (matchedClass) targetId = matchedClass.id
 }
-<h4 id="sequential-slug-resolution-in-edit-page">Sequential slug resolution in edit page</h4>File: <code>app/staff/classes/[id]/edit/page.tsx</code>Lines: 24-28Severity: MediumType: ImprovementDescription: Same anti-pattern as the class detail page — loads all classes into JS memory for slug resolution before the parallel <code>Promise.all</code> block.Recommendation: Replace with a parameterised SQL query or a slug column.<h4 id="sequential-count-before-tab-render">Sequential count before tab render</h4>File: <code>app/staff/finance/page.tsx</code>Lines: 216-218Severity: LowType: ImprovementDescription: <code>pendingTopupCount</code> is awaited sequentially before the <code>FinanceTabs</code> shell renders, blocking the initial paint of the finance page even though the count is only needed for a badge.Recommendation: Move the count into the <code>WalletTopupsTab</code> server component so the shell renders immediately, or fetch it in parallel with the active-tab data.<h4 id="unbounded-payment-scan-for-chart-aggregation">Unbounded payment scan for chart aggregation</h4>File: <code>app/staff/finance/page.tsx</code>Lines: 60-78Severity: MediumType: ImprovementDescription: <code>getOverviewChartData</code> pulls every approved payment since <code>sixMonthsAgo</code> with no <code>take</code> limit. For high-volume academies this returns thousands of rows only to aggregate them in JS.Recommendation: Use a SQL-level <code>GROUP BY</code> (e.g. <code>prismaUnfiltered.$queryRaw</code>) or a cached helper that returns pre-aggregated monthly buckets.<h4 id="reports-revenuetab-scans-all-approved-payments">Reports RevenueTab scans all approved payments</h4>File: <code>app/staff/reports/page.tsx</code>Lines: 399-402 (calls <code>getRevenueReport</code>)Severity: MediumType: ImprovementDescription: <code>getRevenueReport</code> (<code>lib/analytics/reports.ts:38-78</code>) fetches all approved payments for the chart plus a separate recent-payments list. The chart aggregation iterates in JS.Recommendation: Move the monthly rollup into a cached SQL query or a materialised view.<h4 id="exams-analytics-scans-all-bookings-and-results">Exams analytics scans all bookings and results</h4>File: <code>app/staff/reports/page.tsx</code>Lines: 851-852 (calls <code>getExamAnalytics</code>)Severity: HighType: ImprovementDescription: <code>getExamAnalytics</code> (<code>lib/analytics/reports.ts:456-721</code>) loads every <code>examBooking</code> and <code>examResult</code> row with no pagination, then merges/sorts in memory.Recommendation: Add <code>take</code> limits or compute aggregates in SQL. For the full historical view, consider a nightly aggregated snapshot table.<h3 id="rls-overhead">RLS Overhead</h3>Status: No issues found.All <code>app/staff/</code> server components and <code>lib/analytics/*</code> helpers correctly import <code>prismaUnfiltered</code> from <code>lib/prisma/client</code>. The RLS client (<code>prisma</code>) is not used anywhere in the staff portal.<h3 id="caching">Caching</h3><h4 id="analytics-report-functions-are-uncached">Analytics report functions are uncached</h4>File: <code>lib/analytics/reports.ts</code>Lines: 16-838Severity: HighType: ImprovementDescription: None of the 11 report helpers (<code>getEnrollmentTrends</code>, <code>getRevenueReport</code>, <code>getPoolAnalytics</code>, <code>getAttendanceReport</code>, <code>getFinanceReportSummary</code>, <code>getRevenueByProgrammeType</code>, <code>getPaymentMethodBreakdown</code>, <code>getMonthlyRevenueData</code>, <code>getPaymentStatusBreakdown</code>, <code>getCriticalAlerts</code>, <code>getExamAnalytics</code>, <code>getYoYComparison</code>) use <code>unstable_cache</code>. The Reports page (<code>reports/page.tsx</code>) calls these on every request.Recommendation: Wrap each function in <code>unstable_cache</code> with an appropriate TTL (e.g. 300s for operational reports, 3600s for YoY). Add tag-based invalidation where data changes (e.g. <code>revalidateTag('reports')</code> after payment approval).<h4 id="dashboard-metrics-are-uncached">Dashboard metrics are uncached</h4>File: <code>lib/analytics/metrics.ts</code>Lines: 23-279Severity: HighType: ImprovementDescription: <code>getDashboardMetrics</code>, <code>getTopCourses</code>, <code>getBehavioralMetrics</code>, and <code>getAttendanceRate</code> run raw aggregates on every request with no caching.Recommendation: Cache <code>getDashboardMetrics</code> and <code>getTopCourses</code> for 5 minutes. <code>getBehavioralMetrics</code> can be cached for 15-30 minutes. <code>getAttendanceRate</code> should be cached per-user or per-class for 5 minutes.<h4 id="reference-data-caching-is-healthy">Reference data caching is healthy</h4>File: <code>lib/cached-queries.ts</code>Lines: 1-74Severity: No Action NeededType: ImprovementDescription: Course categories, license categories, academic years, semesters, exam components, and active courses are all cached via <code>unstable_cache</code> with sensible TTLs (1h for structure, 5min for operational).<h4 id="dashboard-alerts-are-cached">Dashboard alerts are cached</h4>File: <code>lib/analytics/dashboard-alerts.ts</code>Lines: 172-175Severity: No Action NeededType: ImprovementDescription: <code>getDashboardAlerts</code> uses <code>unstable_cache</code> with a 5-minute TTL and tag-based revalidation. This is the correct pattern.<h3 id="dynamic-imports">Dynamic Imports</h3><h4 id="analytics-dashboard-bundles-all-recharts-sub-components">Analytics dashboard bundles all Recharts sub-components</h4>File: <code>app/staff/analytics/AnalyticsDashboardClient.tsx</code>Lines: 1-101Severity: HighType: ImprovementDescription: The client component imports <code>MetricsOverview</code>, <code>FunnelAnalysis</code>, <code>RetentionAnalysis</code>, <code>FeatureAdoption</code>, <code>PageViews</code>, and <code>UserJourney</code> directly. Each of these imports Recharts components (<code>BarChart</code>, <code>ResponsiveContainer</code>, etc.). Because <code>AnalyticsDashboardClient</code> is not itself dynamically imported, the entire Recharts bundle for all 6 tabs lands in the initial client chunk.Recommendation: Dynamically import each tab component with <code>next/dynamic</code> and <code>ssr: false</code>, matching the pattern already used in <code>ReportCharts.tsx</code> and <code>YoYCharts.tsx</code>.Code Reference:import MetricsOverview from './_components/MetricsOverview'
+</code></pre>
+</li>
+</ul>
+<h4 id="sequential-slug-resolution-in-edit-page">Sequential slug resolution in edit page</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/classes/[id]/edit/page.tsx</code></li>
+<li><strong>Lines</strong>: 24-28</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: Same anti-pattern as the class detail page — loads all classes into JS memory for slug resolution before the parallel <code>Promise.all</code> block.</li>
+<li><strong>Recommendation</strong>: Replace with a parameterised SQL query or a slug column.</li>
+</ul>
+<h4 id="sequential-count-before-tab-render">Sequential count before tab render</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/finance/page.tsx</code></li>
+<li><strong>Lines</strong>: 216-218</li>
+<li><strong>Severity</strong>: Low</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>pendingTopupCount</code> is awaited sequentially before the <code>FinanceTabs</code> shell renders, blocking the initial paint of the finance page even though the count is only needed for a badge.</li>
+<li><strong>Recommendation</strong>: Move the count into the <code>WalletTopupsTab</code> server component so the shell renders immediately, or fetch it in parallel with the active-tab data.</li>
+</ul>
+<h4 id="unbounded-payment-scan-for-chart-aggregation">Unbounded payment scan for chart aggregation</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/finance/page.tsx</code></li>
+<li><strong>Lines</strong>: 60-78</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>getOverviewChartData</code> pulls every approved payment since <code>sixMonthsAgo</code> with no <code>take</code> limit. For high-volume academies this returns thousands of rows only to aggregate them in JS.</li>
+<li><strong>Recommendation</strong>: Use a SQL-level <code>GROUP BY</code> (e.g. <code>prismaUnfiltered.$queryRaw</code>) or a cached helper that returns pre-aggregated monthly buckets.</li>
+</ul>
+<h4 id="reports-revenuetab-scans-all-approved-payments">Reports RevenueTab scans all approved payments</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/reports/page.tsx</code></li>
+<li><strong>Lines</strong>: 399-402 (calls <code>getRevenueReport</code>)</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>getRevenueReport</code> (<code>lib/analytics/reports.ts:38-78</code>) fetches all approved payments for the chart plus a separate recent-payments list. The chart aggregation iterates in JS.</li>
+<li><strong>Recommendation</strong>: Move the monthly rollup into a cached SQL query or a materialised view.</li>
+</ul>
+<h4 id="exams-analytics-scans-all-bookings-and-results">Exams analytics scans all bookings and results</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/reports/page.tsx</code></li>
+<li><strong>Lines</strong>: 851-852 (calls <code>getExamAnalytics</code>)</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>getExamAnalytics</code> (<code>lib/analytics/reports.ts:456-721</code>) loads every <code>examBooking</code> and <code>examResult</code> row with no pagination, then merges/sorts in memory.</li>
+<li><strong>Recommendation</strong>: Add <code>take</code> limits or compute aggregates in SQL. For the full historical view, consider a nightly aggregated snapshot table.</li>
+</ul>
+<hr />
+<h3 id="rls-overhead">RLS Overhead</h3>
+<ul>
+<li><strong>Status</strong>: No issues found.</li>
+<li>All <code>app/staff/</code> server components and <code>lib/analytics/*</code> helpers correctly import <code>prismaUnfiltered</code> from <code>lib/prisma/client</code>. The RLS client (<code>prisma</code>) is not used anywhere in the staff portal.</li>
+</ul>
+<hr />
+<h3 id="caching">Caching</h3>
+<h4 id="analytics-report-functions-are-uncached">Analytics report functions are uncached</h4>
+<ul>
+<li><strong>File</strong>: <code>lib/analytics/reports.ts</code></li>
+<li><strong>Lines</strong>: 16-838</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: None of the 11 report helpers (<code>getEnrollmentTrends</code>, <code>getRevenueReport</code>, <code>getPoolAnalytics</code>, <code>getAttendanceReport</code>, <code>getFinanceReportSummary</code>, <code>getRevenueByProgrammeType</code>, <code>getPaymentMethodBreakdown</code>, <code>getMonthlyRevenueData</code>, <code>getPaymentStatusBreakdown</code>, <code>getCriticalAlerts</code>, <code>getExamAnalytics</code>, <code>getYoYComparison</code>) use <code>unstable_cache</code>. The Reports page (<code>reports/page.tsx</code>) calls these on every request.</li>
+<li><strong>Recommendation</strong>: Wrap each function in <code>unstable_cache</code> with an appropriate TTL (e.g. 300s for operational reports, 3600s for YoY). Add tag-based invalidation where data changes (e.g. <code>revalidateTag('reports')</code> after payment approval).</li>
+</ul>
+<h4 id="dashboard-metrics-are-uncached">Dashboard metrics are uncached</h4>
+<ul>
+<li><strong>File</strong>: <code>lib/analytics/metrics.ts</code></li>
+<li><strong>Lines</strong>: 23-279</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>getDashboardMetrics</code>, <code>getTopCourses</code>, <code>getBehavioralMetrics</code>, and <code>getAttendanceRate</code> run raw aggregates on every request with no caching.</li>
+<li><strong>Recommendation</strong>: Cache <code>getDashboardMetrics</code> and <code>getTopCourses</code> for 5 minutes. <code>getBehavioralMetrics</code> can be cached for 15-30 minutes. <code>getAttendanceRate</code> should be cached per-user or per-class for 5 minutes.</li>
+</ul>
+<h4 id="reference-data-caching-is-healthy">Reference data caching is healthy</h4>
+<ul>
+<li><strong>File</strong>: <code>lib/cached-queries.ts</code></li>
+<li><strong>Lines</strong>: 1-74</li>
+<li><strong>Severity</strong>: No Action Needed</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: Course categories, license categories, academic years, semesters, exam components, and active courses are all cached via <code>unstable_cache</code> with sensible TTLs (1h for structure, 5min for operational).</li>
+</ul>
+<h4 id="dashboard-alerts-are-cached">Dashboard alerts are cached</h4>
+<ul>
+<li><strong>File</strong>: <code>lib/analytics/dashboard-alerts.ts</code></li>
+<li><strong>Lines</strong>: 172-175</li>
+<li><strong>Severity</strong>: No Action Needed</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>getDashboardAlerts</code> uses <code>unstable_cache</code> with a 5-minute TTL and tag-based revalidation. This is the correct pattern.</li>
+</ul>
+<hr />
+<h3 id="dynamic-imports">Dynamic Imports</h3>
+<h4 id="analytics-dashboard-bundles-all-recharts-sub-components">Analytics dashboard bundles all Recharts sub-components</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/analytics/AnalyticsDashboardClient.tsx</code></li>
+<li><strong>Lines</strong>: 1-101</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: The client component imports <code>MetricsOverview</code>, <code>FunnelAnalysis</code>, <code>RetentionAnalysis</code>, <code>FeatureAdoption</code>, <code>PageViews</code>, and <code>UserJourney</code> directly. Each of these imports Recharts components (<code>BarChart</code>, <code>ResponsiveContainer</code>, etc.). Because <code>AnalyticsDashboardClient</code> is not itself dynamically imported, the entire Recharts bundle for all 6 tabs lands in the initial client chunk.</li>
+<li><strong>Recommendation</strong>: Dynamically import each tab component with <code>next/dynamic</code> and <code>ssr: false</code>, matching the pattern already used in <code>ReportCharts.tsx</code> and <code>YoYCharts.tsx</code>.</li>
+<li><strong>Code Reference</strong>:
+<pre><code class="language-ts">import MetricsOverview from './_components/MetricsOverview'
 import FunnelAnalysis from './_components/FunnelAnalysis'
 // ... all imported statically
-<h4 id="good-reports-and-dashboard-charts-are-split">Good: Reports and Dashboard charts are split</h4>Files: <code>app/staff/_components/DashboardCharts.tsx</code>, <code>app/staff/reports/_components/ReportCharts.tsx</code>, <code>app/staff/reports/_components/YoYCharts.tsx</code>Severity: No Action NeededType: ImprovementDescription: RevenueChart, EnrollmentChart, PoolFillChart, AttendanceChart, ExamTrendChart, ScoreDistributionChart, Sparkline, and all YoY charts are dynamically imported with skeleton placeholders. This is the correct pattern.<h4 id="good-tiptap-editor-is-deferred">Good: TipTap editor is deferred</h4>Files: <code>app/staff/newsroom/create/page.tsx</code>, <code>app/staff/newsroom/[id]/edit/page.tsx</code>Severity: No Action NeededType: ImprovementDescription: <code>NewsMarkdownEditor</code> (TipTap) is loaded via <code>dynamic(() => import('../_components/NewsMarkdownEditor'), { ssr: false })</code>.<h4 id="good-email-previews-tab-is-deferred">Good: Email previews tab is deferred</h4>File: <code>app/staff/settings/_components/EmailPreviewsTab.tsx</code>Severity: No Action NeededType: ImprovementDescription: The heavy EmailPreviewsPage is dynamically imported, keeping other Settings tabs snappy.<h3 id="pagination">Pagination</h3><h4 id="classes-list-has-no-pagination">Classes list has no pagination</h4>File: <code>app/staff/classes/page.tsx</code>Lines: 16-48Severity: HighType: ImprovementDescription: <code>findMany</code> without <code>take</code> or <code>skip</code> returns every class row.Recommendation: Add <code>take</code> + <code>skip</code> (or cursor) and wire up <code>TablePagination</code>.<h4 id="enrollments-list-capped-at-100-with-no-paging-ui">Enrollments list capped at 100 with no paging UI</h4>File: <code>app/staff/enrollments/page.tsx</code>Lines: 21-49Severity: MediumType: ImprovementDescription: <code>take: 100</code> is present but there is no skip/pagination mechanism or total count exposed to the client.Recommendation: Add <code>count</code> query, pass <code>total</code> to <code>EnrollmentsTable</code>, and render <code>TablePagination</code>.<h4 id="finance-wallet-top-ups-pending-requests-unbounded">Finance wallet top-ups: pending requests unbounded</h4>File: <code>app/staff/finance/page.tsx</code>Lines: 81-85Severity: MediumType: ImprovementDescription: <code>pendingRequests</code> loads all pending wallet top-ups with no <code>take</code> limit.Recommendation: Add <code>take: 50</code> and pagination.<h4 id="exams-recordstab-unbounded">Exams RecordsTab unbounded</h4>File: <code>app/staff/exams/page.tsx</code>Lines: 510-667Severity: HighType: ImprovementDescription: See "Query Optimization" finding above. Both bookings and results are unbounded.<h3 id="query-consolidation">Query Consolidation</h3><h4 id="duplicate-findunique-for-exam-event-in-metadata-page">Duplicate <code>findUnique</code> for exam event in metadata + page</h4>Files: <code>app/staff/exams/events/[id]/page.tsx</code>, <code>app/staff/exams/events/[id]/edit/page.tsx</code>, <code>app/staff/exams/events/[id]/pools/create/page.tsx</code>Lines:<code>events/[id]/page.tsx</code>: 31 and 40<code>events/[id]/edit/page.tsx</code>: 14 and 23<code>events/[id]/pools/create/page.tsx</code>: 13 and 22Severity: MediumType: ImprovementDescription: <code>generateMetadata</code> runs a <code>findUnique</code> for the event, then the page component runs a second <code>findUnique</code> for the same record (often with a richer <code>include</code>). This doubles the query for the same entity.Recommendation: Pass the event data from <code>generateMetadata</code> to the page component via a cache key or fetch the richer record once in the page and derive metadata from it.<h4 id="duplicate-class-lookup-for-slug-resolution">Duplicate class lookup for slug resolution</h4>File: <code>app/staff/classes/[id]/page.tsx</code> and <code>app/staff/classes/[id]/edit/page.tsx</code>Lines: 39-42 and 25-28Severity: MediumType: ImprovementDescription: Both pages load all classes into memory to resolve a slug, then fetch the target class. This is both a query-consolidation and a query-optimization issue.Recommendation: Replace with a single SQL slug lookup (see <code>users/[id]/page.tsx:36-54</code> for the pattern).<h3 id="loading-states">Loading States</h3><h4 id="missing-loadingtsx-on-ojt-preview">Missing <code>loading.tsx</code> on OJT preview</h4>File: <code>app/staff/ojt/preview/page.tsx</code>Lines: 1-127Severity: LowType: BugDescription: The page is a static sample preview with no data fetch, but CLAUDE.md requires every route segment with a <code>page.tsx</code> that fetches data server-side to have a <code>loading.tsx</code>. While this specific page has no fetch, the parent directory convention is broken.Recommendation: Add a minimal <code>loading.tsx</code> skeleton or remove the <code>page.tsx</code> and render the preview from a client route if it never fetches server data.<h3 id="bundle-size">Bundle Size</h3><h4 id="analytics-tab-chart-components-not-code-split">Analytics tab chart components not code-split</h4>File: <code>app/staff/analytics/AnalyticsDashboardClient.tsx</code>Lines: 1-101Severity: HighType: ImprovementDescription: All six analytics tabs (<code>MetricsOverview</code>, <code>FunnelAnalysis</code>, <code>RetentionAnalysis</code>, <code>FeatureAdoption</code>, <code>PageViews</code>, <code>UserJourney</code>) are statically imported. Each tab contains Recharts components. Because the parent is not dynamically imported, users download the Recharts bundle for all tabs even if they only view one.Recommendation: Convert each tab content component to a <code>dynamic()</code> import inside <code>AnalyticsDashboardClient</code>, or wrap the entire client in <code>dynamic()</code> with a skeleton. This matches the existing pattern in <code>ReportCharts.tsx</code> and <code>YoYCharts.tsx</code>.<h4 id="good-revenuechart-deferred-through-dashboardcharts">Good: RevenueChart deferred through DashboardCharts</h4>Files: <code>app/staff/_components/DashboardCharts.tsx</code>, <code>app/staff/_components/RevenueChart.tsx</code>Severity: No Action NeededType: ImprovementDescription: <code>DashboardCharts</code> uses <code>dynamic(() => import('./RevenueChart'))</code>, keeping the ~200KB Recharts bundle out of the main dashboard chunk.<section class="he-section" id="appendix"><div class="he-section__num">03 · Appendix</div><h2 class="he-section__title">Appendix</h2>Files audited: 100 <code>page.tsx</code> files under <code>app/staff/</code>, plus <code>app/staff/layout.tsx</code>, <code>app/staff/actions.ts</code>, <code>lib/prisma/client.ts</code>, <code>lib/cached-queries.ts</code>, <code>lib/analytics/metrics.ts</code>, <code>lib/analytics/reports.ts</code>, <code>lib/analytics/dashboard-alerts.ts</code>, and shared client components in <code>app/staff/_components/</code>, <code>app/staff/analytics/_components/</code>, <code>app/staff/reports/_components/</code>.Total findings: 14
+</code></pre>
+</li>
+</ul>
+<h4 id="good-reports-and-dashboard-charts-are-split">Good: Reports and Dashboard charts are split</h4>
+<ul>
+<li><strong>Files</strong>: <code>app/staff/_components/DashboardCharts.tsx</code>, <code>app/staff/reports/_components/ReportCharts.tsx</code>, <code>app/staff/reports/_components/YoYCharts.tsx</code></li>
+<li><strong>Severity</strong>: No Action Needed</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: RevenueChart, EnrollmentChart, PoolFillChart, AttendanceChart, ExamTrendChart, ScoreDistributionChart, Sparkline, and all YoY charts are dynamically imported with skeleton placeholders. This is the correct pattern.</li>
+</ul>
+<h4 id="good-tiptap-editor-is-deferred">Good: TipTap editor is deferred</h4>
+<ul>
+<li><strong>Files</strong>: <code>app/staff/newsroom/create/page.tsx</code>, <code>app/staff/newsroom/[id]/edit/page.tsx</code></li>
+<li><strong>Severity</strong>: No Action Needed</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>NewsMarkdownEditor</code> (TipTap) is loaded via <code>dynamic(() =&gt; import('../_components/NewsMarkdownEditor'), { ssr: false })</code>.</li>
+</ul>
+<h4 id="good-email-previews-tab-is-deferred">Good: Email previews tab is deferred</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/settings/_components/EmailPreviewsTab.tsx</code></li>
+<li><strong>Severity</strong>: No Action Needed</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: The heavy EmailPreviewsPage is dynamically imported, keeping other Settings tabs snappy.</li>
+</ul>
+<hr />
+<h3 id="pagination">Pagination</h3>
+<h4 id="classes-list-has-no-pagination">Classes list has no pagination</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/classes/page.tsx</code></li>
+<li><strong>Lines</strong>: 16-48</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>findMany</code> without <code>take</code> or <code>skip</code> returns every class row.</li>
+<li><strong>Recommendation</strong>: Add <code>take</code> + <code>skip</code> (or cursor) and wire up <code>TablePagination</code>.</li>
+</ul>
+<h4 id="enrollments-list-capped-at-100-with-no-paging-ui">Enrollments list capped at 100 with no paging UI</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/enrollments/page.tsx</code></li>
+<li><strong>Lines</strong>: 21-49</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>take: 100</code> is present but there is no skip/pagination mechanism or total count exposed to the client.</li>
+<li><strong>Recommendation</strong>: Add <code>count</code> query, pass <code>total</code> to <code>EnrollmentsTable</code>, and render <code>TablePagination</code>.</li>
+</ul>
+<h4 id="finance-wallet-top-ups-pending-requests-unbounded">Finance wallet top-ups: pending requests unbounded</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/finance/page.tsx</code></li>
+<li><strong>Lines</strong>: 81-85</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>pendingRequests</code> loads all pending wallet top-ups with no <code>take</code> limit.</li>
+<li><strong>Recommendation</strong>: Add <code>take: 50</code> and pagination.</li>
+</ul>
+<h4 id="exams-recordstab-unbounded">Exams RecordsTab unbounded</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/exams/page.tsx</code></li>
+<li><strong>Lines</strong>: 510-667</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: See &quot;Query Optimization&quot; finding above. Both bookings and results are unbounded.</li>
+</ul>
+<hr />
+<h3 id="query-consolidation">Query Consolidation</h3>
+<h4 id="duplicate-findunique-for-exam-event-in-metadata-page">Duplicate <code>findUnique</code> for exam event in metadata + page</h4>
+<ul>
+<li><strong>Files</strong>: <code>app/staff/exams/events/[id]/page.tsx</code>, <code>app/staff/exams/events/[id]/edit/page.tsx</code>, <code>app/staff/exams/events/[id]/pools/create/page.tsx</code></li>
+<li><strong>Lines</strong>:
+<ul>
+<li><code>events/[id]/page.tsx</code>: 31 and 40</li>
+<li><code>events/[id]/edit/page.tsx</code>: 14 and 23</li>
+<li><code>events/[id]/pools/create/page.tsx</code>: 13 and 22</li>
+</ul>
+</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>generateMetadata</code> runs a <code>findUnique</code> for the event, then the page component runs a second <code>findUnique</code> for the same record (often with a richer <code>include</code>). This doubles the query for the same entity.</li>
+<li><strong>Recommendation</strong>: Pass the event data from <code>generateMetadata</code> to the page component via a cache key or fetch the richer record once in the page and derive metadata from it.</li>
+</ul>
+<h4 id="duplicate-class-lookup-for-slug-resolution">Duplicate class lookup for slug resolution</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/classes/[id]/page.tsx</code> and <code>app/staff/classes/[id]/edit/page.tsx</code></li>
+<li><strong>Lines</strong>: 39-42 and 25-28</li>
+<li><strong>Severity</strong>: Medium</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: Both pages load all classes into memory to resolve a slug, then fetch the target class. This is both a query-consolidation and a query-optimization issue.</li>
+<li><strong>Recommendation</strong>: Replace with a single SQL slug lookup (see <code>users/[id]/page.tsx:36-54</code> for the pattern).</li>
+</ul>
+<hr />
+<h3 id="loading-states">Loading States</h3>
+<h4 id="missing-loadingtsx-on-ojt-preview">Missing <code>loading.tsx</code> on OJT preview</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/ojt/preview/page.tsx</code></li>
+<li><strong>Lines</strong>: 1-127</li>
+<li><strong>Severity</strong>: Low</li>
+<li><strong>Type</strong>: Bug</li>
+<li><strong>Description</strong>: The page is a static sample preview with no data fetch, but CLAUDE.md requires every route segment with a <code>page.tsx</code> that fetches data server-side to have a <code>loading.tsx</code>. While this specific page has no fetch, the parent directory convention is broken.</li>
+<li><strong>Recommendation</strong>: Add a minimal <code>loading.tsx</code> skeleton or remove the <code>page.tsx</code> and render the preview from a client route if it never fetches server data.</li>
+</ul>
+<hr />
+<h3 id="bundle-size">Bundle Size</h3>
+<h4 id="analytics-tab-chart-components-not-code-split">Analytics tab chart components not code-split</h4>
+<ul>
+<li><strong>File</strong>: <code>app/staff/analytics/AnalyticsDashboardClient.tsx</code></li>
+<li><strong>Lines</strong>: 1-101</li>
+<li><strong>Severity</strong>: High</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: All six analytics tabs (<code>MetricsOverview</code>, <code>FunnelAnalysis</code>, <code>RetentionAnalysis</code>, <code>FeatureAdoption</code>, <code>PageViews</code>, <code>UserJourney</code>) are statically imported. Each tab contains Recharts components. Because the parent is not dynamically imported, users download the Recharts bundle for all tabs even if they only view one.</li>
+<li><strong>Recommendation</strong>: Convert each tab content component to a <code>dynamic()</code> import inside <code>AnalyticsDashboardClient</code>, or wrap the entire client in <code>dynamic()</code> with a skeleton. This matches the existing pattern in <code>ReportCharts.tsx</code> and <code>YoYCharts.tsx</code>.</li>
+</ul>
+<h4 id="good-revenuechart-deferred-through-dashboardcharts">Good: RevenueChart deferred through DashboardCharts</h4>
+<ul>
+<li><strong>Files</strong>: <code>app/staff/_components/DashboardCharts.tsx</code>, <code>app/staff/_components/RevenueChart.tsx</code></li>
+<li><strong>Severity</strong>: No Action Needed</li>
+<li><strong>Type</strong>: Improvement</li>
+<li><strong>Description</strong>: <code>DashboardCharts</code> uses <code>dynamic(() =&gt; import('./RevenueChart'))</code>, keeping the ~200KB Recharts bundle out of the main dashboard chunk.</li>
+</ul>
+<hr />
+<section class="he-section" id="appendix"><div class="he-section__num">03 · Appendix</div><h2 class="he-section__title">Appendix</h2></section>
+<ul>
+<li>Files audited: 100 <code>page.tsx</code> files under <code>app/staff/</code>, plus <code>app/staff/layout.tsx</code>, <code>app/staff/actions.ts</code>, <code>lib/prisma/client.ts</code>, <code>lib/cached-queries.ts</code>, <code>lib/analytics/metrics.ts</code>, <code>lib/analytics/reports.ts</code>, <code>lib/analytics/dashboard-alerts.ts</code>, and shared client components in <code>app/staff/_components/</code>, <code>app/staff/analytics/_components/</code>, <code>app/staff/reports/_components/</code>.</li>
+<li>Total findings: 14</li>
+</ul>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -70,7 +330,7 @@ import FunnelAnalysis from './_components/FunnelAnalysis'
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

@@ -44,6 +44,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
           name: true,
           moduleCode: true,
           courseId: true,
+          certificateEnabled: true,
           course: { select: { code: true, name: true } },
           ruleSet: true,
         },
@@ -52,6 +53,9 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   })
 
   if (!examSession) return apiError('Exam session not found', 404)
+  if (!examSession.bank.certificateEnabled) {
+    return apiError('Certificate generation is disabled for this exam bank', 403)
+  }
   if (!examSession.isPublished) return apiError('Results must be published before generating a certificate', 409)
   if (examSession.status !== 'COMPLETED' && examSession.status !== 'TIMED_OUT') {
     return apiError('Exam session must be completed to generate a certificate', 409)

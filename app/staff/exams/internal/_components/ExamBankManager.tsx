@@ -30,6 +30,7 @@ interface ExamBank {
   mcqCount: number
   ruleSet: string
   isActive: boolean
+  reviewState: string
   course: { id: string; name: string; code: string }
   _count: { questions: number; sessions: number }
   poolHealth: { health: PoolHealth; questionCount: number; requiredMinimum: number }
@@ -41,6 +42,13 @@ const HEALTH_CONFIG: Record<PoolHealth, { label: string; color: string; bg: stri
   GREEN: { label: 'Healthy', color: 'text-green-700 dark:text-green-300', bg: 'bg-green-100 dark:bg-green-900/30' },
   AMBER: { label: 'Low', color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-100 dark:bg-amber-900/30' },
   RED: { label: 'Critical', color: 'text-red-700 dark:text-red-300', bg: 'bg-red-100 dark:bg-red-900/30' },
+}
+
+const REVIEW_STATE_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
+  DRAFT: { label: 'Draft', color: 'text-slate-700 dark:text-slate-300', bg: 'bg-slate-100 dark:bg-slate-700' },
+  PENDING_REVIEW: { label: 'Pending', color: 'text-amber-700 dark:text-amber-300', bg: 'bg-amber-100 dark:bg-amber-900/30' },
+  APPROVED: { label: 'Approved', color: 'text-green-700 dark:text-green-300', bg: 'bg-green-100 dark:bg-green-900/30' },
+  REJECTED: { label: 'Rejected', color: 'text-red-700 dark:text-red-300', bg: 'bg-red-100 dark:bg-red-900/30' },
 }
 
 export default function ExamBankManager() {
@@ -225,6 +233,14 @@ export default function ExamBankManager() {
                     <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${health.bg} ${health.color}`}>
                       {health.label} ({bank.poolHealth.questionCount}/{bank.poolHealth.requiredMinimum})
                     </span>
+                    {(() => {
+                      const rs = REVIEW_STATE_CONFIG[bank.reviewState] || REVIEW_STATE_CONFIG.DRAFT
+                      return (
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${rs.bg} ${rs.color}`}>
+                          {rs.label}
+                        </span>
+                      )
+                    })()}
                     {bank.pendingCount > 0 && (
                       <span className="rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-bold text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300">
                         {bank.pendingCount} Pending

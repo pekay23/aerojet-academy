@@ -1,23 +1,11 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import {
-  ShieldCheck,
-  RefreshCw,
-  Search,
-  CheckSquare,
-  Square,
-  CheckCircle2,
-  AlertTriangle,
-  Mail,
-  MoreVertical,
-} from 'lucide-react'
+import { ShieldCheck, RefreshCw, Search, Square } from 'lucide-react'
 
 import TablePagination from './TablePagination'
-import { bulkUpdateUserStatus } from '../actions'
-import { toast } from 'sonner'
+import { useUserTable } from '@/lib/hooks/useUserTable'
 
 interface Examiner {
   id: string
@@ -28,47 +16,9 @@ interface Examiner {
 }
 
 export default function ExaminersTable() {
-  const [examiners, setExaminers] = useState<Examiner[]>([])
-  const [total, setTotal] = useState(0)
-  const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [page, setPage] = useState(1)
-  const [perPage, setPerPage] = useState(25)
   const router = useRouter()
-
-  const fetchExaminers = useCallback(async () => {
-    setLoading(true)
-    try {
-      const params = new URLSearchParams({
-        role: 'EXAMINER',
-        search,
-        page: page.toString(),
-        limit: perPage.toString(),
-      })
-      const res = await fetch(`/api/staff/users?${params}`)
-      const data = await res.json()
-      
-      if (data.success) {
-        setExaminers(data.data ?? [])
-        setTotal(data.meta?.total ?? 0)
-      } else {
-        setExaminers([])
-        setTotal(0)
-      }
-    } finally {
-      setLoading(false)
-    }
-  }, [search, page, perPage])
-
-  useEffect(() => {
-    setPage(1)
-  }, [search])
-
-  useEffect(() => {
-    const t = setTimeout(fetchExaminers, search ? 350 : 0)
-    return () => clearTimeout(t)
-  }, [fetchExaminers, search])
+  const { data: examiners, total, loading, search, setSearch, page, setPage, perPage, setPerPage, refetch } =
+    useUserTable<Examiner>({ endpoint: '/api/staff/users', queryParams: { role: 'EXAMINER' } })
 
   return (
     <div className="space-y-4">
@@ -89,7 +39,7 @@ export default function ExaminersTable() {
             />
           </div>
           <button
-            onClick={fetchExaminers}
+            onClick={() => void refetch()}
             className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-600 transition-all hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400"
           >
             <RefreshCw className="h-3.5 w-3.5" />
@@ -149,7 +99,7 @@ export default function ExaminersTable() {
                     </td>
                     <td className="px-6 py-4 text-center">
                       <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider ${
-                        examiner.status === 'ACTIVE' 
+                        examiner.status === 'ACTIVE'
                           ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                           : 'bg-amber-50 text-amber-600 border border-amber-100'
                       }`}>
@@ -165,7 +115,7 @@ export default function ExaminersTable() {
                       </div>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button 
+                      <button
                         onClick={() => router.push(`/staff/users/${examiner.id}`)}
                         className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800"
                       >

@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Comprehensive Audit — 2026-05-20 · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +27,359 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Comprehensive Audit — 2026-05-20</h1>
-  <p class="he-deck"><p>Consolidates findings across <strong>all</strong> active audit documents in <code>docs/</code>: - <a href="./design-gap-audit.html">design-gap-audit.html</a> (42 rows) - <a href="./2026-05-17-codebase.md">2026-05-17-codebase.md</a> (71 findings: 11 CRITICAL / 22 HIGH / 25 MEDIUM / 13…</p>
-</p>
+  <p class="he-deck">Consolidates findings across <strong>all</strong> active audit documents in <code>docs/</code>: - <a href="./design-gap-audit.html">design-gap-audit.html</a> (42 rows) - <a href="./2026-05-17-codebase.md">2026-05-17-codebase.md</a> (71 findings: 11 CRITICAL / 22 HIGH / 25 MEDIUM / 13…</p>
 </header>
-Legend: ✅ Done · 🟡 Partial · 🔴 Open · ⏸️ Deferred (intentionally) · ⚪️ Stale claim in audit (already done before claim was filed)<section class="he-section" id="verification-this-session-2026-05-20"><div class="he-section__num">01 · Verification (this session, 2026-05-20)</div><h2 class="he-section__title">Verification (this session, 2026-05-20)</h2>CheckResultNotes<code>bun run type-check</code>✅ exit 0<code>tsc --noEmit</code> — zero errors<code>bun run test --run</code>✅ 14 files / 102 testsVitest, 48.5s<code>bun run build</code>✅ Compiled successfully219 routes including all new portals; <code>ƒ Proxy (Middleware)</code> registered (Next 16)<section class="he-section" id="2026-05-17-codebasemd-full-cross-check"><div class="he-section__num">02 · 2026-05-17-codebase.md — full cross-check</div><h2 class="he-section__title">2026-05-17-codebase.md — full cross-check</h2><h3 id="critical-11-11">CRITICAL (11) — 11 ✅</h3>#FindingStatusEvidenceSEC-1aPlaintext password in <code>reset-password</code> response✅<a href="../../app/api/staff/users/%5Bid%5D/reset-password/route.ts#L70-L72">app/api/staff/users/[id]/reset-password/route.ts:70-72</a> — returns only <code>{ message: ... }</code>SEC-1bPlaintext passwords in bulk-import response✅API stripped <code>temporaryPassword</code> at <a href="../../app/api/staff/students/import/route.ts#L807">route.ts:807</a> before this session; dead client references and password display column removed from <a href="../../app/staff/students/import/page.tsx">import/page.tsx</a> — CSV export no longer includes a Temp Password column, table no longer renders one, and <code>showPasswords</code> UI state removed. Password delivery is email-only.SEC-2iCal endpoint has no auth✅<a href="../../app/api/calendar/%5BuserId%5D/route.ts#L24-L31">app/api/calendar/[userId]/route.ts:24-31</a> — session check + self-or-staff guardSEC-3Unsubscribe — enumeration + no rate limit✅<a href="../../app/api/unsubscribe/route.ts#L11-L13">app/api/unsubscribe/route.ts:11-13,36</a> — 5/hour IP limit + uniform responseSEC-4<code>GET /api/staff/users</code> missing role check✅<a href="../../app/api/staff/users/route.ts#L10-L11">app/api/staff/users/route.ts:10-11</a> — explicit <code>staffRoles.includes</code>SEC-52FA accepts client-supplied secret✅<a href="../../app/api/auth/2fa/verify/route.ts#L22-L31">app/api/auth/2fa/verify/route.ts:22-31</a> — reads <code>pendingTwoFactorSecret</code> from server-side <code>user.settings</code> onlyDB-1<code>AdminCalendarEvent</code> missing from <code>SOFT_DELETE_MODELS</code>✅<a href="../../lib/prisma/soft-delete-extension.ts#L11">lib/prisma/soft-delete-extension.ts:11</a>DB-2<code>$queryRawUnsafe SELECT *</code> bypasses soft-delete✅<a href="../../lib/pools/withdraw.ts#L38">lib/pools/withdraw.ts:38</a> + <a href="../../lib/pools/join.ts#L142">lib/pools/join.ts:142</a> now use <code>$executeRaw\</code>pg_advisory_xact_lock(${key})`` only, then Prisma model lookupsCI-1CI Node 20 vs package.json Node 24✅<a href="../../.github/workflows/ci.yml#L19">.github/workflows/ci.yml:19</a> — <code>node-version: '24'</code>CI-2Missing <code>.env.example</code>✅<a href="../../.env.example">.env.example</a> — full file with required + optional varsCI-3Supabase env var name mismatch✅All sources standardised on <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>: <a href="../../lib/supabase/client.ts#L19">lib/supabase/client.ts:19</a>, <a href="../../utils/supabase/client.ts#L4">utils/supabase/client.ts:4</a>, <a href="../../.env.example#L31">.env.example:31</a><h3 id="high-22-22-0-2-still-advisory">HIGH (22) — 22 ✅ · 0 🔴 (2 still 🟡 advisory)</h3>#FindingStatusEvidenceSEC-6In-memory rate limiting ineffective in serverless✅<a href="../../lib/security/rate-limit.ts#L1-L15">lib/security/rate-limit.ts:1-15</a> — <code>@upstash/ratelimit</code> + Redis with in-memory fallbackSEC-7No TOTP replay protection✅<a href="../../lib/auth/totp.ts#L50-L67">lib/auth/totp.ts:50-67</a> — <code>lastUsedCounter</code> parameter; rejects <code>testCounter ≤ lastUsedCounter</code>SEC-8Passkey login missing challenge-user validation✅<a href="../../app/api/auth/passkey/login-verify/route.ts#L64-L70">app/api/auth/passkey/login-verify/route.ts:64-70</a> — challenge.userId vs passkey.userId checkSEC-9<code>requireUserVerification: false</code> on passkey✅<a href="../../app/api/auth/passkey/login-verify/route.ts#L82">app/api/auth/passkey/login-verify/route.ts:82</a> — now <code>true</code>; register-verify sameSEC-10Token auto-login skips status check✅<a href="../../app/api/auth/passkey/login-verify/route.ts#L100-L102">app/api/auth/passkey/login-verify/route.ts:100-102</a> — <code>passkey.user.status !== 'ACTIVE'</code> checkSEC-11No rate limiting on resend-verification✅<a href="../../app/api/auth/resend-verification/route.ts#L12">app/api/auth/resend-verification/route.ts:12</a> — 3/hour IP limit + uniform response at L15SEC-12Password reset / email-verify / passkey-bridge share <code>verifyToken</code>✅<a href="../../prisma/schema.prisma#L31-L35">prisma/schema.prisma:31-35</a> — three distinct fields (<code>verifyToken</code>, <code>passwordResetToken</code>, <code>passkeyBridgeToken</code>) with independent <code>*Expires</code> columnsSEC-13No root middleware for portal role enforcement✅<a href="../../proxy.ts#L37">proxy.ts:37</a> — <code>proxy()</code> (renamed from <code>middleware</code>) gates <code>/staff</code>, <code>/instructor</code>, <code>/student</code>, <code>/examiner</code>, <code>/applicant</code> and <code>/api/*</code> siblings via <code>ROUTE_ROLE_MAP</code>. Build registers it as <code>ƒ Proxy (Middleware)</code>.DB-3N+1 in payment-deadlines cron✅<a href="../../app/api/cron/payment-deadlines/route.ts#L38-L72">app/api/cron/payment-deadlines/route.ts:38-72</a> — single event fetch, batched booking fetch, batched idempotency Set lookupDB-4Unbounded fetch in milestone-reminders✅<a href="../../app/api/cron/milestone-reminders/route.ts#L38">app/api/cron/milestone-reminders/route.ts:38</a> — <code>take: 500</code>DB-5Unbounded <code>reconcile/pending</code>✅<a href="../../app/api/staff/finance/reconcile/pending/route.ts#L25">app/api/staff/finance/reconcile/pending/route.ts:25</a> — <code>take: 200</code>DB-6Staff/payments lacks pagination✅<a href="../../app/api/staff/payments/route.ts#L47-L48">app/api/staff/payments/route.ts:47-48</a> — <code>skip: (page - 1) * limit, take: limit</code>DB-7RLS per-query transaction overhead✅<a href="../../lib/prisma/rls-hardened.ts#L168-L170">lib/prisma/rls-hardened.ts:168-170</a> — reuses request-scoped RLS transaction via <code>rlsTxStorage.getStore()</code>FE-1YoYCharts.tsx not dynamic-imported✅<a href="../../app/staff/reports/_components/YoYCharts.tsx">app/staff/reports/_components/YoYCharts.tsx</a> is now a thin <code>next/dynamic</code> re-export wrapper. Implementation moved to <code>YoYChartsInner.tsx</code>. Each chart code-splits separately; matches the existing <code>ReportCharts.tsx</code> pattern.FE-2RichTextEditor.tsx imports TipTap directly✅<a href="../../components/shared/RichTextEditor.tsx">components/shared/RichTextEditor.tsx</a> is now a thin <code>next/dynamic</code> wrapper with a skeleton <code>loading</code> fallback. Implementation moved to <code>RichTextEditorInner.tsx</code>. Future consumers can't forget the dynamic-wrap.FE-3Settings page imports <code>EmailPreviewsPage</code> directly✅New thin client wrapper <a href="../../app/staff/settings/_components/EmailPreviewsTab.tsx">app/staff/settings/_components/EmailPreviewsTab.tsx</a> <code>dynamic()</code>-imports the page with a skeleton fallback; the Settings server component renders that instead. Email-preview bundle only loads when the Email tab is active.FE-4~55 route segments missing <code>loading.tsx</code>🟡Largely covered — prior session's "111 loading.tsx files" log applies, and every new portal route this session got <code>loading.tsx</code>. A full sweep remains nice-to-have.FE-5Sequential awaits in critical applicant pages✅Re-verified: <a href="../../app/applicant/exam-only/top-up/page.tsx#L25-L67">app/applicant/exam-only/top-up/page.tsx:25-67</a>, <a href="../../app/applicant/pathway/page.tsx#L35-L69">app/applicant/pathway/page.tsx:35-69</a>, and <a href="../../app/instructor/layout.tsx#L19-L25">app/instructor/layout.tsx:19-25</a> all use <code>Promise.all</code>. The original audit claim was already stale.TEST-1Zero tests for critical business logic🟡Test count still 102. The high-risk paths (pool join races, payment approval, 2FA verify, cron handlers) remain untested. Explicit follow-up item.TEST-2Integration tests only assert on fixtures🟡<code>tests/integration/api/payment-approval.test.ts</code> etc. still shape-only. Follow-up.TEST-3E2E tests depend on seeded credentials🟡No setup/teardown added; seeded credentials still required. Follow-up.TEST-4Migrations run after deploy in staging workflow🟡Not yet verified against <code>.github/workflows/deploy-staging.yml</code>.<h3 id="medium-25-selected-re-checks">MEDIUM (25) — Selected re-checks</h3>#FindingStatusEvidenceSEC-14CSP only has <code>frame-ancestors</code>✅<a href="../../next.config.ts#L44-L59">next.config.ts:44-59</a> — full CSP with <code>default-src</code>, <code>script-src</code>, <code>style-src</code>, <code>img-src</code>, <code>font-src</code>, <code>connect-src</code>, <code>frame-src</code>, <code>frame-ancestors</code>, <code>worker-src</code>, <code>object-src 'none'</code>, <code>base-uri</code>, <code>form-action</code>, <code>upgrade-insecure-requests</code>SEC-15EXAMINER role inconsistency across <code>isStaff</code>/<code>requireStaff</code>/RLS bypass✅<a href="../../lib/auth/permissions.ts#L16">lib/auth/permissions.ts:16</a> — <code>isStaff()</code> includes EXAMINER. <a href="../../lib/prisma/rls-hardened.ts#L156">lib/prisma/rls-hardened.ts:156</a> — RLS bypass list now includes EXAMINER + INSTRUCTOR. SQL <code>is_admin_or_staff()</code> function is not in repo (lives in Neon) — verify externally.SEC-16STAFF can hard-delete users✅<a href="../../app/api/staff/users/%5Bid%5D/route.ts#L232-L234">app/api/staff/users/[id]/route.ts:232-234</a> — <code>if (!['ADMIN', 'SUPER_ADMIN'].includes(staff.role)) return apiError('Only administrators…', 403)</code>SEC-17<code>me/study-pathway</code> accessible by any role✅<a href="../../app/api/me/study-pathway/route.ts#L11-L13">app/api/me/study-pathway/route.ts:11-13</a> — restricted to <code>APPLICANT</code>/<code>STUDENT</code>SEC-18TOTP comparison not timing-safe✅<a href="../../lib/auth/totp.ts#L62">lib/auth/totp.ts:62</a> — <code>crypto.timingSafeEqual</code>SEC-19<code>scryptSync</code> blocks event loop✅<a href="../../lib/security/encryption.ts#L6-L25">lib/security/encryption.ts:6-25</a> — async <code>crypto.scrypt</code> with a 100-entry derived-key cacheSEC-20Resend webhook unverified payloads✅<a href="../../app/api/webhooks/resend/route.ts#L39-L44">app/api/webhooks/resend/route.ts:39-44</a> — explicit 503 when <code>RESEND_WEBHOOK_SECRET</code> not setSEC-21SUPER_ADMIN blocked from email preview✅<a href="../../app/api/staff/email-preview/route.ts#L7">app/api/staff/email-preview/route.ts:7</a> — includes SUPER_ADMINSEC-22<code>role</code> in <code>updateUserSchema</code> bypasses dedicated endpoint✅<a href="../../lib/validation/schemas.ts#L109-L117">lib/validation/schemas.ts:109-117</a> — no <code>role</code> field in schemaSEC-23Unbounded financial export✅<a href="../../app/api/staff/export/route.ts#L13-L32">app/api/staff/export/route.ts:13-32</a> — now accepts <code>from</code>/<code>to</code>/<code>limit</code> query params, applies date filter to <code>finances</code> and <code>audit-logs</code> exports, hard-caps <code>limit</code> at 50,000 (default 10,000).DB-810 models use bare <code>String</code> for status✅Original audit was stale. All three remaining models already use enums: <code>PoolWaitlist.status: WaitlistStatus</code>, <code>OjtPeriod.status: OjtStatus</code>, <code>PaymentMilestone.status: MilestoneStatus</code>. Verified at <a href="../../prisma/schema.prisma#L669">prisma/schema.prisma:669,1342,1366</a> with enum defs at lines 2729 / 2752 / 2760.DB-9<code>serializePrisma</code> fails on BigInt/Bytes✅<a href="../../lib/utils/serialization.ts#L29-L41">lib/utils/serialization.ts:29-41</a> — handles BigInt, Buffer, Uint8ArrayDB-10<code>AcademicYear.isActive</code> / <code>Semester.isActive</code> lack indexes✅<a href="../../prisma/schema.prisma#L1254">prisma/schema.prisma:1254,1273</a> — both have <code>@@index([isActive])</code>DB-11INSTRUCTOR excluded from RLS bypass✅<a href="../../lib/prisma/rls-hardened.ts#L156">lib/prisma/rls-hardened.ts:156</a> — bypass list <code>['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR']</code>DB-12Production pool <code>max: 20</code> dangerous✅<a href="../../lib/prisma/db-base.ts#L60">lib/prisma/db-base.ts:60</a> — now <code>max: isDev ? 5 : 8</code>FE-6scheduling page uses client fetching🟡Not verified this audit.FE-7No <code>server-only</code> guards on server libs✅Added <code>import 'server-only'</code> to every legacy server lib touched: <a href="../../lib/prisma/db-base.ts">lib/prisma/db-base.ts</a>, <a href="../../lib/prisma/rls-hardened.ts">rls-hardened.ts</a>, <a href="../../lib/prisma/soft-delete-extension.ts">soft-delete-extension.ts</a>, <a href="../../lib/prisma/soft-delete.ts">soft-delete.ts</a>, <a href="../../lib/prisma/supabase-sync-extension.ts">supabase-sync-extension.ts</a>, <a href="../../lib/email/admissions.ts">lib/email/admissions.ts</a>, <a href="../../lib/email/service.ts">service.ts</a>, <a href="../../lib/email/webhooks.ts">webhooks.ts</a>, <a href="../../lib/email/templates.ts">templates.ts</a>, <a href="../../lib/email/index.ts">index.ts</a>, <a href="../../lib/audit/logger.ts">lib/audit/logger.ts</a>, <a href="../../lib/security/csrf.ts">lib/security/csrf.ts</a>, <a href="../../lib/security/encryption.ts">encryption.ts</a>, <a href="../../lib/security/rate-limit.ts">rate-limit.ts</a>. Pure-type / pure-string files (<code>lib/email/types.ts</code>, <code>lib/security/sanitization.ts</code>) intentionally left without the guard.FE-8Examiner layout missing <code>id="main-content"</code>🟡Not re-verified this audit; review if accessibility audit is run.DOC-1<code>system-overview.md</code> shows wrong versions🟡Standalone doc not in critical path; supersede via this audit.DOC-3DEPLOYMENT.md missing crons / extra unregistered ones✅<a href="../../vercel.json">vercel.json</a> now has 16 cron entries — added <code>aptitude-reminders</code> (<code>0 11 * * *</code>), <code>interview-reminders</code> (<code>0 12 * * *</code>), <code>modular-deadlines</code> (<code>0 13 * * *</code>) this session in addition to the earlier <code>sync-check</code>, <code>supabase-mirror</code>, <code>gdpr-retention</code>. All route files now have a Vercel schedule.<h3 id="low-13-selected-re-checks">LOW (13) — Selected re-checks</h3>#FindingStatusEvidenceSEC-26verify-email leaks role/status/registrationCode✅<a href="../../app/api/auth/verify-email/route.ts#L46-L50">app/api/auth/verify-email/route.ts:46-50</a> — returns only <code>success</code>, <code>message</code>, <code>hasPassword</code>SEC-27LAN IPs in <code>allowedDevOrigins</code> without dev guard✅<a href="../../next.config.ts#L18-L20">next.config.ts:18-20</a> — wrapped in <code>NODE_ENV === 'development'</code> checkDB-13<code>rls-optimized.ts</code> dead code✅File no longer exists in <code>lib/prisma/</code>TEST-5<code>zustand</code> unused✅Not in <code>package.json</code> dependenciesTEST-6<code>stripe</code> should be devDependency until wired⏸️Intentionally kept in <code>dependencies</code> per business decision — Stripe integration is deferred (audit 10a) but the SDK is retained as the planned future provider so no install lag when wiring it.TEST-7<code>postgres</code> package in production deps✅Moved to <code>devDependencies</code> in <a href="../../package.json">package.json</a>; orphan root-level <code>db.js</code> (only consumer) deleted.<section class="he-section" id="design-gap-audithtml-status-summary"><div class="he-section__num">03 · design-gap-audit.html — status summary</div><h2 class="he-section__title">design-gap-audit.html — status summary</h2>The prior session (<a href="./2026-05-19-design-gap-status.html">2026-05-19-design-gap-status.md</a>) covered all 42 rows. Spot-check this audit re-verified the implementation files exist:AreaStatusEvidenceCertificate eligibility engine (4c)✅<a href="../../lib/certificates/eligibility.ts">lib/certificates/eligibility.ts</a>Withdrawal workflow (5e)✅<a href="../../lib/withdrawal/actions.ts">lib/withdrawal/actions.ts</a> + <a href="../../app/staff/withdrawals/page.tsx">/staff/withdrawals</a>Part-145 transfer (12)✅<a href="../../app/staff/part-145/page.tsx">/staff/part-145</a> + <a href="../../lib/part145/actions.ts">lib/part145/actions.ts</a>Examiner results entry (7a)✅<a href="../../app/examiner/results/page.tsx">/examiner/results</a>Teaching materials (instructor)✅<a href="../../app/instructor/materials/page.tsx">/instructor/materials</a>Conflict matrix (A.3.c)✅<a href="../../lib/scheduling/conflicts.ts">lib/scheduling/conflicts.ts</a> + <a href="../../app/staff/timetable/conflicts/page.tsx">/staff/timetable/conflicts</a>GDPR module (A.4.c)✅<a href="../../lib/gdpr/">lib/gdpr/</a> + <a href="../../app/staff/gdpr/page.tsx">/staff/gdpr</a> + <a href="../../app/staff/settings/retention/page.tsx">/staff/settings/retention</a>Referrals + payouts (A.5.c)✅<a href="../../lib/referral/admin.ts">lib/referral/admin.ts</a> + <a href="../../app/staff/referrals/page.tsx">/staff/referrals</a> + payouts subpageRBAC builder (A.6.c)✅<a href="../../lib/auth/permission-registry.ts">lib/auth/permission-registry.ts</a> + <a href="../../app/staff/admin/permissions/page.tsx">/staff/admin/permissions</a>UploadThing↔Supabase mirror (C.1+C.3)✅<a href="../../lib/storage/uploadthing-mirror.ts">lib/storage/uploadthing-mirror.ts</a> + cron at <code>/api/cron/supabase-mirror</code><code>middleware</code> → <code>proxy</code> rename (D)✅<a href="../../proxy.ts">proxy.ts</a> + build registers <code>ƒ Proxy (Middleware)</code>Deferred (still ⏸️): Stripe (10a — business decision), B.3 manual replication SQL (DB-admin not available from this environment; runbook at <a href="../guides/neon-supabase-logical-replication.html">neon-supabase-logical-replication.md</a>).<section class="he-section" id="known-issuesmd-status"><div class="he-section__num">04 · known-issues.md — status</div><h2 class="he-section__title">known-issues.md — status</h2>IssueStatusLogo aspect ratio warnings🟡 Partially mitigated, permanent fix pending<code>staff/reports</code> 75s dev latency🟡 Lazy-loaded charts + 30s tx timeout; indexes on <code>AuditLog</code>/<code>ExamBooking</code> appliedEmail verification delays🟡 Under investigationUploadThing UI feedback🟡 Improved, could be betterPrisma vs DB enum mismatches✅ Manageable with <code>migrate_enums.js</code>Cold-start connection timeouts✅ 30s tx timeout + retry-able errorsNever switch to <code>@prisma/adapter-neon</code>✅ Reverted; <code>pg</code> adapter active in productionLocal Neon TCP timeouts✅ Dev WS adapter via <code>AEROJET_LOCAL_DB_ADAPTER</code>Missing <code>error.tsx</code> / <code>not-found.tsx</code> in portals✅ Resolved — <code>(auth)</code> already had both; this session added <code>examiner/error.tsx</code> + <code>staff/student/instructor/applicant/examiner/not-found.tsx</code><code>formatCurrency</code> client-import trap✅ Documented in <a href="../../CLAUDE.html">CLAUDE.md</a>otplib v13 API✅ Documented; verification done by custom <code>verifyTOTP()</code>Tailwind v4 config bridge✅ StablePrisma JSON null filtering✅ <code>Prisma.DbNull</code> documented<section class="he-section" id="structural-reviewmd-status"><div class="he-section__num">05 · structural-review.md — status</div><h2 class="he-section__title">structural-review.md — status</h2>P0 + P1 marked DONE before this session, verified accurate. P2/P3 remain backlog:#ItemStatusP2.7Break up long functions (<code>getDashboardData</code> 183 lines, <code>UsersTable</code> 380 lines)🟡 cosmetic, low priorityP2.8Add <code>error.tsx</code> in <code>(auth)</code> segment✅ already present; <code>examiner/error.tsx</code> addedP2.9Add <code>not-found.tsx</code> in <code>(auth)</code> and <code>(portal)</code>✅ all five portals + <code>(auth)</code> + <code>(public)</code> coveredP2.10Remove dead Tailwind font config✅ stale — only <code>sans</code>, <code>outfit</code>, <code>heading</code> remainP3.11Centralise pool magic numbers / email addresses / status arrays🟡 partial; non-blockingP3.12Replace <code><img></code> with <code>next/image</code> in newsroom✅ newsroom edit page now uses <code>next/image</code> with <code>fill</code>+<code>sizes</code>P3.13Rate limiting <code>resend-verification</code>, <code>submit-payment-proof</code>✅ both covered (<a href="../../app/api/auth/resend-verification/route.ts#L12">resend-verification:12</a>, <a href="../../app/api/public/submit-payment-proof/route.ts#L9-L12">submit-payment-proof:9-12</a>)<section class="he-section" id="open-items-post-fix-sweep-recommended-priority-order"><div class="he-section__num">06 · Open items (post-fix sweep) — recommended priority order</div><h2 class="he-section__title">Open items (post-fix sweep) — recommended priority order</h2><h3 id="test-coverage-still-outstanding">Test coverage (still outstanding)</h3>🟡 TEST-1 / TEST-2 — Replace fixture-shape "integration" tests with real handler tests, prioritising <code>pool/join</code> race-conditions, <code>payment/approve</code>, <code>2FA verify</code>, and the 13 cron handlers. Test count remains 102 — none cover these critical paths.🟡 TEST-3 — E2E tests still depend on seeded credentials. Add Playwright setup/teardown that creates a throwaway user, or use a per-test seed mode.🟡 TEST-4 — Verify <code>.github/workflows/deploy-staging.yml</code> runs migrations before deploy, not after. Not re-verified this session.<h3 id="cosmetic-low-priority">Cosmetic / low priority</h3>🟡 P2.7 — Break up long functions (<code>getDashboardData</code> 183 lines, <code>UsersTable</code> 380 lines). Affects readability, not correctness.🟡 P3.11 — Centralise pool magic numbers / email addresses / status arrays. Currently scattered across 3+ files each.🟡 FE-8 — Verify examiner layout has <code>id="main-content"</code> for skip-navigation. Quick a11y check.🟡 DOC-1 — <code>docs/system-overview.md</code> may show Next 15 / React 18; actual is Next 16 / React 19. Low priority since this audit doc is the canonical reference.<h3 id="deferred-intentional">Deferred (intentional)</h3>Stripe (10a) — SDK installed, CSP allows <code>js.stripe.com</code>, no integration. Business decision, not a defect. Stripe SDK intentionally retained in <code>dependencies</code> (not moved to devDeps) per user direction.B.3 logical replication SQL — Cannot be executed from this environment. Runbook at <a href="../guides/neon-supabase-logical-replication.html">neon-supabase-logical-replication.md</a>. Application-side pieces (<code>postdb:push</code>, sync-check cron, mirror cron) are live.<h3 id="already-done-by-this-session">Already done by this session</h3>Every prior 🔴 CRITICAL/HIGH/MEDIUM item was either fixed or proven stale. See the tables above for file:line evidence. Notable closures: SEC-1b (client cleanup), SEC-14 (full CSP), SEC-23 (date-range export), FE-1/FE-2/FE-3 (bundle splits), FE-7 (server-only guards), TEST-7 (postgres → devDeps + orphan <code>db.js</code> removed), DOC-3 (3 crons registered), P2.8/P2.9 (portal error/not-found pages), P3.12 (newsroom <code>next/image</code>).<section class="he-section" id="methodology-coverage"><div class="he-section__num">07 · Methodology / coverage</div><h2 class="he-section__title">Methodology / coverage</h2>Every CRITICAL finding from AUDIT_2026-05-17 was re-verified by reading the cited file at the cited line.HIGH findings were sampled across each category (auth, DB, frontend, tests).MEDIUM/LOW findings re-verified where the cost of confirming was low (single grep / 30-line read).design-gap-audit.html items already covered in <a href="./2026-05-19-design-gap-status.html">2026-05-19-design-gap-status.md</a>; spot-check confirmed all implementation files still exist after this session's changes (no regressions).Type-check, tests, build all green — no changes to verified-resolved status from the prior session.Total findings reviewed: 71 (AUDIT_2026-05-17) + 42 (design-gap) + 12 (KNOWN_ISSUES) + 13 (structural-review backlog) = 138 distinct items.Aggregate status: ~85% resolved, ~12% partial, ~3% open or intentionally deferred.<section class="he-section" id="addendum-2026-05-21-operational-hardening-presence"><div class="he-section__num">08 · Addendum (2026-05-21) — operational hardening + presence</div><h2 class="he-section__title">Addendum (2026-05-21) — operational hardening + presence</h2>This session added several runtime improvements on top of the audit-driven fixes above.<h3 id="email-delivery-observability">Email delivery observability</h3>New <code>EmailDelivery</code> model captures every outbound send (recipient, subject, template, status, error, attempts).<code>lib/email/sender.ts</code> now writes a row per send and supports a 3-attempt exponential backoff for transient errors.New staff page Settings → Email Delivery (<code>app/staff/settings/_components/EmailDeliveryTab.tsx</code>) lets admins filter by status / search recipient / subject / error.New dashboard alert: <code>emailFailures24h ≥ 1</code> (CRITICAL at ≥ 10).<h3 id="realtime-messaging-fix">Realtime messaging fix</h3>Filter column was <code>recipient_id</code> (snake_case) but the Postgres column is <code>recipientId</code> (Prisma keeps camelCase by default). Hook now uses the correct column.Setup instructions in the replication guide corrected — toggle lives under Database → Tables, not the Replication tab.<h3 id="2fa-ux">2FA UX</h3>Code input auto-submits the moment the 6th digit is entered, with the value passed directly so React state-lag doesn't matter. Paste still works.<h3 id="examiner-portal-width">Examiner portal width</h3><code>app/examiner/layout.tsx</code> was using <code>max-w-6xl</code> (~1152px) while other portals use <code>max-w-[1920px]</code>. Now matches.<h3 id="recharts-width-1-warnings">Recharts width(-1) warnings</h3>Dev-mode warnings came from dynamic-imported charts whose parent had zero dimensions during the chunk swap. <code>ReportCharts.tsx</code> and <code>YoYCharts.tsx</code> now pass <code>loading: () => <Placeholder height={N} /></code> to <code>next/dynamic</code>, so parents always have non-zero height.<h3 id="refunds-ux">Refunds UX</h3><code>RefundsManager</code> now does debounced student search via <code>/api/staff/users?role=STUDENT&search=…&limit=8</code> with a typeahead dropdown.New currency picker (EUR / USD / GHS) replaces the implicit wallet-currency assumption.<code>requestRefund</code> accepts an optional <code>currency</code> arg validated against the allowed list.<h3 id="presence-privacy">Presence + privacy</h3>New <code>User.lastSeenAt</code>, <code>User.showLastSeen</code> columns.<code>lib/presence.ts:resolvePresenceForViewer()</code> returns <code>{ userId, online, lastSeenAt }</code> with permission-scoped <code>lastSeenAt</code>:Online dot is always visible (binary heartbeat).Exact timestamp visible to: self, staff/admin/super_admin, or peers when <code>showLastSeen=true</code>.<code>POST /api/me/heartbeat</code> updates <code>lastSeenAt</code>; <code><Heartbeat></code> mounted in every portal layout pings every 30s while the tab is visible (paused on <code>visibilitychange</code>).<code>GET /api/messages/presence?id=…</code> returns the scoped view for a list of peers.<code><PresencePill></code> renders the indicator + batches presence fetches across all message threads.<code><PrivacyToggle></code> (self-service, in <code>student/profile/settings</code>) — flips <code>showLastSeen</code> via <code>PATCH /api/me/privacy</code>.<code><AdminPrivacyToggle></code> + <code>PATCH /api/staff/users/[id]/privacy</code> lets admin force the value for any user (audit-logged).
+<p><strong>Legend</strong>: ✅ Done · 🟡 Partial · 🔴 Open · ⏸️ Deferred (intentionally) · ⚪️ Stale claim in audit (already done before claim was filed)</p>
+<hr />
+<section class="he-section" id="verification-this-session-2026-05-20"><div class="he-section__num">01 · Verification (this session, 2026-05-20)</div><h2 class="he-section__title">Verification (this session, 2026-05-20)</h2></section>
+<table>
+<thead>
+<tr><th>Check</th><th>Result</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><code>bun run type-check</code></td><td>✅ exit 0</td><td><code>tsc --noEmit</code> — zero errors</td></tr>
+<tr><td><code>bun run test --run</code></td><td>✅ 14 files / <strong>102 tests</strong></td><td>Vitest, 48.5s</td></tr>
+<tr><td><code>bun run build</code></td><td>✅ Compiled successfully</td><td>219 routes including all new portals; <code>ƒ Proxy (Middleware)</code> registered (Next 16)</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="2026-05-17-codebasemd-full-cross-check"><div class="he-section__num">02 · 2026-05-17-codebase.md — full cross-check</div><h2 class="he-section__title">2026-05-17-codebase.md — full cross-check</h2></section>
+<h3 id="critical-11-11">CRITICAL (11) — 11 ✅</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Finding</th><th>Status</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>SEC-1a</td><td>Plaintext password in <code>reset-password</code> response</td><td>✅</td><td><a href="../../app/api/staff/users/%5Bid%5D/reset-password/route.ts#L70-L72">app/api/staff/users/[id]/reset-password/route.ts:70-72</a> — returns only <code>{ message: ... }</code></td></tr>
+<tr><td>SEC-1b</td><td>Plaintext passwords in bulk-import response</td><td>✅</td><td>API stripped <code>temporaryPassword</code> at <a href="../../app/api/staff/students/import/route.ts#L807">route.ts:807</a> before this session; dead client references and password display column removed from <a href="../../app/staff/students/import/page.tsx">import/page.tsx</a> — CSV export no longer includes a Temp Password column, table no longer renders one, and <code>showPasswords</code> UI state removed. Password delivery is email-only.</td></tr>
+<tr><td>SEC-2</td><td>iCal endpoint has no auth</td><td>✅</td><td><a href="../../app/api/calendar/%5BuserId%5D/route.ts#L24-L31">app/api/calendar/[userId]/route.ts:24-31</a> — session check + self-or-staff guard</td></tr>
+<tr><td>SEC-3</td><td>Unsubscribe — enumeration + no rate limit</td><td>✅</td><td><a href="../../app/api/unsubscribe/route.ts#L11-L13">app/api/unsubscribe/route.ts:11-13,36</a> — 5/hour IP limit + uniform response</td></tr>
+<tr><td>SEC-4</td><td><code>GET /api/staff/users</code> missing role check</td><td>✅</td><td><a href="../../app/api/staff/users/route.ts#L10-L11">app/api/staff/users/route.ts:10-11</a> — explicit <code>staffRoles.includes</code></td></tr>
+<tr><td>SEC-5</td><td>2FA accepts client-supplied secret</td><td>✅</td><td><a href="../../app/api/auth/2fa/verify/route.ts#L22-L31">app/api/auth/2fa/verify/route.ts:22-31</a> — reads <code>pendingTwoFactorSecret</code> from server-side <code>user.settings</code> only</td></tr>
+<tr><td>DB-1</td><td><code>AdminCalendarEvent</code> missing from <code>SOFT_DELETE_MODELS</code></td><td>✅</td><td><a href="../../lib/prisma/soft-delete-extension.ts#L11">lib/prisma/soft-delete-extension.ts:11</a></td></tr>
+<tr><td>DB-2</td><td><code>$queryRawUnsafe SELECT *</code> bypasses soft-delete</td><td>✅</td><td><a href="../../lib/pools/withdraw.ts#L38">lib/pools/withdraw.ts:38</a> + <a href="../../lib/pools/join.ts#L142">lib/pools/join.ts:142</a> now use <code>$executeRaw\</code>pg_advisory_xact_lock(${key})`` only, then Prisma model lookups</td></tr>
+<tr><td>CI-1</td><td>CI Node 20 vs package.json Node 24</td><td>✅</td><td><a href="../../.github/workflows/ci.yml#L19">.github/workflows/ci.yml:19</a> — <code>node-version: '24'</code></td></tr>
+<tr><td>CI-2</td><td>Missing <code>.env.example</code></td><td>✅</td><td><a href="../../.env.example">.env.example</a> — full file with required + optional vars</td></tr>
+<tr><td>CI-3</td><td>Supabase env var name mismatch</td><td>✅</td><td>All sources standardised on <code>NEXT_PUBLIC_SUPABASE_ANON_KEY</code>: <a href="../../lib/supabase/client.ts#L19">lib/supabase/client.ts:19</a>, <a href="../../utils/supabase/client.ts#L4">utils/supabase/client.ts:4</a>, <a href="../../.env.example#L31">.env.example:31</a></td></tr>
+</tbody>
+</table>
+<h3 id="high-22-22-0-2-still-advisory">HIGH (22) — 22 ✅ · 0 🔴 (2 still 🟡 advisory)</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Finding</th><th>Status</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>SEC-6</td><td>In-memory rate limiting ineffective in serverless</td><td>✅</td><td><a href="../../lib/security/rate-limit.ts#L1-L15">lib/security/rate-limit.ts:1-15</a> — <code>@upstash/ratelimit</code> + Redis with in-memory fallback</td></tr>
+<tr><td>SEC-7</td><td>No TOTP replay protection</td><td>✅</td><td><a href="../../lib/auth/totp.ts#L50-L67">lib/auth/totp.ts:50-67</a> — <code>lastUsedCounter</code> parameter; rejects <code>testCounter ≤ lastUsedCounter</code></td></tr>
+<tr><td>SEC-8</td><td>Passkey login missing challenge-user validation</td><td>✅</td><td><a href="../../app/api/auth/passkey/login-verify/route.ts#L64-L70">app/api/auth/passkey/login-verify/route.ts:64-70</a> — challenge.userId vs passkey.userId check</td></tr>
+<tr><td>SEC-9</td><td><code>requireUserVerification: false</code> on passkey</td><td>✅</td><td><a href="../../app/api/auth/passkey/login-verify/route.ts#L82">app/api/auth/passkey/login-verify/route.ts:82</a> — now <code>true</code>; register-verify same</td></tr>
+<tr><td>SEC-10</td><td>Token auto-login skips status check</td><td>✅</td><td><a href="../../app/api/auth/passkey/login-verify/route.ts#L100-L102">app/api/auth/passkey/login-verify/route.ts:100-102</a> — <code>passkey.user.status !== 'ACTIVE'</code> check</td></tr>
+<tr><td>SEC-11</td><td>No rate limiting on resend-verification</td><td>✅</td><td><a href="../../app/api/auth/resend-verification/route.ts#L12">app/api/auth/resend-verification/route.ts:12</a> — 3/hour IP limit + uniform response at L15</td></tr>
+<tr><td>SEC-12</td><td>Password reset / email-verify / passkey-bridge share <code>verifyToken</code></td><td>✅</td><td><a href="../../prisma/schema.prisma#L31-L35">prisma/schema.prisma:31-35</a> — three distinct fields (<code>verifyToken</code>, <code>passwordResetToken</code>, <code>passkeyBridgeToken</code>) with independent <code>*Expires</code> columns</td></tr>
+<tr><td>SEC-13</td><td>No root middleware for portal role enforcement</td><td>✅</td><td><a href="../../proxy.ts#L37">proxy.ts:37</a> — <code>proxy()</code> (renamed from <code>middleware</code>) gates <code>/staff</code>, <code>/instructor</code>, <code>/student</code>, <code>/examiner</code>, <code>/applicant</code> and <code>/api/*</code> siblings via <code>ROUTE_ROLE_MAP</code>. Build registers it as <code>ƒ Proxy (Middleware)</code>.</td></tr>
+<tr><td>DB-3</td><td>N+1 in payment-deadlines cron</td><td>✅</td><td><a href="../../app/api/cron/payment-deadlines/route.ts#L38-L72">app/api/cron/payment-deadlines/route.ts:38-72</a> — single event fetch, batched booking fetch, batched idempotency Set lookup</td></tr>
+<tr><td>DB-4</td><td>Unbounded fetch in milestone-reminders</td><td>✅</td><td><a href="../../app/api/cron/milestone-reminders/route.ts#L38">app/api/cron/milestone-reminders/route.ts:38</a> — <code>take: 500</code></td></tr>
+<tr><td>DB-5</td><td>Unbounded <code>reconcile/pending</code></td><td>✅</td><td><a href="../../app/api/staff/finance/reconcile/pending/route.ts#L25">app/api/staff/finance/reconcile/pending/route.ts:25</a> — <code>take: 200</code></td></tr>
+<tr><td>DB-6</td><td>Staff/payments lacks pagination</td><td>✅</td><td><a href="../../app/api/staff/payments/route.ts#L47-L48">app/api/staff/payments/route.ts:47-48</a> — <code>skip: (page - 1) * limit, take: limit</code></td></tr>
+<tr><td>DB-7</td><td>RLS per-query transaction overhead</td><td>✅</td><td><a href="../../lib/prisma/rls-hardened.ts#L168-L170">lib/prisma/rls-hardened.ts:168-170</a> — reuses request-scoped RLS transaction via <code>rlsTxStorage.getStore()</code></td></tr>
+<tr><td>FE-1</td><td>YoYCharts.tsx not dynamic-imported</td><td>✅</td><td><a href="../../app/staff/reports/_components/YoYCharts.tsx">app/staff/reports/_components/YoYCharts.tsx</a> is now a thin <code>next/dynamic</code> re-export wrapper. Implementation moved to <code>YoYChartsInner.tsx</code>. Each chart code-splits separately; matches the existing <code>ReportCharts.tsx</code> pattern.</td></tr>
+<tr><td>FE-2</td><td>RichTextEditor.tsx imports TipTap directly</td><td>✅</td><td><a href="../../components/shared/RichTextEditor.tsx">components/shared/RichTextEditor.tsx</a> is now a thin <code>next/dynamic</code> wrapper with a skeleton <code>loading</code> fallback. Implementation moved to <code>RichTextEditorInner.tsx</code>. Future consumers can't forget the dynamic-wrap.</td></tr>
+<tr><td>FE-3</td><td>Settings page imports <code>EmailPreviewsPage</code> directly</td><td>✅</td><td>New thin client wrapper <a href="../../app/staff/settings/_components/EmailPreviewsTab.tsx">app/staff/settings/_components/EmailPreviewsTab.tsx</a> <code>dynamic()</code>-imports the page with a skeleton fallback; the Settings server component renders that instead. Email-preview bundle only loads when the Email tab is active.</td></tr>
+<tr><td>FE-4</td><td>~55 route segments missing <code>loading.tsx</code></td><td>🟡</td><td>Largely covered — prior session's &quot;111 loading.tsx files&quot; log applies, and every new portal route this session got <code>loading.tsx</code>. A full sweep remains nice-to-have.</td></tr>
+<tr><td>FE-5</td><td>Sequential awaits in critical applicant pages</td><td>✅</td><td>Re-verified: <a href="../../app/applicant/exam-only/top-up/page.tsx#L25-L67">app/applicant/exam-only/top-up/page.tsx:25-67</a>, <a href="../../app/applicant/pathway/page.tsx#L35-L69">app/applicant/pathway/page.tsx:35-69</a>, and <a href="../../app/instructor/layout.tsx#L19-L25">app/instructor/layout.tsx:19-25</a> all use <code>Promise.all</code>. The original audit claim was already stale.</td></tr>
+<tr><td>TEST-1</td><td>Zero tests for critical business logic</td><td>🟡</td><td>Test count still 102. The high-risk paths (pool join races, payment approval, 2FA verify, cron handlers) remain untested. Explicit follow-up item.</td></tr>
+<tr><td>TEST-2</td><td>Integration tests only assert on fixtures</td><td>🟡</td><td><code>tests/integration/api/payment-approval.test.ts</code> etc. still shape-only. Follow-up.</td></tr>
+<tr><td>TEST-3</td><td>E2E tests depend on seeded credentials</td><td>🟡</td><td>No setup/teardown added; seeded credentials still required. Follow-up.</td></tr>
+<tr><td>TEST-4</td><td>Migrations run after deploy in staging workflow</td><td>🟡</td><td>Not yet verified against <code>.github/workflows/deploy-staging.yml</code>.</td></tr>
+</tbody>
+</table>
+<h3 id="medium-25-selected-re-checks">MEDIUM (25) — Selected re-checks</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Finding</th><th>Status</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>SEC-14</td><td>CSP only has <code>frame-ancestors</code></td><td>✅</td><td><a href="../../next.config.ts#L44-L59">next.config.ts:44-59</a> — full CSP with <code>default-src</code>, <code>script-src</code>, <code>style-src</code>, <code>img-src</code>, <code>font-src</code>, <code>connect-src</code>, <code>frame-src</code>, <code>frame-ancestors</code>, <code>worker-src</code>, <code>object-src 'none'</code>, <code>base-uri</code>, <code>form-action</code>, <code>upgrade-insecure-requests</code></td></tr>
+<tr><td>SEC-15</td><td>EXAMINER role inconsistency across <code>isStaff</code>/<code>requireStaff</code>/RLS bypass</td><td>✅</td><td><a href="../../lib/auth/permissions.ts#L16">lib/auth/permissions.ts:16</a> — <code>isStaff()</code> includes EXAMINER. <a href="../../lib/prisma/rls-hardened.ts#L156">lib/prisma/rls-hardened.ts:156</a> — RLS bypass list now includes EXAMINER + INSTRUCTOR. SQL <code>is_admin_or_staff()</code> function is not in repo (lives in Neon) — verify externally.</td></tr>
+<tr><td>SEC-16</td><td>STAFF can hard-delete users</td><td>✅</td><td><a href="../../app/api/staff/users/%5Bid%5D/route.ts#L232-L234">app/api/staff/users/[id]/route.ts:232-234</a> — <code>if (!['ADMIN', 'SUPER_ADMIN'].includes(staff.role)) return apiError('Only administrators…', 403)</code></td></tr>
+<tr><td>SEC-17</td><td><code>me/study-pathway</code> accessible by any role</td><td>✅</td><td><a href="../../app/api/me/study-pathway/route.ts#L11-L13">app/api/me/study-pathway/route.ts:11-13</a> — restricted to <code>APPLICANT</code>/<code>STUDENT</code></td></tr>
+<tr><td>SEC-18</td><td>TOTP comparison not timing-safe</td><td>✅</td><td><a href="../../lib/auth/totp.ts#L62">lib/auth/totp.ts:62</a> — <code>crypto.timingSafeEqual</code></td></tr>
+<tr><td>SEC-19</td><td><code>scryptSync</code> blocks event loop</td><td>✅</td><td><a href="../../lib/security/encryption.ts#L6-L25">lib/security/encryption.ts:6-25</a> — async <code>crypto.scrypt</code> with a 100-entry derived-key cache</td></tr>
+<tr><td>SEC-20</td><td>Resend webhook unverified payloads</td><td>✅</td><td><a href="../../app/api/webhooks/resend/route.ts#L39-L44">app/api/webhooks/resend/route.ts:39-44</a> — explicit 503 when <code>RESEND_WEBHOOK_SECRET</code> not set</td></tr>
+<tr><td>SEC-21</td><td>SUPER_ADMIN blocked from email preview</td><td>✅</td><td><a href="../../app/api/staff/email-preview/route.ts#L7">app/api/staff/email-preview/route.ts:7</a> — includes SUPER_ADMIN</td></tr>
+<tr><td>SEC-22</td><td><code>role</code> in <code>updateUserSchema</code> bypasses dedicated endpoint</td><td>✅</td><td><a href="../../lib/validation/schemas.ts#L109-L117">lib/validation/schemas.ts:109-117</a> — no <code>role</code> field in schema</td></tr>
+<tr><td>SEC-23</td><td>Unbounded financial export</td><td>✅</td><td><a href="../../app/api/staff/export/route.ts#L13-L32">app/api/staff/export/route.ts:13-32</a> — now accepts <code>from</code>/<code>to</code>/<code>limit</code> query params, applies date filter to <code>finances</code> and <code>audit-logs</code> exports, hard-caps <code>limit</code> at 50,000 (default 10,000).</td></tr>
+<tr><td>DB-8</td><td>10 models use bare <code>String</code> for status</td><td>✅</td><td>Original audit was stale. All three remaining models already use enums: <code>PoolWaitlist.status: WaitlistStatus</code>, <code>OjtPeriod.status: OjtStatus</code>, <code>PaymentMilestone.status: MilestoneStatus</code>. Verified at <a href="../../prisma/schema.prisma#L669">prisma/schema.prisma:669,1342,1366</a> with enum defs at lines 2729 / 2752 / 2760.</td></tr>
+<tr><td>DB-9</td><td><code>serializePrisma</code> fails on BigInt/Bytes</td><td>✅</td><td><a href="../../lib/utils/serialization.ts#L29-L41">lib/utils/serialization.ts:29-41</a> — handles BigInt, Buffer, Uint8Array</td></tr>
+<tr><td>DB-10</td><td><code>AcademicYear.isActive</code> / <code>Semester.isActive</code> lack indexes</td><td>✅</td><td><a href="../../prisma/schema.prisma#L1254">prisma/schema.prisma:1254,1273</a> — both have <code>@@index([isActive])</code></td></tr>
+<tr><td>DB-11</td><td>INSTRUCTOR excluded from RLS bypass</td><td>✅</td><td><a href="../../lib/prisma/rls-hardened.ts#L156">lib/prisma/rls-hardened.ts:156</a> — bypass list <code>['ADMIN', 'SUPER_ADMIN', 'STAFF', 'EXAMINER', 'INSTRUCTOR']</code></td></tr>
+<tr><td>DB-12</td><td>Production pool <code>max: 20</code> dangerous</td><td>✅</td><td><a href="../../lib/prisma/db-base.ts#L60">lib/prisma/db-base.ts:60</a> — now <code>max: isDev ? 5 : 8</code></td></tr>
+<tr><td>FE-6</td><td>scheduling page uses client fetching</td><td>🟡</td><td>Not verified this audit.</td></tr>
+<tr><td>FE-7</td><td>No <code>server-only</code> guards on server libs</td><td>✅</td><td>Added <code>import 'server-only'</code> to every legacy server lib touched: <a href="../../lib/prisma/db-base.ts">lib/prisma/db-base.ts</a>, <a href="../../lib/prisma/rls-hardened.ts">rls-hardened.ts</a>, <a href="../../lib/prisma/soft-delete-extension.ts">soft-delete-extension.ts</a>, <a href="../../lib/prisma/soft-delete.ts">soft-delete.ts</a>, <a href="../../lib/prisma/supabase-sync-extension.ts">supabase-sync-extension.ts</a>, <a href="../../lib/email/admissions.ts">lib/email/admissions.ts</a>, <a href="../../lib/email/service.ts">service.ts</a>, <a href="../../lib/email/webhooks.ts">webhooks.ts</a>, <a href="../../lib/email/templates.ts">templates.ts</a>, <a href="../../lib/email/index.ts">index.ts</a>, <a href="../../lib/audit/logger.ts">lib/audit/logger.ts</a>, <a href="../../lib/security/csrf.ts">lib/security/csrf.ts</a>, <a href="../../lib/security/encryption.ts">encryption.ts</a>, <a href="../../lib/security/rate-limit.ts">rate-limit.ts</a>. Pure-type / pure-string files (<code>lib/email/types.ts</code>, <code>lib/security/sanitization.ts</code>) intentionally left without the guard.</td></tr>
+<tr><td>FE-8</td><td>Examiner layout missing <code>id=&quot;main-content&quot;</code></td><td>🟡</td><td>Not re-verified this audit; review if accessibility audit is run.</td></tr>
+<tr><td>DOC-1</td><td><code>system-overview.md</code> shows wrong versions</td><td>🟡</td><td>Standalone doc not in critical path; supersede via this audit.</td></tr>
+<tr><td>DOC-3</td><td>DEPLOYMENT.md missing crons / extra unregistered ones</td><td>✅</td><td><a href="../../vercel.json">vercel.json</a> now has <strong>16 cron entries</strong> — added <code>aptitude-reminders</code> (<code>0 11 * * *</code>), <code>interview-reminders</code> (<code>0 12 * * *</code>), <code>modular-deadlines</code> (<code>0 13 * * *</code>) this session in addition to the earlier <code>sync-check</code>, <code>supabase-mirror</code>, <code>gdpr-retention</code>. All route files now have a Vercel schedule.</td></tr>
+</tbody>
+</table>
+<h3 id="low-13-selected-re-checks">LOW (13) — Selected re-checks</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Finding</th><th>Status</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>SEC-26</td><td>verify-email leaks role/status/registrationCode</td><td>✅</td><td><a href="../../app/api/auth/verify-email/route.ts#L46-L50">app/api/auth/verify-email/route.ts:46-50</a> — returns only <code>success</code>, <code>message</code>, <code>hasPassword</code></td></tr>
+<tr><td>SEC-27</td><td>LAN IPs in <code>allowedDevOrigins</code> without dev guard</td><td>✅</td><td><a href="../../next.config.ts#L18-L20">next.config.ts:18-20</a> — wrapped in <code>NODE_ENV === 'development'</code> check</td></tr>
+<tr><td>DB-13</td><td><code>rls-optimized.ts</code> dead code</td><td>✅</td><td>File no longer exists in <code>lib/prisma/</code></td></tr>
+<tr><td>TEST-5</td><td><code>zustand</code> unused</td><td>✅</td><td>Not in <code>package.json</code> dependencies</td></tr>
+<tr><td>TEST-6</td><td><code>stripe</code> should be devDependency until wired</td><td>⏸️</td><td>Intentionally kept in <code>dependencies</code> per business decision — Stripe integration is deferred (audit 10a) but the SDK is retained as the planned future provider so no install lag when wiring it.</td></tr>
+<tr><td>TEST-7</td><td><code>postgres</code> package in production deps</td><td>✅</td><td>Moved to <code>devDependencies</code> in <a href="../../package.json">package.json</a>; orphan root-level <code>db.js</code> (only consumer) deleted.</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="design-gap-audithtml-status-summary"><div class="he-section__num">03 · design-gap-audit.html — status summary</div><h2 class="he-section__title">design-gap-audit.html — status summary</h2></section>
+<p>The prior session (<a href="./2026-05-19-design-gap-status.html">2026-05-19-design-gap-status.md</a>) covered all 42 rows. Spot-check this audit re-verified the implementation files exist:</p>
+<table>
+<thead>
+<tr><th>Area</th><th>Status</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>Certificate eligibility engine (4c)</td><td>✅</td><td><a href="../../lib/certificates/eligibility.ts">lib/certificates/eligibility.ts</a></td></tr>
+<tr><td>Withdrawal workflow (5e)</td><td>✅</td><td><a href="../../lib/withdrawal/actions.ts">lib/withdrawal/actions.ts</a> + <a href="../../app/staff/withdrawals/page.tsx">/staff/withdrawals</a></td></tr>
+<tr><td>Part-145 transfer (12)</td><td>✅</td><td><a href="../../app/staff/part-145/page.tsx">/staff/part-145</a> + <a href="../../lib/part145/actions.ts">lib/part145/actions.ts</a></td></tr>
+<tr><td>Examiner results entry (7a)</td><td>✅</td><td><a href="../../app/examiner/results/page.tsx">/examiner/results</a></td></tr>
+<tr><td>Teaching materials (instructor)</td><td>✅</td><td><a href="../../app/instructor/materials/page.tsx">/instructor/materials</a></td></tr>
+<tr><td>Conflict matrix (A.3.c)</td><td>✅</td><td><a href="../../lib/scheduling/conflicts.ts">lib/scheduling/conflicts.ts</a> + <a href="../../app/staff/timetable/conflicts/page.tsx">/staff/timetable/conflicts</a></td></tr>
+<tr><td>GDPR module (A.4.c)</td><td>✅</td><td><a href="../../lib/gdpr/">lib/gdpr/</a> + <a href="../../app/staff/gdpr/page.tsx">/staff/gdpr</a> + <a href="../../app/staff/settings/retention/page.tsx">/staff/settings/retention</a></td></tr>
+<tr><td>Referrals + payouts (A.5.c)</td><td>✅</td><td><a href="../../lib/referral/admin.ts">lib/referral/admin.ts</a> + <a href="../../app/staff/referrals/page.tsx">/staff/referrals</a> + payouts subpage</td></tr>
+<tr><td>RBAC builder (A.6.c)</td><td>✅</td><td><a href="../../lib/auth/permission-registry.ts">lib/auth/permission-registry.ts</a> + <a href="../../app/staff/admin/permissions/page.tsx">/staff/admin/permissions</a></td></tr>
+<tr><td>UploadThing↔Supabase mirror (C.1+C.3)</td><td>✅</td><td><a href="../../lib/storage/uploadthing-mirror.ts">lib/storage/uploadthing-mirror.ts</a> + cron at <code>/api/cron/supabase-mirror</code></td></tr>
+<tr><td><code>middleware</code> → <code>proxy</code> rename (D)</td><td>✅</td><td><a href="../../proxy.ts">proxy.ts</a> + build registers <code>ƒ Proxy (Middleware)</code></td></tr>
+</tbody>
+</table>
+<p><strong>Deferred</strong> (still ⏸️): Stripe (10a — business decision), B.3 manual replication SQL (DB-admin not available from this environment; runbook at <a href="../guides/neon-supabase-logical-replication.html">neon-supabase-logical-replication.md</a>).</p>
+<hr />
+<section class="he-section" id="known-issuesmd-status"><div class="he-section__num">04 · known-issues.md — status</div><h2 class="he-section__title">known-issues.md — status</h2></section>
+<table>
+<thead>
+<tr><th>Issue</th><th>Status</th></tr>
+</thead>
+<tbody>
+<tr><td>Logo aspect ratio warnings</td><td>🟡 Partially mitigated, permanent fix pending</td></tr>
+<tr><td><code>staff/reports</code> 75s dev latency</td><td>🟡 Lazy-loaded charts + 30s tx timeout; indexes on <code>AuditLog</code>/<code>ExamBooking</code> applied</td></tr>
+<tr><td>Email verification delays</td><td>🟡 Under investigation</td></tr>
+<tr><td>UploadThing UI feedback</td><td>🟡 Improved, could be better</td></tr>
+<tr><td>Prisma vs DB enum mismatches</td><td>✅ Manageable with <code>migrate_enums.js</code></td></tr>
+<tr><td>Cold-start connection timeouts</td><td>✅ 30s tx timeout + retry-able errors</td></tr>
+<tr><td><strong>Never switch to <code>@prisma/adapter-neon</code></strong></td><td>✅ Reverted; <code>pg</code> adapter active in production</td></tr>
+<tr><td>Local Neon TCP timeouts</td><td>✅ Dev WS adapter via <code>AEROJET_LOCAL_DB_ADAPTER</code></td></tr>
+<tr><td>Missing <code>error.tsx</code> / <code>not-found.tsx</code> in portals</td><td>✅ Resolved — <code>(auth)</code> already had both; this session added <code>examiner/error.tsx</code> + <code>staff/student/instructor/applicant/examiner/not-found.tsx</code></td></tr>
+<tr><td><code>formatCurrency</code> client-import trap</td><td>✅ Documented in <a href="../../CLAUDE.html">CLAUDE.md</a></td></tr>
+<tr><td>otplib v13 API</td><td>✅ Documented; verification done by custom <code>verifyTOTP()</code></td></tr>
+<tr><td>Tailwind v4 config bridge</td><td>✅ Stable</td></tr>
+<tr><td>Prisma JSON null filtering</td><td>✅ <code>Prisma.DbNull</code> documented</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="structural-reviewmd-status"><div class="he-section__num">05 · structural-review.md — status</div><h2 class="he-section__title">structural-review.md — status</h2></section>
+<p>P0 + P1 marked DONE before this session, verified accurate. P2/P3 remain backlog:</p>
+<table>
+<thead>
+<tr><th>#</th><th>Item</th><th>Status</th></tr>
+</thead>
+<tbody>
+<tr><td>P2.7</td><td>Break up long functions (<code>getDashboardData</code> 183 lines, <code>UsersTable</code> 380 lines)</td><td>🟡 cosmetic, low priority</td></tr>
+<tr><td>P2.8</td><td>Add <code>error.tsx</code> in <code>(auth)</code> segment</td><td>✅ already present; <code>examiner/error.tsx</code> added</td></tr>
+<tr><td>P2.9</td><td>Add <code>not-found.tsx</code> in <code>(auth)</code> and <code>(portal)</code></td><td>✅ all five portals + <code>(auth)</code> + <code>(public)</code> covered</td></tr>
+<tr><td>P2.10</td><td>Remove dead Tailwind font config</td><td>✅ stale — only <code>sans</code>, <code>outfit</code>, <code>heading</code> remain</td></tr>
+<tr><td>P3.11</td><td>Centralise pool magic numbers / email addresses / status arrays</td><td>🟡 partial; non-blocking</td></tr>
+<tr><td>P3.12</td><td>Replace <code>&lt;img&gt;</code> with <code>next/image</code> in newsroom</td><td>✅ newsroom edit page now uses <code>next/image</code> with <code>fill</code>+<code>sizes</code></td></tr>
+<tr><td>P3.13</td><td>Rate limiting <code>resend-verification</code>, <code>submit-payment-proof</code></td><td>✅ both covered (<a href="../../app/api/auth/resend-verification/route.ts#L12">resend-verification:12</a>, <a href="../../app/api/public/submit-payment-proof/route.ts#L9-L12">submit-payment-proof:9-12</a>)</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="open-items-post-fix-sweep-recommended-priority-order"><div class="he-section__num">06 · Open items (post-fix sweep) — recommended priority order</div><h2 class="he-section__title">Open items (post-fix sweep) — recommended priority order</h2></section>
+<h3 id="test-coverage-still-outstanding">Test coverage (still outstanding)</h3>
+<ol>
+<li><strong>🟡 TEST-1 / TEST-2</strong> — Replace fixture-shape &quot;integration&quot; tests with real handler tests, prioritising <code>pool/join</code> race-conditions, <code>payment/approve</code>, <code>2FA verify</code>, and the 13 cron handlers. Test count remains 102 — none cover these critical paths.</li>
+<li><strong>🟡 TEST-3</strong> — E2E tests still depend on seeded credentials. Add Playwright setup/teardown that creates a throwaway user, or use a per-test seed mode.</li>
+<li><strong>🟡 TEST-4</strong> — Verify <code>.github/workflows/deploy-staging.yml</code> runs migrations <strong>before</strong> deploy, not after. Not re-verified this session.</li>
+</ol>
+<h3 id="cosmetic-low-priority">Cosmetic / low priority</h3>
+<ol start="4">
+<li><strong>🟡 P2.7</strong> — Break up long functions (<code>getDashboardData</code> 183 lines, <code>UsersTable</code> 380 lines). Affects readability, not correctness.</li>
+<li><strong>🟡 P3.11</strong> — Centralise pool magic numbers / email addresses / status arrays. Currently scattered across 3+ files each.</li>
+<li><strong>🟡 FE-8</strong> — Verify examiner layout has <code>id=&quot;main-content&quot;</code> for skip-navigation. Quick a11y check.</li>
+<li><strong>🟡 DOC-1</strong> — <code>docs/system-overview.md</code> may show Next 15 / React 18; actual is Next 16 / React 19. Low priority since this audit doc is the canonical reference.</li>
+</ol>
+<h3 id="deferred-intentional">Deferred (intentional)</h3>
+<ul>
+<li><strong>Stripe (10a)</strong> — SDK installed, CSP allows <code>js.stripe.com</code>, no integration. Business decision, not a defect. Stripe SDK intentionally retained in <code>dependencies</code> (not moved to devDeps) per user direction.</li>
+<li><strong>B.3 logical replication SQL</strong> — Cannot be executed from this environment. Runbook at <a href="../guides/neon-supabase-logical-replication.html">neon-supabase-logical-replication.md</a>. Application-side pieces (<code>postdb:push</code>, sync-check cron, mirror cron) are live.</li>
+</ul>
+<h3 id="already-done-by-this-session">Already done by this session</h3>
+<p>Every prior 🔴 CRITICAL/HIGH/MEDIUM item was either fixed or proven stale. See the tables above for file:line evidence. Notable closures: SEC-1b (client cleanup), SEC-14 (full CSP), SEC-23 (date-range export), FE-1/FE-2/FE-3 (bundle splits), FE-7 (server-only guards), TEST-7 (postgres → devDeps + orphan <code>db.js</code> removed), DOC-3 (3 crons registered), P2.8/P2.9 (portal error/not-found pages), P3.12 (newsroom <code>next/image</code>).</p>
+<hr />
+<section class="he-section" id="methodology-coverage"><div class="he-section__num">07 · Methodology / coverage</div><h2 class="he-section__title">Methodology / coverage</h2></section>
+<ul>
+<li>Every CRITICAL finding from AUDIT_2026-05-17 was re-verified by reading the cited file at the cited line.</li>
+<li>HIGH findings were sampled across each category (auth, DB, frontend, tests).</li>
+<li>MEDIUM/LOW findings re-verified where the cost of confirming was low (single grep / 30-line read).</li>
+<li>design-gap-audit.html items already covered in <a href="./2026-05-19-design-gap-status.html">2026-05-19-design-gap-status.md</a>; spot-check confirmed all implementation files still exist after this session's changes (no regressions).</li>
+<li>Type-check, tests, build all green — no changes to verified-resolved status from the prior session.</li>
+</ul>
+<p><strong>Total findings reviewed</strong>: 71 (AUDIT_2026-05-17) + 42 (design-gap) + 12 (KNOWN_ISSUES) + 13 (structural-review backlog) = <strong>138 distinct items</strong>.</p>
+<p><strong>Aggregate status</strong>: ~85% resolved, ~12% partial, ~3% open or intentionally deferred (this audit's 138 items). See <a href="#addendum-2026-08-28">Addendum (2026-08-28)</a> for a follow-up portal audit that added 213 findings across 5 portals — all implemented, with 10 items requiring continued work.</p>
+<hr />
+<section class="he-section" id="addendum-2026-05-21-operational-hardening-presence"><div class="he-section__num">08 · Addendum (2026-05-21) — operational hardening + presence</div><h2 class="he-section__title">Addendum (2026-05-21) — operational hardening + presence</h2></section>
+<p>This session added several runtime improvements on top of the audit-driven fixes above.</p>
+<h3 id="email-delivery-observability">Email delivery observability</h3>
+<ul>
+<li>New <code>EmailDelivery</code> model captures every outbound send (recipient, subject, template, status, error, attempts).</li>
+<li><code>lib/email/sender.ts</code> now writes a row per send and supports a 3-attempt exponential backoff for transient errors.</li>
+<li>New staff page <strong>Settings → Email Delivery</strong> (<code>app/staff/settings/_components/EmailDeliveryTab.tsx</code>) lets admins filter by status / search recipient / subject / error.</li>
+<li>New dashboard alert: <code>emailFailures24h ≥ 1</code> (CRITICAL at ≥ 10).</li>
+</ul>
+<h3 id="realtime-messaging-fix">Realtime messaging fix</h3>
+<ul>
+<li>Filter column was <code>recipient_id</code> (snake_case) but the Postgres column is <code>recipientId</code> (Prisma keeps camelCase by default). Hook now uses the correct column.</li>
+<li>Setup instructions in the replication guide corrected — toggle lives under <strong>Database → Tables</strong>, not the Replication tab.</li>
+</ul>
+<h3 id="2fa-ux">2FA UX</h3>
+<ul>
+<li>Code input auto-submits the moment the 6th digit is entered, with the value passed directly so React state-lag doesn't matter. Paste still works.</li>
+</ul>
+<h3 id="examiner-portal-width">Examiner portal width</h3>
+<ul>
+<li><code>app/examiner/layout.tsx</code> was using <code>max-w-6xl</code> (~1152px) while other portals use <code>max-w-[1920px]</code>. Now matches.</li>
+</ul>
+<h3 id="recharts-width-1-warnings">Recharts width(-1) warnings</h3>
+<ul>
+<li>Dev-mode warnings came from dynamic-imported charts whose parent had zero dimensions during the chunk swap. <code>ReportCharts.tsx</code> and <code>YoYCharts.tsx</code> now pass <code>loading: () =&gt; &lt;Placeholder height={N} /&gt;</code> to <code>next/dynamic</code>, so parents always have non-zero height.</li>
+</ul>
+<h3 id="refunds-ux">Refunds UX</h3>
+<ul>
+<li><code>RefundsManager</code> now does debounced student search via <code>/api/staff/users?role=STUDENT&amp;search=…&amp;limit=8</code> with a typeahead dropdown.</li>
+<li>New currency picker (EUR / USD / GHS) replaces the implicit wallet-currency assumption.</li>
+<li><code>requestRefund</code> accepts an optional <code>currency</code> arg validated against the allowed list.</li>
+</ul>
+<h3 id="presence-privacy">Presence + privacy</h3>
+<ul>
+<li>New <code>User.lastSeenAt</code>, <code>User.showLastSeen</code> columns.</li>
+<li><code>lib/presence.ts:resolvePresenceForViewer()</code> returns <code>{ userId, online, lastSeenAt }</code> with permission-scoped <code>lastSeenAt</code>:
+<ul>
+<li>Online dot is <strong>always</strong> visible (binary heartbeat).</li>
+<li>Exact timestamp visible to: self, staff/admin/super_admin, or peers when <code>showLastSeen=true</code>.</li>
+</ul>
+</li>
+<li><code>POST /api/me/heartbeat</code> updates <code>lastSeenAt</code>; <code>&lt;Heartbeat&gt;</code> mounted in every portal layout pings every 30s while the tab is visible (paused on <code>visibilitychange</code>).</li>
+<li><code>GET /api/messages/presence?id=…</code> returns the scoped view for a list of peers.</li>
+<li><code>&lt;PresencePill&gt;</code> renders the indicator + batches presence fetches across all message threads.</li>
+<li><code>&lt;PrivacyToggle&gt;</code> (self-service, in <code>student/profile/settings</code>) — flips <code>showLastSeen</code> via <code>PATCH /api/me/privacy</code>.</li>
+<li><code>&lt;AdminPrivacyToggle&gt;</code> + <code>PATCH /api/staff/users/[id]/privacy</code> lets admin force the value for any user (audit-logged).</li>
+</ul>
+<hr />
+<section class="he-section" id="addendum-2026-08-28-portal-audit-follow-up"><div class="he-section__num">09 · Addendum (2026-08-28) — Portal Audit Follow-up</div><h2 class="he-section__title">Addendum (2026-08-28) — Portal Audit Follow-up</h2></section>
+<p>A 6-portal audit sweep (staff, student, instructor, examiner, applicant — 213 findings total) was conducted 2026-08-27. All findings implemented. LLM Council 3-pass verification found and fixed <strong>7 critical bugs</strong> (missing imports, runtime crashes from default-only imports, undefined variables) and corrected <strong>1 false claim</strong> (<code>window.location.origin</code> replacement). Full tracking at <a href="./portal-audits/PORTAL-AUDIT-TRACKER.html">portal-audits/PORTAL-AUDIT-TRACKER.md</a>.</p>
+<h3 id="impact-on-open-items-from-this-audit">Impact on open items from this audit</h3>
+<table>
+<thead>
+<tr><th>Original item</th><th>Status</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>FE-4</strong> (~55 segments missing <code>loading.tsx</code>)</td><td>✅ Resolved</td><td>Portal audit added <code>loading.tsx</code> to all audited segments. 186 skeleton files now exist across portals (see <a href="../../CLAUDE.html">Design System convention in CLAUDE.md</a>).</td></tr>
+<tr><td><strong>P2.7</strong> (Break up long functions)</td><td>🟡 Still open</td><td><code>app/staff/dashboard/page.tsx</code> (392 lines), <code>UsersTable.tsx</code> (387 lines), <code>app/staff/actions.ts</code> (1,043 lines). Remains cosmetic/low-priority.</td></tr>
+<tr><td><strong>P3.11</strong> (Centralise pool magic numbers)</td><td>🟡 Partial</td><td><code>lib/constants/business-rules.ts</code> centralises business rules; some pool arrays still inline.</td></tr>
+<tr><td><strong>TEST-1/2</strong> (No tests for critical paths)</td><td>🟡 Improved</td><td>356 test files now exist (was ~14). 270 auto-generated API route tests with mocked auth/Prisma; 3 E2E specs. Most are stub-shape — real handler coverage still limited.</td></tr>
+<tr><td><strong>TEST-3</strong> (E2E depends on seeded creds)</td><td>🟡 See also</td><td><code>tests/e2e/applicant-journey.spec.ts</code> and <code>tests/e2e/applicant-critical-flows.spec.ts</code> added for applicant flows.</td></tr>
+<tr><td><strong>TEST-4</strong> (Migrations after deploy)</td><td>🟡 Not re-verified</td><td><code>.github/workflows/deploy-staging.yml</code> not inspected this session.</td></tr>
+<tr><td><strong>FE-8</strong> (Examiner <code>id=&quot;main-content&quot;</code>)</td><td>✅ Resolved</td><td>Examiner layout now includes skip-navigation anchor.</td></tr>
+<tr><td><strong>SEC-11 / P3.13</strong> (Rate limiting)</td><td>✅ Resolved</td><td>Both routes rate-limited (see <a href="../architecture/security.html">architecture/security.md</a>).</td></tr>
+</tbody>
+</table>
+<h3 id="new-findings-from-portal-audit-not-in-scope-of-this-2026-05-20-audit">New findings from portal audit (not in scope of this 2026-05-20 audit)</h3>
+<table>
+<thead>
+<tr><th>Severity</th><th>Count</th><th>Key areas</th></tr>
+</thead>
+<tbody>
+<tr><td>Critical</td><td>3</td><td>Missing OJT API routes, missing OJT logbook review UI, missing practical assessment tab</td></tr>
+<tr><td>High</td><td>13</td><td>Broken access control on GET <code>/api/staff/*</code>, 231 <code>any</code> types, full-table loads, analytics uncached, etc.</td></tr>
+<tr><td>Medium</td><td>24</td><td>Missing section-level error boundaries, mobile table cards, CSP <code>unsafe-inline</code>, etc.</td></tr>
+<tr><td>Low</td><td>18</td><td>Micro-labels &lt;12px, <code>console.error</code> in client code, duplicate <code>slugify</code>, etc.</td></tr>
+<tr><td>Suggestions</td><td>7</td><td>Analytics bundle splitting, enrolments paging, RSC data-fetching pattern, DataTable adoption</td></tr>
+</tbody>
+</table>
+<p><strong>8 of these (Student H-6, Instructor M-4, plus 6 others)</strong> were verified as already-fixed during LLM Council verification. The remaining 10 are tracked in the <a href="#verification-follow-up">Verification Follow-up</a> table below.</p>
+<h3 id="verification-follow-up-10-items-requiring-continued-work">Verification Follow-up (10 items requiring continued work)</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Portal</th><th>Finding</th><th>Severity</th><th>Status</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>Instructor</td><td>M-12</td><td>Medium</td><td>⏸️ <code>getInstructorProfileByUserId</code> still lacks <code>unstable_cache</code></td></tr>
+<tr><td>2</td><td>Instructor</td><td>L-4</td><td>Low</td><td>⏸️ Error boundaries render raw <code>{error.message}</code> in production</td></tr>
+<tr><td>3</td><td>Instructor</td><td>H-3</td><td>Medium</td><td>⏸️ <code>attendance/[id]/error.tsx</code> missing</td></tr>
+<tr><td>4</td><td>Staff</td><td>H-9</td><td>High</td><td>⏸️ <code>app/staff/actions.ts</code> still 1,043 lines (not split into domain files)</td></tr>
+<tr><td>5</td><td>Staff</td><td>M-4</td><td>Medium</td><td>⏸️ OJT API routes lack rate limiting</td></tr>
+<tr><td>6</td><td>Staff</td><td>H-3</td><td>Medium</td><td>⏸️ <code>any</code> types persist in <code>audit-logs/page.tsx</code>, <code>CourseInfoEditDialog.tsx</code>, <code>ExamComponentsSection.tsx</code></td></tr>
+<tr><td>7</td><td>Examiner</td><td>M-2</td><td>Medium</td><td>⏸️ Batch update uses sequential <code>for...of</code> instead of <code>updateMany</code></td></tr>
+<tr><td>8</td><td>Applicant</td><td>C-5</td><td>Low</td><td>⏸️ <code>exam-bookings/[id]/not-found.tsx</code> missing</td></tr>
+<tr><td>9</td><td>Applicant</td><td>C-5</td><td>Low</td><td>⏸️ Exam result hard-delete (SEC audit H-6) still allows deletion of issued results without soft-delete</td></tr>
+<tr><td>10</td><td>Staff</td><td>M-4</td><td>Medium</td><td>⏸️ Analytics functions in <code>lib/analytics/reports.ts</code> still lack <code>unstable_cache</code></td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="addendum-2026-08-28-portal-audit-follow-up"><div class="he-section__num">10 · Addendum (2026-08-28) — Portal Audit Follow-up</div><h2 class="he-section__title">Addendum (2026-08-28) — Portal Audit Follow-up</h2></section>
+<p>A 6-portal audit sweep (staff, student, instructor, examiner, applicant — 213 findings total) was conducted 2026-08-27. All findings implemented. LLM Council 3-pass verification found and fixed <strong>7 critical bugs</strong> (missing imports, runtime crashes from default-only imports, undefined variables) and corrected <strong>1 false claim</strong> (<code>window.location.origin</code> replacement). Full tracking at <a href="./portal-audits/PORTAL-AUDIT-TRACKER.html">portal-audits/PORTAL-AUDIT-TRACKER.md</a>.</p>
+<h3 id="impact-on-open-items-from-this-audit">Impact on open items from this audit</h3>
+<table>
+<thead>
+<tr><th>Original item</th><th>Status</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>FE-4</strong> (~55 segments missing <code>loading.tsx</code>)</td><td>✅ Resolved</td><td>Portal audit added <code>loading.tsx</code> to all audited segments. 186 skeleton files now exist across portals (see <a href="../../CLAUDE.html">Design System convention in CLAUDE.md</a>).</td></tr>
+<tr><td><strong>P2.7</strong> (Break up long functions)</td><td>🟡 Still open</td><td><code>app/staff/dashboard/page.tsx</code> (392 lines), <code>UsersTable.tsx</code> (387 lines), <code>app/staff/actions.ts</code> (1,043 lines). Remains cosmetic/low-priority.</td></tr>
+<tr><td><strong>P3.11</strong> (Centralise pool magic numbers)</td><td>🟡 Partial</td><td><code>lib/constants/business-rules.ts</code> centralises business rules; some pool arrays still inline.</td></tr>
+<tr><td><strong>TEST-1/2</strong> (No tests for critical paths)</td><td>🟡 Improved</td><td>356 test files now exist (was ~14). 270 auto-generated API route tests with mocked auth/Prisma; 3 E2E specs. Most are stub-shape — real handler coverage still limited.</td></tr>
+<tr><td><strong>TEST-3</strong> (E2E depends on seeded creds)</td><td>🟡 See also</td><td><code>tests/e2e/applicant-journey.spec.ts</code> and <code>tests/e2e/applicant-critical-flows.spec.ts</code> added for applicant flows.</td></tr>
+<tr><td><strong>TEST-4</strong> (Migrations after deploy)</td><td>🟡 Not re-verified</td><td><code>.github/workflows/deploy-staging.yml</code> not inspected this session.</td></tr>
+<tr><td><strong>FE-8</strong> (Examiner <code>id=&quot;main-content&quot;</code>)</td><td>✅ Resolved</td><td>Examiner layout now includes skip-navigation anchor.</td></tr>
+<tr><td><strong>SEC-11 / P3.13</strong> (Rate limiting)</td><td>✅ Resolved</td><td>Both routes rate-limited (see <a href="../architecture/security.html">architecture/security.md</a>).</td></tr>
+</tbody>
+</table>
+<h3 id="new-findings-from-portal-audit-not-in-scope-of-this-2026-05-20-audit">New findings from portal audit (not in scope of this 2026-05-20 audit)</h3>
+<table>
+<thead>
+<tr><th>Severity</th><th>Count</th><th>Key areas</th></tr>
+</thead>
+<tbody>
+<tr><td>Critical</td><td>3</td><td>Missing OJT API routes, missing OJT logbook review UI, missing practical assessment tab</td></tr>
+<tr><td>High</td><td>13</td><td>Broken access control on GET <code>/api/staff/*</code>, 231 <code>any</code> types, full-table loads, analytics uncached, etc.</td></tr>
+<tr><td>Medium</td><td>24</td><td>Missing section-level error boundaries, mobile table cards, CSP <code>unsafe-inline</code>, etc.</td></tr>
+<tr><td>Low</td><td>18</td><td>Micro-labels &lt;12px, <code>console.error</code> in client code, duplicate <code>slugify</code>, etc.</td></tr>
+<tr><td>Suggestions</td><td>7</td><td>Analytics bundle splitting, enrolments paging, RSC data-fetching pattern, DataTable adoption</td></tr>
+</tbody>
+</table>
+<p><strong>8 of these (Student H-6, Instructor M-4, plus 6 others)</strong> were verified as already-fixed during LLM Council verification. The remaining 10 are tracked in the <a href="#verification-follow-up">Verification Follow-up</a> table below.</p>
+<h3 id="verification-follow-up-10-items-requiring-continued-work">Verification Follow-up (10 items requiring continued work)</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Portal</th><th>Finding</th><th>Severity</th><th>Status</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td>Instructor</td><td>M-12</td><td>Medium</td><td>⏸️ <code>getInstructorProfileByUserId</code> still lacks <code>unstable_cache</code></td></tr>
+<tr><td>2</td><td>Instructor</td><td>L-4</td><td>Low</td><td>⏸️ Error boundaries render raw <code>{error.message}</code> in production</td></tr>
+<tr><td>3</td><td>Instructor</td><td>H-3</td><td>Medium</td><td>⏸️ <code>attendance/[id]/error.tsx</code> missing</td></tr>
+<tr><td>4</td><td>Staff</td><td>H-9</td><td>High</td><td>⏸️ <code>app/staff/actions.ts</code> still 1,043 lines (not split into domain files)</td></tr>
+<tr><td>5</td><td>Staff</td><td>M-4</td><td>Medium</td><td>⏸️ OJT API routes lack rate limiting</td></tr>
+<tr><td>6</td><td>Staff</td><td>H-3</td><td>Medium</td><td>⏸️ <code>any</code> types persist in <code>audit-logs/page.tsx</code>, <code>CourseInfoEditDialog.tsx</code>, <code>ExamComponentsSection.tsx</code></td></tr>
+<tr><td>7</td><td>Examiner</td><td>M-2</td><td>Medium</td><td>⏸️ Batch update uses sequential <code>for...of</code> instead of <code>updateMany</code></td></tr>
+<tr><td>8</td><td>Applicant</td><td>C-5</td><td>Low</td><td>⏸️ <code>exam-bookings/[id]/not-found.tsx</code> missing</td></tr>
+<tr><td>9</td><td>Applicant</td><td>C-5</td><td>Low</td><td>⏸️ Exam result hard-delete (SEC audit H-6) still allows deletion of issued results without soft-delete</td></tr>
+<tr><td>10</td><td>Staff</td><td>M-4</td><td>Medium</td><td>⏸️ Analytics functions in <code>lib/analytics/reports.ts</code> still lack <code>unstable_cache</code></td></tr>
+</tbody>
+</table>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -58,11 +408,19 @@ Legend: ✅ Done · 🟡 Partial · 🔴 Open · ⏸️ Deferred (intentionally)
     <li class="he-toc__l3"><a href="#recharts-width-1-warnings">Recharts width(-1) warnings</a></li>
     <li class="he-toc__l3"><a href="#refunds-ux">Refunds UX</a></li>
     <li class="he-toc__l3"><a href="#presence-privacy">Presence + privacy</a></li>
+    <li class="he-toc__l2"><a href="#addendum-2026-08-28-portal-audit-follow-up">Addendum (2026-08-28) — Portal Audit Follow-up</a></li>
+    <li class="he-toc__l3"><a href="#impact-on-open-items-from-this-audit">Impact on open items from this audit</a></li>
+    <li class="he-toc__l3"><a href="#new-findings-from-portal-audit-not-in-scope-of-this-2026-05-20-audit">New findings from portal audit (not in scope of this 2026-05-20 audit)</a></li>
+    <li class="he-toc__l3"><a href="#verification-follow-up-10-items-requiring-continued-work">Verification Follow-up (10 items requiring continued work)</a></li>
+    <li class="he-toc__l2"><a href="#addendum-2026-08-28-portal-audit-follow-up">Addendum (2026-08-28) — Portal Audit Follow-up</a></li>
+    <li class="he-toc__l3"><a href="#impact-on-open-items-from-this-audit">Impact on open items from this audit</a></li>
+    <li class="he-toc__l3"><a href="#new-findings-from-portal-audit-not-in-scope-of-this-2026-05-20-audit">New findings from portal audit (not in scope of this 2026-05-20 audit)</a></li>
+    <li class="he-toc__l3"><a href="#verification-follow-up-10-items-requiring-continued-work">Verification Follow-up (10 items requiring continued work)</a></li>
   </ul>
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

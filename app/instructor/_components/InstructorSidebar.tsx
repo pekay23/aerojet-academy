@@ -34,6 +34,7 @@ export default function InstructorSidebar({
     { label: 'Resources', href: '/instructor/resources', icon: FolderOpen },
     { label: 'Teaching Materials', href: '/instructor/materials', icon: FolderOpen },
     { label: 'Students', href: '/instructor/students', icon: Users },
+    { label: 'Exams', href: '/instructor/exams', icon: ClipboardCheck },
     { label: 'My Metrics', href: '/instructor/metrics', icon: LayoutDashboard },
     {
       label: 'Grading',

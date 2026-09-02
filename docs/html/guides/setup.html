@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Setup Guide · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -28,20 +29,47 @@
   <h1 class="he-title">Setup Guide</h1>
   
 </header>
-<section class="he-section" id="prerequisites"><div class="he-section__num">01 · Prerequisites</div><h2 class="he-section__title">Prerequisites</h2>Node.js >= 24.0.0Bun >= 1.0.0 (package manager)PostgreSQL database (Neon recommended)<section class="he-section" id="installation"><div class="he-section__num">02 · Installation</div><h2 class="he-section__title">Installation</h2>git clone <repo-url>
+<section class="he-section" id="prerequisites"><div class="he-section__num">01 · Prerequisites</div><h2 class="he-section__title">Prerequisites</h2></section>
+<ul>
+<li>Node.js &gt;= 24.0.0</li>
+<li>Bun &gt;= 1.0.0 (package manager)</li>
+<li>PostgreSQL database (Neon recommended)</li>
+</ul>
+<section class="he-section" id="installation"><div class="he-section__num">02 · Installation</div><h2 class="he-section__title">Installation</h2></section>
+<pre><code class="language-bash">git clone &lt;repo-url&gt;
 cd aerojet-academy
 bun install
-<section class="he-section" id="environment-configuration"><div class="he-section__num">03 · Environment Configuration</div><h2 class="he-section__title">Environment Configuration</h2>cp .env.example .env.local
-# Edit .env.local with your database URL, API keys, etc.
-<section class="he-section" id="database-setup"><div class="he-section__num">04 · Database Setup</div><h2 class="he-section__title">Database Setup</h2>bun run db:generate    # Generate Prisma client
+</code></pre>
+<section class="he-section" id="environment-configuration"><div class="he-section__num">03 · Environment Configuration</div><h2 class="he-section__title">Environment Configuration</h2></section>
+<pre><code class="language-bash">cp .env.example .env
+# Edit .env with your database URL, API keys, etc.
+</code></pre>
+<section class="he-section" id="database-setup"><div class="he-section__num">04 · Database Setup</div><h2 class="he-section__title">Database Setup</h2></section>
+<pre><code class="language-bash">bun run db:generate    # Generate Prisma client
 bun run db:push        # Push schema to database
 bun run db:seed        # Seed with core system data
 bun run db:seed:mock   # Seed with high-fidelity test data (Pathways, Exams, etc.)
-<section class="he-section" id="development"><div class="he-section__num">05 · Development</div><h2 class="he-section__title">Development</h2>bun dev                # Start dev server (http://localhost:3000)
+</code></pre>
+<section class="he-section" id="development"><div class="he-section__num">05 · Development</div><h2 class="he-section__title">Development</h2></section>
+<pre><code class="language-bash">bun dev                # Start dev server (http://localhost:3000)
 bun run lint           # Run ESLint
 bun run type-check     # TypeScript type checking
-bun test               # Run tests
-<section class="he-section" id="demo-credentials-after-seeding"><div class="he-section__num">06 · Demo Credentials (after seeding)</div><h2 class="he-section__title">Demo Credentials (after seeding)</h2>RoleEmailPasswordSuper Adminadmin@aerojet-academy.comREDACTED_PASSWORDStaffstaff@aerojet-academy.comREDACTED_PASSWORDInstructorinstructor@aerojet-academy.comREDACTED_PASSWORDStudentstudent@aerojet-academy.comREDACTED_PASSWORDApplicantapplicant@example.comREDACTED_PASSWORD
+bun run test           # Run tests (Vitest)
+</code></pre>
+<section class="he-section" id="demo-credentials-after-seeding"><div class="he-section__num">06 · Demo Credentials (after seeding)</div><h2 class="he-section__title">Demo Credentials (after seeding)</h2></section>
+<table>
+<thead>
+<tr><th>Role</th><th>Email</th><th>Password</th></tr>
+</thead>
+<tbody>
+<tr><td>Super Admin</td><td>admin@aerojet-academy.com</td><td>REDACTED_PASSWORD</td></tr>
+<tr><td>Staff</td><td>staff@aerojet-academy.com</td><td>REDACTED_PASSWORD</td></tr>
+<tr><td>Instructor</td><td>instructor@aerojet-academy.com</td><td>REDACTED_PASSWORD</td></tr>
+<tr><td>Student</td><td>student@aerojet-academy.com</td><td>REDACTED_PASSWORD</td></tr>
+<tr><td>Applicant</td><td>applicant@example.com</td><td>REDACTED_PASSWORD</td></tr>
+</tbody>
+</table>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -57,7 +85,7 @@ bun test               # Run tests
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

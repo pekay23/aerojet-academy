@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Security Model · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -28,20 +29,50 @@
   <h1 class="he-title">Security Model</h1>
   
 </header>
-<section class="he-section" id="middleware-chain"><div class="he-section__num">01 · Middleware Chain</div><h2 class="he-section__title">Middleware Chain</h2>Request → middleware.ts
+<section class="he-section" id="middleware-chain"><div class="he-section__num">01 · Middleware Chain</div><h2 class="he-section__title">Middleware Chain</h2></section>
+<pre><code>Request → proxy.ts
   → Check if public route → allow
   → Get JWT token
   → Check account status (SUSPENDED/DEACTIVATED → login)
   → Check mustChangePassword → redirect to change-password
   → Check role matches portal prefix → forbid or allow
-<section class="he-section" id="role-based-access"><div class="he-section__num">02 · Role-Based Access</div><h2 class="he-section__title">Role-Based Access</h2>PortalAllowed Roles/staffSUPER_ADMIN, ADMIN, STAFF/studentSTUDENT/applicantAPPLICANT/instructorINSTRUCTOR<section class="he-section" id="api-security"><div class="he-section__num">03 · API Security</div><h2 class="he-section__title">API Security</h2>All API routes verify session via <code>getServerSession()</code>Staff routes check <code>isStaff(role)</code> or <code>isAdmin(role)</code>Student routes verify <code>user.role === 'STUDENT'</code>Cron routes require <code>Authorization: Bearer ${CRON_SECRET}</code>Webhooks verify signatures (Stripe) or tokens (UploadThing)<section class="he-section" id="pool-join-race-condition-prevention"><div class="he-section__num">04 · Pool Join Race Condition Prevention</div><h2 class="he-section__title">Pool Join Race Condition Prevention</h2>BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-SELECT * FROM "ExamPool" WHERE id = $1 FOR UPDATE;
+</code></pre>
+<section class="he-section" id="role-based-access"><div class="he-section__num">02 · Role-Based Access</div><h2 class="he-section__title">Role-Based Access</h2></section>
+<table>
+<thead>
+<tr><th>Portal</th><th>Allowed Roles</th></tr>
+</thead>
+<tbody>
+<tr><td>/staff</td><td>SUPER_ADMIN, ADMIN, STAFF</td></tr>
+<tr><td>/student</td><td>STUDENT</td></tr>
+<tr><td>/applicant</td><td>APPLICANT</td></tr>
+<tr><td>/instructor</td><td>INSTRUCTOR</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="api-security"><div class="he-section__num">03 · API Security</div><h2 class="he-section__title">API Security</h2></section>
+<ul>
+<li>All API routes verify session via <code>getServerSession()</code></li>
+<li>Staff routes check <code>isStaff(role)</code> or <code>isAdmin(role)</code></li>
+<li>Student routes verify <code>user.role === 'STUDENT'</code></li>
+<li>Cron routes require <code>Authorization: Bearer ${CRON_SECRET}</code></li>
+<li>Webhooks verify signatures (Stripe) or tokens (UploadThing)</li>
+</ul>
+<section class="he-section" id="data-access-convention"><div class="he-section__num">04 · Data Access Convention</div><h2 class="he-section__title">Data Access Convention</h2></section>
+<ul>
+<li>All portal code uses <code>prismaUnfiltered</code> for database queries</li>
+<li>The <code>prisma</code> default export (with RLS/soft-delete extensions) is not used by active portal code</li>
+<li>Row-level ownership is enforced via explicit <code>userId</code> filters in query <code>where</code> clauses, not via PostgreSQL RLS policies</li>
+</ul>
+<section class="he-section" id="pool-join-race-condition-prevention"><div class="he-section__num">05 · Pool Join Race Condition Prevention</div><h2 class="he-section__title">Pool Join Race Condition Prevention</h2></section>
+<pre><code class="language-sql">BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
+SELECT * FROM &quot;ExamPool&quot; WHERE id = $1 FOR UPDATE;
 -- Validate capacity, module diversity, wallet balance
 -- Reserve funds
 -- Create membership
 -- Increment member count atomically
--- Auto-confirm if >= 25
+-- Auto-confirm if &gt;= 25
 COMMIT;
+</code></pre>
 
 </main>
 
@@ -51,12 +82,13 @@ COMMIT;
     <li class="he-toc__l2"><a href="#middleware-chain">Middleware Chain</a></li>
     <li class="he-toc__l2"><a href="#role-based-access">Role-Based Access</a></li>
     <li class="he-toc__l2"><a href="#api-security">API Security</a></li>
+    <li class="he-toc__l2"><a href="#data-access-convention">Data Access Convention</a></li>
     <li class="he-toc__l2"><a href="#pool-join-race-condition-prevention">Pool Join Race Condition Prevention</a></li>
   </ul>
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

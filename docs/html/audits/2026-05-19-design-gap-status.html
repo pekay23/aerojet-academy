@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Design-Gap Audit — Implementation Status · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,12 +27,142 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Design-Gap Audit — Implementation Status</h1>
-  <p class="he-deck"><p>Cross-check of every row in <a href="./design-gap-audit.html">docs/design-gap-audit.html</a> against the codebase as of the latest commit on <code>main</code>.…</p>
-</p>
+  <p class="he-deck">Cross-check of every row in <a href="./design-gap-audit.html">docs/design-gap-audit.html</a> against the codebase as of the latest commit on <code>main</code>.…</p>
 </header>
-Legend: ✅ Done · 🟡 Partial · ⏸️ Deferred (intentionally) · 🔴 Stale (audit
-needs revision).<section class="he-section" id="section-a-staffadmin-portal-post-audit-additions"><div class="he-section__num">01 · Section A — Staff/Admin Portal (post-audit additions)</div><h2 class="he-section__title">Section A — Staff/Admin Portal (post-audit additions)</h2>#Audit itemStatusEvidenceA.1Dashboard alerts + trends + AlertsCenter (.b "Standard")✅<a href="../../lib/analytics/dashboard-alerts.ts">lib/analytics/dashboard-alerts.ts</a>, <a href="../../app/staff/dashboard/_components/AlertsCenter.tsx">app/staff/dashboard/_components/AlertsCenter.tsx</a>; wired in <a href="../../app/staff/dashboard/page.tsx#L209">app/staff/dashboard/page.tsx:209</a> with 60s <code>router.refresh()</code> poll and 5-min <code>unstable_cache</code>. 5 alert checks (overdue payments, overdue DSR, fraud-flagged referrals, expiring bundles, mirror backlog).A.2Role transition wizard + dry-run preview (.c)✅New endpoint <a href="../../app/api/staff/users/%5Bid%5D/role/preview/route.ts">app/api/staff/users/[id]/role/preview/route.ts</a> computes side-effects without mutating. 3-step wizard at <a href="../../app/staff/users/%5Bid%5D/_components/ChangeRoleDialog.tsx">app/staff/users/[id]/_components/ChangeRoleDialog.tsx</a> (select → preview → typed-name confirm). Docs at <a href="../guides/role-transitions.html">docs/role-transitions.md</a>.A.3Cross-class conflict detection matrix (.c)✅<a href="../../lib/scheduling/recurrence.ts">lib/scheduling/recurrence.ts</a> expands recurring classes; <a href="../../lib/scheduling/conflicts.ts">lib/scheduling/conflicts.ts</a> detects instructor + classroom overlaps. UI at <a href="../../app/staff/timetable/conflicts/page.tsx">app/staff/timetable/conflicts/page.tsx</a> with date-range matrix grid + drill-down table. 409 pre-check wired into <a href="../../app/api/staff/classes/route.ts#L71">app/api/staff/classes/route.ts:71</a> (<code>force:true</code> to override).A.4Full GDPR module (.c)✅Models: <code>DataSubjectRequest</code>, <code>RetentionPolicy</code>. Library: <a href="../../lib/gdpr/export.ts">lib/gdpr/export.ts</a> (Art 15), <a href="../../lib/gdpr/anonymise.ts">lib/gdpr/anonymise.ts</a> (Art 17), <a href="../../lib/gdpr/retention.ts">lib/gdpr/retention.ts</a>. UI: <a href="../../app/staff/gdpr/page.tsx">/staff/gdpr</a> queue + <a href="../../app/staff/settings/retention/page.tsx">/staff/settings/retention</a> policy editor. Endpoints: <code>users/[id]/gdpr-export</code>, <code>users/[id]/anonymise</code>, <code>gdpr/requests</code>, <code>settings/retention</code>. Weekly cron at <a href="../../app/api/cron/gdpr-retention/route.ts">app/api/cron/gdpr-retention/route.ts</a> (Mondays 03:00 UTC).A.5Full referrals management (.c)✅Schema adds <code>Referral.fraudScore/fraudReasons/reviewedById/reviewedAt/signupIpHash/signupUaHash</code> + <code>ReferralPayout</code> model + <code>DISQUALIFIED</code> referral status + <code>ReferralStatus</code>/<code>ReferralPayoutStatus</code> enums. Logic in <a href="../../lib/referral/admin.ts">lib/referral/admin.ts</a> (<code>runFraudHeuristics</code>, <code>disqualifyReferral</code>, <code>revokeAmbassador</code>, <code>createPayoutRun</code>, <code>exportPayoutCsv</code>). UI: <a href="../../app/staff/referrals/page.tsx">/staff/referrals</a> (filters + bulk disqualify + fraud column + ambassador revoke) and <a href="../../app/staff/referrals/payouts/page.tsx">/staff/referrals/payouts</a> (queue + CSV export). New <code>MANAGE_REFERRALS</code> permission key.A.6Full RBAC builder (.c)✅Models: <code>Permission</code>, <code>RoleGrant</code>, <code>PermissionScope</code> enum. Registry: <a href="../../lib/auth/permission-registry.ts">lib/auth/permission-registry.ts</a> (cached resolve via <code>unstable_cache</code>, role + user scoping, legacy <code>StaffProfile.permissions</code> fallback). Route bindings: <a href="../../lib/auth/permission-routes.ts">lib/auth/permission-routes.ts</a>. <code>requirePermission(key)</code> rewritten to consult registry — accepts both <code>PERMISSIONS</code> enum and runtime-added custom keys. Admin UI at <a href="../../app/staff/admin/permissions/page.tsx">/staff/admin/permissions</a> with Registry / Grants / Route-bindings tabs. APIs: <code>/api/staff/admin/permissions</code>, <code>/api/staff/admin/permissions/[key]</code>, <code>/api/staff/admin/permissions/grants</code>, <code>/api/staff/admin/permissions/grants/[id]</code>.<section class="he-section" id="section-b-neon-supabase-sync"><div class="he-section__num">02 · Section B — Neon ↔ Supabase sync</div><h2 class="he-section__title">Section B — Neon ↔ Supabase sync</h2>#ItemStatusEvidenceB.3Postgres logical replication (chosen over app dual-write)🟡App-side complete: <code>postdb:push</code> script in <a href="../../package.json#L26">package.json:26</a> auto-mirrors schema; sync-check library + cron at <a href="../../lib/supabase/sync-check.ts">lib/supabase/sync-check.ts</a> + <a href="../../app/api/cron/sync-check/route.ts">app/api/cron/sync-check/route.ts</a> (Mondays 04:00 UTC). Runbook at <a href="../guides/neon-supabase-logical-replication.html">docs/neon-supabase-logical-replication.md</a>. Manual step pending: run the SQL in the runbook on Neon + Supabase (publication + subscription); cannot be done from this environment because it requires DB-admin credentials. The dormant <code>lib/supabase/dual-write.ts</code> and <code>lib/prisma/supabase-sync-extension.ts</code> remain as fallback.<section class="he-section" id="section-c-uploadthing-supabase-storage-mirror"><div class="he-section__num">03 · Section C — UploadThing ↔ Supabase storage mirror</div><h2 class="he-section__title">Section C — UploadThing ↔ Supabase storage mirror</h2>#ItemStatusEvidenceC.1Wire every UT upload through <code>recordFileUpload()</code>✅<a href="../../lib/storage/file-upload-record.ts">lib/storage/file-upload-record.ts</a> inserts a <code>FileUpload</code> row from each <code>onUploadComplete</code> in <a href="../../app/api/uploadthing/core.ts">app/api/uploadthing/core.ts</a>. New fields on <code>FileUpload</code>: <code>route</code>, <code>uploadthingUrl</code>, <code>uploadthingKey</code>, <code>supabasePath</code>, <code>mirroredAt</code>.C.3Nightly reconciliation + 30-day temp sweep✅<a href="../../lib/storage/uploadthing-mirror.ts">lib/storage/uploadthing-mirror.ts</a> (<code>mirrorBatch</code> + <code>sweepTempFolders</code>). Cron at <a href="../../app/api/cron/supabase-mirror/route.ts">app/api/cron/supabase-mirror/route.ts</a> scheduled <code>30 4 * * *</code> in <a href="../../vercel.json">vercel.json</a>.<section class="he-section" id="section-d-nextjs-16-deprecation"><div class="he-section__num">04 · Section D — Next.js 16 deprecation</div><h2 class="he-section__title">Section D — Next.js 16 deprecation</h2>#ItemStatusEvidenceD<code>middleware</code> → <code>proxy</code> rename✅<a href="../../middleware.ts">middleware.ts</a> renamed to <a href="../../proxy.ts">proxy.ts</a>; exported function renamed <code>middleware</code> → <code>proxy</code>. Build output now reports <code>ƒ Proxy (Middleware)</code>. Helpers at <code>lib/auth/middleware-helpers.ts</code> and <code>utils/supabase/middleware.ts</code> are intentionally NOT wired (they're ad-hoc utilities).<section class="he-section" id="section-e-hygiene"><div class="he-section__num">05 · Section E — Hygiene</div><h2 class="he-section__title">Section E — Hygiene</h2>#ItemStatusEvidenceE.1Cross-check doc✅This file.E.2Clean <code>bun run build</code>✅Build exits 0 — <code>✓ Compiled successfully in 86s</code>, 219 pages, no warnings.E.3Tests pass✅<code>bun run test --run</code> — 14 files, 102 tests, all green.E.4Clean <code>bun run type-check</code>✅<code>npx tsc --noEmit</code> exits 0 after fixes (was: 18 errors before this audit; now: 0).<section class="he-section" id="carried-over-from-the-original-42-row-gap-audit"><div class="he-section__num">06 · Carried over from the original 42-row gap audit</div><h2 class="he-section__title">Carried over from the original 42-row gap audit</h2>The earlier session resolved the bulk of the original <code>design-gap-audit.html</code>
-list. The status of every original row is preserved here for completeness.<h3 id="1-exam-pools-bundles">1 — Exam pools / bundles</h3>1a Pool join with bundle: ✅ <a href="../../lib/pools/join.ts">lib/pools/join.ts</a> passes <code>bundleId</code> on booking create.1b Pool list pricing config: ✅ pricing engine <code>lib/pools/pricing-config.ts</code> powers <code>/student/exams</code>.1c Free resit included on bundle: ✅ <a href="../../lib/pools/bundles.ts">lib/pools/bundles.ts</a> seeds <code>freeResitsIncluded</code>; consumed by <code>bookResitExam</code> in <a href="../../lib/enrollment/exams.ts">lib/enrollment/exams.ts</a>.<h3 id="2-exam-sitting-workflow">2 — Exam sitting workflow</h3>2a Sitting → result chain: ✅ already existed pre-audit (engine, fulfillment, scheduler modules).<h3 id="4-student-portal">4 — Student portal</h3>4a/4b Wallet display: ✅ pre-existing.4c Certificate eligibility (pathway/funding/bond rules): ✅ <a href="../../lib/certificates/eligibility.ts">lib/certificates/eligibility.ts</a>; wired into <a href="../../app/student/certificates/page.tsx">/student/certificates</a> and staff <a href="../../app/staff/students/%5Bid%5D/_components/CertificateReleaseControl.tsx">CertificateReleaseControl</a>.4d Bundle/sitting/checklist on booking detail: ✅ <a href="../../app/student/exam-bookings/%5Bid%5D/page.tsx">/student/exam-bookings/[id]</a>.4e Resit booking tab reads real bundle data: ✅ <a href="../../app/student/exams/_components/ResitBookingTab.tsx">ResitBookingTab</a>.4f/4g Wallet transactions scoped to legitimate movements: ✅ <a href="../../app/student/wallet/page.tsx">/student/wallet</a>.<h3 id="5-student-lifecycle">5 — Student lifecycle</h3>5a/g/h/j/k/l (deferred): ⏸️ documented in plan; not in scope.5b Refunds with reason/approval: ✅ <a href="../../lib/refund/actions.ts">lib/refund/actions.ts</a> + <a href="../../app/staff/finance/refunds/page.tsx">/staff/finance/refunds</a>.5c Reconciliation: ✅ pre-existing.5d No GPA (147 facility): ✅ confirmed — no GPA fields anywhere.5e Withdrawal workflow (staff confirm + admin approval): ✅ <a href="../../lib/withdrawal/actions.ts">lib/withdrawal/actions.ts</a> + <a href="../../app/student/withdrawal/page.tsx">/student/withdrawal</a> + <a href="../../app/staff/withdrawals/page.tsx">/staff/withdrawals</a>.5f Bulk ops: ✅ pre-existing.5i Messaging scoped to admin/staff/assigned/current+prev instructor: ✅ <a href="../../app/student/actions.ts">app/student/actions.ts</a> <code>sendMessage</code>.<h3 id="6-grading">6 — Grading</h3>6a Instructor internal CA only; EASA grades by admin/examiner: ✅ <a href="../../prisma/schema.prisma">Grade.category</a> enum + <a href="../../app/api/instructor/classes/%5Bid%5D/grades/route.ts">grades route</a>.6b/c/d Instructor portal additions: ✅ availability, materials, metrics pages added.<h3 id="7-examiner">7 — Examiner</h3>7a Results entry + availability only (suntech-bc.com handles lifecycle): ✅ <a href="../../app/examiner/results/page.tsx">/examiner/results</a> + <a href="../../app/examiner/availability/page.tsx">/examiner/availability</a>.7b Examiner sidebar: ✅ <a href="../../app/examiner/_components/ExaminerSidebar.tsx">ExaminerSidebar</a>.<h3 id="8-admissions">8 — Admissions</h3>8a Toggleable pipeline (full vs simplified): ✅ admin toggle in <a href="../../app/staff/settings/page.tsx">settings page</a> + <a href="../../app/staff/settings/_components/SettingsTabs.tsx">SettingsTabs</a> Admissions tab.8b/8c Pipeline + admissions UIs: ✅ pre-existing (audit was stale).<h3 id="9-attendance">9 — Attendance</h3>9c Admin-configurable threshold vs EASA floor: ✅ <a href="../../lib/attendance.ts">lib/attendance.ts</a> <code>getAttendanceThreshold()</code>.<h3 id="10-payments">10 — Payments</h3>10a Stripe: ⏸️ on hold per business decision. SDK installed, CSP allows js.stripe.com, no integration code.<h3 id="12-part-145-linkage">12 — Part-145 linkage</h3>12 Transfer to linked 145 (not full 145 build): ✅ <a href="../../prisma/schema.prisma">Partner145Organisation</a> + <a href="../../prisma/schema.prisma">Maintenance145Transfer</a> models, <a href="../../lib/part145/actions.ts">lib/part145/actions.ts</a>, <a href="../../app/staff/part-145/page.tsx">/staff/part-145</a>.<h3 id="15-storage">15 — Storage</h3>15b Supabase as structured doc store: ✅ <a href="../../lib/storage/supabase-storage.ts">lib/storage/supabase-storage.ts</a> — bucket taxonomy, signed URLs. Used by Document Vault (<a href="../../app/staff/documents/page.tsx">/staff/documents</a> + <a href="../../app/student/documents/page.tsx">/student/documents</a>) and <a href="../../app/instructor/materials/page.tsx">Teaching Materials</a>. Now extended (this session) with UploadThing↔Supabase mirror — see Section C.<section class="he-section" id="verification-log-this-session"><div class="he-section__num">07 · Verification log (this session)</div><h2 class="he-section__title">Verification log (this session)</h2>CheckResult<code>bun run db:generate</code>✓ Generated Prisma Client (v7.8.0)<code>bun run db:push</code>✓ Database in sync (schema delta applied)<code>bun run type-check</code>✓ exit 0 — 0 errors<code>bun run test --run</code>✓ 14 files / 102 tests pass<code>bun run build</code>✓ Compiled successfully in 86s, 219 pages, <code>Proxy (Middleware)</code> registered
+<p><strong>Legend</strong>: ✅ Done · 🟡 Partial · ⏸️ Deferred (intentionally) · 🔴 Stale (audit
+needs revision).</p>
+<section class="he-section" id="section-a-staffadmin-portal-post-audit-additions"><div class="he-section__num">01 · Section A — Staff/Admin Portal (post-audit additions)</div><h2 class="he-section__title">Section A — Staff/Admin Portal (post-audit additions)</h2></section>
+<table>
+<thead>
+<tr><th>#</th><th>Audit item</th><th>Status</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>A.1</td><td>Dashboard alerts + trends + AlertsCenter (.b &quot;Standard&quot;)</td><td>✅</td><td><a href="../../lib/analytics/dashboard-alerts.ts">lib/analytics/dashboard-alerts.ts</a>, <a href="../../app/staff/dashboard/_components/AlertsCenter.tsx">app/staff/dashboard/_components/AlertsCenter.tsx</a>; wired in <a href="../../app/staff/dashboard/page.tsx#L209">app/staff/dashboard/page.tsx:209</a> with 60s <code>router.refresh()</code> poll and 5-min <code>unstable_cache</code>. 5 alert checks (overdue payments, overdue DSR, fraud-flagged referrals, expiring bundles, mirror backlog).</td></tr>
+<tr><td>A.2</td><td>Role transition wizard + dry-run preview (.c)</td><td>✅</td><td>New endpoint <a href="../../app/api/staff/users/%5Bid%5D/role/preview/route.ts">app/api/staff/users/[id]/role/preview/route.ts</a> computes side-effects without mutating. 3-step wizard at <a href="../../app/staff/users/%5Bid%5D/_components/ChangeRoleDialog.tsx">app/staff/users/[id]/_components/ChangeRoleDialog.tsx</a> (select → preview → typed-name confirm). Docs at <a href="../guides/role-transitions.html">docs/role-transitions.md</a>.</td></tr>
+<tr><td>A.3</td><td>Cross-class conflict detection matrix (.c)</td><td>✅</td><td><a href="../../lib/scheduling/recurrence.ts">lib/scheduling/recurrence.ts</a> expands recurring classes; <a href="../../lib/scheduling/conflicts.ts">lib/scheduling/conflicts.ts</a> detects instructor + classroom overlaps. UI at <a href="../../app/staff/timetable/conflicts/page.tsx">app/staff/timetable/conflicts/page.tsx</a> with date-range matrix grid + drill-down table. 409 pre-check wired into <a href="../../app/api/staff/classes/route.ts#L71">app/api/staff/classes/route.ts:71</a> (<code>force:true</code> to override).</td></tr>
+<tr><td>A.4</td><td>Full GDPR module (.c)</td><td>✅</td><td>Models: <code>DataSubjectRequest</code>, <code>RetentionPolicy</code>. Library: <a href="../../lib/gdpr/export.ts">lib/gdpr/export.ts</a> (Art 15), <a href="../../lib/gdpr/anonymise.ts">lib/gdpr/anonymise.ts</a> (Art 17), <a href="../../lib/gdpr/retention.ts">lib/gdpr/retention.ts</a>. UI: <a href="../../app/staff/gdpr/page.tsx">/staff/gdpr</a> queue + <a href="../../app/staff/settings/retention/page.tsx">/staff/settings/retention</a> policy editor. Endpoints: <code>users/[id]/gdpr-export</code>, <code>users/[id]/anonymise</code>, <code>gdpr/requests</code>, <code>settings/retention</code>. Weekly cron at <a href="../../app/api/cron/gdpr-retention/route.ts">app/api/cron/gdpr-retention/route.ts</a> (Mondays 03:00 UTC).</td></tr>
+<tr><td>A.5</td><td>Full referrals management (.c)</td><td>✅</td><td>Schema adds <code>Referral.fraudScore/fraudReasons/reviewedById/reviewedAt/signupIpHash/signupUaHash</code> + <code>ReferralPayout</code> model + <code>DISQUALIFIED</code> referral status + <code>ReferralStatus</code>/<code>ReferralPayoutStatus</code> enums. Logic in <a href="../../lib/referral/admin.ts">lib/referral/admin.ts</a> (<code>runFraudHeuristics</code>, <code>disqualifyReferral</code>, <code>revokeAmbassador</code>, <code>createPayoutRun</code>, <code>exportPayoutCsv</code>). UI: <a href="../../app/staff/referrals/page.tsx">/staff/referrals</a> (filters + bulk disqualify + fraud column + ambassador revoke) and <a href="../../app/staff/referrals/payouts/page.tsx">/staff/referrals/payouts</a> (queue + CSV export). New <code>MANAGE_REFERRALS</code> permission key.</td></tr>
+<tr><td>A.6</td><td>Full RBAC builder (.c)</td><td>✅</td><td>Models: <code>Permission</code>, <code>RoleGrant</code>, <code>PermissionScope</code> enum. Registry: <a href="../../lib/auth/permission-registry.ts">lib/auth/permission-registry.ts</a> (cached resolve via <code>unstable_cache</code>, role + user scoping, legacy <code>StaffProfile.permissions</code> fallback). Route bindings: <a href="../../lib/auth/permission-routes.ts">lib/auth/permission-routes.ts</a>. <code>requirePermission(key)</code> rewritten to consult registry — accepts both <code>PERMISSIONS</code> enum and runtime-added custom keys. Admin UI at <a href="../../app/staff/admin/permissions/page.tsx">/staff/admin/permissions</a> with Registry / Grants / Route-bindings tabs. APIs: <code>/api/staff/admin/permissions</code>, <code>/api/staff/admin/permissions/[key]</code>, <code>/api/staff/admin/permissions/grants</code>, <code>/api/staff/admin/permissions/grants/[id]</code>.</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="section-b-neon-supabase-sync"><div class="he-section__num">02 · Section B — Neon ↔ Supabase sync</div><h2 class="he-section__title">Section B — Neon ↔ Supabase sync</h2></section>
+<table>
+<thead>
+<tr><th>#</th><th>Item</th><th>Status</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>B.3</td><td>Postgres logical replication (chosen over app dual-write)</td><td>🟡</td><td>App-side complete: <code>postdb:push</code> script in <a href="../../package.json#L26">package.json:26</a> auto-mirrors schema; sync-check library + cron at <a href="../../lib/supabase/sync-check.ts">lib/supabase/sync-check.ts</a> + <a href="../../app/api/cron/sync-check/route.ts">app/api/cron/sync-check/route.ts</a> (Mondays 04:00 UTC). Runbook at <a href="../guides/neon-supabase-logical-replication.html">docs/neon-supabase-logical-replication.md</a>. <strong>Manual step pending</strong>: run the SQL in the runbook on Neon + Supabase (publication + subscription); cannot be done from this environment because it requires DB-admin credentials. The dormant <code>lib/supabase/dual-write.ts</code> and <code>lib/prisma/supabase-sync-extension.ts</code> remain as fallback.</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="section-c-uploadthing-supabase-storage-mirror"><div class="he-section__num">03 · Section C — UploadThing ↔ Supabase storage mirror</div><h2 class="he-section__title">Section C — UploadThing ↔ Supabase storage mirror</h2></section>
+<table>
+<thead>
+<tr><th>#</th><th>Item</th><th>Status</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>C.1</td><td>Wire every UT upload through <code>recordFileUpload()</code></td><td>✅</td><td><a href="../../lib/storage/file-upload-record.ts">lib/storage/file-upload-record.ts</a> inserts a <code>FileUpload</code> row from each <code>onUploadComplete</code> in <a href="../../app/api/uploadthing/core.ts">app/api/uploadthing/core.ts</a>. New fields on <code>FileUpload</code>: <code>route</code>, <code>uploadthingUrl</code>, <code>uploadthingKey</code>, <code>supabasePath</code>, <code>mirroredAt</code>.</td></tr>
+<tr><td>C.3</td><td>Nightly reconciliation + 30-day temp sweep</td><td>✅</td><td><a href="../../lib/storage/uploadthing-mirror.ts">lib/storage/uploadthing-mirror.ts</a> (<code>mirrorBatch</code> + <code>sweepTempFolders</code>). Cron at <a href="../../app/api/cron/supabase-mirror/route.ts">app/api/cron/supabase-mirror/route.ts</a> scheduled <code>30 4 * * *</code> in <a href="../../vercel.json">vercel.json</a>.</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="section-d-nextjs-16-deprecation"><div class="he-section__num">04 · Section D — Next.js 16 deprecation</div><h2 class="he-section__title">Section D — Next.js 16 deprecation</h2></section>
+<table>
+<thead>
+<tr><th>#</th><th>Item</th><th>Status</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>D</td><td><code>middleware</code> → <code>proxy</code> rename</td><td>✅</td><td><a href="../../middleware.ts">middleware.ts</a> renamed to <a href="../../proxy.ts">proxy.ts</a>; exported function renamed <code>middleware</code> → <code>proxy</code>. Build output now reports <code>ƒ Proxy (Middleware)</code>. Helpers at <code>lib/auth/middleware-helpers.ts</code> and <code>utils/supabase/middleware.ts</code> are intentionally NOT wired (they're ad-hoc utilities).</td></tr>
+</tbody>
+</table>
+<section class="he-section" id="section-e-hygiene"><div class="he-section__num">05 · Section E — Hygiene</div><h2 class="he-section__title">Section E — Hygiene</h2></section>
+<table>
+<thead>
+<tr><th>#</th><th>Item</th><th>Status</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>E.1</td><td>Cross-check doc</td><td>✅</td><td>This file.</td></tr>
+<tr><td>E.2</td><td>Clean <code>bun run build</code></td><td>✅</td><td>Build exits 0 — <code>✓ Compiled successfully in 86s</code>, 219 pages, no warnings.</td></tr>
+<tr><td>E.3</td><td>Tests pass</td><td>✅</td><td><code>bun run test --run</code> — 14 files, 102 tests, all green.</td></tr>
+<tr><td>E.4</td><td>Clean <code>bun run type-check</code></td><td>✅</td><td><code>npx tsc --noEmit</code> exits 0 after fixes (was: 18 errors before this audit; now: 0).</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="carried-over-from-the-original-42-row-gap-audit"><div class="he-section__num">06 · Carried over from the original 42-row gap audit</div><h2 class="he-section__title">Carried over from the original 42-row gap audit</h2></section>
+<p>The earlier session resolved the bulk of the original <code>design-gap-audit.html</code>
+list. The status of every original row is preserved here for completeness.</p>
+<h3 id="1-exam-pools-bundles">1 — Exam pools / bundles</h3>
+<ul>
+<li><strong>1a Pool join with bundle</strong>: ✅ <a href="../../lib/pools/join.ts">lib/pools/join.ts</a> passes <code>bundleId</code> on booking create.</li>
+<li><strong>1b Pool list pricing config</strong>: ✅ pricing engine <code>lib/pools/pricing-config.ts</code> powers <code>/student/exams</code>.</li>
+<li><strong>1c Free resit included on bundle</strong>: ✅ <a href="../../lib/pools/bundles.ts">lib/pools/bundles.ts</a> seeds <code>freeResitsIncluded</code>; consumed by <code>bookResitExam</code> in <a href="../../lib/enrollment/exams.ts">lib/enrollment/exams.ts</a>.</li>
+</ul>
+<h3 id="2-exam-sitting-workflow">2 — Exam sitting workflow</h3>
+<ul>
+<li><strong>2a Sitting → result chain</strong>: ✅ already existed pre-audit (engine, fulfillment, scheduler modules).</li>
+</ul>
+<h3 id="4-student-portal">4 — Student portal</h3>
+<ul>
+<li><strong>4a/4b Wallet display</strong>: ✅ pre-existing.</li>
+<li><strong>4c Certificate eligibility (pathway/funding/bond rules)</strong>: ✅ <a href="../../lib/certificates/eligibility.ts">lib/certificates/eligibility.ts</a>; wired into <a href="../../app/student/certificates/page.tsx">/student/certificates</a> and staff <a href="../../app/staff/students/%5Bid%5D/_components/CertificateReleaseControl.tsx">CertificateReleaseControl</a>.</li>
+<li><strong>4d Bundle/sitting/checklist on booking detail</strong>: ✅ <a href="../../app/student/exam-bookings/%5Bid%5D/page.tsx">/student/exam-bookings/[id]</a>.</li>
+<li><strong>4e Resit booking tab reads real bundle data</strong>: ✅ <a href="../../app/student/exams/_components/ResitBookingTab.tsx">ResitBookingTab</a>.</li>
+<li><strong>4f/4g Wallet transactions scoped to legitimate movements</strong>: ✅ <a href="../../app/student/wallet/page.tsx">/student/wallet</a>.</li>
+</ul>
+<h3 id="5-student-lifecycle">5 — Student lifecycle</h3>
+<ul>
+<li><strong>5a/g/h/j/k/l (deferred)</strong>: ⏸️ documented in plan; not in scope.</li>
+<li><strong>5b Refunds with reason/approval</strong>: ✅ <a href="../../lib/refund/actions.ts">lib/refund/actions.ts</a> + <a href="../../app/staff/finance/refunds/page.tsx">/staff/finance/refunds</a>.</li>
+<li><strong>5c Reconciliation</strong>: ✅ pre-existing.</li>
+<li><strong>5d No GPA (147 facility)</strong>: ✅ confirmed — no GPA fields anywhere.</li>
+<li><strong>5e Withdrawal workflow (staff confirm + admin approval)</strong>: ✅ <a href="../../lib/withdrawal/actions.ts">lib/withdrawal/actions.ts</a> + <a href="../../app/student/withdrawal/page.tsx">/student/withdrawal</a> + <a href="../../app/staff/withdrawals/page.tsx">/staff/withdrawals</a>.</li>
+<li><strong>5f Bulk ops</strong>: ✅ pre-existing.</li>
+<li><strong>5i Messaging scoped to admin/staff/assigned/current+prev instructor</strong>: ✅ <a href="../../app/student/actions.ts">app/student/actions.ts</a> <code>sendMessage</code>.</li>
+</ul>
+<h3 id="6-grading">6 — Grading</h3>
+<ul>
+<li><strong>6a Instructor internal CA only; EASA grades by admin/examiner</strong>: ✅ <a href="../../prisma/schema.prisma">Grade.category</a> enum + <a href="../../app/api/instructor/classes/%5Bid%5D/grades/route.ts">grades route</a>.</li>
+<li><strong>6b/c/d Instructor portal additions</strong>: ✅ availability, materials, metrics pages added.</li>
+</ul>
+<h3 id="7-examiner">7 — Examiner</h3>
+<ul>
+<li><strong>7a Results entry + availability only (suntech-bc.com handles lifecycle)</strong>: ✅ <a href="../../app/examiner/results/page.tsx">/examiner/results</a> + <a href="../../app/examiner/availability/page.tsx">/examiner/availability</a>.</li>
+<li><strong>7b Examiner sidebar</strong>: ✅ <a href="../../app/examiner/_components/ExaminerSidebar.tsx">ExaminerSidebar</a>.</li>
+</ul>
+<h3 id="8-admissions">8 — Admissions</h3>
+<ul>
+<li><strong>8a Toggleable pipeline (full vs simplified)</strong>: ✅ admin toggle in <a href="../../app/staff/settings/page.tsx">settings page</a> + <a href="../../app/staff/settings/_components/SettingsTabs.tsx">SettingsTabs</a> Admissions tab.</li>
+<li><strong>8b/8c Pipeline + admissions UIs</strong>: ✅ pre-existing (audit was stale).</li>
+</ul>
+<h3 id="9-attendance">9 — Attendance</h3>
+<ul>
+<li><strong>9c Admin-configurable threshold vs EASA floor</strong>: ✅ <a href="../../lib/attendance.ts">lib/attendance.ts</a> <code>getAttendanceThreshold()</code>.</li>
+</ul>
+<h3 id="10-payments">10 — Payments</h3>
+<ul>
+<li><strong>10a Stripe</strong>: ⏸️ on hold per business decision. SDK installed, CSP allows js.stripe.com, no integration code.</li>
+</ul>
+<h3 id="12-part-145-linkage">12 — Part-145 linkage</h3>
+<ul>
+<li><strong>12 Transfer to linked 145 (not full 145 build)</strong>: ✅ <a href="../../prisma/schema.prisma">Partner145Organisation</a> + <a href="../../prisma/schema.prisma">Maintenance145Transfer</a> models, <a href="../../lib/part145/actions.ts">lib/part145/actions.ts</a>, <a href="../../app/staff/part-145/page.tsx">/staff/part-145</a>.</li>
+</ul>
+<h3 id="15-storage">15 — Storage</h3>
+<ul>
+<li><strong>15b Supabase as structured doc store</strong>: ✅ <a href="../../lib/storage/supabase-storage.ts">lib/storage/supabase-storage.ts</a> — bucket taxonomy, signed URLs. Used by Document Vault (<a href="../../app/staff/documents/page.tsx">/staff/documents</a> + <a href="../../app/student/documents/page.tsx">/student/documents</a>) and <a href="../../app/instructor/materials/page.tsx">Teaching Materials</a>. Now extended (this session) with UploadThing↔Supabase mirror — see Section C.</li>
+</ul>
+<hr />
+<section class="he-section" id="verification-log-this-session"><div class="he-section__num">07 · Verification log (this session)</div><h2 class="he-section__title">Verification log (this session)</h2></section>
+<table>
+<thead>
+<tr><th>Check</th><th>Result</th></tr>
+</thead>
+<tbody>
+<tr><td><code>bun run db:generate</code></td><td>✓ Generated Prisma Client (v7.8.0)</td></tr>
+<tr><td><code>bun run db:push</code></td><td>✓ Database in sync (schema delta applied)</td></tr>
+<tr><td><code>bun run type-check</code></td><td>✓ exit 0 — 0 errors</td></tr>
+<tr><td><code>bun run test --run</code></td><td>✓ 14 files / 102 tests pass</td></tr>
+<tr><td><code>bun run build</code></td><td>✓ Compiled successfully in 86s, 219 pages, <code>Proxy (Middleware)</code> registered</td></tr>
+</tbody>
+</table>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -59,7 +190,7 @@ list. The status of every original row is preserved here for completeness.<h3 id
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

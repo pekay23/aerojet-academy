@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 
 export async function GET() {
   try {
@@ -12,7 +12,7 @@ export async function GET() {
     const userId = session.user.id
 
     const [notifications, messages] = await Promise.all([
-      prisma.notification.findMany({
+      prismaUnfiltered.notification.findMany({
         where: { userId },
         orderBy: { createdAt: 'desc' },
         take: 5,
@@ -26,7 +26,7 @@ export async function GET() {
           linkUrl: true,
         },
       }),
-      prisma.message.findMany({
+      prismaUnfiltered.message.findMany({
         where: { recipientId: userId },
         orderBy: { createdAt: 'desc' },
         take: 5,
