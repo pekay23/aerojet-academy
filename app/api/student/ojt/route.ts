@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireAuth } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, apiCreated, withErrorHandler } from '@/lib/api/response'
 import { z } from 'zod'
@@ -8,13 +8,13 @@ import { z } from 'zod'
 export const GET = withErrorHandler(async () => {
   const user = await requireAuth()
 
-  const studentProfile = await prisma.studentProfile.findUnique({
+  const studentProfile = await prismaUnfiltered.studentProfile.findUnique({
     where: { userId: user.id },
     select: { id: true },
   })
   if (!studentProfile) return apiError('Student profile not found', 404)
 
-  const logbook = await prisma.oJTLogbook.findUnique({
+  const logbook = await prismaUnfiltered.oJTLogbook.findUnique({
     where: { studentProfileId: studentProfile.id },
     include: {
       entries: {
@@ -64,14 +64,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const parsed = signSchema.safeParse(body)
   if (!parsed.success) return apiError('Invalid input')
 
-  const studentProfile = await prisma.studentProfile.findUnique({
+  const studentProfile = await prismaUnfiltered.studentProfile.findUnique({
     where: { userId: user.id },
     select: { id: true },
   })
   if (!studentProfile) return apiError('Student profile not found', 404)
 
   // Verify the entry belongs to this student's logbook
-  const entry = await prisma.oJTLogbookEntry.findUnique({
+  const entry = await prismaUnfiltered.oJTLogbookEntry.findUnique({
     where: { id: parsed.data.entryId },
     include: { logbook: { select: { studentProfileId: true } } },
   })
@@ -79,7 +79,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('Entry not found', 404)
   }
 
-  const updated = await prisma.oJTLogbookEntry.update({
+  const updated = await prismaUnfiltered.oJTLogbookEntry.update({
     where: { id: parsed.data.entryId },
     data: {
       studentSignature: true,

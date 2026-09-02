@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Exam Pooling Refactor Implementation Plan · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +27,760 @@
 <header>
   <p class="he-eyebrow">Plans</p>
   <h1 class="he-title">Exam Pooling Refactor Implementation Plan</h1>
-  <p class="he-deck"><p>This document is the canonical implementation plan for refactoring the Aerojet exam booking system from the current pool-centric model into a demand-driven, scheduling-aware model that matches the updated business rules.</p>
-</p>
+  <p class="he-deck">This document is the canonical implementation plan for refactoring the Aerojet exam booking system from the current pool-centric model into a demand-driven, scheduling-aware model that matches the updated business rules.</p>
 </header>
-<section class="he-section" id="purpose"><div class="he-section__num">01 · Purpose</div><h2 class="he-section__title">Purpose</h2>This document is the canonical implementation plan for refactoring the Aerojet exam booking system from the current pool-centric model into a demand-driven, scheduling-aware model that matches the updated business rules.It is written for engineers and AI agents working in this repository so implementation can proceed consistently without re-interpreting the business logic from scratch.<section class="he-section" id="why-this-refactor-is-needed"><div class="he-section__num">02 · Why This Refactor Is Needed</div><h2 class="he-section__title">Why This Refactor Is Needed</h2>The current implementation mixes three different concerns into the same structures:Public demand collectionCommercial booking/guarantee logicFinal exam delivery schedulingThat coupling was acceptable for the first-generation model where a pool was treated as the final exam sitting, but it is not sufficient for the current operational requirement.The updated business model requires:visible public demand across all booking typesrolling pool creation and overflow handlingbundle commitments that survive partial pool failureevent-level viability instead of isolated pool failuresupport for candidates writing multiple modules across multiple sessions and daysone examiner for now, with future support for multiple examiners running parallel sittings<section class="he-section" id="current-repo-reality"><div class="he-section__num">03 · Current Repo Reality</div><h2 class="he-section__title">Current Repo Reality</h2><h3 id="current-intent-in-docs">Current Intent in Docs</h3>The source documentation already establishes most of the first-generation business model:a pool is a single exam sittinga candidate takes one module per pooleach pool supports up to 4 distinct moduleseach pool targets 25-28 candidatesevent Go/No-Go is based on aggregate thresholds across booking typesconfirmed bookings can roll forward when the event is postponedRelevant sources:<code>aerojet master/AEROJET_Pooling_System_Complete_Technical_Spec (1).md</code><code>aerojet master/AEROJET_MASTER_PACK_COMPLETE.md</code><code>text_output.txt</code><h3 id="current-live-implementation">Current Live Implementation</h3>The codebase diverges from the written model in important ways:<code>ExamPool</code> is still both demand container and final timed sitting<code>PoolMembership</code> enforces one membership per user per poolpool joining rejects a 5th distinct module instead of routing it into the next poolevent Go/No-Go logic still evaluates weak pools too aggressively and independentlypublic pool visibility does not yet reflect total demand across all booking typesgroup charters and individual bookings are not integrated into a unified demand layerRelevant files:<code>prisma/schema.prisma</code><code>lib/pools/join.ts</code><code>lib/pools/validation.ts</code><code>lib/pools/auto-pool.ts</code><code>lib/pools/group-booking.ts</code><code>lib/events/go-no-go.ts</code><code>app/api/cron/check-pools/route.ts</code><code>app/api/applicant/exam-only/book-exam/route.ts</code><code>app/student/exams/_components/AvailablePoolsTab.tsx</code><section class="he-section" id="updated-business-rules"><div class="he-section__num">04 · Updated Business Rules</div><h2 class="he-section__title">Updated Business Rules</h2>This section defines the target behavior to implement.<h3 id="1-pool-filling-rules">1. Pool Filling Rules</h3>A pool can hold a maximum of 28 candidate seats.A pool can contain a maximum of 4 distinct modules.New modules can continue to be introduced into a pool until 4 distinct modules are present.Once a pool has 4 distinct modules:more students for those same 4 modules may still joina candidate for a 5th distinct module must be routed into another poolWhen a pool reaches 28 candidate seats:no more candidates can join that pooloverflow must be routed into the next eligible poolThis process repeats until all candidates and all requested modules are accommodated.<h3 id="2-pool-selection-rules">2. Pool Selection Rules</h3>For each booking that needs pool placement:Prefer an existing open pool in the event that already contains the requested module and still has capacity.Otherwise prefer the earliest open pool with fewer than 4 distinct modules and capacity.Otherwise create the next pool and assign the booking there.This is the required behavior for both normal pool booking and bundle-driven pool assignment.<h3 id="3-demand-visibility-rules">3. Demand Visibility Rules</h3>Pool/status visibility must represent total real demand, not just standard pooled seats.Demand shown to users should include:pooled bookingsindividual bookingscompany/group bookingsbundle-derived module bookingseligible resit seat demand if it contributes to the eventThis visibility is intentional. It helps external candidates and partner institutions see whether an exam window is becoming viable and encourages faster commitment.<h3 id="4-event-viability-rules">4. Event Viability Rules</h3>Event viability must be determined at event level, not by independently failing every weak pool.The event should be considered viable when aggregate demand/economics meet business thresholds. Those thresholds may include:total confirmed paid seatstotal confirmed revenuenumber of viable poolsmanual operational overrideIf the examiner is already coming because the event is viable overall, weaker pools or underfilled sessions may still be allowed to run.<h3 id="5-underfilled-pool-and-session-rules">5. Underfilled Pool and Session Rules</h3>If the event is viable and the examiner trip is confirmed:an underfilled pool does not have to fail automaticallythe underfilled pool may still be scheduled and deliveredspare seats may be backfilled with:resitslate individual bookingsstaff/manual assignmentsThis is especially important when stronger pools or other booking types already make the event economically viable.<h3 id="6-bundle-rules">6. Bundle Rules</h3>Bundles represent guaranteed, paid entitlements to module attempts.a twin bundle creates two guaranteed module demandsa four-seat bundle creates four guaranteed module demandsthose module bookings may land in different poolsif one bundled module executes and another does not:the executed module is consumedthe unexecuted module remains owedthe unexecuted module must roll forward automatically into the next exam window at no extra costBundle logic must not treat all seats in a bundle as all-or-nothing.<h3 id="7-individual-and-company-booking-rules">7. Individual and Company Booking Rules</h3>Individual and company bookings must contribute to visible demand and viability calculations.However, their guarantees differ:<code>INDIVIDUAL</code> bookings are guaranteed seats<code>COMPANY</code> / <code>GROUP_CHARTER</code> bookings are commercially committed demand and should also be treated as guaranteed or contract-backed demandpool bookings are flexible demand until the event and final sittings are confirmed<h3 id="8-candidate-daily-scheduling-rules">8. Candidate Daily Scheduling Rules</h3>Candidates can write multiple exams within the same event window, but final scheduling must respect:per-day maximum of 2 or 3 separate exams depending on duration and session layoutno overlapping assignmentsrealistic examiner/session timingmodule duration differencesThis means scheduling can no longer be represented correctly by pool time alone.<h3 id="9-examiner-rules">9. Examiner Rules</h3>For now:there is one active examinerthe examiner can only supervise one sitting at a timeFuture support must allow:multiple examinersparallel sittingsexaminer conflict detectionThe schema and services should be future-ready now even if the initial implementation uses only one examiner.<h3 id="10-financial-and-registration-integrity-rules">10. Financial and Registration Integrity Rules</h3>To maintain absolute data and financial integrity, the following rules must be enforced during any booking or pool assignment operation:Wallet Pre-check: No <code>PoolMembership</code> or <code>ExamBooking</code> can be created or updated without a mandatory verification of the user's wallet balance.Fund Reservation:If the wallet balance is sufficient (>= exam/module cost), the funds must be moved from <code>availableBalance</code> to <code>reservedBalance</code>.The <code>ExamBooking</code> status must be set to <code>APPROVED</code> and <code>demandStatus</code> to <code>POOLED</code>.The <code>PoolMembership</code> record must include the <code>amountReserved</code>.Intended Demand Handling:If a student has insufficient funds, they must not occupy a seat in a pool (<code>PoolMembership</code>).Instead, their interest should be tracked as "Intended Demand" (using <code>PoolWaitlist</code> or a non-seating metadata layer) without a financial <code>ExamBooking</code> record.Pathway Enforcement:Specific student groups (e.g., Ghana Airforce officers) must have their <code>programmeChoice</code> explicitly set to <code>EXAM_ONLY</code> in their <code>StudentProfile</code>.Registration flows must validate this pathway before allowing exam-only bookings.Atomic Linking:Every pool membership must be explicitly linked to:a valid <code>ExamPool</code>a specific <code>ExamComponent</code> (module)a confirmed <code>ExamBooking</code> (if paid/reserved)Ghost memberships (unlinked or un-reserved) are strictly prohibited in the live pools.The refactor should separate the domain into four clear layers.<h3 id="a-demand-layer">A. Demand Layer</h3>Purpose:collect and expose all exam demand across booking typespower public/student/staff visibilitypower viability calculationsPrimary concepts:event demandmodule demandguaranteed vs flexible demandpool grouping for public consumption<h3 id="b-pooling-layer">B. Pooling Layer</h3>Purpose:organize demand into public-facing pool bucketsenforce max 28 seats and max 4 distinct modulesapply rolling overflow behaviorImportant note:Pools should no longer be the final delivery-time source of truth.<h3 id="c-scheduling-layer">C. Scheduling Layer</h3>Purpose:create real exam sittingsassign bookings into timed sessionsenforce candidate, room, and examiner constraintsThis is where delivery actually happens.<h3 id="d-fulfillment-layer">D. Fulfillment Layer</h3>Purpose:track whether a paid seat has been executed, rolled forward, or remains pendingpreserve individual, company, and bundle guaranteessupport accurate attendance and exam record history<section class="he-section" id="required-data-model-changes"><div class="he-section__num">05 · Required Data Model Changes</div><h2 class="he-section__title">Required Data Model Changes</h2>These schema changes define the target model.<h3 id="1-extend-examevent">1. Extend <code>ExamEvent</code></h3>Add event-level viability fields so the event can be assessed on more than a single revenue number.Suggested additions:<code>minCandidateTarget</code><code>minSeatVolumeTarget</code><code>minRevenueTarget</code> (already exists)<code>viabilityMode</code><code>isExaminerConfirmed</code><code>confirmedExaminerCount</code>Suggested enum:<code>EventViabilityMode</code><code>CANDIDATE_COUNT</code><code>SEAT_VOLUME</code><code>REVENUE</code><code>HYBRID</code><h3 id="2-keep-but-reframe-exampool">2. Keep but Reframe <code>ExamPool</code></h3><code>ExamPool</code> should remain but its role changes.It becomes:a public demand bucketa rolling capacity and module-diversity containeran operational grouping mechanismIt should stop being treated as the ultimate delivery schedule record.Suggested additions:<code>poolNumber</code><code>isPublicVisible</code><code>totalDemandSeats</code><code>guaranteedSeats</code>Notes:keep existing timing fields during migration for compatibilitydo not treat pool time as final truth once <code>ExamSitting</code> exists<h3 id="3-add-examiner">3. Add <code>Examiner</code></h3>Create an explicit model for the examiner.Suggested fields:<code>userId</code><code>isActive</code><code>maxParallelSittings</code><code>notes</code><h3 id="4-add-examsitting">4. Add <code>ExamSitting</code></h3>This becomes the real scheduled delivery slot.Each sitting should represent:one eventone moduleone day/sessionone time blockone examiner assignmentone capacity valueSuggested fields:<code>eventId</code><code>examinerId</code><code>examComponentId</code><code>dayNumber</code><code>sessionType</code><code>startTime</code><code>endTime</code><code>capacity</code><code>reservedSeats</code><code>confirmedSeats</code><code>status</code><code>venue</code><code>notes</code>Suggested enums:<code>SessionType</code><code>MORNING</code><code>AFTERNOON</code><code>EVENING</code><code>SittingStatus</code><code>DRAFT</code><code>OPEN</code><code>SCHEDULED</code><code>CONFIRMED</code><code>COMPLETED</code><code>POSTPONED</code><code>CANCELLED</code><h3 id="5-add-examsittingassignment">5. Add <code>ExamSittingAssignment</code></h3>This links a booking to a real sitting.Suggested fields:<code>sittingId</code><code>bookingId</code><code>userId</code><code>status</code><code>attendanceStatus</code><code>assignedAt</code><code>assignedBy</code>Suggested enum:<code>SittingAssignmentStatus</code><code>ASSIGNED</code><code>CONFIRMED</code><code>ATTENDED</code><code>ABSENT</code><code>EXCUSED</code><code>ROLLED_FORWARD</code><code>CANCELLED</code><h3 id="6-extend-exambooking">6. Extend <code>ExamBooking</code></h3><code>ExamBooking</code> remains the financial and student-facing unit, one row per module attempt.Add fields for guarantee and fulfillment behavior:<code>guaranteeType</code><code>demandStatus</code><code>preferredSessionType</code><code>guaranteedSeat</code><code>executedAt</code><code>rolloverFromBookingId</code><code>rolloverToEventId</code>Suggested enums:<code>BookingGuaranteeType</code><code>POOL_FLEX</code><code>INDIVIDUAL_GUARANTEED</code><code>COMPANY_GUARANTEED</code><code>BUNDLE_GUARANTEED</code><code>BookingDemandStatus</code><code>DEMAND_CAPTURED</code><code>POOLED</code><code>SCHEDULED</code><code>EXECUTED</code><code>ROLLED_FORWARD</code><code>POSTPONED</code><code>CANCELLED</code><h3 id="7-evolve-bookingentitlement">7. Evolve <code>BookingEntitlement</code></h3><code>BookingEntitlement</code> already exists and currently tracks free resits per booking group.That is not enough for the new model.It must either be:extended into a full fulfillment-tracking model, orsupplemented by a new guaranteed-demand modelNeeded behavior:track whether a paid module attempt is still oweddistinguish executed vs pending vs rolled-forward module obligationssupport bundle-level and possibly company-level fulfillment grouping<h3 id="8-extend-examattendance">8. Extend <code>ExamAttendance</code></h3>Attendance must eventually be linked to the sitting assignment or at least sitting itself.Current attendance is still tied mainly to booking/membership context.Add:<code>sittingId</code>Then progressively move attendance flows to use sitting-aware logic.<section class="he-section" id="service-layer-refactor"><div class="he-section__num">06 · Service Layer Refactor</div><h2 class="he-section__title">Service Layer Refactor</h2>Create or refactor services in a way that preserves clean domain boundaries.<h3 id="1-libexamsdemandts">1. <code>lib/exams/demand.ts</code></h3>Responsibilities:aggregate visible demand for an eventinclude all booking typesgroup demand by modulecompute guaranteed vs flexible demandcompute total seat volumefeed public/student/staff demand dashboards<h3 id="2-libpoolsassignmentts">2. <code>lib/pools/assignment.ts</code></h3>Responsibilities:implement rolling pool selectionprefer same-module pool reuseprefer partially filled pools before creating new onesauto-create next pool when neededThis should replace the current hard-reject behavior for a 5th distinct module.<h3 id="3-libexamsviabilityts">3. <code>lib/exams/viability.ts</code></h3>Responsibilities:evaluate event-level viabilitycalculate candidate, revenue, and seat-volume thresholdsdetermine whether underfilled pools/sittings may still runcentralize manual override handlingThis should become the new authoritative replacement for the current pool-centric Go/No-Go assumptions.<h3 id="4-libexamsschedulerts">4. <code>lib/exams/scheduler.ts</code></h3>Responsibilities:build real sittings from demandassign bookings into sittingscluster same-module demand where possibleenforce no-overlap and daily-limit rulesenforce examiner availability<h3 id="5-libexamsrollforwardts">5. <code>lib/exams/rollforward.ts</code></h3>Responsibilities:detect paid bookings not executed in the current windowmove them into the next event/windowpreserve payment linkagemark fulfillment correctly<h3 id="6-libexamsresitsts">6. <code>lib/exams/resits.ts</code></h3>Responsibilities:backfill spare sitting capacity with resitsrespect eligibility and scheduling constraintsensure resit outcomes update exam history correctly<section class="he-section" id="required-behavioral-changes-in-existing-logic"><div class="he-section__num">07 · Required Behavioral Changes in Existing Logic</div><h2 class="he-section__title">Required Behavioral Changes in Existing Logic</h2>This section describes the most important code changes relative to the current implementation.<h3 id="1-replace-reject-5th-module-with-route-to-next-pool">1. Replace “Reject 5th Module” With “Route to Next Pool”</h3>Current behavior in validation and join logic:if the pool already has 4 distinct modulesand the candidate requests a new modulereject the joinTarget behavior:search for the next eligible poolif found, route thereif not found, create one and route there<h3 id="2-stop-failing-pools-in-isolation-at-t-21">2. Stop Failing Pools in Isolation at T-21</h3>Current behavior:weak pools are failed independently at T-21cron logic releases their funds even if the event may still be worth runningTarget behavior:evaluate event viability firstif event is viable, weak pools may still become real sittings or be merged/scheduled differentlyif event is not viable, then roll forward or release based on guarantee type<h3 id="3-integrate-individual-and-company-bookings-into-demand">3. Integrate Individual and Company Bookings Into Demand</h3>Current behavior:individual bookings largely bypass pool demandgroup charter creates a dedicated pool but not a complete seat-level demand modelTarget behavior:all demand counts into the same event-level visibility and viability model<h3 id="4-split-timing-off-of-pools">4. Split Timing Off of Pools</h3>Current behavior:pool date/time is treated as final scheduleTarget behavior:pool is for demand organizationsitting is for actual schedule and attendance<h3 id="5-bundle-modules-must-be-fulfilled-independently">5. Bundle Modules Must Be Fulfilled Independently</h3>Current behavior:bundles create multiple bookings, but the system does not yet fully model partial execution and guaranteed carry-forwardTarget behavior:each module in the bundle becomes its own fulfillment obligationunexecuted paid modules roll forward automatically<section class="he-section" id="ui-and-api-impact"><div class="he-section__num">08 · UI and API Impact</div><h2 class="he-section__title">UI and API Impact</h2><h3 id="student-portal">Student Portal</h3>Update student exam views to show:event-level demandpool demand compositionbooking guarantee statussitting assignment when scheduledroll-forward state if a paid module is deferredKey areas:<code>app/student/exams/*</code><code>app/student/exam-bookings/*</code><h3 id="staff-portal">Staff Portal</h3>Update staff exam management to show:event demand dashboardpool compositionmodule demand heatmapviability indicatorssitting plannerexaminer allocationresit backfill opportunitiesKey areas:<code>app/staff/exams/*</code><code>app/staff/_components/GoNoGoMeter.tsx</code><h3 id="public-registered-demand-visibility">Public / Registered Demand Visibility</h3>Registered modular and exam-only users should be able to see meaningful progress indicators:seat demandmodule demand mixwhether an event window is likely to proceedDo not expose:named candidatessensitive company financial details<section class="he-section" id="migration-strategy"><div class="he-section__num">09 · Migration Strategy</div><h2 class="he-section__title">Migration Strategy</h2>The refactor should be staged carefully to avoid breaking wallet, ledger, and existing booking flows.<h3 id="phase-1-schema-foundation">Phase 1: Schema Foundation</h3>Goals:add new models and fields without changing runtime behavior yetDeliverables:<code>Examiner</code><code>ExamSitting</code><code>ExamSittingAssignment</code>extended <code>ExamEvent</code>extended <code>ExamBooking</code>extended <code>ExamAttendance</code>upgraded fulfillment / entitlement structure<h3 id="phase-2-unified-demand-read-model">Phase 2: Unified Demand Read Model</h3>Goals:compute accurate demand without changing write paths yetDeliverables:<code>lib/exams/demand.ts</code>updated staff/student/public read modelsdemand views that include all booking types<h3 id="phase-3-pool-assignment-rewrite">Phase 3: Pool Assignment Rewrite</h3>Goals:replace hard-reject logic with rolling pool assignmentDeliverables:new <code>lib/pools/assignment.ts</code>refactor <code>lib/pools/join.ts</code>refactor applicant and student exam-booking entry points<h3 id="phase-4-event-level-viability">Phase 4: Event-Level Viability</h3>Goals:replace current pool-centric Go/No-GoDeliverables:<code>lib/exams/viability.ts</code>refactor <code>lib/events/go-no-go.ts</code>refactor <code>app/api/cron/check-pools/route.ts</code>possibly split pool check and event check responsibilities more cleanly<h3 id="phase-5-scheduler">Phase 5: Scheduler</h3>Goals:introduce real sittings and sitting assignmentDeliverables:<code>lib/exams/scheduler.ts</code>staff scheduling interfacessitting assignment logic<h3 id="phase-6-attendance-and-records">Phase 6: Attendance and Records</h3>Goals:make attendance and exam records sitting-awareDeliverables:sitting-aware attendance writesexam record rendering updated to show correct status per module sitting<h3 id="phase-7-legacy-pool-timing-deprecation">Phase 7: Legacy Pool Timing Deprecation</h3>Goals:stop using pool datetime as delivery truthDeliverables:pool datetime retained only for compatibility or eventually removed from critical logic<section class="he-section" id="acceptance-criteria"><div class="he-section__num">10 · Acceptance Criteria</div><h2 class="he-section__title">Acceptance Criteria</h2>The refactor is only considered complete when all of the following are true.<h3 id="demand-visibility">Demand Visibility</h3>all active booking types contribute to visible demandusers can see actual demand progression for an event<h3 id="pool-assignment">Pool Assignment</h3>a 5th distinct module never hard-fails if another pool can be created or reusedpools fill progressivelysame-module grouping is preferredoverflow creates new pools automatically<h3 id="viability">Viability</h3>weak pools are not failed independently if overall event viability is already satisfiedevent viability is calculated from aggregate booking demand<h3 id="bundles">Bundles</h3>every bundle module is represented as a separate module attemptbundle modules may land in different pools/sittingsunexecuted paid modules roll forward automatically<h3 id="scheduling">Scheduling</h3>one examiner cannot be double-bookedcandidates cannot be assigned to overlapping sittingsper-day candidate exam limits are enforcedmodule clustering is preferred where feasible<h3 id="attendance-and-records">Attendance and Records</h3>each executed module sitting can produce independent attendance and result dataresits can use spare seats and still update records correctly<section class="he-section" id="primary-files-likely-to-change"><div class="he-section__num">11 · Primary Files Likely To Change</div><h2 class="he-section__title">Primary Files Likely To Change</h2>The highest-impact files/modules for this refactor are:<code>prisma/schema.prisma</code><code>lib/pools/join.ts</code><code>lib/pools/validation.ts</code><code>lib/pools/auto-pool.ts</code><code>lib/pools/group-booking.ts</code><code>lib/pools/operations.ts</code><code>lib/events/go-no-go.ts</code><code>app/api/cron/check-pools/route.ts</code><code>app/api/applicant/exam-only/book-exam/route.ts</code><code>app/api/applicant/exam-only/join-pool/route.ts</code><code>app/student/actions.ts</code><code>app/student/exams/_components/AvailablePoolsTab.tsx</code><code>app/staff/exams/page.tsx</code><code>lib/exams/attendance.ts</code>New planned modules:<code>lib/exams/demand.ts</code><code>lib/exams/viability.ts</code><code>lib/exams/scheduler.ts</code><code>lib/exams/rollforward.ts</code><code>lib/exams/resits.ts</code><code>lib/pools/assignment.ts</code><section class="he-section" id="implementation-order-recommendation"><div class="he-section__num">12 · Implementation Order Recommendation</div><h2 class="he-section__title">Implementation Order Recommendation</h2>The recommended engineering order is:Schema foundationUnified demand read layerRolling pool assignmentEvent-level viability logicSitting schedulerAttendance and exam record migrationLegacy pool-time deprecationDo not begin with UI-first changes. The domain split between demand, pooling, scheduling, and fulfillment must be established before extensive surface-level work.<section class="he-section" id="final-guiding-principle"><div class="he-section__num">13 · Final Guiding Principle</div><h2 class="he-section__title">Final Guiding Principle</h2>The current system should evolve from:<code>Pool = the exam sitting</code>to:<code>Pool = demand grouping</code><code>Sitting = actual scheduled delivery</code><code>Booking = financial / student-facing attempt</code><code>Fulfillment = whether a paid module has actually been delivered or rolled forward</code>That domain separation is the key design requirement that makes the rest of the updated business rules implementable without brittle workarounds.
+<section class="he-section" id="purpose"><div class="he-section__num">01 · Purpose</div><h2 class="he-section__title">Purpose</h2></section>
+<p>This document is the canonical implementation plan for refactoring the Aerojet exam booking system from the current pool-centric model into a demand-driven, scheduling-aware model that matches the updated business rules.</p>
+<p>It is written for engineers and AI agents working in this repository so implementation can proceed consistently without re-interpreting the business logic from scratch.</p>
+<section class="he-section" id="why-this-refactor-is-needed"><div class="he-section__num">02 · Why This Refactor Is Needed</div><h2 class="he-section__title">Why This Refactor Is Needed</h2></section>
+<p>The current implementation mixes three different concerns into the same structures:</p>
+<ol>
+<li>Public demand collection</li>
+<li>Commercial booking/guarantee logic</li>
+<li>Final exam delivery scheduling</li>
+</ol>
+<p>That coupling was acceptable for the first-generation model where a pool was treated as the final exam sitting, but it is not sufficient for the current operational requirement.</p>
+<p>The updated business model requires:</p>
+<ul>
+<li>visible public demand across all booking types</li>
+<li>rolling pool creation and overflow handling</li>
+<li>bundle commitments that survive partial pool failure</li>
+<li>event-level viability instead of isolated pool failure</li>
+<li>support for candidates writing multiple modules across multiple sessions and days</li>
+<li>one examiner for now, with future support for multiple examiners running parallel sittings</li>
+</ul>
+<section class="he-section" id="current-repo-reality"><div class="he-section__num">03 · Current Repo Reality</div><h2 class="he-section__title">Current Repo Reality</h2></section>
+<h3 id="current-intent-in-docs">Current Intent in Docs</h3>
+<p>The source documentation already establishes most of the first-generation business model:</p>
+<ul>
+<li>a pool is a single exam sitting</li>
+<li>a candidate takes one module per pool</li>
+<li>each pool supports up to 4 distinct modules</li>
+<li>each pool targets 25-28 candidates</li>
+<li>event Go/No-Go is based on aggregate thresholds across booking types</li>
+<li>confirmed bookings can roll forward when the event is postponed</li>
+</ul>
+<p>Relevant sources:</p>
+<ul>
+<li><code>aerojet master/AEROJET_Pooling_System_Complete_Technical_Spec (1).md</code></li>
+<li><code>aerojet master/AEROJET_MASTER_PACK_COMPLETE.md</code></li>
+<li><code>text_output.txt</code></li>
+</ul>
+<h3 id="current-live-implementation">Current Live Implementation</h3>
+<p>The codebase diverges from the written model in important ways:</p>
+<ul>
+<li><code>ExamPool</code> is still both demand container and final timed sitting</li>
+<li><code>PoolMembership</code> enforces one membership per user per pool</li>
+<li>pool joining rejects a 5th distinct module instead of routing it into the next pool</li>
+<li>event Go/No-Go logic still evaluates weak pools too aggressively and independently</li>
+<li>public pool visibility does not yet reflect total demand across all booking types</li>
+<li>group charters and individual bookings are not integrated into a unified demand layer</li>
+</ul>
+<p>Relevant files:</p>
+<ul>
+<li><code>prisma/schema.prisma</code></li>
+<li><code>lib/pools/join.ts</code></li>
+<li><code>lib/pools/validation.ts</code></li>
+<li><code>lib/pools/auto-pool.ts</code></li>
+<li><code>lib/pools/group-booking.ts</code></li>
+<li><code>lib/events/go-no-go.ts</code></li>
+<li><code>app/api/cron/check-pools/route.ts</code></li>
+<li><code>app/api/applicant/exam-only/book-exam/route.ts</code></li>
+<li><code>app/student/exams/_components/AvailablePoolsTab.tsx</code></li>
+</ul>
+<section class="he-section" id="updated-business-rules"><div class="he-section__num">04 · Updated Business Rules</div><h2 class="he-section__title">Updated Business Rules</h2></section>
+<p>This section defines the target behavior to implement.</p>
+<h3 id="1-pool-filling-rules">1. Pool Filling Rules</h3>
+<ul>
+<li>A pool can hold a maximum of 28 candidate seats.</li>
+<li>A pool can contain a maximum of 4 distinct modules.</li>
+<li>New modules can continue to be introduced into a pool until 4 distinct modules are present.</li>
+<li>Once a pool has 4 distinct modules:
+<ul>
+<li>more students for those same 4 modules may still join</li>
+<li>a candidate for a 5th distinct module must be routed into another pool</li>
+</ul>
+</li>
+<li>When a pool reaches 28 candidate seats:
+<ul>
+<li>no more candidates can join that pool</li>
+<li>overflow must be routed into the next eligible pool</li>
+</ul>
+</li>
+<li>This process repeats until all candidates and all requested modules are accommodated.</li>
+</ul>
+<h3 id="2-pool-selection-rules">2. Pool Selection Rules</h3>
+<p>For each booking that needs pool placement:</p>
+<ol>
+<li>Prefer an existing open pool in the event that already contains the requested module and still has capacity.</li>
+<li>Otherwise prefer the earliest open pool with fewer than 4 distinct modules and capacity.</li>
+<li>Otherwise create the next pool and assign the booking there.</li>
+</ol>
+<p>This is the required behavior for both normal pool booking and bundle-driven pool assignment.</p>
+<h3 id="3-demand-visibility-rules">3. Demand Visibility Rules</h3>
+<p>Pool/status visibility must represent total real demand, not just standard pooled seats.</p>
+<p>Demand shown to users should include:</p>
+<ul>
+<li>pooled bookings</li>
+<li>individual bookings</li>
+<li>company/group bookings</li>
+<li>bundle-derived module bookings</li>
+<li>eligible resit seat demand if it contributes to the event</li>
+</ul>
+<p>This visibility is intentional. It helps external candidates and partner institutions see whether an exam window is becoming viable and encourages faster commitment.</p>
+<h3 id="4-event-viability-rules">4. Event Viability Rules</h3>
+<p>Event viability must be determined at event level, not by independently failing every weak pool.</p>
+<p>The event should be considered viable when aggregate demand/economics meet business thresholds. Those thresholds may include:</p>
+<ul>
+<li>total confirmed paid seats</li>
+<li>total confirmed revenue</li>
+<li>number of viable pools</li>
+<li>manual operational override</li>
+</ul>
+<p>If the examiner is already coming because the event is viable overall, weaker pools or underfilled sessions may still be allowed to run.</p>
+<h3 id="5-underfilled-pool-and-session-rules">5. Underfilled Pool and Session Rules</h3>
+<p>If the event is viable and the examiner trip is confirmed:</p>
+<ul>
+<li>an underfilled pool does not have to fail automatically</li>
+<li>the underfilled pool may still be scheduled and delivered</li>
+<li>spare seats may be backfilled with:
+<ul>
+<li>resits</li>
+<li>late individual bookings</li>
+<li>staff/manual assignments</li>
+</ul>
+</li>
+</ul>
+<p>This is especially important when stronger pools or other booking types already make the event economically viable.</p>
+<h3 id="6-bundle-rules">6. Bundle Rules</h3>
+<p>Bundles represent guaranteed, paid entitlements to module attempts.</p>
+<ul>
+<li>a twin bundle creates two guaranteed module demands</li>
+<li>a four-seat bundle creates four guaranteed module demands</li>
+<li>those module bookings may land in different pools</li>
+<li>if one bundled module executes and another does not:
+<ul>
+<li>the executed module is consumed</li>
+<li>the unexecuted module remains owed</li>
+<li>the unexecuted module must roll forward automatically into the next exam window at no extra cost</li>
+</ul>
+</li>
+</ul>
+<p>Bundle logic must not treat all seats in a bundle as all-or-nothing.</p>
+<h3 id="7-individual-and-company-booking-rules">7. Individual and Company Booking Rules</h3>
+<p>Individual and company bookings must contribute to visible demand and viability calculations.</p>
+<p>However, their guarantees differ:</p>
+<ul>
+<li><code>INDIVIDUAL</code> bookings are guaranteed seats</li>
+<li><code>COMPANY</code> / <code>GROUP_CHARTER</code> bookings are commercially committed demand and should also be treated as guaranteed or contract-backed demand</li>
+<li>pool bookings are flexible demand until the event and final sittings are confirmed</li>
+</ul>
+<h3 id="8-candidate-daily-scheduling-rules">8. Candidate Daily Scheduling Rules</h3>
+<p>Candidates can write multiple exams within the same event window, but final scheduling must respect:</p>
+<ul>
+<li>per-day maximum of 2 or 3 separate exams depending on duration and session layout</li>
+<li>no overlapping assignments</li>
+<li>realistic examiner/session timing</li>
+<li>module duration differences</li>
+</ul>
+<p>This means scheduling can no longer be represented correctly by pool time alone.</p>
+<h3 id="9-examiner-rules">9. Examiner Rules</h3>
+<p>For now:</p>
+<ul>
+<li>there is one active examiner</li>
+<li>the examiner can only supervise one sitting at a time</li>
+</ul>
+<p>Future support must allow:</p>
+<ul>
+<li>multiple examiners</li>
+<li>parallel sittings</li>
+<li>examiner conflict detection</li>
+</ul>
+<p>The schema and services should be future-ready now even if the initial implementation uses only one examiner.</p>
+<h3 id="10-financial-and-registration-integrity-rules">10. Financial and Registration Integrity Rules</h3>
+<p>To maintain absolute data and financial integrity, the following rules must be enforced during any booking or pool assignment operation:</p>
+<ul>
+<li><strong>Wallet Pre-check</strong>: No <code>PoolMembership</code> or <code>ExamBooking</code> can be created or updated without a mandatory verification of the user's wallet balance.</li>
+<li><strong>Fund Reservation</strong>:
+<ul>
+<li>If the wallet balance is sufficient (&gt;= exam/module cost), the funds must be moved from <code>availableBalance</code> to <code>reservedBalance</code>.</li>
+<li>The <code>ExamBooking</code> status must be set to <code>APPROVED</code> and <code>demandStatus</code> to <code>POOLED</code>.</li>
+<li>The <code>PoolMembership</code> record must include the <code>amountReserved</code>.</li>
+</ul>
+</li>
+<li><strong>Intended Demand Handling</strong>:
+<ul>
+<li>If a student has insufficient funds, they <strong>must not</strong> occupy a seat in a pool (<code>PoolMembership</code>).</li>
+<li>Instead, their interest should be tracked as &quot;Intended Demand&quot; (using <code>PoolWaitlist</code> or a non-seating metadata layer) without a financial <code>ExamBooking</code> record.</li>
+</ul>
+</li>
+<li><strong>Pathway Enforcement</strong>:
+<ul>
+<li>Specific student groups (e.g., Ghana Airforce officers) must have their <code>programmeChoice</code> explicitly set to <code>EXAM_ONLY</code> in their <code>StudentProfile</code>.</li>
+<li>Registration flows must validate this pathway before allowing exam-only bookings.</li>
+</ul>
+</li>
+<li><strong>Atomic Linking</strong>:
+<ul>
+<li>Every pool membership must be explicitly linked to:
+<ul>
+<li>a valid <code>ExamPool</code></li>
+<li>a specific <code>ExamComponent</code> (module)</li>
+<li>a confirmed <code>ExamBooking</code> (if paid/reserved)</li>
+</ul>
+</li>
+<li>Ghost memberships (unlinked or un-reserved) are strictly prohibited in the live pools.</li>
+</ul>
+</li>
+</ul>
+<p>The refactor should separate the domain into four clear layers.</p>
+<h3 id="a-demand-layer">A. Demand Layer</h3>
+<p>Purpose:</p>
+<ul>
+<li>collect and expose all exam demand across booking types</li>
+<li>power public/student/staff visibility</li>
+<li>power viability calculations</li>
+</ul>
+<p>Primary concepts:</p>
+<ul>
+<li>event demand</li>
+<li>module demand</li>
+<li>guaranteed vs flexible demand</li>
+<li>pool grouping for public consumption</li>
+</ul>
+<h3 id="b-pooling-layer">B. Pooling Layer</h3>
+<p>Purpose:</p>
+<ul>
+<li>organize demand into public-facing pool buckets</li>
+<li>enforce max 28 seats and max 4 distinct modules</li>
+<li>apply rolling overflow behavior</li>
+</ul>
+<p>Important note:</p>
+<p>Pools should no longer be the final delivery-time source of truth.</p>
+<h3 id="c-scheduling-layer">C. Scheduling Layer</h3>
+<p>Purpose:</p>
+<ul>
+<li>create real exam sittings</li>
+<li>assign bookings into timed sessions</li>
+<li>enforce candidate, room, and examiner constraints</li>
+</ul>
+<p>This is where delivery actually happens.</p>
+<h3 id="d-fulfillment-layer">D. Fulfillment Layer</h3>
+<p>Purpose:</p>
+<ul>
+<li>track whether a paid seat has been executed, rolled forward, or remains pending</li>
+<li>preserve individual, company, and bundle guarantees</li>
+<li>support accurate attendance and exam record history</li>
+</ul>
+<section class="he-section" id="required-data-model-changes"><div class="he-section__num">05 · Required Data Model Changes</div><h2 class="he-section__title">Required Data Model Changes</h2></section>
+<p>These schema changes define the target model.</p>
+<h3 id="1-extend-examevent">1. Extend <code>ExamEvent</code></h3>
+<p>Add event-level viability fields so the event can be assessed on more than a single revenue number.</p>
+<p>Suggested additions:</p>
+<ul>
+<li><code>minCandidateTarget</code></li>
+<li><code>minSeatVolumeTarget</code></li>
+<li><code>minRevenueTarget</code> (already exists)</li>
+<li><code>viabilityMode</code></li>
+<li><code>isExaminerConfirmed</code></li>
+<li><code>confirmedExaminerCount</code></li>
+</ul>
+<p>Suggested enum:</p>
+<ul>
+<li><code>EventViabilityMode</code>
+<ul>
+<li><code>CANDIDATE_COUNT</code></li>
+<li><code>SEAT_VOLUME</code></li>
+<li><code>REVENUE</code></li>
+<li><code>HYBRID</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="2-keep-but-reframe-exampool">2. Keep but Reframe <code>ExamPool</code></h3>
+<p><code>ExamPool</code> should remain but its role changes.</p>
+<p>It becomes:</p>
+<ul>
+<li>a public demand bucket</li>
+<li>a rolling capacity and module-diversity container</li>
+<li>an operational grouping mechanism</li>
+</ul>
+<p>It should stop being treated as the ultimate delivery schedule record.</p>
+<p>Suggested additions:</p>
+<ul>
+<li><code>poolNumber</code></li>
+<li><code>isPublicVisible</code></li>
+<li><code>totalDemandSeats</code></li>
+<li><code>guaranteedSeats</code></li>
+</ul>
+<p>Notes:</p>
+<ul>
+<li>keep existing timing fields during migration for compatibility</li>
+<li>do not treat pool time as final truth once <code>ExamSitting</code> exists</li>
+</ul>
+<h3 id="3-add-examiner">3. Add <code>Examiner</code></h3>
+<p>Create an explicit model for the examiner.</p>
+<p>Suggested fields:</p>
+<ul>
+<li><code>userId</code></li>
+<li><code>isActive</code></li>
+<li><code>maxParallelSittings</code></li>
+<li><code>notes</code></li>
+</ul>
+<h3 id="4-add-examsitting">4. Add <code>ExamSitting</code></h3>
+<p>This becomes the real scheduled delivery slot.</p>
+<p>Each sitting should represent:</p>
+<ul>
+<li>one event</li>
+<li>one module</li>
+<li>one day/session</li>
+<li>one time block</li>
+<li>one examiner assignment</li>
+<li>one capacity value</li>
+</ul>
+<p>Suggested fields:</p>
+<ul>
+<li><code>eventId</code></li>
+<li><code>examinerId</code></li>
+<li><code>examComponentId</code></li>
+<li><code>dayNumber</code></li>
+<li><code>sessionType</code></li>
+<li><code>startTime</code></li>
+<li><code>endTime</code></li>
+<li><code>capacity</code></li>
+<li><code>reservedSeats</code></li>
+<li><code>confirmedSeats</code></li>
+<li><code>status</code></li>
+<li><code>venue</code></li>
+<li><code>notes</code></li>
+</ul>
+<p>Suggested enums:</p>
+<ul>
+<li><code>SessionType</code>
+<ul>
+<li><code>MORNING</code></li>
+<li><code>AFTERNOON</code></li>
+<li><code>EVENING</code></li>
+</ul>
+</li>
+<li><code>SittingStatus</code>
+<ul>
+<li><code>DRAFT</code></li>
+<li><code>OPEN</code></li>
+<li><code>SCHEDULED</code></li>
+<li><code>CONFIRMED</code></li>
+<li><code>COMPLETED</code></li>
+<li><code>POSTPONED</code></li>
+<li><code>CANCELLED</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="5-add-examsittingassignment">5. Add <code>ExamSittingAssignment</code></h3>
+<p>This links a booking to a real sitting.</p>
+<p>Suggested fields:</p>
+<ul>
+<li><code>sittingId</code></li>
+<li><code>bookingId</code></li>
+<li><code>userId</code></li>
+<li><code>status</code></li>
+<li><code>attendanceStatus</code></li>
+<li><code>assignedAt</code></li>
+<li><code>assignedBy</code></li>
+</ul>
+<p>Suggested enum:</p>
+<ul>
+<li><code>SittingAssignmentStatus</code>
+<ul>
+<li><code>ASSIGNED</code></li>
+<li><code>CONFIRMED</code></li>
+<li><code>ATTENDED</code></li>
+<li><code>ABSENT</code></li>
+<li><code>EXCUSED</code></li>
+<li><code>ROLLED_FORWARD</code></li>
+<li><code>CANCELLED</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="6-extend-exambooking">6. Extend <code>ExamBooking</code></h3>
+<p><code>ExamBooking</code> remains the financial and student-facing unit, one row per module attempt.</p>
+<p>Add fields for guarantee and fulfillment behavior:</p>
+<ul>
+<li><code>guaranteeType</code></li>
+<li><code>demandStatus</code></li>
+<li><code>preferredSessionType</code></li>
+<li><code>guaranteedSeat</code></li>
+<li><code>executedAt</code></li>
+<li><code>rolloverFromBookingId</code></li>
+<li><code>rolloverToEventId</code></li>
+</ul>
+<p>Suggested enums:</p>
+<ul>
+<li><code>BookingGuaranteeType</code>
+<ul>
+<li><code>POOL_FLEX</code></li>
+<li><code>INDIVIDUAL_GUARANTEED</code></li>
+<li><code>COMPANY_GUARANTEED</code></li>
+<li><code>BUNDLE_GUARANTEED</code></li>
+</ul>
+</li>
+<li><code>BookingDemandStatus</code>
+<ul>
+<li><code>DEMAND_CAPTURED</code></li>
+<li><code>POOLED</code></li>
+<li><code>SCHEDULED</code></li>
+<li><code>EXECUTED</code></li>
+<li><code>ROLLED_FORWARD</code></li>
+<li><code>POSTPONED</code></li>
+<li><code>CANCELLED</code></li>
+</ul>
+</li>
+</ul>
+<h3 id="7-evolve-bookingentitlement">7. Evolve <code>BookingEntitlement</code></h3>
+<p><code>BookingEntitlement</code> already exists and currently tracks free resits per booking group.</p>
+<p>That is not enough for the new model.</p>
+<p>It must either be:</p>
+<ul>
+<li>extended into a full fulfillment-tracking model, or</li>
+<li>supplemented by a new guaranteed-demand model</li>
+</ul>
+<p>Needed behavior:</p>
+<ul>
+<li>track whether a paid module attempt is still owed</li>
+<li>distinguish executed vs pending vs rolled-forward module obligations</li>
+<li>support bundle-level and possibly company-level fulfillment grouping</li>
+</ul>
+<h3 id="8-extend-examattendance">8. Extend <code>ExamAttendance</code></h3>
+<p>Attendance must eventually be linked to the sitting assignment or at least sitting itself.</p>
+<p>Current attendance is still tied mainly to booking/membership context.</p>
+<p>Add:</p>
+<ul>
+<li><code>sittingId</code></li>
+</ul>
+<p>Then progressively move attendance flows to use sitting-aware logic.</p>
+<section class="he-section" id="service-layer-refactor"><div class="he-section__num">06 · Service Layer Refactor</div><h2 class="he-section__title">Service Layer Refactor</h2></section>
+<p>Create or refactor services in a way that preserves clean domain boundaries.</p>
+<h3 id="1-libexamsdemandts">1. <code>lib/exams/demand.ts</code></h3>
+<p>Responsibilities:</p>
+<ul>
+<li>aggregate visible demand for an event</li>
+<li>include all booking types</li>
+<li>group demand by module</li>
+<li>compute guaranteed vs flexible demand</li>
+<li>compute total seat volume</li>
+<li>feed public/student/staff demand dashboards</li>
+</ul>
+<h3 id="2-libpoolsassignmentts">2. <code>lib/pools/assignment.ts</code></h3>
+<p>Responsibilities:</p>
+<ul>
+<li>implement rolling pool selection</li>
+<li>prefer same-module pool reuse</li>
+<li>prefer partially filled pools before creating new ones</li>
+<li>auto-create next pool when needed</li>
+</ul>
+<p>This should replace the current hard-reject behavior for a 5th distinct module.</p>
+<h3 id="3-libexamsviabilityts">3. <code>lib/exams/viability.ts</code></h3>
+<p>Responsibilities:</p>
+<ul>
+<li>evaluate event-level viability</li>
+<li>calculate candidate, revenue, and seat-volume thresholds</li>
+<li>determine whether underfilled pools/sittings may still run</li>
+<li>centralize manual override handling</li>
+</ul>
+<p>This should become the new authoritative replacement for the current pool-centric Go/No-Go assumptions.</p>
+<h3 id="4-libexamsschedulerts">4. <code>lib/exams/scheduler.ts</code></h3>
+<p>Responsibilities:</p>
+<ul>
+<li>build real sittings from demand</li>
+<li>assign bookings into sittings</li>
+<li>cluster same-module demand where possible</li>
+<li>enforce no-overlap and daily-limit rules</li>
+<li>enforce examiner availability</li>
+</ul>
+<h3 id="5-libexamsrollforwardts">5. <code>lib/exams/rollforward.ts</code></h3>
+<p>Responsibilities:</p>
+<ul>
+<li>detect paid bookings not executed in the current window</li>
+<li>move them into the next event/window</li>
+<li>preserve payment linkage</li>
+<li>mark fulfillment correctly</li>
+</ul>
+<h3 id="6-libexamsresitsts">6. <code>lib/exams/resits.ts</code></h3>
+<p>Responsibilities:</p>
+<ul>
+<li>backfill spare sitting capacity with resits</li>
+<li>respect eligibility and scheduling constraints</li>
+<li>ensure resit outcomes update exam history correctly</li>
+</ul>
+<section class="he-section" id="required-behavioral-changes-in-existing-logic"><div class="he-section__num">07 · Required Behavioral Changes in Existing Logic</div><h2 class="he-section__title">Required Behavioral Changes in Existing Logic</h2></section>
+<p>This section describes the most important code changes relative to the current implementation.</p>
+<h3 id="1-replace-reject-5th-module-with-route-to-next-pool">1. Replace “Reject 5th Module” With “Route to Next Pool”</h3>
+<p>Current behavior in validation and join logic:</p>
+<ul>
+<li>if the pool already has 4 distinct modules</li>
+<li>and the candidate requests a new module</li>
+<li>reject the join</li>
+</ul>
+<p>Target behavior:</p>
+<ul>
+<li>search for the next eligible pool</li>
+<li>if found, route there</li>
+<li>if not found, create one and route there</li>
+</ul>
+<h3 id="2-stop-failing-pools-in-isolation-at-t-21">2. Stop Failing Pools in Isolation at T-21</h3>
+<p>Current behavior:</p>
+<ul>
+<li>weak pools are failed independently at T-21</li>
+<li>cron logic releases their funds even if the event may still be worth running</li>
+</ul>
+<p>Target behavior:</p>
+<ul>
+<li>evaluate event viability first</li>
+<li>if event is viable, weak pools may still become real sittings or be merged/scheduled differently</li>
+<li>if event is not viable, then roll forward or release based on guarantee type</li>
+</ul>
+<h3 id="3-integrate-individual-and-company-bookings-into-demand">3. Integrate Individual and Company Bookings Into Demand</h3>
+<p>Current behavior:</p>
+<ul>
+<li>individual bookings largely bypass pool demand</li>
+<li>group charter creates a dedicated pool but not a complete seat-level demand model</li>
+</ul>
+<p>Target behavior:</p>
+<ul>
+<li>all demand counts into the same event-level visibility and viability model</li>
+</ul>
+<h3 id="4-split-timing-off-of-pools">4. Split Timing Off of Pools</h3>
+<p>Current behavior:</p>
+<ul>
+<li>pool date/time is treated as final schedule</li>
+</ul>
+<p>Target behavior:</p>
+<ul>
+<li>pool is for demand organization</li>
+<li>sitting is for actual schedule and attendance</li>
+</ul>
+<h3 id="5-bundle-modules-must-be-fulfilled-independently">5. Bundle Modules Must Be Fulfilled Independently</h3>
+<p>Current behavior:</p>
+<ul>
+<li>bundles create multiple bookings, but the system does not yet fully model partial execution and guaranteed carry-forward</li>
+</ul>
+<p>Target behavior:</p>
+<ul>
+<li>each module in the bundle becomes its own fulfillment obligation</li>
+<li>unexecuted paid modules roll forward automatically</li>
+</ul>
+<section class="he-section" id="ui-and-api-impact"><div class="he-section__num">08 · UI and API Impact</div><h2 class="he-section__title">UI and API Impact</h2></section>
+<h3 id="student-portal">Student Portal</h3>
+<p>Update student exam views to show:</p>
+<ul>
+<li>event-level demand</li>
+<li>pool demand composition</li>
+<li>booking guarantee status</li>
+<li>sitting assignment when scheduled</li>
+<li>roll-forward state if a paid module is deferred</li>
+</ul>
+<p>Key areas:</p>
+<ul>
+<li><code>app/student/exams/*</code></li>
+<li><code>app/student/exam-bookings/*</code></li>
+</ul>
+<h3 id="staff-portal">Staff Portal</h3>
+<p>Update staff exam management to show:</p>
+<ul>
+<li>event demand dashboard</li>
+<li>pool composition</li>
+<li>module demand heatmap</li>
+<li>viability indicators</li>
+<li>sitting planner</li>
+<li>examiner allocation</li>
+<li>resit backfill opportunities</li>
+</ul>
+<p>Key areas:</p>
+<ul>
+<li><code>app/staff/exams/*</code></li>
+<li><code>app/staff/_components/GoNoGoMeter.tsx</code></li>
+</ul>
+<h3 id="public-registered-demand-visibility">Public / Registered Demand Visibility</h3>
+<p>Registered modular and exam-only users should be able to see meaningful progress indicators:</p>
+<ul>
+<li>seat demand</li>
+<li>module demand mix</li>
+<li>whether an event window is likely to proceed</li>
+</ul>
+<p>Do not expose:</p>
+<ul>
+<li>named candidates</li>
+<li>sensitive company financial details</li>
+</ul>
+<section class="he-section" id="migration-strategy"><div class="he-section__num">09 · Migration Strategy</div><h2 class="he-section__title">Migration Strategy</h2></section>
+<p>The refactor should be staged carefully to avoid breaking wallet, ledger, and existing booking flows.</p>
+<h3 id="phase-1-schema-foundation">Phase 1: Schema Foundation</h3>
+<p>Goals:</p>
+<ul>
+<li>add new models and fields without changing runtime behavior yet</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li><code>Examiner</code></li>
+<li><code>ExamSitting</code></li>
+<li><code>ExamSittingAssignment</code></li>
+<li>extended <code>ExamEvent</code></li>
+<li>extended <code>ExamBooking</code></li>
+<li>extended <code>ExamAttendance</code></li>
+<li>upgraded fulfillment / entitlement structure</li>
+</ul>
+<h3 id="phase-2-unified-demand-read-model">Phase 2: Unified Demand Read Model</h3>
+<p>Goals:</p>
+<ul>
+<li>compute accurate demand without changing write paths yet</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li><code>lib/exams/demand.ts</code></li>
+<li>updated staff/student/public read models</li>
+<li>demand views that include all booking types</li>
+</ul>
+<h3 id="phase-3-pool-assignment-rewrite">Phase 3: Pool Assignment Rewrite</h3>
+<p>Goals:</p>
+<ul>
+<li>replace hard-reject logic with rolling pool assignment</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>new <code>lib/pools/assignment.ts</code></li>
+<li>refactor <code>lib/pools/join.ts</code></li>
+<li>refactor applicant and student exam-booking entry points</li>
+</ul>
+<h3 id="phase-4-event-level-viability">Phase 4: Event-Level Viability</h3>
+<p>Goals:</p>
+<ul>
+<li>replace current pool-centric Go/No-Go</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li><code>lib/exams/viability.ts</code></li>
+<li>refactor <code>lib/events/go-no-go.ts</code></li>
+<li>refactor <code>app/api/cron/check-pools/route.ts</code></li>
+<li>possibly split pool check and event check responsibilities more cleanly</li>
+</ul>
+<h3 id="phase-5-scheduler">Phase 5: Scheduler</h3>
+<p>Goals:</p>
+<ul>
+<li>introduce real sittings and sitting assignment</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li><code>lib/exams/scheduler.ts</code></li>
+<li>staff scheduling interfaces</li>
+<li>sitting assignment logic</li>
+</ul>
+<h3 id="phase-6-attendance-and-records">Phase 6: Attendance and Records</h3>
+<p>Goals:</p>
+<ul>
+<li>make attendance and exam records sitting-aware</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>sitting-aware attendance writes</li>
+<li>exam record rendering updated to show correct status per module sitting</li>
+</ul>
+<h3 id="phase-7-legacy-pool-timing-deprecation">Phase 7: Legacy Pool Timing Deprecation</h3>
+<p>Goals:</p>
+<ul>
+<li>stop using pool datetime as delivery truth</li>
+</ul>
+<p>Deliverables:</p>
+<ul>
+<li>pool datetime retained only for compatibility or eventually removed from critical logic</li>
+</ul>
+<section class="he-section" id="acceptance-criteria"><div class="he-section__num">10 · Acceptance Criteria</div><h2 class="he-section__title">Acceptance Criteria</h2></section>
+<p>The refactor is only considered complete when all of the following are true.</p>
+<h3 id="demand-visibility">Demand Visibility</h3>
+<ul>
+<li>all active booking types contribute to visible demand</li>
+<li>users can see actual demand progression for an event</li>
+</ul>
+<h3 id="pool-assignment">Pool Assignment</h3>
+<ul>
+<li>a 5th distinct module never hard-fails if another pool can be created or reused</li>
+<li>pools fill progressively</li>
+<li>same-module grouping is preferred</li>
+<li>overflow creates new pools automatically</li>
+</ul>
+<h3 id="viability">Viability</h3>
+<ul>
+<li>weak pools are not failed independently if overall event viability is already satisfied</li>
+<li>event viability is calculated from aggregate booking demand</li>
+</ul>
+<h3 id="bundles">Bundles</h3>
+<ul>
+<li>every bundle module is represented as a separate module attempt</li>
+<li>bundle modules may land in different pools/sittings</li>
+<li>unexecuted paid modules roll forward automatically</li>
+</ul>
+<h3 id="scheduling">Scheduling</h3>
+<ul>
+<li>one examiner cannot be double-booked</li>
+<li>candidates cannot be assigned to overlapping sittings</li>
+<li>per-day candidate exam limits are enforced</li>
+<li>module clustering is preferred where feasible</li>
+</ul>
+<h3 id="attendance-and-records">Attendance and Records</h3>
+<ul>
+<li>each executed module sitting can produce independent attendance and result data</li>
+<li>resits can use spare seats and still update records correctly</li>
+</ul>
+<section class="he-section" id="primary-files-likely-to-change"><div class="he-section__num">11 · Primary Files Likely To Change</div><h2 class="he-section__title">Primary Files Likely To Change</h2></section>
+<p>The highest-impact files/modules for this refactor are:</p>
+<ul>
+<li><code>prisma/schema.prisma</code></li>
+<li><code>lib/pools/join.ts</code></li>
+<li><code>lib/pools/validation.ts</code></li>
+<li><code>lib/pools/auto-pool.ts</code></li>
+<li><code>lib/pools/group-booking.ts</code></li>
+<li><code>lib/pools/operations.ts</code></li>
+<li><code>lib/events/go-no-go.ts</code></li>
+<li><code>app/api/cron/check-pools/route.ts</code></li>
+<li><code>app/api/applicant/exam-only/book-exam/route.ts</code></li>
+<li><code>app/api/applicant/exam-only/join-pool/route.ts</code></li>
+<li><code>app/student/actions.ts</code></li>
+<li><code>app/student/exams/_components/AvailablePoolsTab.tsx</code></li>
+<li><code>app/staff/exams/page.tsx</code></li>
+<li><code>lib/exams/attendance.ts</code></li>
+</ul>
+<p>New planned modules:</p>
+<ul>
+<li><code>lib/exams/demand.ts</code></li>
+<li><code>lib/exams/viability.ts</code></li>
+<li><code>lib/exams/scheduler.ts</code></li>
+<li><code>lib/exams/rollforward.ts</code></li>
+<li><code>lib/exams/resits.ts</code></li>
+<li><code>lib/pools/assignment.ts</code></li>
+</ul>
+<section class="he-section" id="implementation-order-recommendation"><div class="he-section__num">12 · Implementation Order Recommendation</div><h2 class="he-section__title">Implementation Order Recommendation</h2></section>
+<p>The recommended engineering order is:</p>
+<ol>
+<li>Schema foundation</li>
+<li>Unified demand read layer</li>
+<li>Rolling pool assignment</li>
+<li>Event-level viability logic</li>
+<li>Sitting scheduler</li>
+<li>Attendance and exam record migration</li>
+<li>Legacy pool-time deprecation</li>
+</ol>
+<p>Do not begin with UI-first changes. The domain split between demand, pooling, scheduling, and fulfillment must be established before extensive surface-level work.</p>
+<section class="he-section" id="final-guiding-principle"><div class="he-section__num">13 · Final Guiding Principle</div><h2 class="he-section__title">Final Guiding Principle</h2></section>
+<p>The current system should evolve from:</p>
+<ul>
+<li><code>Pool = the exam sitting</code></li>
+</ul>
+<p>to:</p>
+<ul>
+<li><code>Pool = demand grouping</code></li>
+<li><code>Sitting = actual scheduled delivery</code></li>
+<li><code>Booking = financial / student-facing attempt</code></li>
+<li><code>Fulfillment = whether a paid module has actually been delivered or rolled forward</code></li>
+</ul>
+<p>That domain separation is the key design requirement that makes the rest of the updated business rules implementable without brittle workarounds.</p>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -103,7 +854,7 @@
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

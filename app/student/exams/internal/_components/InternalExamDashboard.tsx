@@ -12,7 +12,9 @@ import {
   ArrowRight,
   Trophy,
   Hourglass,
+  Download,
 } from 'lucide-react'
+import ConfirmModal from '@/app/staff/exams/internal/_components/ConfirmModal'
 
 interface BankProgress {
   bankId: string
@@ -65,6 +67,7 @@ export default function InternalExamDashboard() {
   const [error, setError] = useState<string | null>(null)
   const [confirmedDetails, setConfirmedDetails] = useState<Record<string, boolean>>({})
   const [selectedCategories, setSelectedCategories] = useState<Record<string, string>>({})
+  const [confirmStartBank, setConfirmStartBank] = useState<string | null>(null)
 
   const fetchProgress = useCallback(async () => {
     setError(null)
@@ -98,6 +101,17 @@ export default function InternalExamDashboard() {
       setError('Select the licence category for this internal exam attempt.')
       return
     }
+
+    setConfirmStartBank(bankId)
+  }
+
+  const handleConfirmStart = async () => {
+    const bankId = confirmStartBank
+    if (!bankId) return
+    setConfirmStartBank(null)
+
+    const bank = data?.bankProgress.find((item) => item.bankId === bankId)
+    const categoryCode = bank?.categoryCode || selectedCategories[bankId] || ''
 
     setStarting(bankId)
     setError(null)
@@ -258,6 +272,14 @@ export default function InternalExamDashboard() {
                       )}
                     </button>
                   )}
+                  <a
+                    href={`/api/student/exams/internal/banks/${bank.bankId}/seb-config`}
+                    download
+                    className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download SEB Config
+                  </a>
                 </div>
               </div>
 
@@ -357,6 +379,17 @@ export default function InternalExamDashboard() {
           )
         })}
       </div>
+      <ConfirmModal
+        open={confirmStartBank !== null}
+        title="Confirm Exam Start"
+        description="Once you begin, the timer starts immediately and cannot be paused. Ensure you are ready to complete the exam in one sitting."
+        confirmLabel="Yes, Start Exam"
+        cancelLabel="Cancel"
+        variant="warning"
+        loading={starting !== null}
+        onConfirm={handleConfirmStart}
+        onCancel={() => setConfirmStartBank(null)}
+      />
     </div>
   )
 }

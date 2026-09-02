@@ -5,7 +5,7 @@ import {
   sendStaffMessage,
   markMessageAsRead,
   bulkUpdateUserStatus,
-} from '@/app/staff/actions'
+} from '@/app/staff/actions/index'
 
 // Mock server-only and next/cache
 vi.mock('server-only', () => ({}))

@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Newsroom — Operational Guide · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,25 +27,86 @@
 <header>
   <p class="he-eyebrow">Guides</p>
   <h1 class="he-title">Newsroom — Operational Guide</h1>
-  <p class="he-deck"><p>The newsroom is the public-facing blog / press release system.</p>
-</p>
+  <p class="he-deck">The newsroom is the public-facing blog / press release system.</p>
 </header>
-<section class="he-section" id="overview"><div class="he-section__num">01 · Overview</div><h2 class="he-section__title">Overview</h2>The newsroom is the public-facing blog / press release system. It lives at
+<section class="he-section" id="overview"><div class="he-section__num">01 · Overview</div><h2 class="he-section__title">Overview</h2></section>
+<p>The newsroom is the public-facing blog / press release system. It lives at
 <code>/newsroom</code> with paginated article listing and dynamic detail pages, plus
-staff-only create/edit interfaces.<section class="he-section" id="public-pages"><div class="he-section__num">02 · Public Pages</div><h2 class="he-section__title">Public Pages</h2><h3 id="listing-newsroom">Listing (<code>/newsroom</code>)</h3>Server component at <code>app/(public)/newsroom/page.tsx</code> with <code>force-dynamic</code> to
-always fetch fresh data. Query parameters:ParamValuesDefaultDescription<code>page</code>number1Page number<code>limit</code>number9Articles per page<code>sort</code><code>newest</code> or <code>oldest</code><code>newest</code>Sort by <code>publishedAt</code>Renders <code><NewsSortControl></code>, a grid of <code><NewsCard></code> components, and
-<code><NewsPagination></code>. Falls back to a placeholder cover image from UploadThing
-when <code>article.coverImage</code> is null.<h3 id="detail-newsroomslug">Detail (<code>/newsroom/[slug]</code>)</h3>Server component with full SEO metadata:Open Graph tags (<code>og:title</code>, <code>og:description</code>, <code>og:image</code>, <code>og:type=article</code>)Twitter Cards (<code>summary_large_image</code>)JSON-LD structured data (<code>NewsArticle</code> schema)View counting (increments on each page load)Read time calculation: <code>Math.ceil(wordCount / 200)</code> words per minuteAuthor attribution (custom author name or linked User's profile name)Share buttonsCover image hero with gradient overlay<section class="he-section" id="staff-management"><div class="he-section__num">03 · Staff Management</div><h2 class="he-section__title">Staff Management</h2><h3 id="create-article-staffnewsroomcreate">Create Article (<code>/staff/newsroom/create</code>)</h3>Title, slug, excerpt, content (markdown editor), cover image, tagsCustom publish date and custom author nameStatus: DRAFT or PUBLISHED<h3 id="edit-article-staffnewsroomidedit">Edit Article (<code>/staff/newsroom/[id]/edit</code>)</h3>Same fields as create, plus delete capability. Cover image preview with
-re-upload support.<section class="he-section" id="cover-images"><div class="he-section__num">04 · Cover Images</div><h2 class="he-section__title">Cover Images</h2>Upload via UploadThing's image uploaderStored as URL string in <code>NewsArticle.coverImage</code>Falls back to a hardcoded UploadThing placeholder when nullRecommended aspect ratio: 16:9 (1200×675px minimum)<section class="he-section" id="seo"><div class="he-section__num">05 · SEO</div><h2 class="he-section__title">SEO</h2>Each article page emits:<title>{title} | Aerojet Academy Newsroom</title>
-<meta name="description" content="{excerpt}" />
-<meta property="og:type" content="article" />
-<meta property="og:title" content="{title}" />
-<meta property="og:description" content="{excerpt}" />
-<meta property="og:image" content="{coverImage}" />
-<meta property="article:published_time" content="{publishedIso}" />
-<meta name="twitter:card" content="summary_large_image" />
-A JSON-LD <code>NewsArticle</code> block is also injected for search engines.<section class="he-section" id="seed-script"><div class="he-section__num">06 · Seed Script</div><h2 class="he-section__title">Seed Script</h2>bunx tsx prisma/seed-news-article.ts
-Seeds 8 sample articles with cover images (stored in <code>public/images/newsroom/</code>):EASA Phase 1 CompletionAerojet Foundation LaunchLufthansa Technical TrainingCEO Interview — Aviation Training in AfricaAME Applications OpenTechnology in Aviation TrainingUSTDA Grant AnnouncementNew Training Centre Opening<section class="he-section" id="data-model"><div class="he-section__num">07 · Data Model</div><h2 class="he-section__title">Data Model</h2>model NewsArticle {
+staff-only create/edit interfaces.</p>
+<section class="he-section" id="public-pages"><div class="he-section__num">02 · Public Pages</div><h2 class="he-section__title">Public Pages</h2></section>
+<h3 id="listing-newsroom">Listing (<code>/newsroom</code>)</h3>
+<p>Server component at <code>app/(public)/newsroom/page.tsx</code> with <code>force-dynamic</code> to
+always fetch fresh data. Query parameters:</p>
+<table>
+<thead>
+<tr><th>Param</th><th>Values</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>page</code></td><td>number</td><td>1</td><td>Page number</td></tr>
+<tr><td><code>limit</code></td><td>number</td><td>9</td><td>Articles per page</td></tr>
+<tr><td><code>sort</code></td><td><code>newest</code> or <code>oldest</code></td><td><code>newest</code></td><td>Sort by <code>publishedAt</code></td></tr>
+</tbody>
+</table>
+<p>Renders <code>&lt;NewsSortControl&gt;</code>, a grid of <code>&lt;NewsCard&gt;</code> components, and
+<code>&lt;NewsPagination&gt;</code>. Falls back to a placeholder cover image from UploadThing
+when <code>article.coverImage</code> is null.</p>
+<h3 id="detail-newsroomslug">Detail (<code>/newsroom/[slug]</code>)</h3>
+<p>Server component with full SEO metadata:</p>
+<ul>
+<li>Open Graph tags (<code>og:title</code>, <code>og:description</code>, <code>og:image</code>, <code>og:type=article</code>)</li>
+<li>Twitter Cards (<code>summary_large_image</code>)</li>
+<li>JSON-LD structured data (<code>NewsArticle</code> schema)</li>
+<li>View counting (increments on each page load)</li>
+<li>Read time calculation: <code>Math.ceil(wordCount / 200)</code> words per minute</li>
+<li>Author attribution (custom author name or linked User's profile name)</li>
+<li>Share buttons</li>
+<li>Cover image hero with gradient overlay</li>
+</ul>
+<section class="he-section" id="staff-management"><div class="he-section__num">03 · Staff Management</div><h2 class="he-section__title">Staff Management</h2></section>
+<h3 id="create-article-staffnewsroomcreate">Create Article (<code>/staff/newsroom/create</code>)</h3>
+<ul>
+<li>Title, slug, excerpt, content (markdown editor), cover image, tags</li>
+<li>Custom publish date and custom author name</li>
+<li>Status: DRAFT or PUBLISHED</li>
+</ul>
+<h3 id="edit-article-staffnewsroomidedit">Edit Article (<code>/staff/newsroom/[id]/edit</code>)</h3>
+<p>Same fields as create, plus delete capability. Cover image preview with
+re-upload support.</p>
+<section class="he-section" id="cover-images"><div class="he-section__num">04 · Cover Images</div><h2 class="he-section__title">Cover Images</h2></section>
+<ul>
+<li>Upload via UploadThing's image uploader</li>
+<li>Stored as URL string in <code>NewsArticle.coverImage</code></li>
+<li>Falls back to a hardcoded UploadThing placeholder when null</li>
+<li>Recommended aspect ratio: 16:9 (1200×675px minimum)</li>
+</ul>
+<section class="he-section" id="seo"><div class="he-section__num">05 · SEO</div><h2 class="he-section__title">SEO</h2></section>
+<p>Each article page emits:</p>
+<pre><code class="language-html">&lt;title&gt;{title} | Aerojet Academy Newsroom&lt;/title&gt;
+&lt;meta name=&quot;description&quot; content=&quot;{excerpt}&quot; /&gt;
+&lt;meta property=&quot;og:type&quot; content=&quot;article&quot; /&gt;
+&lt;meta property=&quot;og:title&quot; content=&quot;{title}&quot; /&gt;
+&lt;meta property=&quot;og:description&quot; content=&quot;{excerpt}&quot; /&gt;
+&lt;meta property=&quot;og:image&quot; content=&quot;{coverImage}&quot; /&gt;
+&lt;meta property=&quot;article:published_time&quot; content=&quot;{publishedIso}&quot; /&gt;
+&lt;meta name=&quot;twitter:card&quot; content=&quot;summary_large_image&quot; /&gt;
+</code></pre>
+<p>A JSON-LD <code>NewsArticle</code> block is also injected for search engines.</p>
+<section class="he-section" id="seed-script"><div class="he-section__num">06 · Seed Script</div><h2 class="he-section__title">Seed Script</h2></section>
+<pre><code class="language-bash">bunx tsx prisma/seed-news-article.ts
+</code></pre>
+<p>Seeds 8 sample articles with cover images (stored in <code>public/images/newsroom/</code>):</p>
+<ol>
+<li>EASA Phase 1 Completion</li>
+<li>Aerojet Foundation Launch</li>
+<li>Lufthansa Technical Training</li>
+<li>CEO Interview — Aviation Training in Africa</li>
+<li>AME Applications Open</li>
+<li>Technology in Aviation Training</li>
+<li>USTDA Grant Announcement</li>
+<li>New Training Centre Opening</li>
+</ol>
+<section class="he-section" id="data-model"><div class="he-section__num">07 · Data Model</div><h2 class="he-section__title">Data Model</h2></section>
+<pre><code class="language-prisma">model NewsArticle {
   id                String    @id @default(cuid())
   title             String
   slug              String    @unique
@@ -52,7 +114,7 @@ Seeds 8 sample articles with cover images (stored in <code>public/images/newsroo
   content           String
   coverImage        String?
   tags              String[]
-  status            String    @default("DRAFT") // DRAFT | PUBLISHED
+  status            String    @default(&quot;DRAFT&quot;) // DRAFT | PUBLISHED
   publishedAt       DateTime?
   customPublishedAt DateTime?
   customAuthorName  String?
@@ -62,7 +124,27 @@ Seeds 8 sample articles with cover images (stored in <code>public/images/newsroo
   createdAt         DateTime  @default(now())
   updatedAt         DateTime  @updatedAt
 }
-<section class="he-section" id="key-files"><div class="he-section__num">08 · Key Files</div><h2 class="he-section__title">Key Files</h2>FilePurpose<code>app/(public)/newsroom/page.tsx</code>Server-rendered listing page with pagination<code>app/(public)/newsroom/[slug]/page.tsx</code>Article detail with SEO<code>app/(public)/newsroom/_components/NewsCard.tsx</code>Article card with image, date, tags<code>app/(public)/newsroom/_components/NewsSortControl.tsx</code>Sort toggle (newest/oldest)<code>app/(public)/newsroom/_components/NewsPagination.tsx</code>Page navigation<code>app/(public)/newsroom/_components/ShareButtons.tsx</code>Social sharing<code>app/staff/newsroom/create/page.tsx</code>Staff article creation<code>app/staff/newsroom/[id]/edit/page.tsx</code>Staff article editing<code>app/staff/newsroom/_components/NewsMarkdownEditor.tsx</code>TipTap markdown editor<code>prisma/seed-news-article.ts</code>Sample article seeder<code>public/images/newsroom/*.webp</code>Seed article cover images
+</code></pre>
+<section class="he-section" id="key-files"><div class="he-section__num">08 · Key Files</div><h2 class="he-section__title">Key Files</h2></section>
+<table>
+<thead>
+<tr><th>File</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>app/(public)/newsroom/page.tsx</code></td><td>Server-rendered listing page with pagination</td></tr>
+<tr><td><code>app/(public)/newsroom/[slug]/page.tsx</code></td><td>Article detail with SEO</td></tr>
+<tr><td><code>app/(public)/_components/NewsCard.tsx</code></td><td>Article card with image, date, tags</td></tr>
+<tr><td><code>app/(public)/newsroom/_components/NewsSortControl.tsx</code></td><td>Sort toggle (newest/oldest)</td></tr>
+<tr><td><code>app/(public)/newsroom/_components/NewsPagination.tsx</code></td><td>Page navigation</td></tr>
+<tr><td><code>app/(public)/newsroom/_components/ShareButtons.tsx</code></td><td>Social sharing</td></tr>
+<tr><td><code>app/staff/newsroom/create/page.tsx</code></td><td>Staff article creation</td></tr>
+<tr><td><code>app/staff/newsroom/[id]/edit/page.tsx</code></td><td>Staff article editing</td></tr>
+<tr><td><code>app/staff/newsroom/_components/NewsMarkdownEditor.tsx</code></td><td>TipTap markdown editor</td></tr>
+<tr><td><code>prisma/seed-news-article.ts</code></td><td>Sample article seeder</td></tr>
+<tr><td><code>public/images/newsroom/*.webp</code></td><td>Seed article cover images</td></tr>
+</tbody>
+</table>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -84,7 +166,7 @@ Seeds 8 sample articles with cover images (stored in <code>public/images/newsroo
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

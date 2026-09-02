@@ -194,10 +194,12 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
     expiresAt: examSession.expiresAt?.toISOString(),
     effectiveExpiresAt: effectiveExpiresAt?.toISOString(),
     timeExtensionSec: examSession.timeExtensionSec || 0,
+    timeExtensionRecoveredAt: examSession.timeExtensionRecoveredAt?.toISOString(),
     lastActivityAt: examSession.lastActivityAt?.toISOString(),
     recoveredAt: examSession.recoveredAt?.toISOString(),
     recoveredBy: examSession.recoveredBy || null,
     recoveryReason: examSession.recoveryReason || null,
+    supervised: examSession.supervised,
     categoryCode: examSession.categoryCode,
     rules: {
       timePerQuestionSecs: rules.timePerQuestionSecs,

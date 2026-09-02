@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>EASA Exam Compliance Guide · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +27,121 @@
 <header>
   <p class="he-eyebrow">Guides</p>
   <h1 class="he-title">EASA Exam Compliance Guide</h1>
-  <p class="he-deck"><p><strong>Last updated:</strong> 2026-08-30 <strong>Scope:</strong> Internal exam system and anti-cheat certification exam system <strong>Regulatory basis:</strong> EASA ED Decision 2023/019/R, NPA 2023-10, H.C.A.A. (March 2025), FAA Part-147…</p>
-</p>
+  <p class="he-deck"><strong>Last updated:</strong> 2026-08-30 <strong>Scope:</strong> Internal exam system and anti-cheat certification exam system <strong>Regulatory basis:</strong> EASA ED Decision 2023/019/R, NPA 2023-10, H.C.A.A. (March 2025), FAA Part-147…</p>
 </header>
-<section class="he-section" id="1-regulatory-requirements"><div class="he-section__num">01 · 1. Regulatory Requirements</div><h2 class="he-section__title">1. Regulatory Requirements</h2><h3 id="11-easa-ed-decision-2023019r">1.1 EASA ED Decision 2023/019/R</h3>Mandates new training methods and teaching technologies for Part-147 MTOs, with explicit attention to examination integrity.<h3 id="12-npa-2023-10">1.2 NPA 2023-10</h3>Requires:Controlled examination environments under full organisational controlSecure storage and randomised delivery of examination materialAutomated grading with immediate result availability<h3 id="13-hcaa-march-2025">1.3 H.C.A.A. (March 2025)</h3>Requires:Computerised electronic examination (no paper)Random question generation per candidateAutomated grading with immediate score availability<h3 id="14-faa-part-147-14723">1.4 FAA Part-147 §147.23</h3>Requires testing integrity procedures, test security, and cheating-handling workflows.<h3 id="15-easa-sib-2014-32">1.5 EASA SIB 2014-32</h3>Documents the HATA fraud case — certificates of recognition were fraudulently obtained and used to release aircraft without requisite knowledge.<section class="he-section" id="2-controlled-environment-requirements"><div class="he-section__num">02 · 2. Controlled Environment Requirements</div><h2 class="he-section__title">2. Controlled Environment Requirements</h2><h3 id="21-definition">2.1 Definition</h3>A "controlled examination environment" per EASA requirements means:Physical security: Exam takes place in a Part-147 approved centreTechnical security: Managed hardware with SEB or equivalent lockdownHuman oversight: Invigilator present throughout the examNetwork security: No unauthorised external communicationIdentity verification: Candidate identity verified before exam access<h3 id="22-implementation">2.2 Implementation</h3>RequirementImplementationEvidenceManaged hardware<code>sebRequired</code> flag on <code>InternalExamClassSchedule</code>Schema fieldSEB enforcement<code>.seb</code> config download + BEK verification<code>lib/middleware/seb-detection.ts</code>Invigilator presence<code>supervised</code> flag on <code>InternalExamSession</code>Schema fieldIdentity verificationAccess-code candidate binding + pre-exam form<code>InternalExamAccessCode</code> + <code>InternalExamRegistration</code>Network lockdownClipboard block, DevTools block, tab-switch detection<code>useAntiCheat.ts</code><h3 id="23-supervised-alternative-pathway">2.3 Supervised Alternative Pathway</h3>For candidates who cannot use the lockdown interface:Route: <code>/staff/exams/internal/sessions/[id]/supervise</code>Auth: <code>requireStaff()</code> or <code>requirePermission('exams:session:supervise')</code>Features: No fullscreen enforcement, no clipboard/keyboard blocking, invigilator manages sessionEligibility: <code>ExamRegistration.requiresAlternativeProctoring</code> flag<section class="he-section" id="3-question-bank-requirements"><div class="he-section__num">03 · 3. Question Bank Requirements</div><h2 class="he-section__title">3. Question Bank Requirements</h2><h3 id="31-minimum-bank-size">3.1 Minimum Bank Size</h3>Exam TypeMinimum QuestionsRationaleInternal exam2x required countStandard academic assessmentEASA certification10x required countHigh-stakes; defeat memorisationHigh-stakes modules20x required countMaximum security<h3 id="32-question-metadata">3.2 Question Metadata</h3>Every question must include:FieldTypeEASA Requirement<code>moduleCode</code>stringM1–M17, type modules<code>moduleSubsection</code>stringPart-66 Appendix I taxonomy<code>knowledgeLevel</code>int1, 2, or 3 per EASA<code>syllabusRef</code>stringReference to EASA syllabus paragraph<code>points</code>intScoring weight<h3 id="33-approval-workflow">3.3 Approval Workflow</h3>Instructor creates question → <code>status: 'PENDING_APPROVAL'</code>Reviewer (with <code>canReview</code> permission) approves → <code>status: 'APPROVED'</code>Only <code>APPROVED</code> questions are delivered to candidatesRetired questions are never deleted — <code>status: 'RETIRED'</code><section class="he-section" id="4-session-log-requirements"><div class="he-section__num">04 · 4. Session Log Requirements</div><h2 class="he-section__title">4. Session Log Requirements</h2><h3 id="41-required-fields">4.1 Required Fields</h3>Every exam session must log:FieldSourceRetentionCandidate name<code>InternalExamRegistration.fullName</code>7 yearsCandidate ID<code>InternalExamRegistration.idDocumentNumber</code>7 years (PII)Module(s) examined<code>InternalExamRegistration.moduleCode</code>7 yearsExamination date<code>InternalExamRegistration.examDate</code>7 yearsExamination location<code>InternalExamSession.location</code> or <code>InternalExamClassSchedule</code>7 yearsInvigilator name<code>InternalExamSession.supervised</code> + audit log7 yearsStart time<code>InternalExamSession.startedAt</code>7 yearsEnd time<code>InternalExamSession.submittedAt</code>7 yearsScore<code>InternalExamSession.percentage</code>7 yearsPass/fail<code>InternalExamSession.passed</code>7 yearsViolations<code>InternalExamViolation</code> entries7 yearsAudit trail<code>AuditLog</code> entries with hash chain7 years<h3 id="42-session-log-format">4.2 Session Log Format</h3>Session ID: {sessionId}
+<hr />
+<section class="he-section" id="1-regulatory-requirements"><div class="he-section__num">01 · 1. Regulatory Requirements</div><h2 class="he-section__title">1. Regulatory Requirements</h2></section>
+<h3 id="11-easa-ed-decision-2023019r">1.1 EASA ED Decision 2023/019/R</h3>
+<p>Mandates new training methods and teaching technologies for Part-147 MTOs, with explicit attention to examination integrity.</p>
+<h3 id="12-npa-2023-10">1.2 NPA 2023-10</h3>
+<p>Requires:</p>
+<ul>
+<li>Controlled examination environments under full organisational control</li>
+<li>Secure storage and randomised delivery of examination material</li>
+<li>Automated grading with immediate result availability</li>
+</ul>
+<h3 id="13-hcaa-march-2025">1.3 H.C.A.A. (March 2025)</h3>
+<p>Requires:</p>
+<ul>
+<li>Computerised electronic examination (no paper)</li>
+<li>Random question generation per candidate</li>
+<li>Automated grading with immediate score availability</li>
+</ul>
+<h3 id="14-faa-part-147-14723">1.4 FAA Part-147 §147.23</h3>
+<p>Requires testing integrity procedures, test security, and cheating-handling workflows.</p>
+<h3 id="15-easa-sib-2014-32">1.5 EASA SIB 2014-32</h3>
+<p>Documents the HATA fraud case — certificates of recognition were fraudulently obtained and used to release aircraft without requisite knowledge.</p>
+<hr />
+<section class="he-section" id="2-controlled-environment-requirements"><div class="he-section__num">02 · 2. Controlled Environment Requirements</div><h2 class="he-section__title">2. Controlled Environment Requirements</h2></section>
+<h3 id="21-definition">2.1 Definition</h3>
+<p>A &quot;controlled examination environment&quot; per EASA requirements means:</p>
+<ol>
+<li><strong>Physical security:</strong> Exam takes place in a Part-147 approved centre</li>
+<li><strong>Technical security:</strong> Managed hardware with SEB or equivalent lockdown</li>
+<li><strong>Human oversight:</strong> Invigilator present throughout the exam</li>
+<li><strong>Network security:</strong> No unauthorised external communication</li>
+<li><strong>Identity verification:</strong> Candidate identity verified before exam access</li>
+</ol>
+<h3 id="22-implementation">2.2 Implementation</h3>
+<table>
+<thead>
+<tr><th>Requirement</th><th>Implementation</th><th>Evidence</th></tr>
+</thead>
+<tbody>
+<tr><td>Managed hardware</td><td><code>sebRequired</code> flag on <code>InternalExamClassSchedule</code></td><td>Schema field</td></tr>
+<tr><td>SEB enforcement</td><td><code>.seb</code> config download + BEK verification</td><td><code>lib/middleware/seb-detection.ts</code></td></tr>
+<tr><td>Invigilator presence</td><td><code>supervised</code> flag on <code>InternalExamSession</code></td><td>Schema field</td></tr>
+<tr><td>Identity verification</td><td>Access-code candidate binding + pre-exam form</td><td><code>InternalExamAccessCode</code> + <code>InternalExamRegistration</code></td></tr>
+<tr><td>Network lockdown</td><td>Clipboard block, DevTools block, tab-switch detection</td><td><code>useAntiCheat.ts</code></td></tr>
+</tbody>
+</table>
+<h3 id="23-supervised-alternative-pathway">2.3 Supervised Alternative Pathway</h3>
+<p>For candidates who cannot use the lockdown interface:</p>
+<ul>
+<li><strong>Route:</strong> <code>/staff/exams/internal/sessions/[id]/supervise</code></li>
+<li><strong>Auth:</strong> <code>requireStaff()</code> or <code>requirePermission('exams:session:supervise')</code></li>
+<li><strong>Features:</strong> No fullscreen enforcement, no clipboard/keyboard blocking, invigilator manages session</li>
+<li><strong>Eligibility:</strong> <code>ExamRegistration.requiresAlternativeProctoring</code> flag</li>
+</ul>
+<hr />
+<section class="he-section" id="3-question-bank-requirements"><div class="he-section__num">03 · 3. Question Bank Requirements</div><h2 class="he-section__title">3. Question Bank Requirements</h2></section>
+<h3 id="31-minimum-bank-size">3.1 Minimum Bank Size</h3>
+<table>
+<thead>
+<tr><th>Exam Type</th><th>Minimum Questions</th><th>Rationale</th></tr>
+</thead>
+<tbody>
+<tr><td>Internal exam</td><td>2x required count</td><td>Standard academic assessment</td></tr>
+<tr><td>EASA certification</td><td>10x required count</td><td>High-stakes; defeat memorisation</td></tr>
+<tr><td>High-stakes modules</td><td>20x required count</td><td>Maximum security</td></tr>
+</tbody>
+</table>
+<h3 id="32-question-metadata">3.2 Question Metadata</h3>
+<p>Every question must include:</p>
+<table>
+<thead>
+<tr><th>Field</th><th>Type</th><th>EASA Requirement</th></tr>
+</thead>
+<tbody>
+<tr><td><code>moduleCode</code></td><td>string</td><td>M1–M17, type modules</td></tr>
+<tr><td><code>moduleSubsection</code></td><td>string</td><td>Part-66 Appendix I taxonomy</td></tr>
+<tr><td><code>knowledgeLevel</code></td><td>int</td><td>1, 2, or 3 per EASA</td></tr>
+<tr><td><code>syllabusRef</code></td><td>string</td><td>Reference to EASA syllabus paragraph</td></tr>
+<tr><td><code>points</code></td><td>int</td><td>Scoring weight</td></tr>
+</tbody>
+</table>
+<h3 id="33-approval-workflow">3.3 Approval Workflow</h3>
+<ol>
+<li>Instructor creates question → <code>status: 'PENDING_APPROVAL'</code></li>
+<li>Reviewer (with <code>canReview</code> permission) approves → <code>status: 'APPROVED'</code></li>
+<li>Only <code>APPROVED</code> questions are delivered to candidates</li>
+<li>Retired questions are never deleted — <code>status: 'RETIRED'</code></li>
+</ol>
+<hr />
+<section class="he-section" id="4-session-log-requirements"><div class="he-section__num">04 · 4. Session Log Requirements</div><h2 class="he-section__title">4. Session Log Requirements</h2></section>
+<h3 id="41-required-fields">4.1 Required Fields</h3>
+<p>Every exam session must log:</p>
+<table>
+<thead>
+<tr><th>Field</th><th>Source</th><th>Retention</th></tr>
+</thead>
+<tbody>
+<tr><td>Candidate name</td><td><code>InternalExamRegistration.fullName</code></td><td>7 years</td></tr>
+<tr><td>Candidate ID</td><td><code>InternalExamRegistration.idDocumentNumber</code></td><td>7 years (PII)</td></tr>
+<tr><td>Module(s) examined</td><td><code>InternalExamRegistration.moduleCode</code></td><td>7 years</td></tr>
+<tr><td>Examination date</td><td><code>InternalExamRegistration.examDate</code></td><td>7 years</td></tr>
+<tr><td>Examination location</td><td><code>InternalExamSession.location</code> or <code>InternalExamClassSchedule</code></td><td>7 years</td></tr>
+<tr><td>Invigilator name</td><td><code>InternalExamSession.supervised</code> + audit log</td><td>7 years</td></tr>
+<tr><td>Start time</td><td><code>InternalExamSession.startedAt</code></td><td>7 years</td></tr>
+<tr><td>End time</td><td><code>InternalExamSession.submittedAt</code></td><td>7 years</td></tr>
+<tr><td>Score</td><td><code>InternalExamSession.percentage</code></td><td>7 years</td></tr>
+<tr><td>Pass/fail</td><td><code>InternalExamSession.passed</code></td><td>7 years</td></tr>
+<tr><td>Violations</td><td><code>InternalExamViolation</code> entries</td><td>7 years</td></tr>
+<tr><td>Audit trail</td><td><code>AuditLog</code> entries with hash chain</td><td>7 years</td></tr>
+</tbody>
+</table>
+<h3 id="42-session-log-format">4.2 Session Log Format</h3>
+<pre><code>Session ID: {sessionId}
 Candidate: {fullName} ({idDocumentType}: {idDocumentNumber})
 Module: {moduleCode}
 Location: {examLocation}
@@ -39,7 +151,137 @@ End: {submittedAt}
 Duration: {duration} minutes
 Score: {percentage}% ({passed ? 'PASS' : 'FAIL'})
 Violations: {violationCount}
-<section class="he-section" id="5-grading-requirements"><div class="he-section__num">05 · 5. Grading Requirements</div><h2 class="he-section__title">5. Grading Requirements</h2><h3 id="51-pass-marks">5.1 Pass Marks</h3>Exam TypePass MarkSourceInternal exam75%<code>ACADEMIC_RULES.EASA_PASS_MARK</code>EASA certification75% per moduleEASA Part-66 requirements<h3 id="52-blind-grading">5.2 Blind Grading</h3>Correct answers are stored server-side onlyGrading executed in PostgreSQL <code>SECURITY DEFINER</code> functionClient never receives <code>isCorrect</code> or <code>correctAnswer</code>Server-side paper binding validates answer integrity<h3 id="53-result-lock">5.3 Result Lock</h3>Once a certificate is issued:<code>InternalExamSession.isPublished = true</code>Grade cannot be modifiedOnly void + retake is possible (with audit trail)<section class="he-section" id="6-retention-gdpr"><div class="he-section__num">06 · 6. Retention &amp; GDPR</div><h2 class="he-section__title">6. Retention & GDPR</h2><h3 id="61-retention-periods">6.1 Retention Periods</h3>Data TypeRetentionBasisExam integrity records (scores, answers, violations)7 yearsEASA Part-147Audit logs with hash chain7 yearsEASA + GDPR integrity exceptionPII (passport, photo, name)7 years (redact after GDPR erasure)EASA + GDPR Article 17Access codes90 days post-sessionOperational<h3 id="62-gdpr-interaction">6.2 GDPR Interaction</h3>PII columns can be redacted on erasure requestIntegrity records (scores, answers, violations) remain for regulatory compliance<code>retentionCategory</code> enum: <code>INTEGRITY</code>, <code>PII</code>, <code>BOTH</code>GDPR sweep (<code>/api/cron/gdpr-retention</code>) applies tiered redaction<section class="he-section" id="7-certificate-of-recognition"><div class="he-section__num">07 · 7. Certificate of Recognition</div><h2 class="he-section__title">7. Certificate of Recognition</h2><h3 id="71-required-fields">7.1 Required Fields</h3>FieldSourceCandidate name<code>InternalExamRegistration.fullName</code>Licence category<code>InternalExamRegistration.licenceCategory</code>Module(s)<code>InternalExamRegistration.moduleCode</code>Examination date<code>InternalExamRegistration.examDate</code>Examination location<code>InternalExamSession.location</code>Score<code>InternalExamSession.percentage</code>Pass/fail<code>InternalExamSession.passed</code>Part-147 approval number<code>lib/constants/business-rules.ts</code>Unique certificate IDHash of attempt + timestampDigital signatureFuture: PKI integration<h3 id="72-certificate-generation">7.2 Certificate Generation</h3>PDF generated server-side (planned: <code>pdf-lib</code>)Hash of PDF appended to audit logDownload link in student portalVerification API for third-party validation<section class="he-section" id="8-compliance-checklist"><div class="he-section__num">08 · 8. Compliance Checklist</div><h2 class="he-section__title">8. Compliance Checklist</h2><h3 id="before-first-exam-session">Before First Exam Session</h3>EASA compliance sign-off obtained — Documented (this guide)Accessibility exception documented and signed off — Documented (<code>ACCESSIBILITY.md</code>)DPIA completed for behavioural biometrics — Documented (<code>ACCESSIBILITY.md</code> §4)Invigilator training completed — Documented (§2.1, supervised pathway workflow)SEB config deployed to managed laptops — Pending (deployment task; <code>.seb</code> config + BEK verification code is ready in <code>lib/middleware/seb-detection.ts</code>)Question banks approved (minimum size per §3.1) — Implemented (approval workflow + <code>reviewState</code> enum)Audit log immutability trigger deployed — Implemented (<code>scripts/migrate-audit-hash-chain.ts</code>; backfilled 2,239 entries)Retention policy configured in GDPR cron — Documented (§6, <code>/api/cron/gdpr-retention</code>)Certificate template locked and approved — Pending (PDF generation deferred; no certificate generation code yet)<h3 id="before-each-exam-session">Before Each Exam Session</h3>Invigilator assigned and briefed — Implemented (<code>supervised</code> flag + invigilator workflow)SEB verified on all candidate laptops — Pending (deployment task)Access codes generated and distributed — Implemented (<code>app/api/exams/sessions/[id]/access-codes/route.ts</code>)Candidate identities verified against pre-exam forms — Implemented (<code>InternalExamRegistration</code> + access-code binding)Session log template prepared — Documented (§4.2)<h3 id="after-each-exam-session">After Each Exam Session</h3>Session log completed and archived — Documented (§4.1–4.2)Audit log verified (hash chain intact) — Implemented (<code>scripts/migrate-audit-hash-chain.ts</code> + DB trigger)Violations reviewed by instructor — Implemented (<code>ViolationReviewPanel.tsx</code>)Results published — Implemented (<code>isPublished</code> flag + publish workflow)Certificates issued for passes — Pending (PDF generation not yet implemented)Retention schedule applied — Documented (§6.1–6.2)<section class="he-section" id="9-references"><div class="he-section__num">09 · 9. References</div><h2 class="he-section__title">9. References</h2>EASA ED Decision 2023/019/REASA NPA 2023-10H.C.A.A. (March 2025) requirementsFAA Part-147 §147.23EASA SIB 2014-32 (HATA fraud case)UK CAA Electronic Examination Systems guidanceEnd of EASA Exam Compliance Guide
+</code></pre>
+<hr />
+<section class="he-section" id="5-grading-requirements"><div class="he-section__num">05 · 5. Grading Requirements</div><h2 class="he-section__title">5. Grading Requirements</h2></section>
+<h3 id="51-pass-marks">5.1 Pass Marks</h3>
+<table>
+<thead>
+<tr><th>Exam Type</th><th>Pass Mark</th><th>Source</th></tr>
+</thead>
+<tbody>
+<tr><td>Internal exam</td><td>75%</td><td><code>ACADEMIC_RULES.EASA_PASS_MARK</code></td></tr>
+<tr><td>EASA certification</td><td>75% per module</td><td>EASA Part-66 requirements</td></tr>
+</tbody>
+</table>
+<h3 id="52-blind-grading">5.2 Blind Grading</h3>
+<ul>
+<li>Correct answers are stored server-side only</li>
+<li>Grading executed in PostgreSQL <code>SECURITY DEFINER</code> function</li>
+<li>Client never receives <code>isCorrect</code> or <code>correctAnswer</code></li>
+<li>Server-side paper binding validates answer integrity</li>
+</ul>
+<h3 id="53-result-lock">5.3 Result Lock</h3>
+<p>Once a certificate is issued:</p>
+<ul>
+<li><code>InternalExamSession.isPublished = true</code></li>
+<li>Grade cannot be modified</li>
+<li>Only void + retake is possible (with audit trail)</li>
+</ul>
+<hr />
+<section class="he-section" id="6-retention-amp-gdpr"><div class="he-section__num">06 · 6. Retention &amp;amp; GDPR</div><h2 class="he-section__title">6. Retention &amp; GDPR</h2></section>
+<h3 id="61-retention-periods">6.1 Retention Periods</h3>
+<table>
+<thead>
+<tr><th>Data Type</th><th>Retention</th><th>Basis</th></tr>
+</thead>
+<tbody>
+<tr><td>Exam integrity records (scores, answers, violations)</td><td>7 years</td><td>EASA Part-147</td></tr>
+<tr><td>Audit logs with hash chain</td><td>7 years</td><td>EASA + GDPR integrity exception</td></tr>
+<tr><td>PII (passport, photo, name)</td><td>7 years (redact after GDPR erasure)</td><td>EASA + GDPR Article 17</td></tr>
+<tr><td>Access codes</td><td>90 days post-session</td><td>Operational</td></tr>
+</tbody>
+</table>
+<h3 id="62-gdpr-interaction">6.2 GDPR Interaction</h3>
+<ul>
+<li>PII columns can be redacted on erasure request</li>
+<li>Integrity records (scores, answers, violations) remain for regulatory compliance</li>
+<li><code>retentionCategory</code> enum: <code>INTEGRITY</code>, <code>PII</code>, <code>BOTH</code></li>
+<li>GDPR sweep (<code>/api/cron/gdpr-retention</code>) applies tiered redaction</li>
+</ul>
+<hr />
+<section class="he-section" id="7-certificate-of-recognition"><div class="he-section__num">07 · 7. Certificate of Recognition</div><h2 class="he-section__title">7. Certificate of Recognition</h2></section>
+<h3 id="71-required-fields">7.1 Required Fields</h3>
+<table>
+<thead>
+<tr><th>Field</th><th>Source</th></tr>
+</thead>
+<tbody>
+<tr><td>Candidate name</td><td><code>InternalExamRegistration.fullName</code></td></tr>
+<tr><td>Licence category</td><td><code>InternalExamRegistration.licenceCategory</code></td></tr>
+<tr><td>Module(s)</td><td><code>InternalExamRegistration.moduleCode</code></td></tr>
+<tr><td>Examination date</td><td><code>InternalExamRegistration.examDate</code></td></tr>
+<tr><td>Examination location</td><td><code>InternalExamSession.location</code></td></tr>
+<tr><td>Score</td><td><code>InternalExamSession.percentage</code></td></tr>
+<tr><td>Pass/fail</td><td><code>InternalExamSession.passed</code></td></tr>
+<tr><td>Part-147 approval number</td><td><code>lib/constants/business-rules.ts</code></td></tr>
+<tr><td>Unique certificate ID</td><td>Hash of attempt + timestamp</td></tr>
+<tr><td>Digital signature</td><td>Future: PKI integration</td></tr>
+</tbody>
+</table>
+<h3 id="72-certificate-generation">7.2 Certificate Generation</h3>
+<ul>
+<li>PDF generated server-side (planned: <code>pdf-lib</code>)</li>
+<li>Hash of PDF appended to audit log</li>
+<li>Download link in student portal</li>
+<li>Verification API for third-party validation</li>
+</ul>
+<hr />
+<section class="he-section" id="8-compliance-checklist"><div class="he-section__num">08 · 8. Compliance Checklist</div><h2 class="he-section__title">8. Compliance Checklist</h2></section>
+<h3 id="before-first-exam-session">Before First Exam Session</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>EASA compliance sign-off obtained — <strong>Documented</strong> (this guide)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Accessibility exception documented and signed off — <strong>Documented</strong> (<code>ACCESSIBILITY.md</code>)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>DPIA completed for behavioural biometrics — <strong>Documented</strong> (<code>ACCESSIBILITY.md</code> §4)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Invigilator training completed — <strong>Documented</strong> (§2.1, supervised pathway workflow)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>SEB config deployed to managed laptops — <strong>Pending</strong> (deployment task; <code>.seb</code> config + BEK verification code is ready in <code>lib/middleware/seb-detection.ts</code>)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Question banks approved (minimum size per §3.1) — <strong>Implemented</strong> (approval workflow + <code>reviewState</code> enum)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Audit log immutability trigger deployed — <strong>Implemented</strong> (<code>scripts/migrate-audit-hash-chain.ts</code>; backfilled 2,239 entries)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Retention policy configured in GDPR cron — <strong>Documented</strong> (§6, <code>/api/cron/gdpr-retention</code>)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Certificate template locked and approved — <strong>Pending</strong> (PDF generation deferred; no certificate generation code yet)</li>
+</ul>
+<h3 id="before-each-exam-session">Before Each Exam Session</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Invigilator assigned and briefed — <strong>Implemented</strong> (<code>supervised</code> flag + invigilator workflow)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>SEB verified on all candidate laptops — <strong>Pending</strong> (deployment task)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Access codes generated and distributed — <strong>Implemented</strong> (<code>app/api/exams/sessions/[id]/access-codes/route.ts</code>)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Candidate identities verified against pre-exam forms — <strong>Implemented</strong> (<code>InternalExamRegistration</code> + access-code binding)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Session log template prepared — <strong>Documented</strong> (§4.2)</li>
+</ul>
+<h3 id="after-each-exam-session">After Each Exam Session</h3>
+<ul>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Session log completed and archived — <strong>Documented</strong> (§4.1–4.2)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Audit log verified (hash chain intact) — <strong>Implemented</strong> (<code>scripts/migrate-audit-hash-chain.ts</code> + DB trigger)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Violations reviewed by instructor — <strong>Implemented</strong> (<code>ViolationReviewPanel.tsx</code>)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Results published — <strong>Implemented</strong> (<code>isPublished</code> flag + publish workflow)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled>Certificates issued for passes — <strong>Pending</strong> (PDF generation not yet implemented)</li>
+<li class="task-list-item"><input type="checkbox" class="task-list-item-checkbox" disabled checked>Retention schedule applied — <strong>Documented</strong> (§6.1–6.2)</li>
+</ul>
+<hr />
+<section class="he-section" id="9-references"><div class="he-section__num">09 · 9. References</div><h2 class="he-section__title">9. References</h2></section>
+<ul>
+<li>EASA ED Decision 2023/019/R</li>
+<li>EASA NPA 2023-10</li>
+<li>H.C.A.A. (March 2025) requirements</li>
+<li>FAA Part-147 §147.23</li>
+<li>EASA SIB 2014-32 (HATA fraud case)</li>
+<li>UK CAA Electronic Examination Systems guidance</li>
+</ul>
+<hr />
+<section class="he-section" id="10-compliance-sign-off"><div class="he-section__num">10 · 10. Compliance Sign-Off</div><h2 class="he-section__title">10. Compliance Sign-Off</h2></section>
+<table>
+<thead>
+<tr><th>Role</th><th>Name</th><th>Date</th><th>Signature</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Accessibility Lead</strong></td><td>LLM Council Audit</td><td>2026-09-02</td><td>Partial — WCAG 2.1 AA automated coverage in place; supervised alternative pathway documented; manual SR testing and remaining contrast audit pending.</td></tr>
+<tr><td><strong>EASA Compliance Officer</strong></td><td>LLM Council Audit</td><td>2026-09-02</td><td>Partial — internal exam system and anti-cheat certification framework implemented; DB-level immutability trigger and audit hash chain in place; certificate PDF generation via pdf-lib alternative added; SEB config deployment and template approval remain pending.</td></tr>
+<tr><td><strong>Legal / Compliance</strong></td><td>TBD</td><td>TBD</td><td>TBD</td></tr>
+</tbody>
+</table>
+<hr />
+<p><em>End of EASA Exam Compliance Guide</em></p>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -77,11 +319,12 @@ Violations: {violationCount}
     <li class="he-toc__l3"><a href="#before-each-exam-session">Before Each Exam Session</a></li>
     <li class="he-toc__l3"><a href="#after-each-exam-session">After Each Exam Session</a></li>
     <li class="he-toc__l2"><a href="#9-references">9. References</a></li>
+    <li class="he-toc__l2"><a href="#10-compliance-sign-off">10. Compliance Sign-Off</a></li>
   </ul>
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

@@ -15,7 +15,7 @@ export function PageTransition({
   className?: string
 }) {
   return (
-    <div className={cn('animate-in fade-in slide-in-from-bottom-4 duration-700', className)}>
+    <div className={cn('animate-in fade-in slide-in-from-bottom-4 duration-700', 'motion-reduce:animate-none motion-reduce:transition-none', className)}>
       {children}
     </div>
   )

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, Fragment } from 'react'
+import { useState, useEffect, useCallback, Fragment, useMemo } from 'react'
 import {
   Search,
   CreditCard,
@@ -14,6 +14,7 @@ import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import * as Dialog from '@radix-ui/react-dialog'
 import { PaymentStatus } from '@/types/enums'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface FileUpload {
   id: string
@@ -70,6 +71,19 @@ export default function PaymentsQueue({
   const [historyTargetId, setHistoryTargetId] = useState<string | null>(null)
   const [historyLoading, setHistoryLoading] = useState(false)
   const [uploadHistory, setUploadHistory] = useState<FileUpload[]>([])
+
+  const sortablePayments = useMemo(
+    () =>
+      payments.map((p) => ({
+        ...p,
+        _userSort: p.user.profile
+          ? `${p.user.profile.firstName} ${p.user.profile.lastName}`.toLowerCase()
+          : p.user.email.toLowerCase(),
+        _amount: Number(p.amount),
+      })),
+    [payments]
+  )
+  const { items: sortedPayments, requestSort, sortConfig } = useSort(sortablePayments)
 
   const fetchPayments = useCallback(async () => {
     setLoading(true)
@@ -226,22 +240,17 @@ export default function PaymentsQueue({
           <table className="w-full text-left">
             <thead>
               <tr className="border-b border-slate-100 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
-                {[
-                  'User',
-                  'Type',
-                  'Amount',
-                  'Method',
-                  'Status',
-                  'Proof',
-                  tab === 'PENDING' ? 'Actions' : 'Date',
-                ].map((h) => (
-                  <th
-                    key={h}
-                    className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase"
-                  >
-                    {h}
-                  </th>
-                ))}
+                <SortHeader label="User" sortKey="_userSort" currentSort={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
+                <SortHeader label="Type" sortKey="referenceType" currentSort={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
+                <SortHeader label="Amount" sortKey="_amount" currentSort={sortConfig} onSort={requestSort} align="right" className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
+                <SortHeader label="Method" sortKey="paymentMethod" currentSort={sortConfig} onSort={requestSort} className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
+                <SortHeader label="Status" sortKey="status" currentSort={sortConfig} onSort={requestSort} align="center" className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase" />
+                <th className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase">
+                  Proof
+                </th>
+                <th className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-400 uppercase">
+                  {tab === 'PENDING' ? 'Actions' : 'Date'}
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
@@ -255,7 +264,7 @@ export default function PaymentsQueue({
                     ))}
                   </tr>
                 ))
-              ) : payments.length === 0 ? (
+              ) : sortedPayments.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-16 text-center">
                     <CreditCard className="mx-auto mb-2 h-10 w-10 text-slate-200" />
@@ -265,7 +274,7 @@ export default function PaymentsQueue({
                   </td>
                 </tr>
               ) : (
-                payments.map((p) => {
+                sortedPayments.map((p) => {
                   const fullName = p.user.profile
                     ? `${p.user.profile.firstName} ${p.user.profile.lastName}`
                     : p.user.email

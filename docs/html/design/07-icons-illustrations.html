@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>07 · Icons, illustrations, and imagery · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,19 +27,73 @@
 <header>
   <p class="he-eyebrow">Design</p>
   <h1 class="he-title">07 · Icons, illustrations, and imagery</h1>
-  <p class="he-deck"><p><strong>Library:</strong> <code>lucide-react</code> (pinned to <code>1.8.0</code> in <code>package.json</code>).</p>
-</p>
+  <p class="he-deck"><strong>Library:</strong> <code>lucide-react</code> (pinned to <code>1.8.0</code> in <code>package.json</code>).</p>
 </header>
-<section class="he-section" id="71-icons"><div class="he-section__num">01 · 7.1 · Icons</div><h2 class="he-section__title">7.1 · Icons</h2>Library: <code>lucide-react</code> (pinned to <code>1.8.0</code> in <code>package.json</code>).
-Rule: no emoji as icons — SVG only, via Lucide.<h3 id="default-icon-size">Default icon size</h3>The <code>Button</code> stylesheet sets <code>[&_svg]:size-4 [&_svg]:shrink-0
-[&_svg]:pointer-events-none</code>. That makes every icon inside a Button
-16 × 16 with <code>shrink-0</code>. To override per icon, use Tailwind
-<code>h-4 w-4</code> / <code>h-5 w-5</code> / <code>h-6 w-6</code> / <code>h-8 w-8</code>.Tailwind classPixelsUsed for<code>h-3 w-3</code>12 pxCalendar traffic-light dot<code>h-3.5 w-3.5</code>14 pxSidebar collapse chevron<code>h-4 w-4</code>16 pxDefault in Button, dropdown, tab<code>h-5 w-5</code>20 pxProgramme row trailing arrow, calendar<code>h-6 w-6</code>24 pxEmpty state, success circle<code>h-7 w-7</code>28 pxSidebar logo<code>h-8 w-8</code>32 pxStep number circle, modal close<code>h-9 w-9</code>36 pxSidebar collapsed menu button<code>h-10 w-10</code>40 pxCard service icon<code>h-12 w-12</code>48 pxEmpty state hero icon<code>h-14 w-14</code>56 pxPage hero / marketing icon<code>h-16 w-16</code>64 pxSuccess / failure illustration<h3 id="frequently-used-icons">Frequently used icons</h3>IconLucide componentUsed inArrow right<code>ArrowRight</code>Programme row, breadcrumb, hero CTAArrow right (custom)<code>ArrowR</code> (inline SVG)Design-lab variantsMenu / close<code>Menu</code> / <code>X</code>Mobile nav, sheet, dialogChevron<code>ChevronDown</code>Accordion, sidebar, dropdownCheck<code>Check</code> / <code>CheckCircle2</code>Bullet lists, success statePlus<code>Plus</code>Calendar add, "show all"Alert<code>AlertCircle</code>Form errors, dangerEye / EyeOff<code>Eye</code> / <code>EyeOff</code>Password reveal toggleCopy<code>Copy</code>Copy-to-clipboardSearch<code>Search</code>Public nav search modalLock<code>Lock</code>Auth pagesMail<code>Mail</code>Auth, contact formBell<code>Bell</code>Notifications (sidebar)Sun / Moon / Monitor(ThemeToggle)Light / dark / system<h3 id="decorative-svg-marks">Decorative SVG marks</h3>The editorial public site uses three small marks inline:<code>✦</code> — 4-pointed star, used as list-item terminator
-(<code><span className="text-aerojet-blue/40">✦</span></code>).<code>▸</code> — chevron used in dark variants for "step X" markers
-(<code><span className="text-amber-400">›</span></code>).<code>№ 001</code> — typography pattern in the design-lab masthead.These are typographic glyphs, not icons, and the rule "no emoji"
-applies to UI controls only.<section class="he-section" id="72-imagery"><div class="he-section__num">02 · 7.2 · Imagery</div><h2 class="he-section__title">7.2 · Imagery</h2>All marketing photography lives in <code>public/images/</code>. The
+<section class="he-section" id="71-icons"><div class="he-section__num">01 · 7.1 · Icons</div><h2 class="he-section__title">7.1 · Icons</h2></section>
+<p><strong>Library:</strong> <code>lucide-react</code> (pinned to <code>1.8.0</code> in <code>package.json</code>).
+<strong>Rule:</strong> no emoji as icons — SVG only, via Lucide.</p>
+<h3 id="default-icon-size">Default icon size</h3>
+<p>The <code>Button</code> stylesheet sets <code>[&amp;_svg]:size-4 [&amp;_svg]:shrink-0 [&amp;_svg]:pointer-events-none</code>. That makes every icon inside a Button
+<strong>16 × 16</strong> with <code>shrink-0</code>. To override per icon, use Tailwind
+<code>h-4 w-4</code> / <code>h-5 w-5</code> / <code>h-6 w-6</code> / <code>h-8 w-8</code>.</p>
+<table>
+<thead>
+<tr><th>Tailwind class</th><th>Pixels</th><th>Used for</th></tr>
+</thead>
+<tbody>
+<tr><td><code>h-3 w-3</code></td><td>12 px</td><td>Calendar traffic-light dot</td></tr>
+<tr><td><code>h-3.5 w-3.5</code></td><td>14 px</td><td>Sidebar collapse chevron</td></tr>
+<tr><td><code>h-4 w-4</code></td><td>16 px</td><td>Default in Button, dropdown, tab</td></tr>
+<tr><td><code>h-5 w-5</code></td><td>20 px</td><td>Programme row trailing arrow, calendar</td></tr>
+<tr><td><code>h-6 w-6</code></td><td>24 px</td><td>Empty state, success circle</td></tr>
+<tr><td><code>h-7 w-7</code></td><td>28 px</td><td>Sidebar logo</td></tr>
+<tr><td><code>h-8 w-8</code></td><td>32 px</td><td>Step number circle, modal close</td></tr>
+<tr><td><code>h-9 w-9</code></td><td>36 px</td><td>Sidebar collapsed menu button</td></tr>
+<tr><td><code>h-10 w-10</code></td><td>40 px</td><td>Card service icon</td></tr>
+<tr><td><code>h-12 w-12</code></td><td>48 px</td><td>Empty state hero icon</td></tr>
+<tr><td><code>h-14 w-14</code></td><td>56 px</td><td>Page hero / marketing icon</td></tr>
+<tr><td><code>h-16 w-16</code></td><td>64 px</td><td>Success / failure illustration</td></tr>
+</tbody>
+</table>
+<h3 id="frequently-used-icons">Frequently used icons</h3>
+<table>
+<thead>
+<tr><th>Icon</th><th>Lucide component</th><th>Used in</th></tr>
+</thead>
+<tbody>
+<tr><td>Arrow right</td><td><code>ArrowRight</code></td><td>Programme row, breadcrumb, hero CTA</td></tr>
+<tr><td>Arrow right (custom)</td><td><code>ArrowR</code> (inline SVG)</td><td>Design-lab variants</td></tr>
+<tr><td>Menu / close</td><td><code>Menu</code> / <code>X</code></td><td>Mobile nav, sheet, dialog</td></tr>
+<tr><td>Chevron</td><td><code>ChevronDown</code></td><td>Accordion, sidebar, dropdown</td></tr>
+<tr><td>Check</td><td><code>Check</code> / <code>CheckCircle2</code></td><td>Bullet lists, success state</td></tr>
+<tr><td>Plus</td><td><code>Plus</code></td><td>Calendar add, &quot;show all&quot;</td></tr>
+<tr><td>Alert</td><td><code>AlertCircle</code></td><td>Form errors, danger</td></tr>
+<tr><td>Eye / EyeOff</td><td><code>Eye</code> / <code>EyeOff</code></td><td>Password reveal toggle</td></tr>
+<tr><td>Copy</td><td><code>Copy</code></td><td>Copy-to-clipboard</td></tr>
+<tr><td>Search</td><td><code>Search</code></td><td>Public nav search modal</td></tr>
+<tr><td>Lock</td><td><code>Lock</code></td><td>Auth pages</td></tr>
+<tr><td>Mail</td><td><code>Mail</code></td><td>Auth, contact form</td></tr>
+<tr><td>Bell</td><td><code>Bell</code></td><td>Notifications (sidebar)</td></tr>
+<tr><td>Sun / Moon / Monitor</td><td>(ThemeToggle)</td><td>Light / dark / system</td></tr>
+</tbody>
+</table>
+<h3 id="decorative-svg-marks">Decorative SVG marks</h3>
+<p>The editorial public site uses three small marks inline:</p>
+<ul>
+<li><code>✦</code> — 4-pointed star, used as list-item terminator
+(<code>&lt;span className=&quot;text-aerojet-blue/40&quot;&gt;✦&lt;/span&gt;</code>).</li>
+<li><code>▸</code> — chevron used in dark variants for &quot;step X&quot; markers
+(<code>&lt;span className=&quot;text-amber-400&quot;&gt;›&lt;/span&gt;</code>).</li>
+<li><code>№ 001</code> — typography pattern in the design-lab masthead.</li>
+</ul>
+<p>These are <strong>typographic glyphs</strong>, not icons, and the rule &quot;no emoji&quot;
+applies to UI controls only.</p>
+<section class="he-section" id="72-imagery"><div class="he-section__num">02 · 7.2 · Imagery</div><h2 class="he-section__title">7.2 · Imagery</h2></section>
+<p>All marketing photography lives in <code>public/images/</code>. The
 <code>app/design-lab/shared.tsx</code> file centralises every image path so a
-designer can swap shots in one place.<h3 id="hero-set">Hero set</h3>/images/hero/hero-slide1.webp   — students in classroom
+designer can swap shots in one place.</p>
+<h3 id="hero-set">Hero set</h3>
+<pre><code>/images/hero/hero-slide1.webp   — students in classroom
 /images/hero/hero-slide2.webp   — aircraft on runway
 /images/hero/hero-slide3.webp   — engineer inspecting engine
 /images/hero/hanger.webp        — interior hangar
@@ -48,21 +103,47 @@ designer can swap shots in one place.<h3 id="hero-set">Hero set</h3>/images/hero
 /images/hero/undercarage.webp   — undercarriage close-up
 /images/hero/takeoff.webp       — aircraft take-off
 /images/hero/aircraft-full.webp — full aircraft on tarmac
-<h3 id="other">Other</h3>/images/courses/aircraft-engine-crossection.webp
+</code></pre>
+<h3 id="other">Other</h3>
+<pre><code>/images/courses/aircraft-engine-crossection.webp
 /images/careers/aircraftcareers.webp
 /images/home/al4.webp
-<h3 id="imagery-rules">Imagery rules</h3>Format: <code>.webp</code> (Next/Image + Sharp pipeline).Quality: <code>quality={90}</code> on the live homepage hero.Sizes hint: <code>sizes="(max-width: 1024px) 100vw, 50vw"</code>.<code>priority</code> is set on the LCP candidate (<code>/images/home/al4.webp</code>).Optional <code>sepia-[0.15]</code> filter on the editorial "Who We Are" portrait.<code>aspect-3/4</code> (Tailwind 4) on hero portrait frames.All images are optimised through <code>sharp</code> (<code>package.json</code>) and resized
-via <code>convertImages.js</code> in the repo root.<section class="he-section" id="73-3d-vantajs"><div class="he-section__num">03 · 7.3 · 3D / Vanta.js</div><h2 class="he-section__title">7.3 · 3D / Vanta.js</h2><code>vanta</code> + <code>three</code> are installed (used by some portal pages for subtle
+</code></pre>
+<h3 id="imagery-rules">Imagery rules</h3>
+<ul>
+<li>Format: <code>.webp</code> (Next/Image + Sharp pipeline).</li>
+<li>Quality: <code>quality={90}</code> on the live homepage hero.</li>
+<li>Sizes hint: <code>sizes=&quot;(max-width: 1024px) 100vw, 50vw&quot;</code>.</li>
+<li><code>priority</code> is set on the LCP candidate (<code>/images/home/al4.webp</code>).</li>
+<li>Optional <code>sepia-[0.15]</code> filter on the editorial &quot;Who We Are&quot; portrait.</li>
+<li><code>aspect-3/4</code> (Tailwind 4) on hero portrait frames.</li>
+<li>All images are optimised through <code>sharp</code> (<code>package.json</code>) and resized
+via <code>convertImages.js</code> in the repo root.</li>
+</ul>
+<section class="he-section" id="73-3d-vantajs"><div class="he-section__num">03 · 7.3 · 3D / Vanta.js</div><h2 class="he-section__title">7.3 · 3D / Vanta.js</h2></section>
+<p><code>vanta</code> + <code>three</code> are installed (used by some portal pages for subtle
 background effects) — see <code>package.json</code>. Not currently on the public
-site. Treat as opt-in decoration only.<section class="he-section" id="74-logo"><div class="he-section__num">04 · 7.4 · Logo</div><h2 class="he-section__title">7.4 · Logo</h2>The Aerojet wordmark / brand logo is held in
+site. Treat as opt-in decoration only.</p>
+<section class="he-section" id="74-logo"><div class="he-section__num">04 · 7.4 · Logo</div><h2 class="he-section__title">7.4 · Logo</h2></section>
+<p>The Aerojet wordmark / brand logo is held in
 <code>public/favicon.ico</code> and <code>public/apple-touch-icon.webp</code> (referenced
 from <code>app/layout.tsx</code> <code>metadata.icons</code>). Brand mark for the live site
-is composed of the typographic "Aerojet" wordmark + a small icon, but
+is composed of the typographic &quot;Aerojet&quot; wordmark + a small icon, but
 there is no separate SVG logo file in the repo yet — that is a known
-gap to close.<section class="he-section" id="75-brand-voice-in-writing"><div class="he-section__num">05 · 7.5 · Brand voice in writing</div><h2 class="he-section__title">7.5 · Brand voice in writing</h2>Editorial public-site copy follows a few rules:Sentence case for H1/H2 (e.g. "Building the future of African
-aviation") — never ALL CAPS headings.ALL CAPS is reserved for short eyebrow / category labels
-(<code>— WHO WE ARE</code>, <code>PROGRAMMES</code>, <code>STEP_01</code>).Drop cap on the first paragraph of "Who We Are".Numbers: two-digit zero-pad (<code>01</code>, <code>02</code>).Always mention EASA Part-66 / Part-145 and Ghana on the
-first screen of the public site.
+gap to close.</p>
+<section class="he-section" id="75-brand-voice-in-writing"><div class="he-section__num">05 · 7.5 · Brand voice in writing</div><h2 class="he-section__title">7.5 · Brand voice in writing</h2></section>
+<p>Editorial public-site copy follows a few rules:</p>
+<ul>
+<li><strong>Sentence case</strong> for H1/H2 (e.g. &quot;Building the future of African
+aviation&quot;) — never ALL CAPS headings.</li>
+<li><strong>ALL CAPS</strong> is reserved for short eyebrow / category labels
+(<code>— WHO WE ARE</code>, <code>PROGRAMMES</code>, <code>STEP_01</code>).</li>
+<li>Drop cap on the first paragraph of &quot;Who We Are&quot;.</li>
+<li>Numbers: two-digit zero-pad (<code>01</code>, <code>02</code>).</li>
+<li>Always mention <strong>EASA Part-66 / Part-145</strong> and <strong>Ghana</strong> on the
+first screen of the public site.</li>
+</ul>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -83,7 +164,7 @@ first screen of the public site.
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

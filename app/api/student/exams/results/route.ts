@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStudent } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler, parsePagination } from '@/lib/api/response'
 
@@ -11,7 +11,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
   const where = { userId: user.id }
 
   const [results, total] = await Promise.all([
-    prisma.examResult.findMany({
+    prismaUnfiltered.examResult.findMany({
       where,
       include: {
         exam: {
@@ -22,7 +22,7 @@ export const GET = withErrorHandler(async (req: NextRequest) => {
       skip,
       take: limit,
     }),
-    prisma.examResult.count({ where }),
+    prismaUnfiltered.examResult.count({ where }),
   ])
 
   return apiSuccess({

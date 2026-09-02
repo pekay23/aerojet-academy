@@ -18,7 +18,7 @@ import {
   ArrowDown,
 } from 'lucide-react'
 import { toast } from 'sonner'
-import { updateExamBooking, deleteExamRecord } from '@/app/staff/actions'
+import { updateExamBooking, deleteExamRecord } from '@/app/staff/actions/index'
 import BookExamForStudentDialog from './BookExamForStudentDialog'
 import AddExamRecordDialog from './AddExamRecordDialog'
 import CertificateReleaseControl from './CertificateReleaseControl'

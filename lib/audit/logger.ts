@@ -1,4 +1,6 @@
 import 'server-only'
+import crypto from 'crypto'
+import { Prisma } from '@prisma/client'
 import prisma, { prismaUnfiltered } from '@/lib/prisma/client'
 
 export enum AuditAction {
@@ -49,18 +51,41 @@ interface AuditLogParams {
   entity?: string
   entityId?: string
   description?: string
-  changes?: any
+  changes?: Prisma.InputJsonValue
   ipAddress?: string
   userAgent?: string
-  details?: any // For backward compatibility
+  details?: Prisma.InputJsonValue // For backward compatibility
+}
+
+function computeHash(previousHash: string | null, action: string, entityId: string | undefined, changes: Prisma.InputJsonValue, timestamp: Date): string {
+  const data = [
+    previousHash || '',
+    action,
+    entityId || '',
+    JSON.stringify(changes || {}),
+    timestamp.toISOString(),
+  ].join('|')
+  return crypto.createHash('sha256').update(data).digest('hex')
 }
 
 /**
  * Logs a system or staff action to the audit_logs table.
+ * Implements hash chain: each entry's hash includes the previous entry's hash.
  */
-export async function logAuditEvent(params: AuditLogParams, tx?: any) {
+export async function logAuditEvent(params: AuditLogParams, tx?: Prisma.TransactionClient) {
   const client = tx || prisma
   try {
+    const timestamp = new Date()
+
+    // Fetch the most recent audit log entry for chain continuity
+    const lastEntry = await prismaUnfiltered.auditLog.findFirst({
+      orderBy: { createdAt: 'desc' },
+      select: { hash: true },
+    })
+
+    const previousHash = lastEntry?.hash || null
+    const hash = computeHash(previousHash, params.action, params.entityId, params.changes || params.details, timestamp)
+
     return await client.auditLog.create({
       data: {
         userId: params.userId,
@@ -72,6 +97,8 @@ export async function logAuditEvent(params: AuditLogParams, tx?: any) {
         changes: params.changes || params.details || {},
         ipAddress: params.ipAddress,
         userAgent: params.userAgent,
+        previousHash,
+        hash,
       },
     })
   } catch (error) {
@@ -93,7 +120,7 @@ export async function queryAuditLogs(params: {
   limit: number
   offset: number
 }) {
-  const where: any = {}
+  const where: Prisma.AuditLogWhereInput = {}
   if (params.action) where.action = params.action
   if (params.entity) where.entity = params.entity
   if (params.userId) where.userId = params.userId

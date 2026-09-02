@@ -4,7 +4,7 @@ import { apiCreated, apiError, withErrorHandler } from '@/lib/api/response'
 import { joinPoolSchema, validateBody } from '@/lib/validation/schemas'
 import { joinPool } from '@/lib/pools/operations'
 import { createAuditLog } from '@/lib/audit/logger'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getSystemSetting } from '@/lib/settings'
 
 export const POST = withErrorHandler(

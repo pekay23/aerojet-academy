@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>01-foundations · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,20 +27,78 @@
 <header>
   <p class="he-eyebrow">Design</p>
   <h1 class="he-title">01-foundations</h1>
-  <p class="he-deck"><p>s # 01 · Foundations…</p>
-</p>
+  <p class="he-deck">s # 01 · Foundations…</p>
 </header>
-<blockquote>Brand voice, color hex cheat-sheet, and where everything in the design
+<blockquote>
+<p>Brand voice, color hex cheat-sheet, and where everything in the design
 system actually lives. See <code>02-colors.md</code>, <code>03-typography.md</code>,
 <code>04-sizing.md</code>, <code>05-components.md</code>, <code>06-motion.md</code>, <code>07-icons-illustrations.md</code>
-for the deep references.</blockquote><section class="he-section" id="voice-visual-language"><div class="he-section__num">01 · Voice &amp; visual language</div><h2 class="he-section__title">Voice & visual language</h2>Editorial / aviation-meets-luxury. Headings in a serif (Playfair) for
+for the deep references.</p>
+</blockquote>
+<section class="he-section" id="voice-amp-visual-language"><div class="he-section__num">01 · Voice &amp;amp; visual language</div><h2 class="he-section__title">Voice &amp; visual language</h2></section>
+<ul>
+<li><strong>Editorial / aviation-meets-luxury.</strong> Headings in a serif (Playfair) for
 the public site; a geometric sans (Outfit) for the design-lab and a
-neutral sans (Inter) for body and portal UI.Three canonical "looks" coexist in the repo — visible in
-<code>app/design-lab/variants/</code>:Variant A / B — dark, technical, sci-fi cockpit (navy + sky blue).Variant C — editorial / newsprint (paper background, blue ink).Variant D / E — modern flat marketing (white, big type, accent pills).The public site is currently a Variant-C-style editorial layout
-(paper background, <code>text-aerojet-blue</code>, Playfair headings, <code>bg-paper</code>).The staff/student portals use a sidebar-based shadcn/ui layout on a
-near-white / near-black surface.<section class="he-section" id="where-every-token-comes-from"><div class="he-section__num">02 · Where every token comes from</div><h2 class="he-section__title">Where every token comes from</h2>ConcernFileColor & font CSS vars<code>app/globals.css</code>Tailwind theme<code>tailwind.config.ts</code>shadcn/ui base<code>components.json</code> (<code>baseColor: slate</code>)shadcn/ui tokens<code>components/ui/*</code>Public nav colors<code>components/layouts/PublicNav.tsx</code>Font loading<code>app/layout.tsx</code> (Inter / Outfit / Playfair)Dark mode toggle<code>next-themes</code> (<code>app/providers.tsx</code>)Theme defaults (DB)<code>ThemeConfig</code> Prisma modelBrand examples<code>app/(public)/_components/*.tsx</code>Home variants<code>app/design-lab/variants/*.tsx</code><section class="he-section" id="color-hex-cheat-sheet"><div class="he-section__num">03 · Color hex cheat-sheet</div><h2 class="he-section__title">Color hex cheat-sheet</h2>TokenHSLHexRole<code>--aero-blue</code><code>213 100% 18%</code><code>#002a5c</code>Brand primary / headings on paper<code>--aero-sky</code><code>210 82% 45%</code><code>#1f7ad6</code>Accent / interactive (light)<code>--aero-light</code><code>204 65% 40%</code><code>#2e7eb3</code>Mid-blue hover / link state<code>--aero-soft-blue</code><code>210 100% 40%</code><code>#0066ff</code>Focus ring / CTA hover<code>--aero-slate</code><code>210 29% 24%</code><code>#2c3e50</code>Body / heading on light bg<code>--aero-offwhite</code><code>0 0% 98%</code><code>#f9f9f9</code>Off-white surface<code>--public-primary</code><code>211 100% 18%</code><code>#002347</code>Public nav / footer primary<code>--public-secondary</code><code>212 82% 61%</code><code>#4993e4</code>Public nav CTA / accents<code>--public-dark</code><code>216 34% 25%</code><code>#2f3e57</code>Footer text / dark surface<code>bg-paper</code>—<code>#f7f3ec</code>Editorial page background<code>bg-paper-dark</code>—<code>#efe8dc</code>Editorial card surface<code>background-light</code>—<code>#f6f6f8</code>Dashboard light surface<code>background-dark</code>—<code>#101622</code>Dashboard dark surfaceSidebar bg (light)<code>222 47% 11%</code><code>#0f172a</code>Slate-900 dashboard chrome<blockquote>⚠️ All brand blues were deliberately darkened from their HSL
-prototypes to meet WCAG AA 4.5:1 contrast against white. Comments in
-<code>app/globals.css</code> preserve the original light-mode values for reference.</blockquote>
+neutral sans (Inter) for body and portal UI.</li>
+<li><strong>Three canonical &quot;looks&quot; coexist in the repo</strong> — visible in
+<code>app/design-lab/variants/</code>:
+<ul>
+<li><strong>Variant A / B</strong> — dark, technical, sci-fi cockpit (navy + sky blue).</li>
+<li><strong>Variant C</strong> — editorial / newsprint (paper background, blue ink).</li>
+<li><strong>Variant D / E</strong> — modern flat marketing (white, big type, accent pills).</li>
+</ul>
+</li>
+<li>The <strong>public site</strong> is currently a Variant-C-style editorial layout
+(paper background, <code>text-aerojet-blue</code>, Playfair headings, <code>bg-paper</code>).</li>
+<li>The <strong>staff/student portals</strong> use a sidebar-based shadcn/ui layout on a
+near-white / near-black surface.</li>
+</ul>
+<section class="he-section" id="where-every-token-comes-from"><div class="he-section__num">02 · Where every token comes from</div><h2 class="he-section__title">Where every token comes from</h2></section>
+<table>
+<thead>
+<tr><th>Concern</th><th>File</th></tr>
+</thead>
+<tbody>
+<tr><td>Color &amp; font CSS vars</td><td><code>app/globals.css</code></td></tr>
+<tr><td>Tailwind theme</td><td><code>tailwind.config.ts</code></td></tr>
+<tr><td>shadcn/ui base</td><td><code>components.json</code> (<code>baseColor: slate</code>)</td></tr>
+<tr><td>shadcn/ui tokens</td><td><code>components/ui/*</code></td></tr>
+<tr><td>Public nav colors</td><td><code>components/layouts/PublicNav.tsx</code></td></tr>
+<tr><td>Font loading</td><td><code>app/layout.tsx</code> (Inter / Outfit / Playfair)</td></tr>
+<tr><td>Dark mode toggle</td><td><code>next-themes</code> (<code>app/providers.tsx</code>)</td></tr>
+<tr><td>Theme defaults (DB)</td><td><code>ThemeConfig</code> Prisma model</td></tr>
+<tr><td>Brand examples</td><td><code>app/(public)/_components/*.tsx</code></td></tr>
+<tr><td>Home variants</td><td><code>app/design-lab/variants/*.tsx</code></td></tr>
+</tbody>
+</table>
+<section class="he-section" id="color-hex-cheat-sheet"><div class="he-section__num">03 · Color hex cheat-sheet</div><h2 class="he-section__title">Color hex cheat-sheet</h2></section>
+<table>
+<thead>
+<tr><th>Token</th><th>HSL</th><th>Hex</th><th>Role</th></tr>
+</thead>
+<tbody>
+<tr><td><code>--aero-blue</code></td><td><code>213 100% 18%</code></td><td><code>#002a5c</code></td><td>Brand primary / headings on paper</td></tr>
+<tr><td><code>--aero-sky</code></td><td><code>210 82% 45%</code></td><td><code>#1f7ad6</code></td><td>Accent / interactive (light)</td></tr>
+<tr><td><code>--aero-light</code></td><td><code>204 65% 40%</code></td><td><code>#2e7eb3</code></td><td>Mid-blue hover / link state</td></tr>
+<tr><td><code>--aero-soft-blue</code></td><td><code>210 100% 40%</code></td><td><code>#0066ff</code></td><td>Focus ring / CTA hover</td></tr>
+<tr><td><code>--aero-slate</code></td><td><code>210 29% 24%</code></td><td><code>#2c3e50</code></td><td>Body / heading on light bg</td></tr>
+<tr><td><code>--aero-offwhite</code></td><td><code>0 0% 98%</code></td><td><code>#f9f9f9</code></td><td>Off-white surface</td></tr>
+<tr><td><code>--public-primary</code></td><td><code>211 100% 18%</code></td><td><code>#002347</code></td><td>Public nav / footer primary</td></tr>
+<tr><td><code>--public-secondary</code></td><td><code>212 82% 61%</code></td><td><code>#4993e4</code></td><td>Public nav CTA / accents</td></tr>
+<tr><td><code>--public-dark</code></td><td><code>216 34% 25%</code></td><td><code>#2f3e57</code></td><td>Footer text / dark surface</td></tr>
+<tr><td><code>bg-paper</code></td><td>—</td><td><code>#f7f3ec</code></td><td>Editorial page background</td></tr>
+<tr><td><code>bg-paper-dark</code></td><td>—</td><td><code>#efe8dc</code></td><td>Editorial card surface</td></tr>
+<tr><td><code>background-light</code></td><td>—</td><td><code>#f6f6f8</code></td><td>Dashboard light surface</td></tr>
+<tr><td><code>background-dark</code></td><td>—</td><td><code>#101622</code></td><td>Dashboard dark surface</td></tr>
+<tr><td>Sidebar bg (light)</td><td><code>222 47% 11%</code></td><td><code>#0f172a</code></td><td>Slate-900 dashboard chrome</td></tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ All brand blues were deliberately <strong>darkened from their HSL
+prototypes</strong> to meet WCAG AA 4.5:1 contrast against white. Comments in
+<code>app/globals.css</code> preserve the original light-mode values for reference.</p>
+</blockquote>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -52,7 +111,7 @@ prototypes to meet WCAG AA 4.5:1 contrast against white. Comments in
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Award, FileText } from 'lucide-react'
 import { toast } from 'sonner'
-import { setCertificateRelease } from '@/app/staff/actions'
+import { setCertificateRelease } from '@/app/staff/actions/index'
 
 interface Props {
   studentId: string

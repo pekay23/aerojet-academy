@@ -1,5 +1,5 @@
 import React from 'react'
-import { Text, View, StyleSheet } from '@react-pdf/renderer'
+import { Text, View, StyleSheet, Image } from '@react-pdf/renderer'
 import { PDFBaseTemplate, PDFBaseTemplateProps } from '../PDFBaseTemplate'
 
 const COLORS = {
@@ -211,6 +211,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 1.4,
   },
+  qrCode: {
+    width: 50,
+    height: 50,
+    marginTop: 12,
+  },
+  qrLabel: {
+    fontSize: 6,
+    color: COLORS.slate,
+    marginTop: 3,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
 })
 
 export interface CertificateTemplateProps extends Omit<PDFBaseTemplateProps, 'children' | 'title'> {
@@ -223,6 +235,7 @@ export interface CertificateTemplateProps extends Omit<PDFBaseTemplateProps, 'ch
   totalPoints?: number
   percentage?: number
   passMarkPct?: number
+  qrDataUrl?: string
 }
 
 export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
@@ -235,6 +248,7 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
   totalPoints,
   percentage,
   passMarkPct,
+  qrDataUrl,
   ...baseProps
 }) => {
   const passed = percentage != null && passMarkPct != null && percentage >= passMarkPct
@@ -321,6 +335,13 @@ export const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
               programme and does not constitute an EASA Part-66 Aircraft Maintenance Licence.
             </Text>
           </View>
+
+          {qrDataUrl && (
+            <View style={{ alignItems: 'center', marginTop: 10 }}>
+              <Image src={qrDataUrl} style={styles.qrCode} />
+              <Text style={styles.qrLabel}>Scan to verify</Text>
+            </View>
+          )}
         </View>
       </View>
     </PDFBaseTemplate>

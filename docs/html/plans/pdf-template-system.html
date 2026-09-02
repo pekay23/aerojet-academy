@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>PDF Template Editor &amp; Signature Management · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,24 +27,56 @@
 <header>
   <p class="he-eyebrow">Plans</p>
   <h1 class="he-title">PDF Template Editor &amp; Signature Management</h1>
-  <p class="he-deck"><p>Build a staff-facing system for managing PDF templates, digital signatures, and document verification — integrated into the existing <strong>Staff Settings → PDF Templates</strong> tab.</p>
-</p>
+  <p class="he-deck">Build a staff-facing system for managing PDF templates, digital signatures, and document verification — integrated into the existing <strong>Staff Settings → PDF Templates</strong> tab.</p>
 </header>
-<section class="he-section" id="scope"><div class="he-section__num">01 · Scope</div><h2 class="he-section__title">Scope</h2><h3 id="template-configuration-data-driven">Template Configuration (Data-Driven)</h3>Staff can customize the content of each template (text fields, labels, descriptions, accreditation text, numbering format) through a form UI. The underlying React components remain the same — they become data-driven instead of hardcoded.<blockquote>[!IMPORTANT]
-This is NOT a drag-and-drop layout builder. Templates are pre-built React components. What staff can edit is the text content, signatures, numbering, and branding within each template. Creating a "new template" means cloning an existing configuration and customizing its content. New layouts require developer work.</blockquote><h3 id="signature-management">Signature Management</h3>Staff can upload, manage, and assign signature images to template positions (e.g., "Training Manager", "Academy Director"). Signatures render as images above the signature line in PDFs. Signatures support expiry dates for role change tracking.<h3 id="document-verification-qr-codes">Document Verification (QR Codes)</h3>Every generated document gets a unique verification code and QR code embedded in the PDF. Anyone can scan the QR or visit a public URL to verify the document's authenticity — critical for an aviation training academy issuing EASA-adjacent credentials.<h3 id="certificate-numbering">Certificate Numbering</h3>Configurable per-template numbering format (e.g., <code>CERT-{YYYY}-{SEQ:4}</code> → <code>CERT-2026-0089</code>). Sequence auto-increments per template type per year.<section class="he-section" id="user-review-required"><div class="he-section__num">02 · User Review Required</div><h2 class="he-section__title">User Review Required</h2><blockquote>[!WARNING]
-Template Types: Currently there are 2 template layouts (Certificate, Transcript). New layouts require code changes, but all content within them is editable by staff. Staff can clone templates to create variations (e.g., "Certificate - B1.1", "Certificate - B2").</blockquote><blockquote>[!IMPORTANT]
-Signature Storage: Signatures will be stored in Supabase Storage (<code>aerojet-documents/signatures/</code>) as PNG/JPG. They're read at PDF generation time and embedded as base64 data URIs.</blockquote><blockquote>[!IMPORTANT]
-QR Verification: This creates a public verification route (<code>/verify/[code]</code>) that anyone can access without authentication. It only reveals: document type, recipient name, issue date, certificate number, and verification status. No sensitive academic data is exposed.</blockquote><section class="he-section" id="open-questions"><div class="he-section__num">03 · Open Questions</div><h2 class="he-section__title">Open Questions</h2>Signature approval workflow? — Should uploaded signatures require secondary approval, or is the uploading staff member's authority sufficient?Per-student vs. global signatures? — Are signatures always global (one "Academy Director" signature for all), or could different certificates need different signers?QR code placement — Bottom-right corner of the first page? Or in the footer? I'll default to bottom-right of the accreditation/disclaimer area.<section class="he-section" id="proposed-changes"><div class="he-section__num">04 · Proposed Changes</div><h2 class="he-section__title">Proposed Changes</h2><h3 id="database-schema">Database Schema</h3><h4 id="new-pdftemplate-model-stores-template-configurations">[NEW] <code>PdfTemplate</code> model — stores template configurations</h4>model PdfTemplate {
+<section class="he-section" id="scope"><div class="he-section__num">01 · Scope</div><h2 class="he-section__title">Scope</h2></section>
+<h3 id="template-configuration-data-driven">Template Configuration (Data-Driven)</h3>
+<p>Staff can customize the <strong>content</strong> of each template (text fields, labels, descriptions, accreditation text, numbering format) through a form UI. The underlying React components remain the same — they become data-driven instead of hardcoded.</p>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>This is NOT a drag-and-drop layout builder.</strong> Templates are pre-built React components. What staff can edit is the <strong>text content, signatures, numbering, and branding</strong> within each template. Creating a &quot;new template&quot; means cloning an existing configuration and customizing its content. New <strong>layouts</strong> require developer work.</p>
+</blockquote>
+<h3 id="signature-management">Signature Management</h3>
+<p>Staff can upload, manage, and assign signature images to template positions (e.g., &quot;Training Manager&quot;, &quot;Academy Director&quot;). Signatures render as images above the signature line in PDFs. Signatures support expiry dates for role change tracking.</p>
+<h3 id="document-verification-qr-codes">Document Verification (QR Codes)</h3>
+<p>Every generated document gets a unique verification code and QR code embedded in the PDF. Anyone can scan the QR or visit a public URL to verify the document's authenticity — critical for an aviation training academy issuing EASA-adjacent credentials.</p>
+<h3 id="certificate-numbering">Certificate Numbering</h3>
+<p>Configurable per-template numbering format (e.g., <code>CERT-{YYYY}-{SEQ:4}</code> → <code>CERT-2026-0089</code>). Sequence auto-increments per template type per year.</p>
+<hr />
+<section class="he-section" id="user-review-required"><div class="he-section__num">02 · User Review Required</div><h2 class="he-section__title">User Review Required</h2></section>
+<blockquote>
+<p>[!WARNING]
+<strong>Template Types</strong>: Currently there are 2 template layouts (Certificate, Transcript). New layouts require code changes, but all <strong>content</strong> within them is editable by staff. Staff can clone templates to create variations (e.g., &quot;Certificate - B1.1&quot;, &quot;Certificate - B2&quot;).</p>
+</blockquote>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>Signature Storage</strong>: Signatures will be stored in Supabase Storage (<code>aerojet-documents/signatures/</code>) as PNG/JPG. They're read at PDF generation time and embedded as base64 data URIs.</p>
+</blockquote>
+<blockquote>
+<p>[!IMPORTANT]
+<strong>QR Verification</strong>: This creates a <strong>public</strong> verification route (<code>/verify/[code]</code>) that anyone can access without authentication. It only reveals: document type, recipient name, issue date, certificate number, and verification status. No sensitive academic data is exposed.</p>
+</blockquote>
+<section class="he-section" id="open-questions"><div class="he-section__num">03 · Open Questions</div><h2 class="he-section__title">Open Questions</h2></section>
+<ol>
+<li><strong>Signature approval workflow?</strong> — Should uploaded signatures require secondary approval, or is the uploading staff member's authority sufficient?</li>
+<li><strong>Per-student vs. global signatures?</strong> — Are signatures always global (one &quot;Academy Director&quot; signature for all), or could different certificates need different signers?</li>
+<li><strong>QR code placement</strong> — Bottom-right corner of the first page? Or in the footer? I'll default to bottom-right of the accreditation/disclaimer area.</li>
+</ol>
+<hr />
+<section class="he-section" id="proposed-changes"><div class="he-section__num">04 · Proposed Changes</div><h2 class="he-section__title">Proposed Changes</h2></section>
+<h3 id="database-schema">Database Schema</h3>
+<h4 id="new-pdftemplate-model-stores-template-configurations">[NEW] <code>PdfTemplate</code> model — stores template configurations</h4>
+<pre><code class="language-prisma">model PdfTemplate {
   id                String                @id @default(cuid())
-  name              String                @unique  // "Default Certificate", "B1.1 Certificate"
-  slug              String                @unique  // "certificate-default"
+  name              String                @unique  // &quot;Default Certificate&quot;, &quot;B1.1 Certificate&quot;
+  slug              String                @unique  // &quot;certificate-default&quot;
   type              PdfTemplateType                 // CERTIFICATE | TRANSCRIPT
-  layout            String                @default("default")  // Which React component to use
+  layout            String                @default(&quot;default&quot;)  // Which React component to use
   status            PdfTemplateStatus     @default(DRAFT)
   isDefault         Boolean               @default(false)
   content           Json                            // Editable text fields (see below)
   branding          Json?                           // Per-template overrides: logo, watermark, footer
-  numberFormat      String?                         // e.g. "CERT-{YYYY}-{SEQ:4}"
+  numberFormat      String?                         // e.g. &quot;CERT-{YYYY}-{SEQ:4}&quot;
   lastSequence      Int                   @default(0) // Auto-increment counter
   lastSequenceYear  Int?                            // Reset sequence each year
   createdAt         DateTime              @default(now())
@@ -56,7 +89,7 @@ QR Verification: This creates a public verification route (<code>/verify/[code]<
 
   @@index([type, isDefault])
   @@index([status])
-  @@map("pdf_templates")
+  @@map(&quot;pdf_templates&quot;)
 }
 
 enum PdfTemplateType {
@@ -69,31 +102,41 @@ enum PdfTemplateStatus {
   ACTIVE      // Available for document generation
   ARCHIVED    // Retired, kept for audit trail
 }
-<code>content</code> JSON — template-specific editable fields:Certificate example:{
-  "title": "Certificate of Completion",
-  "subtitle": "This is to certify that",
-  "completionText": "has successfully completed the approved training programme in",
-  "accreditationText": "Aerojet Aviation Training Academy is an EASA Part-147 Approved Maintenance Training Organisation...",
-  "signatureLabels": ["Training Manager", "Academy Director"]
+</code></pre>
+<p><strong><code>content</code> JSON</strong> — template-specific editable fields:</p>
+<p>Certificate example:</p>
+<pre><code class="language-json">{
+  &quot;title&quot;: &quot;Certificate of Completion&quot;,
+  &quot;subtitle&quot;: &quot;This is to certify that&quot;,
+  &quot;completionText&quot;: &quot;has successfully completed the approved training programme in&quot;,
+  &quot;accreditationText&quot;: &quot;Aerojet Aviation Training Academy is an EASA Part-147 Approved Maintenance Training Organisation...&quot;,
+  &quot;signatureLabels&quot;: [&quot;Training Manager&quot;, &quot;Academy Director&quot;]
 }
-Transcript example:{
-  "sectionHeaders": {
-    "studentInfo": "Student Information",
-    "academicRecord": "Academic Record"
+</code></pre>
+<p>Transcript example:</p>
+<pre><code class="language-json">{
+  &quot;sectionHeaders&quot;: {
+    &quot;studentInfo&quot;: &quot;Student Information&quot;,
+    &quot;academicRecord&quot;: &quot;Academic Record&quot;
   },
-  "disclaimerText": "This is an Academy-issued record. It is not an official EASA certificate...",
-  "signatureLabels": ["Registrar"]
+  &quot;disclaimerText&quot;: &quot;This is an Academy-issued record. It is not an official EASA certificate...&quot;,
+  &quot;signatureLabels&quot;: [&quot;Registrar&quot;]
 }
-<code>branding</code> JSON — per-template overrides (falls back to global <code>pdf_*</code> system settings):{
-  "logoUrl": "/images/logos/AATA_logo_hor_onWhite.png",
-  "watermarkUrl": "/apple-touch-icon.png",
-  "watermarkOpacity": 0.15,
-  "footerText": "Small Engines Dept., ATTC\nKokomlemle, Accra — Ghana"
+</code></pre>
+<p><strong><code>branding</code> JSON</strong> — per-template overrides (falls back to global <code>pdf_*</code> system settings):</p>
+<pre><code class="language-json">{
+  &quot;logoUrl&quot;: &quot;/images/logos/AATA_logo_hor_onWhite.png&quot;,
+  &quot;watermarkUrl&quot;: &quot;/apple-touch-icon.png&quot;,
+  &quot;watermarkOpacity&quot;: 0.15,
+  &quot;footerText&quot;: &quot;Small Engines Dept., ATTC\nKokomlemle, Accra — Ghana&quot;
 }
-<h4 id="new-pdfsignature-model-uploaded-signature-images">[NEW] <code>PdfSignature</code> model — uploaded signature images</h4>model PdfSignature {
+</code></pre>
+<hr />
+<h4 id="new-pdfsignature-model-uploaded-signature-images">[NEW] <code>PdfSignature</code> model — uploaded signature images</h4>
+<pre><code class="language-prisma">model PdfSignature {
   id          String                  @id @default(cuid())
-  label       String                  // Role: "Training Manager", "Academy Director"
-  signerName  String                  // Person: "Capt. John Doe"
+  label       String                  // Role: &quot;Training Manager&quot;, &quot;Academy Director&quot;
+  signerName  String                  // Person: &quot;Capt. John Doe&quot;
   imageUrl    String                  // Supabase storage path
   isActive    Boolean                 @default(true)
   sortOrder   Int                     @default(0)
@@ -103,9 +146,11 @@ Transcript example:{
   uploadedBy  String?
   templates   PdfTemplateSignature[]
 
-  @@map("pdf_signatures")
+  @@map(&quot;pdf_signatures&quot;)
 }
-<h4 id="new-pdftemplatesignature-join-table">[NEW] <code>PdfTemplateSignature</code> join table</h4>model PdfTemplateSignature {
+</code></pre>
+<h4 id="new-pdftemplatesignature-join-table">[NEW] <code>PdfTemplateSignature</code> join table</h4>
+<pre><code class="language-prisma">model PdfTemplateSignature {
   id          String       @id @default(cuid())
   templateId  String
   signatureId String
@@ -114,14 +159,16 @@ Transcript example:{
   signature   PdfSignature @relation(fields: [signatureId], references: [id], onDelete: Cascade)
 
   @@unique([templateId, position])
-  @@map("pdf_template_signatures")
+  @@map(&quot;pdf_template_signatures&quot;)
 }
-<h4 id="new-documentverification-model-qr-verification-records">[NEW] <code>DocumentVerification</code> model — QR verification records</h4>model DocumentVerification {
+</code></pre>
+<h4 id="new-documentverification-model-qr-verification-records">[NEW] <code>DocumentVerification</code> model — QR verification records</h4>
+<pre><code class="language-prisma">model DocumentVerification {
   id              String         @id @default(cuid())
-  code            String         @unique  // Short unique code: "AJ-2026-A7X9K2"
+  code            String         @unique  // Short unique code: &quot;AJ-2026-A7X9K2&quot;
   templateId      String?
   recipientName   String         // Who the document was issued to
-  documentType    String         // "Certificate" | "Transcript"
+  documentType    String         // &quot;Certificate&quot; | &quot;Transcript&quot;
   certificateNo   String?        // The formatted certificate number
   issueDate       DateTime
   metadata        Json?          // Any extra display fields for the verification page
@@ -131,9 +178,161 @@ Transcript example:{
 
   @@index([code])
   @@index([recipientName])
-  @@map("document_verifications")
+  @@map(&quot;document_verifications&quot;)
 }
-<h3 id="backend-server-actions-utilities">Backend — Server Actions & Utilities</h3><h4 id="new-libpdf-templatests">[NEW] <code>lib/pdf-templates.ts</code></h4>Core template logic:<code>getDefaultTemplate(type)</code> — fetch active default template for a type<code>getTemplateById(id)</code> — single template with signatures<code>listTemplates(filter?)</code> — all templates for the settings UI<code>cloneTemplate(sourceId, newName)</code> — duplicate with new name/slug<code>getNextCertificateNumber(template)</code> — auto-increment sequence, format with template's <code>numberFormat</code><code>resolveTemplateContent(template, overrides?)</code> — merge template JSON with hardcoded defaults<h4 id="new-libdocument-verificationts">[NEW] <code>lib/document-verification.ts</code></h4><code>createVerificationRecord(data)</code> — generate unique code, store record<code>generateVerificationCode()</code> — collision-free short code (e.g., <code>AJ-2026-A7X9K2</code>)<code>verifyDocument(code)</code> — public lookup for verification page<h4 id="new-appstaffsettingsactionspdf-template-actionsts">[NEW] <code>app/staff/settings/_actions/pdf-template-actions.ts</code></h4>Server actions:<code>saveTemplateAction(formData)</code> — upsert template content + branding<code>setDefaultTemplateAction(id)</code> — mark template as default (unset previous)<code>cloneTemplateAction(id, newName)</code> — clone a template<code>archiveTemplateAction(id)</code> — set status to ARCHIVED<code>activateTemplateAction(id)</code> — set status to ACTIVE<code>uploadSignatureAction(formData)</code> — upload to Supabase Storage, create record<code>deleteSignatureAction(id)</code> — remove signature (check not in active use)<code>assignSignatureAction(templateId, signatureId, position)</code> — assign to slot<code>removeSignatureAssignmentAction(templateId, position)</code> — unassign<h4 id="modify-libpdf-settingsts">[MODIFY] <code>lib/pdf-settings.ts</code></h4><code>getResolvedSignatures(templateId)</code> — read signature images as base64 data URIsMerge per-template branding overrides with global system settings<h4 id="new-appverifycodepagetsx">[NEW] <code>app/verify/[code]/page.tsx</code></h4>Public verification page (no auth required):Accepts a verification code from URLShows: document type, recipient name, issue date, certificate number, verification statusClean branded page with academy logoReturns "Document not found" for invalid codes<h3 id="frontend-settings-ui">Frontend — Settings UI</h3><h4 id="modify-appstaffsettingscomponentspdfsettingsformtsx">[MODIFY] <code>app/staff/settings/_components/PDFSettingsForm.tsx</code></h4>Restructure into a tabbed panel with 3 sub-sections:Branding (existing) — global logo, watermark, footer text, opacityTemplates — template list with status badges, click to editSignatures — signature upload and management grid<h4 id="new-appstaffsettingscomponentstemplateeditortsx">[NEW] <code>app/staff/settings/_components/TemplateEditor.tsx</code></h4>Form-based editor for template content:Header: template name, type badge, status toggle (Draft/Active/Archived)Content Fields: dynamic form fields based on template typeCertificate: title, subtitle, completion text, accreditation textTranscript: section headers, disclaimer textNumbering: certificate number format with live preview (e.g., type <code>CERT-{YYYY}-{SEQ:4}</code> → see <code>CERT-2026-0001</code>)Signature Slots: dropdown pickers for each position, preview thumbnailsBranding Overrides: optional per-template logo/watermark/footer (expandable section, defaults to global)Actions: Save, Clone, Archive, Set as DefaultPreview updates live in the <code>LivePDFViewer</code> alongside<h4 id="new-appstaffsettingscomponentssignaturemanagertsx">[NEW] <code>app/staff/settings/_components/SignatureManager.tsx</code></h4>Card grid of uploaded signatures showing:Preview thumbnail (the signature image)Label (role title), signer nameExpiry date (with warning badge if expired/expiring soon)Which templates use this signatureUpload dialog: drag-and-drop PNG/JPG, max 500KB, transparent background recommendedEdit inline: label, signer name, expiry dateDelete with confirmation (blocked if assigned to an active template)<h4 id="modify-appstaffsettingscomponentslivepdfviewertsx">[MODIFY] <code>app/staff/settings/_components/LivePDFViewer.tsx</code></h4>Enhanced preview:Accept <code>templateConfig</code>, <code>signatures</code>, and <code>branding</code> propsStudent Picker: optional dropdown to load a real student's data for realistic preview (fetched via API)Template selector dropdown (switches between all active templates)Show signature images above signature lines when assignedShow QR code placeholder in preview positionShow certificate number with current format<h3 id="pdf-templates-make-data-driven">PDF Templates — Make Data-Driven</h3><h4 id="modify-componentspdftemplatescertificatetemplatetsx">[MODIFY] <code>components/pdf/templates/CertificateTemplate.tsx</code></h4>Accept optional <code>templateContent?: CertificateContent</code> propFall back to current hardcoded values if not provided (backward compat)Accept <code>signatures?: { label: string; signerName: string; imageDataUri: string }[]</code>Render signature image above the signature line when available, signer name belowAccept optional <code>verificationCode?: string</code> for QR code renderingAccept optional <code>certificateNumber?: string</code> for formatted number display<h4 id="modify-componentspdftemplatestranscripttemplatetsx">[MODIFY] <code>components/pdf/templates/TranscriptTemplate.tsx</code></h4>Same pattern — accept <code>templateContent</code>, <code>signatures</code>Editable: disclaimer text, section headersVerification QR code support<h4 id="modify-componentspdfpdfbasetemplatetsx">[MODIFY] <code>components/pdf/PDFBaseTemplate.tsx</code></h4>Add optional <code>verificationCode</code> propWhen provided, render a small QR code + verification URL text in the bottom-right area of the page (outside the main content, inside the footer zone)<h3 id="qr-code-integration">QR Code Integration</h3><h4 id="new-componentspdfqrcodeblocktsx">[NEW] <code>components/pdf/QRCodeBlock.tsx</code></h4>A react-pdf component that renders a QR code:Uses a server-side QR code generator (e.g., <code>qrcode</code> npm package) to generate a PNG data URIRenders as an <code><Image></code> in the PDFIncludes text: "Scan to verify • verify.aerojet-academy.com/AJ-2026-A7X9K2"Placed in the footer/accreditation area<section class="he-section" id="implementation-order"><div class="he-section__num">05 · Implementation Order</div><h2 class="he-section__title">Implementation Order</h2>Phase 1 — Schema & Migrations: Add new Prisma models, run migrationPhase 2 — Signatures: Upload, manage, render in PDFsPhase 3 — Template Editor: Content editing, cloning, lifecyclePhase 4 — Certificate Numbering: Format configuration, auto-incrementPhase 5 — QR Verification: Code generation, public verification page, PDF embeddingPhase 6 — Enhanced Preview: Student picker, live content updates<section class="he-section" id="verification-plan"><div class="he-section__num">06 · Verification Plan</div><h2 class="he-section__title">Verification Plan</h2><h3 id="automated-tests">Automated Tests</h3><code>bun run type-check</code> — all new types/models compile<code>bunx prisma validate</code> — schema validates<code>bunx prisma migrate dev</code> — migration applies cleanly<h3 id="manual-verification">Manual Verification</h3>Templates: Create → Edit content → Clone → Archive → verify lifecycleSignatures: Upload PNG → assign to template → verify in preview → verify in real PDFNumbering: Set format → generate certificate → verify number incrementsQR Code: Generate document → scan QR → verify public page shows correct dataPreview: Pick real student → verify data fills correctly in previewBackward compat: Existing certificate/transcript generation still works with no template configured (hardcoded defaults)
+</code></pre>
+<hr />
+<h3 id="backend-server-actions-amp-utilities">Backend — Server Actions &amp; Utilities</h3>
+<h4 id="new-libpdf-templatests">[NEW] <code>lib/pdf-templates.ts</code></h4>
+<p>Core template logic:</p>
+<ul>
+<li><code>getDefaultTemplate(type)</code> — fetch active default template for a type</li>
+<li><code>getTemplateById(id)</code> — single template with signatures</li>
+<li><code>listTemplates(filter?)</code> — all templates for the settings UI</li>
+<li><code>cloneTemplate(sourceId, newName)</code> — duplicate with new name/slug</li>
+<li><code>getNextCertificateNumber(template)</code> — auto-increment sequence, format with template's <code>numberFormat</code></li>
+<li><code>resolveTemplateContent(template, overrides?)</code> — merge template JSON with hardcoded defaults</li>
+</ul>
+<h4 id="new-libdocument-verificationts">[NEW] <code>lib/document-verification.ts</code></h4>
+<ul>
+<li><code>createVerificationRecord(data)</code> — generate unique code, store record</li>
+<li><code>generateVerificationCode()</code> — collision-free short code (e.g., <code>AJ-2026-A7X9K2</code>)</li>
+<li><code>verifyDocument(code)</code> — public lookup for verification page</li>
+</ul>
+<h4 id="new-appstaffsettingsactionspdf-template-actionsts">[NEW] <code>app/staff/settings/_actions/pdf-template-actions.ts</code></h4>
+<p>Server actions:</p>
+<ul>
+<li><code>saveTemplateAction(formData)</code> — upsert template content + branding</li>
+<li><code>setDefaultTemplateAction(id)</code> — mark template as default (unset previous)</li>
+<li><code>cloneTemplateAction(id, newName)</code> — clone a template</li>
+<li><code>archiveTemplateAction(id)</code> — set status to ARCHIVED</li>
+<li><code>activateTemplateAction(id)</code> — set status to ACTIVE</li>
+<li><code>uploadSignatureAction(formData)</code> — upload to Supabase Storage, create record</li>
+<li><code>deleteSignatureAction(id)</code> — remove signature (check not in active use)</li>
+<li><code>assignSignatureAction(templateId, signatureId, position)</code> — assign to slot</li>
+<li><code>removeSignatureAssignmentAction(templateId, position)</code> — unassign</li>
+</ul>
+<h4 id="modify-libpdf-settingsts">[MODIFY] <code>lib/pdf-settings.ts</code></h4>
+<ul>
+<li><code>getResolvedSignatures(templateId)</code> — read signature images as base64 data URIs</li>
+<li>Merge per-template branding overrides with global system settings</li>
+</ul>
+<h4 id="new-appverifycodepagetsx">[NEW] <code>app/verify/[code]/page.tsx</code></h4>
+<p>Public verification page (no auth required):</p>
+<ul>
+<li>Accepts a verification code from URL</li>
+<li>Shows: document type, recipient name, issue date, certificate number, verification status</li>
+<li>Clean branded page with academy logo</li>
+<li>Returns &quot;Document not found&quot; for invalid codes</li>
+</ul>
+<hr />
+<h3 id="frontend-settings-ui">Frontend — Settings UI</h3>
+<h4 id="modify-appstaffsettingscomponentspdfsettingsformtsx">[MODIFY] <code>app/staff/settings/_components/PDFSettingsForm.tsx</code></h4>
+<p>Restructure into a tabbed panel with 3 sub-sections:</p>
+<ol>
+<li><strong>Branding</strong> (existing) — global logo, watermark, footer text, opacity</li>
+<li><strong>Templates</strong> — template list with status badges, click to edit</li>
+<li><strong>Signatures</strong> — signature upload and management grid</li>
+</ol>
+<h4 id="new-appstaffsettingscomponentstemplateeditortsx">[NEW] <code>app/staff/settings/_components/TemplateEditor.tsx</code></h4>
+<p>Form-based editor for template content:</p>
+<ul>
+<li><strong>Header</strong>: template name, type badge, status toggle (Draft/Active/Archived)</li>
+<li><strong>Content Fields</strong>: dynamic form fields based on template type
+<ul>
+<li>Certificate: title, subtitle, completion text, accreditation text</li>
+<li>Transcript: section headers, disclaimer text</li>
+</ul>
+</li>
+<li><strong>Numbering</strong>: certificate number format with live preview (e.g., type <code>CERT-{YYYY}-{SEQ:4}</code> → see <code>CERT-2026-0001</code>)</li>
+<li><strong>Signature Slots</strong>: dropdown pickers for each position, preview thumbnails</li>
+<li><strong>Branding Overrides</strong>: optional per-template logo/watermark/footer (expandable section, defaults to global)</li>
+<li><strong>Actions</strong>: Save, Clone, Archive, Set as Default</li>
+<li>Preview updates live in the <code>LivePDFViewer</code> alongside</li>
+</ul>
+<h4 id="new-appstaffsettingscomponentssignaturemanagertsx">[NEW] <code>app/staff/settings/_components/SignatureManager.tsx</code></h4>
+<ul>
+<li>Card grid of uploaded signatures showing:
+<ul>
+<li>Preview thumbnail (the signature image)</li>
+<li>Label (role title), signer name</li>
+<li>Expiry date (with warning badge if expired/expiring soon)</li>
+<li>Which templates use this signature</li>
+</ul>
+</li>
+<li>Upload dialog: drag-and-drop PNG/JPG, max 500KB, transparent background recommended</li>
+<li>Edit inline: label, signer name, expiry date</li>
+<li>Delete with confirmation (blocked if assigned to an active template)</li>
+</ul>
+<h4 id="modify-appstaffsettingscomponentslivepdfviewertsx">[MODIFY] <code>app/staff/settings/_components/LivePDFViewer.tsx</code></h4>
+<p>Enhanced preview:</p>
+<ul>
+<li>Accept <code>templateConfig</code>, <code>signatures</code>, and <code>branding</code> props</li>
+<li><strong>Student Picker</strong>: optional dropdown to load a real student's data for realistic preview (fetched via API)</li>
+<li>Template selector dropdown (switches between all active templates)</li>
+<li>Show signature images above signature lines when assigned</li>
+<li>Show QR code placeholder in preview position</li>
+<li>Show certificate number with current format</li>
+</ul>
+<hr />
+<h3 id="pdf-templates-make-data-driven">PDF Templates — Make Data-Driven</h3>
+<h4 id="modify-componentspdftemplatescertificatetemplatetsx">[MODIFY] <code>components/pdf/templates/CertificateTemplate.tsx</code></h4>
+<ul>
+<li>Accept optional <code>templateContent?: CertificateContent</code> prop</li>
+<li>Fall back to current hardcoded values if not provided (backward compat)</li>
+<li>Accept <code>signatures?: { label: string; signerName: string; imageDataUri: string }[]</code></li>
+<li>Render signature image above the signature line when available, signer name below</li>
+<li>Accept optional <code>verificationCode?: string</code> for QR code rendering</li>
+<li>Accept optional <code>certificateNumber?: string</code> for formatted number display</li>
+</ul>
+<h4 id="modify-componentspdftemplatestranscripttemplatetsx">[MODIFY] <code>components/pdf/templates/TranscriptTemplate.tsx</code></h4>
+<ul>
+<li>Same pattern — accept <code>templateContent</code>, <code>signatures</code></li>
+<li>Editable: disclaimer text, section headers</li>
+<li>Verification QR code support</li>
+</ul>
+<h4 id="modify-componentspdfpdfbasetemplatetsx">[MODIFY] <code>components/pdf/PDFBaseTemplate.tsx</code></h4>
+<ul>
+<li>Add optional <code>verificationCode</code> prop</li>
+<li>When provided, render a small QR code + verification URL text in the bottom-right area of the page (outside the main content, inside the footer zone)</li>
+</ul>
+<hr />
+<h3 id="qr-code-integration">QR Code Integration</h3>
+<h4 id="new-componentspdfqrcodeblocktsx">[NEW] <code>components/pdf/QRCodeBlock.tsx</code></h4>
+<p>A react-pdf component that renders a QR code:</p>
+<ul>
+<li>Uses a server-side QR code generator (e.g., <code>qrcode</code> npm package) to generate a PNG data URI</li>
+<li>Renders as an <code>&lt;Image&gt;</code> in the PDF</li>
+<li>Includes text: &quot;Scan to verify • verify.aerojet-academy.com/AJ-2026-A7X9K2&quot;</li>
+<li>Placed in the footer/accreditation area</li>
+</ul>
+<hr />
+<section class="he-section" id="implementation-order"><div class="he-section__num">05 · Implementation Order</div><h2 class="he-section__title">Implementation Order</h2></section>
+<ol>
+<li><strong>Phase 1 — Schema &amp; Migrations</strong>: Add new Prisma models, run migration</li>
+<li><strong>Phase 2 — Signatures</strong>: Upload, manage, render in PDFs</li>
+<li><strong>Phase 3 — Template Editor</strong>: Content editing, cloning, lifecycle</li>
+<li><strong>Phase 4 — Certificate Numbering</strong>: Format configuration, auto-increment</li>
+<li><strong>Phase 5 — QR Verification</strong>: Code generation, public verification page, PDF embedding</li>
+<li><strong>Phase 6 — Enhanced Preview</strong>: Student picker, live content updates</li>
+</ol>
+<section class="he-section" id="verification-plan"><div class="he-section__num">06 · Verification Plan</div><h2 class="he-section__title">Verification Plan</h2></section>
+<h3 id="automated-tests">Automated Tests</h3>
+<ul>
+<li><code>bun run type-check</code> — all new types/models compile</li>
+<li><code>bunx prisma validate</code> — schema validates</li>
+<li><code>bunx prisma migrate dev</code> — migration applies cleanly</li>
+</ul>
+<h3 id="manual-verification">Manual Verification</h3>
+<ol>
+<li><strong>Templates</strong>: Create → Edit content → Clone → Archive → verify lifecycle</li>
+<li><strong>Signatures</strong>: Upload PNG → assign to template → verify in preview → verify in real PDF</li>
+<li><strong>Numbering</strong>: Set format → generate certificate → verify number increments</li>
+<li><strong>QR Code</strong>: Generate document → scan QR → verify public page shows correct data</li>
+<li><strong>Preview</strong>: Pick real student → verify data fills correctly in preview</li>
+<li><strong>Backward compat</strong>: Existing certificate/transcript generation still works with no template configured (hardcoded defaults)</li>
+</ol>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -160,7 +359,7 @@ Transcript example:{
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

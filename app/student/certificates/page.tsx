@@ -1,9 +1,12 @@
 import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { Award, Download, Calendar, AlertCircle, Lock, FileText } from 'lucide-react'
+import { format } from 'date-fns'
 
 import { getAuthSession } from '@/lib/auth/helpers'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
+import { SortableTh } from '@/components/ui/sortable-th'
+import { buildOrderBy } from '@/lib/utils/build-order-by'
 import {
   canAccessFeature,
   getEnrollmentMilestoneStatus,
@@ -12,6 +15,16 @@ import {
 } from '@/lib/access-control'
 import { getCertificateEligibility } from '@/lib/certificates/eligibility'
 import { PaymentRequiredBanner } from '../_components/PaymentRequiredBanner'
+
+type SortKey = 'module' | 'exam' | 'score' | 'result' | 'date'
+
+const ALLOWED_SORT_KEYS = {
+  module: 'moduleCode',
+  exam: 'exam.examComponent.course.name',
+  score: 'percentage',
+  result: 'passed',
+  date: 'exam.examDate',
+} as const satisfies Record<SortKey, string>
 
 export const metadata: Metadata = {
   title: 'Certificates | Student Portal',
@@ -71,12 +84,12 @@ export default async function CertificatesPage({
 
   const [eligibility, examResults] = await Promise.all([
     getCertificateEligibility(session.user.id),
-    prisma.examResult.findMany({
+    prismaUnfiltered.examResult.findMany({
       where: { userId: session.user.id },
       include: {
         exam: { include: { examComponent: { include: { course: true } } } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: buildOrderBy<SortKey>(params, ALLOWED_SORT_KEYS, { createdAt: 'desc' }),
     }),
   ])
 

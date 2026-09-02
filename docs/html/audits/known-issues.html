@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Known Issues &amp; Pending Fixes · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +27,97 @@
 <header>
   <p class="he-eyebrow">Audits</p>
   <h1 class="he-title">Known Issues &amp; Pending Fixes</h1>
-  <p class="he-deck"><p>This document tracks persistent issues and bugs that are not yet fully resolved.</p>
-</p>
+  <p class="he-deck">This document tracks persistent issues and bugs that are not yet fully resolved.</p>
 </header>
-<section class="he-section" id="logo-aspect-ratio-css-warnings-resolved-2026-05-20"><div class="he-section__num">01 · 🖼️ Logo Aspect Ratio &amp; CSS Warnings — RESOLVED (2026-05-20)</div><h2 class="he-section__title">🖼️ Logo Aspect Ratio & CSS Warnings — RESOLVED (2026-05-20)</h2>Was: The AATA Logo triggered hydration / layout warnings in <code>not-found.tsx</code>, <code>loading.tsx</code>, and <code>(auth)/layout.tsx</code> because each call site mixed <code><Image width/height></code> with <code>style={{ width: 'auto', height: 'auto' }}</code>.Resolution: Centralised on <code>components/shared/Logo.tsx</code> — a single component that passes the intrinsic 700×156 dimensions and lets className-based sizing handle the rest (no inline <code>style</code>). Every entry point (auth error/not-found, root error/not-found, root loading, <code>(auth)</code> layout, DashboardSidebar, PublicNav) now uses it.<section class="he-section" id="dashboard-analytics-latency"><div class="he-section__num">02 · 🐢 Dashboard Analytics Latency</div><h2 class="he-section__title">🐢 Dashboard Analytics Latency</h2>Problem: Initial load of <code>/staff/reports</code> was slow (up to 75s in dev).Root cause (production): <code>lib/analytics/metrics.ts</code> used the RLS-wrapped <code>prisma</code> client even though staff pages are already auth-gated. Every count/aggregate paid a per-query <code>BEGIN/SET LOCAL/COMMIT</code> round-trip.Root cause (dev): Turbopack compile-on-demand for the 1427-line <code>app/staff/reports/page.tsx</code> dominates the first hit (~16.8s of <code>next.js:</code> time in the user's logs).Resolution applied:Switched <code>lib/analytics/metrics.ts</code> to <code>prismaUnfiltered as prisma</code> (no RLS overhead).Added composite index <code>Enrollment(@@index([status, enrolledAt]))</code> for the analytics window queries.Replaced bare <code>next/dynamic</code> chart imports with placeholders (<code>loading: () => <div style={{height:N}}></code>) so Recharts always sees non-zero parent dimensions — silences the <code>width(-1) height(-1)</code> console warnings.Still slow in dev: a follow-up refactor would split the single-page reports into one segment per tab so Turbopack only compiles the active tab. Not blocking production.<section class="he-section" id="email-verification-delays-hardened-2026-05-20"><div class="he-section__num">03 · ✉️ Email Verification Delays — HARDENED (2026-05-20)</div><h2 class="he-section__title">✉️ Email Verification Delays — HARDENED (2026-05-20)</h2>Was: Some users reported delays in receiving the <code>verifyToken</code> email.Root cause hypothesis: Resend transient errors (429 rate limit, 5xx, network) were retried zero times — a single failure meant no email.Resolution applied:<code>lib/email/sender.ts</code> now retries up to 3 times with exponential backoff (300ms → 600ms → 1200ms) for retryable errors (429, 5xx, ECONN*, fetch failed).Every send (success or failure) is logged to the new <code>EmailDelivery</code> table — visible in Settings → Email Delivery so admins can spot patterns without tailing server logs.New <code>EmailOptions.template</code> + <code>EmailOptions.userId</code> fields tag each send for filtering in the admin view.Dashboard alert fires when ≥1 email fails in the last 24h (CRITICAL at ≥10).Remaining: deliverability problems at the recipient's mail provider (SPF/DKIM, spam folder) are outside the app's control — see the admin Email Delivery tab for evidence of attempted delivery.<section class="he-section" id="uploadthing-feedback-resolved-2026-05-20"><div class="he-section__num">04 · 📄 UploadThing Feedback — RESOLVED (2026-05-20)</div><h2 class="he-section__title">📄 UploadThing Feedback — RESOLVED (2026-05-20)</h2>Was: The file picker sometimes reset or didn't show a clear "Uploaded" state until the user interacted with the form.Resolution: <code>components/shared/FileField.tsx</code> wraps <code>UploadButton</code> with explicit <code>empty → uploading → uploaded</code> states, a remove button, a view-file link, and an error-display surface. New consumers just pass <code>value</code> / <code>onChange</code>.<section class="he-section" id="prisma-enums-vs-db-enums"><div class="he-section__num">05 · 🧩 Prisma Enums vs DB Enums</div><h2 class="he-section__title">🧩 Prisma Enums vs DB Enums</h2>Problem: Occasional mismatches between Prisma-defined enums and existing database enums.Fix Strategy: Use the <code>migrate_enums.js</code> script to manually synchronize enums if <code>prisma migrate dev</code> fails.<section class="he-section" id="database-connection-safety"><div class="he-section__num">06 · 🔗 Database Connection Safety</div><h2 class="he-section__title">🔗 Database Connection Safety</h2>Problem: Cold starts or high concurrent traffic can lead to Prisma connection timeouts.Symptoms: <code>P2028: Transaction API error: Transaction already closed</code> or generic timeout errors during payment/booking.Status: Mitigated by increasing <code>$transaction</code> timeout to 30s and implementing robust error handling in <code>chargeWallet</code> and <code>joinPool</code> services.<section class="he-section" id="database-adapter-do-not-switch-to-prismaadapter-neon"><div class="he-section__num">07 · ⚠️ Database Adapter — DO NOT switch to @prisma/adapter-neon</div><h2 class="he-section__title">⚠️ Database Adapter — DO NOT switch to @prisma/adapter-neon</h2>Problem: Commit b0b5e73 switched from <code>@prisma/adapter-pg</code> to <code>@prisma/adapter-neon</code> + <code>ws</code>, which broke all Vercel runtime DB connections.Root Cause: The <code>ws</code> WebSocket module does not work in Vercel's Turbopack serverless bundles. The Neon serverless adapter is designed for edge/Cloudflare Workers environments, not Node.js serverless.Resolution: Reverted to <code>@prisma/adapter-pg</code> with standard <code>pg</code> Pool in commit 6ed1cd9.Rule: Always use <code>@prisma/adapter-pg</code> for production. Test any adapter changes against a live Vercel deployment before merging.<section class="he-section" id="local-development-neon-tcp-timeouts"><div class="he-section__num">08 · Local Development Neon TCP Timeouts</div><h2 class="he-section__title">Local Development Neon TCP Timeouts</h2>Problem: On some local networks, <code>pg</code> TCP connections to Neon can hang until the connection timeout even when the Neon HTTP/WebSocket driver works and Vercel remains healthy.Resolution: <code>next dev</code> dynamically uses the Neon WebSocket Prisma adapter for <code>*.neon.tech</code> URLs, while production keeps <code>@prisma/adapter-pg</code>.Rule: Keep this as a development-only exception. Do not import/configure <code>ws</code> for Vercel runtime, and use <code>AEROJET_LOCAL_DB_ADAPTER=pg</code> if local testing specifically needs the standard <code>pg</code> adapter.<section class="he-section" id="missing-error-boundaries-resolved-2026-05-20"><div class="he-section__num">09 · 🛡️ Missing Error Boundaries — RESOLVED (2026-05-20)</div><h2 class="he-section__title">🛡️ Missing Error Boundaries — RESOLVED (2026-05-20)</h2>Was: The (auth) route segment had no <code>error.tsx</code>, and (auth)/(portal) had no <code>not-found.tsx</code>.Impact (historical): Auth flow errors showed raw Next.js error pages instead of branded error UI.Resolution: Every portal segment (staff, student, instructor, applicant, examiner) now has a branded <code>not-found.tsx</code>. The examiner segment also gained <code>error.tsx</code>. <code>(auth)</code> already had both before this audit.<section class="he-section" id="clientserver-import-boundary"><div class="he-section__num">10 · ⚡ Client/Server Import Boundary</div><h2 class="he-section__title">⚡ Client/Server Import Boundary</h2>Problem: <code>@/lib/analytics/metrics</code> re-exports <code>formatCurrency</code> but imports <code>prisma</code>, creating a transitive server dependency. Client components importing from this module will fail with <code>Can't resolve 'async_hooks'</code>.Rule: Client components must import <code>formatCurrency</code> from <code>@/lib/currency</code> (client-safe), never from <code>@/lib/analytics/metrics</code>.Status: Resolved in v1.4.0 for <code>ReportsPanel.tsx</code>. Pattern documented here to prevent recurrence.<section class="he-section" id="otplib-v13-api"><div class="he-section__num">11 · 🔑 otplib v13 API</div><h2 class="he-section__title">🔑 otplib v13 API</h2>Problem: The project uses <code>otplib</code> v13 which has a different API from earlier versions. Only used for secret/URI generation.Rule: Always use named imports: <code>import { generateSecret, generateURI } from 'otplib'</code>. Use lowercase <code>algorithm: 'sha1'</code> (not <code>'SHA1'</code>). TOTP verification uses the custom <code>verifyTOTP()</code> from <code>lib/auth/totp.ts</code> (timing-safe comparison, replay protection via counter tracking), NOT otplib.Status: Resolved in v1.5.0. Documented here to prevent recurrence if adding new TOTP features.<section class="he-section" id="tailwind-v4-config-bridge"><div class="he-section__num">12 · 🎨 Tailwind v4 Config Bridge</div><h2 class="he-section__title">🎨 Tailwind v4 Config Bridge</h2>Status: The project uses Tailwind CSS v4 with the <code>@config '../tailwind.config.ts'</code> compatibility bridge in <code>globals.css</code>. This is the officially supported migration path and works correctly.Full CSS-first migration (moving all <code>theme.extend</code> values to <code>@theme {}</code> blocks in CSS) is optional and low priority. The current setup is stable and the config bridge has no performance overhead.When to migrate: Only consider if dropping <code>tailwind.config.ts</code> entirely becomes necessary (e.g., for CSS-only theming tooling). The <code>@config</code> approach will remain supported through the v4 lifecycle.<section class="he-section" id="prisma-json-field-null-filtering"><div class="he-section__num">13 · 📐 Prisma JSON Field Null Filtering</div><h2 class="he-section__title">📐 Prisma JSON Field Null Filtering</h2>Problem: Filtering Prisma JSON fields with <code>{ not: null }</code> produces a TypeScript error: <code>Type 'null' is not assignable to type 'InputJsonValue | JsonNullValueFilter'</code>.Rule: Use <code>Prisma.DbNull</code> instead of <code>null</code> when filtering JSON fields: <code>layout: { not: Prisma.DbNull }</code>. Requires <code>import { Prisma } from '@prisma/client'</code>.Status: Applied in exam seating query (v1.5.0). Documented here to prevent recurrence.
+<section class="he-section" id="logo-aspect-ratio-amp-css-warnings-resolved-2026-05-20"><div class="he-section__num">01 · 🖼️ Logo Aspect Ratio &amp;amp; CSS Warnings — RESOLVED (2026-05-20)</div><h2 class="he-section__title">🖼️ Logo Aspect Ratio &amp; CSS Warnings — RESOLVED (2026-05-20)</h2></section>
+<p><strong>Was</strong>: The AATA Logo triggered hydration / layout warnings in <code>not-found.tsx</code>, <code>loading.tsx</code>, and <code>(auth)/layout.tsx</code> because each call site mixed <code>&lt;Image width/height&gt;</code> with <code>style={{ width: 'auto', height: 'auto' }}</code>.</p>
+<p><strong>Resolution</strong>: Centralised on <code>components/shared/Logo.tsx</code> — a single component that passes the intrinsic 700×156 dimensions and lets className-based sizing handle the rest (no inline <code>style</code>). Every entry point (auth error/not-found, root error/not-found, root loading, <code>(auth)</code> layout, DashboardSidebar, PublicNav) now uses it.</p>
+<section class="he-section" id="dashboard-analytics-latency"><div class="he-section__num">02 · 🐢 Dashboard Analytics Latency</div><h2 class="he-section__title">🐢 Dashboard Analytics Latency</h2></section>
+<p><strong>Problem</strong>: Initial load of <code>/staff/reports</code> was slow (up to 75s in dev).</p>
+<ul>
+<li><strong>Root cause</strong> (production): <code>lib/analytics/metrics.ts</code> used the RLS-wrapped <code>prisma</code> client even though staff pages are already auth-gated. Every count/aggregate paid a per-query <code>BEGIN/SET LOCAL/COMMIT</code> round-trip.</li>
+<li><strong>Root cause</strong> (dev): Turbopack compile-on-demand for the 1427-line <code>app/staff/reports/page.tsx</code> dominates the first hit (~16.8s of <code>next.js:</code> time in the user's logs).</li>
+<li><strong>Resolution applied</strong>:
+<ol>
+<li>Switched <code>lib/analytics/metrics.ts</code> to <code>prismaUnfiltered as prisma</code> (no RLS overhead).</li>
+<li>Added composite index <code>Enrollment(@@index([status, enrolledAt]))</code> for the analytics window queries.</li>
+<li>Replaced bare <code>next/dynamic</code> chart imports with placeholders (<code>loading: () =&gt; &lt;div style={{height:N}}&gt;</code>) so Recharts always sees non-zero parent dimensions — silences the <code>width(-1) height(-1)</code> console warnings.</li>
+</ol>
+</li>
+<li><strong>Still slow in dev</strong>: a follow-up refactor would split the single-page reports into one segment per tab so Turbopack only compiles the active tab. Not blocking production.</li>
+</ul>
+<section class="he-section" id="email-verification-delays-hardened-2026-05-20"><div class="he-section__num">03 · ✉️ Email Verification Delays — HARDENED (2026-05-20)</div><h2 class="he-section__title">✉️ Email Verification Delays — HARDENED (2026-05-20)</h2></section>
+<p><strong>Was</strong>: Some users reported delays in receiving the <code>verifyToken</code> email.</p>
+<ul>
+<li><strong>Root cause hypothesis</strong>: Resend transient errors (429 rate limit, 5xx, network) were retried zero times — a single failure meant no email.</li>
+<li><strong>Resolution applied</strong>:
+<ol>
+<li><code>lib/email/sender.ts</code> now retries up to 3 times with exponential backoff (300ms → 600ms → 1200ms) for retryable errors (429, 5xx, ECONN*, fetch failed).</li>
+<li>Every send (success or failure) is logged to the new <code>EmailDelivery</code> table — visible in <strong>Settings → Email Delivery</strong> so admins can spot patterns without tailing server logs.</li>
+<li>New <code>EmailOptions.template</code> + <code>EmailOptions.userId</code> fields tag each send for filtering in the admin view.</li>
+<li>Dashboard alert fires when ≥1 email fails in the last 24h (CRITICAL at ≥10).</li>
+</ol>
+</li>
+<li><strong>Remaining</strong>: deliverability problems at the recipient's mail provider (SPF/DKIM, spam folder) are outside the app's control — see the admin Email Delivery tab for evidence of attempted delivery.</li>
+</ul>
+<section class="he-section" id="uploadthing-feedback-resolved-2026-05-20"><div class="he-section__num">04 · 📄 UploadThing Feedback — RESOLVED (2026-05-20)</div><h2 class="he-section__title">📄 UploadThing Feedback — RESOLVED (2026-05-20)</h2></section>
+<p><strong>Was</strong>: The file picker sometimes reset or didn't show a clear &quot;Uploaded&quot; state until the user interacted with the form.</p>
+<p><strong>Resolution</strong>: <code>components/shared/FileField.tsx</code> wraps <code>UploadButton</code> with explicit <code>empty → uploading → uploaded</code> states, a remove button, a view-file link, and an error-display surface. New consumers just pass <code>value</code> / <code>onChange</code>.</p>
+<section class="he-section" id="prisma-enums-vs-db-enums"><div class="he-section__num">05 · 🧩 Prisma Enums vs DB Enums</div><h2 class="he-section__title">🧩 Prisma Enums vs DB Enums</h2></section>
+<p><strong>Problem</strong>: Occasional mismatches between Prisma-defined enums and existing database enums.</p>
+<ul>
+<li><strong>Fix Strategy</strong>: Use the <code>migrate_enums.js</code> script to manually synchronize enums if <code>prisma migrate dev</code> fails.</li>
+</ul>
+<section class="he-section" id="database-connection-safety"><div class="he-section__num">06 · 🔗 Database Connection Safety</div><h2 class="he-section__title">🔗 Database Connection Safety</h2></section>
+<p><strong>Problem</strong>: Cold starts or high concurrent traffic can lead to Prisma connection timeouts.</p>
+<ul>
+<li><strong>Symptoms</strong>: <code>P2028: Transaction API error: Transaction already closed</code> or generic timeout errors during payment/booking.</li>
+<li><strong>Status</strong>: Mitigated by increasing <code>$transaction</code> timeout to 30s and implementing robust error handling in <code>chargeWallet</code> and <code>joinPool</code> services.</li>
+</ul>
+<section class="he-section" id="database-adapter-do-not-switch-to-prismaadapter-neon"><div class="he-section__num">07 · ⚠️ Database Adapter — DO NOT switch to @prisma/adapter-neon</div><h2 class="he-section__title">⚠️ Database Adapter — DO NOT switch to @prisma/adapter-neon</h2></section>
+<p><strong>Problem</strong>: Commit b0b5e73 switched from <code>@prisma/adapter-pg</code> to <code>@prisma/adapter-neon</code> + <code>ws</code>, which broke all Vercel runtime DB connections.</p>
+<ul>
+<li><strong>Root Cause</strong>: The <code>ws</code> WebSocket module does not work in Vercel's Turbopack serverless bundles. The Neon serverless adapter is designed for edge/Cloudflare Workers environments, not Node.js serverless.</li>
+<li><strong>Resolution</strong>: Reverted to <code>@prisma/adapter-pg</code> with standard <code>pg</code> Pool in commit 6ed1cd9.</li>
+<li><strong>Rule</strong>: Always use <code>@prisma/adapter-pg</code> for production. Test any adapter changes against a live Vercel deployment before merging.</li>
+</ul>
+<section class="he-section" id="local-development-neon-tcp-timeouts"><div class="he-section__num">08 · Local Development Neon TCP Timeouts</div><h2 class="he-section__title">Local Development Neon TCP Timeouts</h2></section>
+<p><strong>Problem</strong>: On some local networks, <code>pg</code> TCP connections to Neon can hang until the connection timeout even when the Neon HTTP/WebSocket driver works and Vercel remains healthy.</p>
+<ul>
+<li><strong>Resolution</strong>: <code>next dev</code> dynamically uses the Neon WebSocket Prisma adapter for <code>*.neon.tech</code> URLs, while production keeps <code>@prisma/adapter-pg</code>.</li>
+<li><strong>Rule</strong>: Keep this as a development-only exception. Do not import/configure <code>ws</code> for Vercel runtime, and use <code>AEROJET_LOCAL_DB_ADAPTER=pg</code> if local testing specifically needs the standard <code>pg</code> adapter.</li>
+</ul>
+<section class="he-section" id="missing-error-boundaries-resolved-2026-05-20"><div class="he-section__num">09 · 🛡️ Missing Error Boundaries — RESOLVED (2026-05-20)</div><h2 class="he-section__title">🛡️ Missing Error Boundaries — RESOLVED (2026-05-20)</h2></section>
+<p><strong>Was</strong>: The (auth) route segment had no <code>error.tsx</code>, and (auth)/(portal) had no <code>not-found.tsx</code>.</p>
+<ul>
+<li><strong>Impact (historical)</strong>: Auth flow errors showed raw Next.js error pages instead of branded error UI.</li>
+<li><strong>Resolution</strong>: Every portal segment (staff, student, instructor, applicant, examiner) now has a branded <code>not-found.tsx</code>. The examiner segment also gained <code>error.tsx</code>. <code>(auth)</code> already had both before this audit.</li>
+</ul>
+<section class="he-section" id="clientserver-import-boundary"><div class="he-section__num">10 · ⚡ Client/Server Import Boundary</div><h2 class="he-section__title">⚡ Client/Server Import Boundary</h2></section>
+<p><strong>Problem</strong>: <code>@/lib/analytics/metrics</code> re-exports <code>formatCurrency</code> but imports <code>prisma</code>, creating a transitive server dependency. Client components importing from this module will fail with <code>Can't resolve 'async_hooks'</code>.</p>
+<ul>
+<li><strong>Rule</strong>: Client components must import <code>formatCurrency</code> from <code>@/lib/currency</code> (client-safe), never from <code>@/lib/analytics/metrics</code>.</li>
+<li><strong>Status</strong>: Resolved in v1.4.0 for <code>ReportsPanel.tsx</code>. Pattern documented here to prevent recurrence.</li>
+</ul>
+<section class="he-section" id="otplib-v13-api"><div class="he-section__num">11 · 🔑 otplib v13 API</div><h2 class="he-section__title">🔑 otplib v13 API</h2></section>
+<p><strong>Problem</strong>: The project uses <code>otplib</code> v13 which has a different API from earlier versions. Only used for secret/URI generation.</p>
+<ul>
+<li><strong>Rule</strong>: Always use named imports: <code>import { generateSecret, generateURI } from 'otplib'</code>. Use lowercase <code>algorithm: 'sha1'</code> (not <code>'SHA1'</code>). TOTP <strong>verification</strong> uses the custom <code>verifyTOTP()</code> from <code>lib/auth/totp.ts</code> (timing-safe comparison, replay protection via counter tracking), NOT otplib.</li>
+<li><strong>Status</strong>: Resolved in v1.5.0. Documented here to prevent recurrence if adding new TOTP features.</li>
+</ul>
+<section class="he-section" id="tailwind-v4-config-bridge"><div class="he-section__num">12 · 🎨 Tailwind v4 Config Bridge</div><h2 class="he-section__title">🎨 Tailwind v4 Config Bridge</h2></section>
+<p><strong>Status</strong>: The project uses Tailwind CSS v4 with the <code>@config '../tailwind.config.ts'</code> compatibility bridge in <code>globals.css</code>. This is the officially supported migration path and works correctly.</p>
+<ul>
+<li><strong>Full CSS-first migration</strong> (moving all <code>theme.extend</code> values to <code>@theme {}</code> blocks in CSS) is optional and low priority. The current setup is stable and the config bridge has no performance overhead.</li>
+<li><strong>When to migrate</strong>: Only consider if dropping <code>tailwind.config.ts</code> entirely becomes necessary (e.g., for CSS-only theming tooling). The <code>@config</code> approach will remain supported through the v4 lifecycle.</li>
+</ul>
+<section class="he-section" id="prisma-json-field-null-filtering"><div class="he-section__num">13 · 📐 Prisma JSON Field Null Filtering</div><h2 class="he-section__title">📐 Prisma JSON Field Null Filtering</h2></section>
+<p><strong>Problem</strong>: Filtering Prisma JSON fields with <code>{ not: null }</code> produces a TypeScript error: <code>Type 'null' is not assignable to type 'InputJsonValue | JsonNullValueFilter'</code>.</p>
+<ul>
+<li><strong>Rule</strong>: Use <code>Prisma.DbNull</code> instead of <code>null</code> when filtering JSON fields: <code>layout: { not: Prisma.DbNull }</code>. Requires <code>import { Prisma } from '@prisma/client'</code>.</li>
+<li><strong>Status</strong>: Applied in exam seating query (v1.5.0). Documented here to prevent recurrence.</li>
+</ul>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -52,7 +140,7 @@
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

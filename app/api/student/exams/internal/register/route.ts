@@ -41,18 +41,23 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
     return apiError('No valid access code found for this session', 403)
   }
 
+  // Verify candidate has a registration record (created during access-code validation)
   const existing = await prismaUnfiltered.internalExamRegistration.findFirst({
     where: { sessionId: data.sessionId, userId: session.user.id },
   })
 
-  if (existing) {
-    return apiError('Registration already exists for this session', 409)
+  if (!existing) {
+    return apiError('No registration found. Please validate your access code first.', 403)
   }
 
-  const registration = await prismaUnfiltered.internalExamRegistration.create({
+  if (existing.status === 'COMPLETED') {
+    return apiError('Registration already completed for this session', 409)
+  }
+
+  // Update the registration with full candidate details
+  const registration = await prismaUnfiltered.internalExamRegistration.update({
+    where: { id: existing.id },
     data: {
-      sessionId: data.sessionId,
-      userId: session.user.id,
       fullName: data.fullName,
       dateOfBirth: new Date(data.dateOfBirth),
       nationality: data.nationality,
@@ -69,17 +74,18 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
       consentMonitoring: data.consentMonitoring,
       consentIdentity: data.consentIdentity,
       consentProcessing: data.consentProcessing,
+      status: 'COMPLETED',
     },
   })
 
   const ctx = await getRequestContext()
   await createAuditLog({
     userId: session.user.id,
-    action: AuditAction.CREATE,
+    action: AuditAction.UPDATE,
     entity: 'InternalExamRegistration',
     entityId: registration.id,
-    description: `Student registered for internal exam session ${data.sessionId}`,
-    changes: { sessionId: data.sessionId, fullName: data.fullName },
+    description: `Candidate completed pre-exam registration for session ${data.sessionId}`,
+    changes: { sessionId: data.sessionId, fullName: data.fullName, status: 'COMPLETED' },
     ipAddress: ctx.ipAddress ?? undefined,
     userAgent: ctx.userAgent ?? undefined,
   })

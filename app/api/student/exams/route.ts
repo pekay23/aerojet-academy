@@ -1,11 +1,11 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { requireStudent } from '@/lib/auth/helpers'
 import { apiSuccess, withErrorHandler } from '@/lib/api/response'
 
 export const GET = withErrorHandler(async (req: NextRequest) => {
   const user = await requireStudent()
-  const bookings = await prisma.examBooking.findMany({
+  const bookings = await prismaUnfiltered.examBooking.findMany({
     where: { userId: user.id },
     include: {
       exam: {

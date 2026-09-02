@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import {
   Users,
   RefreshCw,
@@ -20,6 +21,7 @@ import BulkActionsDropdown from './BulkActionsDropdown'
 import UsersTableFilters from './users-table/UsersTableFilters'
 import UsersTableRow from './users-table/UsersTableRow'
 import type { User } from './users-table/types'
+import { SortableTh } from '@/components/ui/sortable-th'
 
 import {
   bulkUpdateUserStatus,
@@ -30,6 +32,7 @@ import {
 import { toast } from 'sonner'
 
 export default function UsersTable({ initialTotal }: { initialTotal: number }) {
+  const searchParams = useSearchParams()
   const [users, setUsers] = useState<User[]>([])
   const [total, setTotal] = useState(initialTotal)
   const [loading, setLoading] = useState(true)
@@ -50,6 +53,10 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
         limit: String(perPage),
         ...(search && { search }),
       })
+      const sort = searchParams.get('sort')
+      const order = searchParams.get('order')
+      if (sort) params.set('sort', sort)
+      if (order) params.set('order', order)
       const res = await fetch(`/api/staff/users?${params}`)
       const data = await res.json()
 
@@ -63,7 +70,7 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
     } finally {
       setLoading(false)
     }
-  }, [role, status, search, page, perPage])
+  }, [role, status, search, page, perPage, searchParams])
 
   useEffect(() => {
     const t = setTimeout(fetchUsers, search ? 350 : 0)
@@ -234,14 +241,16 @@ export default function UsersTable({ initialTotal }: { initialTotal: number }) {
                     )}
                   </button>
                 </th>
-                {['User', 'Role', 'Status', 'Joined', 'Actions'].map((h) => (
-                  <th
-                    key={h}
-                    className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-500 uppercase"
-                  >
-                    {h}
-                  </th>
-                ))}
+                <SortableTh sortKey="name" label="User" />
+                <SortableTh sortKey="role" label="Role" />
+                <SortableTh sortKey="status" label="Status" />
+                <SortableTh sortKey="joined" label="Joined" />
+                <th
+                  key="actions"
+                  className="px-5 py-3 text-[10px] font-black tracking-wider text-slate-500 uppercase"
+                >
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">

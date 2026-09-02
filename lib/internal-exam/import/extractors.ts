@@ -1,5 +1,17 @@
 import 'server-only'
 
+interface RawQuestion {
+  text?: string
+  options?: unknown[]
+  correctAnswer?: string
+  correct_answer?: string
+  subTopic?: string
+  sub_topic?: string
+  difficulty?: 'EASY' | 'MEDIUM' | 'HARD'
+  points?: number
+  explanation?: string
+}
+
 export interface ExtractedQuestion {
   text: string
   options: string[]
@@ -97,7 +109,7 @@ export async function extractFromTxt(content: string): Promise<ExtractedQuestion
 export async function extractFromJson(content: string): Promise<ExtractedQuestion[]> {
   const parsed = JSON.parse(content)
   const arr = Array.isArray(parsed) ? parsed : [parsed]
-  return arr.map((q: any) => {
+  return arr.map((q: RawQuestion) => {
     const question: ExtractedQuestion = {
       text: q.text || '',
       options: Array.isArray(q.options) ? q.options : [],

@@ -30,7 +30,7 @@ describe('submitExaminerResults', () => {
   }
 
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
     ;(requireExaminer as any).mockResolvedValue(mockUser)
     prismaMock.examiner.findUnique.mockResolvedValue(mockExaminer)
     prismaMock.examSitting.findUnique.mockResolvedValue(mockSitting)

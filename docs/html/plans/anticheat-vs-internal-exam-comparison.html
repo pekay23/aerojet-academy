@@ -4,21 +4,22 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Anti-Cheat Exam System vs Internal Exam System — Comparison &amp; Integration Report · Aerojet Academy</title>
-<link rel="stylesheet" href="../design-tokens.css">
-<link rel="stylesheet" href="../docs.css">
+<link rel="stylesheet" href="../../design-tokens.css">
+<link rel="stylesheet" href="../../docs.css">
 </head>
 <body>
 <div class="he-shell he-shell--wide">
 
 <nav class="he-nav">
-  <a class="he-nav__brand" href="../index.html">Aerojet Academy <small>docs</small></a>
+  <a class="he-nav__brand" href="undefinedindex.html">Aerojet Academy <small>docs</small></a>
   <div class="he-nav__links">
-    <a href="../index.html">Index</a>
-    <a href="../architecture/system-overview.html">Architecture</a>
-    <a href="../guides/setup.html">Guides</a>
-    <a href="../audits/2026-05-20-comprehensive.html">Audits</a>
-    <a href="../plans/future-plans.html">Plans</a>
-    <a href="../design-system.html">Design</a>
+    <a href="undefinedindex.html">Index</a>
+    <a href="undefinedarchitecture/system-overview.html">Architecture</a>
+    <a href="undefinedguides/setup.html">Guides</a>
+    <a href="undefinedaudits/2026-05-20-comprehensive.html">Audits</a>
+    <a href="undefinedplans/future-plans.html">Plans</a>
+    <a href="undefineddesign-system.html">Design</a>
+    <a href="undefinedoperations/branch-strategy.html">Operations</a>
   </div>
 </nav>
 <div class="he-layout">
@@ -26,10 +27,382 @@
 <header>
   <p class="he-eyebrow">Plans</p>
   <h1 class="he-title">Anti-Cheat Exam System vs Internal Exam System — Comparison &amp; Integration Report</h1>
-  <p class="he-deck"><p><strong>Date:</strong> 2026-08-30 <strong>Audience:</strong> Backend agents, frontend agents, implementers <strong>Status:</strong> Comparative analysis — not yet implemented…</p>
-</p>
+  <p class="he-deck"><strong>Date:</strong> 2026-08-30 <strong>Audience:</strong> Backend agents, frontend agents, implementers <strong>Status:</strong> Comparative analysis — not yet implemented…</p>
 </header>
-<section class="he-section" id="1-executive-summary"><div class="he-section__num">01 · 1. Executive Summary</div><h2 class="he-section__title">1. Executive Summary</h2>Two exam-system plans exist for Aerojet Academy:PlanFileScopePrimary UsersInternal Exam System<code>docs/plans/internal-exam-system-ui-plan.md</code>Academy-internal MCQ exams for courses, classes, and instructorsStaff, Instructors, StudentsAnti-Cheat Exam System<code>.kilo/plans/1788099263147-anticheat-exam-system-plan.md</code>EASA Part-66/Part-147 aviation certification exams with strict anti-cheat controlsStaff, Instructors, Students, Examiners, ApplicantsKey finding: These plans are complementary, not competing. The Internal Exam System handles day-to-day class assessment; the Anti-Cheat Exam System handles high-stakes external certification. They share the same Aerojet codebase, auth layer, and Prisma pattern but differ in regulatory requirements, threat model, and exam lifecycle.Recommendation: Build the Internal Exam System first (Phases 1-5, ~5 weeks), then layer the Anti-Cheat Exam System as an extended module on top. The Anti-Cheat system reuses Internal Exam concepts (question banks, sessions, autosave) but adds mandatory anti-cheat controls, access-code gating, and EASA-specific compliance features.<section class="he-section" id="2-scope-use-case-comparison"><div class="he-section__num">02 · 2. Scope &amp; Use-Case Comparison</div><h2 class="he-section__title">2. Scope & Use-Case Comparison</h2><h3 id="21-internal-exam-system">2.1 Internal Exam System</h3>Purpose: Internal course assessment for Aerojet Academy students.Context: Academy-managed classes, instructors, and cohorts.Stakes: Medium — academic progress, not aviation licences.Delivery: Browser-based, desktop + tablet responsive.Regulatory: No external certification body oversight.Current state: Partially implemented schema (<code>InternalExamBank</code>, <code>InternalExamQuestion</code>, <code>InternalExamSession</code>). Staff UI exists. Instructor UI does not exist yet.<h3 id="22-anti-cheat-exam-system">2.2 Anti-Cheat Exam System</h3>Purpose: High-stakes EASA Part-66/Part-147 certification exams.Context: Approved Maintenance Training Organisation (MTO) examinations; candidates may be external to the academy.Stakes: High — determines EASA Aircraft Maintenance Licence (AML) eligibility.Delivery: Browser-based with optional Safe Exam Browser (SEB) lockdown; desktop-only by design.Regulatory: Must comply with EASA ED Decision 2023/019/R, NPA 2023-10, H.C.A.A. March 2025 requirements, FAA Part-147 §147.23.Current state: Planning only — no schema, no routes, no UI.<h3 id="23-feature-matrix">2.3 Feature Matrix</h3>FeatureInternal ExamAnti-Cheat ExamNotesMCQ delivery✅ Planned✅ PlannedShared coreEssay / subjective questions❌ Not planned✅ PlannedAnti-Cheat onlyQuestion bank with versions✅ Existing✅ PlannedAnti-Cheat adds approval workflowQuestion randomisation❌ Not planned✅ PlannedAnti-Cheat: per-candidate random paperOption randomisation❌ Not planned✅ PlannedAnti-Cheat: per-question option shuffleServer-authoritative timer✅ Partial (<code>expiresAt</code> + cron)✅ Planned (SSE/polling + DB deadline)Anti-Cheat stricterAuto-submit on expiry✅ Planned (cron)✅ PlannedSame mechanismAuto-submit on key press❌ Not planned✅ PlannedUser clarified: any key = auto-submit, NO confirmationFullscreen enforcement❌ Cosmetic only✅ PlannedAnti-Cheat: real Fullscreen API + overlayTab-switch detection❌ Not tracked server-side✅ PlannedAnti-Cheat: <code>visibilitychange</code> → violation tableClipboard block (copy/paste)❌ Not planned✅ PlannedAnti-Cheat: client-side <code>preventDefault</code>DevTools / PrintScreen block❌ Not planned✅ PlannedAnti-Cheat: keyboard hook + detectionWebcam proctoring❌ Not planned❌ Excluded by userUser confirmed: no webcam neededSEB (Safe Exam Browser)❌ Not planned✅ PlannedAnti-Cheat: optional but recommendedLive instructor monitoring✅ Planned (Realtime)✅ PlannedShared concept, different UIProctor review queue❌ Not planned✅ PlannedAnti-Cheat: violation review workflowRealtime monitoring✅ Planned (Supabase Realtime)✅ PlannedSame infra, different event typesClass scheduling✅ Planned❌ Not plannedInternal only; Anti-Cheat uses session windowsInstructor analytics✅ Planned✅ PlannedSharedQuestion import pipeline✅ Planned✅ PlannedShared (PDF/DOCX/JSON)RBAC / permissions✅ Existing + planned✅ PlannedAnti-Cheat maps to EASA rolesAudit log✅ Existing (<code>createAuditLog</code>)✅ Planned (hash-chain)Anti-Cheat adds cryptographic chainViolation tracking✅ Planned (<code>InternalExamViolation</code>)✅ Planned (<code>ExamViolation</code>)Same concept, different schemaRecovery / resume✅ Planned✅ PlannedAnti-Cheat: same pattern but stricterGDPR compliancePartialFull (DPIA, retention tiers)Anti-Cheat: behavioural data implicationsEASA compliance❌ Not applicable✅ FullAnti-Cheat: Part-66/Part-147 specific<section class="he-section" id="3-data-model-comparison"><div class="he-section__num">03 · 3. Data Model Comparison</div><h2 class="he-section__title">3. Data Model Comparison</h2><h3 id="31-internal-exam-schema-existing-planned">3.1 Internal Exam Schema (Existing + Planned)</h3>ModelPurposeKey Fields<code>InternalExamBank</code>Question bank<code>id</code>, <code>courseId</code>, <code>moduleCode</code>, <code>title</code>, <code>reviewState</code><code>InternalExamQuestion</code>Question<code>id</code>, <code>bankId</code>, <code>questionText</code>, <code>options</code>, <code>correctAnswer</code>, <code>explanation</code>, <code>knowledgeLevel</code><code>InternalExamQuestionVersion</code>Version history<code>id</code>, <code>questionId</code>, <code>changeType</code>, <code>changedById</code>, <code>changedAt</code><code>InternalExamBankInstructor</code>Instructor assignment<code>id</code>, <code>bankId</code>, <code>instructorId</code>, <code>canEdit</code>, <code>canReview</code>, <code>canMonitor</code>, <code>canPublish</code><code>InternalExamClassSchedule</code>Class scheduling<code>id</code>, <code>bankId</code>, <code>classId</code>, <code>scheduledStart</code>, <code>scheduledEnd</code>, <code>isActive</code><code>InternalExamSession</code>Exam session<code>id</code>, <code>studentId</code>, <code>bankId</code>, <code>classId</code>, <code>status</code>, <code>score</code>, <code>percentage</code>, <code>passed</code>, <code>expiresAt</code>, <code>lastActivityAt</code>, <code>timeExtensionSec</code><code>InternalExamAnswer</code>Student answer<code>id</code>, <code>sessionId</code>, <code>questionId</code>, <code>selectedAnswer</code>, <code>isCorrect</code><code>InternalExamViolation</code>Violation event<code>id</code>, <code>sessionId</code>, <code>studentId</code>, <code>type</code>, <code>severity</code>, <code>detail</code>, <code>reviewedAt</code>, <code>reviewOutcome</code><code>InternalExamReport</code>Post-exam report<code>id</code>, <code>sessionId</code>, <code>generatedAt</code><h3 id="32-anti-cheat-exam-schema-planned">3.2 Anti-Cheat Exam Schema (Planned)</h3>ModelPurposeKey Fields<code>Exam</code>Exam definition<code>id</code>, <code>title</code>, <code>moduleCode</code>, <code>licenceCategory</code>, <code>durationMinutes</code>, <code>passMark</code>, <code>config</code> (JSON), <code>status</code><code>ExamSession</code>Scheduled exam window<code>id</code>, <code>examId</code>, <code>startTime</code>, <code>endTime</code>, <code>location</code>, <code>invigilatorId</code><code>ExamAccessCode</code>One-time access code<code>id</code>, <code>sessionId</code>, <code>code</code>, <code>candidateId</code>, <code>used</code>, <code>usedAt</code>, <code>expiresAt</code><code>ExamRegistration</code>Pre-exam student form<code>id</code>, <code>sessionId</code>, <code>userId</code>, <code>fullName</code>, <code>email</code>, <code>dob</code>, <code>nationality</code>, <code>licenceCategory</code>, <code>moduleCode</code>, <code>examDate</code>, <code>examLocation</code>, <code>idDocumentType</code>, <code>idDocumentNumber</code>, <code>photoUrl</code>, <code>consentGiven</code>, <code>signatureData</code>, <code>retentionCategory</code><code>ExamAttempt</code>Candidate attempt<code>id</code>, <code>registrationId</code>, <code>examId</code>, <code>status</code>, <code>startedAt</code>, <code>submittedAt</code>, <code>score</code>, <code>passed</code>, <code>autoSubmitted</code>, <code>violationCount</code>, <code>certificateUrl</code>, <code>answers</code>, <code>violations</code><code>ExamAnswer</code>Answer per question<code>id</code>, <code>attemptId</code>, <code>questionId</code>, <code>selectedOption</code>, <code>textAnswer</code>, <code>isCorrect</code><code>ExamViolation</code>Violation event<code>id</code>, <code>attemptId</code>, <code>type</code>, <code>severity</code>, <code>detail</code>, <code>timestamp</code><code>ExamQuestion</code>Question<code>id</code>, <code>examId</code>, <code>questionText</code>, <code>questionType</code>, <code>options</code>, <code>correctAnswer</code>, <code>explanation</code>, <code>moduleSubsection</code>, <code>knowledgeLevel</code>, <code>sortOrder</code><h3 id="33-schema-gaps-overlaps">3.3 Schema Gaps & Overlaps</h3>Overlap (can be unified):<code>InternalExamQuestion</code> vs <code>ExamQuestion</code> — same purpose, different naming. Anti-Cheat adds <code>moduleSubsection</code>, <code>sortOrder</code> (EASA-specific). Internal Exam already has <code>knowledgeLevel</code>. Recommendation: Merge into a single <code>Question</code> model with an <code>examType</code> discriminator (<code>INTERNAL</code> vs <code>CERTIFICATION</code>).<code>InternalExamViolation</code> vs <code>ExamViolation</code> — same concept. Anti-Cheat adds <code>severity</code>, <code>detail</code>. Recommendation: Merge into <code>ExamViolation</code> with polymorphic <code>sessionId</code>/<code>attemptId</code> and a <code>source</code> enum.<code>InternalExamSession</code> vs <code>ExamAttempt</code> — Anti-Cheat's <code>ExamAttempt</code> is more granular (bound to <code>ExamRegistration</code>). Internal Exam's <code>InternalExamSession</code> is simpler. Recommendation: Keep <code>InternalExamSession</code> for internal flow; use <code>ExamAttempt</code> for certification flow.Gap (Anti-Cheat adds):<code>ExamAccessCode</code> — no equivalent in Internal Exam. Needed for external candidate gating.<code>ExamRegistration</code> — no equivalent. Pre-exam form captures EASA-required fields.<code>ExamSession</code> (scheduling window) — differs from <code>InternalExamClassSchedule</code>. Anti-Cheat uses time-bound access codes rather than class-linked windows.<code>Exam</code> (top-level exam definition) — no equivalent. Internal Exam uses <code>InternalExamBank</code> + <code>InternalExamClassSchedule</code> for the same purpose but with different semantics.Gap (Internal Exam adds):<code>InternalExamBankInstructor</code> — instructor-to-bank assignment with capability flags. Anti-Cheat does not model instructor permissions (relies on role-based guards).<code>InternalExamClassSchedule</code> — class-to-bank scheduling. Anti-Cheat uses session-level access codes instead.<code>InternalExamQuestionVersion</code> — version history per question. Anti-Cheat does not plan version history (relies on approval workflow).<section class="he-section" id="4-architecture-control-comparison"><div class="he-section__num">04 · 4. Architecture &amp; Control Comparison</div><h2 class="he-section__title">4. Architecture & Control Comparison</h2><h3 id="41-anti-cheat-controls">4.1 Anti-Cheat Controls</h3>ControlInternal ExamAnti-Cheat ExamSourceFullscreen lock❌ None✅ Fullscreen API + overlayAnti-Cheat §3.3Tab-switch detection❌ Client-only state✅ Server-side <code>visibilitychange</code> → <code>ExamViolation</code>Anti-Cheat §3.3, §5.1Clipboard block❌ Not planned✅ <code>preventDefault</code> on copy/paste/cutAnti-Cheat §3.3DevTools detection❌ Not planned✅ <code>debugger</code> timing + <code>outerWidth</code> checkAnti-Cheat §3.3PrintScreen block❌ Not planned✅ <code>keydown</code> interceptionAnti-Cheat §3.3Keyboard shortcut block❌ Not planned✅ Ctrl+C/V/P, F12, Alt+TabAnti-Cheat §3.3Multi-tab prevention❌ Not planned✅ <code>BroadcastChannel</code> + <code>localStorage</code>Anti-Cheat §3.3Webcam capture❌ Not planned❌ Excluded by userUser directiveSEB enforcement❌ Not planned✅ <code>.seb</code> config + BEK verificationAnti-Cheat §3.3Server-authoritative timer✅ Partial (<code>expiresAt</code> + cron)✅ Planned (SSE/polling + DB deadline)Anti-Cheat §3.4Auto-submit on key press❌ Not planned✅ Any key triggers submit, NO confirmationAnti-Cheat §3.5, User directiveAccess-code gating❌ Not planned✅ One-time, time-bound, candidate-boundAnti-Cheat §3.1, §3.2Pre-exam identity form❌ Not planned✅ Personal details, photo ID, consentAnti-Cheat §3.2Blind grading❌ Not planned✅ <code>SECURITY DEFINER</code> functionAnti-Cheat §3.6Hash-chain audit log❌ Not planned✅ Append-only with <code>previous_hash</code>Anti-Cheat §3.8<h3 id="42-recovery-time-preservation">4.2 Recovery & Time Preservation</h3>FeatureInternal ExamAnti-Cheat ExamHeartbeat endpoint✅ Planned (<code>POST /heartbeat</code>)❌ Not plannedServer-side auto-submit cron✅ Planned (<code>/api/cron/exam-timeout</code>)✅ PlannedTime extension✅ Planned (<code>timeExtensionSec</code>)❌ Not plannedResume after disconnect✅ Planned❌ Not plannedForce-submit by instructor✅ Planned❌ Not plannedVoid + retake✅ Planned❌ Not plannedFinding: The Internal Exam System has a more mature recovery model (heartbeat, resume, time extension, force-submit). The Anti-Cheat Exam System's stricter posture (no resume, no extension) aligns with EASA "controlled environment" requirements but lacks the operational resilience the Internal Exam System plans.Recommendation: Adopt the Internal Exam System's recovery primitives (heartbeat, auto-submit cron, force-submit) into the Anti-Cheat Exam System. For EASA compliance, restrict time extensions to invigilator-only actions with audit logging. Do not allow candidate-initiated resume without invigilator approval.<section class="he-section" id="5-realtime-monitoring-comparison"><div class="he-section__num">05 · 5. Realtime &amp; Monitoring Comparison</div><h2 class="he-section__title">5. Realtime & Monitoring Comparison</h2><h3 id="51-internal-exam-realtime">5.1 Internal Exam Realtime</h3>Events: <code>exam_started</code>, <code>exam_submitted</code>, <code>exam_voided</code>, <code>exam_published</code>Subscription model: GET-first initial fetch + Realtime deltasThrottling: Per-student 5s throttle, debounced batch refreshInstructor monitor: Live session table with progress, score, statusStudent side: No live monitoring needed<h3 id="52-anti-cheat-exam-realtime">5.2 Anti-Cheat Exam Realtime</h3>Events: Not explicitly defined, but violation events stream to serverSubscription model: Not planned for live monitoring (relies on post-exam review)Throttling: Not addressedInstructor/proctor monitor: Not planned in Phase 1Student side: Anti-cheat events POSTed to serverFinding: The Internal Exam System has a complete realtime monitoring architecture with throttling, fallback, and RLS. The Anti-Cheat Exam System has no realtime monitoring plan — violations are logged but not streamed to a live proctor dashboard.Recommendation: Adopt the Internal Exam System's realtime monitoring pattern for the Anti-Cheat Exam System's proctor dashboard. Stream <code>ExamViolation</code> INSERT events to the proctor view using the same GET-first + Realtime delta pattern. Apply the same throttling, debouncing, and RLS rules.<section class="he-section" id="6-api-route-comparison"><div class="he-section__num">06 · 6. API Route Comparison</div><h2 class="he-section__title">6. API Route Comparison</h2><h3 id="61-internal-exam-api-routes">6.1 Internal Exam API Routes</h3>RoutePurpose<code>GET /api/staff/exams/internal/operations/sessions</code>Admin session list<code>POST /api/student/exams/internal/start</code>Student starts exam<code>GET /api/student/exams/internal/session</code>Student session detail<code>POST /api/student/exams/internal/heartbeat</code>Student heartbeat<code>POST /api/student/exams/internal/violation</code>Student violation report<code>POST /api/staff/exams/internal/sessions/[id]/extend</code>Instructor extends time<code>POST /api/staff/exams/internal/sessions/[id]/force-submit</code>Instructor force-submits<code>POST /api/staff/exams/internal/sessions/[id]/void</code>Instructor voids session<code>GET /api/instructor/exams/banks</code>Instructor bank list<code>GET /api/instructor/exams/classes</code>Instructor class list<code>POST /api/instructor/exams/classes/[classId]/start</code>Instructor starts class exam<h3 id="62-anti-cheat-exam-api-routes">6.2 Anti-Cheat Exam API Routes</h3>RoutePurpose<code>GET /api/exams</code>Exam CRUD<code>GET /api/exams/[id]/access-codes</code>Generate/validate access codes<code>GET /api/exams/[id]/attempts</code>Create attempt, submit, grade<code>POST /api/exams/proctoring/events</code>Receive client-side violation events<code>POST /api/exams/proctoring/webcam</code>Upload webcam snapshots (excluded by user)<code>GET /api/exams/certificate/[attemptId]</code>Generate signed PDF (excluded by user)<code>GET /api/exams/audit</code>Query audit logFinding: The Internal Exam System has a richer instructor action set (extend, force-submit, void). The Anti-Cheat Exam System has a richer candidate-facing set (access codes, pre-exam form, certificate).Recommendation: Merge the action sets. The Anti-Cheat Exam System needs instructor recovery actions (extend, force-submit, void) from the Internal Exam System. The Internal Exam System needs access-code gating and pre-exam forms from the Anti-Cheat Exam System if it ever handles external candidates.<section class="he-section" id="7-llm-council-remediation-integration"><div class="he-section__num">07 · 7. LLM Council Remediation Integration</div><h2 class="he-section__title">7. LLM Council Remediation Integration</h2>The Anti-Cheat Exam System plan was audited by three LLM Council personas. The following sections integrate those findings into this comparison, with specific implementation guidance.Excluded per user directive:❌ Webcam proctoring (not needed)❌ Certificate generation (not needed yet)❌ Auto-submit confirmation dialog (strict keypress = immediate auto-submit)<h3 id="71-must-fix-items-blocking">7.1 MUST-FIX Items (Blocking)</h3>#IssueSourceResolutionImplementation Guidance1<code>SECURITY DEFINER</code> grading function lacks <code>search_path</code> hardeningSecurity AuditorAdd <code>SET search_path = pg_catalog, public</code>Add Prisma migration with explicit <code>search_path</code>. Add lint script scanning migrations for <code>SECURITY DEFINER</code>.2Server-side paper binding & answer validation missingSecurity AuditorRe-derive randomised paper server-side; reject answers not in paperStore <code>ExamAttempt.questionOrder</code> JSONB. In <code>submit_attempt</code>, JOIN with question order and reject unknown <code>questionId</code>s. Never trust client <code>isCorrect</code>.3Audit immutability claimed but not enforcedSecurity Auditor + EASA ComplianceAdd <code>BEFORE UPDATE/DELETE</code> trigger on <code>audit_logs</code>; add <code>CHECK (previous_hash IS NOT NULL)</code>Prisma migration with <code>CREATE TRIGGER audit_logs_no_modify BEFORE UPDATE OR DELETE ON audit_logs FOR EACH ROW EXECUTE FUNCTION deny_audit_modification()</code>.4EASA "controlled environment" gap unresolvedEASA ComplianceRestrict to SEB + managed hardware + live invigilation, or scope to on-site onlyAdd <code>ExamSession.invigilatorId</code> (required). Add <code>Exam.config.sebRequired</code> boolean. Document in <code>docs/guides/easa-exam-compliance.md</code>.5No DPIA + lawful-basis analysis for biometric dataPrivacy AdvocateComplete DPIA (Article 35) before behavioural loggingEven without webcam, keystroke/mouse patterns are behavioural biometrics under GDPR Article 9. Draft DPIA before Phase 1. Add granular consent toggles.6Auto-submit on violations must be flag-and-review, not silent terminationEASA Compliance + SecurityViolations flag for human review; exam finalises only after reviewChange <code>ExamAttempt.autoSubmitted</code> to <code>ExamViolation.reviewOutcome</code>. Strict keypress auto-submit (user directive) routes to <code>CRITICAL</code> violation → invigilator review.7EU AI Act scoping absentPrivacy AdvocateClassify AI proctoring as high-risk or document legal sign-off for out-of-scopeIf AI proctoring deferred, document legal basis for exclusion. If added later, define human oversight and accuracy controls now.8Access-code candidate-binding after form entrySecurity AuditorBind/validate candidate identity at code-entry time<code>/exams/[code]</code> route resolves candidate via <code>ExamAccessCode.candidateId</code> or email match before rendering pre-exam form.9No <code>ExamAttempt.status</code> state machineSystems ArchitectAdd <code>status</code> enum + atomic transitionsPrisma <code>@default('pending')</code>. Single <code>transitionAttempt(attemptId, newStatus)</code> function with <code>SELECT ... FOR UPDATE</code>.10SSE-per-second timer is a Vercel deployment blockerPerformance Engineer + SREReplace with 30s polling + cron auto-submit<code>GET /api/exams/attempts/[id]/timer</code> returns <code>{ remainingMs, expiresAt }</code>. Client polls every 30s. Server enforces deadline at submission.11Auto-submit on any key press violates WCAGAccessibility AdvocateDocument accessibility exception for regulated examsUser confirmed strict keypress. Document exception under EASA controlled-environment rules. Provide supervised alternative for disabled candidates.12GDPR/EASA retention conflictSRE + Tech LeadAdd <code>retentionCategory</code> enum (<code>INTEGRITY</code>, <code>PII</code>, <code>BOTH</code>)GDPR sweep redacts <code>PII</code> columns but preserves <code>INTEGRITY</code> rows. Applied to <code>ExamAttempt</code>, <code>ExamAnswer</code>, <code>ExamViolation</code>, <code>ExamRegistration</code>.13Server crash recovery not specifiedSRE + QAAdd recovery cron<code>POST /api/cron/recover-exams</code> (gated by <code>CRON_SECRET</code>) runs every 60s, auto-submitting expired attempts via grading function.14Exam config JSON lacks TypeScript schemaTech LeadDefine <code>ExamConfig</code> Zod schema<code>lib/validation/exam-schema.ts</code> with <code>ExamConfigSchema</code> (fullscreen, sebRequired, violationThreshold, strictMode). Use in Prisma defaults and route validators.15Security test harness missingQA StrategistAdd Playwright security config<code>playwright.security.config.ts</code> with <code>--headed</code> mode. <code>npm run test:security</code> script. Test fullscreen block, clipboard block, DevTools detection, keypress auto-submit.16Key-press auto-submit semantics undefinedTech LeadUser clarified: any key = auto-submit, NO confirmationImplement <code>document.keydown</code> listener with 100ms debounce. Exclude modifier-only keys (Shift, Ctrl, Alt, Meta). Log every keypress-triggered submit as <code>CRITICAL</code> violation.17Proctor review queue not modeledTech LeadExtend <code>ExamViolation</code> with review fieldsAdd <code>reviewedAt</code>, <code>reviewedBy</code>, <code>reviewOutcome</code> to <code>ExamViolation</code>. Add <code>POST /api/exams/proctoring/violations/[id]/review</code> endpoint.18SEB integration deferred to Phase 4Tech LeadMove to Phase 2Move SEB <code>.seb</code> config download + BEK verification to Phase 2 (with <code>sebRequired: false</code> default).<h3 id="72-recommended-improvements-address-during-implementation">7.2 RECOMMENDED Improvements (Address During Implementation)</h3>#IssueSourceResolutionImplementation Guidance19N+1 question delivery riskPerformance EngineerBatch-fetch randomised question order on <code>ExamAttempt</code> creationCompute randomised order server-side, store as <code>ExamAttempt.questionOrder</code> JSONB, deliver full array to client in one response.20Violation event floodPerformance EngineerQueue violations client-side, batch-upload every 10sClient-side queue array. Flush on <code>beforeunload</code> and every 10s via <code>POST /api/exams/proctoring/events/batch</code>.21Anti-cheat SDK bundle size / jankPerformance Engineer + AccessibilityLazy-load SDK; show loading state<code>next/dynamic</code> with <code>ssr: false</code> for anti-cheat SDK. Non-animated "Securing exam environment..." loading state.22Polymorphic answer/grading model gapSystems ArchitectAdd <code>gradingType</code> / <code>gradingStatus</code><code>ExamQuestion.gradingType</code> enum (<code>MCQ</code>, <code>ESSAY</code>, <code>MSQ</code>). <code>ExamAnswer.gradingStatus</code> (<code>auto</code>23Circular dependency risk in anti-cheat SDKSystems ArchitectAdopt barrel-file pattern<code>lib/exam/index.ts</code> barrel. SDK imports from <code>lib/exam/types.ts</code> only. Audit logger imports from <code>lib/exam/types.ts</code> for exam types.24No ARIA live regions for fullscreen entryAccessibility AdvocateAdd ARIA live region announcementsAnnounce "Entering fullscreen exam mode" before fullscreen entry. Focus first question after entry.25Accessibility exception documentationAccessibility AdvocateAdd <code>ACCESSIBILITY.md</code>Document WCAG criteria met, waived with regulatory justification (strict keypress, fullscreen lock), and alternative supervised delivery pathway.26Question bank size for high-stakes modulesEASA ComplianceLarger banks (>5x) for high-stakes modulesMinimum 10x questions for EASA Part-66 modules. Wire post-exam analytics to auto-flag questions for review.27No <code>ExamAttempt.status</code> state machineSystems ArchitectAdd status enum + atomic transitionsSee MUST-FIX #9. Also add <code>autoSubmitted</code> boolean and <code>submittedAt</code> timestamp.28No recovery cron for expired attemptsSRE + QAAdd <code>/api/cron/recover-exams</code>See MUST-FIX #13. Also add <code>lastActivityAt</code> to <code>ExamAttempt</code> for stale detection.<h3 id="73-acceptable-trade-offs">7.3 ACCEPTABLE Trade-Offs</h3>Trade-OffJustificationConditionClient-side anti-cheat is knowingly bypassable. No client-side control can be fully tamper-proof. Server-side controls (timer, blind grading, access codes, hash chain) are the real trust boundary.Client-side violations are signals, not enforcement.Client-side violations must be logged and reviewed; they are never sole basis for adverse action.Fullscreen lock cannot be made fully accessible. Fullscreen is a browser API with no screen-reader-friendly alternative. EASA requires controlled environments.Document as regulated exception; offer supervised in-person alternative.Formal accessibility exception documented with legal/compliance sign-off.500 concurrent candidates on Vercel is unrealistic without architecture changes. Vercel serverless is not designed for 500 persistent connections.Acceptable if deployment target is documented. For >200, recommend containerised runtime or separate exam service.Document realistic concurrency ceiling for chosen deployment target.Webcam excluded per user directive. No webcam proctoring in Phase 1.User confirmed no webcam needed.Revisit in Phase 4 if EASA compliance or fraud prevention requires it.Certificate generation excluded per user directive.User confirmed not needed yet.Revisit in Phase 4 when EASA compliance requires Certificates of Recognition.Strict keypress auto-submit without confirmation.User confirmed: any key = auto-submit, NO confirmation.Document as regulated exception. Implement with modifier-key exclusion (Shift, Ctrl, Alt, Meta) to prevent accessibility-tool false positives.<section class="he-section" id="8-unified-implementation-roadmap"><div class="he-section__num">08 · 8. Unified Implementation Roadmap</div><h2 class="he-section__title">8. Unified Implementation Roadmap</h2><h3 id="phase-1-foundation-weeks-1-2-build-internal-exam-system-first">Phase 1: Foundation (Weeks 1-2) — Build Internal Exam System first</h3>Schema: <code>InternalExamBankInstructor</code>, <code>InternalExamClassSchedule</code>, <code>InternalExamViolation</code>, bank <code>reviewState</code>.Run <code>bun run db:push</code> and <code>bun run db:push:supabase</code>.Enable Realtime on <code>internal_exam_sessions</code> in Supabase Console.RBAC: <code>requireBankAccess(bankId, capability)</code> helper.Staff UI: Instructor assignment, class scheduling.Backend: Staff assignment/schedule API routes with <code>createAuditLog</code>.Tests: Generated route tests, unit test for <code>requireBankAccess</code>.<h3 id="phase-2-instructor-experience-weeks-3-4">Phase 2: Instructor Experience (Weeks 3-4)</h3>Nav: Add "Exams" link to <code>InstructorSidebar</code>.Dashboard: <code>/instructor/exams</code> with tabs (My Questions, My Banks, Module Bank, My Classes, Live Monitor).Question editor: Read/write per <code>canEdit</code>/<code>canReview</code>.Class monitor: GET-first population + Realtime deltas.Analytics: SQL <code>groupBy</code> aggregations, CSV export.Anti-Cheat additions: Access-code generation API, pre-exam student form, <code>Exam</code>/<code>ExamSession</code>/<code>ExamAccessCode</code>/<code>ExamRegistration</code> models.<h3 id="phase-3-live-monitoring-anti-cheat-weeks-5-8">Phase 3: Live Monitoring & Anti-Cheat (Weeks 5-8)</h3>Realtime: Supabase Realtime with RLS, throttling, debounced refresh, polling fallback.Instructor recovery: Extend, force-submit, void (reuse Internal Exam operations).Anti-cheat client SDK: Fullscreen lock, tab-switch detection, clipboard block, DevTools block, PrintScreen block, keyboard shortcut block, multi-tab prevention.Violation logging: <code>POST /api/exams/proctoring/events</code> (batch), server-side severity classification.Proctor dashboard: Live violation feed, session detail with violation timeline.Server-authoritative timer: Replace SSE with 30s polling + cron auto-submit.<h3 id="phase-4-grading-hardening-weeks-9-12">Phase 4: Grading & Hardening (Weeks 9-12)</h3>Server-side blind grading: <code>SECURITY DEFINER</code> function with <code>search_path</code> hardening.Answer validation: Server-side paper binding; reject answers not in candidate's randomised paper.Essay grading UI: Instructor rubric for <code>ESSAY</code> questions.Audit log: Hash-chain implementation with DB-level immutability trigger.SEB integration: <code>.seb</code> config download + BEK verification (moved from Phase 4 to Phase 2).Security test harness: Playwright headed tests for anti-cheat bypass scenarios.<h3 id="phase-5-compliance-polish-weeks-13-16">Phase 5: Compliance & Polish (Weeks 13-16)</h3>DPIA: Complete GDPR Article 35 assessment for behavioural biometrics.Accessibility exception: Document WCAG waivers with regulatory justification.EASA compliance: Invigilator workflow, session log format, question bank metadata validation.Crash recovery: Startup recovery cron for expired attempts.Load testing: k6 script with 100-concurrent target.Retention tiers: Implement <code>retentionCategory</code> + GDPR sweep integration.<section class="he-section" id="9-key-differences-summary"><div class="he-section__num">09 · 9. Key Differences Summary</div><h2 class="he-section__title">9. Key Differences Summary</h2>DimensionInternal ExamAnti-Cheat ExamWinner / Merge StrategyQuestion banksPer-course, per-instructorPer-module, EASA-taxonomyMerge: <code>Exam</code> with <code>type</code> discriminatorSchedulingClass-linked windowsAccess-code windowsKeep both: class windows for internal, access codes for certificationCandidate identityLogged-in studentAccess-code + pre-exam formMerge: pre-exam form for both, access-code only for external candidatesAnti-cheatNone (cosmetic)Full lockdown suiteAdopt Anti-Cheat controls for both (raise internal exam integrity)Violation trackingPlanned tablePlanned tableMerge into unified <code>ExamViolation</code>RecoveryHeartbeat, resume, extendNone plannedAdopt Internal Exam recovery for bothRealtimeGET-first + deltas + throttlingNot plannedAdopt Internal Exam pattern for bothGradingAuto-grade MCQBlind grading via <code>SECURITY DEFINER</code>Adopt blind grading for bothAudit<code>createAuditLog</code> rowsHash-chain tableMerge: hash-chain <code>audit_logs</code> table with <code>Exam</code> as entityComplianceNoneEASA, GDPR, EU AI ActAnti-Cheat compliance layer only<section class="he-section" id="10-final-recommendations"><div class="he-section__num">10 · 10. Final Recommendations</div><h2 class="he-section__title">10. Final Recommendations</h2>Build Internal Exam System first (5 weeks). It has clearer scope, existing schema, and immediate user value.Unify the data model around a single <code>Exam</code> table with <code>ExamType</code> discriminator. Avoid maintaining two parallel exam schemas.Adopt Internal Exam's recovery model (heartbeat, resume, extend, force-submit) for Anti-Cheat exams, gated by invigilator permissions.Adopt Internal Exam's realtime pattern (GET-first + deltas, throttling, RLS, polling fallback) for Anti-Cheat proctor dashboard.Implement Anti-Cheat's anti-cheat controls (fullscreen, tab-switch, clipboard, DevTools, PrintScreen, keyboard block, multi-tab prevention) for both exam types.Resolve all MUST-FIX items from the LLM Council audits before Phase 1 coding begins. The 18 MUST-FIX items are listed in Section 7.1 with specific implementation guidance.Address RECOMMENDED improvements during implementation. The 10 recommended items in Section 7.2 improve scalability, accessibility, and testability.Document trade-offs formally. The 6 acceptable trade-offs in Section 7.3 should be recorded in the project's ADR (Architecture Decision Record) for future reference.End of Comparison Report
+<hr />
+<section class="he-section" id="1-executive-summary"><div class="he-section__num">01 · 1. Executive Summary</div><h2 class="he-section__title">1. Executive Summary</h2></section>
+<p>Two exam-system plans exist for Aerojet Academy:</p>
+<table>
+<thead>
+<tr><th>Plan</th><th>File</th><th>Scope</th><th>Primary Users</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Internal Exam System</strong></td><td><code>docs/plans/internal-exam-system-ui-plan.md</code></td><td>Academy-internal MCQ exams for courses, classes, and instructors</td><td>Staff, Instructors, Students</td></tr>
+<tr><td><strong>Anti-Cheat Exam System</strong></td><td><code>.kilo/plans/1788099263147-anticheat-exam-system-plan.md</code></td><td>EASA Part-66/Part-147 aviation certification exams with strict anti-cheat controls</td><td>Staff, Instructors, Students, Examiners, Applicants</td></tr>
+</tbody>
+</table>
+<p><strong>Key finding:</strong> These plans are <strong>complementary, not competing</strong>. The Internal Exam System handles day-to-day class assessment; the Anti-Cheat Exam System handles high-stakes external certification. They share the same Aerojet codebase, auth layer, and Prisma pattern but differ in regulatory requirements, threat model, and exam lifecycle.</p>
+<p><strong>Recommendation:</strong> Build the Internal Exam System first (Phases 1-5, ~5 weeks), then layer the Anti-Cheat Exam System as an extended module on top. The Anti-Cheat system reuses Internal Exam concepts (question banks, sessions, autosave) but adds mandatory anti-cheat controls, access-code gating, and EASA-specific compliance features.</p>
+<hr />
+<section class="he-section" id="2-scope-amp-use-case-comparison"><div class="he-section__num">02 · 2. Scope &amp;amp; Use-Case Comparison</div><h2 class="he-section__title">2. Scope &amp; Use-Case Comparison</h2></section>
+<h3 id="21-internal-exam-system">2.1 Internal Exam System</h3>
+<ul>
+<li><strong>Purpose:</strong> Internal course assessment for Aerojet Academy students.</li>
+<li><strong>Context:</strong> Academy-managed classes, instructors, and cohorts.</li>
+<li><strong>Stakes:</strong> Medium — academic progress, not aviation licences.</li>
+<li><strong>Delivery:</strong> Browser-based, desktop + tablet responsive.</li>
+<li><strong>Regulatory:</strong> No external certification body oversight.</li>
+<li><strong>Current state:</strong> Partially implemented schema (<code>InternalExamBank</code>, <code>InternalExamQuestion</code>, <code>InternalExamSession</code>). Staff UI exists. Instructor UI does not exist yet.</li>
+</ul>
+<h3 id="22-anti-cheat-exam-system">2.2 Anti-Cheat Exam System</h3>
+<ul>
+<li><strong>Purpose:</strong> High-stakes EASA Part-66/Part-147 certification exams.</li>
+<li><strong>Context:</strong> Approved Maintenance Training Organisation (MTO) examinations; candidates may be external to the academy.</li>
+<li><strong>Stakes:</strong> High — determines EASA Aircraft Maintenance Licence (AML) eligibility.</li>
+<li><strong>Delivery:</strong> Browser-based with optional Safe Exam Browser (SEB) lockdown; desktop-only by design.</li>
+<li><strong>Regulatory:</strong> Must comply with EASA ED Decision 2023/019/R, NPA 2023-10, H.C.A.A. March 2025 requirements, FAA Part-147 §147.23.</li>
+<li><strong>Current state:</strong> Planning only — no schema, no routes, no UI.</li>
+</ul>
+<h3 id="23-feature-matrix">2.3 Feature Matrix</h3>
+<table>
+<thead>
+<tr><th>Feature</th><th>Internal Exam</th><th>Anti-Cheat Exam</th><th>Notes</th></tr>
+</thead>
+<tbody>
+<tr><td>MCQ delivery</td><td>✅ Planned</td><td>✅ Planned</td><td>Shared core</td></tr>
+<tr><td>Essay / subjective questions</td><td>❌ Not planned</td><td>✅ Planned</td><td>Anti-Cheat only</td></tr>
+<tr><td>Question bank with versions</td><td>✅ Existing</td><td>✅ Planned</td><td>Anti-Cheat adds approval workflow</td></tr>
+<tr><td>Question randomisation</td><td>❌ Not planned</td><td>✅ Planned</td><td>Anti-Cheat: per-candidate random paper</td></tr>
+<tr><td>Option randomisation</td><td>❌ Not planned</td><td>✅ Planned</td><td>Anti-Cheat: per-question option shuffle</td></tr>
+<tr><td>Server-authoritative timer</td><td>✅ Partial (<code>expiresAt</code> + cron)</td><td>✅ Planned (SSE/polling + DB deadline)</td><td>Anti-Cheat stricter</td></tr>
+<tr><td>Auto-submit on expiry</td><td>✅ Planned (cron)</td><td>✅ Planned</td><td>Same mechanism</td></tr>
+<tr><td>Auto-submit on key press</td><td>❌ Not planned</td><td>✅ Planned</td><td><strong>User clarified: any key = auto-submit, NO confirmation</strong></td></tr>
+<tr><td>Fullscreen enforcement</td><td>❌ Cosmetic only</td><td>✅ Planned</td><td>Anti-Cheat: real Fullscreen API + overlay</td></tr>
+<tr><td>Tab-switch detection</td><td>❌ Not tracked server-side</td><td>✅ Planned</td><td>Anti-Cheat: <code>visibilitychange</code> → violation table</td></tr>
+<tr><td>Clipboard block (copy/paste)</td><td>❌ Not planned</td><td>✅ Planned</td><td>Anti-Cheat: client-side <code>preventDefault</code></td></tr>
+<tr><td>DevTools / PrintScreen block</td><td>❌ Not planned</td><td>✅ Planned</td><td>Anti-Cheat: keyboard hook + detection</td></tr>
+<tr><td>Webcam proctoring</td><td>❌ Not planned</td><td>❌ Excluded by user</td><td><strong>User confirmed: no webcam needed</strong></td></tr>
+<tr><td>SEB (Safe Exam Browser)</td><td>❌ Not planned</td><td>✅ Planned</td><td>Anti-Cheat: optional but recommended</td></tr>
+<tr><td>Live instructor monitoring</td><td>✅ Planned (Realtime)</td><td>✅ Planned</td><td>Shared concept, different UI</td></tr>
+<tr><td>Proctor review queue</td><td>❌ Not planned</td><td>✅ Planned</td><td>Anti-Cheat: violation review workflow</td></tr>
+<tr><td>Realtime monitoring</td><td>✅ Planned (Supabase Realtime)</td><td>✅ Planned</td><td>Same infra, different event types</td></tr>
+<tr><td>Class scheduling</td><td>✅ Planned</td><td>❌ Not planned</td><td>Internal only; Anti-Cheat uses session windows</td></tr>
+<tr><td>Instructor analytics</td><td>✅ Planned</td><td>✅ Planned</td><td>Shared</td></tr>
+<tr><td>Question import pipeline</td><td>✅ Planned</td><td>✅ Planned</td><td>Shared (PDF/DOCX/JSON)</td></tr>
+<tr><td>RBAC / permissions</td><td>✅ Existing + planned</td><td>✅ Planned</td><td>Anti-Cheat maps to EASA roles</td></tr>
+<tr><td>Audit log</td><td>✅ Existing (<code>createAuditLog</code>)</td><td>✅ Planned (hash-chain)</td><td>Anti-Cheat adds cryptographic chain</td></tr>
+<tr><td>Violation tracking</td><td>✅ Planned (<code>InternalExamViolation</code>)</td><td>✅ Planned (<code>ExamViolation</code>)</td><td>Same concept, different schema</td></tr>
+<tr><td>Recovery / resume</td><td>✅ Planned</td><td>✅ Planned</td><td>Anti-Cheat: same pattern but stricter</td></tr>
+<tr><td>GDPR compliance</td><td>Partial</td><td>Full (DPIA, retention tiers)</td><td>Anti-Cheat: behavioural data implications</td></tr>
+<tr><td>EASA compliance</td><td>❌ Not applicable</td><td>✅ Full</td><td>Anti-Cheat: Part-66/Part-147 specific</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="3-data-model-comparison"><div class="he-section__num">03 · 3. Data Model Comparison</div><h2 class="he-section__title">3. Data Model Comparison</h2></section>
+<h3 id="31-internal-exam-schema-existing-planned">3.1 Internal Exam Schema (Existing + Planned)</h3>
+<table>
+<thead>
+<tr><th>Model</th><th>Purpose</th><th>Key Fields</th></tr>
+</thead>
+<tbody>
+<tr><td><code>InternalExamBank</code></td><td>Question bank</td><td><code>id</code>, <code>courseId</code>, <code>moduleCode</code>, <code>title</code>, <code>reviewState</code></td></tr>
+<tr><td><code>InternalExamQuestion</code></td><td>Question</td><td><code>id</code>, <code>bankId</code>, <code>questionText</code>, <code>options</code>, <code>correctAnswer</code>, <code>explanation</code>, <code>knowledgeLevel</code></td></tr>
+<tr><td><code>InternalExamQuestionVersion</code></td><td>Version history</td><td><code>id</code>, <code>questionId</code>, <code>changeType</code>, <code>changedById</code>, <code>changedAt</code></td></tr>
+<tr><td><code>InternalExamBankInstructor</code></td><td>Instructor assignment</td><td><code>id</code>, <code>bankId</code>, <code>instructorId</code>, <code>canEdit</code>, <code>canReview</code>, <code>canMonitor</code>, <code>canPublish</code></td></tr>
+<tr><td><code>InternalExamClassSchedule</code></td><td>Class scheduling</td><td><code>id</code>, <code>bankId</code>, <code>classId</code>, <code>scheduledStart</code>, <code>scheduledEnd</code>, <code>isActive</code></td></tr>
+<tr><td><code>InternalExamSession</code></td><td>Exam session</td><td><code>id</code>, <code>studentId</code>, <code>bankId</code>, <code>classId</code>, <code>status</code>, <code>score</code>, <code>percentage</code>, <code>passed</code>, <code>expiresAt</code>, <code>lastActivityAt</code>, <code>timeExtensionSec</code></td></tr>
+<tr><td><code>InternalExamAnswer</code></td><td>Student answer</td><td><code>id</code>, <code>sessionId</code>, <code>questionId</code>, <code>selectedAnswer</code>, <code>isCorrect</code></td></tr>
+<tr><td><code>InternalExamViolation</code></td><td>Violation event</td><td><code>id</code>, <code>sessionId</code>, <code>studentId</code>, <code>type</code>, <code>severity</code>, <code>detail</code>, <code>reviewedAt</code>, <code>reviewOutcome</code></td></tr>
+<tr><td><code>InternalExamReport</code></td><td>Post-exam report</td><td><code>id</code>, <code>sessionId</code>, <code>generatedAt</code></td></tr>
+</tbody>
+</table>
+<h3 id="32-anti-cheat-exam-schema-planned">3.2 Anti-Cheat Exam Schema (Planned)</h3>
+<table>
+<thead>
+<tr><th>Model</th><th>Purpose</th><th>Key Fields</th></tr>
+</thead>
+<tbody>
+<tr><td><code>Exam</code></td><td>Exam definition</td><td><code>id</code>, <code>title</code>, <code>moduleCode</code>, <code>licenceCategory</code>, <code>durationMinutes</code>, <code>passMark</code>, <code>config</code> (JSON), <code>status</code></td></tr>
+<tr><td><code>ExamSession</code></td><td>Scheduled exam window</td><td><code>id</code>, <code>examId</code>, <code>startTime</code>, <code>endTime</code>, <code>location</code>, <code>invigilatorId</code></td></tr>
+<tr><td><code>ExamAccessCode</code></td><td>One-time access code</td><td><code>id</code>, <code>sessionId</code>, <code>code</code>, <code>candidateId</code>, <code>used</code>, <code>usedAt</code>, <code>expiresAt</code></td></tr>
+<tr><td><code>ExamRegistration</code></td><td>Pre-exam student form</td><td><code>id</code>, <code>sessionId</code>, <code>userId</code>, <code>fullName</code>, <code>email</code>, <code>dob</code>, <code>nationality</code>, <code>licenceCategory</code>, <code>moduleCode</code>, <code>examDate</code>, <code>examLocation</code>, <code>idDocumentType</code>, <code>idDocumentNumber</code>, <code>photoUrl</code>, <code>consentGiven</code>, <code>signatureData</code>, <code>retentionCategory</code></td></tr>
+<tr><td><code>ExamAttempt</code></td><td>Candidate attempt</td><td><code>id</code>, <code>registrationId</code>, <code>examId</code>, <code>status</code>, <code>startedAt</code>, <code>submittedAt</code>, <code>score</code>, <code>passed</code>, <code>autoSubmitted</code>, <code>violationCount</code>, <code>certificateUrl</code>, <code>answers</code>, <code>violations</code></td></tr>
+<tr><td><code>ExamAnswer</code></td><td>Answer per question</td><td><code>id</code>, <code>attemptId</code>, <code>questionId</code>, <code>selectedOption</code>, <code>textAnswer</code>, <code>isCorrect</code></td></tr>
+<tr><td><code>ExamViolation</code></td><td>Violation event</td><td><code>id</code>, <code>attemptId</code>, <code>type</code>, <code>severity</code>, <code>detail</code>, <code>timestamp</code></td></tr>
+<tr><td><code>ExamQuestion</code></td><td>Question</td><td><code>id</code>, <code>examId</code>, <code>questionText</code>, <code>questionType</code>, <code>options</code>, <code>correctAnswer</code>, <code>explanation</code>, <code>moduleSubsection</code>, <code>knowledgeLevel</code>, <code>sortOrder</code></td></tr>
+</tbody>
+</table>
+<h3 id="33-schema-gaps-amp-overlaps">3.3 Schema Gaps &amp; Overlaps</h3>
+<p><strong>Overlap (can be unified):</strong></p>
+<ul>
+<li><code>InternalExamQuestion</code> vs <code>ExamQuestion</code> — same purpose, different naming. Anti-Cheat adds <code>moduleSubsection</code>, <code>sortOrder</code> (EASA-specific). Internal Exam already has <code>knowledgeLevel</code>. <strong>Recommendation:</strong> Merge into a single <code>Question</code> model with an <code>examType</code> discriminator (<code>INTERNAL</code> vs <code>CERTIFICATION</code>).</li>
+<li><code>InternalExamViolation</code> vs <code>ExamViolation</code> — same concept. Anti-Cheat adds <code>severity</code>, <code>detail</code>. <strong>Recommendation:</strong> Merge into <code>ExamViolation</code> with polymorphic <code>sessionId</code>/<code>attemptId</code> and a <code>source</code> enum.</li>
+<li><code>InternalExamSession</code> vs <code>ExamAttempt</code> — Anti-Cheat's <code>ExamAttempt</code> is more granular (bound to <code>ExamRegistration</code>). Internal Exam's <code>InternalExamSession</code> is simpler. <strong>Recommendation:</strong> Keep <code>InternalExamSession</code> for internal flow; use <code>ExamAttempt</code> for certification flow.</li>
+</ul>
+<p><strong>Gap (Anti-Cheat adds):</strong></p>
+<ul>
+<li><code>ExamAccessCode</code> — no equivalent in Internal Exam. Needed for external candidate gating.</li>
+<li><code>ExamRegistration</code> — no equivalent. Pre-exam form captures EASA-required fields.</li>
+<li><code>ExamSession</code> (scheduling window) — differs from <code>InternalExamClassSchedule</code>. Anti-Cheat uses time-bound access codes rather than class-linked windows.</li>
+<li><code>Exam</code> (top-level exam definition) — no equivalent. Internal Exam uses <code>InternalExamBank</code> + <code>InternalExamClassSchedule</code> for the same purpose but with different semantics.</li>
+</ul>
+<p><strong>Gap (Internal Exam adds):</strong></p>
+<ul>
+<li><code>InternalExamBankInstructor</code> — instructor-to-bank assignment with capability flags. Anti-Cheat does not model instructor permissions (relies on role-based guards).</li>
+<li><code>InternalExamClassSchedule</code> — class-to-bank scheduling. Anti-Cheat uses session-level access codes instead.</li>
+<li><code>InternalExamQuestionVersion</code> — version history per question. Anti-Cheat does not plan version history (relies on approval workflow).</li>
+</ul>
+<hr />
+<section class="he-section" id="4-architecture-amp-control-comparison"><div class="he-section__num">04 · 4. Architecture &amp;amp; Control Comparison</div><h2 class="he-section__title">4. Architecture &amp; Control Comparison</h2></section>
+<h3 id="41-anti-cheat-controls">4.1 Anti-Cheat Controls</h3>
+<table>
+<thead>
+<tr><th>Control</th><th>Internal Exam</th><th>Anti-Cheat Exam</th><th>Source</th></tr>
+</thead>
+<tbody>
+<tr><td>Fullscreen lock</td><td>❌ None</td><td>✅ Fullscreen API + overlay</td><td>Anti-Cheat §3.3</td></tr>
+<tr><td>Tab-switch detection</td><td>❌ Client-only state</td><td>✅ Server-side <code>visibilitychange</code> → <code>ExamViolation</code></td><td>Anti-Cheat §3.3, §5.1</td></tr>
+<tr><td>Clipboard block</td><td>❌ Not planned</td><td>✅ <code>preventDefault</code> on copy/paste/cut</td><td>Anti-Cheat §3.3</td></tr>
+<tr><td>DevTools detection</td><td>❌ Not planned</td><td>✅ <code>debugger</code> timing + <code>outerWidth</code> check</td><td>Anti-Cheat §3.3</td></tr>
+<tr><td>PrintScreen block</td><td>❌ Not planned</td><td>✅ <code>keydown</code> interception</td><td>Anti-Cheat §3.3</td></tr>
+<tr><td>Keyboard shortcut block</td><td>❌ Not planned</td><td>✅ Ctrl+C/V/P, F12, Alt+Tab</td><td>Anti-Cheat §3.3</td></tr>
+<tr><td>Multi-tab prevention</td><td>❌ Not planned</td><td>✅ <code>BroadcastChannel</code> + <code>localStorage</code></td><td>Anti-Cheat §3.3</td></tr>
+<tr><td>Webcam capture</td><td>❌ Not planned</td><td>❌ Excluded by user</td><td>User directive</td></tr>
+<tr><td>SEB enforcement</td><td>❌ Not planned</td><td>✅ <code>.seb</code> config + BEK verification</td><td>Anti-Cheat §3.3</td></tr>
+<tr><td>Server-authoritative timer</td><td>✅ Partial (<code>expiresAt</code> + cron)</td><td>✅ Planned (SSE/polling + DB deadline)</td><td>Anti-Cheat §3.4</td></tr>
+<tr><td>Auto-submit on key press</td><td>❌ Not planned</td><td>✅ <strong>Any key triggers submit, NO confirmation</strong></td><td>Anti-Cheat §3.5, User directive</td></tr>
+<tr><td>Access-code gating</td><td>❌ Not planned</td><td>✅ One-time, time-bound, candidate-bound</td><td>Anti-Cheat §3.1, §3.2</td></tr>
+<tr><td>Pre-exam identity form</td><td>❌ Not planned</td><td>✅ Personal details, photo ID, consent</td><td>Anti-Cheat §3.2</td></tr>
+<tr><td>Blind grading</td><td>❌ Not planned</td><td>✅ <code>SECURITY DEFINER</code> function</td><td>Anti-Cheat §3.6</td></tr>
+<tr><td>Hash-chain audit log</td><td>❌ Not planned</td><td>✅ Append-only with <code>previous_hash</code></td><td>Anti-Cheat §3.8</td></tr>
+</tbody>
+</table>
+<h3 id="42-recovery-amp-time-preservation">4.2 Recovery &amp; Time Preservation</h3>
+<table>
+<thead>
+<tr><th>Feature</th><th>Internal Exam</th><th>Anti-Cheat Exam</th></tr>
+</thead>
+<tbody>
+<tr><td>Heartbeat endpoint</td><td>✅ Planned (<code>POST /heartbeat</code>)</td><td>❌ Not planned</td></tr>
+<tr><td>Server-side auto-submit cron</td><td>✅ Planned (<code>/api/cron/exam-timeout</code>)</td><td>✅ Planned</td></tr>
+<tr><td>Time extension</td><td>✅ Planned (<code>timeExtensionSec</code>)</td><td>❌ Not planned</td></tr>
+<tr><td>Resume after disconnect</td><td>✅ Planned</td><td>❌ Not planned</td></tr>
+<tr><td>Force-submit by instructor</td><td>✅ Planned</td><td>❌ Not planned</td></tr>
+<tr><td>Void + retake</td><td>✅ Planned</td><td>❌ Not planned</td></tr>
+</tbody>
+</table>
+<p><strong>Finding:</strong> The Internal Exam System has a <strong>more mature recovery model</strong> (heartbeat, resume, time extension, force-submit). The Anti-Cheat Exam System's stricter posture (no resume, no extension) aligns with EASA &quot;controlled environment&quot; requirements but lacks the operational resilience the Internal Exam System plans.</p>
+<p><strong>Recommendation:</strong> Adopt the Internal Exam System's recovery primitives (heartbeat, auto-submit cron, force-submit) into the Anti-Cheat Exam System. For EASA compliance, restrict time extensions to invigilator-only actions with audit logging. Do not allow candidate-initiated resume without invigilator approval.</p>
+<hr />
+<section class="he-section" id="5-realtime-amp-monitoring-comparison"><div class="he-section__num">05 · 5. Realtime &amp;amp; Monitoring Comparison</div><h2 class="he-section__title">5. Realtime &amp; Monitoring Comparison</h2></section>
+<h3 id="51-internal-exam-realtime">5.1 Internal Exam Realtime</h3>
+<ul>
+<li><strong>Events:</strong> <code>exam_started</code>, <code>exam_submitted</code>, <code>exam_voided</code>, <code>exam_published</code></li>
+<li><strong>Subscription model:</strong> GET-first initial fetch + Realtime deltas</li>
+<li><strong>Throttling:</strong> Per-student 5s throttle, debounced batch refresh</li>
+<li><strong>Instructor monitor:</strong> Live session table with progress, score, status</li>
+<li><strong>Student side:</strong> No live monitoring needed</li>
+</ul>
+<h3 id="52-anti-cheat-exam-realtime">5.2 Anti-Cheat Exam Realtime</h3>
+<ul>
+<li><strong>Events:</strong> Not explicitly defined, but violation events stream to server</li>
+<li><strong>Subscription model:</strong> Not planned for live monitoring (relies on post-exam review)</li>
+<li><strong>Throttling:</strong> Not addressed</li>
+<li><strong>Instructor/proctor monitor:</strong> Not planned in Phase 1</li>
+<li><strong>Student side:</strong> Anti-cheat events POSTed to server</li>
+</ul>
+<p><strong>Finding:</strong> The Internal Exam System has a <strong>complete realtime monitoring architecture</strong> with throttling, fallback, and RLS. The Anti-Cheat Exam System has no realtime monitoring plan — violations are logged but not streamed to a live proctor dashboard.</p>
+<p><strong>Recommendation:</strong> Adopt the Internal Exam System's realtime monitoring pattern for the Anti-Cheat Exam System's proctor dashboard. Stream <code>ExamViolation</code> INSERT events to the proctor view using the same GET-first + Realtime delta pattern. Apply the same throttling, debouncing, and RLS rules.</p>
+<hr />
+<section class="he-section" id="6-api-route-comparison"><div class="he-section__num">06 · 6. API Route Comparison</div><h2 class="he-section__title">6. API Route Comparison</h2></section>
+<h3 id="61-internal-exam-api-routes">6.1 Internal Exam API Routes</h3>
+<table>
+<thead>
+<tr><th>Route</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>GET /api/staff/exams/internal/operations/sessions</code></td><td>Admin session list</td></tr>
+<tr><td><code>POST /api/student/exams/internal/start</code></td><td>Student starts exam</td></tr>
+<tr><td><code>GET /api/student/exams/internal/session</code></td><td>Student session detail</td></tr>
+<tr><td><code>POST /api/student/exams/internal/heartbeat</code></td><td>Student heartbeat</td></tr>
+<tr><td><code>POST /api/student/exams/internal/violation</code></td><td>Student violation report</td></tr>
+<tr><td><code>POST /api/staff/exams/internal/sessions/[id]/extend</code></td><td>Instructor extends time</td></tr>
+<tr><td><code>POST /api/staff/exams/internal/sessions/[id]/force-submit</code></td><td>Instructor force-submits</td></tr>
+<tr><td><code>POST /api/staff/exams/internal/sessions/[id]/void</code></td><td>Instructor voids session</td></tr>
+<tr><td><code>GET /api/instructor/exams/banks</code></td><td>Instructor bank list</td></tr>
+<tr><td><code>GET /api/instructor/exams/classes</code></td><td>Instructor class list</td></tr>
+<tr><td><code>POST /api/instructor/exams/classes/[classId]/start</code></td><td>Instructor starts class exam</td></tr>
+</tbody>
+</table>
+<h3 id="62-anti-cheat-exam-api-routes">6.2 Anti-Cheat Exam API Routes</h3>
+<table>
+<thead>
+<tr><th>Route</th><th>Purpose</th></tr>
+</thead>
+<tbody>
+<tr><td><code>GET /api/exams</code></td><td>Exam CRUD</td></tr>
+<tr><td><code>GET /api/exams/[id]/access-codes</code></td><td>Generate/validate access codes</td></tr>
+<tr><td><code>GET /api/exams/[id]/attempts</code></td><td>Create attempt, submit, grade</td></tr>
+<tr><td><code>POST /api/exams/proctoring/events</code></td><td>Receive client-side violation events</td></tr>
+<tr><td><code>POST /api/exams/proctoring/webcam</code></td><td>Upload webcam snapshots (excluded by user)</td></tr>
+<tr><td><code>GET /api/exams/certificate/[attemptId]</code></td><td>Generate signed PDF (excluded by user)</td></tr>
+<tr><td><code>GET /api/exams/audit</code></td><td>Query audit log</td></tr>
+</tbody>
+</table>
+<p><strong>Finding:</strong> The Internal Exam System has a <strong>richer instructor action set</strong> (extend, force-submit, void). The Anti-Cheat Exam System has a <strong>richer candidate-facing set</strong> (access codes, pre-exam form, certificate).</p>
+<p><strong>Recommendation:</strong> Merge the action sets. The Anti-Cheat Exam System needs instructor recovery actions (extend, force-submit, void) from the Internal Exam System. The Internal Exam System needs access-code gating and pre-exam forms from the Anti-Cheat Exam System if it ever handles external candidates.</p>
+<hr />
+<section class="he-section" id="7-llm-council-remediation-integration"><div class="he-section__num">07 · 7. LLM Council Remediation Integration</div><h2 class="he-section__title">7. LLM Council Remediation Integration</h2></section>
+<p>The Anti-Cheat Exam System plan was audited by three LLM Council personas. The following sections integrate those findings into this comparison, with specific implementation guidance.</p>
+<p><strong>Excluded per user directive:</strong></p>
+<ul>
+<li>❌ Webcam proctoring (not needed)</li>
+<li>❌ Certificate generation (not needed yet)</li>
+<li>❌ Auto-submit confirmation dialog (strict keypress = immediate auto-submit)</li>
+</ul>
+<h3 id="71-must-fix-items-blocking">7.1 MUST-FIX Items (Blocking)</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Issue</th><th>Source</th><th>Resolution</th><th>Implementation Guidance</th></tr>
+</thead>
+<tbody>
+<tr><td>1</td><td><code>SECURITY DEFINER</code> grading function lacks <code>search_path</code> hardening</td><td>Security Auditor</td><td>Add <code>SET search_path = pg_catalog, public</code></td><td>Add Prisma migration with explicit <code>search_path</code>. Add lint script scanning migrations for <code>SECURITY DEFINER</code>.</td></tr>
+<tr><td>2</td><td>Server-side paper binding &amp; answer validation missing</td><td>Security Auditor</td><td>Re-derive randomised paper server-side; reject answers not in paper</td><td>Store <code>ExamAttempt.questionOrder</code> JSONB. In <code>submit_attempt</code>, JOIN with question order and reject unknown <code>questionId</code>s. Never trust client <code>isCorrect</code>.</td></tr>
+<tr><td>3</td><td>Audit immutability claimed but not enforced</td><td>Security Auditor + EASA Compliance</td><td>Add <code>BEFORE UPDATE/DELETE</code> trigger on <code>audit_logs</code>; add <code>CHECK (previous_hash IS NOT NULL)</code></td><td>Prisma migration with <code>CREATE TRIGGER audit_logs_no_modify BEFORE UPDATE OR DELETE ON audit_logs FOR EACH ROW EXECUTE FUNCTION deny_audit_modification()</code>.</td></tr>
+<tr><td>4</td><td>EASA &quot;controlled environment&quot; gap unresolved</td><td>EASA Compliance</td><td>Restrict to SEB + managed hardware + live invigilation, or scope to on-site only</td><td>Add <code>ExamSession.invigilatorId</code> (required). Add <code>Exam.config.sebRequired</code> boolean. Document in <code>docs/guides/easa-exam-compliance.md</code>.</td></tr>
+<tr><td>5</td><td>No DPIA + lawful-basis analysis for biometric data</td><td>Privacy Advocate</td><td>Complete DPIA (Article 35) before behavioural logging</td><td>Even without webcam, keystroke/mouse patterns are behavioural biometrics under GDPR Article 9. Draft DPIA before Phase 1. Add granular consent toggles.</td></tr>
+<tr><td>6</td><td>Auto-submit on violations must be flag-and-review, not silent termination</td><td>EASA Compliance + Security</td><td>Violations flag for human review; exam finalises only after review</td><td>Change <code>ExamAttempt.autoSubmitted</code> to <code>ExamViolation.reviewOutcome</code>. Strict keypress auto-submit (user directive) routes to <code>CRITICAL</code> violation → invigilator review.</td></tr>
+<tr><td>7</td><td>EU AI Act scoping absent</td><td>Privacy Advocate</td><td>Classify AI proctoring as high-risk or document legal sign-off for out-of-scope</td><td>If AI proctoring deferred, document legal basis for exclusion. If added later, define human oversight and accuracy controls now.</td></tr>
+<tr><td>8</td><td>Access-code candidate-binding after form entry</td><td>Security Auditor</td><td>Bind/validate candidate identity at code-entry time</td><td><code>/exams/[code]</code> route resolves candidate via <code>ExamAccessCode.candidateId</code> or email match before rendering pre-exam form.</td></tr>
+<tr><td>9</td><td>No <code>ExamAttempt.status</code> state machine</td><td>Systems Architect</td><td>Add <code>status</code> enum + atomic transitions</td><td>Prisma <code>@default('pending')</code>. Single <code>transitionAttempt(attemptId, newStatus)</code> function with <code>SELECT ... FOR UPDATE</code>.</td></tr>
+<tr><td>10</td><td>SSE-per-second timer is a Vercel deployment blocker</td><td>Performance Engineer + SRE</td><td>Replace with 30s polling + cron auto-submit</td><td><code>GET /api/exams/attempts/[id]/timer</code> returns <code>{ remainingMs, expiresAt }</code>. Client polls every 30s. Server enforces deadline at submission.</td></tr>
+<tr><td>11</td><td>Auto-submit on any key press violates WCAG</td><td>Accessibility Advocate</td><td>Document accessibility exception for regulated exams</td><td>User confirmed strict keypress. Document exception under EASA controlled-environment rules. Provide supervised alternative for disabled candidates.</td></tr>
+<tr><td>12</td><td>GDPR/EASA retention conflict</td><td>SRE + Tech Lead</td><td>Add <code>retentionCategory</code> enum (<code>INTEGRITY</code>, <code>PII</code>, <code>BOTH</code>)</td><td>GDPR sweep redacts <code>PII</code> columns but preserves <code>INTEGRITY</code> rows. Applied to <code>ExamAttempt</code>, <code>ExamAnswer</code>, <code>ExamViolation</code>, <code>ExamRegistration</code>.</td></tr>
+<tr><td>13</td><td>Server crash recovery not specified</td><td>SRE + QA</td><td>Add recovery cron</td><td><code>POST /api/cron/recover-exams</code> (gated by <code>CRON_SECRET</code>) runs every 60s, auto-submitting expired attempts via grading function.</td></tr>
+<tr><td>14</td><td>Exam config JSON lacks TypeScript schema</td><td>Tech Lead</td><td>Define <code>ExamConfig</code> Zod schema</td><td><code>lib/validation/exam-schema.ts</code> with <code>ExamConfigSchema</code> (fullscreen, sebRequired, violationThreshold, strictMode). Use in Prisma defaults and route validators.</td></tr>
+<tr><td>15</td><td>Security test harness missing</td><td>QA Strategist</td><td>Add Playwright security config</td><td><code>playwright.security.config.ts</code> with <code>--headed</code> mode. <code>npm run test:security</code> script. Test fullscreen block, clipboard block, DevTools detection, keypress auto-submit.</td></tr>
+<tr><td>16</td><td>Key-press auto-submit semantics undefined</td><td>Tech Lead</td><td>User clarified: any key = auto-submit, NO confirmation</td><td>Implement <code>document.keydown</code> listener with 100ms debounce. Exclude modifier-only keys (Shift, Ctrl, Alt, Meta). Log every keypress-triggered submit as <code>CRITICAL</code> violation.</td></tr>
+<tr><td>17</td><td>Proctor review queue not modeled</td><td>Tech Lead</td><td>Extend <code>ExamViolation</code> with review fields</td><td>Add <code>reviewedAt</code>, <code>reviewedBy</code>, <code>reviewOutcome</code> to <code>ExamViolation</code>. Add <code>POST /api/exams/proctoring/violations/[id]/review</code> endpoint.</td></tr>
+<tr><td>18</td><td>SEB integration deferred to Phase 4</td><td>Tech Lead</td><td>Move to Phase 2</td><td>Move SEB <code>.seb</code> config download + BEK verification to Phase 2 (with <code>sebRequired: false</code> default).</td></tr>
+</tbody>
+</table>
+<h3 id="72-recommended-improvements-address-during-implementation">7.2 RECOMMENDED Improvements (Address During Implementation)</h3>
+<table>
+<thead>
+<tr><th>#</th><th>Issue</th><th>Source</th><th>Resolution</th><th>Implementation Guidance</th></tr>
+</thead>
+<tbody>
+<tr><td>19</td><td>N+1 question delivery risk</td><td>Performance Engineer</td><td>Batch-fetch randomised question order on <code>ExamAttempt</code> creation</td><td>Compute randomised order server-side, store as <code>ExamAttempt.questionOrder</code> JSONB, deliver full array to client in one response.</td></tr>
+<tr><td>20</td><td>Violation event flood</td><td>Performance Engineer</td><td>Queue violations client-side, batch-upload every 10s</td><td>Client-side queue array. Flush on <code>beforeunload</code> and every 10s via <code>POST /api/exams/proctoring/events/batch</code>.</td></tr>
+<tr><td>21</td><td>Anti-cheat SDK bundle size / jank</td><td>Performance Engineer + Accessibility</td><td>Lazy-load SDK; show loading state</td><td><code>next/dynamic</code> with <code>ssr: false</code> for anti-cheat SDK. Non-animated &quot;Securing exam environment...&quot; loading state.</td></tr>
+<tr><td>22</td><td>Polymorphic answer/grading model gap</td><td>Systems Architect</td><td>Add <code>gradingType</code> / <code>gradingStatus</code></td><td><code>ExamQuestion.gradingType</code> enum (<code>MCQ</code>, <code>ESSAY</code>, <code>MSQ</code>). <code>ExamAnswer.gradingStatus</code> (<code>auto</code></td></tr>
+<tr><td>23</td><td>Circular dependency risk in anti-cheat SDK</td><td>Systems Architect</td><td>Adopt barrel-file pattern</td><td><code>lib/exam/index.ts</code> barrel. SDK imports from <code>lib/exam/types.ts</code> only. Audit logger imports from <code>lib/exam/types.ts</code> for exam types.</td></tr>
+<tr><td>24</td><td>No ARIA live regions for fullscreen entry</td><td>Accessibility Advocate</td><td>Add ARIA live region announcements</td><td>Announce &quot;Entering fullscreen exam mode&quot; before fullscreen entry. Focus first question after entry.</td></tr>
+<tr><td>25</td><td>Accessibility exception documentation</td><td>Accessibility Advocate</td><td>Add <code>ACCESSIBILITY.md</code></td><td>Document WCAG criteria met, waived with regulatory justification (strict keypress, fullscreen lock), and alternative supervised delivery pathway.</td></tr>
+<tr><td>26</td><td>Question bank size for high-stakes modules</td><td>EASA Compliance</td><td>Larger banks (&gt;5x) for high-stakes modules</td><td>Minimum 10x questions for EASA Part-66 modules. Wire post-exam analytics to auto-flag questions for review.</td></tr>
+<tr><td>27</td><td>No <code>ExamAttempt.status</code> state machine</td><td>Systems Architect</td><td>Add status enum + atomic transitions</td><td>See MUST-FIX #9. Also add <code>autoSubmitted</code> boolean and <code>submittedAt</code> timestamp.</td></tr>
+<tr><td>28</td><td>No recovery cron for expired attempts</td><td>SRE + QA</td><td>Add <code>/api/cron/recover-exams</code></td><td>See MUST-FIX #13. Also add <code>lastActivityAt</code> to <code>ExamAttempt</code> for stale detection.</td></tr>
+</tbody>
+</table>
+<h3 id="73-acceptable-trade-offs">7.3 ACCEPTABLE Trade-Offs</h3>
+<table>
+<thead>
+<tr><th>Trade-Off</th><th>Justification</th><th>Condition</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Client-side anti-cheat is knowingly bypassable.</strong> No client-side control can be fully tamper-proof. Server-side controls (timer, blind grading, access codes, hash chain) are the real trust boundary.</td><td>Client-side violations are signals, not enforcement.</td><td>Client-side violations must be logged and reviewed; they are never sole basis for adverse action.</td></tr>
+<tr><td><strong>Fullscreen lock cannot be made fully accessible.</strong> Fullscreen is a browser API with no screen-reader-friendly alternative. EASA requires controlled environments.</td><td>Document as regulated exception; offer supervised in-person alternative.</td><td>Formal accessibility exception documented with legal/compliance sign-off.</td></tr>
+<tr><td><strong>500 concurrent candidates on Vercel is unrealistic without architecture changes.</strong> Vercel serverless is not designed for 500 persistent connections.</td><td>Acceptable if deployment target is documented. For &gt;200, recommend containerised runtime or separate exam service.</td><td>Document realistic concurrency ceiling for chosen deployment target.</td></tr>
+<tr><td><strong>Webcam excluded per user directive.</strong> No webcam proctoring in Phase 1.</td><td>User confirmed no webcam needed.</td><td>Revisit in Phase 4 if EASA compliance or fraud prevention requires it.</td></tr>
+<tr><td><strong>Certificate generation excluded per user directive.</strong></td><td>User confirmed not needed yet.</td><td>Revisit in Phase 4 when EASA compliance requires Certificates of Recognition.</td></tr>
+<tr><td><strong>Strict keypress auto-submit without confirmation.</strong></td><td>User confirmed: any key = auto-submit, NO confirmation.</td><td>Document as regulated exception. Implement with modifier-key exclusion (Shift, Ctrl, Alt, Meta) to prevent accessibility-tool false positives.</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="8-unified-implementation-roadmap"><div class="he-section__num">08 · 8. Unified Implementation Roadmap</div><h2 class="he-section__title">8. Unified Implementation Roadmap</h2></section>
+<h3 id="phase-1-foundation-weeks-1-2-build-internal-exam-system-first">Phase 1: Foundation (Weeks 1-2) — Build Internal Exam System first</h3>
+<ol>
+<li><strong>Schema:</strong> <code>InternalExamBankInstructor</code>, <code>InternalExamClassSchedule</code>, <code>InternalExamViolation</code>, bank <code>reviewState</code>.
+<ul>
+<li>Run <code>bun run db:push</code> and <code>bun run db:push:supabase</code>.</li>
+<li>Enable Realtime on <code>internal_exam_sessions</code> in Supabase Console.</li>
+</ul>
+</li>
+<li><strong>RBAC:</strong> <code>requireBankAccess(bankId, capability)</code> helper.</li>
+<li><strong>Staff UI:</strong> Instructor assignment, class scheduling.</li>
+<li><strong>Backend:</strong> Staff assignment/schedule API routes with <code>createAuditLog</code>.</li>
+<li><strong>Tests:</strong> Generated route tests, unit test for <code>requireBankAccess</code>.</li>
+</ol>
+<h3 id="phase-2-instructor-experience-weeks-3-4">Phase 2: Instructor Experience (Weeks 3-4)</h3>
+<ol>
+<li><strong>Nav:</strong> Add &quot;Exams&quot; link to <code>InstructorSidebar</code>.</li>
+<li><strong>Dashboard:</strong> <code>/instructor/exams</code> with tabs (My Questions, My Banks, Module Bank, My Classes, Live Monitor).</li>
+<li><strong>Question editor:</strong> Read/write per <code>canEdit</code>/<code>canReview</code>.</li>
+<li><strong>Class monitor:</strong> GET-first population + Realtime deltas.</li>
+<li><strong>Analytics:</strong> SQL <code>groupBy</code> aggregations, CSV export.</li>
+<li><strong>Anti-Cheat additions:</strong> Access-code generation API, pre-exam student form, <code>Exam</code>/<code>ExamSession</code>/<code>ExamAccessCode</code>/<code>ExamRegistration</code> models.</li>
+</ol>
+<h3 id="phase-3-live-monitoring-amp-anti-cheat-weeks-5-8">Phase 3: Live Monitoring &amp; Anti-Cheat (Weeks 5-8)</h3>
+<ol>
+<li><strong>Realtime:</strong> Supabase Realtime with RLS, throttling, debounced refresh, polling fallback.</li>
+<li><strong>Instructor recovery:</strong> Extend, force-submit, void (reuse Internal Exam operations).</li>
+<li><strong>Anti-cheat client SDK:</strong> Fullscreen lock, tab-switch detection, clipboard block, DevTools block, PrintScreen block, keyboard shortcut block, multi-tab prevention.</li>
+<li><strong>Violation logging:</strong> <code>POST /api/exams/proctoring/events</code> (batch), server-side severity classification.</li>
+<li><strong>Proctor dashboard:</strong> Live violation feed, session detail with violation timeline.</li>
+<li><strong>Server-authoritative timer:</strong> Replace SSE with 30s polling + cron auto-submit.</li>
+</ol>
+<h3 id="phase-4-grading-amp-hardening-weeks-9-12">Phase 4: Grading &amp; Hardening (Weeks 9-12)</h3>
+<ol>
+<li><strong>Server-side blind grading:</strong> <code>SECURITY DEFINER</code> function with <code>search_path</code> hardening.</li>
+<li><strong>Answer validation:</strong> Server-side paper binding; reject answers not in candidate's randomised paper.</li>
+<li><strong>Essay grading UI:</strong> Instructor rubric for <code>ESSAY</code> questions.</li>
+<li><strong>Audit log:</strong> Hash-chain implementation with DB-level immutability trigger.</li>
+<li><strong>SEB integration:</strong> <code>.seb</code> config download + BEK verification (moved from Phase 4 to Phase 2).</li>
+<li><strong>Security test harness:</strong> Playwright headed tests for anti-cheat bypass scenarios.</li>
+</ol>
+<h3 id="phase-5-compliance-amp-polish-weeks-13-16">Phase 5: Compliance &amp; Polish (Weeks 13-16)</h3>
+<ol>
+<li><strong>DPIA:</strong> Complete GDPR Article 35 assessment for behavioural biometrics.</li>
+<li><strong>Accessibility exception:</strong> Document WCAG waivers with regulatory justification.</li>
+<li><strong>EASA compliance:</strong> Invigilator workflow, session log format, question bank metadata validation.</li>
+<li><strong>Crash recovery:</strong> Startup recovery cron for expired attempts.</li>
+<li><strong>Load testing:</strong> k6 script with 100-concurrent target.</li>
+<li><strong>Retention tiers:</strong> Implement <code>retentionCategory</code> + GDPR sweep integration.</li>
+</ol>
+<hr />
+<section class="he-section" id="9-key-differences-summary"><div class="he-section__num">09 · 9. Key Differences Summary</div><h2 class="he-section__title">9. Key Differences Summary</h2></section>
+<table>
+<thead>
+<tr><th>Dimension</th><th>Internal Exam</th><th>Anti-Cheat Exam</th><th>Winner / Merge Strategy</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Question banks</strong></td><td>Per-course, per-instructor</td><td>Per-module, EASA-taxonomy</td><td>Merge: <code>Exam</code> with <code>type</code> discriminator</td></tr>
+<tr><td><strong>Scheduling</strong></td><td>Class-linked windows</td><td>Access-code windows</td><td>Keep both: class windows for internal, access codes for certification</td></tr>
+<tr><td><strong>Candidate identity</strong></td><td>Logged-in student</td><td>Access-code + pre-exam form</td><td>Merge: pre-exam form for both, access-code only for external candidates</td></tr>
+<tr><td><strong>Anti-cheat</strong></td><td>None (cosmetic)</td><td>Full lockdown suite</td><td>Adopt Anti-Cheat controls for both (raise internal exam integrity)</td></tr>
+<tr><td><strong>Violation tracking</strong></td><td>Planned table</td><td>Planned table</td><td>Merge into unified <code>ExamViolation</code></td></tr>
+<tr><td><strong>Recovery</strong></td><td>Heartbeat, resume, extend</td><td>None planned</td><td>Adopt Internal Exam recovery for both</td></tr>
+<tr><td><strong>Realtime</strong></td><td>GET-first + deltas + throttling</td><td>Not planned</td><td>Adopt Internal Exam pattern for both</td></tr>
+<tr><td><strong>Grading</strong></td><td>Auto-grade MCQ</td><td>Blind grading via <code>SECURITY DEFINER</code></td><td>Adopt blind grading for both</td></tr>
+<tr><td><strong>Audit</strong></td><td><code>createAuditLog</code> rows</td><td>Hash-chain table</td><td>Merge: hash-chain <code>audit_logs</code> table with <code>Exam</code> as entity</td></tr>
+<tr><td><strong>Compliance</strong></td><td>None</td><td>EASA, GDPR, EU AI Act</td><td>Anti-Cheat compliance layer only</td></tr>
+</tbody>
+</table>
+<hr />
+<section class="he-section" id="10-final-recommendations"><div class="he-section__num">10 · 10. Final Recommendations</div><h2 class="he-section__title">10. Final Recommendations</h2></section>
+<ol>
+<li><strong>Build Internal Exam System first</strong> (5 weeks). It has clearer scope, existing schema, and immediate user value.</li>
+<li><strong>Unify the data model</strong> around a single <code>Exam</code> table with <code>ExamType</code> discriminator. Avoid maintaining two parallel exam schemas.</li>
+<li><strong>Adopt Internal Exam's recovery model</strong> (heartbeat, resume, extend, force-submit) for Anti-Cheat exams, gated by invigilator permissions.</li>
+<li><strong>Adopt Internal Exam's realtime pattern</strong> (GET-first + deltas, throttling, RLS, polling fallback) for Anti-Cheat proctor dashboard.</li>
+<li><strong>Implement Anti-Cheat's anti-cheat controls</strong> (fullscreen, tab-switch, clipboard, DevTools, PrintScreen, keyboard block, multi-tab prevention) for both exam types.</li>
+<li><strong>Resolve all MUST-FIX items</strong> from the LLM Council audits before Phase 1 coding begins. The 18 MUST-FIX items are listed in Section 7.1 with specific implementation guidance.</li>
+<li><strong>Address RECOMMENDED improvements</strong> during implementation. The 10 recommended items in Section 7.2 improve scalability, accessibility, and testability.</li>
+<li><strong>Document trade-offs</strong> formally. The 6 acceptable trade-offs in Section 7.3 should be recorded in the project's ADR (Architecture Decision Record) for future reference.</li>
+</ol>
+<hr />
+<p><em>End of Comparison Report</em></p>
+
 </main>
 
 <aside class="he-toc" aria-label="On this page">
@@ -69,7 +442,7 @@
 </aside>
 </div>
 <footer class="he-foot">
-  Source · <a href="../../">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
+  Source · <a href="../../..">browse the markdown</a> · rebuild with <code>bun run docs:html</code>
 </footer>
 </div>
 </body>

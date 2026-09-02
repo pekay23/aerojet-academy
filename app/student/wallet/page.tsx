@@ -356,7 +356,7 @@ export default async function WalletPage({
                   <h3 className="text-sm font-bold text-slate-900 sm:text-base dark:text-slate-100">
                     Payment Milestones
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
                     {ftEnrollment.programme.name} — Year {ftEnrollment.currentYearNumber}
                   </p>
                 </div>
@@ -377,7 +377,7 @@ export default async function WalletPage({
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <div className="flex justify-between text-xs text-slate-400">
+                    <div className="flex justify-between text-xs text-slate-500 dark:text-slate-400">
                       <span>{pct}% paid</span>
                       <span>
                         {currencySymbol} {total.toLocaleString()} total

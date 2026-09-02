@@ -376,3 +376,187 @@ export default function ExamPreviewClient({ banks }: { banks: BankOption[] }) {
       setQuestionReportReason('')
     } finally { setQuestionReportSubmitting(false) }
   }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <Loader2 className="h-10 w-10 animate-spin text-aerojet-blue" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center text-center">
+        <XCircle className="mb-4 h-12 w-12 text-red-500" />
+        <p className="text-lg font-bold text-slate-900 dark:text-white">{error}</p>
+      </div>
+    )
+  }
+
+  if (!data) {
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={selectedBankId}
+            onChange={(e) => setSelectedBankId(e.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          >
+            {banks.map((bank) => (
+              <option key={bank.id} value={bank.id}>{bank.name} ({bank.courseCode})</option>
+            ))}
+          </select>
+          <button
+            onClick={loadPreview}
+            className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90"
+          >
+            <BookOpen className="h-3.5 w-3.5" />
+            Load Preview
+          </button>
+          {selectedBankId && (
+            <button
+              onClick={() => handleDownloadSeb(selectedBankId)}
+              disabled={downloadingSeb === selectedBankId}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            >
+              {downloadingSeb === selectedBankId ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Download className="h-3.5 w-3.5" />
+              )}
+              Download SEB Config
+            </button>
+          )}
+        </div>
+        <p className="text-sm text-slate-500">Select an exam bank to preview.</p>
+      </div>
+    )
+  }
+
+  const questions = data.questions
+  const currentQ = questions[currentIndex]
+  const answeredCount = Object.keys(answers).length
+  const optionLabels = ['A', 'B', 'C']
+
+  if (result) {
+    return (
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={selectedBankId}
+            onChange={(e) => setSelectedBankId(e.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          >
+            {banks.map((bank) => (
+              <option key={bank.id} value={bank.id}>{bank.name} ({bank.courseCode})</option>
+            ))}
+          </select>
+          <button onClick={loadPreview} className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90">
+            <BookOpen className="h-3.5 w-3.5" /> Reload
+          </button>
+        </div>
+        <div className="mx-auto max-w-lg rounded-2xl border border-slate-200 bg-white p-8 text-center dark:border-slate-800 dark:bg-slate-900">
+          <CheckCircle2 className="mx-auto mb-4 h-16 w-16 text-green-500" />
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white">Preview Complete</h2>
+          <p className="mt-3 text-sm text-slate-500">
+            Score: {result.correctCount}/{result.total} ({result.score}%)
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {showFullscreenPrompt && !result && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-2xl dark:border-slate-800 dark:bg-slate-900">
+            <ShieldAlert className="mx-auto mb-4 h-16 w-16 text-amber-500" />
+            <h2 className="text-xl font-black text-slate-900 dark:text-white">Enter Preview Mode</h2>
+            <p className="mt-2 text-sm text-slate-500">This preview runs in lockdown mode.</p>
+            <button onClick={enterFullscreen} className="mt-6 inline-flex items-center gap-2 rounded-xl bg-aerojet-blue px-8 py-3 text-sm font-bold text-white">
+              <Maximize className="h-4 w-4" /> Enter Fullscreen
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="space-y-4">
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={selectedBankId}
+            onChange={(e) => setSelectedBankId(e.target.value)}
+            className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          >
+            {banks.map((bank) => (
+              <option key={bank.id} value={bank.id}>{bank.name} ({bank.courseCode})</option>
+            ))}
+          </select>
+          <button onClick={loadPreview} className="flex items-center gap-1.5 rounded-lg bg-aerojet-blue px-4 py-2 text-xs font-bold text-white hover:bg-aerojet-blue/90">
+            <RefreshCw className="h-3.5 w-3.5" /> Reload
+          </button>
+          {selectedBankId && (
+            <button
+              onClick={() => handleDownloadSeb(selectedBankId)}
+              disabled={downloadingSeb === selectedBankId}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300"
+            >
+              {downloadingSeb === selectedBankId ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Download className="h-3.5 w-3.5" />}
+              Download SEB Config
+            </button>
+          )}
+          <span className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-bold ${timeLeft < 120 ? 'bg-red-100 text-red-700' : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'}`}>
+            <Clock className="h-4 w-4" /> {formatTime(timeLeft)}
+          </span>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+          <div className="mb-4 flex items-center justify-between border-b border-slate-100 pb-3 dark:border-slate-800">
+            <span className="text-xs font-bold uppercase text-slate-400">Question {currentIndex + 1} of {questions.length}</span>
+            <span className={`rounded-lg px-2.5 py-1 text-[10px] font-bold ${DIFFICULTY_COLORS[currentQ.difficulty] || ''}`}>{currentQ.difficulty}</span>
+          </div>
+          <p className="text-base font-medium text-slate-900 dark:text-slate-100">{currentQ.text}</p>
+          <div className="mt-6 space-y-2">
+            {currentQ.options.map((opt, i) => {
+              const selected = answers[currentQ.questionId] === opt
+              return (
+                <button key={i} onClick={() => selectAnswer(currentQ.questionId, opt)} className={`flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left ${selected ? 'border-aerojet-blue bg-blue-50 dark:bg-blue-900/20' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900'}`}>
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold text-slate-600 dark:bg-slate-800">{optionLabels[i]}</span>
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{opt}</span>
+                </button>
+              )
+            })}
+          </div>
+          <div className="mt-6 flex items-center justify-between">
+            <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 1))} disabled={currentIndex === 0} className="flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-bold text-slate-600 disabled:opacity-40 dark:bg-slate-900 dark:text-slate-300">
+              <ChevronLeft className="h-4 w-4" /> Previous
+            </button>
+            {currentIndex < questions.length - 1 ? (
+              <button onClick={() => setCurrentIdx(currentIndex + 1)} className="flex items-center gap-2 rounded-lg bg-aerojet-blue px-4 py-2 text-sm font-bold text-white">
+                Next <ChevronRight className="h-4 w-4" />
+              </button>
+            ) : (
+              <button onClick={() => setShowConfirm(true)} className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white">
+                <Send className="h-4 w-4" /> Submit
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {showConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+          <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
+            <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-amber-500" />
+            <h3 className="text-center text-xl font-black text-slate-900 dark:text-white">Submit Preview?</h3>
+            <div className="mt-4 flex gap-3">
+              <button onClick={() => setShowConfirm(false)} className="flex-1 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">Cancel</button>
+              <button onClick={() => handleSubmit(false)} className="flex-1 rounded-xl bg-green-600 px-4 py-2.5 text-sm font-bold text-white">Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}

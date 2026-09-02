@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import prisma from '@/lib/prisma/client'
+import { prismaUnfiltered } from '@/lib/prisma/client'
 import { getAuthSession } from '@/lib/auth/helpers'
 import { apiSuccess, apiError, withErrorHandler } from '@/lib/api/response'
 import { chargeWallet } from '@/lib/wallet/operations'
@@ -13,7 +13,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const userId = session.user.id
 
   // Verify user is a student
-  const user = await prisma.user.findUnique({ where: { id: userId } })
+  const user = await prismaUnfiltered.user.findUnique({ where: { id: userId } })
   if (!user || user.role !== 'STUDENT') return apiError('Only students can use this endpoint', 403)
 
   let body: any
@@ -26,7 +26,7 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
   const { milestoneId } = body
   if (!milestoneId) return apiError('milestoneId is required')
 
-  const milestone = await prisma.paymentMilestone.findUnique({
+  const milestone = await prismaUnfiltered.paymentMilestone.findUnique({
     where: { id: milestoneId },
     include: { enrollment: true },
   })
@@ -40,14 +40,14 @@ export const POST = withErrorHandler(async (req: NextRequest) => {
 
   const amountToCharge = Number(milestone.amountDue)
 
-  const wallet = await prisma.wallet.findUnique({ where: { userId } })
+  const wallet = await prismaUnfiltered.wallet.findUnique({ where: { userId } })
   if (!wallet || Number(wallet.availableBalance) < amountToCharge) {
     return apiError(
       `Insufficient wallet balance. Need ${amountToCharge.toLocaleString()}, available: ${Number(wallet?.availableBalance ?? 0).toLocaleString()}`
     )
   }
 
-  await prisma.$transaction(async (tx) => {
+  await prismaUnfiltered.$transaction(async (tx) => {
     await chargeWallet(
       tx,
       userId,

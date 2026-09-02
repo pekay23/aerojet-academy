@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { format } from 'date-fns'
-import { ArrowUpDown, ArrowUp, ArrowDown, Loader2 } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import TablePagination from './TablePagination'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -13,9 +14,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { SortableTh } from '@/components/ui/sortable-th'
 import SearchInput from '@/components/SearchInput'
-
-type SortDir = 'asc' | 'desc'
 
 interface TransactionsTableProps {
   currencySymbol: string
@@ -37,9 +37,10 @@ export default function TransactionsTable({
   const [related, setRelated] = useState(initialRelated)
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState(25)
-  const [sortBy, setSortBy] = useState('createdAt')
-  const [sortDir, setSortDir] = useState<SortDir>('desc')
   const [loading, setLoading] = useState(false)
+  const searchParams = useSearchParams()
+  const sortBy = searchParams.get('sort') ?? 'createdAt'
+  const sortDir = (searchParams.get('order') ?? 'desc') as 'asc' | 'desc'
 
   const symbol = currencySymbol
 
@@ -161,26 +162,7 @@ export default function TransactionsTable({
     return tx.type.replace(/_/g, ' ')
   }
 
-  const handleSort = (col: string) => {
-    if (sortBy === col) {
-      setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
-    } else {
-      setSortBy(col)
-      setSortDir('desc')
-    }
-    setPage(1)
-  }
-
-  const SortIcon = ({ col }: { col: string }) => {
-    if (sortBy !== col) return <ArrowUpDown className="ml-1 inline h-3 w-3 opacity-40" />
-    return sortDir === 'asc' ? (
-      <ArrowUp className="ml-1 inline h-3 w-3 text-aerojet-blue dark:text-aerojet-sky" />
-    ) : (
-      <ArrowDown className="ml-1 inline h-3 w-3 text-aerojet-blue dark:text-aerojet-sky" />
-    )
-  }
-
-  return (
+return (
     <div className="space-y-6">
       <div className="flex items-center justify-end">
         <div className="w-72">
@@ -188,34 +170,19 @@ export default function TransactionsTable({
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm dark:border-slate-900">
         <Table>
           <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
             <TableRow>
               <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
                 User
               </TableHead>
-              <TableHead
-                className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase cursor-pointer select-none hover:text-slate-600 transition-colors"
-                onClick={() => handleSort('type')}
-              >
-                Type <SortIcon col="type" />
-              </TableHead>
-              <TableHead
-                className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase cursor-pointer select-none hover:text-slate-600 transition-colors"
-                onClick={() => handleSort('amount')}
-              >
-                Amount <SortIcon col="amount" />
-              </TableHead>
+              <SortableTh sortKey="type" label="Type" />
+              <SortableTh sortKey="amount" label="Amount" align="right" />
               <TableHead className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase">
-                Reference & Status
+                Reference &amp; Status
               </TableHead>
-              <TableHead
-                className="px-6 py-4 text-[10px] font-black tracking-widest text-slate-400 uppercase cursor-pointer select-none hover:text-slate-600 transition-colors"
-                onClick={() => handleSort('createdAt')}
-              >
-                Date <SortIcon col="createdAt" />
-              </TableHead>
+              <SortableTh sortKey="createdAt" label="Date" align="right" />
             </TableRow>
           </TableHeader>
           <TableBody className="divide-y divide-slate-100 dark:divide-slate-800">

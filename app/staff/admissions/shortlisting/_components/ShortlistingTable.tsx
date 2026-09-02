@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -18,6 +18,7 @@ import {
   Users,
   ClipboardList,
 } from 'lucide-react'
+import { useSort, SortHeader } from '@/lib/hooks/useSort'
 
 interface ScoreData {
   compositeScore: number
@@ -107,11 +108,14 @@ export default function ShortlistingTable({ data }: { data: ApplicationRow[] }) 
       row.programmeChoice.toLowerCase().includes(search.toLowerCase())
   )
 
+  const { items: sortedData, requestSort, sortConfig } = useSort(filteredData)
+  const displayData = sortedData
+
   const toggleSelectAll = () => {
-    if (selectedIds.size === filteredData.length && filteredData.length > 0) {
+    if (selectedIds.size === displayData.length && displayData.length > 0) {
       setSelectedIds(new Set())
     } else {
-      setSelectedIds(new Set(filteredData.map((d) => d.id)))
+      setSelectedIds(new Set(displayData.map((d) => d.id)))
     }
   }
 
@@ -228,33 +232,33 @@ export default function ShortlistingTable({ data }: { data: ApplicationRow[] }) 
             <tr>
               <th className="px-4 py-3 font-medium">
                 <button onClick={toggleSelectAll} className="text-slate-400 hover:text-slate-600">
-                  {selectedIds.size === filteredData.length && filteredData.length > 0 ? (
+                  {selectedIds.size === displayData.length && displayData.length > 0 ? (
                     <CheckSquare className="h-5 w-5 text-aerojet-blue" />
                   ) : (
                     <Square className="h-5 w-5" />
                   )}
                 </button>
               </th>
-              <th className="px-4 py-3 font-medium">Candidate</th>
-              <th className="px-4 py-3 font-medium">Programme</th>
-              <th className="px-4 py-3 font-medium">Aptitude</th>
-              <th className="px-4 py-3 font-medium">Percentile</th>
-              <th className="px-4 py-3 font-medium">Interview</th>
-              <th className="px-4 py-3 font-medium">Exp.</th>
-              <th className="px-4 py-3 font-medium">Composite</th>
+              <SortHeader label="Candidate" sortKey="applicantName" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" />
+              <SortHeader label="Programme" sortKey="programmeChoice" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" />
+              <SortHeader label="Aptitude" sortKey="scores.aptitudeScore" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" align="right" />
+              <SortHeader label="Percentile" sortKey="scores.aptitudePercentile" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" align="right" />
+              <SortHeader label="Interview" sortKey="scores.interviewScore" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" align="right" />
+              <SortHeader label="Exp." sortKey="scores.experienceScore" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" align="right" />
+              <SortHeader label="Composite" sortKey="scores.compositeScore" currentSort={sortConfig} onSort={requestSort} className="px-4 py-3 font-medium" align="right" />
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 font-medium text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-            {filteredData.length === 0 ? (
+            {displayData.length === 0 ? (
               <tr>
                 <td colSpan={10} className="py-8 text-center text-slate-500">
                   No applicants pending shortlisting.
                 </td>
               </tr>
             ) : (
-              filteredData.map((row) => {
+              displayData.map((row) => {
                 const isExpanded = expandedId === row.id
                 return (
                   <tr key={row.id} className="group">
